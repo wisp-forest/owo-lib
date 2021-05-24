@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "owo",
+  "version": "${version}",
+  "name": "OwO",
+  "description": "yes its bad i know thanks",
+  "authors": [],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/owo/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "com.glisco.owo.client.OwoClient"
+    ],
+    "main": [
+      "com.glisco.owo.Owo"
+    ]
+  },
+  "mixins": [
+    "owo.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.11.3",
+    "fabric": "*",
+    "minecraft": ">=1.16.2"
+  }
+}
