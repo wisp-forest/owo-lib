@@ -1,5 +1,6 @@
 package com.glisco.owo;
 
+import com.google.gson.Gson;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -12,6 +13,8 @@ import java.util.HashMap;
 import java.util.function.Consumer;
 
 public class ServerParticles {
+
+    public static final Gson NETWORK_GSON = new Gson();
 
     private static HashMap<Identifier, ParticlePacketHandler> handlerRegistry = new HashMap<>();
 
