@@ -2,7 +2,8 @@ package com.glisco.owo;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
@@ -25,7 +26,7 @@ public class Owo implements ModInitializer {
                 if (!context.getSource().getPlayer().getMainHandStack().hasTag()) {
                     context.getSource().sendError(Text.of("This item has no tag"));
                 } else {
-                    Text message = context.getSource().getPlayer().getMainHandStack().getTag().toText();
+                    Text message = NbtHelper.toPrettyPrintedText(context.getSource().getPlayer().getMainHandStack().getTag());
                     context.getSource().getPlayer().sendMessage(message, false);
                 }
                 return 0;
@@ -55,7 +56,7 @@ public class Owo implements ModInitializer {
                 }
 
                 if (player.getServerWorld().getBlockEntity(pos) != null) {
-                    source.sendFeedback(new LiteralText("Tag: ").append(player.getServerWorld().getBlockEntity(pos).toTag(new CompoundTag()).toText()), false);
+                    source.sendFeedback(new LiteralText("Tag: ").append(NbtHelper.toPrettyPrintedText(player.getServerWorld().getBlockEntity(pos).writeNbt(new NbtCompound()))), false);
                 }
 
                 return 0;

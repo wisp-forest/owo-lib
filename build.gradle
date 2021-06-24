@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '0.7-SNAPSHOT'
+    id 'fabric-loom' version '0.8-SNAPSHOT'
     id 'maven-publish'
 }
 
@@ -25,6 +25,7 @@ dependencies {
 
 processResources {
     inputs.property "version", project.version
+    duplicatesStrategy(DuplicatesStrategy.INCLUDE)
 
     from(sourceSets.main.resources.srcDirs) {
         include "fabric.mod.json"
