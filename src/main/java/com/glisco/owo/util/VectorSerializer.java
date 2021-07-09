@@ -1,4 +1,4 @@
-package com.glisco.owo;
+package com.glisco.owo.util;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;

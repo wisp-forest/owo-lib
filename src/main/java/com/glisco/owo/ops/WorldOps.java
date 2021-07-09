@@ -1,4 +1,4 @@
-package com.glisco.owo;
+package com.glisco.owo.ops;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;

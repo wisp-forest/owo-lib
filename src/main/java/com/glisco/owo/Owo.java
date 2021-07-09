@@ -1,16 +1,20 @@
 package com.glisco.owo;
 
+import com.glisco.owo.util.RegistryHelper;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.minecraft.item.Item;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.Registry;
 
 import java.util.regex.Pattern;
 
@@ -62,6 +66,10 @@ public class Owo implements ModInitializer {
                 return 0;
             })));
         });
+
+        RegistryHelper.runWhenPresent(Registry.ITEM, new Identifier("owo", "yeetus-deetus"), item -> System.out.println("item registered"));
+
+        Registry.register(Registry.ITEM, new Identifier("owo", "yeetus-deetus"), new Item(new Item.Settings()));
 
     }
 }

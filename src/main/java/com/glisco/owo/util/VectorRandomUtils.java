@@ -1,4 +1,4 @@
-package com.glisco.owo;
+package com.glisco.owo.util;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;

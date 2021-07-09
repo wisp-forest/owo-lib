@@ -1,6 +1,6 @@
-package com.glisco.owo.client;
+package com.glisco.owo.particles;
 
-import com.glisco.owo.VectorRandomUtils;
+import com.glisco.owo.util.VectorRandomUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.mixin.client.particle.ParticleManagerAccessor;

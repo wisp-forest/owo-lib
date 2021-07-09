@@ -1,4 +1,4 @@
-package com.glisco.owo;
+package com.glisco.owo.particles;
 
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;

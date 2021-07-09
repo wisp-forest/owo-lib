@@ -1,4 +1,4 @@
-package com.glisco.owo;
+package com.glisco.owo.particles;
 
 import com.google.gson.Gson;
 import net.minecraft.client.MinecraftClient;
