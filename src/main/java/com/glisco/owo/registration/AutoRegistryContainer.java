@@ -11,30 +11,38 @@ public interface AutoRegistryContainer<T> {
 
     Class<T> getRegisteredType();
 
+    default void afterRegistration() {
+
+    }
+
     @SuppressWarnings("unchecked")
-    static <T> void register(Class<? extends AutoRegistryContainer<T>> entrypointClass, String targetModId) {
-        AutoRegistryContainer<T> entrypoint;
+    static <T> void register(Class<? extends AutoRegistryContainer<T>> containerClass, String targetModId) {
+        AutoRegistryContainer<T> container;
         try {
-            entrypoint = entrypointClass.getDeclaredConstructor().newInstance();
+            container = containerClass.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             e.printStackTrace();
             throw new RuntimeException("Could not instantiate registry container", e);
         }
 
-        for (var field : entrypointClass.getDeclaredFields()) {
+        for (var field : containerClass.getDeclaredFields()) {
             Object value;
             try {
-                value = field.get(entrypointClass);
+                value = field.get(containerClass);
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
                 continue;
             }
 
-            if (!entrypoint.getRegisteredType().isAssignableFrom(value.getClass())) continue;
+            if (!container.getRegisteredType().isAssignableFrom(value.getClass())) continue;
 
-            var id = new Identifier(targetModId, field.getName().toLowerCase());
-            Registry.register(entrypoint.getRegistry(), id, (T) value);
+            var fieldId = field.getName().toLowerCase();
+            if (field.isAnnotationPresent(RegisteredName.class)) fieldId = field.getAnnotation(RegisteredName.class).value();
+
+            Registry.register(container.getRegistry(), new Identifier(targetModId, fieldId), (T) value);
         }
+
+        container.afterRegistration();
     }
 
 }
