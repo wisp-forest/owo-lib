@@ -16,7 +16,7 @@ public class ServerParticles {
 
     public static final Gson NETWORK_GSON = new Gson();
 
-    private static HashMap<Identifier, ParticlePacketHandler> handlerRegistry = new HashMap<>();
+    private static final HashMap<Identifier, ParticlePacketHandler> handlerRegistry = new HashMap<>();
 
     /**
      * Registers a handler that can react to particle events sent by the server
