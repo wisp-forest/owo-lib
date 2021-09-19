@@ -56,7 +56,7 @@ tasks.register("buildAndApply", Copy) {
     dependsOn "build"
     from layout.buildDirectory.dir("libs")
     include "*.jar"
-    into project.relativePath("../Spawnertooltip/libs")
+    into project.relativePath("../victus/libs")
 }
 
 build.finalizedBy "buildAndApply"
