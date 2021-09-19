@@ -3,9 +3,9 @@
   "minVersion": "0.8",
   "package": "com.glisco.owo.mixin",
   "compatibilityLevel": "JAVA_8",
-  "mixins": [
-  ],
+  "mixins": [],
   "client": [
+    "CreativeInventoryScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1
