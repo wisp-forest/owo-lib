@@ -21,9 +21,9 @@
     "owo.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.11.3",
+    "fabricloader": "*",
     "fabric": "*",
-    "minecraft": ">=1.16.2"
+    "minecraft": ">=1.17"
   },
   "custom": {
     "modmenu": {
