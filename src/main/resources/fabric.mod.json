@@ -15,6 +15,9 @@
     ],
     "main": [
       "com.glisco.owo.Owo"
+    ],
+    "rei_plugins": [
+      "com.glisco.owo.compat.rei.OwoReiPlugin"
     ]
   },
   "mixins": [

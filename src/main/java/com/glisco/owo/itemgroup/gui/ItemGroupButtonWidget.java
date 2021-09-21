@@ -1,21 +1,23 @@
 package com.glisco.owo.itemgroup.gui;
 
-import com.glisco.owo.itemgroup.TabbedItemGroup;
+import com.glisco.owo.itemgroup.OwoItemGroup;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
+import org.jetbrains.annotations.ApiStatus;
 
-public class ItemGroupTabButtonWidget extends ButtonWidget {
+@ApiStatus.Internal
+public class ItemGroupButtonWidget extends ButtonWidget {
 
     public boolean isSelected = false;
-    private final TabbedItemGroup.DrawableComponent drawable;
+    private final OwoItemGroup.ButtonDefinition definition;
     private final boolean hoverReactive;
 
-    public ItemGroupTabButtonWidget(int x, int y, boolean hoverReactive, TabbedItemGroup.DrawableComponent drawable, String groupTranslationKey, PressAction onPress) {
-        super(x, y, 24, 24, new TranslatableText(drawable.getTranslationKey(groupTranslationKey)), onPress);
-        this.drawable = drawable;
+    public ItemGroupButtonWidget(int x, int y, boolean hoverReactive, OwoItemGroup.ButtonDefinition definition, String groupTranslationKey, PressAction onPress) {
+        super(x, y, 24, 24, new TranslatableText(definition.getTranslationKey(groupTranslationKey)), onPress);
+        this.definition = definition;
         this.hoverReactive = hoverReactive;
     }
 
@@ -27,13 +29,13 @@ public class ItemGroupTabButtonWidget extends ButtonWidget {
     public void renderButton(MatrixStack matrixStack, int mouseX, int mouseY, float delta) {
         MinecraftClient minecraftClient = MinecraftClient.getInstance();
 
-        RenderSystem.setShaderTexture(0, drawable.texture());
+        RenderSystem.setShaderTexture(0, definition.texture());
         RenderSystem.setShaderColor(1, 1, 1, 1);
         RenderSystem.enableBlend();
 
         drawTexture(matrixStack, this.x, this.y, 0, (shouldShowHighlight(hovered) ? 1 : 0) * height, this.width, this.height, 64, 64);
 
         this.renderBackground(matrixStack, minecraftClient, mouseX, mouseY);
-        this.drawable.icon().render(matrixStack, this.x + 4, this.y + 4, mouseX, mouseY, delta);
+        this.definition.icon().render(matrixStack, this.x + 4, this.y + 4, mouseX, mouseY, delta);
     }
 }

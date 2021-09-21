@@ -1,12 +1,12 @@
 package com.glisco.owo.itemgroup.gui;
 
 import com.glisco.owo.itemgroup.Icon;
-import com.glisco.owo.itemgroup.TabbedItemGroup;
+import com.glisco.owo.itemgroup.OwoItemGroup;
 import net.minecraft.item.Item;
 import net.minecraft.tag.Tag;
 import net.minecraft.util.Identifier;
 
-public record ItemGroupTab(Icon icon, String name, Tag<Item> contentTag, Identifier texture) implements TabbedItemGroup.DrawableComponent {
+public record ItemGroupTab(Icon icon, String name, Tag<Item> contentTag, Identifier texture) implements OwoItemGroup.ButtonDefinition {
 
     public static final Identifier DEFAULT_TEXTURE = new Identifier("owo", "textures/gui/tabs.png");
 

@@ -1,6 +1,7 @@
 package com.glisco.owo.itemgroup.json;
 
 import com.glisco.owo.itemgroup.Icon;
+import com.glisco.owo.itemgroup.OwoItemExtensions;
 import com.glisco.owo.itemgroup.gui.ItemGroupTab;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -12,6 +13,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.registry.Registry;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -22,6 +24,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
+/**
+ * Manages loading and adding JSON-based tabs to preexisting {@code ItemGroup}s
+ * without needing to depend on owo
+ * <p>
+ * This is used instead of a {@link net.minecraft.resource.JsonDataLoader} because
+ * it needs to load on the client as well
+ */
+@ApiStatus.Internal
 public class GroupTabLoader {
 
     private static final Gson GSON = new Gson();
@@ -75,7 +85,13 @@ public class GroupTabLoader {
 
         for (ItemGroup group : ItemGroup.GROUPS) {
             if (!group.getName().equals(targetGroup)) continue;
-            new WrapperGroup(group.getIndex(), group.getName(), createdTabs, group::createIcon);
+            final var wrappedGroup = new WrapperGroup(group.getIndex(), group.getName(), createdTabs, group::createIcon);
+
+            for (var item : Registry.ITEM) {
+                if (item.getGroup() != group) continue;
+                ((OwoItemExtensions) item).setItemGroup(wrappedGroup);
+            }
+
             return;
         }
 

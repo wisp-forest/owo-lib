@@ -1,13 +1,19 @@
 package com.glisco.owo.itemgroup.json;
 
+import com.glisco.owo.itemgroup.OwoItemGroup;
 import com.glisco.owo.itemgroup.gui.ItemGroupTab;
-import com.glisco.owo.itemgroup.TabbedItemGroup;
 import net.minecraft.item.ItemStack;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 import java.util.function.Supplier;
 
-public class WrapperGroup extends TabbedItemGroup {
+/**
+ * Used to replace a vanilla or modded item group to add the JSON-defined
+ * tabs while keeping the same name, id and icon
+ */
+@ApiStatus.Internal
+public class WrapperGroup extends OwoItemGroup {
 
     private final Supplier<ItemStack> icon;
 
