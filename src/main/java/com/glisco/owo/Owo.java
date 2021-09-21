@@ -1,5 +1,6 @@
 package com.glisco.owo;
 
+import com.glisco.owo.itemgroup.json.GroupTabLoader;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.nbt.NbtCompound;
@@ -23,10 +24,10 @@ public class Owo implements ModInitializer {
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             dispatcher.register(literal("dumpdata").then(literal("item").executes(context -> {
 
-                if (!context.getSource().getPlayer().getMainHandStack().hasTag()) {
+                if (!context.getSource().getPlayer().getMainHandStack().hasNbt()) {
                     context.getSource().sendError(Text.of("This item has no tag"));
                 } else {
-                    Text message = NbtHelper.toPrettyPrintedText(context.getSource().getPlayer().getMainHandStack().getTag());
+                    Text message = NbtHelper.toPrettyPrintedText(context.getSource().getPlayer().getMainHandStack().getNbt());
                     context.getSource().getPlayer().sendMessage(message, false);
                 }
                 return 0;
@@ -62,5 +63,7 @@ public class Owo implements ModInitializer {
                 return 0;
             })));
         });
+
+        GroupTabLoader.readModGroups();
     }
 }

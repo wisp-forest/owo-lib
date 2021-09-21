@@ -1,11 +1,12 @@
 package com.glisco.owo.mixin;
 
-import com.glisco.owo.group.ItemGroupTabWidget;
-import com.glisco.owo.group.TabbedItemGroup;
-import com.google.common.collect.Lists;
+import com.glisco.owo.itemgroup.gui.ItemGroupTabButtonWidget;
+import com.glisco.owo.itemgroup.TabbedItemGroup;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
+import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemGroup;
@@ -15,57 +16,65 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(CreativeInventoryScreen.class)
 public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScreen<CreativeInventoryScreen.CreativeScreenHandler> {
-    private final List<ItemGroupTabWidget> tabButtons = Lists.newArrayList();
-    private ItemGroupTabWidget selectedSubtab;
+
+    private final List<ItemGroupTabButtonWidget> tabButtons = new ArrayList<>();
 
     @Inject(at = @At("HEAD"), method = "setSelectedTab(Lnet/minecraft/item/ItemGroup;)V")
-    private void setSelectedTab(ItemGroup group, CallbackInfo cbi) {
-        for (var button : tabButtons) {
-            this.remove(button);
-        }
+    private void setSelectedTab(ItemGroup group, CallbackInfo ci) {
+        tabButtons.forEach(this::remove);
         tabButtons.clear();
 
         if (group instanceof TabbedItemGroup tabbedGroup) {
-            if (!tabbedGroup.hasInitialized()) {
-                tabbedGroup.initialize();
+
+            if (tabbedGroup.tabs.size() > 1) {
+                for (int i = 0; i < tabbedGroup.tabs.size(); i++) {
+                    var tab = tabbedGroup.tabs.get(i);
+
+                    int xOffset = this.x - 27 - (i / 4) * 26;
+                    int yOffset = this.y + 10 + (i % 4) * 30;
+
+                    var tabButton = new ItemGroupTabButtonWidget(xOffset, yOffset, false, tab, group.getName(), createSelectAction(this, tabbedGroup, i));
+
+                    if (i == tabbedGroup.getSelectedTabIndex()) tabButton.isSelected = true;
+
+                    tabButtons.add(tabButton);
+                    this.addDrawableChild(tabButton);
+                }
             }
 
-            int i = 0;
-            for(var tab : tabbedGroup.getTabs()) {
-                var selectTab = i;
-                var flipTab = i > 3;
-                var xOffset = flipTab ? (this.x + 191) : (this.x - 29);
-                var yOffset = flipTab ? (this.y + 12) + ((i - 4) * 30) : (this.y + 12) + (i * 30);
-                var tabWidget = new ItemGroupTabWidget(xOffset, yOffset, flipTab, tab, (button)-> {
-                    tabbedGroup.setSelectedTab(selectTab);
-                    MinecraftClient.getInstance().openScreen(this);
-                    ((ItemGroupTabWidget) button).isSelected = true;
-                    selectedSubtab = (ItemGroupTabWidget) button;
-                });
+            var buttons = tabbedGroup.getButtons();
+            for (int i = 0; i < buttons.size(); i++) {
+                var button = buttons.get(i);
 
-                if(i == tabbedGroup.getSelectedTabIndex()) {
-                    selectedSubtab = tabWidget;
-                    tabWidget.isSelected = true;
-                }
+                int xOffset = this.x + 198 + (i / 4) * 26;
+                int yOffset = this.y + 10 + (i % 4) * 30;
 
-                tabButtons.add(tabWidget);
-                this.addDrawableChild(tabWidget);
-                i++;
+                var tabButton = new ItemGroupTabButtonWidget(xOffset, yOffset, true, button, group.getName(), button1 -> button.action().run());
+
+                tabButtons.add(tabButton);
+                this.addDrawableChild(tabButton);
             }
         }
     }
 
     @Inject(at = @At("TAIL"), method = "render(Lnet/minecraft/client/util/math/MatrixStack;IIF)V")
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float delta, CallbackInfo cbi) {
-        tabButtons.forEach(b -> {
-            if (b.isHovered()) {
-                renderTooltip(matrixStack, b.getMessage(), mouseX, mouseY);
-            }
+        tabButtons.forEach(button -> {
+            if (button.isHovered()) renderTooltip(matrixStack, button.getMessage(), mouseX, mouseY);
         });
+    }
+
+    private static ButtonWidget.PressAction createSelectAction(Screen targetScreen, TabbedItemGroup group, int targetTabIndex) {
+        return button -> {
+            group.setSelectedTab(targetTabIndex);
+            MinecraftClient.getInstance().setScreen(targetScreen);
+            ((ItemGroupTabButtonWidget) button).isSelected = true;
+        };
     }
 
     public CreativeInventoryScreenMixin(CreativeInventoryScreen.CreativeScreenHandler screenHandler, PlayerInventory playerInventory, Text text) {

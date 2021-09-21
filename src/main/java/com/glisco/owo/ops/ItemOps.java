@@ -14,7 +14,7 @@ public class ItemOps {
      * @return Whether that operation is legal
      */
     public static boolean canStack(ItemStack one, ItemStack two) {
-        return canIncrease(one) && ItemStack.areItemsEqual(one, two) && ItemStack.areTagsEqual(one, two);
+        return canIncrease(one) && ItemStack.areItemsEqual(one, two) && ItemStack.areNbtEqual(one, two);
     }
 
     /**
