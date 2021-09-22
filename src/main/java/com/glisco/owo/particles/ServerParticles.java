@@ -2,6 +2,7 @@ package com.glisco.owo.particles;
 
 import com.google.gson.Gson;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -12,9 +13,16 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.function.Consumer;
 
+/**
+ * A simple handler for dispatching particle events on the server via {@link #issueEvent(ServerWorld, BlockPos, Identifier, Consumer)}
+ * which then get handled on the client by a handler registered via {@link #registerClientSideHandler(Identifier, ParticlePacketHandler)}.
+ * <p>
+ * The packet can contain arbitrary data to make sending complex particle states easier than with vanilla's WorldEvent {@code int} data
+ */
 public class ServerParticles {
 
     public static final Gson NETWORK_GSON = new Gson();
+    public static final Consumer<PacketByteBuf> NOOP_PROCESSOR = byteBuf -> {};
 
     private static final HashMap<Identifier, ParticlePacketHandler> handlerRegistry = new HashMap<>();
 
@@ -42,6 +50,17 @@ public class ServerParticles {
     }
 
     /**
+     * Issues a particle event for the corresponding handler on all clients in range
+     *
+     * @param world     The world the event is happening in
+     * @param pos       The position the event should happen at
+     * @param handlerId The client-side handler for this event
+     */
+    public static void issueEvent(ServerWorld world, BlockPos pos, Identifier handlerId) {
+        issueEvent(world, pos, handlerId, NOOP_PROCESSOR);
+    }
+
+    /**
      * Issues a particle event for the corresponding handler of the given player
      *
      * @param player        The world the event is happening in
@@ -51,6 +70,27 @@ public class ServerParticles {
      */
     public static void issueEvent(ServerPlayerEntity player, BlockPos pos, Identifier handlerId, Consumer<PacketByteBuf> dataProcessor) {
         player.networkHandler.sendPacket(ParticleSystemPacket.create(handlerId, pos, dataProcessor));
+    }
+
+    /**
+     * Issues a particle event for the corresponding handler of the given player
+     *
+     * @param player    The world the event is happening in
+     * @param pos       The position the event should happen at
+     * @param handlerId The client-side handler for this event
+     */
+    public static void issueEvent(ServerPlayerEntity player, BlockPos pos, Identifier handlerId) {
+        issueEvent(player, pos, handlerId, NOOP_PROCESSOR);
+    }
+
+    /**
+     * Creates a data processor that writes the given nbt compound to the buffer
+     *
+     * @param nbt The data to write
+     * @return A processor to use in any of the {@code issueEvent(...)} methods
+     */
+    public static Consumer<PacketByteBuf> writeNbt(NbtCompound nbt) {
+        return byteBuf -> byteBuf.writeNbt(nbt);
     }
 
     @Nullable

@@ -3,18 +3,18 @@ package com.glisco.owo.particles;
 import com.glisco.owo.util.VectorRandomUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.mixin.client.particle.ParticleManagerAccessor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.particle.Particle;
-import net.minecraft.client.particle.ParticleFactory;
-import net.minecraft.client.world.ClientWorld;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 
+/**
+ * A wrapper for vanilla's terrible particle system that allows for easier
+ * and more complex multi-particle operations
+ */
 @Environment(EnvType.CLIENT)
 public class ClientParticles {
 
@@ -58,10 +58,10 @@ public class ClientParticles {
     }
 
     private static void clearState() {
-        if (!persist) {
-            particleCount = 1;
-            velocity = new Vec3d(0, 0, 0);
-        }
+        if (persist) return;
+
+        particleCount = 1;
+        velocity = new Vec3d(0, 0, 0);
     }
 
     /**
@@ -188,17 +188,13 @@ public class ClientParticles {
      * Spawns a particle at the given location with a lifetime of {@code maxAge}
      *
      * @param particleType The type of the particle to spawn
-     * @param world        The world to spawn the particles in, must be {@link net.minecraft.client.world.ClientWorld}
      * @param pos          The position to spawn at
      * @param maxAge       The maxAge to set for the spawned particle
      */
-    @SuppressWarnings({"unchecked", "ConstantConditions"})
-    public static <T extends ParticleEffect> void spawnWithMaxAge(T particleType, World world, Vec3d pos, int maxAge) {
-        ParticleFactory<T> particleFactory = (ParticleFactory<T>) ((ParticleManagerAccessor) MinecraftClient.getInstance().particleManager).getFactories().get(Registry.PARTICLE_TYPE.getRawId(particleType.getType()));
-
-        Particle particle = particleFactory.createParticle(particleType, (ClientWorld) world, pos.x, pos.y, pos.z, velocity.x, velocity.y, velocity.z);
+    @SuppressWarnings("ConstantConditions")
+    public static <T extends ParticleEffect> void spawnWithMaxAge(T particleType, Vec3d pos, int maxAge) {
+        Particle particle = MinecraftClient.getInstance().particleManager.addParticle(particleType, pos.x, pos.y, pos.z, velocity.x, velocity.y, velocity.z);
         particle.setMaxAge(maxAge);
-        MinecraftClient.getInstance().particleManager.addParticle(particle);
 
         clearState();
     }
@@ -217,16 +213,16 @@ public class ClientParticles {
         clearState();
     }
 
-    private static void spawnLineInner(ParticleEffect particle, World world, Vec3d start, Vec3d end, float deviation) {
-        Vec3d increment = end.subtract(start).multiply(1f / (float) particleCount);
-
-        for (int i = 0; i < particleCount; i++) {
-            start = VectorRandomUtils.getRandomOffset(world, start, deviation);
-            world.addParticle(particle, start.x, start.y, start.z, 0, 0, 0);
-            start = start.add(increment);
-        }
-    }
-
+    /**
+     * Spawns a cube outline starting at {@code origin} and expanding by {@code size} in positive
+     * direction on all axis
+     *
+     * @param particle  The particle to spawn
+     * @param world     The world to spawn the particles in, must be {@link net.minecraft.client.world.ClientWorld}
+     * @param origin    The cube's origin
+     * @param size      The cube's side length
+     * @param deviation A random offset from the line that particles can have
+     */
     public static void spawnCubeOutline(ParticleEffect particle, World world, Vec3d origin, float size, float deviation) {
 
         spawnLineInner(particle, world, origin, origin.add(size, 0, 0), deviation);
@@ -249,6 +245,16 @@ public class ClientParticles {
         spawnLineInner(particle, world, origin.add(size, 0, size), origin.add(size, -size, size), deviation);
 
         clearState();
+    }
+
+    private static void spawnLineInner(ParticleEffect particle, World world, Vec3d start, Vec3d end, float deviation) {
+        Vec3d increment = end.subtract(start).multiply(1f / (float) particleCount);
+
+        for (int i = 0; i < particleCount; i++) {
+            start = VectorRandomUtils.getRandomOffset(world, start, deviation);
+            world.addParticle(particle, start.x, start.y, start.z, 0, 0, 0);
+            start = start.add(increment);
+        }
     }
 
 }

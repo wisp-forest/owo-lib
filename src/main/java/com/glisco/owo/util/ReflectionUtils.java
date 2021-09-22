@@ -2,12 +2,14 @@ package com.glisco.owo.util;
 
 import com.glisco.owo.registration.annotations.FriendlyName;
 import com.glisco.owo.registration.annotations.IterationIgnored;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+@ApiStatus.Experimental
 public class ReflectionUtils {
 
     /**

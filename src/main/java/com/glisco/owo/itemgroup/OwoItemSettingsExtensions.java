@@ -15,6 +15,7 @@ public interface OwoItemSettingsExtensions {
 
     /**
      * Sets the tab index the target item should reside in
+     *
      * @param tab The 0-indexed tab id
      * @return this
      */

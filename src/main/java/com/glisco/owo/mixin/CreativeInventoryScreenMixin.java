@@ -2,7 +2,7 @@ package com.glisco.owo.mixin;
 
 import com.glisco.owo.itemgroup.OwoItemGroup;
 import com.glisco.owo.itemgroup.gui.ItemGroupButtonWidget;
-import com.glisco.owo.util.ScreenRootSupplier;
+import com.glisco.owo.util.OwoCreativeInventoryScreenExtensions;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
@@ -13,6 +13,7 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -21,8 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(CreativeInventoryScreen.class)
-public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScreen<CreativeInventoryScreen.CreativeScreenHandler> implements ScreenRootSupplier {
+public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScreen<CreativeInventoryScreen.CreativeScreenHandler> implements OwoCreativeInventoryScreenExtensions {
 
+    @Unique
     private final List<ItemGroupButtonWidget> tabButtons = new ArrayList<>();
 
     @Inject(at = @At("HEAD"), method = "setSelectedTab(Lnet/minecraft/item/ItemGroup;)V")
@@ -80,6 +82,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
         return (height - backgroundHeight) / 2;
     }
 
+    @Unique
     private static ButtonWidget.PressAction createSelectAction(Screen targetScreen, OwoItemGroup group, int targetTabIndex) {
         return button -> {
             group.setSelectedTab(targetTabIndex);

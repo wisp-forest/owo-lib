@@ -7,17 +7,24 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * An action to be executed by a {@link RegistryHelper} if and only if
+ * all of it's required entries are present in that helper's registry
+ *
+ * @see ComplexRegistryAction.Builder#create(Runnable)
+ */
+@SuppressWarnings("ClassCanBeRecord")
 public class ComplexRegistryAction {
 
     private final List<Identifier> predicates;
     private final Runnable action;
 
-    public ComplexRegistryAction(List<Identifier> predicates, Runnable action) {
+    protected ComplexRegistryAction(List<Identifier> predicates, Runnable action) {
         this.predicates = predicates;
         this.action = action;
     }
 
-    public <T> boolean preCheck(Registry<T> registry) {
+    protected <T> boolean preCheck(Registry<T> registry) {
         predicates.removeIf(registry::containsId);
         if (!predicates.isEmpty()) return false;
 
@@ -25,7 +32,7 @@ public class ComplexRegistryAction {
         return true;
     }
 
-    public boolean update(Identifier id) {
+    protected boolean update(Identifier id) {
         predicates.remove(id);
         if (!predicates.isEmpty()) return false;
 
@@ -43,6 +50,14 @@ public class ComplexRegistryAction {
             this.predicates = new ArrayList<>();
         }
 
+        /**
+         * Creates a new builder to link the provided action
+         * to a list of identifiers
+         *
+         * @param action The action to run once all identifiers are found in the targeted registry
+         * @see #entry(Identifier)
+         * @see #entries(Collection)
+         */
         public static Builder create(Runnable action) {
             return new Builder(action);
         }
@@ -57,6 +72,12 @@ public class ComplexRegistryAction {
             return this;
         }
 
+        /**
+         * Creates a registry action that can get run by a {@link RegistryHelper} once all the entries
+         * added via this builder are found in the target registry
+         *
+         * @return The built action
+         */
         public ComplexRegistryAction build() {
             if (predicates.isEmpty()) throw new IllegalStateException("Predicate list must not be empty");
             return new ComplexRegistryAction(predicates, action);

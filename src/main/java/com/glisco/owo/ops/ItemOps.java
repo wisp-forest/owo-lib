@@ -4,6 +4,9 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 
+/**
+ * A collection of common checks and operations done on {@link ItemStack}
+ */
 public class ItemOps {
 
     private ItemOps() {}

@@ -1,7 +1,7 @@
 package com.glisco.owo.mixin;
 
-import com.glisco.owo.itemgroup.json.GroupTabLoader;
 import com.glisco.owo.itemgroup.OwoItemGroup;
+import com.glisco.owo.itemgroup.json.GroupTabLoader;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;

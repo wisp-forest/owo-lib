@@ -11,9 +11,11 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.function.Consumer;
 
+@ApiStatus.Internal
 public class ParticleSystemPacket {
 
     private static final Logger LOGGER = LogManager.getLogger();
