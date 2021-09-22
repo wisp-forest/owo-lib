@@ -7,7 +7,13 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.ApiStatus;
 
+/**
+ * An icon used for rendering on buttons in {@link OwoItemGroup}s
+ * <p>
+ * Default implementations provided for textures and itemstacks
+ */
 @SuppressWarnings("ClassCanBeRecord")
 public interface Icon {
 
@@ -18,13 +24,17 @@ public interface Icon {
     }
 
     static Icon of(ItemConvertible item) {
-        return new ItemIcon(new ItemStack(item));
+        return of(new ItemStack(item));
     }
 
     static Icon of(Identifier texture, int u, int v, int textureWidth, int textureHeight) {
         return new TextureIcon(texture, u, v, textureWidth, textureHeight);
     }
 
+    /**
+     * Renders an {@link ItemStack}
+     */
+    @ApiStatus.Internal
     class ItemIcon implements Icon {
 
         private final ItemStack stack;
@@ -39,6 +49,10 @@ public interface Icon {
         }
     }
 
+    /**
+     * Renders a 16x16 region of the given texture, starting at (u, v)
+     */
+    @ApiStatus.Internal
     class TextureIcon implements Icon {
 
         private final Identifier texture;

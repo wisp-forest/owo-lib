@@ -5,6 +5,10 @@ import com.glisco.owo.itemgroup.OwoItemGroup;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 
+/**
+ * A button placed to the right side of the creative inventory. Provides defaults
+ * for linking to sites, but can execute arbitrary actions
+ */
 public record ItemGroupButton(Icon icon, String name, Runnable action) implements OwoItemGroup.ButtonDefinition {
 
     public static final Identifier ICONS_TEXTURE = new Identifier("owo", "textures/gui/icons.png");
@@ -25,6 +29,14 @@ public record ItemGroupButton(Icon icon, String name, Runnable action) implement
         return link(Icon.of(ICONS_TEXTURE, 48, 0, 64, 64), "discord", url);
     }
 
+    /**
+     * Creates a button that opens the given link when clicked
+     *
+     * @param icon The icon for this button to use
+     * @param name The name of this button, used for the translation key
+     * @param url  The url to open
+     * @return The created button
+     */
     public static ItemGroupButton link(Icon icon, String name, String url) {
         return new ItemGroupButton(icon, name, () -> Util.getOperatingSystem().open(url));
     }

@@ -28,8 +28,6 @@ import java.util.Set;
  */
 public abstract class OwoItemGroup extends ItemGroup {
 
-    public static final Tag<Item> EMPTY = Tag.of(Set.of());
-
     public final List<ItemGroupTab> tabs = new ArrayList<>();
     private final List<ItemGroupButton> buttons = new ArrayList<>();
 
@@ -37,7 +35,7 @@ public abstract class OwoItemGroup extends ItemGroup {
     private boolean initialized = false;
 
     /**
-     * Creates a new instance. This is also automatically registers the group
+     * Creates a new instance. This also automatically registers the group
      * (basically like calling {@code build()} on Fabric's builder),
      * so be careful when and how you invoke this
      *
@@ -48,7 +46,7 @@ public abstract class OwoItemGroup extends ItemGroup {
     }
 
     /**
-     * Creates a new instance from the given name and at the given index, without ensuring that
+     * Creates a new instance from the given name at the given index, without ensuring that
      * there is space in the array or the name is valid. Used by {@link com.glisco.owo.itemgroup.json.WrapperGroup}
      * to replace an existing group
      *
@@ -74,7 +72,7 @@ public abstract class OwoItemGroup extends ItemGroup {
     }
 
     /**
-     * Adds the specified button to the buttons to
+     * Adds the specified button to the buttons on
      * the right side of the creative menu
      *
      * @param button The button to add
@@ -101,11 +99,11 @@ public abstract class OwoItemGroup extends ItemGroup {
 
     /**
      * Adds a new tab to this group, using the default button texture
-     * 
-     * @param icon The icon to use
-     * @param name The name of the, used for the translation key
+     *
+     * @param icon       The icon to use
+     * @param name       The name of the, used for the translation key
      * @param contentTag The tag used for filling this tab
-     * @see Icon#of(ItemConvertible) 
+     * @see Icon#of(ItemConvertible)
      */
     protected void addTab(Icon icon, String name, Tag<Item> contentTag) {
         addTab(icon, name, contentTag, ItemGroupTab.DEFAULT_TEXTURE);
@@ -145,13 +143,13 @@ public abstract class OwoItemGroup extends ItemGroup {
 
     @Override
     public void appendStacks(DefaultedList<ItemStack> stacks) {
-        if (!initialized) throw new IllegalStateException("Owo item group not initialized");
+        if (!initialized) throw new IllegalStateException("Owo item group not initialized, was 'initialize()' called?");
         Registry.ITEM.stream().filter(this::includes).forEach(item -> stacks.add(new ItemStack(item)));
     }
 
     private boolean includes(Item item) {
         if (tabs.size() > 1)
-            return getSelectedTab().includes(item) || ((OwoItemExtensions) item).getTab() == this.getSelectedTab();
+            return getSelectedTab().includes(item) || ((OwoItemExtensions) item).getTab() == this.getSelectedTabIndex();
         else
             return item.getGroup() != null && Objects.equals(item.getGroup().getName(), this.getName());
     }

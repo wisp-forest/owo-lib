@@ -1,9 +1,8 @@
 package com.glisco.owo.mixin;
 
 import com.glisco.owo.itemgroup.OwoItemExtensions;
-import com.glisco.owo.itemgroup.OwoItemSettings;
 import com.glisco.owo.itemgroup.OwoItemGroup;
-import com.glisco.owo.itemgroup.gui.ItemGroupTab;
+import com.glisco.owo.itemgroup.OwoItemSettingsExtensions;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import org.spongepowered.asm.mixin.Final;
@@ -21,15 +20,15 @@ public class ItemMixin implements OwoItemExtensions {
     @Shadow
     @Mutable
     protected ItemGroup group;
-    private ItemGroupTab tab = null;
+    private int tab = -1;
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void grabTab(Item.Settings settings, CallbackInfo ci) {
-        if (settings instanceof OwoItemSettings owoSettings && group instanceof OwoItemGroup group) this.tab = group.getTab(owoSettings.getTab());
+        if (group instanceof OwoItemGroup group) this.tab = ((OwoItemSettingsExtensions) settings).getTab();
     }
 
     @Override
-    public ItemGroupTab getTab() {
+    public int getTab() {
         return tab;
     }
 

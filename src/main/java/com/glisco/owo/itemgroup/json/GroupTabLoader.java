@@ -37,6 +37,8 @@ public class GroupTabLoader {
     private static final Gson GSON = new Gson();
     private static final Map<String, List<ItemGroupTab>> CACHED_TABS = new HashMap<>();
 
+    private GroupTabLoader() {}
+
     public static void readModGroups() {
         FabricLoader.getInstance().getAllMods().forEach(modContainer -> {
             try {

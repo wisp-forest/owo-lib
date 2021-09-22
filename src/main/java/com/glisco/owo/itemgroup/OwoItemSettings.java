@@ -5,17 +5,19 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.util.Rarity;
 
-public class OwoItemSettings extends Item.Settings {
-
-    private int tab = 0;
+/**
+ * A wrapper for {@link ItemGroup} that provides easy access to the methods implemented onto
+ * it from {@link OwoItemSettingsExtensions} for defining the tab of item in a tabbed group
+ */
+public class OwoItemSettings extends Item.Settings implements OwoItemSettingsExtensions {
 
     public OwoItemSettings tab(int tab) {
-        this.tab = tab;
+        ((OwoItemSettingsExtensions) this).tab(tab);
         return this;
     }
 
     public int getTab() {
-        return tab;
+        return ((OwoItemSettingsExtensions) this).getTab();
     }
 
     public OwoItemSettings food(FoodComponent foodComponent) {

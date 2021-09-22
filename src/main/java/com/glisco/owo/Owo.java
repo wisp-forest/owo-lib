@@ -1,6 +1,7 @@
 package com.glisco.owo;
 
 import com.glisco.owo.itemgroup.OwoItemGroup;
+import com.glisco.owo.itemgroup.OwoItemSettings;
 import com.glisco.owo.itemgroup.gui.ItemGroupButton;
 import com.glisco.owo.itemgroup.json.GroupTabLoader;
 import net.fabricmc.api.ModInitializer;
