@@ -12,12 +12,12 @@ public class ItemSettingsMixin implements OwoItemSettingsExtensions {
     private int tab = 0;
 
     @Override
-    public int getTab() {
+    public int getTabIndex() {
         return tab;
     }
 
     @Override
-    public Item.Settings tab(int tab) {
+    public Item.Settings setTab(int tab) {
         this.tab = tab;
         return (Item.Settings) (Object) this;
     }

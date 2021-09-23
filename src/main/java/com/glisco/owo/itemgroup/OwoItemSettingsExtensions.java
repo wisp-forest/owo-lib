@@ -11,7 +11,7 @@ public interface OwoItemSettingsExtensions {
     /**
      * @return The index of the tab the target item should reside in
      */
-    int getTab();
+    int getTabIndex();
 
     /**
      * Sets the tab index the target item should reside in
@@ -19,6 +19,6 @@ public interface OwoItemSettingsExtensions {
      * @param tab The 0-indexed tab id
      * @return this
      */
-    Item.Settings tab(int tab);
+    Item.Settings setTab(int tab);
 
 }

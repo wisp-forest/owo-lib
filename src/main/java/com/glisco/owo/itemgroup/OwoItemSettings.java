@@ -9,15 +9,15 @@ import net.minecraft.util.Rarity;
  * A wrapper for {@link ItemGroup} that provides easy access to the methods implemented onto
  * it from {@link OwoItemSettingsExtensions} for defining the tab of item in a tabbed group
  */
-public class OwoItemSettings extends Item.Settings implements OwoItemSettingsExtensions {
+public class OwoItemSettings extends Item.Settings {
 
     public OwoItemSettings tab(int tab) {
-        ((OwoItemSettingsExtensions) this).tab(tab);
+        ((OwoItemSettingsExtensions) this).setTab(tab);
         return this;
     }
 
     public int getTab() {
-        return ((OwoItemSettingsExtensions) this).getTab();
+        return ((OwoItemSettingsExtensions) this).getTabIndex();
     }
 
     public OwoItemSettings food(FoodComponent foodComponent) {

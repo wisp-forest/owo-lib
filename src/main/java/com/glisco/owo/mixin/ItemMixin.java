@@ -23,7 +23,7 @@ public class ItemMixin implements OwoItemExtensions {
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void grabTab(Item.Settings settings, CallbackInfo ci) {
-        if (group instanceof OwoItemGroup group) this.tab = ((OwoItemSettingsExtensions) settings).getTab();
+        if (group instanceof OwoItemGroup group) this.tab = ((OwoItemSettingsExtensions) settings).getTabIndex();
     }
 
     @Override
