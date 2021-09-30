@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.function.Supplier;
 
-@Mixin(value = FabricItemGroupBuilder.class, remap = false)
+@Mixin(value = FabricItemGroupBuilder.class)
 public class FabricItemGroupBuilderMixin {
 
     @Shadow
