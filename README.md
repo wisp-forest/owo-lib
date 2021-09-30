@@ -10,7 +10,7 @@ repositories {
 dependencies {
     modImplementation "com.github.glisco03:owo-lib:${project.owo_version}"
     
-    //This is optional, but recommended so users to have to install *another* library
+    //This is optional, but recommended so users dont have to install *another* library
     include "com.github.glisco03:owo-lib:${project.owo_version}"
 }
 ```
