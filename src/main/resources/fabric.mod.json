@@ -2,9 +2,12 @@
   "schemaVersion": 1,
   "id": "owo",
   "version": "${version}",
-  "name": "OwO",
+  "name": "oωo",
   "description": "yes its bad i know thanks",
-  "authors": [],
+  "authors": [
+    "glisco",
+    "Noaaan"
+  ],
   "contact": {},
   "license": "MIT",
   "icon": "assets/owo/icon.png",

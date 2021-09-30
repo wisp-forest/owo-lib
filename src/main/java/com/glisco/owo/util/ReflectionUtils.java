@@ -1,6 +1,6 @@
 package com.glisco.owo.util;
 
-import com.glisco.owo.registration.annotations.FriendlyName;
+import com.glisco.owo.registration.annotations.AssignedName;
 import com.glisco.owo.registration.annotations.IterationIgnored;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -56,7 +56,7 @@ public class ReflectionUtils {
             if (field.isAnnotationPresent(IterationIgnored.class)) continue;
 
             var fieldId = field.getName().toLowerCase();
-            if (field.isAnnotationPresent(FriendlyName.class)) fieldId = field.getAnnotation(FriendlyName.class).value();
+            if (field.isAnnotationPresent(AssignedName.class)) fieldId = field.getAnnotation(AssignedName.class).value();
 
             fieldConsumer.accept(value, fieldId);
         }
