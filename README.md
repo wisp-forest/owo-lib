@@ -1,12 +1,12 @@
 A general utility library for content-focused modding on Fabric. Particles, automatic registration, tabbed item groups and more
 
 **Build Setup:**
-```
+```groovy
 repositories {
     maven { url 'https://jitpack.io' }
 }
 ```
-```
+```groovy
 dependencies {
     modImplementation "com.github.glisco03:owo-lib:${project.owo_version}"
     
