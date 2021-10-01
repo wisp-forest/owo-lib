@@ -20,7 +20,7 @@ public class FabricItemGroupBuilderMixin {
     @Shadow
     private Identifier identifier;
 
-    @Shadow
+    @Shadow(remap = false)
     private Supplier<ItemStack> stackSupplier;
 
     @SuppressWarnings("ConstantConditions")

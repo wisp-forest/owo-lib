@@ -18,11 +18,15 @@ import java.util.regex.Pattern;
 
 import static net.minecraft.server.command.CommandManager.literal;
 
-@ApiStatus.Internal
 public class Owo implements ModInitializer {
 
     @Override
+    @ApiStatus.Internal
     public void onInitialize() {
+        GroupTabLoader.readModGroups();
+
+        if (!debugEnabled()) return;
+
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             dispatcher.register(literal("dumpdata").then(literal("item").executes(context -> {
 
@@ -65,7 +69,10 @@ public class Owo implements ModInitializer {
                 return 0;
             })));
         });
-
-        GroupTabLoader.readModGroups();
     }
+
+    public static boolean debugEnabled() {
+        return Boolean.getBoolean("owo.debug");
+    }
+
 }

@@ -62,7 +62,9 @@ public class GroupTabLoader {
 
     public static ItemGroup onGroupCreated(String name, int index, Supplier<ItemStack> icon) {
         if (!CACHED_TABS.containsKey(name)) return null;
-        return new WrapperGroup(index, name, CACHED_TABS.remove(name), icon);
+        final var wrapperGroup = new WrapperGroup(index, name, CACHED_TABS.remove(name), icon);
+        wrapperGroup.initialize();
+        return wrapperGroup;
     }
 
     private static void loadGroups(JsonObject json) {
@@ -88,6 +90,7 @@ public class GroupTabLoader {
         for (ItemGroup group : ItemGroup.GROUPS) {
             if (!group.getName().equals(targetGroup)) continue;
             final var wrappedGroup = new WrapperGroup(group.getIndex(), group.getName(), createdTabs, group::createIcon);
+            wrappedGroup.initialize();
 
             for (var item : Registry.ITEM) {
                 if (item.getGroup() != group) continue;
