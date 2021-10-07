@@ -22,7 +22,10 @@ public class OwoReiPlugin implements REIClientPlugin {
             int x = ((OwoCreativeInventoryScreenExtensions) screen).getRootX();
             int y = ((OwoCreativeInventoryScreenExtensions) screen).getRootY();
 
-            return Collections.singleton(new Rectangle(x + 200, y + 15, 28 * owoGroup.getButtons().size() / 4, 25 * owoGroup.getButtons().size() % 4));
+            int stackHeight = owoGroup.getStackHeight();
+            if(stackHeight > 4) y -= 12.5 * (stackHeight - 4);
+
+            return Collections.singleton(new Rectangle(x + 200, y + 15, 28 * owoGroup.getButtons().size() / stackHeight, 25 * owoGroup.getButtons().size() % stackHeight));
         });
     }
 }

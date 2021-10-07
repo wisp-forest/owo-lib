@@ -12,10 +12,13 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.ArrayList;
@@ -24,38 +27,58 @@ import java.util.List;
 @Mixin(CreativeInventoryScreen.class)
 public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScreen<CreativeInventoryScreen.CreativeScreenHandler> implements OwoCreativeInventoryScreenExtensions {
 
+    @Shadow
+    private static int selectedTab;
+
     @Unique
     private final List<ItemGroupButtonWidget> tabButtons = new ArrayList<>();
+
+    @ModifyArg(method = "drawBackground", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderTexture(ILnet/minecraft/util/Identifier;)V", ordinal = 1))
+    private Identifier injectCustomGroupTexture(Identifier original) {
+        if (!(ItemGroup.GROUPS[selectedTab] instanceof OwoItemGroup owoGroup) || owoGroup.getCustomTexture() == null) return original;
+        return owoGroup.getCustomTexture();
+    }
+
+    @ModifyArg(method = "drawForeground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/font/TextRenderer;draw(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/text/Text;FFI)I"))
+    private Text injectTabNameAsTitle(Text original) {
+        if (!(ItemGroup.GROUPS[selectedTab] instanceof OwoItemGroup owoGroup) || !owoGroup.shouldDisplayTabNamesAsTitle()) return original;
+        return tabButtons.get(owoGroup.getSelectedTabIndex()).getMessage();
+    }
 
     @Inject(at = @At("HEAD"), method = "setSelectedTab(Lnet/minecraft/item/ItemGroup;)V")
     private void setSelectedTab(ItemGroup group, CallbackInfo ci) {
         tabButtons.forEach(this::remove);
         tabButtons.clear();
 
-        if (group instanceof OwoItemGroup tabbedGroup) {
+        if (group instanceof OwoItemGroup owoGroup) {
 
-            if (tabbedGroup.tabs.size() > 1) {
-                for (int i = 0; i < tabbedGroup.tabs.size(); i++) {
-                    var tab = tabbedGroup.tabs.get(i);
+            int tabRootY = this.y;
 
-                    int xOffset = this.x - 27 - (i / 4) * 26;
-                    int yOffset = this.y + 10 + (i % 4) * 30;
+            final int stackHeight = owoGroup.getStackHeight();
+            if (stackHeight > 4) tabRootY -= 13 * (stackHeight - 4);
 
-                    var tabButton = new ItemGroupButtonWidget(xOffset, yOffset, false, tab, group.getName(), createSelectAction(this, tabbedGroup, i));
+            if (owoGroup.tabs.size() > 1) {
+                for (int i = 0; i < owoGroup.tabs.size(); i++) {
+                    var tab = owoGroup.tabs.get(i);
 
-                    if (i == tabbedGroup.getSelectedTabIndex()) tabButton.isSelected = true;
+                    int xOffset = this.x - 27 - (i / stackHeight) * 26;
+                    int yOffset = tabRootY + 10 + (i % stackHeight) * 30;
+
+                    var tabButton = new ItemGroupButtonWidget(xOffset, yOffset, false, tab, group.getName(), createSelectAction(this, owoGroup, i));
+
+                    if (i == owoGroup.getSelectedTabIndex()) tabButton.isSelected = true;
 
                     tabButtons.add(tabButton);
                     this.addDrawableChild(tabButton);
                 }
             }
 
-            var buttons = tabbedGroup.getButtons();
+            var buttons = owoGroup.getButtons();
             for (int i = 0; i < buttons.size(); i++) {
                 var button = buttons.get(i);
 
-                int xOffset = this.x + 198 + (i / 4) * 26;
-                int yOffset = this.y + 10 + (i % 4) * 30;
+                int xOffset = this.x + 198 + (i / stackHeight) * 26;
+                int yOffset = tabRootY + 10 + (i % stackHeight) * 30;
 
                 var tabButton = new ItemGroupButtonWidget(xOffset, yOffset, true, button, group.getName(), button1 -> button.action().run());
 

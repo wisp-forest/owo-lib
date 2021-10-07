@@ -34,6 +34,10 @@ public abstract class OwoItemGroup extends ItemGroup {
     private int selectedTab = 0;
     private boolean initialized = false;
 
+    private int stackHeight = 4;
+    private Identifier customTexture = null;
+    private boolean displayTabNamesAsTitle = true;
+
     /**
      * Creates a new instance. This also automatically registers the group
      * (basically like calling {@code build()} on Fabric's builder),
@@ -109,6 +113,19 @@ public abstract class OwoItemGroup extends ItemGroup {
         addTab(icon, name, contentTag, ItemGroupTab.DEFAULT_TEXTURE);
     }
 
+    protected void setCustomTexture(Identifier texture) {
+        this.customTexture = texture;
+    }
+
+    protected void setStackHeight(int height) {
+        if(height < 4) throw new IllegalArgumentException("Stack height must not be lower than 4");
+        this.stackHeight = height;
+    }
+
+    protected void keepStaticTitle() {
+        this.displayTabNamesAsTitle = false;
+    }
+
     /**
      * Called from the constructor to register tabs and buttons
      *
@@ -129,6 +146,18 @@ public abstract class OwoItemGroup extends ItemGroup {
 
     public int getSelectedTabIndex() {
         return selectedTab;
+    }
+
+    public Identifier getCustomTexture() {
+        return customTexture;
+    }
+
+    public int getStackHeight() {
+        return stackHeight;
+    }
+
+    public boolean shouldDisplayTabNamesAsTitle() {
+        return displayTabNamesAsTitle;
     }
 
     public List<ItemGroupButton> getButtons() {
