@@ -22,6 +22,7 @@ public class OwoReiPlugin implements REIClientPlugin {
             int x = ((OwoCreativeInventoryScreenExtensions) screen).getRootX();
             int y = ((OwoCreativeInventoryScreenExtensions) screen).getRootY();
 
+            //TODO account for multiple columns
             return Collections.singleton(new Rectangle(x + 200, y + 15, 28, 25 * owoGroup.getButtons().size()));
         });
     }

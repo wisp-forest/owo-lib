@@ -74,12 +74,12 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 
     @Override
     public int getRootX() {
-        return (width - backgroundWidth) / 2;
+        return this.x;
     }
 
     @Override
     public int getRootY() {
-        return (height - backgroundHeight) / 2;
+        return this.y;
     }
 
     @Unique

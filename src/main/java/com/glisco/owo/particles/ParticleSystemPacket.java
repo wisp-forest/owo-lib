@@ -1,5 +1,6 @@
 package com.glisco.owo.particles;
 
+import com.glisco.owo.util.VectorSerializer;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -9,6 +10,7 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
@@ -22,10 +24,10 @@ public class ParticleSystemPacket {
 
     public static Identifier ID = new Identifier("owo", "particles");
 
-    static Packet<?> create(Identifier handler, BlockPos pos, Consumer<PacketByteBuf> dataProcessor) {
+    static Packet<?> create(Identifier handler, Vec3d pos, Consumer<PacketByteBuf> dataProcessor) {
         PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer());
         buffer.writeIdentifier(handler);
-        buffer.writeBlockPos(pos);
+        VectorSerializer.write(pos, buffer);
 
         dataProcessor.accept(buffer);
 
@@ -35,7 +37,7 @@ public class ParticleSystemPacket {
     public static void onPacket(MinecraftClient minecraftClient, ClientPlayNetworkHandler clientPlayNetworkHandler, PacketByteBuf packetByteBuf, PacketSender packetSender) {
 
         Identifier handlerID = packetByteBuf.readIdentifier();
-        BlockPos pos = packetByteBuf.readBlockPos();
+        Vec3d pos = VectorSerializer.read(packetByteBuf);
 
         ServerParticles.ParticlePacketHandler handler = ServerParticles.getHandler(handlerID);
         if (handler == null) {

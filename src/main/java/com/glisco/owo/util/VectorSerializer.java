@@ -4,6 +4,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtDouble;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.math.Vec3d;
 
 /**
@@ -49,6 +50,28 @@ public class VectorSerializer {
         double z = vectorArray.getDouble(2);
 
         return new Vec3d(x, y, z);
+    }
+
+    /**
+     * Writes the given vector into the given packet buffer
+     *
+     * @param vec3d  The vector to write
+     * @param buffer The packet buffer to write into
+     */
+    public static void write(Vec3d vec3d, PacketByteBuf buffer) {
+        buffer.writeDouble(vec3d.x);
+        buffer.writeDouble(vec3d.y);
+        buffer.writeDouble(vec3d.z);
+    }
+
+    /**
+     * Reads one vector from the given packet buffer
+     *
+     * @param buffer The buffer to read from
+     * @return The deserialized vector
+     */
+    public static Vec3d read(PacketByteBuf buffer) {
+        return new Vec3d(buffer.readDouble(), buffer.readDouble(), buffer.readDouble());
     }
 
 }

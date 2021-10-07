@@ -29,7 +29,7 @@ import java.util.Set;
 public abstract class OwoItemGroup extends ItemGroup {
 
     public final List<ItemGroupTab> tabs = new ArrayList<>();
-    private final List<ItemGroupButton> buttons = new ArrayList<>();
+    public final List<ItemGroupButton> buttons = new ArrayList<>();
 
     private int selectedTab = 0;
     private boolean initialized = false;

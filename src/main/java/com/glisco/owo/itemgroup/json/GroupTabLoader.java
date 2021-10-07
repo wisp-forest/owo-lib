@@ -2,6 +2,7 @@ package com.glisco.owo.itemgroup.json;
 
 import com.glisco.owo.itemgroup.Icon;
 import com.glisco.owo.itemgroup.OwoItemExtensions;
+import com.glisco.owo.itemgroup.gui.ItemGroupButton;
 import com.glisco.owo.itemgroup.gui.ItemGroupTab;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -12,6 +13,7 @@ import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
+import net.minecraft.util.Pair;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -35,7 +37,7 @@ import java.util.function.Supplier;
 public class GroupTabLoader {
 
     private static final Gson GSON = new Gson();
-    private static final Map<String, List<ItemGroupTab>> CACHED_TABS = new HashMap<>();
+    private static final Map<String, Pair<List<ItemGroupTab>, List<ItemGroupButton>>> CACHED_BUTTONS = new HashMap<>();
 
     private GroupTabLoader() {}
 
@@ -61,19 +63,22 @@ public class GroupTabLoader {
     }
 
     public static ItemGroup onGroupCreated(String name, int index, Supplier<ItemStack> icon) {
-        if (!CACHED_TABS.containsKey(name)) return null;
-        final var wrapperGroup = new WrapperGroup(index, name, CACHED_TABS.remove(name), icon);
+        if (!CACHED_BUTTONS.containsKey(name)) return null;
+        final var cache = CACHED_BUTTONS.remove(name);
+        final var wrapperGroup = new WrapperGroup(index, name, cache.getLeft(), cache.getRight(), icon);
         wrapperGroup.initialize();
         return wrapperGroup;
     }
 
+    @SuppressWarnings("ConstantConditions")
     private static void loadGroups(JsonObject json) {
         String targetGroup = JsonHelper.getString(json, "target_group");
 
         var tabsArray = JsonHelper.getArray(json, "tabs", new JsonArray());
+        var buttonsArray = JsonHelper.getArray(json, "buttons", new JsonArray());
         var createdTabs = new ArrayList<ItemGroupTab>();
+        var createdButtons = new ArrayList<ItemGroupButton>();
 
-        //noinspection ConstantConditions
         tabsArray.forEach(jsonElement -> {
             if (!jsonElement.isJsonObject()) return;
             var tabObject = jsonElement.getAsJsonObject();
@@ -87,9 +92,22 @@ public class GroupTabLoader {
             createdTabs.add(new ItemGroupTab(Icon.of(icon), name, tag, texture));
         });
 
+        buttonsArray.forEach(jsonElement -> {
+            if (!jsonElement.isJsonObject()) return;
+            var buttonObject = jsonElement.getAsJsonObject();
+
+            String link = JsonHelper.getString(buttonObject, "link");
+            String name = JsonHelper.getString(buttonObject, "name");
+
+            int u = JsonHelper.getInt(buttonObject, "texture_u");
+            int v = JsonHelper.getInt(buttonObject, "texture_v");
+
+            createdButtons.add(ItemGroupButton.link(Icon.of(ItemGroupButton.ICONS_TEXTURE, u, v, 64, 64), name, link));
+        });
+
         for (ItemGroup group : ItemGroup.GROUPS) {
             if (!group.getName().equals(targetGroup)) continue;
-            final var wrappedGroup = new WrapperGroup(group.getIndex(), group.getName(), createdTabs, group::createIcon);
+            final var wrappedGroup = new WrapperGroup(group.getIndex(), group.getName(), createdTabs, createdButtons, group::createIcon);
             wrappedGroup.initialize();
 
             for (var item : Registry.ITEM) {
@@ -100,7 +118,7 @@ public class GroupTabLoader {
             return;
         }
 
-        CACHED_TABS.put(targetGroup, createdTabs);
+        CACHED_BUTTONS.put(targetGroup, new Pair<>(createdTabs, createdButtons));
     }
 
 }

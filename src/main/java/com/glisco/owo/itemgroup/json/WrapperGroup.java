@@ -1,6 +1,7 @@
 package com.glisco.owo.itemgroup.json;
 
 import com.glisco.owo.itemgroup.OwoItemGroup;
+import com.glisco.owo.itemgroup.gui.ItemGroupButton;
 import com.glisco.owo.itemgroup.gui.ItemGroupTab;
 import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
@@ -17,10 +18,15 @@ public class WrapperGroup extends OwoItemGroup {
 
     private final Supplier<ItemStack> icon;
 
-    public WrapperGroup(int index, String name, List<ItemGroupTab> tabs, Supplier<ItemStack> icon) {
+    public WrapperGroup(int index, String name, List<ItemGroupTab> tabs, List<ItemGroupButton> buttons, Supplier<ItemStack> icon) {
         super(index, name);
+
         this.tabs.clear();
         this.tabs.addAll(tabs);
+
+        this.buttons.clear();
+        this.buttons.addAll(buttons);
+
         this.icon = icon;
     }
 

@@ -8,13 +8,14 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.function.Consumer;
 
 /**
- * A simple handler for dispatching particle events on the server via {@link #issueEvent(ServerWorld, BlockPos, Identifier, Consumer)}
+ * A simple handler for dispatching particle events on the server via {@link #issueEvent(ServerWorld, Vec3d, Identifier, Consumer)}
  * which then get handled on the client by a handler registered via {@link #registerClientSideHandler(Identifier, ParticlePacketHandler)}.
  * <p>
  * The packet can contain arbitrary data to make sending complex particle states easier than with vanilla's WorldEvent {@code int} data
@@ -45,7 +46,7 @@ public class ServerParticles {
      * @param handlerId     The client-side handler for this event
      * @param dataProcessor Optional consumer to add data to the sent packet
      */
-    public static void issueEvent(ServerWorld world, BlockPos pos, Identifier handlerId, Consumer<PacketByteBuf> dataProcessor) {
+    public static void issueEvent(ServerWorld world, Vec3d pos, Identifier handlerId, Consumer<PacketByteBuf> dataProcessor) {
         world.getServer().getPlayerManager().sendToAround(null, pos.getX(), pos.getY(), pos.getZ(), 50, world.getRegistryKey(), ParticleSystemPacket.create(handlerId, pos, dataProcessor));
     }
 
@@ -56,7 +57,7 @@ public class ServerParticles {
      * @param pos       The position the event should happen at
      * @param handlerId The client-side handler for this event
      */
-    public static void issueEvent(ServerWorld world, BlockPos pos, Identifier handlerId) {
+    public static void issueEvent(ServerWorld world, Vec3d pos, Identifier handlerId) {
         issueEvent(world, pos, handlerId, NOOP_PROCESSOR);
     }
 
@@ -68,7 +69,7 @@ public class ServerParticles {
      * @param handlerId     The client-side handler for this event
      * @param dataProcessor Optional consumer to add data to the sent packet
      */
-    public static void issueEvent(ServerPlayerEntity player, BlockPos pos, Identifier handlerId, Consumer<PacketByteBuf> dataProcessor) {
+    public static void issueEvent(ServerPlayerEntity player, Vec3d pos, Identifier handlerId, Consumer<PacketByteBuf> dataProcessor) {
         player.networkHandler.sendPacket(ParticleSystemPacket.create(handlerId, pos, dataProcessor));
     }
 
@@ -79,7 +80,7 @@ public class ServerParticles {
      * @param pos       The position the event should happen at
      * @param handlerId The client-side handler for this event
      */
-    public static void issueEvent(ServerPlayerEntity player, BlockPos pos, Identifier handlerId) {
+    public static void issueEvent(ServerPlayerEntity player, Vec3d pos, Identifier handlerId) {
         issueEvent(player, pos, handlerId, NOOP_PROCESSOR);
     }
 
@@ -89,6 +90,7 @@ public class ServerParticles {
      * @param nbt The data to write
      * @return A processor to use in any of the {@code issueEvent(...)} methods
      */
+    @Deprecated
     public static Consumer<PacketByteBuf> writeNbt(NbtCompound nbt) {
         return byteBuf -> byteBuf.writeNbt(nbt);
     }
@@ -100,7 +102,7 @@ public class ServerParticles {
 
     @FunctionalInterface
     public interface ParticlePacketHandler {
-        void onPacket(MinecraftClient client, BlockPos pos, PacketByteBuf data);
+        void onPacket(MinecraftClient client, Vec3d pos, PacketByteBuf data);
     }
 
 }
