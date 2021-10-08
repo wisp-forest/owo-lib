@@ -14,6 +14,30 @@ repositories {
     maven { url "https://maven.shedaniel.me/" }
 }
 
+sourceSets {
+    testmod {
+        runtimeClasspath += main.runtimeClasspath
+        compileClasspath += main.compileClasspath
+    }
+}
+
+loom {
+    runs {
+        testmodClient {
+            client()
+            ideConfigGenerated project.rootProject == project
+            name = "Testmod Client"
+            source sourceSets.testmod
+        }
+        testmodServer {
+            server()
+            ideConfigGenerated project.rootProject == project
+            name = "Testmod Server"
+            source sourceSets.testmod
+        }
+    }
+}
+
 dependencies {
     //to change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -28,6 +52,8 @@ dependencies {
 
     // PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
     // You may need to force-disable transitiveness on them.
+
+    testmodImplementation sourceSets.main.output
 }
 
 processResources {

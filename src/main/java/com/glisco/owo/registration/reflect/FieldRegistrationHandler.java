@@ -58,20 +58,21 @@ public class FieldRegistrationHandler {
      * Registers all public static fields of the specified class that
      * match its type parameter into the registry it specifies
      *
-     * @param clazz       The class from which to take the fields, must implement {@link AutoRegistryContainer}
-     * @param targetModId The namespace to use in the generated identifiers
-     * @param <T>         The type of object to register
+     * @param clazz     The class from which to take the fields, must implement {@link AutoRegistryContainer}
+     * @param namespace The namespace to use in the generated identifiers
+     * @param <T>       The type of object to register
      */
-    public static <T> void register(Class<? extends AutoRegistryContainer<T>> clazz, String targetModId, boolean recurseIntoInnerClasses) {
+    public static <T> void register(Class<? extends AutoRegistryContainer<T>> clazz, String namespace, boolean recurseIntoInnerClasses) {
         AutoRegistryContainer<T> container = ReflectionUtils.tryInstantiateWithNoArgs(clazz);
 
         ReflectionUtils.iterateAccessibleStaticFields(clazz, container.getTargetFieldType(), createProcessor((fieldValue, identifier) -> {
-            Registry.register(container.getRegistry(), new Identifier(targetModId, identifier), fieldValue);
+            Registry.register(container.getRegistry(), new Identifier(namespace, identifier), fieldValue);
+            container.postProcessField(namespace, fieldValue, identifier);
         }, container));
 
         if (recurseIntoInnerClasses) {
             ReflectionUtils.forApplicableSubclasses(clazz, AutoRegistryContainer.class, subclass -> {
-                var classModId = targetModId;
+                var classModId = namespace;
                 if (subclass.isAnnotationPresent(RegistryNamespace.class)) classModId = subclass.getAnnotation(RegistryNamespace.class).value();
                 register((Class<? extends AutoRegistryContainer<T>>) subclass, classModId, true);
             });

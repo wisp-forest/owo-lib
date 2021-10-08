@@ -2,6 +2,8 @@ package com.glisco.owo.ops;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.util.Hand;
 
 /**
@@ -19,7 +21,7 @@ public class ItemOps {
      * @return {@code true} if addition can stack onto base
      */
     public static boolean canStack(ItemStack base, ItemStack addition) {
-        return canIncreaseBy(base, addition.getCount()) && ItemStack.areItemsEqual(base, addition) && ItemStack.areNbtEqual(base, addition);
+        return base.isEmpty() || (canIncreaseBy(base, addition.getCount()) && ItemStack.areItemsEqual(base, addition) && ItemStack.areNbtEqual(base, addition));
     }
 
     /**
@@ -75,6 +77,37 @@ public class ItemOps {
         var stack = player.getStackInHand(hand);
         if (!emptyAwareDecrement(stack)) player.setStackInHand(hand, ItemStack.EMPTY);
         return !stack.isEmpty();
+    }
+
+    /**
+     * Stores the given ItemStack with the specified key
+     * into the given nbt compound
+     *
+     * @param stack The stack to store
+     * @param nbt   The nbt compound to write to
+     * @param key   The key to prefix the stack with
+     */
+    public static void store(ItemStack stack, NbtCompound nbt, String key) {
+        if (stack.isEmpty()) return;
+
+        var stackNbt = new NbtCompound();
+        stack.writeNbt(stackNbt);
+        nbt.put(key, stackNbt);
+    }
+
+    /**
+     * Loads the ItemStack stored at the specified key
+     * in the given nbt compound
+     *
+     * @param nbt The nbt compound to read from
+     * @param key The key to load from
+     * @return The deserialized stack
+     */
+    public static ItemStack get(NbtCompound nbt, String key) {
+        if (!nbt.contains(key, NbtElement.COMPOUND_TYPE)) return ItemStack.EMPTY;
+
+        var stackNbt = nbt.getCompound(key);
+        return ItemStack.fromNbt(stackNbt);
     }
 
 }

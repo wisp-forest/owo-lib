@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "uwu",
+  "version": "${version}",
+  "name": "uωu",
+  "description": "oωo testmod",
+  "authors": [
+    "glisco"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.glisco.uwu.Uwu"
+    ]
+  },
+  "mixins": [
+    "owo.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": "*",
+    "fabric": "*",
+    "minecraft": ">=1.17"
+  }
+}
