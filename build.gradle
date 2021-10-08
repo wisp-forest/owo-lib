@@ -63,7 +63,7 @@ tasks.register("buildAndApply", Copy) {
     dependsOn "build"
     from layout.buildDirectory.dir("libs")
     include "*.jar"
-    into project.relativePath("../victus/libs")
+    into project.relativePath("../conjuring/libs")
 }
 
 build.finalizedBy "buildAndApply"
