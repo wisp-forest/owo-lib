@@ -1,7 +1,7 @@
 package com.glisco.owo.util;
 
 public interface OwoCreativeInventoryScreenExtensions {
-    int getRootX();
+    int owo$getRootX();
 
-    int getRootY();
+    int owo$getRootY();
 }

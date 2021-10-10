@@ -37,7 +37,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
     private static Identifier TEXTURE;
 
     @Unique
-    private final List<ItemGroupButtonWidget> tabButtons = new ArrayList<>();
+    private final List<ItemGroupButtonWidget> owo$buttons = new ArrayList<>();
 
     @Unique
     private OwoItemGroup owoGroup = null;
@@ -71,13 +71,13 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
     @ModifyArg(method = "drawForeground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/font/TextRenderer;draw(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/text/Text;FFI)I"))
     private Text injectTabNameAsTitle(Text original) {
         if (!(ItemGroup.GROUPS[selectedTab] instanceof OwoItemGroup owoGroup) || !owoGroup.shouldDisplayTabNamesAsTitle()) return original;
-        return tabButtons.get(owoGroup.getSelectedTabIndex()).getMessage();
+        return owo$buttons.get(owoGroup.getSelectedTabIndex()).getMessage();
     }
 
     @Inject(at = @At("HEAD"), method = "setSelectedTab(Lnet/minecraft/item/ItemGroup;)V")
     private void setSelectedTab(ItemGroup group, CallbackInfo ci) {
-        tabButtons.forEach(this::remove);
-        tabButtons.clear();
+        owo$buttons.forEach(this::remove);
+        owo$buttons.clear();
 
         if (group instanceof OwoItemGroup owoGroup) {
 
@@ -93,11 +93,11 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
                     int xOffset = this.x - 27 - (i / stackHeight) * 26;
                     int yOffset = tabRootY + 10 + (i % stackHeight) * 30;
 
-                    var tabButton = new ItemGroupButtonWidget(xOffset, yOffset, false, tab, group.getName(), createSelectAction(this, owoGroup, i));
+                    var tabButton = new ItemGroupButtonWidget(xOffset, yOffset, false, tab, group.getName(), owo$createSelectAction(this, owoGroup, i));
 
                     if (i == owoGroup.getSelectedTabIndex()) tabButton.isSelected = true;
 
-                    tabButtons.add(tabButton);
+                    owo$buttons.add(tabButton);
                     this.addDrawableChild(tabButton);
                 }
             }
@@ -111,7 +111,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 
                 var tabButton = new ItemGroupButtonWidget(xOffset, yOffset, true, button, group.getName(), button1 -> button.action().run());
 
-                tabButtons.add(tabButton);
+                owo$buttons.add(tabButton);
                 this.addDrawableChild(tabButton);
             }
         }
@@ -119,23 +119,23 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 
     @Inject(at = @At("TAIL"), method = "render(Lnet/minecraft/client/util/math/MatrixStack;IIF)V")
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float delta, CallbackInfo cbi) {
-        tabButtons.forEach(button -> {
+        owo$buttons.forEach(button -> {
             if (button.isHovered()) renderTooltip(matrixStack, button.getMessage(), mouseX, mouseY);
         });
     }
 
     @Override
-    public int getRootX() {
+    public int owo$getRootX() {
         return this.x;
     }
 
     @Override
-    public int getRootY() {
+    public int owo$getRootY() {
         return this.y;
     }
 
     @Unique
-    private static ButtonWidget.PressAction createSelectAction(Screen targetScreen, OwoItemGroup group, int targetTabIndex) {
+    private static ButtonWidget.PressAction owo$createSelectAction(Screen targetScreen, OwoItemGroup group, int targetTabIndex) {
         return button -> {
             group.setSelectedTab(targetTabIndex);
             MinecraftClient.getInstance().setScreen(targetScreen);

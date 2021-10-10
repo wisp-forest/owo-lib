@@ -19,8 +19,8 @@ public class OwoReiPlugin implements REIClientPlugin {
             if (!(group instanceof OwoItemGroup owoGroup)) return Collections.emptySet();
             if (owoGroup.getButtons().isEmpty()) return Collections.emptySet();
 
-            int x = ((OwoCreativeInventoryScreenExtensions) screen).getRootX();
-            int y = ((OwoCreativeInventoryScreenExtensions) screen).getRootY();
+            int x = ((OwoCreativeInventoryScreenExtensions) screen).owo$getRootX();
+            int y = ((OwoCreativeInventoryScreenExtensions) screen).owo$getRootY();
 
             int stackHeight = owoGroup.getStackHeight();
             if (stackHeight > 4) y -= 15 * (stackHeight - 4);
