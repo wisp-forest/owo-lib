@@ -6,6 +6,10 @@ import net.minecraft.screen.slot.Slot;
 
 import java.util.function.Predicate;
 
+/**
+ * A slot that uses the provided {@code insertCondition}
+ * to decide which items can be inserted
+ */
 public class ValidatingSlot extends Slot {
 
     private final Predicate<ItemStack> insertCondition;

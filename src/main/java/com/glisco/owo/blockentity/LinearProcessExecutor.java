@@ -9,6 +9,13 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
+/**
+ * A handler that executes the steps defined in a {@link LinearProcess}. Each object that is
+ * supposed to run the process needs an instance of this, and each instance of this refers back
+ * to the object it operates on
+ *
+ * @param <T> The type of object this executor operates on
+ */
 public class LinearProcessExecutor<T> {
 
     public static final int CANCEL_EVENT_INDEX = -1;
@@ -25,20 +32,22 @@ public class LinearProcessExecutor<T> {
 
     private int processTick = 0;
 
-    protected LinearProcessExecutor(T target, int processLength, Predicate<LinearProcessExecutor<T>> condition, Int2ObjectMap<BiConsumer<LinearProcessExecutor<T>, T>> eventTable, Int2ObjectMap<ProcessStep<T>> processStepTable) {
+    protected LinearProcessExecutor(T target, int processLength, Predicate<LinearProcessExecutor<T>> condition) {
         this.target = target;
         this.processLength = processLength;
         this.condition = condition;
-        this.eventTable = eventTable;
-        this.processStepTable = processStepTable;
+        this.eventTable = null;
+        this.processStepTable = null;
     }
 
-    protected void reconfigure(Int2ObjectMap<BiConsumer<LinearProcessExecutor<T>, T>> eventTable, Int2ObjectMap<ProcessStep<T>> processStepTable) {
+    protected void configure(Int2ObjectMap<BiConsumer<LinearProcessExecutor<T>, T>> eventTable, Int2ObjectMap<ProcessStep<T>> processStepTable) {
         this.eventTable = eventTable;
         this.processStepTable = processStepTable;
     }
 
     public void tick() {
+        if (eventTable == null || processStepTable == null) throw new IllegalStateException("Illegal attempt to tick unconfigured executor");
+
         if (!running()) return;
 
         if (cancelIfAppropriate()) return;
@@ -54,6 +63,12 @@ public class LinearProcessExecutor<T> {
         this.processTick++;
     }
 
+    /**
+     * Attempts to begin execution
+     *
+     * @return {@code true} if execution will start next tick,
+     * {@code false} if execution is already running
+     */
     public boolean begin() {
         if (this.processTick != 0) return false;
 
@@ -61,18 +76,33 @@ public class LinearProcessExecutor<T> {
         return true;
     }
 
+    /**
+     * @return {@code true} if this executor is currently running
+     */
     public boolean running() {
         return this.processTick > 0;
     }
 
+    /**
+     * @return The last processing tick this executor completed
+     */
     public int getProcessTick() {
         return processTick;
     }
 
+    /**
+     * @return The object this executor is operating on
+     */
     public T getTarget() {
         return target;
     }
 
+    /**
+     * Attempts to instantly cancel execution
+     *
+     * @return {@code true} if execution was successfully cancelled,
+     * {@code false} if this executor was not running
+     */
     public boolean cancel() {
         if (!this.running()) return false;
 
@@ -101,10 +131,20 @@ public class LinearProcessExecutor<T> {
         return true;
     }
 
+    /**
+     * Saves the state of this executor
+     *
+     * @param targetTag The nbt to write state into
+     */
     public void writeState(NbtCompound targetTag) {
         targetTag.putInt("ProcessTick", processTick);
     }
 
+    /**
+     * Restores the saved state of this executor
+     *
+     * @param targetTag The nbt to read state from
+     */
     public void readState(NbtCompound targetTag) {
         this.processTick = targetTag.getInt("ProcessTick");
 

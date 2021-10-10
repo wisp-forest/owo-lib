@@ -4,6 +4,7 @@ import com.glisco.owo.itemgroup.Icon;
 import com.glisco.owo.itemgroup.OwoItemExtensions;
 import com.glisco.owo.itemgroup.gui.ItemGroupButton;
 import com.glisco.owo.itemgroup.gui.ItemGroupTab;
+import com.glisco.owo.moddata.ModDataConsumer;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -34,33 +35,11 @@ import java.util.function.Supplier;
  * it needs to load on the client as well
  */
 @ApiStatus.Internal
-public class GroupTabLoader {
+public class GroupTabLoader implements ModDataConsumer {
 
-    private static final Gson GSON = new Gson();
     private static final Map<String, Pair<List<ItemGroupTab>, List<ItemGroupButton>>> CACHED_BUTTONS = new HashMap<>();
 
-    private GroupTabLoader() {}
-
-    public static void readModGroups() {
-        FabricLoader.getInstance().getAllMods().forEach(modContainer -> {
-            try {
-                final var targetPath = modContainer.getRootPath().resolve(String.format("data/%s/item_group_tabs", modContainer.getMetadata().getId()));
-
-                if (!Files.exists(targetPath)) return;
-                Files.walk(targetPath).forEach(path -> {
-                    if (!path.toString().endsWith(".json")) return;
-                    try {
-                        final InputStreamReader tabData = new InputStreamReader(Files.newInputStream(path));
-                        loadGroups(GSON.fromJson(tabData, JsonObject.class));
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                });
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-    }
+    public GroupTabLoader() {}
 
     public static ItemGroup onGroupCreated(String name, int index, Supplier<ItemStack> icon) {
         if (!CACHED_BUTTONS.containsKey(name)) return null;
@@ -70,8 +49,14 @@ public class GroupTabLoader {
         return wrapperGroup;
     }
 
+    @Override
+    public String getDataSubdirectory() {
+        return "item_group_tabs";
+    }
+
     @SuppressWarnings("ConstantConditions")
-    private static void loadGroups(JsonObject json) {
+    @Override
+    public void acceptParsedFile(JsonObject json) {
         String targetGroup = JsonHelper.getString(json, "target_group");
 
         var tabsArray = JsonHelper.getArray(json, "tabs", new JsonArray());
