@@ -7,7 +7,6 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,7 +14,7 @@ import java.util.HashMap;
 import java.util.function.Consumer;
 
 /**
- * A simple handler for dispatching particle events on the server via {@link #issueEvent(ServerWorld, Vec3d, Identifier, Consumer)}
+ * A simple handler for dispatching particle events on the server via {@link #issueEvent(ServerWorld, Vec3d, Identifier)}
  * which then get handled on the client by a handler registered via {@link #registerClientSideHandler(Identifier, ParticlePacketHandler)}.
  * <p>
  * The packet can contain arbitrary data to make sending complex particle states easier than with vanilla's WorldEvent {@code int} data
@@ -89,6 +88,7 @@ public class ServerParticles {
      *
      * @param nbt The data to write
      * @return A processor to use in any of the {@code issueEvent(...)} methods
+     * @deprecated You should really use the corresponding methods to write your data directly
      */
     @Deprecated
     public static Consumer<PacketByteBuf> writeNbt(NbtCompound nbt) {

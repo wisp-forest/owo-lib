@@ -31,7 +31,7 @@ public class Uwu implements ModInitializer {
             addTab(Icon.of(Items.EMERALD), "tab_2", TAB_2_CONTENT);
             addTab(Icon.of(Items.AMETHYST_SHARD), "tab_3", ItemGroupTab.EMPTY);
             addTab(Icon.of(Items.GOLD_INGOT), "tab_4", ItemGroupTab.EMPTY);
-            addTab(Icon.of(Items.IRON_INGOT), "tab_4", ItemGroupTab.EMPTY);
+            addTab(Icon.of(Items.IRON_INGOT), "tab_5", ItemGroupTab.EMPTY);
 
             addButton(ItemGroupButton.github("https://github.com/glisco03/owo-lib"));
         }
@@ -53,6 +53,7 @@ public class Uwu implements ModInitializer {
             addTab(Icon.of(Items.AMETHYST_SHARD), "tab_3", ItemGroupTab.EMPTY);
             addTab(Icon.of(Items.GOLD_INGOT), "tab_4", ItemGroupTab.EMPTY);
             addTab(Icon.of(Items.IRON_INGOT), "tab_5", ItemGroupTab.EMPTY);
+            addTab(Icon.of(Items.QUARTZ), "tab_6", ItemGroupTab.EMPTY);
 
             addButton(new ItemGroupButton(Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16), "owo", () -> {
                 MinecraftClient.getInstance().player.sendMessage(Text.of("oωo button pressed!"), false);
@@ -68,7 +69,7 @@ public class Uwu implements ModInitializer {
     @Override
     public void onInitialize() {
 
-        FieldRegistrationHandler.register(UwuItems.class, "uwu", false);
+        FieldRegistrationHandler.register(UwuItems.class, "uwu", true);
 
         FOUR_TAB_GROUP.initialize();
         SIX_TAB_GROUP.initialize();

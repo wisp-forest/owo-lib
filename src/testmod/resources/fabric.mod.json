@@ -13,6 +13,9 @@
   "entrypoints": {
     "main": [
       "com.glisco.uwu.Uwu"
+    ],
+    "client": [
+      "com.glisco.uwu.client.UwuClient"
     ]
   },
   "mixins": [

@@ -118,7 +118,7 @@ public abstract class OwoItemGroup extends ItemGroup {
     }
 
     protected void setStackHeight(int height) {
-        if(height < 4) throw new IllegalArgumentException("Stack height must not be lower than 4");
+        if (height < 4) throw new IllegalArgumentException("Stack height must not be lower than 4");
         this.stackHeight = height;
     }
 
@@ -157,7 +157,7 @@ public abstract class OwoItemGroup extends ItemGroup {
     }
 
     public boolean shouldDisplayTabNamesAsTitle() {
-        return displayTabNamesAsTitle;
+        return displayTabNamesAsTitle && this.tabs.size() > 1;
     }
 
     public List<ItemGroupButton> getButtons() {
@@ -176,9 +176,9 @@ public abstract class OwoItemGroup extends ItemGroup {
         Registry.ITEM.stream().filter(this::includes).forEach(item -> stacks.add(new ItemStack(item)));
     }
 
-    private boolean includes(Item item) {
+    protected boolean includes(Item item) {
         if (tabs.size() > 1)
-            return getSelectedTab().includes(item) || ((OwoItemExtensions) item).getTab() == this.getSelectedTabIndex();
+            return getSelectedTab().includes(item) || (item.getGroup() == this && ((OwoItemExtensions) item).getTab() == this.getSelectedTabIndex());
         else
             return item.getGroup() != null && Objects.equals(item.getGroup().getName(), this.getName());
     }

@@ -117,7 +117,7 @@ public class LinearProcessExecutor<T> {
     }
 
     @ApiStatus.Internal
-    public static record ProcessStep<T>(int length, BiConsumer<LinearProcessExecutor<T>, T> executor) {
+    public static final record ProcessStep<T>(int length, BiConsumer<LinearProcessExecutor<T>, T> executor) {
 
         public Info<T> createInfo(int index) {
             return new Info<>(index, this);

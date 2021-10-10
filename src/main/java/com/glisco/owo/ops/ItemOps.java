@@ -31,7 +31,7 @@ public class ItemOps {
      * @return stack.getCount() < stack.getMaxCount()
      */
     public static boolean canIncrease(ItemStack stack) {
-        return stack.getCount() < stack.getMaxCount();
+        return stack.isStackable() && stack.getCount() < stack.getMaxCount();
     }
 
     /**
@@ -42,7 +42,7 @@ public class ItemOps {
      * @return {@code true} if the stack can increase by the given amount
      */
     public static boolean canIncreaseBy(ItemStack stack, int by) {
-        return stack.getCount() + by <= stack.getMaxCount();
+        return stack.isStackable() && stack.getCount() + by <= stack.getMaxCount();
     }
 
     /**

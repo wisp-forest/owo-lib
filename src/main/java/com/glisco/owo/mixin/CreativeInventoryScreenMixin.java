@@ -3,6 +3,7 @@ package com.glisco.owo.mixin;
 import com.glisco.owo.itemgroup.OwoItemGroup;
 import com.glisco.owo.itemgroup.gui.ItemGroupButtonWidget;
 import com.glisco.owo.util.OwoCreativeInventoryScreenExtensions;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
@@ -13,6 +14,7 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -30,13 +32,40 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
     @Shadow
     private static int selectedTab;
 
+    @Shadow
+    @Final
+    private static Identifier TEXTURE;
+
     @Unique
     private final List<ItemGroupButtonWidget> tabButtons = new ArrayList<>();
+
+    @Unique
+    private OwoItemGroup owoGroup = null;
 
     @ModifyArg(method = "drawBackground", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderTexture(ILnet/minecraft/util/Identifier;)V", ordinal = 1))
     private Identifier injectCustomGroupTexture(Identifier original) {
         if (!(ItemGroup.GROUPS[selectedTab] instanceof OwoItemGroup owoGroup) || owoGroup.getCustomTexture() == null) return original;
         return owoGroup.getCustomTexture();
+    }
+
+    @Inject(method = "renderTabIcon", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemGroup;isSpecial()Z"))
+    private void injectCustomTabTexture(MatrixStack matrices, ItemGroup group, CallbackInfo ci) {
+        if (!(group instanceof OwoItemGroup owoGroup) || owoGroup.getCustomTexture() == null) return;
+        this.owoGroup = owoGroup;
+        RenderSystem.setShaderTexture(0, owoGroup.getCustomTexture());
+    }
+
+    @ModifyArg(method = "renderTabIcon", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/CreativeInventoryScreen;drawTexture(Lnet/minecraft/client/util/math/MatrixStack;IIIIII)V"), index = 3)
+    private int injectCustomTabTextureLocation(int original) {
+        if (owoGroup == null) return original;
+        return owoGroup.getColumn() == 0 ? 195 : 223;
+    }
+
+    @Inject(method = "renderTabIcon", at = @At("RETURN"))
+    private void restoreTabTexture(MatrixStack matrices, ItemGroup group, CallbackInfo ci) {
+        if (owoGroup == null) return;
+        this.owoGroup = null;
+        RenderSystem.setShaderTexture(0, TEXTURE);
     }
 
     @ModifyArg(method = "drawForeground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/font/TextRenderer;draw(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/text/Text;FFI)I"))

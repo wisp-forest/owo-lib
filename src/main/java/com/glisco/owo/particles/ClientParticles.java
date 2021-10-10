@@ -20,7 +20,10 @@ public class ClientParticles {
 
     private static int particleCount = 1;
     private static boolean persist = false;
+
     private static Vec3d velocity = new Vec3d(0, 0, 0);
+    private static boolean randomizeVelocity = false;
+    private static double randomVelocityScalar = 0;
 
     /**
      * Marks the values set by {@link ClientParticles#setParticleCount(int)} and {@link ClientParticles#setVelocity(Vec3d)} to be persistent
@@ -50,6 +53,20 @@ public class ClientParticles {
     }
 
     /**
+     * Makes the system use a random velocity for each particle
+     * <br><b>
+     * Volatile unless {@link ClientParticles#persist()} is called before the next operation
+     * </b>
+     *
+     * @param scalar The scalar to use for the generated velocities which
+     *               nominally range from -0.5 to 0.5 on each axis
+     */
+    public static void randomizeVelocity(double scalar) {
+        randomizeVelocity = true;
+        randomVelocityScalar = scalar;
+    }
+
+    /**
      * Forces a reset of velocity and particleCount
      */
     public static void reset() {
@@ -62,6 +79,14 @@ public class ClientParticles {
 
         particleCount = 1;
         velocity = new Vec3d(0, 0, 0);
+
+        randomizeVelocity = false;
+    }
+
+    private static void addParticle(ParticleEffect particle, World world, Vec3d location) {
+        if (randomizeVelocity) velocity = VectorRandomUtils.getRandomOffset(world, Vec3d.ZERO, randomVelocityScalar);
+
+        world.addParticle(particle, location.x, location.y, location.z, velocity.x, velocity.y, velocity.z);
     }
 
     /**
@@ -77,7 +102,7 @@ public class ClientParticles {
 
         for (int i = 0; i < particleCount; i++) {
             location = VectorRandomUtils.getRandomCenteredOnBlock(world, pos, deviation);
-            world.addParticle(particle, location.x, location.y, location.z, velocity.x, velocity.y, velocity.z);
+            addParticle(particle, world, location);
         }
 
         clearState();
@@ -95,7 +120,7 @@ public class ClientParticles {
 
         for (int i = 0; i < particleCount; i++) {
             location = VectorRandomUtils.getRandomWithinBlock(world, pos);
-            world.addParticle(particle, location.x, location.y, location.z, velocity.x, velocity.y, velocity.z);
+            addParticle(particle, world, location);
         }
 
         clearState();
@@ -117,7 +142,7 @@ public class ClientParticles {
         for (int i = 0; i < particleCount; i++) {
             location = VectorRandomUtils.getRandomOffset(world, offset, deviation);
 
-            world.addParticle(particle, location.x, location.y, location.z, velocity.x, velocity.y, velocity.z);
+            addParticle(particle, world, location);
         }
 
         clearState();
@@ -136,7 +161,7 @@ public class ClientParticles {
 
         for (int i = 0; i < particleCount; i++) {
             location = VectorRandomUtils.getRandomOffset(world, pos, deviation);
-            world.addParticle(particle, location.x, location.y, location.z, velocity.x, velocity.y, velocity.z);
+            addParticle(particle, world, location);
         }
 
         clearState();
@@ -157,7 +182,7 @@ public class ClientParticles {
 
         for (int i = 0; i < particleCount; i++) {
             location = VectorRandomUtils.getRandomOffsetSpecific(world, pos, deviationX, deviationY, deviationZ);
-            world.addParticle(particle, location.x, location.y, location.z, velocity.x, velocity.y, velocity.z);
+            addParticle(particle, world, location);
         }
 
         clearState();
@@ -252,7 +277,7 @@ public class ClientParticles {
 
         for (int i = 0; i < particleCount; i++) {
             start = VectorRandomUtils.getRandomOffset(world, start, deviation);
-            world.addParticle(particle, start.x, start.y, start.z, 0, 0, 0);
+            addParticle(particle, world, start);
             start = start.add(increment);
         }
     }
