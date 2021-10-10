@@ -53,7 +53,7 @@ public class ScreenUtils {
             clickedSlot.markDirty();
         }
 
-        return ItemStack.EMPTY;
+        return clickedStack;
     }
 
 }

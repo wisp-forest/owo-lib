@@ -21,7 +21,7 @@ public class ParticleSystemPacket {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public static Identifier ID = new Identifier("owo", "particles");
+    public static final Identifier ID = new Identifier("owo", "particles");
 
     static Packet<?> create(Identifier handler, Vec3d pos, Consumer<PacketByteBuf> dataProcessor) {
         PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer());
