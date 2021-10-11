@@ -1,11 +1,12 @@
 package com.glisco.owo.client.screens;
 
+import com.glisco.owo.mixin.ScreenHandlerInvoker;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 
-import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -49,21 +50,22 @@ public class ScreenUtils {
      * }
      * </pre>
      *
-     * @param slots              The slots of the target ScreenHandler
+     * @param handler            The target ScreenHandler
      * @param clickedSlotIndex   The slot index that was clicked
      * @param upperInventorySize The size of the upper (main) inventory
      * @return The return value for {{@link net.minecraft.screen.ScreenHandler#transferSlot(PlayerEntity, int)}}
      */
-    public static ItemStack handleSlotTransfer(List<Slot> slots, int clickedSlotIndex, int upperInventorySize) {
+    public static ItemStack handleSlotTransfer(ScreenHandler handler, int clickedSlotIndex, int upperInventorySize) {
+        final var slots = handler.slots;
         final var clickedSlot = slots.get(clickedSlotIndex);
         if (!clickedSlot.hasStack()) return ItemStack.EMPTY;
 
         final var clickedStack = clickedSlot.getStack();
 
         if (clickedSlotIndex < upperInventorySize) {
-            ScreenUtils.insertIntoSlotRange(slots, upperInventorySize, slots.size(), clickedStack);
+            if (!insertIntoSlotRange(handler, clickedStack, upperInventorySize, slots.size())) return ItemStack.EMPTY;
         } else {
-            ScreenUtils.insertIntoSlotRange(slots, 0, upperInventorySize, clickedStack);
+            if (!insertIntoSlotRange(handler, clickedStack, 0, upperInventorySize)) return ItemStack.EMPTY;
         }
 
         if (clickedStack.isEmpty()) {
@@ -78,22 +80,16 @@ public class ScreenUtils {
     /**
      * Tries to insert the {@code addition} stack into all slots in the given range
      *
-     * @param slots      The slots to operate on
+     * @param handler    The ScreenHandler to operate on
      * @param beginIndex The index of the first slot to check
      * @param endIndex   The index of the last slot to check
      * @param addition   The ItemStack to try and insert, this gets mutated
      *                   if insertion (partly) succeeds
+     * @return {@code true} if state was modified
      */
-    public static void insertIntoSlotRange(List<Slot> slots, int beginIndex, int endIndex, ItemStack addition) {
-        for (int i = beginIndex; i < endIndex; i++) {
-            final var slot = slots.get(i);
-            final int countBefore = addition.getCount();
-
-            slot.insertStack(addition);
-
-            if (countBefore != addition.getCount()) slot.markDirty();
-            if (addition.getCount() == 0) break;
-        }
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    public static boolean insertIntoSlotRange(ScreenHandler handler, ItemStack addition, int beginIndex, int endIndex) {
+        return ((ScreenHandlerInvoker) handler).owo$insertItem(addition, beginIndex, endIndex, false);
     }
 
 }

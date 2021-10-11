@@ -5,9 +5,10 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "FabricItemGroupBuilderMixin",
-    "LevelInfoMixin",
     "ItemMixin",
-    "ItemSettingsMixin"
+    "ItemSettingsMixin",
+    "LevelInfoMixin",
+    "ScreenHandlerInvoker"
   ],
   "client": [
     "CreativeInventoryScreenMixin"

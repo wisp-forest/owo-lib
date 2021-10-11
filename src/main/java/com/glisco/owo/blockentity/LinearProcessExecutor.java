@@ -79,6 +79,7 @@ public class LinearProcessExecutor<T> {
     /**
      * @return {@code true} if this executor is currently running
      */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean running() {
         return this.processTick > 0;
     }
