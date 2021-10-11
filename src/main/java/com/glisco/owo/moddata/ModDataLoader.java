@@ -4,13 +4,15 @@ import com.glisco.owo.Owo;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.util.Identifier;
+import org.apache.commons.io.FilenameUtils;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 
 /**
- * Contains the logic to load JSON from all other mods' data directory
+ * Contains the logic to load JSON from all other mods' data directories
  * when {@link #load(ModDataConsumer)} is called. This should ideally be done
  * one and in a {@link net.fabricmc.api.ModInitializer}
  */
@@ -33,7 +35,8 @@ public class ModDataLoader {
                     if (!path.toString().endsWith(".json")) return;
                     try {
                         final InputStreamReader tabData = new InputStreamReader(Files.newInputStream(path));
-                        consumer.acceptParsedFile(GSON.fromJson(tabData, JsonObject.class));
+
+                        consumer.acceptParsedFile(new Identifier(modContainer.getMetadata().getId(), FilenameUtils.removeExtension(targetPath.relativize(path).toString())), GSON.fromJson(tabData, JsonObject.class));
                     } catch (IOException e) {
                         Owo.LOGGER.warn("### Unable to open mod data file ++ Stacktrace below ###");
                         e.printStackTrace();

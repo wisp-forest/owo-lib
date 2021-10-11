@@ -32,12 +32,12 @@ public class LinearProcessExecutor<T> {
 
     private int processTick = 0;
 
-    protected LinearProcessExecutor(T target, int processLength, Predicate<LinearProcessExecutor<T>> condition) {
+    protected LinearProcessExecutor(T target, int processLength, Predicate<LinearProcessExecutor<T>> condition, Int2ObjectMap<ProcessStep<T>> serverStepTable) {
         this.target = target;
         this.processLength = processLength;
         this.condition = condition;
         this.eventTable = null;
-        this.processStepTable = null;
+        this.processStepTable = serverStepTable;
     }
 
     protected void configure(Int2ObjectMap<BiConsumer<LinearProcessExecutor<T>, T>> eventTable, Int2ObjectMap<ProcessStep<T>> processStepTable) {
@@ -46,7 +46,7 @@ public class LinearProcessExecutor<T> {
     }
 
     public void tick() {
-        if (eventTable == null || processStepTable == null) throw new IllegalStateException("Illegal attempt to tick unconfigured executor");
+        if (eventTable == null) throw new IllegalStateException("Illegal attempt to tick unconfigured executor");
 
         if (!running()) return;
 

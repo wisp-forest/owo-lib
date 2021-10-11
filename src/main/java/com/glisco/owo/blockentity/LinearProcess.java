@@ -60,7 +60,7 @@ public class LinearProcess<T> {
      */
     public LinearProcessExecutor<T> createExecutor(T target) {
         if (!finished) throw new IllegalStateException("Illegal attempt to create executor for unfinished process");
-        return new LinearProcessExecutor<>(target, processLength, condition);
+        return new LinearProcessExecutor<>(target, processLength, condition, serverProcessStepTable);
     }
 
     /**

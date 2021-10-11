@@ -56,7 +56,7 @@ public class GroupTabLoader implements ModDataConsumer {
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public void acceptParsedFile(JsonObject json) {
+    public void acceptParsedFile(Identifier id, JsonObject json) {
         String targetGroup = JsonHelper.getString(json, "target_group");
 
         var tabsArray = JsonHelper.getArray(json, "tabs", new JsonArray());
