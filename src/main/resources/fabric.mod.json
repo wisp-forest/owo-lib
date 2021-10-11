@@ -36,7 +36,9 @@
       "links": {
         "modmenu.discord": "https://discord.gg/xrwHKktV2d"
       },
-      "badges": [ "library" ]
+      "badges": [
+        "library"
+      ]
     }
   }
 }

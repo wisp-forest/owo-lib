@@ -7,10 +7,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 /**
- * A collection of common operations(s) done on {@link World}
+ * A collection of common operations done on {@link World}
  */
 public class WorldOps {
 
@@ -27,8 +28,36 @@ public class WorldOps {
         world.breakBlock(pos, false, null);
     }
 
+    /**
+     * Plays the provided sound at the provided location. This works on both client
+     * and server. Volume and pitch default to 1
+     *
+     * @param world    The world to play the sound in
+     * @param pos      Where to play the sound
+     * @param sound    The sound to play
+     * @param category The category for the sound
+     */
+    public static void playSound(World world, Vec3d pos, SoundEvent sound, SoundCategory category) {
+        playSound(world, new BlockPos(pos), sound, category, 1, 1);
+    }
+
     public static void playSound(World world, BlockPos pos, SoundEvent sound, SoundCategory category) {
-        world.playSound(null, pos, sound, category, 1, 1);
+        playSound(world, pos, sound, category, 1, 1);
+    }
+
+    /**
+     * Plays the provided sound at the provided location. This works on both client
+     * and server
+     *
+     * @param world    The world to play the sound in
+     * @param pos      Where to play the sound
+     * @param sound    The sound to play
+     * @param category The category for the sound
+     * @param volume   The volume to play the sound at
+     * @param pitch    The pitch, or speed, to play the sound at
+     */
+    public static void playSound(World world, Vec3d pos, SoundEvent sound, SoundCategory category, float volume, float pitch) {
+        world.playSound(null, new BlockPos(pos), sound, category, volume, pitch);
     }
 
     public static void playSound(World world, BlockPos pos, SoundEvent sound, SoundCategory category, float volume, float pitch) {

@@ -18,9 +18,6 @@
       "com.glisco.uwu.client.UwuClient"
     ]
   },
-  "mixins": [
-    "owo.mixins.json"
-  ],
   "depends": {
     "fabricloader": "*",
     "fabric": "*",
