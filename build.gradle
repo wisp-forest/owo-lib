@@ -13,6 +13,7 @@ group = project.maven_group
 
 repositories {
     maven { url "https://maven.shedaniel.me/" }
+    maven { url "https://repo.repsy.io/mvn/tempora/core" }
 }
 
 sourceSets {

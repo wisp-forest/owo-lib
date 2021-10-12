@@ -5,6 +5,8 @@ import com.glisco.owo.itemgroup.OwoItemGroup;
 import com.glisco.owo.itemgroup.gui.ItemGroupButton;
 import com.glisco.owo.itemgroup.gui.ItemGroupTab;
 import com.glisco.owo.registration.reflect.FieldRegistrationHandler;
+import com.glisco.owo.util.FrameMetadata;
+import com.glisco.owo.util.SpriteSheetMetadata;
 import com.glisco.uwu.items.UwuItems;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
@@ -29,7 +31,13 @@ public class Uwu implements ModInitializer {
         protected void setup() {
             keepStaticTitle();
 
-            addTab(Icon.of(Items.DIAMOND), "tab_1", ItemGroupTab.EMPTY);
+            addTab(Icon.of(
+                    new Identifier("uwu", "textures/gui/animated_icon_test.png"),
+                    new SpriteSheetMetadata(32, 32, new FrameMetadata(16, 16)),
+                    1000,
+                    true
+            ), "tab_1", ItemGroupTab.EMPTY);
+
             addTab(Icon.of(Items.EMERALD), "tab_2", TAB_2_CONTENT);
             addTab(Icon.of(Items.AMETHYST_SHARD), "tab_3", ItemGroupTab.EMPTY);
             addTab(Icon.of(Items.GOLD_INGOT), "tab_4", ItemGroupTab.EMPTY);
