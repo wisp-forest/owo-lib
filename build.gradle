@@ -13,6 +13,7 @@ group = project.maven_group
 
 repositories {
     maven { url "https://maven.shedaniel.me/" }
+    maven { url "https://repo.repsy.io/mvn/tempora/core" }
 }
 
 sourceSets {
@@ -39,6 +40,13 @@ loom {
     }
 }
 
+configurations {
+    modImpleclude
+
+    modImplementation.extendsFrom(modImpleclude)
+    include.extendsFrom(modImpleclude)
+}
+
 dependencies {
     //to change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -50,6 +58,7 @@ dependencies {
 
     modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}"
     modRuntime "me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}"
+    modImpleclude "tempora.dev:Animawid:${project.animawid_version}"
 
     // PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
     // You may need to force-disable transitiveness on them.

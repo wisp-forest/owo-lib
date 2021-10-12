@@ -1,5 +1,6 @@
 package com.glisco.owo.mixin;
 
+import com.glisco.owo.itemgroup.Icon;
 import com.glisco.owo.itemgroup.OwoItemGroup;
 import com.glisco.owo.itemgroup.gui.ItemGroupButtonWidget;
 import com.glisco.owo.util.OwoCreativeInventoryScreenExtensions;

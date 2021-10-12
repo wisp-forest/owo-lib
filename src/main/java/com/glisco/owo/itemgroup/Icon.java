@@ -8,6 +8,8 @@ import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
+import tempora.dev.animawid.AnimatedTextureDrawable;
+import tempora.dev.animawid.SpriteSheetMetadata;
 
 /**
  * An icon used for rendering on buttons in {@link OwoItemGroup}s
@@ -29,6 +31,18 @@ public interface Icon {
 
     static Icon of(Identifier texture, int u, int v, int textureWidth, int textureHeight) {
         return new TextureIcon(texture, u, v, textureWidth, textureHeight);
+    }
+
+    /**
+     * Creates an Animated ItemGroup Icon
+     * @param texture The location of the texture. Example: minecraft:textures/my_animation.png
+     * @param spriteSheetMetadata Infomation on the spritesheet. Each frame must be 16x16 pixels.
+     * @param frameDelay The delay in milliseconds between frames.
+     * @param loop Should the animation play once or loop?
+     * @return An animated icon.
+     */
+    static Icon of(Identifier texture, SpriteSheetMetadata spriteSheetMetadata, int frameDelay, boolean loop) {
+        return new AnimatedTextureIcon(texture, spriteSheetMetadata, frameDelay, loop);
     }
 
     /**
@@ -71,6 +85,25 @@ public interface Icon {
         public void render(MatrixStack matrixStack, int x, int y, int mouseX, int mouseY, float delta) {
             RenderSystem.setShaderTexture(0, texture);
             DrawableHelper.drawTexture(matrixStack, x, y, u, v, 16, 16, textureWidth, textureHeight);
+        }
+    }
+
+    /**
+     * Similar to TextureIcon but allows 16x16 frame animated textures.
+     */
+    @ApiStatus.Internal
+    class AnimatedTextureIcon implements Icon {
+        private final AnimatedTextureDrawable widget;
+
+        public AnimatedTextureIcon(Identifier texture, SpriteSheetMetadata spriteSheetMetadata, int frameDelay, boolean loop) {
+            this.widget = new AnimatedTextureDrawable(0, 0, texture, spriteSheetMetadata, frameDelay, loop);
+        }
+
+        @Override
+        public void render(MatrixStack matrixStack, int x, int y, int mouseX, int mouseY, float delta) {
+            widget.setX(x);
+            widget.setY(y);
+            widget.render(matrixStack, mouseX, mouseY, delta);
         }
     }
 
