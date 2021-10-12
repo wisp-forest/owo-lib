@@ -35,6 +35,7 @@ public class Uwu implements ModInitializer {
                     1000,
                     true
             ), "tab_1", ItemGroupTab.EMPTY);
+
             addTab(Icon.of(Items.EMERALD), "tab_2", TAB_2_CONTENT);
             addTab(Icon.of(Items.AMETHYST_SHARD), "tab_3", ItemGroupTab.EMPTY);
             addTab(Icon.of(Items.GOLD_INGOT), "tab_4", ItemGroupTab.EMPTY);
