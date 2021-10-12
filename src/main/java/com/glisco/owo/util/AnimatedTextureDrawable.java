@@ -48,8 +48,6 @@ public class AnimatedTextureDrawable implements Drawable {
         int columns = metadata.width() / meta.width();
         this.rows = metadata.height() / meta.height();
         this.validFrames = columns * this.rows;
-
-        System.out.println(new Gson().toJson(this));
     }
 
     /**
