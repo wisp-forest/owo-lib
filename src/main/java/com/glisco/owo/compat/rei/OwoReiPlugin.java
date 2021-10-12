@@ -25,7 +25,7 @@ public class OwoReiPlugin implements REIClientPlugin {
             int stackHeight = owoGroup.getStackHeight();
             if (stackHeight > 4) y -= 15 * (stackHeight - 4);
 
-            return Collections.singleton(new Rectangle(x + 200, y + 15, 28 + (28 * owoGroup.getButtons().size() / stackHeight), 25 * (owoGroup.getButtons().size() % stackHeight)));
+            return Collections.singleton(new Rectangle(x + 200, y + 15, 28 + (28 * owoGroup.getButtons().size() / stackHeight), 25 * Math.min(owoGroup.getButtons().size(), owoGroup.getStackHeight())));
         });
     }
 }
