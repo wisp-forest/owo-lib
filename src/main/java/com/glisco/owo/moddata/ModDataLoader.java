@@ -54,9 +54,7 @@ public class ModDataLoader {
             Owo.LOGGER.error("### Unable to traverse global data tree ++ Stacktrace below ###", e);
         }
 
-        for (Map.Entry<Identifier, JsonObject> file : foundFiles.entrySet()) {
-            consumer.acceptParsedFile(file.getKey(), file.getValue());
-        }
+        foundFiles.forEach(consumer::acceptParsedFile);
     }
 
     private static void tryLoadFilesFrom(Map<Identifier, JsonObject> foundFiles, String namespace, Path targetPath) {
