@@ -5,6 +5,8 @@ import com.glisco.owo.itemgroup.OwoItemGroup;
 import com.glisco.owo.itemgroup.gui.ItemGroupButton;
 import com.glisco.owo.itemgroup.gui.ItemGroupTab;
 import com.glisco.owo.registration.reflect.FieldRegistrationHandler;
+import com.glisco.owo.util.FrameMetadata;
+import com.glisco.owo.util.SpriteSheetMetadata;
 import com.glisco.uwu.items.UwuItems;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.tag.TagFactory;
@@ -15,8 +17,6 @@ import net.minecraft.item.Items;
 import net.minecraft.tag.Tag;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import tempora.dev.animawid.FrameMetadata;
-import tempora.dev.animawid.SpriteSheetMetadata;
 
 public class Uwu implements ModInitializer {
 

@@ -1,5 +1,7 @@
 package com.glisco.owo.itemgroup;
 
+import com.glisco.owo.util.AnimatedTextureDrawable;
+import com.glisco.owo.util.SpriteSheetMetadata;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
@@ -8,8 +10,6 @@ import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
-import tempora.dev.animawid.AnimatedTextureDrawable;
-import tempora.dev.animawid.SpriteSheetMetadata;
 
 /**
  * An icon used for rendering on buttons in {@link OwoItemGroup}s
