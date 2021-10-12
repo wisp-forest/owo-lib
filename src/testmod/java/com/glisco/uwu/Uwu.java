@@ -7,9 +7,11 @@ import com.glisco.owo.itemgroup.gui.ItemGroupTab;
 import com.glisco.owo.registration.reflect.FieldRegistrationHandler;
 import com.glisco.uwu.items.UwuItems;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.fabric.api.tag.TagFactory;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.tag.Tag;
@@ -65,6 +67,8 @@ public class Uwu implements ModInitializer {
             return new ItemStack(Items.POWDER_SNOW_BUCKET);
         }
     };
+
+    public static final ItemGroup VANILLA_GROUP = FabricItemGroupBuilder.build(new Identifier("uwu", "vanilla_group"), Items.ACACIA_BOAT::getDefaultStack);
 
     @Override
     public void onInitialize() {
