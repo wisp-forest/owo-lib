@@ -1,7 +1,7 @@
 package com.glisco.owo.itemgroup;
 
-import com.glisco.owo.util.AnimatedTextureDrawable;
-import com.glisco.owo.util.SpriteSheetMetadata;
+import com.glisco.owo.client.texture.AnimatedTextureDrawable;
+import com.glisco.owo.client.texture.SpriteSheetMetadata;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
@@ -35,14 +35,15 @@ public interface Icon {
 
     /**
      * Creates an Animated ItemGroup Icon
-     * @param texture The location of the texture. Example: minecraft:textures/my_animation.png
-     * @param spriteSheetMetadata Infomation on the spritesheet. Each frame must be 16x16 pixels.
-     * @param frameDelay The delay in milliseconds between frames.
-     * @param loop Should the animation play once or loop?
-     * @return An animated icon.
+     *
+     * @param texture     The texture to render, this is the spritesheet
+     * @param textureSize The size of the texture, it is assumed to be square
+     * @param frameDelay  The delay in milliseconds between frames.
+     * @param loop        Should the animation play once or loop?
+     * @return The created icon instance
      */
-    static Icon of(Identifier texture, SpriteSheetMetadata spriteSheetMetadata, int frameDelay, boolean loop) {
-        return new AnimatedTextureIcon(texture, spriteSheetMetadata, frameDelay, loop);
+    static Icon of(Identifier texture, int textureSize, int frameDelay, boolean loop) {
+        return new AnimatedTextureIcon(texture, new SpriteSheetMetadata(textureSize, 16), frameDelay, loop);
     }
 
     /**
@@ -96,14 +97,12 @@ public interface Icon {
         private final AnimatedTextureDrawable widget;
 
         public AnimatedTextureIcon(Identifier texture, SpriteSheetMetadata spriteSheetMetadata, int frameDelay, boolean loop) {
-            this.widget = new AnimatedTextureDrawable(0, 0, texture, spriteSheetMetadata, frameDelay, loop);
+            this.widget = new AnimatedTextureDrawable(0, 0, 16, 16, texture, spriteSheetMetadata, frameDelay, loop);
         }
 
         @Override
         public void render(MatrixStack matrixStack, int x, int y, int mouseX, int mouseY, float delta) {
-            widget.setX(x);
-            widget.setY(y);
-            widget.render(matrixStack, mouseX, mouseY, delta);
+            widget.render(x, y, matrixStack, mouseX, mouseY, delta);
         }
     }
 
