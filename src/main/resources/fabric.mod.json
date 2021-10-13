@@ -29,7 +29,7 @@
   "depends": {
     "fabricloader": "*",
     "fabric": "*",
-    "minecraft": ">=1.17"
+    "minecraft": ">=1.18-alpha.21.40.a"
   },
   "custom": {
     "modmenu": {

@@ -61,6 +61,7 @@ public class LootOps {
      * @param chance       The chance for the ItemStack to actually generate
      * @param targetTables The LootTable(s) to inject into
      */
+    @SuppressWarnings("deprecation")
     public static void injectItemStack(ItemStack stack, float chance, Identifier... targetTables) {
         ADDITIONS.put(targetTables, () -> ItemEntry.builder(stack.getItem())
                 .conditionally(RandomChanceLootCondition.builder(chance))

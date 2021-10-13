@@ -3,7 +3,6 @@ package com.glisco.owo.command;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.command.argument.IdentifierArgumentType;
 import net.minecraft.command.argument.ItemStackArgumentType;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.server.command.LootCommand;
 import net.minecraft.server.command.ServerCommandSource;
@@ -49,7 +48,7 @@ public class OwoDebugCommands {
 
                         BlockPos pos = ((BlockHitResult) target).getBlockPos();
 
-                        String blockState = player.getServerWorld().getBlockState(pos).toString();
+                        String blockState = player.getWorld().getBlockState(pos).toString();
                         String blockId = blockState.split(Pattern.quote("["))[0];
                         blockId = blockId.substring(6, blockId.length() - 1);
 
@@ -61,8 +60,8 @@ public class OwoDebugCommands {
                             source.sendFeedback(Text.of("Block ID: §b" + blockId), false);
                         }
 
-                        if (player.getServerWorld().getBlockEntity(pos) != null) {
-                            source.sendFeedback(new LiteralText("Tag: ").append(NbtHelper.toPrettyPrintedText(player.getServerWorld().getBlockEntity(pos).writeNbt(new NbtCompound()))), false);
+                        if (player.getWorld().getBlockEntity(pos) != null) {
+                            source.sendFeedback(new LiteralText("Tag: ").append(NbtHelper.toPrettyPrintedText(player.getWorld().getBlockEntity(pos).createNbt())), false);
                         }
 
                         return 0;
