@@ -10,6 +10,9 @@
   "contact": {},
   "license": "MIT",
   "environment": "*",
+  "mixins": [
+    "uwu.mixins.json"
+  ],
   "entrypoints": {
     "main": [
       "com.glisco.uwu.Uwu"

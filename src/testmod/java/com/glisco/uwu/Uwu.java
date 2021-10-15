@@ -5,6 +5,7 @@ import com.glisco.owo.itemgroup.OwoItemGroup;
 import com.glisco.owo.itemgroup.gui.ItemGroupButton;
 import com.glisco.owo.itemgroup.gui.ItemGroupTab;
 import com.glisco.owo.registration.reflect.FieldRegistrationHandler;
+import com.glisco.owo.sounds.OwoSoundEvent;
 import com.glisco.uwu.items.UwuItems;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
@@ -24,6 +25,8 @@ public class Uwu implements ModInitializer {
     public static final Identifier GROUP_TEXTURE = new Identifier("uwu", "textures/gui/group.png");
     public static final Identifier OWO_ICON_TEXTURE = new Identifier("uwu", "textures/gui/icon.png");
     public static final Identifier ANIMATED_BUTTON_TEXTURE = new Identifier("uwu", "textures/gui/animated_icon_test.png");
+
+    public static final OwoSoundEvent OWO_SOUND_EVENT = new OwoSoundEvent(new Identifier("uwu", "wazzup"), null);
 
     public static final OwoItemGroup FOUR_TAB_GROUP = new OwoItemGroup(new Identifier("uwu", "four_tab_group")) {
         @Override

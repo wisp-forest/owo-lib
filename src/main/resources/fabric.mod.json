@@ -3,10 +3,11 @@
   "id": "owo",
   "version": "${version}",
   "name": "oωo",
-  "description": "yes its bad i know thanks",
+  "description": "A general utility library for content-focused modding on Fabric. Particles, automatic registration, tabbed item groups and more.",
   "authors": [
     "glisco",
-    "Noaaan"
+    "Noaaan",
+    "temporadev"
   ],
   "contact": {},
   "license": "MIT",
