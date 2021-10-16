@@ -4,6 +4,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.math.BlockPos;
@@ -62,6 +63,11 @@ public class WorldOps {
 
     public static void playSound(World world, BlockPos pos, SoundEvent sound, SoundCategory category, float volume, float pitch) {
         world.playSound(null, pos, sound, category, volume, pitch);
+    }
+
+    public static void updateIfOnServer(World world, BlockPos pos) {
+        if (!(world instanceof ServerWorld serverWorld)) return;
+        serverWorld.getChunkManager().markForUpdate(pos);
     }
 
 }
