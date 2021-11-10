@@ -93,6 +93,12 @@ jar {
     from "LICENSE"
 }
 
+javadoc {
+    options.stylesheetFile = new File(projectDir, "stylesheet.css")
+    options.tags = ["apiNote", "implNote", "implSpec"]
+    options.addStringOption("Xdoclint:-missing", "-quiet")
+}
+
 // configure the maven publication
 publishing {
     publications {

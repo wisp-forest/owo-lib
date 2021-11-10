@@ -28,7 +28,7 @@ public class ItemOps {
      * Checks if a stack can increase
      *
      * @param stack The stack to test
-     * @return stack.getCount() < stack.getMaxCount()
+     * @return stack.getCount() &lt; stack.getMaxCount()
      */
     public static boolean canIncrease(ItemStack stack) {
         return stack.isStackable() && stack.getCount() < stack.getMaxCount();
