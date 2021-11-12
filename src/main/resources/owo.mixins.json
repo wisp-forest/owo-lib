@@ -1,18 +1,18 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "com.glisco.owo.mixin",
+  "package": "io.wispforest.owo.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "FabricItemGroupBuilderMixin",
-    "ItemMixin",
-    "ItemSettingsMixin",
-    "LevelInfoMixin",
-    "ScreenHandlerInvoker"
+    "io.wispforest.owo.mixin.FabricItemGroupBuilderMixin",
+    "io.wispforest.owo.mixin.ItemMixin",
+    "io.wispforest.owo.mixin.ItemSettingsMixin",
+    "io.wispforest.owo.mixin.LevelInfoMixin",
+    "io.wispforest.owo.mixin.ScreenHandlerInvoker"
   ],
   "client": [
-    "CreativeInventoryScreenMixin",
-    "TextFieldWidgetMixin"
+    "io.wispforest.owo.mixin.CreativeInventoryScreenMixin",
+    "io.wispforest.owo.mixin.TextFieldWidgetMixin"
   ],
   "injectors": {
     "defaultRequire": 1

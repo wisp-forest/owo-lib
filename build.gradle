@@ -10,6 +10,8 @@ archivesBaseName = project.archives_base_name
 version = project.mod_version
 group = project.maven_group
 
+def ENV = System.getenv()
+
 repositories {
     maven { url "https://maven.shedaniel.me/" }
     maven { url "https://repo.repsy.io/mvn/tempora/core" }
@@ -117,5 +119,12 @@ publishing {
     repositories {
         // uncomment to publish to the local maven
         // mavenLocal()
+        maven {
+            url ENV.MAVEN_URL
+            credentials {
+                username ENV.MAVEN_USER
+                password ENV.MAVEN_PASSWORD
+            }
+        }
     }
 }

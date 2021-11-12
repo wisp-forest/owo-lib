@@ -12,8 +12,8 @@
  */
 
 body {
-    background-color: #ffffff;
-    color: white;
+    background-color: #2E303E;
+    color: #D4D7F2;
     font-family: 'Roboto', Arial, Helvetica, sans-serif;
     font-size: 18px;
     margin: 0;
@@ -80,6 +80,11 @@ ul {
     list-style-type: disc;
 }
 
+div.block code,
+tt {
+    background-color: #21222c;
+}
+
 code,
 tt {
     font-family: 'Roboto Mono', monospace;
@@ -87,7 +92,6 @@ tt {
     padding: 3px;
     margin-top: 8px;
     line-height: 1.4em;
-    background-color: #21222c;
     border-radius: 5px;
 }
 
@@ -286,7 +290,7 @@ ul.sub-nav-list li {
  */
 
 .title {
-    color: #9497B2;
+    color: white;
 }
 
 hr {
@@ -326,7 +330,7 @@ body.module-declaration-page .block-list h2 {
 body.class-declaration-page .summary h3,
 body.class-declaration-page .details h3,
 body.class-declaration-page .summary .inherited-list h2 {
-    background-color: #24242f;
+    background-color: #292936;
     margin: 0 0 6px -8px;
     padding: 7px 5px;
     border-radius: 5px;
@@ -470,8 +474,9 @@ ul.summary-list>li {
     color: white;
     border: none;
     height: 16px;
-    border-radius: 2px;
+    border-radius: 6px;
     font-size: 14px;
+    margin-bottom: 10px;
 }
 
 div.table-tabs>button {
@@ -479,8 +484,8 @@ div.table-tabs>button {
     cursor: pointer;
     padding: 5px 12px 7px 12px;
     font-weight: bold;
-    margin-right: 3px;
-    border-radius: 2px;
+    margin-right: 6px;
+    border-radius: 6px;
 }
 
 div.table-tabs>button.active-table-tab {
@@ -534,7 +539,7 @@ div.table-tabs>button.table-tab {
 
 .summary-table>div {
     text-align: left;
-    padding: 8px 3px 3px 7px;
+    padding: 10px 3px 8px 7px;
 }
 
 .col-first,
@@ -551,6 +556,53 @@ div.table-tabs>button.table-tab {
 .table-header {
     background: #21222C;
     font-weight: bold;
+}
+
+.table-header.col-first {
+    border-top-left-radius: 10px;
+}
+
+.table-header.col-last {
+    border-top-right-radius: 10px;
+}
+
+.col-last:last-child {
+    border-bottom-right-radius: 10px;
+}
+
+.two-column-summary .col-first:nth-last-child(2) {
+    border-bottom-left-radius: 10px;
+}
+
+.two-column-summary>.col-constructor-name:nth-last-child(2),
+.col-first:nth-last-child(3) {
+    border-bottom-left-radius: 10px;
+}
+
+@media screen and (max-width: 800px) {
+
+    .table-header.col-first {
+        border-top-right-radius: 10px;
+        border-top-left-radius: 10px;
+    }
+
+    .table-header.col-last {
+        border-top-right-radius: 0px;
+    }
+
+    .col-last:last-child {
+        border-bottom-left-radius: 10px;
+        border-bottom-right-radius: 10px;
+    }
+
+    .two-column-summary .col-first:nth-last-child(2) {
+        border-bottom-left-radius: 0px;
+    }
+
+    .two-column-summary>.col-constructor-name:nth-last-child(2),
+    .col-first:nth-last-child(3) {
+        border-bottom-left-radius: 0px;
+    }
 }
 
 .col-first,
@@ -605,12 +657,12 @@ div.table-tabs>button.table-tab {
 
 .even-row-color,
 .even-row-color .table-header {
-    background-color: #21222C;
+    background-color: #272834;
 }
 
 .odd-row-color,
 .odd-row-color .table-header {
-    background-color: #24242f;
+    background-color: #232430;
 }
 
 
@@ -685,7 +737,7 @@ h1.hidden {
 .block {
     display: block;
     margin: 0 10px 5px 0;
-    color: white;
+    color: #D4D7F2;
 }
 
 .deprecated-label,
@@ -851,6 +903,8 @@ section.description {
     background-color: #21222C;
     border-radius: 6px;
     box-shadow: 0 0 4px 1px rgb(0 0 0 / 25%);
+    box-sizing: border-box;
+    padding-bottom: 15px;
 }
 
 .inherited-list,
