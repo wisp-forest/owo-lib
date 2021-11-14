@@ -4,6 +4,8 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.s2c.play.EntityStatusEffectS2CPacket;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
@@ -65,9 +67,43 @@ public class WorldOps {
         world.playSound(null, pos, sound, category, volume, pitch);
     }
 
+    /**
+     * Causes a block update at the given position, if {@code world}
+     * is an instance of {@link ServerWorld}
+     *
+     * @param world The target world
+     * @param pos   The target position
+     */
     public static void updateIfOnServer(World world, BlockPos pos) {
         if (!(world instanceof ServerWorld serverWorld)) return;
         serverWorld.getChunkManager().markForUpdate(pos);
+    }
+
+    /**
+     * Same as {@link WorldOps#teleportToWorld(ServerPlayerEntity, ServerWorld, Vec3d, float, float)} but defaults
+     * to {@code 0} for {@code pitch} and {@code yaw}
+     */
+    public static void teleportToWorld(ServerPlayerEntity player, ServerWorld target, Vec3d pos) {
+        teleportToWorld(player, target, pos, 0, 0);
+    }
+
+    /**
+     * Teleports the given player to the given world, syncing all the annoying data
+     * like experience and status effects that minecraft doesn't
+     *
+     * @param player The player to teleport
+     * @param target The world to teleport to
+     * @param pos    The target position
+     * @param yaw    The target yaw
+     * @param pitch  The target pitch
+     */
+    public static void teleportToWorld(ServerPlayerEntity player, ServerWorld target, Vec3d pos, float yaw, float pitch) {
+        player.teleport(target, pos.x, pos.y, pos.z, pitch, yaw);
+        player.addExperience(0);
+
+        player.getStatusEffects().forEach(effect -> {
+            player.networkHandler.sendPacket(new EntityStatusEffectS2CPacket(player.getId(), effect));
+        });
     }
 
 }
