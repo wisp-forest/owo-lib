@@ -1,24 +1,37 @@
+# oωo (owo-lib)
+
+[![curseforge](https://img.shields.io/badge/-CurseForge-gray?style=for-the-badge&logo=curseforge&labelColor=orange)](https://www.curseforge.com/minecraft/mc-mods/owo-lib)
+[![modrinth](https://img.shields.io/badge/-modrinth-gray?style=for-the-badge&labelColor=green&labelWidth=15&logo=appveyor&logoColor=white)](https://modrinth.com/mod/owo-lib)
+[![release](https://img.shields.io/github/v/release/glisco03/owo-lib?logo=github&style=for-the-badge)](https://github.com/glisco03/owo-lib/releases)
+[![discord](https://img.shields.io/discord/825828008644313089?label=wisp%20forest&logo=discord&logoColor=white&style=for-the-badge)](https://discord.gg/xrwHKktV2d)
+
+## Overview
+
 A general utility library for content-focused modding on Fabric. Particles, automatic registration, tabbed item groups and more
 
 **Build Setup:**
 ```groovy
 repositories {
-    maven { url 'https://jitpack.io' }
+    maven { url 'https://maven.wispforest.io' }
 }
 ```
 ```groovy
 dependencies {
-    modImplementation "com.github.glisco03:owo-lib:${project.owo_version}"
+    // Versions tagged with +1.18 onwards
+    modImplementation "io.wispforest:owo-lib:${project.owo_version}"
     
-    //This is optional, but recommended so users dont have to install *another* library
-    include "com.github.glisco03:owo-lib:${project.owo_version}"
+    // Versions for 1.17
+    modImplementation "com.glisco:owo-lib:${project.owo_version}"
 }
 ```
 You can check the latest version on the [Releases](https://github.com/glisco03/owo-lib/releases) page
- 
-***
 
-Features include:
+owo currently has thorough documentation in the form of [Javadoc](https://docs.wispforest.io/javadoc/owo/) throught the entire codebase, a wiki with detailed instructions for each feature is under
+construction over at https://docs.wispforest.io/owo/
+ 
+## Features
+
+This is by no means an exhaustive list, it only provides a rough overview
 
 - A fully automatic registry system that is designed to be as generic as possible. It is simple and non-verbose to use for basic Minecraft registries but can just as well be used for any kind of custom system that you want to store values in class fields for.
 
@@ -30,6 +43,3 @@ Features include:
 
 - Common comparison and verification operations for ItemStacks to make handling them less painful
 
-***
-
-owo currently has thorough documentation in the form of Javadoc throught the entire codebase, a wiki with detailed instructions for each feature is on it's way
