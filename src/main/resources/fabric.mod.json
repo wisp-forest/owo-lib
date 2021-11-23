@@ -14,13 +14,13 @@
   "environment": "*",
   "entrypoints": {
     "client": [
-      "io.glisco.owo.client.OwoClient"
+      "io.wispforest.owo.client.OwoClient"
     ],
     "main": [
-      "io.glisco.owo.Owo"
+      "io.wispforest.owo.Owo"
     ],
     "rei_plugins": [
-      "io.glisco.owo.compat.rei.OwoReiPlugin"
+      "io.wispforest.owo.compat.rei.OwoReiPlugin"
     ]
   },
   "mixins": [

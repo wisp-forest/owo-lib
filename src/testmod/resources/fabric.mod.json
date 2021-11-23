@@ -12,10 +12,10 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "io.glisco.uwu.Uwu"
+      "io.wispforest.uwu.Uwu"
     ],
     "client": [
-      "io.glisco.uwu.client.UwuClient"
+      "io.wispforest.uwu.client.UwuClient"
     ]
   },
   "depends": {

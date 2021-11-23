@@ -4,15 +4,15 @@
   "package": "io.wispforest.owo.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "io.wispforest.owo.mixin.FabricItemGroupBuilderMixin",
-    "io.wispforest.owo.mixin.ItemMixin",
-    "io.wispforest.owo.mixin.ItemSettingsMixin",
-    "io.wispforest.owo.mixin.LevelInfoMixin",
-    "io.wispforest.owo.mixin.ScreenHandlerInvoker"
+    "FabricItemGroupBuilderMixin",
+    "ItemMixin",
+    "ItemSettingsMixin",
+    "LevelInfoMixin",
+    "ScreenHandlerInvoker"
   ],
   "client": [
-    "io.wispforest.owo.mixin.CreativeInventoryScreenMixin",
-    "io.wispforest.owo.mixin.TextFieldWidgetMixin"
+    "CreativeInventoryScreenMixin",
+    "TextFieldWidgetMixin"
   ],
   "injectors": {
     "defaultRequire": 1
