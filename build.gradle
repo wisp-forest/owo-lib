@@ -4,6 +4,7 @@ plugins {
     id 'io.github.juuxel.loom-quiltflower-mini' version '1.1.0'
 }
 
+// TODO: declare mc dependency correctly
 version = "${project.mod_version}+${project.minecraft_base_version}"
 group = project.maven_group
 
@@ -46,7 +47,7 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
     modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}"
-    modRuntime "me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}"
+    modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}"
 
     testmodImplementation sourceSets.main.output
 }
@@ -96,7 +97,6 @@ javadoc {
     options.addStringOption("Xdoclint:-missing", "-quiet")
 }
 
-// configure the maven publication
 publishing {
     publications {
         mavenJava(MavenPublication) {
@@ -104,10 +104,7 @@ publishing {
         }
     }
 
-    // select the repositories you want to publish to
     repositories {
-        // uncomment to publish to the local maven
-        // mavenLocal()
         maven {
             url ENV.MAVEN_URL
             credentials {

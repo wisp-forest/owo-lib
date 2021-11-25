@@ -8,7 +8,8 @@
     "ItemMixin",
     "ItemSettingsMixin",
     "LevelInfoMixin",
-    "ScreenHandlerInvoker"
+    "ScreenHandlerInvoker",
+    "TagGroupLoaderMixin"
   ],
   "client": [
     "CreativeInventoryScreenMixin",

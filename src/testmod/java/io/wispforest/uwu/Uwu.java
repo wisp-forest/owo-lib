@@ -5,10 +5,12 @@ import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
 import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
 import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
+import io.wispforest.owo.util.TagInjector;
 import io.wispforest.uwu.items.UwuItems;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.fabric.api.tag.TagFactory;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -74,6 +76,8 @@ public class Uwu implements ModInitializer {
     public void onInitialize() {
 
         FieldRegistrationHandler.register(UwuItems.class, "uwu", true);
+
+        TagInjector.injectBlocks(new Identifier("base_stone_overworld"), Blocks.GLASS);
 
         FOUR_TAB_GROUP.initialize();
         SIX_TAB_GROUP.initialize();
