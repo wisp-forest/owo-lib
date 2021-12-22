@@ -6,9 +6,14 @@ import io.wispforest.owo.moddata.ModDataLoader;
 import io.wispforest.owo.ops.LootOps;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
+
+import static io.wispforest.owo.ops.TextOps.withColor;
 
 public class Owo implements ModInitializer {
 
@@ -18,6 +23,12 @@ public class Owo implements ModInitializer {
      */
     public static final boolean DEBUG;
     public static final Logger LOGGER = LogManager.getLogger("owo");
+
+    public static final Text PREFIX = new LiteralText("[").formatted(Formatting.GRAY)
+            .append(withColor("o", 0x3955e5))
+            .append(withColor("ω", 0x13a6f0))
+            .append(withColor("o", 0x3955e5))
+            .append(new LiteralText("] ").formatted(Formatting.GRAY));
 
     static {
         if (FabricLoader.getInstance().isDevelopmentEnvironment()) {

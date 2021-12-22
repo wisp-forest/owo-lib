@@ -29,6 +29,7 @@ public class UwuTestStickItem extends Item {
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+
         if (user.isSneaking()) {
             if (world.isClient) return TypedActionResult.success(user.getStackInHand(hand));
 

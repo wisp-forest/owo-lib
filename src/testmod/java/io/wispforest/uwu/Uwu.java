@@ -70,6 +70,19 @@ public class Uwu implements ModInitializer {
         }
     };
 
+    public static final OwoItemGroup SINGLE_TAB_GROUP = new OwoItemGroup(new Identifier("uwu", "single_tab_group")) {
+        @Override
+        protected void setup() {
+            displaySingleTab();
+            addTab(Icon.of(Items.SPONGE), "tab_1", ItemGroupTab.EMPTY);
+        }
+
+        @Override
+        public ItemStack createIcon() {
+            return new ItemStack(Items.SPYGLASS);
+        }
+    };
+
     public static final ItemGroup VANILLA_GROUP = FabricItemGroupBuilder.build(new Identifier("uwu", "vanilla_group"), Items.ACACIA_BOAT::getDefaultStack);
 
     @Override
@@ -81,5 +94,6 @@ public class Uwu implements ModInitializer {
 
         FOUR_TAB_GROUP.initialize();
         SIX_TAB_GROUP.initialize();
+        SINGLE_TAB_GROUP.initialize();
     }
 }

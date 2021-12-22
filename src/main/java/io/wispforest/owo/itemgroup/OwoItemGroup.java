@@ -15,7 +15,6 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * A custom implementation of {@link ItemGroup} that supports multiple sub-tabs
@@ -39,6 +38,7 @@ public abstract class OwoItemGroup extends ItemGroup {
     private int stackHeight = 4;
     private Identifier customTexture = null;
     private boolean displayTabNamesAsTitle = true;
+    private boolean displaySingleTab = false;
 
     /**
      * Creates a new instance. This also automatically registers the group
@@ -73,7 +73,7 @@ public abstract class OwoItemGroup extends ItemGroup {
         if (initialized) return;
 
         setup();
-        if (tabs.size() == 0) this.addTab(Icon.of(Items.AIR), "based_placeholder_tab", Tag.of(Set.of()));
+        if (tabs.size() == 0) this.addTab(Icon.of(Items.AIR), "based_placeholder_tab", ItemGroupTab.EMPTY);
         this.initialized = true;
     }
 
@@ -124,6 +124,10 @@ public abstract class OwoItemGroup extends ItemGroup {
         this.stackHeight = height;
     }
 
+    protected void displaySingleTab() {
+        this.displaySingleTab = true;
+    }
+
     protected void keepStaticTitle() {
         this.displayTabNamesAsTitle = false;
     }
@@ -160,6 +164,10 @@ public abstract class OwoItemGroup extends ItemGroup {
 
     public boolean shouldDisplayTabNamesAsTitle() {
         return displayTabNamesAsTitle && this.tabs.size() > 1;
+    }
+
+    public boolean shouldDisplaySingleTab() {
+        return displaySingleTab;
     }
 
     public List<ItemGroupButton> getButtons() {

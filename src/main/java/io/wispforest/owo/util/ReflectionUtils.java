@@ -52,7 +52,7 @@ public class ReflectionUtils {
                 continue;
             }
 
-            if (!targetFieldType.isAssignableFrom(value.getClass())) continue;
+            if (value == null || !targetFieldType.isAssignableFrom(value.getClass())) continue;
             if (field.isAnnotationPresent(IterationIgnored.class)) continue;
 
             var fieldId = field.getName().toLowerCase();
