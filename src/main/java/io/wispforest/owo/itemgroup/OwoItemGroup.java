@@ -133,7 +133,7 @@ public abstract class OwoItemGroup extends ItemGroup {
     }
 
     /**
-     * Called from the constructor to register tabs and buttons
+     * Called from {@link #initialize()} to register tabs and buttons
      *
      * @see #addTab(Icon, String, Tag)
      * @see #addButton(ItemGroupButton)

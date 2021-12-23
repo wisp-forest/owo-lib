@@ -2,6 +2,8 @@ package io.wispforest.owo.itemgroup.gui;
 
 import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ConfirmChatLinkScreen;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 
@@ -38,7 +40,14 @@ public record ItemGroupButton(Icon icon, String name, Runnable action) implement
      * @return The created button
      */
     public static ItemGroupButton link(Icon icon, String name, String url) {
-        return new ItemGroupButton(icon, name, () -> Util.getOperatingSystem().open(url));
+        return new ItemGroupButton(icon, name, () -> {
+            final var client = MinecraftClient.getInstance();
+            var screen = client.currentScreen;
+            client.setScreen(new ConfirmChatLinkScreen(confirmed -> {
+                if (confirmed) Util.getOperatingSystem().open(url);
+                client.setScreen(screen);
+            }, url, true));
+        });
     }
 
     @Override

@@ -8,6 +8,7 @@
     "ItemMixin",
     "ItemSettingsMixin",
     "LevelInfoMixin",
+    "OperatingSystemMixin",
     "ScreenHandlerInvoker",
     "TagGroupLoaderMixin",
     "TranslationStorageMixin"
