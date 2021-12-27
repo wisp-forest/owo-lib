@@ -1,5 +1,6 @@
 package io.wispforest.owo.command;
 
+import com.google.gson.JsonObject;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -8,6 +9,9 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandSource;
+import net.minecraft.command.argument.ArgumentTypes;
+import net.minecraft.command.argument.serialize.ArgumentSerializer;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.text.LiteralText;
 
 import java.util.Arrays;
@@ -24,28 +28,35 @@ import java.util.concurrent.CompletableFuture;
 public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<Enum<T>> {
 
     private final DynamicCommandExceptionType noValueException;
+    private final String noElementMessage;
     private final Class<T> enumClass;
 
     private EnumArgumentType(Class<T> enumClass, String noElementMessage) {
         this.enumClass = enumClass;
-        this.noValueException = new DynamicCommandExceptionType(o -> new LiteralText(noElementMessage.replace("{}", o.toString())));
+        this.noElementMessage = noElementMessage;
+        this.noValueException = new DynamicCommandExceptionType(o -> new LiteralText(this.noElementMessage.replace("{}", o.toString())));
     }
 
     /**
      * Creates a new instance that uses {@code Invalid enum value '{}'} as the
-     * error message if an invalid value is supplied
+     * error message if an invalid value is supplied. This <b>must</b> be called
+     * on both <b>server and client</b> so the serializer can be registered correctly
      *
      * @param enumClass The {@code enum} type to parse for
      * @param <T>       The {@code enum} type to parse for
      * @return A new argument type that can parse instances of {@code T}
      */
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static <T extends Enum<T>> EnumArgumentType<T> create(Class<T> enumClass) {
-        return new EnumArgumentType<>(enumClass, "Invalid enum value '{}'");
+        final var type = new EnumArgumentType<>(enumClass, "Invalid enum value '{}'");
+        ArgumentTypes.register("owo-enum_" + enumClass.getName().toLowerCase(), type.getClass(), new Serializer(type));
+        return type;
     }
 
     /**
      * Creates a new instance that uses {@code noElementMessage} as the
-     * error message if an invalid value is supplied
+     * error message if an invalid value is supplied. This <b>must</b> be called
+     * on both <b>server and client</b> so the serializer can be registered correctly
      *
      * @param enumClass        The {@code enum} type to parse for
      * @param noElementMessage The error message to send if an invalid value is
@@ -54,8 +65,11 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<Enum<T>
      * @param <T>              The {@code enum} type to parse for
      * @return A new argument type that can parse instances of {@code T}
      */
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static <T extends Enum<T>> EnumArgumentType<T> create(Class<T> enumClass, String noElementMessage) {
-        return new EnumArgumentType<>(enumClass, noElementMessage);
+        final var type = new EnumArgumentType<>(enumClass, noElementMessage);
+        ArgumentTypes.register("owo-enum_" + enumClass.getName().toLowerCase(), type.getClass(), new Serializer(type));
+        return type;
     }
 
     public T get(CommandContext<?> context, String name) {
@@ -75,5 +89,25 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<Enum<T>
         } catch (IllegalArgumentException e) {
             throw noValueException.create(name);
         }
+    }
+
+    public static final class Serializer<T extends Enum<T>, TypeInstance extends EnumArgumentType<T>> implements ArgumentSerializer<TypeInstance> {
+
+        private final TypeInstance instance;
+
+        public Serializer(TypeInstance instance) {
+            this.instance = instance;
+        }
+
+        @Override
+        public void toPacket(TypeInstance type, PacketByteBuf buf) {}
+
+        @Override
+        public TypeInstance fromPacket(PacketByteBuf buf) {
+            return instance;
+        }
+
+        @Override
+        public void toJson(TypeInstance type, JsonObject json) {}
     }
 }

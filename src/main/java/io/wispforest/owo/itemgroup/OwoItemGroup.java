@@ -4,7 +4,9 @@ import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButtonWidget;
 import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
 import io.wispforest.owo.itemgroup.json.WrapperGroup;
+import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.impl.item.group.ItemGroupExtensions;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.item.*;
 import net.minecraft.tag.Tag;
 import net.minecraft.util.Identifier;
@@ -72,7 +74,7 @@ public abstract class OwoItemGroup extends ItemGroup {
     public void initialize() {
         if (initialized) return;
 
-        setup();
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) setup();
         if (tabs.size() == 0) this.addTab(Icon.of(Items.AIR), "based_placeholder_tab", ItemGroupTab.EMPTY);
         this.initialized = true;
     }
@@ -107,7 +109,7 @@ public abstract class OwoItemGroup extends ItemGroup {
      * Adds a new tab to this group, using the default button texture
      *
      * @param icon       The icon to use
-     * @param name       The name of the, used for the translation key
+     * @param name       The name of the tab, used for the translation key
      * @param contentTag The tag used for filling this tab
      * @see Icon#of(ItemConvertible)
      */

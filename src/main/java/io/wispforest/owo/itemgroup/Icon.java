@@ -16,7 +16,6 @@ import org.jetbrains.annotations.ApiStatus;
  * <p>
  * Default implementations provided for textures and itemstacks
  */
-@SuppressWarnings("ClassCanBeRecord")
 public interface Icon {
 
     void render(MatrixStack matrixStack, int x, int y, int mouseX, int mouseY, float delta);

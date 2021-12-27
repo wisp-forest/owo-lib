@@ -4,6 +4,7 @@
   "package": "io.wispforest.owo.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "EulaReaderMixin",
     "FabricItemGroupBuilderMixin",
     "ItemMixin",
     "ItemSettingsMixin",
