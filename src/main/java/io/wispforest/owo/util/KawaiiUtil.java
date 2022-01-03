@@ -1,8 +1,5 @@
 package io.wispforest.owo.util;
 
-import org.jetbrains.annotations.ApiStatus;
-
-@ApiStatus.Internal
 public class KawaiiUtil {
 
     private static final String[] kaomoji = """
@@ -169,8 +166,21 @@ public class KawaiiUtil {
             (´꒳`)♡
             """.split("\n");
 
-    public static String uwu(String string) {
-        return string + " " + kaomoji[(int) (Math.random() * (kaomoji.length - 1))];
+    /**
+     * Prepends a randomly chosen Kaomoji to the given String
+     *
+     * @param string The string the process
+     * @return {@code string} with a random Kaomoji prepended
+     */
+    public static String uwuify(String string) {
+        return string + " " + uwuGen();
+    }
+
+    /**
+     * @return A random Kaomoji
+     */
+    public static String uwuGen() {
+        return kaomoji[(int) (Math.random() * (kaomoji.length - 1))];
     }
 
 }

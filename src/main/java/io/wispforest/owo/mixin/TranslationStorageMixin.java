@@ -27,7 +27,7 @@ public class TranslationStorageMixin {
         if (!Objects.equals(System.getProperty("owo.uwu"), "yes please")) return;
 
         var builder = ImmutableMap.<String, String>builder();
-        translations.forEach((s, s2) -> builder.put(s, KawaiiUtil.uwu(s2)));
+        translations.forEach((s, s2) -> builder.put(s, KawaiiUtil.uwuify(s2)));
         this.translations = builder.build();
     }
 

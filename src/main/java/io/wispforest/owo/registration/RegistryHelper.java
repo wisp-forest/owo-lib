@@ -31,11 +31,12 @@ public class RegistryHelper<T> {
 
         RegistryEntryAddedCallback.event(registry).register((rawId, id, object) -> {
             if (actions.containsKey(id)) {
-                actions.get(id).accept(object);
-                actions.remove(id);
+                actions.remove(id).accept(object);
             }
 
-            complexActions.removeIf(action -> action.update(id));
+            final var actionsToExecute = new ArrayList<Runnable>();
+            complexActions.removeIf(action -> action.update(id, actionsToExecute));
+            actionsToExecute.forEach(Runnable::run);
         });
     }
 

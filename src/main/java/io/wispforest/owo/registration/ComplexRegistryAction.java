@@ -13,7 +13,6 @@ import java.util.List;
  *
  * @see ComplexRegistryAction.Builder#create(Runnable)
  */
-@SuppressWarnings("ClassCanBeRecord")
 public class ComplexRegistryAction {
 
     private final List<Identifier> predicates;
@@ -32,11 +31,11 @@ public class ComplexRegistryAction {
         return true;
     }
 
-    protected boolean update(Identifier id) {
+    protected boolean update(Identifier id, Collection<Runnable> actionList) {
         predicates.remove(id);
         if (!predicates.isEmpty()) return false;
 
-        action.run();
+        actionList.add(action);
         return true;
     }
 
