@@ -7,6 +7,12 @@ import net.minecraft.item.Item;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.Field;
+
 public interface BlockRegistryContainer extends AutoRegistryContainer<Block> {
 
     @Override
@@ -20,7 +26,8 @@ public interface BlockRegistryContainer extends AutoRegistryContainer<Block> {
     }
 
     @Override
-    default void postProcessField(String namespace, Block value, String identifier) {
+    default void postProcessField(String namespace, Block value, String identifier, Field field) {
+        if (field.isAnnotationPresent(NoBlockItem.class)) return;
         Registry.register(Registry.ITEM, new Identifier(namespace, identifier), createBlockItem(value, identifier));
     }
 
@@ -35,4 +42,12 @@ public interface BlockRegistryContainer extends AutoRegistryContainer<Block> {
     default BlockItem createBlockItem(Block block, String identifier) {
         return new BlockItem(block, new Item.Settings());
     }
+
+    /**
+     * Declares that the annotated field should not
+     * have a block item created for it
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.FIELD)
+    @interface NoBlockItem {}
 }

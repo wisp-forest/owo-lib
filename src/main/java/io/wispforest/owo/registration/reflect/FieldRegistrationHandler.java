@@ -4,7 +4,9 @@ import io.wispforest.owo.registration.annotations.RegistryNamespace;
 import io.wispforest.owo.util.ReflectionUtils;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
+import org.apache.logging.log4j.util.TriConsumer;
 
+import java.lang.reflect.Field;
 import java.util.function.BiConsumer;
 
 /**
@@ -22,7 +24,7 @@ public class FieldRegistrationHandler {
      * @param recurseIntoInnerClasses Whether this method should recursively process all inner classes of {@code clazz}
      * @param <T>                     The type of field to match
      */
-    public static <T> void process(Class<? extends FieldProcessingSubject<T>> clazz, BiConsumer<T, String> processor, boolean recurseIntoInnerClasses) {
+    public static <T> void process(Class<? extends FieldProcessingSubject<T>> clazz, TriConsumer<T, String, Field> processor, boolean recurseIntoInnerClasses) {
         var handler = ReflectionUtils.tryInstantiateWithNoArgs(clazz);
         ReflectionUtils.iterateAccessibleStaticFields(clazz, handler.getTargetFieldType(), createProcessor(processor, handler));
 
@@ -65,9 +67,9 @@ public class FieldRegistrationHandler {
     public static <T> void register(Class<? extends AutoRegistryContainer<T>> clazz, String namespace, boolean recurseIntoInnerClasses) {
         AutoRegistryContainer<T> container = ReflectionUtils.tryInstantiateWithNoArgs(clazz);
 
-        ReflectionUtils.iterateAccessibleStaticFields(clazz, container.getTargetFieldType(), createProcessor((fieldValue, identifier) -> {
+        ReflectionUtils.iterateAccessibleStaticFields(clazz, container.getTargetFieldType(), createProcessor((fieldValue, identifier, field) -> {
             Registry.register(container.getRegistry(), new Identifier(namespace, identifier), fieldValue);
-            container.postProcessField(namespace, fieldValue, identifier);
+            container.postProcessField(namespace, fieldValue, identifier, field);
         }, container));
 
         if (recurseIntoInnerClasses) {
@@ -81,10 +83,10 @@ public class FieldRegistrationHandler {
         container.afterFieldProcessing();
     }
 
-    private static <T> BiConsumer<T, String> createProcessor(BiConsumer<T, String> delegate, FieldProcessingSubject<T> handler) {
-        return (t, u) -> {
-            if (!handler.shouldProcessField(t, u)) return;
-            delegate.accept(t, u);
+    private static <T> TriConsumer<T, String, Field> createProcessor(TriConsumer<T, String, Field> delegate, FieldProcessingSubject<T> handler) {
+        return (t, u, f) -> {
+            if (!handler.shouldProcessField(t, u, f)) return;
+            delegate.accept(t, u, f);
         };
     }
 

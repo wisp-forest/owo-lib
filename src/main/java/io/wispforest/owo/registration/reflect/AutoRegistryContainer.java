@@ -2,6 +2,9 @@ package io.wispforest.owo.registration.reflect;
 
 import io.wispforest.owo.registration.annotations.AssignedName;
 import net.minecraft.util.registry.Registry;
+import org.jetbrains.annotations.ApiStatus;
+
+import java.lang.reflect.Field;
 
 /**
  * A special version of {@link FieldProcessingSubject} that contains fields which should
@@ -28,6 +31,12 @@ public interface AutoRegistryContainer<T> extends FieldProcessingSubject<T> {
      * @param identifier The identifier the field was assigned, possibly overridden by an {@link AssignedName}
      *                   annotation and always fully lowercase
      */
+    default void postProcessField(String namespace, T value, String identifier, Field field) {
+        postProcessField(namespace, value, identifier);
+    }
+
+    @ApiStatus.ScheduledForRemoval
+    @Deprecated(forRemoval = true, since = "0.3.13")
     default void postProcessField(String namespace, T value, String identifier) {
 
     }

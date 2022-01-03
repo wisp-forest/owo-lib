@@ -1,6 +1,9 @@
 package io.wispforest.owo.registration.reflect;
 
 import io.wispforest.owo.registration.annotations.AssignedName;
+import org.jetbrains.annotations.ApiStatus;
+
+import java.lang.reflect.Field;
 
 /**
  * A class that can have its accessible static fields that match the
@@ -25,6 +28,12 @@ public interface FieldProcessingSubject<T> {
      *                   annotation and always fully lowercase
      * @return {@code true} if the inspected field should be processed
      */
+    default boolean shouldProcessField(T value, String identifier, Field field) {
+        return shouldProcessField(value, identifier);
+    }
+
+    @ApiStatus.ScheduledForRemoval
+    @Deprecated(forRemoval = true, since = "0.3.13")
     default boolean shouldProcessField(T value, String identifier) {
         return true;
     }
