@@ -7,7 +7,6 @@ import net.minecraft.util.registry.Registry;
 import org.apache.logging.log4j.util.TriConsumer;
 
 import java.lang.reflect.Field;
-import java.util.function.BiConsumer;
 
 /**
  * Main hub for all interactions with implementations of

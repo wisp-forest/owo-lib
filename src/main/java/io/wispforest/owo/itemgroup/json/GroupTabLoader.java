@@ -1,12 +1,12 @@
 package io.wispforest.owo.itemgroup.json;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.itemgroup.OwoItemExtensions;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
 import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
 import io.wispforest.owo.moddata.ModDataConsumer;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import net.fabricmc.fabric.api.tag.TagFactory;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;

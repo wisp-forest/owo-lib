@@ -33,12 +33,17 @@ public class UwuTestStickItem extends Item {
         if (user.isSneaking()) {
             if (world.isClient) return TypedActionResult.success(user.getStackInHand(hand));
 
+            Uwu.CHANNEL.serverHandle((ServerPlayerEntity) user).send(new Uwu.OtherTestMessage(user.getBlockPos(), "based"));
+
             var server = user.getServer();
             WorldOps.teleportToWorld((ServerPlayerEntity) user, server.getWorld(World.END), new Vec3d(0, 128, 0));
 
             return TypedActionResult.success(user.getStackInHand(hand));
         } else {
-            if (!world.isClient) return TypedActionResult.success(user.getStackInHand(hand));
+            if (!world.isClient) {
+                Uwu.CHANNEL.clientHandle().send(Uwu.MESSAGE);
+                return TypedActionResult.success(user.getStackInHand(hand));
+            }
 
             ClientParticles.setParticleCount(5);
             ClientParticles.spawnCubeOutline(ParticleTypes.END_ROD, world, user.getEyePos().add(user.getRotationVec(0).multiply(3)).subtract(.5, .5, .5), 1, .01f);

@@ -1,8 +1,8 @@
 package io.wispforest.owo.moddata;
 
-import io.wispforest.owo.Owo;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import io.wispforest.owo.Owo;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Identifier;
 import org.apache.commons.io.FilenameUtils;

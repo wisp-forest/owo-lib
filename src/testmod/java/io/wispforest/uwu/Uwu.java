@@ -1,9 +1,13 @@
 package io.wispforest.uwu;
 
+import com.google.common.collect.ImmutableList;
 import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
 import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
+import io.wispforest.owo.network.OwoNetChannel;
+import io.wispforest.owo.network.annotations.CollectionType;
+import io.wispforest.owo.network.annotations.MapTypes;
 import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
 import io.wispforest.owo.util.TagInjector;
 import io.wispforest.uwu.items.UwuItems;
@@ -19,6 +23,11 @@ import net.minecraft.item.Items;
 import net.minecraft.tag.Tag;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 public class Uwu implements ModInitializer {
 
@@ -85,6 +94,12 @@ public class Uwu implements ModInitializer {
 
     public static final ItemGroup VANILLA_GROUP = FabricItemGroupBuilder.build(new Identifier("uwu", "vanilla_group"), Items.ACACIA_BOAT::getDefaultStack);
 
+    public static final OwoNetChannel CHANNEL = new OwoNetChannel(new Identifier("uwu", "uwu"));
+
+    public static final TestMessage MESSAGE = new TestMessage("hahayes", 69, Long.MAX_VALUE, ItemStack.EMPTY, Short.MAX_VALUE, Byte.MAX_VALUE, new BlockPos(69, 420, 489),
+    Float.NEGATIVE_INFINITY, Double.NaN, false, new Identifier("uowou", "hahayes"), Collections.emptyMap(),
+                ImmutableList.of(new BlockPos(9786, 42, 9234)));
+
     @Override
     public void onInitialize() {
 
@@ -95,5 +110,25 @@ public class Uwu implements ModInitializer {
         FOUR_TAB_GROUP.initialize();
         SIX_TAB_GROUP.initialize();
         SINGLE_TAB_GROUP.initialize();
+
+        CHANNEL.registerClientbound(TestMessage.class, (message, client, handler) -> {
+            client.player.sendMessage(Text.of(message.string), false);
+        });
+
+        CHANNEL.registerClientbound(OtherTestMessage.class, (message, client, handler) -> {
+            client.player.sendMessage(Text.of("Message '" + message.message + "' from " + message.pos), false);
+        });
+
+        CHANNEL.registerServerbound(TestMessage.class, (message, server, player, handler) -> {
+            player.sendMessage(Text.of(String.valueOf(message.bite)), false);
+        });
     }
+
+    public record OtherTestMessage(BlockPos pos, String message) {}
+
+    public record TestMessage(String string, Integer integer, Long along, ItemStack stack, Short ashort, Byte bite,
+                              BlockPos pos, Float afloat, Double adouble, Boolean aboolean, Identifier identifier,
+                              @MapTypes(keys = String.class, values = Integer.class) Map<String, Integer> map,
+                              @CollectionType(BlockPos.class) List<BlockPos> posses) {}
+
 }

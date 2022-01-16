@@ -1,7 +1,7 @@
 package io.wispforest.owo.particles;
 
-import io.wispforest.owo.util.VectorSerializer;
 import io.netty.buffer.Unpooled;
+import io.wispforest.owo.util.VectorSerializer;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.client.MinecraftClient;

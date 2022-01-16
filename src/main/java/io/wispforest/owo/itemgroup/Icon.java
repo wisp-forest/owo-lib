@@ -1,8 +1,8 @@
 package io.wispforest.owo.itemgroup;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.client.texture.AnimatedTextureDrawable;
 import io.wispforest.owo.client.texture.SpriteSheetMetadata;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.util.math.MatrixStack;

@@ -1,7 +1,7 @@
 package io.wispforest.owo.itemgroup.gui;
 
-import io.wispforest.owo.itemgroup.OwoItemGroup;
 import com.mojang.blaze3d.systems.RenderSystem;
+import io.wispforest.owo.itemgroup.OwoItemGroup;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
