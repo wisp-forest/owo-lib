@@ -83,4 +83,21 @@ public class ReflectionUtils {
             action.accept(subclass);
         }
     }
+
+    /**
+     * Tries to acquire the name of the calling class,
+     * {@code depth} frames up the call stack
+     *
+     * @param depth How many frames upwards to walk the call stack
+     * @return The name of the class at {@code depth} in the call stack or
+     * {@code <unknown>} if the class name was not found
+     */
+    public static String getCallingClassName(int depth) {
+        depth++; // compensate for this method call itself
+
+        var trace = Thread.currentThread().getStackTrace();
+        if (depth > trace.length - 1) return "<unknown>"; // verify the stacktrace is actually that deep
+
+        return trace[depth].getClassName();
+    }
 }

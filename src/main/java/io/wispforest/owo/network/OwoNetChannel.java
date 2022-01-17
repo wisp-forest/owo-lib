@@ -1,6 +1,7 @@
 package io.wispforest.owo.network;
 
 import io.wispforest.owo.network.serialization.RecordSerializer;
+import io.wispforest.owo.util.ReflectionUtils;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.fabricmc.api.EnvType;
@@ -9,11 +10,9 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 
@@ -21,49 +20,67 @@ import java.util.*;
 
 public class OwoNetChannel {
 
+    private static final Map<Identifier, String> REGISTERED_CHANNELS = new HashMap<>();
+
     private final Map<Class<?>, IndexedSerializer<?>> serializersByClass = new HashMap<>();
     private final Int2ObjectMap<IndexedSerializer<?>> serializersByIndex = new Int2ObjectOpenHashMap<>();
 
-    @SuppressWarnings("rawtypes") private final List<ClientChannelHandler> clientHandlers = new ArrayList<>();
-    @SuppressWarnings("rawtypes") private final List<ServerChannelHandler> serverHandlers = new ArrayList<>();
+    private final List<ChannelHandler<Record, ClientAccess>> clientHandlers = new ArrayList<>();
+    private final List<ChannelHandler<Record, ServerAccess>> serverHandlers = new ArrayList<>();
 
     private final Identifier packetId;
 
     private ClientHandle clientHandle = null;
     private ServerHandle serverHandle = null;
 
-    @SuppressWarnings("unchecked")
-    public OwoNetChannel(Identifier id) {
+    public static OwoNetChannel create(Identifier id) {
+        return new OwoNetChannel(id, ReflectionUtils.getCallingClassName(2));
+    }
+
+    private OwoNetChannel(Identifier id, String ownerClassName) {
+        if (REGISTERED_CHANNELS.containsKey(id)) {
+            throw new IllegalStateException("Channel with id '" + id + "' was already registered from class '" + REGISTERED_CHANNELS.get(id) + "'");
+        }
+
         this.packetId = id;
 
         ServerPlayNetworking.registerGlobalReceiver(packetId, (server, player, handler, buf, responseSender) -> {
             int handlerIndex = buf.readVarInt();
             final Record message = serializersByIndex.get(handlerIndex).serializer.read(buf);
-            server.execute(() -> serverHandlers.get(handlerIndex).handle(message, server, player, handler));
+            server.execute(() -> serverHandlers.get(handlerIndex).handle(message, new ServerAccess(player)));
         });
 
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
             ClientPlayNetworking.registerGlobalReceiver(packetId, (client, handler, buf, responseSender) -> {
                 int handlerIndex = buf.readVarInt();
                 final Record message = serializersByIndex.get(-handlerIndex).serializer.read(buf);
-                client.execute(() -> clientHandlers.get(handlerIndex).handle(message, client, handler));
+                client.execute(() -> clientHandlers.get(handlerIndex).handle(message, new ClientAccess(handler)));
             });
         }
+
+        clientHandlers.add(null);
+        serverHandlers.add(null);
+        REGISTERED_CHANNELS.put(id, ownerClassName);
     }
 
-    public <R extends Record> void registerClientbound(Class<R> messageClass, ClientChannelHandler<R> handler) {
-        int index = clientHandlers.size();
+    @SuppressWarnings("unchecked")
+    public <R extends Record> void registerClientbound(Class<R> messageClass, ChannelHandler<R, ClientAccess> handler) {
+        int index = this.clientHandlers.size();
         this.createSerializer(messageClass, index, EnvType.CLIENT);
-        this.clientHandlers.add(handler);
+        this.clientHandlers.add((ChannelHandler<Record, ClientAccess>) handler);
     }
 
-    public <R extends Record> void registerServerbound(Class<R> messageClass, ServerChannelHandler<R> handler) {
-        int index = serverHandlers.size();
+    @SuppressWarnings("unchecked")
+    public <R extends Record> void registerServerbound(Class<R> messageClass, ChannelHandler<R, ServerAccess> handler) {
+        int index = this.serverHandlers.size();
         this.createSerializer(messageClass, index, EnvType.SERVER);
-        this.serverHandlers.add(handler);
+        this.serverHandlers.add((ChannelHandler<Record, ServerAccess>) handler);
     }
 
     public ClientHandle clientHandle() {
+        if (FabricLoader.getInstance().getEnvironmentType() != EnvType.CLIENT)
+            throw new NetworkException("Cannot obtain client handle in environment type '" + FabricLoader.getInstance().getEnvironmentType() + "'");
+
         if (this.clientHandle == null) this.clientHandle = new ClientHandle();
         return clientHandle;
     }
@@ -80,9 +97,11 @@ public class OwoNetChannel {
         return handle;
     }
 
-    public ServerHandle serverHandle(ServerPlayerEntity player) {
+    public ServerHandle serverHandle(PlayerEntity player) {
+        if (!(player instanceof ServerPlayerEntity serverPlayer)) throw new NetworkException("'player' must be a 'ServerPlayerEntity'");
+
         var handle = getServerHandle();
-        handle.targets = Collections.singleton(player);
+        handle.targets = Collections.singleton(serverPlayer);
         return handle;
     }
 
@@ -111,12 +130,12 @@ public class OwoNetChannel {
         final var messageClass = message.getClass();
 
         if (!this.serializersByClass.containsKey(messageClass)) {
-            throw new IllegalStateException("Message class '" + messageClass + "' is not registered");
+            throw new NetworkException("Message class '" + messageClass + "' is not registered");
         }
 
         final IndexedSerializer<R> serializer = (IndexedSerializer<R>) this.serializersByClass.get(messageClass);
         if (serializer.handlerIndex(target) == -1) {
-            throw new IllegalStateException("Message class '" + messageClass + "' has not handler registered for target environment " + target);
+            throw new NetworkException("Message class '" + messageClass + "' has not handler registered for target environment " + target);
         }
 
         buffer.writeVarInt(serializer.handlerIndex(target));
@@ -141,14 +160,16 @@ public class OwoNetChannel {
         }
     }
 
-    @FunctionalInterface
-    public interface ServerChannelHandler<R extends Record> {
-        void handle(R message, MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler);
+    public interface ChannelHandler<R extends Record, E extends EnvironmentAccess<?, ?, ?>> {
+        void handle(R message, E access);
     }
 
-    @FunctionalInterface
-    public interface ClientChannelHandler<R extends Record> {
-        void handle(R message, MinecraftClient client, ClientPlayNetworkHandler handler);
+    public interface EnvironmentAccess<P extends PlayerEntity, R, N> {
+        P player();
+
+        R runtime();
+
+        N netHandler();
     }
 
     private static final class IndexedSerializer<R extends Record> {

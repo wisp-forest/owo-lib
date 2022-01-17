@@ -11,6 +11,7 @@ import io.wispforest.owo.network.annotations.MapTypes;
 import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
 import io.wispforest.owo.util.TagInjector;
 import io.wispforest.uwu.items.UwuItems;
+import io.wispforest.uwu.network.UwuNetworkExample;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.fabric.api.tag.TagFactory;
@@ -94,11 +95,13 @@ public class Uwu implements ModInitializer {
 
     public static final ItemGroup VANILLA_GROUP = FabricItemGroupBuilder.build(new Identifier("uwu", "vanilla_group"), Items.ACACIA_BOAT::getDefaultStack);
 
-    public static final OwoNetChannel CHANNEL = new OwoNetChannel(new Identifier("uwu", "uwu"));
+    public static final OwoNetChannel CHANNEL = OwoNetChannel.create(new Identifier("uwu", "uwu"));
 
     public static final TestMessage MESSAGE = new TestMessage("hahayes", 69, Long.MAX_VALUE, ItemStack.EMPTY, Short.MAX_VALUE, Byte.MAX_VALUE, new BlockPos(69, 420, 489),
-    Float.NEGATIVE_INFINITY, Double.NaN, false, new Identifier("uowou", "hahayes"), Collections.emptyMap(),
-                ImmutableList.of(new BlockPos(9786, 42, 9234)));
+            Float.NEGATIVE_INFINITY, Double.NaN, false, new Identifier("uowou", "hahayes"), Collections.emptyMap(),
+            ImmutableList.of(new BlockPos(9786, 42, 9234)));
+
+    public static final Identifier BREAK_BLOCK_PARTICLES = new Identifier("uwu", "break_block");
 
     @Override
     public void onInitialize() {
@@ -111,17 +114,19 @@ public class Uwu implements ModInitializer {
         SIX_TAB_GROUP.initialize();
         SINGLE_TAB_GROUP.initialize();
 
-        CHANNEL.registerClientbound(TestMessage.class, (message, client, handler) -> {
-            client.player.sendMessage(Text.of(message.string), false);
+        CHANNEL.registerClientbound(TestMessage.class, (message, access) -> {
+            access.player().sendMessage(Text.of(message.string), false);
         });
 
-        CHANNEL.registerClientbound(OtherTestMessage.class, (message, client, handler) -> {
-            client.player.sendMessage(Text.of("Message '" + message.message + "' from " + message.pos), false);
+        CHANNEL.registerClientbound(OtherTestMessage.class, (message, access) -> {
+            access.player().sendMessage(Text.of("Message '" + message.message + "' from " + message.pos), false);
         });
 
-        CHANNEL.registerServerbound(TestMessage.class, (message, server, player, handler) -> {
-            player.sendMessage(Text.of(String.valueOf(message.bite)), false);
+        CHANNEL.registerServerbound(TestMessage.class, (message, access) -> {
+            access.player().sendMessage(Text.of(String.valueOf(message.bite)), false);
         });
+
+        UwuNetworkExample.init();
     }
 
     public record OtherTestMessage(BlockPos pos, String message) {}

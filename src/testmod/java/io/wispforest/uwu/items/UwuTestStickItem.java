@@ -33,17 +33,16 @@ public class UwuTestStickItem extends Item {
         if (user.isSneaking()) {
             if (world.isClient) return TypedActionResult.success(user.getStackInHand(hand));
 
-            Uwu.CHANNEL.serverHandle((ServerPlayerEntity) user).send(new Uwu.OtherTestMessage(user.getBlockPos(), "based"));
+            Uwu.CHANNEL.serverHandle(user).send(new Uwu.OtherTestMessage(user.getBlockPos(), "based"));
 
             var server = user.getServer();
             WorldOps.teleportToWorld((ServerPlayerEntity) user, server.getWorld(World.END), new Vec3d(0, 128, 0));
 
             return TypedActionResult.success(user.getStackInHand(hand));
         } else {
-            if (!world.isClient) {
-                Uwu.CHANNEL.clientHandle().send(Uwu.MESSAGE);
-                return TypedActionResult.success(user.getStackInHand(hand));
-            }
+            if (!world.isClient) return TypedActionResult.success(user.getStackInHand(hand));
+
+            Uwu.CHANNEL.clientHandle().send(Uwu.MESSAGE);
 
             ClientParticles.setParticleCount(5);
             ClientParticles.spawnCubeOutline(ParticleTypes.END_ROD, world, user.getEyePos().add(user.getRotationVec(0).multiply(3)).subtract(.5, .5, .5), 1, .01f);
@@ -61,7 +60,7 @@ public class UwuTestStickItem extends Item {
         breakStack.addEnchantment(Enchantments.FORTUNE, 3);
         WorldOps.breakBlockWithItem(context.getWorld(), context.getBlockPos(), breakStack);
 
-        ServerParticles.issueEvent((ServerWorld) context.getWorld(), Vec3d.of(context.getBlockPos()), UwuClient.BREAK_BLOCK_PARTICLES);
+        ServerParticles.issueEvent((ServerWorld) context.getWorld(), Vec3d.of(context.getBlockPos()), Uwu.BREAK_BLOCK_PARTICLES);
 
         return ActionResult.SUCCESS;
     }
