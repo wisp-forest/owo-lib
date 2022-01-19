@@ -1,0 +1,10 @@
+{
+  "target_group": "misc",
+  "tabs": [
+    {
+      "tag": "minecraft:diamond_ores",
+      "name": "tab_0",
+      "icon": "minecraft:deepslate"
+    }
+  ]
+}

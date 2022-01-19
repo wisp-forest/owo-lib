@@ -1,21 +1,15 @@
 package io.wispforest.owo.network.serialization;
 
 import com.google.common.collect.ImmutableMap;
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.network.annotations.CollectionType;
 import io.wispforest.owo.network.annotations.MapTypes;
-import io.wispforest.owo.util.VectorSerializer;
-import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3f;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.RecordComponent;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,10 +17,22 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
+/**
+ * A utility for serializing {@code record} classes into {@link PacketByteBuf}s.
+ * Use {@link #create(Class)} to create (or obtain if it already exists)
+ * the instance for a specific class. Should an exception
+ * about a missing type adapter be thrown, register one
+ * using {@link TypeAdapter#register(Class, BiConsumer, Function)}
+ *
+ * <p> To serialize an instance use {@link #write(PacketByteBuf, Record)},
+ * to read it back again use {@link #read(PacketByteBuf)}
+ *
+ * @param <R> The type of record this serializer can handle
+ */
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class RecordSerializer<R extends Record> {
 
-    private static final Map<Class<?>, TypeAdapter<?>> TYPE_ADAPTERS = new HashMap<>();
+    private static final Map<Class<?>, RecordSerializer<?>> SERIALIZERS = new HashMap<>();
 
     private final Map<Function<R, ?>, TypeAdapter> adapters;
     private final Constructor<R> instanceCreator;
@@ -38,7 +44,17 @@ public class RecordSerializer<R extends Record> {
         this.fieldCount = recordClass.getRecordComponents().length;
     }
 
+    /**
+     * Creates a new serializer for the given record type, or retrieves the
+     * existing one if it was already created
+     *
+     * @param recordClass The type of record to (de-)serialize
+     * @param <R>         The type of record to (de-)serialize
+     * @return The serializer for the given record type
+     */
     public static <R extends Record> RecordSerializer<R> create(Class<R> recordClass) {
+        if (SERIALIZERS.containsKey(recordClass)) return (RecordSerializer<R>) SERIALIZERS.get(recordClass);
+
         final ImmutableMap.Builder<Function<R, ?>, TypeAdapter> adapters = new ImmutableMap.Builder<>();
         final Class<?>[] canonicalConstructorArgs = new Class<?>[recordClass.getRecordComponents().length];
 
@@ -50,12 +66,21 @@ public class RecordSerializer<R extends Record> {
         }
 
         try {
-            return new RecordSerializer<>(recordClass, recordClass.getConstructor(canonicalConstructorArgs), adapters.build());
+            final var serializer = new RecordSerializer<>(recordClass, recordClass.getConstructor(canonicalConstructorArgs), adapters.build());
+            SERIALIZERS.put(recordClass, serializer);
+            return serializer;
         } catch (NoSuchMethodException e) {
             throw new IllegalStateException("Could not locate canonical record constructor");
         }
     }
 
+    /**
+     * Attempts to read a record of this serializer's
+     * type from the given buffer
+     *
+     * @param buffer The buffer to read from
+     * @return The deserialized record
+     */
     public R read(PacketByteBuf buffer) {
         Object[] messageContents = new Object[fieldCount];
 
@@ -65,87 +90,52 @@ public class RecordSerializer<R extends Record> {
         try {
             return instanceCreator.newInstance(messageContents);
         } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            e.printStackTrace();
+            Owo.LOGGER.error("Error while deserializing record", e);
         }
 
         return null;
     }
 
-    public void write(PacketByteBuf buffer, R instance) {
+    /**
+     * Writes the given record instance
+     * to the given buffer
+     *
+     * @param buffer   The buffer to write to
+     * @param instance The record instance to serialize
+     */
+    public RecordSerializer<R> write(PacketByteBuf buffer, R instance) {
         adapters.forEach((rFunction, typeAdapter) -> typeAdapter.serializer().accept(buffer, rFunction.apply(instance)));
+        return this;
     }
 
     private static <R extends Record> Object getRecordEntry(R instance, Method accessor) {
         try {
             return accessor.invoke(instance);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalStateException("Unable to get message contents", e);
+            throw new IllegalStateException("Unable to get record entry", e);
         }
-    }
-
-    public static <T> void registerTypeAdapter(Class<T> clazz, BiConsumer<PacketByteBuf, T> serializer, Function<PacketByteBuf, T> deserializer) {
-        if (TYPE_ADAPTERS.containsKey(clazz)) throw new IllegalStateException("Class '" + clazz.getName() + "' already has a type adapter");
-        TYPE_ADAPTERS.put(clazz, new TypeAdapter<>(serializer, deserializer));
     }
 
     private static <T> TypeAdapter<T> createAdapter(Class<T> componentClass, RecordComponent component) {
         if (Map.class.isAssignableFrom(componentClass)) {
             var typeAnnotation = component.getAnnotation(MapTypes.class);
-            return (TypeAdapter<T>) getMapAdapter(conform(componentClass, Map.class), typeAnnotation.keys(), typeAnnotation.values());
+            return (TypeAdapter<T>) TypeAdapter.createMapAdapter(conform(componentClass, Map.class), typeAnnotation.keys(), typeAnnotation.values());
         }
 
         if (Collection.class.isAssignableFrom(componentClass)) {
             var typeAnnotation = component.getAnnotation(CollectionType.class);
-            return (TypeAdapter<T>) getCollectionAdapter(conform(componentClass, Collection.class), typeAnnotation.value());
+            return (TypeAdapter<T>) TypeAdapter.createCollectionAdapter(conform(componentClass, Collection.class), typeAnnotation.value());
         }
 
-        return getTypeAdapter(componentClass);
-    }
+        if (Record.class.isAssignableFrom(componentClass)) return (TypeAdapter<T>) TypeAdapter.createRecordAdapter(conform(componentClass, Record.class));
+        if (componentClass.isEnum()) return (TypeAdapter<T>) TypeAdapter.createEnumAdapter(conform(componentClass, Enum.class));
+        if (componentClass.isArray()) return (TypeAdapter<T>) TypeAdapter.createArrayAdapter(componentClass.getComponentType());
 
-    public static <T> TypeAdapter<T> getTypeAdapter(Class<T> clazz) {
-        if (!TYPE_ADAPTERS.containsKey(clazz)) {
-            throw new IllegalStateException(clazz.isPrimitive() ?
-                    "Primitive type '" + clazz.getName() + "' can not be serialized. Use the boxed type instead" :
-                    "No type adapter available for class '" + clazz.getName() + "'");
-        }
-
-        return (TypeAdapter<T>) TYPE_ADAPTERS.get(clazz);
-    }
-
-    public static <K, V, T extends Map<K, V>> TypeAdapter<T> getMapAdapter(Class<T> clazz, Class<K> keyClass, Class<V> valueClass) {
-        var keyAdapter = getTypeAdapter(keyClass);
-        var valueAdapter = getTypeAdapter(valueClass);
-        return new TypeAdapter<>((buf, t) -> buf.writeMap(t, keyAdapter.serializer(), valueAdapter.serializer()),
-                buf -> buf.readMap(buf1 -> (T) new HashMap<>(), keyAdapter.deserializer(), valueAdapter.deserializer()));
-    }
-
-    public static <E, T extends Collection<E>> TypeAdapter<T> getCollectionAdapter(Class<T> clazz, Class<E> elementClass) {
-        var elementAdapter = getTypeAdapter(elementClass);
-        return new TypeAdapter<>((buf, t) -> buf.writeCollection(t, elementAdapter.serializer()),
-                buf -> buf.readCollection(value -> (T) new ArrayList<>(), elementAdapter.deserializer()));
+        return TypeAdapter.get(componentClass);
     }
 
     private static <T> Class<T> conform(Class<?> clazz, Class<T> target) {
         return (Class<T>) clazz;
-    }
-
-    static {
-        registerTypeAdapter(Boolean.class, PacketByteBuf::writeBoolean, PacketByteBuf::readBoolean);
-        registerTypeAdapter(Double.class, PacketByteBuf::writeDouble, PacketByteBuf::readDouble);
-        registerTypeAdapter(Float.class, PacketByteBuf::writeFloat, PacketByteBuf::readFloat);
-
-        registerTypeAdapter(Byte.class, (BiConsumer<PacketByteBuf, Byte>) PacketByteBuf::writeByte, PacketByteBuf::readByte);
-        registerTypeAdapter(Short.class, (BiConsumer<PacketByteBuf, Short>) PacketByteBuf::writeShort, PacketByteBuf::readShort);
-        registerTypeAdapter(Integer.class, PacketByteBuf::writeVarInt, PacketByteBuf::readVarInt);
-        registerTypeAdapter(Long.class, PacketByteBuf::writeLong, PacketByteBuf::readLong);
-
-        registerTypeAdapter(String.class, PacketByteBuf::writeString, PacketByteBuf::readString);
-        registerTypeAdapter(BlockPos.class, PacketByteBuf::writeBlockPos, PacketByteBuf::readBlockPos);
-        registerTypeAdapter(ItemStack.class, PacketByteBuf::writeItemStack, PacketByteBuf::readItemStack);
-        registerTypeAdapter(Identifier.class, PacketByteBuf::writeIdentifier, PacketByteBuf::readIdentifier);
-
-        registerTypeAdapter(Vec3d.class, (buf, vec3d) -> VectorSerializer.write(vec3d, buf), VectorSerializer::read);
-        registerTypeAdapter(Vec3f.class, (buf, vec3d) -> VectorSerializer.writef(vec3d, buf), VectorSerializer::readf);
     }
 
 }

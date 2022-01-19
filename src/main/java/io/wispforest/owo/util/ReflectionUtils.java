@@ -5,11 +5,13 @@ import io.wispforest.owo.registration.annotations.IterationIgnored;
 import org.apache.logging.log4j.util.TriConsumer;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 @ApiStatus.Experimental
 public class ReflectionUtils {
@@ -24,10 +26,45 @@ public class ReflectionUtils {
      */
     public static <C> C tryInstantiateWithNoArgs(Class<C> clazz) {
         try {
-            return clazz.getDeclaredConstructor().newInstance();
+            return clazz.getConstructor().newInstance();
         } catch (InstantiationException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             e.printStackTrace();
             throw new RuntimeException((e instanceof NoSuchMethodException ? "No zero-args constructor defined on class " : "Could not instantiate class ") + clazz, e);
+        }
+    }
+
+    /**
+     * Calls the {@link Constructor#newInstance(Object...)} method and
+     * wraps the exception in a {@link RuntimeException}, thus making it unchecked.
+     * <b>Use this when you would otherwise rethrow</b>
+     *
+     * @param constructor The constructor to call
+     * @param args        The arguments to pass the constructor
+     * @param <C>         The type of object to create
+     * @return The created object
+     */
+    public static <C> C instantiate(Constructor<C> constructor, Object... args) {
+        try {
+            return constructor.newInstance(args);
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException("Wrapped object creation failure, look below for reason", e);
+        }
+    }
+
+    /**
+     * Tries to obtain the public zero-args constructor of the given class.
+     * <b>Use this when no constructor constitutes an error condition or
+     * you previously checked for its existence with {@link #requireZeroArgsConstructor(Class, Function)}</b>
+     *
+     * @param clazz The class to get the constructor from
+     * @param <C>   The type of object the constructor will create
+     * @return The public zero-args constructor of the given class
+     */
+    public static <C> Constructor<C> getNoArgsConstructor(Class<C> clazz) {
+        try {
+            return clazz.getConstructor();
+        } catch (NoSuchMethodException e) {
+            throw new IllegalStateException("Class " + clazz.getName() + " does not declare a zero-args constructor", e);
         }
     }
 
@@ -63,11 +100,21 @@ public class ReflectionUtils {
             if (value == null || !targetFieldType.isAssignableFrom(value.getClass())) continue;
             if (field.isAnnotationPresent(IterationIgnored.class)) continue;
 
-            var fieldId = field.getName().toLowerCase();
-            if (field.isAnnotationPresent(AssignedName.class)) fieldId = field.getAnnotation(AssignedName.class).value();
-
-            fieldConsumer.accept(value, fieldId, field);
+            fieldConsumer.accept(value, getFieldName(field), field);
         }
+    }
+
+    /**
+     * Returns the name of field in all lowercase, or
+     * the name defined by an {@link AssignedName} annotation
+     *
+     * @param field The field to check
+     * @return the properly formatted field name
+     */
+    public static String getFieldName(Field field) {
+        var fieldId = field.getName().toLowerCase();
+        if (field.isAnnotationPresent(AssignedName.class)) fieldId = field.getAnnotation(AssignedName.class).value();
+        return fieldId;
     }
 
     /**
@@ -82,6 +129,25 @@ public class ReflectionUtils {
             if (!targetType.isAssignableFrom(subclass)) continue;
             action.accept(subclass);
         }
+    }
+
+    /**
+     * Verifies that the given class provides a public zero-args constructor.
+     * Throws an exception with a caller-controlled message if the constructor
+     * doesn't exist
+     *
+     * @param clazz           The class to check the existence of a zero-args constructor for
+     * @param reasonFormatter The error message to throw, gets the class name passed
+     */
+    public static void requireZeroArgsConstructor(Class<?> clazz, Function<String, String> reasonFormatter) {
+        boolean found = false;
+        for (var constructor : clazz.getConstructors()) {
+            if (constructor.getParameterCount() != 0) continue;
+            found = true;
+            break;
+        }
+
+        if (!found) throw new IllegalStateException(reasonFormatter.apply(clazz.getName()));
     }
 
     /**

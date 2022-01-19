@@ -6,6 +6,7 @@ import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
 import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -28,6 +29,14 @@ public class WrapperGroup extends OwoItemGroup {
         this.buttons.addAll(buttons);
 
         this.icon = icon;
+    }
+
+    public void addTabs(Collection<ItemGroupTab> tabs) {
+        this.tabs.addAll(tabs);
+    }
+
+    public void addButtons(Collection<ItemGroupButton> buttons) {
+        this.buttons.addAll(buttons);
     }
 
     @Override

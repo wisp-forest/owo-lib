@@ -1,0 +1,10 @@
+{
+  "target_group": "misc",
+  "tabs": [
+    {
+      "tag": "minecraft:gold_ores",
+      "name": "tab_1",
+      "icon": "minecraft:emerald"
+    }
+  ]
+}

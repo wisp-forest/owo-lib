@@ -49,7 +49,6 @@ public class GroupTabLoader implements ModDataConsumer {
         return "item_group_tabs";
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Override
     public void acceptParsedFile(Identifier id, JsonObject json) {
         String targetGroup = JsonHelper.getString(json, "target_group");
@@ -87,12 +86,18 @@ public class GroupTabLoader implements ModDataConsumer {
 
         for (ItemGroup group : ItemGroup.GROUPS) {
             if (!group.getName().equals(targetGroup)) continue;
-            final var wrappedGroup = new WrapperGroup(group.getIndex(), group.getName(), createdTabs, createdButtons, group::createIcon);
-            wrappedGroup.initialize();
 
-            for (var item : Registry.ITEM) {
-                if (item.getGroup() != group) continue;
-                ((OwoItemExtensions) item).setItemGroup(wrappedGroup);
+            if (group instanceof WrapperGroup wrapper) {
+                wrapper.addTabs(createdTabs);
+                wrapper.addButtons(createdButtons);
+            } else {
+                final var wrappedGroup = new WrapperGroup(group.getIndex(), group.getName(), createdTabs, createdButtons, group::createIcon);
+                wrappedGroup.initialize();
+
+                for (var item : Registry.ITEM) {
+                    if (item.getGroup() != group) continue;
+                    ((OwoItemExtensions) item).setItemGroup(wrappedGroup);
+                }
             }
 
             return;
