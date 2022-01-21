@@ -9,13 +9,14 @@
     "ItemMixin",
     "ItemSettingsMixin",
     "LevelInfoMixin",
+    "ReloadableResourceManagerImplMixin",
     "ScreenHandlerInvoker",
     "TagGroupLoaderMixin"
   ],
   "client": [
     "CreativeInventoryScreenMixin",
-    "TextFieldWidgetMixin",
     "OperatingSystemMixin",
+    "TextFieldWidgetMixin",
     "TranslationStorageMixin"
   ],
   "injectors": {
