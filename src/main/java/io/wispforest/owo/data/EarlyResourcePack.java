@@ -52,7 +52,7 @@ public class EarlyResourcePack extends AbstractFileResourcePack {
     }
 
     private Path resolvePath(String name) {
-        Path path = basePath.resolve(name).toAbsolutePath().normalize();
+        Path path = basePath.resolve(name.replace("/", basePath.getFileSystem().getSeparator())).toAbsolutePath().normalize();
         if (!path.startsWith(basePath)) return null;
         return path;
     }
@@ -73,15 +73,15 @@ public class EarlyResourcePack extends AbstractFileResourcePack {
 
     @Override
     protected boolean containsFile(String name) {
-        return Files.isRegularFile(basePath.resolve(name));
+        Path path = resolvePath(name);
+        return path != null && Files.isRegularFile(path);
     }
 
     @Override
     public Collection<Identifier> findResources(ResourceType type, String namespace, String prefix, int maxDepth, Predicate<String> pathFilter) {
-        Path nsPath = basePath.resolve(type.getDirectory()).resolve(namespace);
-        Path walkPath = nsPath.resolve(prefix.replace("/", basePath.getFileSystem().getSeparator()));
-
-        if (!Files.exists(walkPath))
+        Path nsPath = resolvePath(type.getDirectory() + "/" + namespace);
+        Path walkPath = resolvePath(type.getDirectory() + "/" + namespace + "/" + prefix);
+        if (walkPath == null || nsPath == null || !Files.exists(walkPath))
             return Collections.emptyList();
 
         List<Identifier> ids = new ArrayList<>();
