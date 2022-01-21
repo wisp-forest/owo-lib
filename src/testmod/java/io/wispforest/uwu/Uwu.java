@@ -1,6 +1,8 @@
 package io.wispforest.uwu;
 
 import com.google.common.collect.ImmutableList;
+import io.wispforest.owo.data.EarlyResourcePack;
+import io.wispforest.owo.data.EarlyResourcePackHelper;
 import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
@@ -10,17 +12,21 @@ import io.wispforest.owo.network.annotations.CollectionType;
 import io.wispforest.owo.network.annotations.MapTypes;
 import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
 import io.wispforest.owo.util.TagInjector;
+import io.wispforest.uwu.data.LoggingResourceLoader;
 import io.wispforest.uwu.items.UwuItems;
 import io.wispforest.uwu.network.UwuNetworkExample;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.tag.TagFactory;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.resource.ResourceType;
 import net.minecraft.tag.Tag;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -127,6 +133,11 @@ public class Uwu implements ModInitializer {
         });
 
         UwuNetworkExample.init();
+
+        ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(new LoggingResourceLoader());
+        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new LoggingResourceLoader());
+
+        EarlyResourcePackHelper.register(FabricLoader.getInstance().getModContainer("uwu").get().getPath("early_data"), "UwU Early Data");
     }
 
     public record OtherTestMessage(BlockPos pos, String message) {}
