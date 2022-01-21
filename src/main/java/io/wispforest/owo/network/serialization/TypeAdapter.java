@@ -1,6 +1,8 @@
 
 package io.wispforest.owo.network.serialization;
 
+import io.wispforest.owo.network.annotations.CollectionType;
+import io.wispforest.owo.network.annotations.MapTypes;
 import io.wispforest.owo.util.VectorSerializer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -11,8 +13,11 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3f;
+import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Array;
+import java.lang.reflect.RecordComponent;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -54,6 +59,29 @@ public record TypeAdapter<T>(BiConsumer<PacketByteBuf, T> serializer, Function<P
     }
 
     /**
+     * Gets the type adapter for the given class, using additional data from
+     * annotations, or throws an exception if none is registered
+     *
+     * @param componentClass The class to obtain an adapter for
+     * @param element The element to take annotations from
+     * @return The respective type adapter instance
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> TypeAdapter<T> getWithAnnotations(Class<T> componentClass, AnnotatedElement element) {
+        if (Map.class.isAssignableFrom(componentClass)) {
+            var typeAnnotation = element.getAnnotation(MapTypes.class);
+            return (TypeAdapter<T>) TypeAdapter.createMapAdapter(conform(componentClass, Map.class), typeAnnotation.keys(), typeAnnotation.values());
+        }
+
+        if (Collection.class.isAssignableFrom(componentClass)) {
+            var typeAnnotation = element.getAnnotation(CollectionType.class);
+            return (TypeAdapter<T>) TypeAdapter.createCollectionAdapter(conform(componentClass, Collection.class), typeAnnotation.value());
+        }
+
+        return get(componentClass);
+    }
+
+    /**
      * Gets the type adapter for the given class, or throws
      * an exception if none is registered
      *
@@ -61,12 +89,13 @@ public record TypeAdapter<T>(BiConsumer<PacketByteBuf, T> serializer, Function<P
      * @return The respective type adapter instance
      */
     public static <T> TypeAdapter<T> get(Class<T> clazz) {
-        if (!TYPE_ADAPTERS.containsKey(clazz)) {
+        TypeAdapter<T> adapter = getOrNull(clazz);
+
+        if (adapter == null) {
             throw new IllegalStateException("No type adapter available for class '" + clazz.getName() + "'");
         }
 
-        //noinspection unchecked
-        return (TypeAdapter<T>) TYPE_ADAPTERS.get(clazz);
+        return adapter;
     }
 
     /**
@@ -76,8 +105,28 @@ public record TypeAdapter<T>(BiConsumer<PacketByteBuf, T> serializer, Function<P
      * @return An empty optional if no adapter is registered
      */
     public static <T> Optional<TypeAdapter<T>> maybeGet(Class<T> clazz) {
-        //noinspection unchecked
-        return Optional.ofNullable((TypeAdapter<T>) TYPE_ADAPTERS.get(clazz));
+        return Optional.ofNullable(getOrNull(clazz));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> @Nullable TypeAdapter<T> getOrNull(Class<T> clazz) {
+        TypeAdapter<T> adapter = (TypeAdapter<T>) TYPE_ADAPTERS.get(clazz);
+
+        if (adapter == null) {
+            if (Record.class.isAssignableFrom(clazz))
+                adapter = (TypeAdapter<T>) TypeAdapter.createRecordAdapter(conform(clazz, Record.class));
+            else if (clazz.isEnum())
+                adapter = (TypeAdapter<T>) TypeAdapter.createEnumAdapter(conform(clazz, Enum.class));
+            else if (clazz.isArray())
+                adapter = (TypeAdapter<T>) TypeAdapter.createArrayAdapter(clazz.getComponentType());
+            else
+                return null;
+
+            TYPE_ADAPTERS.put(clazz, adapter);
+        }
+
+
+        return adapter;
     }
 
     /**
@@ -192,6 +241,10 @@ public record TypeAdapter<T>(BiConsumer<PacketByteBuf, T> serializer, Function<P
         return new TypeAdapter<>(PacketByteBuf::writeEnumConstant, buf -> buf.readEnumConstant(enumClass));
     }
 
+    private static <T> Class<T> conform(Class<?> clazz, Class<T> target) {
+        return (Class<T>) clazz;
+    }
+
     static {
 
         // ----------
@@ -207,6 +260,8 @@ public record TypeAdapter<T>(BiConsumer<PacketByteBuf, T> serializer, Function<P
         register((BiConsumer<PacketByteBuf, Byte>) PacketByteBuf::writeByte, PacketByteBuf::readByte, Byte.class, byte.class);
         register((BiConsumer<PacketByteBuf, Short>) PacketByteBuf::writeShort, PacketByteBuf::readShort, Short.class, short.class);
         register((BiConsumer<PacketByteBuf, Character>) PacketByteBuf::writeChar, PacketByteBuf::readChar, Character.class, char.class);
+
+        register(Void.class, (packetByteBuf, unused) -> {}, packetByteBuf -> null);
 
         // ----
         // Misc

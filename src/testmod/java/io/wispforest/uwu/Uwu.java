@@ -8,6 +8,9 @@ import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
 import io.wispforest.owo.network.OwoNetChannel;
 import io.wispforest.owo.network.annotations.CollectionType;
 import io.wispforest.owo.network.annotations.MapTypes;
+import io.wispforest.owo.particles.ClientParticles;
+import io.wispforest.owo.particles.system.ParticleSystem;
+import io.wispforest.owo.particles.system.ParticleSystemManager;
 import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
 import io.wispforest.owo.util.TagInjector;
 import io.wispforest.uwu.items.UwuItems;
@@ -21,6 +24,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.tag.Tag;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -101,7 +105,22 @@ public class Uwu implements ModInitializer {
             Float.NEGATIVE_INFINITY, Double.NaN, false, new Identifier("uowou", "hahayes"), Collections.emptyMap(),
             ImmutableList.of(new BlockPos(9786, 42, 9234)));
 
-    public static final Identifier BREAK_BLOCK_PARTICLES = new Identifier("uwu", "break_block");
+    public static final ParticleSystemManager PARTICLE_MANAGER = new ParticleSystemManager(new Identifier("uwu", "particles"));
+    public static final ParticleSystem<Void> CUBE = PARTICLE_MANAGER.register(Void.class, (world, pos, data) -> {
+        ClientParticles.setParticleCount(5);
+        ClientParticles.spawnCubeOutline(ParticleTypes.END_ROD, world, pos, 1, .01f);
+    });
+    public static final ParticleSystem<Void> BREAK_BLOCK_PARTICLES = PARTICLE_MANAGER.register(Void.class, (world, pos, data) -> {
+        ClientParticles.persist();
+
+        ClientParticles.setParticleCount(30);
+        ClientParticles.spawnLine(ParticleTypes.DRAGON_BREATH, world, pos.add(.5, .5, .5), pos.add(.5, 2.5, .5), .015f);
+
+        ClientParticles.randomizeVelocity(.1);
+        ClientParticles.spawn(ParticleTypes.CLOUD, world, pos.add(.5, 2.5, .5), 0);
+
+        ClientParticles.reset();
+    });
 
     @Override
     public void onInitialize() {

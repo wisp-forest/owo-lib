@@ -8,6 +8,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -18,7 +19,11 @@ import java.util.function.Consumer;
  * which then get handled on the client by a handler registered via {@link #registerClientSideHandler(Identifier, ParticlePacketHandler)}.
  * <p>
  * The packet can contain arbitrary data to make sending complex particle states easier than with vanilla's WorldEvent {@code int} data
+ *
+ * @deprecated Use {@link io.wispforest.owo.particles.system.ParticleSystemManager} instead.
  */
+@SuppressWarnings("DeprecatedIsStillUsed")
+@Deprecated(forRemoval = true)
 public class ServerParticles {
 
     public static final Gson NETWORK_GSON = new Gson();

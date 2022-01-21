@@ -61,7 +61,7 @@ public class RecordSerializer<R extends Record> {
         for (int i = 0; i < recordClass.getRecordComponents().length; i++) {
             var component = recordClass.getRecordComponents()[i];
 
-            adapters.put(r -> getRecordEntry(r, component.getAccessor()), createAdapter(component.getType(), component));
+            adapters.put(r -> getRecordEntry(r, component.getAccessor()), TypeAdapter.getWithAnnotations(component.getType(), component));
             canonicalConstructorArgs[i] = component.getType();
         }
 
@@ -115,28 +115,5 @@ public class RecordSerializer<R extends Record> {
             throw new IllegalStateException("Unable to get record entry", e);
         }
     }
-
-    private static <T> TypeAdapter<T> createAdapter(Class<T> componentClass, RecordComponent component) {
-        if (Map.class.isAssignableFrom(componentClass)) {
-            var typeAnnotation = component.getAnnotation(MapTypes.class);
-            return (TypeAdapter<T>) TypeAdapter.createMapAdapter(conform(componentClass, Map.class), typeAnnotation.keys(), typeAnnotation.values());
-        }
-
-        if (Collection.class.isAssignableFrom(componentClass)) {
-            var typeAnnotation = component.getAnnotation(CollectionType.class);
-            return (TypeAdapter<T>) TypeAdapter.createCollectionAdapter(conform(componentClass, Collection.class), typeAnnotation.value());
-        }
-
-        if (Record.class.isAssignableFrom(componentClass)) return (TypeAdapter<T>) TypeAdapter.createRecordAdapter(conform(componentClass, Record.class));
-        if (componentClass.isEnum()) return (TypeAdapter<T>) TypeAdapter.createEnumAdapter(conform(componentClass, Enum.class));
-        if (componentClass.isArray()) return (TypeAdapter<T>) TypeAdapter.createArrayAdapter(componentClass.getComponentType());
-
-        return TypeAdapter.get(componentClass);
-    }
-
-    private static <T> Class<T> conform(Class<?> clazz, Class<T> target) {
-        return (Class<T>) clazz;
-    }
-
 }
 
