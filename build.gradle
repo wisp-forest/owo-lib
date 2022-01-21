@@ -11,6 +11,12 @@ def ENV = System.getenv()
 
 repositories {
     maven { url "https://maven.shedaniel.me/" }
+    maven {
+        url "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
 }
 
 sourceSets {
@@ -47,6 +53,8 @@ dependencies {
 
     modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}"
     modLocalRuntime "me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}"
+
+    modLocalRuntime "maven.modrinth:lazydfu:0.1.2"
 
     testmodImplementation sourceSets.main.output
 }

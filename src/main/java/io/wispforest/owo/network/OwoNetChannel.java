@@ -249,6 +249,7 @@ public class OwoNetChannel {
             serializersByIndex.put(target == EnvType.CLIENT ? -handlerIndex : handlerIndex, indexedSerializer);
         } else if (serializer.handlerIndex(target) == -1) {
             serializer.setHandlerIndex(handlerIndex, target);
+            serializersByIndex.put(target == EnvType.CLIENT ? -handlerIndex : handlerIndex, serializer);
         } else {
             throw new IllegalStateException("Message class '" + messageClass.getName() + "' is already registered for target environment " + target);
         }
