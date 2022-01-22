@@ -1,14 +1,14 @@
 package io.wispforest.owo.network;
 
+import io.wispforest.owo.network.serialization.PacketBufSerializer;
 import io.wispforest.owo.network.serialization.RecordSerializer;
 import io.wispforest.owo.util.ReflectionUtils;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.client.networking.v1.ClientLoginNetworking;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.*;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -28,7 +28,7 @@ import java.util.function.Supplier;
  * An efficient networking abstraction that uses {@code record}s to store
  * and define packet data. Serialization for most types is fully automatic
  * and no custom handling needs to be done, should one of your record
- * components be of an unsupported type use {@link io.wispforest.owo.network.serialization.TypeAdapter#register(Class, BiConsumer, Function)}
+ * components be of an unsupported type use {@link PacketBufSerializer#register(Class, BiConsumer, Function)}
  * to register a custom serializer.
  *
  * <p> To define a packet class suited for use with this wrapper, simply create a
@@ -46,20 +46,21 @@ import java.util.function.Supplier;
  * <p> The registered packet handlers are executed synchronously on the target environment's
  * game thread instead of Netty's event loops - there is no need to call {@code .execute(...)}
  *
- * @see io.wispforest.owo.network.serialization.TypeAdapter#register(Class, BiConsumer, Function)
- * @see io.wispforest.owo.network.serialization.TypeAdapter#registerCollectionProvider(Class, Supplier)
+ * @see PacketBufSerializer#register(Class, BiConsumer, Function)
+ * @see PacketBufSerializer#registerCollectionProvider(Class, Supplier)
  */
 public class OwoNetChannel {
 
-    private static final Map<Identifier, String> REGISTERED_CHANNELS = new HashMap<>();
+    static final Map<Identifier, OwoNetChannel> REGISTERED_CHANNELS = new HashMap<>();
 
-    private final Map<Class<?>, IndexedSerializer<?>> serializersByClass = new HashMap<>();
+    final Map<Class<?>, IndexedSerializer<?>> serializersByClass = new HashMap<>();
     private final Int2ObjectMap<IndexedSerializer<?>> serializersByIndex = new Int2ObjectOpenHashMap<>();
 
     private final List<ChannelHandler<Record, ClientAccess>> clientHandlers = new ArrayList<>();
     private final List<ChannelHandler<Record, ServerAccess>> serverHandlers = new ArrayList<>();
 
-    private final Identifier packetId;
+    final Identifier packetId;
+    private final String ownerClassName;
 
     private ClientHandle clientHandle = null;
     private ServerHandle serverHandle = null;
@@ -80,10 +81,11 @@ public class OwoNetChannel {
 
     private OwoNetChannel(Identifier id, String ownerClassName) {
         if (REGISTERED_CHANNELS.containsKey(id)) {
-            throw new IllegalStateException("Channel with id '" + id + "' was already registered from class '" + REGISTERED_CHANNELS.get(id) + "'");
+            throw new IllegalStateException("Channel with id '" + id + "' was already registered from class '" + REGISTERED_CHANNELS.get(id).ownerClassName + "'");
         }
 
         this.packetId = id;
+        this.ownerClassName = ownerClassName;
 
         ServerPlayNetworking.registerGlobalReceiver(packetId, (server, player, handler, buf, responseSender) -> {
             int handlerIndex = buf.readVarInt();
@@ -101,7 +103,7 @@ public class OwoNetChannel {
 
         clientHandlers.add(null);
         serverHandlers.add(null);
-        REGISTERED_CHANNELS.put(id, ownerClassName);
+        REGISTERED_CHANNELS.put(id, this);
     }
 
     /**
@@ -114,7 +116,7 @@ public class OwoNetChannel {
      * @see #serverHandle(PlayerEntity)
      * @see #serverHandle(MinecraftServer)
      * @see #serverHandle(ServerWorld, BlockPos)
-     * @see io.wispforest.owo.network.serialization.TypeAdapter#register(Class, BiConsumer, Function)
+     * @see PacketBufSerializer#register(Class, BiConsumer, Function)
      */
     @SuppressWarnings("unchecked")
     public <R extends Record> void registerClientbound(Class<R> messageClass, ChannelHandler<R, ClientAccess> handler) {
@@ -131,7 +133,7 @@ public class OwoNetChannel {
      * @param messageClass The type of packet data to send and serialize
      * @param handler      The handler that will receive the deserialized
      * @see #clientHandle()
-     * @see io.wispforest.owo.network.serialization.TypeAdapter#register(Class, BiConsumer, Function)
+     * @see PacketBufSerializer#register(Class, BiConsumer, Function)
      */
     @SuppressWarnings("unchecked")
     public <R extends Record> void registerServerbound(Class<R> messageClass, ChannelHandler<R, ServerAccess> handler) {
@@ -376,11 +378,20 @@ public class OwoNetChannel {
         N netHandler();
     }
 
-    private static final class IndexedSerializer<R extends Record> {
+    static {
+        ServerLoginConnectionEvents.QUERY_START.register(OwoHandshake::queryStart);
+        ServerLoginNetworking.registerGlobalReceiver(OwoHandshake.CHANNEL_ID, OwoHandshake::syncServer);
+
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+            ClientLoginNetworking.registerGlobalReceiver(OwoHandshake.CHANNEL_ID, OwoHandshake::syncClient);
+        }
+    }
+
+    static final class IndexedSerializer<R extends Record> {
         private int clientHandlerIndex = -1;
         private int serverHandlerIndex = -1;
 
-        private final RecordSerializer<R> serializer;
+        final RecordSerializer<R> serializer;
 
         private IndexedSerializer(RecordSerializer<R> serializer) {
             this.serializer = serializer;

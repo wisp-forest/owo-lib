@@ -33,6 +33,7 @@ public class ParticleSystemPacket {
         return ServerPlayNetworking.createS2CPacket(ID, buffer);
     }
 
+    @SuppressWarnings("removal")
     public static void onPacket(MinecraftClient minecraftClient, ClientPlayNetworkHandler clientPlayNetworkHandler, PacketByteBuf packetByteBuf, PacketSender packetSender) {
 
         Identifier handlerID = packetByteBuf.readIdentifier();

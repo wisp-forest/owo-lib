@@ -2,15 +2,11 @@ package io.wispforest.owo.network.serialization;
 
 import com.google.common.collect.ImmutableMap;
 import io.wispforest.owo.Owo;
-import io.wispforest.owo.network.annotations.CollectionType;
-import io.wispforest.owo.network.annotations.MapTypes;
 import net.minecraft.network.PacketByteBuf;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.RecordComponent;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -22,7 +18,7 @@ import java.util.function.Function;
  * Use {@link #create(Class)} to create (or obtain if it already exists)
  * the instance for a specific class. Should an exception
  * about a missing type adapter be thrown, register one
- * using {@link TypeAdapter#register(Class, BiConsumer, Function)}
+ * using {@link PacketBufSerializer#register(Class, BiConsumer, Function)}
  *
  * <p> To serialize an instance use {@link #write(PacketByteBuf, Record)},
  * to read it back again use {@link #read(PacketByteBuf)}
@@ -34,11 +30,11 @@ public class RecordSerializer<R extends Record> {
 
     private static final Map<Class<?>, RecordSerializer<?>> SERIALIZERS = new HashMap<>();
 
-    private final Map<Function<R, ?>, TypeAdapter> adapters;
+    private final Map<Function<R, ?>, PacketBufSerializer> adapters;
     private final Constructor<R> instanceCreator;
     private final int fieldCount;
 
-    private RecordSerializer(Class<R> recordClass, Constructor<R> instanceCreator, ImmutableMap<Function<R, ?>, TypeAdapter> adapters) {
+    private RecordSerializer(Class<R> recordClass, Constructor<R> instanceCreator, ImmutableMap<Function<R, ?>, PacketBufSerializer> adapters) {
         this.instanceCreator = instanceCreator;
         this.adapters = adapters;
         this.fieldCount = recordClass.getRecordComponents().length;
@@ -55,13 +51,13 @@ public class RecordSerializer<R extends Record> {
     public static <R extends Record> RecordSerializer<R> create(Class<R> recordClass) {
         if (SERIALIZERS.containsKey(recordClass)) return (RecordSerializer<R>) SERIALIZERS.get(recordClass);
 
-        final ImmutableMap.Builder<Function<R, ?>, TypeAdapter> adapters = new ImmutableMap.Builder<>();
+        final ImmutableMap.Builder<Function<R, ?>, PacketBufSerializer> adapters = new ImmutableMap.Builder<>();
         final Class<?>[] canonicalConstructorArgs = new Class<?>[recordClass.getRecordComponents().length];
 
         for (int i = 0; i < recordClass.getRecordComponents().length; i++) {
             var component = recordClass.getRecordComponents()[i];
 
-            adapters.put(r -> getRecordEntry(r, component.getAccessor()), TypeAdapter.getWithAnnotations(component.getType(), component));
+            adapters.put(r -> getRecordEntry(r, component.getAccessor()), PacketBufSerializer.getWithAnnotations(component.getType(), component));
             canonicalConstructorArgs[i] = component.getType();
         }
 

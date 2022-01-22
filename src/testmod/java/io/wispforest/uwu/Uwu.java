@@ -6,7 +6,7 @@ import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
 import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
 import io.wispforest.owo.network.OwoNetChannel;
-import io.wispforest.owo.network.annotations.CollectionType;
+import io.wispforest.owo.network.annotations.ElementType;
 import io.wispforest.owo.network.annotations.MapTypes;
 import io.wispforest.owo.particles.ClientParticles;
 import io.wispforest.owo.particles.system.ParticleSystem;
@@ -15,9 +15,11 @@ import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
 import io.wispforest.owo.util.TagInjector;
 import io.wispforest.uwu.items.UwuItems;
 import io.wispforest.uwu.network.UwuNetworkExample;
+import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.fabric.api.tag.TagFactory;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.Item;
@@ -145,6 +147,10 @@ public class Uwu implements ModInitializer {
             access.player().sendMessage(Text.of(String.valueOf(message.bite)), false);
         });
 
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER) {
+            OwoNetChannel.create(new Identifier("uwu", "server_only"));
+        }
+
         UwuNetworkExample.init();
     }
 
@@ -153,6 +159,6 @@ public class Uwu implements ModInitializer {
     public record TestMessage(String string, Integer integer, Long along, ItemStack stack, Short ashort, Byte bite,
                               BlockPos pos, Float afloat, Double adouble, Boolean aboolean, Identifier identifier,
                               @MapTypes(keys = String.class, values = Integer.class) Map<String, Integer> map,
-                              @CollectionType(BlockPos.class) List<BlockPos> posses) {}
+                              @ElementType(BlockPos.class) List<BlockPos> posses) {}
 
 }

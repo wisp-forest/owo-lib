@@ -1,7 +1,7 @@
 
 package io.wispforest.uwu.network;
 
-import io.wispforest.owo.network.annotations.CollectionType;
+import io.wispforest.owo.network.annotations.ElementType;
 import io.wispforest.owo.network.serialization.RecordSerializer;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 
@@ -27,7 +27,7 @@ public class UwuNetworkTest {
         testEquals(test, read);
     }
 
-    public static final record TestRecord(@CollectionType(String.class) Collection<String> text, TestEnum enumValue) {}
+    public static final record TestRecord(@ElementType(String.class) Collection<String> text, TestEnum enumValue) {}
 
     public enum TestEnum {ONE_VALUE, ANOTHER_VALUE}
 
