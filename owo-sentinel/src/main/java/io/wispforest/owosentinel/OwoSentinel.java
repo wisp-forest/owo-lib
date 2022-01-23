@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -20,7 +21,7 @@ public class OwoSentinel implements PreLaunchEntrypoint {
     private static final String OWO_EXPLANATION = """
             oωo-lib is a library used by most mods under the
             Wisp Forest domain to ease development. This is
-            simply a convenient installer, as oωo missing from your
+            simply a convenient installer, as oωo is missing from your
             installation. Should you not trust it, feel free to head to the
             repository and download oωo yourself.
             """;
@@ -46,14 +47,20 @@ public class OwoSentinel implements PreLaunchEntrypoint {
 
     @Override
     public void onPreLaunch() {
+        if (owoPresent()) return;
+
         try {
 
-            // Force GTK is available
+            // Force GTK if available
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             for (var laf : UIManager.getInstalledLookAndFeels()) {
                 if (!"GTK+".equals(laf.getName())) continue;
                 UIManager.setLookAndFeel(laf.getClassName());
             }
+
+            // Fix AA
+            System.setProperty("awt.useSystemAAFontSettings", "lcd");
+            System.setProperty("swing.aatext", "true");
 
             // ------
             // Window
@@ -64,10 +71,11 @@ public class OwoSentinel implements PreLaunchEntrypoint {
 
             //noinspection ConstantConditions
             final var owoIconImage = ImageIO.read(OwoSentinel.class.getClassLoader()
-                    .getResourceAsStream("assets/owo-sentinel/textures/icon.png"));
+                    .getResourceAsStream("icon.png"));
 
             window.setIconImage(owoIconImage);
-            window.setMinimumSize(new Dimension(450, 250));
+            window.setMinimumSize(new Dimension(0, 250));
+            window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
             window.addWindowListener(new WindowAdapter() {
                 @Override
                 public void windowClosed(WindowEvent e) {
@@ -83,13 +91,14 @@ public class OwoSentinel implements PreLaunchEntrypoint {
             final var titleLabel = new JLabel("oωo-lib is required to run the following mods", new ImageIcon(owoIconImage), SwingConstants.LEFT);
             titleLabel.setFont(titleLabel.getFont().deriveFont(titleLabel.getFont().getSize() * 1.25f));
             titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            titleLabel.setBorder(new EmptyBorder(0, 15, 0, 15));
             window.getContentPane().add(titleLabel, BorderLayout.NORTH);
 
             // ----------
             // Dependents
             // ----------
 
-            var dependents = "<html><center><b>" + String.join("<br>", listOwoDependants());
+            var dependents = "<html><center><b>" + String.join("<br>", listOwoDependants()) + "<p>\u200B";
 
             final var dependentsLabel = new JLabel(dependents);
             final var defaultDepFont = dependentsLabel.getFont();
@@ -122,11 +131,15 @@ public class OwoSentinel implements PreLaunchEntrypoint {
 
                 final var logBox = new JTextArea();
                 logBox.setEditable(false);
-                window.getContentPane().add(logBox, BorderLayout.CENTER);
+                logBox.setMargin(new Insets(15, 15, 15, 15));
+                final var scrollPane = new JScrollPane(logBox);
+                scrollPane.setBorder(new EmptyBorder(0, 15, 0, 15));
+                window.getContentPane().add(scrollPane, BorderLayout.CENTER);
 
                 var task = new DownloadTask(s -> {
                     LOGGER.info(s);
-                    logBox.setText(logBox.getText() + s + "\n");
+                    logBox.setText(logBox.getText() + (logBox.getText().isBlank() ? "" : "\n") + s);
+                    scrollPane.getVerticalScrollBar().setValue(scrollPane.getVerticalScrollBar().getMaximum());
                 }, () -> {
                     progressBar.setVisible(false);
                     titleLabel.setText("");
