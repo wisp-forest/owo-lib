@@ -217,13 +217,13 @@ public record PacketBufSerializer<T>(BiConsumer<PacketByteBuf, T> serializer, Fu
      * @return The created serializer
      */
     @SuppressWarnings("unchecked")
-    public static <E> PacketBufSerializer<E[]> createArraySerializer(Class<E> elementClass) {
-        var elementSerializer = get(elementClass);
+    public static PacketBufSerializer<?> createArraySerializer(Class<?> elementClass) {
+        var elementSerializer = (PacketBufSerializer<Object>)get(elementClass);
         return new PacketBufSerializer<>((buf, t) -> {
             final int length = Array.getLength(t);
             buf.writeVarInt(length);
             for (int i = 0; i < length; i++) {
-                elementSerializer.serializer().accept(buf, (E) Array.get(t, i));
+                elementSerializer.serializer().accept(buf, Array.get(t, i));
             }
         }, buf -> {
             final int length = buf.readVarInt();
@@ -231,7 +231,7 @@ public record PacketBufSerializer<T>(BiConsumer<PacketByteBuf, T> serializer, Fu
             for (int i = 0; i < length; i++) {
                 Array.set(array, i, elementSerializer.deserializer().apply(buf));
             }
-            return (E[]) array;
+            return array;
         });
     }
 
