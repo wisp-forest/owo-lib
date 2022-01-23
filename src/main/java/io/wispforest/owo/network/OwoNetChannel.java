@@ -53,8 +53,8 @@ public class OwoNetChannel {
 
     static final Map<Identifier, OwoNetChannel> REGISTERED_CHANNELS = new HashMap<>();
 
-    final Map<Class<?>, IndexedSerializer<?>> serializersByClass = new HashMap<>();
-    private final Int2ObjectMap<IndexedSerializer<?>> serializersByIndex = new Int2ObjectOpenHashMap<>();
+    private final Map<Class<?>, IndexedSerializer<?>> serializersByClass = new HashMap<>();
+    final Int2ObjectMap<IndexedSerializer<?>> serializersByIndex = new Int2ObjectOpenHashMap<>();
 
     private final List<ChannelHandler<Record, ClientAccess>> clientHandlers = new ArrayList<>();
     private final List<ChannelHandler<Record, ServerAccess>> serverHandlers = new ArrayList<>();

@@ -31,10 +31,12 @@ public class RecordSerializer<R extends Record> {
     private static final Map<Class<?>, RecordSerializer<?>> SERIALIZERS = new HashMap<>();
 
     private final Map<Function<R, ?>, PacketBufSerializer> adapters;
+    private final Class<R> recordClass;
     private final Constructor<R> instanceCreator;
     private final int fieldCount;
 
     private RecordSerializer(Class<R> recordClass, Constructor<R> instanceCreator, ImmutableMap<Function<R, ?>, PacketBufSerializer> adapters) {
+        this.recordClass = recordClass;
         this.instanceCreator = instanceCreator;
         this.adapters = adapters;
         this.fieldCount = recordClass.getRecordComponents().length;
@@ -102,6 +104,10 @@ public class RecordSerializer<R extends Record> {
     public RecordSerializer<R> write(PacketByteBuf buffer, R instance) {
         adapters.forEach((rFunction, typeAdapter) -> typeAdapter.serializer().accept(buffer, rFunction.apply(instance)));
         return this;
+    }
+
+    public Class<R> getRecordClass() {
+        return recordClass;
     }
 
     private static <R extends Record> Object getRecordEntry(R instance, Method accessor) {
