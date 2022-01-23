@@ -6,9 +6,10 @@ import io.wispforest.owo.util.ReflectionUtils;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.fabricmc.api.EnvType;
-import net.fabricmc.fabric.api.client.networking.v1.ClientLoginNetworking;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.*;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -37,7 +38,8 @@ import java.util.function.Supplier;
  * <p>To register a packet onto this channel, use either {@link #registerClientbound(Class, ChannelHandler)}
  * or {@link #registerServerbound(Class, ChannelHandler)}, depending on which direction the packet goes.
  * Bidirectional registration of the same class is explicitly supported. <b>For synchronization purposes,
- * all registration must happen on both client and server, even for clientbound packets.</b>
+ * all registration must happen on both client and server, even for clientbound packets. Otherwise,
+ * joining the server will fail with a handshake error</b>
  *
  * <p>To send a packet, use any of the {@code handle} methods to obtain a handle for sending. These are
  * named after where the packet is sent <i>from</i>, meaning the {@link #clientHandle()} is used for sending
@@ -379,12 +381,7 @@ public class OwoNetChannel {
     }
 
     static {
-        ServerLoginConnectionEvents.QUERY_START.register(OwoHandshake::queryStart);
-        ServerLoginNetworking.registerGlobalReceiver(OwoHandshake.CHANNEL_ID, OwoHandshake::syncServer);
-
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            ClientLoginNetworking.registerGlobalReceiver(OwoHandshake.CHANNEL_ID, OwoHandshake::syncClient);
-        }
+        OwoHandshake.enable();
     }
 
     static final class IndexedSerializer<R extends Record> {

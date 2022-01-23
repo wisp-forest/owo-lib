@@ -1,4 +1,4 @@
-package io.wispforest.owo.mixin;
+package io.wispforest.owo.mixin.tweaks;
 
 import net.minecraft.server.dedicated.EulaReader;
 import org.apache.logging.log4j.Logger;

@@ -12,8 +12,8 @@ import io.wispforest.owo.network.annotations.MapTypes;
 import io.wispforest.owo.offline.OfflineAdvancementLookup;
 import io.wispforest.owo.offline.OfflineDataLookup;
 import io.wispforest.owo.particles.ClientParticles;
-import io.wispforest.owo.particles.system.ParticleSystem;
-import io.wispforest.owo.particles.system.ParticleSystemManager;
+import io.wispforest.owo.particles.systems.ParticleSystem;
+import io.wispforest.owo.particles.systems.ParticleSystemController;
 import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
 import io.wispforest.owo.util.TagInjector;
 import io.wispforest.uwu.items.UwuItems;
@@ -121,16 +121,16 @@ public class Uwu implements ModInitializer {
 
     public static final TestMessage MESSAGE = new TestMessage("hahayes", 69, Long.MAX_VALUE, ItemStack.EMPTY, Short.MAX_VALUE, Byte.MAX_VALUE, new BlockPos(69, 420, 489),
             Float.NEGATIVE_INFINITY, Double.NaN, false, new Identifier("uowou", "hahayes"), Collections.emptyMap(),
-            new int[] {10, 20}, new String[] {"trollface"}, new short[] {1, 2, 3}, new long[] {Long.MAX_VALUE, 1, 3}, new byte[] {1, 2, 3, 4},
+            new int[]{10, 20}, new String[]{"trollface"}, new short[]{1, 2, 3}, new long[]{Long.MAX_VALUE, 1, 3}, new byte[]{1, 2, 3, 4},
             Optional.of("NullableString"), Optional.empty(),
             ImmutableList.of(new BlockPos(9786, 42, 9234)));
 
-    public static final ParticleSystemManager PARTICLE_MANAGER = new ParticleSystemManager(new Identifier("uwu", "particles"));
-    public static final ParticleSystem<Void> CUBE = PARTICLE_MANAGER.register(Void.class, (world, pos, data) -> {
+    public static final ParticleSystemController PARTICLE_CONTROLLER = new ParticleSystemController(new Identifier("uwu", "particles"));
+    public static final ParticleSystem<Void> CUBE = PARTICLE_CONTROLLER.register(Void.class, (world, pos, data) -> {
         ClientParticles.setParticleCount(5);
         ClientParticles.spawnCubeOutline(ParticleTypes.END_ROD, world, pos, 1, .01f);
     });
-    public static final ParticleSystem<Void> BREAK_BLOCK_PARTICLES = PARTICLE_MANAGER.register(Void.class, (world, pos, data) -> {
+    public static final ParticleSystem<Void> BREAK_BLOCK_PARTICLES = PARTICLE_CONTROLLER.register(Void.class, (world, pos, data) -> {
         ClientParticles.persist();
 
         ClientParticles.setParticleCount(30);
@@ -166,43 +166,44 @@ public class Uwu implements ModInitializer {
         });
 
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER && WE_TESTEN_HANDSHAKE) {
-            OwoNetChannel.create(new Identifier("uwu", "server_only"));
+            OwoNetChannel.create(new Identifier("uwu", "server_only_channel"));
+            new ParticleSystemController(new Identifier("uwu", "server_only_particles"));
         }
 
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             dispatcher.register(
-                literal("show_nbt")
-                    .then(argument("player", GameProfileArgumentType.gameProfile())
-                        .executes(context -> {
-                            GameProfile profile = GameProfileArgumentType.getProfileArgument(context, "player").iterator().next();
-                            NbtCompound tag = OfflineDataLookup.get(profile.getId());
-                            context.getSource().sendFeedback(NbtHelper.toPrettyPrintedText(tag), false);
-                            return 0;
-                        })));
+                    literal("show_nbt")
+                            .then(argument("player", GameProfileArgumentType.gameProfile())
+                                    .executes(context -> {
+                                        GameProfile profile = GameProfileArgumentType.getProfileArgument(context, "player").iterator().next();
+                                        NbtCompound tag = OfflineDataLookup.get(profile.getId());
+                                        context.getSource().sendFeedback(NbtHelper.toPrettyPrintedText(tag), false);
+                                        return 0;
+                                    })));
 
             dispatcher.register(
-                literal("test_advancement_cache")
-                    .then(literal("read")
-                        .then(argument("player", GameProfileArgumentType.gameProfile())
-                            .executes(context -> {
-                                GameProfile profile = GameProfileArgumentType.getProfileArgument(context, "player").iterator().next();
-                                Map<Identifier, AdvancementProgress> map = OfflineAdvancementLookup.get(profile.getId());
-                                context.getSource().sendFeedback(new LiteralText(map.toString()), false);
-                                System.out.println(map);
-                                return 0;
-                            })))
-                    .then(literal("write")
-                        .then(argument("player", GameProfileArgumentType.gameProfile())
-                            .executes(context -> {
-                                MinecraftServer server = context.getSource().getServer();
-                                GameProfile profile = GameProfileArgumentType.getProfileArgument(context, "player").iterator().next();
+                    literal("test_advancement_cache")
+                            .then(literal("read")
+                                    .then(argument("player", GameProfileArgumentType.gameProfile())
+                                            .executes(context -> {
+                                                GameProfile profile = GameProfileArgumentType.getProfileArgument(context, "player").iterator().next();
+                                                Map<Identifier, AdvancementProgress> map = OfflineAdvancementLookup.get(profile.getId());
+                                                context.getSource().sendFeedback(new LiteralText(map.toString()), false);
+                                                System.out.println(map);
+                                                return 0;
+                                            })))
+                            .then(literal("write")
+                                    .then(argument("player", GameProfileArgumentType.gameProfile())
+                                            .executes(context -> {
+                                                MinecraftServer server = context.getSource().getServer();
+                                                GameProfile profile = GameProfileArgumentType.getProfileArgument(context, "player").iterator().next();
 
-                                var tx = OfflineAdvancementLookup.start(profile.getId());
-                                tx.grant(server.getAdvancementLoader().get(new Identifier("story/iron_tools")));
-                                tx.commit();
+                                                OfflineAdvancementLookup.edit(profile.getId(), handle -> {
+                                                    handle.grant(server.getAdvancementLoader().get(new Identifier("story/iron_tools")));
+                                                });
 
-                                return 0;
-                            }))));
+                                                return 0;
+                                            }))));
 
         });
 

@@ -1,4 +1,4 @@
-package io.wispforest.owo.mixin;
+package io.wispforest.owo.mixin.tweaks;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.Util;

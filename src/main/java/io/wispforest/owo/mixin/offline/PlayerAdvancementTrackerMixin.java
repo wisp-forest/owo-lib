@@ -1,6 +1,6 @@
-package io.wispforest.owo.mixin;
+package io.wispforest.owo.mixin.offline;
 
-import io.wispforest.owo.offline.PlayerAdvancementsSaved;
+import io.wispforest.owo.offline.DataSavedEvents;
 import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.advancement.PlayerAdvancementTracker;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -19,7 +19,7 @@ public class PlayerAdvancementTrackerMixin {
     @SuppressWarnings("unchecked")
     @ModifyArg(method = "save", at = @At(value = "INVOKE", target = "Lcom/google/gson/Gson;toJsonTree(Ljava/lang/Object;)Lcom/google/gson/JsonElement;"))
     private Object onAdvancementsSaved(Object map) {
-        PlayerAdvancementsSaved.EVENT.invoker().onPlayerAdvancementsSaved(owner.getUuid(), (Map<Identifier, AdvancementProgress>)map);
+        DataSavedEvents.ADVANCEMENTS.invoker().onSaved(owner.getUuid(), (Map<Identifier, AdvancementProgress>) map);
         return map;
     }
 }

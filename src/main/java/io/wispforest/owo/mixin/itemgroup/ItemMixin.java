@@ -1,4 +1,4 @@
-package io.wispforest.owo.mixin;
+package io.wispforest.owo.mixin.itemgroup;
 
 import io.wispforest.owo.itemgroup.OwoItemExtensions;
 import io.wispforest.owo.itemgroup.OwoItemGroup;

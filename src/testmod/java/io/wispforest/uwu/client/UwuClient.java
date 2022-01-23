@@ -1,6 +1,7 @@
 package io.wispforest.uwu.client;
 
 import io.wispforest.owo.network.OwoNetChannel;
+import io.wispforest.owo.particles.systems.ParticleSystemController;
 import io.wispforest.uwu.Uwu;
 import io.wispforest.uwu.network.UwuNetworkExample;
 import net.fabricmc.api.ClientModInitializer;
@@ -13,17 +14,15 @@ public class UwuClient implements ClientModInitializer {
         UwuNetworkExample.Client.init();
 
         if (Uwu.WE_TESTEN_HANDSHAKE) {
-            OwoNetChannel.create(new Identifier("uwu", "client_only"));
+            OwoNetChannel.create(new Identifier("uwu", "client_only_channel"));
 
-            Uwu.CHANNEL.registerServerbound(WeirdMessage.class, (data, access) -> {
+            Uwu.CHANNEL.registerServerbound(WeirdMessage.class, (data, access) -> {});
+            Uwu.CHANNEL.registerClientbound(WeirdMessage.class, (data, access) -> {});
 
-            });
-
-            Uwu.CHANNEL.registerClientbound(WeirdMessage.class, (data, access) -> {
-
-            });
+            new ParticleSystemController(new Identifier("uwu", "client_only_particles"));
+            Uwu.PARTICLE_CONTROLLER.register(WeirdMessage.class, (world, pos, data) -> {});
         }
     }
 
-    public record WeirdMessage(int e) { }
+    public record WeirdMessage(int e) {}
 }

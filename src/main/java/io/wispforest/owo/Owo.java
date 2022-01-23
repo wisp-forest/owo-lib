@@ -25,7 +25,7 @@ public class Owo implements ModInitializer {
      */
     public static final boolean DEBUG;
     public static final Logger LOGGER = LogManager.getLogger("owo");
-    public static MinecraftServer SERVER;
+    private static MinecraftServer SERVER;
 
     public static final Text PREFIX = new LiteralText("[").formatted(Formatting.GRAY)
             .append(withColor("o", 0x3955e5))
@@ -47,17 +47,16 @@ public class Owo implements ModInitializer {
         ModDataLoader.load(new GroupTabLoader());
         LootOps.registerListener();
 
-        ServerLifecycleEvents.SERVER_STARTING.register(server -> {
-            SERVER = server;
-        });
-
-        ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
-            SERVER = null;
-        });
+        ServerLifecycleEvents.SERVER_STARTING.register(server -> SERVER = server);
+        ServerLifecycleEvents.SERVER_STOPPED.register(server -> SERVER = null);
 
         if (!DEBUG) return;
 
         OwoDebugCommands.register();
+    }
+
+    public static MinecraftServer currentServer() {
+        return SERVER;
     }
 
 }

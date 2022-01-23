@@ -1,7 +1,6 @@
 package io.wispforest.owo.offline;
 
 import com.google.common.base.Charsets;
-import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -11,7 +10,7 @@ import com.google.gson.stream.JsonReader;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
 import io.wispforest.owo.Owo;
-import io.wispforest.owo.mixin.AdvancementProgressAccessor;
+import io.wispforest.owo.mixin.offline.AdvancementProgressAccessor;
 import net.minecraft.SharedConstants;
 import net.minecraft.advancement.Advancement;
 import net.minecraft.advancement.AdvancementProgress;
@@ -25,20 +24,35 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Consumer;
 
+/**
+ * Allows retrieving and editing the saved
+ * advancement data of a player
+ * <p>
+ * <b>This only works while the given player is offline</b>
+ *
+ * @author BasiqueEvangelist
+ */
 public class OfflineAdvancementLookup {
-    private OfflineAdvancementLookup() {
 
-    }
+    private OfflineAdvancementLookup() {}
 
     private static final Gson GSON = (new GsonBuilder()).registerTypeAdapter(AdvancementProgress.class, new AdvancementProgress.Serializer()).registerTypeAdapter(Identifier.class, new Identifier.Serializer()).setPrettyPrinting().create();
-    private static final TypeToken<Map<Identifier, AdvancementProgress>> JSON_TYPE = new TypeToken<>() { };
+    private static final TypeToken<Map<Identifier, AdvancementProgress>> JSON_TYPE = new TypeToken<>() {};
 
-    public static void save(UUID player, Map<Identifier, AdvancementProgress> map) {
-        PlayerAdvancementsSaved.EVENT.invoker().onPlayerAdvancementsSaved(player, map);
+    /**
+     * Saves the given advancement state
+     * for the given player to disk
+     *
+     * @param player The player to modify
+     * @param map    The advancement state to save
+     */
+    public static void put(UUID player, Map<Identifier, AdvancementProgress> map) {
+        DataSavedEvents.ADVANCEMENTS.invoker().onSaved(player, map);
 
         try {
-            Path advancementsPath = Owo.SERVER.getSavePath(WorldSavePath.ADVANCEMENTS);
+            Path advancementsPath = Owo.currentServer().getSavePath(WorldSavePath.ADVANCEMENTS);
             Path advancementPath = advancementsPath.resolve(player.toString() + ".json");
             JsonElement savedElement = GSON.toJsonTree(map);
             savedElement.getAsJsonObject().addProperty("DataVersion", SharedConstants.getGameVersion().getSaveVersion().getId());
@@ -54,9 +68,17 @@ public class OfflineAdvancementLookup {
         }
     }
 
+
+    /**
+     * Loads the advancement state
+     * of the given player from disk
+     *
+     * @param player The player to query
+     * @return The saved advancement data, or {@code null} if none is saved
+     */
     public static @Nullable Map<Identifier, AdvancementProgress> get(UUID player) {
         try {
-            Path advancementsPath = Owo.SERVER.getSavePath(WorldSavePath.ADVANCEMENTS);
+            Path advancementsPath = Owo.currentServer().getSavePath(WorldSavePath.ADVANCEMENTS);
 
             if (!Files.exists(advancementsPath))
                 return null;
@@ -83,7 +105,7 @@ public class OfflineAdvancementLookup {
             Map<Identifier, AdvancementProgress> parsedMap = GSON.getAdapter(JSON_TYPE).fromJsonTree(dynamic.getValue());
             for (Map.Entry<Identifier, AdvancementProgress> entry : parsedMap.entrySet()) {
                 if (((AdvancementProgressAccessor) entry.getValue()).getRequirements().length == 0) {
-                    Advancement adv = Owo.SERVER.getAdvancementLoader().get(entry.getKey());
+                    Advancement adv = Owo.currentServer().getAdvancementLoader().get(entry.getKey());
 
                     if (adv != null) {
                         ((AdvancementProgressAccessor) entry.getValue()).setRequirements(adv.getRequirements());
@@ -98,14 +120,27 @@ public class OfflineAdvancementLookup {
         }
     }
 
-    public static AdvancementsTransaction start(UUID player) {
+    /**
+     * Edits the saved advancement state of the given player
+     * with the given editing function
+     *
+     * @param player The player to target
+     * @param editor The function to apply to the advancement state
+     */
+    public static void edit(UUID player, Consumer<OfflineAdvancementState> editor) {
         Map<Identifier, AdvancementProgress> advancementData = get(player);
         if (advancementData == null) advancementData = new HashMap<>();
-        return new AdvancementsTransaction(player, advancementData);
+
+        var transaction = new OfflineAdvancementState(advancementData);
+        editor.accept(transaction);
+        put(player, transaction.advancementData());
     }
 
-    public static List<UUID> listSavedPlayers() {
-        Path advancementsPath = Owo.SERVER.getSavePath(WorldSavePath.ADVANCEMENTS);
+    /**
+     * @return The UUID of every player that has saved advancements
+     */
+    public static List<UUID> savedPlayers() {
+        Path advancementsPath = Owo.currentServer().getSavePath(WorldSavePath.ADVANCEMENTS);
 
         if (!Files.isDirectory(advancementsPath))
             return Collections.emptyList();
@@ -113,9 +148,9 @@ public class OfflineAdvancementLookup {
         List<UUID> list = new ArrayList<>();
 
         try {
-            Iterator<Path> iter = Files.list(advancementsPath).iterator();
-            while(iter.hasNext()) {
-                Path savedPlayerFile = iter.next();
+            Iterator<Path> iterator = Files.list(advancementsPath).iterator();
+            while (iterator.hasNext()) {
+                Path savedPlayerFile = iterator.next();
 
                 if (Files.isDirectory(savedPlayerFile) || !savedPlayerFile.toString().endsWith(".json")) {
                     continue;
@@ -127,7 +162,7 @@ public class OfflineAdvancementLookup {
                     UUID uuid = UUID.fromString(uuidStr);
                     list.add(uuid);
                 } catch (IllegalArgumentException iae) {
-                    Owo.LOGGER.error("Encountered invalid UUID in advancements directory! ", iae);
+                    Owo.LOGGER.error("Encountered invalid UUID in advancements directory", iae);
                 }
             }
         } catch (IOException e) {

@@ -1,4 +1,4 @@
-package io.wispforest.owo.mixin;
+package io.wispforest.owo.mixin.tweaks;
 
 import io.wispforest.owo.Owo;
 import net.fabricmc.loader.api.FabricLoader;

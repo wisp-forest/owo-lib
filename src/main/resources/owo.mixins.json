@@ -4,21 +4,21 @@
   "package": "io.wispforest.owo.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
-    "AdvancementProgressAccessor",
-    "EulaReaderMixin",
-    "FabricItemGroupBuilderMixin",
-    "ItemMixin",
-    "ItemSettingsMixin",
-    "LevelInfoMixin",
-    "PlayerAdvancementTrackerMixin",
+    "offline.AdvancementProgressAccessor",
+    "tweaks.EulaReaderMixin",
+    "itemgroup.FabricItemGroupBuilderMixin",
+    "itemgroup.ItemMixin",
+    "itemgroup.ItemSettingsMixin",
+    "tweaks.LevelInfoMixin",
+    "offline.PlayerAdvancementTrackerMixin",
     "ScreenHandlerInvoker",
     "TagGroupLoaderMixin",
-    "WorldSaveHandlerMixin"
+    "offline.WorldSaveHandlerMixin"
   ],
   "client": [
-    "CreativeInventoryScreenMixin",
-    "TextFieldWidgetMixin",
-    "OperatingSystemMixin",
+    "itemgroup.CreativeInventoryScreenMixin",
+    "tweaks.TextFieldWidgetMixin",
+    "tweaks.OperatingSystemMixin",
     "TranslationStorageMixin"
   ],
   "injectors": {

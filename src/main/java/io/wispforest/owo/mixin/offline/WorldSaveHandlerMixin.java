@@ -1,6 +1,6 @@
-package io.wispforest.owo.mixin;
+package io.wispforest.owo.mixin.offline;
 
-import io.wispforest.owo.offline.PlayerDataSaved;
+import io.wispforest.owo.offline.DataSavedEvents;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.world.WorldSaveHandler;
@@ -14,6 +14,6 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 public class WorldSaveHandlerMixin {
     @Inject(method = "savePlayerData", at = @At(value = "INVOKE", target = "Ljava/io/File;createTempFile(Ljava/lang/String;Ljava/lang/String;Ljava/io/File;)Ljava/io/File;"), locals = LocalCapture.CAPTURE_FAILHARD)
     public void onPlayerDataSaved(PlayerEntity player, CallbackInfo ci, NbtCompound tag) {
-        PlayerDataSaved.EVENT.invoker().onPlayerDataSaved(player.getUuid(), tag);
+        DataSavedEvents.PLAYER_DATA.invoker().onSaved(player.getUuid(), tag);
     }
 }

@@ -1,4 +1,4 @@
-package io.wispforest.owo.mixin;
+package io.wispforest.owo.mixin.offline;
 
 import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.advancement.criterion.CriterionProgress;

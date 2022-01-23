@@ -1,4 +1,3 @@
-
 package io.wispforest.owo.network.serialization;
 
 import io.wispforest.owo.network.annotations.ElementType;
@@ -218,7 +217,7 @@ public record PacketBufSerializer<T>(BiConsumer<PacketByteBuf, T> serializer, Fu
      */
     @SuppressWarnings("unchecked")
     public static PacketBufSerializer<?> createArraySerializer(Class<?> elementClass) {
-        var elementSerializer = (PacketBufSerializer<Object>)get(elementClass);
+        var elementSerializer = (PacketBufSerializer<Object>) get(elementClass);
         return new PacketBufSerializer<>((buf, t) -> {
             final int length = Array.getLength(t);
             buf.writeVarInt(length);

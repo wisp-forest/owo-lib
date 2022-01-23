@@ -1,4 +1,4 @@
-package io.wispforest.owo.mixin;
+package io.wispforest.owo.mixin.itemgroup;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.itemgroup.OwoItemGroup;

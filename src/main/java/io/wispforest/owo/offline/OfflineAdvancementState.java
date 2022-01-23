@@ -5,21 +5,36 @@ import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.util.Identifier;
 
 import java.util.Map;
-import java.util.UUID;
 
-public class AdvancementsTransaction {
-    private final UUID player;
+/**
+ * A utility class that allows easy
+ * modification of the advancement data
+ * of offline players
+ *
+ * @author BasiqueEvangelist
+ */
+public class OfflineAdvancementState {
+
     private final Map<Identifier, AdvancementProgress> advancementData;
 
-    AdvancementsTransaction(UUID player, Map<Identifier, AdvancementProgress> advancementData) {
-        this.player = player;
+    OfflineAdvancementState(Map<Identifier, AdvancementProgress> advancementData) {
         this.advancementData = advancementData;
     }
 
-    public Map<Identifier, AdvancementProgress> getAdvancementData() {
+    /**
+     * @return The raw data this state holds
+     */
+    public Map<Identifier, AdvancementProgress> advancementData() {
         return advancementData;
     }
 
+    /**
+     * Either obtains or creates an entry for
+     * the given advancement
+     *
+     * @param advancement The target advancement
+     * @return The progress of the targeted advancement
+     */
     public AdvancementProgress getOrAddProgress(Advancement advancement) {
         return advancementData.computeIfAbsent(advancement.getId(), id -> {
             AdvancementProgress progress = new AdvancementProgress();
@@ -28,6 +43,12 @@ public class AdvancementsTransaction {
         });
     }
 
+    /**
+     * Grants the given advancement to the player
+     * this state refers to
+     *
+     * @param advancement The advancement to grant
+     */
     public void grant(Advancement advancement) {
         AdvancementProgress progress = getOrAddProgress(advancement);
         for (String criterion : progress.getUnobtainedCriteria()) {
@@ -35,14 +56,16 @@ public class AdvancementsTransaction {
         }
     }
 
+    /**
+     * Revokes the given advancement from the player
+     * this state refers to
+     *
+     * @param advancement The advancement to revoke
+     */
     public void revoke(Advancement advancement) {
         AdvancementProgress progress = getOrAddProgress(advancement);
         for (String criterion : progress.getObtainedCriteria()) {
             progress.reset(criterion);
         }
-    }
-
-    public void commit() {
-        OfflineAdvancementLookup.save(player, advancementData);
     }
 }

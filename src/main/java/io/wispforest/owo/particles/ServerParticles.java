@@ -1,6 +1,7 @@
 package io.wispforest.owo.particles;
 
 import com.google.gson.Gson;
+import io.wispforest.owo.particles.systems.ParticleSystemController;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
@@ -8,7 +9,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -20,10 +20,10 @@ import java.util.function.Consumer;
  * <p>
  * The packet can contain arbitrary data to make sending complex particle states easier than with vanilla's WorldEvent {@code int} data
  *
- * @deprecated Use {@link io.wispforest.owo.particles.system.ParticleSystemManager} instead.
+ * @deprecated Use {@link ParticleSystemController} instead.
  */
 @SuppressWarnings("DeprecatedIsStillUsed")
-@Deprecated(forRemoval = true)
+@Deprecated(forRemoval = true, since = "0.5.0")
 public class ServerParticles {
 
     public static final Gson NETWORK_GSON = new Gson();
