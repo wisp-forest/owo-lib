@@ -1,13 +1,94 @@
+buildscript {
+    dependencies {
+        classpath 'net.fabricmc:tiny-remapper:0.8.1'
+    }
+}
+
 plugins {
     id 'fabric-loom' version '0.10-SNAPSHOT'
     id 'maven-publish'
     id 'io.github.juuxel.loom-quiltflower-mini' version '1.2.1'
 }
 
-version = "${project.mod_version}+${project.minecraft_base_version}"
-group = project.maven_group
+allprojects {
+    apply plugin: "java"
+    apply plugin: "fabric-loom"
+    apply plugin: "maven-publish"
 
-def ENV = System.getenv()
+    def ENV = System.getenv()
+
+    version = "${project.mod_version}+${rootProject.minecraft_base_version}"
+    group = rootProject.maven_group
+
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << "-Xlint:unchecked"
+    }
+
+    dependencies {
+        minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
+        mappings "net.fabricmc:yarn:${rootProject.yarn_mappings}:v2"
+        modImplementation "net.fabricmc:fabric-loader:${rootProject.loader_version}"
+
+        modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    }
+
+    processResources {
+        inputs.property "version", project.version
+        filteringCharset "UTF-8"
+
+        filesMatching("fabric.mod.json") {
+            expand "version": project.version
+        }
+    }
+
+    def targetJavaVersion = 17
+    tasks.withType(JavaCompile).configureEach {
+        // ensure that the encoding is set to UTF-8, no matter what the system default is
+        // this fixes some edge cases with special characters not displaying correctly
+        // see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
+        // If Javadoc is generated, this must be specified in that task too.
+        it.options.encoding = "UTF-8"
+        if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
+            it.options.release = targetJavaVersion
+        }
+    }
+
+    java {
+        def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+        if (JavaVersion.current() < javaVersion) {
+            toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+        }
+        archivesBaseName = project.archives_base_name
+        // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
+        // if it is present.
+        // If you remove this line, sources will not be generated.
+        withSourcesJar()
+    }
+
+    jar {
+        from("LICENSE") {
+            rename { "${it}_${project.archivesBaseName}" }
+        }
+    }
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+            }
+        }
+
+        repositories {
+            maven {
+                url ENV.MAVEN_URL
+                credentials {
+                    username ENV.MAVEN_USER
+                    password ENV.MAVEN_PASSWORD
+                }
+            }
+        }
+    }
+}
 
 repositories {
     maven { url "https://maven.shedaniel.me/" }
@@ -44,13 +125,6 @@ loom {
 }
 
 dependencies {
-    //to change the versions see the gradle.properties file
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-
     modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}"
     modLocalRuntime "me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}"
 
@@ -59,65 +133,8 @@ dependencies {
     testmodImplementation sourceSets.main.output
 }
 
-processResources {
-    inputs.property "version", project.version
-    filteringCharset "UTF-8"
-
-    filesMatching("fabric.mod.json") {
-        expand "version": project.version
-    }
-}
-
-def targetJavaVersion = 17
-tasks.withType(JavaCompile).configureEach {
-    // ensure that the encoding is set to UTF-8, no matter what the system default is
-    // this fixes some edge cases with special characters not displaying correctly
-    // see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
-    // If Javadoc is generated, this must be specified in that task too.
-    it.options.encoding = "UTF-8"
-    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
-        it.options.release = targetJavaVersion
-    }
-}
-
-java {
-    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
-    if (JavaVersion.current() < javaVersion) {
-        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
-    }
-    archivesBaseName = project.archives_base_name
-    // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-    // if it is present.
-    // If you remove this line, sources will not be generated.
-    withSourcesJar()
-}
-
-jar {
-    from("LICENSE") {
-        rename { "${it}_${project.archivesBaseName}" }
-    }
-}
-
 javadoc {
     options.stylesheetFile = new File(projectDir, "stylesheet.css")
     options.tags = ["apiNote", "implNote", "implSpec"]
     options.addStringOption("Xdoclint:-missing", "-quiet")
-}
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-        }
-    }
-
-    repositories {
-        maven {
-            url ENV.MAVEN_URL
-            credentials {
-                username ENV.MAVEN_USER
-                password ENV.MAVEN_PASSWORD
-            }
-        }
-    }
 }

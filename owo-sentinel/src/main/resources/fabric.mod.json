@@ -1,37 +1,26 @@
 {
   "schemaVersion": 1,
-  "id": "owo",
+  "id": "owo-sentinel",
   "version": "${version}",
-  "name": "oωo",
-  "description": "yes its bad i know thanks",
+  "name": "oωo-sentinel",
+  "description": "makes u download oωo",
   "authors": [
-    "glisco",
-    "Noaaan"
+    "glisco"
   ],
   "contact": {},
   "license": "MIT",
-  "icon": "assets/owo/icon.png",
+  "icon": "assets/owo-sentinel/textures/icon.png",
   "environment": "*",
   "entrypoints": {
-    "client": [
-      "io.wispforest.owo.client.OwoClient"
-    ],
-    "main": [
-      "io.wispforest.owo.Owo"
-    ],
-    "rei_plugins": [
-      "io.wispforest.owo.compat.rei.OwoReiPlugin"
+    "preLaunch": [
+      "io.wispforest.owosentinel.OwoSentinel"
     ]
   },
-  "mixins": [
-    "owo.mixins.json"
-  ],
   "provides": [
-    "owo-impl"
+    "owo"
   ],
   "depends": {
     "fabricloader": "*",
-    "fabric": "*",
     "minecraft": ">=1.18"
   },
   "custom": {

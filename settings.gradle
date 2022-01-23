@@ -12,3 +12,5 @@ pluginManagement {
         }
     }
 }
+
+include 'owo-sentinel'

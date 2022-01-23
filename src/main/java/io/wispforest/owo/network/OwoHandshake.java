@@ -31,7 +31,7 @@ class OwoHandshake {
     @SuppressWarnings("unchecked")
     private static final PacketBufSerializer<Map<Identifier, Integer>> RESPONSE_SERIALIZER = (PacketBufSerializer<Map<Identifier, Integer>>)(Object)PacketBufSerializer.createMapSerializer(Map.class, Identifier.class, Integer.class);
     private static final MutableText PREFIX = TextOps.concat(Owo.PREFIX, Text.of("§chandshake failure\n"));
-    static Identifier CHANNEL_ID = new Identifier("owo", "handshake");
+    static final Identifier CHANNEL_ID = new Identifier("owo", "handshake");
 
     static void queryStart(ServerLoginNetworkHandler serverLoginNetworkHandler, MinecraftServer server, PacketSender sender, ServerLoginNetworking.LoginSynchronizer loginSynchronizer) {
         sender.sendPacket(OwoHandshake.CHANNEL_ID, PacketByteBufs.create());
