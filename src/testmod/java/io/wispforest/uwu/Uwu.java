@@ -35,8 +35,11 @@ import net.minecraft.util.math.BlockPos;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class Uwu implements ModInitializer {
+
+    public static final boolean WE_TESTEN_HANDSHAKE = false;
 
     public static final Tag<Item> TAB_2_CONTENT = TagFactory.ITEM.create(new Identifier("uwu", "tab_2_content"));
     public static final Identifier GROUP_TEXTURE = new Identifier("uwu", "textures/gui/group.png");
@@ -105,6 +108,8 @@ public class Uwu implements ModInitializer {
 
     public static final TestMessage MESSAGE = new TestMessage("hahayes", 69, Long.MAX_VALUE, ItemStack.EMPTY, Short.MAX_VALUE, Byte.MAX_VALUE, new BlockPos(69, 420, 489),
             Float.NEGATIVE_INFINITY, Double.NaN, false, new Identifier("uowou", "hahayes"), Collections.emptyMap(),
+            new int[] {10, 20}, new String[] {"trollface"}, new short[] {1, 2, 3}, new long[] {Long.MAX_VALUE, 1, 3}, new byte[] {1, 2, 3, 4},
+            Optional.of("NullableString"), Optional.empty(),
             ImmutableList.of(new BlockPos(9786, 42, 9234)));
 
     public static final ParticleSystemManager PARTICLE_MANAGER = new ParticleSystemManager(new Identifier("uwu", "particles"));
@@ -147,7 +152,7 @@ public class Uwu implements ModInitializer {
             access.player().sendMessage(Text.of(String.valueOf(message.bite)), false);
         });
 
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER) {
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER && WE_TESTEN_HANDSHAKE) {
             OwoNetChannel.create(new Identifier("uwu", "server_only"));
         }
 
@@ -159,6 +164,8 @@ public class Uwu implements ModInitializer {
     public record TestMessage(String string, Integer integer, Long along, ItemStack stack, Short ashort, Byte bite,
                               BlockPos pos, Float afloat, Double adouble, Boolean aboolean, Identifier identifier,
                               @MapTypes(keys = String.class, values = Integer.class) Map<String, Integer> map,
+                              int[] arr1, String[] arr2, short[] arr3, long[] arr4, byte[] arr5,
+                              @ElementType(String.class) Optional<String> optional1, @ElementType(String.class) Optional<String> optional2,
                               @ElementType(BlockPos.class) List<BlockPos> posses) {}
 
 }
