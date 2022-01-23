@@ -39,6 +39,8 @@ import java.util.Optional;
 
 public class Uwu implements ModInitializer {
 
+    public static final boolean WE_TESTEN_HANDSHAKE = false;
+
     public static final Tag<Item> TAB_2_CONTENT = TagFactory.ITEM.create(new Identifier("uwu", "tab_2_content"));
     public static final Identifier GROUP_TEXTURE = new Identifier("uwu", "textures/gui/group.png");
     public static final Identifier OWO_ICON_TEXTURE = new Identifier("uwu", "textures/gui/icon.png");
@@ -150,7 +152,7 @@ public class Uwu implements ModInitializer {
             access.player().sendMessage(Text.of(String.valueOf(message.bite)), false);
         });
 
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER) {
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER && WE_TESTEN_HANDSHAKE) {
             OwoNetChannel.create(new Identifier("uwu", "server_only"));
         }
 
