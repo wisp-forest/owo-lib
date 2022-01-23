@@ -1,6 +1,7 @@
 package io.wispforest.uwu;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.authlib.GameProfile;
 import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
@@ -8,6 +9,8 @@ import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
 import io.wispforest.owo.network.OwoNetChannel;
 import io.wispforest.owo.network.annotations.ElementType;
 import io.wispforest.owo.network.annotations.MapTypes;
+import io.wispforest.owo.offline.OfflineAdvancementLookup;
+import io.wispforest.owo.offline.OfflineDataLookup;
 import io.wispforest.owo.particles.ClientParticles;
 import io.wispforest.owo.particles.system.ParticleSystem;
 import io.wispforest.owo.particles.system.ParticleSystemManager;
@@ -18,16 +21,23 @@ import io.wispforest.uwu.network.UwuNetworkExample;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
+import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.tag.TagFactory;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.command.argument.GameProfileArgumentType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tag.Tag;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -36,6 +46,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import static net.minecraft.server.command.CommandManager.argument;
+import static net.minecraft.server.command.CommandManager.literal;
 
 public class Uwu implements ModInitializer {
 
@@ -155,6 +168,43 @@ public class Uwu implements ModInitializer {
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER && WE_TESTEN_HANDSHAKE) {
             OwoNetChannel.create(new Identifier("uwu", "server_only"));
         }
+
+        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
+            dispatcher.register(
+                literal("show_nbt")
+                    .then(argument("player", GameProfileArgumentType.gameProfile())
+                        .executes(context -> {
+                            GameProfile profile = GameProfileArgumentType.getProfileArgument(context, "player").iterator().next();
+                            NbtCompound tag = OfflineDataLookup.get(profile.getId());
+                            context.getSource().sendFeedback(NbtHelper.toPrettyPrintedText(tag), false);
+                            return 0;
+                        })));
+
+            dispatcher.register(
+                literal("test_advancement_cache")
+                    .then(literal("read")
+                        .then(argument("player", GameProfileArgumentType.gameProfile())
+                            .executes(context -> {
+                                GameProfile profile = GameProfileArgumentType.getProfileArgument(context, "player").iterator().next();
+                                Map<Identifier, AdvancementProgress> map = OfflineAdvancementLookup.get(profile.getId());
+                                context.getSource().sendFeedback(new LiteralText(map.toString()), false);
+                                System.out.println(map);
+                                return 0;
+                            })))
+                    .then(literal("write")
+                        .then(argument("player", GameProfileArgumentType.gameProfile())
+                            .executes(context -> {
+                                MinecraftServer server = context.getSource().getServer();
+                                GameProfile profile = GameProfileArgumentType.getProfileArgument(context, "player").iterator().next();
+
+                                var tx = OfflineAdvancementLookup.start(profile.getId());
+                                tx.grant(server.getAdvancementLoader().get(new Identifier("story/iron_tools")));
+                                tx.commit();
+
+                                return 0;
+                            }))));
+
+        });
 
         UwuNetworkExample.init();
     }

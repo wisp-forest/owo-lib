@@ -4,13 +4,16 @@
   "package": "io.wispforest.owo.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
+    "AdvancementProgressAccessor",
     "EulaReaderMixin",
     "FabricItemGroupBuilderMixin",
     "ItemMixin",
     "ItemSettingsMixin",
     "LevelInfoMixin",
+    "PlayerAdvancementTrackerMixin",
     "ScreenHandlerInvoker",
-    "TagGroupLoaderMixin"
+    "TagGroupLoaderMixin",
+    "WorldSaveHandlerMixin"
   ],
   "client": [
     "CreativeInventoryScreenMixin",
