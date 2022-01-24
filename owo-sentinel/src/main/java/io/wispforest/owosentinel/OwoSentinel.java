@@ -45,16 +45,16 @@ public class OwoSentinel implements PreLaunchEntrypoint {
 
         try {
 
+            // Fix AA
+            System.setProperty("awt.useSystemAAFontSettings", "lcd");
+            System.setProperty("swing.aatext", "true");
+
             // Force GTK if available
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             for (var laf : UIManager.getInstalledLookAndFeels()) {
                 if (!"GTK+".equals(laf.getName())) continue;
                 UIManager.setLookAndFeel(laf.getClassName());
             }
-
-            // Fix AA
-            System.setProperty("awt.useSystemAAFontSettings", "lcd");
-            System.setProperty("swing.aatext", "true");
 
             // ------
             // Window
