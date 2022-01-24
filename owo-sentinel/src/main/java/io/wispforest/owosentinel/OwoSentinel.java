@@ -26,12 +26,6 @@ public class OwoSentinel implements PreLaunchEntrypoint {
             repository and download oωo yourself.
             """;
 
-    private static final boolean OWO_INSTALLED = FabricLoader.getInstance().isModLoaded("owo-impl");
-
-    public static boolean owoPresent() {
-        return OWO_INSTALLED;
-    }
-
     private static List<String> listOwoDependants() {
         var list = new ArrayList<String>();
 
@@ -47,7 +41,7 @@ public class OwoSentinel implements PreLaunchEntrypoint {
 
     @Override
     public void onPreLaunch() {
-        if (owoPresent()) return;
+        if (FabricLoader.getInstance().isModLoaded("owo-impl")) return;
 
         try {
 
@@ -71,7 +65,7 @@ public class OwoSentinel implements PreLaunchEntrypoint {
 
             //noinspection ConstantConditions
             final var owoIconImage = ImageIO.read(OwoSentinel.class.getClassLoader()
-                    .getResourceAsStream("icon.png"));
+                    .getResourceAsStream("owo_sentinel_icon.png"));
 
             window.setIconImage(owoIconImage);
             window.setMinimumSize(new Dimension(0, 250));

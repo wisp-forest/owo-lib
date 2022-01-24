@@ -9,7 +9,7 @@
   ],
   "contact": {},
   "license": "MIT",
-  "icon": "assets/owo-sentinel/textures/icon.png",
+  "icon": "owo_sentinel_icon.png",
   "environment": "*",
   "entrypoints": {
     "preLaunch": [
