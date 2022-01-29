@@ -9,13 +9,13 @@ import io.wispforest.owo.particles.systems.ParticleSystemController;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientLoginNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
-import net.fabricmc.fabric.api.networking.v1.ServerLoginConnectionEvents;
-import net.fabricmc.fabric.api.networking.v1.ServerLoginNetworking;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.*;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientLoginNetworkHandler;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerLoginNetworkHandler;
@@ -42,6 +42,8 @@ public class OwoHandshake {
 
     public static final Identifier CHANNEL_ID = new Identifier("owo", "handshake");
 
+    private static final boolean ENABLED = !Boolean.getBoolean("owo.handshake.disable");
+
     // ------------
     // Registration
     // ------------
@@ -51,9 +53,11 @@ public class OwoHandshake {
     static {
         ServerLoginConnectionEvents.QUERY_START.register(OwoHandshake::queryStart);
         ServerLoginNetworking.registerGlobalReceiver(OwoHandshake.CHANNEL_ID, OwoHandshake::syncServer);
+        ServerPlayNetworking.registerGlobalReceiver(OwoHandshake.CHANNEL_ID, (server, player, handler, buf, responseSender) -> {});
 
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
             ClientLoginNetworking.registerGlobalReceiver(OwoHandshake.CHANNEL_ID, OwoHandshake::syncClient);
+            ClientPlayConnectionEvents.JOIN.register(OwoHandshake::handleJoinClient);
         }
     }
 
@@ -62,6 +66,8 @@ public class OwoHandshake {
     // -------
 
     private static void queryStart(ServerLoginNetworkHandler serverLoginNetworkHandler, MinecraftServer server, PacketSender sender, ServerLoginNetworking.LoginSynchronizer loginSynchronizer) {
+        if (!ENABLED) return;
+
         sender.sendPacket(OwoHandshake.CHANNEL_ID, PacketByteBufs.create());
         Owo.LOGGER.info("[Handshake] Sending channel query");
     }
@@ -98,6 +104,12 @@ public class OwoHandshake {
         } else {
             Owo.LOGGER.info("[Handshake] Handshake completed successfully");
         }
+    }
+
+    @Environment(EnvType.CLIENT)
+    private static void handleJoinClient(ClientPlayNetworkHandler handler, PacketSender packetSender, MinecraftClient client) {
+        if (ClientPlayNetworking.canSend(CHANNEL_ID)) return;
+        handler.getConnection().disconnect(TextOps.concat(PREFIX, Text.of("incompatible server")));
     }
 
     // -------
