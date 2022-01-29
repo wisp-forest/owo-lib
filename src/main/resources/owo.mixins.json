@@ -4,22 +4,26 @@
   "package": "io.wispforest.owo.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
-    "offline.AdvancementProgressAccessor",
-    "tweaks.EulaReaderMixin",
+    "ScreenHandlerInvoker",
+    "TagGroupLoaderMixin",
     "itemgroup.FabricItemGroupBuilderMixin",
     "itemgroup.ItemMixin",
     "itemgroup.ItemSettingsMixin",
-    "tweaks.LevelInfoMixin",
+    "offline.AdvancementProgressAccessor",
     "offline.PlayerAdvancementTrackerMixin",
-    "ScreenHandlerInvoker",
-    "TagGroupLoaderMixin",
-    "offline.WorldSaveHandlerMixin"
+    "offline.WorldSaveHandlerMixin",
+    "tweaks.EulaReaderMixin",
+    "tweaks.LevelInfoMixin"
   ],
   "client": [
+    "MinecraftClientMixin",
+    "TranslationStorageMixin",
     "itemgroup.CreativeInventoryScreenMixin",
-    "tweaks.TextFieldWidgetMixin",
     "tweaks.OperatingSystemMixin",
-    "TranslationStorageMixin"
+    "tweaks.TextFieldWidgetMixin"
+  ],
+  "server": [
+    "MainMixin"
   ],
   "injectors": {
     "defaultRequire": 1

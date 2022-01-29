@@ -1,5 +1,6 @@
 package io.wispforest.owo.network;
 
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.network.serialization.PacketBufSerializer;
 import io.wispforest.owo.network.serialization.RecordSerializer;
 import io.wispforest.owo.util.ReflectionUtils;
@@ -19,6 +20,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -53,6 +55,7 @@ import java.util.function.Supplier;
  */
 public class OwoNetChannel {
 
+    private static boolean FROZEN = false;
     static final Map<Identifier, OwoNetChannel> REGISTERED_CHANNELS = new HashMap<>();
 
     private final Map<Class<?>, IndexedSerializer<?>> serializersByClass = new HashMap<>();
@@ -246,6 +249,10 @@ public class OwoNetChannel {
     }
 
     private <R extends Record> void createSerializer(Class<R> messageClass, int handlerIndex, EnvType target) {
+        if (FROZEN) {
+            throw new NetworkException("Network handlers may only be registered during mod initialization");
+        }
+
         var serializer = serializersByClass.get(messageClass);
         if (serializer == null) {
             final var indexedSerializer = IndexedSerializer.create(RecordSerializer.create(messageClass), handlerIndex, target);
@@ -378,6 +385,16 @@ public class OwoNetChannel {
          * {@link net.minecraft.server.network.ServerPlayNetworkHandler}
          */
         N netHandler();
+    }
+
+    @Deprecated
+    @ApiStatus.Internal
+    @SuppressWarnings("DeprecatedIsStillUsed")
+    public static void freezeAllChannels() {
+        FROZEN = true;
+
+        if (!Owo.DEBUG) return;
+        Owo.LOGGER.info("Channels frozen by '" + ReflectionUtils.getCallingClassName(2) + "'");
     }
 
     static {

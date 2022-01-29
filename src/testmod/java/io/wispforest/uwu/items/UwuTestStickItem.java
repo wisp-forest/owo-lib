@@ -3,6 +3,7 @@ package io.wispforest.uwu.items;
 import io.wispforest.owo.itemgroup.OwoItemSettings;
 import io.wispforest.owo.ops.WorldOps;
 import io.wispforest.uwu.Uwu;
+import io.wispforest.uwu.client.UwuClient;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -25,6 +26,8 @@ public class UwuTestStickItem extends Item {
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 
+        Uwu.CHANNEL.registerClientbound(UwuClient.WeirdMessage.class, (message, access) -> {});
+
         if (user.isSneaking()) {
             if (world.isClient) return TypedActionResult.success(user.getStackInHand(hand));
 
@@ -39,7 +42,7 @@ public class UwuTestStickItem extends Item {
 
             Uwu.CHANNEL.clientHandle().send(Uwu.MESSAGE);
 
-            Uwu.CUBE.execute(world, user.getEyePos().add(user.getRotationVec(0).multiply(3)).subtract(.5, .5, .5), null);
+            Uwu.CUBE.spawn(world, user.getEyePos().add(user.getRotationVec(0).multiply(3)).subtract(.5, .5, .5), null);
 
             return TypedActionResult.success(user.getStackInHand(hand));
         }
@@ -54,7 +57,7 @@ public class UwuTestStickItem extends Item {
         breakStack.addEnchantment(Enchantments.FORTUNE, 3);
         WorldOps.breakBlockWithItem(context.getWorld(), context.getBlockPos(), breakStack);
 
-        Uwu.BREAK_BLOCK_PARTICLES.execute(context.getWorld(), Vec3d.of(context.getBlockPos()), null);
+        Uwu.BREAK_BLOCK_PARTICLES.spawn(context.getWorld(), Vec3d.of(context.getBlockPos()), null);
 
         return ActionResult.SUCCESS;
     }

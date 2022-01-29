@@ -14,12 +14,12 @@ import java.util.function.Function;
  * at a position in a world <i>on both client and server</i>,
  * with some optional data attached.
  * <br>
- * To run this effect, call {@link #execute(World, Vec3d, Object)}. If you call this
+ * To run this effect, call {@link #spawn(World, Vec3d, Object)}. If you call this
  * on the server, a command will be sent to the client to execute the system.
  * <b>Thus, it is important this is registered on both client and server</b>
  * <p>
  * In case your particle effect not required any additional data,
- * use {@link Void} as the data class and pass {@code null} to {@link #execute(World, Vec3d, Object)}
+ * use {@link Void} as the data class and pass {@code null} to {@link #spawn(World, Vec3d, Object)}
  * <p>
  * The data is serialized with the {@link PacketBufSerializer} system,
  * so should your data class not be supported, register your own
@@ -47,7 +47,7 @@ public class ParticleSystem<T> {
     }
 
     /**
-     * Executes or displays, whichever term you prefer,
+     * Spawns, or displays, whichever term you prefer,
      * this particle system in the given world at the
      * given position and with the passed context data
      *
@@ -58,7 +58,7 @@ public class ParticleSystem<T> {
      * @param pos   The position to execute at
      * @param data  The context to execute with
      */
-    public void execute(World world, Vec3d pos, @Nullable T data) {
+    public void spawn(World world, Vec3d pos, @Nullable T data) {
         if (data == null && !permitsContextlessExecution) throw new IllegalStateException("This particle system does not permit 'null' data");
 
         if (world.isClient) {
@@ -69,13 +69,13 @@ public class ParticleSystem<T> {
     }
 
     /**
-     * Convenience wrapper for {@link #execute(World, Vec3d, Object)}
+     * Convenience wrapper for {@link #spawn(World, Vec3d, Object)}
      * that always passes {@code null} data
      *
      * @param world The world to execute in
      * @param pos   The position to execute at
      */
-    public void execute(World world, Vec3d pos) {
-        execute(world, pos, null);
+    public void spawn(World world, Vec3d pos) {
+        spawn(world, pos, null);
     }
 }
