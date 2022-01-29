@@ -68,7 +68,7 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<Enum<T>
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static <T extends Enum<T>> EnumArgumentType<T> create(Class<T> enumClass, String noElementMessage) {
         final var type = new EnumArgumentType<>(enumClass, noElementMessage);
-        ArgumentTypes.register("owo-enum_" + enumClass.getName().toLowerCase(), type.getClass(), new Serializer(type));
+        ArgumentTypes.register("owo:enum_" + enumClass.getName().toLowerCase(), type.getClass(), new Serializer(type));
         return type;
     }
 
