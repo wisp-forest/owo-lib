@@ -109,7 +109,9 @@ public class OwoHandshake {
     @Environment(EnvType.CLIENT)
     private static void handleJoinClient(ClientPlayNetworkHandler handler, PacketSender packetSender, MinecraftClient client) {
         if (ClientPlayNetworking.canSend(CHANNEL_ID)) return;
-        handler.getConnection().disconnect(TextOps.concat(PREFIX, Text.of("incompatible server")));
+        client.execute(() -> {
+            handler.getConnection().disconnect(TextOps.concat(PREFIX, Text.of("incompatible server")));
+        });
     }
 
     // -------
