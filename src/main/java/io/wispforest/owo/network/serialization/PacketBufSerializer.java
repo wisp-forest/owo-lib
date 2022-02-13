@@ -6,12 +6,16 @@ import io.wispforest.owo.util.VectorSerializer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.particle.ParticleEffect;
+import net.minecraft.particle.ParticleType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3f;
+import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.AnnotatedElement;
@@ -297,12 +301,23 @@ public record PacketBufSerializer<T>(BiConsumer<PacketByteBuf, T> serializer, Fu
         // --------
 
         register(BlockPos.class, PacketByteBuf::writeBlockPos, PacketByteBuf::readBlockPos);
+        register(ChunkPos.class, PacketByteBuf::writeChunkPos, PacketByteBuf::readChunkPos);
         register(ItemStack.class, PacketByteBuf::writeItemStack, PacketByteBuf::readItemStack);
         register(Identifier.class, PacketByteBuf::writeIdentifier, PacketByteBuf::readIdentifier);
         register(NbtCompound.class, PacketByteBuf::writeNbt, PacketByteBuf::readNbt);
         register(BlockHitResult.class, PacketByteBuf::writeBlockHitResult, PacketByteBuf::readBlockHitResult);
         register(BitSet.class, PacketByteBuf::writeBitSet, PacketByteBuf::readBitSet);
         register(Text.class, PacketByteBuf::writeText, PacketByteBuf::readText);
+
+        PacketBufSerializer.register(ParticleEffect.class, (buf, particleEffect) -> {
+            buf.writeInt(Registry.PARTICLE_TYPE.getRawId(particleEffect.getType()));
+            particleEffect.write(buf);
+        }, buf -> {
+            //noinspection rawtypes
+            final ParticleType particleType = Registry.PARTICLE_TYPE.get(buf.readInt());
+            //noinspection unchecked, ConstantConditions
+            return particleType.getParametersFactory().read(particleType, buf);
+        });
 
         register(Vec3d.class, (buf, vec3d) -> VectorSerializer.write(vec3d, buf), VectorSerializer::read);
         register(Vec3f.class, (buf, vec3d) -> VectorSerializer.writef(vec3d, buf), VectorSerializer::readf);

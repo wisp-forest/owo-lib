@@ -37,7 +37,7 @@ public class TextFieldWidgetMixin {
 
     @Unique
     private boolean owo$isWordChar(char charAt) {
-        return charAt == '_' || Character.isAlphabetic(charAt);
+        return charAt == '_' || Character.isAlphabetic(charAt) || Character.isDigit(charAt);
     }
 
 }
