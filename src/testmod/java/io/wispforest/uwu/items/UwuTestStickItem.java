@@ -25,9 +25,6 @@ public class UwuTestStickItem extends Item {
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-
-        Uwu.CHANNEL.registerClientbound(UwuClient.WeirdMessage.class, (message, access) -> {});
-
         if (user.isSneaking()) {
             if (world.isClient) return TypedActionResult.success(user.getStackInHand(hand));
 

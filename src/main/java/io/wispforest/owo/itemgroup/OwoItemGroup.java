@@ -9,6 +9,7 @@ import net.fabricmc.fabric.impl.item.group.ItemGroupExtensions;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.item.*;
 import net.minecraft.tag.Tag;
+import net.minecraft.tag.TagKey;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.registry.Registry;
@@ -75,7 +76,7 @@ public abstract class OwoItemGroup extends ItemGroup {
         if (initialized) return;
 
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) setup();
-        if (tabs.size() == 0) this.addTab(Icon.of(Items.AIR), "based_placeholder_tab", ItemGroupTab.EMPTY);
+        if (tabs.size() == 0) this.addTab(Icon.of(Items.AIR), "based_placeholder_tab", null);
         this.initialized = true;
     }
 
@@ -101,7 +102,7 @@ public abstract class OwoItemGroup extends ItemGroup {
      * @param texture    The texture to use for drawing the button
      * @see Icon#of(ItemConvertible)
      */
-    protected void addTab(Icon icon, String name, Tag<Item> contentTag, Identifier texture) {
+    protected void addTab(Icon icon, String name, TagKey<Item> contentTag, Identifier texture) {
         this.tabs.add(new ItemGroupTab(icon, name, contentTag, texture));
     }
 
@@ -113,7 +114,7 @@ public abstract class OwoItemGroup extends ItemGroup {
      * @param contentTag The tag used for filling this tab
      * @see Icon#of(ItemConvertible)
      */
-    protected void addTab(Icon icon, String name, Tag<Item> contentTag) {
+    protected void addTab(Icon icon, String name, TagKey<Item> contentTag) {
         addTab(icon, name, contentTag, ItemGroupTab.DEFAULT_TEXTURE);
     }
 
@@ -137,7 +138,7 @@ public abstract class OwoItemGroup extends ItemGroup {
     /**
      * Called from {@link #initialize()} to register tabs and buttons
      *
-     * @see #addTab(Icon, String, Tag)
+     * @see #addTab(Icon, String, TagKey)
      * @see #addButton(ItemGroupButton)
      */
     protected abstract void setup();

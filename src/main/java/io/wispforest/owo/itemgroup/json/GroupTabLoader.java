@@ -7,9 +7,9 @@ import io.wispforest.owo.itemgroup.OwoItemExtensions;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
 import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
 import io.wispforest.owo.moddata.ModDataConsumer;
-import net.fabricmc.fabric.api.tag.TagFactory;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tag.TagKey;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.Pair;
@@ -64,7 +64,7 @@ public class GroupTabLoader implements ModDataConsumer {
 
             var texture = new Identifier(JsonHelper.getString(tabObject, "texture", ItemGroupTab.DEFAULT_TEXTURE.toString()));
 
-            var tag = TagFactory.ITEM.create(new Identifier(JsonHelper.getString(tabObject, "tag")));
+            var tag = TagKey.of(Registry.ITEM_KEY, new Identifier(JsonHelper.getString(tabObject, "tag")));
             var icon = Registry.ITEM.get(new Identifier(JsonHelper.getString(tabObject, "icon")));
             var name = JsonHelper.getString(tabObject, "name");
 

@@ -22,7 +22,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.tag.TagFactory;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.block.Blocks;
@@ -37,10 +36,12 @@ import net.minecraft.nbt.NbtHelper;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tag.Tag;
+import net.minecraft.tag.TagKey;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.Registry;
 
 import java.util.Collections;
 import java.util.List;
@@ -54,7 +55,7 @@ public class Uwu implements ModInitializer {
 
     public static final boolean WE_TESTEN_HANDSHAKE = false;
 
-    public static final Tag<Item> TAB_2_CONTENT = TagFactory.ITEM.create(new Identifier("uwu", "tab_2_content"));
+    public static final TagKey<Item> TAB_2_CONTENT = TagKey.of(Registry.ITEM_KEY, new Identifier("uwu", "tab_2_content"));
     public static final Identifier GROUP_TEXTURE = new Identifier("uwu", "textures/gui/group.png");
     public static final Identifier OWO_ICON_TEXTURE = new Identifier("uwu", "textures/gui/icon.png");
     public static final Identifier ANIMATED_BUTTON_TEXTURE = new Identifier("uwu", "textures/gui/animated_icon_test.png");
@@ -64,10 +65,10 @@ public class Uwu implements ModInitializer {
         protected void setup() {
             keepStaticTitle();
 
-            addTab(Icon.of(ANIMATED_BUTTON_TEXTURE, 32, 1000, true), "tab_1", ItemGroupTab.EMPTY);
+            addTab(Icon.of(ANIMATED_BUTTON_TEXTURE, 32, 1000, true), "tab_1", null);
             addTab(Icon.of(Items.EMERALD), "tab_2", TAB_2_CONTENT);
-            addTab(Icon.of(Items.AMETHYST_SHARD), "tab_3", ItemGroupTab.EMPTY);
-            addTab(Icon.of(Items.GOLD_INGOT), "tab_4", ItemGroupTab.EMPTY);
+            addTab(Icon.of(Items.AMETHYST_SHARD), "tab_3", null);
+            addTab(Icon.of(Items.GOLD_INGOT), "tab_4", null);
 
             addButton(ItemGroupButton.github("https://github.com/glisco03/owo-lib"));
         }
@@ -84,12 +85,12 @@ public class Uwu implements ModInitializer {
             setStackHeight(6);
             setCustomTexture(GROUP_TEXTURE);
 
-            addTab(Icon.of(Items.DIAMOND), "tab_1", ItemGroupTab.EMPTY);
-            addTab(Icon.of(Items.EMERALD), "tab_2", ItemGroupTab.EMPTY);
-            addTab(Icon.of(Items.AMETHYST_SHARD), "tab_3", ItemGroupTab.EMPTY);
-            addTab(Icon.of(Items.GOLD_INGOT), "tab_4", ItemGroupTab.EMPTY);
-            addTab(Icon.of(Items.IRON_INGOT), "tab_5", ItemGroupTab.EMPTY);
-            addTab(Icon.of(Items.QUARTZ), "tab_6", ItemGroupTab.EMPTY);
+            addTab(Icon.of(Items.DIAMOND), "tab_1", null);
+            addTab(Icon.of(Items.EMERALD), "tab_2", null);
+            addTab(Icon.of(Items.AMETHYST_SHARD), "tab_3", null);
+            addTab(Icon.of(Items.GOLD_INGOT), "tab_4", null);
+            addTab(Icon.of(Items.IRON_INGOT), "tab_5", null);
+            addTab(Icon.of(Items.QUARTZ), "tab_6", null);
 
             addButton(new ItemGroupButton(Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16), "owo", () -> {
                 MinecraftClient.getInstance().player.sendMessage(Text.of("oωo button pressed!"), false);
@@ -106,7 +107,7 @@ public class Uwu implements ModInitializer {
         @Override
         protected void setup() {
             displaySingleTab();
-            addTab(Icon.of(Items.SPONGE), "tab_1", ItemGroupTab.EMPTY);
+            addTab(Icon.of(Items.SPONGE), "tab_1", null);
         }
 
         @Override
