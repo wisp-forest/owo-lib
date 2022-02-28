@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MainMixin {
 
     @SuppressWarnings({"MixinAnnotationTarget", "UnresolvedMixinReference"})
-    @Inject(method = "main", at = @At(value = "INVOKE",
+    @Inject(method = "main", at = @At(value = "INVOKE", remap = false,
             target = "Lnet/fabricmc/loader/impl/game/minecraft/Hooks;startServer(Ljava/io/File;Ljava/lang/Object;)V", shift = At.Shift.AFTER))
     private static void afterFabricHook(CallbackInfo ci) {
         OwoNetChannel.freezeAllChannels();

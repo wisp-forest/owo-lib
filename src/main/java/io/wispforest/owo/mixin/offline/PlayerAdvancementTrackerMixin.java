@@ -14,10 +14,11 @@ import java.util.Map;
 
 @Mixin(PlayerAdvancementTracker.class)
 public class PlayerAdvancementTrackerMixin {
-    @Shadow private ServerPlayerEntity owner;
+    @Shadow
+    private ServerPlayerEntity owner;
 
     @SuppressWarnings("unchecked")
-    @ModifyArg(method = "save", at = @At(value = "INVOKE", target = "Lcom/google/gson/Gson;toJsonTree(Ljava/lang/Object;)Lcom/google/gson/JsonElement;"))
+    @ModifyArg(method = "save", at = @At(value = "INVOKE", target = "Lcom/google/gson/Gson;toJsonTree(Ljava/lang/Object;)Lcom/google/gson/JsonElement;", remap = false))
     private Object onAdvancementsSaved(Object map) {
         DataSavedEvents.ADVANCEMENTS.invoker().onSaved(owner.getUuid(), (Map<Identifier, AdvancementProgress>) map);
         return map;
