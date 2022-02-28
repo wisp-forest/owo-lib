@@ -27,7 +27,8 @@
     "owo.mixins.json"
   ],
   "provides": [
-    "owo-impl"
+    "owo-impl",
+    "owo-lib"
   ],
   "depends": {
     "fabricloader": "*",
