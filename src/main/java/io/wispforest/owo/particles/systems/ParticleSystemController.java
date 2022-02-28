@@ -102,6 +102,7 @@ public class ParticleSystemController {
 
     static {
         OwoHandshake.enable();
+        OwoHandshake.requireHandshake();
     }
 
     @Environment(EnvType.CLIENT)

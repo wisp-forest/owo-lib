@@ -7,15 +7,18 @@ import io.wispforest.owo.util.ReflectionUtils;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
@@ -57,6 +60,8 @@ public class OwoNetChannel {
 
     private static boolean FROZEN = false;
     static final Map<Identifier, OwoNetChannel> REGISTERED_CHANNELS = new HashMap<>();
+    static final Map<Identifier, OwoNetChannel> REQUIRED_CHANNELS = new HashMap<>();
+    static final Map<Identifier, OwoNetChannel> OPTIONAL_CHANNELS = new HashMap<>();
 
     private final Map<Class<?>, IndexedSerializer<?>> serializersByClass = new HashMap<>();
     final Int2ObjectMap<IndexedSerializer<?>> serializersByIndex = new Int2ObjectOpenHashMap<>();
@@ -66,13 +71,14 @@ public class OwoNetChannel {
 
     final Identifier packetId;
     private final String ownerClassName;
+    final boolean required;
 
     private ClientHandle clientHandle = null;
     private ServerHandle serverHandle = null;
 
     /**
-     * Creates a new channel with given ID. Duplicate channel IDs
-     * are not allowed - if there is a collision, the name of the
+     * Creates a new required channel with given ID. Duplicate channel
+     * IDs are not allowed - if there is a collision, the name of the
      * class that previously registered the channel will be part of
      * the exception. <b>This may be called at any stage during
      * mod initialization</b>
@@ -81,16 +87,35 @@ public class OwoNetChannel {
      * @return The created channel
      */
     public static OwoNetChannel create(Identifier id) {
-        return new OwoNetChannel(id, ReflectionUtils.getCallingClassName(2));
+        return new OwoNetChannel(id, ReflectionUtils.getCallingClassName(2), true);
     }
 
-    private OwoNetChannel(Identifier id, String ownerClassName) {
+    /**
+     * Creates a new optional channel with given ID. Duplicate channel
+     * IDs are not allowed - if there is a collision, the name of the
+     * class that previously registered the channel will be part of
+     * the exception. <b>This may be called at any stage during
+     * mod initialization</b>
+     *
+     * @param id The desired channel ID
+     * @return The created channel
+     */
+    public static OwoNetChannel createOptional(Identifier id) {
+        return new OwoNetChannel(id, ReflectionUtils.getCallingClassName(2), false);
+    }
+
+    private OwoNetChannel(Identifier id, String ownerClassName, boolean required) {
         if (REGISTERED_CHANNELS.containsKey(id)) {
             throw new IllegalStateException("Channel with id '" + id + "' was already registered from class '" + REGISTERED_CHANNELS.get(id).ownerClassName + "'");
         }
 
         this.packetId = id;
         this.ownerClassName = ownerClassName;
+        this.required = required;
+
+        if (required) {
+            OwoHandshake.requireHandshake();
+        }
 
         ServerPlayNetworking.registerGlobalReceiver(packetId, (server, player, handler, buf, responseSender) -> {
             int handlerIndex = buf.readVarInt();
@@ -109,6 +134,12 @@ public class OwoNetChannel {
         clientHandlers.add(null);
         serverHandlers.add(null);
         REGISTERED_CHANNELS.put(id, this);
+
+        if (required) {
+            REQUIRED_CHANNELS.put(id, this);
+        } else {
+            OPTIONAL_CHANNELS.put(id, this);
+        }
     }
 
     /**
@@ -145,6 +176,23 @@ public class OwoNetChannel {
         int index = this.serverHandlers.size();
         this.createSerializer(messageClass, index, EnvType.SERVER);
         this.serverHandlers.add((ChannelHandler<Record, ServerAccess>) handler);
+    }
+
+    public boolean canSendToPlayer(ServerPlayerEntity player) {
+        return canSendToPlayer(player.networkHandler);
+    }
+
+    public boolean canSendToPlayer(ServerPlayNetworkHandler networkHandler) {
+        if (required) return true;
+
+        return ((OwoClientConnectionExtension) networkHandler.connection).owo$getChannelSet().contains(packetId);
+    }
+
+    @Environment(EnvType.CLIENT)
+    public boolean canSendToServer() {
+        if (required) return true;
+
+        return ((OwoClientConnectionExtension) MinecraftClient.getInstance().getNetworkHandler().getConnection()).owo$getChannelSet().contains(packetId);
     }
 
     /**
