@@ -18,6 +18,7 @@ import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
 import io.wispforest.owo.util.TagInjector;
 import io.wispforest.uwu.items.UwuItems;
 import io.wispforest.uwu.network.UwuNetworkExample;
+import io.wispforest.uwu.network.UwuOptionalNetExample;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
@@ -209,6 +210,7 @@ public class Uwu implements ModInitializer {
         });
 
         UwuNetworkExample.init();
+        UwuOptionalNetExample.init();
     }
 
     public record OtherTestMessage(BlockPos pos, String message) {}

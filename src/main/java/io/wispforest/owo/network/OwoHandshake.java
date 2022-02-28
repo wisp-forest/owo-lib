@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
 
 @ApiStatus.Internal
@@ -44,11 +45,17 @@ public class OwoHandshake {
 
     private static final boolean ENABLED = !Boolean.getBoolean("owo.handshake.disable");
 
+    private static boolean HANDSHAKE_REQUIRED = false;
+
     // ------------
     // Registration
     // ------------
 
     public static void enable() {}
+
+    public static void requireHandshake() {
+        HANDSHAKE_REQUIRED = true;
+    }
 
     static {
         ServerLoginConnectionEvents.QUERY_START.register(OwoHandshake::queryStart);
@@ -68,7 +75,9 @@ public class OwoHandshake {
     private static void queryStart(ServerLoginNetworkHandler serverLoginNetworkHandler, MinecraftServer server, PacketSender sender, ServerLoginNetworking.LoginSynchronizer loginSynchronizer) {
         if (!ENABLED) return;
 
-        sender.sendPacket(OwoHandshake.CHANNEL_ID, PacketByteBufs.create());
+        var request = PacketByteBufs.create();
+        writeHashes(request, OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel);
+        sender.sendPacket(OwoHandshake.CHANNEL_ID, request);
         Owo.LOGGER.info("[Handshake] Sending channel query");
     }
 
@@ -76,9 +85,13 @@ public class OwoHandshake {
     private static CompletableFuture<PacketByteBuf> syncClient(MinecraftClient client, ClientLoginNetworkHandler clientLoginNetworkHandler, PacketByteBuf buf, Consumer<GenericFutureListener<? extends Future<? super Void>>> genericFutureListenerConsumer) {
         Owo.LOGGER.info("[Handshake] Sending client channels");
 
+        final var serverOptionalChannels = RESPONSE_SERIALIZER.deserializer().apply(buf);
+        ((OwoClientConnectionExtension) clientLoginNetworkHandler.getConnection()).owo$setChannelSet(verifyOptionalServices(serverOptionalChannels, OwoNetChannel.REGISTERED_CHANNELS, OwoHandshake::hashChannel));
+
         var response = PacketByteBufs.create();
-        writeHashes(response, OwoNetChannel.REGISTERED_CHANNELS, OwoHandshake::hashChannel);
+        writeHashes(response, OwoNetChannel.REQUIRED_CHANNELS, OwoHandshake::hashChannel);
         writeHashes(response, ParticleSystemController.REGISTERED_CONTROLLERS, OwoHandshake::hashController);
+        writeHashes(response, OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel);
 
         return CompletableFuture.completedFuture(response);
     }
@@ -86,6 +99,8 @@ public class OwoHandshake {
     private static void syncServer(MinecraftServer server, ServerLoginNetworkHandler handler, boolean responded, PacketByteBuf buf, ServerLoginNetworking.LoginSynchronizer loginSynchronizer, PacketSender packetSender) {
         Owo.LOGGER.info("[Handshake] Receiving client channels");
         if (!responded) {
+            if (!HANDSHAKE_REQUIRED) return;
+
             handler.disconnect(TextOps.concat(PREFIX, Text.of("incompatible client")));
             Owo.LOGGER.info("[Handshake] Handshake failed, client did not respond to channel query");
             return;
@@ -96,19 +111,24 @@ public class OwoHandshake {
 
         StringBuilder disconnectMessage = new StringBuilder();
 
-        boolean isAllGood = verifyReceivedHashes("channels", clientChannels, OwoNetChannel.REGISTERED_CHANNELS, OwoHandshake::hashChannel, disconnectMessage);
+        boolean isAllGood = verifyReceivedHashes("channels", clientChannels, OwoNetChannel.REQUIRED_CHANNELS, OwoHandshake::hashChannel, disconnectMessage);
         isAllGood &= verifyReceivedHashes("controllers", clientParticleControllers, ParticleSystemController.REGISTERED_CONTROLLERS, OwoHandshake::hashController, disconnectMessage);
 
         if (!isAllGood) {
             handler.disconnect(TextOps.concat(PREFIX, Text.of(disconnectMessage.toString())));
-        } else {
-            Owo.LOGGER.info("[Handshake] Handshake completed successfully");
         }
+
+        if (buf.readableBytes() > 0) {
+            final var clientOptionalChannels = RESPONSE_SERIALIZER.deserializer().apply(buf);
+            ((OwoClientConnectionExtension) handler.getConnection()).owo$setChannelSet(verifyOptionalServices(clientOptionalChannels, OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel));
+        }
+
+        Owo.LOGGER.info("[Handshake] Handshake completed successfully");
     }
 
     @Environment(EnvType.CLIENT)
     private static void handleJoinClient(ClientPlayNetworkHandler handler, PacketSender packetSender, MinecraftClient client) {
-        if (ClientPlayNetworking.canSend(CHANNEL_ID)) return;
+        if (ClientPlayNetworking.canSend(CHANNEL_ID) || !HANDSHAKE_REQUIRED) return;
         client.execute(() -> {
             handler.getConnection().disconnect(TextOps.concat(PREFIX, Text.of("incompatible server")));
         });
@@ -117,6 +137,22 @@ public class OwoHandshake {
     // -------
     // Utility
     // -------
+
+    private static <T> Set<Identifier> verifyOptionalServices(Map<Identifier, Integer> remoteMap, Map<Identifier, T> localMap, ToIntFunction<T> hashFunction) {
+        Set<Identifier> readableServices = new HashSet<>();
+
+        for (var entry : remoteMap.entrySet()) {
+            var service = localMap.get(entry.getKey());
+
+            if (service == null) continue;
+
+            if (hashFunction.applyAsInt(service) != entry.getValue()) continue;
+
+            readableServices.add(entry.getKey());
+        }
+
+        return readableServices;
+    }
 
     private static <T> boolean verifyReceivedHashes(String serviceNamePlural, Map<Identifier, Integer> clientMap, Map<Identifier, T> serverMap, ToIntFunction<T> hashFunction, StringBuilder disconnectMessage) {
         boolean isAllGood = true;

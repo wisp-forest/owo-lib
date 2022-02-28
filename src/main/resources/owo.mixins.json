@@ -4,6 +4,7 @@
   "package": "io.wispforest.owo.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
+    "ClientConnectionMixin",
     "ScreenHandlerInvoker",
     "TagGroupLoaderMixin",
     "itemgroup.FabricItemGroupBuilderMixin",
