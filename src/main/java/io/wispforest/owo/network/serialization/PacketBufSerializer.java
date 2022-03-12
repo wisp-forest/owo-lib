@@ -1,7 +1,5 @@
 package io.wispforest.owo.network.serialization;
 
-import io.wispforest.owo.network.annotations.ElementType;
-import io.wispforest.owo.network.annotations.MapTypes;
 import io.wispforest.owo.util.VectorSerializer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -18,8 +16,9 @@ import net.minecraft.util.math.Vec3f;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Array;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -62,30 +61,32 @@ public record PacketBufSerializer<T>(BiConsumer<PacketByteBuf, T> serializer, Fu
 
     /**
      * Gets the serializer for the given class, using additional data from
-     * annotations, or throws an exception if none is registered
+     * generics, or throws an exception if none is registered
      *
-     * @param componentClass The class to obtain a serializer for
-     * @param element        The element to take annotations from
+     * @param type The type to obtain a serializer for
      * @return The respective serializer instance
      */
     @SuppressWarnings("unchecked")
-    public static <T> PacketBufSerializer<T> getWithAnnotations(Class<T> componentClass, AnnotatedElement element) {
-        if (Map.class.isAssignableFrom(componentClass)) {
-            var typeAnnotation = element.getAnnotation(MapTypes.class);
-            return (PacketBufSerializer<T>) PacketBufSerializer.createMapSerializer(conform(componentClass, Map.class), typeAnnotation.keys(), typeAnnotation.values());
+    public static PacketBufSerializer<?> getGeneric(Type type) {
+        if (type instanceof Class<?> klass) return get(klass);
+
+        var pType = (ParameterizedType) type;
+        Class<?> raw = (Class<?>) pType.getRawType();
+        var typeArgs = pType.getActualTypeArguments();
+
+        if (Map.class.isAssignableFrom(raw)) {
+            return PacketBufSerializer.createMapSerializer(conform(raw, Map.class), (Class<?>) typeArgs[0], (Class<?>) typeArgs[1]);
         }
 
-        if (Collection.class.isAssignableFrom(componentClass)) {
-            var typeAnnotation = element.getAnnotation(ElementType.class);
-            return (PacketBufSerializer<T>) PacketBufSerializer.createCollectionSerializer(conform(componentClass, Collection.class), typeAnnotation.value());
+        if (Collection.class.isAssignableFrom(raw)) {
+            return PacketBufSerializer.createCollectionSerializer(conform(raw, Collection.class), (Class<?>) typeArgs[0]);
         }
 
-        if (Optional.class.isAssignableFrom(componentClass)) {
-            var typeAnnotation = element.getAnnotation(ElementType.class);
-            return (PacketBufSerializer<T>) PacketBufSerializer.createOptionalSerializer(typeAnnotation.value());
+        if (Optional.class.isAssignableFrom(raw)) {
+            return PacketBufSerializer.createOptionalSerializer((Class<?>) typeArgs[0]);
         }
 
-        return get(componentClass);
+        return get(raw);
     }
 
     /**
