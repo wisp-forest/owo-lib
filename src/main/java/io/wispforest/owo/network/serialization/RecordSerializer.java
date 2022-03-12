@@ -59,7 +59,7 @@ public class RecordSerializer<R extends Record> {
         for (int i = 0; i < recordClass.getRecordComponents().length; i++) {
             var component = recordClass.getRecordComponents()[i];
 
-            adapters.put(r -> getRecordEntry(r, component.getAccessor()), PacketBufSerializer.getWithAnnotations(component.getType(), component));
+            adapters.put(r -> getRecordEntry(r, component.getAccessor()), PacketBufSerializer.getGeneric(component.getGenericType()));
             canonicalConstructorArgs[i] = component.getType();
         }
 

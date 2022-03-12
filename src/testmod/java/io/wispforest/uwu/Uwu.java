@@ -217,9 +217,9 @@ public class Uwu implements ModInitializer {
 
     public record TestMessage(String string, Integer integer, Long along, ItemStack stack, Short ashort, Byte bite,
                               BlockPos pos, Float afloat, Double adouble, Boolean aboolean, Identifier identifier,
-                              @MapTypes(keys = String.class, values = Integer.class) Map<String, Integer> map,
+                              Map<String, Integer> map,
                               int[] arr1, String[] arr2, short[] arr3, long[] arr4, byte[] arr5,
-                              @ElementType(String.class) Optional<String> optional1, @ElementType(String.class) Optional<String> optional2,
-                              @ElementType(BlockPos.class) List<BlockPos> posses) {}
+                              Optional<String> optional1, Optional<String> optional2,
+                              List<BlockPos> posses) {}
 
 }
