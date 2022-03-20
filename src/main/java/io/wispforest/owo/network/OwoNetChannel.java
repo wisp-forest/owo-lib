@@ -16,6 +16,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.ClientConnection;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
@@ -185,14 +186,22 @@ public class OwoNetChannel {
     public boolean canSendToPlayer(ServerPlayNetworkHandler networkHandler) {
         if (required) return true;
 
-        return ((OwoClientConnectionExtension) networkHandler.connection).owo$getChannelSet().contains(packetId);
+        return OwoHandshake.isValid() ?
+                getChannelSet(networkHandler.connection).contains(this.packetId)
+                : ServerPlayNetworking.canSend(networkHandler, this.packetId);
     }
 
     @Environment(EnvType.CLIENT)
     public boolean canSendToServer() {
         if (required) return true;
 
-        return ((OwoClientConnectionExtension) MinecraftClient.getInstance().getNetworkHandler().getConnection()).owo$getChannelSet().contains(packetId);
+        return OwoHandshake.isValid() ?
+                getChannelSet(MinecraftClient.getInstance().getNetworkHandler().getConnection()).contains(packetId)
+                : ClientPlayNetworking.canSend(this.packetId);
+    }
+
+    private static Set<Identifier> getChannelSet(ClientConnection connection) {
+        return ((OwoClientConnectionExtension) connection).owo$getChannelSet();
     }
 
     /**

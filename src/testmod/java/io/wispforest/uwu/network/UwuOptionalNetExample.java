@@ -17,6 +17,7 @@ import static net.minecraft.server.command.CommandManager.literal;
 
 public class UwuOptionalNetExample {
     public static final boolean SERVER_CHANNEL_IN_CLIENT = false;
+    public static final boolean CLIENT_CHANNEL_IN_SERVER = false;
 
     public static void init() {
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER || SERVER_CHANNEL_IN_CLIENT) {
@@ -37,6 +38,14 @@ public class UwuOptionalNetExample {
                         return 0;
                     }));
             });
+
+            if (CLIENT_CHANNEL_IN_SERVER) {
+                var clientChannel = OwoNetChannel.createOptional(new Identifier("uwu", "optional_client"));
+
+                clientChannel.registerServerbound(KeycodePacket.class, (message, access) -> {
+                    System.out.println(message.key());
+                });
+            }
         }
     }
 
@@ -54,8 +63,11 @@ public class UwuOptionalNetExample {
             KeyBindingHelper.registerKeyBinding(NETWORK_TEST);
             ClientTickEvents.END_CLIENT_TICK.register(client -> {
                 while (NETWORK_TEST.wasPressed()) {
-                    if (clientChannel.canSendToServer())
+                    if (clientChannel.canSendToServer()) {
                         clientChannel.clientHandle().send(new KeycodePacket(KeyBindingHelper.getBoundKeyOf(NETWORK_TEST).getCode()));
+                    } else {
+                        client.player.sendMessage(Text.of("channel unavailable"), false);
+                    }
                 }
             });
         }
