@@ -1,7 +1,6 @@
 package io.wispforest.owo.registration.reflect;
 
 import io.wispforest.owo.registration.annotations.AssignedName;
-import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.reflect.Field;
 
@@ -29,12 +28,6 @@ public interface FieldProcessingSubject<T> {
      * @return {@code true} if the inspected field should be processed
      */
     default boolean shouldProcessField(T value, String identifier, Field field) {
-        return shouldProcessField(value, identifier);
-    }
-
-    @ApiStatus.ScheduledForRemoval
-    @Deprecated(forRemoval = true, since = "0.3.13")
-    default boolean shouldProcessField(T value, String identifier) {
         return true;
     }
 

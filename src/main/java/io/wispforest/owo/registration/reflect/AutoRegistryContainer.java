@@ -2,7 +2,6 @@ package io.wispforest.owo.registration.reflect;
 
 import io.wispforest.owo.registration.annotations.AssignedName;
 import net.minecraft.util.registry.Registry;
-import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.reflect.Field;
 
@@ -32,12 +31,6 @@ public interface AutoRegistryContainer<T> extends FieldProcessingSubject<T> {
      *                   annotation and always fully lowercase
      */
     default void postProcessField(String namespace, T value, String identifier, Field field) {
-        postProcessField(namespace, value, identifier);
-    }
-
-    @ApiStatus.ScheduledForRemoval
-    @Deprecated(forRemoval = true, since = "0.3.13")
-    default void postProcessField(String namespace, T value, String identifier) {
 
     }
 }

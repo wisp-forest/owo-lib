@@ -82,7 +82,7 @@ public class FieldRegistrationHandler {
         container.afterFieldProcessing();
     }
 
-    private static <T> TriConsumer<T, String, Field> createProcessor(TriConsumer<T, String, Field> delegate, FieldProcessingSubject<T> handler) {
+    private static <T> ReflectionUtils.FieldConsumer<T> createProcessor(TriConsumer<T, String, Field> delegate, FieldProcessingSubject<T> handler) {
         return (t, u, f) -> {
             if (!handler.shouldProcessField(t, u, f)) return;
             delegate.accept(t, u, f);

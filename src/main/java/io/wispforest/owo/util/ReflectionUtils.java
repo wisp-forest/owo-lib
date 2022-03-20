@@ -2,14 +2,12 @@ package io.wispforest.owo.util;
 
 import io.wispforest.owo.registration.annotations.AssignedName;
 import io.wispforest.owo.registration.annotations.IterationIgnored;
-import org.apache.logging.log4j.util.TriConsumer;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -68,12 +66,6 @@ public class ReflectionUtils {
         }
     }
 
-    @ApiStatus.ScheduledForRemoval
-    @Deprecated(forRemoval = true, since = "0.3.13")
-    public static <C, F> void iterateAccessibleStaticFields(Class<C> clazz, Class<F> targetFieldType, BiConsumer<F, String> fieldConsumer) {
-        iterateAccessibleStaticFields(clazz, targetFieldType, (f, s, field) -> fieldConsumer.accept(f, s));
-    }
-
     /**
      * Iterates all accessible static fields of the given class and
      * calls the field consumer on each applicable one
@@ -86,7 +78,7 @@ public class ReflectionUtils {
      * @param <F>             The type of field to match
      */
     @SuppressWarnings("unchecked")
-    public static <C, F> void iterateAccessibleStaticFields(Class<C> clazz, Class<F> targetFieldType, TriConsumer<F, String, Field> fieldConsumer) {
+    public static <C, F> void iterateAccessibleStaticFields(Class<C> clazz, Class<F> targetFieldType, FieldConsumer<F> fieldConsumer) {
         for (var field : clazz.getDeclaredFields()) {
             if (!Modifier.isStatic(field.getModifiers())) continue;
 
@@ -165,5 +157,10 @@ public class ReflectionUtils {
         if (depth > trace.length - 1) return "<unknown>"; // verify the stacktrace is actually that deep
 
         return trace[depth].getClassName();
+    }
+
+    @FunctionalInterface
+    public interface FieldConsumer<F> {
+        void accept(F value, String name, Field field);
     }
 }
