@@ -15,6 +15,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.text.LiteralText;
 
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -49,7 +50,7 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<Enum<T>
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static <T extends Enum<T>> EnumArgumentType<T> create(Class<T> enumClass) {
         final var type = new EnumArgumentType<>(enumClass, "Invalid enum value '{}'");
-        ArgumentTypes.register("owo:enum_" + enumClass.getName().toLowerCase(), type.getClass(), new Serializer(type));
+        ArgumentTypes.register("owo:enum_" + enumClass.getName().toLowerCase(Locale.ROOT), type.getClass(), new Serializer(type));
         return type;
     }
 
@@ -68,7 +69,7 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<Enum<T>
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static <T extends Enum<T>> EnumArgumentType<T> create(Class<T> enumClass, String noElementMessage) {
         final var type = new EnumArgumentType<>(enumClass, noElementMessage);
-        ArgumentTypes.register("owo:enum_" + enumClass.getName().toLowerCase(), type.getClass(), new Serializer(type));
+        ArgumentTypes.register("owo:enum_" + enumClass.getName().toLowerCase(Locale.ROOT), type.getClass(), new Serializer(type));
         return type;
     }
 

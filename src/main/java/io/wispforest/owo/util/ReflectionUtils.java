@@ -8,6 +8,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
+import java.util.Locale;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -104,7 +105,7 @@ public class ReflectionUtils {
      * @return the properly formatted field name
      */
     public static String getFieldName(Field field) {
-        var fieldId = field.getName().toLowerCase();
+        var fieldId = field.getName().toLowerCase(Locale.ROOT);
         if (field.isAnnotationPresent(AssignedName.class)) fieldId = field.getAnnotation(AssignedName.class).value();
         return fieldId;
     }
