@@ -1,7 +1,11 @@
 package io.wispforest.owosentinel;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
+import net.minecraft.SharedConstants;
 import net.minecraft.util.Util;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,13 +16,19 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class OwoSentinel implements PreLaunchEntrypoint {
+    public static final Logger LOGGER = LogManager.getLogger("oωo-sentinel");
+    private static final Gson GSON = new Gson();
 
-    private static final Logger LOGGER = LogManager.getLogger("oωo-sentinel");
-    private static final String OWO_EXPLANATION = """
+    public static final String OWO_EXPLANATION = """
             oωo-lib is a library used by most mods under the
             Wisp Forest domain to ease development. This is
             simply a convenient installer, as oωo is missing from your
@@ -26,7 +36,27 @@ public class OwoSentinel implements PreLaunchEntrypoint {
             repository and download oωo yourself.
             """;
 
-    private static List<String> listOwoDependants() {
+    public static final boolean FORCE_HEADLESS = Boolean.getBoolean("owo.sentinel.forceHeadless");
+
+    @Override
+    public void onPreLaunch() {
+        if (FabricLoader.getInstance().isModLoaded("owo-impl")) return;
+
+        try {
+            if (GraphicsEnvironment.isHeadless() || FORCE_HEADLESS) {
+                SentinelConsole.run();
+            } else {
+                SentinelWindow.open();
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error thrown while opening sentinel! Exiting", e);
+            System.exit(1);
+        }
+
+        System.exit(0);
+    }
+
+    public static List<String> listOwoDependents() {
         var list = new ArrayList<String>();
 
         for (var mod : FabricLoader.getInstance().getAllMods()) {
@@ -39,148 +69,49 @@ public class OwoSentinel implements PreLaunchEntrypoint {
         return list;
     }
 
-    @Override
-    public void onPreLaunch() {
-        if (FabricLoader.getInstance().isModLoaded("owo-impl")) return;
+    @SuppressWarnings("deprecation")
+    public static void downloadAndInstall(Consumer<String> logger) throws Exception {
+        logger.accept("Fetching versions");
+        final URL url = new URL("https://api.modrinth.com/v2/project/owo-lib/version?game_versions=[%22" + SharedConstants.VERSION_NAME + "%22]&loaders=[%22fabric%22]");
 
-        try {
+        final var response = GSON.fromJson(new InputStreamReader(url.openStream()), JsonArray.class);
 
-            // Fix AA
-            System.setProperty("awt.useSystemAAFontSettings", "lcd");
-            System.setProperty("swing.aatext", "true");
+        final var targetVersion = FabricLoader.getInstance().getModContainer("owo-sentinel").orElseThrow().getMetadata().getVersion().getFriendlyString();
 
-            // Force GTK if available
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            for (var laf : UIManager.getInstalledLookAndFeels()) {
-                if (!"GTK+".equals(laf.getName())) continue;
-                UIManager.setLookAndFeel(laf.getClassName());
+        JsonObject latestVersion = null;
+
+        for (var version : response) {
+            final var versionObject = version.getAsJsonObject();
+
+            if (versionObject.get("version_number").getAsString().equals(targetVersion)) {
+                latestVersion = versionObject;
+                break;
+            }
+        }
+
+        if (latestVersion != null) {
+            final var firstFile = latestVersion
+                .get("files").getAsJsonArray().get(0).getAsJsonObject();
+
+            final var versionUrl = firstFile
+                .get("url").getAsString();
+
+            final var versionFilename = firstFile
+                .get("filename").getAsString();
+
+            logger.accept("Found latest version: " + latestVersion.get("version_number").getAsString());
+
+            final var filePath = FabricLoader.getInstance().getGameDir().resolve("mods").resolve(versionFilename);
+
+            logger.accept("Downloading...");
+
+            try (final var modStream = new URL(versionUrl).openStream()) {
+                Files.copy(modStream, filePath, StandardCopyOption.REPLACE_EXISTING);
             }
 
-            // ------
-            // Window
-            // ------
-
-            JFrame window = new JFrame("oωo-sentinel");
-            window.setVisible(false);
-
-            //noinspection ConstantConditions
-            final var owoIconImage = ImageIO.read(OwoSentinel.class.getClassLoader()
-                    .getResourceAsStream("owo_sentinel_icon.png"));
-
-            window.setIconImage(owoIconImage);
-            window.setMinimumSize(new Dimension(0, 250));
-            window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-            window.addWindowListener(new WindowAdapter() {
-                @Override
-                public void windowClosed(WindowEvent e) {
-                    System.exit(0);
-                }
-            });
-            window.setLocationByPlatform(true);
-
-            // -----
-            // Title
-            // -----
-
-            final var titleLabel = new JLabel("oωo-lib is required to run the following mods", new ImageIcon(owoIconImage), SwingConstants.LEFT);
-            titleLabel.setFont(titleLabel.getFont().deriveFont(titleLabel.getFont().getSize() * 1.25f));
-            titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
-            titleLabel.setBorder(new EmptyBorder(0, 15, 0, 15));
-            window.getContentPane().add(titleLabel, BorderLayout.NORTH);
-
-            // ----------
-            // Dependents
-            // ----------
-
-            var dependents = "<html><center><b>" + String.join("<br>", listOwoDependants()) + "<p>\u200B";
-
-            final var dependentsLabel = new JLabel(dependents);
-            final var defaultDepFont = dependentsLabel.getFont();
-
-            dependentsLabel.setFont(defaultDepFont.deriveFont(defaultDepFont.getSize() * 1.1f));
-            dependentsLabel.setHorizontalAlignment(SwingConstants.CENTER);
-
-            window.getContentPane().add(dependentsLabel, BorderLayout.CENTER);
-
-            // -------
-            // Buttons
-            // -------
-
-            var buttonsPanel = new JPanel();
-
-            // Download
-
-            final var downloadButton = new JButton("Download and install");
-
-            final var progressBar = new JProgressBar();
-            progressBar.setIndeterminate(true);
-
-            downloadButton.addActionListener(e -> {
-                downloadButton.setEnabled(false);
-                downloadButton.add(progressBar);
-                downloadButton.updateUI();
-
-                titleLabel.setText("Installing oωo-lib");
-                window.getContentPane().remove(dependentsLabel);
-
-                final var logBox = new JTextArea();
-                logBox.setEditable(false);
-                logBox.setMargin(new Insets(15, 15, 15, 15));
-                final var scrollPane = new JScrollPane(logBox);
-                scrollPane.setBorder(new EmptyBorder(0, 15, 0, 15));
-                window.getContentPane().add(scrollPane, BorderLayout.CENTER);
-
-                var task = new DownloadTask(s -> {
-                    LOGGER.info(s);
-                    logBox.setText(logBox.getText() + (logBox.getText().isBlank() ? "" : "\n") + s);
-                    scrollPane.getVerticalScrollBar().setValue(scrollPane.getVerticalScrollBar().getMaximum());
-                }, () -> {
-                    progressBar.setVisible(false);
-                    titleLabel.setText("");
-                    downloadButton.setText("Installed");
-                });
-                task.execute();
-            });
-
-            // What is this
-
-            final var whatIsThisButton = new JButton("What is this?");
-            whatIsThisButton.addActionListener(e -> {
-                String[] options = {"Open GitHub", "OK"};
-
-                int selection = JOptionPane.showOptionDialog(window, OWO_EXPLANATION, "oωo-sentinel",
-                        JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, new ImageIcon(owoIconImage),
-                        options, options[0]);
-
-                if (selection == 0) Util.getOperatingSystem().open("https://github.com/glisco03/owo-lib");
-            });
-
-            // Exit
-
-            final var exitButton = new JButton("Close");
-            exitButton.addActionListener(e -> window.dispose());
-
-            // Panel setup
-
-            buttonsPanel.add(downloadButton);
-            buttonsPanel.add(whatIsThisButton);
-            buttonsPanel.add(exitButton);
-
-            // ---------------
-            // Window creation
-            // ---------------
-
-            window.getContentPane().add(buttonsPanel, BorderLayout.SOUTH);
-
-            window.pack();
-            window.setVisible(true);
-            window.requestFocus();
-
-            synchronized (this) {
-                this.wait();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+            logger.accept("Success!");
+        } else {
+            logger.accept("No matching version found");
         }
     }
 }
