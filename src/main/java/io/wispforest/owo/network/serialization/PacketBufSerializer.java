@@ -282,6 +282,22 @@ public record PacketBufSerializer<T>(BiConsumer<PacketByteBuf, T> serializer, Fu
     }
 
     @SuppressWarnings("unchecked")
+    public static <T, K> PacketBufSerializer<T> createDispatchedSerializer(Function<K, PacketBufSerializer<? extends T>> keyToSerializer, Function<T, K> keyGetter, PacketBufSerializer<K> keySerializer) {
+        return new PacketBufSerializer<>((buf, value) -> {
+            var key = keyGetter.apply(value);
+            var serializer = (PacketBufSerializer<Object>) keyToSerializer.apply(key);
+
+            keySerializer.serializer.accept(buf, key);
+            serializer.serializer.accept(buf, value);
+        }, buf -> {
+            var key = keySerializer.deserializer.apply(buf);
+            var serializer = keyToSerializer.apply(key);
+
+            return serializer.deserializer.apply(buf);
+        });
+    }
+
+    @SuppressWarnings("unchecked")
     private static PacketBufSerializer<?> createSealedSerializer(Class<?> commonClass) {
         if (!commonClass.isSealed())
             throw new IllegalStateException("@SealedPolymorphic class should be sealed!");
