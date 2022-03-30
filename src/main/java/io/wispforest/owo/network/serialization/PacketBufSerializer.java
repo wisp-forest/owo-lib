@@ -1,6 +1,11 @@
 package io.wispforest.owo.network.serialization;
 
+import io.wispforest.owo.network.annotations.SealedPolymorphic;
 import io.wispforest.owo.util.VectorSerializer;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Reference2IntMap;
+import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
@@ -17,12 +22,14 @@ import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * A simple wrapper for (de-)serialization methods on {@link PacketByteBuf}s. For
@@ -41,21 +48,31 @@ public record PacketBufSerializer<T>(BiConsumer<PacketByteBuf, T> serializer, Fu
      * Enables (de-)serialization for the given class
      *
      * @param clazz        The object class to serialize
+     * @param serializer   The serializer
+     * @param <T>          The type of object to register a serializer for
+     */
+    public static <T> void register(Class<T> clazz, PacketBufSerializer<T> serializer) {
+        if (SERIALIZERS.containsKey(clazz)) throw new IllegalStateException("Class '" + clazz.getName() + "' already has a serializer");
+        SERIALIZERS.put(clazz, serializer);
+    }
+
+    /**
+     * Enables (de-)serialization for the given class
+     *
+     * @param clazz        The object class to serialize
      * @param serializer   The serialization method
      * @param deserializer The deserialization method
      * @param <T>          The type of object to register a serializer for
      */
     public static <T> void register(Class<T> clazz, BiConsumer<PacketByteBuf, T> serializer, Function<PacketByteBuf, T> deserializer) {
-        if (SERIALIZERS.containsKey(clazz)) throw new IllegalStateException("Class '" + clazz.getName() + "' already has a serializer");
-        SERIALIZERS.put(clazz, new PacketBufSerializer<>(serializer, deserializer));
+        register(clazz, new PacketBufSerializer<>(serializer, deserializer));
     }
 
     @SafeVarargs
     private static <T> void register(BiConsumer<PacketByteBuf, T> serializer, Function<PacketByteBuf, T> deserializer, Class<T>... classes) {
         final var packetSerializer = new PacketBufSerializer<T>(serializer, deserializer);
         for (var clazz : classes) {
-            if (SERIALIZERS.containsKey(clazz)) throw new IllegalStateException("Class '" + clazz + "' already has a serializer");
-            SERIALIZERS.put(clazz, packetSerializer);
+            register(clazz, packetSerializer);
         }
     }
 
@@ -127,6 +144,8 @@ public record PacketBufSerializer<T>(BiConsumer<PacketByteBuf, T> serializer, Fu
                 serializer = (PacketBufSerializer<T>) PacketBufSerializer.createEnumSerializer(conform(clazz, Enum.class));
             else if (clazz.isArray())
                 serializer = (PacketBufSerializer<T>) PacketBufSerializer.createArraySerializer(clazz.getComponentType());
+            else if (clazz.isAnnotationPresent(SealedPolymorphic.class))
+                serializer = (PacketBufSerializer<T>) PacketBufSerializer.createSealedSerializer(clazz);
             else
                 return null;
 
@@ -260,6 +279,60 @@ public record PacketBufSerializer<T>(BiConsumer<PacketByteBuf, T> serializer, Fu
      */
     public static <E extends Enum<E>> PacketBufSerializer<E> createEnumSerializer(Class<E> enumClass) {
         return new PacketBufSerializer<>(PacketByteBuf::writeEnumConstant, buf -> buf.readEnumConstant(enumClass));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static PacketBufSerializer<?> createSealedSerializer(Class<?> commonClass) {
+        if (!commonClass.isSealed())
+            throw new IllegalStateException("@SealedPolymorphic class should be sealed!");
+
+        List<Class<?>> sortedPermittedSubclasses = Arrays.stream(commonClass.getPermittedSubclasses()).collect(Collectors.toList());
+
+        for (int i = 0; i < sortedPermittedSubclasses.size(); i++) {
+            Class<?> klass = sortedPermittedSubclasses.get(i);
+
+            if (klass.isSealed()) {
+                for (Class<?> subclass : klass.getPermittedSubclasses()) {
+                    if (!sortedPermittedSubclasses.contains(subclass))
+                        sortedPermittedSubclasses.add(subclass);
+                }
+            }
+        }
+
+        for (Class<?> klass : sortedPermittedSubclasses) {
+            if (!klass.isSealed() && !Modifier.isFinal(klass.getModifiers()))
+                throw new IllegalStateException("Subclasses of a @SealedPolymorphic class must be sealed themselves!");
+        }
+
+        sortedPermittedSubclasses.sort(Comparator.comparing(Class::getName));
+
+        Int2ObjectMap<PacketBufSerializer<?>> serializerMap = new Int2ObjectOpenHashMap<>();
+        Reference2IntMap<Class<?>> classesMap = new Reference2IntOpenHashMap<>();
+
+        classesMap.defaultReturnValue(-1);
+
+        for (int i = 0; i < sortedPermittedSubclasses.size(); i++) {
+            Class<?> klass = sortedPermittedSubclasses.get(i);
+
+            serializerMap.put(i, PacketBufSerializer.get(klass));
+            classesMap.put(klass, i);
+        }
+        
+        return new PacketBufSerializer<>((buf, value) -> {
+            int idx = classesMap.getInt(value.getClass());
+
+            if (idx == -1) throw new IllegalStateException("Tried to serialize instance of " + value.getClass() + " as a " + commonClass);
+
+            buf.writeVarInt(idx);
+            ((BiConsumer<PacketByteBuf, Object>) serializerMap.get(idx).serializer).accept(buf, value);
+        }, buf -> {
+            int idx = buf.readVarInt();
+            PacketBufSerializer<Object> serializer = (PacketBufSerializer<Object>) serializerMap.get(idx);
+
+            if (serializer == null) throw new IllegalStateException("Unknown index " + idx);
+
+            return serializer.deserializer.apply(buf);
+        });
     }
 
     @SuppressWarnings("unchecked")
