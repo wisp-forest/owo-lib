@@ -158,9 +158,7 @@ public class Uwu implements ModInitializer {
             access.player().sendMessage(Text.of(message.string), false);
         });
 
-        CHANNEL.registerClientbound(OtherTestMessage.class, (message, access) -> {
-            access.player().sendMessage(Text.of("Message '" + message.message + "' from " + message.pos), false);
-        });
+        CHANNEL.registerClientbound(OtherTestMessage.class);
 
         CHANNEL.registerServerbound(TestMessage.class, (message, access) -> {
             access.player().sendMessage(Text.of(String.valueOf(message.bite)), false);

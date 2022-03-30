@@ -6,6 +6,8 @@ import io.wispforest.owo.network.serialization.RecordSerializer;
 import io.wispforest.owo.util.ReflectionUtils;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Reference2IntMap;
+import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -30,6 +32,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * An efficient networking abstraction that uses {@code record}s to store
@@ -70,6 +73,8 @@ public class OwoNetChannel {
     private final List<ChannelHandler<Record, ClientAccess>> clientHandlers = new ArrayList<>();
     private final List<ChannelHandler<Record, ServerAccess>> serverHandlers = new ArrayList<>();
 
+    private final Reference2IntMap<Class<?>> deferredClientSerializers = new Reference2IntOpenHashMap<>();
+
     final Identifier packetId;
     private final String ownerClassName;
     final boolean required;
@@ -109,6 +114,8 @@ public class OwoNetChannel {
         if (REGISTERED_CHANNELS.containsKey(id)) {
             throw new IllegalStateException("Channel with id '" + id + "' was already registered from class '" + REGISTERED_CHANNELS.get(id).ownerClassName + "'");
         }
+
+        deferredClientSerializers.defaultReturnValue(-1);
 
         this.packetId = id;
         this.ownerClassName = ownerClassName;
@@ -157,9 +164,23 @@ public class OwoNetChannel {
      */
     @SuppressWarnings("unchecked")
     public <R extends Record> void registerClientbound(Class<R> messageClass, ChannelHandler<R, ClientAccess> handler) {
+        int deferredIndex = deferredClientSerializers.removeInt(messageClass);
+        if (deferredIndex != -1) {
+            this.clientHandlers.set(deferredIndex, (ChannelHandler<Record, ClientAccess>) handler);
+            return;
+        }
+
         int index = this.clientHandlers.size();
         this.createSerializer(messageClass, index, EnvType.CLIENT);
         this.clientHandlers.add((ChannelHandler<Record, ClientAccess>) handler);
+    }
+
+    public <R extends Record> void registerClientbound(Class<R> messageClass) {
+        int index = this.clientHandlers.size();
+        this.createSerializer(messageClass, index, EnvType.CLIENT);
+        this.clientHandlers.add(null);
+
+        this.deferredClientSerializers.put(messageClass, index);
     }
 
     /**
@@ -444,11 +465,23 @@ public class OwoNetChannel {
         N netHandler();
     }
 
+    private void verify() {
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+            if (deferredClientSerializers.size() > 0) {
+                throw new NetworkException("Some deferred client handlers for channel " + packetId + " haven't been registered: " + deferredClientSerializers.keySet().stream().map(Class::getName).collect(Collectors.joining(", ")));
+            }
+        }
+    }
+
     @Deprecated
     @ApiStatus.Internal
     @SuppressWarnings("DeprecatedIsStillUsed")
     public static void freezeAllChannels() {
         FROZEN = true;
+
+        for (OwoNetChannel channel : REGISTERED_CHANNELS.values()) {
+            channel.verify();
+        }
 
         if (!Owo.DEBUG) return;
         Owo.LOGGER.info("Channels frozen by '" + ReflectionUtils.getCallingClassName(2) + "'");
