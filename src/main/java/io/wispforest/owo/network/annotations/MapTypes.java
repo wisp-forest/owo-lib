@@ -7,6 +7,7 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.RECORD_COMPONENT)
 @Retention(RetentionPolicy.RUNTIME)
+@Deprecated
 public @interface MapTypes {
 
     Class<?> keys();

@@ -6,6 +6,7 @@ import java.lang.annotation.Target;
 
 @Target(java.lang.annotation.ElementType.RECORD_COMPONENT)
 @Retention(RetentionPolicy.RUNTIME)
+@Deprecated
 public @interface ElementType {
 
     Class<?> value();
