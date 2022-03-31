@@ -1,6 +1,9 @@
 package io.wispforest.owo.particles.systems;
 
+import io.wispforest.owo.network.NetworkException;
+import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.network.serialization.PacketBufSerializer;
+import io.wispforest.owo.util.ServicesFrozenException;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -31,19 +34,36 @@ public class ParticleSystem<T> {
 
     private final ParticleSystemController manager;
 
+    final Class<T> dataClass;
     final int index;
     final PacketBufSerializer<T> adapter;
-    final ParticleSystemExecutor<T> handler;
+    ParticleSystemExecutor<T> handler;
 
     private final boolean permitsContextlessExecution;
 
     ParticleSystem(ParticleSystemController manager, Class<T> dataClass, int index, PacketBufSerializer<T> adapter, ParticleSystemExecutor<T> handler) {
+        OwoFreezer.checkRegister("Particle systems");
+
         this.manager = manager;
+        this.dataClass = dataClass;
         this.index = index;
         this.adapter = adapter;
         this.handler = handler;
 
         this.permitsContextlessExecution = dataClass == Void.class;
+    }
+
+    /**
+     * Sets the particle system's handler.
+     *
+     * @param handler the code that is run to actually display the particle system
+     * @throws NetworkException if this particle system already has a handler
+     */
+    public void setHandler(ParticleSystemExecutor<T> handler) {
+        if (OwoFreezer.isFrozen()) throw new ServicesFrozenException("Particle systems can only be changed during mod init");
+        if (this.handler != null) throw new NetworkException("Particle system already has a handler");
+
+        this.handler = handler;
     }
 
     /**

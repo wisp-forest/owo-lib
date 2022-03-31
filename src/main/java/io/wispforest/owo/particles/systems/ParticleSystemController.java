@@ -1,6 +1,8 @@
 package io.wispforest.owo.particles.systems;
 
 import io.wispforest.owo.Owo;
+import io.wispforest.owo.network.NetworkException;
+import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.network.OwoHandshake;
 import io.wispforest.owo.network.serialization.PacketBufSerializer;
 import io.wispforest.owo.util.ReflectionUtils;
@@ -58,6 +60,8 @@ public class ParticleSystemController {
      * @param channelId The packet ID to use
      */
     public ParticleSystemController(Identifier channelId) {
+        OwoFreezer.checkRegister("Particle system controllers");
+
         if (REGISTERED_CONTROLLERS.containsKey(channelId)) {
             throw new IllegalStateException("Controller with id '" + channelId + "' was already registered from class '" +
                     REGISTERED_CONTROLLERS.get(channelId).ownerClassName + "'");
@@ -89,6 +93,26 @@ public class ParticleSystemController {
         return system;
     }
 
+    /**
+     * Registers the given system executor with the given
+     * context data class, thereby creating a new system
+     *
+     * This method defers executor registration, so
+     * you must register the handler later in a client entrypoint.
+     *
+     * @param dataClass The class to use as context data
+     * @param <T>       The type of context data to use
+     * @return The created particle system
+     *
+     * @see ParticleSystem#setHandler(ParticleSystemExecutor)
+     */
+    public <T> ParticleSystem<T> registerDeferred(Class<T> dataClass) {
+        int index = maxIndex++;
+        var system = new ParticleSystem<>(this, dataClass, index, PacketBufSerializer.get(dataClass), null);
+        systemsByIndex.put(index, system);
+        return system;
+    }
+
     <T> void sendPacket(ParticleSystem<T> particleSystem, ServerWorld world, Vec3d pos, T data) {
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeVarInt(particleSystem.index);
@@ -100,9 +124,25 @@ public class ParticleSystemController {
         }
     }
 
+    private void verify() {
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+            for (ParticleSystem<?> system : systemsByIndex.values()) {
+                if (system.handler == null) {
+                    throw new NetworkException("Some particle systems of " + channelId + " don't have handlers registered");
+                }
+            }
+        }
+    }
+
     static {
         OwoHandshake.enable();
         OwoHandshake.requireHandshake();
+
+        OwoFreezer.registerFreezeCallback(() -> {
+            for (ParticleSystemController controller : REGISTERED_CONTROLLERS.values()) {
+                controller.verify();
+            }
+        });
     }
 
     @Environment(EnvType.CLIENT)

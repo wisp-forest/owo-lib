@@ -1,8 +1,8 @@
 package io.wispforest.owo.network;
 
-import io.wispforest.owo.Owo;
 import io.wispforest.owo.network.serialization.PacketBufSerializer;
 import io.wispforest.owo.network.serialization.RecordSerializer;
+import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.ReflectionUtils;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -26,7 +26,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -62,7 +61,6 @@ import java.util.stream.Collectors;
  */
 public class OwoNetChannel {
 
-    private static boolean FROZEN = false;
     static final Map<Identifier, OwoNetChannel> REGISTERED_CHANNELS = new HashMap<>();
     static final Map<Identifier, OwoNetChannel> REQUIRED_CHANNELS = new HashMap<>();
     static final Map<Identifier, OwoNetChannel> OPTIONAL_CHANNELS = new HashMap<>();
@@ -111,6 +109,8 @@ public class OwoNetChannel {
     }
 
     private OwoNetChannel(Identifier id, String ownerClassName, boolean required) {
+        OwoFreezer.checkRegister("Network channels");
+
         if (REGISTERED_CHANNELS.containsKey(id)) {
             throw new IllegalStateException("Channel with id '" + id + "' was already registered from class '" + REGISTERED_CHANNELS.get(id).ownerClassName + "'");
         }
@@ -166,6 +166,8 @@ public class OwoNetChannel {
     public <R extends Record> void registerClientbound(Class<R> messageClass, ChannelHandler<R, ClientAccess> handler) {
         int deferredIndex = deferredClientSerializers.removeInt(messageClass);
         if (deferredIndex != -1) {
+            OwoFreezer.checkRegister("Network handlers");
+
             this.clientHandlers.set(deferredIndex, (ChannelHandler<Record, ClientAccess>) handler);
             return;
         }
@@ -175,7 +177,18 @@ public class OwoNetChannel {
         this.clientHandlers.add((ChannelHandler<Record, ClientAccess>) handler);
     }
 
-    public <R extends Record> void registerClientbound(Class<R> messageClass) {
+    /**
+     * Registers a message class <i>on the client</i> with deferred handler registration.
+     * This also ensures the required serializer is available. If an exception
+     * about a missing type adapter is thrown, register one
+     *
+     * @param messageClass The type of packet data to send and serialize
+     * @see #serverHandle(PlayerEntity)
+     * @see #serverHandle(MinecraftServer)
+     * @see #serverHandle(ServerWorld, BlockPos)
+     * @see PacketBufSerializer#register(Class, BiConsumer, Function)
+     */
+    public <R extends Record> void registerClientboundDeferred(Class<R> messageClass) {
         int index = this.clientHandlers.size();
         this.createSerializer(messageClass, index, EnvType.CLIENT);
         this.clientHandlers.add(null);
@@ -327,9 +340,7 @@ public class OwoNetChannel {
     }
 
     private <R extends Record> void createSerializer(Class<R> messageClass, int handlerIndex, EnvType target) {
-        if (FROZEN) {
-            throw new NetworkException("Network handlers may only be registered during mod initialization");
-        }
+        OwoFreezer.checkRegister("Network handlers");
 
         var serializer = serializersByClass.get(messageClass);
         if (serializer == null) {
@@ -473,22 +484,14 @@ public class OwoNetChannel {
         }
     }
 
-    @Deprecated
-    @ApiStatus.Internal
-    @SuppressWarnings("DeprecatedIsStillUsed")
-    public static void freezeAllChannels() {
-        FROZEN = true;
-
-        for (OwoNetChannel channel : REGISTERED_CHANNELS.values()) {
-            channel.verify();
-        }
-
-        if (!Owo.DEBUG) return;
-        Owo.LOGGER.info("Channels frozen by '" + ReflectionUtils.getCallingClassName(2) + "'");
-    }
-
     static {
         OwoHandshake.enable();
+
+        OwoFreezer.registerFreezeCallback(() -> {
+            for (OwoNetChannel channel : OwoNetChannel.REGISTERED_CHANNELS.values()) {
+                channel.verify();
+            }
+        });
     }
 
     static final class IndexedSerializer<R extends Record> {

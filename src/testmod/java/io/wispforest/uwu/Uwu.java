@@ -126,10 +126,7 @@ public class Uwu implements ModInitializer {
             ImmutableList.of(new BlockPos(9786, 42, 9234)), new SealedSubclassOne("basede", 10), new SealedSubclassTwo(10, null));
 
     public static final ParticleSystemController PARTICLE_CONTROLLER = new ParticleSystemController(new Identifier("uwu", "particles"));
-    public static final ParticleSystem<Void> CUBE = PARTICLE_CONTROLLER.register(Void.class, (world, pos, data) -> {
-        ClientParticles.setParticleCount(5);
-        ClientParticles.spawnCubeOutline(ParticleTypes.END_ROD, world, pos, 1, .01f);
-    });
+    public static final ParticleSystem<Void> CUBE = PARTICLE_CONTROLLER.registerDeferred(Void.class);
     public static final ParticleSystem<Void> BREAK_BLOCK_PARTICLES = PARTICLE_CONTROLLER.register(Void.class, (world, pos, data) -> {
         ClientParticles.persist();
 
@@ -158,7 +155,7 @@ public class Uwu implements ModInitializer {
             access.player().sendMessage(Text.of(message.string), false);
         });
 
-        CHANNEL.registerClientbound(OtherTestMessage.class);
+        CHANNEL.registerClientboundDeferred(OtherTestMessage.class);
 
         CHANNEL.registerServerbound(TestMessage.class, (message, access) -> {
             access.player().sendMessage(Text.of(String.valueOf(message.bite)), false);

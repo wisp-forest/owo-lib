@@ -14,7 +14,6 @@ import java.util.function.Function;
 
 @ApiStatus.Experimental
 public class ReflectionUtils {
-
     /**
      * Tries to instantiate the given class with a zero-args constructor call,
      * throws a {@link RuntimeException} if it fails
@@ -152,12 +151,10 @@ public class ReflectionUtils {
      * {@code <unknown>} if the class name was not found
      */
     public static String getCallingClassName(int depth) {
-        depth++; // compensate for this method call itself
-
-        var trace = Thread.currentThread().getStackTrace();
-        if (depth > trace.length - 1) return "<unknown>"; // verify the stacktrace is actually that deep
-
-        return trace[depth].getClassName();
+        return StackWalker.getInstance().walk(s -> s
+            .skip(depth)
+            .map(StackWalker.StackFrame::getClassName)
+            .findFirst()).orElse("<unknown>");
     }
 
     @FunctionalInterface
