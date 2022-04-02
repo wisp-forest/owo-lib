@@ -5,16 +5,14 @@ import com.mojang.authlib.GameProfile;
 import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
-import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
 import io.wispforest.owo.network.OwoNetChannel;
-import io.wispforest.owo.network.annotations.ElementType;
-import io.wispforest.owo.network.annotations.MapTypes;
 import io.wispforest.owo.offline.OfflineAdvancementLookup;
 import io.wispforest.owo.offline.OfflineDataLookup;
 import io.wispforest.owo.particles.ClientParticles;
 import io.wispforest.owo.particles.systems.ParticleSystem;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
 import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
+import io.wispforest.owo.util.RegistryAccess;
 import io.wispforest.owo.util.TagInjector;
 import io.wispforest.uwu.items.UwuItems;
 import io.wispforest.uwu.network.UwuNetworkExample;
@@ -173,6 +171,9 @@ public class Uwu implements ModInitializer {
             OwoNetChannel.create(new Identifier("uwu", "server_only_channel"));
             new ParticleSystemController(new Identifier("uwu", "server_only_particles"));
         }
+
+        System.out.println(RegistryAccess.getEntry(Registry.ITEM, Items.ACACIA_BOAT));
+        System.out.println(RegistryAccess.getEntry(Registry.ITEM, new Identifier("acacia_planks")));
 
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             dispatcher.register(

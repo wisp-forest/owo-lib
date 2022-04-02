@@ -6,6 +6,7 @@
   "mixins": [
     "ClientConnectionMixin",
     "ScreenHandlerInvoker",
+    "SimpleRegistryMixin",
     "TagGroupLoaderMixin",
     "itemgroup.FabricItemGroupBuilderMixin",
     "itemgroup.ItemMixin",
