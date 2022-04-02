@@ -14,15 +14,28 @@ import java.util.function.Consumer;
 
 /**
  * A simple helper to run code conditionally based on whether certain registry
- * entries are present or not. Use {@link ModCompatHelpers#getRegistryHelper(Registry)}
+ * entries are present or not. Use {@link #get(Registry)}
  * to obtain the instance for a given registry
  */
 public class RegistryHelper<T> {
+
+    private static final Map<Registry<?>, RegistryHelper<?>> REGISTRY_HELPERS = new HashMap<>();
 
     private final Registry<T> registry;
     private final Map<Identifier, Consumer<T>> actions;
 
     private final List<ComplexRegistryAction> complexActions = new ArrayList<>();
+
+    /**
+     * Gets the {@link RegistryHelper} instance for the provided registry
+     *
+     * @param registry The target registry
+     * @return The helper for the targeted registry
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> RegistryHelper<T> get(Registry<T> registry) {
+        return (RegistryHelper<T>) REGISTRY_HELPERS.computeIfAbsent(registry, objects -> new RegistryHelper<>(registry));
+    }
 
     @ApiStatus.Internal
     public RegistryHelper(Registry<T> registry) {
