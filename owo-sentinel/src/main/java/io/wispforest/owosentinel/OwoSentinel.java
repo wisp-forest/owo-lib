@@ -99,7 +99,7 @@ public class OwoSentinel implements PreLaunchEntrypoint {
             final var versionFilename = firstFile
                 .get("filename").getAsString();
 
-            logger.accept("Found latest version: " + latestVersion.get("version_number").getAsString());
+            logger.accept("Found matching version: " + latestVersion.get("version_number").getAsString());
 
             final var filePath = FabricLoader.getInstance().getGameDir().resolve("mods").resolve(versionFilename);
 
