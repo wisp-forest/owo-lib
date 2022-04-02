@@ -1,11 +1,14 @@
 package io.wispforest.uwu.client;
 
 import io.wispforest.owo.network.OwoNetChannel;
+import io.wispforest.owo.particles.ClientParticles;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
 import io.wispforest.uwu.Uwu;
 import io.wispforest.uwu.network.UwuNetworkExample;
 import io.wispforest.uwu.network.UwuOptionalNetExample;
 import net.fabricmc.api.ClientModInitializer;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 public class UwuClient implements ClientModInitializer {
@@ -14,6 +17,10 @@ public class UwuClient implements ClientModInitializer {
     public void onInitializeClient() {
         UwuNetworkExample.Client.init();
         UwuOptionalNetExample.Client.init();
+
+        Uwu.CHANNEL.registerClientbound(Uwu.OtherTestMessage.class, (message, access) -> {
+            access.player().sendMessage(Text.of("Message '" + message.message() + "' from " + message.pos()), false);
+        });
 
         if (Uwu.WE_TESTEN_HANDSHAKE) {
             OwoNetChannel.create(new Identifier("uwu", "client_only_channel"));
@@ -24,6 +31,11 @@ public class UwuClient implements ClientModInitializer {
             new ParticleSystemController(new Identifier("uwu", "client_only_particles"));
             Uwu.PARTICLE_CONTROLLER.register(WeirdMessage.class, (world, pos, data) -> {});
         }
+
+        Uwu.CUBE.setHandler((world, pos, data) -> {
+            ClientParticles.setParticleCount(5);
+            ClientParticles.spawnCubeOutline(ParticleTypes.END_ROD, world, pos, 1, .01f);
+        });
     }
 
     public record WeirdMessage(int e) {}

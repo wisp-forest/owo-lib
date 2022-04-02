@@ -31,7 +31,9 @@ public class UwuTestStickItem extends Item {
             Uwu.CHANNEL.serverHandle(user).send(new Uwu.OtherTestMessage(user.getBlockPos(), "based"));
 
             var server = user.getServer();
-            WorldOps.teleportToWorld((ServerPlayerEntity) user, server.getWorld(World.END), new Vec3d(0, 128, 0));
+            var teleportTo = world.getRegistryKey() == World.END ? server.getWorld(World.OVERWORLD) : server.getWorld(World.END);
+
+            WorldOps.teleportToWorld((ServerPlayerEntity) user, teleportTo, new Vec3d(0, 128, 0));
 
             return TypedActionResult.success(user.getStackInHand(hand));
         } else {

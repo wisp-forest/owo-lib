@@ -27,7 +27,7 @@ public class UwuNetworkTest {
         testEquals(test, read);
     }
 
-    public static final record TestRecord(@ElementType(String.class) Collection<String> text, TestEnum enumValue) {}
+    public record TestRecord(Collection<String> text, TestEnum enumValue) {}
 
     public enum TestEnum {ONE_VALUE, ANOTHER_VALUE}
 
