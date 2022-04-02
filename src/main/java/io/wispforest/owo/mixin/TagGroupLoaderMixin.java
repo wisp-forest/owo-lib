@@ -25,11 +25,11 @@ public class TagGroupLoaderMixin {
     public void injectValues(ResourceManager manager, CallbackInfoReturnable<Map<Identifier, Tag.Builder>> cir) {
         var map = cir.getReturnValue();
 
-        TagInjector.ADDITIIONS.forEach((location, identifiers) -> {
+        TagInjector.ADDITIIONS.forEach((location, entries) -> {
             if (!this.dataType.equals(location.type())) return;
 
-            var builder = map.computeIfAbsent(location.tagId(), identifier1 -> new Tag.Builder());
-            identifiers.forEach(addition -> builder.add(addition, "owo"));
+            var builder = map.computeIfAbsent(location.tagId(), id -> new Tag.Builder());
+            entries.forEach(addition -> builder.add(addition, "owo"));
         });
     }
 

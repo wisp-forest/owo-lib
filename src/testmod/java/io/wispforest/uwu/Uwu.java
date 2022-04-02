@@ -36,7 +36,8 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.tag.Tag;
+import net.minecraft.tag.BlockTags;
+import net.minecraft.tag.ItemTags;
 import net.minecraft.tag.TagKey;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
@@ -149,7 +150,8 @@ public class Uwu implements ModInitializer {
 
         FieldRegistrationHandler.register(UwuItems.class, "uwu", true);
 
-        TagInjector.injectBlocks(new Identifier("base_stone_overworld"), Blocks.GLASS);
+        TagInjector.inject(Registry.BLOCK, BlockTags.BASE_STONE_OVERWORLD.id(), Blocks.GLASS);
+        TagInjector.injectTagReference(Registry.ITEM, ItemTags.COALS.id(), ItemTags.FOX_FOOD.id());
 
         FOUR_TAB_GROUP.initialize();
         SIX_TAB_GROUP.initialize();
