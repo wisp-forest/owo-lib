@@ -47,9 +47,9 @@ public record PacketBufSerializer<T>(BiConsumer<PacketByteBuf, T> serializer, Fu
     /**
      * Enables (de-)serialization for the given class
      *
-     * @param clazz        The object class to serialize
-     * @param serializer   The serializer
-     * @param <T>          The type of object to register a serializer for
+     * @param clazz      The object class to serialize
+     * @param serializer The serializer
+     * @param <T>        The type of object to register a serializer for
      */
     public static <T> void register(Class<T> clazz, PacketBufSerializer<T> serializer) {
         if (SERIALIZERS.containsKey(clazz)) throw new IllegalStateException("Class '" + clazz.getName() + "' already has a serializer");
@@ -333,7 +333,7 @@ public record PacketBufSerializer<T>(BiConsumer<PacketByteBuf, T> serializer, Fu
             serializerMap.put(i, PacketBufSerializer.get(klass));
             classesMap.put(klass, i);
         }
-        
+
         return new PacketBufSerializer<>((buf, value) -> {
             int idx = classesMap.getInt(value.getClass());
 

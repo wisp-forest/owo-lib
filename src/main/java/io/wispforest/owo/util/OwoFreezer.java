@@ -14,12 +14,11 @@ public final class OwoFreezer {
     private static boolean IS_FROZEN = false;
     private static String FREEZER_CLASS = null;
 
-    private OwoFreezer() {
-
-    }
+    private OwoFreezer() {}
 
     /**
      * Registers an on freeze callback. The callback will be called when services are frozen
+     *
      * @param callback the callback to register
      */
     public static void registerFreezeCallback(Runnable callback) {
@@ -35,6 +34,7 @@ public final class OwoFreezer {
 
     /**
      * Shorthand for checking if services aren't frozen, and throwing if not.
+     *
      * @param pluralName the plural of the service being registered (e.g. "Network channels")
      * @throws ServicesFrozenException if services are frozen
      */

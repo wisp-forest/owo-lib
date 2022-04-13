@@ -2,9 +2,9 @@ package io.wispforest.owo.particles.systems;
 
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.network.NetworkException;
-import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.network.OwoHandshake;
 import io.wispforest.owo.network.serialization.PacketBufSerializer;
+import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.ReflectionUtils;
 import io.wispforest.owo.util.VectorSerializer;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -96,14 +96,13 @@ public class ParticleSystemController {
     /**
      * Registers the given system executor with the given
      * context data class, thereby creating a new system
-     *
+     * <p>
      * This method defers executor registration, so
      * you must register the handler later in a client entrypoint.
      *
      * @param dataClass The class to use as context data
      * @param <T>       The type of context data to use
      * @return The created particle system
-     *
      * @see ParticleSystem#setHandler(ParticleSystemExecutor)
      */
     public <T> ParticleSystem<T> registerDeferred(Class<T> dataClass) {

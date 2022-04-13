@@ -1,6 +1,5 @@
 package io.wispforest.owo.registration;
 
-import io.wispforest.owo.util.ModCompatHelpers;
 import net.fabricmc.fabric.api.event.registry.RegistryEntryAddedCallback;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;

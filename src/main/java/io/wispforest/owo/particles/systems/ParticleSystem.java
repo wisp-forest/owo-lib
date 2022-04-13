@@ -1,8 +1,8 @@
 package io.wispforest.owo.particles.systems;
 
 import io.wispforest.owo.network.NetworkException;
-import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.network.serialization.PacketBufSerializer;
+import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.ServicesFrozenException;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Vec3d;

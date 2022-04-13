@@ -152,9 +152,9 @@ public class ReflectionUtils {
      */
     public static String getCallingClassName(int depth) {
         return StackWalker.getInstance().walk(s -> s
-            .skip(depth)
-            .map(StackWalker.StackFrame::getClassName)
-            .findFirst()).orElse("<unknown>");
+                .skip(depth)
+                .map(StackWalker.StackFrame::getClassName)
+                .findFirst()).orElse("<unknown>");
     }
 
     @FunctionalInterface
