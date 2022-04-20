@@ -40,6 +40,7 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.registry.Registry;
 
 import java.util.Collections;
@@ -133,7 +134,7 @@ public class Uwu implements ModInitializer {
         ClientParticles.setParticleCount(30);
         ClientParticles.spawnLine(ParticleTypes.DRAGON_BREATH, world, pos.add(.5, .5, .5), pos.add(.5, 2.5, .5), .015f);
 
-        ClientParticles.randomizeVelocity(.1);
+        ClientParticles.randomizeVelocityOnAxis(.1, Direction.Axis.Z);
         ClientParticles.spawn(ParticleTypes.CLOUD, world, pos.add(.5, 2.5, .5), 0);
 
         ClientParticles.reset();

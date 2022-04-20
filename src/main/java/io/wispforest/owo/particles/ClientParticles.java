@@ -8,6 +8,7 @@ import net.minecraft.client.particle.Particle;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
@@ -24,6 +25,7 @@ public class ClientParticles {
     private static Vec3d velocity = new Vec3d(0, 0, 0);
     private static boolean randomizeVelocity = false;
     private static double randomVelocityScalar = 0;
+    private static Direction.Axis randomizationAxis = null;
 
     /**
      * Marks the values set by {@link ClientParticles#setParticleCount(int)} and {@link ClientParticles#setVelocity(Vec3d)} to be persistent
@@ -64,6 +66,23 @@ public class ClientParticles {
     public static void randomizeVelocity(double scalar) {
         randomizeVelocity = true;
         randomVelocityScalar = scalar;
+        randomizationAxis = null;
+    }
+
+    /**
+     * Makes the system use a random velocity for each particle
+     * <br><b>
+     * Volatile unless {@link ClientParticles#persist()} is called before the next operation
+     * </b>
+     *
+     * @param scalar The scalar to use for the generated velocities which
+     *               nominally range from -0.5 to 0.5 on each axis
+     * @param axis   The axis on which to apply random velocity
+     */
+    public static void randomizeVelocityOnAxis(double scalar, Direction.Axis axis) {
+        randomizeVelocity = true;
+        randomVelocityScalar = scalar;
+        randomizationAxis = axis;
     }
 
     /**
@@ -84,7 +103,18 @@ public class ClientParticles {
     }
 
     private static void addParticle(ParticleEffect particle, World world, Vec3d location) {
-        if (randomizeVelocity) velocity = VectorRandomUtils.getRandomOffset(world, Vec3d.ZERO, randomVelocityScalar);
+        if (randomizeVelocity) {
+            if (randomizationAxis == null) {
+                velocity = VectorRandomUtils.getRandomOffset(world, Vec3d.ZERO, randomVelocityScalar);
+            } else {
+                final var stopIt_getSomeHelp = (world.random.nextDouble(2) - 1) * randomVelocityScalar;
+                velocity = switch (randomizationAxis) {
+                    case X -> new Vec3d(stopIt_getSomeHelp, 0, 0);
+                    case Y -> new Vec3d(0, stopIt_getSomeHelp, 0);
+                    case Z -> new Vec3d(0, 0, stopIt_getSomeHelp);
+                };
+            }
+        }
 
         world.addParticle(particle, location.x, location.y, location.z, velocity.x, velocity.y, velocity.z);
     }
