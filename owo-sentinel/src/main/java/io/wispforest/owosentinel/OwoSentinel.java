@@ -59,6 +59,10 @@ public class OwoSentinel implements PreLaunchEntrypoint {
     public static List<String> listOwoDependents() {
         var list = new ArrayList<String>();
 
+        if (FabricLoader.getInstance().isModLoaded("quilt_loader")) {
+            return List.of("At least one of them. Quilt currently does not", "allow us to collect more info.", "We're sorry");
+        }
+
         for (var mod : FabricLoader.getInstance().getAllMods()) {
             for (var dependency : mod.getMetadata().getDependencies()) {
                 if (!dependency.getModId().equals("owo")) continue;

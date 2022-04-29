@@ -118,7 +118,7 @@ public class SentinelWindow {
                 JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, new ImageIcon(owoIconImage),
                 options, options[0]);
 
-            if (selection == 0) Util.getOperatingSystem().open("https://github.com/glisco03/owo-lib");
+            if (selection == 0) Util.getOperatingSystem().open("https://github.com/wisp-forest/owo-lib");
         });
 
         // Exit
