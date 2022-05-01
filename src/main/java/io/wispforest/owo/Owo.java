@@ -1,6 +1,6 @@
 package io.wispforest.owo;
 
-import io.wispforest.owo.command.OwoDebugCommands;
+import io.wispforest.owo.command.debug.OwoDebugCommands;
 import io.wispforest.owo.itemgroup.json.GroupTabLoader;
 import io.wispforest.owo.moddata.ModDataLoader;
 import io.wispforest.owo.ops.LootOps;
