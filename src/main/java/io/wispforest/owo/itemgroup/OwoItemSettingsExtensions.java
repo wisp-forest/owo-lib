@@ -1,6 +1,10 @@
 package io.wispforest.owo.itemgroup;
 
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.collection.DefaultedList;
+
+import java.util.function.BiConsumer;
 
 /**
  * Used for storing a tab index for use with a {@link OwoItemGroup}
@@ -20,5 +24,9 @@ public interface OwoItemSettingsExtensions {
      * @return this
      */
     Item.Settings setTab(int tab);
+
+    BiConsumer<Item, DefaultedList<ItemStack>> getStackGenerator();
+
+    void setStackGenerator(BiConsumer<Item, DefaultedList<ItemStack>> appender);
 
 }

@@ -6,11 +6,16 @@ import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.item.FoodComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.Rarity;
+import net.minecraft.util.collection.DefaultedList;
+
+import java.util.function.BiConsumer;
 
 /**
  * A wrapper for {@link ItemGroup} that provides easy access to the methods implemented onto
  * it from {@link OwoItemSettingsExtensions} for defining the tab of item in a tabbed group
+ * as well as the function used for actually adding stacks
  */
 public class OwoItemSettings extends FabricItemSettings {
 
@@ -21,6 +26,15 @@ public class OwoItemSettings extends FabricItemSettings {
 
     public int getTab() {
         return ((OwoItemSettingsExtensions) this).getTabIndex();
+    }
+
+    /**
+     * @param generator The function this item uses for creating stacks in the
+     *                  {@link OwoItemGroup} it is in, by default this will be {@link OwoItemGroup#DEFAULT_STACK_GENERATOR}
+     */
+    public OwoItemSettings stackGenerator(BiConsumer<Item, DefaultedList<ItemStack>> generator) {
+        ((OwoItemSettingsExtensions) this).setStackGenerator(generator);
+        return this;
     }
 
     @Override

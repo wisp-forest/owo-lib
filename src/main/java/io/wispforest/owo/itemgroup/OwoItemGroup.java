@@ -17,6 +17,7 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 
 /**
  * A custom implementation of {@link ItemGroup} that supports multiple sub-tabs
@@ -30,6 +31,8 @@ import java.util.Objects;
  * Adapted from Azagwens implementation
  */
 public abstract class OwoItemGroup extends ItemGroup {
+
+    public static final BiConsumer<Item, DefaultedList<ItemStack>> DEFAULT_STACK_GENERATOR = (item, stacks) -> stacks.add(item.getDefaultStack());
 
     public final List<ItemGroupTab> tabs = new ArrayList<>();
     public final List<ItemGroupButton> buttons = new ArrayList<>();
@@ -185,7 +188,9 @@ public abstract class OwoItemGroup extends ItemGroup {
     @Override
     public void appendStacks(DefaultedList<ItemStack> stacks) {
         if (!initialized) throw new IllegalStateException("Owo item group not initialized, was 'initialize()' called?");
-        Registry.ITEM.stream().filter(this::includes).forEach(item -> stacks.add(new ItemStack(item)));
+        Registry.ITEM.stream().filter(this::includes).forEach(item -> {
+            ((OwoItemExtensions) item).getStackGenerator().accept(item, stacks);
+        });
     }
 
     protected boolean includes(Item item) {

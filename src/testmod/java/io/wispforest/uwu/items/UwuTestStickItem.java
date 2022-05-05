@@ -1,5 +1,6 @@
 package io.wispforest.uwu.items;
 
+import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.OwoItemSettings;
 import io.wispforest.owo.ops.WorldOps;
 import io.wispforest.owo.util.NbtKey;
@@ -26,7 +27,12 @@ public class UwuTestStickItem extends Item {
             (compound, s, text) -> compound.putString(s, Text.Serializer.toJson(text))));
 
     public UwuTestStickItem() {
-        super(new OwoItemSettings().group(Uwu.SIX_TAB_GROUP).tab(3).maxCount(1));
+        super(new OwoItemSettings().group(Uwu.SIX_TAB_GROUP).tab(3).maxCount(1)
+                .stackGenerator(OwoItemGroup.DEFAULT_STACK_GENERATOR.andThen((item, stacks) -> {
+                    final var stack = new ItemStack(item);
+                    stack.setCustomName(Text.of("the stick of the test"));
+                    stacks.add(stack);
+                })));
     }
 
     @Override
