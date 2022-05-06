@@ -4,9 +4,13 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import io.wispforest.owo.Owo;
+import io.wispforest.owo.ops.TextOps;
 import net.minecraft.command.argument.EntityArgumentType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.util.Formatting;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
@@ -35,7 +39,18 @@ public class DamageCommand {
         final var entity = EntityArgumentType.getEntity(context, "entity");
         final float amount = FloatArgumentType.getFloat(context, "damage");
 
-        entity.damage(source, amount);
+        if (entity instanceof LivingEntity living) {
+            float damage = living.getHealth();
+            living.damage(source, amount);
+            damage -= living.getHealth();
+
+            context.getSource().sendFeedback(TextOps.concat(Owo.PREFIX, TextOps.withColor("dealt §" + damage + " §damage",
+                    TextOps.color(Formatting.GRAY), OwoDebugCommands.GENERAL_PURPLE, TextOps.color(Formatting.GRAY))), false);
+        } else {
+            entity.damage(source, amount);
+            context.getSource().sendFeedback(TextOps.concat(Owo.PREFIX, TextOps.withFormatting("dealt unknown damage", Formatting.GRAY)), false);
+        }
+
 
         return (int) Math.floor(amount);
     }

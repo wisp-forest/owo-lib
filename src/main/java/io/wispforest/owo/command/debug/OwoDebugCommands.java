@@ -46,9 +46,9 @@ public class OwoDebugCommands {
             (context, builder) -> CommandSource.suggestIdentifiers(Registry.POINT_OF_INTEREST_TYPE.getIds(), builder);
 
     private static final SimpleCommandExceptionType NO_POI_TYPE = new SimpleCommandExceptionType(Text.of("Invalid POI type"));
-    private static final int GENERAL_PURPLE = 0xB983FF;
-    private static final int KEY_BLUE = 0x94B3FD;
-    private static final int VALUE_BLUE = 0x94DAFF;
+    public static final int GENERAL_PURPLE = 0xB983FF;
+    public static final int KEY_BLUE = 0x94B3FD;
+    public static final int VALUE_BLUE = 0x94DAFF;
 
     public static void register() {
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
@@ -57,7 +57,7 @@ public class OwoDebugCommands {
                 final var level = LEVEL_ARGUMENT_TYPE.get(context, "level");
                 LogUtils.configureRootLoggingLevel(level);
 
-                context.getSource().sendFeedback(TextOps.concat(Owo.PREFIX, new LiteralText("Global logging level set to: §9" + level)), false);
+                context.getSource().sendFeedback(TextOps.concat(Owo.PREFIX, Text.of("global logging level set to: §9" + level)), false);
                 return 0;
             })));
 

@@ -10,6 +10,7 @@ import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
@@ -27,7 +28,12 @@ public class HealCommand {
         final float amount = FloatArgumentType.getFloat(context, "amount");
 
         if (entity instanceof LivingEntity living) {
+            float healed = living.getHealth();
             living.heal(amount);
+            healed = living.getHealth() - healed;
+
+            context.getSource().sendFeedback(TextOps.concat(Owo.PREFIX, TextOps.withColor("healed §" + healed + " §hp",
+                    TextOps.color(Formatting.GRAY), OwoDebugCommands.GENERAL_PURPLE, TextOps.color(Formatting.GRAY))), false);
         } else {
             context.getSource().sendError(TextOps.concat(Owo.PREFIX, Text.of("Cannot heal non living entity")));
         }
