@@ -98,7 +98,7 @@ public class WorldOps {
      * @param pitch  The target pitch
      */
     public static void teleportToWorld(ServerPlayerEntity player, ServerWorld target, Vec3d pos, float yaw, float pitch) {
-        player.teleport(target, pos.x, pos.y, pos.z, pitch, yaw);
+        player.teleport(target, pos.x, pos.y, pos.z, yaw, pitch);
         player.addExperience(0);
 
         player.getStatusEffects().forEach(effect -> {
