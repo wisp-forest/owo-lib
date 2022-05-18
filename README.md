@@ -1,24 +1,45 @@
-# oωo (owo-lib)
-
-[![curseforge](https://img.shields.io/badge/-CurseForge-gray?style=for-the-badge&logo=curseforge&labelColor=orange)](https://www.curseforge.com/minecraft/mc-mods/owo-lib)
-[![modrinth](https://img.shields.io/badge/-modrinth-gray?style=for-the-badge&labelColor=green&labelWidth=15&logo=appveyor&logoColor=white)](https://modrinth.com/mod/owo-lib)
-[![release](https://img.shields.io/github/v/release/glisco03/owo-lib?logo=github&style=for-the-badge)](https://github.com/glisco03/owo-lib/releases)
-[![discord](https://img.shields.io/discord/825828008644313089?label=wisp%20forest&logo=discord&logoColor=white&style=for-the-badge)](https://discord.gg/xrwHKktV2d)
-
+<h1 align="center">
+    <img src="https://i.imgur.com/VXjFso4.png">
+    <br>
+    oωo (owo-lib)
+    <br>
+    <a href="https://www.curseforge.com/minecraft/mc-mods/owo-lib">
+        <img src="https://img.shields.io/badge/-CurseForge-gray?style=for-the-badge&logo=curseforge&labelColor=orange">
+    </a>
+    <a href="https://modrinth.com/mod/owo-lib">
+        <img src="https://img.shields.io/badge/-modrinth-gray?style=for-the-badge&labelColor=green&labelWidth=15&logo=appveyor&logoColor=white">
+    </a>
+    <br>
+    <a href="https://github.com/glisco03/owo-lib/releases">
+        <img src="https://img.shields.io/github/v/release/glisco03/owo-lib?logo=github&style=for-the-badge">
+    </a>
+    <a href="https://discord.gg/xrwHKktV2d">
+        <img src="https://img.shields.io/discord/825828008644313089?label=wisp%20forest&logo=discord&logoColor=white&style=for-the-badge">
+    </a>
+</h1>
+    
 ## Overview
 
-A general utility library for content-focused modding on Fabric. Particles, automatic registration, tabbed item groups and more
+A general utility library for content-focused modding on Fabric. oωo is generally aimed at reducing code verbosity and making developement more ergonomic. It covers a wide range of applications from networking and serialization over data handling and registration. 
 
 **Build Setup:**
+```properties
+# https://maven.wispforest.io/io/wispforest/owo-lib/
+owo_version=...
+```
+
 ```groovy
 repositories {
     maven { url 'https://maven.wispforest.io' }
 }
-```
-```groovy
+
+<...>
+
 dependencies {
     // Versions tagged with +1.18 onwards
     modImplementation "io.wispforest:owo-lib:${project.owo_version}"
+    
+    modInclude "io.wispforest:owo-sentinel:${project.owo_version}"
     
     // Versions for 1.17
     modImplementation "com.glisco:owo-lib:${project.owo_version}"
@@ -26,20 +47,18 @@ dependencies {
 ```
 You can check the latest version on the [Releases](https://github.com/glisco03/owo-lib/releases) page
 
-owo currently has thorough documentation in the form of [Javadoc](https://docs.wispforest.io/javadoc/owo/) throught the entire codebase, a wiki with detailed instructions for each feature is under
-construction over at https://docs.wispforest.io/owo/
+owo currently has thorough documentation in the form of [Javadoc](https://docs.wispforest.io/javadoc/owo/) throughout the entire codebase, a wiki with detailed instructions for each feature is under construction over at https://docs.wispforest.io/owo/
  
 ## Features
 
-This is by no means an exhaustive list, it only provides a rough overview
+This is by no means an exhaustive list, for a more complete overview head to https://docs.wispforest.io/owo/features/
 
-- A fully automatic registry system that is designed to be as generic as possible. It is simple and non-verbose to use for basic Minecraft registries but can just as well be used for any kind of custom system that you want to store values in class fields for.
+- A fully automatic [registration system](https://docs.wispforest.io/owo/registration/) that is designed to be as generic as possible. It is simple and non-verbose to use for basic registries, yet the underlying API tree is flexible and can also be used for many custom registration solutions
 
-- A custom implemetation of Item Groups which allows for sub-tabs inside your mod's group, removing the need to have 3 seperate groups for mods with many items
+- Item Groups extensions which allow for sub-tabs inside your mod's group as well as a host of other features like custom buttons, textures and item variant handling
 
-- The RegistryHelper, a simple and logical way to execute code (eg. registration) if and when one or multiple entries you specify are present in a registry. This makes inter-mod compatibility very quick to implement.
+- A fully-featured networking layer with fully automatic serialization, handshaking to ensure client compatibility and a built-in solution for triggering parametrized particle events in a side-agnostic manner
 
-- A wrapper for vanilla's terrible particle system which makes spawning multiple particles with specified random distributions or precise geometric particles a breeze. This also includes a hassle-free system to trigger arbitrary particle events from the server without much packet setup.
+- Client-sided particle helpers that allow for easily composing multi-particle effects 
 
-- Common comparison and verification operations for ItemStacks to make handling them less painful
-
+- Common comparison and verification operations for item stacks, which can save lots of `if...else` blocks and implement missing functionality like checking if two stacks can stack onto each other 
