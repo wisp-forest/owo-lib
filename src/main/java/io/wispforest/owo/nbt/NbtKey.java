@@ -1,13 +1,16 @@
-package io.wispforest.owo.util;
+package io.wispforest.owo.nbt;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 import org.apache.logging.log4j.util.TriConsumer;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /**
  * A utility class for serializing data into {@link NbtCompound}
@@ -35,63 +38,32 @@ public class NbtKey<T> {
     }
 
     /**
-     * Gets the stored data from the given NBT compound
-     *
-     * @param nbt The NBT to read from
-     * @return The deserialized data
+     * @deprecated Use {@link NbtCarrier#get(NbtKey)} instead
      */
-    public T get(NbtCompound nbt) {
+    @Deprecated
+    public T get(@NotNull NbtCompound nbt) {
         return this.type.getter.apply(nbt, this.key);
     }
 
     /**
-     * Gets the stored data from the given NBT compound
-     *
-     * @param nbt          The NBT to read from
-     * @param defaultValue The default value to use if {@code nbt} does not
-     *                     contain data corresponding to this key
-     * @return The deserialized data, or {@code defaultValue} if no data was found
+     * @deprecated Use {@link NbtCarrier#put(NbtKey, T)} instead
      */
-    public T getOr(NbtCompound nbt, T defaultValue) {
-        return nbt.contains(this.key, this.type.nbtEquivalent) ? this.get(nbt) : defaultValue;
-    }
-
-    /**
-     * Stores the given data in the given NBT compound
-     *
-     * @param nbt   The NBT to write into
-     * @param value The data to write
-     */
-    public void put(NbtCompound nbt, T value) {
+    public void put(@NotNull NbtCompound nbt, T value) {
         this.type.setter.accept(nbt, this.key, value);
     }
 
     /**
-     * Removes data corresponding to this key's
-     * {@code key} from the given NBT compound
-     *
-     * @param nbt The NBT to operate on
+     * @deprecated Use {@link NbtCarrier#delete(NbtKey)} instead
      */
-    public void delete(NbtCompound nbt) {
+    public void delete(@NotNull NbtCompound nbt) {
         nbt.remove(this.key);
     }
 
     /**
-     * @return {@code true} if the given NBT compound contains data of this key's type
+     * @deprecated Use {@link NbtCarrier#has(NbtKey)} instead
      */
-    public boolean isIn(NbtCompound nbt) {
+    public boolean isIn(@NotNull NbtCompound nbt) {
         return nbt.contains(this.key, this.type.nbtEquivalent);
-    }
-
-    /**
-     * Same as {@link #isIn(NbtCompound)} but also allows {@code nbt} to be null
-     *
-     * @param nbt The NBT to test against, or optionally {@code null}
-     * @return {@code true} if the given NBT compound is not null
-     * and contains data of this key's type
-     */
-    public boolean maybeIsIn(@Nullable NbtCompound nbt) {
-        return nbt != null && nbt.contains(this.key, this.type.nbtEquivalent);
     }
 
     /**
@@ -110,28 +82,26 @@ public class NbtKey<T> {
         }
 
         @Override
-        public NbtList get(NbtCompound nbt) {
+        public NbtList get(@NotNull NbtCompound nbt) {
             return nbt.getList(this.key, this.elementType.nbtEquivalent);
         }
 
         @Override
-        public NbtList getOr(NbtCompound nbt, NbtList defaultValue) {
-            return nbt.contains(this.key, NbtElement.LIST_TYPE) ? this.get(nbt) : defaultValue;
+        public void put(@NotNull NbtCompound nbt, NbtList value) {
+            nbt.put(this.key, value);
         }
 
         @Override
-        public void put(NbtCompound nbt, NbtList value) {
-            nbt.put(this.key, value);
+        public boolean isIn(@NotNull NbtCompound nbt) {
+            return nbt.contains(this.key, NbtElement.LIST_TYPE);
         }
     }
 
     /**
      * A container type holding serialization functions,
      * used for creating {@link NbtKey} instances
-     *
-     * @param <T> The type of object a given key can serialize
      */
-    public static class Type<T> {
+    public static final class Type<T> {
         public static final Type<Byte> BYTE = new Type<>(NbtElement.BYTE_TYPE, NbtCompound::getByte, NbtCompound::putByte);
         public static final Type<Short> SHORT = new Type<>(NbtElement.SHORT_TYPE, NbtCompound::getShort, NbtCompound::putShort);
         public static final Type<Integer> INT = new Type<>(NbtElement.INT_TYPE, NbtCompound::getInt, NbtCompound::putInt);
@@ -144,6 +114,8 @@ public class NbtKey<T> {
         public static final Type<int[]> INT_ARRAY = new Type<>(NbtElement.INT_ARRAY_TYPE, NbtCompound::getIntArray, NbtCompound::putIntArray);
         public static final Type<long[]> LONG_ARRAY = new Type<>(NbtElement.LONG_ARRAY_TYPE, NbtCompound::getLongArray, NbtCompound::putLongArray);
         public static final Type<ItemStack> ITEM_STACK = new Type<>(NbtElement.COMPOUND_TYPE, Type::readItemStack, Type::writeItemStack);
+        public static final Type<Identifier> IDENTIFIER = new Type<>(NbtElement.STRING_TYPE, Type::readIdentifier, Type::writeIdentifier);
+        public static final Type<Boolean> BOOLEAN = new Type<>(NbtElement.BYTE_TYPE, NbtCompound::getBoolean, NbtCompound::putBoolean);
 
         private final byte nbtEquivalent;
         private final BiFunction<NbtCompound, String, T> getter;
@@ -153,6 +125,12 @@ public class NbtKey<T> {
             this.nbtEquivalent = nbtEquivalent;
             this.getter = getter;
             this.setter = setter;
+        }
+
+        public <R> Type<R> then(Function<T, R> getter, Function<R, T> setter) {
+            return new Type<>(this.nbtEquivalent,
+                    (compound, s) -> getter.apply(this.getter.apply(compound, s)),
+                    (compound, s, r) -> this.setter.accept(compound, s, setter.apply(r)));
         }
 
         /**
@@ -171,12 +149,26 @@ public class NbtKey<T> {
             return new Type<>(nbtType, getter, setter);
         }
 
+        public static <T> Type<T> ofRegistry(Registry<T> registry) {
+            return new Type<>(NbtElement.STRING_TYPE,
+                    (compound, s) -> registry.get(new Identifier(compound.getString(s))),
+                    (compound, s, t) -> compound.putString(s, registry.getId(t).toString()));
+        }
+
         private static void writeItemStack(NbtCompound nbt, String key, ItemStack stack) {
             nbt.put(key, stack.writeNbt(new NbtCompound()));
         }
 
         private static ItemStack readItemStack(NbtCompound nbt, String key) {
             return nbt.contains(key, NbtElement.COMPOUND_TYPE) ? ItemStack.fromNbt(nbt.getCompound(key)) : ItemStack.EMPTY;
+        }
+
+        private static void writeIdentifier(NbtCompound nbt, String key, Identifier identifier) {
+            nbt.putString(key, identifier.toString());
+        }
+
+        private static Identifier readIdentifier(NbtCompound nbt, String key) {
+            return nbt.contains(key, NbtElement.STRING_TYPE) ? new Identifier(nbt.getString(key)) : null;
         }
     }
 

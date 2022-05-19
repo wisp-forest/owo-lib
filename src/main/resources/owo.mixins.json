@@ -6,6 +6,8 @@
   "mixins": [
     "ClientConnectionMixin",
     "Copenhagen",
+    "ItemStackMixin",
+    "NbtCompoundMixin",
     "ScreenHandlerInvoker",
     "SimpleRegistryMixin",
     "TagGroupLoaderMixin",

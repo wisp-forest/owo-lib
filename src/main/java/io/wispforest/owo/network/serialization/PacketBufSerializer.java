@@ -409,8 +409,8 @@ public record PacketBufSerializer<T>(BiConsumer<PacketByteBuf, T> serializer, Fu
             return particleType.getParametersFactory().read(particleType, buf);
         });
 
-        register(Vec3d.class, (buf, vec3d) -> VectorSerializer.write(vec3d, buf), VectorSerializer::read);
-        register(Vec3f.class, (buf, vec3d) -> VectorSerializer.writef(vec3d, buf), VectorSerializer::readf);
+        register(Vec3d.class, VectorSerializer::write, VectorSerializer::read);
+        register(Vec3f.class, VectorSerializer::writef, VectorSerializer::readf);
 
         // -----------
         // Collections

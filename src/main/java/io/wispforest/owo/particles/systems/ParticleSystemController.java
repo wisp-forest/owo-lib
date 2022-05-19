@@ -115,7 +115,7 @@ public class ParticleSystemController {
     <T> void sendPacket(ParticleSystem<T> particleSystem, ServerWorld world, Vec3d pos, T data) {
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeVarInt(particleSystem.index);
-        VectorSerializer.write(pos, buf);
+        VectorSerializer.write(buf, pos);
         particleSystem.adapter.serializer().accept(buf, data);
 
         for (var player : PlayerLookup.tracking(world, new BlockPos(pos))) {

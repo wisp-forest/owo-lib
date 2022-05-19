@@ -45,6 +45,14 @@
       "badges": [
         "library"
       ]
+    },
+    "loom:injected_interfaces": {
+      "net/minecraft/class_1799": [
+        "io/wispforest/owo/nbt/NbtCarrier"
+      ],
+      "net/minecraft/class_2487": [
+        "io/wispforest/owo/nbt/NbtCarrier"
+      ]
     }
   }
 }

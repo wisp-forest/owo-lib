@@ -2,8 +2,8 @@ package io.wispforest.uwu.items;
 
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.OwoItemSettings;
+import io.wispforest.owo.nbt.NbtKey;
 import io.wispforest.owo.ops.WorldOps;
-import io.wispforest.owo.util.NbtKey;
 import io.wispforest.uwu.Uwu;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.player.PlayerEntity;
@@ -13,6 +13,7 @@ import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -70,8 +71,10 @@ public class UwuTestStickItem extends Item {
 
         final var stickStack = context.getStack();
 
-        if (!TEXT_KEY.maybeIsIn(stickStack.getNbt())) {
-            TEXT_KEY.put(stickStack.getOrCreateNbt(), Text.of(String.valueOf(context.getWorld().random.nextInt(1000000))));
+        stickStack.mutate(TEXT_KEY, text -> new LiteralText("mutated: ").append(text));
+
+        if (!stickStack.has(TEXT_KEY)) {
+            stickStack.put(TEXT_KEY, Text.of(String.valueOf(context.getWorld().random.nextInt(1000000))));
         }
 
         context.getPlayer().sendMessage(TEXT_KEY.get(stickStack.getNbt()), false);

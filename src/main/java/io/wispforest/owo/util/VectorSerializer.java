@@ -15,12 +15,12 @@ public class VectorSerializer {
      * Stores the given vector  as an array at the
      * given key in the given nbt compound
      *
-     * @param vec3d The vector to serialize
      * @param nbt   The nbt compound to serialize into
      * @param key   The key to use
+     * @param vec3d The vector to serialize
      * @return {@code nbt}
      */
-    public static NbtCompound store(Vec3d vec3d, NbtCompound nbt, String key) {
+    public static NbtCompound put(NbtCompound nbt, String key, Vec3d vec3d) {
 
         NbtList vectorArray = new NbtList();
         vectorArray.add(NbtDouble.of(vec3d.x));
@@ -32,6 +32,11 @@ public class VectorSerializer {
         return nbt;
     }
 
+    @Deprecated(forRemoval = true)
+    public static NbtCompound store(Vec3d vec3d, NbtCompound nbt, String key) {
+        return put(nbt, key, vec3d);
+    }
+
     /**
      * Stores the given vector  as an array at the
      * given key in the given nbt compound
@@ -41,7 +46,7 @@ public class VectorSerializer {
      * @param key   The key to use
      * @return {@code nbt}
      */
-    public static NbtCompound storef(Vec3f vec3f, NbtCompound nbt, String key) {
+    public static NbtCompound putf(NbtCompound nbt, String key, Vec3f vec3f) {
 
         NbtList vectorArray = new NbtList();
         vectorArray.add(NbtFloat.of(vec3f.getX()));
@@ -51,6 +56,11 @@ public class VectorSerializer {
         nbt.put(key, vectorArray);
 
         return nbt;
+    }
+
+    @Deprecated(forRemoval = true)
+    public static NbtCompound storef(Vec3f vec3f, NbtCompound nbt, String key) {
+        return putf(nbt, key, vec3f);
     }
 
     /**
@@ -95,10 +105,15 @@ public class VectorSerializer {
      * @param vec3d  The vector to write
      * @param buffer The packet buffer to write into
      */
-    public static void write(Vec3d vec3d, PacketByteBuf buffer) {
+    public static void write(PacketByteBuf buffer, Vec3d vec3d) {
         buffer.writeDouble(vec3d.x);
         buffer.writeDouble(vec3d.y);
         buffer.writeDouble(vec3d.z);
+    }
+
+    @Deprecated(forRemoval = true)
+    public static void write(Vec3d vec3d, PacketByteBuf buffer) {
+        write(buffer, vec3d);
     }
 
     /**
@@ -107,10 +122,15 @@ public class VectorSerializer {
      * @param vec3f  The vector to write
      * @param buffer The packet buffer to write into
      */
-    public static void writef(Vec3f vec3f, PacketByteBuf buffer) {
+    public static void writef(PacketByteBuf buffer, Vec3f vec3f) {
         buffer.writeFloat(vec3f.getX());
         buffer.writeFloat(vec3f.getY());
         buffer.writeFloat(vec3f.getZ());
+    }
+
+    @Deprecated(forRemoval = true)
+    public static void writef(Vec3f vec3f, PacketByteBuf buffer) {
+        writef(buffer, vec3f);
     }
 
     /**
