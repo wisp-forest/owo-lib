@@ -4,18 +4,11 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
 import net.minecraft.SharedConstants;
-import net.minecraft.util.Util;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.file.Files;
@@ -24,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class OwoSentinel implements PreLaunchEntrypoint {
+public class OwoSentinel {
     public static final Logger LOGGER = LogManager.getLogger("oωo-sentinel");
     private static final Gson GSON = new Gson();
 
@@ -38,8 +31,7 @@ public class OwoSentinel implements PreLaunchEntrypoint {
 
     public static final boolean FORCE_HEADLESS = Boolean.getBoolean("owo.sentinel.forceHeadless");
 
-    @Override
-    public void onPreLaunch() {
+    public static void launch() {
         if (FabricLoader.getInstance().isModLoaded("owo-impl")) return;
 
         try {
@@ -95,13 +87,13 @@ public class OwoSentinel implements PreLaunchEntrypoint {
 
         if (latestVersion != null) {
             final var firstFile = latestVersion
-                .get("files").getAsJsonArray().get(0).getAsJsonObject();
+                    .get("files").getAsJsonArray().get(0).getAsJsonObject();
 
             final var versionUrl = firstFile
-                .get("url").getAsString();
+                    .get("url").getAsString();
 
             final var versionFilename = firstFile
-                .get("filename").getAsString();
+                    .get("filename").getAsString();
 
             logger.accept("Found matching version: " + latestVersion.get("version_number").getAsString());
 

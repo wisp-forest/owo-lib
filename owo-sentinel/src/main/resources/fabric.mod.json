@@ -11,14 +11,12 @@
   "license": "MIT",
   "icon": "owo_sentinel_icon.png",
   "environment": "*",
-  "entrypoints": {
-    "preLaunch": [
-      "io.wispforest.owosentinel.OwoSentinel"
-    ]
-  },
   "provides": [
     "owo",
     "owo-lib"
+  ],
+  "mixins": [
+    "owo-sentinel.mixins.json"
   ],
   "depends": {
     "fabricloader": "*",

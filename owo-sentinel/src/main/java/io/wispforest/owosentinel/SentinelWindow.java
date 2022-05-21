@@ -1,13 +1,13 @@
 package io.wispforest.owosentinel;
 
-import net.minecraft.util.Util;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
+import java.net.URI;
 
 public class SentinelWindow {
     public static void open() throws Exception {
@@ -31,7 +31,7 @@ public class SentinelWindow {
 
         //noinspection ConstantConditions
         final var owoIconImage = ImageIO.read(OwoSentinel.class.getClassLoader()
-            .getResourceAsStream("owo_sentinel_icon.png"));
+                .getResourceAsStream("owo_sentinel_icon.png"));
 
         window.setIconImage(owoIconImage);
         window.setMinimumSize(new Dimension(0, 250));
@@ -115,10 +115,14 @@ public class SentinelWindow {
             String[] options = {"Open GitHub", "OK"};
 
             int selection = JOptionPane.showOptionDialog(window, OwoSentinel.OWO_EXPLANATION, "oωo-sentinel",
-                JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, new ImageIcon(owoIconImage),
-                options, options[0]);
+                    JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, new ImageIcon(owoIconImage),
+                    options, options[0]);
 
-            if (selection == 0) Util.getOperatingSystem().open("https://github.com/wisp-forest/owo-lib");
+            if (selection == 0 && Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                try {
+                    Desktop.getDesktop().browse(URI.create("https://github.com/wisp-forest/owo-lib"));
+                } catch (IOException ignored) {}
+            }
         });
 
         // Exit
