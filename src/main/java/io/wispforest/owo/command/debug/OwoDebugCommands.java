@@ -7,11 +7,13 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.logging.LogUtils;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.command.EnumArgumentType;
+import io.wispforest.owo.mixin.ArgumentTypesInvoker;
 import io.wispforest.owo.ops.TextOps;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.IdentifierArgumentType;
+import net.minecraft.command.argument.serialize.ConstantArgumentSerializer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -45,7 +47,10 @@ public class OwoDebugCommands {
     public static final int VALUE_BLUE = 0x94DAFF;
 
     public static void register() {
+        ArgumentTypesInvoker.owo$register(Registry.COMMAND_ARGUMENT_TYPE, "damage_source", DamageSourceArgumentType.class, ConstantArgumentSerializer.of(DamageSourceArgumentType::damageSource));
+
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+
             dispatcher.register(literal("logger").then(argument("level", LEVEL_ARGUMENT_TYPE).executes(context -> {
                 final var level = LEVEL_ARGUMENT_TYPE.get(context, "level");
                 LogUtils.configureRootLoggingLevel(level);
