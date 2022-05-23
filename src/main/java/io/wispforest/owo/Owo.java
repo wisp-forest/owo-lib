@@ -4,6 +4,7 @@ import io.wispforest.owo.command.debug.OwoDebugCommands;
 import io.wispforest.owo.itemgroup.json.GroupTabLoader;
 import io.wispforest.owo.moddata.ModDataLoader;
 import io.wispforest.owo.ops.LootOps;
+import io.wispforest.owo.text.InsertingTextContent;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
@@ -45,6 +46,7 @@ public class Owo implements ModInitializer {
     public void onInitialize() {
         ModDataLoader.load(new GroupTabLoader());
         LootOps.registerListener();
+        InsertingTextContent.init();
 
         ServerLifecycleEvents.SERVER_STARTING.register(server -> SERVER = server);
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> SERVER = null);
