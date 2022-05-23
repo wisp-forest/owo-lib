@@ -122,13 +122,13 @@ loom {
     }
 }
 
-loom {
-    accessWidenerPath = file("src/main/resources/owo.accesswidener")
-}
-
 dependencies {
-    modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}"
-    modLocalRuntime "me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}"
+    modCompileOnly ("me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}") {
+        exclude group: "com.terraformersmc"
+    }
+    modLocalRuntime ("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}") {
+        exclude group: "com.terraformersmc"
+    }
 
     modLocalRuntime "maven.modrinth:lazydfu:0.1.2"
 

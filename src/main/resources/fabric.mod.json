@@ -13,7 +13,6 @@
   "license": "MIT",
   "icon": "assets/owo/icon.png",
   "environment": "*",
-  "accessWidener": "owo.accesswidener",
   "entrypoints": {
     "client": [
       "io.wispforest.owo.client.OwoClient"
@@ -21,7 +20,7 @@
     "main": [
       "io.wispforest.owo.Owo"
     ],
-    "rei_plugins": [
+    "rei_client": [
       "io.wispforest.owo.compat.rei.OwoReiPlugin"
     ]
   },

@@ -8,11 +8,13 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import io.wispforest.owo.mixin.ArgumentTypesInvoker;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
-import net.minecraft.command.argument.ArgumentTypes;
 import net.minecraft.command.argument.serialize.ArgumentSerializer;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
+import net.minecraft.util.registry.Registry;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -35,7 +37,7 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<Enum<T>
     private EnumArgumentType(Class<T> enumClass, String noElementMessage) {
         this.enumClass = enumClass;
         this.noElementMessage = noElementMessage;
-        this.noValueException = new DynamicCommandExceptionType(o -> new LiteralText(this.noElementMessage.replace("{}", o.toString())));
+        this.noValueException = new DynamicCommandExceptionType(o -> Text.literal(this.noElementMessage.replace("{}", o.toString())));
     }
 
     /**
@@ -50,7 +52,7 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<Enum<T>
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static <T extends Enum<T>> EnumArgumentType<T> create(Class<T> enumClass) {
         final var type = new EnumArgumentType<>(enumClass, "Invalid enum value '{}'");
-        ArgumentTypes.register("owo:enum_" + enumClass.getName().toLowerCase(Locale.ROOT), type.getClass(), new Serializer(type));
+        ArgumentTypesInvoker.owo$register(Registry.COMMAND_ARGUMENT_TYPE, "owo:enum_" + enumClass.getName().toLowerCase(Locale.ROOT), type.getClass(), new Serializer(type));
         return type;
     }
 
@@ -69,7 +71,7 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<Enum<T>
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static <T extends Enum<T>> EnumArgumentType<T> create(Class<T> enumClass, String noElementMessage) {
         final var type = new EnumArgumentType<>(enumClass, noElementMessage);
-        ArgumentTypes.register("owo:enum_" + enumClass.getName().toLowerCase(Locale.ROOT), type.getClass(), new Serializer(type));
+        ArgumentTypesInvoker.owo$register(Registry.COMMAND_ARGUMENT_TYPE, "owo:enum_" + enumClass.getName().toLowerCase(Locale.ROOT), type.getClass(), new Serializer(type));
         return type;
     }
 
@@ -92,23 +94,49 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<Enum<T>
         }
     }
 
-    public static final class Serializer<T extends Enum<T>, TypeInstance extends EnumArgumentType<T>> implements ArgumentSerializer<TypeInstance> {
+    public static final class Serializer<T extends Enum<T>, TypeInstance extends EnumArgumentType<T>> implements ArgumentSerializer<TypeInstance, ArgumentSerializer.ArgumentTypeProperties<TypeInstance>> {
+
+        private final EnumArgumentType.ArgumentTypeProperties<T, TypeInstance> properties;
+
+        public Serializer(TypeInstance type) {
+            this.properties = new EnumArgumentType.ArgumentTypeProperties<>(type, this);
+        }
+
+        @Override
+        public ArgumentTypeProperties<TypeInstance> fromPacket(PacketByteBuf buf) {
+            return this.properties;
+        }
+
+        @Override
+        public ArgumentTypeProperties<TypeInstance> getArgumentTypeProperties(TypeInstance argumentType) {
+            return this.properties;
+        }
+
+        @Override
+        public void writePacket(ArgumentTypeProperties properties, PacketByteBuf buf) {}
+
+        @Override
+        public void writeJson(ArgumentTypeProperties properties, JsonObject json) {}
+    }
+
+    private static final class ArgumentTypeProperties<T extends Enum<T>, TypeInstance extends EnumArgumentType<T>> implements ArgumentSerializer.ArgumentTypeProperties<TypeInstance> {
 
         private final TypeInstance instance;
+        private final Serializer<T, TypeInstance> serializer;
 
-        public Serializer(TypeInstance instance) {
+        private ArgumentTypeProperties(TypeInstance instance, Serializer<T, TypeInstance> serializer) {
             this.instance = instance;
+            this.serializer = serializer;
         }
 
         @Override
-        public void toPacket(TypeInstance type, PacketByteBuf buf) {}
-
-        @Override
-        public TypeInstance fromPacket(PacketByteBuf buf) {
-            return instance;
+        public TypeInstance createType(CommandRegistryAccess commandRegistryAccess) {
+            return this.instance;
         }
 
         @Override
-        public void toJson(TypeInstance type, JsonObject json) {}
+        public ArgumentSerializer<TypeInstance, ?> getSerializer() {
+            return this.serializer;
+        }
     }
 }

@@ -18,7 +18,7 @@ public class TextOps {
      * @return The combined text
      */
     public static MutableText concat(Text prefix, Text text) {
-        return new LiteralText("").append(prefix).append(text);
+        return Text.empty().append(prefix).append(text);
     }
 
     /**
@@ -27,10 +27,10 @@ public class TextOps {
      *
      * @param text  The text to create
      * @param color The color to use in {@code RRGGBB} format
-     * @return The colored text, specifically a {@link LiteralText}
+     * @return The colored text, specifically a {@link LiteralTextContent}
      */
     public static MutableText withColor(String text, int color) {
-        return new LiteralText(text).setStyle(Style.EMPTY.withColor(color));
+        return Text.literal(text).setStyle(Style.EMPTY.withColor(color));
     }
 
     /**
@@ -39,10 +39,10 @@ public class TextOps {
      *
      * @param text  The text to create
      * @param color The color to use in {@code RRGGBB} format
-     * @return The colored text, specifically a {@link TranslatableText}
+     * @return The colored text, specifically a {@link TranslatableTextContent}
      */
     public static MutableText translateWithColor(String text, int color) {
-        return new TranslatableText(text).setStyle(Style.EMPTY.withColor(color));
+        return Text.translatable(text).setStyle(Style.EMPTY.withColor(color));
     }
 
     /**
@@ -59,10 +59,10 @@ public class TextOps {
         var textPieces = text.split("§");
         if (formatting.length != textPieces.length) return withColor("unmatched format specifiers - this is a bug", 0xff007f);
 
-        var textBase = new LiteralText(textPieces[0]).formatted(formatting[0]);
+        var textBase = Text.literal(textPieces[0]).formatted(formatting[0]);
 
         for (int i = 1; i < textPieces.length; i++) {
-            textBase.append(new LiteralText(textPieces[i]).formatted(formatting[i]));
+            textBase.append(Text.literal(textPieces[i]).formatted(formatting[i]));
         }
 
         return textBase;

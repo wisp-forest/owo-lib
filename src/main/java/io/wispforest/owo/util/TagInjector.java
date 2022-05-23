@@ -2,7 +2,7 @@ package io.wispforest.owo.util;
 
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
-import net.minecraft.tag.Tag;
+import net.minecraft.tag.TagEntry;
 import net.minecraft.tag.TagManagerLoader;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
@@ -24,7 +24,7 @@ public class TagInjector {
     @Deprecated(forRemoval = true) public static final String FLUID_TAG = "fluids";
 
     @ApiStatus.Internal
-    public static final HashMap<TagLocation, Set<Tag.Entry>> ADDITIIONS = new HashMap<>();
+    public static final HashMap<TagLocation, Set<TagEntry>> ADDITIIONS = new HashMap<>();
 
     /**
      * Injects the given Identifiers into the given Tag.
@@ -36,15 +36,13 @@ public class TagInjector {
      * @param tag        The tag to insert into, this could contain all kinds of values
      * @param entryMaker The function to use for creating tag entries from the given identifiers
      * @param values     The values to insert
-     * @see Tag.ObjectEntry#ObjectEntry(Identifier)
-     * @see Tag.TagEntry#TagEntry(Identifier)
      */
-    public static void injectRaw(Registry<?> registry, Identifier tag, Function<Identifier, Tag.Entry> entryMaker, Collection<Identifier> values) {
+    public static void injectRaw(Registry<?> registry, Identifier tag, Function<Identifier, TagEntry> entryMaker, Collection<Identifier> values) {
         ADDITIIONS.computeIfAbsent(new TagLocation(TagManagerLoader.getPath(registry.getKey()), tag), identifier -> new HashSet<>())
                 .addAll(values.stream().map(entryMaker).toList());
     }
 
-    public static void injectRaw(Registry<?> registry, Identifier tag, Function<Identifier, Tag.Entry> entryMaker, Identifier... values) {
+    public static void injectRaw(Registry<?> registry, Identifier tag, Function<Identifier, TagEntry> entryMaker, Identifier... values) {
         injectRaw(registry, tag, entryMaker, Arrays.asList(values));
     }
 
@@ -78,7 +76,7 @@ public class TagInjector {
      * @param values   The values to inject
      */
     public static void injectDirectReference(Registry<?> registry, Identifier tag, Collection<Identifier> values) {
-        injectRaw(registry, tag, Tag.ObjectEntry::new, values);
+        injectRaw(registry, tag, TagEntry::create, values);
     }
 
     public static void injectDirectReference(Registry<?> registry, Identifier tag, Identifier... values) {
@@ -98,7 +96,7 @@ public class TagInjector {
      * @param values   The values to inject
      */
     public static void injectTagReference(Registry<?> registry, Identifier tag, Collection<Identifier> values) {
-        injectRaw(registry, tag, Tag.TagEntry::new, values);
+        injectRaw(registry, tag, TagEntry::createTag, values);
     }
 
     public static void injectTagReference(Registry<?> registry, Identifier tag, Identifier... values) {
@@ -113,7 +111,7 @@ public class TagInjector {
     @Deprecated(forRemoval = true)
     public static void injectRaw(String tagType, Identifier tag, Collection<Identifier> values) {
         ADDITIIONS.computeIfAbsent(new TagLocation("tags/" + tagType, tag), identifier -> new HashSet<>())
-                .addAll(values.stream().map(Tag.ObjectEntry::new).toList());
+                .addAll(values.stream().map(TagEntry::create).toList());
 
     }
 

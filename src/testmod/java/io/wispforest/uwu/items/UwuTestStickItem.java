@@ -13,7 +13,6 @@ import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -71,7 +70,7 @@ public class UwuTestStickItem extends Item {
 
         final var stickStack = context.getStack();
 
-        stickStack.mutate(TEXT_KEY, text -> new LiteralText("mutated: ").append(text));
+        stickStack.mutate(TEXT_KEY, text -> Text.literal("mutated: ").append(text));
 
         if (!stickStack.has(TEXT_KEY)) {
             stickStack.put(TEXT_KEY, Text.of(String.valueOf(context.getWorld().random.nextInt(1000000))));

@@ -8,18 +8,15 @@ import com.mojang.logging.LogUtils;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.command.EnumArgumentType;
 import io.wispforest.owo.ops.TextOps;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.IdentifierArgumentType;
-import net.minecraft.command.argument.ItemStackArgumentType;
-import net.minecraft.server.command.LootCommand;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.hit.BlockHitResult;
@@ -27,9 +24,6 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.poi.PointOfInterestStorage;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.spi.StandardLevel;
 import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.event.Level;
 
@@ -51,8 +45,7 @@ public class OwoDebugCommands {
     public static final int VALUE_BLUE = 0x94DAFF;
 
     public static void register() {
-        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
-
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             dispatcher.register(literal("logger").then(argument("level", LEVEL_ARGUMENT_TYPE).executes(context -> {
                 final var level = LEVEL_ARGUMENT_TYPE.get(context, "level");
                 LogUtils.configureRootLoggingLevel(level);
@@ -67,7 +60,7 @@ public class OwoDebugCommands {
                         var poiType = Registry.POINT_OF_INTEREST_TYPE.getOrEmpty(IdentifierArgumentType.getIdentifier(context, "poi_type"))
                                 .orElseThrow(NO_POI_TYPE::create);
 
-                        var entries = ((ServerWorld) player.world).getPointOfInterestStorage().getInCircle(type -> type == poiType,
+                        var entries = ((ServerWorld) player.world).getPointOfInterestStorage().getInCircle(type -> type.value() == poiType,
                                 player.getBlockPos(), IntegerArgumentType.getInteger(context, "radius"), PointOfInterestStorage.OccupationStatus.ANY).toList();
 
                         player.sendMessage(TextOps.concat(Owo.PREFIX, TextOps.withColor("Found §" + entries.size() + " §entr" + (entries.size() == 1 ? "y" : "ies"),
@@ -99,7 +92,7 @@ public class OwoDebugCommands {
                 HitResult target = player.raycast(5, 0, false);
 
                 if (target.getType() != HitResult.Type.BLOCK) {
-                    source.sendError(TextOps.concat(Owo.PREFIX, new LiteralText("You're not looking at a block")));
+                    source.sendError(TextOps.concat(Owo.PREFIX, Text.literal("You're not looking at a block")));
                     return 1;
                 }
 
@@ -107,7 +100,7 @@ public class OwoDebugCommands {
                 final var blockEntity = player.getWorld().getBlockEntity(pos);
 
                 if (blockEntity == null) {
-                    source.sendError(TextOps.concat(Owo.PREFIX, new LiteralText("No block entity")));
+                    source.sendError(TextOps.concat(Owo.PREFIX, Text.literal(("No block entity"))));
                     return 1;
                 }
 
@@ -122,13 +115,13 @@ public class OwoDebugCommands {
                     source.sendFeedback(TextOps.concat(Owo.PREFIX, TextOps.withColor("Field value: §" + value, TextOps.color(Formatting.GRAY), KEY_BLUE)), false);
 
                 } catch (Exception e) {
-                    source.sendError(TextOps.concat(Owo.PREFIX, new LiteralText("Could not access field - " + e.getClass().getSimpleName() + ": " + e.getMessage())));
+                    source.sendError(TextOps.concat(Owo.PREFIX, Text.literal("Could not access field - " + e.getClass().getSimpleName() + ": " + e.getMessage())));
                 }
 
                 return 0;
             })));
 
-            MakeLootContainerCommand.register(dispatcher);
+            MakeLootContainerCommand.register(dispatcher, registryAccess);
             DumpdataCommand.register(dispatcher);
             DamageCommand.register(dispatcher);
             HealCommand.register(dispatcher);
@@ -137,6 +130,5 @@ public class OwoDebugCommands {
                 CcaDataCommand.register(dispatcher);
             }
         });
-
     }
 }
