@@ -1,4 +1,4 @@
-package io.wispforest.owo.mixin;
+package io.wispforest.owo.mixin.text;
 
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.text.TextLanguage;

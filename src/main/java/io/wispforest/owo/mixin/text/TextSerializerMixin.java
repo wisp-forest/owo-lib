@@ -1,4 +1,4 @@
-package io.wispforest.owo.mixin;
+package io.wispforest.owo.mixin.text;
 
 import com.google.gson.*;
 import io.wispforest.owo.text.CustomTextContent;

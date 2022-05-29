@@ -1,4 +1,4 @@
-package io.wispforest.owo.mixin;
+package io.wispforest.owo.mixin.text;
 
 import com.google.common.collect.ImmutableMap;
 import io.wispforest.owo.text.LanguageAccess;
