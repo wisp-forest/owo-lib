@@ -41,7 +41,7 @@ dependencies {
     
     // include this if you don't want force your users to install owo
     // sentinel will warn them and give the option to download it automatically
-    modInclude "io.wispforest:owo-sentinel:${project.owo_version}"
+    include "io.wispforest:owo-sentinel:${project.owo_version}"
     
     // Versions for 1.17
     modImplementation "com.glisco:owo-lib:${project.owo_version}"
