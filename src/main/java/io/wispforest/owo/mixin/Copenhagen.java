@@ -29,7 +29,7 @@ import java.util.Map;
 public class Copenhagen {
 
     // this map contains the seethe'd orr blocks. its quite important
-    private final Map<BlockPos, BlockState> OWO$COPING = new HashMap<>();
+    private final ThreadLocal<Map<BlockPos, BlockState>> OWO$COPING = ThreadLocal.withInitial(HashMap::new);
 
     // this target method is just so damn complex that not even mixin can correctly guess the injector signature.
     // i just kinda gave up and deleted some of them until it worked. very epic
@@ -49,7 +49,7 @@ public class Copenhagen {
                          int ad, int ae, int af, BlockState blockState, Iterator<OreFeatureConfig.Target> var57, OreFeatureConfig.Target target) {
 
         if (!Maldenhagen.isOnCopium(target.state.getBlock())) return;
-        OWO$COPING.put(new BlockPos(t, v, aa), target.state);
+        OWO$COPING.get().put(new BlockPos(t, v, aa), target.state);
     }
 
     // now in here we read all the gleaming ore spots from our cache and actually cause a block update so that the
@@ -59,10 +59,10 @@ public class Copenhagen {
                         double startZ, double endZ, double startY, double endY, int x, int y, int z, int horizontalSize,
                         int verticalSize, CallbackInfoReturnable<Boolean> cir) {
 
-        OWO$COPING.forEach((blockPos, state) -> {
+        OWO$COPING.get().forEach((blockPos, state) -> {
             world.setBlockState(blockPos, state, Block.NOTIFY_ALL);
         });
-        OWO$COPING.clear();
+        OWO$COPING.get().clear();
     }
 
 }
