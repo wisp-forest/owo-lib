@@ -8,6 +8,7 @@ import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.item.ItemGroup;
 
+import java.util.ArrayList;
 import java.util.Collections;
 
 public class OwoReiPlugin implements REIClientPlugin {
@@ -23,9 +24,16 @@ public class OwoReiPlugin implements REIClientPlugin {
             int y = ((OwoCreativeInventoryScreenExtensions) screen).owo$getRootY();
 
             int stackHeight = owoGroup.getStackHeight();
-            if (stackHeight > 4) y -= 15 * (stackHeight - 4);
+            if (stackHeight > 4) y -= 13 * (stackHeight - 4);
 
-            return Collections.singleton(new Rectangle(x + 200, y + 15, 28 + (28 * owoGroup.getButtons().size() / stackHeight), 25 * Math.min(owoGroup.getButtons().size(), owoGroup.getStackHeight())));
+            final var rectangles = new ArrayList<Rectangle>();
+            for (int i = 0; i < owoGroup.getButtons().size(); i++) {
+                int xOffset = x + 198 + (i / stackHeight) * 26;
+                int yOffset = y + 10 + (i % stackHeight) * 30;
+                rectangles.add(new Rectangle(xOffset, yOffset, 24, 24));
+            }
+
+            return rectangles;
         });
     }
 }

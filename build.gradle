@@ -123,12 +123,15 @@ loom {
 }
 
 dependencies {
-    modCompileOnly ("me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}") {
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}") {
+        exclude group: "net.fabricmc.fabric-api"
         exclude group: "com.terraformersmc"
     }
-    modLocalRuntime ("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}") {
+    modLocalRuntime("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}") {
+        exclude group: "net.fabricmc.fabric-api"
         exclude group: "com.terraformersmc"
     }
+    modLocalRuntime "dev.architectury:architectury-fabric:5.4.14"
 
     modLocalRuntime "maven.modrinth:lazydfu:0.1.2"
 

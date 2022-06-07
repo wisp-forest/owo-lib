@@ -19,7 +19,7 @@ import io.wispforest.uwu.network.*;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.block.Blocks;
@@ -170,7 +170,7 @@ public class Uwu implements ModInitializer {
         System.out.println(RegistryAccess.getEntry(Registry.ITEM, Items.ACACIA_BOAT));
         System.out.println(RegistryAccess.getEntry(Registry.ITEM, new Identifier("acacia_planks")));
 
-        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
+        CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> {
             dispatcher.register(
                     literal("show_nbt")
                             .then(argument("player", GameProfileArgumentType.gameProfile())

@@ -16,7 +16,11 @@ import java.util.function.Function;
  * A utility class for serializing data into {@link NbtCompound}
  * instances. {@link Type} instances are used for holding the
  * actual serializer functions while the key itself carries information
- * about what string key to use
+ * about what string key to use.
+ * <p>
+ * In order to conveniently use instances of this class, employ the methods
+ * defined on {@link NbtCarrier} - this is interface-injected onto
+ * {@link ItemStack} and {@link NbtCompound} by default
  *
  * @param <T> The type of data a given instance can serialize
  */
@@ -127,6 +131,16 @@ public class NbtKey<T> {
             this.setter = setter;
         }
 
+        /**
+         * Creates a new type that applies the given functions on top of
+         * this type. This allows easily composing types by abstracting away
+         * the underlying NBT compound
+         *
+         * @param getter The getter function to convert from this type's value type to the new one
+         * @param setter The setter function to convert from the new value type to this type's one
+         * @param <R>    The value type of the created type
+         * @return The new key
+         */
         public <R> Type<R> then(Function<T, R> getter, Function<R, T> setter) {
             return new Type<>(this.nbtEquivalent,
                     (compound, s) -> getter.apply(this.getter.apply(compound, s)),
@@ -149,6 +163,14 @@ public class NbtKey<T> {
             return new Type<>(nbtType, getter, setter);
         }
 
+        /**
+         * Creates a new type that serializes registry entries of the given
+         * registry using their ID in string form
+         *
+         * @param registry The registry of which to serialize entries
+         * @param <T>      The type of registry entry to serialize
+         * @return The created type
+         */
         public static <T> Type<T> ofRegistry(Registry<T> registry) {
             return new Type<>(NbtElement.STRING_TYPE,
                     (compound, s) -> registry.get(new Identifier(compound.getString(s))),

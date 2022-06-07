@@ -1,9 +1,9 @@
 package io.wispforest.owo.ops;
 
-import net.fabricmc.fabric.api.loot.v1.FabricLootPoolBuilder;
-import net.fabricmc.fabric.api.loot.v1.event.LootTableLoadingCallback;
+import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
+import net.minecraft.loot.LootPool;
 import net.minecraft.loot.condition.RandomChanceLootCondition;
 import net.minecraft.loot.entry.ItemEntry;
 import net.minecraft.loot.entry.LootPoolEntry;
@@ -85,9 +85,9 @@ public class LootOps {
 
     @ApiStatus.Internal
     public static void registerListener() {
-        LootTableLoadingCallback.EVENT.register((resourceManager, manager, id, supplier, setter) -> {
+        LootTableEvents.MODIFY.register((resourceManager, manager, id, tableBuilder, source) -> {
             ADDITIONS.forEach((identifiers, lootPoolEntrySupplier) -> {
-                if (anyMatch(id, identifiers)) supplier.withPool(FabricLootPoolBuilder.builder().withEntry(lootPoolEntrySupplier.get()).build());
+                if (anyMatch(id, identifiers)) tableBuilder.pool(LootPool.builder().with(lootPoolEntrySupplier.get()));
             });
         });
     }
