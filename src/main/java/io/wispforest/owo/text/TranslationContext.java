@@ -1,10 +1,12 @@
 package io.wispforest.owo.text;
 
 import net.minecraft.text.TranslatableTextContent;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@ApiStatus.Experimental
 public class TranslationContext {
     private static final ThreadLocal<List<TranslatableTextContent>> translationStack = ThreadLocal.withInitial(ArrayList::new);
 

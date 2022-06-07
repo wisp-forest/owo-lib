@@ -5,12 +5,12 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.HashMap;
 import java.util.Map;
 
+@ApiStatus.Experimental
 public final class CustomTextRegistry {
+
     private static final Map<String, CustomTextContentSerializer<?>> SERIALIZERS = new HashMap<>();
 
-    private CustomTextRegistry() {
-
-    }
+    private CustomTextRegistry() {}
 
     public static void register(String baseKey, CustomTextContentSerializer<?> serializer) {
         SERIALIZERS.put(baseKey, serializer);
