@@ -12,10 +12,12 @@ import io.wispforest.owo.particles.ClientParticles;
 import io.wispforest.owo.particles.systems.ParticleSystem;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
 import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
+import io.wispforest.owo.text.CustomTextRegistry;
 import io.wispforest.owo.util.RegistryAccess;
 import io.wispforest.owo.util.TagInjector;
 import io.wispforest.uwu.items.UwuItems;
 import io.wispforest.uwu.network.*;
+import io.wispforest.uwu.text.BasedTextContent;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
@@ -206,6 +208,8 @@ public class Uwu implements ModInitializer {
                                             }))));
 
         });
+
+        CustomTextRegistry.register("based", BasedTextContent.Serializer.INSTANCE);
 
         UwuNetworkExample.init();
         UwuOptionalNetExample.init();

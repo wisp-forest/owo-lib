@@ -1,5 +1,15 @@
 {
-  "item.uwu.test_stick": "Test Stick",
+  "item.uwu.test_stick": [
+    "",
+    {
+      "text": "Test",
+      "color": "blue"
+    },
+    {
+      "text": " Stick",
+      "color": "red"
+    }
+  ],
   "item.uowou.owo_ingot": "oωo Ingot",
   "itemGroup.uwu.four_tab_group": "uωu",
   "itemGroup.uwu.four_tab_group.tab.tab_1": "Tab 1",
