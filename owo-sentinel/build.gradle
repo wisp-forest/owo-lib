@@ -1,3 +1,9 @@
 loom {
     runConfigs.client.ideConfigGenerated = true
+
+    mods {
+        "owo-sentinel" {
+            sourceSet sourceSets.main
+        }
+    }
 }

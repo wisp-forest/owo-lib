@@ -7,12 +7,14 @@ import io.wispforest.owo.text.CustomTextContentSerializer;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.text.TextContent;
 import net.minecraft.util.JsonHelper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.lang.reflect.Type;
 import java.util.Map;
@@ -53,29 +55,14 @@ public abstract class TextSerializerMixin {
     }
 
     @SuppressWarnings({"unchecked"})
-    @Inject(method = "serialize(Lnet/minecraft/text/Text;Ljava/lang/reflect/Type;Lcom/google/gson/JsonSerializationContext;)Lcom/google/gson/JsonElement;", at = @At("HEAD"), cancellable = true)
-    private void serializeCustomText(Text text, Type type, JsonSerializationContext ctx, CallbackInfoReturnable<JsonElement> cir) {
-        if (!(text instanceof CustomTextContent custom))
+    @Inject(method = "serialize(Lnet/minecraft/text/Text;Ljava/lang/reflect/Type;Lcom/google/gson/JsonSerializationContext;)Lcom/google/gson/JsonElement;", at = @At(value = "INVOKE", target = "Ljava/lang/IllegalArgumentException;<init>(Ljava/lang/String;)V"), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
+    private void serializeCustomText(Text text, Type type, JsonSerializationContext ctx, CallbackInfoReturnable<JsonElement> cir, JsonObject jsonObject, TextContent textContent) {
+        if (!(textContent instanceof CustomTextContent custom))
             return;
 
-        JsonObject obj = new JsonObject();
+        ((CustomTextContentSerializer<CustomTextContent>) custom.serializer()).serialize(custom, jsonObject, ctx);
 
-        ((CustomTextContentSerializer<CustomTextContent>) custom.serializer()).serialize(custom, obj, ctx);
-
-        if (!text.getStyle().isEmpty()) {
-            addStyle(text.getStyle(), obj, ctx);
-        }
-
-        if (!text.getSiblings().isEmpty()) {
-            JsonArray siblings = new JsonArray();
-            for (Text sibling : text.getSiblings()) {
-                siblings.add(serialize(sibling, sibling.getClass(), ctx));
-            }
-
-            obj.add("extra", siblings);
-        }
-
-        cir.setReturnValue(obj);
+        cir.setReturnValue(jsonObject);
     }
 }
 

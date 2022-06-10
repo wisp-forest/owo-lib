@@ -15,9 +15,9 @@
     "owo",
     "owo-lib"
   ],
-  "mixins": [
-    "owo-sentinel.mixins.json"
-  ],
+  "languageAdapters": {
+    "maldenhagen": "io.wispforest.owosentinel.Maldenhagen"
+  },
   "depends": {
     "fabricloader": "*",
     "minecraft": ">=1.18"

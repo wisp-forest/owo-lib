@@ -28,6 +28,4 @@ public class DownloadTask extends SwingWorker<Void, Void> {
         }
         return null;
     }
-
-    public static void loadTheClassSoMixinDoesNotCry() {}
 }
