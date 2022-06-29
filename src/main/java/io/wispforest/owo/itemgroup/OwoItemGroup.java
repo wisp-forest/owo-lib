@@ -40,7 +40,8 @@ public abstract class OwoItemGroup extends ItemGroup {
     private int selectedTab = 0;
     private boolean initialized = false;
 
-    private int stackHeight = 4;
+    private int tabStackHeight = 4;
+    private int buttonStackHeight = 4;
     private Identifier customTexture = null;
     private boolean displayTabNamesAsTitle = true;
     private boolean displaySingleTab = false;
@@ -124,15 +125,41 @@ public abstract class OwoItemGroup extends ItemGroup {
         this.customTexture = texture;
     }
 
-    protected void setStackHeight(int height) {
-        if (height < 4) throw new IllegalArgumentException("Stack height must not be lower than 4");
-        this.stackHeight = height;
+    /**
+     * @deprecated Use {@link #setTabStackHeight(int)} instead
+     */
+    @Deprecated(forRemoval = true)
+    protected void setStackHeight(int tabStackHeight) {
+        this.tabStackHeight = tabStackHeight;
     }
 
+    /**
+     * Sets how many tab buttons may be displayed in a single
+     * column to the left of the creative inventory
+     */
+    protected void setTabStackHeight(int tabStackHeight) {
+        this.tabStackHeight = tabStackHeight;
+    }
+
+    /**
+     * Sets how many buttons may be displayed in a single
+     * column to the right of the creative inventory
+     */
+    protected void setButtonStackHeight(int buttonStackHeight) {
+        this.buttonStackHeight = buttonStackHeight;
+    }
+
+    /**
+     * Display a tab button, even if only a single tab is registered
+     */
     protected void displaySingleTab() {
         this.displaySingleTab = true;
     }
 
+    /**
+     * Do not change the title of the group to the name of the
+     * currently selected tab - instead always the name of the group itself
+     */
     protected void keepStaticTitle() {
         this.displayTabNamesAsTitle = false;
     }
@@ -163,8 +190,12 @@ public abstract class OwoItemGroup extends ItemGroup {
         return customTexture;
     }
 
-    public int getStackHeight() {
-        return stackHeight;
+    public int getTabStackHeight() {
+        return tabStackHeight;
+    }
+
+    public int getButtonStackHeight() {
+        return buttonStackHeight;
     }
 
     public boolean shouldDisplayTabNamesAsTitle() {

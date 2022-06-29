@@ -18,7 +18,7 @@ import java.util.function.Function;
  * Use {@link #create(Class)} to create (or obtain if it already exists)
  * the instance for a specific class. Should an exception
  * about a missing type adapter be thrown, register one
- * using {@link PacketBufSerializer#register(Class, BiConsumer, Function)}
+ * using {@link PacketBufSerializer#register(Class, net.minecraft.network.PacketByteBuf.PacketWriter, net.minecraft.network.PacketByteBuf.PacketReader)}
  *
  * <p> To serialize an instance use {@link #write(PacketByteBuf, Record)},
  * to read it back again use {@link #read(PacketByteBuf)}

@@ -72,6 +72,8 @@ public class Uwu implements ModInitializer {
             addTab(Icon.of(Items.GOLD_INGOT), "tab_4", null);
 
             addButton(ItemGroupButton.github("https://github.com/glisco03/owo-lib"));
+
+            setButtonStackHeight(1);
         }
 
         @Override
@@ -83,7 +85,7 @@ public class Uwu implements ModInitializer {
     public static final OwoItemGroup SIX_TAB_GROUP = new OwoItemGroup(new Identifier("uwu", "six_tab_group")) {
         @Override
         protected void setup() {
-            setStackHeight(6);
+            setTabStackHeight(3);
             setCustomTexture(GROUP_TEXTURE);
 
             addTab(Icon.of(Items.DIAMOND), "tab_1", null);

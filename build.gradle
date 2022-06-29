@@ -89,6 +89,7 @@ allprojects {
 }
 
 repositories {
+    maven { url "https://maven.terraformersmc.com/releases/" }
     maven { url "https://maven.shedaniel.me/" }
     maven {
         url "https://api.modrinth.com/maven"
@@ -123,17 +124,12 @@ loom {
 }
 
 dependencies {
-    modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}") {
-        exclude group: "net.fabricmc.fabric-api"
-        exclude group: "com.terraformersmc"
-    }
-    modLocalRuntime("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}") {
-        exclude group: "net.fabricmc.fabric-api"
-        exclude group: "com.terraformersmc"
-    }
-    modLocalRuntime "dev.architectury:architectury-fabric:5.4.14"
+    modLocalRuntime("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}")
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}")
 
     modLocalRuntime "maven.modrinth:lazydfu:0.1.2"
+
+    modLocalRuntime include("blue.endless:jankson:${project.jankson_version}")
 
     testmodImplementation sourceSets.main.output
 }

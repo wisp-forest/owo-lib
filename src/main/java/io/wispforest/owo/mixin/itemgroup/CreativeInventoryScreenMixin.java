@@ -127,15 +127,15 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 
             int tabRootY = this.y;
 
-            final int stackHeight = owoGroup.getStackHeight();
-            if (stackHeight > 4) tabRootY -= 13 * (stackHeight - 4);
+            final var tabStackHeight = owoGroup.getTabStackHeight();
+            tabRootY -= 13 * (tabStackHeight - 4);
 
             if (owoGroup.shouldDisplaySingleTab() || owoGroup.tabs.size() > 1) {
                 for (int i = 0; i < owoGroup.tabs.size(); i++) {
                     var tab = owoGroup.tabs.get(i);
 
-                    int xOffset = this.x - 27 - (i / stackHeight) * 26;
-                    int yOffset = tabRootY + 10 + (i % stackHeight) * 30;
+                    int xOffset = this.x - 27 - (i / tabStackHeight) * 26;
+                    int yOffset = tabRootY + 10 + (i % tabStackHeight) * 30;
 
                     var tabButton = new ItemGroupButtonWidget(xOffset, yOffset, false, tab, group.getName(), owo$createSelectAction(this, owoGroup, i));
 
@@ -146,12 +146,15 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
                 }
             }
 
+            final var buttonStackHeight = owoGroup.getButtonStackHeight();
+            tabRootY = this.y - 13 * (buttonStackHeight - 4);
+
             var buttons = owoGroup.getButtons();
             for (int i = 0; i < buttons.size(); i++) {
                 var button = buttons.get(i);
 
-                int xOffset = this.x + 198 + (i / stackHeight) * 26;
-                int yOffset = tabRootY + 10 + (i % stackHeight) * 30;
+                int xOffset = this.x + 198 + (i / buttonStackHeight) * 26;
+                int yOffset = tabRootY + 10 + (i % buttonStackHeight) * 30;
 
                 var tabButton = new ItemGroupButtonWidget(xOffset, yOffset, true, button, group.getName(), button1 -> button.action().run());
 

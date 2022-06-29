@@ -16,7 +16,7 @@ public class RegistryAccess {
      * @param registry The registry to operate on. Must be a {@link SimpleRegistry} at some point in the hierarchy
      * @param id       The id to use
      * @param <T>      The type of the registry and returned entry
-     * @return The entry, or {@link null} if it's not present
+     * @return The entry, or {@code null} if it's not present
      */
     @Nullable
     @SuppressWarnings("unchecked")
@@ -31,7 +31,7 @@ public class RegistryAccess {
      * @param registry The registry to operate on. Must be a {@link SimpleRegistry} at some point in the hierarchy
      * @param value    The value to use
      * @param <T>      The type of the registry and returned entry
-     * @return The entry, or {@link null} if it's not present
+     * @return The entry, or {@code null} if it's not present
      */
     @Nullable
     @SuppressWarnings("unchecked")

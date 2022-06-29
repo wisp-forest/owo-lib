@@ -10,6 +10,12 @@
       "color": "red"
     }
   ],
+  "item.uwu.screen_shard": [
+    {
+      "text": "Screen Shard",
+      "color": "#3AB0FF"
+    }
+  ],
   "item.uowou.owo_ingot": "oωo Ingot",
   "itemGroup.uwu.four_tab_group": "uωu",
   "itemGroup.uwu.four_tab_group.tab.tab_1": "Tab 1",

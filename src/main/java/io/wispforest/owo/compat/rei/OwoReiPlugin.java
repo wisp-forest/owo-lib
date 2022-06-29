@@ -4,6 +4,8 @@ import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.util.OwoCreativeInventoryScreenExtensions;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
+import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
+import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.item.ItemGroup;
@@ -23,8 +25,8 @@ public class OwoReiPlugin implements REIClientPlugin {
             int x = ((OwoCreativeInventoryScreenExtensions) screen).owo$getRootX();
             int y = ((OwoCreativeInventoryScreenExtensions) screen).owo$getRootY();
 
-            int stackHeight = owoGroup.getStackHeight();
-            if (stackHeight > 4) y -= 13 * (stackHeight - 4);
+            int stackHeight = owoGroup.getButtonStackHeight();
+            y -= 13 * (stackHeight - 4);
 
             final var rectangles = new ArrayList<Rectangle>();
             for (int i = 0; i < owoGroup.getButtons().size(); i++) {

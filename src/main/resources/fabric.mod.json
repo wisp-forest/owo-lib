@@ -51,6 +51,12 @@
       ],
       "net/minecraft/class_2487": [
         "io/wispforest/owo/nbt/NbtCarrier"
+      ],
+      "net/minecraft/class_339": [
+        "io/wispforest/owo/ui/inject/ComponentStub"
+      ],
+      "net/minecraft/class_4185": [
+        "io/wispforest/owo/ui/inject/ButtonWidgetExtension"
       ]
     }
   }
