@@ -225,6 +225,12 @@ public class ScrollContainer<T extends Component> extends WrappingParentComponen
         UIParsing.apply(children, "scrollbar-color", UIParsing::parseColor, this::scrollbarColor);
     }
 
+    public static ScrollContainer<?> parse(Element element) {
+        return element.getAttribute("direction").equals("vertical")
+                ? ScrollContainer.vertical(Sizing.content(), Sizing.content(), null)
+                : ScrollContainer.horizontal(Sizing.content(), Sizing.content(), null);
+    }
+
     public enum ScrollDirection {
         VERTICAL(Component::height, Component::setY, Component::y, Insets::vertical, GLFW.GLFW_KEY_UP, GLFW.GLFW_KEY_DOWN),
         HORIZONTAL(Component::width, Component::setX, Component::x, Insets::horizontal, GLFW.GLFW_KEY_LEFT, GLFW.GLFW_KEY_RIGHT);

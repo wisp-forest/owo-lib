@@ -7,7 +7,10 @@ import io.wispforest.owo.ui.layout.Layouts;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.texture.Sprite;
+import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -57,6 +60,22 @@ public class Components {
         final var slider = createSized(SliderComponent::new, horizontalSizing, Sizing.fixed(20));
         slider.setMessage(message);
         return slider;
+    }
+
+    public static SpriteComponent sprite(SpriteIdentifier spriteId) {
+        return new SpriteComponent(spriteId.getSprite());
+    }
+
+    public static SpriteComponent sprite(Sprite sprite) {
+        return new SpriteComponent(sprite);
+    }
+
+    public static TextureComponent texture(Identifier texture, int u, int v, int regionWidth, int regionHeight, int textureWidth, int textureHeight) {
+        return new TextureComponent(texture, u, v, regionWidth, regionHeight, textureWidth, textureHeight);
+    }
+
+    public static TextureComponent texture(Identifier texture, int u, int v, int regionWidth, int regionHeight) {
+        return new TextureComponent(texture, u, v, regionWidth, regionHeight, 256, 256);
     }
 
     public static <T extends Component> T createSized(Supplier<T> componentMaker, Sizing horizontalSizing, Sizing verticalSizing) {

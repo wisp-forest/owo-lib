@@ -1,12 +1,16 @@
 package io.wispforest.owo.ui.parsing;
 
-import io.wispforest.owo.ui.component.Components;
+import io.wispforest.owo.ui.component.*;
 import io.wispforest.owo.ui.definitions.Component;
 import io.wispforest.owo.ui.definitions.Sizing;
+import io.wispforest.owo.ui.layout.FlowLayout;
+import io.wispforest.owo.ui.layout.GridLayout;
 import io.wispforest.owo.ui.layout.HoverContainer;
-import io.wispforest.owo.ui.layout.Layouts;
 import io.wispforest.owo.ui.layout.ScrollContainer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.InvalidIdentifierException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -142,6 +146,22 @@ public class UIParsing {
     }
 
     /**
+     * Tries to interpret the text content of the
+     * given node as a floating-point number
+     *
+     * @throws UIModelParsingException If the text content does not
+     *                                 represent a valid floating point number
+     */
+    public static float parseFloat(Node node) {
+        var data = node.getTextContent().strip();
+        if (data.matches("-?\\d+(\\.\\d+)?")) {
+            return Float.parseFloat(data);
+        } else {
+            throw new UIModelParsingException("Invalid value '" + data + "', expected a floating point number");
+        }
+    }
+
+    /**
      * Interprets the text content of the
      * given node as a boolean - more specifically this
      * method returns {@code true} if and only if the text content
@@ -149,6 +169,21 @@ public class UIParsing {
      */
     public static boolean parseBool(Node node) {
         return node.getTextContent().strip().equalsIgnoreCase("true");
+    }
+
+    /**
+     * Tries to interpret the text content of the
+     * given node as an identifier
+     *
+     * @throws UIModelParsingException If the text content does not
+     *                                 represent a valid identifier
+     */
+    public static Identifier parseIdentifier(Node node) {
+        try {
+            return new Identifier(node.getTextContent());
+        } catch (InvalidIdentifierException exception) {
+            throw new UIModelParsingException("Invalid identifier '" + node.getTextContent() + "'", exception);
+        }
     }
 
     /**
@@ -220,29 +255,23 @@ public class UIParsing {
     }
 
     static {
-        registerFactory("flow-layout", element -> {
-            return element.getAttribute("direction").equals("vertical")
-                    ? Layouts.verticalFlow(Sizing.content(), Sizing.content())
-                    : Layouts.horizontalFlow(Sizing.content(), Sizing.content());
-        });
+        // Layout
+        registerFactory("flow-layout", FlowLayout::parse);
+        registerFactory("grid-layout", GridLayout::parse);
 
-        registerFactory("scroll", element -> {
-            return element.getAttribute("direction").equals("vertical")
-                    ? ScrollContainer.vertical(Sizing.content(), Sizing.content(), null)
-                    : ScrollContainer.horizontal(Sizing.content(), Sizing.content(), null);
-        });
-
-        registerFactory("grid", element -> {
-            expectAttributes(element, "rows", "columns");
-
-            int rows = UIParsing.parseSignedInt(element.getAttributeNode("rows"));
-            int columns = UIParsing.parseSignedInt(element.getAttributeNode("columns"));
-
-            return Layouts.grid(Sizing.content(), Sizing.content(), rows, columns);
-        });
-
+        // Container
+        registerFactory("scroll", ScrollContainer::parse);
         registerFactory("hover", element -> HoverContainer.of(null, null, null));
 
+        // Textures
+        registerFactory("sprite", SpriteComponent::parse);
+        registerFactory("texture", TextureComponent::parse);
+
+        // Game Objects
+        registerFactory("entity", EntityComponent::parse);
+        registerFactory("item", element -> new ItemComponent(ItemStack.EMPTY));
+
+        // Widgets
         registerFactory("label", element -> Components.label(Text.empty()));
         registerFactory("button", element -> Components.button(Text.empty(), button -> {}));
         registerFactory("text-box", element -> Components.textBox(Sizing.content()));

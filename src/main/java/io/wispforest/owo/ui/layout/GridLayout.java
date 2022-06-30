@@ -5,6 +5,7 @@ import io.wispforest.owo.ui.definitions.Component;
 import io.wispforest.owo.ui.definitions.Size;
 import io.wispforest.owo.ui.definitions.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
+import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import net.minecraft.client.util.math.MatrixStack;
 import org.apache.commons.lang3.mutable.MutableInt;
@@ -165,7 +166,22 @@ public class GridLayout extends BaseParentComponent {
             int row = UIParsing.parseUnsignedInt(child.getAttributeNode("row"));
             int column = UIParsing.parseUnsignedInt(child.getAttributeNode("column"));
 
+            final var existingChild = this.getChild(row, column);
+            if (existingChild != null) {
+                throw new UIModelParsingException("Tried to populate cell " + row + "," + column + " in grid layout twice. " +
+                        "Present component: " + existingChild.getClass().getSimpleName() + "\nNew element: " + child.getNodeName());
+            }
+
             this.child(model.parseComponent(Component.class, child), row, column);
         }
+    }
+
+    public static GridLayout parse(Element element) {
+        UIParsing.expectAttributes(element, "rows", "columns");
+
+        int rows = UIParsing.parseSignedInt(element.getAttributeNode("rows"));
+        int columns = UIParsing.parseSignedInt(element.getAttributeNode("columns"));
+
+        return new GridLayout(Sizing.content(), Sizing.content(), rows, columns);
     }
 }

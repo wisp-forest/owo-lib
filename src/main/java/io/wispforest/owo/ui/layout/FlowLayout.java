@@ -74,4 +74,10 @@ public abstract class FlowLayout extends BaseParentComponent {
             this.child(model.parseComponent(Component.class, child));
         }
     }
+
+    public static FlowLayout parse(Element element) {
+        return element.getAttribute("direction").equals("vertical")
+                ? Layouts.verticalFlow(Sizing.content(), Sizing.content())
+                : Layouts.horizontalFlow(Sizing.content(), Sizing.content());
+    }
 }
