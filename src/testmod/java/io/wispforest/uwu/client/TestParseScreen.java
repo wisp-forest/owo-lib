@@ -1,6 +1,6 @@
 package io.wispforest.uwu.client;
 
-import io.wispforest.owo.ui.BaseUISpecScreen;
+import io.wispforest.owo.ui.BaseUIModelScreen;
 import io.wispforest.owo.ui.component.SliderComponent;
 import io.wispforest.owo.ui.definitions.Component;
 import io.wispforest.owo.ui.layout.FlowLayout;
@@ -10,7 +10,7 @@ import net.minecraft.client.gui.widget.TextFieldWidget;
 
 import java.util.Map;
 
-public class TestParseScreen extends BaseUISpecScreen<FlowLayout> {
+public class TestParseScreen extends BaseUIModelScreen<FlowLayout> {
 
     public TestParseScreen() {
         super(FlowLayout.class, DataSource.debug("config_ui.xml"));
@@ -33,7 +33,7 @@ public class TestParseScreen extends BaseUISpecScreen<FlowLayout> {
     }
 
     protected Component createTextOption(final int index) {
-        var option = this.spec.expandTemplate(FlowLayout.class,
+        var option = this.model.expandTemplate(FlowLayout.class,
                 "text-config-option",
                 Map.of(
                         "config-option-name", "very epic option #" + index,
@@ -50,7 +50,7 @@ public class TestParseScreen extends BaseUISpecScreen<FlowLayout> {
     }
 
     protected Component createRangeOption(final int index) {
-        var option = this.spec.expandTemplate(FlowLayout.class,
+        var option = this.model.expandTemplate(FlowLayout.class,
                 "range-config-option",
                 Map.of(
                         "config-option-name", "very epic option #" + index,

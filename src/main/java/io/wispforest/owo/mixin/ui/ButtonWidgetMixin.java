@@ -2,8 +2,8 @@ package io.wispforest.owo.mixin.ui;
 
 import io.wispforest.owo.ui.definitions.CursorStyle;
 import io.wispforest.owo.ui.inject.ButtonWidgetExtension;
-import io.wispforest.owo.ui.parsing.OwoUIParsing;
-import io.wispforest.owo.ui.parsing.OwoUISpec;
+import io.wispforest.owo.ui.parsing.UIModel;
+import io.wispforest.owo.ui.parsing.UIParsing;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.text.Text;
@@ -28,9 +28,9 @@ public abstract class ButtonWidgetMixin extends ClickableWidget implements Butto
     }
 
     @Override
-    public void parseProperties(OwoUISpec spec, Element element, Map<String, Element> children) {
+    public void parseProperties(UIModel spec, Element element, Map<String, Element> children) {
         super.parseProperties(spec, element, children);
-        OwoUIParsing.apply(children, "text", OwoUIParsing::parseText, ((ButtonWidget) (Object) this)::setMessage);
+        UIParsing.apply(children, "text", UIParsing::parseText, ((ButtonWidget) (Object) this)::setMessage);
     }
 
     @Override

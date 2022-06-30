@@ -23,74 +23,74 @@ import java.util.*;
 import java.util.function.Function;
 
 /**
- * A specification of a UI hierarchy parsed from an
+ * A model of a UI hierarchy parsed from an
  * XML definition. You can use this to create a UI adapter for your
  * screen with {@link #createAdapter(Class, Screen)} as well as expanding
  * templates via {@link #expandTemplate(Class, String, Map)}
  */
-public class OwoUISpec {
+public class UIModel {
 
     private final Element componentsElement;
     private final Map<String, Element> templates;
 
     private final Deque<ExpansionFrame> expansionStack = new ArrayDeque<>();
 
-    protected OwoUISpec(Element componentsElement, Map<String, Element> templates) {
+    protected UIModel(Element componentsElement, Map<String, Element> templates) {
         this.componentsElement = componentsElement;
         this.templates = templates;
     }
 
-    protected OwoUISpec(Element docElement) {
+    protected UIModel(Element docElement) {
         docElement.normalize();
         if (!docElement.getNodeName().equals("owo-ui")) {
-            throw new UIParsingException("");
+            throw new UIModelParsingException("");
         }
 
-        final var children = OwoUIParsing.childElements(docElement);
-        if (!children.containsKey("components")) throw new UIParsingException("Missing 'components' element in UI specification");
+        final var children = UIParsing.childElements(docElement);
+        if (!children.containsKey("components")) throw new UIModelParsingException("Missing 'components' element in UI model");
 
-        var componentsList = OwoUIParsing.<Element>allChildrenOfType(children.get("components"), Node.ELEMENT_NODE);
+        var componentsList = UIParsing.<Element>allChildrenOfType(children.get("components"), Node.ELEMENT_NODE);
         if (componentsList.size() == 1) {
             this.componentsElement = componentsList.get(0);
         } else {
-            throw new UIParsingException("Invalid number of children in 'components' element - a single child must be declared");
+            throw new UIModelParsingException("Invalid number of children in 'components' element - a single child must be declared");
         }
 
-        this.templates = OwoUIParsing.get(children, "templates", OwoUIParsing::childElements).orElse(Collections.emptyMap());
+        this.templates = UIParsing.get(children, "templates", UIParsing::childElements).orElse(Collections.emptyMap());
     }
 
     /**
-     * Load the UI specification declared in the given file. If the file cannot
-     * be found or an XML parsing error occurs, and empty specification is
-     * returned and an error is logged
+     * Load the UI model declared in the given file. If the file cannot
+     * be found or an XML parsing error occurs, null is
+     * returned and the error is logged
      *
      * @param path The file to read from
-     * @return The parsed UI specification
+     * @return The parsed UI model
      */
-    public static @Nullable OwoUISpec load(Path path) {
+    public static @Nullable UIModel load(Path path) {
         try (var in = Files.newInputStream(path)) {
             return load(in);
         } catch (Exception error) {
-            Owo.LOGGER.warn("Could not load UI spec from file {}", path, error);
+            Owo.LOGGER.warn("Could not load UI model from file {}", path, error);
             return null;
         }
     }
 
     /**
-     * Load the UI specification declared in the XML document
+     * Load the UI model declared in the XML document
      * encoded by the given input stream. Contrary to {@link #load(Path)},
      * this method throws if a parsing error occurs
      *
      * @param stream The input stream to decode and read
-     * @return The parsed UI specification
+     * @return The parsed UI model
      */
-    public static OwoUISpec load(InputStream stream) throws ParserConfigurationException, IOException, SAXException, UIParsingException {
-        return new OwoUISpec(DocumentBuilderFactory.newDefaultInstance().newDocumentBuilder().parse(stream).getDocumentElement());
+    public static UIModel load(InputStream stream) throws ParserConfigurationException, IOException, SAXException, UIModelParsingException {
+        return new UIModel(DocumentBuilderFactory.newDefaultInstance().newDocumentBuilder().parse(stream).getDocumentElement());
     }
 
     /**
      * Create a UI adapter which contains the component hierarchy
-     * declared by this UI specification, attached to the given screen.
+     * declared by this UI model, attached to the given screen.
      * <p>
      * If there are components in your hierarchy you need to modify in
      * code after the main hierarchy has been parsed, give them an id
@@ -103,7 +103,7 @@ public class OwoUISpec {
     /**
      * Attempt to parse the given XMl element into a component,
      * expanding any templates encountered. If the XML does
-     * not describe a valid component, a {@link UIParsingException}
+     * not describe a valid component, a {@link UIModelParsingException}
      * may be thrown
      *
      * @param componentElement The XML element represented the
@@ -115,16 +115,16 @@ public class OwoUISpec {
         if (componentElement.getNodeName().equals("template")) {
             var templateName = componentElement.getAttribute("name").strip();
             if (templateName.isEmpty()) {
-                throw new UIParsingException("Template element is missing 'name' attribute");
+                throw new UIModelParsingException("Template element is missing 'name' attribute");
             }
 
             var templateParams = new HashMap<String, String>();
             var childParams = new HashMap<String, Element>();
-            for (var element : OwoUIParsing.<Element>allChildrenOfType(componentElement, Node.ELEMENT_NODE)) {
+            for (var element : UIParsing.<Element>allChildrenOfType(componentElement, Node.ELEMENT_NODE)) {
                 if (element.getNodeName().equals("child")) {
                     childParams.put(
                             element.getAttribute("id"),
-                            OwoUIParsing.<Element>allChildrenOfType(element, Node.ELEMENT_NODE).get(0)
+                            UIParsing.<Element>allChildrenOfType(element, Node.ELEMENT_NODE).get(0)
                     );
                 } else {
                     templateParams.put(element.getNodeName(), element.getTextContent());
@@ -134,15 +134,15 @@ public class OwoUISpec {
             return this.expandTemplate(expectedClass, templateName, templateParams::get, childParams::get);
         }
 
-        var component = OwoUIParsing.getFactory(componentElement).apply(componentElement);
-        component.parseProperties(this, componentElement, OwoUIParsing.childElements(componentElement));
+        var component = UIParsing.getFactory(componentElement).apply(componentElement);
+        component.parseProperties(this, componentElement, UIParsing.childElements(componentElement));
 
         if (!expectedClass.isAssignableFrom(component.getClass())) {
             var idString = componentElement.hasAttribute("id")
                     ? " with id '" + componentElement.getAttribute("id") + "'"
                     : "";
 
-            throw new IncompatibleUISpecException(
+            throw new IncompatibleUIModelException(
                     "Expected component '" + componentElement.getNodeName() + "'"
                             + idString
                             + " to be a " + expectedClass.getSimpleName()
@@ -180,7 +180,7 @@ public class OwoUISpec {
 
         var template = (Element) this.templates.get(name);
         if (template == null) {
-            throw new UIParsingException("Unknown template '" + name + "'");
+            throw new UIModelParsingException("Unknown template '" + name + "'");
         } else {
             template = (Element) template.cloneNode(true);
         }
@@ -188,9 +188,9 @@ public class OwoUISpec {
         this.expandChildren(template);
         this.applySubstitutions(template);
 
-        final var component = this.parseComponent(Component.class, OwoUIParsing.<Element>allChildrenOfType(template, Node.ELEMENT_NODE).get(0));
+        final var component = this.parseComponent(Component.class, UIParsing.<Element>allChildrenOfType(template, Node.ELEMENT_NODE).get(0));
         if (!expectedClass.isAssignableFrom(component.getClass())) {
-            throw new IncompatibleUISpecException(
+            throw new IncompatibleUIModelException(
                     "Expected template '" + name + "'"
                             + " to expand into a " + expectedClass.getSimpleName()
                             + ", but it expanded into a " + component.getClass().getSimpleName()
@@ -225,8 +225,8 @@ public class OwoUISpec {
     protected void applySubstitutions(Element template) {
         final var parameterSupplier = this.expansionStack.peek().parameterSupplier;
 
-        for (var child : OwoUIParsing.<Element>allChildrenOfType(template, Node.ELEMENT_NODE)) {
-            for (var node : OwoUIParsing.<Text>allChildrenOfType(child, Node.TEXT_NODE)) {
+        for (var child : UIParsing.<Element>allChildrenOfType(template, Node.ELEMENT_NODE)) {
+            for (var node : UIParsing.<Text>allChildrenOfType(child, Node.TEXT_NODE)) {
                 var textContent = node.getTextContent();
                 if (!textContent.matches("\\{\\{.*}}")) continue;
 
@@ -242,14 +242,14 @@ public class OwoUISpec {
     protected void expandChildren(Element template) {
         final var childSupplier = this.expansionStack.peek().childSupplier;
 
-        for (var child : OwoUIParsing.<Element>allChildrenOfType(template, Node.ELEMENT_NODE)) {
+        for (var child : UIParsing.<Element>allChildrenOfType(template, Node.ELEMENT_NODE)) {
             if (child.getNodeName().equals("template-child")) {
                 var childId = child.getAttribute("id");
 
                 var expanded = childSupplier.apply(childId);
                 if (expanded != null) {
                     expanded = (Element) expanded.cloneNode(true);
-                    for (var element : OwoUIParsing.<Element>allChildrenOfType(child, Node.ELEMENT_NODE)) {
+                    for (var element : UIParsing.<Element>allChildrenOfType(child, Node.ELEMENT_NODE)) {
                         if (expanded.getElementsByTagName(element.getNodeName()).getLength() != 0) continue;
                         expanded.appendChild(element);
                     }

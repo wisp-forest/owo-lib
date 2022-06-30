@@ -1,8 +1,8 @@
 package io.wispforest.owo.ui.definitions;
 
-import io.wispforest.owo.ui.parsing.IncompatibleUISpecException;
-import io.wispforest.owo.ui.parsing.OwoUIParsing;
-import io.wispforest.owo.ui.parsing.OwoUISpec;
+import io.wispforest.owo.ui.parsing.IncompatibleUIModelException;
+import io.wispforest.owo.ui.parsing.UIModel;
+import io.wispforest.owo.ui.parsing.UIParsing;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 
@@ -121,12 +121,12 @@ public interface ParentComponent extends Component {
     }
 
     @Override
-    default void parseProperties(OwoUISpec spec, Element element, Map<String, Element> children) {
-        Component.super.parseProperties(spec, element, children);
-        OwoUIParsing.apply(children, "padding", Insets::parse, this::padding);
-        OwoUIParsing.apply(children, "surface", Surface::parse, this::surface);
-        OwoUIParsing.apply(children, "vertical-alignment", VerticalAlignment::parse, this::verticalAlignment);
-        OwoUIParsing.apply(children, "horizontal-alignment", HorizontalAlignment::parse, this::horizontalAlignment);
+    default void parseProperties(UIModel model, Element element, Map<String, Element> children) {
+        Component.super.parseProperties(model, element, children);
+        UIParsing.apply(children, "padding", Insets::parse, this::padding);
+        UIParsing.apply(children, "surface", Surface::parse, this::surface);
+        UIParsing.apply(children, "vertical-alignment", VerticalAlignment::parse, this::verticalAlignment);
+        UIParsing.apply(children, "horizontal-alignment", HorizontalAlignment::parse, this::horizontalAlignment);
     }
 
     /**
@@ -143,7 +143,7 @@ public interface ParentComponent extends Component {
             if (Objects.equals(child.id(), id)) {
 
                 if (!expectedClass.isAssignableFrom(child.getClass())) {
-                    throw new IncompatibleUISpecException(
+                    throw new IncompatibleUIModelException(
                             "Expected child with id '" + id + "'"
                                     + " to be a " + expectedClass.getSimpleName()
                                     + " but it is a " + child.getClass().getSimpleName()

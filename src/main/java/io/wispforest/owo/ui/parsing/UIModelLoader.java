@@ -12,33 +12,33 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.HashMap;
 
-public class OwoUISpecLoader implements SynchronousResourceReloader, IdentifiableResourceReloadListener {
+public class UIModelLoader implements SynchronousResourceReloader, IdentifiableResourceReloadListener {
 
-    private static final HashMap<Identifier, OwoUISpec> LOADED_SPECS = new HashMap<>();
+    private static final HashMap<Identifier, UIModel> LOADED_MODELS = new HashMap<>();
 
-    public static @Nullable OwoUISpec getPreloaded(Identifier id) {
-        return LOADED_SPECS.getOrDefault(id, null);
+    public static @Nullable UIModel getPreloaded(Identifier id) {
+        return LOADED_MODELS.getOrDefault(id, null);
     }
 
     @Override
     public Identifier getFabricId() {
-        return new Identifier("owo", "ui-spec-loader");
+        return new Identifier("owo", "ui-model-loader");
     }
 
     @Override
     public void reload(ResourceManager manager) {
-        LOADED_SPECS.clear();
+        LOADED_MODELS.clear();
 
         manager.findResources("owo_ui", identifier -> identifier.getPath().endsWith(".xml")).forEach((resourceId, resource) -> {
             try {
-                var specId = new Identifier(
+                var modelId = new Identifier(
                         resourceId.getNamespace(),
                         resourceId.getPath().substring(7, resourceId.getPath().length() - 4)
                 );
 
-                LOADED_SPECS.put(specId, OwoUISpec.load(resource.getInputStream()));
+                LOADED_MODELS.put(modelId, UIModel.load(resource.getInputStream()));
             } catch (ParserConfigurationException | IOException | SAXException e) {
-                Owo.LOGGER.error("Could not parse UI spec {}", resourceId, e);
+                Owo.LOGGER.error("Could not parse UI model {}", resourceId, e);
             }
         });
     }

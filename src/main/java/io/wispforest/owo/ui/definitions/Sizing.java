@@ -1,7 +1,7 @@
 package io.wispforest.owo.ui.definitions;
 
 import io.wispforest.owo.Owo;
-import io.wispforest.owo.ui.parsing.UIParsingException;
+import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import net.minecraft.util.math.MathHelper;
 import org.w3c.dom.Element;
 
@@ -84,7 +84,7 @@ public class Sizing implements Animatable<Sizing> {
     public static Sizing parse(Element sizingElement) {
         var methodString = sizingElement.getAttribute("method");
         if (methodString.isBlank()) {
-            throw new UIParsingException("Missing 'method' attribute on sizing declaration. Must be one of: fixed, content, fill");
+            throw new UIModelParsingException("Missing 'method' attribute on sizing declaration. Must be one of: fixed, content, fill");
         }
 
         var method = Method.valueOf(methodString.toUpperCase(Locale.ROOT));
@@ -92,13 +92,13 @@ public class Sizing implements Animatable<Sizing> {
 
         if (method == Method.CONTENT) {
             if (!value.matches("(-?\\d+)?")) {
-                throw new UIParsingException("Invalid value in sizing declaration");
+                throw new UIModelParsingException("Invalid value in sizing declaration");
             }
 
             return new Sizing(value.isEmpty() ? 0 : Integer.parseInt(value), method);
         } else {
             if (!value.matches("-?\\d+")) {
-                throw new UIParsingException("Invalid value in sizing declaration");
+                throw new UIModelParsingException("Invalid value in sizing declaration");
             }
 
             return new Sizing(Integer.parseInt(value), method);

@@ -2,8 +2,8 @@ package io.wispforest.owo.ui.definitions;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.Drawer;
-import io.wispforest.owo.ui.parsing.OwoUIParsing;
-import io.wispforest.owo.ui.parsing.UIParsingException;
+import io.wispforest.owo.ui.parsing.UIParsing;
+import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import net.minecraft.client.util.math.MatrixStack;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -45,7 +45,7 @@ public interface Surface {
     }
 
     static Surface parse(Element surfaceElement) {
-        var children = OwoUIParsing.<Element>allChildrenOfType(surfaceElement, Node.ELEMENT_NODE);
+        var children = UIParsing.<Element>allChildrenOfType(surfaceElement, Node.ELEMENT_NODE);
         var surface = BLANK;
 
         for (var child : children) {
@@ -54,9 +54,9 @@ public interface Surface {
                         ? DARK_PANEL
                         : PANEL);
                 case "options-background" -> surface.and(OPTIONS_BACKGROUND);
-                case "outline" -> surface.and(outline(OwoUIParsing.parseColor(child)));
-                case "flat" -> surface.and(flat(OwoUIParsing.parseColor(child)));
-                default -> throw new UIParsingException("Unknown surface type '" + child.getNodeName() + "'");
+                case "outline" -> surface.and(outline(UIParsing.parseColor(child)));
+                case "flat" -> surface.and(flat(UIParsing.parseColor(child)));
+                default -> throw new UIModelParsingException("Unknown surface type '" + child.getNodeName() + "'");
             };
         }
 

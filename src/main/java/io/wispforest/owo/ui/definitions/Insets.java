@@ -1,7 +1,7 @@
 package io.wispforest.owo.ui.definitions;
 
-import io.wispforest.owo.ui.parsing.OwoUIParsing;
-import io.wispforest.owo.ui.parsing.UIParsingException;
+import io.wispforest.owo.ui.parsing.UIParsing;
+import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
 import org.w3c.dom.Element;
@@ -76,7 +76,7 @@ public record Insets(int top, int bottom, int left, int right) implements Animat
     public static Insets parse(Element insetsElement) {
         int top = 0, bottom = 0, left = 0, right = 0;
 
-        for (var node : OwoUIParsing.<Element>allChildrenOfType(insetsElement, Node.ELEMENT_NODE)) {
+        for (var node : UIParsing.<Element>allChildrenOfType(insetsElement, Node.ELEMENT_NODE)) {
             try {
                 int value = Integer.parseInt(node.getTextContent().strip());
 
@@ -90,7 +90,7 @@ public record Insets(int top, int bottom, int left, int right) implements Animat
                     case "horizontal" -> left = right = value;
                 }
             } catch (NumberFormatException exception) {
-                throw new UIParsingException("Non-int value in inset declaration");
+                throw new UIModelParsingException("Non-int value in inset declaration");
             }
         }
 

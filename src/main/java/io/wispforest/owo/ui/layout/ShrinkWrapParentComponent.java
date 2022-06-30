@@ -4,9 +4,9 @@ import io.wispforest.owo.ui.BaseParentComponent;
 import io.wispforest.owo.ui.definitions.Component;
 import io.wispforest.owo.ui.definitions.Size;
 import io.wispforest.owo.ui.definitions.Sizing;
-import io.wispforest.owo.ui.parsing.OwoUIParsing;
-import io.wispforest.owo.ui.parsing.OwoUISpec;
-import io.wispforest.owo.ui.parsing.UIParsingException;
+import io.wispforest.owo.ui.parsing.UIModel;
+import io.wispforest.owo.ui.parsing.UIParsing;
+import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -58,13 +58,13 @@ public abstract class ShrinkWrapParentComponent<T extends Component> extends Bas
 
     @Override
     @SuppressWarnings("unchecked")
-    public void parseProperties(OwoUISpec spec, Element element, Map<String, Element> children) {
-        super.parseProperties(spec, element, children);
-        var child = OwoUIParsing.get(children, "child", e -> e).orElseThrow(() -> new UIParsingException("Container declared without child element"));
+    public void parseProperties(UIModel model, Element element, Map<String, Element> children) {
+        super.parseProperties(model, element, children);
+        var child = UIParsing.get(children, "child", e -> e).orElseThrow(() -> new UIModelParsingException("Container declared without child element"));
 
-        var childList = OwoUIParsing.<Element>allChildrenOfType(child, Node.ELEMENT_NODE);
-        if (childList.size() != 1) throw new UIParsingException("Containers must have exactly one child declared");
+        var childList = UIParsing.<Element>allChildrenOfType(child, Node.ELEMENT_NODE);
+        if (childList.size() != 1) throw new UIModelParsingException("Containers must have exactly one child declared");
 
-        this.child((T) spec.parseComponent(Component.class, childList.get(0)));
+        this.child((T) model.parseComponent(Component.class, childList.get(0)));
     }
 }

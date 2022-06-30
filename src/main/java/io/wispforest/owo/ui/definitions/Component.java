@@ -1,8 +1,8 @@
 package io.wispforest.owo.ui.definitions;
 
 import io.wispforest.owo.ui.FocusHandler;
-import io.wispforest.owo.ui.parsing.OwoUIParsing;
-import io.wispforest.owo.ui.parsing.OwoUISpec;
+import io.wispforest.owo.ui.parsing.UIModel;
+import io.wispforest.owo.ui.parsing.UIParsing;
 import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
@@ -110,7 +110,7 @@ public interface Component {
 
     /**
      * Set the id of this component. If this is not unique across the hierarchy,
-     * calls to {@link ParentComponent#childById(String)} may not be deterministic
+     * calls to {@link ParentComponent#childById(Class, String)} may not be deterministic
      *
      * @param id The new id of this component
      */
@@ -313,24 +313,24 @@ public interface Component {
      * Read the properties, and potentially children, of this
      * component from the given XML element
      *
-     * @param spec     The UI specification that's being read from,
+     * @param model    The UI model that's being instantiated,
      *                 used for creating child components
      * @param element  The XML element representing this component
      * @param children The child elements of the XML element representing
      *                 this component by tag name, without duplicates
      */
-    default void parseProperties(OwoUISpec spec, Element element, Map<String, Element> children) {
+    default void parseProperties(UIModel model, Element element, Map<String, Element> children) {
         if (!element.getAttribute("id").isBlank()) {
             this.id(element.getAttribute("id").strip());
         }
 
-        OwoUIParsing.apply(children, "margins", Insets::parse, this::margins);
-        OwoUIParsing.apply(children, "positioning", Positioning::parse, this::positioning);
+        UIParsing.apply(children, "margins", Insets::parse, this::margins);
+        UIParsing.apply(children, "positioning", Positioning::parse, this::positioning);
 
         if (children.containsKey("sizing")) {
-            var sizingValues = OwoUIParsing.childElements(children.get("sizing"));
-            OwoUIParsing.apply(sizingValues, "vertical", Sizing::parse, this::verticalSizing);
-            OwoUIParsing.apply(sizingValues, "horizontal", Sizing::parse, this::horizontalSizing);
+            var sizingValues = UIParsing.childElements(children.get("sizing"));
+            UIParsing.apply(sizingValues, "vertical", Sizing::parse, this::verticalSizing);
+            UIParsing.apply(sizingValues, "horizontal", Sizing::parse, this::horizontalSizing);
         }
     }
 

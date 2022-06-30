@@ -2,8 +2,8 @@ package io.wispforest.owo.mixin.ui;
 
 import io.wispforest.owo.ui.FocusHandler;
 import io.wispforest.owo.ui.inject.ComponentStub;
-import io.wispforest.owo.ui.parsing.OwoUIParsing;
-import io.wispforest.owo.ui.parsing.OwoUISpec;
+import io.wispforest.owo.ui.parsing.UIModel;
+import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.component.VanillaWidgetComponent;
 import io.wispforest.owo.ui.definitions.*;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -180,20 +180,20 @@ public abstract class ClickableWidgetMixin implements ComponentStub {
     }
 
     @Override
-    public void parseProperties(OwoUISpec spec, Element element, Map<String, Element> children) {
+    public void parseProperties(UIModel spec, Element element, Map<String, Element> children) {
         // --- copied from Component, because you can't invoke interface super methods in mixins - very cool ---
 
         if (!element.getAttribute("id").isBlank()) {
             this.id(element.getAttribute("id").strip());
         }
 
-        OwoUIParsing.apply(children, "margins", Insets::parse, this::margins);
-        OwoUIParsing.apply(children, "positioning", Positioning::parse, this::positioning);
+        UIParsing.apply(children, "margins", Insets::parse, this::margins);
+        UIParsing.apply(children, "positioning", Positioning::parse, this::positioning);
 
         if (children.containsKey("sizing")) {
-            var sizingValues = OwoUIParsing.childElements(children.get("sizing"));
-            OwoUIParsing.apply(sizingValues, "vertical", Sizing::parse, this::verticalSizing);
-            OwoUIParsing.apply(sizingValues, "horizontal", Sizing::parse, this::horizontalSizing);
+            var sizingValues = UIParsing.childElements(children.get("sizing"));
+            UIParsing.apply(sizingValues, "vertical", Sizing::parse, this::verticalSizing);
+            UIParsing.apply(sizingValues, "horizontal", Sizing::parse, this::horizontalSizing);
         }
 
         // --- end ---

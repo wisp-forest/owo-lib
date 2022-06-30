@@ -13,7 +13,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class OwoUIParsing {
+public class UIParsing {
 
     private static final Map<String, Function<Element, Component>> COMPONENT_FACTORIES = new HashMap<>();
 
@@ -28,7 +28,7 @@ public class OwoUIParsing {
     public static Function<Element, Component> getFactory(Element element) {
         var factory = COMPONENT_FACTORIES.get(element.getNodeName());
         if (factory == null) {
-            throw new UIParsingException("Unknown component type: " + element.getNodeName());
+            throw new UIModelParsingException("Unknown component type: " + element.getNodeName());
         }
 
         return factory;
@@ -54,7 +54,7 @@ public class OwoUIParsing {
             if (child.getNodeType() != Node.ELEMENT_NODE) continue;
 
             if (map.containsKey(child.getNodeName())) {
-                throw new UIParsingException("Duplicate child " + child.getNodeName() + " in element " + element.getNodeName());
+                throw new UIModelParsingException("Duplicate child " + child.getNodeName() + " in element " + element.getNodeName());
             }
 
             map.put(child.getNodeName(), (Element) child);
@@ -68,7 +68,7 @@ public class OwoUIParsing {
         if (text.matches("#([A-Fa-f\\d]{2}){3,4}")) {
             return Integer.parseUnsignedInt(text.substring(1), 16);
         } else {
-            throw new UIParsingException("Invalid color value '" + text + "', expected hex color of format #RRGGBB or #AARRGGBB");
+            throw new UIModelParsingException("Invalid color value '" + text + "', expected hex color of format #RRGGBB or #AARRGGBB");
         }
     }
 
@@ -85,7 +85,7 @@ public class OwoUIParsing {
         if (data.matches((allowNegative ? "-?" : "") + "\\d+")) {
             return Integer.parseInt(data);
         } else {
-            throw new UIParsingException("Invalid value '" + data + "', expected " + (allowNegative ? "" : "positive") + " integer");
+            throw new UIModelParsingException("Invalid value '" + data + "', expected " + (allowNegative ? "" : "positive") + " integer");
         }
     }
 

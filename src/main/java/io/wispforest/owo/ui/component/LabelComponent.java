@@ -3,8 +3,8 @@ package io.wispforest.owo.ui.component;
 import io.wispforest.owo.ui.BaseComponent;
 import io.wispforest.owo.ui.definitions.Size;
 import io.wispforest.owo.ui.definitions.Sizing;
-import io.wispforest.owo.ui.parsing.OwoUIParsing;
-import io.wispforest.owo.ui.parsing.OwoUISpec;
+import io.wispforest.owo.ui.parsing.UIModel;
+import io.wispforest.owo.ui.parsing.UIParsing;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.util.math.MatrixStack;
@@ -134,11 +134,11 @@ public class LabelComponent extends BaseComponent {
     }
 
     @Override
-    public void parseProperties(OwoUISpec spec, Element element, Map<String, Element> children) {
-        super.parseProperties(spec, element, children);
-        OwoUIParsing.apply(children, "text", OwoUIParsing::parseText, this::text);
-        OwoUIParsing.apply(children, "max-width", OwoUIParsing::parseUnsignedInt, this::maxWidth);
-        OwoUIParsing.apply(children, "color", OwoUIParsing::parseColor, this::color);
-        OwoUIParsing.apply(children, "shadow", OwoUIParsing::parseBool, this::shadow);
+    public void parseProperties(UIModel model, Element element, Map<String, Element> children) {
+        super.parseProperties(model, element, children);
+        UIParsing.apply(children, "text", UIParsing::parseText, this::text);
+        UIParsing.apply(children, "max-width", UIParsing::parseUnsignedInt, this::maxWidth);
+        UIParsing.apply(children, "color", UIParsing::parseColor, this::color);
+        UIParsing.apply(children, "shadow", UIParsing::parseBool, this::shadow);
     }
 }

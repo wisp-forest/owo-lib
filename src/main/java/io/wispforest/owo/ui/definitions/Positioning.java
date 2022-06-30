@@ -1,7 +1,7 @@
 package io.wispforest.owo.ui.definitions;
 
 import io.wispforest.owo.Owo;
-import io.wispforest.owo.ui.parsing.UIParsingException;
+import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import net.minecraft.util.math.MathHelper;
 import org.w3c.dom.Element;
 
@@ -54,14 +54,14 @@ public class Positioning implements Animatable<Positioning> {
     public static Positioning parse(Element positioningElement) {
         var typeString = positioningElement.getAttribute("type");
         if (typeString.isBlank()) {
-            throw new UIParsingException("Missing 'type' attribute on positioning declaration. Must be one of: relative, absolute, layout");
+            throw new UIModelParsingException("Missing 'type' attribute on positioning declaration. Must be one of: relative, absolute, layout");
         }
 
         var type = Type.valueOf(typeString.toUpperCase(Locale.ROOT));
 
         var values = positioningElement.getTextContent().strip();
         if (!values.matches("-?\\d+,-?\\d+")) {
-            throw new UIParsingException("Invalid value in positioning declaration");
+            throw new UIModelParsingException("Invalid value in positioning declaration");
         }
 
         int x = Integer.parseInt(values.split(",")[0]);
