@@ -1,7 +1,7 @@
 package io.wispforest.owo.ui.definitions;
 
-import io.wispforest.owo.ui.parse.OwoUIParsing;
-import io.wispforest.owo.ui.parse.UIParsingException;
+import io.wispforest.owo.ui.parsing.OwoUIParsing;
+import io.wispforest.owo.ui.parsing.UIParsingException;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
 import org.w3c.dom.Element;

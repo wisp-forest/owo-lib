@@ -4,8 +4,8 @@ import io.wispforest.owo.ui.BaseParentComponent;
 import io.wispforest.owo.ui.definitions.Component;
 import io.wispforest.owo.ui.definitions.Size;
 import io.wispforest.owo.ui.definitions.Sizing;
-import io.wispforest.owo.ui.parse.OwoUISpec;
-import io.wispforest.owo.ui.parse.OwoUIParsing;
+import io.wispforest.owo.ui.parsing.OwoUIParsing;
+import io.wispforest.owo.ui.parsing.OwoUISpec;
 import net.minecraft.client.util.math.MatrixStack;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -62,7 +62,7 @@ public abstract class FlowLayout extends BaseParentComponent {
                 .orElse(Collections.emptyList());
 
         for (var child : components) {
-            this.child(spec.parseComponent(child));
+            this.child(spec.parseComponent(Component.class, child));
         }
     }
 }

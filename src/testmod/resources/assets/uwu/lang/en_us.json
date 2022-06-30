@@ -16,6 +16,22 @@
       "color": "#3AB0FF"
     }
   ],
+  "text.uwu.config_screen": [
+    "very epic ",
+    {
+      "text": "o",
+      "color": "#3955e5"
+    },
+    {
+      "text": "ω",
+      "color": "#13a6f0"
+    },
+    {
+      "text": "o",
+      "color": "#3955e5"
+    },
+    " config"
+  ],
   "item.uowou.owo_ingot": "oωo Ingot",
   "itemGroup.uwu.four_tab_group": "uωu",
   "itemGroup.uwu.four_tab_group.tab.tab_1": "Tab 1",

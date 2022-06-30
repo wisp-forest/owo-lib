@@ -1,0 +1,120 @@
+<owo-ui>
+
+    <components>
+        <flow-layout direction="vertical">
+            <children>
+                <label>
+                    <text>very epic owo config</text>
+                    <shadow>true</shadow>
+                    <margins>
+                        <bottom>15</bottom>
+                    </margins>
+                </label>
+
+                <scroll direction="vertical">
+
+                    <child>
+                        <flow-layout direction="vertical" id="config-panel"/>
+                    </child>
+
+                    <sizing>
+                        <horizontal method="fill">90</horizontal>
+                        <vertical method="fill">85</vertical>
+                    </sizing>
+
+                    <surface>
+                        <flat>#77000000</flat>
+                        <outline>#FF121212</outline>
+                    </surface>
+
+                    <scrollbar-thiccness>3</scrollbar-thiccness>
+
+                    <padding>
+                        <all>1</all>
+                    </padding>
+
+                </scroll>
+            </children>
+
+            <vertical-alignment>center</vertical-alignment>
+            <horizontal-alignment>center</horizontal-alignment>
+
+            <surface>
+                <flat>#77000000</flat>
+            </surface>
+
+            <sizing>
+                <horizontal method="fill">100</horizontal>
+                <vertical method="fill">100</vertical>
+            </sizing>
+        </flow-layout>
+    </components>
+
+    <templates>
+        <config-option>
+            <flow-layout direction="horizontal">
+                <children>
+                    <label>
+                        <text>{{config-option-name}}</text>
+                        <positioning type="relative">0,50</positioning>
+                    </label>
+
+                    <flow-layout direction="horizontal">
+                        <children>
+                            <template-child id="value-container">
+                                <sizing>
+                                    <horizontal method="fixed">120</horizontal>
+                                </sizing>
+                            </template-child>
+
+                            <button id="reset-button">
+                                <text>⇄</text>
+                                <margins>
+                                    <horizontal>5</horizontal>
+                                </margins>
+                            </button>
+                        </children>
+
+                        <positioning type="relative">100,50</positioning>
+                        <vertical-alignment>center</vertical-alignment>
+                    </flow-layout>
+                </children>
+
+                <sizing>
+                    <horizontal method="fill">100</horizontal>
+                    <vertical method="fixed">32</vertical>
+                </sizing>
+
+                <padding>
+                    <all>5</all>
+                </padding>
+
+            </flow-layout>
+        </config-option>
+
+        <text-config-option>
+            <template name="config-option">
+                <child id="value-container">
+                    <text-box id="value-box">
+                        <text>{{config-option-value}}</text>
+                    </text-box>
+                </child>
+            </template>
+        </text-config-option>
+
+        <range-config-option>
+            <template name="config-option">
+                <child id="value-container">
+                    <slider id="value-slider">
+                        <text>{{config-option-value}}</text>
+                        <margins>
+                            <all>1</all>
+                        </margins>
+                    </slider>
+                </child>
+            </template>
+        </range-config-option>
+    </templates>
+
+</owo-ui>
+

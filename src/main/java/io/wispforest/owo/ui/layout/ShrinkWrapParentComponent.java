@@ -4,9 +4,9 @@ import io.wispforest.owo.ui.BaseParentComponent;
 import io.wispforest.owo.ui.definitions.Component;
 import io.wispforest.owo.ui.definitions.Size;
 import io.wispforest.owo.ui.definitions.Sizing;
-import io.wispforest.owo.ui.parse.OwoUISpec;
-import io.wispforest.owo.ui.parse.OwoUIParsing;
-import io.wispforest.owo.ui.parse.UIParsingException;
+import io.wispforest.owo.ui.parsing.OwoUIParsing;
+import io.wispforest.owo.ui.parsing.OwoUISpec;
+import io.wispforest.owo.ui.parsing.UIParsingException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -65,6 +65,6 @@ public abstract class ShrinkWrapParentComponent<T extends Component> extends Bas
         var childList = OwoUIParsing.<Element>allChildrenOfType(child, Node.ELEMENT_NODE);
         if (childList.size() != 1) throw new UIParsingException("Containers must have exactly one child declared");
 
-        this.child((T) spec.parseComponent(childList.get(0)));
+        this.child((T) spec.parseComponent(Component.class, childList.get(0)));
     }
 }

@@ -314,38 +314,6 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
         );
     }
 
-    // TODO move this to the ui adapter
-
-    /**
-     * Execute the given layout function, catching any exceptions it throws
-     * and displaying them in the UI
-     *
-     * @param labelConsumer   A function for adding a descriptive label to the UI
-     * @param failureCallback A function to run if an exception is thrown
-     * @param layoutFunc      The layout function
-     */
-    protected void layoutSafely(Consumer<LabelComponent> labelConsumer, Runnable failureCallback, Runnable layoutFunc) {
-        try {
-            layoutFunc.run();
-        } catch (Throwable error) {
-            failureCallback.run();
-
-            final var out = new CharArrayWriter();
-            error.printStackTrace(new PrintWriter(out));
-            Owo.LOGGER.warn("Layout inflation of component " + this.getClass().getSimpleName() + "@" + Integer.toHexString(this.hashCode()) + " failed", error);
-
-            var traceLines = out.toString().lines().collect(Collectors.toList());
-            traceLines.add(0, "");
-            traceLines.add(0, "Layout inflation failed --- Error below");
-            for (int i = 0; i < traceLines.size(); i++) {
-                final var label = new LabelComponent(Text.literal(traceLines.get(i).replace("\t", "    "))).color(0xFF0000);
-                label.inflate(this.space);
-                label.mount(this, this.x(), this.y() + i * 11);
-                labelConsumer.accept(label);
-            }
-        }
-    }
-
     @Override
     public BaseParentComponent positioning(Positioning positioning) {
         return (BaseParentComponent) super.positioning(positioning);

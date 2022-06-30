@@ -6,7 +6,6 @@ import io.wispforest.owo.ui.layout.FlowLayout;
 import io.wispforest.owo.ui.layout.Layouts;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.SliderWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
 
@@ -54,14 +53,10 @@ public class Components {
         return textBox;
     }
 
-    public static SliderWidget slider(Sizing horizontalSizing, Text message) {
-        return createSized(() -> new SliderWidget(0, 0, 0, 0, message, .5) {
-            @Override
-            protected void updateMessage() {}
-
-            @Override
-            protected void applyValue() {}
-        }, horizontalSizing, Sizing.fixed(20));
+    public static SliderComponent slider(Sizing horizontalSizing, Text message) {
+        final var slider = createSized(SliderComponent::new, horizontalSizing, Sizing.fixed(20));
+        slider.setMessage(message);
+        return slider;
     }
 
     public static <T extends Component> T createSized(Supplier<T> componentMaker, Sizing horizontalSizing, Sizing verticalSizing) {

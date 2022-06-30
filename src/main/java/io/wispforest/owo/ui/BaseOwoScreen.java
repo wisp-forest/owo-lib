@@ -4,7 +4,9 @@ import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.definitions.ParentComponent;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -33,6 +35,13 @@ public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen {
      */
     protected OwoUIAdapter<R> uiAdapter = null;
 
+    /**
+     * Whether this screen has encountered an unrecoverable
+     * error during its lifecycle and should this close
+     * itself on the next frame
+     */
+    protected boolean invalid = false;
+
     protected BaseOwoScreen(Text title) {
         super(title);
     }
@@ -48,7 +57,7 @@ public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen {
      *
      * @return The UI adapter for this screen to use
      */
-    protected abstract OwoUIAdapter<R> createAdapter();
+    protected abstract @NotNull OwoUIAdapter<R> createAdapter();
 
     /**
      * Build the component hierarchy of this screen,
@@ -62,19 +71,32 @@ public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen {
 
     @Override
     protected void init() {
+        if (this.invalid) return;
+
         if (this.uiAdapter != null) {
             this.uiAdapter.dispose();
         }
 
-        this.uiAdapter = this.createAdapter();
         try {
+            this.uiAdapter = this.createAdapter();
             this.build(this.uiAdapter.rootComponent);
-        } catch (Exception error) {
-            Owo.LOGGER.warn("Could not build owo screen", error);
-        }
 
-        this.uiAdapter.inflateAndMount();
-        this.client.keyboard.setRepeatEvents(true);
+            this.uiAdapter.inflateAndMount();
+            this.client.keyboard.setRepeatEvents(true);
+        } catch (Exception error) {
+            Owo.LOGGER.warn("Could not initialize owo screen", error);
+            UIErrorToast.report(error);
+            this.invalid = true;
+        }
+    }
+
+    @Override
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+        if (!this.invalid) {
+            super.render(matrices, mouseX, mouseY, delta);
+        } else {
+            this.close();
+        }
     }
 
     @Override
@@ -100,7 +122,7 @@ public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen {
 
     @Override
     public void removed() {
-        this.uiAdapter.dispose();
+        if (this.uiAdapter != null) this.uiAdapter.dispose();
         this.client.keyboard.setRepeatEvents(false);
     }
 }

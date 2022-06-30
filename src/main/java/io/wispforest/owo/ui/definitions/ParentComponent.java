@@ -1,7 +1,8 @@
 package io.wispforest.owo.ui.definitions;
 
-import io.wispforest.owo.ui.parse.OwoUIParsing;
-import io.wispforest.owo.ui.parse.OwoUISpec;
+import io.wispforest.owo.ui.parsing.IncompatibleUISpecException;
+import io.wispforest.owo.ui.parsing.OwoUIParsing;
+import io.wispforest.owo.ui.parsing.OwoUISpec;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 
@@ -137,12 +138,21 @@ public interface ParentComponent extends Component {
      * none was found
      */
     @SuppressWarnings("unchecked")
-    default <T extends Component> @Nullable T childById(String id) {
+    default <T extends Component> @Nullable T childById(Class<T> expectedClass, String id) {
         for (var child : this.children()) {
             if (Objects.equals(child.id(), id)) {
+
+                if (!expectedClass.isAssignableFrom(child.getClass())) {
+                    throw new IncompatibleUISpecException(
+                            "Expected child with id '" + id + "'"
+                                    + " to be a " + expectedClass.getSimpleName()
+                                    + " but it is a " + child.getClass().getSimpleName()
+                    );
+                }
+
                 return (T) child;
             } else if (child instanceof ParentComponent parent) {
-                var candidate = parent.<T>childById(id);
+                var candidate = parent.childById(expectedClass, id);
                 if (candidate != null) return candidate;
             }
         }

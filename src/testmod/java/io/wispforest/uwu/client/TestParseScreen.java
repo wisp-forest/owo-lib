@@ -1,34 +1,26 @@
 package io.wispforest.uwu.client;
 
-import io.wispforest.owo.ui.BaseOwoScreen;
-import io.wispforest.owo.ui.OwoUIAdapter;
+import io.wispforest.owo.ui.BaseUISpecScreen;
+import io.wispforest.owo.ui.component.SliderComponent;
 import io.wispforest.owo.ui.definitions.Component;
-import io.wispforest.owo.ui.definitions.ParentComponent;
+import io.wispforest.owo.ui.layout.FlowLayout;
 import io.wispforest.owo.ui.layout.VerticalFlowLayout;
-import io.wispforest.owo.ui.parse.OwoUISpec;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.SliderWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.util.Identifier;
 
-import java.nio.file.Path;
 import java.util.Map;
 
-public class TestParseScreen extends BaseOwoScreen<ParentComponent> {
-
-    private final OwoUISpec spec;
+public class TestParseScreen extends BaseUISpecScreen<FlowLayout> {
 
     public TestParseScreen() {
-        this.spec = OwoUISpec.load(Path.of("config_ui.xml"));
+        super(FlowLayout.class, DataSource.release(new Identifier("owo", "config_ui")));
     }
 
     @Override
-    protected OwoUIAdapter<ParentComponent> createAdapter() {
-        return this.spec.createAdapter(this);
-    }
-
-    @Override
-    protected void build(ParentComponent rootComponent) {
-        var panel = rootComponent.<VerticalFlowLayout>childById("config-panel");
+    protected void build(FlowLayout rootComponent) {
+        var panel = rootComponent.childById(VerticalFlowLayout.class, "config-panel");
+        long now = System.nanoTime();
 
         for (int i = 0; i < 25; i++) {
             panel.child(i % 2 == 0
@@ -36,19 +28,22 @@ public class TestParseScreen extends BaseOwoScreen<ParentComponent> {
                     : this.createRangeOption(i)
             );
         }
+
+        long diff = System.nanoTime() - now;
+        System.out.printf("Config screen built in %.3fms\n", diff / 1000000f);
     }
 
     protected Component createTextOption(final int index) {
-        var option = this.spec.expandTemplate(
+        var option = this.spec.expandTemplate(FlowLayout.class,
                 "text-config-option",
                 Map.of(
-                        "config-option-name", "very epic option # " + index,
+                        "config-option-name", "very epic option #" + index,
                         "config-option-value", String.valueOf(index * index)
                 )
         );
 
-        var valueBox = ((ParentComponent) option).<TextFieldWidget>childById("value-box");
-        ((ParentComponent) option).<ButtonWidget>childById("reset-button").onPress(button -> {
+        var valueBox = option.childById(TextFieldWidget.class, "value-box");
+        option.childById(ButtonWidget.class, "reset-button").onPress(button -> {
             valueBox.setText(String.valueOf(index * index));
         });
 
@@ -56,19 +51,19 @@ public class TestParseScreen extends BaseOwoScreen<ParentComponent> {
     }
 
     protected Component createRangeOption(final int index) {
-        var option = this.spec.expandTemplate(
+        var option = this.spec.expandTemplate(FlowLayout.class,
                 "range-config-option",
                 Map.of(
-                        "config-option-name", "very epic option # " + index,
+                        "config-option-name", "very epic option #" + index,
                         "config-option-value", String.valueOf(index * index)
                 )
         );
 
-        var valueSlider = ((ParentComponent) option).<SliderWidget>childById("value-slider");
-        valueSlider.onClick(valueSlider.x + ((index * index) / 600d) * valueSlider.width(), 0);
+        var valueSlider = option.childById(SliderComponent.class, "value-slider");
+        valueSlider.value((index * index) / 500d);
 
-        ((ParentComponent) option).<ButtonWidget>childById("reset-button").onPress(button -> {
-            valueSlider.onClick(valueSlider.x + ((index * index) / 600d) * valueSlider.width(), 0);
+        option.childById(ButtonWidget.class, "reset-button").onPress(button -> {
+            valueSlider.value((index * index) / 500d);
         });
 
         return option;

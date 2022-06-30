@@ -1,8 +1,8 @@
 package io.wispforest.owo.ui.definitions;
 
 import io.wispforest.owo.ui.FocusHandler;
-import io.wispforest.owo.ui.parse.OwoUIParsing;
-import io.wispforest.owo.ui.parse.OwoUISpec;
+import io.wispforest.owo.ui.parsing.OwoUIParsing;
+import io.wispforest.owo.ui.parsing.OwoUISpec;
 import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;

@@ -2,8 +2,8 @@ package io.wispforest.owo.ui.definitions;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.Drawer;
-import io.wispforest.owo.ui.parse.OwoUIParsing;
-import io.wispforest.owo.ui.parse.UIParsingException;
+import io.wispforest.owo.ui.parsing.OwoUIParsing;
+import io.wispforest.owo.ui.parsing.UIParsingException;
 import net.minecraft.client.util.math.MatrixStack;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;

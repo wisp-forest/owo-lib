@@ -2,8 +2,8 @@ package io.wispforest.owo.mixin.ui;
 
 import io.wispforest.owo.ui.definitions.CursorStyle;
 import io.wispforest.owo.ui.inject.ButtonWidgetExtension;
-import io.wispforest.owo.ui.parse.OwoUIParsing;
-import io.wispforest.owo.ui.parse.OwoUISpec;
+import io.wispforest.owo.ui.parsing.OwoUIParsing;
+import io.wispforest.owo.ui.parsing.OwoUISpec;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.text.Text;
@@ -39,7 +39,8 @@ public abstract class ButtonWidgetMixin extends ClickableWidget implements Butto
     }
 
     @Override
-    public void onPress(ButtonWidget.PressAction pressAction) {
+    public ButtonWidget onPress(ButtonWidget.PressAction pressAction) {
         this.onPress = pressAction;
+        return (ButtonWidget) (Object) this;
     }
 }

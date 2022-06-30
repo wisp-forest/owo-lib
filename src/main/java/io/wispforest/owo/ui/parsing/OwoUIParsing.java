@@ -1,4 +1,4 @@
-package io.wispforest.owo.ui.parse;
+package io.wispforest.owo.ui.parsing;
 
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.definitions.Component;

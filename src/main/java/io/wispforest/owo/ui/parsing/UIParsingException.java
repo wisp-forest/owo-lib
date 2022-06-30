@@ -1,4 +1,4 @@
-package io.wispforest.owo.ui.parse;
+package io.wispforest.owo.ui.parsing;
 
 public class UIParsingException extends RuntimeException {
 

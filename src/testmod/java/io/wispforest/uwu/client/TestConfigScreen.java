@@ -11,6 +11,7 @@ import io.wispforest.owo.ui.layout.Layouts;
 import io.wispforest.owo.ui.layout.ScrollContainer;
 import io.wispforest.owo.ui.layout.VerticalFlowLayout;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
@@ -24,7 +25,7 @@ import java.util.stream.IntStream;
 public class TestConfigScreen extends BaseOwoScreen<VerticalFlowLayout> {
 
     @Override
-    protected OwoUIAdapter<VerticalFlowLayout> createAdapter() {
+    protected @NotNull OwoUIAdapter<VerticalFlowLayout> createAdapter() {
         return OwoUIAdapter.create(this, Layouts::verticalFlow);
     }
 
