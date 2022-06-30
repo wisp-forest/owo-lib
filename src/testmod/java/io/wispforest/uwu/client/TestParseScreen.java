@@ -4,7 +4,6 @@ import io.wispforest.owo.ui.BaseUIModelScreen;
 import io.wispforest.owo.ui.component.SliderComponent;
 import io.wispforest.owo.ui.definitions.Component;
 import io.wispforest.owo.ui.layout.FlowLayout;
-import io.wispforest.owo.ui.layout.VerticalFlowLayout;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 
@@ -13,23 +12,23 @@ import java.util.Map;
 public class TestParseScreen extends BaseUIModelScreen<FlowLayout> {
 
     public TestParseScreen() {
-        super(FlowLayout.class, DataSource.debug("config_ui.xml"));
+        super(FlowLayout.class, DataSource.debug("epic_ui.xml"));
     }
 
     @Override
     protected void build(FlowLayout rootComponent) {
-        var panel = rootComponent.childById(VerticalFlowLayout.class, "config-panel");
-        long now = System.nanoTime();
-
-        for (int i = 1; i <= 25; i++) {
-            panel.child(i % 2 == 0
-                    ? this.createTextOption(i)
-                    : this.createRangeOption(i)
-            );
-        }
-
-        long diff = System.nanoTime() - now;
-        System.out.printf("Config screen built in %.3fms\n", diff / 1000000f);
+//        var panel = rootComponent.childById(VerticalFlowLayout.class, "config-panel");
+//        long now = System.nanoTime();
+//
+//        for (int i = 1; i <= 25; i++) {
+//            panel.child(i % 2 == 0
+//                    ? this.createTextOption(i)
+//                    : this.createRangeOption(i)
+//            );
+//        }
+//
+//        long diff = System.nanoTime() - now;
+//        System.out.printf("Config screen built in %.3fms\n", diff / 1000000f);
     }
 
     protected Component createTextOption(final int index) {

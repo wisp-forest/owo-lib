@@ -5,8 +5,8 @@ import io.wispforest.owo.ui.definitions.Component;
 import io.wispforest.owo.ui.definitions.Size;
 import io.wispforest.owo.ui.definitions.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
-import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
+import io.wispforest.owo.ui.parsing.UIParsing;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -14,11 +14,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
-public abstract class ShrinkWrapParentComponent<T extends Component> extends BaseParentComponent {
+public abstract class WrappingParentComponent<T extends Component> extends BaseParentComponent {
 
     protected T child;
 
-    protected ShrinkWrapParentComponent(Sizing horizontalSizing, Sizing verticalSizing, T child) {
+    protected WrappingParentComponent(Sizing horizontalSizing, Sizing verticalSizing, T child) {
         super(horizontalSizing, verticalSizing);
         this.child = child;
     }
@@ -41,7 +41,11 @@ public abstract class ShrinkWrapParentComponent<T extends Component> extends Bas
         this.child.mount(this, this.x + child.margins().get().left() + padding.left(), this.y + child.margins().get().top() + padding.top());
     }
 
-    public ShrinkWrapParentComponent<T> child(T newChild) {
+    public WrappingParentComponent<T> child(T newChild) {
+        if (this.child != null) {
+            this.child.onDismounted(DismountReason.REMOVED);
+        }
+
         this.child = newChild;
         this.updateLayout();
         return this;

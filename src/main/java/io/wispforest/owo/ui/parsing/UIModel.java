@@ -43,7 +43,7 @@ public class UIModel {
     protected UIModel(Element docElement) {
         docElement.normalize();
         if (!docElement.getNodeName().equals("owo-ui")) {
-            throw new UIModelParsingException("");
+            throw new UIModelParsingException("Missing owo-ui root element");
         }
 
         final var children = UIParsing.childElements(docElement);
@@ -95,6 +95,11 @@ public class UIModel {
      * If there are components in your hierarchy you need to modify in
      * code after the main hierarchy has been parsed, give them an id
      * and look them up via {@link ParentComponent#childById(Class, String)}
+     *
+     * @param expectedRootComponentClass The class the created root component is expected to have.
+     *                                   Should this be violated, an exception is thrown. If there
+     *                                   are no specific expectations about the type of
+     *                                   root component to create, pass {@link Component}
      */
     public <T extends ParentComponent> OwoUIAdapter<T> createAdapter(Class<T> expectedRootComponentClass, Screen screen) {
         return OwoUIAdapter.create(screen, (horizontalSizing, verticalSizing) -> this.parseComponentTree(expectedRootComponentClass));
@@ -106,6 +111,10 @@ public class UIModel {
      * not describe a valid component, a {@link UIModelParsingException}
      * may be thrown
      *
+     * @param expectedClass    The class the parsed component is expected to
+     *                         have. Should this be violated, an exception is
+     *                         thrown. If there are no specific expectations about
+     *                         the type of component to parse, pass {@link Component}
      * @param componentElement The XML element represented the
      *                         component to parse.
      * @return The parsed component
@@ -159,6 +168,10 @@ public class UIModel {
      * function and creating template children using the given
      * child supplier
      *
+     * @param expectedClass     The class the expanded template is expected to
+     *                          have. Should this be violated, an exception is
+     *                          thrown. If there are no specific expectations about
+     *                          the type of component to create, pass {@link Component}
      * @param name              The name of the template to expand
      * @param parameterSupplier The parameter mapping function to invoke
      *                          for each parameter encountered in the template
@@ -207,9 +220,13 @@ public class UIModel {
      * elements, this method will most likely fail because
      * parameters for those can only be provided in XML
      *
-     * @param name       The name of the template to expand
-     * @param parameters The parameter mappings to apply while
-     *                   expanding the template
+     * @param expectedClass The class the expanded template is expected to
+     *                      have. Should this be violated, an exception is
+     *                      thrown. If there are no specific expectations about
+     *                      the type of component to create, pass {@link Component}
+     * @param name          The name of the template to expand
+     * @param parameters    The parameter mappings to apply while
+     *                      expanding the template
      * @return The expanded template parsed into a component
      */
     public <T extends Component> T expandTemplate(Class<T> expectedClass, String name, Map<String, String> parameters) {

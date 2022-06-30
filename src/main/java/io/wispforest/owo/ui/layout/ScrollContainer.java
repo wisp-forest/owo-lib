@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-public class ScrollContainer<T extends Component> extends ShrinkWrapParentComponent<T> {
+public class ScrollContainer<T extends Component> extends WrappingParentComponent<T> {
 
     protected double scrollOffset = 0;
     protected double currentScrollPosition = 0;

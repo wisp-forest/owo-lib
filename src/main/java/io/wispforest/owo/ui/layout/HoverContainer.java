@@ -8,10 +8,10 @@ import net.minecraft.client.util.math.MatrixStack;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class HoverContainer<T extends Component> extends ShrinkWrapParentComponent<T> {
+public class HoverContainer<T extends Component> extends WrappingParentComponent<T> {
 
-    protected final Consumer<T> onMouseEnter;
-    protected final Consumer<T> onMouseLeave;
+    protected Consumer<T> onMouseEnter;
+    protected Consumer<T> onMouseLeave;
 
     protected boolean hovered = false;
 
@@ -21,9 +21,23 @@ public class HoverContainer<T extends Component> extends ShrinkWrapParentCompone
         this.onMouseLeave = onMouseLeave;
     }
 
+    public static <T extends Component> HoverContainer<T> of(T child, Consumer<T> onMouseEnter, Consumer<T> onMouseLeave) {
+        return new HoverContainer<>(child, onMouseEnter, onMouseLeave);
+    }
+
     public static <T extends Component> HoverContainer<T> forAnimation(T child, Function<T, Animation<?>> animationMaker) {
         var animation = animationMaker.apply(child);
         return new HoverContainer<>(child, t -> animation.reverse(), t -> animation.reverse());
+    }
+
+    public HoverContainer<T> onMouseEnter(Consumer<T> onMouseEnter) {
+        this.onMouseEnter = onMouseEnter;
+        return this;
+    }
+
+    public HoverContainer<T> onMouseLeave(Consumer<T> onMouseLeave) {
+        this.onMouseLeave = onMouseLeave;
+        return this;
     }
 
     @Override

@@ -4,14 +4,15 @@ import io.wispforest.owo.ui.BaseParentComponent;
 import io.wispforest.owo.ui.definitions.Component;
 import io.wispforest.owo.ui.definitions.Size;
 import io.wispforest.owo.ui.definitions.Sizing;
+import io.wispforest.owo.ui.parsing.UIModel;
+import io.wispforest.owo.ui.parsing.UIParsing;
 import net.minecraft.client.util.math.MatrixStack;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class GridLayout extends BaseParentComponent {
 
@@ -136,5 +137,23 @@ public class GridLayout extends BaseParentComponent {
     @Override
     public Collection<Component> children() {
         return this.nonNullChildren;
+    }
+
+    @Override
+    public void parseProperties(UIModel model, Element element, Map<String, Element> children) {
+        super.parseProperties(model, element, children);
+
+        final var components = UIParsing
+                .get(children, "children", e -> UIParsing.<Element>allChildrenOfType(e, Node.ELEMENT_NODE))
+                .orElse(Collections.emptyList());
+
+        for (var child : components) {
+            UIParsing.expectAttributes(child, "row", "column");
+
+            int row = UIParsing.parseUnsignedInt(child.getAttributeNode("row"));
+            int column = UIParsing.parseUnsignedInt(child.getAttributeNode("column"));
+
+            this.child(model.parseComponent(Component.class, child), row, column);
+        }
     }
 }
