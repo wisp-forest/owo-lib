@@ -12,7 +12,7 @@ import java.util.Map;
 public class TestParseScreen extends BaseUIModelScreen<FlowLayout> {
 
     public TestParseScreen() {
-        super(FlowLayout.class, DataSource.debug("epic_ui.xml"));
+        super(FlowLayout.class, DataSource.file("epic_ui.xml"));
     }
 
     @Override

@@ -4,6 +4,10 @@ import io.wispforest.owo.ui.definitions.*;
 import io.wispforest.owo.util.Observable;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * The reference implementation of the {@link Component} interface,
+ * ideally you should extend this when making your own components
+ */
 public abstract class BaseComponent implements Component {
 
     @Nullable protected ParentComponent parent = null;

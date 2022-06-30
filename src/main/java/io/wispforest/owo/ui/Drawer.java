@@ -12,6 +12,10 @@ import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
 
+/**
+ * An extension of vanilla's {@link DrawableHelper} with all methods
+ * statically accessible as well as extra convenience methods
+ */
 public class Drawer extends DrawableHelper {
 
     private static final Drawer INSTANCE = new Drawer();
@@ -93,7 +97,7 @@ public class Drawer extends DrawableHelper {
         return INSTANCE.debug;
     }
 
-    public class DebugDrawer {
+    public static class DebugDrawer {
 
         /**
          * Draw the area around the given rectangle which

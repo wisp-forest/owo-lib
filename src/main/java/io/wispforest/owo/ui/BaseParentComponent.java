@@ -1,19 +1,19 @@
 package io.wispforest.owo.ui;
 
-import io.wispforest.owo.Owo;
-import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.definitions.*;
 import io.wispforest.owo.util.Observable;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
-import java.io.CharArrayWriter;
-import java.io.PrintWriter;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
+/**
+ * The reference implementation of the {@link ParentComponent} interface,
+ * serving as a base for all parent components on owo-ui. If you need your own parent
+ * component, it is often beneficial to subclass one of owo-ui's existing layout classes,
+ * especially {@link io.wispforest.owo.ui.layout.WrappingParentComponent} is often useful
+ */
 public abstract class BaseParentComponent extends BaseComponent implements ParentComponent {
 
     protected Observable<VerticalAlignment> verticalAlignment = Observable.of(VerticalAlignment.TOP);
