@@ -7,14 +7,13 @@ import io.wispforest.owo.ui.layout.FlowLayout;
 import io.wispforest.owo.ui.layout.VerticalFlowLayout;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.util.Identifier;
 
 import java.util.Map;
 
 public class TestParseScreen extends BaseUISpecScreen<FlowLayout> {
 
     public TestParseScreen() {
-        super(FlowLayout.class, DataSource.release(new Identifier("owo", "config_ui")));
+        super(FlowLayout.class, DataSource.debug("config_ui.xml"));
     }
 
     @Override
@@ -22,7 +21,7 @@ public class TestParseScreen extends BaseUISpecScreen<FlowLayout> {
         var panel = rootComponent.childById(VerticalFlowLayout.class, "config-panel");
         long now = System.nanoTime();
 
-        for (int i = 0; i < 25; i++) {
+        for (int i = 1; i <= 25; i++) {
             panel.child(i % 2 == 0
                     ? this.createTextOption(i)
                     : this.createRangeOption(i)
@@ -60,10 +59,10 @@ public class TestParseScreen extends BaseUISpecScreen<FlowLayout> {
         );
 
         var valueSlider = option.childById(SliderComponent.class, "value-slider");
-        valueSlider.value((index * index) / 500d);
+        valueSlider.value((index * index) / 625d);
 
         option.childById(ButtonWidget.class, "reset-button").onPress(button -> {
-            valueSlider.value((index * index) / 500d);
+            valueSlider.value((index * index) / 625d);
         });
 
         return option;

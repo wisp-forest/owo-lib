@@ -40,7 +40,7 @@ public class TestConfigScreen extends BaseOwoScreen<VerticalFlowLayout> {
                 .toList();
 
         rootComponent.child(Components.label(
-                Text.literal("very epic ").append(Owo.PREFIX).append(" config")
+                Text.literal("very epic ").append(Owo.PREFIX).append("config")
         ).shadow(true).margins(Insets.bottom(15)));
 
         final var optionsScrollContainer = ScrollContainer.vertical(

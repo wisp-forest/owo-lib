@@ -19,6 +19,10 @@
   "text.uwu.config_screen": [
     "very epic ",
     {
+      "text": "[",
+      "color": "gray"
+    },
+    {
       "text": "o",
       "color": "#3955e5"
     },
@@ -29,6 +33,10 @@
     {
       "text": "o",
       "color": "#3955e5"
+    },
+    {
+      "text": "]",
+      "color": "gray"
     },
     " config"
   ],

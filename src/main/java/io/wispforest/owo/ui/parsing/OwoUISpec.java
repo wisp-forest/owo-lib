@@ -3,7 +3,6 @@ package io.wispforest.owo.ui.parsing;
 
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.OwoUIAdapter;
-import io.wispforest.owo.ui.UIErrorToast;
 import io.wispforest.owo.ui.definitions.Component;
 import io.wispforest.owo.ui.definitions.ParentComponent;
 import io.wispforest.owo.ui.definitions.Sizing;
@@ -139,11 +138,15 @@ public class OwoUISpec {
         component.parseProperties(this, componentElement, OwoUIParsing.childElements(componentElement));
 
         if (!expectedClass.isAssignableFrom(component.getClass())) {
+            var idString = componentElement.hasAttribute("id")
+                    ? " with id '" + componentElement.getAttribute("id") + "'"
+                    : "";
+
             throw new IncompatibleUISpecException(
                     "Expected component '" + componentElement.getNodeName() + "'"
-                            + " with id '" + componentElement.getAttribute("id") + "'"
+                            + idString
                             + " to be a " + expectedClass.getSimpleName()
-                            + " but it is a " + component.getClass().getSimpleName()
+                            + ", but it is a " + component.getClass().getSimpleName()
             );
         }
 
@@ -190,7 +193,7 @@ public class OwoUISpec {
             throw new IncompatibleUISpecException(
                     "Expected template '" + name + "'"
                             + " to expand into a " + expectedClass.getSimpleName()
-                            + " but it expanded to a " + component.getClass().getSimpleName()
+                            + ", but it expanded into a " + component.getClass().getSimpleName()
             );
         }
 
