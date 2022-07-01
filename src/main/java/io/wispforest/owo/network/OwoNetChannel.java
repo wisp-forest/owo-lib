@@ -28,8 +28,6 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -37,7 +35,7 @@ import java.util.stream.Collectors;
  * An efficient networking abstraction that uses {@code record}s to store
  * and define packet data. Serialization for most types is fully automatic
  * and no custom handling needs to be done, should one of your record
- * components be of an unsupported type use {@link PacketBufSerializer#register(Class, BiConsumer, Function)}
+ * components be of an unsupported type use {@link PacketBufSerializer#register(Class, PacketByteBuf.PacketWriter, PacketByteBuf.PacketReader)}
  * to register a custom serializer.
  *
  * <p> To define a packet class suited for use with this wrapper, simply create a
@@ -56,7 +54,7 @@ import java.util.stream.Collectors;
  * <p> The registered packet handlers are executed synchronously on the target environment's
  * game thread instead of Netty's event loops - there is no need to call {@code .execute(...)}
  *
- * @see PacketBufSerializer#register(Class, BiConsumer, Function)
+ * @see PacketBufSerializer#register(Class, PacketByteBuf.PacketWriter, PacketByteBuf.PacketReader)
  * @see PacketBufSerializer#registerCollectionProvider(Class, Supplier)
  */
 public class OwoNetChannel {
@@ -160,7 +158,7 @@ public class OwoNetChannel {
      * @see #serverHandle(PlayerEntity)
      * @see #serverHandle(MinecraftServer)
      * @see #serverHandle(ServerWorld, BlockPos)
-     * @see PacketBufSerializer#register(Class, BiConsumer, Function)
+     * @see PacketBufSerializer#register(Class, PacketByteBuf.PacketWriter, PacketByteBuf.PacketReader)
      */
     @SuppressWarnings("unchecked")
     public <R extends Record> void registerClientbound(Class<R> messageClass, ChannelHandler<R, ClientAccess> handler) {
@@ -186,7 +184,7 @@ public class OwoNetChannel {
      * @see #serverHandle(PlayerEntity)
      * @see #serverHandle(MinecraftServer)
      * @see #serverHandle(ServerWorld, BlockPos)
-     * @see PacketBufSerializer#register(Class, BiConsumer, Function)
+     * @see PacketBufSerializer#register(Class, PacketByteBuf.PacketWriter, PacketByteBuf.PacketReader) 
      */
     public <R extends Record> void registerClientboundDeferred(Class<R> messageClass) {
         int index = this.clientHandlers.size();
@@ -204,7 +202,7 @@ public class OwoNetChannel {
      * @param messageClass The type of packet data to send and serialize
      * @param handler      The handler that will receive the deserialized
      * @see #clientHandle()
-     * @see PacketBufSerializer#register(Class, BiConsumer, Function)
+     * @see PacketBufSerializer#register(Class, PacketByteBuf.PacketWriter, PacketByteBuf.PacketReader) 
      */
     @SuppressWarnings("unchecked")
     public <R extends Record> void registerServerbound(Class<R> messageClass, ChannelHandler<R, ServerAccess> handler) {

@@ -21,7 +21,7 @@ public class UwuScreenShardItem extends Item {
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         if (world.isClient) {
-            MinecraftClient.getInstance().setScreen(user.isSneaking() ? new ComponentTestScreen() : new TestParseScreen());
+            MinecraftClient.getInstance().setScreen(user.isSneaking() ? new TestConfigScreen() : new TestParseScreen());
             return TypedActionResult.success(user.getStackInHand(hand));
         }
         return TypedActionResult.pass(user.getStackInHand(hand));
