@@ -25,7 +25,7 @@ public class Components {
 
     public static ButtonWidget button(Text message, ButtonWidget.PressAction onPress) {
         final var button = new ButtonWidget(0, 0, 0, 0, message, onPress);
-        button.sizing(Sizing.content(), Sizing.content());
+        button.sizing(Sizing.content(1), Sizing.content());
         return button;
     }
 
