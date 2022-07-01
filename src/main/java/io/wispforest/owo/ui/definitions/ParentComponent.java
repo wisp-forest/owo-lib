@@ -82,7 +82,9 @@ public interface ParentComponent extends Component {
     Surface surface();
 
     /**
-     * @return The children of this component
+     * @return The children of this component. The iterator
+     * of this collection is expected to return the children in reverse
+     * insertion order to ensure mouse priority is intuitive
      */
     Collection<Component> children();
 
@@ -127,6 +129,7 @@ public interface ParentComponent extends Component {
         UIParsing.apply(children, "surface", Surface::parse, this::surface);
         UIParsing.apply(children, "vertical-alignment", VerticalAlignment::parse, this::verticalAlignment);
         UIParsing.apply(children, "horizontal-alignment", HorizontalAlignment::parse, this::horizontalAlignment);
+        UIParsing.apply(children, "allow-overflow", UIParsing::parseBool, this::allowOverflow);
     }
 
     /**

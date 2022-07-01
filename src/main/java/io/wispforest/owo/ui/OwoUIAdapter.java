@@ -62,12 +62,8 @@ public class OwoUIAdapter<T extends ParentComponent> implements Element, Drawabl
     }
 
     public void inflateAndMount() {
-        try {
-            this.rootComponent.inflate(Size.of(this.width, this.height));
-            this.rootComponent.mount(null, this.x, this.y);
-        } catch (Exception error) {
-            Owo.LOGGER.warn("");
-        }
+        this.rootComponent.inflate(Size.of(this.width, this.height));
+        this.rootComponent.mount(null, this.x, this.y);
     }
 
     public void dispose() {

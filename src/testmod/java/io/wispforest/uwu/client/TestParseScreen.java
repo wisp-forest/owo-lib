@@ -1,11 +1,17 @@
 package io.wispforest.uwu.client;
 
 import io.wispforest.owo.ui.BaseUIModelScreen;
+import io.wispforest.owo.ui.component.EntityComponent;
+import io.wispforest.owo.ui.component.ItemComponent;
+import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.component.SliderComponent;
-import io.wispforest.owo.ui.definitions.Component;
+import io.wispforest.owo.ui.definitions.*;
 import io.wispforest.owo.ui.layout.FlowLayout;
+import io.wispforest.owo.ui.layout.HoverContainer;
+import io.wispforest.owo.ui.layout.ScrollContainer;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.text.Text;
 
 import java.util.Map;
 
@@ -29,6 +35,31 @@ public class TestParseScreen extends BaseUIModelScreen<FlowLayout> {
 //
 //        long diff = System.nanoTime() - now;
 //        System.out.printf("Config screen built in %.3fms\n", diff / 1000000f);
+
+        var allay = rootComponent.childById(EntityComponent.class, "allay");
+        var verticalAnimation = allay.verticalSizing().animate(450, Easing.CUBIC, Sizing.fixed(200));
+        var horizontalAnimation = allay.horizontalSizing().animate(450, Easing.CUBIC, Sizing.fixed(200));
+
+        rootComponent.childById(ButtonWidget.class, "allay-button").onPress(button -> {
+            verticalAnimation.reverse();
+            horizontalAnimation.reverse();
+            button.setMessage(Text.of(button.getMessage().getString().equals("+") ? "-" : "+"));
+        });
+
+        var stretchAnimation = rootComponent.childById(ItemComponent.class, "stretch-item")
+                .verticalSizing().animate(500, Easing.CUBIC, Sizing.fixed(300));
+        rootComponent.childById(ButtonWidget.class, "stretch-button").onPress(button -> stretchAnimation.reverse());
+
+        var flyAnimation = rootComponent.childById(ScrollContainer.class, "fly")
+                .positioning().animate(350, Easing.QUADRATIC, Positioning.relative(85, 35));
+        rootComponent.childById(ButtonWidget.class, "fly-button").onPress(button -> flyAnimation.reverse());
+
+        var growAnimation = rootComponent.childById(LabelComponent.class, "grow-label")
+                .margins().animate(250, Easing.SINE, Insets.of(15));
+        //noinspection unchecked
+        rootComponent.childById(HoverContainer.class, "grow-label-hover")
+                .onMouseEnter(o -> growAnimation.forwards())
+                .onMouseLeave(o -> growAnimation.backwards());
     }
 
     protected Component createTextOption(final int index) {

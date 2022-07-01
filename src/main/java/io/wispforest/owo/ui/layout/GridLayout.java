@@ -20,7 +20,7 @@ public class GridLayout extends BaseParentComponent {
     protected final int rows, columns;
 
     protected final Component[] children;
-    protected final Set<Component> nonNullChildren = new HashSet<>();
+    protected final List<Component> nonNullChildren = new ArrayList<>();
 
     protected Size contentSize = Size.zero();
 
@@ -92,8 +92,8 @@ public class GridLayout extends BaseParentComponent {
         super.draw(matrices, mouseX, mouseY, partialTicks, delta);
 
         this.drawClipped(matrices, !this.allowOverflow, () -> {
-            for (var child : this.nonNullChildren) {
-                child.draw(matrices, mouseX, mouseY, partialTicks, delta);
+            for (int i = this.nonNullChildren.size() - 1; i >= 0; i--) {
+                this.nonNullChildren.get(i).draw(matrices, mouseX, mouseY, partialTicks, delta);
             }
         });
     }
@@ -127,7 +127,7 @@ public class GridLayout extends BaseParentComponent {
 
         if (previousChild != child) {
             this.nonNullChildren.remove(previousChild);
-            this.nonNullChildren.add(child);
+            this.nonNullChildren.add(0, child);
 
             this.updateLayout();
         }

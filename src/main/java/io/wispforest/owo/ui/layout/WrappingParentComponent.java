@@ -64,11 +64,12 @@ public abstract class WrappingParentComponent<T extends Component> extends BaseP
     @SuppressWarnings("unchecked")
     public void parseProperties(UIModel model, Element element, Map<String, Element> children) {
         super.parseProperties(model, element, children);
-        var child = UIParsing.get(children, "child", e -> e).orElseThrow(() -> new UIModelParsingException("Container declared without child element"));
 
-        var childList = UIParsing.<Element>allChildrenOfType(child, Node.ELEMENT_NODE);
-        if (childList.size() != 1) throw new UIModelParsingException("Containers must have exactly one child declared");
-
-        this.child((T) model.parseComponent(Component.class, childList.get(0)));
+        try {
+            var childList = UIParsing.<Element>allChildrenOfType(element, Node.ELEMENT_NODE);
+            this.child((T) model.parseComponent(Component.class, childList.get(0)));
+        } catch (UIModelParsingException exception) {
+            throw new UIModelParsingException("Could not initialize container child", exception);
+        }
     }
 }

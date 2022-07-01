@@ -3,10 +3,7 @@ package io.wispforest.owo.ui.parsing;
 import io.wispforest.owo.ui.component.*;
 import io.wispforest.owo.ui.definitions.Component;
 import io.wispforest.owo.ui.definitions.Sizing;
-import io.wispforest.owo.ui.layout.FlowLayout;
-import io.wispforest.owo.ui.layout.GridLayout;
-import io.wispforest.owo.ui.layout.HoverContainer;
-import io.wispforest.owo.ui.layout.ScrollContainer;
+import io.wispforest.owo.ui.layout.*;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -262,6 +259,7 @@ public class UIParsing {
         // Container
         registerFactory("scroll", ScrollContainer::parse);
         registerFactory("hover", element -> HoverContainer.of(null, null, null));
+        registerFactory("drag", element -> new DraggableContainer<>(Sizing.content(), Sizing.content(), null));
 
         // Textures
         registerFactory("sprite", SpriteComponent::parse);

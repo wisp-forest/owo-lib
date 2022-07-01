@@ -32,7 +32,7 @@ public abstract class FlowLayout extends BaseParentComponent {
     }
 
     public FlowLayout child(Component child) {
-        this.children.add(child);
+        this.children.add(0, child);
         this.updateLayout();
         return this;
     }
@@ -56,8 +56,8 @@ public abstract class FlowLayout extends BaseParentComponent {
         super.draw(matrices, mouseX, mouseY, partialTicks, delta);
 
         this.drawClipped(matrices, !this.allowOverflow, () -> {
-            for (var child : children) {
-                child.draw(matrices, mouseX, mouseY, partialTicks, delta);
+            for (int i = this.children.size() - 1; i >= 0; i--) {
+                this.children.get(i).draw(matrices, mouseX, mouseY, partialTicks, delta);
             }
         });
     }

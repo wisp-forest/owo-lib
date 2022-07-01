@@ -55,20 +55,20 @@ public class TextureComponent extends BaseComponent {
             v = UIParsing.parseSignedInt(element.getAttributeNode("v"));
         }
 
-        if (element.hasAttribute("regionWidth")) {
-            regionWidth = UIParsing.parseSignedInt(element.getAttributeNode("regionWidth"));
+        if (element.hasAttribute("region-width")) {
+            regionWidth = UIParsing.parseSignedInt(element.getAttributeNode("region-width"));
         }
 
-        if (element.hasAttribute("regionHeight")) {
-            regionHeight = UIParsing.parseSignedInt(element.getAttributeNode("regionHeight"));
+        if (element.hasAttribute("region-height")) {
+            regionHeight = UIParsing.parseSignedInt(element.getAttributeNode("region-height"));
         }
 
-        if (element.hasAttribute("textureWidth")) {
-            textureWidth = UIParsing.parseSignedInt(element.getAttributeNode("textureWidth"));
+        if (element.hasAttribute("texture-width")) {
+            textureWidth = UIParsing.parseSignedInt(element.getAttributeNode("texture-width"));
         }
 
-        if (element.hasAttribute("textureHeight")) {
-            textureHeight = UIParsing.parseSignedInt(element.getAttributeNode("textureHeight"));
+        if (element.hasAttribute("texture-height")) {
+            textureHeight = UIParsing.parseSignedInt(element.getAttributeNode("texture-height"));
         }
 
         return new TextureComponent(textureId, u, v, regionWidth, regionHeight, textureWidth, textureHeight);
