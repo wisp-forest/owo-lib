@@ -101,8 +101,10 @@ public class OwoHandshake {
         Owo.LOGGER.info("[Handshake] Sending client channels");
         QUERY_RECEIVED = true;
 
-        final var serverOptionalChannels = RESPONSE_SERIALIZER.deserializer().apply(buf);
-        ((OwoClientConnectionExtension) clientLoginNetworkHandler.getConnection()).owo$setChannelSet(verifyOptionalServices(serverOptionalChannels, OwoNetChannel.REGISTERED_CHANNELS, OwoHandshake::hashChannel));
+        if (buf.readableBytes() > 0) {
+            final var serverOptionalChannels = RESPONSE_SERIALIZER.deserializer().apply(buf);
+            ((OwoClientConnectionExtension) clientLoginNetworkHandler.getConnection()).owo$setChannelSet(verifyOptionalServices(serverOptionalChannels, OwoNetChannel.REGISTERED_CHANNELS, OwoHandshake::hashChannel));
+        }
 
         var response = PacketByteBufs.create();
         writeHashes(response, OwoNetChannel.REQUIRED_CHANNELS, OwoHandshake::hashChannel);
