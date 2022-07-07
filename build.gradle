@@ -132,6 +132,7 @@ dependencies {
     modLocalRuntime include("blue.endless:jankson:${project.jankson_version}")
 
     testmodImplementation sourceSets.main.output
+    testmodAnnotationProcessor sourceSets.main.output
 }
 
 javadoc {

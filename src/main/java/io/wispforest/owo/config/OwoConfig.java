@@ -1,33 +1,29 @@
 package io.wispforest.owo.config;
 
-import blue.endless.jankson.Jankson;
-import blue.endless.jankson.api.SyntaxError;
-
-import java.io.File;
-import java.io.IOException;
+import java.lang.reflect.Field;
 
 public class OwoConfig {
 
-    public static void yes() {
-        var jankson = new Jankson.Builder().build();
-
-        try {
-            final var load = jankson.load((new File("yes.json5")));
-
-            System.out.println(load.getComment("yesValue"));
-            System.out.println(jankson.getMarshaller().marshall(Yes.class, load).yesValue);
-
-            load.setComment("yesValue", "no");
-            System.out.println(load.toJson(true, true));
-        } catch (IOException | SyntaxError e) {
-            System.out.println("mald harder");
-            e.printStackTrace();
-        }
-
+    public static <T> T instantiate(Class<T> clazz) {
+        return null;
     }
 
-    public static class Yes {
-        int yesValue = 10;
+    public static Field getField(Class<?> configClass, String key) {
+        var pathElements = key.split("\\.");
+
+        Class<?> clazz = configClass;
+        Field field = null;
+
+        for (var element : pathElements) {
+            try {
+                field = clazz.getDeclaredField(element);
+                clazz = field.getType();
+            } catch (NoSuchFieldException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return field;
     }
 
 }

@@ -34,6 +34,7 @@ public class ReflectionUtils {
     /**
      * Calls the {@link Constructor#newInstance(Object...)} method and
      * wraps the exception in a {@link RuntimeException}, thus making it unchecked.
+     * <br>
      * <b>Use this when you would otherwise rethrow</b>
      *
      * @param constructor The constructor to call

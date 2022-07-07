@@ -15,6 +15,7 @@ import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
 import io.wispforest.owo.text.CustomTextRegistry;
 import io.wispforest.owo.util.RegistryAccess;
 import io.wispforest.owo.util.TagInjector;
+import io.wispforest.uwu.config.UwuConfig;
 import io.wispforest.uwu.items.UwuItems;
 import io.wispforest.uwu.network.*;
 import io.wispforest.uwu.text.BasedTextContent;
@@ -143,8 +144,16 @@ public class Uwu implements ModInitializer {
         ClientParticles.reset();
     });
 
+    public static final UwuConfig CONFIG = UwuConfig.createAndLoad();
+
     @Override
     public void onInitialize() {
+
+        System.out.println(CONFIG.aValue());
+        System.out.println(CONFIG.regexe());
+        CONFIG.aValue(7564);
+        CONFIG.aValue(16);
+        System.exit(69);
 
         FieldRegistrationHandler.register(UwuItems.class, "uwu", true);
 
