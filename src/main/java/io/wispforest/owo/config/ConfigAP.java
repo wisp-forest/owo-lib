@@ -55,16 +55,14 @@ public class ConfigAP extends AbstractProcessor {
 
     private static final String SET_ACCESSOR_TEMPLATE = """
             public void {field_name}({field_type} value) {
-                if (!verifyConstraint("{field_key}", value)) return;
-
                 instance{field_key} = value;
-                listeners.get("{field_key}").set(value);
+                options.get("{field_key}").synchronizeWithBackingField();
             }
             """;
 
     private static final String SUBSCRIBE_TEMPLATE = """
             public void subscribeTo{field_name}(Consumer<{field_type}> subscriber) {
-                listeners.get("{field_key}").observe(subscriber);
+                options.get("{field_key}").events().observe(subscriber);
             }
             """;
 

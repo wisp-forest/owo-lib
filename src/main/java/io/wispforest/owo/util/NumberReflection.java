@@ -3,7 +3,7 @@ package io.wispforest.owo.util;
 public class NumberReflection {
 
     public static boolean isNumberType(Class<?> clazz) {
-        return (clazz.isPrimitive() && clazz != boolean.class) || Number.class.isAssignableFrom(clazz);
+        return (clazz.isPrimitive() && clazz != boolean.class  && clazz != char.class) || Number.class.isAssignableFrom(clazz);
     }
 
     public static boolean isFloatingPointType(Class<?> clazz) {

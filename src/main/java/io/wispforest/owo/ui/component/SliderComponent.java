@@ -1,7 +1,7 @@
 package io.wispforest.owo.ui.component;
 
-import io.wispforest.owo.config.Observable;
 import io.wispforest.owo.ui.definitions.Sizing;
+import io.wispforest.owo.util.Observable;
 import net.minecraft.client.gui.widget.SliderWidget;
 import net.minecraft.text.Text;
 

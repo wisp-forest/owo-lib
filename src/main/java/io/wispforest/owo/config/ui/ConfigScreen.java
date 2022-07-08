@@ -1,6 +1,7 @@
 package io.wispforest.owo.config.ui;
 
 import io.wispforest.owo.config.ConfigWrapper;
+import io.wispforest.owo.config.Option;
 import io.wispforest.owo.config.annotation.RangeConstraint;
 import io.wispforest.owo.ui.BaseUIModelScreen;
 import io.wispforest.owo.ui.definitions.Component;
@@ -35,19 +36,19 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
         var panel = rootComponent.childById(VerticalFlowLayout.class, "config-panel");
 
         this.config.forEachOption(option -> {
-            var field = option.fieldReference().field();
+            var field = option.backingField().field();
 
-            if (field.getType() == CharSequence.class) {
+            if (CharSequence.class.isAssignableFrom(field.getType())) {
                 panel.child(this.createTextBox(option, configTextBox -> {
                     if (option.constraint() != null) {
                         configTextBox.applyPredicate(option.constraint()::test);
                     }
                 }));
-            } else if (NumberReflection.isNumberType(field.getType()) && field.getType() != char.class) {
+            } else if (NumberReflection.isNumberType(field.getType())) {
                 boolean floatingPoint = NumberReflection.isFloatingPointType(field.getType());
 
                 if (field.isAnnotationPresent(RangeConstraint.class)) {
-                    panel.child(this.createSlider(option, floatingPoint));
+                    panel.child(this.createSlider((Option<? extends Number>) option, floatingPoint));
                 } else {
                     panel.child(this.createTextBox(option, configTextBox -> {
                         configTextBox.configureForNumber((Class<? extends Number>) field.getType());
@@ -58,60 +59,60 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void removed() {
         for (var optionAndComponent : this.options) {
             if (!optionAndComponent.component.isValid()) continue;
-            optionAndComponent.option.update(optionAndComponent.component.parsedValue());
+            optionAndComponent.option.set(optionAndComponent.component.parsedValue());
         }
         super.removed();
     }
 
     @SuppressWarnings({"ConstantConditions"})
-    protected Component createTextBox(ConfigWrapper.ConfigOption option, Consumer<ConfigTextBox> processor) {
+    protected Component createTextBox(Option<?> option, Consumer<ConfigTextBox> processor) {
         var optionComponent = this.model.expandTemplate(FlowLayout.class,
                 "text-box-config-option",
-                packParameters("text.config." + option.configName() + ".option" + option.key(), option.cast().toString())
+                packParameters("text.config." + option.configName() + ".option" + option.key(), option.value().toString())
         );
 
         var valueBox = optionComponent.childById(ConfigTextBox.class, "value-box");
         var resetButton = optionComponent.childById(ButtonWidget.class, "reset-button");
-        resetButton.active = !valueBox.getText().equals(option.castDefault().toString());
+        resetButton.active = !valueBox.getText().equals(option.defaultValue().toString());
         resetButton.onPress(button -> {
-            valueBox.setText(option.castDefault().toString());
+            valueBox.setText(option.defaultValue().toString());
             button.active = false;
         });
 
-        valueBox.setChangedListener(s -> resetButton.active = !s.equals(option.castDefault().toString()));
+        valueBox.setChangedListener(s -> resetButton.active = !s.equals(option.defaultValue().toString()));
         processor.accept(valueBox);
 
         this.options.add(new OptionAndComponent(option, valueBox));
         return optionComponent;
     }
 
-    @SuppressWarnings("unchecked")
-    protected Component createSlider(ConfigWrapper.ConfigOption option, boolean withDecimals) {
-        var value = option.<Number>cast();
+    protected Component createSlider(Option<? extends Number> option, boolean withDecimals) {
+        var value = option.value();
         var optionComponent = this.model.expandTemplate(FlowLayout.class,
                 "range-config-option",
                 packParameters("text.config." + option.configName() + ".option" + option.key(), value.toString())
         );
 
-        var constraint = option.fieldReference().field().getAnnotation(RangeConstraint.class);
+        var constraint = option.backingField().field().getAnnotation(RangeConstraint.class);
         double min = constraint.min(), max = constraint.max();
 
         var valueSlider = optionComponent.childById(ConfigSlider.class, "value-slider");
         valueSlider.min(min).max(max).decimalPlaces(withDecimals ? 2 : 0).setFromValue(value.doubleValue());
 
         var resetButton = optionComponent.childById(ButtonWidget.class, "reset-button");
-        resetButton.active = (withDecimals ? value.doubleValue() : Math.round(value.doubleValue())) != option.<Number>castDefault().doubleValue();
+        resetButton.active = (withDecimals ? value.doubleValue() : Math.round(value.doubleValue())) != option.defaultValue().doubleValue();
         resetButton.onPress(button -> {
-            valueSlider.setFromValue(option.<Number>castDefault().doubleValue());
+            valueSlider.setFromValue(option.defaultValue().doubleValue());
             button.active = false;
         });
 
-        valueSlider.valueType((Class<? extends Number>) option.fieldReference().field().getType());
+        valueSlider.valueType(option.clazz());
         valueSlider.onChanged(newValue -> {
-            resetButton.active = (withDecimals ? newValue : Math.round(newValue)) != option.<Number>castDefault().doubleValue();
+            resetButton.active = (withDecimals ? newValue : Math.round(newValue)) != option.defaultValue().doubleValue();
         });
 
         this.options.add(new OptionAndComponent(option, valueSlider));
@@ -125,7 +126,8 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
         );
     }
 
-    private record OptionAndComponent(ConfigWrapper.ConfigOption option, ConfigOptionComponent component) {}
+    @SuppressWarnings("rawtypes")
+    protected record OptionAndComponent(Option option, ConfigOptionComponent component) {}
 
     static {
         UIParsing.registerFactory("config-slider", element -> new ConfigSlider());

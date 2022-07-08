@@ -7,15 +7,13 @@ import blue.endless.jankson.impl.POJODeserializer;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.annotation.*;
 import io.wispforest.owo.util.NumberReflection;
+import io.wispforest.owo.util.Observable;
 import io.wispforest.owo.util.ReflectionUtils;
 import net.fabricmc.loader.api.FabricLoader;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -29,25 +27,22 @@ import java.util.regex.Pattern;
 public abstract class ConfigWrapper<C> {
 
     protected final String name;
-    protected final C defaultInstance;
-    protected C instance;
+    protected final C instance;
 
     protected boolean loading = false;
-
     protected final Jankson jankson = Jankson.builder().build();
-    protected final Map<String, Constraint> constraints = new HashMap<>();
-    @SuppressWarnings("rawtypes") protected final Map<String, Observable> listeners = new HashMap<>();
+
+    @SuppressWarnings("rawtypes") protected final Map<String, Option> options = new HashMap<>();
 
     protected ConfigWrapper(Class<C> clazz) {
         ReflectionUtils.requireZeroArgsConstructor(clazz, s -> "Config model class " + s + " must provide a zero-args constructor");
-        this.defaultInstance = ReflectionUtils.tryInstantiateWithNoArgs(clazz);
         this.instance = ReflectionUtils.tryInstantiateWithNoArgs(clazz);
 
         var configAnnotation = instance.getClass().getAnnotation(Config.class);
         this.name = configAnnotation.name();
 
         try {
-            this.initialize(configAnnotation.saveOnModification());
+            this.initializeOptions(configAnnotation.saveOnModification());
         } catch (IllegalAccessException | NoSuchMethodException e) {
             throw new RuntimeException("Failed to initialize config " + this.name, e);
         }
@@ -71,7 +66,6 @@ public abstract class ConfigWrapper<C> {
      * Load the config represented by this wrapper from
      * its associated file, or create it if it does not exist
      */
-    @SuppressWarnings("unchecked")
     public void load() {
         var configPath = FabricLoader.getInstance().getConfigDir().resolve(this.name + ".json5");
         if (!Files.exists(configPath)) {
@@ -81,184 +75,117 @@ public abstract class ConfigWrapper<C> {
 
         try {
             this.loading = true;
-
-            this.instance = this.newInstanceWithNullCollections();
-            POJODeserializer.unpackObject(this.instance, this.jankson.load(Files.readString(configPath, StandardCharsets.UTF_8)));
-
-            var newValues = new HashMap<String, BoundField>();
-            this.collectFieldValues("", this.instance, newValues);
-
-            for (var entry : newValues.entrySet()) {
-                var key = entry.getKey();
-                var boundField = entry.getValue();
-
-                if (!this.verifyConstraint(key, boundField.value)) {
-                    boundField.field.set(boundField.owner, this.listeners.get(key).get());
-                } else {
-                    this.listeners.get(key).set(boundField.value);
+            for (var option : this.options.values()) {
+                if (Collection.class.isAssignableFrom(option.clazz())) {
+                    option.backingField().setValue(null);
                 }
             }
-        } catch (IOException | SyntaxError | IllegalAccessException | NoSuchMethodException | InvocationTargetException | InstantiationException e) {
+
+            POJODeserializer.unpackObject(this.instance, this.jankson.load(Files.readString(configPath, StandardCharsets.UTF_8)));
+
+            for (var option : this.options.values()) {
+                option.synchronizeWithBackingField();
+            }
+        } catch (IOException | SyntaxError e) {
             Owo.LOGGER.warn("Could not load config {}", this.name, e);
         } finally {
             this.loading = false;
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public void forEachOption(Consumer<ConfigOption> action) {
-        try {
-            var current = new HashMap<String, BoundField>();
-            var defaulted = new HashMap<String, BoundField>();
-            this.collectFieldValues("", this.instance, current);
-            this.collectFieldValues("", this.defaultInstance, defaulted);
-
-            current.forEach((key, boundField) -> action.accept(new ConfigOption(
-                    this.name,
-                    key,
-                    defaulted.get(key).value,
-                    boundField,
-                    this.constraints.get(key),
-                    o -> this.listeners.get(key).set(o)
-            )));
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException("Could not collect options of config " + this.name, e);
+    public void forEachOption(Consumer<Option<?>> action) {
+        for (var option : this.options.values()) {
+            action.accept(option);
         }
     }
 
-    protected boolean verifyConstraint(String key, Object value) {
-        var constraint = this.constraints.get(key);
-        if (constraint == null) return true;
-
-        final var matched = constraint.test(value);
-        if (!matched) {
-            Owo.LOGGER.warn(
-                    "Option {} in config '{}' could not be updated, as the given value '{}' does not match its constraint: {}",
-                    key, this.name, value, constraint.formatted
-            );
-        }
-
-        return matched;
-    }
-
-    private void initialize(boolean hookSave) throws IllegalAccessException, NoSuchMethodException {
-        var fields = new HashMap<String, BoundField>();
+    private void initializeOptions(boolean hookSave) throws IllegalAccessException, NoSuchMethodException {
+        var fields = new HashMap<String, Option.BoundField>();
         collectFieldValues("", this.instance, fields);
 
         for (var entry : fields.entrySet()) {
             var key = entry.getKey();
             var boundField = entry.getValue();
 
-            var field = boundField.field;
+            var field = boundField.field();
             var fieldType = field.getType();
 
+            Constraint constraint = null;
             if (field.isAnnotationPresent(RangeConstraint.class)) {
-                var constraint = field.getAnnotation(RangeConstraint.class);
+                var annotation = field.getAnnotation(RangeConstraint.class);
 
                 if (NumberReflection.isNumberType(fieldType)) {
                     Predicate<?> predicate;
                     if (fieldType == long.class || fieldType == Long.class) {
-                        predicate = o -> (Long) o >= constraint.min() && (Long) o <= constraint.max();
-                    } else if (fieldType == char.class) {
-                        predicate = o -> (Character) o >= constraint.min() && (Character) o <= constraint.max();
+                        predicate = o -> (Long) o >= annotation.min() && (Long) o <= annotation.max();
                     } else {
-                        predicate = o -> ((Number) o).doubleValue() >= constraint.min() && ((Number) o).doubleValue() <= constraint.max();
+                        predicate = o -> ((Number) o).doubleValue() >= annotation.min() && ((Number) o).doubleValue() <= annotation.max();
                     }
 
-                    this.constraints.put(key, new Constraint("Range from " + constraint.min() + " to " + constraint.max(), predicate));
+                    constraint = new Constraint("Range from " + annotation.min() + " to " + annotation.max(), predicate);
                 } else {
                     throw new IllegalStateException("@RangeConstraint can only be applied to numeric fields");
                 }
             }
 
             if (field.isAnnotationPresent(RegexConstraint.class)) {
-                var constraint = field.getAnnotation(RegexConstraint.class);
+                var annotation = field.getAnnotation(RegexConstraint.class);
 
                 if (CharSequence.class.isAssignableFrom(fieldType)) {
-                    var pattern = Pattern.compile(constraint.value());
-                    this.constraints.put(key, new Constraint("Regex " + constraint.value(), o -> pattern.matcher((CharSequence) o).matches()));
+                    var pattern = Pattern.compile(annotation.value());
+                    constraint = new Constraint("Regex " + annotation.value(), o -> pattern.matcher((CharSequence) o).matches());
                 } else {
                     throw new IllegalStateException("@RegexConstraint can only be applied to fields with a string representation");
                 }
             }
 
             if (field.isAnnotationPresent(PredicateConstraint.class)) {
-                var constraint = field.getAnnotation(PredicateConstraint.class);
-                var method = boundField.owner.getClass().getMethod(constraint.value(), fieldType);
+                var annotation = field.getAnnotation(PredicateConstraint.class);
+                var method = boundField.owner().getClass().getMethod(annotation.value(), fieldType);
 
                 if (method.getReturnType() != boolean.class) {
-                    throw new NoSuchMethodException("Return type of predicate implementation '" + constraint.value() + "' must be 'boolean'");
+                    throw new NoSuchMethodException("Return type of predicate implementation '" + annotation.value() + "' must be 'boolean'");
                 }
 
                 if (!Modifier.isStatic(method.getModifiers())) {
-                    throw new IllegalStateException("Predicated implementation '" + constraint.value() + "' must be static");
+                    throw new IllegalStateException("Predicated implementation '" + annotation.value() + "' must be static");
                 }
 
                 var handle = MethodHandles.publicLookup().unreflect(method);
-                this.constraints.put(key, new Constraint("Predicate method " + constraint.value(), o -> this.invokePredicate(handle, o)));
+                constraint = new Constraint("Predicate method " + annotation.value(), o -> this.invokePredicate(handle, o));
             }
 
-            final var observable = new Observable<>(boundField.value);
+            final var defaultValue = boundField.getValue();
+
+            final var observable = Observable.of(defaultValue);
             if (hookSave) observable.observe(o -> this.save());
 
-            this.listeners.put(key, observable);
+            this.options.put(key, new Option<>(this.name, key, defaultValue, observable, constraint, boundField));
         }
     }
 
-    private void collectFieldValues(String prefix, Object instance, Map<String, BoundField> fields) throws IllegalAccessException {
-        if (instance == null) return;
-        var clazz = instance.getClass();
+    private void collectFieldValues(String prefix, Object instance, Map<String, Option.BoundField> fields) throws IllegalAccessException {
+        for (var field : instance.getClass().getDeclaredFields()) {
+            if (Modifier.isTransient(field.getModifiers()) || Modifier.isStatic(field.getModifiers())) continue;
 
-        for (var field : clazz.getDeclaredFields()) {
-            fields.put(prefix + "." + field.getName(), new BoundField(instance, field, field.get(instance)));
+            fields.put(prefix + "." + field.getName(), new Option.BoundField(instance, field));
 
             if (field.getType().isAnnotationPresent(Nest.class)) {
-                this.collectFieldValues(prefix + "." + field.getName(), field.get(instance), fields);
+                var fieldValue = field.get(instance);
+                if (fieldValue != null) {
+                    this.collectFieldValues(prefix + "." + field.getName(), fieldValue, fields);
+                } else {
+                    throw new IllegalStateException("Nested config option containers must never be null");
+                }
             }
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private C newInstanceWithNullCollections() throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        var clazz = (Class<C>) this.instance.getClass();
-
-        final var instance = ReflectionUtils.tryInstantiateWithNoArgs(clazz);
-        for (var field : clazz.getDeclaredFields()) {
-            if (Modifier.isTransient(field.getModifiers()) || Modifier.isStatic(field.getModifiers())) continue;
-            if (!Collection.class.isAssignableFrom(field.getType())) continue;
-            field.set(instance, null);
-        }
-        return instance;
     }
 
     private boolean invokePredicate(MethodHandle predicate, Object value) {
         try {
             return (boolean) predicate.invoke(value);
         } catch (Throwable e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public record ConfigOption(String configName, String key, Object defaultValue, BoundField fieldReference, @Nullable Constraint constraint,
-                               Consumer listener) {
-        @SuppressWarnings("unchecked")
-        public <T> T cast() {
-            return (T) this.fieldReference.value;
-        }
-
-        @SuppressWarnings("unchecked")
-        public <T> T castDefault() {
-            return (T) this.defaultValue;
-        }
-
-        public void update(Object value) {
-            try {
-                this.fieldReference.field.set(this.fieldReference.owner, value);
-                this.listener.accept(value);
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException("Failed to update config value", e);
-            }
+            throw new RuntimeException("Could not invoke predicate", e);
         }
     }
 
@@ -269,5 +196,4 @@ public abstract class ConfigWrapper<C> {
         }
     }
 
-    public record BoundField(Object owner, Field field, Object value) {}
 }
