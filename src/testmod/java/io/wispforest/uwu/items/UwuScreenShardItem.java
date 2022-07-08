@@ -1,5 +1,7 @@
 package io.wispforest.uwu.items;
 
+import io.wispforest.owo.config.ui.ConfigScreen;
+import io.wispforest.uwu.Uwu;
 import io.wispforest.uwu.client.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
@@ -19,7 +21,7 @@ public class UwuScreenShardItem extends Item {
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         if (world.isClient) {
-            MinecraftClient.getInstance().setScreen(user.isSneaking() ? new SelectUwuScreenScreen() : new UwuConfigScreen());
+            MinecraftClient.getInstance().setScreen(user.isSneaking() ? new SelectUwuScreenScreen() : new ConfigScreen(Uwu.CONFIG));
             return TypedActionResult.success(user.getStackInHand(hand));
         }
         return TypedActionResult.pass(user.getStackInHand(hand));

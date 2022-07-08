@@ -1,11 +1,13 @@
 package io.wispforest.uwu.client;
 
+import io.wispforest.owo.config.ui.ConfigScreen;
 import io.wispforest.owo.ui.BaseOwoScreen;
 import io.wispforest.owo.ui.OwoUIAdapter;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.definitions.*;
 import io.wispforest.owo.ui.layout.Layouts;
 import io.wispforest.owo.ui.layout.VerticalFlowLayout;
+import io.wispforest.uwu.Uwu;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 
@@ -36,7 +38,7 @@ public class SelectUwuScreenScreen extends BaseOwoScreen<VerticalFlowLayout> {
         panel.child(Components.button(Text.literal("code demo"), button -> this.client.setScreen(new ComponentTestScreen())).margins(Insets.vertical(3)));
         panel.child(Components.button(Text.literal("xml demo"), button -> this.client.setScreen(new TestParseScreen())).margins(Insets.vertical(3)));
         panel.child(Components.button(Text.literal("code config"), button -> this.client.setScreen(new TestConfigScreen())).margins(Insets.vertical(3)));
-        panel.child(Components.button(Text.literal("xml config"), button -> this.client.setScreen(new UwuConfigScreen())).margins(Insets.vertical(3)));
+        panel.child(Components.button(Text.literal("xml config"), button -> this.client.setScreen(new ConfigScreen(Uwu.CONFIG))).margins(Insets.vertical(3)));
 
         this.uiAdapter.rootComponent.child(panel);
     }

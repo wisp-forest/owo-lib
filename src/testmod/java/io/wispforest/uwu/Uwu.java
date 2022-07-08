@@ -149,12 +149,6 @@ public class Uwu implements ModInitializer {
     @Override
     public void onInitialize() {
 
-        System.out.println(CONFIG.aValue());
-        System.out.println(CONFIG.regexe());
-        CONFIG.aValue(7564);
-        CONFIG.aValue(16);
-        System.exit(69);
-
         FieldRegistrationHandler.register(UwuItems.class, "uwu", true);
 
         TagInjector.inject(Registry.BLOCK, BlockTags.BASE_STONE_OVERWORLD.id(), Blocks.GLASS);
