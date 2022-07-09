@@ -18,7 +18,7 @@ import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -32,7 +32,7 @@ public abstract class ConfigWrapper<C> {
     protected boolean loading = false;
     protected final Jankson jankson = Jankson.builder().build();
 
-    @SuppressWarnings("rawtypes") protected final Map<String, Option> options = new HashMap<>();
+    @SuppressWarnings("rawtypes") protected final Map<String, Option> options = new LinkedHashMap<>();
 
     protected ConfigWrapper(Class<C> clazz) {
         ReflectionUtils.requireZeroArgsConstructor(clazz, s -> "Config model class " + s + " must provide a zero-args constructor");
@@ -84,6 +84,7 @@ public abstract class ConfigWrapper<C> {
             POJODeserializer.unpackObject(this.instance, this.jankson.load(Files.readString(configPath, StandardCharsets.UTF_8)));
 
             for (var option : this.options.values()) {
+                option.backingField().rebind(this.instance, option.key());
                 option.synchronizeWithBackingField();
             }
         } catch (IOException | SyntaxError e) {
@@ -100,7 +101,7 @@ public abstract class ConfigWrapper<C> {
     }
 
     private void initializeOptions(boolean hookSave) throws IllegalAccessException, NoSuchMethodException {
-        var fields = new HashMap<String, Option.BoundField>();
+        var fields = new LinkedHashMap<String, Option.BoundField>();
         collectFieldValues("", this.instance, fields);
 
         for (var entry : fields.entrySet()) {
@@ -168,8 +169,6 @@ public abstract class ConfigWrapper<C> {
         for (var field : instance.getClass().getDeclaredFields()) {
             if (Modifier.isTransient(field.getModifiers()) || Modifier.isStatic(field.getModifiers())) continue;
 
-            fields.put(prefix + "." + field.getName(), new Option.BoundField(instance, field));
-
             if (field.getType().isAnnotationPresent(Nest.class)) {
                 var fieldValue = field.get(instance);
                 if (fieldValue != null) {
@@ -177,6 +176,8 @@ public abstract class ConfigWrapper<C> {
                 } else {
                     throw new IllegalStateException("Nested config option containers must never be null");
                 }
+            } else {
+                fields.put(prefix + "." + field.getName(), new Option.BoundField(instance, field));
             }
         }
     }

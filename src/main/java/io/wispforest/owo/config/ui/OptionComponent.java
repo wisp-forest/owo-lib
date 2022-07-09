@@ -1,6 +1,6 @@
 package io.wispforest.owo.config.ui;
 
-public interface ConfigOptionComponent {
+public interface OptionComponent {
 
     /**
      * @return {@code true} if the current state of this component

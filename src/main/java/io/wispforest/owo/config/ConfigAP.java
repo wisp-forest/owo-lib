@@ -25,7 +25,7 @@ public class ConfigAP extends AbstractProcessor {
             package {package};
 
             import io.wispforest.owo.config.ConfigWrapper;
-            import io.wispforest.owo.config.Observable;
+            import io.wispforest.owo.util.Observable;
 
             import java.util.HashMap;
             import java.util.Map;
@@ -101,7 +101,7 @@ public class ConfigAP extends AbstractProcessor {
                 try {
                     var file = this.processingEnv.getFiler().createSourceFile(wrapperName);
                     try (var writer = new PrintWriter(file.openWriter())) {
-                        writer.println(makeWrapper(wrapperName, className, this.collectFields("", clazz)));
+                        writer.println(makeWrapper(wrapperName, className, this.collectFields("", clazz, clazz.getAnnotation(Config.class).defaultHook())));
                     }
                 } catch (IOException e) {
                     throw new RuntimeException("Failed to generate config wrapper", e);
@@ -112,11 +112,9 @@ public class ConfigAP extends AbstractProcessor {
         return true;
     }
 
-    private List<ConfigField> collectFields(String prefix, TypeElement clazz) {
+    private List<ConfigField> collectFields(String prefix, TypeElement clazz, boolean defaultHook) {
         var messager = this.processingEnv.getMessager();
         var list = new ArrayList<ConfigField>();
-
-        boolean defaultHook = clazz.getAnnotation(Config.class).defaultHook();
 
         for (var field : clazz.getEnclosedElements()) {
             if (field.getKind() != ElementKind.FIELD) continue;
@@ -138,7 +136,7 @@ public class ConfigAP extends AbstractProcessor {
             }
 
             if (typeElement != null && typeElement.getAnnotation(Nest.class) != null) {
-                list.add(new NestField(fieldName, collectFields(prefix + "." + fieldName, typeElement)));
+                list.add(new NestField(fieldName, collectFields(prefix + "." + fieldName, typeElement, defaultHook)));
             } else {
                 list.add(new ValueField(fieldName, prefix + "." + fieldName, field.asType(),
                         defaultHook || field.getAnnotation(Hook.class) != null));
