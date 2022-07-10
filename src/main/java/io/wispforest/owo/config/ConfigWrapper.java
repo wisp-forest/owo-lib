@@ -18,6 +18,7 @@ import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -33,6 +34,7 @@ public abstract class ConfigWrapper<C> {
     protected final Jankson jankson = Jankson.builder().build();
 
     @SuppressWarnings("rawtypes") protected final Map<Option.Key, Option> options = new LinkedHashMap<>();
+    @SuppressWarnings("rawtypes") protected final Map<Option.Key, Option> optionsView = Collections.unmodifiableMap(options);
 
     protected ConfigWrapper(Class<C> clazz) {
         ReflectionUtils.requireZeroArgsConstructor(clazz, s -> "Config model class " + s + " must provide a zero-args constructor");
@@ -92,6 +94,11 @@ public abstract class ConfigWrapper<C> {
         } finally {
             this.loading = false;
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<Option.Key, Option<?>> allOptions() {
+        return (Map<Option.Key, Option<?>>) (Object) this.optionsView;
     }
 
     public void forEachOption(Consumer<Option<?>> action) {

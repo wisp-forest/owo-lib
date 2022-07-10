@@ -6,7 +6,8 @@
       "bold": true
     },
     {
-      "index": 0
+      "index": 0,
+      "underlined": true
     }
   ],
   "text.config.boolean_toggle.enabled": [

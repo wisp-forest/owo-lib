@@ -55,29 +55,49 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
         this.options.clear();
         var panel = rootComponent.childById(VerticalFlowLayout.class, "config-panel");
 
+        var containers = new HashMap<Option.Key, VerticalFlowLayout>();
+        containers.put(Option.Key.ROOT, panel);
+
         this.config.forEachOption(option -> {
             var factory = this.applicableFactory(option);
             if (factory == null) {
                 Owo.LOGGER.warn("Could not create UI component for config option {}", option);
             }
 
+            // TODO make nested elements collapsible
             var result = factory.make(this.model, option);
             this.options.put(option, result.optionContainer());
 
-            // TODO make nested elements collapsible
-            // TODO display nest element name
-            int nestDepth = option.key().nestDepth();
-            if (nestDepth > 0) {
-                panel.child(Layouts.verticalFlow(Sizing.fill(100), Sizing.content())
-                        .child(Components.label(Text.translatable("text.config.nested_container", option.key().parent().name())))
-                        .child(result.baseComponent())
-                        .surface(NESTING_SURFACE)
-                        .padding(Insets.left(nestDepth * NEST_PADDING)));
-            } else {
-                panel.child(result.baseComponent());
+            var parentKey = option.key().parent();
+            var container = containers.getOrDefault(parentKey, makeContainer(option.configName(), parentKey));
+
+            if (!containers.containsKey(parentKey)) {
+                containers.put(parentKey, container);
+                containers.get(parentKey.parent()).child(container);
             }
 
+            container.child(result.baseComponent());
         });
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void removed() {
+        this.options.forEach((option, component) -> {
+            if (!component.isValid()) return;
+            option.set(component.parsedValue());
+        });
+        super.removed();
+    }
+
+    protected VerticalFlowLayout makeContainer(String configName, Option.Key parentKey) {
+        return (VerticalFlowLayout) Layouts.verticalFlow(Sizing.fill(100), Sizing.content())
+                .child(
+                        Components.label(Text.translatable("text.config.nested_container", Text.translatable("text.config." + configName + ".category." + parentKey.asString())))
+                                .margins(Insets.top(5))
+                )
+                .surface(NESTING_SURFACE)
+                .padding(Insets.left(NEST_PADDING));
     }
 
     @SuppressWarnings("rawtypes")
@@ -93,16 +113,6 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
         }
 
         return null;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public void removed() {
-        this.options.forEach((option, component) -> {
-            if (!component.isValid()) return;
-            option.set(component.parsedValue());
-        });
-        super.removed();
     }
 
     static {
