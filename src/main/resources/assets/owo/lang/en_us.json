@@ -1,9 +1,19 @@
 {
-  "text.config.nested_container": [
+  "text.config.nested_container.collapsed": [
     "",
     {
       "text": "> ",
       "bold": true
+    },
+    {
+      "index": 0,
+      "underlined": true
+    }
+  ],
+  "text.config.nested_container.expanded": [
+    "",
+    {
+      "text": "∨ "
     },
     {
       "index": 0,

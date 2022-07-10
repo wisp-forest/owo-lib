@@ -4,13 +4,7 @@ import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.ConfigWrapper;
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.ui.BaseUIModelScreen;
-import io.wispforest.owo.ui.Drawer;
-import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.definitions.Insets;
-import io.wispforest.owo.ui.definitions.Sizing;
-import io.wispforest.owo.ui.definitions.Surface;
 import io.wispforest.owo.ui.layout.FlowLayout;
-import io.wispforest.owo.ui.layout.Layouts;
 import io.wispforest.owo.ui.layout.VerticalFlowLayout;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.util.NumberReflection;
@@ -22,20 +16,6 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
-
-    private static final int NEST_PADDING = 10;
-    private static final Surface NESTING_SURFACE = (matrices, component) -> {
-        final var indentCount = component.padding().get().left() / NEST_PADDING;
-        for (int i = 0; i < indentCount; i++) {
-            Drawer.fill(matrices,
-                    component.x() + 5 + i * NEST_PADDING,
-                    component.y(),
-                    component.x() + 6 + i * NEST_PADDING,
-                    component.y() + component.height(),
-                    0x77FFFFFF
-            );
-        }
-    };
 
     private static final Map<Predicate<Option<?>>, OptionComponentFactory<?>> DEFAULT_FACTORIES = new HashMap<>();
     protected final Map<Predicate<Option<?>>, OptionComponentFactory<?>> extraFactories = new HashMap<>();
@@ -64,7 +44,6 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                 Owo.LOGGER.warn("Could not create UI component for config option {}", option);
             }
 
-            // TODO make nested elements collapsible
             var result = factory.make(this.model, option);
             this.options.put(option, result.optionContainer());
 
@@ -91,13 +70,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
     }
 
     protected VerticalFlowLayout makeContainer(String configName, Option.Key parentKey) {
-        return (VerticalFlowLayout) Layouts.verticalFlow(Sizing.fill(100), Sizing.content())
-                .child(
-                        Components.label(Text.translatable("text.config.nested_container", Text.translatable("text.config." + configName + ".category." + parentKey.asString())))
-                                .margins(Insets.top(5))
-                )
-                .surface(NESTING_SURFACE)
-                .padding(Insets.left(NEST_PADDING));
+        return new OptionContainerLayout(Text.translatable("text.config." + configName + ".category." + parentKey.asString()));
     }
 
     @SuppressWarnings("rawtypes")

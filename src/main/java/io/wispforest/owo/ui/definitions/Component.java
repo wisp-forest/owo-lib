@@ -279,12 +279,12 @@ public interface Component {
     }
 
     /**
-     * Update the state of all animatable properties
-     * of this component
+     * Update the state of this component
+     * before rendering the next frame
      *
      * @param delta The duration of the last frame, in partial ticks
      */
-    default void updateProperties(float delta) {
+    default void update(float delta) {
         AnimatableProperty.updateAll(delta, this.margins(), this.positioning(), this.horizontalSizing(), this.verticalSizing());
     }
 

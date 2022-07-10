@@ -113,12 +113,12 @@ public interface ParentComponent extends Component {
     }
 
     @Override
-    default void updateProperties(float delta) {
-        Component.super.updateProperties(delta);
+    default void update(float delta) {
+        Component.super.update(delta);
         AnimatableProperty.updateAll(delta, this.padding());
 
         for (var child : this.children()) {
-            child.updateProperties(delta);
+            child.update(delta);
         }
     }
 

@@ -79,7 +79,7 @@ public class OwoUIAdapter<T extends ParentComponent> implements Element, Drawabl
     public void render(MatrixStack matrices, int mouseX, int mouseY, float partialTicks) {
         final var delta = MinecraftClient.getInstance().getLastFrameDuration();
 
-        this.rootComponent.updateProperties(delta);
+        this.rootComponent.update(delta);
 
         GlStateManager._enableScissorTest();
         this.rootComponent.draw(matrices, mouseX, mouseY, partialTicks, delta);
