@@ -129,7 +129,7 @@ dependencies {
 
     modLocalRuntime "maven.modrinth:lazydfu:0.1.2"
 
-    modLocalRuntime include("blue.endless:jankson:${project.jankson_version}")
+    implementation include("blue.endless:jankson:${project.jankson_version}")
 
     testmodImplementation sourceSets.main.output
     testmodAnnotationProcessor sourceSets.main.output

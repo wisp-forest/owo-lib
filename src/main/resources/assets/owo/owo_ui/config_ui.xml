@@ -1,10 +1,9 @@
 <owo-ui>
-
     <components>
         <flow-layout direction="vertical">
             <children>
-                <label>
-                    <text>very epic owo config</text>
+                <label id="title">
+                    <text translate="true"/>
                     <shadow>true</shadow>
                     <margins>
                         <bottom>15</bottom>
@@ -12,10 +11,7 @@
                 </label>
 
                 <scroll direction="vertical">
-
-                    <child>
-                        <flow-layout direction="vertical" id="config-panel"/>
-                    </child>
+                    <flow-layout direction="vertical" id="config-panel"/>
 
                     <sizing>
                         <horizontal method="fill">90</horizontal>
@@ -55,8 +51,9 @@
             <flow-layout direction="horizontal">
                 <children>
                     <label>
-                        <text>{{config-option-name}}</text>
+                        <text translate="true">{{config-option-name}}</text>
                         <positioning type="relative">0,50</positioning>
+                        <shadow>true</shadow>
                     </label>
 
                     <flow-layout direction="horizontal">
@@ -92,25 +89,32 @@
             </flow-layout>
         </config-option>
 
-        <text-config-option>
+        <text-box-config-option>
             <template name="config-option">
                 <child id="value-container">
-                    <text-box id="value-box">
+                    <config-text-box id="value-box">
                         <text>{{config-option-value}}</text>
-                    </text-box>
+                    </config-text-box>
                 </child>
             </template>
-        </text-config-option>
+        </text-box-config-option>
+
+        <boolean-toggle-config-option>
+            <template name="config-option">
+                <child id="value-container">
+                    <config-toggle-button id="toggle-button"/>
+                </child>
+            </template>
+        </boolean-toggle-config-option>
 
         <range-config-option>
             <template name="config-option">
                 <child id="value-container">
-                    <slider id="value-slider">
-                        <text>{{config-option-value}}</text>
+                    <config-slider id="value-slider">
                         <margins>
                             <all>1</all>
                         </margins>
-                    </slider>
+                    </config-slider>
                 </child>
             </template>
         </range-config-option>

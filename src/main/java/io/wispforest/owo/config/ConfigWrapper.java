@@ -51,6 +51,14 @@ public abstract class ConfigWrapper<C> {
     }
 
     /**
+     * @return The name of this config, used for translation
+     * keys and the filename
+     */
+    public String name() {
+        return this.name;
+    }
+
+    /**
      * Save the config represented by this wrapper
      */
     public void save() {

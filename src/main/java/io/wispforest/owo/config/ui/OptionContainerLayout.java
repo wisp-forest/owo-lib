@@ -10,6 +10,7 @@ import io.wispforest.owo.ui.layout.FlowLayout;
 import io.wispforest.owo.ui.layout.Layouts;
 import io.wispforest.owo.ui.layout.VerticalFlowLayout;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -37,15 +38,17 @@ public class OptionContainerLayout extends VerticalFlowLayout {
     protected OptionContainerLayout(Text title) {
         super(Sizing.fill(100), Sizing.content());
         this.surface(SURFACE);
-        this.padding(Insets.left(10));
+        this.padding(Insets.left(15));
 
         this.titleLayout = Layouts.horizontalFlow(Sizing.content(), Sizing.content());
         this.titleLayout.padding(Insets.vertical(5));
+        this.titleLayout.margins(Insets.left(-7));
+        this.allowOverflow(true);
 
         this.spinnyBoi = new SpinnyBoiComponent();
         this.titleLayout.child(spinnyBoi);
 
-        this.title = title;
+        this.title = title.copy().formatted(Formatting.UNDERLINE);
         this.titleLayout.child(Components.label(this.title));
 
         super.child(this.titleLayout);
