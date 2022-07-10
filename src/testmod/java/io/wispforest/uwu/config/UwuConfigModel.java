@@ -13,7 +13,7 @@ public class UwuConfigModel {
     public int aValue = 56;
 
     @RegexConstraint("[A-Za-z]{1,3}")
-    public String regexe = "yes";
+    public String regex = "yes";
 
     public Nested nestingTime = new Nested();
 

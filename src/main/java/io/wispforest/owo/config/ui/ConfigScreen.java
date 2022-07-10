@@ -5,6 +5,7 @@ import io.wispforest.owo.config.ConfigWrapper;
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.ui.BaseUIModelScreen;
 import io.wispforest.owo.ui.Drawer;
+import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.definitions.Insets;
 import io.wispforest.owo.ui.definitions.Sizing;
 import io.wispforest.owo.ui.definitions.Surface;
@@ -13,7 +14,6 @@ import io.wispforest.owo.ui.layout.Layouts;
 import io.wispforest.owo.ui.layout.VerticalFlowLayout;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.util.NumberReflection;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 
@@ -64,9 +64,12 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
             var result = factory.make(this.model, option);
             this.options.put(option, result.optionContainer());
 
-            int nestDepth = option.key().substring(1).split("\\.").length - 1;
+            // TODO make nested elements collapsible
+            // TODO display nest element name
+            int nestDepth = option.key().nestDepth();
             if (nestDepth > 0) {
-                panel.child(Layouts.horizontalFlow(Sizing.fill(100), Sizing.content())
+                panel.child(Layouts.verticalFlow(Sizing.fill(100), Sizing.content())
+                        .child(Components.label(Text.translatable("text.config.nested_container", option.key().parent().name())))
                         .child(result.baseComponent())
                         .surface(NESTING_SURFACE)
                         .padding(Insets.left(nestDepth * NEST_PADDING)));
@@ -109,8 +112,6 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
 
         UIParsing.registerFactory("config-slider", element -> new ConfigSlider());
         UIParsing.registerFactory("config-toggle-button", element -> new ConfigToggleButton());
-        UIParsing.registerFactory("config-text-box", element -> {
-            return new ConfigTextBox(MinecraftClient.getInstance().textRenderer, 0, 0, 0, 0, Text.empty());
-        });
+        UIParsing.registerFactory("config-text-box", element -> new ConfigTextBox());
     }
 }

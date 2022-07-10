@@ -4,7 +4,7 @@ import io.wispforest.owo.ui.definitions.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.util.NumberReflection;
-import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
 import org.w3c.dom.Element;
@@ -21,8 +21,8 @@ public class ConfigTextBox extends TextFieldWidget implements OptionComponent {
     protected Predicate<String> inputPredicate = s -> true, applyPredicate = s -> true;
     protected Consumer<String> externalListener = s -> {};
 
-    public ConfigTextBox(TextRenderer textRenderer, int x, int y, int width, int height, Text text) {
-        super(textRenderer, x, y, width, height, text);
+    public ConfigTextBox() {
+        super(MinecraftClient.getInstance().textRenderer, 0, 0, 0, 0, Text.empty());
         this.verticalSizing(Sizing.fixed(20));
         super.setChangedListener(s -> {
             this.setEditableColor(this.applyPredicate.test(s) ? this.validColor : this.invalidColor);

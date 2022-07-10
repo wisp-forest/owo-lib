@@ -6,8 +6,9 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
+import java.util.List;
 
-public record Option<T>(String configName, String key, T defaultValue, Observable<T> events, @Nullable ConfigWrapper.Constraint constraint,
+public record Option<T>(String configName, Key key, T defaultValue, Observable<T> events, @Nullable ConfigWrapper.Constraint constraint,
                         BoundField backingField) {
 
     public void set(T value) {
@@ -50,6 +51,44 @@ public record Option<T>(String configName, String key, T defaultValue, Observabl
         return matched;
     }
 
+    public record Key(String[] path) {
+
+        public static final Key ROOT = new Key(new String[0]);
+
+        public Key(List<String> path) {
+            this(path.toArray(String[]::new));
+        }
+
+        public Key(String key) {
+            this(key.split("\\."));
+        }
+
+        public Key parent() {
+            var newPath = new String[this.path.length - 1];
+            System.arraycopy(this.path, 0, newPath, 0, this.path.length - 1);
+            return new Key(newPath);
+        }
+
+        public Key child(String childName) {
+            var newPath = new String[this.path.length + 1];
+            System.arraycopy(this.path, 0, newPath, 0, this.path.length);
+            newPath[this.path.length] = childName;
+            return new Key(newPath);
+        }
+
+        public String asString() {
+            return String.join(".", this.path);
+        }
+
+        public int nestDepth() {
+            return Math.max(0, this.path.length - 1);
+        }
+
+        public String name() {
+            return this.path[this.path.length - 1];
+        }
+    }
+
     public static final class BoundField {
         private Object owner;
         private final Field field;
@@ -60,9 +99,9 @@ public record Option<T>(String configName, String key, T defaultValue, Observabl
         }
 
         @ApiStatus.Internal
-        public void rebind(Object root, String key) {
+        public void rebind(Object root, Key key) {
             if (this.owner == root) return;
-            var path = key.substring(1).split("\\.");
+            var path = key.path();
 
             try {
                 var owner = root;

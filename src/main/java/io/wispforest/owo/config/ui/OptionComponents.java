@@ -15,7 +15,7 @@ public class OptionComponents {
     public static OptionComponentFactory.FactoryResult createTextBox(UIModel model, Option<?> option, Consumer<ConfigTextBox> processor) {
         var optionComponent = model.expandTemplate(FlowLayout.class,
                 "text-box-config-option",
-                packParameters("text.config." + option.configName() + ".option" + option.key(), option.value().toString())
+                packParameters("text.config." + option.configName() + ".option" + option.key().asString(), option.value().toString())
         );
 
         var valueBox = optionComponent.childById(ConfigTextBox.class, "value-box");
@@ -36,7 +36,7 @@ public class OptionComponents {
         var value = option.value();
         var optionComponent = model.expandTemplate(FlowLayout.class,
                 "range-config-option",
-                packParameters("text.config." + option.configName() + ".option" + option.key(), value.toString())
+                packParameters("text.config." + option.configName() + ".option" + option.key().asString(), value.toString())
         );
 
         var constraint = option.backingField().field().getAnnotation(RangeConstraint.class);
@@ -64,7 +64,7 @@ public class OptionComponents {
     public static OptionComponentFactory.FactoryResult createToggleButton(UIModel model, Option<Boolean> option) {
         var optionComponent = model.expandTemplate(FlowLayout.class,
                 "boolean-toggle-config-option",
-                packParameters("text.config." + option.configName() + ".option" + option.key(), option.value().toString())
+                packParameters("text.config." + option.configName() + ".option" + option.key().asString(), option.value().toString())
         );
 
         var toggleButton = optionComponent.childById(ConfigToggleButton.class, "toggle-button");

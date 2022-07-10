@@ -1,4 +1,14 @@
 {
+  "text.config.nested_container": [
+    "",
+    {
+      "text": "> ",
+      "bold": true
+    },
+    {
+      "index": 0
+    }
+  ],
   "text.config.boolean_toggle.enabled": [
     "",
     {

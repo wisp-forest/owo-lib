@@ -32,7 +32,7 @@ public abstract class ConfigWrapper<C> {
     protected boolean loading = false;
     protected final Jankson jankson = Jankson.builder().build();
 
-    @SuppressWarnings("rawtypes") protected final Map<String, Option> options = new LinkedHashMap<>();
+    @SuppressWarnings("rawtypes") protected final Map<Option.Key, Option> options = new LinkedHashMap<>();
 
     protected ConfigWrapper(Class<C> clazz) {
         ReflectionUtils.requireZeroArgsConstructor(clazz, s -> "Config model class " + s + " must provide a zero-args constructor");
@@ -101,8 +101,8 @@ public abstract class ConfigWrapper<C> {
     }
 
     private void initializeOptions(boolean hookSave) throws IllegalAccessException, NoSuchMethodException {
-        var fields = new LinkedHashMap<String, Option.BoundField>();
-        collectFieldValues("", this.instance, fields);
+        var fields = new LinkedHashMap<Option.Key, Option.BoundField>();
+        collectFieldValues(Option.Key.ROOT, this.instance, fields);
 
         for (var entry : fields.entrySet()) {
             var key = entry.getKey();
@@ -165,19 +165,19 @@ public abstract class ConfigWrapper<C> {
         }
     }
 
-    private void collectFieldValues(String prefix, Object instance, Map<String, Option.BoundField> fields) throws IllegalAccessException {
+    private void collectFieldValues(Option.Key parent, Object instance, Map<Option.Key, Option.BoundField> fields) throws IllegalAccessException {
         for (var field : instance.getClass().getDeclaredFields()) {
             if (Modifier.isTransient(field.getModifiers()) || Modifier.isStatic(field.getModifiers())) continue;
 
             if (field.getType().isAnnotationPresent(Nest.class)) {
                 var fieldValue = field.get(instance);
                 if (fieldValue != null) {
-                    this.collectFieldValues(prefix + "." + field.getName(), fieldValue, fields);
+                    this.collectFieldValues(parent.child(field.getName()), fieldValue, fields);
                 } else {
                     throw new IllegalStateException("Nested config option containers must never be null");
                 }
             } else {
-                fields.put(prefix + "." + field.getName(), new Option.BoundField(instance, field));
+                fields.put(parent.child(field.getName()), new Option.BoundField(instance, field));
             }
         }
     }
