@@ -2,7 +2,7 @@ package io.wispforest.owo.config.ui;
 
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.config.annotation.RangeConstraint;
-import io.wispforest.owo.ui.definitions.Component;
+import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.util.NumberReflection;
 

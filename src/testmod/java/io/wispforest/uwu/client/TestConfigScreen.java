@@ -1,25 +1,17 @@
 package io.wispforest.uwu.client;
 
 import io.wispforest.owo.Owo;
-import io.wispforest.owo.ui.BaseOwoScreen;
-import io.wispforest.owo.ui.OwoUIAdapter;
+import io.wispforest.owo.ui.base.BaseOwoScreen;
+import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.component.LabelComponent;
-import io.wispforest.owo.ui.definitions.*;
-import io.wispforest.owo.ui.layout.FlowLayout;
-import io.wispforest.owo.ui.layout.Layouts;
-import io.wispforest.owo.ui.layout.ScrollContainer;
-import io.wispforest.owo.ui.layout.VerticalFlowLayout;
+import io.wispforest.owo.ui.core.*;
+import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.container.Layouts;
+import io.wispforest.owo.ui.container.ScrollContainer;
+import io.wispforest.owo.ui.container.VerticalFlowLayout;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
-import java.io.IOException;
 import java.util.stream.IntStream;
 
 public class TestConfigScreen extends BaseOwoScreen<VerticalFlowLayout> {

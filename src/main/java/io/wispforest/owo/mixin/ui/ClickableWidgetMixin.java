@@ -1,11 +1,11 @@
 package io.wispforest.owo.mixin.ui;
 
-import io.wispforest.owo.ui.FocusHandler;
+import io.wispforest.owo.ui.util.FocusHandler;
 import io.wispforest.owo.ui.inject.ComponentStub;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.component.VanillaWidgetComponent;
-import io.wispforest.owo.ui.definitions.*;
+import io.wispforest.owo.ui.core.*;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.SliderWidget;

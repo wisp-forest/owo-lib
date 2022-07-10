@@ -1,6 +1,6 @@
 package io.wispforest.owo.config.ui;
 
-import io.wispforest.owo.ui.definitions.Sizing;
+import io.wispforest.owo.ui.core.Sizing;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
 

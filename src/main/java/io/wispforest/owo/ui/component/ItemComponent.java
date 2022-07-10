@@ -1,8 +1,8 @@
 package io.wispforest.owo.ui.component;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import io.wispforest.owo.ui.BaseComponent;
-import io.wispforest.owo.ui.definitions.Sizing;
+import io.wispforest.owo.ui.base.BaseComponent;
+import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;

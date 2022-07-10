@@ -1,10 +1,10 @@
 package io.wispforest.owo.ui.component;
 
 import io.wispforest.owo.mixin.ui.ClickableWidgetAccessor;
-import io.wispforest.owo.ui.BaseComponent;
-import io.wispforest.owo.ui.definitions.Insets;
-import io.wispforest.owo.ui.definitions.ParentComponent;
-import io.wispforest.owo.ui.definitions.Sizing;
+import io.wispforest.owo.ui.base.BaseComponent;
+import io.wispforest.owo.ui.core.Insets;
+import io.wispforest.owo.ui.core.ParentComponent;
+import io.wispforest.owo.ui.core.Sizing;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;

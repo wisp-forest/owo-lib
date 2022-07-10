@@ -1,6 +1,6 @@
 package io.wispforest.owo.mixin.ui;
 
-import io.wispforest.owo.ui.definitions.CursorStyle;
+import io.wispforest.owo.ui.core.CursorStyle;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import net.minecraft.client.gui.widget.ClickableWidget;

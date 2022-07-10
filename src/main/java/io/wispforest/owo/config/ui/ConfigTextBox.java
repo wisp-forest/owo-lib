@@ -1,6 +1,6 @@
 package io.wispforest.owo.config.ui;
 
-import io.wispforest.owo.ui.definitions.Sizing;
+import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.util.NumberReflection;

@@ -1,14 +1,14 @@
 package io.wispforest.uwu.client;
 
-import io.wispforest.owo.ui.BaseUIModelScreen;
+import io.wispforest.owo.ui.base.BaseUIModelScreen;
 import io.wispforest.owo.ui.component.EntityComponent;
 import io.wispforest.owo.ui.component.ItemComponent;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.component.SliderComponent;
-import io.wispforest.owo.ui.definitions.*;
-import io.wispforest.owo.ui.layout.FlowLayout;
-import io.wispforest.owo.ui.layout.HoverContainer;
-import io.wispforest.owo.ui.layout.ScrollContainer;
+import io.wispforest.owo.ui.core.*;
+import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.container.HoverContainer;
+import io.wispforest.owo.ui.container.ScrollContainer;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;

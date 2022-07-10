@@ -1,8 +1,8 @@
 package io.wispforest.owo.ui.component;
 
-import io.wispforest.owo.ui.BaseComponent;
-import io.wispforest.owo.ui.definitions.Size;
-import io.wispforest.owo.ui.definitions.Sizing;
+import io.wispforest.owo.ui.base.BaseComponent;
+import io.wispforest.owo.ui.core.Size;
+import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import net.minecraft.client.MinecraftClient;

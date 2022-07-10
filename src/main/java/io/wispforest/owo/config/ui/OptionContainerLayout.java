@@ -1,14 +1,14 @@
 package io.wispforest.owo.config.ui;
 
-import io.wispforest.owo.ui.Drawer;
+import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.definitions.Component;
-import io.wispforest.owo.ui.definitions.Insets;
-import io.wispforest.owo.ui.definitions.Sizing;
-import io.wispforest.owo.ui.definitions.Surface;
-import io.wispforest.owo.ui.layout.FlowLayout;
-import io.wispforest.owo.ui.layout.Layouts;
-import io.wispforest.owo.ui.layout.VerticalFlowLayout;
+import io.wispforest.owo.ui.core.Component;
+import io.wispforest.owo.ui.core.Insets;
+import io.wispforest.owo.ui.core.Sizing;
+import io.wispforest.owo.ui.core.Surface;
+import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.container.Layouts;
+import io.wispforest.owo.ui.container.VerticalFlowLayout;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.lwjgl.glfw.GLFW;

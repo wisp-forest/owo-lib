@@ -1,9 +1,9 @@
 package io.wispforest.owo.ui.parsing;
 
 import io.wispforest.owo.ui.component.*;
-import io.wispforest.owo.ui.definitions.Component;
-import io.wispforest.owo.ui.definitions.Sizing;
-import io.wispforest.owo.ui.layout.*;
+import io.wispforest.owo.ui.core.Component;
+import io.wispforest.owo.ui.core.Sizing;
+import io.wispforest.owo.ui.container.*;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;

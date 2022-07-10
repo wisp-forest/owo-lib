@@ -1,7 +1,7 @@
 package io.wispforest.owo.config.ui;
 
 import io.wispforest.owo.ui.component.LabelComponent;
-import io.wispforest.owo.ui.definitions.Insets;
+import io.wispforest.owo.ui.core.Insets;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3f;

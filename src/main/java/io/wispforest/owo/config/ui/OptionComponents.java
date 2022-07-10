@@ -2,7 +2,7 @@ package io.wispforest.owo.config.ui;
 
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.config.annotation.RangeConstraint;
-import io.wispforest.owo.ui.layout.FlowLayout;
+import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.parsing.UIModel;
 import net.minecraft.client.gui.widget.ButtonWidget;
 

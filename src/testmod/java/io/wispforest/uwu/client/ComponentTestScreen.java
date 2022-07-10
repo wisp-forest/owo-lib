@@ -1,13 +1,13 @@
 package io.wispforest.uwu.client;
 
-import io.wispforest.owo.ui.OwoUIAdapter;
+import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.component.BoundingBoxComponent;
 import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.definitions.*;
-import io.wispforest.owo.ui.layout.FlowLayout;
-import io.wispforest.owo.ui.layout.HoverContainer;
-import io.wispforest.owo.ui.layout.Layouts;
-import io.wispforest.owo.ui.layout.ScrollContainer;
+import io.wispforest.owo.ui.core.*;
+import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.container.HoverContainer;
+import io.wispforest.owo.ui.container.Layouts;
+import io.wispforest.owo.ui.container.ScrollContainer;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;

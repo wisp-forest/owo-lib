@@ -1,8 +1,8 @@
 package io.wispforest.owo.ui.component;
 
-import io.wispforest.owo.ui.BaseComponent;
-import io.wispforest.owo.ui.Drawer;
-import io.wispforest.owo.ui.definitions.Sizing;
+import io.wispforest.owo.ui.base.BaseComponent;
+import io.wispforest.owo.ui.util.Drawer;
+import io.wispforest.owo.ui.core.Sizing;
 import net.minecraft.client.util.math.MatrixStack;
 
 public class BoundingBoxComponent extends BaseComponent {

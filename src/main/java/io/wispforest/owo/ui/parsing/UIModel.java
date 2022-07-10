@@ -2,10 +2,10 @@
 package io.wispforest.owo.ui.parsing;
 
 import io.wispforest.owo.Owo;
-import io.wispforest.owo.ui.OwoUIAdapter;
-import io.wispforest.owo.ui.definitions.Component;
-import io.wispforest.owo.ui.definitions.ParentComponent;
-import io.wispforest.owo.ui.definitions.Sizing;
+import io.wispforest.owo.ui.core.OwoUIAdapter;
+import io.wispforest.owo.ui.core.Component;
+import io.wispforest.owo.ui.core.ParentComponent;
+import io.wispforest.owo.ui.core.Sizing;
 import net.minecraft.client.gui.screen.Screen;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;

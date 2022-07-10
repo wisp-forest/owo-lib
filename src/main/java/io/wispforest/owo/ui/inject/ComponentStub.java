@@ -1,7 +1,7 @@
 package io.wispforest.owo.ui.inject;
 
-import io.wispforest.owo.ui.FocusHandler;
-import io.wispforest.owo.ui.definitions.*;
+import io.wispforest.owo.ui.util.FocusHandler;
+import io.wispforest.owo.ui.core.*;
 import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
