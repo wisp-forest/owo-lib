@@ -1,8 +1,10 @@
 package io.wispforest.owo.ui.core;
 
-import io.wispforest.owo.ui.util.FocusHandler;
+import io.wispforest.owo.ui.event.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
+import io.wispforest.owo.ui.util.FocusHandler;
+import io.wispforest.owo.util.EventSource;
 import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
@@ -170,9 +172,9 @@ public interface Component {
      * @return {@code true} if this component handled the click and no more
      * components should be notified
      */
-    default boolean onMouseClick(double mouseX, double mouseY, int button) {
-        return false;
-    }
+    boolean onMouseDown(double mouseX, double mouseY, int button);
+
+    EventSource<MouseDown> mouseDown();
 
     /**
      * Called when a mouse button has been released
@@ -183,9 +185,9 @@ public interface Component {
      * @return {@code true} if this component handled the event and no more
      * components should be notified
      */
-    default boolean onMouseRelease(double mouseX, double mouseY, int button) {
-        return false;
-    }
+    boolean onMouseUp(double mouseX, double mouseY, int button);
+
+    EventSource<MouseUp> mouseUp();
 
     /**
      * Called when the mouse has been scrolled inside
@@ -199,9 +201,9 @@ public interface Component {
      * @return {@code true} if this component handled the scroll event
      * and no more components should be notified
      */
-    default boolean onMouseScroll(double mouseX, double mouseY, double amount) {
-        return false;
-    }
+    boolean onMouseScroll(double mouseX, double mouseY, double amount);
+
+    EventSource<MouseScroll> mouseScroll();
 
     /**
      * Called when the mouse has been dragged
@@ -218,9 +220,9 @@ public interface Component {
      * @return {@code true} if this component handled the mouse move and no more
      * components should be notified
      */
-    default boolean onMouseDrag(double mouseX, double mouseY, double deltaX, double deltaY, int button) {
-        return false;
-    }
+    boolean onMouseDrag(double mouseX, double mouseY, double deltaX, double deltaY, int button);
+
+    EventSource<MouseDrag> mouseDrag();
 
     /**
      * Called when a key on the keyboard has been pressed
@@ -233,9 +235,9 @@ public interface Component {
      * @return {@code true} if this component handled the key-press and no
      * more components should be notified
      */
-    default boolean onKeyPress(int keyCode, int scanCode, int modifiers) {
-        return false;
-    }
+    boolean onKeyPress(int keyCode, int scanCode, int modifiers);
+
+    EventSource<KeyPress> keyPress();
 
     /**
      * Called when a keyboard input event occurred - namely when
@@ -248,9 +250,9 @@ public interface Component {
      * @return {@code true} if this component handled the input and no
      * * more components should be notified
      */
-    default boolean onCharTyped(char chr, int modifiers) {
-        return false;
-    }
+    boolean onCharTyped(char chr, int modifiers);
+
+    EventSource<CharTyped> charTyped();
 
     /**
      * @return {@code true} if this component can gain focus
@@ -263,28 +265,42 @@ public interface Component {
      * Called when this component gains focus, due
      * to being clicked or selected via tab-cycling
      */
-    default void onFocusGained(FocusSource source) {}
+    void onFocusGained(FocusSource source);
+
+    EventSource<FocusGained> focusGained();
 
     /**
      * Called when this component loses focus
      */
-    default void onFocusLost() {}
+    void onFocusLost();
+
+    EventSource<FocusLost> focusLost();
+
+    EventSource<MouseEnter> mouseEnter();
+
+    EventSource<MouseLeave> mouseLeave();
 
     /**
      * @return The style of cursor to use while the mouse is
      * hovering this component
      */
-    default CursorStyle cursorStyle() {
-        return CursorStyle.POINTER;
-    }
+    CursorStyle cursorStyle();
+
+    /**
+     * Set the style of cursor to use while the
+     * mouse is hovering this component
+     */
+    Component cursorStyle(CursorStyle style);
 
     /**
      * Update the state of this component
-     * before rendering the next frame
+     * before ~ing the next frame
      *
-     * @param delta The duration of the last frame, in partial ticks
+     * @param delta  The duration of the last frame, in partial ticks
+     * @param mouseX The mouse pointer's x-coordinate
+     * @param mouseY The mouse pointer's y-coordinate
      */
-    default void update(float delta) {
+    default void update(float delta, int mouseX, int mouseY) {
         AnimatableProperty.updateAll(delta, this.margins(), this.positioning(), this.horizontalSizing(), this.verticalSizing());
     }
 

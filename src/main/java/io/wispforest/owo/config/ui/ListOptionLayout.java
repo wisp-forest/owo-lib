@@ -10,6 +10,7 @@ import io.wispforest.owo.util.ReflectionUtils;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.math.ChunkPos;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,7 @@ public class ListOptionLayout<T> extends OptionContainerLayout implements Option
     protected final ButtonWidget resetButton;
 
     //TODO move most of this to xml
+    @SuppressWarnings("unchecked")
     protected ListOptionLayout(Option<List<T>> option) {
         super(
                 Text.translatable("text.config." + option.configName() + ".option." + option.key().asString()),
@@ -39,6 +41,17 @@ public class ListOptionLayout<T> extends OptionContainerLayout implements Option
         this.titleLayout.verticalSizing(Sizing.fixed(30));
         this.titleLayout.verticalAlignment(VerticalAlignment.CENTER);
 
+        var addLabel = Components.label(Text.literal("Add entry").formatted(Formatting.GRAY));
+        addLabel.cursorStyle(CursorStyle.HAND);
+        addLabel.mouseEnter().subscribe(() -> addLabel.text(addLabel.text().copy().styled(style -> style.withColor(Formatting.YELLOW))));
+        addLabel.mouseLeave().subscribe(() -> addLabel.text(addLabel.text().copy().styled(style -> style.withColor(Formatting.GRAY))));
+        addLabel.mouseDown().subscribe((mouseX, mouseY, button) -> {
+            this.backingList.add((T) "");
+            this.refreshOptions();
+            return true;
+        });
+        this.titleLayout.child(addLabel.margins(Insets.of(5)));
+
         this.resetButton = Components.button(Text.literal("⇄"), button -> {
             this.backingList.clear();
             this.backingList.addAll(option.defaultValue());
@@ -48,7 +61,7 @@ public class ListOptionLayout<T> extends OptionContainerLayout implements Option
         });
         this.resetButton.margins(Insets.right(10));
         this.resetButton.positioning(Positioning.relative(100, 50));
-        this.resetButton.active = !this.backingList.equals(this.backingOption.defaultValue());
+        this.refreshResetButton();
         this.titleLayout.child(resetButton);
 
         this.refreshOptions();
@@ -66,8 +79,18 @@ public class ListOptionLayout<T> extends OptionContainerLayout implements Option
             container.verticalAlignment(VerticalAlignment.CENTER);
             container.padding(Insets.left(10));
 
-            // TODO make this clickable to remove the entry, turn into "x " on hover
-            container.child(Components.label(Text.literal("- ").formatted(Formatting.GRAY)));
+            int idx = i;
+            final var label = Components.label(Text.literal("- ").formatted(Formatting.GRAY));
+            label.cursorStyle(CursorStyle.HAND);
+            label.mouseEnter().subscribe(() -> label.text(Text.literal("x ").formatted(Formatting.GRAY)));
+            label.mouseLeave().subscribe(() -> label.text(Text.literal("- ").formatted(Formatting.GRAY)));
+            label.mouseDown().subscribe((mouseX, mouseY, button) -> {
+                this.backingList.remove(idx);
+                this.refreshResetButton();
+                this.refreshOptions();
+                return true;
+            });
+            container.child(label);
 
             final var box = new ConfigTextBox();
             box.setText(this.backingList.get(i).toString());
@@ -78,12 +101,11 @@ public class ListOptionLayout<T> extends OptionContainerLayout implements Option
             box.verticalSizing(Sizing.fixed(8));
             box.setMaxLength(Integer.MAX_VALUE);
 
-            int idx = i;
             box.setChangedListener(s -> {
                 if (!box.isValid()) return;
 
                 this.backingList.set(idx, (T) box.parsedValue());
-                this.resetButton.active = !this.backingList.equals(this.backingOption.defaultValue());
+                this.refreshResetButton();
             });
 
             if (NumberReflection.isNumberType(listType)) {
@@ -99,6 +121,11 @@ public class ListOptionLayout<T> extends OptionContainerLayout implements Option
         }
 
         this.updateLayout();
+        this.refreshResetButton();
+    }
+
+    protected void refreshResetButton() {
+        this.resetButton.active = !this.backingList.equals(this.backingOption.defaultValue());
     }
 
     @Override
@@ -107,7 +134,6 @@ public class ListOptionLayout<T> extends OptionContainerLayout implements Option
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Object parsedValue() {
         return this.backingList;
     }

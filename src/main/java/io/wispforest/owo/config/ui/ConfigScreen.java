@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
+// TODO docs
 public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
 
     private static final Map<Predicate<Option<?>>, OptionComponentFactory<?>> DEFAULT_FACTORIES = new HashMap<>();

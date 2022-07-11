@@ -1,11 +1,13 @@
 package io.wispforest.owo.mixin.ui;
 
+import io.wispforest.owo.ui.event.*;
 import io.wispforest.owo.ui.util.FocusHandler;
 import io.wispforest.owo.ui.inject.ComponentStub;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.component.VanillaWidgetComponent;
 import io.wispforest.owo.ui.core.*;
+import io.wispforest.owo.util.EventSource;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.SliderWidget;
@@ -28,6 +30,8 @@ public abstract class ClickableWidgetMixin implements ComponentStub {
 
     @Shadow
     public abstract boolean mouseClicked(double mouseX, double mouseY, int button);
+
+    @Shadow public abstract boolean mouseReleased(double mouseX, double mouseY, int button);
 
     @Unique
     protected VanillaWidgetComponent owo$wrapper = null;
@@ -103,6 +107,11 @@ public abstract class ClickableWidgetMixin implements ComponentStub {
     }
 
     @Override
+    public EventSource<MouseDown> mouseDown() {
+        return this.owo$getWrapper().mouseDown();
+    }
+
+    @Override
     public int x() {
         return this.owo$getWrapper().x();
     }
@@ -138,8 +147,63 @@ public abstract class ClickableWidgetMixin implements ComponentStub {
     }
 
     @Override
-    public boolean onMouseClick(double mouseX, double mouseY, int button) {
+    public void update(float delta, int mouseX, int mouseY) {
+        this.owo$getWrapper().update(delta, mouseX, mouseY);
+    }
+
+    @Override
+    public boolean onMouseDown(double mouseX, double mouseY, int button) {
         return this.mouseClicked(this.x() + mouseX, this.y() + mouseY, button);
+    }
+
+    @Override
+    public boolean onMouseUp(double mouseX, double mouseY, int button) {
+        return this.mouseReleased(mouseX, mouseY, button);
+    }
+
+    @Override
+    public EventSource<MouseUp> mouseUp() {
+        return this.owo$getWrapper().mouseUp();
+    }
+
+    @Override
+    public EventSource<MouseScroll> mouseScroll() {
+        return this.owo$getWrapper().mouseScroll();
+    }
+
+    @Override
+    public EventSource<MouseDrag> mouseDrag() {
+        return this.owo$getWrapper().mouseDrag();
+    }
+
+    @Override
+    public EventSource<KeyPress> keyPress() {
+        return this.owo$getWrapper().keyPress();
+    }
+
+    @Override
+    public EventSource<CharTyped> charTyped() {
+        return this.owo$getWrapper().charTyped();
+    }
+
+    @Override
+    public EventSource<FocusGained> focusGained() {
+        return this.owo$getWrapper().focusGained();
+    }
+
+    @Override
+    public EventSource<FocusLost> focusLost() {
+        return this.owo$getWrapper().focusLost();
+    }
+
+    @Override
+    public EventSource<MouseEnter> mouseEnter() {
+        return this.owo$getWrapper().mouseEnter();
+    }
+
+    @Override
+    public EventSource<MouseLeave> mouseLeave() {
+        return this.owo$getWrapper().mouseLeave();
     }
 
     @Override
@@ -200,6 +264,16 @@ public abstract class ClickableWidgetMixin implements ComponentStub {
     }
 
     @Override
+    public CursorStyle cursorStyle() {
+        return this.owo$getWrapper().cursorStyle();
+    }
+
+    @Override
+    public Component cursorStyle(CursorStyle style) {
+        return this.owo$getWrapper().cursorStyle(style);
+    }
+
+    @Override
     public Component id(@Nullable String id) {
         this.owo$getWrapper().id(id);
         return this;
@@ -214,8 +288,11 @@ public abstract class ClickableWidgetMixin implements ComponentStub {
     protected VanillaWidgetComponent owo$getWrapper() {
         if (this.owo$wrapper == null) {
             this.owo$wrapper = new VanillaWidgetComponent((ClickableWidget) (Object) this);
+            this.owo$initializeWrapper();
         }
 
         return this.owo$wrapper;
     }
+
+    protected void owo$initializeWrapper() {}
 }

@@ -34,13 +34,13 @@ public abstract class ButtonWidgetMixin extends ClickableWidget implements Butto
     }
 
     @Override
-    public CursorStyle cursorStyle() {
-        return CursorStyle.HAND;
-    }
-
-    @Override
     public ButtonWidget onPress(ButtonWidget.PressAction pressAction) {
         this.onPress = pressAction;
         return (ButtonWidget) (Object) this;
+    }
+
+    @SuppressWarnings("ReferenceToMixin")
+    protected void owo$initializeWrapper() {
+        ((ClickableWidgetMixin)(Object)this).owo$wrapper.cursorStyle(CursorStyle.HAND);
     }
 }

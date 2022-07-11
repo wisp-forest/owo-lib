@@ -89,27 +89,32 @@ public class VanillaWidgetComponent extends BaseComponent {
     }
 
     @Override
-    public boolean onMouseClick(double mouseX, double mouseY, int button) {
-        return this.widget.mouseClicked(this.x + mouseX, this.y + mouseY, button);
+    public boolean onMouseDown(double mouseX, double mouseY, int button) {
+        return this.widget.mouseClicked(this.x + mouseX, this.y + mouseY, button)
+                | super.onMouseDown(mouseX, mouseY, button);
     }
 
     @Override
     public boolean onMouseScroll(double mouseX, double mouseY, double amount) {
-        return this.widget.mouseScrolled(this.x + mouseX, this.y + mouseY, amount);
+        return this.widget.mouseScrolled(this.x + mouseX, this.y + mouseY, amount)
+                | super.onMouseScroll(mouseX, mouseY, amount);
     }
 
     @Override
     public boolean onMouseDrag(double mouseX, double mouseY, double deltaX, double deltaY, int button) {
-        return this.widget.mouseDragged(this.x + mouseX, this.y + mouseY, button, deltaX, deltaY);
+        return this.widget.mouseDragged(this.x + mouseX, this.y + mouseY, button, deltaX, deltaY)
+                | super.onMouseDrag(mouseX, mouseY, deltaX, deltaY, button);
     }
 
     @Override
     public boolean onCharTyped(char chr, int modifiers) {
-        return this.widget.charTyped(chr, modifiers);
+        return this.widget.charTyped(chr, modifiers)
+                | super.onCharTyped(chr, modifiers);
     }
 
     @Override
     public boolean onKeyPress(int keyCode, int scanCode, int modifiers) {
-        return this.widget.onKeyPress(keyCode, scanCode, modifiers);
+        return this.widget.onKeyPress(keyCode, scanCode, modifiers)
+                | super.onKeyPress(keyCode, scanCode, modifiers);
     }
 }

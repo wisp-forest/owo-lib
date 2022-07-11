@@ -9,6 +9,7 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 
+// TODO docs
 public record Option<T>(String configName, Key key, T defaultValue, Observable<T> events, @Nullable ConfigWrapper.Constraint constraint,
                         BoundField backingField) {
 

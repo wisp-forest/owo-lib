@@ -29,7 +29,7 @@ public class OptionContainerLayout extends VerticalFlowLayout {
     };
 
     protected List<Component> collapsingChildren = new ArrayList<>();
-    protected boolean expanded = true;
+    protected boolean expanded;
 
     protected final SpinnyBoiComponent spinnyBoi;
     protected final FlowLayout titleLayout;
@@ -86,8 +86,8 @@ public class OptionContainerLayout extends VerticalFlowLayout {
     }
 
     @Override
-    public boolean onMouseClick(double mouseX, double mouseY, int button) {
-        if (super.onMouseClick(mouseX, mouseY, button)) return true;
+    public boolean onMouseDown(double mouseX, double mouseY, int button) {
+        if (super.onMouseDown(mouseX, mouseY, button)) return true;
 
         if (mouseY <= this.titleLayout.fullSize().height()) {
             this.toggleExpansion();

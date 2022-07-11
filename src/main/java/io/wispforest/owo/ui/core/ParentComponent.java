@@ -89,10 +89,10 @@ public interface ParentComponent extends Component {
     Collection<Component> children();
 
     @Override
-    default boolean onMouseClick(double mouseX, double mouseY, int button) {
+    default boolean onMouseDown(double mouseX, double mouseY, int button) {
         for (var child : this.children()) {
             if (!child.isInBoundingBox(this.x() + mouseX, this.y() + mouseY)) continue;
-            if (child.onMouseClick(this.x() + mouseX - child.x(), this.y() + mouseY - child.y(), button)) {
+            if (child.onMouseDown(this.x() + mouseX - child.x(), this.y() + mouseY - child.y(), button)) {
                 return true;
             }
         }
@@ -113,12 +113,12 @@ public interface ParentComponent extends Component {
     }
 
     @Override
-    default void update(float delta) {
-        Component.super.update(delta);
+    default void update(float delta, int mouseX, int mouseY) {
+        Component.super.update(delta, mouseX, mouseY);
         AnimatableProperty.updateAll(delta, this.padding());
 
         for (var child : this.children()) {
-            child.update(delta);
+            child.update(delta, mouseX, mouseY);
         }
     }
 

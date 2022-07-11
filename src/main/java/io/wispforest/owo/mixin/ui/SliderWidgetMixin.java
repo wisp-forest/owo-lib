@@ -19,13 +19,13 @@ public abstract class SliderWidgetMixin extends ClickableWidget {
     }
 
     @Override
-    public CursorStyle cursorStyle() {
-        return CursorStyle.MOVE;
-    }
-
-    @Override
     public void parseProperties(UIModel spec, Element element, Map<String, Element> children) {
         super.parseProperties(spec, element, children);
         UIParsing.apply(children, "text", UIParsing::parseText, ((SliderWidget) (Object) this)::setMessage);
+    }
+
+    @SuppressWarnings("ReferenceToMixin")
+    protected void owo$initializeWrapper() {
+        ((ClickableWidgetMixin)(Object)this).owo$wrapper.cursorStyle(CursorStyle.MOVE);
     }
 }

@@ -258,7 +258,6 @@ public class UIParsing {
 
         // Container
         registerFactory("scroll", ScrollContainer::parse);
-        registerFactory("hover", element -> HoverContainer.of(null, null, null));
         registerFactory("drag", element -> new DraggableContainer<>(Sizing.content(), Sizing.content(), null));
 
         // Textures

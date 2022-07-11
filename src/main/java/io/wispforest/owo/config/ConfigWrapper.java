@@ -129,6 +129,7 @@ public abstract class ConfigWrapper<C> {
         }
     }
 
+    // TODO docs
     public Field fieldForKey(Option.Key key) {
         try {
             var path = new ArrayList<>(List.of(key.path()));

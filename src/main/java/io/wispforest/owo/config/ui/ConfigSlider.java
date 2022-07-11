@@ -4,7 +4,7 @@ import io.wispforest.owo.ui.component.SliderComponent;
 import io.wispforest.owo.util.NumberReflection;
 import net.minecraft.text.Text;
 
-class ConfigSlider extends SliderComponent implements OptionComponent {
+public class ConfigSlider extends SliderComponent implements OptionComponent {
 
     protected Class<? extends Number> valueType;
     protected double min = 0, max = 1;

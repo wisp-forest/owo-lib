@@ -5,7 +5,6 @@ import io.wispforest.owo.ui.component.BoundingBoxComponent;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.container.FlowLayout;
-import io.wispforest.owo.ui.container.HoverContainer;
 import io.wispforest.owo.ui.container.Layouts;
 import io.wispforest.owo.ui.container.ScrollContainer;
 import net.minecraft.client.gui.Element;
@@ -92,12 +91,15 @@ public class ComponentTestScreen extends Screen {
                 .padding(Insets.of(5))
                 .margins(Insets.of(10));
 
+        final var growingTextBox = Components.textBox(Sizing.fixed(60));
+        final var growAnimation = growingTextBox.horizontalSizing().animate(500, Easing.SINE, Sizing.fixed(80));
+        growingTextBox.mouseEnter().subscribe(growAnimation::forwards);
+        growingTextBox.mouseLeave().subscribe(growAnimation::backwards);
+        growingTextBox.margins(Insets.vertical(5));
+
         var weeAnimation = buttonPanel.positioning().animate(450, Easing.SINE, Positioning.relative(0, 100));
         rootComponent.child(Layouts.verticalFlow(Sizing.content(), Sizing.content())
-                .child(HoverContainer.forAnimation(
-                        Components.textBox(Sizing.fixed(60)),
-                        component -> component.horizontalSizing().animate(500, Easing.SINE, Sizing.fixed(80))
-                ).margins(Insets.vertical(5)))
+                .child(growingTextBox)
                 .child(new TextFieldWidget(this.client.textRenderer, 0, 0, 60, 20, Text.empty()).margins(Insets.vertical(5)))
                 .child(Components.button(Text.of("weeeee"), 0, 0, button -> {
                     weeAnimation.reverse();

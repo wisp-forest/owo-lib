@@ -76,7 +76,7 @@ public class OwoUIAdapter<T extends ParentComponent> implements Element, Drawabl
     public void render(MatrixStack matrices, int mouseX, int mouseY, float partialTicks) {
         final var delta = MinecraftClient.getInstance().getLastFrameDuration();
 
-        this.rootComponent.update(delta);
+        this.rootComponent.update(delta, mouseX, mouseY);
 
         GlStateManager._enableScissorTest();
         this.rootComponent.draw(matrices, mouseX, mouseY, partialTicks, delta);
@@ -100,12 +100,12 @@ public class OwoUIAdapter<T extends ParentComponent> implements Element, Drawabl
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        return this.rootComponent.onMouseClick(mouseX, mouseY, button);
+        return this.rootComponent.onMouseDown(mouseX, mouseY, button);
     }
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        return this.rootComponent.onMouseRelease(mouseX, mouseY, button);
+        return this.rootComponent.onMouseUp(mouseX, mouseY, button);
     }
 
     @Override

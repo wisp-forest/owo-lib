@@ -5,10 +5,9 @@ import io.wispforest.owo.ui.component.EntityComponent;
 import io.wispforest.owo.ui.component.ItemComponent;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.component.SliderComponent;
-import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.container.FlowLayout;
-import io.wispforest.owo.ui.container.HoverContainer;
 import io.wispforest.owo.ui.container.ScrollContainer;
+import io.wispforest.owo.ui.core.*;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
@@ -54,12 +53,10 @@ public class TestParseScreen extends BaseUIModelScreen<FlowLayout> {
                 .positioning().animate(350, Easing.QUADRATIC, Positioning.relative(85, 35));
         rootComponent.childById(ButtonWidget.class, "fly-button").onPress(button -> flyAnimation.reverse());
 
-        var growAnimation = rootComponent.childById(LabelComponent.class, "grow-label")
-                .margins().animate(250, Easing.SINE, Insets.of(15));
-        //noinspection unchecked
-        rootComponent.childById(HoverContainer.class, "grow-label-hover")
-                .onMouseEnter(o -> growAnimation.forwards())
-                .onMouseLeave(o -> growAnimation.backwards());
+        var growLabel = rootComponent.childById(LabelComponent.class, "grow-label");
+        var growAnimation = growLabel.margins().animate(250, Easing.SINE, Insets.of(15));
+        growLabel.mouseEnter().subscribe(growAnimation::forwards);
+        growLabel.mouseLeave().subscribe(growAnimation::backwards);
     }
 
     protected Component createTextOption(final int index) {

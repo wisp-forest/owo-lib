@@ -21,8 +21,8 @@ public class SpinnyBoiComponent extends LabelComponent {
     }
 
     @Override
-    public void update(float delta) {
-        super.update(delta);
+    public void update(float delta, int mouseX, int mouseY) {
+        super.update(delta, mouseX, mouseY);
         this.rotation += (this.targetRotation - this.rotation) * delta * .65;
     }
 

@@ -36,6 +36,12 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
     }
 
     @Override
+    public void update(float delta, int mouseX, int mouseY) {
+        ParentComponent.super.update(delta, mouseX, mouseY);
+        super.update(delta, mouseX, mouseY);
+    }
+
+    @Override
     public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
         this.surface.draw(matrices, this);
     }
@@ -153,22 +159,28 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
     }
 
     @Override
-    public boolean onMouseClick(double mouseX, double mouseY, int button) {
+    public boolean onMouseDown(double mouseX, double mouseY, int button) {
         if (this.focusHandler != null) {
             this.focusHandler.updateClickFocus(mouseX, mouseY);
         }
 
-        return ParentComponent.super.onMouseClick(mouseX, mouseY, button);
+        return ParentComponent.super.onMouseDown(mouseX, mouseY, button)
+                || super.onMouseDown(mouseX, mouseY, button);
     }
 
     @Override
-    public boolean onMouseRelease(double mouseX, double mouseY, int button) {
+    public boolean onMouseUp(double mouseX, double mouseY, int button) {
         if (this.focusHandler != null && this.focusHandler.focused() != null) {
             final var focused = this.focusHandler.focused();
-            return focused.onMouseRelease(mouseX - focused.x(), mouseY - focused.y(), button);
+            return focused.onMouseUp(mouseX - focused.x(), mouseY - focused.y(), button);
         } else {
-            return super.onMouseRelease(mouseX, mouseY, button);
+            return super.onMouseUp(mouseX, mouseY, button);
         }
+    }
+
+    @Override
+    public boolean onMouseScroll(double mouseX, double mouseY, double amount) {
+        return ParentComponent.super.onMouseScroll(mouseX, mouseY, amount) || super.onMouseScroll(mouseX, mouseY, amount);
     }
 
     @Override
@@ -194,7 +206,7 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
             return this.focusHandler.focused().onKeyPress(keyCode, scanCode, modifiers);
         }
 
-        return false;
+        return super.onKeyPress(keyCode, scanCode, modifiers);
     }
 
     @Override
@@ -205,7 +217,7 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
             return this.focusHandler.focused().onCharTyped(chr, modifiers);
         }
 
-        return false;
+        return super.onCharTyped(chr, modifiers);
     }
 
     @Override

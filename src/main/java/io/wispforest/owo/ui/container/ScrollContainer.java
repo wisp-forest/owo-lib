@@ -164,11 +164,11 @@ public class ScrollContainer<T extends Component> extends WrappingParentComponen
     }
 
     @Override
-    public boolean onMouseClick(double mouseX, double mouseY, int button) {
+    public boolean onMouseDown(double mouseX, double mouseY, int button) {
         if (this.isInScrollbar(this.x + mouseX, this.y + mouseY)) {
             return true;
         } else {
-            return super.onMouseClick(mouseX, mouseY, button);
+            return super.onMouseDown(mouseX, mouseY, button);
         }
     }
 
@@ -191,7 +191,7 @@ public class ScrollContainer<T extends Component> extends WrappingParentComponen
     }
 
     @Override
-    public boolean onMouseRelease(double mouseX, double mouseY, int button) {
+    public boolean onMouseUp(double mouseX, double mouseY, int button) {
         this.scrollbaring = false;
         return true;
     }
