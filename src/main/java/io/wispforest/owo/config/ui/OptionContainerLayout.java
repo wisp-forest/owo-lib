@@ -1,14 +1,14 @@
 package io.wispforest.owo.config.ui;
 
-import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.component.Components;
+import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.container.Layouts;
+import io.wispforest.owo.ui.container.VerticalFlowLayout;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.core.Surface;
-import io.wispforest.owo.ui.container.FlowLayout;
-import io.wispforest.owo.ui.container.Layouts;
-import io.wispforest.owo.ui.container.VerticalFlowLayout;
+import io.wispforest.owo.ui.util.Drawer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.lwjgl.glfw.GLFW;
@@ -84,17 +84,25 @@ public class OptionContainerLayout extends VerticalFlowLayout {
 
     @Override
     public boolean onMouseClick(double mouseX, double mouseY, int button) {
+        if (super.onMouseClick(mouseX, mouseY, button)) return true;
+
         if (mouseY <= this.titleLayout.fullSize().height()) {
             this.toggleExpansion();
             return true;
         }
 
-        return super.onMouseClick(mouseX, mouseY, button);
+        return false;
     }
 
     @Override
     public FlowLayout child(Component child) {
         this.collapsingChildren.add(child);
         return super.child(child);
+    }
+
+    @Override
+    public FlowLayout removeChild(Component child) {
+        this.collapsingChildren.remove(child);
+        return super.removeChild(child);
     }
 }

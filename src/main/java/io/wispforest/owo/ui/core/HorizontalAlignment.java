@@ -4,8 +4,6 @@ import org.w3c.dom.Element;
 
 import java.util.Locale;
 
-;
-
 public enum HorizontalAlignment {
     LEFT, CENTER, RIGHT;
 

@@ -16,7 +16,7 @@
       "color": "#3AB0FF"
     }
   ],
-  "text.uwu.config_screen": [
+  "text.config.uwu.title": [
     "very epic ",
     {
       "text": "[",
@@ -45,9 +45,10 @@
   "text.config.uwu.category.nestingTime": "Nesting Time",
   "text.config.uwu.option.nestingTime.togglee": "Togglee",
   "text.config.uwu.option.nestingTime.yesThisIsAlsoNested": "Yes this is also nested",
-  "text.config.uwu.category.nestingTime.nestingTimeIntensifies": "Nesting Time Intensifies ",
+  "text.config.uwu.category.nestingTime.nestingTimeIntensifies": "Nesting Time Intensifies",
   "text.config.uwu.option.nestingTime.nestingTimeIntensifies.wowSoNested": "Wow so nested",
   "text.config.uwu.option.floting": "Floting",
+  "text.config.uwu.option.thereAreStringsHere": "There are Strings here",
   "item.uowou.owo_ingot": "oωo Ingot",
   "itemGroup.uwu.four_tab_group": "uωu",
   "itemGroup.uwu.four_tab_group.tab.tab_1": "Tab 1",

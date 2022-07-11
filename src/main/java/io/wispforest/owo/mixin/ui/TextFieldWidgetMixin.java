@@ -7,6 +7,7 @@ import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -17,6 +18,8 @@ import java.util.Map;
 @SuppressWarnings("ConstantConditions")
 @Mixin(TextFieldWidget.class)
 public abstract class TextFieldWidgetMixin extends ClickableWidget {
+
+    @Shadow public abstract void setDrawsBackground(boolean drawsBackground);
 
     public TextFieldWidgetMixin(int x, int y, int width, int height, Text message) {
         super(x, y, width, height, message);
@@ -29,6 +32,7 @@ public abstract class TextFieldWidgetMixin extends ClickableWidget {
             ((TextFieldWidget) (Object) this).setText(text);
             ((TextFieldWidget) (Object) this).setCursorToStart();
         });
+        UIParsing.apply(children, "show-background", UIParsing::parseBool, this::setDrawsBackground);
     }
 
     @SuppressWarnings("ReferenceToMixin")

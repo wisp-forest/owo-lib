@@ -6,6 +6,9 @@ import io.wispforest.owo.config.annotation.Nest;
 import io.wispforest.owo.config.annotation.RangeConstraint;
 import io.wispforest.owo.config.annotation.RegexConstraint;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Config(name = "uwu", wrapperName = "UwuConfig")
 public class UwuConfigModel {
 
@@ -18,6 +21,8 @@ public class UwuConfigModel {
     public Nested nestingTime = new Nested();
 
     public float floting = 6.9f;
+
+    public List<String> thereAreStringsHere = new ArrayList<>(List.of("yes", "no"));
 
     @Nest
     public static class Nested {

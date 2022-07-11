@@ -1,6 +1,8 @@
 package io.wispforest.owo.config.ui;
 
-public interface OptionComponent {
+import io.wispforest.owo.ui.core.Component;
+
+public interface OptionComponent extends Component {
 
     /**
      * @return {@code true} if the current state of this component

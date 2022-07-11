@@ -3,11 +3,9 @@ package io.wispforest.owo.util;
 import io.wispforest.owo.registration.annotations.AssignedName;
 import io.wispforest.owo.registration.annotations.IterationIgnored;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.util.Locale;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -156,6 +154,16 @@ public class ReflectionUtils {
                 .skip(depth)
                 .map(StackWalker.StackFrame::getClassName)
                 .findFirst()).orElse("<unknown>");
+    }
+
+    public static @Nullable Class<?> getFirstTypeArgument(Field field) {
+        var type = field.getGenericType();
+        if (!(type instanceof ParameterizedType parameterizedType)) return null;
+
+        var typeArgument = parameterizedType.getActualTypeArguments()[0];
+        if (!(typeArgument instanceof Class<?> typeClass)) return null;
+
+        return typeClass;
     }
 
     @FunctionalInterface

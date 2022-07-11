@@ -96,6 +96,8 @@ public abstract class ConfigWrapper<C> {
             for (var option : this.options.values()) {
                 option.backingField().rebind(this.instance, option.key());
                 option.synchronizeWithBackingField();
+
+                if (option.value() == null) option.set(option.defaultValue());
             }
         } catch (IOException | SyntaxError e) {
             Owo.LOGGER.warn("Could not load config {}", this.name, e);

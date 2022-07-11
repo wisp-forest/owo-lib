@@ -30,7 +30,7 @@ public class ConfigTextBox extends TextFieldWidget implements OptionComponent {
         });
     }
 
-    public void configureForNumber(Class<? extends Number> fieldType) {
+    public ConfigTextBox configureForNumber(Class<? extends Number> fieldType) {
         final boolean floatingPoint = NumberReflection.isFloatingPointType(fieldType);
         final double min = NumberReflection.minValue(fieldType).doubleValue(), max = NumberReflection.maxValue(fieldType).doubleValue();
 
@@ -51,6 +51,8 @@ public class ConfigTextBox extends TextFieldWidget implements OptionComponent {
                 return false;
             }
         });
+
+        return this;
     }
 
     @Override
