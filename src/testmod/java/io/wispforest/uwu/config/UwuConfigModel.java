@@ -1,10 +1,7 @@
 package io.wispforest.uwu.config;
 
 import blue.endless.jankson.Comment;
-import io.wispforest.owo.config.annotation.Config;
-import io.wispforest.owo.config.annotation.Nest;
-import io.wispforest.owo.config.annotation.RangeConstraint;
-import io.wispforest.owo.config.annotation.RegexConstraint;
+import io.wispforest.owo.config.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +15,7 @@ public class UwuConfigModel {
     @RegexConstraint("[A-Za-z]{1,3}")
     public String regex = "yes";
 
+    @Expanded
     public Nested nestingTime = new Nested();
 
     public float floting = 6.9f;
@@ -31,6 +29,8 @@ public class UwuConfigModel {
 
         @Comment("Commented nesting")
         public SuperNested nestingTimeIntensifies = new SuperNested();
+
+        public List<Integer> nestedIntegers = new ArrayList<>(List.of(69, 34, 35, 420));
     }
 
     @Nest

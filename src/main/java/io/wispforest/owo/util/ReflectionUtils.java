@@ -156,11 +156,12 @@ public class ReflectionUtils {
                 .findFirst()).orElse("<unknown>");
     }
 
-    public static @Nullable Class<?> getFirstTypeArgument(Field field) {
+    // TODO documentation
+    public static @Nullable Class<?> getTypeArgument(Field field, int index) {
         var type = field.getGenericType();
         if (!(type instanceof ParameterizedType parameterizedType)) return null;
 
-        var typeArgument = parameterizedType.getActualTypeArguments()[0];
+        var typeArgument = parameterizedType.getActualTypeArguments()[index];
         if (!(typeArgument instanceof Class<?> typeClass)) return null;
 
         return typeClass;

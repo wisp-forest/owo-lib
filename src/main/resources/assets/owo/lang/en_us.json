@@ -1,4 +1,6 @@
 {
+  "text.config.ui.reload": "Reload",
+  "text.config.ui.done": "Done",
   "text.config.nested_container.collapsed": [
     "",
     {

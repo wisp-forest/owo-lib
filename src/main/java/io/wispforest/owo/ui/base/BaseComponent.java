@@ -50,12 +50,14 @@ public abstract class BaseComponent implements Component {
         final var horizontalSizing = this.horizontalSizing.get();
         final var verticalSizing = this.verticalSizing.get();
 
+        final var margins = this.margins.get();
+
         if (horizontalSizing.method == Sizing.Method.CONTENT) {
-            verticalSizing.inflate(space.height(), height -> this.height = height, this::applyVerticalContentSizing);
-            horizontalSizing.inflate(space.width(), width -> this.width = width, this::applyHorizontalContentSizing);
+            verticalSizing.inflate(space.height() - margins.vertical(), height -> this.height = height, this::applyVerticalContentSizing);
+            horizontalSizing.inflate(space.width() - margins.horizontal(), width -> this.width = width, this::applyHorizontalContentSizing);
         } else {
-            horizontalSizing.inflate(space.width(), width -> this.width = width, this::applyHorizontalContentSizing);
-            verticalSizing.inflate(space.height(), height -> this.height = height, this::applyVerticalContentSizing);
+            horizontalSizing.inflate(space.width() - margins.horizontal(), width -> this.width = width, this::applyHorizontalContentSizing);
+            verticalSizing.inflate(space.height() - margins.vertical(), height -> this.height = height, this::applyVerticalContentSizing);
         }
     }
 

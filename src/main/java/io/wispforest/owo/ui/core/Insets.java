@@ -19,6 +19,10 @@ public record Insets(int top, int bottom, int left, int right) implements Animat
         return new Insets(-this.top, -this.bottom, -this.left, -this.right);
     }
 
+    public Insets add(int top, int bottom, int left, int right) {
+        return new Insets(this.top + top, this.bottom + bottom, this.left + left, this.right + right);
+    }
+
     public int horizontal() {
         return this.left + this.right;
     }

@@ -3,6 +3,7 @@ package io.wispforest.owo.config.ui;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.ConfigWrapper;
 import io.wispforest.owo.config.Option;
+import io.wispforest.owo.config.annotation.Expanded;
 import io.wispforest.owo.ui.base.BaseUIModelScreen;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
@@ -11,8 +12,8 @@ import io.wispforest.owo.ui.core.Surface;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.util.NumberReflection;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
@@ -32,8 +33,8 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
     @SuppressWarnings("rawtypes") protected final Map<Option, OptionComponent> options = new HashMap<>();
 
     public ConfigScreen(ConfigWrapper<?> config, @Nullable Screen parent) {
-        super(FlowLayout.class, DataSource.asset(new Identifier("owo", "config_ui")));
-//        super(FlowLayout.class, DataSource.file("config_ui.xml"));
+//        super(FlowLayout.class, DataSource.asset(new Identifier("owo", "config_ui")));
+        super(FlowLayout.class, DataSource.file("config_ui.xml"));
         this.parent = parent;
         this.config = config;
     }
@@ -52,6 +53,12 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
             rootComponent.surface(Surface.OPTIONS_BACKGROUND);
         }
 
+        rootComponent.childById(ButtonWidget.class, "done-button").onPress(button -> this.close());
+        rootComponent.childById(ButtonWidget.class, "reload-button").onPress(button -> {
+            this.config.load();
+            this.clearAndInit();
+        });
+
         var panel = rootComponent.childById(VerticalFlowLayout.class, "config-panel");
 
         var containers = new HashMap<Option.Key, VerticalFlowLayout>();
@@ -67,9 +74,10 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
             this.options.put(option, result.optionContainer());
 
             var parentKey = option.key().parent();
+            var expanded = parentKey != Option.Key.ROOT && this.config.fieldForKey(parentKey).isAnnotationPresent(Expanded.class);
             var container = containers.getOrDefault(
                     parentKey,
-                    new OptionContainerLayout(Text.translatable("text.config." + this.config.name() + ".category." + parentKey.asString()))
+                    new OptionContainerLayout(Text.translatable("text.config." + this.config.name() + ".category." + parentKey.asString()), expanded)
             );
 
             if (!containers.containsKey(parentKey)) {

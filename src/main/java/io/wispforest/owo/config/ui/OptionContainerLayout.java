@@ -35,7 +35,7 @@ public class OptionContainerLayout extends VerticalFlowLayout {
     protected final FlowLayout titleLayout;
     protected final Text title;
 
-    protected OptionContainerLayout(Text title) {
+    protected OptionContainerLayout(Text title, boolean expanded) {
         super(Sizing.fill(100), Sizing.content());
         this.surface(SURFACE);
         this.padding(Insets.left(15));
@@ -50,6 +50,9 @@ public class OptionContainerLayout extends VerticalFlowLayout {
 
         this.title = title.copy().formatted(Formatting.UNDERLINE);
         this.titleLayout.child(Components.label(this.title));
+
+        this.expanded = expanded;
+        this.spinnyBoi.spin(expanded ? 90 : 0);
 
         super.child(this.titleLayout);
     }
@@ -97,7 +100,11 @@ public class OptionContainerLayout extends VerticalFlowLayout {
     @Override
     public FlowLayout child(Component child) {
         this.collapsingChildren.add(child);
-        return super.child(child);
+
+        if (this.expanded) {
+            super.child(child);
+        }
+        return this;
     }
 
     @Override

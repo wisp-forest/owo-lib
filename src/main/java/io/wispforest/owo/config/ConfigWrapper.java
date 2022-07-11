@@ -1,9 +1,12 @@
 package io.wispforest.owo.config;
 
 import blue.endless.jankson.Jankson;
+import blue.endless.jankson.JsonElement;
 import blue.endless.jankson.JsonGrammar;
+import blue.endless.jankson.api.DeserializationException;
 import blue.endless.jankson.api.SyntaxError;
 import blue.endless.jankson.impl.POJODeserializer;
+import blue.endless.jankson.magic.TypeMagic;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.annotation.*;
 import io.wispforest.owo.util.NumberReflection;
@@ -14,13 +17,11 @@ import net.fabricmc.loader.api.FabricLoader;
 import java.io.IOException;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -76,6 +77,7 @@ public abstract class ConfigWrapper<C> {
      * Load the config represented by this wrapper from
      * its associated file, or create it if it does not exist
      */
+    @SuppressWarnings({"unchecked", "ConstantConditions"})
     public void load() {
         var configPath = FabricLoader.getInstance().getConfigDir().resolve(this.name + ".json5");
         if (!Files.exists(configPath)) {
@@ -85,24 +87,60 @@ public abstract class ConfigWrapper<C> {
 
         try {
             this.loading = true;
+            var configObject = this.jankson.load(Files.readString(configPath, StandardCharsets.UTF_8));
+
             for (var option : this.options.values()) {
-                if (Collection.class.isAssignableFrom(option.clazz())) {
-                    option.backingField().setValue(null);
+                Object newValue;
+
+                final var clazz = option.clazz();
+                if (Map.class.isAssignableFrom(clazz)) {
+                    var field = option.backingField().field();
+
+                    newValue = TypeMagic.createAndCast(clazz);
+                    POJODeserializer.unpackMap(
+                            (Map<Object, Object>) newValue,
+                            ReflectionUtils.getTypeArgument(field, 0),
+                            ReflectionUtils.getTypeArgument(field, 1),
+                            configObject.recursiveGet(JsonElement.class, option.key().asString()),
+                            this.jankson.getMarshaller()
+                    );
+                } else if (List.class.isAssignableFrom(clazz)) {
+                    newValue = TypeMagic.createAndCast(clazz);
+                    POJODeserializer.unpackCollection(
+                            (Collection<Object>) newValue,
+                            ReflectionUtils.getTypeArgument(option.backingField().field(), 0),
+                            configObject.recursiveGet(JsonElement.class, option.key().asString()),
+                            this.jankson.getMarshaller()
+                    );
+                } else {
+                    newValue = configObject.recursiveGet(clazz, option.key().asString());
                 }
-            }
 
-            POJODeserializer.unpackObject(this.instance, this.jankson.load(Files.readString(configPath, StandardCharsets.UTF_8)));
+                if (!option.verifyConstraint(newValue)) continue;
 
-            for (var option : this.options.values()) {
-                option.backingField().rebind(this.instance, option.key());
-                option.synchronizeWithBackingField();
-
-                if (option.value() == null) option.set(option.defaultValue());
+                option.set(newValue == null ? option.defaultValue() : newValue);
             }
         } catch (IOException | SyntaxError e) {
             Owo.LOGGER.warn("Could not load config {}", this.name, e);
+        } catch (DeserializationException e) {
+            throw new RuntimeException(e);
         } finally {
             this.loading = false;
+        }
+    }
+
+    public Field fieldForKey(Option.Key key) {
+        try {
+            var path = new ArrayList<>(List.of(key.path()));
+            var clazz = this.instance.getClass();
+
+            while (path.size() > 1) {
+                clazz = clazz.getDeclaredField(path.remove(0)).getType();
+            }
+
+            return clazz.getField(path.get(0));
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException("Could not get config option field", e);
         }
     }
 
