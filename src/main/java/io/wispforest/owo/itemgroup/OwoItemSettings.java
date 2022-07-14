@@ -1,5 +1,8 @@
 package io.wispforest.owo.itemgroup;
 
+import io.wispforest.owo.mixin.itemgroup.FabricItemInternalsAccessor;
+import io.wispforest.owo.mixin.itemgroup.FabricItemInternalsAccessor.ExtraDataAccessor;
+import io.wispforest.owo.mixin.itemgroup.SettingsAccessor;
 import net.fabricmc.fabric.api.item.v1.CustomDamageHandler;
 import net.fabricmc.fabric.api.item.v1.EquipmentSlotProvider;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
@@ -7,9 +10,11 @@ import net.minecraft.item.FoodComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.Rarity;
 import net.minecraft.util.collection.DefaultedList;
 
+import java.util.Map;
 import java.util.function.BiConsumer;
 
 /**
@@ -85,6 +90,44 @@ public class OwoItemSettings extends FabricItemSettings {
     @Override
     public OwoItemSettings fireproof() {
         return (OwoItemSettings) super.fireproof();
+    }
+
+    /**
+     * Method used to make a copy of a given {@link Item.Settings}
+     *
+     * @param settings The Settings to copy from
+     * @return A 1:1 Deep copy of the given {@link Item.Settings} as {@link OwoItemSettings}
+     */
+    public static OwoItemSettings copyFrom(Item.Settings settings){
+        OwoItemSettings settingsNew = new OwoItemSettings();
+
+        if(settings instanceof OwoItemSettings oldOwoItemSettings){
+            settingsNew.tab(oldOwoItemSettings.getTab());
+        }
+
+        if(settings instanceof FabricItemSettings oldFabricItemSettings){
+            ExtraDataAccessor oldData = (ExtraDataAccessor) (Object) FabricItemInternalsAccessor.owo$getExtraData().get(oldFabricItemSettings);
+
+            if (oldData != null) {
+                ((FabricItemSettings)settingsNew).customDamage(oldData.owo$getCustomDamageHandler());
+                ((FabricItemSettings)settingsNew).equipmentSlot(oldData.owo$getEquipmentSlotProvider());
+            }
+        }
+
+        SettingsAccessor settingsAccessor = (SettingsAccessor) settings;
+
+        if (settingsAccessor.owo$isFireproof()) {
+            settingsNew.fireproof();
+        }
+
+        settingsNew.group(settingsAccessor.owo$getGroup())
+                .food(settingsAccessor.owo$getFoodComponent())
+                .recipeRemainder(settingsAccessor.owo$getRecipeRemainder())
+                .maxCount(settingsAccessor.owo$getMaxCount())
+                .maxDamageIfAbsent(settingsAccessor.owo$getMaxDamage())
+                .rarity(settingsAccessor.owo$getRarity());
+
+        return settingsNew;
     }
 
 }
