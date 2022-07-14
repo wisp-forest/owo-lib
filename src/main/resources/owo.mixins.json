@@ -21,6 +21,8 @@
     "itemgroup.FabricItemInternalsAccessor",
     "itemgroup.FabricItemInternalsAccessor$ExtraDataAccessor",
     "itemgroup.SettingsAccessor",
+    "recipe.RecipeManagerMixin",
+    "recipe.RecipeMixin",
     "offline.AdvancementProgressAccessor",
     "offline.PlayerAdvancementTrackerMixin",
     "offline.WorldSaveHandlerMixin",
