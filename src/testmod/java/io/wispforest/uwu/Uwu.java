@@ -11,12 +11,14 @@ import io.wispforest.owo.offline.OfflineDataLookup;
 import io.wispforest.owo.particles.ClientParticles;
 import io.wispforest.owo.particles.systems.ParticleSystem;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
+import io.wispforest.owo.persistence.OwoPersistentStateManager;
 import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
 import io.wispforest.owo.text.CustomTextRegistry;
 import io.wispforest.owo.util.RegistryAccess;
 import io.wispforest.owo.util.TagInjector;
 import io.wispforest.uwu.items.UwuItems;
 import io.wispforest.uwu.network.*;
+import io.wispforest.uwu.persistence.UwuCounterState;
 import io.wispforest.uwu.text.BasedTextContent;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
@@ -35,6 +37,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.tag.BlockTags;
 import net.minecraft.tag.ItemTags;
 import net.minecraft.tag.TagKey;
@@ -172,7 +175,23 @@ public class Uwu implements ModInitializer {
         System.out.println(RegistryAccess.getEntry(Registry.ITEM, Items.ACACIA_BOAT));
         System.out.println(RegistryAccess.getEntry(Registry.ITEM, new Identifier("acacia_planks")));
 
+        OwoPersistentStateManager.register(UwuCounterState.ID, new UwuCounterState());
+
         CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> {
+
+            dispatcher.register(
+                    literal("increment_world_uwus").executes(context -> {
+                        ServerWorld world = context.getSource().getWorld();
+                        UwuCounterState state = OwoPersistentStateManager.get(world, UwuCounterState.ID);
+                        state.uwuws++;
+                        state.markDirty(); // Will be saved on next server world save.
+
+                        context.getSource().sendFeedback(Text.literal("UwUs incremented to: " + state.uwuws), false);
+
+                        return 0;
+                    })
+            );
+
             dispatcher.register(
                     literal("show_nbt")
                             .then(argument("player", GameProfileArgumentType.gameProfile())
