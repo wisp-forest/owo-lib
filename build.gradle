@@ -121,6 +121,8 @@ loom {
             source sourceSets.testmod
         }
     }
+
+    accessWidenerPath = file("src/main/resources/owo.accesswidener")
 }
 
 dependencies {

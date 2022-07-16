@@ -102,7 +102,7 @@ public class FocusHandler {
         allChildren.removeIf(component -> !component.canFocus(Component.FocusSource.KEYBOARD_CYCLE));
         if (allChildren.isEmpty()) return;
 
-        int index = allChildren.indexOf(this.focused) + (forwards ? 1 : -1);
+        int index = (this.focused == null ? 0 : allChildren.indexOf(this.focused)) + (forwards ? -1 : 1);
         if (index >= allChildren.size()) index -= allChildren.size();
         if (index < 0) index += allChildren.size();
 

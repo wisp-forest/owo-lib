@@ -31,6 +31,7 @@
     "owo-impl",
     "owo-lib"
   ],
+  "accessWidener": "owo.accesswidener",
   "depends": {
     "fabricloader": "*",
     "fabric": "*",
