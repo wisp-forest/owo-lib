@@ -75,7 +75,9 @@ public class ItemOps {
      */
     public static boolean decrementPlayerHandItem(PlayerEntity player, Hand hand) {
         var stack = player.getStackInHand(hand);
-        if (!emptyAwareDecrement(stack)) player.setStackInHand(hand, ItemStack.EMPTY);
+        if (!player.isCreative()) {
+            if (!emptyAwareDecrement(stack)) player.setStackInHand(hand, ItemStack.EMPTY);
+        }
         return !stack.isEmpty();
     }
 
