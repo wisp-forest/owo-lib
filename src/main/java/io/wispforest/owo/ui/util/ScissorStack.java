@@ -1,5 +1,6 @@
 package io.wispforest.owo.ui.util;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.AffineTransformation;
@@ -48,15 +49,7 @@ public class ScissorStack {
             ));
         }
 
-        var newFrame = STACK.peek();
-        var scale = MinecraftClient.getInstance().getWindow().getScaleFactor();
-
-        GL11.glScissor(
-                (int) (newFrame.x * scale),
-                (int) (MinecraftClient.getInstance().getWindow().getFramebufferHeight() - (newFrame.y * scale) - newFrame.height * scale),
-                (int) (newFrame.width * scale),
-                (int) (newFrame.height * scale)
-        );
+        applyState();
     }
 
     public static void pop() {
@@ -70,16 +63,28 @@ public class ScissorStack {
         if (STACK.isEmpty()) {
             GL11.glScissor(0, 0, window.getFramebufferWidth(), window.getFramebufferHeight());
         } else {
-            var scale = window.getScaleFactor();
-            var top = STACK.peek();
-
-            GL11.glScissor(
-                    (int) (top.x * scale),
-                    (int) (MinecraftClient.getInstance().getWindow().getFramebufferHeight() - (top.y * scale) - top.height * scale),
-                    (int) (top.width * scale),
-                    (int) (top.height * scale)
-            );
+            applyState();
         }
+    }
+
+    public static void drawUnclipped(Runnable action) {
+        boolean scissorEnabled = GL11.glIsEnabled(GL11.GL_SCISSOR_TEST);
+
+        if (!scissorEnabled) GlStateManager._disableScissorTest();
+        action.run();
+        if (scissorEnabled) GlStateManager._enableScissorTest();
+    }
+
+    private static void applyState() {
+        var newFrame = STACK.peek();
+        var scale = MinecraftClient.getInstance().getWindow().getScaleFactor();
+
+        GL11.glScissor(
+                (int) (newFrame.x * scale),
+                (int) (MinecraftClient.getInstance().getWindow().getFramebufferHeight() - (newFrame.y * scale) - newFrame.height * scale),
+                (int) (newFrame.width * scale),
+                (int) (newFrame.height * scale)
+        );
     }
 
     private record ScissorArea(int x, int y, int width, int height) {}

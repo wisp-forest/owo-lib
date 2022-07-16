@@ -5,6 +5,7 @@ import io.wispforest.owo.ui.core.Size;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
+import io.wispforest.owo.ui.util.ScissorStack;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.Screen;
@@ -136,7 +137,7 @@ public class LabelComponent extends BaseComponent {
         }
 
         if (this.isInBoundingBox(mouseX, mouseY)) {
-            EventScreen.get().renderTextHoverEffect(matrices, this.text.getStyle(), mouseX, mouseY);
+            ScissorStack.drawUnclipped(() -> EventScreen.get().renderTextHoverEffect(matrices, this.text.getStyle(), mouseX, mouseY));
         }
     }
 
