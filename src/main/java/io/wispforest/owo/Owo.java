@@ -4,6 +4,7 @@ import io.wispforest.owo.command.debug.OwoDebugCommands;
 import io.wispforest.owo.itemgroup.json.GroupTabLoader;
 import io.wispforest.owo.moddata.ModDataLoader;
 import io.wispforest.owo.ops.LootOps;
+import io.wispforest.owo.persistence.OwoPersistentStateManager;
 import io.wispforest.owo.text.InsertingTextContent;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -50,6 +51,8 @@ public class Owo implements ModInitializer {
 
         ServerLifecycleEvents.SERVER_STARTING.register(server -> SERVER = server);
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> SERVER = null);
+
+        OwoPersistentStateManager.init();
 
         if (!DEBUG) return;
 
