@@ -77,14 +77,15 @@ public class ComponentTestScreen extends Screen {
                 .padding(Insets.of(3))
         );
 
-        rootComponent.child(Components.label(Text.literal("A vertical Flow Layout, as well as a really long text to demonstrate wrapping")
-                        .styled(style -> {
-                            return style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, "yes"))
-                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackContent(Items.SCULK_SHRIEKER.getDefaultStack())));
-                        }))
-                .shadow(true)
-                .maxWidth(100)
-                .margins(Insets.horizontal(15))
+        rootComponent.child(Layouts.verticalFlow(Sizing.content(), Sizing.content())
+                .child(Components.label(Text.literal("A vertical Flow Layout, as well as a really long text to demonstrate wrapping")
+                                .styled(style -> {
+                                    return style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, "yes"))
+                                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackContent(Items.SCULK_SHRIEKER.getDefaultStack())));
+                                }))
+                        .shadow(true)
+                        .maxWidth(100)
+                        .margins(Insets.horizontal(15)))
         );
 
         final var buttonPanel = Layouts.horizontalFlow(Sizing.content(), Sizing.content())

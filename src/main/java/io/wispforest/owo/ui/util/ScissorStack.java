@@ -70,7 +70,7 @@ public class ScissorStack {
     public static void drawUnclipped(Runnable action) {
         boolean scissorEnabled = GL11.glIsEnabled(GL11.GL_SCISSOR_TEST);
 
-        if (!scissorEnabled) GlStateManager._disableScissorTest();
+        if (scissorEnabled) GlStateManager._disableScissorTest();
         action.run();
         if (scissorEnabled) GlStateManager._enableScissorTest();
     }
