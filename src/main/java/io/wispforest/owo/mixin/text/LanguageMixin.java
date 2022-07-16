@@ -28,9 +28,12 @@ public class LanguageMixin {
             LanguageAccess.textConsumer.accept(str, text);
 
             return "";
-        } else {
+        } else if (el.isJsonPrimitive()) {
             skipNext = false;
             return JsonHelper.asString(el, str);
+        } else {
+            skipNext = true;
+            return "";
         }
     }
 

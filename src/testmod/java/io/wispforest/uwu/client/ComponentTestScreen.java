@@ -1,15 +1,17 @@
 package io.wispforest.uwu.client;
 
-import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.component.BoundingBoxComponent;
 import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.Layouts;
 import io.wispforest.owo.ui.container.ScrollContainer;
+import io.wispforest.owo.ui.core.*;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.item.Items;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -75,7 +77,11 @@ public class ComponentTestScreen extends Screen {
                 .padding(Insets.of(3))
         );
 
-        rootComponent.child(Components.label(Text.of("A vertical Flow Layout, as well as a really long text to demonstrate wrapping"))
+        rootComponent.child(Components.label(Text.literal("A vertical Flow Layout, as well as a really long text to demonstrate wrapping")
+                        .styled(style -> {
+                            return style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, "yes"))
+                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackContent(Items.SCULK_SHRIEKER.getDefaultStack())));
+                        }))
                 .shadow(true)
                 .maxWidth(100)
                 .margins(Insets.horizontal(15))

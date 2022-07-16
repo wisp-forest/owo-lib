@@ -14,6 +14,7 @@ import io.wispforest.owo.util.NumberReflection;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
@@ -34,8 +35,8 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
     @SuppressWarnings("rawtypes") protected final Map<Option, OptionComponent> options = new HashMap<>();
 
     public ConfigScreen(ConfigWrapper<?> config, @Nullable Screen parent) {
-//        super(FlowLayout.class, DataSource.asset(new Identifier("owo", "config_ui")));
-        super(FlowLayout.class, DataSource.file("config_ui.xml"));
+        super(FlowLayout.class, DataSource.asset(new Identifier("owo", "config_ui")));
+//        super(FlowLayout.class, DataSource.file("config_ui.xml"));
         this.parent = parent;
         this.config = config;
     }

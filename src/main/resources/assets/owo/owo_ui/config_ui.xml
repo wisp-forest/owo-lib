@@ -2,13 +2,20 @@
     <components>
         <flow-layout direction="vertical">
             <children>
-                <label id="title">
-                    <text translate="true"/>
-                    <shadow>true</shadow>
-                    <margins>
-                        <bottom>15</bottom>
-                    </margins>
-                </label>
+                <flow-layout direction="vertical">
+                    <children>
+                        <label id="title">
+                            <text translate="true"/>
+                            <shadow>true</shadow>
+                        </label>
+                    </children>
+
+                    <vertical-alignment>center</vertical-alignment>
+
+                    <sizing>
+                        <vertical method="fill">8</vertical>
+                    </sizing>
+                </flow-layout>
 
                 <scroll direction="vertical">
                     <flow-layout direction="vertical" id="config-panel"/>
@@ -30,6 +37,35 @@
                     </padding>
 
                 </scroll>
+
+                <flow-layout direction="horizontal">
+                    <children>
+                        <button id="reload-button">
+                            <text translate="true">text.config.ui.reload</text>
+                            <sizing>
+                                <horizontal method="fill">10</horizontal>
+                            </sizing>
+                            <margins>
+                                <right>5</right>
+                            </margins>
+                        </button>
+
+                        <button id="done-button">
+                            <text translate="true">text.config.ui.done</text>
+                            <sizing>
+                                <horizontal method="fill">10</horizontal>
+                            </sizing>
+                        </button>
+                    </children>
+
+                    <horizontal-alignment>right</horizontal-alignment>
+                    <vertical-alignment>center</vertical-alignment>
+
+                    <sizing>
+                        <horizontal method="fill">90</horizontal>
+                        <vertical method="fill">7</vertical>
+                    </sizing>
+                </flow-layout>
             </children>
 
             <vertical-alignment>center</vertical-alignment>

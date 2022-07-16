@@ -10,7 +10,6 @@ import io.wispforest.owo.util.ReflectionUtils;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.math.ChunkPos;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,12 +74,12 @@ public class ListOptionLayout<T> extends OptionContainerLayout implements Option
 
         var listType = ReflectionUtils.getTypeArgument(this.backingOption.backingField().field(), 0);
         for (int i = 0; i < this.backingList.size(); i++) {
-            var container = Layouts.horizontalFlow(Sizing.content(), Sizing.content());
+            var container = Layouts.horizontalFlow(Sizing.fill(100), Sizing.content());
             container.verticalAlignment(VerticalAlignment.CENTER);
-            container.padding(Insets.left(10));
 
             int idx = i;
             final var label = Components.label(Text.literal("- ").formatted(Formatting.GRAY));
+            label.margins(Insets.left(10));
             label.cursorStyle(CursorStyle.HAND);
             label.mouseEnter().subscribe(() -> label.text(Text.literal("x ").formatted(Formatting.GRAY)));
             label.mouseLeave().subscribe(() -> label.text(Text.literal("- ").formatted(Formatting.GRAY)));
@@ -93,13 +92,13 @@ public class ListOptionLayout<T> extends OptionContainerLayout implements Option
             container.child(label);
 
             final var box = new ConfigTextBox();
+            box.setMaxLength(Integer.MAX_VALUE);
             box.setText(this.backingList.get(i).toString());
             box.setCursorToStart();
             box.setDrawsBackground(false);
             box.margins(Insets.vertical(2));
-            box.horizontalSizing(Sizing.fill(100));
+            box.horizontalSizing(Sizing.fill(95));
             box.verticalSizing(Sizing.fixed(8));
-            box.setMaxLength(Integer.MAX_VALUE);
 
             box.setChangedListener(s -> {
                 if (!box.isValid()) return;

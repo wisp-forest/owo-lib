@@ -2,11 +2,10 @@ package io.wispforest.uwu.client;
 
 import io.wispforest.owo.config.ui.ConfigScreen;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
-import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.container.Layouts;
 import io.wispforest.owo.ui.container.VerticalFlowLayout;
+import io.wispforest.owo.ui.core.*;
 import io.wispforest.uwu.Uwu;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
