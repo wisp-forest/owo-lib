@@ -140,9 +140,9 @@ public class Drawer extends DrawableHelper {
             }
 
             for (var child : children) {
-                if (child instanceof ParentComponent layoutComponent) {
-                    this.drawInsets(matrices, layoutComponent.x(), layoutComponent.y(), layoutComponent.width(),
-                            layoutComponent.height(), layoutComponent.padding().get().inverted(), 0xA753BF9D);
+                if (child instanceof ParentComponent parentComponent) {
+                    this.drawInsets(matrices, parentComponent.x(), parentComponent.y(), parentComponent.width(),
+                            parentComponent.height(), parentComponent.padding().get().inverted(), 0xA753BF9D);
                 }
 
                 final var margins = child.margins().get();
@@ -151,8 +151,14 @@ public class Drawer extends DrawableHelper {
 
                 textRenderer.draw(matrices, Text.of(child.getClass().getSimpleName() + (child.id() != null ? " '" + child.id() + "'" : "")),
                         child.x() + 1, child.y() + child.height() + 1, 0xFFFFFF);
-                textRenderer.draw(matrices, Text.of(child.x() + "," + child.y() + " (" + child.width() + "," + child.height() + ")"
-                                + "[" + margins.top() + "," + margins.bottom() + "," + margins.left() + "," + margins.right() + "]"),
+
+                final var descriptor = Text.literal(child.x() + "," + child.y() + " (" + child.width() + "," + child.height() + ")"
+                        + " <" + margins.top() + "," + margins.bottom() + "," + margins.left() + "," + margins.right() + "> ");
+                if (child instanceof ParentComponent parentComponent) {
+                    var padding = parentComponent.padding().get();
+                    descriptor.append(" >" + padding.top() + "," + padding.bottom() + "," + padding.left() + "," + padding.right() + "<");
+                }
+                textRenderer.draw(matrices, descriptor,
                         child.x() + 1, child.y() + child.height() + textRenderer.fontHeight + 2, 0xFFFFFF);
             }
         }
