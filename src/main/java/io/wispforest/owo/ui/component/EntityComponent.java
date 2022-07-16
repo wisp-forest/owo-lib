@@ -34,6 +34,14 @@ public class EntityComponent extends BaseComponent {
     protected boolean lookAtCursor = false;
     protected boolean allowMouseRotation = false;
 
+    public EntityComponent(Entity entity) {
+        final var client = MinecraftClient.getInstance();
+        this.dispatcher = client.getEntityRenderDispatcher();
+        this.entityBuffers = client.getBufferBuilders().getEntityVertexConsumers();
+
+        this.entity = entity;
+    }
+
     public EntityComponent(EntityType<?> type, @Nullable NbtCompound nbt) {
         final var client = MinecraftClient.getInstance();
         this.dispatcher = client.getEntityRenderDispatcher();

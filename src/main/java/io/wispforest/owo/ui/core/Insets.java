@@ -41,6 +41,10 @@ public record Insets(int top, int bottom, int left, int right) implements Animat
         );
     }
 
+    public static Insets both(int horizontal, int vertical) {
+        return new Insets(vertical, vertical, horizontal, horizontal);
+    }
+
     public static Insets top(int top) {
         return new Insets(top, 0, 0, 0);
     }
