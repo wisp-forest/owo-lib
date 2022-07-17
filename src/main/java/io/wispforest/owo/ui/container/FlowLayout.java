@@ -54,12 +54,7 @@ public abstract class FlowLayout extends BaseParentComponent {
     @Override
     public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
         super.draw(matrices, mouseX, mouseY, partialTicks, delta);
-
-        this.drawClipped(matrices, !this.allowOverflow, () -> {
-            for (int i = this.children.size() - 1; i >= 0; i--) {
-                this.children.get(i).draw(matrices, mouseX, mouseY, partialTicks, delta);
-            }
-        });
+        this.drawClipped(matrices, mouseX, mouseY, partialTicks, delta, this.children);
     }
 
     @Override

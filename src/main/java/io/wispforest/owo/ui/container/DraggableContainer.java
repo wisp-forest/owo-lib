@@ -10,6 +10,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 
+import java.util.Collections;
 import java.util.Map;
 
 public class DraggableContainer<T extends Component> extends WrappingParentComponent<T> {
@@ -27,7 +28,7 @@ public class DraggableContainer<T extends Component> extends WrappingParentCompo
     @Override
     public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
         super.draw(matrices, mouseX, mouseY, partialTicks, delta);
-        this.drawClipped(matrices, !this.allowOverflow, () -> this.child.draw(matrices, mouseX, mouseY, partialTicks, delta));
+        this.drawClipped(matrices, mouseX, mouseY, partialTicks, delta, Collections.singletonList(this.child));
     }
 
     @Override

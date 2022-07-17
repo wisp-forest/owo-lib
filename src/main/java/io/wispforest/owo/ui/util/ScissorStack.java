@@ -1,6 +1,7 @@
 package io.wispforest.owo.ui.util;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import io.wispforest.owo.ui.core.Component;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.AffineTransformation;
@@ -73,6 +74,17 @@ public class ScissorStack {
         if (scissorEnabled) GlStateManager._disableScissorTest();
         action.run();
         if (scissorEnabled) GlStateManager._enableScissorTest();
+    }
+
+    public static boolean isVisible(Component component) {
+        var top = STACK.peek();
+        if (top == null) return true;
+
+        var margins = component.margins().get();
+        return component.x() - margins.left() < top.x + top.width
+                && component.x() + component.width() + margins.right() > top.x
+                && component.y() - margins.top() < top.y + top.height
+                && component.y() + component.height() + margins.bottom() > top.y;
     }
 
     private static void applyState() {

@@ -8,6 +8,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -299,18 +300,21 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
      * function and clip overflowing children to the bounding box
      * of the component, otherwise draw normally
      *
-     * @param clip     Whether to clip overflowing components
-     * @param drawFunc The drawing function to run
+     * @param children The list of children to draw
      */
-    protected void drawClipped(MatrixStack matrices, boolean clip, Runnable drawFunc) {
-        if (clip) {
+    protected void drawClipped(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta, List<Component> children) {
+        if (!this.allowOverflow) {
             var padding = this.padding.get();
             ScissorStack.push(this.x + padding.left(), this.y + padding.top(), this.width - padding.horizontal(), this.height - padding.vertical(), matrices);
         }
 
-        drawFunc.run();
+        for (int i = children.size() - 1; i >= 0; i--) {
+            var child = children.get(i);
+            if (!ScissorStack.isVisible(child)) continue;
+            child.draw(matrices, mouseX, mouseY, partialTicks, delta);
+        }
 
-        if (clip) {
+        if (!this.allowOverflow) {
             ScissorStack.pop();
         }
     }
@@ -326,8 +330,8 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
         final var padding = this.padding.get();
 
         return Size.of(
-                this.horizontalSizing.get().method == Sizing.Method.CONTENT ? thisSpace.width() - padding.horizontal(): this.width - padding.horizontal(),
-                this.verticalSizing.get().method == Sizing.Method.CONTENT ? thisSpace.height() - padding.vertical(): this.height - padding.vertical()
+                this.horizontalSizing.get().method == Sizing.Method.CONTENT ? thisSpace.width() - padding.horizontal() : this.width - padding.horizontal(),
+                this.verticalSizing.get().method == Sizing.Method.CONTENT ? thisSpace.height() - padding.vertical() : this.height - padding.vertical()
         );
     }
 
