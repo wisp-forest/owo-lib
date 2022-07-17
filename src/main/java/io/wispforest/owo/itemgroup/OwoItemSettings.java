@@ -123,9 +123,13 @@ public class OwoItemSettings extends FabricItemSettings {
         settingsNew.group(settingsAccessor.owo$getGroup())
                 .food(settingsAccessor.owo$getFoodComponent())
                 .recipeRemainder(settingsAccessor.owo$getRecipeRemainder())
-                .maxCount(settingsAccessor.owo$getMaxCount())
-                .maxDamageIfAbsent(settingsAccessor.owo$getMaxDamage())
                 .rarity(settingsAccessor.owo$getRarity());
+
+        if(settingsAccessor.owo$getMaxDamage() > 0){
+            settingsNew.maxDamageIfAbsent(settingsAccessor.owo$getMaxDamage());
+        } else {
+            settingsNew.maxCount(settingsAccessor.owo$getMaxCount());
+        }
 
         return settingsNew;
     }
