@@ -4,7 +4,9 @@ import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.core.Sizing;
 import net.minecraft.client.util.math.MatrixStack;
+import org.jetbrains.annotations.VisibleForTesting;
 
+@VisibleForTesting
 public class BoundingBoxComponent extends BaseComponent {
 
     public BoundingBoxComponent(Sizing horizontalSizing, Sizing verticalSizing) {

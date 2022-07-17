@@ -1,10 +1,11 @@
 package io.wispforest.owo.ui.core;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import io.wispforest.owo.ui.util.Drawer;
-import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
+import io.wispforest.owo.ui.parsing.UIParsing;
+import io.wispforest.owo.ui.util.Drawer;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.Identifier;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -35,6 +36,13 @@ public interface Surface {
         return (matrices, component) -> Drawer.drawRectOutline(matrices, component.x(), component.y(), component.width(), component.height(), color);
     }
 
+    static Surface tiled(Identifier texture, int textureWidth, int textureHeight) {
+        return (matrices, component) -> {
+            RenderSystem.setShaderTexture(0, texture);
+            Drawer.drawTexture(matrices, component.x(), component.y(), 0, 0, component.width(), component.height(), textureWidth, textureHeight);
+        };
+    }
+
     void draw(MatrixStack matrices, ParentComponent component);
 
     default Surface and(Surface surface) {
@@ -53,6 +61,14 @@ public interface Surface {
                 case "panel" -> surface.and(child.getAttribute("dark").equalsIgnoreCase("true")
                         ? DARK_PANEL
                         : PANEL);
+                case "tiled" -> {
+                    UIParsing.expectAttributes(child, "texture-width", "texture-height");
+                    yield surface.and(tiled(
+                            UIParsing.parseIdentifier(child),
+                            UIParsing.parseUnsignedInt(child.getAttributeNode("texture-width")),
+                            UIParsing.parseUnsignedInt(child.getAttributeNode("texture-height")))
+                    );
+                }
                 case "options-background" -> surface.and(OPTIONS_BACKGROUND);
                 case "outline" -> surface.and(outline(UIParsing.parseColor(child)));
                 case "flat" -> surface.and(flat(UIParsing.parseColor(child)));

@@ -31,7 +31,7 @@ public class LabelComponent extends BaseComponent {
     protected boolean shadow;
     protected int maxWidth;
 
-    public LabelComponent(Text text) {
+    protected LabelComponent(Text text) {
         this.text = text;
         this.wrappedText = new ArrayList<>();
 

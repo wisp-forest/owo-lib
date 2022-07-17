@@ -26,7 +26,7 @@ public class ItemComponent extends BaseComponent {
     protected final ItemRenderer itemRenderer;
     protected ItemStack stack;
 
-    public ItemComponent(ItemStack stack) {
+    protected ItemComponent(ItemStack stack) {
         this.entityBuffers = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
         this.itemRenderer = MinecraftClient.getInstance().getItemRenderer();
         this.stack = stack;

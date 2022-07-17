@@ -11,7 +11,7 @@ public class SliderComponent extends SliderWidget {
 
     protected Observable<Double> listeners;
 
-    public SliderComponent() {
+    protected SliderComponent() {
         super(0, 0, 0, 0, Text.empty(), 0);
         this.listeners = Observable.of(this.value);
         this.verticalSizing(Sizing.fixed(20));

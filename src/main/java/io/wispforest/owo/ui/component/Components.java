@@ -1,16 +1,21 @@
 package io.wispforest.owo.ui.component;
 
-import io.wispforest.owo.ui.core.Component;
-import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.Layouts;
+import io.wispforest.owo.ui.core.Component;
+import io.wispforest.owo.ui.core.Sizing;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.SpriteIdentifier;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -22,6 +27,18 @@ public class Components {
     private static final Supplier<TextFieldWidget> EMPTY_TEXT_FIELD = () -> {
         return new TextFieldWidget(MinecraftClient.getInstance().textRenderer, 0, 0, 0, 0, Text.empty());
     };
+
+    public static EntityComponent entity(Sizing sizing, EntityType<?> type, @Nullable NbtCompound nbt) {
+        return createSized(() -> new EntityComponent(type, nbt), sizing, sizing);
+    }
+
+    public static EntityComponent entity(Sizing sizing, Entity entity) {
+        return createSized(() -> new EntityComponent(entity), sizing, sizing);
+    }
+
+    public static ItemComponent item(ItemStack item) {
+        return new ItemComponent(item);
+    }
 
     public static ButtonWidget button(Text message, ButtonWidget.PressAction onPress) {
         final var button = new ButtonWidget(0, 0, 0, 0, message, onPress);

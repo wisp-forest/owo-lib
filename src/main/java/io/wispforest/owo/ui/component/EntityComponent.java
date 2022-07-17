@@ -33,8 +33,9 @@ public class EntityComponent extends BaseComponent {
     protected float scale = 1;
     protected boolean lookAtCursor = false;
     protected boolean allowMouseRotation = false;
+    protected boolean scaleToFit = false;
 
-    public EntityComponent(Entity entity) {
+    protected EntityComponent(Entity entity) {
         final var client = MinecraftClient.getInstance();
         this.dispatcher = client.getEntityRenderDispatcher();
         this.entityBuffers = client.getBufferBuilders().getEntityVertexConsumers();
@@ -42,7 +43,7 @@ public class EntityComponent extends BaseComponent {
         this.entity = entity;
     }
 
-    public EntityComponent(EntityType<?> type, @Nullable NbtCompound nbt) {
+    protected EntityComponent(EntityType<?> type, @Nullable NbtCompound nbt) {
         final var client = MinecraftClient.getInstance();
         this.dispatcher = client.getEntityRenderDispatcher();
         this.entityBuffers = client.getBufferBuilders().getEntityVertexConsumers();
@@ -128,6 +129,23 @@ public class EntityComponent extends BaseComponent {
         return this.scale;
     }
 
+    public boolean scaleToFit() {
+        return this.scaleToFit;
+    }
+
+    public EntityComponent scaleToFit(boolean scaleToFit) {
+        this.scaleToFit = scaleToFit;
+
+        if (scaleToFit) {
+            float xScale = .5f / entity.getWidth();
+            float yScale = .5f / entity.getHeight();
+
+            this.scale(Math.min(xScale, yScale));
+        }
+
+        return this;
+    }
+
     @Override
     public boolean canFocus(FocusSource source) {
         return source == FocusSource.MOUSE_CLICK;
@@ -140,6 +158,7 @@ public class EntityComponent extends BaseComponent {
         UIParsing.apply(children, "scale", UIParsing::parseFloat, this::scale);
         UIParsing.apply(children, "look-at-cursor", UIParsing::parseBool, this::lookAtCursor);
         UIParsing.apply(children, "mouse-rotation", UIParsing::parseBool, this::allowMouseRotation);
+        UIParsing.apply(children, "scale-to-fit", UIParsing::parseBool, this::scaleToFit);
     }
 
     public static EntityComponent parse(Element element) {

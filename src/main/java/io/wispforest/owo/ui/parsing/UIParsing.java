@@ -1,9 +1,15 @@
 package io.wispforest.owo.ui.parsing;
 
-import io.wispforest.owo.ui.component.*;
+import io.wispforest.owo.ui.component.Components;
+import io.wispforest.owo.ui.component.EntityComponent;
+import io.wispforest.owo.ui.component.SpriteComponent;
+import io.wispforest.owo.ui.component.TextureComponent;
+import io.wispforest.owo.ui.container.DraggableContainer;
+import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.container.GridLayout;
+import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.Sizing;
-import io.wispforest.owo.ui.container.*;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -177,7 +183,7 @@ public class UIParsing {
      */
     public static Identifier parseIdentifier(Node node) {
         try {
-            return new Identifier(node.getTextContent());
+            return new Identifier(node.getTextContent().strip());
         } catch (InvalidIdentifierException exception) {
             throw new UIModelParsingException("Invalid identifier '" + node.getTextContent() + "'", exception);
         }
@@ -266,7 +272,7 @@ public class UIParsing {
 
         // Game Objects
         registerFactory("entity", EntityComponent::parse);
-        registerFactory("item", element -> new ItemComponent(ItemStack.EMPTY));
+        registerFactory("item", element -> Components.item(ItemStack.EMPTY));
 
         // Widgets
         registerFactory("label", element -> Components.label(Text.empty()));
