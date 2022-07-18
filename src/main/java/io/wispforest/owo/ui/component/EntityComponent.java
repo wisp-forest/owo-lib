@@ -129,10 +129,6 @@ public class EntityComponent extends BaseComponent {
         return this.scale;
     }
 
-    public boolean scaleToFit() {
-        return this.scaleToFit;
-    }
-
     public EntityComponent scaleToFit(boolean scaleToFit) {
         this.scaleToFit = scaleToFit;
 
@@ -144,6 +140,10 @@ public class EntityComponent extends BaseComponent {
         }
 
         return this;
+    }
+
+    public boolean scaleToFit() {
+        return this.scaleToFit;
     }
 
     @Override

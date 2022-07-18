@@ -20,6 +20,16 @@ public class SpinnyBoiComponent extends LabelComponent {
         this.targetRotation = to;
     }
 
+    public SpinnyBoiComponent rotation(float rotation) {
+        this.targetRotation = rotation;
+        this.rotation = this.targetRotation;
+        return this;
+    }
+
+    public float rotation() {
+        return this.rotation;
+    }
+
     @Override
     public void update(float delta, int mouseX, int mouseY) {
         super.update(delta, mouseX, mouseY);

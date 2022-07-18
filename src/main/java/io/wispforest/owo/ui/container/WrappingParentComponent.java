@@ -10,17 +10,19 @@ import io.wispforest.owo.ui.parsing.UIParsing;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 public abstract class WrappingParentComponent<T extends Component> extends BaseParentComponent {
 
     protected T child;
+    protected List<Component> childView;
 
     protected WrappingParentComponent(Sizing horizontalSizing, Sizing verticalSizing, T child) {
         super(horizontalSizing, verticalSizing);
         this.child = child;
+        this.childView = Collections.singletonList(this.child);
     }
 
     @Override
@@ -47,6 +49,8 @@ public abstract class WrappingParentComponent<T extends Component> extends BaseP
         }
 
         this.child = newChild;
+        this.childView = Collections.singletonList(this.child);
+
         this.updateLayout();
         return this;
     }
@@ -56,8 +60,8 @@ public abstract class WrappingParentComponent<T extends Component> extends BaseP
     }
 
     @Override
-    public Collection<Component> children() {
-        return Collections.singleton(this.child);
+    public List<Component> children() {
+        return this.childView;
     }
 
     @Override

@@ -20,9 +20,7 @@ public class VerticalFlowLayout extends FlowLayout {
         final var padding = this.padding.get();
         final var childSpace = this.calculateChildSpace(space);
 
-        for (int i = children.size() - 1; i >= 0; i--) {
-            final var child = this.children.get(i);
-
+        for (var child : children) {
             this.mountChild(child, childSpace, c -> {
                 layout.add(child);
 

@@ -21,6 +21,7 @@ public class GridLayout extends BaseParentComponent {
 
     protected final Component[] children;
     protected final List<Component> nonNullChildren = new ArrayList<>();
+    protected final List<Component> nonNullChildrenView = Collections.unmodifiableList(this.nonNullChildren);
 
     protected Size contentSize = Size.zero();
 
@@ -143,8 +144,8 @@ public class GridLayout extends BaseParentComponent {
     }
 
     @Override
-    public Collection<Component> children() {
-        return this.nonNullChildren;
+    public List<Component> children() {
+        return this.nonNullChildrenView;
     }
 
     @Override

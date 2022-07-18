@@ -12,6 +12,7 @@ public class FocusHandler {
 
     protected final ParentComponent root;
     @Nullable protected Component focused = null;
+    @Nullable protected Component.FocusSource lastFocusSource = null;
 
     public FocusHandler(ParentComponent root) {
         this.root = root;
@@ -25,6 +26,24 @@ public class FocusHandler {
     @Contract(pure = true)
     public @Nullable Component focused() {
         return this.focused;
+    }
+
+    public Component.FocusSource lastFocusSource() {
+        return this.lastFocusSource;
+    }
+
+    public void cycle(boolean forwards) {
+        var allChildren = new ArrayList<Component>();
+        this.root.collectChildren(allChildren);
+
+        allChildren.removeIf(component -> !component.canFocus(Component.FocusSource.KEYBOARD_CYCLE));
+        if (allChildren.isEmpty()) return;
+
+        int index = (this.focused == null ? 0 : allChildren.indexOf(this.focused)) + (forwards ? 1 : -1);
+        if (index >= allChildren.size()) index -= allChildren.size();
+        if (index < 0) index += allChildren.size();
+
+        this.focus(allChildren.get(index), Component.FocusSource.KEYBOARD_CYCLE);
     }
 
     public void moveFocus(int keyCode) {
@@ -95,20 +114,6 @@ public class FocusHandler {
         this.focus(closest, Component.FocusSource.KEYBOARD_CYCLE);
     }
 
-    public void cycle(boolean forwards) {
-        var allChildren = new ArrayList<Component>();
-        this.root.collectChildren(allChildren);
-
-        allChildren.removeIf(component -> !component.canFocus(Component.FocusSource.KEYBOARD_CYCLE));
-        if (allChildren.isEmpty()) return;
-
-        int index = (this.focused == null ? 0 : allChildren.indexOf(this.focused)) + (forwards ? -1 : 1);
-        if (index >= allChildren.size()) index -= allChildren.size();
-        if (index < 0) index += allChildren.size();
-
-        this.focus(allChildren.get(index), Component.FocusSource.KEYBOARD_CYCLE);
-    }
-
     public void focus(@Nullable Component component, Component.FocusSource source) {
         if (this.focused != component) {
             if (this.focused != null) {
@@ -117,6 +122,9 @@ public class FocusHandler {
 
             if ((this.focused = component) != null) {
                 this.focused.onFocusGained(source);
+                this.lastFocusSource = source;
+            } else {
+                this.lastFocusSource = null;
             }
         }
     }

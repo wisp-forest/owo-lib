@@ -1,6 +1,7 @@
 package io.wispforest.owo.ui.base;
 
 import io.wispforest.owo.ui.core.*;
+import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.FocusHandler;
 import io.wispforest.owo.ui.util.ScissorStack;
 import io.wispforest.owo.util.Observable;
@@ -308,10 +309,14 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
             ScissorStack.push(this.x + padding.left(), this.y + padding.top(), this.width - padding.horizontal(), this.height - padding.vertical(), matrices);
         }
 
-        for (int i = children.size() - 1; i >= 0; i--) {
-            var child = children.get(i);
+        var focusHandler = this.focusHandler();
+        for (var child : children) {
             if (!ScissorStack.isVisible(child)) continue;
             child.draw(matrices, mouseX, mouseY, partialTicks, delta);
+
+            if (focusHandler.lastFocusSource() == FocusSource.KEYBOARD_CYCLE && focusHandler.focused() == child) {
+                Drawer.drawRectOutline(matrices, child.x(), child.y(), child.width(), child.height(), 0xFFFFFFFF);
+            }
         }
 
         if (!this.allowOverflow) {

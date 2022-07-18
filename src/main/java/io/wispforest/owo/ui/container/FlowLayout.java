@@ -10,11 +10,15 @@ import net.minecraft.client.util.math.MatrixStack;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 public abstract class FlowLayout extends BaseParentComponent {
 
     protected final List<Component> children = new ArrayList<>();
+    protected final List<Component> childrenView = Collections.unmodifiableList(this.children);
     protected Size contentSize = Size.zero();
 
     protected FlowLayout(Sizing horizontalSizing, Sizing verticalSizing) {
@@ -32,7 +36,7 @@ public abstract class FlowLayout extends BaseParentComponent {
     }
 
     public FlowLayout child(Component child) {
-        this.children.add(0, child);
+        this.children.add(child);
         this.updateLayout();
         return this;
     }
@@ -47,8 +51,8 @@ public abstract class FlowLayout extends BaseParentComponent {
     }
 
     @Override
-    public Collection<Component> children() {
-        return this.children;
+    public List<Component> children() {
+        return this.childrenView;
     }
 
     @Override

@@ -52,7 +52,7 @@ public class OptionContainerLayout extends VerticalFlowLayout {
         this.titleLayout.child(Components.label(this.title));
 
         this.expanded = expanded;
-        this.spinnyBoi.spin(expanded ? 90 : 0);
+        this.spinnyBoi.rotation(expanded ? 90 : 0);
 
         super.child(this.titleLayout);
     }
@@ -62,7 +62,7 @@ public class OptionContainerLayout extends VerticalFlowLayout {
             this.children.removeAll(collapsingChildren);
             this.spinnyBoi.spin(0);
         } else {
-            for (var child : this.collapsingChildren) this.children.add(0, child);
+            this.children.addAll(this.collapsingChildren);
             this.spinnyBoi.spin(90);
         }
         this.updateLayout();

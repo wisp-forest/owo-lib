@@ -6,10 +6,7 @@ import io.wispforest.owo.ui.parsing.UIParsing;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public interface ParentComponent extends Component {
 
@@ -82,15 +79,24 @@ public interface ParentComponent extends Component {
     Surface surface();
 
     /**
-     * @return The children of this component. The iterator
-     * of this collection is expected to return the children in reverse
-     * insertion order to ensure mouse priority is intuitive
+     * @return The children of this component
      */
-    Collection<Component> children();
+    List<Component> children();
+
+    /**
+     * @return A ListIterator for the children of this
+     * component, with its cursor on the last element
+     */
+    default ListIterator<Component> reverseChildrenIterator() {
+        return this.children().listIterator(this.children().size());
+    }
 
     @Override
     default boolean onMouseDown(double mouseX, double mouseY, int button) {
-        for (var child : this.children()) {
+        var iter = this.reverseChildrenIterator();
+
+        while (iter.hasPrevious()) {
+            var child = iter.previous();
             if (!child.isInBoundingBox(this.x() + mouseX, this.y() + mouseY)) continue;
             if (child.onMouseDown(this.x() + mouseX - child.x(), this.y() + mouseY - child.y(), button)) {
                 return true;
@@ -102,7 +108,10 @@ public interface ParentComponent extends Component {
 
     @Override
     default boolean onMouseScroll(double mouseX, double mouseY, double amount) {
-        for (var child : this.children()) {
+        var iter = this.reverseChildrenIterator();
+
+        while (iter.hasPrevious()) {
+            var child = iter.previous();
             if (!child.isInBoundingBox(this.x() + mouseX, this.y() + mouseY)) continue;
             if (child.onMouseScroll(this.x() + mouseX - child.x(), this.y() + mouseY - child.y(), amount)) {
                 return true;
@@ -142,7 +151,10 @@ public interface ParentComponent extends Component {
      */
     @SuppressWarnings("unchecked")
     default <T extends Component> @Nullable T childById(Class<T> expectedClass, String id) {
-        for (var child : this.children()) {
+        var iter = this.reverseChildrenIterator();
+
+        while (iter.hasPrevious()) {
+            var child = iter.previous();
             if (Objects.equals(child.id(), id)) {
 
                 if (!expectedClass.isAssignableFrom(child.getClass())) {
@@ -180,7 +192,10 @@ public interface ParentComponent extends Component {
      * or {@code null} if there is none
      */
     default @Nullable Component childAt(int x, int y) {
-        for (var child : this.children()) {
+        var iter = this.reverseChildrenIterator();
+
+        while (iter.hasPrevious()) {
+            var child = iter.previous();
             if (child.isInBoundingBox(x, y)) {
                 if (child instanceof ParentComponent parent) {
                     return parent.childAt(x, y);
@@ -201,12 +216,16 @@ public interface ParentComponent extends Component {
      */
     default void collectChildren(ArrayList<Component> into) {
         into.add(this);
-        for (var child : children()) {
+        for (var child : this.children()) {
             if (child instanceof ParentComponent parent) {
                 parent.collectChildren(into);
             } else {
                 into.add(child);
             }
         }
+    }
+
+    enum IterationDirection {
+        FORWARD, BACKWARD
     }
 }
