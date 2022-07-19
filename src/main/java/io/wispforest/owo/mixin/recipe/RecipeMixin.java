@@ -14,8 +14,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-import java.util.Set;
-
 @Mixin(Recipe.class)
 public interface RecipeMixin<C extends Inventory> {
 

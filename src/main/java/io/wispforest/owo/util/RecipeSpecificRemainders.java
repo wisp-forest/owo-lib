@@ -21,17 +21,8 @@ public final class RecipeSpecificRemainders {
      * @param itemRemainder The Remainder Item for the given Item
      */
     public static void add(Identifier recipeId, Item item, Item itemRemainder){
-        RecipeRemainder recipeRemainder = new RecipeRemainder(item, itemRemainder);
-
-        if(allSpecificRemainders.containsKey(recipeId)) {
-            allSpecificRemainders.get(recipeId).add(recipeRemainder);
-        } else {
-            Set<RecipeRemainder> set = new HashSet<>();
-
-            set.add(recipeRemainder);
-
-            allSpecificRemainders.put(recipeId, set);
-        }
+        allSpecificRemainders.computeIfAbsent(recipeId, (id) -> new HashSet<>())
+                .add(new RecipeRemainder(item, itemRemainder));
     }
 
     /**
@@ -52,7 +43,7 @@ public final class RecipeSpecificRemainders {
     }
 
     /**
-     *  Simple Record used to store an Item and it's Crafting Remainder (Look at {@link RecipeMixin})
+     *  Simple Record used to store an Item, and it's Crafting Remainder (Look at {@link RecipeMixin})
      */
     public final record RecipeRemainder(Item item, Item itemRemainder){}
 }
