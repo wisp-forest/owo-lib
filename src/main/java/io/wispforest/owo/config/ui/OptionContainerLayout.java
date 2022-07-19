@@ -9,6 +9,7 @@ import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.core.Surface;
 import io.wispforest.owo.ui.util.Drawer;
+import io.wispforest.owo.ui.util.UISounds;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.lwjgl.glfw.GLFW;
@@ -91,6 +92,8 @@ public class OptionContainerLayout extends VerticalFlowLayout {
 
         if (mouseY <= this.titleLayout.fullSize().height()) {
             this.toggleExpansion();
+            UISounds.playInteractionSound();
+
             return true;
         }
 

@@ -5,6 +5,7 @@ import io.wispforest.owo.config.annotation.Expanded;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Layouts;
 import io.wispforest.owo.ui.core.*;
+import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.owo.util.NumberReflection;
 import io.wispforest.owo.util.ReflectionUtils;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -47,6 +48,8 @@ public class ListOptionLayout<T> extends OptionContainerLayout implements Option
         addLabel.mouseDown().subscribe((mouseX, mouseY, button) -> {
             this.backingList.add((T) "");
             this.refreshOptions();
+            UISounds.playInteractionSound();
+
             return true;
         });
         this.titleLayout.child(addLabel.margins(Insets.of(5)));
@@ -87,6 +90,8 @@ public class ListOptionLayout<T> extends OptionContainerLayout implements Option
                 this.backingList.remove(idx);
                 this.refreshResetButton();
                 this.refreshOptions();
+                UISounds.playInteractionSound();
+
                 return true;
             });
             container.child(label);

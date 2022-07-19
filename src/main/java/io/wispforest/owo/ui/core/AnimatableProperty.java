@@ -28,18 +28,6 @@ public class AnimatableProperty<A extends Animatable<A>> extends Observable<A> {
     }
 
     /**
-     * Update all the given properties
-     *
-     * @param delta      The duration of the last frame, in partial ticks
-     * @param properties The list of properties to update
-     */
-    public static void updateAll(float delta, AnimatableProperty<?>... properties) {
-        for (var property : properties) {
-            property.update(delta);
-        }
-    }
-
-    /**
      * Create an animation object which interpolates the state of this
      * property from the current one to {@code to} in {@code duration}
      * milliseconds, applying the given easing

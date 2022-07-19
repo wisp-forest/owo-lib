@@ -6,7 +6,10 @@ import io.wispforest.owo.ui.parsing.UIParsing;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public interface ParentComponent extends Component {
 
@@ -14,6 +17,14 @@ public interface ParentComponent extends Component {
      * Recalculate the layout of this component
      */
     void layout(Size space);
+
+    /**
+     * Called when a child of this parent component has been mutated in some way
+     * that would affect the layout of this component
+     *
+     * @param child The child that has been mutated
+     */
+    void onChildMutated(Component child);
 
     /**
      * Set how this component should vertically arrange its children
@@ -83,17 +94,9 @@ public interface ParentComponent extends Component {
      */
     List<Component> children();
 
-    /**
-     * @return A ListIterator for the children of this
-     * component, with its cursor on the last element
-     */
-    default ListIterator<Component> reverseChildrenIterator() {
-        return this.children().listIterator(this.children().size());
-    }
-
     @Override
     default boolean onMouseDown(double mouseX, double mouseY, int button) {
-        var iter = this.reverseChildrenIterator();
+        var iter = this.children().listIterator(this.children().size());
 
         while (iter.hasPrevious()) {
             var child = iter.previous();
@@ -108,7 +111,7 @@ public interface ParentComponent extends Component {
 
     @Override
     default boolean onMouseScroll(double mouseX, double mouseY, double amount) {
-        var iter = this.reverseChildrenIterator();
+        var iter = this.children().listIterator(this.children().size());
 
         while (iter.hasPrevious()) {
             var child = iter.previous();
@@ -124,7 +127,7 @@ public interface ParentComponent extends Component {
     @Override
     default void update(float delta, int mouseX, int mouseY) {
         Component.super.update(delta, mouseX, mouseY);
-        AnimatableProperty.updateAll(delta, this.padding());
+        this.padding().update(delta);
 
         for (var child : this.children()) {
             child.update(delta, mouseX, mouseY);
@@ -151,7 +154,7 @@ public interface ParentComponent extends Component {
      */
     @SuppressWarnings("unchecked")
     default <T extends Component> @Nullable T childById(Class<T> expectedClass, String id) {
-        var iter = this.reverseChildrenIterator();
+        var iter = this.children().listIterator(this.children().size());
 
         while (iter.hasPrevious()) {
             var child = iter.previous();
@@ -176,14 +179,6 @@ public interface ParentComponent extends Component {
     }
 
     /**
-     * Called when a child of this parent component has been mutated in some way
-     * that would affect the layout of this component
-     *
-     * @param child The child that has been mutated
-     */
-    void onChildMutated(Component child);
-
-    /**
      * Get the most specific child at the given coordinates
      *
      * @param x The x-coordinate to query
@@ -192,7 +187,7 @@ public interface ParentComponent extends Component {
      * or {@code null} if there is none
      */
     default @Nullable Component childAt(int x, int y) {
-        var iter = this.reverseChildrenIterator();
+        var iter = this.children().listIterator(this.children().size());
 
         while (iter.hasPrevious()) {
             var child = iter.previous();
@@ -223,9 +218,5 @@ public interface ParentComponent extends Component {
                 into.add(child);
             }
         }
-    }
-
-    enum IterationDirection {
-        FORWARD, BACKWARD
     }
 }

@@ -12,7 +12,7 @@ import org.w3c.dom.Element;
 
 import java.util.Map;
 
-public interface Component {
+public interface Component extends PositionedRectangle {
 
     /**
      * Draw the current state of this component onto the screen
@@ -301,7 +301,10 @@ public interface Component {
      * @param mouseY The mouse pointer's y-coordinate
      */
     default void update(float delta, int mouseX, int mouseY) {
-        AnimatableProperty.updateAll(delta, this.margins(), this.positioning(), this.horizontalSizing(), this.verticalSizing());
+        this.margins().update(delta);
+        this.positioning().update(delta);
+        this.horizontalSizing().update(delta);
+        this.verticalSizing().update(delta);
     }
 
     /**
@@ -313,8 +316,9 @@ public interface Component {
      * @return {@code true} if this component's bounding box encloses
      * the given coordinates
      */
+    @Override
     default boolean isInBoundingBox(double x, double y) {
-        return x >= this.x() && x <= this.x() + this.width() && y >= this.y() && y <= this.y() + this.height();
+        return PositionedRectangle.super.isInBoundingBox(x, y);
     }
 
     /**
@@ -354,6 +358,7 @@ public interface Component {
      * @return The current width of the bounding box
      * of this component
      */
+    @Override
     @Contract(pure = true)
     int width();
 
@@ -361,6 +366,7 @@ public interface Component {
      * @return The current height of the bounding box
      * of this component
      */
+    @Override
     @Contract(pure = true)
     int height();
 
@@ -368,6 +374,7 @@ public interface Component {
      * @return The current x-coordinate of the top-left
      * corner of the bounding box of this component
      */
+    @Override
     @Contract(pure = true)
     int x();
 
@@ -391,6 +398,7 @@ public interface Component {
      * @return The current y-coordinate of the top-left
      * corner of the bounding box of this component
      */
+    @Override
     @Contract(pure = true)
     int y();
 

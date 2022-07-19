@@ -2,6 +2,7 @@ package io.wispforest.uwu.client;
 
 import io.wispforest.owo.ui.component.BoundingBoxComponent;
 import io.wispforest.owo.ui.component.Components;
+import io.wispforest.owo.ui.component.DropdownComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.Layouts;
 import io.wispforest.owo.ui.container.ScrollContainer;
@@ -86,6 +87,14 @@ public class ComponentTestScreen extends Screen {
                         .shadow(true)
                         .maxWidth(100)
                         .margins(Insets.horizontal(15)))
+        );
+
+        rootComponent.child(new DropdownComponent(Sizing.content())
+                .text(Text.of("hahayes"))
+                .button(Text.of("epic button"), dropdownComponent -> {})
+                .divider()
+                .text(Text.of("very good"))
+                .margins(Insets.horizontal(5))
         );
 
         final var buttonPanel = Layouts.horizontalFlow(Sizing.content(), Sizing.content())

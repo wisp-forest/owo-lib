@@ -29,6 +29,7 @@ public class LabelComponent extends BaseComponent {
 
     protected int color;
     protected boolean shadow;
+    // TODO get rid of this
     protected int maxWidth;
 
     protected LabelComponent(Text text) {
