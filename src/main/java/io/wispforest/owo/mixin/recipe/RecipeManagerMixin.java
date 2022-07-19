@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Map;
+import java.util.Objects;
 
 @Mixin(RecipeManager.class)
 public abstract class RecipeManagerMixin {
@@ -26,16 +27,23 @@ public abstract class RecipeManagerMixin {
             JsonObject remainders = json.getAsJsonObject("owo:remainders");
 
             for(Map.Entry<String, JsonElement> entry : remainders.entrySet()){
-                Item item = JsonHelper.asItem(new JsonPrimitive(entry.getKey()), entry.getKey());
+                Item item;
+                Item remainderItem;
 
-                if (entry.getValue() instanceof JsonObject jsonObject) {
-                    Item remainderItem = JsonHelper.getItem(jsonObject, "item");
-
-                    RecipeSpecificRemainders.add(id, item, remainderItem);
+                if(Objects.equals(entry.getKey(), "item")){
+                    item = JsonHelper.asItem(entry.getValue(), entry.getKey());
+                    remainderItem = item;
 
                 } else {
-                    throw new JsonSyntaxException("owo Remainders: " + entry.getValue() + "was expected to be a JsonObject but found not to be");
+                    if (!(entry.getValue() instanceof JsonObject)) {
+                        throw new JsonSyntaxException("owo Remainders: " + entry.getValue() + "was expected to be a JsonObject but found not to be");
+                    }
+
+                    item = JsonHelper.asItem(new JsonPrimitive(entry.getKey()), entry.getKey());
+                    remainderItem = JsonHelper.getItem((JsonObject)entry.getValue(), "item");
                 }
+
+                RecipeSpecificRemainders.add(id, item, remainderItem);
             }
         }
     }
