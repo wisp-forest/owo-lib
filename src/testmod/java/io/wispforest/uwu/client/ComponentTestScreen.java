@@ -1,8 +1,10 @@
 package io.wispforest.uwu.client;
 
+import com.mojang.authlib.GameProfile;
 import io.wispforest.owo.ui.component.BoundingBoxComponent;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.DropdownComponent;
+import io.wispforest.owo.ui.component.PlayerComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.Layouts;
 import io.wispforest.owo.ui.container.ScrollContainer;
@@ -23,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.UUID;
 import java.util.stream.IntStream;
 
 public class ComponentTestScreen extends Screen {
@@ -87,16 +90,6 @@ public class ComponentTestScreen extends Screen {
                         .shadow(true)
                         .maxWidth(100)
                         .margins(Insets.horizontal(15)))
-        );
-
-        rootComponent.child(new DropdownComponent(Sizing.content())
-                .checkbox(Text.of("more checking"), true)
-                .text(Text.of("hahayes"))
-                .button(Text.of("epic button"), dropdownComponent -> {})
-                .divider()
-                .text(Text.of("very good"))
-                .checkbox(Text.of("checking time"), false)
-                .margins(Insets.horizontal(5))
         );
 
         final var buttonPanel = Layouts.horizontalFlow(Sizing.content(), Sizing.content())
@@ -171,6 +164,29 @@ public class ComponentTestScreen extends Screen {
                         .padding(Insets.of(4))
                         .margins(Insets.left(15))
                         .positioning(Positioning.relative(50, 100))
+        );
+
+        rootComponent.child(new DropdownComponent(Sizing.content())
+                .checkbox(Text.of("more checking"), true)
+                .text(Text.of("hahayes"))
+                .button(Text.of("epic button"), dropdownComponent -> {})
+                .divider()
+                .text(Text.of("very good"))
+                .checkbox(Text.of("checking time"), false)
+                .nested(Text.of("nested entry"), Sizing.content(), dropdown -> {
+                    dropdown.text(Text.of("nest title"))
+                            .divider()
+                            .button(Text.of("nest button"), dropdownComponent -> {});
+                })
+                .requiresHover(false)
+                .margins(Insets.horizontal(5))
+                .positioning(Positioning.absolute(250, 15))
+        );
+
+        rootComponent.child(new PlayerComponent(new GameProfile(UUID.fromString("91a033f7-1dd3-4858-9c7b-8fb61ba6363d"), "MythicMetals"))
+                .lookAtCursor(true)
+                .scaleToFit(true)
+                .sizing(Sizing.fixed(100))
         );
 
         rootComponent.child(buttonPanel);

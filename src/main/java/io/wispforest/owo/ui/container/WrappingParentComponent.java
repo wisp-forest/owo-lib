@@ -2,6 +2,7 @@ package io.wispforest.owo.ui.container;
 
 import io.wispforest.owo.ui.base.BaseParentComponent;
 import io.wispforest.owo.ui.core.Component;
+import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.core.Size;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
@@ -62,6 +63,11 @@ public abstract class WrappingParentComponent<T extends Component> extends BaseP
     @Override
     public List<Component> children() {
         return this.childView;
+    }
+
+    @Override
+    public ParentComponent removeChild(Component child) {
+        throw new UnsupportedOperationException("Cannot remove the child of a wrapping component");
     }
 
     @Override

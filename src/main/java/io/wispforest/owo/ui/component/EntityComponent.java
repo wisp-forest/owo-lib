@@ -102,6 +102,10 @@ public class EntityComponent extends BaseComponent {
         }
     }
 
+    public Entity entity() {
+        return this.entity;
+    }
+
     public EntityComponent allowMouseRotation(boolean allowMouseRotation) {
         this.allowMouseRotation = allowMouseRotation;
         return this;

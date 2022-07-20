@@ -144,6 +144,18 @@ public class GridLayout extends BaseParentComponent {
     }
 
     @Override
+    public GridLayout removeChild(Component child) {
+        for (int i = 0; i < this.children.length; i++) {
+            if (Objects.equals(this.children[i], child)) {
+                this.removeChild(i / this.columns, i % columns);
+                break;
+            }
+        }
+
+        return this;
+    }
+
+    @Override
     public List<Component> children() {
         return this.nonNullChildrenView;
     }

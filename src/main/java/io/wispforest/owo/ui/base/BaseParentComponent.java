@@ -9,6 +9,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -26,6 +27,7 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
     protected AnimatableProperty<Insets> padding = AnimatableProperty.of(Insets.none());
 
     protected @Nullable FocusHandler focusHandler = null;
+    protected @Nullable ArrayList<Runnable> taskQueue = null;
 
     protected Surface surface = Surface.BLANK;
     protected boolean allowOverflow = false;
@@ -38,14 +40,41 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
     }
 
     @Override
-    public void update(float delta, int mouseX, int mouseY) {
+    public final void update(float delta, int mouseX, int mouseY) {
         ParentComponent.super.update(delta, mouseX, mouseY);
         super.update(delta, mouseX, mouseY);
+        this.parentUpdate(delta, mouseX, mouseY);
+
+        if (this.taskQueue != null) {
+            this.taskQueue.forEach(Runnable::run);
+            this.taskQueue.clear();
+        }
     }
+
+    /**
+     * Update the state of this component
+     * before drawing the next frame. This method is separated out from
+     * {@link #update(float, int, int)} to enforce the task queue always
+     * being run last
+     *
+     * @param delta  The duration of the last frame, in partial ticks
+     * @param mouseX The mouse pointer's x-coordinate
+     * @param mouseY The mouse pointer's y-coordinate
+     */
+    protected void parentUpdate(float delta, int mouseX, int mouseY) {}
 
     @Override
     public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
         this.surface.draw(matrices, this);
+    }
+
+    @Override
+    public void queue(Runnable task) {
+        if (this.taskQueue == null) {
+            this.parent.queue(task);
+        } else {
+            this.taskQueue.add(task);
+        }
     }
 
     @Override
@@ -118,6 +147,7 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
         super.mount(parent, x, y);
         if (parent == null && this.focusHandler == null) {
             this.focusHandler = new FocusHandler(this);
+            this.taskQueue = new ArrayList<>();
         }
     }
 

@@ -27,6 +27,14 @@ public interface ParentComponent extends Component {
     void onChildMutated(Component child);
 
     /**
+     * Queue a task to be run after the
+     * entire UI has finished updating
+     *
+     * @param task The task to run
+     */
+    void queue(Runnable task);
+
+    /**
      * Set how this component should vertically arrange its children
      *
      * @param alignment The new alignment method to use
@@ -93,6 +101,11 @@ public interface ParentComponent extends Component {
      * @return The children of this component
      */
     List<Component> children();
+
+    /**
+     * Remove the given child from this component
+     */
+    ParentComponent removeChild(Component child);
 
     @Override
     default boolean onMouseDown(double mouseX, double mouseY, int button) {

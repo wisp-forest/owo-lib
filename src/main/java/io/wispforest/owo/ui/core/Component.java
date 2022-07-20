@@ -294,7 +294,7 @@ public interface Component extends PositionedRectangle {
 
     /**
      * Update the state of this component
-     * before ~ing the next frame
+     * before drawing the next frame
      *
      * @param delta  The duration of the last frame, in partial ticks
      * @param mouseX The mouse pointer's x-coordinate
