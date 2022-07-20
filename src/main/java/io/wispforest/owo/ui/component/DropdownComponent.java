@@ -1,5 +1,6 @@
 package io.wispforest.owo.ui.component;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.container.VerticalFlowLayout;
 import io.wispforest.owo.ui.core.CursorStyle;
@@ -9,6 +10,7 @@ import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.UISounds;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
 import java.util.function.Consumer;
 
@@ -39,6 +41,10 @@ public class DropdownComponent extends VerticalFlowLayout {
         return (DropdownComponent) this.child(new Button(text, onClick));
     }
 
+    public DropdownComponent checkbox(Text text, boolean state) {
+        return (DropdownComponent) this.child(new Checkbox(text, state));
+    }
+
     protected static class Divider extends BaseComponent {
 
         public Divider() {
@@ -59,7 +65,7 @@ public class DropdownComponent extends VerticalFlowLayout {
     }
 
     protected static class Button extends LabelComponent {
-        protected final Consumer<DropdownComponent> onClick;
+        protected Consumer<DropdownComponent> onClick;
 
         protected Button(Text text, Consumer<DropdownComponent> onClick) {
             super(text);
@@ -81,11 +87,12 @@ public class DropdownComponent extends VerticalFlowLayout {
         @Override
         public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
             if (this.isInBoundingBox(mouseX, mouseY)) {
+                var margins = this.margins.get();
                 Drawer.fill(matrices,
-                        this.x - 1,
-                        this.y,
+                        this.x - margins.top(),
+                        this.y - 1,
                         this.x + this.parent.width() - this.parent.padding().get().horizontal() + 1,
-                        this.y + this.height,
+                        this.y + this.height + margins.bottom(),
                         0x44FFFFFF
                 );
             }
@@ -94,17 +101,36 @@ public class DropdownComponent extends VerticalFlowLayout {
         }
     }
 
-    protected static final class Checkbox extends Button {
+    protected static class Checkbox extends Button {
 
+        protected static final Identifier CHECKBOX_TEXTURE = new Identifier("owo", "textures/gui/dropdown_checkbox.png");
         protected boolean state;
 
         public Checkbox(Text text, boolean state) {
-            super(text, dropdownComponent -> {
-
-            });
+            super(text, dropdownComponent -> {});
 
             this.state = state;
+            this.onClick = dropdownComponent -> this.state = !this.state;
         }
 
+        @Override
+        public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+            super.draw(matrices, mouseX, mouseY, partialTicks, delta);
+
+            RenderSystem.setShaderTexture(0, CHECKBOX_TEXTURE);
+            Drawer.drawTexture(matrices,
+                    this.x + this.parent.width() - this.parent.padding().get().horizontal() - 10,
+                    this.y,
+                    this.state ? 16 : 0, 0,
+                    9, 9,
+                    32, 16
+            );
+        }
+
+        @Override
+        protected void applyHorizontalContentSizing(Sizing sizing) {
+            super.applyHorizontalContentSizing(sizing);
+            this.width += 17;
+        }
     }
 }

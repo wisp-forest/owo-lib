@@ -90,10 +90,12 @@ public class ComponentTestScreen extends Screen {
         );
 
         rootComponent.child(new DropdownComponent(Sizing.content())
+                .checkbox(Text.of("more checking"), true)
                 .text(Text.of("hahayes"))
                 .button(Text.of("epic button"), dropdownComponent -> {})
                 .divider()
                 .text(Text.of("very good"))
+                .checkbox(Text.of("checking time"), false)
                 .margins(Insets.horizontal(5))
         );
 
