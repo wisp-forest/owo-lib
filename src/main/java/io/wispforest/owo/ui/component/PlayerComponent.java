@@ -45,6 +45,8 @@ public class PlayerComponent extends EntityComponent {
 
                 this.skinTextureId = identifier;
                 this.model = texture.getMetadata("model");
+                if (this.model == null) this.model = "default";
+
             }, true);
         }
 

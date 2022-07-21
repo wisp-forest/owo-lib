@@ -1,8 +1,9 @@
 package io.wispforest.uwu.client;
 
+import com.mojang.authlib.GameProfile;
 import io.wispforest.owo.ui.component.BoundingBoxComponent;
 import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.component.DropdownComponent;
+import io.wispforest.owo.ui.component.PlayerComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.Layouts;
 import io.wispforest.owo.ui.container.ScrollContainer;
@@ -23,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.UUID;
 import java.util.stream.IntStream;
 
 public class ComponentTestScreen extends Screen {
@@ -117,26 +119,32 @@ public class ComponentTestScreen extends Screen {
                 .surface(Surface.DARK_PANEL)
         );
 
-        var dropdown = new DropdownComponent(Sizing.content())
-                .checkbox(Text.of("more checking"), true)
-                .text(Text.of("hahayes"))
-                .button(Text.of("epic button"), dropdownComponent -> {})
-                .divider()
-                .text(Text.of("very good"))
-                .checkbox(Text.of("checking time"), false)
-                .nested(Text.of("nested entry"), Sizing.content(), nested -> {
-                    nested.text(Text.of("nest title"))
-                            .divider()
-                            .button(Text.of("nest button"), dropdownComponent -> {});
-                });
+//        var dropdown = new DropdownComponent(Sizing.content())
+//                .checkbox(Text.of("more checking"), true)
+//                .text(Text.of("hahayes"))
+//                .button(Text.of("epic button"), dropdownComponent -> {})
+//                .divider()
+//                .text(Text.of("very good"))
+//                .checkbox(Text.of("checking time"), false)
+//                .nested(Text.of("nested entry"), Sizing.content(), nested -> {
+//                    nested.text(Text.of("nest title"))
+//                            .divider()
+//                            .button(Text.of("nest button"), dropdownComponent -> {});
+//                });
+//
+//        var dropdownButton = Components.button(Text.of("Dropdown"), button -> {
+//            if (dropdown.hasParent()) return;
+//            rootComponent.child(dropdown.positioning(Positioning.absolute(button.x(), button.y() + button.height())));
+//        }).margins(Insets.horizontal(8));
+//        dropdown.mouseLeave().subscribe(() -> dropdown.requiresHover(true));
+//
+//        rootComponent.child(dropdownButton);
 
-        var dropdownButton = Components.button(Text.of("Dropdown"), button -> {
-            if (dropdown.hasParent()) return;
-            rootComponent.child(dropdown.positioning(Positioning.absolute(button.x(), button.y() + button.height())));
-        }).margins(Insets.horizontal(8));
-        dropdown.mouseLeave().subscribe(() -> dropdown.requiresHover(true));
-
-        rootComponent.child(dropdownButton);
+        rootComponent.child(new PlayerComponent(new GameProfile(UUID.fromString("09de8a6d-86bf-4c15-bb93-ce3384ce4e96"), "chyzman"))
+                .lookAtCursor(true)
+                .scaleToFit(true)
+                .sizing(Sizing.fixed(100))
+        );
 
         final var buttonGrid = Layouts.grid(Sizing.content(), Sizing.content(), 3, 5);
         for (int row = 0; row < 3; row++) {
