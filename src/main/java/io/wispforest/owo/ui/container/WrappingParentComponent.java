@@ -46,7 +46,7 @@ public abstract class WrappingParentComponent<T extends Component> extends BaseP
 
     public WrappingParentComponent<T> child(T newChild) {
         if (this.child != null) {
-            this.child.onDismounted(DismountReason.REMOVED);
+            this.child.dismount(DismountReason.REMOVED);
         }
 
         this.child = newChild;

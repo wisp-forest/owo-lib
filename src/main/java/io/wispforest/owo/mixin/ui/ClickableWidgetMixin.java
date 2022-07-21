@@ -47,8 +47,8 @@ public abstract class ClickableWidgetMixin implements ComponentStub {
     }
 
     @Override
-    public void onDismounted(DismountReason reason) {
-        this.owo$getWrapper().onDismounted(reason);
+    public void dismount(DismountReason reason) {
+        this.owo$getWrapper().dismount(reason);
     }
 
     @Nullable

@@ -16,6 +16,7 @@ public abstract class BaseComponent implements Component {
 
     @Nullable protected ParentComponent parent = null;
     @Nullable protected String id = null;
+    protected boolean mounted = false;
 
     protected AnimatableProperty<Insets> margins = AnimatableProperty.of(Insets.none());
 
@@ -202,12 +203,14 @@ public abstract class BaseComponent implements Component {
     @Override
     public void mount(ParentComponent parent, int x, int y) {
         this.parent = parent;
+        this.mounted = true;
         this.moveTo(x, y);
     }
 
     @Override
-    public void onDismounted(DismountReason reason) {
+    public void dismount(DismountReason reason) {
         this.parent = null;
+        this.mounted = false;
     }
 
     @Override

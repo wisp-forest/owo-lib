@@ -156,7 +156,7 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
         this.space = space;
 
         for (var child : this.children()) {
-            child.onDismounted(DismountReason.LAYOUT_INFLATION);
+            child.dismount(DismountReason.LAYOUT_INFLATION);
         }
 
         super.inflate(space);
@@ -165,7 +165,7 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
     }
 
     protected void updateLayout() {
-        if (!this.hasParent()) return;
+        if (!this.mounted) return;
 
         var previousSize = this.fullSize();
         this.inflate(this.space);

@@ -44,7 +44,7 @@ public class DropdownComponent extends HorizontalFlowLayout {
     }
 
     public DropdownComponent text(Text text) {
-        this.entries.child(Components.label(text));
+        this.entries.child(Components.label(text).color(0xAFAFAF));
         return this;
     }
 
@@ -180,7 +180,7 @@ public class DropdownComponent extends HorizontalFlowLayout {
             super.onMouseDown(mouseX, mouseY, button);
 
             this.onClick.accept((DropdownComponent) this.parent.parent());
-            UISounds.playButtonSound();
+            this.playInteractionSound();
 
             return true;
         }
@@ -199,6 +199,10 @@ public class DropdownComponent extends HorizontalFlowLayout {
             }
 
             super.draw(matrices, mouseX, mouseY, partialTicks, delta);
+        }
+
+        protected void playInteractionSound() {
+            UISounds.playButtonSound();
         }
     }
 
@@ -223,6 +227,11 @@ public class DropdownComponent extends HorizontalFlowLayout {
         protected void applyHorizontalContentSizing(Sizing sizing) {
             super.applyHorizontalContentSizing(sizing);
             this.width += 17;
+        }
+
+        @Override
+        protected void playInteractionSound() {
+            UISounds.playInteractionSound();
         }
     }
 }

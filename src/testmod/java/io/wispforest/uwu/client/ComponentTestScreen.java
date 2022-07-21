@@ -1,10 +1,8 @@
 package io.wispforest.uwu.client;
 
-import com.mojang.authlib.GameProfile;
 import io.wispforest.owo.ui.component.BoundingBoxComponent;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.DropdownComponent;
-import io.wispforest.owo.ui.component.PlayerComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.Layouts;
 import io.wispforest.owo.ui.container.ScrollContainer;
@@ -25,7 +23,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.UUID;
 import java.util.stream.IntStream;
 
 public class ComponentTestScreen extends Screen {
@@ -120,6 +117,27 @@ public class ComponentTestScreen extends Screen {
                 .surface(Surface.DARK_PANEL)
         );
 
+        var dropdown = new DropdownComponent(Sizing.content())
+                .checkbox(Text.of("more checking"), true)
+                .text(Text.of("hahayes"))
+                .button(Text.of("epic button"), dropdownComponent -> {})
+                .divider()
+                .text(Text.of("very good"))
+                .checkbox(Text.of("checking time"), false)
+                .nested(Text.of("nested entry"), Sizing.content(), nested -> {
+                    nested.text(Text.of("nest title"))
+                            .divider()
+                            .button(Text.of("nest button"), dropdownComponent -> {});
+                });
+
+        var dropdownButton = Components.button(Text.of("Dropdown"), button -> {
+            if (dropdown.hasParent()) return;
+            rootComponent.child(dropdown.positioning(Positioning.absolute(button.x(), button.y() + button.height())));
+        }).margins(Insets.horizontal(8));
+        dropdown.mouseLeave().subscribe(() -> dropdown.requiresHover(true));
+
+        rootComponent.child(dropdownButton);
+
         final var buttonGrid = Layouts.grid(Sizing.content(), Sizing.content(), 3, 5);
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 5; column++) {
@@ -145,7 +163,6 @@ public class ComponentTestScreen extends Screen {
                 .verticalAlignment(VerticalAlignment.CENTER)
                 .surface(Surface.PANEL)
                 .padding(Insets.of(4))
-                .margins(Insets.left(15))
         );
 
         var data = IntStream.rangeClosed(1, 15).boxed().toList();
@@ -164,29 +181,6 @@ public class ComponentTestScreen extends Screen {
                         .padding(Insets.of(4))
                         .margins(Insets.left(15))
                         .positioning(Positioning.relative(50, 100))
-        );
-
-        rootComponent.child(new DropdownComponent(Sizing.content())
-                .checkbox(Text.of("more checking"), true)
-                .text(Text.of("hahayes"))
-                .button(Text.of("epic button"), dropdownComponent -> {})
-                .divider()
-                .text(Text.of("very good"))
-                .checkbox(Text.of("checking time"), false)
-                .nested(Text.of("nested entry"), Sizing.content(), dropdown -> {
-                    dropdown.text(Text.of("nest title"))
-                            .divider()
-                            .button(Text.of("nest button"), dropdownComponent -> {});
-                })
-                .requiresHover(false)
-                .margins(Insets.horizontal(5))
-                .positioning(Positioning.absolute(250, 15))
-        );
-
-        rootComponent.child(new PlayerComponent(new GameProfile(UUID.fromString("91a033f7-1dd3-4858-9c7b-8fb61ba6363d"), "MythicMetals"))
-                .lookAtCursor(true)
-                .scaleToFit(true)
-                .sizing(Sizing.fixed(100))
         );
 
         rootComponent.child(buttonPanel);

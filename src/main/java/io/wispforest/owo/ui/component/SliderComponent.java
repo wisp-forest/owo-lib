@@ -28,8 +28,9 @@ public class SliderComponent extends SliderWidget {
         return this.value;
     }
 
-    public void onChanged(Consumer<Double> listener) {
+    public SliderComponent onChanged(Consumer<Double> listener) {
         this.listeners.observe(listener);
+        return this;
     }
 
     @Override

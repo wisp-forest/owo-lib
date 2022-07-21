@@ -149,7 +149,7 @@ public interface Component extends PositionedRectangle {
      *               {@link DismountReason#LAYOUT_INFLATION}, resources should still be held onto
      *               as the component will be re-mounted right after
      */
-    void onDismounted(DismountReason reason);
+    void dismount(DismountReason reason);
 
     /**
      * @return {@code true} if this component currently has a parent

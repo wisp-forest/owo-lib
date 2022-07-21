@@ -102,7 +102,7 @@ public interface ComponentStub extends Component {
     }
 
     @Override
-    default void onDismounted(DismountReason reason) {
+    default void dismount(DismountReason reason) {
         throw new IllegalStateException("Interface stub method called");
     }
 

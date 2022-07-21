@@ -134,7 +134,7 @@ public class GridLayout extends BaseParentComponent {
     public GridLayout removeChild(int row, int column) {
         var currentChild = getChild(row, column);
         if (currentChild != null) {
-            currentChild.onDismounted(DismountReason.REMOVED);
+            currentChild.dismount(DismountReason.REMOVED);
 
             this.nonNullChildren.remove(currentChild);
             this.updateLayout();
