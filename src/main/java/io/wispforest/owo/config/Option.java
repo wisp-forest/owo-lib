@@ -2,7 +2,6 @@ package io.wispforest.owo.config;
 
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.util.Observable;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
@@ -115,38 +114,7 @@ public record Option<T>(String configName, Key key, T defaultValue, Observable<T
         }
     }
 
-    public static final class BoundField {
-        private Object owner;
-        private final Field field;
-
-        public BoundField(Object owner, Field field) {
-            this.owner = owner;
-            this.field = field;
-        }
-
-        @ApiStatus.Internal
-        public void rebind(Object root, Key key) {
-            if (this.owner == root) return;
-            var path = key.path();
-
-            try {
-                var owner = root;
-                var field = root.getClass().getDeclaredField(path[0]);
-                for (int i = 1; i < path.length; i++) {
-                    owner = field.get(owner);
-                    if (owner != null) {
-                        field = owner.getClass().getDeclaredField(path[i]);
-                    } else {
-                        throw new IllegalStateException("Nested config option containers must never be null");
-                    }
-                }
-
-                this.owner = owner;
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                throw new RuntimeException("Failed to re-bind config option to field", e);
-            }
-        }
-
+    public record BoundField(Object owner, Field field) {
         public Object getValue() {
             try {
                 return this.field.get(this.owner);
@@ -161,14 +129,6 @@ public record Option<T>(String configName, Key key, T defaultValue, Observable<T
             } catch (IllegalAccessException e) {
                 throw new RuntimeException("Could not set config option field " + field.getName(), e);
             }
-        }
-
-        public Object owner() {
-            return owner;
-        }
-
-        public Field field() {
-            return field;
         }
     }
 }
