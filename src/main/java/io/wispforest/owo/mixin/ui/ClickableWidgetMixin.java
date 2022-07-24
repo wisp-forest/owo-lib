@@ -1,12 +1,13 @@
 package io.wispforest.owo.mixin.ui;
 
+import io.wispforest.owo.ui.component.Components;
+import io.wispforest.owo.ui.component.VanillaWidgetComponent;
+import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.event.*;
-import io.wispforest.owo.ui.util.FocusHandler;
 import io.wispforest.owo.ui.inject.ComponentStub;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
-import io.wispforest.owo.ui.component.VanillaWidgetComponent;
-import io.wispforest.owo.ui.core.*;
+import io.wispforest.owo.ui.util.FocusHandler;
 import io.wispforest.owo.util.EventSource;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
@@ -31,7 +32,8 @@ public abstract class ClickableWidgetMixin implements ComponentStub {
     @Shadow
     public abstract boolean mouseClicked(double mouseX, double mouseY, int button);
 
-    @Shadow public abstract boolean mouseReleased(double mouseX, double mouseY, int button);
+    @Shadow
+    public abstract boolean mouseReleased(double mouseX, double mouseY, int button);
 
     @Unique
     protected VanillaWidgetComponent owo$wrapper = null;
@@ -287,7 +289,7 @@ public abstract class ClickableWidgetMixin implements ComponentStub {
     @Unique
     protected VanillaWidgetComponent owo$getWrapper() {
         if (this.owo$wrapper == null) {
-            this.owo$wrapper = new VanillaWidgetComponent((ClickableWidget) (Object) this);
+            this.owo$wrapper = Components.wrapVanillaWidget((ClickableWidget) (Object) this);
             this.owo$initializeWrapper();
         }
 

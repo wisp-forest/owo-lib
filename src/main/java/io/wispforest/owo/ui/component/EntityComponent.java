@@ -1,20 +1,29 @@
 package io.wispforest.owo.ui.component;
 
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
+import net.minecraft.client.render.entity.PlayerModelPart;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.ClientConnection;
+import net.minecraft.network.NetworkSide;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3f;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.Nullable;
@@ -23,11 +32,11 @@ import org.w3c.dom.Element;
 
 import java.util.Map;
 
-public class EntityComponent extends BaseComponent {
+public class EntityComponent<E extends Entity> extends BaseComponent {
 
     protected final EntityRenderDispatcher dispatcher;
     protected final VertexConsumerProvider.Immediate entityBuffers;
-    protected final Entity entity;
+    protected final E entity;
 
     protected float mouseRotation = 0;
     protected float scale = 1;
@@ -35,7 +44,7 @@ public class EntityComponent extends BaseComponent {
     protected boolean allowMouseRotation = false;
     protected boolean scaleToFit = false;
 
-    protected EntityComponent(Entity entity) {
+    protected EntityComponent(E entity) {
         final var client = MinecraftClient.getInstance();
         this.dispatcher = client.getEntityRenderDispatcher();
         this.entityBuffers = client.getBufferBuilders().getEntityVertexConsumers();
@@ -43,7 +52,7 @@ public class EntityComponent extends BaseComponent {
         this.entity = entity;
     }
 
-    protected EntityComponent(EntityType<?> type, @Nullable NbtCompound nbt) {
+    protected EntityComponent(EntityType<E> type, @Nullable NbtCompound nbt) {
         final var client = MinecraftClient.getInstance();
         this.dispatcher = client.getEntityRenderDispatcher();
         this.entityBuffers = client.getBufferBuilders().getEntityVertexConsumers();
@@ -102,11 +111,11 @@ public class EntityComponent extends BaseComponent {
         }
     }
 
-    public Entity entity() {
+    public E entity() {
         return this.entity;
     }
 
-    public EntityComponent allowMouseRotation(boolean allowMouseRotation) {
+    public EntityComponent<E> allowMouseRotation(boolean allowMouseRotation) {
         this.allowMouseRotation = allowMouseRotation;
         return this;
     }
@@ -115,7 +124,7 @@ public class EntityComponent extends BaseComponent {
         return this.allowMouseRotation;
     }
 
-    public EntityComponent lookAtCursor(boolean lookAtCursor) {
+    public EntityComponent<E> lookAtCursor(boolean lookAtCursor) {
         this.lookAtCursor = lookAtCursor;
         return this;
     }
@@ -124,7 +133,7 @@ public class EntityComponent extends BaseComponent {
         return this.lookAtCursor;
     }
 
-    public EntityComponent scale(float scale) {
+    public EntityComponent<E> scale(float scale) {
         this.scale = scale;
         return this;
     }
@@ -133,7 +142,7 @@ public class EntityComponent extends BaseComponent {
         return this.scale;
     }
 
-    public EntityComponent scaleToFit(boolean scaleToFit) {
+    public EntityComponent<E> scaleToFit(boolean scaleToFit) {
         this.scaleToFit = scaleToFit;
 
         if (scaleToFit) {
@@ -155,6 +164,10 @@ public class EntityComponent extends BaseComponent {
         return source == FocusSource.MOUSE_CLICK;
     }
 
+    public static RenderablePlayerEntity createRenderablePlayer(GameProfile profile) {
+        return new RenderablePlayerEntity(profile);
+    }
+
     @Override
     public void parseProperties(UIModel model, Element element, Map<String, Element> children) {
         super.parseProperties(model, element, children);
@@ -165,11 +178,66 @@ public class EntityComponent extends BaseComponent {
         UIParsing.apply(children, "scale-to-fit", UIParsing::parseBool, this::scaleToFit);
     }
 
-    public static EntityComponent parse(Element element) {
+    public static EntityComponent<?> parse(Element element) {
         UIParsing.expectAttributes(element, "type");
         var entityId = UIParsing.parseIdentifier(element.getAttributeNode("type"));
         var entityType = Registry.ENTITY_TYPE.getOrEmpty(entityId).orElseThrow(() -> new UIModelParsingException("Unknown entity type " + entityId));
 
-        return new EntityComponent(entityType, null);
+        return new EntityComponent<>(entityType, null);
+    }
+
+    protected static class RenderablePlayerEntity extends ClientPlayerEntity {
+
+        protected Identifier skinTextureId = null;
+        protected String model = null;
+
+        public RenderablePlayerEntity(GameProfile profile) {
+            super(MinecraftClient.getInstance(),
+                    MinecraftClient.getInstance().world,
+                    new ClientPlayNetworkHandler(MinecraftClient.getInstance(),
+                            null,
+                            new ClientConnection(NetworkSide.CLIENTBOUND),
+                            profile,
+                            MinecraftClient.getInstance().createTelemetrySender()
+                    ),
+                    null, null, false, false
+            );
+
+            this.client.getSkinProvider().loadSkin(this.getGameProfile(), (type, identifier, texture) -> {
+                if (type != MinecraftProfileTexture.Type.SKIN) return;
+
+                this.skinTextureId = identifier;
+                this.model = texture.getMetadata("model");
+                if (this.model == null) this.model = "default";
+
+            }, true);
+        }
+
+        @Override
+        public boolean hasSkinTexture() {
+            return skinTextureId != null;
+        }
+
+        @Override
+        public Identifier getSkinTexture() {
+            return this.skinTextureId != null ? this.skinTextureId : super.getSkinTexture();
+        }
+
+
+        @Override
+        public boolean isPartVisible(PlayerModelPart modelPart) {
+            return true;
+        }
+
+        @Override
+        public String getModel() {
+            return this.model != null ? this.model : super.getModel();
+        }
+
+        @Nullable
+        @Override
+        protected PlayerListEntry getPlayerListEntry() {
+            return null;
+        }
     }
 }

@@ -6,7 +6,7 @@ import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.container.FlowLayout;
-import io.wispforest.owo.ui.container.Layouts;
+import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.container.VerticalFlowLayout;
 import net.minecraft.text.Text;
@@ -18,7 +18,7 @@ public class TestConfigScreen extends BaseOwoScreen<VerticalFlowLayout> {
 
     @Override
     protected @NotNull OwoUIAdapter<VerticalFlowLayout> createAdapter() {
-        return OwoUIAdapter.create(this, Layouts::verticalFlow);
+        return OwoUIAdapter.create(this, Containers::verticalFlow);
     }
 
     @Override
@@ -35,7 +35,7 @@ public class TestConfigScreen extends BaseOwoScreen<VerticalFlowLayout> {
                 Text.literal("very epic ").append(Owo.PREFIX).append("config")
         ).shadow(true).margins(Insets.bottom(15)));
 
-        final var optionsScrollContainer = ScrollContainer.vertical(
+        final var optionsScrollContainer = Containers.verticalScroll(
                 Sizing.fill(90),
                 Sizing.fill(85),
                 Components.list(
@@ -54,17 +54,17 @@ public class TestConfigScreen extends BaseOwoScreen<VerticalFlowLayout> {
     }
 
     private FlowLayout createOptionComponent(ConfigOption option) {
-        var container = Layouts.horizontalFlow(Sizing.fill(100), Sizing.fixed(32));
+        var container = Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(32));
         container.padding(Insets.of(5));
 
         container.child(Components.label(Text.literal(option.name)).positioning(Positioning.relative(0, 50)));
 
         {
-            var valueLayout = Layouts.horizontalFlow(Sizing.content(), Sizing.fill(100));
+            var valueLayout = Containers.horizontalFlow(Sizing.content(), Sizing.fill(100));
             valueLayout.positioning(Positioning.relative(100, 50)).verticalAlignment(VerticalAlignment.CENTER);
             container.child(valueLayout);
 
-            valueLayout.child(Components.slider(Sizing.fixed(200), Text.literal("slider for " + option.name)));
+            valueLayout.child(Components.slider(Sizing.fixed(200)).message(s -> Text.literal("slider for " + option.name)));
 
             final var valueBox = Components.textBox(Sizing.fixed(80), option.value);
             valueLayout.child(valueBox.margins(Insets.horizontal(5)));

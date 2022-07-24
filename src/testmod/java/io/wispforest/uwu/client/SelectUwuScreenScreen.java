@@ -3,7 +3,7 @@ package io.wispforest.uwu.client;
 import io.wispforest.owo.config.ui.ConfigScreen;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.container.Layouts;
+import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.VerticalFlowLayout;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.uwu.Uwu;
@@ -14,7 +14,7 @@ public class SelectUwuScreenScreen extends BaseOwoScreen<VerticalFlowLayout> {
 
     @Override
     protected @NotNull OwoUIAdapter<VerticalFlowLayout> createAdapter() {
-        return OwoUIAdapter.create(this, Layouts::verticalFlow);
+        return OwoUIAdapter.create(this, Containers::verticalFlow);
     }
 
     @Override
@@ -29,7 +29,7 @@ public class SelectUwuScreenScreen extends BaseOwoScreen<VerticalFlowLayout> {
                         .margins(Insets.bottom(5))
         );
 
-        var panel = Layouts.verticalFlow(Sizing.content(), Sizing.content());
+        var panel = Containers.verticalFlow(Sizing.content(), Sizing.content());
         panel.padding(Insets.of(5))
                 .surface(Surface.PANEL)
                 .horizontalAlignment(HorizontalAlignment.CENTER);

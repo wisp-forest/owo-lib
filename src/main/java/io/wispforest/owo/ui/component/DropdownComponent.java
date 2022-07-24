@@ -20,7 +20,7 @@ public class DropdownComponent extends HorizontalFlowLayout {
     protected final EntryList entries;
     protected boolean requiresHover = false;
 
-    public DropdownComponent(Sizing horizontalSizing) {
+    protected DropdownComponent(Sizing horizontalSizing) {
         super(Sizing.content(), Sizing.content());
 
         this.entries = new EntryList(horizontalSizing);

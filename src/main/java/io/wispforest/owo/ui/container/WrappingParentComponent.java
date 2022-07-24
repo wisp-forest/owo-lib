@@ -15,12 +15,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public abstract class WrappingParentComponent<T extends Component> extends BaseParentComponent {
+public abstract class WrappingParentComponent<C extends Component> extends BaseParentComponent {
 
-    protected T child;
+    protected C child;
     protected List<Component> childView;
 
-    protected WrappingParentComponent(Sizing horizontalSizing, Sizing verticalSizing, T child) {
+    protected WrappingParentComponent(Sizing horizontalSizing, Sizing verticalSizing, C child) {
         super(horizontalSizing, verticalSizing);
         this.child = child;
         this.childView = Collections.singletonList(this.child);
@@ -44,7 +44,7 @@ public abstract class WrappingParentComponent<T extends Component> extends BaseP
         this.child.mount(this, this.x + child.margins().get().left() + padding.left(), this.y + child.margins().get().top() + padding.top());
     }
 
-    public WrappingParentComponent<T> child(T newChild) {
+    public WrappingParentComponent<C> child(C newChild) {
         if (this.child != null) {
             this.child.dismount(DismountReason.REMOVED);
         }
@@ -56,7 +56,7 @@ public abstract class WrappingParentComponent<T extends Component> extends BaseP
         return this;
     }
 
-    public T child() {
+    public C child() {
         return this.child;
     }
 
@@ -77,7 +77,7 @@ public abstract class WrappingParentComponent<T extends Component> extends BaseP
 
         try {
             var childList = UIParsing.<Element>allChildrenOfType(element, Node.ELEMENT_NODE);
-            this.child((T) model.parseComponent(Component.class, childList.get(0)));
+            this.child((C) model.parseComponent(Component.class, childList.get(0)));
         } catch (UIModelParsingException exception) {
             throw new UIModelParsingException("Could not initialize container child", exception);
         }

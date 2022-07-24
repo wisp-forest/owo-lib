@@ -1,19 +1,29 @@
 package io.wispforest.owo.ui.component;
 
 import io.wispforest.owo.ui.core.Sizing;
+import io.wispforest.owo.ui.parsing.UIModel;
+import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.util.Observable;
 import net.minecraft.client.gui.widget.SliderWidget;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.MathHelper;
+import org.w3c.dom.Element;
 
+import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class SliderComponent extends SliderWidget {
 
-    protected Observable<Double> listeners;
+    protected final Observable<Double> listeners;
+    protected Function<String, Text> messageProvider;
 
     protected SliderComponent() {
         super(0, 0, 0, 0, Text.empty(), 0);
+
+        this.messageProvider = value -> Text.empty();
         this.listeners = Observable.of(this.value);
+
         this.verticalSizing(Sizing.fixed(20));
     }
 
@@ -33,11 +43,57 @@ public class SliderComponent extends SliderWidget {
         return this;
     }
 
+    public SliderComponent message(Function<String, Text> messageProvider) {
+        this.messageProvider = messageProvider;
+        this.updateMessage();
+        return this;
+    }
+
     @Override
-    protected void updateMessage() {}
+    protected void updateMessage() {
+        this.setMessage(this.messageProvider.apply(String.valueOf(this.value)));
+    }
 
     @Override
     protected void applyValue() {
         this.listeners.set(this.value);
+    }
+
+    @Override
+    public boolean onMouseScroll(double mouseX, double mouseY, double amount) {
+        this.value(MathHelper.clamp(this.value + .05 * amount, 0, 1));
+
+        super.onMouseScroll(mouseX, mouseY, amount);
+        return true;
+    }
+
+    @Override
+    public void parseProperties(UIModel model, Element element, Map<String, Element> children) {
+        super.parseProperties(model, element, children);
+
+        if (children.containsKey("text")) {
+            var node = children.get("text");
+            var content = node.getTextContent().strip();
+
+            if (node.getAttribute("translate").equalsIgnoreCase("true")) {
+                this.message(value -> Text.translatable(content, value));
+            } else {
+                var text = Text.literal(content);
+                this.message(value -> text);
+            }
+        }
+
+        UIParsing.apply(children, "value", UIParsing::parseDouble, this::value);
+    }
+
+    /**
+     * @deprecated Use {@link #message(Function)} instead,
+     * as the message set by this method will be overwritten
+     * the next time this slider is moved
+     */
+    @Override
+    @Deprecated
+    public void setMessage(Text message) {
+        super.setMessage(message);
     }
 }

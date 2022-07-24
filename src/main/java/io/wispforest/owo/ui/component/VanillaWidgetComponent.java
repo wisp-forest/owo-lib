@@ -15,7 +15,7 @@ public class VanillaWidgetComponent extends BaseComponent {
 
     private final ClickableWidget widget;
 
-    public VanillaWidgetComponent(ClickableWidget widget) {
+    protected VanillaWidgetComponent(ClickableWidget widget) {
         this.widget = widget;
 
         this.horizontalSizing.set(Sizing.fixed(this.widget.getWidth()));

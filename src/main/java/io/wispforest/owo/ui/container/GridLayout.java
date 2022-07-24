@@ -122,9 +122,12 @@ public class GridLayout extends BaseParentComponent {
         this.children[row * this.columns + column] = child;
 
         if (previousChild != child) {
-            this.nonNullChildren.remove(previousChild);
-            this.nonNullChildren.add(0, child);
+            if (previousChild != null) {
+                this.nonNullChildren.remove(previousChild);
+                previousChild.dismount(DismountReason.REMOVED);
+            }
 
+            this.nonNullChildren.add(0, child);
             this.updateLayout();
         }
 

@@ -2,7 +2,7 @@ package io.wispforest.owo.config.ui;
 
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.FlowLayout;
-import io.wispforest.owo.ui.container.Layouts;
+import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.VerticalFlowLayout;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.Insets;
@@ -41,7 +41,7 @@ public class OptionContainerLayout extends VerticalFlowLayout {
         this.surface(SURFACE);
         this.padding(Insets.left(15));
 
-        this.titleLayout = Layouts.horizontalFlow(Sizing.content(), Sizing.content());
+        this.titleLayout = Containers.horizontalFlow(Sizing.content(), Sizing.content());
         this.titleLayout.padding(Insets.vertical(5));
         this.titleLayout.margins(Insets.left(-7));
         this.allowOverflow(true);

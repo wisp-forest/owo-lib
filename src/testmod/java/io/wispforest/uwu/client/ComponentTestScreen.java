@@ -3,9 +3,10 @@ package io.wispforest.uwu.client;
 import com.mojang.authlib.GameProfile;
 import io.wispforest.owo.ui.component.BoundingBoxComponent;
 import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.component.PlayerComponent;
+import io.wispforest.owo.ui.component.DiscreteSliderComponent;
+import io.wispforest.owo.ui.component.EntityComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
-import io.wispforest.owo.ui.container.Layouts;
+import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.core.*;
 import net.minecraft.client.gui.Element;
@@ -37,11 +38,11 @@ public class ComponentTestScreen extends Screen {
 
     @Override
     protected void init() {
-        this.uiAdapter = OwoUIAdapter.create(this, Layouts::horizontalFlow);
+        this.uiAdapter = OwoUIAdapter.create(this, Containers::horizontalFlow);
         final var rootComponent = uiAdapter.rootComponent;
 
         rootComponent.child(
-                Layouts.verticalFlow(Sizing.content(), Sizing.content())
+                Containers.verticalFlow(Sizing.content(), Sizing.content())
                         .child(Components.button(Text.of("Dark Background"), 95, 20, button -> rootComponent.surface(Surface.flat(0x77000000))))
                         .child(Components.button(Text.of("No Background"), 95, 20, button -> rootComponent.surface(Surface.BLANK)).margins(Insets.vertical(5)))
                         .child(Components.button(Text.of("Dirt Background"), 95, 20, button -> rootComponent.surface(Surface.OPTIONS_BACKGROUND)))
@@ -50,10 +51,10 @@ public class ComponentTestScreen extends Screen {
                         .positioning(Positioning.relative(1, 1))
         );
 
-        final var innerLayout = Layouts.verticalFlow(Sizing.content(100), Sizing.content());
+        final var innerLayout = Containers.verticalFlow(Sizing.content(100), Sizing.content());
         var verticalAnimation = innerLayout.verticalSizing().animate(350, Easing.SINE, Sizing.content(50));
 
-        innerLayout.child(ScrollContainer.vertical(Sizing.content(), Sizing.fixed(50), Layouts.verticalFlow(Sizing.content(), Sizing.content())
+        innerLayout.child(Containers.verticalScroll(Sizing.content(), Sizing.fixed(50), Containers.verticalFlow(Sizing.content(), Sizing.content())
                         .child(new BoundingBoxComponent(Sizing.fixed(20), Sizing.fixed(40)).margins(Insets.of(5)))
                         .child(new BoundingBoxComponent(Sizing.fixed(45), Sizing.fixed(45)).margins(Insets.of(5)))
                         .child(Components.textBox(Sizing.fixed(60)))
@@ -74,13 +75,13 @@ public class ComponentTestScreen extends Screen {
                 .verticalAlignment(VerticalAlignment.CENTER)
                 .padding(Insets.of(5));
 
-        rootComponent.child(ScrollContainer.horizontal(Sizing.fill(20), Sizing.content(), innerLayout)
+        rootComponent.child(Containers.horizontalScroll(Sizing.fill(20), Sizing.content(), innerLayout)
                 .scrollbarThiccness(5)
                 .surface(Surface.PANEL)
                 .padding(Insets.of(3))
         );
 
-        rootComponent.child(Layouts.verticalFlow(Sizing.content(), Sizing.content())
+        rootComponent.child(Containers.verticalFlow(Sizing.content(), Sizing.content())
                 .child(Components.label(Text.literal("A vertical Flow Layout, as well as a really long text to demonstrate wrapping")
                                 .styled(style -> {
                                     return style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, "yes"))
@@ -91,7 +92,7 @@ public class ComponentTestScreen extends Screen {
                         .margins(Insets.horizontal(15)))
         );
 
-        final var buttonPanel = Layouts.horizontalFlow(Sizing.content(), Sizing.content())
+        final var buttonPanel = Containers.horizontalFlow(Sizing.content(), Sizing.content())
                 .child(Components.label(Text.of("A horizontal Flow Layout\nwith a dark panel")).margins(Insets.of(5)))
                 .child(Components.button(Text.of("⇄"), 20, 20, button -> this.clearAndInit()))
                 .child(Components.button(Text.of("X"), 20, 20, button -> this.close()))
@@ -108,12 +109,17 @@ public class ComponentTestScreen extends Screen {
         growingTextBox.margins(Insets.vertical(5));
 
         var weeAnimation = buttonPanel.positioning().animate(450, Easing.SINE, Positioning.relative(0, 100));
-        rootComponent.child(Layouts.verticalFlow(Sizing.content(), Sizing.content())
+        rootComponent.child(Containers.verticalFlow(Sizing.content(), Sizing.content())
                 .child(growingTextBox)
                 .child(new TextFieldWidget(this.client.textRenderer, 0, 0, 60, 20, Text.empty()).margins(Insets.vertical(5)))
                 .child(Components.button(Text.of("weeeee"), 0, 0, button -> {
                     weeAnimation.reverse();
                 }).sizing(Sizing.content()).margins(Insets.vertical(5)))
+                .child(new DiscreteSliderComponent(0, 1)
+                        .snap(true)
+                        .decimalPlaces(1)
+                        .message(value -> Text.translatable("text.ui.test_slider", value))
+                        .horizontalSizing(Sizing.fill(10)))
                 .padding(Insets.of(5))
                 .horizontalAlignment(HorizontalAlignment.CENTER)
                 .surface(Surface.DARK_PANEL)
@@ -140,13 +146,14 @@ public class ComponentTestScreen extends Screen {
 //
 //        rootComponent.child(dropdownButton);
 
-        rootComponent.child(new PlayerComponent(new GameProfile(UUID.fromString("09de8a6d-86bf-4c15-bb93-ce3384ce4e96"), "chyzman"))
+        rootComponent.child(Components.entity(
+                        Sizing.fixed(100),
+                        EntityComponent.createRenderablePlayer(new GameProfile(UUID.fromString("09de8a6d-86bf-4c15-bb93-ce3384ce4e96"), "chyzman")))
                 .lookAtCursor(true)
                 .scaleToFit(true)
-                .sizing(Sizing.fixed(100))
         );
 
-        final var buttonGrid = Layouts.grid(Sizing.content(), Sizing.content(), 3, 5);
+        final var buttonGrid = Containers.grid(Sizing.content(), Sizing.content(), 3, 5);
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 5; column++) {
                 buttonGrid.child(
@@ -175,7 +182,7 @@ public class ComponentTestScreen extends Screen {
 
         var data = IntStream.rangeClosed(1, 15).boxed().toList();
         rootComponent.child(
-                ScrollContainer.horizontal(
+                Containers.horizontalScroll(
                                 Sizing.fill(25),
                                 Sizing.content(),
                                 Components.list(

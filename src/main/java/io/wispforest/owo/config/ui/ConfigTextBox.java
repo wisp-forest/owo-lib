@@ -14,6 +14,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+@SuppressWarnings("UnusedReturnValue")
 public class ConfigTextBox extends TextFieldWidget implements OptionComponent {
 
     protected int invalidColor = 0xEB1D36, validColor = 0x28FFBF;

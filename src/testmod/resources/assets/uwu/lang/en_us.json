@@ -40,6 +40,7 @@
     },
     " config"
   ],
+  "text.ui.test_slider": "Value: %s",
   "text.config.uwu.option.aValue": "A Value",
   "text.config.uwu.option.regex": "Regex'd",
   "text.config.uwu.category.nestingTime": "Nesting Time",

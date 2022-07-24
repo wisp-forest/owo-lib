@@ -1,9 +1,6 @@
 package io.wispforest.owo.ui.parsing;
 
-import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.component.EntityComponent;
-import io.wispforest.owo.ui.component.SpriteComponent;
-import io.wispforest.owo.ui.component.TextureComponent;
+import io.wispforest.owo.ui.component.*;
 import io.wispforest.owo.ui.container.DraggableContainer;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.GridLayout;
@@ -165,6 +162,22 @@ public class UIParsing {
     }
 
     /**
+     * Tries to interpret the text content of the
+     * given node as a double-precision floating-point number
+     *
+     * @throws UIModelParsingException If the text content does not
+     *                                 represent a valid floating point number
+     */
+    public static double parseDouble(Node node) {
+        var data = node.getTextContent().strip();
+        if (data.matches("-?\\d+(\\.\\d+)?")) {
+            return Double.parseDouble(data);
+        } else {
+            throw new UIModelParsingException("Invalid value '" + data + "', expected a double-precision floating point number");
+        }
+    }
+
+    /**
      * Interprets the text content of the
      * given node as a boolean - more specifically this
      * method returns {@code true} if and only if the text content
@@ -278,7 +291,8 @@ public class UIParsing {
         registerFactory("label", element -> Components.label(Text.empty()));
         registerFactory("button", element -> Components.button(Text.empty(), button -> {}));
         registerFactory("text-box", element -> Components.textBox(Sizing.content()));
-        registerFactory("slider", element -> Components.slider(Sizing.content(), Text.empty()));
+        registerFactory("slider", element -> Components.slider(Sizing.content()));
+        registerFactory("discrete-slider", DiscreteSliderComponent::parse);
     }
 
 }

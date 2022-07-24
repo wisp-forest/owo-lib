@@ -3,7 +3,7 @@ package io.wispforest.owo.config.ui;
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.config.annotation.Expanded;
 import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.container.Layouts;
+import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.owo.util.NumberReflection;
@@ -77,7 +77,7 @@ public class ListOptionLayout<T> extends OptionContainerLayout implements Option
 
         var listType = ReflectionUtils.getTypeArgument(this.backingOption.backingField().field(), 0);
         for (int i = 0; i < this.backingList.size(); i++) {
-            var container = Layouts.horizontalFlow(Sizing.fill(100), Sizing.content());
+            var container = Containers.horizontalFlow(Sizing.fill(100), Sizing.content());
             container.verticalAlignment(VerticalAlignment.CENTER);
 
             int idx = i;

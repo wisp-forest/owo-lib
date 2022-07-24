@@ -1,11 +1,12 @@
 package io.wispforest.owo.ui.component;
 
 import io.wispforest.owo.ui.container.FlowLayout;
-import io.wispforest.owo.ui.container.Layouts;
+import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.Sizing;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.SpriteIdentifier;
@@ -22,18 +23,19 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+// TODO enforce sizing in all component constructors that need it
+
+/**
+ * Utility methods for creating UI components
+ */
 public class Components {
 
-    private static final Supplier<TextFieldWidget> EMPTY_TEXT_FIELD = () -> {
-        return new TextFieldWidget(MinecraftClient.getInstance().textRenderer, 0, 0, 0, 0, Text.empty());
-    };
-
-    public static EntityComponent entity(Sizing sizing, EntityType<?> type, @Nullable NbtCompound nbt) {
-        return createSized(() -> new EntityComponent(type, nbt), sizing, sizing);
+    public static <E extends Entity> EntityComponent<E> entity(Sizing sizing, EntityType<E> type, @Nullable NbtCompound nbt) {
+        return createWithSizing(() -> new EntityComponent<>(type, nbt), sizing, sizing);
     }
 
-    public static EntityComponent entity(Sizing sizing, Entity entity) {
-        return createSized(() -> new EntityComponent(entity), sizing, sizing);
+    public static <E extends Entity> EntityComponent<E> entity(Sizing sizing, E entity) {
+        return createWithSizing(() -> new EntityComponent<>(entity), sizing, sizing);
     }
 
     public static ItemComponent item(ItemStack item) {
@@ -55,27 +57,27 @@ public class Components {
     }
 
     public static TextFieldWidget textBox(Sizing horizontalSizing) {
-        return createSized(
-                EMPTY_TEXT_FIELD,
+        return createWithSizing(
+                () -> new TextFieldWidget(MinecraftClient.getInstance().textRenderer, 0, 0, 0, 0, Text.empty()),
                 horizontalSizing,
                 Sizing.fixed(20)
         );
     }
 
     public static TextFieldWidget textBox(Sizing horizontalSizing, String text) {
-        final var textBox = createSized(
-                EMPTY_TEXT_FIELD,
-                horizontalSizing,
-                Sizing.fixed(20)
-        );
+        final var textBox = textBox(horizontalSizing);
         textBox.setText(text);
         textBox.setCursorToStart();
         return textBox;
     }
 
-    public static SliderComponent slider(Sizing horizontalSizing, Text message) {
-        final var slider = createSized(SliderComponent::new, horizontalSizing, Sizing.fixed(20));
-        slider.setMessage(message);
+    public static SliderComponent slider(Sizing horizontalSizing) {
+        return createWithSizing(SliderComponent::new, horizontalSizing, Sizing.fixed(20));
+    }
+
+    public static DiscreteSliderComponent discreteSlider(Sizing horizontalSizing, double min, double max) {
+        var slider = new DiscreteSliderComponent(min, max);
+        slider.horizontalSizing(horizontalSizing);
         return slider;
     }
 
@@ -95,14 +97,12 @@ public class Components {
         return new TextureComponent(texture, u, v, regionWidth, regionHeight, 256, 256);
     }
 
-    public static <T extends Component> T createSized(Supplier<T> componentMaker, Sizing horizontalSizing, Sizing verticalSizing) {
-        var component = componentMaker.get();
-        component.sizing(horizontalSizing, verticalSizing);
-        return component;
+    public static DropdownComponent dropdown(Sizing horizontalSizing) {
+        return new DropdownComponent(horizontalSizing);
     }
 
     public static <T, C extends Component> FlowLayout list(List<T> data, Consumer<FlowLayout> layoutConfigurator, Function<T, C> componentMaker, boolean vertical) {
-        var layout = vertical ? Layouts.verticalFlow(Sizing.content(), Sizing.content()) : Layouts.horizontalFlow(Sizing.content(), Sizing.content());
+        var layout = vertical ? Containers.verticalFlow(Sizing.content(), Sizing.content()) : Containers.horizontalFlow(Sizing.content(), Sizing.content());
         layoutConfigurator.accept(layout);
 
         for (var value : data) {
@@ -110,6 +110,16 @@ public class Components {
         }
 
         return layout;
+    }
+
+    public static VanillaWidgetComponent wrapVanillaWidget(ClickableWidget widget) {
+        return new VanillaWidgetComponent(widget);
+    }
+
+    public static <T extends Component> T createWithSizing(Supplier<T> componentMaker, Sizing horizontalSizing, Sizing verticalSizing) {
+        var component = componentMaker.get();
+        component.sizing(horizontalSizing, verticalSizing);
+        return component;
     }
 
 }

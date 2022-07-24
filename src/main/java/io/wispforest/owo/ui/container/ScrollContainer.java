@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-public class ScrollContainer<T extends Component> extends WrappingParentComponent<T> {
+public class ScrollContainer<C extends Component> extends WrappingParentComponent<C> {
 
     protected double scrollOffset = 0;
     protected double currentScrollPosition = 0;
@@ -33,17 +33,9 @@ public class ScrollContainer<T extends Component> extends WrappingParentComponen
 
     protected final ScrollDirection direction;
 
-    protected ScrollContainer(ScrollDirection direction, Sizing horizontalSizing, Sizing verticalSizing, T child) {
+    protected ScrollContainer(ScrollDirection direction, Sizing horizontalSizing, Sizing verticalSizing, C child) {
         super(horizontalSizing, verticalSizing, child);
         this.direction = direction;
-    }
-
-    public static <T extends Component> ScrollContainer<T> vertical(Sizing horizontalSizing, Sizing verticalSizing, T child) {
-        return new ScrollContainer<>(ScrollDirection.VERTICAL, horizontalSizing, verticalSizing, child);
-    }
-
-    public static <T extends Component> ScrollContainer<T> horizontal(Sizing horizontalSizing, Sizing verticalSizing, T child) {
-        return new ScrollContainer<>(ScrollDirection.HORIZONTAL, horizontalSizing, verticalSizing, child);
     }
 
     @Override
@@ -210,7 +202,7 @@ public class ScrollContainer<T extends Component> extends WrappingParentComponen
         return this.isInBoundingBox(mouseX, mouseY) && this.direction.choose(mouseY, mouseX) >= this.scrollbarOffset;
     }
 
-    public ScrollContainer<T> scrollbarThiccness(int scrollbarThiccness) {
+    public ScrollContainer<C> scrollbarThiccness(int scrollbarThiccness) {
         this.scrollbarThiccness = scrollbarThiccness;
         return this;
     }
@@ -219,7 +211,7 @@ public class ScrollContainer<T extends Component> extends WrappingParentComponen
         return this.scrollbarThiccness;
     }
 
-    public ScrollContainer<T> scrollbarColor(int scrollbarColor) {
+    public ScrollContainer<C> scrollbarColor(int scrollbarColor) {
         this.scrollbarColor = scrollbarColor;
         return this;
     }
@@ -237,8 +229,8 @@ public class ScrollContainer<T extends Component> extends WrappingParentComponen
 
     public static ScrollContainer<?> parse(Element element) {
         return element.getAttribute("direction").equals("vertical")
-                ? ScrollContainer.vertical(Sizing.content(), Sizing.content(), null)
-                : ScrollContainer.horizontal(Sizing.content(), Sizing.content(), null);
+                ? Containers.verticalScroll(Sizing.content(), Sizing.content(), null)
+                : Containers.horizontalScroll(Sizing.content(), Sizing.content(), null);
     }
 
     public enum ScrollDirection {

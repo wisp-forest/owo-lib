@@ -13,14 +13,14 @@ import org.w3c.dom.Element;
 import java.util.Collections;
 import java.util.Map;
 
-public class DraggableContainer<T extends Component> extends WrappingParentComponent<T> {
+public class DraggableContainer<C extends Component> extends WrappingParentComponent<C> {
 
     protected int foreheadSize = 10;
 
     protected int baseX = 0, baseY = 0;
     protected double xOffset = 0, yOffset = 0;
 
-    public DraggableContainer(Sizing horizontalSizing, Sizing verticalSizing, T child) {
+    public DraggableContainer(Sizing horizontalSizing, Sizing verticalSizing, C child) {
         super(horizontalSizing, verticalSizing, child);
         this.padding(Insets.none());
     }
@@ -72,7 +72,7 @@ public class DraggableContainer<T extends Component> extends WrappingParentCompo
         return super.padding(Insets.of(padding.top() + this.foreheadSize, padding.bottom(), padding.left(), padding.right()));
     }
 
-    public DraggableContainer<T> foreheadSize(int foreheadSize) {
+    public DraggableContainer<C> foreheadSize(int foreheadSize) {
         int prevForeheadSize = this.foreheadSize;
         this.foreheadSize = foreheadSize;
 

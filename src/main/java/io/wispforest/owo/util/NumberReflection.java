@@ -1,5 +1,8 @@
 package io.wispforest.owo.util;
 
+import org.jetbrains.annotations.ApiStatus;
+
+@ApiStatus.Experimental
 public class NumberReflection {
 
     public static boolean isNumberType(Class<?> clazz) {

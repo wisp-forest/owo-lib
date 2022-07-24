@@ -3,7 +3,7 @@ package io.wispforest.uwu.rei;
 import io.wispforest.owo.compat.rei.ReiUIAdapter;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.core.*;
-import io.wispforest.owo.ui.container.Layouts;
+import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.uwu.items.UwuItems;
 import me.shedaniel.math.Rectangle;
@@ -28,14 +28,14 @@ public class UiCategory implements DisplayCategory<Display> {
 
     @Override
     public List<Widget> setupDisplay(Display display, Rectangle bounds) {
-        var adapter = new ReiUIAdapter<>(bounds, Layouts::verticalFlow);
+        var adapter = new ReiUIAdapter<>(bounds, Containers::verticalFlow);
         var root = adapter.rootComponent();
 
         root.horizontalAlignment(HorizontalAlignment.CENTER)
                 .surface(Surface.DARK_PANEL)
                 .padding(Insets.of(8));
 
-        var inner = Layouts.verticalFlow(Sizing.fill(100), Sizing.content());
+        var inner = Containers.verticalFlow(Sizing.fill(100), Sizing.content());
         inner.horizontalAlignment(HorizontalAlignment.CENTER).surface(Surface.flat(0xFF00FFAF));
 
         inner.child(Components.label(Text.of("A demonstration\ninside REI"))
@@ -47,7 +47,7 @@ public class UiCategory implements DisplayCategory<Display> {
         inner.child(Components.button(Text.of("shrink"), 60, 20, button -> animation.forwards()).margins(Insets.vertical(25)));
         inner.child(Components.button(Text.of("grow"), 60, 20, button -> animation.backwards()).margins(Insets.vertical(25)));
 
-        root.child(ScrollContainer.vertical(Sizing.content(), Sizing.fill(100), inner));
+        root.child(Containers.verticalScroll(Sizing.content(), Sizing.fill(100), inner));
 
         adapter.prepare();
         return List.of(adapter);
