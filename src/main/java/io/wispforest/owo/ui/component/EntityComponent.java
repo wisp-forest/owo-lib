@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.base.BaseComponent;
+import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
@@ -44,15 +45,17 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
     protected boolean allowMouseRotation = false;
     protected boolean scaleToFit = false;
 
-    protected EntityComponent(E entity) {
+    protected EntityComponent(Sizing sizing, E entity) {
         final var client = MinecraftClient.getInstance();
         this.dispatcher = client.getEntityRenderDispatcher();
         this.entityBuffers = client.getBufferBuilders().getEntityVertexConsumers();
 
         this.entity = entity;
+
+        this.sizing(sizing);
     }
 
-    protected EntityComponent(EntityType<E> type, @Nullable NbtCompound nbt) {
+    protected EntityComponent(Sizing sizing, EntityType<E> type, @Nullable NbtCompound nbt) {
         final var client = MinecraftClient.getInstance();
         this.dispatcher = client.getEntityRenderDispatcher();
         this.entityBuffers = client.getBufferBuilders().getEntityVertexConsumers();
@@ -60,6 +63,8 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
         this.entity = type.create(client.world);
         if (nbt != null) entity.readNbt(nbt);
         entity.updatePosition(client.player.getX(), client.player.getY(), client.player.getZ());
+
+        this.sizing(sizing);
     }
 
     @Override
@@ -183,7 +188,7 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
         var entityId = UIParsing.parseIdentifier(element.getAttributeNode("type"));
         var entityType = Registry.ENTITY_TYPE.getOrEmpty(entityId).orElseThrow(() -> new UIModelParsingException("Unknown entity type " + entityId));
 
-        return new EntityComponent<>(entityType, null);
+        return new EntityComponent<>(Sizing.content(), entityType, null);
     }
 
     protected static class RenderablePlayerEntity extends ClientPlayerEntity {

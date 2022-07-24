@@ -3,11 +3,9 @@ package io.wispforest.uwu.client;
 import com.mojang.authlib.GameProfile;
 import io.wispforest.owo.ui.component.BoundingBoxComponent;
 import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.component.DiscreteSliderComponent;
 import io.wispforest.owo.ui.component.EntityComponent;
-import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.Containers;
-import io.wispforest.owo.ui.container.ScrollContainer;
+import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.*;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
@@ -115,11 +113,10 @@ public class ComponentTestScreen extends Screen {
                 .child(Components.button(Text.of("weeeee"), 0, 0, button -> {
                     weeAnimation.reverse();
                 }).sizing(Sizing.content()).margins(Insets.vertical(5)))
-                .child(new DiscreteSliderComponent(0, 1)
+                .child(Components.discreteSlider(Sizing.fill(10), 0, 1)
                         .snap(true)
                         .decimalPlaces(1)
-                        .message(value -> Text.translatable("text.ui.test_slider", value))
-                        .horizontalSizing(Sizing.fill(10)))
+                        .message(value -> Text.translatable("text.ui.test_slider", value)))
                 .padding(Insets.of(5))
                 .horizontalAlignment(HorizontalAlignment.CENTER)
                 .surface(Surface.DARK_PANEL)

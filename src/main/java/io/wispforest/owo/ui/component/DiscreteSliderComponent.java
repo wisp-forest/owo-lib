@@ -1,5 +1,6 @@
 package io.wispforest.owo.ui.component;
 
+import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import net.minecraft.text.Text;
@@ -16,7 +17,9 @@ public class DiscreteSliderComponent extends SliderComponent {
     protected int decimalPlaces = 0;
     protected boolean snap = false;
 
-    public DiscreteSliderComponent(double min, double max) {
+    protected DiscreteSliderComponent(Sizing horizontalSizing, double min, double max) {
+        super(horizontalSizing);
+
         this.min = min;
         this.max = max;
 
@@ -79,6 +82,7 @@ public class DiscreteSliderComponent extends SliderComponent {
     public static DiscreteSliderComponent parse(Element element) {
         UIParsing.expectAttributes(element, "min", "max");
         return new DiscreteSliderComponent(
+                Sizing.content(),
                 UIParsing.parseDouble(element.getAttributeNode("min")),
                 UIParsing.parseDouble(element.getAttributeNode("max"))
         );

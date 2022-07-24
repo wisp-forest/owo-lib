@@ -18,13 +18,13 @@ public class SliderComponent extends SliderWidget {
     protected final Observable<Double> listeners;
     protected Function<String, Text> messageProvider;
 
-    protected SliderComponent() {
+    protected SliderComponent(Sizing horizontalSizing) {
         super(0, 0, 0, 0, Text.empty(), 0);
 
         this.messageProvider = value -> Text.empty();
         this.listeners = Observable.of(this.value);
 
-        this.verticalSizing(Sizing.fixed(20));
+        this.sizing(horizontalSizing, Sizing.fixed(20));
     }
 
     public SliderComponent value(double value) {

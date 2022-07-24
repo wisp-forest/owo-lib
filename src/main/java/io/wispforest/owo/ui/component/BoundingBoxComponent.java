@@ -1,8 +1,8 @@
 package io.wispforest.owo.ui.component;
 
 import io.wispforest.owo.ui.base.BaseComponent;
-import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.core.Sizing;
+import io.wispforest.owo.ui.util.Drawer;
 import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.VisibleForTesting;
 
@@ -10,8 +10,7 @@ import org.jetbrains.annotations.VisibleForTesting;
 public class BoundingBoxComponent extends BaseComponent {
 
     public BoundingBoxComponent(Sizing horizontalSizing, Sizing verticalSizing) {
-        this.horizontalSizing.set(horizontalSizing);
-        this.verticalSizing.set(verticalSizing);
+        this.sizing(horizontalSizing, verticalSizing);
     }
 
     @Override

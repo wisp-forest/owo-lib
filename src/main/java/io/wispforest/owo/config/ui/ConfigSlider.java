@@ -1,6 +1,7 @@
 package io.wispforest.owo.config.ui;
 
 import io.wispforest.owo.ui.component.DiscreteSliderComponent;
+import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.util.NumberReflection;
 
 public class ConfigSlider extends DiscreteSliderComponent implements OptionComponent {
@@ -8,7 +9,7 @@ public class ConfigSlider extends DiscreteSliderComponent implements OptionCompo
     protected Class<? extends Number> valueType;
 
     public ConfigSlider() {
-        super(0, 1);
+        super(Sizing.content(), 0, 1);
     }
 
     public ConfigSlider valueType(Class<? extends Number> valueType) {

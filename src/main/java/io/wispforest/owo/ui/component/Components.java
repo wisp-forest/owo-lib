@@ -1,7 +1,7 @@
 package io.wispforest.owo.ui.component;
 
-import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.Sizing;
 import net.minecraft.client.MinecraftClient;
@@ -23,37 +23,23 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-// TODO enforce sizing in all component constructors that need it
-
 /**
  * Utility methods for creating UI components
  */
 public class Components {
 
-    public static <E extends Entity> EntityComponent<E> entity(Sizing sizing, EntityType<E> type, @Nullable NbtCompound nbt) {
-        return createWithSizing(() -> new EntityComponent<>(type, nbt), sizing, sizing);
-    }
+    // -----------------------
+    // Wrapped Vanilla Widgets
+    // -----------------------
 
-    public static <E extends Entity> EntityComponent<E> entity(Sizing sizing, E entity) {
-        return createWithSizing(() -> new EntityComponent<>(entity), sizing, sizing);
-    }
-
-    public static ItemComponent item(ItemStack item) {
-        return new ItemComponent(item);
+    public static ButtonWidget button(Text message, int width, int height, ButtonWidget.PressAction onPress) {
+        return new ButtonWidget(0, 0, width, height, message, onPress);
     }
 
     public static ButtonWidget button(Text message, ButtonWidget.PressAction onPress) {
         final var button = new ButtonWidget(0, 0, 0, 0, message, onPress);
         button.sizing(Sizing.content(1), Sizing.content());
         return button;
-    }
-
-    public static ButtonWidget button(Text message, int width, int height, ButtonWidget.PressAction onPress) {
-        return new ButtonWidget(0, 0, width, height, message, onPress);
-    }
-
-    public static LabelComponent label(Text text) {
-        return new LabelComponent(text);
     }
 
     public static TextFieldWidget textBox(Sizing horizontalSizing) {
@@ -71,14 +57,32 @@ public class Components {
         return textBox;
     }
 
+    // ------------------
+    // Default Components
+    // ------------------
+
+    public static <E extends Entity> EntityComponent<E> entity(Sizing sizing, EntityType<E> type, @Nullable NbtCompound nbt) {
+        return new EntityComponent<>(sizing, type, nbt);
+    }
+
+    public static <E extends Entity> EntityComponent<E> entity(Sizing sizing, E entity) {
+        return new EntityComponent<>(sizing, entity);
+    }
+
+    public static ItemComponent item(ItemStack item) {
+        return new ItemComponent(item);
+    }
+
+    public static LabelComponent label(Text text) {
+        return new LabelComponent(text);
+    }
+
     public static SliderComponent slider(Sizing horizontalSizing) {
-        return createWithSizing(SliderComponent::new, horizontalSizing, Sizing.fixed(20));
+        return new SliderComponent(horizontalSizing);
     }
 
     public static DiscreteSliderComponent discreteSlider(Sizing horizontalSizing, double min, double max) {
-        var slider = new DiscreteSliderComponent(min, max);
-        slider.horizontalSizing(horizontalSizing);
-        return slider;
+        return new DiscreteSliderComponent(horizontalSizing, min, max);
     }
 
     public static SpriteComponent sprite(SpriteIdentifier spriteId) {
@@ -100,6 +104,10 @@ public class Components {
     public static DropdownComponent dropdown(Sizing horizontalSizing) {
         return new DropdownComponent(horizontalSizing);
     }
+
+    // -------
+    // Utility
+    // -------
 
     public static <T, C extends Component> FlowLayout list(List<T> data, Consumer<FlowLayout> layoutConfigurator, Function<T, C> componentMaker, boolean vertical) {
         var layout = vertical ? Containers.verticalFlow(Sizing.content(), Sizing.content()) : Containers.horizontalFlow(Sizing.content(), Sizing.content());
