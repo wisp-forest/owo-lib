@@ -41,8 +41,9 @@ public class DiscreteSliderComponent extends SliderComponent {
         return new BigDecimal(this.min + this.value * (this.max - this.min)).setScale(this.decimalPlaces, RoundingMode.HALF_UP).doubleValue();
     }
 
-    public void setFromValue(double value) {
-        this.value((value - min) / (max - min));
+    public DiscreteSliderComponent setFromDiscreteValue(double discreteValue) {
+        this.value((discreteValue - min) / (max - min));
+        return this;
     }
 
     public DiscreteSliderComponent decimalPlaces(int decimalPlaces) {
@@ -76,7 +77,7 @@ public class DiscreteSliderComponent extends SliderComponent {
         super.parseProperties(model, element, children);
 
         UIParsing.apply(children, "decimal-places", UIParsing::parseUnsignedInt, this::decimalPlaces);
-        UIParsing.apply(children, "value", UIParsing::parseDouble, this::setFromValue);
+        UIParsing.apply(children, "value", UIParsing::parseDouble, this::setFromDiscreteValue);
     }
 
     public static DiscreteSliderComponent parse(Element element) {

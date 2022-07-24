@@ -43,12 +43,12 @@ public class OptionComponents {
         double min = constraint.min(), max = constraint.max();
 
         var valueSlider = optionComponent.childById(ConfigSlider.class, "value-slider");
-        valueSlider.min(min).max(max).decimalPlaces(withDecimals ? 2 : 0).snap(!withDecimals).setFromValue(value.doubleValue());
+        valueSlider.min(min).max(max).decimalPlaces(withDecimals ? 2 : 0).snap(!withDecimals).setFromDiscreteValue(value.doubleValue());
 
         var resetButton = optionComponent.childById(ButtonWidget.class, "reset-button");
         resetButton.active = (withDecimals ? value.doubleValue() : Math.round(value.doubleValue())) != option.defaultValue().doubleValue();
         resetButton.onPress(button -> {
-            valueSlider.setFromValue(option.defaultValue().doubleValue());
+            valueSlider.setFromDiscreteValue(option.defaultValue().doubleValue());
             button.active = false;
         });
 
