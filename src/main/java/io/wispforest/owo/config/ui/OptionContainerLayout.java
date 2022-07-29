@@ -17,6 +17,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.List;
 
+// TODO move this to UI
 public class OptionContainerLayout extends VerticalFlowLayout {
 
     public static final Surface SURFACE = (matrices, component) -> {
