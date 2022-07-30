@@ -35,6 +35,18 @@ public interface ParentComponent extends Component {
     void queue(Runnable task);
 
     /**
+     * Set how this component should arrange its children
+     *
+     * @param horizontalAlignment The horizontal alignment method to use
+     * @param verticalAlignment   The vertical alignment method to use
+     */
+    default ParentComponent alignment(HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignment) {
+        this.horizontalAlignment(horizontalAlignment);
+        this.verticalAlignment(verticalAlignment);
+        return this;
+    }
+
+    /**
      * Set how this component should vertically arrange its children
      *
      * @param alignment The new alignment method to use

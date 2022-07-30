@@ -1,4 +1,4 @@
-package io.wispforest.owo.config.ui;
+package io.wispforest.owo.config.ui.component;
 
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;

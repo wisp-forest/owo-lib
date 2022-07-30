@@ -2,6 +2,9 @@ package io.wispforest.owo.config.ui;
 
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.config.annotation.RangeConstraint;
+import io.wispforest.owo.config.ui.component.ConfigSlider;
+import io.wispforest.owo.config.ui.component.ConfigTextBox;
+import io.wispforest.owo.config.ui.component.ConfigToggleButton;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.parsing.UIModel;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -12,7 +15,7 @@ import java.util.function.Consumer;
 public class OptionComponents {
 
     @SuppressWarnings({"ConstantConditions"})
-    public static OptionComponentFactory.FactoryResult createTextBox(UIModel model, Option<?> option, Consumer<ConfigTextBox> processor) {
+    public static OptionComponentFactory.Result createTextBox(UIModel model, Option<?> option, Consumer<ConfigTextBox> processor) {
         var optionComponent = model.expandTemplate(FlowLayout.class,
                 "text-box-config-option",
                 packParameters("text.config." + option.configName() + ".option." + option.key().asString(), option.value().toString())
@@ -29,10 +32,10 @@ public class OptionComponents {
         valueBox.setChangedListener(s -> resetButton.active = !s.equals(option.defaultValue().toString()));
         processor.accept(valueBox);
 
-        return new OptionComponentFactory.FactoryResult(optionComponent, valueBox);
+        return new OptionComponentFactory.Result(optionComponent, valueBox);
     }
 
-    public static OptionComponentFactory.FactoryResult createSlider(UIModel model, Option<? extends Number> option, boolean withDecimals) {
+    public static OptionComponentFactory.Result createSlider(UIModel model, Option<? extends Number> option, boolean withDecimals) {
         var value = option.value();
         var optionComponent = model.expandTemplate(FlowLayout.class,
                 "range-config-option",
@@ -57,11 +60,11 @@ public class OptionComponents {
             resetButton.active = (withDecimals ? newValue : Math.round(newValue)) != option.defaultValue().doubleValue();
         });
 
-        return new OptionComponentFactory.FactoryResult(optionComponent, valueSlider);
+        return new OptionComponentFactory.Result(optionComponent, valueSlider);
     }
 
     @SuppressWarnings({"ConstantConditions"})
-    public static OptionComponentFactory.FactoryResult createToggleButton(UIModel model, Option<Boolean> option) {
+    public static OptionComponentFactory.Result createToggleButton(UIModel model, Option<Boolean> option) {
         var optionComponent = model.expandTemplate(FlowLayout.class,
                 "boolean-toggle-config-option",
                 packParameters("text.config." + option.configName() + ".option." + option.key().asString(), option.value().toString())
@@ -79,7 +82,7 @@ public class OptionComponents {
         toggleButton.enabled(option.value());
         toggleButton.onPress(button -> resetButton.active = toggleButton.parsedValue() != option.defaultValue());
 
-        return new OptionComponentFactory.FactoryResult(optionComponent, toggleButton);
+        return new OptionComponentFactory.Result(optionComponent, toggleButton);
     }
 
     public static Map<String, String> packParameters(String name, String value) {

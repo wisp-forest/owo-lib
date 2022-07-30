@@ -33,6 +33,7 @@
     "ui.ButtonWidgetMixin",
     "ui.ClickableWidgetAccessor",
     "ui.ClickableWidgetMixin",
+    "ui.MinecraftClientMixin",
     "ui.SliderWidgetMixin",
     "ui.TextFieldWidgetMixin"
   ],

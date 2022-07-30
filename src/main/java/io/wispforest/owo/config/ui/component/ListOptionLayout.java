@@ -1,4 +1,4 @@
-package io.wispforest.owo.config.ui;
+package io.wispforest.owo.config.ui.component;
 
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.config.annotation.Expanded;
@@ -25,7 +25,7 @@ public class ListOptionLayout<T> extends OptionContainerLayout implements Option
 
     //TODO move most of this to xml
     @SuppressWarnings("unchecked")
-    protected ListOptionLayout(Option<List<T>> option) {
+    public ListOptionLayout(Option<List<T>> option) {
         super(
                 Text.translatable("text.config." + option.configName() + ".option." + option.key().asString()),
                 option.backingField().field().isAnnotationPresent(Expanded.class)

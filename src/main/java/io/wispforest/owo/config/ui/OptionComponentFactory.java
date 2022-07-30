@@ -2,11 +2,11 @@ package io.wispforest.owo.config.ui;
 
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.config.annotation.RangeConstraint;
+import io.wispforest.owo.config.ui.component.ListOptionLayout;
+import io.wispforest.owo.config.ui.component.OptionComponent;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.util.NumberReflection;
-import io.wispforest.owo.util.ReflectionUtils;
-import net.minecraft.text.Text;
 
 import java.util.List;
 
@@ -38,10 +38,10 @@ public interface OptionComponentFactory<T> {
     @SuppressWarnings({"unchecked", "rawtypes"})
     OptionComponentFactory<List<?>> LIST = (model, option) -> {
         var layout = new ListOptionLayout(option);
-        return new FactoryResult(layout, layout);
+        return new Result(layout, layout);
     };
 
-    FactoryResult make(UIModel model, Option<T> option);
+    Result make(UIModel model, Option<T> option);
 
-    record FactoryResult(Component baseComponent, OptionComponent optionContainer) {}
+    record Result(Component baseComponent, OptionComponent optionContainer) {}
 }

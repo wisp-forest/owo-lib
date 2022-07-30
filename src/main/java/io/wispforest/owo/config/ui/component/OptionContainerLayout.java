@@ -1,4 +1,4 @@
-package io.wispforest.owo.config.ui;
+package io.wispforest.owo.config.ui.component;
 
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.FlowLayout;
@@ -37,7 +37,7 @@ public class OptionContainerLayout extends VerticalFlowLayout {
     protected final FlowLayout titleLayout;
     protected final Text title;
 
-    protected OptionContainerLayout(Text title, boolean expanded) {
+    public OptionContainerLayout(Text title, boolean expanded) {
         super(Sizing.fill(100), Sizing.content());
         this.surface(SURFACE);
         this.padding(Insets.left(15));

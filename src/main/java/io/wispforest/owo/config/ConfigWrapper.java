@@ -217,7 +217,7 @@ public abstract class ConfigWrapper<C> {
             final var observable = Observable.of(defaultValue);
             if (hookSave) observable.observe(o -> this.save());
 
-            this.options.put(key, new Option<>(this.name, key, defaultValue, observable, constraint, boundField));
+            this.options.put(key, new Option<>(this.name, key, defaultValue, observable, boundField, constraint));
         }
     }
 
