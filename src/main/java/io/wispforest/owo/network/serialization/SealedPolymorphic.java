@@ -1,4 +1,4 @@
-package io.wispforest.owo.network.annotations;
+package io.wispforest.owo.network.serialization;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
