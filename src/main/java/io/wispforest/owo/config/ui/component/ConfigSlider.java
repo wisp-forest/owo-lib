@@ -3,7 +3,9 @@ package io.wispforest.owo.config.ui.component;
 import io.wispforest.owo.ui.component.DiscreteSliderComponent;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.util.NumberReflection;
+import org.jetbrains.annotations.ApiStatus;
 
+@ApiStatus.Internal
 public class ConfigSlider extends DiscreteSliderComponent implements OptionComponent {
 
     protected Class<? extends Number> valueType;

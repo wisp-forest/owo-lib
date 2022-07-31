@@ -35,6 +35,8 @@ public interface OptionComponentFactory<T> {
 
     OptionComponentFactory<Boolean> BOOLEAN = OptionComponents::createToggleButton;
 
+    OptionComponentFactory<? extends Enum<?>> ENUM = OptionComponents::createEnumButton;
+
     @SuppressWarnings({"unchecked", "rawtypes"})
     OptionComponentFactory<List<?>> LIST = (model, option) -> {
         var layout = new ListOptionContainer(option);

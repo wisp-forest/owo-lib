@@ -12,10 +12,12 @@ import io.wispforest.owo.util.ReflectionUtils;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@ApiStatus.Internal
 public class ListOptionContainer<T> extends CollapsibleContainer implements OptionComponent {
 
     protected final Option<List<T>> backingOption;
@@ -24,7 +26,6 @@ public class ListOptionContainer<T> extends CollapsibleContainer implements Opti
     protected final List<Component> optionContainers = new ArrayList<>();
     protected final ButtonWidget resetButton;
 
-    //TODO move most of this to xml
     @SuppressWarnings("unchecked")
     public ListOptionContainer(Option<List<T>> option) {
         super(
@@ -43,18 +44,18 @@ public class ListOptionContainer<T> extends CollapsibleContainer implements Opti
         this.titleLayout.verticalSizing(Sizing.fixed(30));
         this.titleLayout.verticalAlignment(VerticalAlignment.CENTER);
 
-        var addLabel = Components.label(Text.literal("Add entry").formatted(Formatting.GRAY));
-        addLabel.cursorStyle(CursorStyle.HAND);
-        addLabel.mouseEnter().subscribe(() -> addLabel.text(addLabel.text().copy().styled(style -> style.withColor(Formatting.YELLOW))));
-        addLabel.mouseLeave().subscribe(() -> addLabel.text(addLabel.text().copy().styled(style -> style.withColor(Formatting.GRAY))));
-        addLabel.mouseDown().subscribe((mouseX, mouseY, button) -> {
+        var addButton = Components.label(Text.literal("Add entry").formatted(Formatting.GRAY));
+        addButton.cursorStyle(CursorStyle.HAND);
+        addButton.mouseEnter().subscribe(() -> addButton.text(addButton.text().copy().styled(style -> style.withColor(Formatting.YELLOW))));
+        addButton.mouseLeave().subscribe(() -> addButton.text(addButton.text().copy().styled(style -> style.withColor(Formatting.GRAY))));
+        addButton.mouseDown().subscribe((mouseX, mouseY, button) -> {
             this.backingList.add((T) "");
             this.refreshOptions();
             UISounds.playInteractionSound();
 
             return true;
         });
-        this.titleLayout.child(addLabel.margins(Insets.of(5)));
+        this.titleLayout.child(addButton.margins(Insets.of(5)));
 
         this.resetButton = Components.button(Text.literal("⇄"), button -> {
             this.backingList.clear();
@@ -82,14 +83,14 @@ public class ListOptionContainer<T> extends CollapsibleContainer implements Opti
             var container = Containers.horizontalFlow(Sizing.fill(100), Sizing.content());
             container.verticalAlignment(VerticalAlignment.CENTER);
 
-            int idx = i;
+            int optionIndex = i;
             final var label = Components.label(Text.literal("- ").formatted(Formatting.GRAY));
             label.margins(Insets.left(10));
             label.cursorStyle(CursorStyle.HAND);
             label.mouseEnter().subscribe(() -> label.text(Text.literal("x ").formatted(Formatting.GRAY)));
             label.mouseLeave().subscribe(() -> label.text(Text.literal("- ").formatted(Formatting.GRAY)));
             label.mouseDown().subscribe((mouseX, mouseY, button) -> {
-                this.backingList.remove(idx);
+                this.backingList.remove(optionIndex);
                 this.refreshResetButton();
                 this.refreshOptions();
                 UISounds.playInteractionSound();
@@ -99,7 +100,6 @@ public class ListOptionContainer<T> extends CollapsibleContainer implements Opti
             container.child(label);
 
             final var box = new ConfigTextBox();
-            box.setMaxLength(Integer.MAX_VALUE);
             box.setText(this.backingList.get(i).toString());
             box.setCursorToStart();
             box.setDrawsBackground(false);
@@ -110,7 +110,7 @@ public class ListOptionContainer<T> extends CollapsibleContainer implements Opti
             box.setChangedListener(s -> {
                 if (!box.isValid()) return;
 
-                this.backingList.set(idx, (T) box.parsedValue());
+                this.backingList.set(optionIndex, (T) box.parsedValue());
                 this.refreshResetButton();
             });
 
@@ -132,6 +132,11 @@ public class ListOptionContainer<T> extends CollapsibleContainer implements Opti
 
     protected void refreshResetButton() {
         this.resetButton.active = !this.backingList.equals(this.backingOption.defaultValue());
+    }
+
+    @Override
+    public boolean shouldDrawTooltip(double mouseX, double mouseY) {
+        return ((mouseY - this.y) <= this.titleLayout.height()) && super.shouldDrawTooltip(mouseX, mouseY);
     }
 
     @Override

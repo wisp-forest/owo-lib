@@ -40,4 +40,10 @@ public class UwuConfigModel {
 
     @ExcludeFromScreen
     public String noSeeingThis = "yep, never";
+
+    public WowValues broTheresAnEnum = WowValues.FIRST;
+
+    public enum WowValues {
+        FIRST, SECOND, THIRD, FOURTH
+    }
 }

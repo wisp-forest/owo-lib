@@ -3,6 +3,7 @@ package io.wispforest.owo.config;
 import io.wispforest.owo.config.annotation.Config;
 import io.wispforest.owo.config.annotation.Hook;
 import io.wispforest.owo.config.annotation.Nest;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.processing.*;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
 
+@ApiStatus.Internal
 @SupportedAnnotationTypes("io.wispforest.owo.config.annotation.Config")
 @SupportedSourceVersion(SourceVersion.RELEASE_17)
 public class ConfigAP extends AbstractProcessor {

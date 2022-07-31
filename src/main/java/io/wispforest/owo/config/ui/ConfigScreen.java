@@ -5,10 +5,7 @@ import io.wispforest.owo.config.ConfigWrapper;
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.config.annotation.ExcludeFromScreen;
 import io.wispforest.owo.config.annotation.Expanded;
-import io.wispforest.owo.config.ui.component.ConfigSlider;
-import io.wispforest.owo.config.ui.component.ConfigTextBox;
-import io.wispforest.owo.config.ui.component.ConfigToggleButton;
-import io.wispforest.owo.config.ui.component.OptionComponent;
+import io.wispforest.owo.config.ui.component.*;
 import io.wispforest.owo.ui.base.BaseUIModelScreen;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.Containers;
@@ -104,7 +101,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                 containers.get(parentKey.parent()).child(container);
             }
 
-            var tooltipTranslationKey = "text.config." + this.config.name() + ".option." + option.key().asString() + ".tooltip";
+            var tooltipTranslationKey = option.translationKey() + ".tooltip";
             if (I18n.hasTranslation(tooltipTranslationKey)) {
                 var tooltipText = this.client.textRenderer.wrapLines(Text.translatable(tooltipTranslationKey), Integer.MAX_VALUE);
                 result.baseComponent().tooltip(tooltipText.stream().map(TooltipComponent::of).toList());
@@ -149,9 +146,11 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
         DEFAULT_FACTORIES.put(option -> option.clazz() == String.class, OptionComponentFactory.STRING);
         DEFAULT_FACTORIES.put(option -> option.clazz() == Boolean.class || option.clazz() == boolean.class, OptionComponentFactory.BOOLEAN);
         DEFAULT_FACTORIES.put(option -> isStringOrNumberList(option.backingField().field()), OptionComponentFactory.LIST);
+        DEFAULT_FACTORIES.put(option -> option.clazz().isEnum(), OptionComponentFactory.ENUM);
 
         UIParsing.registerFactory("config-slider", element -> new ConfigSlider());
         UIParsing.registerFactory("config-toggle-button", element -> new ConfigToggleButton());
+        UIParsing.registerFactory("config-enum-button", element -> new ConfigEnumButton());
         UIParsing.registerFactory("config-text-box", element -> new ConfigTextBox());
     }
 

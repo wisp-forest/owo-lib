@@ -43,7 +43,7 @@ public class UwuClient implements ClientModInitializer {
                         .padding(Insets.of(5))
                         .surface(Surface.PANEL)
                         .margins(Insets.of(5))
-                        .positioning(Positioning.relative(0, 50));
+                        .positioning(Positioning.relative(100, 25));
 
         Hud.add(hudComponentId, hudComponent);
 

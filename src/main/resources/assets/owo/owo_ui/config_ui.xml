@@ -143,6 +143,14 @@
             </template>
         </boolean-toggle-config-option>
 
+        <enum-config-option>
+            <template name="config-option">
+                <child id="value-container">
+                    <config-enum-button id="enum-button"/>
+                </child>
+            </template>
+        </enum-config-option>
+
         <range-config-option>
             <template name="config-option">
                 <child id="value-container">

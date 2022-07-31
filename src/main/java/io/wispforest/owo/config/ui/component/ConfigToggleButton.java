@@ -3,7 +3,9 @@ package io.wispforest.owo.config.ui.component;
 import io.wispforest.owo.ui.core.Sizing;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.ApiStatus;
 
+@ApiStatus.Internal
 public class ConfigToggleButton extends ButtonWidget implements OptionComponent {
 
     protected static final Text ENABLED_MESSAGE = Text.translatable("text.config.boolean_toggle.enabled");

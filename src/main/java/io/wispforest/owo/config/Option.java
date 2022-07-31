@@ -14,7 +14,7 @@ public record Option<T>(
         Key key,
         T defaultValue,
         Observable<T> events,
-        BoundField backingField,
+        BoundField<T> backingField,
         @Nullable ConfigWrapper.Constraint constraint
 ) {
 
@@ -34,7 +34,6 @@ public record Option<T>(
         return (Class<T>) this.backingField.field().getType();
     }
 
-    @SuppressWarnings("unchecked")
     public void synchronizeWithBackingField() {
         final var fieldValue = (T) this.backingField.getValue();
         if (verifyConstraint(fieldValue)) {
@@ -56,6 +55,10 @@ public record Option<T>(
         }
 
         return matched;
+    }
+
+    public String translationKey() {
+        return "text.config." + this.configName + ".option." + this.key.asString();
     }
 
     public record Key(String[] path) {
@@ -124,16 +127,17 @@ public record Option<T>(
         }
     }
 
-    public record BoundField(Object owner, Field field) {
-        public Object getValue() {
+    @SuppressWarnings("unchecked")
+    public record BoundField<T>(Object owner, Field field) {
+        public T getValue() {
             try {
-                return this.field.get(this.owner);
+                return (T) this.field.get(this.owner);
             } catch (IllegalAccessException e) {
                 throw new RuntimeException("Could not access config option field " + field.getName(), e);
             }
         }
 
-        public void setValue(Object value) {
+        public void setValue(T value) {
             try {
                 this.field.set(this.owner, value);
             } catch (IllegalAccessException e) {

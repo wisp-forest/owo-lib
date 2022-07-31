@@ -7,6 +7,7 @@ import io.wispforest.owo.util.NumberReflection;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.ApiStatus;
 import org.w3c.dom.Element;
 
 import java.util.Map;
@@ -14,6 +15,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+@ApiStatus.Internal
 @SuppressWarnings("UnusedReturnValue")
 public class ConfigTextBox extends TextFieldWidget implements OptionComponent {
 
@@ -25,6 +27,8 @@ public class ConfigTextBox extends TextFieldWidget implements OptionComponent {
     public ConfigTextBox() {
         super(MinecraftClient.getInstance().textRenderer, 0, 0, 0, 0, Text.empty());
         this.verticalSizing(Sizing.fixed(20));
+        this.setMaxLength(Integer.MAX_VALUE);
+
         super.setChangedListener(s -> {
             this.setEditableColor(this.applyPredicate.test(s) ? this.validColor : this.invalidColor);
             this.externalListener.accept(s);
