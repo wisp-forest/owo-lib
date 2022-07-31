@@ -81,7 +81,7 @@ public class OwoUIAdapter<T extends ParentComponent> implements Element, Drawabl
         this.rootComponent.draw(matrices, mouseX, mouseY, partialTicks, delta);
         GlStateManager._disableScissorTest();
 
-        if (this.rootComponent.tooltip() != null) Drawer.drawTooltip(matrices, mouseX, mouseY, this.rootComponent.tooltip());
+        this.rootComponent.drawTooltip(matrices, mouseX, mouseY, partialTicks, delta);
 
         final var hovered = this.rootComponent.childAt(mouseX, mouseY);
         if (!disposed && hovered != null && hovered.cursorStyle() != this.lastCursorStyle) {

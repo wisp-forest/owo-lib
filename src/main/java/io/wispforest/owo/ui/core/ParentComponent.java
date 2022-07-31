@@ -3,6 +3,7 @@ package io.wispforest.owo.ui.core;
 import io.wispforest.owo.ui.parsing.IncompatibleUIModelException;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
+import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 
@@ -118,6 +119,12 @@ public interface ParentComponent extends Component {
      * Remove the given child from this component
      */
     ParentComponent removeChild(Component child);
+
+    @Override
+    default void drawTooltip(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+        Component.super.drawTooltip(matrices, mouseX, mouseY, partialTicks, delta);
+        for (var child : this.children()) child.drawTooltip(matrices, mouseX, mouseY, partialTicks, delta);
+    }
 
     @Override
     default boolean onMouseDown(double mouseX, double mouseY, int button) {

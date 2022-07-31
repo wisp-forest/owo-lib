@@ -3,6 +3,7 @@ package io.wispforest.owo.ui.hud;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.OwoUIAdapter;
+import io.wispforest.owo.ui.event.WindowResizeCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.Identifier;
@@ -67,11 +68,6 @@ public class Hud {
         return activeComponents.containsKey(id);
     }
 
-    public static void onResized() {
-        if (adapter == null) return;
-        initializeAdapter();
-    }
-
     private static void initializeAdapter() {
         var window = MinecraftClient.getInstance().getWindow();
         adapter = OwoUIAdapter.createWithoutScreen(
@@ -83,6 +79,11 @@ public class Hud {
     }
 
     static {
+        WindowResizeCallback.EVENT.register((client, window) -> {
+            if (adapter == null) return;
+            initializeAdapter();
+        });
+
         HudRenderCallback.EVENT.register((matrixStack, tickDelta) -> {
             if (!pendingComponents.isEmpty()) {
                 if (adapter == null) initializeAdapter();

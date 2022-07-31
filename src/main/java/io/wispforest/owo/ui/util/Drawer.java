@@ -5,6 +5,7 @@ import io.wispforest.owo.mixin.ui.ScreenInvoker;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.ui.core.ParentComponent;
+import io.wispforest.owo.ui.event.WindowResizeCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
@@ -196,10 +197,23 @@ public class Drawer extends DrawableHelper {
         public static UtilityScreen get() {
             if (INSTANCE == null) {
                 INSTANCE = new UtilityScreen();
-                INSTANCE.init(MinecraftClient.getInstance(), Integer.MAX_VALUE, Integer.MAX_VALUE);
+
+                final var client = MinecraftClient.getInstance();
+                INSTANCE.init(
+                        client,
+                        client.getWindow().getScaledWidth(),
+                        client.getWindow().getScaledHeight()
+                );
             }
 
             return INSTANCE;
+        }
+
+        static {
+            WindowResizeCallback.EVENT.register((client, window) -> {
+                if (INSTANCE == null) return;
+                INSTANCE.init(client, window.getScaledWidth(), window.getScaledHeight());
+            });
         }
     }
 

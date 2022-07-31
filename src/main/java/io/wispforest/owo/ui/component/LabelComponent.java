@@ -6,7 +6,6 @@ import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.Drawer;
-import io.wispforest.owo.ui.util.ScissorStack;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.util.math.MatrixStack;
@@ -133,10 +132,14 @@ public class LabelComponent extends BaseComponent {
                 this.textRenderer.draw(matrices, this.wrappedText.get(i), x, y + i * 11, this.color);
             }
         }
+    }
 
-        if (this.isInBoundingBox(mouseX, mouseY)) {
-            ScissorStack.drawUnclipped(() -> Drawer.utilityScreen().renderTextHoverEffect(matrices, this.text.getStyle(), mouseX, mouseY));
-        }
+    @Override
+    public void drawTooltip(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+        super.drawTooltip(matrices, mouseX, mouseY, partialTicks, delta);
+
+        if (!this.isInBoundingBox(mouseX, mouseY)) return;
+        Drawer.utilityScreen().renderTextHoverEffect(matrices, this.text.getStyle(), mouseX, mouseY);
     }
 
     @Override

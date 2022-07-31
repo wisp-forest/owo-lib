@@ -3,6 +3,7 @@ package io.wispforest.owo.ui.core;
 import io.wispforest.owo.ui.event.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
+import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.FocusHandler;
 import io.wispforest.owo.util.EventSource;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
@@ -26,6 +27,34 @@ public interface Component extends PositionedRectangle {
      * @param delta        The duration of the last frame, in partial ticks
      */
     void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta);
+
+    /**
+     * Draw the current tooltip of this component onto the screen
+     *
+     * @param matrices     The transformation stack
+     * @param mouseX       The mouse pointer's x-coordinate
+     * @param mouseY       The mouse pointer's y-coordinate
+     * @param partialTicks The fraction of the current tick that has passed
+     * @param delta        The duration of the last frame, in partial ticks
+     */
+    default void drawTooltip(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+        if (!this.shouldDrawTooltip(mouseX, mouseY)) return;
+        Drawer.drawTooltip(matrices, mouseX, mouseY, this.tooltip());
+    }
+
+    /**
+     * Draw something which clearly indicates
+     * that this component is currently focused
+     *
+     * @param matrices     The transformation stack
+     * @param mouseX       The mouse pointer's x-coordinate
+     * @param mouseY       The mouse pointer's y-coordinate
+     * @param partialTicks The fraction of the current tick that has passed
+     * @param delta        The duration of the last frame, in partial ticks
+     */
+    default void drawFocusHighlight(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+        Drawer.drawRectOutline(matrices, this.x(), this.y(), this.width(), this.height(), 0xFFFFFFFF);
+    }
 
     /**
      * @return The parent of this component
@@ -139,6 +168,18 @@ public interface Component extends PositionedRectangle {
      */
     @Contract(pure = true)
     @Nullable List<TooltipComponent> tooltip();
+
+    /**
+     * Determine if this component should currently
+     * render its tooltip
+     *
+     * @param mouseX The mouse cursor's x-coordinate
+     * @param mouseY The mouse cursor's y-coordinate
+     * @return {@code true} if the tooltip should be rendered
+     */
+    default boolean shouldDrawTooltip(double mouseX, double mouseY) {
+        return this.tooltip() != null && this.isInBoundingBox(mouseX, mouseY);
+    }
 
     /**
      * Inflate this component into some amount of available space
