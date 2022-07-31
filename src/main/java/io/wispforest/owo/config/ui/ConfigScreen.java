@@ -4,11 +4,16 @@ import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.ConfigWrapper;
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.config.annotation.Expanded;
-import io.wispforest.owo.config.ui.component.*;
+import io.wispforest.owo.config.ui.component.ConfigSlider;
+import io.wispforest.owo.config.ui.component.ConfigTextBox;
+import io.wispforest.owo.config.ui.component.ConfigToggleButton;
+import io.wispforest.owo.config.ui.component.OptionComponent;
 import io.wispforest.owo.ui.base.BaseUIModelScreen;
 import io.wispforest.owo.ui.component.LabelComponent;
+import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.VerticalFlowLayout;
+import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.core.Surface;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.util.NumberReflection;
@@ -37,7 +42,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
 
     public ConfigScreen(ConfigWrapper<?> config, @Nullable Screen parent) {
         super(FlowLayout.class, DataSource.asset(new Identifier("owo", "config_ui")));
-//        super(FlowLayout.class, DataSource.file("config_ui.xml"));
+//      super(FlowLayout.class, DataSource.file("config_ui.xml"));
         this.parent = parent;
         this.config = config;
     }
@@ -80,7 +85,11 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
             var expanded = parentKey != Option.Key.ROOT && this.config.fieldForKey(parentKey).isAnnotationPresent(Expanded.class);
             var container = containers.getOrDefault(
                     parentKey,
-                    new OptionContainerLayout(Text.translatable("text.config." + this.config.name() + ".category." + parentKey.asString()), expanded)
+                    Containers.collapsible(
+                            Sizing.fill(100), Sizing.content(),
+                            Text.translatable("text.config." + this.config.name() + ".category." + parentKey.asString()),
+                            expanded
+                    )
             );
 
             if (!containers.containsKey(parentKey)) {

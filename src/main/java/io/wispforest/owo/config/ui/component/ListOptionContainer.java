@@ -3,6 +3,7 @@ package io.wispforest.owo.config.ui.component;
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.config.annotation.Expanded;
 import io.wispforest.owo.ui.component.Components;
+import io.wispforest.owo.ui.container.CollapsibleContainer;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.UISounds;
@@ -15,7 +16,7 @@ import net.minecraft.util.Formatting;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ListOptionLayout<T> extends OptionContainerLayout implements OptionComponent {
+public class ListOptionContainer<T> extends CollapsibleContainer implements OptionComponent {
 
     protected final Option<List<T>> backingOption;
     protected final List<T> backingList;
@@ -25,8 +26,9 @@ public class ListOptionLayout<T> extends OptionContainerLayout implements Option
 
     //TODO move most of this to xml
     @SuppressWarnings("unchecked")
-    public ListOptionLayout(Option<List<T>> option) {
+    public ListOptionContainer(Option<List<T>> option) {
         super(
+                Sizing.fill(100), Sizing.content(),
                 Text.translatable("text.config." + option.configName() + ".option." + option.key().asString()),
                 option.backingField().field().isAnnotationPresent(Expanded.class)
         );
@@ -71,7 +73,7 @@ public class ListOptionLayout<T> extends OptionContainerLayout implements Option
 
     @SuppressWarnings({"unchecked", "ConstantConditions"})
     protected void refreshOptions() {
-        this.collapsingChildren.removeAll(this.optionContainers);
+        this.collapsibleChildren.removeAll(this.optionContainers);
         this.children.removeAll(this.optionContainers);
         this.optionContainers.clear();
 

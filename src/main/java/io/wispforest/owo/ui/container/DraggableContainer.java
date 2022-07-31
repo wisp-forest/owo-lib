@@ -20,7 +20,7 @@ public class DraggableContainer<C extends Component> extends WrappingParentCompo
     protected int baseX = 0, baseY = 0;
     protected double xOffset = 0, yOffset = 0;
 
-    public DraggableContainer(Sizing horizontalSizing, Sizing verticalSizing, C child) {
+    protected DraggableContainer(Sizing horizontalSizing, Sizing verticalSizing, C child) {
         super(horizontalSizing, verticalSizing, child);
         this.padding(Insets.none());
     }

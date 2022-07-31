@@ -6,13 +6,19 @@ import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.HorizontalFlowLayout;
 import io.wispforest.owo.ui.container.VerticalFlowLayout;
 import io.wispforest.owo.ui.core.*;
+import io.wispforest.owo.ui.parsing.UIModel;
+import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.UISounds;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
+import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class DropdownComponent extends HorizontalFlowLayout {
 
@@ -53,8 +59,8 @@ public class DropdownComponent extends HorizontalFlowLayout {
         return this;
     }
 
-    public DropdownComponent checkbox(Text text, boolean state) {
-        this.entries.child(new Checkbox(text, state));
+    public DropdownComponent checkbox(Text text, boolean state, Consumer<Boolean> onClick) {
+        this.entries.child(new Checkbox(text, state, onClick));
         return this;
     }
 
@@ -94,6 +100,46 @@ public class DropdownComponent extends HorizontalFlowLayout {
     public DropdownComponent requiresHover(boolean requiresHover) {
         this.requiresHover = requiresHover;
         return this;
+    }
+
+    @Override
+    public void parseProperties(UIModel model, Element element, Map<String, Element> children) {
+        super.parseProperties(model, element, children);
+        UIParsing.apply(children, "entries", Function.identity(), this::parseAndApplyEntries);
+        UIParsing.apply(children, "requires-hover", UIParsing::parseBool, this::requiresHover);
+    }
+
+    protected void parseAndApplyEntries(Element container) {
+        for (var node : UIParsing.allChildrenOfType(container, Node.ELEMENT_NODE)) {
+            var entry = (Element) node;
+
+            switch (entry.getNodeName()) {
+                case "divider" -> this.divider();
+                case "text" -> this.text(UIParsing.parseText(entry));
+                case "button" -> {
+                    var children = UIParsing.childElements(entry);
+                    UIParsing.expectChildren(entry, children, "text");
+
+                    var text = UIParsing.parseText(children.get("text"));
+                    this.button(text, dropdownComponent -> {});
+                }
+                case "checkbox" -> {
+                    var children = UIParsing.childElements(entry);
+                    UIParsing.expectChildren(entry, children, "text", "checked");
+
+                    var text = UIParsing.parseText(children.get("text"));
+                    var checked = UIParsing.parseBool(children.get("checked"));
+
+                    this.checkbox(text, checked, aBoolean -> {});
+                }
+                case "nested" -> {
+                    var text = entry.getAttribute("translate").equals("true")
+                            ? Text.translatable(entry.getAttribute("name"))
+                            : Text.literal(entry.getAttribute("name"));
+                    this.nested(text, Sizing.content(), dropdownComponent -> dropdownComponent.parseAndApplyEntries(entry));
+                }
+            }
+        }
     }
 
     public static class EntryList extends VerticalFlowLayout {
@@ -210,11 +256,14 @@ public class DropdownComponent extends HorizontalFlowLayout {
 
         protected boolean state;
 
-        public Checkbox(Text text, boolean state) {
+        public Checkbox(Text text, boolean state, Consumer<Boolean> onClick) {
             super(text, dropdownComponent -> {});
 
             this.state = state;
-            this.onClick = dropdownComponent -> this.state = !this.state;
+            this.onClick = dropdownComponent -> {
+                this.state = !this.state;
+                onClick.accept(this.state);
+            };
         }
 
         @Override

@@ -1,10 +1,7 @@
 package io.wispforest.owo.ui.parsing;
 
 import io.wispforest.owo.ui.component.*;
-import io.wispforest.owo.ui.container.DraggableContainer;
-import io.wispforest.owo.ui.container.FlowLayout;
-import io.wispforest.owo.ui.container.GridLayout;
-import io.wispforest.owo.ui.container.ScrollContainer;
+import io.wispforest.owo.ui.container.*;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.Sizing;
 import net.minecraft.item.ItemStack;
@@ -261,6 +258,22 @@ public class UIParsing {
         }
     }
 
+    /**
+     * Verify that all the given elements are present
+     * as children of the given element and throw if one is missing
+     *
+     * @param element  The element to verify
+     * @param children The children of that element
+     * @param expected The expected child elements
+     */
+    public static void expectChildren(Element element, Map<String, Element> children, String... expected) {
+        for (var childName : expected) {
+            if (!children.containsKey(childName)) {
+                throw new UIModelParsingException("Element '" + element.getNodeName() + "' is missing element '" + childName + "'");
+            }
+        }
+    }
+
     protected static int parseInt(Node node, boolean allowNegative) {
         var data = node.getTextContent().strip();
         if (data.matches((allowNegative ? "-?" : "") + "\\d+")) {
@@ -277,7 +290,8 @@ public class UIParsing {
 
         // Container
         registerFactory("scroll", ScrollContainer::parse);
-        registerFactory("drag", element -> new DraggableContainer<>(Sizing.content(), Sizing.content(), null));
+        registerFactory("collapsible", CollapsibleContainer::parse);
+        registerFactory("drag", element -> Containers.draggable(Sizing.content(), Sizing.content(), null));
 
         // Textures
         registerFactory("sprite", SpriteComponent::parse);
@@ -293,6 +307,7 @@ public class UIParsing {
         registerFactory("text-box", element -> Components.textBox(Sizing.content()));
         registerFactory("slider", element -> Components.slider(Sizing.content()));
         registerFactory("discrete-slider", DiscreteSliderComponent::parse);
+        registerFactory("dropdown", element -> Components.dropdown(Sizing.content()));
     }
 
 }

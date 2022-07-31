@@ -120,10 +120,8 @@ public abstract class ConfigWrapper<C> {
 
                 option.set(newValue == null ? option.defaultValue() : newValue);
             }
-        } catch (IOException | SyntaxError e) {
+        } catch (IOException | SyntaxError | DeserializationException e) {
             Owo.LOGGER.warn("Could not load config {}", this.name, e);
-        } catch (DeserializationException e) {
-            throw new RuntimeException(e);
         } finally {
             this.loading = false;
         }

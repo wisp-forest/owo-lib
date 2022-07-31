@@ -2,7 +2,7 @@ package io.wispforest.owo.config.ui;
 
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.config.annotation.RangeConstraint;
-import io.wispforest.owo.config.ui.component.ListOptionLayout;
+import io.wispforest.owo.config.ui.component.ListOptionContainer;
 import io.wispforest.owo.config.ui.component.OptionComponent;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.parsing.UIModel;
@@ -37,7 +37,7 @@ public interface OptionComponentFactory<T> {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     OptionComponentFactory<List<?>> LIST = (model, option) -> {
-        var layout = new ListOptionLayout(option);
+        var layout = new ListOptionContainer(option);
         return new Result(layout, layout);
     };
 

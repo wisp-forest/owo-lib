@@ -47,16 +47,16 @@ public class AnimatableProperty<A extends Animatable<A>> extends Observable<A> {
 
     /**
      * @return The current animation object of this property,
-     * potentially missing if {@link #animate(int, Easing, Animatable)} was
-     * never called
+     * potentially {@code null} if {@link #animate(int, Easing, Animatable)}
+     * was never called
      */
     public @Nullable Animation<A> animation() {
         return this.animation;
     }
 
     /**
-     * Update the currently stored animation object
-     * of this property
+     * Update the currently stored animation
+     * object of this property
      *
      * @param delta The duration of the last frame, in partial ticks
      */
