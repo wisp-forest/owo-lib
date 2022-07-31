@@ -9,7 +9,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 
-// TODO docs
+/**
+ * Very simple extension of {@link VerticalFlowLayout} that
+ * does not allow children to be layout-positioned, used by {@link Hud}
+ */
 public class HudContainer extends VerticalFlowLayout {
 
     protected HudContainer(Sizing horizontalSizing, Sizing verticalSizing) {
@@ -21,7 +24,7 @@ public class HudContainer extends VerticalFlowLayout {
         if (child == null) return;
 
         if (child.positioning().get().type == Positioning.Type.LAYOUT) {
-            throw new IllegalStateException("Hud component containers must be explicitly positioned");
+            throw new IllegalStateException("owo-ui HUD components must be explicitly positioned");
         } else {
             super.mountChild(child, space, layoutFunc);
         }

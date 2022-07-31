@@ -1,6 +1,6 @@
 package io.wispforest.owo.mixin.ui;
 
-import io.wispforest.owo.ui.hud.OwoHud;
+import io.wispforest.owo.ui.hud.Hud;
 import net.minecraft.client.MinecraftClient;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -12,7 +12,7 @@ public class MinecraftClientMixin {
 
     @Inject(method = "onResolutionChanged", at = @At("TAIL"))
     private void captureResize(CallbackInfo ci) {
-        OwoHud.onResized();
+        Hud.onResized();
     }
 
 }

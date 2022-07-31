@@ -40,6 +40,12 @@
     },
     " config"
   ],
+  "key.uwu.hud_test": [
+    {
+      "text": "Toggle Test HUD",
+      "color": "#0096FF"
+    }
+  ],
   "text.ui.test_slider": "Value: %s",
   "text.config.uwu.option.aValue": "A Value",
   "text.config.uwu.option.regex": "Regex'd",

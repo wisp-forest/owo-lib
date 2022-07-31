@@ -1,13 +1,10 @@
 package io.wispforest.owo.config.ui.component;
 
 import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.VerticalFlowLayout;
-import io.wispforest.owo.ui.core.Component;
-import io.wispforest.owo.ui.core.Insets;
-import io.wispforest.owo.ui.core.Sizing;
-import io.wispforest.owo.ui.core.Surface;
+import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.UISounds;
 import net.minecraft.text.Text;
@@ -51,7 +48,7 @@ public class OptionContainerLayout extends VerticalFlowLayout {
         this.titleLayout.child(spinnyBoi);
 
         this.title = title.copy().formatted(Formatting.UNDERLINE);
-        this.titleLayout.child(Components.label(this.title));
+        this.titleLayout.child(Components.label(this.title).cursorStyle(CursorStyle.HAND));
 
         this.expanded = expanded;
         this.spinnyBoi.rotation(expanded ? 90 : 0);
@@ -81,6 +78,8 @@ public class OptionContainerLayout extends VerticalFlowLayout {
     public boolean onKeyPress(int keyCode, int scanCode, int modifiers) {
         if (keyCode == GLFW.GLFW_KEY_SPACE || keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
             this.toggleExpansion();
+
+            super.onKeyPress(keyCode, scanCode, modifiers);
             return true;
         }
 
@@ -89,16 +88,15 @@ public class OptionContainerLayout extends VerticalFlowLayout {
 
     @Override
     public boolean onMouseDown(double mouseX, double mouseY, int button) {
-        if (super.onMouseDown(mouseX, mouseY, button)) return true;
-
         if (mouseY <= this.titleLayout.fullSize().height()) {
             this.toggleExpansion();
             UISounds.playInteractionSound();
 
+            super.onMouseDown(mouseX, mouseY, button);
             return true;
+        } else {
+            return super.onMouseDown(mouseX, mouseY, button);
         }
-
-        return false;
     }
 
     @Override

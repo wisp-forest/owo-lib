@@ -88,7 +88,7 @@ public class TagInjector {
     /**
      * Injects the given tags into the given tag,
      * effectively nesting them. This is equivalent to
-     * prefixing an entry in the tag JSON's {@code values} field
+     * prefixing an entry in the tag JSON's {@code values} array
      * with a {@code #}
      *
      * @param registry The registry the target tag is for

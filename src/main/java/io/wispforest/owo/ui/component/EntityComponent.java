@@ -110,9 +110,11 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
     public boolean onMouseDrag(double mouseX, double mouseY, double deltaX, double deltaY, int button) {
         if (this.allowMouseRotation && button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
             this.mouseRotation += deltaX;
+
+            super.onMouseDrag(mouseX, mouseY, deltaX, deltaY, button);
             return true;
         } else {
-            return false;
+            return super.onMouseDrag(mouseX, mouseY, deltaX, deltaY, button);
         }
     }
 

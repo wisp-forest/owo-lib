@@ -13,10 +13,6 @@ import io.wispforest.owo.particles.systems.ParticleSystem;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
 import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
 import io.wispforest.owo.text.CustomTextRegistry;
-import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.container.Containers;
-import io.wispforest.owo.ui.core.*;
-import io.wispforest.owo.ui.hud.OwoHud;
 import io.wispforest.owo.util.RegistryAccess;
 import io.wispforest.owo.util.TagInjector;
 import io.wispforest.uwu.config.UwuConfig;
@@ -26,14 +22,12 @@ import io.wispforest.uwu.text.BasedTextContent;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.argument.GameProfileArgumentType;
-import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -179,18 +173,6 @@ public class Uwu implements ModInitializer {
             OwoNetChannel.create(new Identifier("uwu", "server_only_channel"));
             new ParticleSystemController(new Identifier("uwu", "server_only_particles"));
         }
-
-        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
-            OwoHud.add(Containers.verticalFlow(Sizing.content(), Sizing.content())
-                    .child(Components.item(Items.DIAMOND.getDefaultStack()).margins(Insets.of(3)))
-                    .child(Components.label(Text.literal("epic stuff in hud")))
-                    .child(Components.entity(Sizing.fixed(50), EntityType.ALLAY, null))
-                    .alignment(HorizontalAlignment.CENTER, VerticalAlignment.CENTER)
-                    .padding(Insets.of(5))
-                    .surface(Surface.PANEL)
-                    .margins(Insets.of(5))
-                    .positioning(Positioning.relative(0, 50)));
-        });
 
         System.out.println(RegistryAccess.getEntry(Registry.ITEM, Items.ACACIA_BOAT));
         System.out.println(RegistryAccess.getEntry(Registry.ITEM, new Identifier("acacia_planks")));
