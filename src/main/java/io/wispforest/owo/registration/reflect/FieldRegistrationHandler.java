@@ -23,7 +23,7 @@ public class FieldRegistrationHandler {
      * @param recurseIntoInnerClasses Whether this method should recursively process all inner classes of {@code clazz}
      * @param <T>                     The type of field to match
      */
-    public static <T> void process(Class<? extends FieldProcessingSubject<T>> clazz, TriConsumer<T, String, Field> processor, boolean recurseIntoInnerClasses) {
+    public static <T> void process(Class<? extends FieldProcessingSubject<T>> clazz, ReflectionUtils.FieldConsumer<T> processor, boolean recurseIntoInnerClasses) {
         var handler = ReflectionUtils.tryInstantiateWithNoArgs(clazz);
         ReflectionUtils.iterateAccessibleStaticFields(clazz, handler.getTargetFieldType(), createProcessor(processor, handler));
 
@@ -82,10 +82,10 @@ public class FieldRegistrationHandler {
         container.afterFieldProcessing();
     }
 
-    private static <T> ReflectionUtils.FieldConsumer<T> createProcessor(TriConsumer<T, String, Field> delegate, FieldProcessingSubject<T> handler) {
-        return (t, u, f) -> {
-            if (!handler.shouldProcessField(t, u, f)) return;
-            delegate.accept(t, u, f);
+    private static <T> ReflectionUtils.FieldConsumer<T> createProcessor(ReflectionUtils.FieldConsumer<T> delegate, FieldProcessingSubject<T> handler) {
+        return (value, name, field) -> {
+            if (!handler.shouldProcessField(value, name, field)) return;
+            delegate.accept(value, name, field);
         };
     }
 
