@@ -16,15 +16,8 @@ import java.util.function.Function;
  */
 public class TagInjector {
 
-    @Deprecated(forRemoval = true) public static final String BLOCK_TAG = "blocks";
-    @Deprecated(forRemoval = true) public static final String ITEM_TAG = "items";
-    @Deprecated(forRemoval = true) public static final String ENTITY_TAG = "entity_types";
-    @Deprecated(forRemoval = true) public static final String FUNCTION_TAG = "functions";
-    @Deprecated(forRemoval = true) public static final String GAME_EVENT_TAG = "game_events";
-    @Deprecated(forRemoval = true) public static final String FLUID_TAG = "fluids";
-
     @ApiStatus.Internal
-    public static final HashMap<TagLocation, Set<TagEntry>> ADDITIIONS = new HashMap<>();
+    public static final HashMap<TagLocation, Set<TagEntry>> ADDITIONS = new HashMap<>();
 
     /**
      * Injects the given Identifiers into the given Tag.
@@ -38,7 +31,7 @@ public class TagInjector {
      * @param values     The values to insert
      */
     public static void injectRaw(Registry<?> registry, Identifier tag, Function<Identifier, TagEntry> entryMaker, Collection<Identifier> values) {
-        ADDITIIONS.computeIfAbsent(new TagLocation(TagManagerLoader.getPath(registry.getKey()), tag), identifier -> new HashSet<>())
+        ADDITIONS.computeIfAbsent(new TagLocation(TagManagerLoader.getPath(registry.getKey()), tag), identifier -> new HashSet<>())
                 .addAll(values.stream().map(entryMaker).toList());
     }
 
@@ -101,60 +94,6 @@ public class TagInjector {
 
     public static void injectTagReference(Registry<?> registry, Identifier tag, Identifier... values) {
         injectTagReference(registry, tag, Arrays.asList(values));
-    }
-
-    // -------
-
-    /**
-     * @deprecated Use {@link #injectDirectReference(Registry, Identifier, Collection)} instead
-     */
-    @Deprecated(forRemoval = true)
-    public static void injectRaw(String tagType, Identifier tag, Collection<Identifier> values) {
-        ADDITIIONS.computeIfAbsent(new TagLocation("tags/" + tagType, tag), identifier -> new HashSet<>())
-                .addAll(values.stream().map(TagEntry::create).toList());
-
-    }
-
-    /**
-     * @deprecated Use {@link #injectDirectReference(Registry, Identifier, Identifier...)} instead
-     */
-    @Deprecated(forRemoval = true)
-    public static void injectRaw(String tagType, Identifier tag, Identifier... values) {
-        injectRaw(tagType, tag, Arrays.asList(values));
-    }
-
-    // -------
-
-    /**
-     * @deprecated Use {@link #inject(Registry, Identifier, Collection)} instead
-     */
-    @Deprecated(forRemoval = true)
-    public static void injectBlocks(Identifier tag, Collection<Block> values) {
-        inject(Registry.BLOCK, tag, values);
-    }
-
-    /**
-     * @deprecated Use {@link #inject(Registry, Identifier, Object[])} instead
-     */
-    @Deprecated(forRemoval = true)
-    public static void injectBlocks(Identifier tag, Block... values) {
-        injectDirectReference(Registry.BLOCK, tag, Arrays.stream(values).map(Registry.BLOCK::getId).toList());
-    }
-
-    /**
-     * @deprecated Use {@link #inject(Registry, Identifier, Collection)} instead
-     */
-    @Deprecated(forRemoval = true)
-    public static void injectItems(Identifier tag, Collection<Item> values) {
-        inject(Registry.ITEM, tag, values);
-    }
-
-    /**
-     * @deprecated Use {@link #inject(Registry, Identifier, Object[])} instead
-     */
-    @Deprecated(forRemoval = true)
-    public static void injectItems(Identifier tag, Item... values) {
-        inject(Registry.ITEM, tag, values);
     }
 
     public record TagLocation(String type, Identifier tagId) {}
