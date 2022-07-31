@@ -156,12 +156,22 @@ public class ReflectionUtils {
                 .findFirst()).orElse("<unknown>");
     }
 
-    // TODO documentation
-    public static @Nullable Class<?> getTypeArgument(Field field, int index) {
-        var type = field.getGenericType();
+    /**
+     * Determines the n-th type argument of the given type. If {@code type}
+     * is not a parameterized type, {@code null} is returned
+     *
+     * @param type  The type to query
+     * @param index The index of the type argument the retrieve
+     * @return The n-th type argument of {@code type} or {@code null} if {@code index}
+     * is out of bounds or the type argument is not a {@link Class}
+     */
+    public static @Nullable Class<?> getTypeArgument(Type type, int index) {
         if (!(type instanceof ParameterizedType parameterizedType)) return null;
 
-        var typeArgument = parameterizedType.getActualTypeArguments()[index];
+        var typeArgs = parameterizedType.getActualTypeArguments();
+        if (index > typeArgs.length - 1) return null;
+
+        var typeArgument = typeArgs[index];
         if (!(typeArgument instanceof Class<?> typeClass)) return null;
 
         return typeClass;

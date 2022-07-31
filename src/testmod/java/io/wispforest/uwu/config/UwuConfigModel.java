@@ -37,4 +37,7 @@ public class UwuConfigModel {
     public static class SuperNested {
         public byte wowSoNested;
     }
+
+    @ExcludeFromScreen
+    public String noSeeingThis = "yep, never";
 }

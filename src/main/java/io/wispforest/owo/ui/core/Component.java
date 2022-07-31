@@ -5,11 +5,13 @@ import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.FocusHandler;
 import io.wispforest.owo.util.EventSource;
+import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 
+import java.util.List;
 import java.util.Map;
 
 public interface Component extends PositionedRectangle {
@@ -122,6 +124,21 @@ public interface Component extends PositionedRectangle {
      * @return The current id of this component
      */
     @Nullable String id();
+
+    /**
+     * Set the tooltip this component should display
+     * while hovered
+     *
+     * @param tooltip The tooltip to display
+     */
+    Component tooltip(@Nullable List<TooltipComponent> tooltip);
+
+    /**
+     * @return The tooltip this component currently
+     * display while hovered
+     */
+    @Contract(pure = true)
+    @Nullable List<TooltipComponent> tooltip();
 
     /**
      * Inflate this component into some amount of available space

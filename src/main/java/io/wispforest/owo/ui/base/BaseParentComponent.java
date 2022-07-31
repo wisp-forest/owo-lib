@@ -325,11 +325,10 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
         }
     }
 
-
     /**
-     * If {@code clip} is {@code true}, execute the given drawing
-     * function and clip overflowing children to the bounding box
-     * of the component, otherwise draw normally
+     * Draw the children of this component along with
+     * their focus outline and tooltip, optionally clipping
+     * them if {@link #allowOverflow} is {@code true}
      *
      * @param children The list of children to draw
      */
@@ -344,8 +343,13 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
             if (!ScissorStack.isVisible(child)) continue;
             child.draw(matrices, mouseX, mouseY, partialTicks, delta);
 
+            // TODO move both these into BaseComponent#draw
             if (focusHandler.lastFocusSource() == FocusSource.KEYBOARD_CYCLE && focusHandler.focused() == child) {
                 Drawer.drawRectOutline(matrices, child.x(), child.y(), child.width(), child.height(), 0xFFFFFFFF);
+            }
+
+            if (child.tooltip() != null && child.isInBoundingBox(mouseX, mouseY)) {
+                ScissorStack.drawUnclipped(() -> Drawer.drawTooltip(matrices, mouseX, mouseY, child.tooltip()));
             }
         }
 

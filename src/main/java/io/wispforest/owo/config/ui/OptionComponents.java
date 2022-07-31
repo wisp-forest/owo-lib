@@ -12,6 +12,7 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import java.util.Map;
 import java.util.function.Consumer;
 
+// TODO enum cycle buttons
 public class OptionComponents {
 
     @SuppressWarnings({"ConstantConditions"})

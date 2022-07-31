@@ -49,10 +49,18 @@
   "text.ui.test_slider": "Value: %s",
   "text.config.uwu.option.aValue": "A Value",
   "text.config.uwu.option.regex": "Regex'd",
+  "text.config.uwu.option.regex.tooltip": "Regex tooltip, this is epic",
   "text.config.uwu.category.nestingTime": "Nesting Time",
   "text.config.uwu.option.nestingTime.togglee": "Togglee",
   "text.config.uwu.option.nestingTime.yesThisIsAlsoNested": "Yes this is also nested",
   "text.config.uwu.option.nestingTime.nestedIntegers": "A nested List of Integers",
+  "text.config.uwu.option.nestingTime.nestedIntegers.tooltip": [
+    "A very epic nested Integers tooltip",
+    {
+      "text": "\nwith multiple lines",
+      "color": "#ae0000"
+    }
+  ],
   "text.config.uwu.category.nestingTime.nestingTimeIntensifies": "Nesting Time Intensifies",
   "text.config.uwu.option.nestingTime.nestingTimeIntensifies.wowSoNested": "Wow so nested",
   "text.config.uwu.option.floting": "Floting",

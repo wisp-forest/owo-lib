@@ -5,15 +5,13 @@ import io.wispforest.owo.ui.core.Size;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
+import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.ScissorStack;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.OrderedText;
-import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 
 import java.util.ArrayList;
@@ -29,7 +27,6 @@ public class LabelComponent extends BaseComponent {
 
     protected int color;
     protected boolean shadow;
-    // TODO get rid of this
     protected int maxWidth;
 
     protected LabelComponent(Text text) {
@@ -138,13 +135,13 @@ public class LabelComponent extends BaseComponent {
         }
 
         if (this.isInBoundingBox(mouseX, mouseY)) {
-            ScissorStack.drawUnclipped(() -> EventScreen.get().renderTextHoverEffect(matrices, this.text.getStyle(), mouseX, mouseY));
+            ScissorStack.drawUnclipped(() -> Drawer.utilityScreen().renderTextHoverEffect(matrices, this.text.getStyle(), mouseX, mouseY));
         }
     }
 
     @Override
     public boolean onMouseDown(double mouseX, double mouseY, int button) {
-        return EventScreen.get().handleTextClick(this.text.getStyle()) | super.onMouseDown(mouseX, mouseY, button);
+        return Drawer.utilityScreen().handleTextClick(this.text.getStyle()) | super.onMouseDown(mouseX, mouseY, button);
     }
 
     @Override
@@ -154,28 +151,5 @@ public class LabelComponent extends BaseComponent {
         UIParsing.apply(children, "max-width", UIParsing::parseUnsignedInt, this::maxWidth);
         UIParsing.apply(children, "color", UIParsing::parseColor, this::color);
         UIParsing.apply(children, "shadow", UIParsing::parseBool, this::shadow);
-    }
-
-    protected static class EventScreen extends Screen {
-
-        private static EventScreen instance;
-
-        private EventScreen() {
-            super(Text.empty());
-        }
-
-        @Override
-        public void renderTextHoverEffect(MatrixStack matrices, @Nullable Style style, int x, int y) {
-            super.renderTextHoverEffect(matrices, style, x, y);
-        }
-
-        public static EventScreen get() {
-            if (instance == null) {
-                instance = new EventScreen();
-                instance.init(MinecraftClient.getInstance(), Integer.MAX_VALUE, Integer.MAX_VALUE);
-            }
-
-            return instance;
-        }
     }
 }

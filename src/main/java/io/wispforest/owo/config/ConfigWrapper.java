@@ -99,8 +99,8 @@ public abstract class ConfigWrapper<C> {
                     newValue = TypeMagic.createAndCast(clazz);
                     POJODeserializer.unpackMap(
                             (Map<Object, Object>) newValue,
-                            ReflectionUtils.getTypeArgument(field, 0),
-                            ReflectionUtils.getTypeArgument(field, 1),
+                            ReflectionUtils.getTypeArgument(field.getGenericType(), 0),
+                            ReflectionUtils.getTypeArgument(field.getGenericType(), 1),
                             configObject.recursiveGet(JsonElement.class, option.key().asString()),
                             this.jankson.getMarshaller()
                     );
@@ -108,7 +108,7 @@ public abstract class ConfigWrapper<C> {
                     newValue = TypeMagic.createAndCast(clazz);
                     POJODeserializer.unpackCollection(
                             (Collection<Object>) newValue,
-                            ReflectionUtils.getTypeArgument(option.backingField().field(), 0),
+                            ReflectionUtils.getTypeArgument(option.backingField().field().getGenericType(), 0),
                             configObject.recursiveGet(JsonElement.class, option.key().asString()),
                             this.jankson.getMarshaller()
                     );
@@ -141,6 +141,11 @@ public abstract class ConfigWrapper<C> {
         } catch (NoSuchFieldException e) {
             throw new RuntimeException("Could not get config option field", e);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> Option<T> optionForKey(Option.Key key) {
+        return this.options.get(key);
     }
 
     @SuppressWarnings("unchecked")

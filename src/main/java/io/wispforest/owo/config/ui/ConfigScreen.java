@@ -3,6 +3,7 @@ package io.wispforest.owo.config.ui;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.ConfigWrapper;
 import io.wispforest.owo.config.Option;
+import io.wispforest.owo.config.annotation.ExcludeFromScreen;
 import io.wispforest.owo.config.annotation.Expanded;
 import io.wispforest.owo.config.ui.component.ConfigSlider;
 import io.wispforest.owo.config.ui.component.ConfigTextBox;
@@ -18,7 +19,9 @@ import io.wispforest.owo.ui.core.Surface;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.util.NumberReflection;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
@@ -73,7 +76,12 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
         containers.put(Option.Key.ROOT, panel);
 
         this.config.forEachOption(option -> {
-            var factory = this.applicableFactory(option);
+            if (option.backingField().field().isAnnotationPresent(ExcludeFromScreen.class)) return;
+
+            var parentKey = option.key().parent();
+            if (!parentKey.isRoot() && this.config.fieldForKey(parentKey).isAnnotationPresent(ExcludeFromScreen.class)) return;
+
+            var factory = this.factoryForOption(option);
             if (factory == null) {
                 Owo.LOGGER.warn("Could not create UI component for config option {}", option);
             }
@@ -81,8 +89,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
             var result = factory.make(this.model, option);
             this.options.put(option, result.optionContainer());
 
-            var parentKey = option.key().parent();
-            var expanded = parentKey != Option.Key.ROOT && this.config.fieldForKey(parentKey).isAnnotationPresent(Expanded.class);
+            var expanded = !parentKey.isRoot() && this.config.fieldForKey(parentKey).isAnnotationPresent(Expanded.class);
             var container = containers.getOrDefault(
                     parentKey,
                     Containers.collapsible(
@@ -92,9 +99,15 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                     )
             );
 
-            if (!containers.containsKey(parentKey)) {
+            if (!containers.containsKey(parentKey) && containers.containsKey(parentKey.parent())) {
                 containers.put(parentKey, container);
                 containers.get(parentKey.parent()).child(container);
+            }
+
+            var tooltipTranslationKey = "text.config." + this.config.name() + ".option." + option.key().asString() + ".tooltip";
+            if (I18n.hasTranslation(tooltipTranslationKey)) {
+                var tooltipText = this.client.textRenderer.wrapLines(Text.translatable(tooltipTranslationKey), Integer.MAX_VALUE);
+                result.baseComponent().tooltip(tooltipText.stream().map(TooltipComponent::of).toList());
             }
 
             container.child(result.baseComponent());
@@ -117,7 +130,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
     }
 
     @SuppressWarnings("rawtypes")
-    protected @Nullable OptionComponentFactory applicableFactory(Option<?> option) {
+    protected @Nullable OptionComponentFactory factoryForOption(Option<?> option) {
         for (var predicate : this.extraFactories.keySet()) {
             if (!predicate.test(option)) continue;
             return this.extraFactories.get(predicate);

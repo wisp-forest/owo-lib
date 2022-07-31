@@ -77,7 +77,7 @@ public class ListOptionContainer<T> extends CollapsibleContainer implements Opti
         this.children.removeAll(this.optionContainers);
         this.optionContainers.clear();
 
-        var listType = ReflectionUtils.getTypeArgument(this.backingOption.backingField().field(), 0);
+        var listType = ReflectionUtils.getTypeArgument(this.backingOption.backingField().field().getGenericType(), 0);
         for (int i = 0; i < this.backingList.size(); i++) {
             var container = Containers.horizontalFlow(Sizing.fill(100), Sizing.content());
             container.verticalAlignment(VerticalAlignment.CENTER);

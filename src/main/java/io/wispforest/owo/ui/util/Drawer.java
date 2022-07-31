@@ -1,16 +1,22 @@
 package io.wispforest.owo.ui.util;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import io.wispforest.owo.mixin.ui.ScreenInvoker;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.ui.core.ParentComponent;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * An extension of vanilla's {@link DrawableHelper} with all methods
@@ -93,11 +99,21 @@ public class Drawer extends DrawableHelper {
         }
     }
 
+    public static void drawTooltip(MatrixStack matrices, int x, int y, List<TooltipComponent> tooltip) {
+        ((ScreenInvoker) utilityScreen()).owo$renderTooltipFromComponents(matrices, tooltip, x, y);
+    }
+
+    public static UtilityScreen utilityScreen() {
+        return UtilityScreen.get();
+    }
+
     public static DebugDrawer debug() {
         return INSTANCE.debug;
     }
 
     public static class DebugDrawer {
+
+        private DebugDrawer() {}
 
         /**
          * Draw the area around the given rectangle which
@@ -161,6 +177,29 @@ public class Drawer extends DrawableHelper {
                 textRenderer.draw(matrices, descriptor,
                         child.x() + 1, child.y() + child.height() + textRenderer.fontHeight + 2, 0xFFFFFF);
             }
+        }
+    }
+
+    public static class UtilityScreen extends Screen {
+
+        private static UtilityScreen INSTANCE;
+
+        private UtilityScreen() {
+            super(Text.empty());
+        }
+
+        @Override
+        public void renderTextHoverEffect(MatrixStack matrices, @Nullable Style style, int x, int y) {
+            super.renderTextHoverEffect(matrices, style, x, y);
+        }
+
+        public static UtilityScreen get() {
+            if (INSTANCE == null) {
+                INSTANCE = new UtilityScreen();
+                INSTANCE.init(MinecraftClient.getInstance(), Integer.MAX_VALUE, Integer.MAX_VALUE);
+            }
+
+            return INSTANCE;
         }
     }
 

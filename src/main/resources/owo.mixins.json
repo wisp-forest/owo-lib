@@ -34,6 +34,7 @@
     "ui.ClickableWidgetAccessor",
     "ui.ClickableWidgetMixin",
     "ui.MinecraftClientMixin",
+    "ui.ScreenInvoker",
     "ui.SliderWidgetMixin",
     "ui.TextFieldWidgetMixin"
   ],

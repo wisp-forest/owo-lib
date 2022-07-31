@@ -15,7 +15,6 @@ import org.lwjgl.glfw.GLFW;
 import java.util.EnumMap;
 import java.util.function.BiFunction;
 
-// TODO hud adapter
 public class OwoUIAdapter<T extends ParentComponent> implements Element, Drawable, Selectable {
 
     public final T rootComponent;
@@ -82,8 +81,10 @@ public class OwoUIAdapter<T extends ParentComponent> implements Element, Drawabl
         this.rootComponent.draw(matrices, mouseX, mouseY, partialTicks, delta);
         GlStateManager._disableScissorTest();
 
+        if (this.rootComponent.tooltip() != null) Drawer.drawTooltip(matrices, mouseX, mouseY, this.rootComponent.tooltip());
+
         final var hovered = this.rootComponent.childAt(mouseX, mouseY);
-        if (hovered != null && hovered.cursorStyle() != this.lastCursorStyle && !disposed) {
+        if (!disposed && hovered != null && hovered.cursorStyle() != this.lastCursorStyle) {
             GLFW.glfwSetCursor(MinecraftClient.getInstance().getWindow().getHandle(), this.cursors.get(hovered.cursorStyle()));
             this.lastCursorStyle = hovered.cursorStyle();
         }

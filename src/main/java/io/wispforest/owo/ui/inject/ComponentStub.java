@@ -1,12 +1,15 @@
 package io.wispforest.owo.ui.inject;
 
+import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.event.*;
 import io.wispforest.owo.ui.util.FocusHandler;
-import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.util.EventSource;
+import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 /**
  * Stub-version of component which adds implementations for all methods
@@ -88,6 +91,16 @@ public interface ComponentStub extends Component {
 
     @Override
     default Component cursorStyle(CursorStyle style) {
+        throw new IllegalStateException("Interface stub method called");
+    }
+
+    @Override
+    default Component tooltip(List<TooltipComponent> tooltip) {
+        throw new IllegalStateException("Interface stub method called");
+    }
+
+    @Override
+    default List<TooltipComponent> tooltip() {
         throw new IllegalStateException("Interface stub method called");
     }
 

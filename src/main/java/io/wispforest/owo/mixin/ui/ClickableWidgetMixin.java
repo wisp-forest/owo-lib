@@ -9,6 +9,7 @@ import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.FocusHandler;
 import io.wispforest.owo.util.EventSource;
+import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.SliderWidget;
@@ -20,6 +21,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.w3c.dom.Element;
 
+import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("ConstantConditions")
@@ -273,6 +275,16 @@ public abstract class ClickableWidgetMixin implements ComponentStub {
     @Override
     public Component cursorStyle(CursorStyle style) {
         return this.owo$getWrapper().cursorStyle(style);
+    }
+
+    @Override
+    public Component tooltip(List<TooltipComponent> tooltip) {
+        return this.owo$getWrapper().tooltip(tooltip);
+    }
+
+    @Override
+    public List<TooltipComponent> tooltip() {
+        return this.owo$getWrapper().tooltip();
     }
 
     @Override
