@@ -10,6 +10,10 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
+import net.minecraft.client.render.GameRenderer;
+import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexFormat;
+import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -54,16 +58,35 @@ public class Drawer extends DrawableHelper {
     /**
      * Draw a filled rectangle with a gradient
      *
-     * @param matrices   The transformation matrix stack
-     * @param x          The x-coordinate of top-left corner of the rectangle
-     * @param y          The y-coordinate of top-left corner of the rectangle
-     * @param width      The width of the rectangle
-     * @param height     The height of the rectangle
-     * @param startColor The color at the rectangle's origin
-     * @param endColor   The color at the corner opposite the origin
+     * @param matrices         The transformation matrix stack
+     * @param x                The x-coordinate of top-left corner of the rectangle
+     * @param y                The y-coordinate of top-left corner of the rectangle
+     * @param width            The width of the rectangle
+     * @param height           The height of the rectangle
+     * @param topLeftColor     The color at the rectangle's top left corner
+     * @param topRightColor    The color at the rectangle's top right corner
+     * @param bottomRightColor The color at the rectangle's bottom right corner
+     * @param bottomLeftColor  The color at the rectangle's bottom left corner
      */
-    public static void drawGradientRect(MatrixStack matrices, int x, int y, int width, int height, int startColor, int endColor) {
-        fillGradient(matrices, x, y, x + width, y + height, startColor, endColor, 0);
+    public static void drawGradientRect(MatrixStack matrices, int x, int y, int width, int height, int topLeftColor, int topRightColor, int bottomRightColor, int bottomLeftColor) {
+        var buffer = Tessellator.getInstance().getBuffer();
+        var matrix = matrices.peek().getPositionMatrix();
+
+        buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
+        buffer.vertex(matrix, x + width, y, 0).color(topRightColor).next();
+        buffer.vertex(matrix, x, y, 0).color(topLeftColor).next();
+        buffer.vertex(matrix, x, y + height, 0).color(bottomLeftColor).next();
+        buffer.vertex(matrix, x + width, y + height, 0).color(bottomRightColor).next();
+
+        RenderSystem.disableTexture();
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
+        Tessellator.getInstance().draw();
+
+        RenderSystem.disableBlend();
+        RenderSystem.enableTexture();
     }
 
     /**

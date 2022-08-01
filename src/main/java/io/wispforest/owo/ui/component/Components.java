@@ -103,6 +103,10 @@ public class Components {
         return new TextureComponent(texture, u, v, regionWidth, regionHeight, 256, 256);
     }
 
+    public static BoxComponent box(Sizing horizontalSizing, Sizing verticalSizing) {
+        return new BoxComponent(horizontalSizing, verticalSizing);
+    }
+
     public static DropdownComponent dropdown(Sizing horizontalSizing) {
         return new DropdownComponent(horizontalSizing);
     }

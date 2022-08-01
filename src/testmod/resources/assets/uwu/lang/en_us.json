@@ -64,6 +64,7 @@
   "text.config.uwu.category.nestingTime.nestingTimeIntensifies": "Nesting Time Intensifies",
   "text.config.uwu.option.nestingTime.nestingTimeIntensifies.wowSoNested": "Wow so nested",
   "text.config.uwu.option.floting": "Floting",
+  "text.config.uwu.section.bottom": "Bottom Text",
   "text.config.uwu.option.thereAreStringsHere": "There are Strings here",
   "text.config.uwu.option.broTheresAnEnum": "Bro, there's an Enum!",
   "text.config.uwu.option.broTheresAnEnum.tooltip": "Yeah, it's crazy",

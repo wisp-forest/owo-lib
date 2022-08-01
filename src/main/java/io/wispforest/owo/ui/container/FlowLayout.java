@@ -75,6 +75,8 @@ public abstract class FlowLayout extends BaseParentComponent {
     }
 
     public static FlowLayout parse(Element element) {
+        UIParsing.expectAttributes(element, "direction");
+
         return element.getAttribute("direction").equals("vertical")
                 ? Containers.verticalFlow(Sizing.content(), Sizing.content())
                 : Containers.horizontalFlow(Sizing.content(), Sizing.content());

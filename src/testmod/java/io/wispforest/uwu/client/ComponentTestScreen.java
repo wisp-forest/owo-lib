@@ -1,7 +1,7 @@
 package io.wispforest.uwu.client;
 
 import com.mojang.authlib.GameProfile;
-import io.wispforest.owo.ui.component.BoundingBoxComponent;
+import io.wispforest.owo.ui.component.BoxComponent;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.EntityComponent;
 import io.wispforest.owo.ui.container.Containers;
@@ -53,8 +53,8 @@ public class ComponentTestScreen extends Screen {
         var verticalAnimation = innerLayout.verticalSizing().animate(350, Easing.SINE, Sizing.content(50));
 
         innerLayout.child(Containers.verticalScroll(Sizing.content(), Sizing.fixed(50), Containers.verticalFlow(Sizing.content(), Sizing.content())
-                        .child(new BoundingBoxComponent(Sizing.fixed(20), Sizing.fixed(40)).margins(Insets.of(5)))
-                        .child(new BoundingBoxComponent(Sizing.fixed(45), Sizing.fixed(45)).margins(Insets.of(5)))
+                        .child(new BoxComponent(Sizing.fixed(20), Sizing.fixed(40)).margins(Insets.of(5)))
+                        .child(new BoxComponent(Sizing.fixed(45), Sizing.fixed(45)).margins(Insets.of(5)))
                         .child(Components.textBox(Sizing.fixed(60)))
                         .horizontalAlignment(HorizontalAlignment.RIGHT)
                         .surface(Surface.flat(0x77000000)))
@@ -68,7 +68,7 @@ public class ComponentTestScreen extends Screen {
                             );
                         }).margins(Insets.of(15, 15, 5, 5))
                 )
-                .child(new BoundingBoxComponent(Sizing.fixed(40), Sizing.fixed(20)).margins(Insets.of(5)))
+                .child(new BoxComponent(Sizing.fixed(40), Sizing.fixed(20)).margins(Insets.of(5)))
                 .horizontalAlignment(HorizontalAlignment.CENTER)
                 .verticalAlignment(VerticalAlignment.CENTER)
                 .padding(Insets.of(5));

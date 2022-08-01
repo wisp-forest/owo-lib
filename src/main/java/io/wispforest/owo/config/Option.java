@@ -4,6 +4,7 @@ import io.wispforest.owo.Owo;
 import io.wispforest.owo.util.Observable;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
@@ -129,6 +130,15 @@ public record Option<T>(
 
     @SuppressWarnings("unchecked")
     public record BoundField<T>(Object owner, Field field) {
+
+        public boolean hasAnnotation(Class<? extends Annotation> annotationClass) {
+            return field.isAnnotationPresent(annotationClass);
+        }
+
+        public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
+            return this.field.getAnnotation(annotationClass);
+        }
+
         public T getValue() {
             try {
                 return (T) this.field.get(this.owner);

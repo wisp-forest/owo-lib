@@ -212,6 +212,17 @@ public class UIParsing {
                 : Text.literal(element.getTextContent());
     }
 
+    public static <E extends Enum<E>> Function<Element, E> parseEnum(Class<E> enumClass) {
+        return element -> {
+            var name = element.getTextContent().strip().toUpperCase(Locale.ROOT).replace('-', '_');
+            for (var value : enumClass.getEnumConstants()) {
+                if (Objects.equals(name, value.name())) return value;
+            }
+
+            throw new UIModelParsingException("No such constant " + name + " in enum " + enumClass.getSimpleName());
+        };
+    }
+
     /**
      * Parse the property indicated by {@code key} into an object of type {@code T}
      *
@@ -303,6 +314,7 @@ public class UIParsing {
 
         // Widgets
         registerFactory("label", element -> Components.label(Text.empty()));
+        registerFactory("box", element -> Components.box(Sizing.content(), Sizing.content()));
         registerFactory("button", element -> Components.button(Text.empty(), button -> {}));
         registerFactory("text-box", element -> Components.textBox(Sizing.content()));
         registerFactory("slider", element -> Components.slider(Sizing.content()));

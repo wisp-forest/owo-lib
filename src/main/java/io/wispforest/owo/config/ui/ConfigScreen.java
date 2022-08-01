@@ -6,6 +6,7 @@ import io.wispforest.owo.config.Option;
 import io.wispforest.owo.config.annotation.ExcludeFromScreen;
 import io.wispforest.owo.config.annotation.Expanded;
 import io.wispforest.owo.config.annotation.RestartRequired;
+import io.wispforest.owo.config.annotation.SectionHeader;
 import io.wispforest.owo.config.ui.component.*;
 import io.wispforest.owo.ui.base.BaseUIModelScreen;
 import io.wispforest.owo.ui.component.LabelComponent;
@@ -21,6 +22,7 @@ import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.jetbrains.annotations.Nullable;
@@ -77,7 +79,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
         containers.put(Option.Key.ROOT, panel);
 
         this.config.forEachOption(option -> {
-            if (option.backingField().field().isAnnotationPresent(ExcludeFromScreen.class)) return;
+            if (option.backingField().hasAnnotation(ExcludeFromScreen.class)) return;
 
             var parentKey = option.key().parent();
             if (!parentKey.isRoot() && this.config.fieldForKey(parentKey).isAnnotationPresent(ExcludeFromScreen.class)) return;
@@ -111,6 +113,16 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                 result.baseComponent().tooltip(tooltipText.stream().map(TooltipComponent::of).toList());
             }
 
+            if (option.backingField().hasAnnotation(SectionHeader.class)) {
+                var translationKey = "text.config." + this.config.name() + ".section."
+                        + option.backingField().getAnnotation(SectionHeader.class).value();
+
+                final var header = this.model.expandTemplate(FlowLayout.class, "section-header", Map.of());
+                header.childById(LabelComponent.class, "header").text(Text.translatable(translationKey).formatted(Formatting.YELLOW, Formatting.BOLD));
+
+                container.child(header);
+            }
+
             container.child(result.baseComponent());
         });
     }
@@ -119,7 +131,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
     public void close() {
         var mustRestart = new MutableBoolean();
         this.options.forEach((option, component) -> {
-            if (!option.backingField().field().isAnnotationPresent(RestartRequired.class)) return;
+            if (!option.backingField().hasAnnotation(RestartRequired.class)) return;
             if (Objects.equals(option.value(), component.parsedValue())) return;
 
             mustRestart.setTrue();

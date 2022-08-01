@@ -22,7 +22,7 @@
 
                     <sizing>
                         <horizontal method="fill">90</horizontal>
-                        <vertical method="fill">85</vertical>
+                        <vertical method="fill">82</vertical>
                     </sizing>
 
                     <surface>
@@ -35,7 +35,6 @@
                     <padding>
                         <all>1</all>
                     </padding>
-
                 </scroll>
 
                 <flow-layout direction="horizontal">
@@ -63,7 +62,7 @@
 
                     <sizing>
                         <horizontal method="fill">90</horizontal>
-                        <vertical method="fill">7</vertical>
+                        <vertical method="fill">10</vertical>
                     </sizing>
                 </flow-layout>
             </children>
@@ -124,6 +123,56 @@
 
             </flow-layout>
         </config-option>
+
+        <section-header>
+            <flow-layout direction="horizontal">
+                <children>
+                    <box>
+                        <sizing>
+                            <vertical method="fixed">2</vertical>
+                            <horizontal method="fill">20</horizontal>
+                        </sizing>
+
+                        <start-color>#FFFFFFFF</start-color>
+                        <end-color>#00000000</end-color>
+
+                        <direction>right-to-left</direction>
+
+                        <fill>true</fill>
+                    </box>
+                    <label id="header">
+                        <margins>
+                            <horizontal>5</horizontal>
+                        </margins>
+                    </label>
+                    <box>
+                        <sizing>
+                            <vertical method="fixed">2</vertical>
+                            <horizontal method="fill">20</horizontal>
+                        </sizing>
+
+                        <start-color>#FFFFFFFF</start-color>
+                        <end-color>#00000000</end-color>
+
+                        <direction>left-to-right</direction>
+
+                        <fill>true</fill>
+                    </box>
+                </children>
+
+                <horizontal-alignment>center</horizontal-alignment>
+                <vertical-alignment>center</vertical-alignment>
+
+                <margins>
+                    <top>10</top>
+                </margins>
+
+                <sizing>
+                    <horizontal method="fill">100</horizontal>
+                    <vertical method="fixed">20</vertical>
+                </sizing>
+            </flow-layout>
+        </section-header>
 
         <text-box-config-option>
             <template name="config-option">

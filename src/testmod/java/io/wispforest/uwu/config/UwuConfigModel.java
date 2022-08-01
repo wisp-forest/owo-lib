@@ -20,7 +20,14 @@ public class UwuConfigModel {
 
     public float floting = 6.9f;
 
+    @SectionHeader("bottom")
     public List<String> thereAreStringsHere = new ArrayList<>(List.of("yes", "no"));
+
+    @RestartRequired
+    public WowValues broTheresAnEnum = WowValues.FIRST;
+
+    @ExcludeFromScreen
+    public String noSeeingThis = "yep, never";
 
     @Nest
     public static class Nested {
@@ -38,13 +45,7 @@ public class UwuConfigModel {
         public byte wowSoNested;
     }
 
-    @ExcludeFromScreen
-    public String noSeeingThis = "yep, never";
-
-    @RestartRequired
-    public WowValues broTheresAnEnum = WowValues.FIRST;
-
     public enum WowValues {
-        FIRST, SECOND, THIRD, FOURTH
+        FIRST, SECOND, THIRD, FOURTH;
     }
 }
