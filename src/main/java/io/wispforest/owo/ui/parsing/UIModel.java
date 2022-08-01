@@ -2,12 +2,13 @@
 package io.wispforest.owo.ui.parsing;
 
 import io.wispforest.owo.Owo;
-import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.core.Component;
+import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.core.Sizing;
 import net.minecraft.client.gui.screen.Screen;
 import org.jetbrains.annotations.Nullable;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
@@ -21,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 /**
  * A model of a UI hierarchy parsed from an
@@ -29,6 +31,8 @@ import java.util.function.Function;
  * templates via {@link #expandTemplate(Class, String, Map)}
  */
 public class UIModel {
+
+    private static final Pattern PARAMETER_PATTERN = Pattern.compile("\\{\\{[-_a-zA-Z]+}}");
 
     private final Element componentsElement;
     private final Map<String, Element> templates;
@@ -191,7 +195,7 @@ public class UIModel {
             ));
         }
 
-        var template = (Element) this.templates.get(name);
+        var template = this.templates.get(name);
         if (template == null) {
             throw new UIModelParsingException("Unknown template '" + name + "'");
         } else {
@@ -245,12 +249,16 @@ public class UIModel {
         for (var child : UIParsing.<Element>allChildrenOfType(template, Node.ELEMENT_NODE)) {
             for (var node : UIParsing.<Text>allChildrenOfType(child, Node.TEXT_NODE)) {
                 var textContent = node.getTextContent();
-                if (!textContent.matches("\\{\\{.*}}")) continue;
+                node.setTextContent(PARAMETER_PATTERN.matcher(textContent).replaceAll(
+                        matchResult -> parameterSupplier.apply(matchResult.group().substring(2, matchResult.group().length() - 2))
+                ));
+            }
 
-                final var substitution = parameterSupplier.apply(textContent.substring(2, textContent.length() - 2));
-                if (substitution != null) {
-                    node.setTextContent(substitution);
-                }
+            for (int i = 0; i < child.getAttributes().getLength(); i++) {
+                var attr = (Attr) child.getAttributes().item(i);
+                attr.setValue(PARAMETER_PATTERN.matcher(attr.getValue()).replaceAll(
+                        matchResult -> parameterSupplier.apply(matchResult.group().substring(2, matchResult.group().length() - 2))
+                ));
             }
             applySubstitutions(child);
         }

@@ -41,6 +41,7 @@ public class UwuConfigModel {
     @ExcludeFromScreen
     public String noSeeingThis = "yep, never";
 
+    @RestartRequired
     public WowValues broTheresAnEnum = WowValues.FIRST;
 
     public enum WowValues {

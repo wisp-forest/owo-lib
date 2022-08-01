@@ -5,6 +5,7 @@ import io.wispforest.owo.config.ConfigWrapper;
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.config.annotation.ExcludeFromScreen;
 import io.wispforest.owo.config.annotation.Expanded;
+import io.wispforest.owo.config.annotation.RestartRequired;
 import io.wispforest.owo.config.ui.component.*;
 import io.wispforest.owo.ui.base.BaseUIModelScreen;
 import io.wispforest.owo.ui.component.LabelComponent;
@@ -21,6 +22,7 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
@@ -28,6 +30,7 @@ import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 // TODO docs
@@ -40,9 +43,10 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
     protected final ConfigWrapper<?> config;
     @SuppressWarnings("rawtypes") protected final Map<Option, OptionComponent> options = new HashMap<>();
 
+    // TODO allow customizing model file
     public ConfigScreen(ConfigWrapper<?> config, @Nullable Screen parent) {
-        super(FlowLayout.class, DataSource.asset(new Identifier("owo", "config_ui")));
-//      super(FlowLayout.class, DataSource.file("config_ui.xml"));
+        super(FlowLayout.class, DataSource.asset(new Identifier("owo", "config")));
+//      super(FlowLayout.class, DataSource.file("config.xml"));
         this.parent = parent;
         this.config = config;
     }
@@ -113,7 +117,15 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
 
     @Override
     public void close() {
-        this.client.setScreen(this.parent);
+        var mustRestart = new MutableBoolean();
+        this.options.forEach((option, component) -> {
+            if (!option.backingField().field().isAnnotationPresent(RestartRequired.class)) return;
+            if (Objects.equals(option.value(), component.parsedValue())) return;
+
+            mustRestart.setTrue();
+        });
+
+        this.client.setScreen(mustRestart.booleanValue() ? new RestartRequiredScreen(this.parent) : this.parent);
     }
 
     @Override

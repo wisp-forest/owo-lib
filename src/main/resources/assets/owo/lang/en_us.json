@@ -1,4 +1,7 @@
 {
+  "text.owo.must_restart": "Some changes you made require a restart to apply",
+  "text.owo.exit_minecraft": "Exit Minecraft",
+  "text.owo.ignore_restart": "Restart later",
   "text.config.ui.reload": "Reload",
   "text.config.ui.done": "Done",
   "text.config.nested_container.collapsed": [
