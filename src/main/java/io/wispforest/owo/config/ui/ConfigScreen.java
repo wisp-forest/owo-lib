@@ -9,13 +9,15 @@ import io.wispforest.owo.config.annotation.RestartRequired;
 import io.wispforest.owo.config.annotation.SectionHeader;
 import io.wispforest.owo.config.ui.component.*;
 import io.wispforest.owo.ui.base.BaseUIModelScreen;
+import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.container.VerticalFlowLayout;
-import io.wispforest.owo.ui.core.Sizing;
-import io.wispforest.owo.ui.core.Surface;
+import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIParsing;
+import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.owo.util.NumberReflection;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
@@ -29,10 +31,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Predicate;
 
 // TODO docs
@@ -73,10 +72,11 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
             this.clearAndInit();
         });
 
-        var panel = rootComponent.childById(VerticalFlowLayout.class, "config-panel");
+        var optionPanel = rootComponent.childById(VerticalFlowLayout.class, "option-panel");
+        var sections = new LinkedHashMap<Component, Text>();
 
         var containers = new HashMap<Option.Key, VerticalFlowLayout>();
-        containers.put(Option.Key.ROOT, panel);
+        containers.put(Option.Key.ROOT, optionPanel);
 
         this.config.forEachOption(option -> {
             if (option.backingField().hasAnnotation(ExcludeFromScreen.class)) return;
@@ -120,24 +120,72 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                 final var header = this.model.expandTemplate(FlowLayout.class, "section-header", Map.of());
                 header.childById(LabelComponent.class, "header").text(Text.translatable(translationKey).formatted(Formatting.YELLOW, Formatting.BOLD));
 
+                sections.put(header, Text.translatable(translationKey));
+
                 container.child(header);
             }
 
             container.child(result.baseComponent());
         });
+
+        if (!sections.isEmpty()) {
+            var panelContainer = rootComponent.childById(FlowLayout.class, "option-panel-container");
+            var panelScroll = rootComponent.childById(ScrollContainer.class, "option-panel-scroll");
+            panelScroll.margins(Insets.right(10));
+
+            var buttonPanel = this.model.expandTemplate(FlowLayout.class, "section-buttons", Map.of());
+            sections.forEach((component, text) -> {
+                var hoveredText = text.copy().formatted(Formatting.YELLOW);
+
+                final var label = Components.label(text);
+                label.cursorStyle(CursorStyle.HAND).margins(Insets.of(5));
+
+                label.mouseEnter().subscribe(() -> label.text(hoveredText));
+                label.mouseLeave().subscribe(() -> label.text(text));
+
+                label.mouseDown().subscribe((mouseX, mouseY, button) -> {
+                    panelScroll.scrollTo(component);
+                    UISounds.playInteractionSound();
+                    return true;
+                });
+
+                buttonPanel.child(label);
+            });
+
+            var expandPanelAnimation = buttonPanel.horizontalSizing().animate(650, Easing.CUBIC, Sizing.fill(15));
+            var contractOptionsAnimation = panelContainer.horizontalSizing().animate(650, Easing.CUBIC, Sizing.fill(85));
+
+            var closeButton = Components.label(Text.literal("<").formatted(Formatting.BOLD));
+            closeButton.positioning(Positioning.relative(100, 50)).cursorStyle(CursorStyle.HAND).margins(Insets.right(2));
+
+            panelContainer.child(closeButton);
+            panelContainer.mouseDown().subscribe((mouseX, mouseY, button) -> {
+                if (mouseX < panelContainer.width() - 10) return false;
+
+                expandPanelAnimation.reverse();
+                contractOptionsAnimation.reverse();
+
+                closeButton.text(Text.literal(closeButton.text().getString().equals(">") ? "<" : ">").formatted(Formatting.BOLD));
+
+                UISounds.playInteractionSound();
+                return true;
+            });
+
+            rootComponent.childById(FlowLayout.class, "main-panel").child(buttonPanel);
+        }
     }
 
     @Override
     public void close() {
-        var mustRestart = new MutableBoolean();
+        var shouldRestart = new MutableBoolean();
         this.options.forEach((option, component) -> {
             if (!option.backingField().hasAnnotation(RestartRequired.class)) return;
             if (Objects.equals(option.value(), component.parsedValue())) return;
 
-            mustRestart.setTrue();
+            shouldRestart.setTrue();
         });
 
-        this.client.setScreen(mustRestart.booleanValue() ? new RestartRequiredScreen(this.parent) : this.parent);
+        this.client.setScreen(shouldRestart.booleanValue() ? new RestartRequiredScreen(this.parent) : this.parent);
     }
 
     @Override

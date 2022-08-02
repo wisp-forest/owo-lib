@@ -16,30 +16,7 @@
       "color": "#3AB0FF"
     }
   ],
-  "text.config.uwu.title": [
-    "very epic ",
-    {
-      "text": "[",
-      "color": "gray"
-    },
-    {
-      "text": "o",
-      "color": "#3955e5"
-    },
-    {
-      "text": "ω",
-      "color": "#13a6f0"
-    },
-    {
-      "text": "o",
-      "color": "#3955e5"
-    },
-    {
-      "text": "]",
-      "color": "gray"
-    },
-    " config"
-  ],
+  "text.config.uwu.title": "Test Config Screen",
   "key.uwu.hud_test": [
     {
       "text": "Toggle Test HUD",
@@ -47,6 +24,7 @@
     }
   ],
   "text.ui.test_slider": "Value: %s",
+  "text.config.uwu.section.top": "Top Text",
   "text.config.uwu.option.aValue": "A Value",
   "text.config.uwu.option.regex": "Regex'd",
   "text.config.uwu.option.regex.tooltip": "Regex tooltip, this is epic",

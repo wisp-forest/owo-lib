@@ -17,8 +17,32 @@
                     </sizing>
                 </flow-layout>
 
-                <scroll direction="vertical">
-                    <flow-layout direction="vertical" id="config-panel"/>
+                <flow-layout direction="horizontal" id="main-panel">
+                    <children>
+                        <flow-layout direction="vertical" id="option-panel-container">
+                            <children>
+                                <scroll direction="vertical" id="option-panel-scroll">
+                                    <flow-layout direction="vertical" id="option-panel"/>
+
+                                    <scrollbar-thiccness>3</scrollbar-thiccness>
+
+                                    <sizing>
+                                        <horizontal method="fill">100</horizontal>
+                                        <vertical method="fill">100</vertical>
+                                    </sizing>
+
+                                    <padding>
+                                        <all>1</all>
+                                    </padding>
+                                </scroll>
+                            </children>
+
+                            <sizing>
+                                <horizontal method="fill">100</horizontal>
+                                <vertical method="fill">100</vertical>
+                            </sizing>
+                        </flow-layout>
+                    </children>
 
                     <sizing>
                         <horizontal method="fill">90</horizontal>
@@ -29,13 +53,7 @@
                         <flat>#77000000</flat>
                         <outline>#FF121212</outline>
                     </surface>
-
-                    <scrollbar-thiccness>3</scrollbar-thiccness>
-
-                    <padding>
-                        <all>1</all>
-                    </padding>
-                </scroll>
+                </flow-layout>
 
                 <flow-layout direction="horizontal">
                     <children>
@@ -173,6 +191,30 @@
                 </sizing>
             </flow-layout>
         </section-header>
+
+        <section-buttons>
+            <flow-layout direction="vertical">
+                <children>
+                    <label>
+                        <text translate="true">text.config.sections</text>
+
+                        <positioning type="relative">50,0</positioning>
+
+                        <margins>
+                            <top>15</top>
+                        </margins>
+                    </label>
+                </children>
+
+                <vertical-alignment>center</vertical-alignment>
+                <horizontal-alignment>center</horizontal-alignment>
+
+                <sizing>
+                    <horizontal method="fill">0</horizontal>
+                    <vertical method="fill">100</vertical>
+                </sizing>
+            </flow-layout>
+        </section-buttons>
 
         <text-box-config-option>
             <template name="config-option">

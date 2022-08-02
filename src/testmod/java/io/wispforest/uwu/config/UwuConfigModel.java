@@ -9,6 +9,7 @@ import java.util.List;
 @Config(name = "uwu", wrapperName = "UwuConfig")
 public class UwuConfigModel {
 
+    @SectionHeader("top")
     @RangeConstraint(min = 0, max = 56)
     public int aValue = 56;
 

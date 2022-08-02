@@ -41,6 +41,12 @@ public abstract class FlowLayout extends BaseParentComponent {
         return this;
     }
 
+    public FlowLayout child(int index, Component child) {
+        this.children.add(index, child);
+        this.updateLayout();
+        return this;
+    }
+
     public FlowLayout removeChild(Component child) {
         if (this.children.remove(child)) {
             child.dismount(DismountReason.REMOVED);

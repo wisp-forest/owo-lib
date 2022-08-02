@@ -159,6 +159,7 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
     @Override
     public boolean onMouseDown(double mouseX, double mouseY, int button) {
         if (this.isInScrollbar(this.x + mouseX, this.y + mouseY)) {
+            super.onMouseDown(mouseX, mouseY, button);
             return true;
         } else {
             return super.onMouseDown(mouseX, mouseY, button);
@@ -200,6 +201,11 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
 
     protected boolean isInScrollbar(double mouseX, double mouseY) {
         return this.isInBoundingBox(mouseX, mouseY) && this.direction.choose(mouseY, mouseX) >= this.scrollbarOffset;
+    }
+
+    public ScrollContainer<C> scrollTo(Component component) {
+        this.scrollOffset = MathHelper.clamp(this.scrollOffset - (this.y - component.y() + component.margins().get().top()), 0, this.maxScroll);
+        return this;
     }
 
     public ScrollContainer<C> scrollbarThiccness(int scrollbarThiccness) {
