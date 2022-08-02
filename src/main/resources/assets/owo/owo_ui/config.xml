@@ -58,7 +58,7 @@
                 <flow-layout direction="horizontal">
                     <children>
                         <button id="reload-button">
-                            <text translate="true">text.config.ui.reload</text>
+                            <text translate="true">text.owo.config.button.reload</text>
                             <sizing>
                                 <horizontal method="fill">10</horizontal>
                             </sizing>
@@ -68,7 +68,7 @@
                         </button>
 
                         <button id="done-button">
-                            <text translate="true">text.config.ui.done</text>
+                            <text translate="true">text.owo.config.button.done</text>
                             <sizing>
                                 <horizontal method="fill">10</horizontal>
                             </sizing>
@@ -196,7 +196,7 @@
             <flow-layout direction="vertical">
                 <children>
                     <label>
-                        <text translate="true">text.config.sections</text>
+                        <text translate="true">text.owo.config.sections</text>
 
                         <positioning type="relative">50,0</positioning>
 

@@ -23,10 +23,12 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
+import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import org.apache.commons.lang3.mutable.MutableBoolean;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
@@ -107,9 +109,18 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                 containers.get(parentKey.parent()).child(container);
             }
 
+            var tooltipText = new ArrayList<OrderedText>();
             var tooltipTranslationKey = option.translationKey() + ".tooltip";
+
             if (I18n.hasTranslation(tooltipTranslationKey)) {
-                var tooltipText = this.client.textRenderer.wrapLines(Text.translatable(tooltipTranslationKey), Integer.MAX_VALUE);
+                tooltipText.addAll(this.client.textRenderer.wrapLines(Text.translatable(tooltipTranslationKey), Integer.MAX_VALUE));
+            }
+
+            if (option.backingField().hasAnnotation(RestartRequired.class)) {
+                tooltipText.add(Text.translatable("text.owo.config.applies_after_restart").asOrderedText());
+            }
+
+            if (!tooltipText.isEmpty()) {
                 result.baseComponent().tooltip(tooltipText.stream().map(TooltipComponent::of).toList());
             }
 
@@ -134,11 +145,16 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
             panelScroll.margins(Insets.right(10));
 
             var buttonPanel = this.model.expandTemplate(FlowLayout.class, "section-buttons", Map.of());
+            var widestText = new MutableInt();
+
             sections.forEach((component, text) -> {
                 var hoveredText = text.copy().formatted(Formatting.YELLOW);
+                if (this.textRenderer.getWidth(text) > widestText.intValue()) {
+                    widestText.setValue(this.textRenderer.getWidth(text));
+                }
 
                 final var label = Components.label(text);
-                label.cursorStyle(CursorStyle.HAND).margins(Insets.of(5));
+                label.cursorStyle(CursorStyle.HAND).margins(Insets.of(2));
 
                 label.mouseEnter().subscribe(() -> label.text(hoveredText));
                 label.mouseLeave().subscribe(() -> label.text(text));
@@ -152,9 +168,6 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                 buttonPanel.child(label);
             });
 
-            var expandPanelAnimation = buttonPanel.horizontalSizing().animate(650, Easing.CUBIC, Sizing.fill(15));
-            var contractOptionsAnimation = panelContainer.horizontalSizing().animate(650, Easing.CUBIC, Sizing.fill(85));
-
             var closeButton = Components.label(Text.literal("<").formatted(Formatting.BOLD));
             closeButton.positioning(Positioning.relative(100, 50)).cursorStyle(CursorStyle.HAND).margins(Insets.right(2));
 
@@ -162,8 +175,15 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
             panelContainer.mouseDown().subscribe((mouseX, mouseY, button) -> {
                 if (mouseX < panelContainer.width() - 10) return false;
 
-                expandPanelAnimation.reverse();
-                contractOptionsAnimation.reverse();
+                if (buttonPanel.horizontalSizing().animation() == null) {
+                    int percentage = Math.min(Math.round(((widestText.intValue() + 25f) / panelContainer.width()) * 100), 50);
+
+                    buttonPanel.horizontalSizing().animate(650, Easing.CUBIC, Sizing.fill(percentage));
+                    panelContainer.horizontalSizing().animate(650, Easing.CUBIC, Sizing.fill(100 - percentage));
+                }
+
+                buttonPanel.horizontalSizing().animation().reverse();
+                panelContainer.horizontalSizing().animation().reverse();
 
                 closeButton.text(Text.literal(closeButton.text().getString().equals(">") ? "<" : ">").formatted(Formatting.BOLD));
 

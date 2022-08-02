@@ -3,7 +3,7 @@
         <flow-layout direction="vertical">
             <children>
                 <label>
-                    <text translate="true">text.owo.must_restart</text>#
+                    <text translate="true">text.owo.config.must_restart</text>#
                     <shadow>true</shadow>
                 </label>
 
@@ -39,7 +39,7 @@
     <templates>
         <action-button>
             <button id="{{id}}">
-                <text translate="true">text.owo.{{action}}</text>
+                <text translate="true">text.owo.config.button.{{action}}</text>
 
                 <sizing>
                     <horizontal method="content">5</horizontal>

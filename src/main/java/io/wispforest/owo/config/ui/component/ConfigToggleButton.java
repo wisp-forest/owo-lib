@@ -8,8 +8,8 @@ import org.jetbrains.annotations.ApiStatus;
 @ApiStatus.Internal
 public class ConfigToggleButton extends ButtonWidget implements OptionComponent {
 
-    protected static final Text ENABLED_MESSAGE = Text.translatable("text.config.boolean_toggle.enabled");
-    protected static final Text DISABLED_MESSAGE = Text.translatable("text.config.boolean_toggle.disabled");
+    protected static final Text ENABLED_MESSAGE = Text.translatable("text.owo.config.boolean_toggle.enabled");
+    protected static final Text DISABLED_MESSAGE = Text.translatable("text.owo.config.boolean_toggle.disabled");
 
     protected boolean enabled = false;
 

@@ -87,14 +87,14 @@ public class CollapsibleContainer extends VerticalFlowLayout {
 
     @Override
     public boolean onMouseDown(double mouseX, double mouseY, int button) {
-        if (mouseY <= this.titleLayout.fullSize().height()) {
+        final var superResult = super.onMouseDown(mouseX, mouseY, button);
+
+        if (mouseY <= this.titleLayout.fullSize().height() && !superResult) {
             this.toggleExpansion();
             UISounds.playInteractionSound();
-
-            super.onMouseDown(mouseX, mouseY, button);
             return true;
         } else {
-            return super.onMouseDown(mouseX, mouseY, button);
+            return superResult;
         }
     }
 
