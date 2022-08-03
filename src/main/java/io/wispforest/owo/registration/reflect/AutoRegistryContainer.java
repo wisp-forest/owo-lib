@@ -8,7 +8,6 @@ import java.lang.reflect.Field;
 /**
  * A special version of {@link FieldProcessingSubject} that contains fields which should
  * be registered into a {@link Registry} using the field names in lowercase as ID
- *
  * <p>
  * Use {@link FieldRegistrationHandler#register(Class, String, boolean)} to automatically register all fields
  * of this class into the specified registry
