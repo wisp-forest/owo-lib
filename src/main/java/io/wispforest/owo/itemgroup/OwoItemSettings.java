@@ -92,6 +92,10 @@ public class OwoItemSettings extends FabricItemSettings {
         return (OwoItemSettings) super.fireproof();
     }
 
+    public OwoItemSettings createCopy(){
+        return copyFrom(this);
+    }
+    
     /**
      * Method used to make a copy of a given {@link Item.Settings}
      *
