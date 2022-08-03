@@ -15,6 +15,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.EnumMap;
 import java.util.function.BiFunction;
 
+// TODO docs
 public class OwoUIAdapter<T extends ParentComponent> implements Element, Drawable, Selectable {
 
     public final T rootComponent;

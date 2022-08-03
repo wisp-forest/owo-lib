@@ -19,6 +19,7 @@ import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.owo.util.NumberReflection;
+import io.wispforest.owo.util.ReflectionUtils;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -32,12 +33,13 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
 import java.util.*;
 import java.util.function.Predicate;
 
 // TODO docs
 public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
+
+    public static final Identifier DEFAULT_MODEL_ID = new Identifier("owo", "config");
 
     private static final Map<Predicate<Option<?>>, OptionComponentFactory<?>> DEFAULT_FACTORIES = new HashMap<>();
     protected final Map<Predicate<Option<?>>, OptionComponentFactory<?>> extraFactories = new HashMap<>();
@@ -46,16 +48,18 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
     protected final ConfigWrapper<?> config;
     @SuppressWarnings("rawtypes") protected final Map<Option, OptionComponent> options = new HashMap<>();
 
-    // TODO allow customizing model file
-    public ConfigScreen(ConfigWrapper<?> config, @Nullable Screen parent) {
-        super(FlowLayout.class, DataSource.asset(new Identifier("owo", "config")));
-//      super(FlowLayout.class, DataSource.file("config.xml"));
+    protected ConfigScreen(Identifier modelId, ConfigWrapper<?> config, @Nullable Screen parent) {
+        super(FlowLayout.class, DataSource.asset(modelId));
         this.parent = parent;
         this.config = config;
     }
 
-    public ConfigScreen(ConfigWrapper<?> config) {
-        this(config, null);
+    public static ConfigScreen create(ConfigWrapper<?> config, @Nullable Screen parent) {
+        return new ConfigScreen(DEFAULT_MODEL_ID, config, parent);
+    }
+
+    public static ConfigScreen createWithCustomModel(Identifier modelId, ConfigWrapper<?> config, @Nullable Screen parent) {
+        return new ConfigScreen(modelId, config, parent);
     }
 
     @Override
@@ -249,12 +253,9 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
     private static boolean isStringOrNumberList(Field field) {
         if (field.getType() != List.class) return false;
 
-        var type = field.getGenericType();
-        if (!(type instanceof ParameterizedType parameterizedType)) return false;
+        var listType = ReflectionUtils.getTypeArgument(field.getGenericType(), 0);
+        if (listType == null) return false;
 
-        var listType = parameterizedType.getActualTypeArguments()[0];
-        if (!(listType instanceof Class<?> listTypeClass)) return false;
-
-        return String.class == listTypeClass || NumberReflection.isNumberType(listTypeClass);
+        return String.class == listType || NumberReflection.isNumberType(listType);
     }
 }

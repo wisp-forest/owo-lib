@@ -9,10 +9,13 @@ import blue.endless.jankson.impl.POJODeserializer;
 import blue.endless.jankson.magic.TypeMagic;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.annotation.*;
+import io.wispforest.owo.config.ui.ConfigScreen;
 import io.wispforest.owo.util.NumberReflection;
 import io.wispforest.owo.util.Observable;
 import io.wispforest.owo.util.ReflectionUtils;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.util.Identifier;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandle;
@@ -22,11 +25,15 @@ import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 public abstract class ConfigWrapper<C> {
+
+    private static final Map<String, Function<Screen, ConfigScreen>> CONFIG_SCREEN_PROVIDERS = new HashMap<>();
 
     protected final String name;
     protected final C instance;
@@ -41,8 +48,16 @@ public abstract class ConfigWrapper<C> {
         ReflectionUtils.requireZeroArgsConstructor(clazz, s -> "Config model class " + s + " must provide a zero-args constructor");
         this.instance = ReflectionUtils.tryInstantiateWithNoArgs(clazz);
 
-        var configAnnotation = instance.getClass().getAnnotation(Config.class);
+        var configAnnotation = clazz.getAnnotation(Config.class);
         this.name = configAnnotation.name();
+
+        if (clazz.isAnnotationPresent(Modmenu.class)) {
+            var modmenuAnnotation = clazz.getAnnotation(Modmenu.class);
+            CONFIG_SCREEN_PROVIDERS.put(
+                    modmenuAnnotation.modId(),
+                    screen -> ConfigScreen.createWithCustomModel(new Identifier(modmenuAnnotation.uiModelId()), this, screen)
+            );
+        }
 
         try {
             this.initializeOptions(configAnnotation.saveOnModification());
@@ -160,7 +175,7 @@ public abstract class ConfigWrapper<C> {
     }
 
     private void initializeOptions(boolean hookSave) throws IllegalAccessException, NoSuchMethodException {
-        var fields = new LinkedHashMap<Option.Key, Option.BoundField>();
+        var fields = new LinkedHashMap<Option.Key, Option.BoundField<Object>>();
         collectFieldValues(Option.Key.ROOT, this.instance, fields);
 
         for (var entry : fields.entrySet()) {
@@ -224,7 +239,7 @@ public abstract class ConfigWrapper<C> {
         }
     }
 
-    private void collectFieldValues(Option.Key parent, Object instance, Map<Option.Key, Option.BoundField> fields) throws IllegalAccessException {
+    private void collectFieldValues(Option.Key parent, Object instance, Map<Option.Key, Option.BoundField<Object>> fields) throws IllegalAccessException {
         for (var field : instance.getClass().getDeclaredFields()) {
             if (Modifier.isTransient(field.getModifiers()) || Modifier.isStatic(field.getModifiers())) continue;
 
@@ -236,7 +251,7 @@ public abstract class ConfigWrapper<C> {
                     throw new IllegalStateException("Nested config option containers must never be null");
                 }
             } else {
-                fields.put(parent.child(field.getName()), new Option.BoundField(instance, field));
+                fields.put(parent.child(field.getName()), new Option.BoundField<>(instance, field));
             }
         }
     }
@@ -247,6 +262,10 @@ public abstract class ConfigWrapper<C> {
         } catch (Throwable e) {
             throw new RuntimeException("Could not invoke predicate", e);
         }
+    }
+
+    public static void forEachScreenProvider(BiConsumer<String, Function<Screen, ConfigScreen>> action) {
+        CONFIG_SCREEN_PROVIDERS.forEach(action);
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})

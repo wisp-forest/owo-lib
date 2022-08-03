@@ -6,6 +6,7 @@ import io.wispforest.owo.config.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@Modmenu(modId = "uwu", uiModelId = "uwu:config")
 @Config(name = "uwu", wrapperName = "UwuConfig")
 public class UwuConfigModel {
 

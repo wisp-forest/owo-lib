@@ -129,6 +129,8 @@ dependencies {
     modLocalRuntime("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}")
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}")
 
+    modLocalRuntime modCompileOnly("com.terraformersmc:modmenu:${project.modmenu_version}")
+
     modLocalRuntime "maven.modrinth:lazydfu:0.1.2"
 
     implementation include("blue.endless:jankson:${project.jankson_version}")

@@ -22,6 +22,9 @@
     ],
     "rei_client": [
       "io.wispforest.owo.compat.rei.OwoReiPlugin"
+    ],
+    "modmenu": [
+      "io.wispforest.owo.compat.modmenu.OwoModMenuPlugin"
     ]
   },
   "mixins": [
