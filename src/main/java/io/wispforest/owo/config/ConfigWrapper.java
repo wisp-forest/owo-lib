@@ -16,6 +16,7 @@ import io.wispforest.owo.util.ReflectionUtils;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandle;
@@ -31,6 +32,16 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
+/**
+ * The common base class of all generated config classes.
+ * The majority of all config functionality resides in here
+ * <p>
+ * Do not extend this class yourself - instead annotate
+ * a class describing your config model with {@link Config},
+ * just as you would do with other libraries like Cloth Config
+ *
+ * @see Config
+ */
 public abstract class ConfigWrapper<C> {
 
     private static final Map<String, Function<Screen, ConfigScreen>> CONFIG_SCREEN_PROVIDERS = new HashMap<>();
@@ -142,8 +153,17 @@ public abstract class ConfigWrapper<C> {
         }
     }
 
-    // TODO docs
-    public Field fieldForKey(Option.Key key) {
+    /**
+     * Query the field associated with a given key. This is relevant
+     * in cases where said field is annotated with {@link Nest}, meaning
+     * that {@link #optionForKey(Option.Key)} would return {@code null}
+     * because the field won't be treated as an option in itself.
+     *
+     * @param key The for which to query the field
+     * @return The field described by {@code key}, or {@code null}
+     * if it does not point to a valid field in the config tree
+     */
+    public @Nullable Field fieldForKey(Option.Key key) {
         try {
             var path = new ArrayList<>(List.of(key.path()));
             var clazz = this.instance.getClass();
@@ -154,20 +174,33 @@ public abstract class ConfigWrapper<C> {
 
             return clazz.getField(path.get(0));
         } catch (NoSuchFieldException e) {
-            throw new RuntimeException("Could not get config option field", e);
+            return null;
         }
     }
 
+    /**
+     * Query the config option associated with a given key
+     *
+     * @param key The key for which to query the option
+     * @return The option described by {@code key}, or {@code null}
+     * if no such option exists
+     */
     @SuppressWarnings("unchecked")
-    public <T> Option<T> optionForKey(Option.Key key) {
+    public <T> @Nullable Option<T> optionForKey(Option.Key key) {
         return this.options.get(key);
     }
 
+    /**
+     * @return A view of all options contained in this config
+     */
     @SuppressWarnings("unchecked")
     public Map<Option.Key, Option<?>> allOptions() {
         return (Map<Option.Key, Option<?>>) (Object) this.optionsView;
     }
 
+    /**
+     * Execute the given action once for each option in this config
+     */
     public void forEachOption(Consumer<Option<?>> action) {
         for (var option : this.options.values()) {
             action.accept(option);

@@ -10,6 +10,8 @@ import java.lang.annotation.Target;
  * implementation of {@link io.wispforest.owo.config.ConfigWrapper}
  * will be generated which can subsequently be used to manage
  * the config data described by the annotated class
+ *
+ * @see io.wispforest.owo.config.ConfigWrapper
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

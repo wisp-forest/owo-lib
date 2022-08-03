@@ -36,12 +36,29 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.Predicate;
 
-// TODO docs
+/**
+ * A screen which generates components for each option in the
+ * provided config. The general structure of the screen is determined
+ * by the XML config model it uses - the default one is located at
+ * {@code assets/owo/owo_ui/config.xml}. Changing which model is used
+ * via {@link #createWithCustomModel(Identifier, ConfigWrapper, Screen)}
+ * can often be enough to visually customize the generated screen - should
+ * you need custom functionality however, extending this class is your
+ * best bet
+ *
+ * @see io.wispforest.owo.config.annotation.Modmenu
+ * @see ConfigWrapper
+ */
 public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
 
     public static final Identifier DEFAULT_MODEL_ID = new Identifier("owo", "config");
 
     private static final Map<Predicate<Option<?>>, OptionComponentFactory<?>> DEFAULT_FACTORIES = new HashMap<>();
+    /**
+     * A set of extra option factories - add to this if you want to override
+     * some of the default factories or add extra ones for specific config options
+     * the standard ones don't support
+     */
     protected final Map<Predicate<Option<?>>, OptionComponentFactory<?>> extraFactories = new HashMap<>();
 
     protected final Screen parent;
@@ -54,10 +71,26 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
         this.config = config;
     }
 
+    /**
+     * Create a config screen with the default model ({@code owo:config})
+     *
+     * @param config The config to create a screen for
+     * @param parent The parent screen to return to
+     *               when the created screen is closed
+     */
     public static ConfigScreen create(ConfigWrapper<?> config, @Nullable Screen parent) {
         return new ConfigScreen(DEFAULT_MODEL_ID, config, parent);
     }
 
+    /**
+     * Create a config screen with a custom model
+     * located in your mod's assets
+     *
+     * @param modelId The ID of the model to use
+     * @param config  The config to create a screen for
+     * @param parent  The parent screen to return to
+     *                when the created screen is closed
+     */
     public static ConfigScreen createWithCustomModel(Identifier modelId, ConfigWrapper<?> config, @Nullable Screen parent) {
         return new ConfigScreen(modelId, config, parent);
     }
@@ -200,6 +233,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void close() {
         var shouldRestart = new MutableBoolean();
         this.options.forEach((option, component) -> {
