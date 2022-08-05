@@ -79,6 +79,10 @@ public class Components {
         return new LabelComponent(text);
     }
 
+    public static CheckboxComponent checkbox(Text message) {
+        return new CheckboxComponent(message);
+    }
+
     public static SliderComponent slider(Sizing horizontalSizing) {
         return new SliderComponent(horizontalSizing);
     }

@@ -182,11 +182,11 @@ public class Drawer extends DrawableHelper {
             for (var child : children) {
                 if (child instanceof ParentComponent parentComponent) {
                     this.drawInsets(matrices, parentComponent.x(), parentComponent.y(), parentComponent.width(),
-                            parentComponent.height(), parentComponent.padding().get().inverted(), 0xA753BF9D);
+                            parentComponent.height(), parentComponent.padding().get().inverted(), 0xA70CECDD);
                 }
 
                 final var margins = child.margins().get();
-                this.drawInsets(matrices, child.x(), child.y(), child.width(), child.height(), margins, 0xA70000AF);
+                this.drawInsets(matrices, child.x(), child.y(), child.width(), child.height(), margins, 0xA7FFF338);
                 drawRectOutline(matrices, child.x(), child.y(), child.width(), child.height(), 0xFF3AB0FF);
 
                 textRenderer.draw(matrices, Text.of(child.getClass().getSimpleName() + (child.id() != null ? " '" + child.id() + "'" : "")),

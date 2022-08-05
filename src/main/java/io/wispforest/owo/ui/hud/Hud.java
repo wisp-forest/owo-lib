@@ -81,6 +81,8 @@ public class Hud {
     static {
         WindowResizeCallback.EVENT.register((client, window) -> {
             if (adapter == null) return;
+
+            adapter.dispose();
             initializeAdapter();
         });
 

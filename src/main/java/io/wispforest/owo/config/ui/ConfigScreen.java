@@ -43,8 +43,8 @@ import java.util.function.Predicate;
  * {@code assets/owo/owo_ui/config.xml}. Changing which model is used
  * via {@link #createWithCustomModel(Identifier, ConfigWrapper, Screen)}
  * can often be enough to visually customize the generated screen - should
- * you need custom functionality however, extending this class is your
- * best bet
+ * you need custom functionality however, extending this class is usually
+ * your best bet
  *
  * @see io.wispforest.owo.config.annotation.Modmenu
  * @see ConfigWrapper

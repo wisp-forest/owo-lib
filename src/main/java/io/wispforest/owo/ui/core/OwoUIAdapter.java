@@ -109,6 +109,8 @@ public class OwoUIAdapter<T extends ParentComponent> implements Element, Drawabl
      * After this method has executed, this adapter can safely be garbage-collected
      */
     public void dispose() {
+        if (this.disposed) return;
+
         this.cursors.values().forEach(GLFW::glfwDestroyCursor);
         this.disposed = true;
     }

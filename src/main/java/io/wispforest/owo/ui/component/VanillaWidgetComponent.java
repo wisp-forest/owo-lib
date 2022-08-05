@@ -7,6 +7,7 @@ import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.core.Sizing;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.CheckboxWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.math.MatrixStack;
@@ -34,7 +35,7 @@ public class VanillaWidgetComponent extends BaseComponent {
 
     @Override
     protected void applyVerticalContentSizing(Sizing sizing) {
-        if (this.widget instanceof ButtonWidget) {
+        if (this.widget instanceof ButtonWidget || this.widget instanceof CheckboxWidget || this.widget instanceof SliderComponent) {
             this.height = 20;
         } else {
             super.applyVerticalContentSizing(sizing);
@@ -47,6 +48,8 @@ public class VanillaWidgetComponent extends BaseComponent {
     protected void applyHorizontalContentSizing(Sizing sizing) {
         if (this.widget instanceof ButtonWidget button) {
             this.width = MinecraftClient.getInstance().textRenderer.getWidth(button.getMessage()) + 6 + sizing.value * 2;
+        } else if (this.widget instanceof CheckboxWidget checkbox) {
+            this.width = MinecraftClient.getInstance().textRenderer.getWidth(checkbox.getMessage()) + 24;
         } else {
             super.applyVerticalContentSizing(sizing);
         }

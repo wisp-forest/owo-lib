@@ -32,6 +32,7 @@
     "tweaks.OperatingSystemMixin",
     "tweaks.TextFieldWidgetMixin",
     "ui.ButtonWidgetMixin",
+    "ui.CheckboxWidgetMixin",
     "ui.ClickableWidgetAccessor",
     "ui.ClickableWidgetMixin",
     "ui.MinecraftClientMixin",

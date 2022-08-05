@@ -1,7 +1,7 @@
 package io.wispforest.owo.ui.core;
 
-import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
+import io.wispforest.owo.ui.parsing.UIParsing;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
 import org.w3c.dom.Element;
@@ -21,6 +21,22 @@ public record Insets(int top, int bottom, int left, int right) implements Animat
 
     public Insets add(int top, int bottom, int left, int right) {
         return new Insets(this.top + top, this.bottom + bottom, this.left + left, this.right + right);
+    }
+
+    public Insets withTop(int top) {
+        return new Insets(top, this.bottom, this.left, this.right);
+    }
+
+    public Insets withBottom(int bottom) {
+        return new Insets(this.top, bottom, this.left, this.right);
+    }
+
+    public Insets withLeft(int left) {
+        return new Insets(this.top, this.bottom, left, this.right);
+    }
+
+    public Insets withRight(int right) {
+        return new Insets(this.top, this.bottom, this.left, right);
     }
 
     public int horizontal() {
