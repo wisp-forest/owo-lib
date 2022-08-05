@@ -44,18 +44,20 @@ public class ListOptionContainer<T> extends CollapsibleContainer implements Opti
         this.titleLayout.verticalSizing(Sizing.fixed(30));
         this.titleLayout.verticalAlignment(VerticalAlignment.CENTER);
 
-        var addButton = Components.label(Text.literal("Add entry").formatted(Formatting.GRAY));
-        addButton.cursorStyle(CursorStyle.HAND);
-        addButton.mouseEnter().subscribe(() -> addButton.text(addButton.text().copy().styled(style -> style.withColor(Formatting.YELLOW))));
-        addButton.mouseLeave().subscribe(() -> addButton.text(addButton.text().copy().styled(style -> style.withColor(Formatting.GRAY))));
-        addButton.mouseDown().subscribe((mouseX, mouseY, button) -> {
-            this.backingList.add((T) "");
-            this.refreshOptions();
-            UISounds.playInteractionSound();
+        if (!option.detached()) {
+            var addButton = Components.label(Text.literal("Add entry").formatted(Formatting.GRAY));
+            addButton.cursorStyle(CursorStyle.HAND);
+            addButton.mouseEnter().subscribe(() -> addButton.text(addButton.text().copy().styled(style -> style.withColor(Formatting.YELLOW))));
+            addButton.mouseLeave().subscribe(() -> addButton.text(addButton.text().copy().styled(style -> style.withColor(Formatting.GRAY))));
+            addButton.mouseDown().subscribe((mouseX, mouseY, button) -> {
+                this.backingList.add((T) "");
+                this.refreshOptions();
+                UISounds.playInteractionSound();
 
-            return true;
-        });
-        this.titleLayout.child(addButton.margins(Insets.of(5)));
+                return true;
+            });
+            this.titleLayout.child(addButton.margins(Insets.of(5)));
+        }
 
         this.resetButton = Components.button(Text.literal("⇄"), button -> {
             this.backingList.clear();
@@ -86,17 +88,19 @@ public class ListOptionContainer<T> extends CollapsibleContainer implements Opti
             int optionIndex = i;
             final var label = Components.label(Text.literal("- ").formatted(Formatting.GRAY));
             label.margins(Insets.left(10));
-            label.cursorStyle(CursorStyle.HAND);
-            label.mouseEnter().subscribe(() -> label.text(Text.literal("x ").formatted(Formatting.GRAY)));
-            label.mouseLeave().subscribe(() -> label.text(Text.literal("- ").formatted(Formatting.GRAY)));
-            label.mouseDown().subscribe((mouseX, mouseY, button) -> {
-                this.backingList.remove(optionIndex);
-                this.refreshResetButton();
-                this.refreshOptions();
-                UISounds.playInteractionSound();
+            if (!this.backingOption.detached()) {
+                label.cursorStyle(CursorStyle.HAND);
+                label.mouseEnter().subscribe(() -> label.text(Text.literal("x ").formatted(Formatting.GRAY)));
+                label.mouseLeave().subscribe(() -> label.text(Text.literal("- ").formatted(Formatting.GRAY)));
+                label.mouseDown().subscribe((mouseX, mouseY, button) -> {
+                    this.backingList.remove(optionIndex);
+                    this.refreshResetButton();
+                    this.refreshOptions();
+                    UISounds.playInteractionSound();
 
-                return true;
-            });
+                    return true;
+                });
+            }
             container.child(label);
 
             final var box = new ConfigTextBox();
@@ -107,12 +111,16 @@ public class ListOptionContainer<T> extends CollapsibleContainer implements Opti
             box.horizontalSizing(Sizing.fill(95));
             box.verticalSizing(Sizing.fixed(8));
 
-            box.setChangedListener(s -> {
-                if (!box.isValid()) return;
+            if (!this.backingOption.detached()) {
+                box.setChangedListener(s -> {
+                    if (!box.isValid()) return;
 
-                this.backingList.set(optionIndex, (T) box.parsedValue());
-                this.refreshResetButton();
-            });
+                    this.backingList.set(optionIndex, (T) box.parsedValue());
+                    this.refreshResetButton();
+                });
+            } else {
+                box.active = false;
+            }
 
             if (NumberReflection.isNumberType(listType)) {
                 box.configureForNumber((Class<? extends Number>) listType);
@@ -131,7 +139,7 @@ public class ListOptionContainer<T> extends CollapsibleContainer implements Opti
     }
 
     protected void refreshResetButton() {
-        this.resetButton.active = !this.backingList.equals(this.backingOption.defaultValue());
+        this.resetButton.active = !this.backingOption.detached() && !this.backingList.equals(this.backingOption.defaultValue());
     }
 
     @Override

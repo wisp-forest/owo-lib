@@ -24,13 +24,20 @@ public class OptionComponents {
 
         var valueBox = optionComponent.childById(ConfigTextBox.class, "value-box");
         var resetButton = optionComponent.childById(ButtonWidget.class, "reset-button");
-        resetButton.active = !valueBox.getText().equals(option.defaultValue().toString());
-        resetButton.onPress(button -> {
-            valueBox.setText(option.defaultValue().toString());
-            button.active = false;
-        });
 
-        valueBox.setChangedListener(s -> resetButton.active = !s.equals(option.defaultValue().toString()));
+        if (option.detached()) {
+            resetButton.active = false;
+            valueBox.setEditable(false);
+        } else {
+            resetButton.active = !valueBox.getText().equals(option.defaultValue().toString());
+            resetButton.onPress(button -> {
+                valueBox.setText(option.defaultValue().toString());
+                button.active = false;
+            });
+
+            valueBox.setChangedListener(s -> resetButton.active = !s.equals(option.defaultValue().toString()));
+        }
+
         processor.accept(valueBox);
 
         return new OptionComponentFactory.Result(optionComponent, valueBox);
@@ -48,18 +55,24 @@ public class OptionComponents {
 
         var valueSlider = optionComponent.childById(ConfigSlider.class, "value-slider");
         valueSlider.min(min).max(max).decimalPlaces(withDecimals ? 2 : 0).snap(!withDecimals).setFromDiscreteValue(value.doubleValue());
+        valueSlider.valueType(option.clazz());
 
         var resetButton = optionComponent.childById(ButtonWidget.class, "reset-button");
-        resetButton.active = (withDecimals ? value.doubleValue() : Math.round(value.doubleValue())) != option.defaultValue().doubleValue();
-        resetButton.onPress(button -> {
-            valueSlider.setFromDiscreteValue(option.defaultValue().doubleValue());
-            button.active = false;
-        });
 
-        valueSlider.valueType(option.clazz());
-        valueSlider.onChanged(newValue -> {
-            resetButton.active = (withDecimals ? newValue : Math.round(newValue)) != option.defaultValue().doubleValue();
-        });
+        if (option.detached()) {
+            resetButton.active = false;
+            valueSlider.active = false;
+        } else {
+            resetButton.active = (withDecimals ? value.doubleValue() : Math.round(value.doubleValue())) != option.defaultValue().doubleValue();
+            resetButton.onPress(button -> {
+                valueSlider.setFromDiscreteValue(option.defaultValue().doubleValue());
+                button.active = false;
+            });
+
+            valueSlider.onChanged(newValue -> {
+                resetButton.active = (withDecimals ? newValue : Math.round(newValue)) != option.defaultValue().doubleValue();
+            });
+        }
 
         return new OptionComponentFactory.Result(optionComponent, valueSlider);
     }
@@ -73,14 +86,20 @@ public class OptionComponents {
         var toggleButton = optionComponent.childById(ConfigToggleButton.class, "toggle-button");
         var resetButton = optionComponent.childById(ButtonWidget.class, "reset-button");
 
-        resetButton.active = option.value() != option.defaultValue();
-        resetButton.onPress(button -> {
-            toggleButton.enabled(option.defaultValue());
-            button.active = false;
-        });
-
         toggleButton.enabled(option.value());
-        toggleButton.onPress(button -> resetButton.active = toggleButton.parsedValue() != option.defaultValue());
+
+        if (option.detached()) {
+            resetButton.active = false;
+            toggleButton.active = false;
+        } else {
+            resetButton.active = option.value() != option.defaultValue();
+            resetButton.onPress(button -> {
+                toggleButton.enabled(option.defaultValue());
+                button.active = false;
+            });
+
+            toggleButton.onPress(button -> resetButton.active = toggleButton.parsedValue() != option.defaultValue());
+        }
 
         return new OptionComponentFactory.Result(optionComponent, toggleButton);
     }
@@ -94,14 +113,20 @@ public class OptionComponents {
         var enumButton = optionComponent.childById(ConfigEnumButton.class, "enum-button");
         var resetButton = optionComponent.childById(ButtonWidget.class, "reset-button");
 
-        resetButton.active = option.value() != option.defaultValue();
-        resetButton.onPress(button -> {
-            enumButton.select(option.defaultValue().ordinal());
-            button.active = false;
-        });
-
         enumButton.init(option, option.value().ordinal());
-        enumButton.onPress(button -> resetButton.active = enumButton.parsedValue() != option.defaultValue());
+
+        if (option.detached()) {
+            resetButton.active = false;
+            enumButton.active = false;
+        } else {
+            resetButton.active = option.value() != option.defaultValue();
+            resetButton.onPress(button -> {
+                enumButton.select(option.defaultValue().ordinal());
+                button.active = false;
+            });
+
+            enumButton.onPress(button -> resetButton.active = enumButton.parsedValue() != option.defaultValue());
+        }
 
         return new OptionComponentFactory.Result(optionComponent, enumButton);
     }

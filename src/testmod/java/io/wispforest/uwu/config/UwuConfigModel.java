@@ -1,11 +1,13 @@
 package io.wispforest.uwu.config;
 
 import blue.endless.jankson.Comment;
+import io.wispforest.owo.config.Option;
 import io.wispforest.owo.config.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Sync(Option.SyncMode.OVERRIDE_CLIENT)
 @Modmenu(modId = "uwu", uiModelId = "uwu:config")
 @Config(name = "uwu", wrapperName = "UwuConfig")
 public class UwuConfigModel {
@@ -17,6 +19,7 @@ public class UwuConfigModel {
     @RegexConstraint("[A-Za-z]{1,3}")
     public String regex = "yes";
 
+    @Nest
     @Expanded
     public Nested nestingTime = new Nested();
 
@@ -31,18 +34,18 @@ public class UwuConfigModel {
     @ExcludeFromScreen
     public String noSeeingThis = "yep, never";
 
-    @Nest
     public static class Nested {
         public boolean togglee = false;
         public boolean yesThisIsAlsoNested = true;
 
+        @Nest
         @Comment("Commented nesting")
         public SuperNested nestingTimeIntensifies = new SuperNested();
 
+        @Sync(Option.SyncMode.INFORM_SERVER)
         public List<Integer> nestedIntegers = new ArrayList<>(List.of(69, 34, 35, 420));
     }
 
-    @Nest
     public static class SuperNested {
         public byte wowSoNested;
     }

@@ -36,7 +36,7 @@ public class ConfigAP extends AbstractProcessor {
 
             public class {wrapper_class_name} extends ConfigWrapper<{config_class_name}> {
 
-            {key_constants}
+            {option_instances}
 
                 private {wrapper_class_name}() {
                     super({config_class_name}.class);
@@ -55,20 +55,20 @@ public class ConfigAP extends AbstractProcessor {
 
     private static final String GET_ACCESSOR_TEMPLATE = """
             public {field_type} {field_name}() {
-                return instance.{field_key};
+                return {option_instance}.value();
             }
             """;
 
     private static final String SET_ACCESSOR_TEMPLATE = """
             public void {field_name}({field_type} value) {
                 instance.{field_key} = value;
-                options.get({field_key_constant}).synchronizeWithBackingField();
+                {option_instance}.synchronizeWithBackingField();
             }
             """;
 
     private static final String SUBSCRIBE_TEMPLATE = """
             public void subscribeTo{field_name}(Consumer<{field_type}> subscriber) {
-                options.get({field_key_constant}).events().observe(subscriber);
+                {option_instance}.observe(subscriber);
             }
             """;
 
@@ -141,7 +141,7 @@ public class ConfigAP extends AbstractProcessor {
                 }
             }
 
-            if (typeElement != null && typeElement.getAnnotation(Nest.class) != null) {
+            if (typeElement != null && field.getAnnotation(Nest.class) != null) {
                 list.add(new NestField(fieldName, collectFields(parent.child(fieldName), typeElement, defaultHook)));
             } else {
                 list.add(new ValueField(fieldName, parent.child(fieldName), field.asType(),
@@ -159,21 +159,21 @@ public class ConfigAP extends AbstractProcessor {
                 .replace("{config_class_name}", configClassName);
 
         var accessorMethods = new Writer(new StringBuilder());
-        var keyConstants = new Writer(new StringBuilder());
+        var optionInstances = new Writer(new StringBuilder());
 
         for (var field : fields) {
-            field.appendAccessors(accessorMethods, keyConstants);
+            field.appendAccessors(accessorMethods, optionInstances);
         }
 
         return baseAccessor
-                .replace("{key_constants}", keyConstants.finish())
+                .replace("{option_instances}", optionInstances.finish())
                 .replace("{accessors}", accessorMethods.finish());
     }
 
     private String makeGetAccessor(String fieldName, Option.Key fieldKey, TypeMirror fieldType) {
         return GET_ACCESSOR_TEMPLATE
                 .replace("{field_key}", fieldKey.asString())
-                .replace("{field_key_constant}", constantNameOf(fieldKey))
+                .replace("{option_instance}", constantNameOf(fieldKey))
                 .replace("{field_name}", fieldName)
                 .replace("{field_type}", fieldType.toString());
     }
@@ -181,7 +181,7 @@ public class ConfigAP extends AbstractProcessor {
     private String makeSetAccessor(String fieldName, Option.Key fieldKey, TypeMirror fieldType) {
         return SET_ACCESSOR_TEMPLATE
                 .replace("{field_key}", fieldKey.asString())
-                .replace("{field_key_constant}", constantNameOf(fieldKey))
+                .replace("{option_instance}", constantNameOf(fieldKey))
                 .replace("{field_name}", fieldName)
                 .replace("{field_type}", fieldType.toString());
     }
@@ -195,7 +195,7 @@ public class ConfigAP extends AbstractProcessor {
     }
 
     private String constantNameOf(Option.Key key) {
-        return key.asString().replace(".", "_").toUpperCase(Locale.ROOT);
+        return key.asString().replace(".", "_");
     }
 
     private interface ConfigField {
@@ -216,8 +216,8 @@ public class ConfigAP extends AbstractProcessor {
         }
 
         @Override
-        public void appendAccessors(Writer accessors, Writer keyConstants) {
-            keyConstants.line("private static final Option.Key " + constantNameOf(this.key) + " = new Option.Key(\"" + this.key.asString() + "\");");
+        public void appendAccessors(Writer accessors, Writer optionInstances) {
+            optionInstances.line("private final Option<" + primitivesToWrappers.getOrDefault(type, type) + "> " + constantNameOf(this.key) + " = this.optionForKey(new Option.Key(\"" + this.key.asString() + "\"));");
 
             accessors.append(makeGetAccessor(this.name, this.key, this.type)).write("\n");
             accessors.append(makeSetAccessor(this.name, this.key, this.type)).write("\n");
@@ -227,14 +227,14 @@ public class ConfigAP extends AbstractProcessor {
 
     private record NestField(String nestName, List<ConfigField> children) implements ConfigField {
         @Override
-        public void appendAccessors(Writer accessors, Writer keyConstants) {
+        public void appendAccessors(Writer accessors, Writer optionInstances) {
             var nestClassName = capitalize(nestName);
 
             accessors.beginLine("public final ").write(nestClassName).write(" ").write(nestName).write(" = new ").write(nestClassName).endLine("();");
             accessors.beginLine("public class ").write(nestClassName).endLine(" {");
             accessors.beginBlock();
             for (var child : children) {
-                child.appendAccessors(accessors, keyConstants);
+                child.appendAccessors(accessors, optionInstances);
             }
             accessors.endBlock();
             accessors.line("}");

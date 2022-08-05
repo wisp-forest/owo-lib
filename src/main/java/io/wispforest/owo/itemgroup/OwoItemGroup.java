@@ -13,6 +13,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -117,7 +118,7 @@ public abstract class OwoItemGroup extends ItemGroup {
      * @param contentTag The tag used for filling this tab
      * @see Icon#of(ItemConvertible)
      */
-    protected void addTab(Icon icon, String name, TagKey<Item> contentTag) {
+    protected void addTab(Icon icon, String name, @Nullable TagKey<Item> contentTag) {
         addTab(icon, name, contentTag, ItemGroupTab.DEFAULT_TEXTURE);
     }
 

@@ -10,6 +10,14 @@ import io.wispforest.owo.util.NumberReflection;
 
 import java.util.List;
 
+/**
+ * A function which creates an instance of {@link OptionComponent}
+ * fitting for the given config option. Whatever component is created
+ * should accurately reflect if the option is currently detached
+ * and thus immutable - ideally it is non-interactable
+ *
+ * @param <T> The type of option for which this factory can create components
+ */
 public interface OptionComponentFactory<T> {
 
     OptionComponentFactory<? extends Number> NUMBER = (model, option) -> {
@@ -43,6 +51,16 @@ public interface OptionComponentFactory<T> {
         return new Result(layout, layout);
     };
 
+    /**
+     * Create a new component fitting for, and bound to,
+     * the given config option
+     *
+     * @param model  The UI model of the enclosing screen, used
+     *               for expanding templates
+     * @param option The option for which to create a component
+     * @return The option component as well as a potential wrapping
+     * component, this simply be the option component itself
+     */
     Result make(UIModel model, Option<T> option);
 
     record Result(Component baseComponent, OptionComponent optionContainer) {}

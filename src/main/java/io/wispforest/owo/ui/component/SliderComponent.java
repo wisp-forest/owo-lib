@@ -61,10 +61,23 @@ public class SliderComponent extends SliderWidget {
 
     @Override
     public boolean onMouseScroll(double mouseX, double mouseY, double amount) {
+        if (!this.active) return super.onMouseScroll(mouseX, mouseY, amount);
+
         this.value(MathHelper.clamp(this.value + .05 * amount, 0, 1));
 
         super.onMouseScroll(mouseX, mouseY, amount);
         return true;
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (!this.active) return false;
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    @Override
+    protected boolean isValidClickButton(int button) {
+        return this.active && super.isValidClickButton(button);
     }
 
     @Override

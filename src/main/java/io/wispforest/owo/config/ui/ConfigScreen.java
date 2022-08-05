@@ -146,19 +146,26 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                 containers.get(parentKey.parent()).child(container);
             }
 
-            var tooltipText = new ArrayList<OrderedText>();
-            var tooltipTranslationKey = option.translationKey() + ".tooltip";
+            if (option.detached()) {
+                result.baseComponent().tooltip(
+                        this.client.textRenderer.wrapLines(Text.translatable("text.owo.config.managed_by_server"), Integer.MAX_VALUE)
+                                .stream().map(TooltipComponent::of).toList()
+                );
+            } else {
+                var tooltipText = new ArrayList<OrderedText>();
+                var tooltipTranslationKey = option.translationKey() + ".tooltip";
 
-            if (I18n.hasTranslation(tooltipTranslationKey)) {
-                tooltipText.addAll(this.client.textRenderer.wrapLines(Text.translatable(tooltipTranslationKey), Integer.MAX_VALUE));
-            }
+                if (I18n.hasTranslation(tooltipTranslationKey)) {
+                    tooltipText.addAll(this.client.textRenderer.wrapLines(Text.translatable(tooltipTranslationKey), Integer.MAX_VALUE));
+                }
 
-            if (option.backingField().hasAnnotation(RestartRequired.class)) {
-                tooltipText.add(Text.translatable("text.owo.config.applies_after_restart").asOrderedText());
-            }
+                if (option.backingField().hasAnnotation(RestartRequired.class)) {
+                    tooltipText.add(Text.translatable("text.owo.config.applies_after_restart").asOrderedText());
+                }
 
-            if (!tooltipText.isEmpty()) {
-                result.baseComponent().tooltip(tooltipText.stream().map(TooltipComponent::of).toList());
+                if (!tooltipText.isEmpty()) {
+                    result.baseComponent().tooltip(tooltipText.stream().map(TooltipComponent::of).toList());
+                }
             }
 
             if (option.backingField().hasAnnotation(SectionHeader.class)) {

@@ -13,6 +13,8 @@ import io.wispforest.owo.config.ui.ConfigScreen;
 import io.wispforest.owo.util.NumberReflection;
 import io.wispforest.owo.util.Observable;
 import io.wispforest.owo.util.ReflectionUtils;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.Identifier;
@@ -44,6 +46,7 @@ import java.util.regex.Pattern;
  */
 public abstract class ConfigWrapper<C> {
 
+    @Environment(EnvType.CLIENT)
     private static final Map<String, Function<Screen, ConfigScreen>> CONFIG_SCREEN_PROVIDERS = new HashMap<>();
 
     protected final String name;
@@ -62,7 +65,7 @@ public abstract class ConfigWrapper<C> {
         var configAnnotation = clazz.getAnnotation(Config.class);
         this.name = configAnnotation.name();
 
-        if (clazz.isAnnotationPresent(Modmenu.class)) {
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT && clazz.isAnnotationPresent(Modmenu.class)) {
             var modmenuAnnotation = clazz.getAnnotation(Modmenu.class);
             CONFIG_SCREEN_PROVIDERS.put(
                     modmenuAnnotation.modId(),
@@ -72,6 +75,12 @@ public abstract class ConfigWrapper<C> {
 
         try {
             this.initializeOptions(configAnnotation.saveOnModification());
+            for (var option : this.options.values()) {
+                if (option.syncMode().isNone()) continue;
+
+                ConfigSynchronizer.register(this);
+                break;
+            }
         } catch (IllegalAccessException | NoSuchMethodException e) {
             throw new RuntimeException("Failed to initialize config " + this.name, e);
         }
@@ -211,6 +220,10 @@ public abstract class ConfigWrapper<C> {
         var fields = new LinkedHashMap<Option.Key, Option.BoundField<Object>>();
         collectFieldValues(Option.Key.ROOT, this.instance, fields);
 
+        var instanceSyncMode = this.instance.getClass().isAnnotationPresent(Sync.class)
+                ? this.instance.getClass().getAnnotation(Sync.class).value()
+                : Option.SyncMode.NONE;
+
         for (var entry : fields.entrySet()) {
             var key = entry.getKey();
             var boundField = entry.getValue();
@@ -268,7 +281,22 @@ public abstract class ConfigWrapper<C> {
             final var observable = Observable.of(defaultValue);
             if (hookSave) observable.observe(o -> this.save());
 
-            this.options.put(key, new Option<>(this.name, key, defaultValue, observable, boundField, constraint));
+            var syncMode = instanceSyncMode;
+            if (field.isAnnotationPresent(Sync.class)) {
+                syncMode = field.getAnnotation(Sync.class).value();
+            } else {
+                var parentKey = key.parent();
+                while (!parentKey.isRoot()) {
+                    var parentField = this.fieldForKey(parentKey);
+                    if (parentField.isAnnotationPresent(Sync.class)) {
+                        syncMode = parentField.getAnnotation(Sync.class).value();
+                    }
+
+                    parentKey = parentKey.parent();
+                }
+            }
+
+            this.options.put(key, new Option<>(this.name, key, defaultValue, observable, boundField, constraint, syncMode));
         }
     }
 
@@ -276,7 +304,7 @@ public abstract class ConfigWrapper<C> {
         for (var field : instance.getClass().getDeclaredFields()) {
             if (Modifier.isTransient(field.getModifiers()) || Modifier.isStatic(field.getModifiers())) continue;
 
-            if (field.getType().isAnnotationPresent(Nest.class)) {
+            if (field.isAnnotationPresent(Nest.class)) {
                 var fieldValue = field.get(instance);
                 if (fieldValue != null) {
                     this.collectFieldValues(parent.child(field.getName()), fieldValue, fields);

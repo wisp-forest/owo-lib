@@ -1,38 +1,84 @@
 package io.wispforest.owo.config;
 
 import io.wispforest.owo.Owo;
+import io.wispforest.owo.network.serialization.PacketBufSerializer;
 import io.wispforest.owo.util.Observable;
+import net.minecraft.network.PacketByteBuf;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Describes a single option in a config. Instances
  * of this class keep a reference to the field in
- * the model class which stores the value used for serialization
- *
- * @param configName   The name of the config this option is contained in
- * @param key          The key of this option
- * @param defaultValue The default value of this option
- * @param events       A mirror of the value of this option, used for
- *                     emitting events when it changes as well as correcting
- *                     invalid values after deserialization
- * @param backingField The backing field in the config model class
- *                     which this option describes
- * @param constraint   The constraint placed on the value of this option,
- *                     or {@code null} if the option is unconstrained
+ * the model class which stores the value used for serialization.
+ * <p>
+ * An option may enter the so-called "detached" state, which means
+ * its value is being overridden by the server. In this state, the option
+ * is completely immutable and can only be changed again afterwards
  */
-public record Option<T>(
-        String configName,
-        Key key,
-        T defaultValue,
-        Observable<T> events,
-        BoundField<T> backingField,
-        @Nullable ConfigWrapper.Constraint constraint
-) {
+public final class Option<T> {
+
+    private final String configName;
+    private final Key key;
+    private final String translationKey;
+
+    private final T defaultValue;
+    private final Observable<T> mirror;
+
+    private final BoundField<T> backingField;
+    private final Class<T> clazz;
+
+    private final ConfigWrapper.@Nullable Constraint constraint;
+    private final @Nullable PacketBufSerializer<T> serializer;
+    private final SyncMode syncMode;
+
+    /**
+     * Indicates whether this option is currently being overridden
+     * by the server and should thus never synchronize with its backing
+     * field and behave immutably to the client
+     */
+    private boolean detached = false;
+
+    /**
+     * @param configName   The name of the config this option is contained in
+     * @param key          The key of this option
+     * @param defaultValue The default value of this option
+     * @param mirror       A mirror of the value of this option, used for
+     *                     emitting events when it changes as well as correcting
+     *                     invalid values after deserialization
+     * @param backingField The backing field in the config model class
+     *                     which this option describes
+     * @param constraint   The constraint placed on the value of this option,
+     *                     or {@code null} if the option is unconstrained
+     */
+    @SuppressWarnings("unchecked")
+    public Option(String configName,
+                  Key key,
+                  T defaultValue,
+                  Observable<T> mirror,
+                  BoundField<T> backingField,
+                  @Nullable ConfigWrapper.Constraint constraint,
+                  SyncMode syncMode
+    ) {
+        this.configName = configName;
+        this.key = key;
+        this.translationKey = "text.config." + this.configName + ".option." + this.key.asString();
+
+        this.defaultValue = defaultValue;
+        this.mirror = mirror;
+
+        this.backingField = backingField;
+        this.clazz = (Class<T>) backingField.field().getType();
+
+        this.constraint = constraint;
+        this.syncMode = syncMode;
+        this.serializer = syncMode.isNone() ? null : (PacketBufSerializer<T>) PacketBufSerializer.getGeneric(this.backingField.field.getGenericType());
+    }
 
     /**
      * Update the current value of this option,
@@ -41,25 +87,26 @@ public record Option<T>(
      * @param value The new value of the option
      */
     public void set(T value) {
+        if (this.detached) return;
+
         if (!this.verifyConstraint(value)) return;
 
         this.backingField.setValue(value);
-        this.events.set(value);
+        this.mirror.set(value);
     }
 
     /**
      * @return The current value of this option
      */
     public T value() {
-        return this.events.get();
+        return this.mirror.get();
     }
 
     /**
      * @return The class of this option's value
      */
-    @SuppressWarnings("unchecked")
     public Class<T> clazz() {
-        return (Class<T>) this.backingField.field().getType();
+        return this.clazz;
     }
 
     /**
@@ -68,11 +115,13 @@ public record Option<T>(
      * invalid value after updating the field or updating the mirror
      */
     public void synchronizeWithBackingField() {
+        if (this.detached) return;
+
         final var fieldValue = (T) this.backingField.getValue();
         if (verifyConstraint(fieldValue)) {
-            this.events.set(fieldValue);
+            this.mirror.set(fieldValue);
         } else {
-            this.backingField.setValue(this.events.get());
+            this.backingField.setValue(this.mirror.get());
         }
     }
 
@@ -86,13 +135,13 @@ public record Option<T>(
      * option is unconstrained
      */
     public boolean verifyConstraint(T value) {
-        if (constraint == null) return true;
+        if (this.constraint == null) return true;
 
-        final var matched = constraint.test(value);
+        final var matched = this.constraint.test(value);
         if (!matched) {
             Owo.LOGGER.warn(
                     "Option {} in config '{}' could not be updated, as the given value '{}' does not match its constraint: {}",
-                    key, configName, value, constraint.formatted()
+                    this.key, this.configName, value, this.constraint.formatted()
             );
         }
 
@@ -100,10 +149,145 @@ public record Option<T>(
     }
 
     /**
+     * Add an observer function to be run every time
+     * the value of this option changes
+     */
+    public void observe(Consumer<T> observer) {
+        this.mirror.observe(observer);
+    }
+
+    /**
+     * Write the current value of this option into the given buffer
+     *
+     * @param buf The packet buffer to write to
+     */
+    void write(PacketByteBuf buf) {
+        this.serializer.serializer().accept(buf, this.value());
+    }
+
+    /**
+     * Read a new value of this option from the given buffer
+     * and enter a detached state
+     *
+     * @param buf The packet buffer to read from
+     */
+    void read(PacketByteBuf buf) {
+        this.mirror.set(this.serializer.deserializer().apply(buf));
+        this.detached = true;
+    }
+
+    /**
+     * @return The serializer for this option's value
+     */
+    PacketBufSerializer<T> serializer() {
+        return this.serializer;
+    }
+
+    /**
+     * Reset this option's attached state and synchronize
+     * it with the backing field again
+     */
+    void reattach() {
+        if (!this.detached) return;
+
+        this.detached = false;
+        this.synchronizeWithBackingField();
+    }
+
+    // -------------
+
+    /**
      * @return The translation key of this option
      */
     public String translationKey() {
-        return "text.config." + this.configName + ".option." + this.key.asString();
+        return this.translationKey;
+    }
+
+    /**
+     * @return The name of the config this option is contained in
+     */
+    public String configName() {
+        return configName;
+    }
+
+    /**
+     * @return The key of this option
+     */
+    public Key key() {
+        return key;
+    }
+
+    /**
+     * @return The default value of this option
+     */
+    public T defaultValue() {
+        return defaultValue;
+    }
+
+    /**
+     * @return The field which is backing this option,
+     * used for serialization as well as storing the client's
+     * value while the option is detached
+     */
+    public BoundField<T> backingField() {
+        return backingField;
+    }
+
+    /**
+     * @return The constraint placed on the value of this option,
+     * or {@code null} if the option is unconstrained
+     */
+    public ConfigWrapper.@Nullable Constraint constraint() {
+        return constraint;
+    }
+
+    /**
+     * @return {@code true} if this option is currently detached
+     */
+    public boolean detached() {
+        return this.detached;
+    }
+
+    /**
+     * @return The way in which this option
+     * should be synchronized between sever and client
+     */
+    public SyncMode syncMode() {
+        return this.syncMode;
+    }
+
+    @Override
+    public String toString() {
+        return "Option[" +
+                "configName=" + configName + ", " +
+                "key=" + key + ", " +
+                "defaultValue=" + defaultValue + ", " +
+                "constraint=" + (constraint == null ? null : constraint.formatted())
+                + "]";
+    }
+
+    // -------------
+
+    public enum SyncMode {
+        /**
+         * Do not ever send this option over the network
+         */
+        NONE,
+        /**
+         * Only send the client's value to the server,
+         * but not vice-versa
+         */
+        INFORM_SERVER,
+        /**
+         * Send the client's value to the server
+         * <i>and</i> send the server's value back,
+         * overriding the client's value
+         */
+        OVERRIDE_CLIENT;
+
+        public boolean isNone() {
+            return this == NONE;
+        }
     }
 
     /**

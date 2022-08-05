@@ -12,5 +12,5 @@ import java.lang.annotation.Target;
  * as an option in itself
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
+@Target(ElementType.FIELD)
 public @interface Nest {}
