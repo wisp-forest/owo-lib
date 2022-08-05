@@ -62,7 +62,7 @@ public class ConfigSynchronizer {
             configBuf.writeVarInt((int) config.allOptions().values().stream().filter(option -> option.syncMode().ordinal() >= targetMode.ordinal()).count());
 
             config.allOptions().forEach((key, option) -> {
-                if (option.syncMode().ordinal() >= targetMode.ordinal()) return;
+                if (option.syncMode().ordinal() < targetMode.ordinal()) return;
 
                 configBuf.writeString(key.asString());
 
