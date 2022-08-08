@@ -1,0 +1,56 @@
+{
+  "key.owo-ui-academy.begin": "Begin Academy",
+  "text.owo-ui-academy.tutorial.margins": [
+    "The margins of a component are added to its normal bounding box as dead space - useful for spacing out neighboring components. They can also be negative, which effectively shrinks the bounding box of the component on that side.\n\nThe inspector shows the margins of a component in ",
+    {
+      "text": "bright yellow",
+      "color": "#FFF338"
+    }
+  ],
+  "text.owo-ui-academy.tutorial.padding": [
+    "Padding only exists on parent components (which will usually be some sort of layout) and works like the opposite of margins - it gets removed from the area available to its children. Just like margins, padding can technically be made negative to increase the area used for the children, however that's generally not very useful\n\nThe inspector shows the padding of a component in ",
+    {
+      "text": "bright cyan",
+      "color": "#0CECDD"
+    }
+  ],
+  "text.owo-ui-academy.tutorial.positioning": [
+    "The Positioning of a component is the method by which it gets placed on the screen.\n\n",
+    {
+      "text": "Layout",
+      "bold": true
+    },
+    " simply makes the component follow its parent's layout\n\n",
+    {
+      "text": "Absolute",
+      "bold": true
+    },
+    " places the component an absolute amount of pixels from the parent's origin\n\n",
+    {
+      "text": "Relative",
+      "bold": true
+    },
+    " places the component some percentage across its parent. 50|50 means center, 100|100 means bottom right corner and so on"
+  ],
+  "text.owo-ui-academy.tutorial.sizing": [
+    "The Sizing of a component is the method by which it calculates its size.\n\n",
+    {
+      "text": "Content",
+      "bold": true
+    },
+    " simply makes the component as large as it has to be to fit all its content (plus some amount of padding). Some components may not support this, like if they don't have intrinsic size, and will throw an exception when configured this way.\n\n",
+    {
+      "text": "Fixed",
+      "bold": true
+    },
+    " gives the component a fixed size in pixels\n\n",
+    {
+      "text": "Fill",
+      "bold": true
+    },
+    " gives the component a dynamic size in % of the available space - in case of a content-sized parent this will be the space available to the parent, potentially all the way up to the whole screen if all parents are content-sized.\n\nSizing is applied independently on the X and Y-axis, this screen only forces the same method on both axis to avoid clutter"
+  ],
+  "text.owo-ui-academy.tutorial.alignment": "Alignment, a property of parent components, determines how it aligns its children on the respective axis. It is most often useful with flow layouts, but every parent supports it.\n\nLabels present a special case, as they are the only normal component which also supports alignment .",
+  "text.owo-ui-academy.tutorial.layout": "owo-ui offers 2 builtin layout types - Flow and Grid.\n\nA Flow Layout simply arranges all of its children one after the other, depending on its direction on either the horizontal or vertical axis.\n\nA Grid Layout, as seen on the bottom, has a fixed number of rows and columns and places a single child in each of those cells. If its content-sized, each row and column grow to fit their largest cell, otherwise they will be evenly split along the length of that side."
+
+}

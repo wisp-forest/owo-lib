@@ -45,8 +45,6 @@ public class UwuClient implements ClientModInitializer {
                         .margins(Insets.of(5))
                         .positioning(Positioning.relative(100, 25));
 
-        Hud.add(hudComponentId, hudComponent);
-
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (binding.wasPressed()) {
                 if (Hud.hasComponent(hudComponentId)) {

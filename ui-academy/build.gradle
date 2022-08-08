@@ -1,0 +1,13 @@
+loom {
+    runConfigs.client.ideConfigGenerated = true
+
+    mods {
+        "owo-ui-academcy" {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+dependencies {
+    modImplementation rootProject
+}

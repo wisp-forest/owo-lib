@@ -1,0 +1,199 @@
+<owo-ui>
+
+    <components>
+        <flow-layout direction="horizontal">
+            <children>
+                <label>
+                    <text>Topic 2.1 - Positioning</text>
+                    <shadow>true</shadow>
+
+                    <positioning type="relative">50,5</positioning>
+                </label>
+
+                <label>
+                    <text translate="true">text.owo-ui-academy.tutorial.positioning</text>
+                    <max-width>250</max-width>
+
+                    <margins>
+                        <all>15</all>
+                    </margins>
+                </label>
+
+                <flow-layout direction="vertical" id="box-container">
+                    <children>
+                        <box id="the-box">
+                            <start-color>#FF00D7FF</start-color>
+                            <end-color>#FF5800FF</end-color>
+                            <fill>true</fill>
+                            <direction>top-to-bottom</direction>
+
+                            <sizing>
+                                <vertical method="fixed">50</vertical>
+                                <horizontal method="fixed">50</horizontal>
+                            </sizing>
+                        </box>
+
+                        <flow-layout direction="vertical">
+                            <children>
+                                <label>
+                                    <text>This label follows&#10;the layout</text>
+                                    <shadow>true</shadow>
+                                    <horizontal-text-alignment>center</horizontal-text-alignment>
+                                </label>
+                            </children>
+
+                            <padding>
+                                <all>3</all>
+                            </padding>
+
+                            <surface>
+                                <flat>#77000000</flat>
+                            </surface>
+                        </flow-layout>
+                    </children>
+
+                    <surface>
+                        <flat>#77000000</flat>
+                        <outline>#FF121212</outline>
+                    </surface>
+
+                    <padding>
+                        <all>1</all>
+                    </padding>
+
+                    <sizing>
+                        <vertical method="fixed">150</vertical>
+                        <horizontal method="fixed">150</horizontal>
+                    </sizing>
+                </flow-layout>
+
+                <flow-layout direction="vertical">
+                    <children>
+                        <button id="layout-button">
+                            <text>Layout</text>
+                            <margins>
+                                <vertical>2</vertical>
+                            </margins>
+                            <sizing>
+                                <horizontal method="fixed">52</horizontal>
+                            </sizing>
+                        </button>
+
+                       <template name="positioning-button">
+                           <type>relative</type>
+                           <type-name>Relative</type-name>
+                           <x-default>50</x-default>
+                           <y-default>50</y-default>
+                       </template>
+
+                        <template name="positioning-button">
+                            <type>absolute</type>
+                            <type-name>Absolute</type-name>
+                            <x-default>25</x-default>
+                            <y-default>75</y-default>
+                        </template>
+                    </children>
+
+                    <margins>
+                        <left>10</left>
+                    </margins>
+                </flow-layout>
+
+                <flow-layout direction="horizontal">
+                    <children>
+                        <button id="inspector-button">
+                            <text>⚡ Inspector</text>
+                        </button>
+
+                        <box>
+                            <color>#FF696969</color>
+                            <sizing>
+                                <vertical method="fixed">16</vertical>
+                                <horizontal method="fixed">1</horizontal>
+                            </sizing>
+                            <margins>
+                                <horizontal>5</horizontal>
+                            </margins>
+                        </box>
+
+                        <button id="previous-button">
+                            <text>⏴ Previous</text>
+                            <margins><right>2</right></margins>
+                        </button>
+                        <button id="next-button">
+                            <text>Next ⏵</text>
+                        </button>
+                    </children>
+
+                    <positioning type="relative">50,100</positioning>#
+
+                    <vertical-alignment>center</vertical-alignment>
+
+                    <surface>
+                        <panel dark="true"/>
+                    </surface>
+
+                    <padding>
+                        <all>6</all>
+                    </padding>
+
+                    <margins>
+                        <bottom>15</bottom>
+                    </margins>
+                </flow-layout>
+            </children>
+
+            <vertical-alignment>center</vertical-alignment>
+            <horizontal-alignment>center</horizontal-alignment>
+
+            <surface>
+                <flat>#C0101010</flat>
+            </surface>
+
+        </flow-layout>
+    </components>
+
+    <templates>
+        <positioning-button>
+            <flow-layout direction="horizontal">
+                <children>
+                    <button id="{{type}}-button">
+                        <text>{{type-name}}</text>
+                        <sizing>
+                            <horizontal method="fixed">52</horizontal>
+                        </sizing>
+                    </button>
+
+                    <text-box id="{{type}}-x-text-box">
+                        <sizing>
+                            <horizontal method="fixed">30</horizontal>
+                        </sizing>
+                        <text>{{x-default}}</text>
+
+                        <margins>
+                            <left>5</left>
+                        </margins>
+                    </text-box>
+
+                    <text-box id="{{type}}-y-text-box">
+                        <sizing>
+                            <horizontal method="fixed">30</horizontal>
+                        </sizing>
+                        <text>{{y-default}}</text>
+
+                        <margins>
+                            <left>5</left>
+                        </margins>
+                    </text-box>
+                </children>
+
+                <margins>
+                    <vertical>2</vertical>
+                </margins>
+
+                <vertical-alignment>center</vertical-alignment>
+            </flow-layout>
+        </positioning-button>
+    </templates>
+
+</owo-ui>
