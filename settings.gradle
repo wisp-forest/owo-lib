@@ -14,4 +14,3 @@ pluginManagement {
 }
 
 include 'owo-sentinel'
-include 'ui-academy'
