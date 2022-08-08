@@ -1,8 +1,10 @@
 package io.wispforest.owo.ui.component;
 
 import io.wispforest.owo.ui.base.BaseComponent;
+import io.wispforest.owo.ui.core.HorizontalAlignment;
 import io.wispforest.owo.ui.core.Size;
 import io.wispforest.owo.ui.core.Sizing;
+import io.wispforest.owo.ui.core.VerticalAlignment;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.Drawer;
@@ -23,6 +25,9 @@ public class LabelComponent extends BaseComponent {
 
     protected Text text;
     protected List<OrderedText> wrappedText;
+
+    protected VerticalAlignment verticalTextAlignment = VerticalAlignment.TOP;
+    protected HorizontalAlignment horizontalTextAlignment = HorizontalAlignment.LEFT;
 
     protected int color;
     protected boolean shadow;
@@ -77,6 +82,24 @@ public class LabelComponent extends BaseComponent {
         return this.color;
     }
 
+    public LabelComponent verticalTextAlignment(VerticalAlignment verticalAlignment) {
+        this.verticalTextAlignment = verticalAlignment;
+        return this;
+    }
+
+    public VerticalAlignment verticalTextAlignment() {
+        return this.verticalTextAlignment;
+    }
+
+    public LabelComponent horizontalTextAlignment(HorizontalAlignment horizontalAlignment) {
+        this.horizontalTextAlignment = horizontalAlignment;
+        return this;
+    }
+
+    public HorizontalAlignment horizontalTextAlignment() {
+        return this.horizontalTextAlignment;
+    }
+
     @Override
     protected void applyHorizontalContentSizing(Sizing sizing) {
         int widestText = 0;
@@ -125,11 +148,24 @@ public class LabelComponent extends BaseComponent {
             y += this.verticalSizing.get().value;
         }
 
+        switch (this.verticalTextAlignment) {
+            case CENTER -> y += (this.height - ((this.wrappedText.size() * (this.textRenderer.fontHeight + 2)) - 2)) / 2;
+            case BOTTOM -> y += this.height - ((this.wrappedText.size() * (this.textRenderer.fontHeight + 2)) - 2);
+        }
+
         for (int i = 0; i < this.wrappedText.size(); i++) {
+            var renderText = this.wrappedText.get(i);
+            int renderX = x;
+
+            switch (this.horizontalTextAlignment) {
+                case CENTER -> renderX += (this.width - this.textRenderer.getWidth(renderText)) / 2;
+                case RIGHT -> renderX += this.width - this.textRenderer.getWidth(renderText);
+            }
+
             if (this.shadow) {
-                this.textRenderer.drawWithShadow(matrices, this.wrappedText.get(i), x, y + i * 11, this.color);
+                this.textRenderer.drawWithShadow(matrices, renderText, renderX, y + i * 11, this.color);
             } else {
-                this.textRenderer.draw(matrices, this.wrappedText.get(i), x, y + i * 11, this.color);
+                this.textRenderer.draw(matrices, renderText, renderX, y + i * 11, this.color);
             }
         }
     }
@@ -154,5 +190,8 @@ public class LabelComponent extends BaseComponent {
         UIParsing.apply(children, "max-width", UIParsing::parseUnsignedInt, this::maxWidth);
         UIParsing.apply(children, "color", UIParsing::parseColor, this::color);
         UIParsing.apply(children, "shadow", UIParsing::parseBool, this::shadow);
+
+        UIParsing.apply(children, "vertical-text-alignment", VerticalAlignment::parse, this::verticalTextAlignment);
+        UIParsing.apply(children, "horizontal-text-alignment", HorizontalAlignment::parse, this::horizontalTextAlignment);
     }
 }
