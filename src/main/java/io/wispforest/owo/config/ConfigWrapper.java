@@ -27,6 +27,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -48,6 +49,7 @@ public abstract class ConfigWrapper<C> {
 
     @Environment(EnvType.CLIENT)
     private static final Map<String, Function<Screen, ConfigScreen>> CONFIG_SCREEN_PROVIDERS = new HashMap<>();
+    private static final Map<String, Class<?>> KNOWN_CONFIG_CLASSES = new HashMap<>();
 
     protected final String name;
     protected final C instance;
@@ -64,6 +66,11 @@ public abstract class ConfigWrapper<C> {
 
         var configAnnotation = clazz.getAnnotation(Config.class);
         this.name = configAnnotation.name();
+
+        if (KNOWN_CONFIG_CLASSES.put(this.name, this.getClass()) != null) {
+            throw new IllegalStateException("Config name '" + this.name + "'"
+                    + " is already taken an by instance of class '" + KNOWN_CONFIG_CLASSES.get(this.name).getName() + "'");
+        }
 
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT && clazz.isAnnotationPresent(Modmenu.class)) {
             var modmenuAnnotation = clazz.getAnnotation(Modmenu.class);
@@ -87,22 +94,13 @@ public abstract class ConfigWrapper<C> {
     }
 
     /**
-     * @return The name of this config, used for translation
-     * keys and the filename
-     */
-    public String name() {
-        return this.name;
-    }
-
-    /**
      * Save the config represented by this wrapper
      */
     public void save() {
         if (this.loading) return;
-        var configPath = FabricLoader.getInstance().getConfigDir().resolve(this.name + ".json5");
 
         try {
-            Files.writeString(configPath, this.jankson.toJson(this.instance).toJson(JsonGrammar.JANKSON), StandardCharsets.UTF_8);
+            Files.writeString(this.fileLocation(), this.jankson.toJson(this.instance).toJson(JsonGrammar.JANKSON), StandardCharsets.UTF_8);
         } catch (IOException e) {
             Owo.LOGGER.warn("Could not save config {}", this.name, e);
         }
@@ -114,15 +112,14 @@ public abstract class ConfigWrapper<C> {
      */
     @SuppressWarnings({"unchecked", "ConstantConditions"})
     public void load() {
-        var configPath = FabricLoader.getInstance().getConfigDir().resolve(this.name + ".json5");
-        if (!Files.exists(configPath)) {
+        if (!Files.exists(this.fileLocation())) {
             this.save();
             return;
         }
 
         try {
             this.loading = true;
-            var configObject = this.jankson.load(Files.readString(configPath, StandardCharsets.UTF_8));
+            var configObject = this.jankson.load(Files.readString(this.fileLocation(), StandardCharsets.UTF_8));
 
             for (var option : this.options.values()) {
                 Object newValue;
@@ -185,6 +182,21 @@ public abstract class ConfigWrapper<C> {
         } catch (NoSuchFieldException e) {
             return null;
         }
+    }
+
+    /**
+     * @return The name of this config, used for translation
+     * keys and the filename
+     */
+    public String name() {
+        return this.name;
+    }
+
+    /**
+     * @return The location to which this config is saved
+     */
+    public Path fileLocation() {
+        return FabricLoader.getInstance().getConfigDir().resolve(this.name + ".json5");
     }
 
     /**

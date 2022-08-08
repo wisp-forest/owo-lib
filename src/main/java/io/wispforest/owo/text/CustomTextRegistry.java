@@ -5,7 +5,6 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.HashMap;
 import java.util.Map;
 
-@ApiStatus.Experimental
 public final class CustomTextRegistry {
 
     private static final Map<String, CustomTextContentSerializer<?>> SERIALIZERS = new HashMap<>();
