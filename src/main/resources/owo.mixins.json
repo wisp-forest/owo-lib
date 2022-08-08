@@ -20,6 +20,7 @@
     "offline.PlayerAdvancementTrackerMixin",
     "offline.WorldSaveHandlerMixin",
     "text.LanguageMixin",
+    "text.stapi.SystemDelegatedLanguageFixin",
     "text.TextSerializerMixin",
     "text.TranslatableTextContentMixin",
     "tweaks.EulaReaderMixin",

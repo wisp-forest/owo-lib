@@ -70,5 +70,18 @@
   "itemGroup.uwu.single_tab_group.tab.tab_1": "uωu~",
   "itemGroup.uwu.vanilla_group": "uωu (.❛ ᴗ ❛.)",
   "itemGroup.uwu.vanilla_group.tab.tab_0": "(´• ω •`)",
-  "itemGroup.uwu.vanilla_group.tab.tab_1": "(o˘◡˘o)"
+  "itemGroup.uwu.vanilla_group.tab.tab_1": "(o˘◡˘o)",
+
+  "menu.returnToGame": {
+    "text": "Back to Game",
+    "color": "red"
+  },
+  "menu.returnToMenu": [
+    "",
+    {"text": "Save", "color": "red"},
+    {"text": " and", "color": "#FFA500"},
+    {"text": " Quit", "color": "green"},
+    {"text": " to", "color": "blue"},
+    {"text": " Title", "color": "dark_blue"}
+  ]
 }
