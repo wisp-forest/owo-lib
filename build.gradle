@@ -143,4 +143,5 @@ javadoc {
     options.stylesheetFile = new File(projectDir, "stylesheet.css")
     options.tags = ["apiNote", "implNote", "implSpec"]
     options.addStringOption("Xdoclint:-missing", "-quiet")
+    options.encoding = 'UTF-8'
 }

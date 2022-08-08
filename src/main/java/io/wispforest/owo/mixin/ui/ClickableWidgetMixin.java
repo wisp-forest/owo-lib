@@ -10,10 +10,7 @@ import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.FocusHandler;
 import io.wispforest.owo.util.EventSource;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.SliderWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.gui.widget.*;
 import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,6 +33,8 @@ public abstract class ClickableWidgetMixin implements ComponentStub {
 
     @Shadow
     public abstract boolean mouseReleased(double mouseX, double mouseY, int button);
+
+    @Shadow public boolean active;
 
     @Unique
     protected VanillaWidgetComponent owo$wrapper = null;
@@ -234,7 +233,8 @@ public abstract class ClickableWidgetMixin implements ComponentStub {
     public boolean canFocus(FocusSource source) {
         return (Object) this instanceof TextFieldWidget
                 || (Object) this instanceof SliderWidget
-                || (Object) this instanceof ButtonWidget;
+                || (Object) this instanceof ButtonWidget
+                || (Object) this instanceof CheckboxWidget;
     }
 
     @Override
@@ -265,6 +265,8 @@ public abstract class ClickableWidgetMixin implements ComponentStub {
         }
 
         // --- end ---
+
+        UIParsing.apply(children, "active", UIParsing::parseBool, active -> this.active = active);
     }
 
     @Override

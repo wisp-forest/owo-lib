@@ -4,13 +4,11 @@ import io.wispforest.owo.network.NetworkException;
 import io.wispforest.owo.network.serialization.PacketBufSerializer;
 import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.ServicesFrozenException;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.function.BiConsumer;
-import java.util.function.Function;
 
 /**
  * Represents a particle effect that can be played
@@ -26,7 +24,7 @@ import java.util.function.Function;
  * <p>
  * The data is serialized with the {@link PacketBufSerializer} system,
  * so should your data class not be supported, register your own
- * serializer with {@link PacketBufSerializer#register(Class, BiConsumer, Function)}
+ * serializer with {@link PacketBufSerializer#register(Class, PacketByteBuf.PacketWriter, PacketByteBuf.PacketReader)}
  *
  * @param <T> The data class
  */

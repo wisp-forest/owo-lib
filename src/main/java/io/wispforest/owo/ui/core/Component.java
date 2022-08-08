@@ -6,9 +6,12 @@ import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.FocusHandler;
 import io.wispforest.owo.util.EventSource;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.Text;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 
@@ -161,6 +164,15 @@ public interface Component extends PositionedRectangle {
      * @param tooltip The tooltip to display
      */
     Component tooltip(@Nullable List<TooltipComponent> tooltip);
+
+    /**
+     * Set the tooltip of this component to the given
+     * text, wrapping at newline characters
+     */
+    default Component tooltip(@NotNull Text tooltip) {
+        this.tooltip(MinecraftClient.getInstance().textRenderer.wrapLines(tooltip, Integer.MAX_VALUE).stream().map(TooltipComponent::of).toList());
+        return this;
+    }
 
     /**
      * @return The tooltip this component currently

@@ -4,6 +4,8 @@ import io.wispforest.owo.ui.parsing.IncompatibleUIModelException;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import net.minecraft.client.util.math.MatrixStack;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 
@@ -185,7 +187,7 @@ public interface ParentComponent extends Component {
      * none was found
      */
     @SuppressWarnings("unchecked")
-    default <T extends Component> @Nullable T childById(Class<T> expectedClass, String id) {
+    default <T extends Component> @Nullable T childById(@NotNull Class<T> expectedClass, @NotNull String id) {
         var iter = this.children().listIterator(this.children().size());
 
         while (iter.hasPrevious()) {
