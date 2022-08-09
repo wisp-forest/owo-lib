@@ -26,7 +26,7 @@ public interface RecipeMixin<C extends Inventory> {
         if(remainders.isEmpty()) return;
 
         for (int i = 0; i < defaultedList.size(); ++i) {
-            Item item = inventory.getStack(i).getItem();
+            var item = inventory.getStack(i).getItem();
 
             for(RecipeSpecificRemainders.RecipeRemainder recipeRemainder : remainders) {
                 if(recipeRemainder.item() == item){

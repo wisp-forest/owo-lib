@@ -18,8 +18,6 @@
     "itemgroup.FabricItemGroupBuilderMixin",
     "itemgroup.ItemMixin",
     "itemgroup.ItemSettingsMixin",
-    "itemgroup.FabricItemInternalsAccessor",
-    "itemgroup.FabricItemInternalsAccessor$ExtraDataAccessor",
     "itemgroup.SettingsAccessor",
     "recipe.RecipeManagerMixin",
     "recipe.RecipeMixin",

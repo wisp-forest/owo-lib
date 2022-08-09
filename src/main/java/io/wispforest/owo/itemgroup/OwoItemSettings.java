@@ -1,7 +1,5 @@
 package io.wispforest.owo.itemgroup;
 
-import io.wispforest.owo.mixin.itemgroup.FabricItemInternalsAccessor;
-import io.wispforest.owo.mixin.itemgroup.FabricItemInternalsAccessor.ExtraDataAccessor;
 import io.wispforest.owo.mixin.itemgroup.SettingsAccessor;
 import net.fabricmc.fabric.api.item.v1.CustomDamageHandler;
 import net.fabricmc.fabric.api.item.v1.EquipmentSlotProvider;
@@ -10,11 +8,9 @@ import net.minecraft.item.FoodComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.Rarity;
 import net.minecraft.util.collection.DefaultedList;
 
-import java.util.Map;
 import java.util.function.BiConsumer;
 
 /**
@@ -97,7 +93,9 @@ public class OwoItemSettings extends FabricItemSettings {
     }
     
     /**
-     * Method used to make a copy of a given {@link Item.Settings}
+     *
+     * Method used to make a copy of a given {@link Item.Settings}.
+     * Will not copy any fabric or quilted custom Item.Settings data
      *
      * @param settings The Settings to copy from
      * @return A 1:1 Deep copy of the given {@link Item.Settings} as {@link OwoItemSettings}
@@ -107,15 +105,6 @@ public class OwoItemSettings extends FabricItemSettings {
 
         if(settings instanceof OwoItemSettings oldOwoItemSettings){
             settingsNew.tab(oldOwoItemSettings.getTab());
-        }
-
-        if(settings instanceof FabricItemSettings oldFabricItemSettings){
-            ExtraDataAccessor oldData = (ExtraDataAccessor) (Object) FabricItemInternalsAccessor.owo$getExtraData().get(oldFabricItemSettings);
-
-            if (oldData != null) {
-                ((FabricItemSettings)settingsNew).customDamage(oldData.owo$getCustomDamageHandler());
-                ((FabricItemSettings)settingsNew).equipmentSlot(oldData.owo$getEquipmentSlotProvider());
-            }
         }
 
         SettingsAccessor settingsAccessor = (SettingsAccessor) settings;
