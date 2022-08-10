@@ -7,6 +7,7 @@ import io.wispforest.owo.config.ui.component.OptionComponent;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.util.NumberReflection;
+import net.minecraft.util.Identifier;
 
 import java.util.List;
 
@@ -38,6 +39,14 @@ public interface OptionComponentFactory<T> {
             if (option.constraint() != null) {
                 configTextBox.applyPredicate(option.constraint()::test);
             }
+        });
+    };
+
+    OptionComponentFactory<Identifier> IDENTIFIER = (model, option) -> {
+        return OptionComponents.createTextBox(model, option, configTextBox -> {
+            configTextBox.inputPredicate(s -> s.matches("[a-z0-9_.:\\-]*"));
+            configTextBox.applyPredicate(s -> Identifier.tryParse(s) != null);
+            configTextBox.valueParser(Identifier::new);
         });
     };
 

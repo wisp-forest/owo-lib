@@ -3,6 +3,7 @@ package io.wispforest.owo.config;
 import blue.endless.jankson.Jankson;
 import blue.endless.jankson.JsonElement;
 import blue.endless.jankson.JsonGrammar;
+import blue.endless.jankson.JsonPrimitive;
 import blue.endless.jankson.api.DeserializationException;
 import blue.endless.jankson.api.SyntaxError;
 import blue.endless.jankson.impl.POJODeserializer;
@@ -55,7 +56,10 @@ public abstract class ConfigWrapper<C> {
     protected final C instance;
 
     protected boolean loading = false;
-    protected final Jankson jankson = Jankson.builder().build();
+    protected final Jankson jankson = Jankson.builder()
+            .registerSerializer(Identifier.class, (identifier, marshaller) -> new JsonPrimitive(identifier.toString()))
+            .registerDeserializer(JsonPrimitive.class, Identifier.class, (jsonPrimitive, m) -> Identifier.tryParse(jsonPrimitive.asString()))
+            .build();
 
     @SuppressWarnings("rawtypes") protected final Map<Option.Key, Option> options = new LinkedHashMap<>();
     @SuppressWarnings("rawtypes") protected final Map<Option.Key, Option> optionsView = Collections.unmodifiableMap(options);
@@ -281,7 +285,7 @@ public abstract class ConfigWrapper<C> {
                 }
 
                 if (!Modifier.isStatic(method.getModifiers())) {
-                    throw new IllegalStateException("Predicated implementation '" + annotation.value() + "' must be static");
+                    throw new IllegalStateException("Predicate implementation '" + annotation.value() + "' must be static");
                 }
 
                 var handle = MethodHandles.publicLookup().unreflect(method);

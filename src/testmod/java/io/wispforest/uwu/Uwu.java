@@ -15,6 +15,7 @@ import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
 import io.wispforest.owo.text.CustomTextRegistry;
 import io.wispforest.owo.util.RegistryAccess;
 import io.wispforest.owo.util.TagInjector;
+import io.wispforest.uwu.config.BruhConfig;
 import io.wispforest.uwu.config.UwuConfig;
 import io.wispforest.uwu.items.UwuItems;
 import io.wispforest.uwu.network.*;
@@ -145,6 +146,7 @@ public class Uwu implements ModInitializer {
     });
 
     public static final UwuConfig CONFIG = UwuConfig.createAndLoad();
+    public static final BruhConfig BRUHHHHH = BruhConfig.createAndLoad();
 
     @Override
     public void onInitialize() {

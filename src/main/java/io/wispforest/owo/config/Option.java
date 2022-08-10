@@ -1,6 +1,7 @@
 package io.wispforest.owo.config;
 
 import io.wispforest.owo.Owo;
+import io.wispforest.owo.config.annotation.RestartRequired;
 import io.wispforest.owo.network.serialization.PacketBufSerializer;
 import io.wispforest.owo.util.Observable;
 import net.minecraft.network.PacketByteBuf;
@@ -10,6 +11,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -170,10 +172,20 @@ public final class Option<T> {
      * and enter a detached state
      *
      * @param buf The packet buffer to read from
+     * @return {@code null} if this option was successfully detached,
+     * the server's value otherwise
      */
-    void read(PacketByteBuf buf) {
-        this.mirror.set(this.serializer.deserializer().apply(buf));
+    T read(PacketByteBuf buf) {
+        final var newValue = this.serializer.deserializer().apply(buf);
+
+        if (!Objects.equals(newValue, this.value()) && this.backingField.hasAnnotation(RestartRequired.class)) {
+            return newValue;
+        }
+
+        this.mirror.set(newValue);
         this.detached = true;
+
+        return null;
     }
 
     /**

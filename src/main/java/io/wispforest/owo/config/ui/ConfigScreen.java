@@ -109,6 +109,8 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
         rootComponent.childById(ButtonWidget.class, "reload-button").onPress(button -> {
             this.config.load();
             this.clearAndInit();
+
+            // TODO check if any options changed and warn
         });
 
         var optionPanel = rootComponent.childById(VerticalFlowLayout.class, "option-panel");
@@ -282,6 +284,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
         DEFAULT_FACTORIES.put(option -> NumberReflection.isNumberType(option.clazz()), OptionComponentFactory.NUMBER);
         DEFAULT_FACTORIES.put(option -> option.clazz() == String.class, OptionComponentFactory.STRING);
         DEFAULT_FACTORIES.put(option -> option.clazz() == Boolean.class || option.clazz() == boolean.class, OptionComponentFactory.BOOLEAN);
+        DEFAULT_FACTORIES.put(option -> option.clazz() == Identifier.class, OptionComponentFactory.IDENTIFIER);
         DEFAULT_FACTORIES.put(option -> isStringOrNumberList(option.backingField().field()), OptionComponentFactory.LIST);
         DEFAULT_FACTORIES.put(option -> option.clazz().isEnum(), OptionComponentFactory.ENUM);
 

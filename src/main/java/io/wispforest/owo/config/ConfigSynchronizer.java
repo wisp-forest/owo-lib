@@ -1,10 +1,13 @@
 package io.wispforest.owo.config;
 
+import com.google.common.collect.HashMultimap;
 import io.wispforest.owo.Owo;
+import io.wispforest.owo.ops.TextOps;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -16,7 +19,11 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Pair;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -28,6 +35,7 @@ public class ConfigSynchronizer {
     public static final Identifier CONFIG_SYNC_CHANNEL = new Identifier("owo", "config_sync");
 
     private static final Map<String, ConfigWrapper<?>> KNOWN_CONFIGS = new HashMap<>();
+    private static final MutableText PREFIX = TextOps.concat(Owo.PREFIX, Text.of("§cunrecoverable config mismatch\n\n"));
 
     static void register(ConfigWrapper<?> config) {
         KNOWN_CONFIGS.put(config.name(), config);
@@ -117,7 +125,42 @@ public class ConfigSynchronizer {
     @Environment(EnvType.CLIENT)
     private static void applyClient(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender sender) {
         Owo.LOGGER.info("Applying server overrides");
-        read(buf, Option::read);
+        var mismatchedOptions = new HashMap<Option<?>, Object>();
+
+        read(buf, (option, packetByteBuf) -> {
+            var mismatchedValue = option.read(packetByteBuf);
+            if (mismatchedValue != null) mismatchedOptions.put(option, mismatchedValue);
+        });
+
+        if (!mismatchedOptions.isEmpty()) {
+            Owo.LOGGER.error("Aborting connection, non-syncable config values were mismatched");
+            mismatchedOptions.forEach((option, serverValue) -> {
+                Owo.LOGGER.error("- Option {} in config '{}' has value '{}' but server requires '{}'",
+                        option.key().asString(), option.configName(), option.value(), serverValue);
+            });
+
+            var errorMessage = Text.empty();
+            var optionsByConfig = HashMultimap.<String, Pair<Option<?>, Object>>create();
+
+            mismatchedOptions.forEach((option, serverValue) -> optionsByConfig.put(option.configName(), new Pair<>(option, serverValue)));
+            for (var configName : optionsByConfig.keys()) {
+                errorMessage.append(TextOps.withFormatting("in config ", Formatting.GRAY)).append(configName).append("\n");
+                for (var option : optionsByConfig.get(configName)) {
+                    errorMessage.append(Text.translatable(option.getLeft().translationKey()).formatted(Formatting.YELLOW)).append(" -> ");
+                    errorMessage.append(option.getLeft().value().toString()).append(TextOps.withFormatting(" (client)", Formatting.GRAY));
+                    errorMessage.append(TextOps.withFormatting(" / ", Formatting.DARK_GRAY));
+                    errorMessage.append(option.getRight().toString()).append(TextOps.withFormatting(" (server)", Formatting.GRAY)).append("\n");
+                }
+                errorMessage.append("\n");
+            }
+
+            errorMessage.append(TextOps.withFormatting("these options could not be synchronized because\n", Formatting.GRAY));
+            errorMessage.append(TextOps.withFormatting("they require your client to be restarted\n", Formatting.GRAY));
+            errorMessage.append(TextOps.withFormatting("change them manually and restart if you want to join this server", Formatting.GRAY));
+
+            handler.getConnection().disconnect(TextOps.concat(PREFIX, errorMessage));
+            return;
+        }
 
         Owo.LOGGER.info("Responding with client values");
         var packet = PacketByteBufs.create();
@@ -137,7 +180,9 @@ public class ConfigSynchronizer {
     }
 
     static {
-        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+        var earlyPhase = new Identifier("owo", "early");
+        ServerPlayConnectionEvents.JOIN.addPhaseOrdering(earlyPhase, Event.DEFAULT_PHASE);
+        ServerPlayConnectionEvents.JOIN.register(earlyPhase, (handler, sender, server) -> {
             if (server.isSingleplayer()) return;
             Owo.LOGGER.info("Sending server config values to client");
 

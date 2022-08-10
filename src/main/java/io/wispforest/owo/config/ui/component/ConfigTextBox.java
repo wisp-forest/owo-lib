@@ -112,6 +112,15 @@ public class ConfigTextBox extends TextFieldWidget implements OptionComponent {
         return validColor;
     }
 
+    public Function<String, Object> valueParser() {
+        return this.valueParser;
+    }
+
+    public ConfigTextBox valueParser(Function<String, Object> valueParser) {
+        this.valueParser = valueParser;
+        return this;
+    }
+
     @Override
     public void parseProperties(UIModel model, Element element, Map<String, Element> children) {
         super.parseProperties(model, element, children);
