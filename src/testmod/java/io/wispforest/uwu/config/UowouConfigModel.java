@@ -1,10 +1,7 @@
 package io.wispforest.uwu.config;
 
 import io.wispforest.owo.config.Option;
-import io.wispforest.owo.config.annotation.Config;
-import io.wispforest.owo.config.annotation.Modmenu;
-import io.wispforest.owo.config.annotation.RestartRequired;
-import io.wispforest.owo.config.annotation.Sync;
+import io.wispforest.owo.config.annotation.*;
 import net.minecraft.util.Identifier;
 
 @Modmenu(modId = "fabric")
@@ -15,6 +12,7 @@ public class UowouConfigModel {
     @RestartRequired
     public boolean thisIsNotSyncable = false;
 
+    @Hook
     public Identifier idPlease = new Identifier("uowou", "bruh");
 
 }

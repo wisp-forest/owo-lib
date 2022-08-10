@@ -189,7 +189,7 @@ public class ConfigAP extends AbstractProcessor {
     private String makeSubscribe(String fieldName, Option.Key fieldKey, TypeMirror fieldType) {
         return SUBSCRIBE_TEMPLATE
                 .replace("{field_key}", fieldKey.asString())
-                .replace("{field_key_constant}", constantNameOf(fieldKey))
+                .replace("{option_instance}", constantNameOf(fieldKey))
                 .replace("{field_name}", fieldName)
                 .replace("{field_type}", this.primitivesToWrappers.getOrDefault(fieldType, fieldType).toString());
     }
