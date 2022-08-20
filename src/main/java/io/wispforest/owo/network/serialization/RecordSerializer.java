@@ -4,23 +4,24 @@ import com.google.common.collect.ImmutableMap;
 import io.wispforest.owo.Owo;
 import net.minecraft.network.PacketByteBuf;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 /**
  * A utility for serializing {@code record} classes into {@link PacketByteBuf}s.
  * Use {@link #create(Class)} to create (or obtain if it already exists)
  * the instance for a specific class. Should an exception
- * about a missing type adapter be thrown, register one
- * using {@link PacketBufSerializer#register(Class, BiConsumer, Function)}
- *
- * <p> To serialize an instance use {@link #write(PacketByteBuf, Record)},
+ * about a missing serializer be thrown, register one
+ * using {@link PacketBufSerializer#register(Class, net.minecraft.network.PacketByteBuf.PacketWriter, net.minecraft.network.PacketByteBuf.PacketReader)}
+ * <p>
+ * To serialize an instance use {@link #write(PacketByteBuf, Record)},
  * to read it back again use {@link #read(PacketByteBuf)}
  *
  * @param <R> The type of record this serializer can handle
@@ -56,11 +57,17 @@ public class RecordSerializer<R extends Record> {
         final ImmutableMap.Builder<Function<R, ?>, PacketBufSerializer> adapters = new ImmutableMap.Builder<>();
         final Class<?>[] canonicalConstructorArgs = new Class<?>[recordClass.getRecordComponents().length];
 
+        var lookup = MethodHandles.publicLookup();
         for (int i = 0; i < recordClass.getRecordComponents().length; i++) {
-            var component = recordClass.getRecordComponents()[i];
+            try {
+                var component = recordClass.getRecordComponents()[i];
+                var handle = lookup.unreflect(component.getAccessor());
 
-            adapters.put(r -> getRecordEntry(r, component.getAccessor()), PacketBufSerializer.getGeneric(component.getGenericType()));
-            canonicalConstructorArgs[i] = component.getType();
+                adapters.put(r -> getRecordEntry(r, handle), PacketBufSerializer.getGeneric(component.getGenericType()));
+                canonicalConstructorArgs[i] = component.getType();
+            } catch (IllegalAccessException e) {
+                throw new IllegalStateException("Could not create method handle for record component");
+            }
         }
 
         try {
@@ -82,7 +89,7 @@ public class RecordSerializer<R extends Record> {
     public R read(PacketByteBuf buffer) {
         Object[] messageContents = new Object[fieldCount];
 
-        AtomicInteger index = new AtomicInteger();
+        var index = new AtomicInteger();
         adapters.forEach((rFunction, typeAdapter) -> messageContents[index.getAndIncrement()] = typeAdapter.deserializer().apply(buffer));
 
         try {
@@ -110,11 +117,11 @@ public class RecordSerializer<R extends Record> {
         return recordClass;
     }
 
-    private static <R extends Record> Object getRecordEntry(R instance, Method accessor) {
+    private static <R extends Record> Object getRecordEntry(R instance, MethodHandle accessor) {
         try {
             return accessor.invoke(instance);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalStateException("Unable to get record entry", e);
+        } catch (Throwable e) {
+            throw new IllegalStateException("Unable to get record component value", e);
         }
     }
 }

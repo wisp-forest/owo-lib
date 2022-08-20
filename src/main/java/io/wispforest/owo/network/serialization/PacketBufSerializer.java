@@ -1,6 +1,5 @@
 package io.wispforest.owo.network.serialization;
 
-import io.wispforest.owo.network.annotations.SealedPolymorphic;
 import io.wispforest.owo.util.VectorSerializer;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;

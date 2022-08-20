@@ -18,10 +18,10 @@ import java.util.function.Consumer;
  */
 public class RegistryHelper<T> {
 
-    private static final Map<Registry<?>, RegistryHelper<?>> REGISTRY_HELPERS = new HashMap<>();
+    private static final Map<Registry<?>, RegistryHelper<?>> INSTANCES = new HashMap<>();
 
     private final Registry<T> registry;
-    private final Map<Identifier, Consumer<T>> actions;
+    private final Map<Identifier, Consumer<T>> actions = new HashMap<>();
 
     private final List<ComplexRegistryAction> complexActions = new ArrayList<>();
 
@@ -33,14 +33,12 @@ public class RegistryHelper<T> {
      */
     @SuppressWarnings("unchecked")
     public static <T> RegistryHelper<T> get(Registry<T> registry) {
-        return (RegistryHelper<T>) REGISTRY_HELPERS.computeIfAbsent(registry, objects -> new RegistryHelper<>(registry));
+        return (RegistryHelper<T>) INSTANCES.computeIfAbsent(registry, objects -> new RegistryHelper<>(registry));
     }
 
     @ApiStatus.Internal
     public RegistryHelper(Registry<T> registry) {
         this.registry = registry;
-        this.actions = new HashMap<>();
-
         RegistryEntryAddedCallback.event(registry).register((rawId, id, object) -> {
             if (actions.containsKey(id)) {
                 actions.remove(id).accept(object);
@@ -54,7 +52,7 @@ public class RegistryHelper<T> {
 
     /**
      * Runs the given consumer supplied with the registered object as soon
-     * as the requested id exists in the registry
+     * as the requested ID exists in the registry
      *
      * @param id     The ID the registry must contain for {@code action} to be run
      * @param action The code to run once {@code id} is present
@@ -68,7 +66,7 @@ public class RegistryHelper<T> {
     }
 
     /**
-     * Runs the given action once all of it's required entries are
+     * Runs the given action once all of its required entries are
      * present in the registry
      *
      * @param action The {@link ComplexRegistryAction} to run or queue

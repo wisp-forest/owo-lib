@@ -7,11 +7,9 @@ import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.JsonHelper;
-import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Optional;
 
-@ApiStatus.Experimental
 public record InsertingTextContent(int index) implements CustomTextContent {
     public static void init() {
         CustomTextRegistry.register("index", Serializer.INSTANCE);

@@ -26,7 +26,7 @@ public class TagGroupLoaderMixin {
     public void injectValues(ResourceManager manager, CallbackInfoReturnable<Map<Identifier, List<TagGroupLoader.TrackedEntry>>> cir) {
         var map = cir.getReturnValue();
 
-        TagInjector.ADDITIIONS.forEach((location, entries) -> {
+        TagInjector.ADDITIONS.forEach((location, entries) -> {
             if (!this.dataType.equals(location.type())) return;
 
             var list = map.computeIfAbsent(location.tagId(), id -> new ArrayList<>());

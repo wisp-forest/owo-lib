@@ -1,0 +1,65 @@
+{
+  "text.owo.config.must_restart": "Some changes you made require a restart to apply",
+  "text.owo.config.button.exit_minecraft": "Exit Minecraft",
+  "text.owo.config.button.ignore_restart": "Restart later",
+  "text.owo.config.applies_after_restart": [
+    {
+      "text": "⏻ ",
+      "color": "#FAEA48"
+    },
+    {
+      "text": "This option applies after a restart",
+      "color": "gray"
+    }
+  ],
+  "text.owo.config.managed_by_server": [
+    {
+      "text": "⚑ ",
+      "color": "#EB1D36"
+    },
+    {
+      "text": "This option is being managed by the server\n   Disconnect to edit it",
+      "color": "gray"
+    }
+  ],
+  "text.owo.config.button.reload": "Reload",
+  "text.owo.config.button.done": "Done",
+  "text.owo.config.sections": [
+    {
+      "text": "Sections",
+      "underlined": true
+    }
+  ],
+  "text.owo.config.boolean_toggle.enabled": [
+    "",
+    {
+      "text": "[",
+      "color": "gray"
+    },
+    {
+      "text": "✔",
+      "color": "#28FFBF"
+    },
+    {
+      "text": "]",
+      "color": "gray"
+    },
+    " Enabled"
+  ],
+  "text.owo.config.boolean_toggle.disabled": [
+    "",
+    {
+      "text": "[",
+      "color": "gray"
+    },
+    {
+      "text": "❌",
+      "color": "#EB1D36"
+    },
+    {
+      "text": "]",
+      "color": "gray"
+    },
+    " Disabled"
+  ]
+}

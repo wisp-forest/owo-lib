@@ -1,5 +1,6 @@
 package io.wispforest.owo.ops;
 
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 
@@ -90,6 +91,38 @@ public class TextOps {
         }
 
         return textBase;
+    }
+
+    /**
+     * Determine the width of the given iterable of texts,
+     * which is defined as the width of the widest text
+     * int the iterable
+     *
+     * @param renderer The text renderer responsible for rendering
+     *                 the text later on
+     * @param texts    The texts to check
+     * @return The width of the widest text in the collection
+     */
+    public static int width(TextRenderer renderer, Iterable<Text> texts) {
+        int width = 0;
+        for (var text : texts) width = Math.max(width, renderer.getWidth(text));
+        return width;
+    }
+
+    /**
+     * Determine the width of the given iterable of texts,
+     * which is defined as the width of the widest text
+     * int the iterable
+     *
+     * @param renderer The text renderer responsible for rendering
+     *                 the text later on
+     * @param texts    The texts to check
+     * @return The width of the widest text in the collection
+     */
+    public static int widthOrdered(TextRenderer renderer, Iterable<OrderedText> texts) {
+        int width = 0;
+        for (var text : texts) width = Math.max(width, renderer.getWidth(text));
+        return width;
     }
 
     /**

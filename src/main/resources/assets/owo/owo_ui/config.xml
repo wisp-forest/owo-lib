@@ -1,0 +1,259 @@
+<owo-ui>
+    <components>
+        <flow-layout direction="vertical">
+            <children>
+                <flow-layout direction="vertical">
+                    <children>
+                        <label id="title">
+                            <text translate="true"/>
+                            <shadow>true</shadow>
+                        </label>
+                    </children>
+
+                    <vertical-alignment>center</vertical-alignment>
+
+                    <sizing>
+                        <vertical method="fill">8</vertical>
+                    </sizing>
+                </flow-layout>
+
+                <flow-layout direction="horizontal" id="main-panel">
+                    <children>
+                        <flow-layout direction="vertical" id="option-panel-container">
+                            <children>
+                                <scroll direction="vertical" id="option-panel-scroll">
+                                    <flow-layout direction="vertical" id="option-panel"/>
+
+                                    <scrollbar-thiccness>3</scrollbar-thiccness>
+
+                                    <sizing>
+                                        <horizontal method="fill">100</horizontal>
+                                        <vertical method="fill">100</vertical>
+                                    </sizing>
+
+                                    <padding>
+                                        <all>1</all>
+                                    </padding>
+                                </scroll>
+                            </children>
+
+                            <sizing>
+                                <horizontal method="fill">100</horizontal>
+                                <vertical method="fill">100</vertical>
+                            </sizing>
+                        </flow-layout>
+                    </children>
+
+                    <sizing>
+                        <horizontal method="fill">90</horizontal>
+                        <vertical method="fill">82</vertical>
+                    </sizing>
+
+                    <surface>
+                        <flat>#77000000</flat>
+                        <outline>#FF121212</outline>
+                    </surface>
+                </flow-layout>
+
+                <flow-layout direction="horizontal">
+                    <children>
+                        <button id="reload-button">
+                            <text translate="true">text.owo.config.button.reload</text>
+                            <sizing>
+                                <horizontal method="fill">10</horizontal>
+                            </sizing>
+                            <margins>
+                                <right>5</right>
+                            </margins>
+                        </button>
+
+                        <button id="done-button">
+                            <text translate="true">text.owo.config.button.done</text>
+                            <sizing>
+                                <horizontal method="fill">10</horizontal>
+                            </sizing>
+                        </button>
+                    </children>
+
+                    <horizontal-alignment>right</horizontal-alignment>
+                    <vertical-alignment>center</vertical-alignment>
+
+                    <sizing>
+                        <horizontal method="fill">90</horizontal>
+                        <vertical method="fill">10</vertical>
+                    </sizing>
+                </flow-layout>
+            </children>
+
+            <vertical-alignment>center</vertical-alignment>
+            <horizontal-alignment>center</horizontal-alignment>
+
+            <surface>
+                <flat>#77000000</flat>
+            </surface>
+
+            <sizing>
+                <horizontal method="fill">100</horizontal>
+                <vertical method="fill">100</vertical>
+            </sizing>
+        </flow-layout>
+    </components>
+
+    <templates>
+        <config-option>
+            <flow-layout direction="horizontal">
+                <children>
+                    <label>
+                        <text translate="true">{{config-option-name}}</text>
+                        <positioning type="relative">0,50</positioning>
+                        <shadow>true</shadow>
+                    </label>
+
+                    <flow-layout direction="horizontal">
+                        <children>
+                            <template-child id="value-container">
+                                <sizing>
+                                    <horizontal method="fixed">120</horizontal>
+                                </sizing>
+                            </template-child>
+
+                            <button id="reset-button">
+                                <text>⇄</text>
+                                <margins>
+                                    <horizontal>5</horizontal>
+                                </margins>
+                            </button>
+                        </children>
+
+                        <positioning type="relative">100,50</positioning>
+                        <vertical-alignment>center</vertical-alignment>
+                    </flow-layout>
+                </children>
+
+                <sizing>
+                    <horizontal method="fill">100</horizontal>
+                    <vertical method="fixed">32</vertical>
+                </sizing>
+
+                <padding>
+                    <all>5</all>
+                </padding>
+
+            </flow-layout>
+        </config-option>
+
+        <section-header>
+            <flow-layout direction="horizontal">
+                <children>
+                    <box>
+                        <sizing>
+                            <vertical method="fixed">2</vertical>
+                            <horizontal method="fill">20</horizontal>
+                        </sizing>
+
+                        <start-color>#FFFFFFFF</start-color>
+                        <end-color>#00000000</end-color>
+
+                        <direction>right-to-left</direction>
+
+                        <fill>true</fill>
+                    </box>
+                    <label id="header">
+                        <margins>
+                            <horizontal>5</horizontal>
+                        </margins>
+                    </label>
+                    <box>
+                        <sizing>
+                            <vertical method="fixed">2</vertical>
+                            <horizontal method="fill">20</horizontal>
+                        </sizing>
+
+                        <start-color>#FFFFFFFF</start-color>
+                        <end-color>#00000000</end-color>
+
+                        <direction>left-to-right</direction>
+
+                        <fill>true</fill>
+                    </box>
+                </children>
+
+                <horizontal-alignment>center</horizontal-alignment>
+                <vertical-alignment>center</vertical-alignment>
+
+                <margins>
+                    <top>10</top>
+                </margins>
+
+                <sizing>
+                    <horizontal method="fill">100</horizontal>
+                    <vertical method="fixed">20</vertical>
+                </sizing>
+            </flow-layout>
+        </section-header>
+
+        <section-buttons>
+            <flow-layout direction="vertical">
+                <children>
+                    <label>
+                        <text translate="true">text.owo.config.sections</text>
+
+                        <positioning type="relative">50,0</positioning>
+
+                        <margins>
+                            <top>15</top>
+                        </margins>
+                    </label>
+                </children>
+
+                <vertical-alignment>center</vertical-alignment>
+                <horizontal-alignment>center</horizontal-alignment>
+
+                <sizing>
+                    <horizontal method="fill">0</horizontal>
+                    <vertical method="fill">100</vertical>
+                </sizing>
+            </flow-layout>
+        </section-buttons>
+
+        <text-box-config-option>
+            <template name="config-option">
+                <child id="value-container">
+                    <config-text-box id="value-box">
+                        <text>{{config-option-value}}</text>
+                    </config-text-box>
+                </child>
+            </template>
+        </text-box-config-option>
+
+        <boolean-toggle-config-option>
+            <template name="config-option">
+                <child id="value-container">
+                    <config-toggle-button id="toggle-button"/>
+                </child>
+            </template>
+        </boolean-toggle-config-option>
+
+        <enum-config-option>
+            <template name="config-option">
+                <child id="value-container">
+                    <config-enum-button id="enum-button"/>
+                </child>
+            </template>
+        </enum-config-option>
+
+        <range-config-option>
+            <template name="config-option">
+                <child id="value-container">
+                    <config-slider id="value-slider">
+                        <margins>
+                            <all>1</all>
+                        </margins>
+                    </config-slider>
+                </child>
+            </template>
+        </range-config-option>
+    </templates>
+
+</owo-ui>
+

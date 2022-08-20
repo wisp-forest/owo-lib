@@ -13,6 +13,7 @@ import java.lang.reflect.Field;
 public class UwuItems implements ItemRegistryContainer {
 
     public static final Item TEST_STICK = new UwuTestStickItem();
+    public static final Item SCREEN_SHARD = new UwuScreenShardItem();
 
     @RegistryNamespace("uowou")
     public static class OwoCompatItems implements ItemRegistryContainer {

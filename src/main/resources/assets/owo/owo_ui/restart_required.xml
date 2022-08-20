@@ -1,0 +1,54 @@
+<owo-ui>
+    <components>
+        <flow-layout direction="vertical">
+            <children>
+                <label>
+                    <text translate="true">text.owo.config.must_restart</text>#
+                    <shadow>true</shadow>
+                </label>
+
+                <flow-layout direction="horizontal">
+                    <children>
+                        <template name="action-button">
+                            <id>exit-button</id>
+                            <action>exit_minecraft</action>
+                        </template>
+
+                        <template name="action-button">
+                            <id>ignore-button</id>
+                            <action>ignore_restart</action>
+                        </template>
+                    </children>
+
+                    <margins>
+                        <top>25</top>
+                    </margins>
+
+                </flow-layout>
+            </children>
+
+            <surface>
+                <flat>#C0101010</flat>
+            </surface>
+            
+            <vertical-alignment>center</vertical-alignment>
+            <horizontal-alignment>center</horizontal-alignment>
+        </flow-layout>
+    </components>
+
+    <templates>
+        <action-button>
+            <button id="{{id}}">
+                <text translate="true">text.owo.config.button.{{action}}</text>
+
+                <sizing>
+                    <horizontal method="content">5</horizontal>
+                </sizing>
+
+                <margins>
+                    <all>5</all>
+                </margins>
+            </button>
+        </action-button>
+    </templates>
+</owo-ui>

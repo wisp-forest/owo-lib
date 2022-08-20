@@ -103,7 +103,7 @@ public class OwoHandshake {
 
         if (buf.readableBytes() > 0) {
             final var serverOptionalChannels = RESPONSE_SERIALIZER.deserializer().apply(buf);
-            ((OwoClientConnectionExtension) clientLoginNetworkHandler.getConnection()).owo$setChannelSet(verifyOptionalServices(serverOptionalChannels, OwoNetChannel.REGISTERED_CHANNELS, OwoHandshake::hashChannel));
+            ((OwoClientConnectionExtension) clientLoginNetworkHandler.getConnection()).owo$setChannelSet(filterOptionalServices(serverOptionalChannels, OwoNetChannel.REGISTERED_CHANNELS, OwoHandshake::hashChannel));
         }
 
         var response = PacketByteBufs.create();
@@ -138,7 +138,7 @@ public class OwoHandshake {
 
         if (buf.readableBytes() > 0) {
             final var clientOptionalChannels = RESPONSE_SERIALIZER.deserializer().apply(buf);
-            ((OwoClientConnectionExtension) handler.getConnection()).owo$setChannelSet(verifyOptionalServices(clientOptionalChannels, OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel));
+            ((OwoClientConnectionExtension) handler.getConnection()).owo$setChannelSet(filterOptionalServices(clientOptionalChannels, OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel));
         }
 
         Owo.LOGGER.info("[Handshake] Handshake completed successfully");
@@ -156,14 +156,13 @@ public class OwoHandshake {
     // Utility
     // -------
 
-    private static <T> Set<Identifier> verifyOptionalServices(Map<Identifier, Integer> remoteMap, Map<Identifier, T> localMap, ToIntFunction<T> hashFunction) {
+    private static <T> Set<Identifier> filterOptionalServices(Map<Identifier, Integer> remoteMap, Map<Identifier, T> localMap, ToIntFunction<T> hashFunction) {
         Set<Identifier> readableServices = new HashSet<>();
 
         for (var entry : remoteMap.entrySet()) {
             var service = localMap.get(entry.getKey());
 
             if (service == null) continue;
-
             if (hashFunction.applyAsInt(service) != entry.getValue()) continue;
 
             readableServices.add(entry.getKey());

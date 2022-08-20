@@ -22,6 +22,9 @@
     ],
     "rei_client": [
       "io.wispforest.owo.compat.rei.OwoReiPlugin"
+    ],
+    "modmenu": [
+      "io.wispforest.owo.compat.modmenu.OwoModMenuPlugin"
     ]
   },
   "mixins": [
@@ -31,6 +34,7 @@
     "owo-impl",
     "owo-lib"
   ],
+  "accessWidener": "owo.accesswidener",
   "depends": {
     "fabricloader": "*",
     "fabric": "*",
@@ -51,6 +55,15 @@
       ],
       "net/minecraft/class_2487": [
         "io/wispforest/owo/nbt/NbtCarrier"
+      ],
+      "net/minecraft/class_339": [
+        "io/wispforest/owo/ui/inject/ComponentStub"
+      ],
+      "net/minecraft/class_4185": [
+        "io/wispforest/owo/ui/inject/ButtonWidgetExtension"
+      ],
+      "net/minecraft/class_4286": [
+        "io/wispforest/owo/ui/inject/CheckboxWidgetExtension"
       ]
     }
   }

@@ -15,6 +15,8 @@ import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
 import io.wispforest.owo.text.CustomTextRegistry;
 import io.wispforest.owo.util.RegistryAccess;
 import io.wispforest.owo.util.TagInjector;
+import io.wispforest.uwu.config.BruhConfig;
+import io.wispforest.uwu.config.UwuConfig;
 import io.wispforest.uwu.items.UwuItems;
 import io.wispforest.uwu.network.*;
 import io.wispforest.uwu.text.BasedTextContent;
@@ -72,6 +74,8 @@ public class Uwu implements ModInitializer {
             addTab(Icon.of(Items.GOLD_INGOT), "tab_4", null);
 
             addButton(ItemGroupButton.github("https://github.com/glisco03/owo-lib"));
+
+            setButtonStackHeight(1);
         }
 
         @Override
@@ -83,7 +87,7 @@ public class Uwu implements ModInitializer {
     public static final OwoItemGroup SIX_TAB_GROUP = new OwoItemGroup(new Identifier("uwu", "six_tab_group")) {
         @Override
         protected void setup() {
-            setStackHeight(6);
+            setTabStackHeight(3);
             setCustomTexture(GROUP_TEXTURE);
 
             addTab(Icon.of(Items.DIAMOND), "tab_1", null);
@@ -140,6 +144,9 @@ public class Uwu implements ModInitializer {
 
         ClientParticles.reset();
     });
+
+    public static final UwuConfig CONFIG = UwuConfig.createAndLoad();
+    public static final BruhConfig BRUHHHHH = BruhConfig.createAndLoad();
 
     @Override
     public void onInitialize() {
@@ -215,13 +222,15 @@ public class Uwu implements ModInitializer {
         UwuOptionalNetExample.init();
     }
 
-    public record OtherTestMessage(BlockPos pos, String message) {}
+    public record OtherTestMessage(BlockPos pos, String message) {
+    }
 
     public record TestMessage(String string, Integer integer, Long along, ItemStack stack, Short ashort, Byte bite,
                               BlockPos pos, Float afloat, Double adouble, Boolean aboolean, Identifier identifier,
                               Map<String, Integer> map,
                               int[] arr1, String[] arr2, short[] arr3, long[] arr4, byte[] arr5,
                               Optional<String> optional1, Optional<String> optional2,
-                              List<BlockPos> posses, SealedTestClass sealed1, SealedTestClass sealed2) {}
+                              List<BlockPos> posses, SealedTestClass sealed1, SealedTestClass sealed2) {
+    }
 
 }

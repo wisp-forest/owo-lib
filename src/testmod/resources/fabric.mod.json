@@ -16,6 +16,9 @@
     ],
     "client": [
       "io.wispforest.uwu.client.UwuClient"
+    ],
+    "rei_client": [
+      "io.wispforest.uwu.rei.UwuReiPlugin"
     ]
   },
   "depends": {

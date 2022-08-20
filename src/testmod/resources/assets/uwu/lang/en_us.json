@@ -10,6 +10,47 @@
       "color": "red"
     }
   ],
+  "item.uwu.screen_shard": [
+    {
+      "text": "Screen Shard",
+      "color": "#3AB0FF"
+    }
+  ],
+  "text.config.uwu.title": "Test Config Screen",
+  "key.uwu.hud_test": [
+    {
+      "text": "Toggle Test HUD",
+      "color": "#0096FF"
+    }
+  ],
+  "text.ui.test_slider": "Value: %s",
+  "text.config.uwu.section.top": "Top Text",
+  "text.config.uwu.option.aValue": "A Value",
+  "text.config.uwu.option.regex": "Regex'd",
+  "text.config.uwu.option.regex.tooltip": "Regex tooltip, this is epic",
+  "text.config.uwu.category.nestingTime": "Nesting Time",
+  "text.config.uwu.option.nestingTime.togglee": "Togglee",
+  "text.config.uwu.option.nestingTime.yesThisIsAlsoNested": "Yes this is also nested",
+  "text.config.uwu.option.nestingTime.nestedIntegers": "A nested List of Integers",
+  "text.config.uwu.option.nestingTime.nestedIntegers.tooltip": [
+    "A very epic nested Integers tooltip",
+    {
+      "text": "\nwith multiple lines",
+      "color": "#ae0000"
+    }
+  ],
+  "text.config.uwu.category.nestingTime.nestingTimeIntensifies": "Nesting Time Intensifies",
+  "text.config.uwu.option.nestingTime.nestingTimeIntensifies.wowSoNested": "Wow so nested",
+  "text.config.uwu.option.floting": "Floting",
+  "text.config.uwu.section.bottom": "Bottom Text",
+  "text.config.uwu.option.thereAreStringsHere": "There are Strings here",
+  "text.config.uwu.option.broTheresAnEnum": "Bro, there's an Enum!",
+  "text.config.uwu.option.broTheresAnEnum.tooltip": "Yeah, it's crazy",
+  "text.config.uwu.option.broTheresAnEnum.value.first": "First",
+  "text.config.uwu.option.broTheresAnEnum.value.second": "Second",
+  "text.config.uwu.option.broTheresAnEnum.value.third": "Third",
+  "text.config.uwu.option.broTheresAnEnum.value.fourth": "Fourth",
+  "text.config.uowou.option.thisIsNotSyncable": "Unsyncable Option",
   "item.uowou.owo_ingot": "oωo Ingot",
   "itemGroup.uwu.four_tab_group": "uωu",
   "itemGroup.uwu.four_tab_group.tab.tab_1": "Tab 1",
@@ -30,5 +71,18 @@
   "itemGroup.uwu.single_tab_group.tab.tab_1": "uωu~",
   "itemGroup.uwu.vanilla_group": "uωu (.❛ ᴗ ❛.)",
   "itemGroup.uwu.vanilla_group.tab.tab_0": "(´• ω •`)",
-  "itemGroup.uwu.vanilla_group.tab.tab_1": "(o˘◡˘o)"
+  "itemGroup.uwu.vanilla_group.tab.tab_1": "(o˘◡˘o)",
+
+  "menu.returnToGame": {
+    "text": "Back to Game",
+    "color": "red"
+  },
+  "menu.returnToMenu": [
+    "",
+    {"text": "Save", "color": "red"},
+    {"text": " and", "color": "#FFA500"},
+    {"text": " Quit", "color": "green"},
+    {"text": " to", "color": "blue"},
+    {"text": " Title", "color": "dark_blue"}
+  ]
 }

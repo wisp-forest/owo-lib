@@ -32,11 +32,6 @@ public class VectorSerializer {
         return nbt;
     }
 
-    @Deprecated(forRemoval = true)
-    public static NbtCompound store(Vec3d vec3d, NbtCompound nbt, String key) {
-        return put(nbt, key, vec3d);
-    }
-
     /**
      * Stores the given vector  as an array at the
      * given key in the given nbt compound
@@ -56,11 +51,6 @@ public class VectorSerializer {
         nbt.put(key, vectorArray);
 
         return nbt;
-    }
-
-    @Deprecated(forRemoval = true)
-    public static NbtCompound storef(Vec3f vec3f, NbtCompound nbt, String key) {
-        return putf(nbt, key, vec3f);
     }
 
     /**
@@ -111,11 +101,6 @@ public class VectorSerializer {
         buffer.writeDouble(vec3d.z);
     }
 
-    @Deprecated(forRemoval = true)
-    public static void write(Vec3d vec3d, PacketByteBuf buffer) {
-        write(buffer, vec3d);
-    }
-
     /**
      * Writes the given vector into the given packet buffer
      *
@@ -126,11 +111,6 @@ public class VectorSerializer {
         buffer.writeFloat(vec3f.getX());
         buffer.writeFloat(vec3f.getY());
         buffer.writeFloat(vec3f.getZ());
-    }
-
-    @Deprecated(forRemoval = true)
-    public static void writef(Vec3f vec3f, PacketByteBuf buffer) {
-        writef(buffer, vec3f);
     }
 
     /**

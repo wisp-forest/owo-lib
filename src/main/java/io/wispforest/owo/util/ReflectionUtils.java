@@ -3,11 +3,9 @@ package io.wispforest.owo.util;
 import io.wispforest.owo.registration.annotations.AssignedName;
 import io.wispforest.owo.registration.annotations.IterationIgnored;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.util.Locale;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -34,6 +32,7 @@ public class ReflectionUtils {
     /**
      * Calls the {@link Constructor#newInstance(Object...)} method and
      * wraps the exception in a {@link RuntimeException}, thus making it unchecked.
+     * <br>
      * <b>Use this when you would otherwise rethrow</b>
      *
      * @param constructor The constructor to call
@@ -155,6 +154,27 @@ public class ReflectionUtils {
                 .skip(depth)
                 .map(StackWalker.StackFrame::getClassName)
                 .findFirst()).orElse("<unknown>");
+    }
+
+    /**
+     * Determines the n-th type argument of the given type. If {@code type}
+     * is not a parameterized type, {@code null} is returned
+     *
+     * @param type  The type to query
+     * @param index The index of the type argument the retrieve
+     * @return The n-th type argument of {@code type} or {@code null} if {@code index}
+     * is out of bounds or the type argument is not a {@link Class}
+     */
+    public static @Nullable Class<?> getTypeArgument(Type type, int index) {
+        if (!(type instanceof ParameterizedType parameterizedType)) return null;
+
+        var typeArgs = parameterizedType.getActualTypeArguments();
+        if (index > typeArgs.length - 1) return null;
+
+        var typeArgument = typeArgs[index];
+        if (!(typeArgument instanceof Class<?> typeClass)) return null;
+
+        return typeClass;
     }
 
     @FunctionalInterface

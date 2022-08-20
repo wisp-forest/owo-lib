@@ -1,7 +1,6 @@
 
 package io.wispforest.uwu.network;
 
-import io.wispforest.owo.network.annotations.ElementType;
 import io.wispforest.owo.network.serialization.RecordSerializer;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 

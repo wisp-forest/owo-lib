@@ -5,7 +5,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import org.jetbrains.annotations.ApiStatus;
 
-@ApiStatus.Experimental
 public interface CustomTextContentSerializer<T extends CustomTextContent> {
 
     T deserialize(JsonObject obj, JsonDeserializationContext ctx);
