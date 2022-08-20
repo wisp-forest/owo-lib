@@ -19,6 +19,8 @@
     "offline.AdvancementProgressAccessor",
     "offline.PlayerAdvancementTrackerMixin",
     "offline.WorldSaveHandlerMixin",
+    "recipe.RecipeManagerMixin",
+    "recipe.RecipeMixin",
     "text.LanguageMixin",
     "text.stapi.SystemDelegatedLanguageFixin",
     "text.TextSerializerMixin",
