@@ -3,7 +3,7 @@ package io.wispforest.owo.itemgroup.json;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import io.wispforest.owo.itemgroup.Icon;
-import io.wispforest.owo.itemgroup.OwoItemExtensions;
+import io.wispforest.owo.util.pond.OwoItemExtensions;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
 import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
 import io.wispforest.owo.moddata.ModDataConsumer;
@@ -96,7 +96,7 @@ public class GroupTabLoader implements ModDataConsumer {
 
                 for (var item : Registry.ITEM) {
                     if (item.getGroup() != group) continue;
-                    ((OwoItemExtensions) item).setItemGroup(wrappedGroup);
+                    ((OwoItemExtensions) item).owo$setItemGroup(wrappedGroup);
                 }
             }
 

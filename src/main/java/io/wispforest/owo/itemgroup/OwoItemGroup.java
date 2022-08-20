@@ -4,6 +4,7 @@ import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButtonWidget;
 import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
 import io.wispforest.owo.itemgroup.json.WrapperGroup;
+import io.wispforest.owo.util.pond.OwoItemExtensions;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.impl.item.group.ItemGroupExtensions;
 import net.fabricmc.loader.api.FabricLoader;
@@ -221,13 +222,13 @@ public abstract class OwoItemGroup extends ItemGroup {
     public void appendStacks(DefaultedList<ItemStack> stacks) {
         if (!initialized) throw new IllegalStateException("Owo item group not initialized, was 'initialize()' called?");
         Registry.ITEM.stream().filter(this::includes).forEach(item -> {
-            ((OwoItemExtensions) item).getStackGenerator().accept(item, stacks);
+            ((OwoItemExtensions) item).owo$stackGenerator().accept(item, stacks);
         });
     }
 
     protected boolean includes(Item item) {
         if (tabs.size() > 1)
-            return getSelectedTab().includes(item) || (item.getGroup() == this && ((OwoItemExtensions) item).getTab() == this.getSelectedTabIndex());
+            return getSelectedTab().includes(item) || (item.getGroup() == this && ((OwoItemExtensions) item).owo$tab() == this.getSelectedTabIndex());
         else
             return item.getGroup() != null && Objects.equals(item.getGroup().getName(), this.getName());
     }

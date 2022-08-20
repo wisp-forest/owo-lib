@@ -1,5 +1,6 @@
 package io.wispforest.owo.itemgroup;
 
+import io.wispforest.owo.util.pond.OwoItemSettingsExtensions;
 import net.fabricmc.fabric.api.item.v1.CustomDamageHandler;
 import net.fabricmc.fabric.api.item.v1.EquipmentSlotProvider;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
@@ -20,12 +21,12 @@ import java.util.function.BiConsumer;
 public class OwoItemSettings extends FabricItemSettings {
 
     public OwoItemSettings tab(int tab) {
-        ((OwoItemSettingsExtensions) this).setTab(tab);
+        ((OwoItemSettingsExtensions) this).owo$setTab(tab);
         return this;
     }
 
     public int getTab() {
-        return ((OwoItemSettingsExtensions) this).getTabIndex();
+        return ((OwoItemSettingsExtensions) this).owo$tab();
     }
 
     /**
@@ -33,7 +34,7 @@ public class OwoItemSettings extends FabricItemSettings {
      *                  {@link OwoItemGroup} it is in, by default this will be {@link OwoItemGroup#DEFAULT_STACK_GENERATOR}
      */
     public OwoItemSettings stackGenerator(BiConsumer<Item, DefaultedList<ItemStack>> generator) {
-        ((OwoItemSettingsExtensions) this).setStackGenerator(generator);
+        ((OwoItemSettingsExtensions) this).owo$setStackGenerator(generator);
         return this;
     }
 

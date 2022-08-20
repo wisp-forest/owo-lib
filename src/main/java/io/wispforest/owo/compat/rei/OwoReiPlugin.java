@@ -1,11 +1,9 @@
 package io.wispforest.owo.compat.rei;
 
 import io.wispforest.owo.itemgroup.OwoItemGroup;
-import io.wispforest.owo.util.OwoCreativeInventoryScreenExtensions;
+import io.wispforest.owo.util.pond.OwoCreativeInventoryScreenExtensions;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
-import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
-import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.item.ItemGroup;

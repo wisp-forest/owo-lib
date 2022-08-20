@@ -1,4 +1,4 @@
-package io.wispforest.owo.util;
+package io.wispforest.owo.util.pond;
 
 public interface OwoCreativeInventoryScreenExtensions {
     int owo$getRootX();

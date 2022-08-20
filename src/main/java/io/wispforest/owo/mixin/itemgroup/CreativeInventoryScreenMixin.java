@@ -3,7 +3,7 @@ package io.wispforest.owo.mixin.itemgroup;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButtonWidget;
-import io.wispforest.owo.util.OwoCreativeInventoryScreenExtensions;
+import io.wispforest.owo.util.pond.OwoCreativeInventoryScreenExtensions;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;

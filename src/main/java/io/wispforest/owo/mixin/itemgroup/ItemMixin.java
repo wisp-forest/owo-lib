@@ -1,8 +1,8 @@
 package io.wispforest.owo.mixin.itemgroup;
 
-import io.wispforest.owo.itemgroup.OwoItemExtensions;
+import io.wispforest.owo.util.pond.OwoItemExtensions;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
-import io.wispforest.owo.itemgroup.OwoItemSettingsExtensions;
+import io.wispforest.owo.util.pond.OwoItemSettingsExtensions;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -31,23 +31,23 @@ public class ItemMixin implements OwoItemExtensions {
     @Inject(method = "<init>", at = @At("TAIL"))
     private void grabTab(Item.Settings settings, CallbackInfo ci) {
         if (group instanceof OwoItemGroup) {
-            this.tab = ((OwoItemSettingsExtensions) settings).getTabIndex();
-            this.stackGenerator = ((OwoItemSettingsExtensions) settings).getStackGenerator();
+            this.tab = ((OwoItemSettingsExtensions) settings).owo$tab();
+            this.stackGenerator = ((OwoItemSettingsExtensions) settings).owo$stackGenerator();
         }
     }
 
     @Override
-    public int getTab() {
+    public int owo$tab() {
         return tab;
     }
 
     @Override
-    public BiConsumer<Item, DefaultedList<ItemStack>> getStackGenerator() {
+    public BiConsumer<Item, DefaultedList<ItemStack>> owo$stackGenerator() {
         return stackGenerator;
     }
 
     @Override
-    public void setItemGroup(ItemGroup group) {
+    public void owo$setItemGroup(ItemGroup group) {
         this.group = group;
     }
 }

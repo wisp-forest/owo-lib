@@ -1,8 +1,7 @@
-package io.wispforest.owo.mixin.recipe;
+package io.wispforest.owo.mixin.recipe_remainders;
 
-import io.wispforest.owo.util.RecipeSpecificRemainders;
+import io.wispforest.owo.util.RecipeRemainderStorage;
 import net.minecraft.inventory.Inventory;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.util.Identifier;
@@ -17,22 +16,19 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 @Mixin(Recipe.class)
 public interface RecipeMixin<C extends Inventory> {
 
-    @Shadow Identifier getId();
+    @Shadow
+    Identifier getId();
 
     @Inject(method = "getRemainder", at = @At("RETURN"), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void addRecipeSpecificRemainders(C inventory, CallbackInfoReturnable<DefaultedList<ItemStack>> cir, DefaultedList<ItemStack> defaultedList) {
-        final var remainders = RecipeSpecificRemainders.getRemainders(getId());
+    private void addRecipeSpecificRemainders(C inventory, CallbackInfoReturnable<DefaultedList<ItemStack>> cir, DefaultedList<ItemStack> remainders) {
+        if (!RecipeRemainderStorage.has(this.getId())) return;
 
-        if(remainders.isEmpty()) return;
-
-        for (int i = 0; i < defaultedList.size(); ++i) {
+        var owoRemainders = RecipeRemainderStorage.get(this.getId());
+        for (int i = 0; i < remainders.size(); ++i) {
             var item = inventory.getStack(i).getItem();
+            if (!owoRemainders.containsKey(item)) continue;
 
-            for(RecipeSpecificRemainders.RecipeRemainder recipeRemainder : remainders) {
-                if(recipeRemainder.item() == item){
-                    defaultedList.set(i, new ItemStack(recipeRemainder.itemRemainder()));
-                }
-            }
+            remainders.set(i, owoRemainders.get(item).copy());
         }
     }
 }

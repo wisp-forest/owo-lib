@@ -1,0 +1,31 @@
+package io.wispforest.owo.util;
+
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.ApiStatus;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@ApiStatus.Internal
+public class RecipeRemainderStorage {
+    private static final Map<Identifier, Map<Item, ItemStack>> REMAINDERS = new HashMap<>();
+
+    public static void store(Identifier recipe, Map<Item, ItemStack> remainders) {
+        REMAINDERS.put(recipe, remainders);
+    }
+
+    public static boolean has(Identifier recipe) {
+        return REMAINDERS.containsKey(recipe);
+    }
+
+    public static Map<Item, ItemStack> get(Identifier recipe) {
+        return REMAINDERS.get(recipe);
+    }
+
+    static {
+        ServerLifecycleEvents.START_DATA_PACK_RELOAD.register((server, resourceManager) -> REMAINDERS.clear());
+    }
+}

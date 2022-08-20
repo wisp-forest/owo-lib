@@ -9,8 +9,10 @@
     }
   },
   "owo:remainders": {
-    "minecraft:sand": {
-      "item": "minecraft:sand"
+    "minecraft:sand": "minecraft:sand",
+    "minecraft:stick": {
+      "item": "minecraft:stick",
+      "count": 64
     }
   },
   "pattern": [

@@ -1,7 +1,7 @@
 package io.wispforest.owo.mixin.itemgroup;
 
 import io.wispforest.owo.itemgroup.OwoItemGroup;
-import io.wispforest.owo.itemgroup.OwoItemSettingsExtensions;
+import io.wispforest.owo.util.pond.OwoItemSettingsExtensions;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.collection.DefaultedList;
@@ -14,29 +14,28 @@ import java.util.function.BiConsumer;
 public class ItemSettingsMixin implements OwoItemSettingsExtensions {
 
     @Unique
-    private int tab = 0;
+    private int owo$tab = 0;
 
     @Unique
-    private BiConsumer<Item, DefaultedList<ItemStack>> stackGenerator = OwoItemGroup.DEFAULT_STACK_GENERATOR;
+    private BiConsumer<Item, DefaultedList<ItemStack>> owo$stackGenerator = OwoItemGroup.DEFAULT_STACK_GENERATOR;
 
     @Override
-    public int getTabIndex() {
-        return tab;
+    public int owo$tab() {
+        return owo$tab;
     }
 
     @Override
-    public Item.Settings setTab(int tab) {
-        this.tab = tab;
-        return (Item.Settings) (Object) this;
+    public void owo$setTab(int tab) {
+        this.owo$tab = tab;
     }
 
     @Override
-    public BiConsumer<Item, DefaultedList<ItemStack>> getStackGenerator() {
-        return this.stackGenerator;
+    public BiConsumer<Item, DefaultedList<ItemStack>> owo$stackGenerator() {
+        return this.owo$stackGenerator;
     }
 
     @Override
-    public void setStackGenerator(BiConsumer<Item, DefaultedList<ItemStack>> appender) {
-        this.stackGenerator = appender;
+    public void owo$setStackGenerator(BiConsumer<Item, DefaultedList<ItemStack>> appender) {
+        this.owo$stackGenerator = appender;
     }
 }

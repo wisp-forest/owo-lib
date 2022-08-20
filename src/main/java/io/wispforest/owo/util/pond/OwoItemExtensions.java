@@ -1,5 +1,6 @@
-package io.wispforest.owo.itemgroup;
+package io.wispforest.owo.util.pond;
 
+import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.json.GroupTabLoader;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -13,13 +14,13 @@ public interface OwoItemExtensions {
     /**
      * @return The 0-indexed tab id this item resides in, {@code -1} if none is defined
      */
-    int getTab();
+    int owo$tab();
 
     /**
      * @return The function used for adding stacks of
      * this item to an {@link OwoItemGroup} it resides in
      */
-    BiConsumer<Item, DefaultedList<ItemStack>> getStackGenerator();
+    BiConsumer<Item, DefaultedList<ItemStack>> owo$stackGenerator();
 
     /**
      * Sets the group of this item, used by {@link GroupTabLoader} to ensure
@@ -27,6 +28,6 @@ public interface OwoItemExtensions {
      *
      * @param group The group to replace the current on with
      */
-    void setItemGroup(ItemGroup group);
+    void owo$setItemGroup(ItemGroup group);
 
 }

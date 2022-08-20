@@ -1,5 +1,6 @@
-package io.wispforest.owo.itemgroup;
+package io.wispforest.owo.util.pond;
 
+import io.wispforest.owo.itemgroup.OwoItemGroup;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.collection.DefaultedList;
@@ -15,18 +16,17 @@ public interface OwoItemSettingsExtensions {
     /**
      * @return The index of the tab the target item should reside in
      */
-    int getTabIndex();
+    int owo$tab();
 
     /**
      * Sets the tab index the target item should reside in
      *
      * @param tab The 0-indexed tab id
-     * @return this
      */
-    Item.Settings setTab(int tab);
+    void owo$setTab(int tab);
 
-    BiConsumer<Item, DefaultedList<ItemStack>> getStackGenerator();
+    BiConsumer<Item, DefaultedList<ItemStack>> owo$stackGenerator();
 
-    void setStackGenerator(BiConsumer<Item, DefaultedList<ItemStack>> appender);
+    void owo$setStackGenerator(BiConsumer<Item, DefaultedList<ItemStack>> appender);
 
 }
