@@ -40,6 +40,7 @@ public class OwoUIAdapter<T extends ParentComponent> implements Element, Drawabl
     public final int width, height;
 
     public boolean enableInspector = false;
+    public boolean globalInspector = false;
 
     protected OwoUIAdapter(int x, int y, int width, int height, T rootComponent) {
         this.x = x;
@@ -122,6 +123,14 @@ public class OwoUIAdapter<T extends ParentComponent> implements Element, Drawabl
         return this.enableInspector = !this.enableInspector;
     }
 
+    /**
+     * @return Toggle the inspector between
+     * hovered and global mode
+     */
+    public boolean toggleGlobalInspector() {
+        return this.globalInspector = !this.globalInspector;
+    }
+
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float partialTicks) {
         final var delta = MinecraftClient.getInstance().getLastFrameDuration();
@@ -141,7 +150,7 @@ public class OwoUIAdapter<T extends ParentComponent> implements Element, Drawabl
         }
 
         if (this.enableInspector) {
-            Drawer.debug().drawInspector(matrices, this.rootComponent, mouseX, mouseY, true);
+            Drawer.debug().drawInspector(matrices, this.rootComponent, mouseX, mouseY, !this.globalInspector);
         }
     }
 
@@ -172,8 +181,12 @@ public class OwoUIAdapter<T extends ParentComponent> implements Element, Drawabl
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (Owo.DEBUG && keyCode == GLFW.GLFW_KEY_LEFT_SHIFT && (modifiers & GLFW.GLFW_KEY_LEFT_ALT) != 0) {
-            this.toggleInspector();
+        if (Owo.DEBUG && keyCode == GLFW.GLFW_KEY_LEFT_SHIFT) {
+            if ((modifiers & GLFW.GLFW_MOD_CONTROL) != 0) {
+                this.toggleInspector();
+            } else if ((modifiers & GLFW.GLFW_MOD_ALT) != 0) {
+                this.toggleGlobalInspector();
+            }
         }
 
         return this.rootComponent.onKeyPress(keyCode, scanCode, modifiers);

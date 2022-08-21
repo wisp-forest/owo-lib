@@ -190,8 +190,8 @@ public class GridLayout extends BaseParentComponent {
     public static GridLayout parse(Element element) {
         UIParsing.expectAttributes(element, "rows", "columns");
 
-        int rows = UIParsing.parseSignedInt(element.getAttributeNode("rows"));
-        int columns = UIParsing.parseSignedInt(element.getAttributeNode("columns"));
+        int rows = UIParsing.parseUnsignedInt(element.getAttributeNode("rows"));
+        int columns = UIParsing.parseUnsignedInt(element.getAttributeNode("columns"));
 
         return new GridLayout(Sizing.content(), Sizing.content(), rows, columns);
     }

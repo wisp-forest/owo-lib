@@ -35,7 +35,6 @@ public abstract class RecipeManagerMixin {
                 var remainderItem = JsonHelper.asItem(remainderEntry.getValue(), "item");
                 remainders.put(item, new ItemStack(remainderItem));
             }
-
         }
 
         if (remainders.isEmpty()) return;

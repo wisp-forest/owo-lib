@@ -1,0 +1,448 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <xs:element name="owo-ui">
+        <xs:complexType>
+            <xs:all>
+                <xs:element name="components">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:group ref="anyComponent"/>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="templates" minOccurs="0">
+                    <xs:complexType>
+                        <xs:sequence maxOccurs="unbounded">
+                            <xs:any processContents="lax"/>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+            </xs:all>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:group name="anyComponent">
+        <xs:choice>
+            <xs:element name="label" type="labelType"/>
+            <xs:element name="button" type="buttonType"/>
+            <xs:element name="box" type="boxType"/>
+            <xs:element name="entity" type="entityType"/>
+            <xs:element name="button" type="buttonType"/>
+            <xs:element name="slider" type="sliderType"/>
+            <xs:element name="discrete-slider" type="discreteSliderType"/>
+            <xs:element name="checkbox" type="checkboxType"/>
+            <xs:element name="item" type="itemType"/>
+            <xs:element name="sprite" type="spriteType"/>
+            <xs:element name="texture" type="textureType"/>
+            <xs:element name="collapsible" type="collapsibleContainerType"/>
+            <xs:element name="draggable" type="draggableContainerType"/>
+            <xs:element name="flow-layout" type="flowLayoutType"/>
+            <xs:element name="scroll" type="scrollContainerType"/>
+            <xs:element name="template">
+                <xs:complexType>
+                    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+                        <xs:any processContents="lax"/>
+                    </xs:sequence>
+                    <xs:attribute name="name" type="xs:string" use="required"/>
+                </xs:complexType>
+            </xs:element>
+            <xs:any processContents="lax"/>
+        </xs:choice>
+    </xs:group>
+
+    <xs:complexType name="componentList">
+        <xs:choice maxOccurs="unbounded" minOccurs="0">
+            <xs:group ref="anyComponent"/>
+        </xs:choice>
+    </xs:complexType>
+
+    <xs:complexType name="insetsType">
+        <xs:all>
+            <xs:element type="xs:integer" name="top" minOccurs="0"/>
+            <xs:element type="xs:integer" name="bottom" minOccurs="0"/>
+            <xs:element type="xs:integer" name="left" minOccurs="0"/>
+            <xs:element type="xs:integer" name="right" minOccurs="0"/>
+            <xs:element type="xs:integer" name="all" minOccurs="0"/>
+            <xs:element type="xs:integer" name="horizontal" minOccurs="0"/>
+            <xs:element type="xs:integer" name="vertical" minOccurs="0"/>
+        </xs:all>
+    </xs:complexType>
+
+    <xs:simpleType name="positioningValueType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="-?\d+,-?\d+"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="positioningType">
+        <xs:simpleContent>
+            <xs:extension base="positioningValueType">
+                <xs:attribute name="type" use="required">
+                    <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                            <xs:enumeration value="absolute"/>
+                            <xs:enumeration value="relative"/>
+                            <xs:enumeration value="layout"/>
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:attribute>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:complexType name="sizingDeclarationType">
+        <xs:simpleContent>
+            <xs:extension base="xs:integer">
+                <xs:attribute name="method" use="required">
+                    <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                            <xs:enumeration value="content"/>
+                            <xs:enumeration value="fixed"/>
+                            <xs:enumeration value="fill"/>
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:attribute>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:complexType name="sizingType">
+        <xs:all>
+            <xs:element name="horizontal" type="sizingDeclarationType" minOccurs="0"/>
+            <xs:element name="vertical" type="sizingDeclarationType" minOccurs="0"/>
+        </xs:all>
+    </xs:complexType>
+
+    <xs:complexType name="textType">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="translate">
+                    <xs:simpleType>
+                        <xs:restriction base="xs:boolean"/>
+                    </xs:simpleType>
+                </xs:attribute>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:simpleType name="colorType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="#([A-Fa-f\d]{2}){3,4}"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="verticalAlignmentType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="top"/>
+            <xs:enumeration value="center"/>
+            <xs:enumeration value="bottom"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="horizontalAlignmentType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="left"/>
+            <xs:enumeration value="center"/>
+            <xs:enumeration value="right"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="surfaceType">
+        <xs:choice maxOccurs="unbounded">
+            <xs:element name="panel">
+                <xs:complexType>
+                    <xs:attribute name="dark" type="xs:boolean"/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="tiled">
+                <xs:complexType>
+                    <xs:simpleContent>
+                        <xs:extension base="identifierType">
+                            <xs:attribute name="texture-width" type="xs:unsignedInt"/>
+                            <xs:attribute name="texture-height" type="xs:unsignedInt"/>
+                        </xs:extension>
+                    </xs:simpleContent>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="options-background"/>
+            <xs:element type="colorType" name="outline"/>
+            <xs:element type="colorType" name="flat"/>
+        </xs:choice>
+    </xs:complexType>
+
+    <xs:simpleType name="axisDirectionType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="vertical"/>
+            <xs:enumeration value="horizontal"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="identifierType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="([a-z0-9_.-]+:)?[a-z0-9_.-]+"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:group name="componentProps">
+        <xs:choice>
+            <xs:element type="insetsType" name="margins" minOccurs="0"/>
+            <xs:element type="positioningType" name="positioning" minOccurs="0"/>
+            <xs:element type="sizingType" name="sizing" minOccurs="0"/>
+        </xs:choice>
+    </xs:group>
+
+    <xs:group name="parentComponentProps">
+        <xs:choice>
+            <xs:group ref="componentProps" maxOccurs="unbounded"/>
+            <xs:element type="insetsType" name="padding" minOccurs="0"/>
+            <xs:element type="surfaceType" name="surface" minOccurs="0"/>
+            <xs:element type="horizontalAlignmentType" name="horizontal-alignment" minOccurs="0"/>
+            <xs:element type="verticalAlignmentType" name="vertical-alignment" minOccurs="0"/>
+            <xs:element type="xs:boolean" name="allow-overflow" minOccurs="0"/>
+        </xs:choice>
+    </xs:group>
+
+    <xs:group name="vanillaWidgetProps">
+        <xs:choice>
+            <xs:group ref="parentComponentProps" maxOccurs="unbounded"/>
+            <xs:element type="xs:boolean" name="active" minOccurs="0"/>
+        </xs:choice>
+    </xs:group>
+
+    <xs:complexType name="componentType">
+        <xs:attribute name="id"/>
+    </xs:complexType>
+
+    <xs:complexType name="labelType">
+        <xs:complexContent>
+            <xs:extension base="componentType">
+                <xs:choice maxOccurs="unbounded">
+                    <xs:group ref="parentComponentProps"/>
+                    <xs:element type="textType" name="text" minOccurs="0"/>
+                    <xs:element type="xs:integer" name="max-width" minOccurs="0"/>
+                    <xs:element type="colorType" name="color" minOccurs="0"/>
+                    <xs:element type="xs:boolean" name="shadow" minOccurs="0"/>
+                    <xs:element type="verticalAlignmentType" name="vertical-text-alignment" minOccurs="0"/>
+                    <xs:element type="horizontalAlignmentType" name="horizontal-text-alignment" minOccurs="0"/>
+                </xs:choice>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="boxType">
+        <xs:complexContent>
+            <xs:extension base="componentType">
+                <xs:choice maxOccurs="unbounded">
+                    <xs:group ref="parentComponentProps"/>
+                    <xs:choice minOccurs="0">
+                        <xs:element type="colorType" name="color"/>
+                        <xs:sequence>
+                            <xs:element type="colorType" name="start-color"/>
+                            <xs:element type="colorType" name="end-color"/>
+                        </xs:sequence>
+                    </xs:choice>
+                    <xs:element type="xs:boolean" name="fill" minOccurs="0"/>
+                    <xs:element name="direction" minOccurs="0">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:enumeration value="top-to-bottom"/>
+                                <xs:enumeration value="left-to-right"/>
+                                <xs:enumeration value="right-to-left"/>
+                                <xs:enumeration value="bottom-to-top"/>
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:element>
+                </xs:choice>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="checkboxType">
+        <xs:complexContent>
+            <xs:extension base="componentType">
+                <xs:choice maxOccurs="unbounded">
+                    <xs:group ref="vanillaWidgetProps"/>
+                    <xs:element type="xs:boolean" name="checked" minOccurs="0"/>
+                    <xs:element type="textType" name="text" minOccurs="0"/>
+                </xs:choice>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="buttonType">
+        <xs:complexContent>
+            <xs:extension base="componentType">
+                <xs:choice maxOccurs="unbounded">
+                    <xs:group ref="vanillaWidgetProps"/>
+                    <xs:element type="textType" name="text" minOccurs="0"/>
+                </xs:choice>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="textFieldType">
+        <xs:complexContent>
+            <xs:extension base="componentType">
+                <xs:choice maxOccurs="unbounded">
+                    <xs:group ref="vanillaWidgetProps"/>
+                    <xs:element type="xs:string" name="text" minOccurs="0"/>
+                    <xs:element type="xs:boolean" name="show-background" minOccurs="0"/>
+                </xs:choice>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="sliderType">
+        <xs:complexContent>
+            <xs:extension base="componentType">
+                <xs:choice maxOccurs="unbounded">
+                    <xs:group ref="vanillaWidgetProps"/>
+                    <xs:element type="textType" name="text" minOccurs="0"/>
+                    <xs:element type="xs:double" name="value" minOccurs="0"/>
+                </xs:choice>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="discreteSliderType">
+        <xs:complexContent>
+            <xs:extension base="componentType">
+                <xs:choice maxOccurs="unbounded">
+                    <xs:group ref="vanillaWidgetProps"/>
+                    <xs:element type="xs:unsignedInt" name="decimal-places" minOccurs="0"/>
+                    <xs:element type="xs:double" name="value" minOccurs="0"/>
+                </xs:choice>
+                <xs:attribute name="min" type="xs:double" use="required"/>
+                <xs:attribute name="max" type="xs:double" use="required"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="entityType">
+        <xs:complexContent>
+            <xs:extension base="componentType">
+                <xs:choice maxOccurs="unbounded">
+                    <xs:group ref="componentProps"/>
+                    <xs:element type="xs:float" name="scale" minOccurs="0"/>
+                    <xs:element type="xs:boolean" name="look-at-cursor" minOccurs="0"/>
+                    <xs:element type="xs:boolean" name="mouse-rotation" minOccurs="0"/>
+                    <xs:element type="xs:boolean" name="scale-to-fit" minOccurs="0"/>
+                </xs:choice>
+                <xs:attribute name="type" type="identifierType" use="required"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="itemType">
+        <xs:complexContent>
+            <xs:extension base="componentType">
+                <xs:choice maxOccurs="unbounded">
+                    <xs:group ref="componentProps"/>
+                    <xs:element type="identifierType" name="item" minOccurs="0"/>
+                </xs:choice>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="spriteType">
+        <xs:complexContent>
+            <xs:extension base="componentType">
+                <xs:group ref="componentProps"/>
+                <xs:attribute name="atlas" type="identifierType" use="required"/>
+                <xs:attribute name="sprite" type="identifierType" use="required"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="textureType">
+        <xs:complexContent>
+            <xs:extension base="componentType">
+                <xs:group ref="componentProps"/>
+                <xs:attribute name="texture" type="identifierType" use="required"/>
+                <xs:attribute name="u" type="xs:integer"/>
+                <xs:attribute name="v" type="xs:integer"/>
+                <xs:attribute name="region-width" type="xs:integer"/>
+                <xs:attribute name="region-height" type="xs:integer"/>
+                <xs:attribute name="texture-width" type="xs:integer"/>
+                <xs:attribute name="texture-height" type="xs:integer"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="flowLayoutType">
+        <xs:complexContent>
+            <xs:extension base="componentType">
+                <xs:sequence>
+                    <xs:element type="componentList" name="children"/>
+                    <xs:group ref="parentComponentProps" maxOccurs="unbounded"/>
+                </xs:sequence>
+                <xs:attribute name="direction" type="axisDirectionType" use="required"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="collapsibleContainerType">
+        <xs:complexContent>
+            <xs:extension base="componentType">
+                <xs:sequence>
+                    <xs:group ref="anyComponent"/>
+                    <xs:choice maxOccurs="unbounded">
+                        <xs:group ref="parentComponentProps"/>
+                        <xs:element type="textType" name="text" minOccurs="0"/>
+                    </xs:choice>
+                </xs:sequence>
+                <xs:attribute name="expanded" type="xs:boolean"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="draggableContainerType">
+        <xs:complexContent>
+            <xs:extension base="componentType">
+                <xs:sequence>
+                    <xs:group ref="anyComponent"/>
+                    <xs:choice maxOccurs="unbounded">
+                        <xs:group ref="parentComponentProps"/>
+                        <xs:element type="xs:unsignedInt" name="forehead-size" minOccurs="0"/>
+                    </xs:choice>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="scrollContainerType">
+        <xs:complexContent>
+            <xs:extension base="componentType">
+                <xs:sequence>
+                    <xs:group ref="anyComponent"/>
+                    <xs:choice maxOccurs="unbounded">
+                        <xs:group ref="parentComponentProps"/>
+                        <xs:element type="xs:unsignedInt" name="scrollbar-thiccness" minOccurs="0"/>
+                        <xs:element type="colorType" name="scrollbar-color" minOccurs="0"/>
+                    </xs:choice>
+                </xs:sequence>
+                <xs:attribute name="direction" type="axisDirectionType" use="required"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="gridLayoutType">
+        <xs:complexContent>
+            <xs:extension base="componentType">
+                <xs:sequence>
+                    <xs:element type="componentList" name="children"/>
+                    <xs:group ref="parentComponentProps" maxOccurs="unbounded"/>
+                </xs:sequence>
+                <xs:attribute name="rows" type="xs:unsignedInt" use="required"/>
+                <xs:attribute name="columns" type="xs:unsignedInt" use="required"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <!-- <xs:complexType name="templatesType">
+        <xs:sequence>
+            <xs:element type="the-boxType" name="the-box"/>
+        </xs:sequence>
+    </xs:complexType> -->
+</xs:schema>

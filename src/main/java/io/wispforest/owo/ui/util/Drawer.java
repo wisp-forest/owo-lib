@@ -189,17 +189,19 @@ public class Drawer extends DrawableHelper {
                 this.drawInsets(matrices, child.x(), child.y(), child.width(), child.height(), margins, 0xA7FFF338);
                 drawRectOutline(matrices, child.x(), child.y(), child.width(), child.height(), 0xFF3AB0FF);
 
-                textRenderer.draw(matrices, Text.of(child.getClass().getSimpleName() + (child.id() != null ? " '" + child.id() + "'" : "")),
-                        child.x() + 1, child.y() + child.height() + 1, 0xFFFFFF);
+                if (onlyHovered) {
+                    textRenderer.draw(matrices, Text.of(child.getClass().getSimpleName() + (child.id() != null ? " '" + child.id() + "'" : "")),
+                            child.x() + 1, child.y() + child.height() + 1, 0xFFFFFF);
 
-                final var descriptor = Text.literal(child.x() + "," + child.y() + " (" + child.width() + "," + child.height() + ")"
-                        + " <" + margins.top() + "," + margins.bottom() + "," + margins.left() + "," + margins.right() + "> ");
-                if (child instanceof ParentComponent parentComponent) {
-                    var padding = parentComponent.padding().get();
-                    descriptor.append(" >" + padding.top() + "," + padding.bottom() + "," + padding.left() + "," + padding.right() + "<");
+                    final var descriptor = Text.literal(child.x() + "," + child.y() + " (" + child.width() + "," + child.height() + ")"
+                            + " <" + margins.top() + "," + margins.bottom() + "," + margins.left() + "," + margins.right() + "> ");
+                    if (child instanceof ParentComponent parentComponent) {
+                        var padding = parentComponent.padding().get();
+                        descriptor.append(" >" + padding.top() + "," + padding.bottom() + "," + padding.left() + "," + padding.right() + "<");
+                    }
+                    textRenderer.draw(matrices, descriptor,
+                            child.x() + 1, child.y() + child.height() + textRenderer.fontHeight + 2, 0xFFFFFF);
                 }
-                textRenderer.draw(matrices, descriptor,
-                        child.x() + 1, child.y() + child.height() + textRenderer.fontHeight + 2, 0xFFFFFF);
             }
         }
     }
