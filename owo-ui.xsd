@@ -218,7 +218,7 @@
         <xs:complexContent>
             <xs:extension base="componentType">
                 <xs:choice maxOccurs="unbounded">
-                    <xs:group ref="parentComponentProps"/>
+                    <xs:group ref="componentProps"/>
                     <xs:element type="textType" name="text" minOccurs="0"/>
                     <xs:element type="xs:integer" name="max-width" minOccurs="0"/>
                     <xs:element type="colorType" name="color" minOccurs="0"/>
@@ -234,7 +234,7 @@
         <xs:complexContent>
             <xs:extension base="componentType">
                 <xs:choice maxOccurs="unbounded">
-                    <xs:group ref="parentComponentProps"/>
+                    <xs:group ref="componentProps"/>
                     <xs:choice minOccurs="0">
                         <xs:element type="colorType" name="color"/>
                         <xs:sequence>
