@@ -417,6 +417,8 @@ public interface Component extends PositionedRectangle {
         UIParsing.apply(children, "margins", Insets::parse, this::margins);
         UIParsing.apply(children, "positioning", Positioning::parse, this::positioning);
 
+        UIParsing.apply(children, "tooltip-text", UIParsing::parseText, this::tooltip);
+
         if (children.containsKey("sizing")) {
             var sizingValues = UIParsing.childElements(children.get("sizing"));
             UIParsing.apply(sizingValues, "vertical", Sizing::parse, this::verticalSizing);

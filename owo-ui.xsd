@@ -189,6 +189,7 @@
             <xs:element type="insetsType" name="margins" minOccurs="0"/>
             <xs:element type="positioningType" name="positioning" minOccurs="0"/>
             <xs:element type="sizingType" name="sizing" minOccurs="0"/>
+            <xs:element type="textType" name="tooltip-text" minOccurs="0"/>
         </xs:choice>
     </xs:group>
 
