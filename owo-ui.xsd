@@ -3,7 +3,7 @@
 
     <xs:element name="owo-ui">
         <xs:complexType>
-            <xs:all>
+            <xs:sequence>
                 <xs:element name="components">
                     <xs:complexType>
                         <xs:sequence>
@@ -18,27 +18,27 @@
                         </xs:sequence>
                     </xs:complexType>
                 </xs:element>
-            </xs:all>
+            </xs:sequence>
         </xs:complexType>
     </xs:element>
 
     <xs:group name="anyComponent">
         <xs:choice>
-            <xs:element name="label" type="labelType"/>
-            <xs:element name="button" type="buttonType"/>
-            <xs:element name="box" type="boxType"/>
-            <xs:element name="entity" type="entityType"/>
-            <xs:element name="button" type="buttonType"/>
-            <xs:element name="slider" type="sliderType"/>
-            <xs:element name="discrete-slider" type="discreteSliderType"/>
-            <xs:element name="checkbox" type="checkboxType"/>
-            <xs:element name="item" type="itemType"/>
-            <xs:element name="sprite" type="spriteType"/>
-            <xs:element name="texture" type="textureType"/>
-            <xs:element name="collapsible" type="collapsibleContainerType"/>
-            <xs:element name="draggable" type="draggableContainerType"/>
-            <xs:element name="flow-layout" type="flowLayoutType"/>
-            <xs:element name="scroll" type="scrollContainerType"/>
+            <xs:element name="label" type="owo-ui-label-component"/>
+            <xs:element name="button" type="owo-ui-button-component"/>
+            <xs:element name="box" type="owo-ui-box-component"/>
+            <xs:element name="entity" type="owo-ui-entity-component"/>
+            <xs:element name="button" type="owo-ui-button-component"/>
+            <xs:element name="slider" type="owo-ui-slider-component"/>
+            <xs:element name="discrete-slider" type="owo-ui-discrete-slider-component"/>
+            <xs:element name="checkbox" type="owo-ui-checkbox-component"/>
+            <xs:element name="item" type="owo-ui-item-component"/>
+            <xs:element name="sprite" type="owo-ui-sprite-component"/>
+            <xs:element name="texture" type="owo-ui-texture-component"/>
+            <xs:element name="collapsible" type="owo-ui-collapsible-container"/>
+            <xs:element name="draggable" type="owo-ui-draggable-container"/>
+            <xs:element name="flow-layout" type="owo-ui-flow-layout"/>
+            <xs:element name="scroll" type="owo-ui-scroll-container"/>
             <xs:element name="template">
                 <xs:complexType>
                     <xs:sequence minOccurs="0" maxOccurs="unbounded">
@@ -57,7 +57,16 @@
         </xs:choice>
     </xs:complexType>
 
-    <xs:complexType name="insetsType">
+    <xs:complexType name="owo-ui-insets">
+        <xs:annotation>
+            <xs:documentation>
+                Insets describing an offset on each side of a rectangle.
+                Elements which occur after one another override each other, meaning
+                that a `bottom` element after an `all` element will only redefine
+                the bottom offset and leave the rest intact
+            </xs:documentation>
+        </xs:annotation>
+
         <xs:all>
             <xs:element type="xs:integer" name="top" minOccurs="0"/>
             <xs:element type="xs:integer" name="bottom" minOccurs="0"/>
@@ -75,7 +84,14 @@
         </xs:restriction>
     </xs:simpleType>
 
-    <xs:complexType name="positioningType">
+    <xs:complexType name="owo-ui-positioning">
+        <xs:annotation>
+            <xs:documentation>
+                Any of the three positioning types supported by owo-ui,
+                with the content formatted as `{horizontal},{vertical}`, eg `25,50`
+            </xs:documentation>
+        </xs:annotation>
+
         <xs:simpleContent>
             <xs:extension base="positioningValueType">
                 <xs:attribute name="type" use="required">
@@ -107,14 +123,28 @@
         </xs:simpleContent>
     </xs:complexType>
 
-    <xs:complexType name="sizingType">
+    <xs:complexType name="owo-ui-sizing">
+        <xs:annotation>
+            <xs:documentation>
+                A container for the horizontal and vertical sizing
+                declaration, each of which may occur once
+            </xs:documentation>
+        </xs:annotation>
+
         <xs:all>
             <xs:element name="horizontal" type="sizingDeclarationType" minOccurs="0"/>
             <xs:element name="vertical" type="sizingDeclarationType" minOccurs="0"/>
         </xs:all>
     </xs:complexType>
 
-    <xs:complexType name="textType">
+    <xs:complexType name="owo-ui-text">
+        <xs:annotation>
+            <xs:documentation>
+                Some literal or translated text, depending on whether
+                the `translate` attribute is `true`
+            </xs:documentation>
+        </xs:annotation>
+
         <xs:simpleContent>
             <xs:extension base="xs:string">
                 <xs:attribute name="translate">
@@ -126,13 +156,20 @@
         </xs:simpleContent>
     </xs:complexType>
 
-    <xs:simpleType name="colorType">
+    <xs:simpleType name="owo-ui-color">
+        <xs:annotation>
+            <xs:documentation>
+                A standard integer color in either `#AARRGGBB` or `#RRGGBB` format.
+                Alternatively, the all-lowercase name of any of Minecraft's 16 text colors
+            </xs:documentation>
+        </xs:annotation>
+
         <xs:restriction base="xs:string">
             <xs:pattern value="#([A-Fa-f\d]{2}){3,4}"/>
         </xs:restriction>
     </xs:simpleType>
 
-    <xs:simpleType name="verticalAlignmentType">
+    <xs:simpleType name="owo-ui-vertical-alignment">
         <xs:restriction base="xs:string">
             <xs:enumeration value="top"/>
             <xs:enumeration value="center"/>
@@ -140,7 +177,7 @@
         </xs:restriction>
     </xs:simpleType>
 
-    <xs:simpleType name="horizontalAlignmentType">
+    <xs:simpleType name="owo-ui-horizontal-alignment">
         <xs:restriction base="xs:string">
             <xs:enumeration value="left"/>
             <xs:enumeration value="center"/>
@@ -148,37 +185,81 @@
         </xs:restriction>
     </xs:simpleType>
 
-    <xs:complexType name="surfaceType">
+    <xs:complexType name="owo-ui-surface">
+        <xs:annotation>
+            <xs:documentation>
+                One or multiple surfaces chained together. If multiple surfaces
+                appear in this declaration, they are chained together in order of
+                appearance via the `and(...)` method
+            </xs:documentation>
+        </xs:annotation>
+
         <xs:choice maxOccurs="unbounded">
             <xs:element name="panel">
+                <xs:annotation>
+                    <xs:documentation>
+                        A standard Minecraft panel, optionally with a dark texture
+                    </xs:documentation>
+                </xs:annotation>
                 <xs:complexType>
                     <xs:attribute name="dark" type="xs:boolean"/>
                 </xs:complexType>
             </xs:element>
             <xs:element name="tiled">
+                <xs:annotation>
+                    <xs:documentation>
+                        A simple surface repeating the given texture, just like the
+                        options background does with the dirt texture
+                    </xs:documentation>
+                </xs:annotation>
                 <xs:complexType>
                     <xs:simpleContent>
-                        <xs:extension base="identifierType">
+                        <xs:extension base="minecraft-identifier">
                             <xs:attribute name="texture-width" type="xs:unsignedInt"/>
                             <xs:attribute name="texture-height" type="xs:unsignedInt"/>
                         </xs:extension>
                     </xs:simpleContent>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="options-background"/>
-            <xs:element type="colorType" name="outline"/>
-            <xs:element type="colorType" name="flat"/>
+            <xs:element name="options-background">
+                <xs:annotation>
+                    <xs:documentation>
+                        The standard Minecraft options background,
+                        usually a repeating dirt texture
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element type="owo-ui-color" name="outline">
+                <xs:annotation>
+                    <xs:documentation>
+                        A simple rectangular outline of the specified color
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element type="owo-ui-color" name="flat">
+                <xs:annotation>
+                    <xs:documentation>
+                        A flat rectangle of the specified color
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
         </xs:choice>
     </xs:complexType>
 
-    <xs:simpleType name="axisDirectionType">
+    <xs:simpleType name="owo-ui-axis-direction">
         <xs:restriction base="xs:string">
             <xs:enumeration value="vertical"/>
             <xs:enumeration value="horizontal"/>
         </xs:restriction>
     </xs:simpleType>
 
-    <xs:simpleType name="identifierType">
+    <xs:simpleType name="minecraft-identifier">
+        <xs:annotation>
+            <xs:documentation>
+                A standard Minecraft identifier, optionally with the
+                namespace omitted and defaulted to `minecraft`
+            </xs:documentation>
+        </xs:annotation>
         <xs:restriction base="xs:string">
             <xs:pattern value="([a-z0-9_.-]+:)?[a-z0-9_.-]+"/>
         </xs:restriction>
@@ -186,20 +267,20 @@
 
     <xs:group name="componentProps">
         <xs:choice>
-            <xs:element type="insetsType" name="margins" minOccurs="0"/>
-            <xs:element type="positioningType" name="positioning" minOccurs="0"/>
-            <xs:element type="sizingType" name="sizing" minOccurs="0"/>
-            <xs:element type="textType" name="tooltip-text" minOccurs="0"/>
+            <xs:element type="owo-ui-insets" name="margins" minOccurs="0"/>
+            <xs:element type="owo-ui-positioning" name="positioning" minOccurs="0"/>
+            <xs:element type="owo-ui-sizing" name="sizing" minOccurs="0"/>
+            <xs:element type="owo-ui-text" name="tooltip-text" minOccurs="0"/>
         </xs:choice>
     </xs:group>
 
     <xs:group name="parentComponentProps">
         <xs:choice>
             <xs:group ref="componentProps" maxOccurs="unbounded"/>
-            <xs:element type="insetsType" name="padding" minOccurs="0"/>
-            <xs:element type="surfaceType" name="surface" minOccurs="0"/>
-            <xs:element type="horizontalAlignmentType" name="horizontal-alignment" minOccurs="0"/>
-            <xs:element type="verticalAlignmentType" name="vertical-alignment" minOccurs="0"/>
+            <xs:element type="owo-ui-insets" name="padding" minOccurs="0"/>
+            <xs:element type="owo-ui-surface" name="surface" minOccurs="0"/>
+            <xs:element type="owo-ui-horizontal-alignment" name="horizontal-alignment" minOccurs="0"/>
+            <xs:element type="owo-ui-vertical-alignment" name="vertical-alignment" minOccurs="0"/>
             <xs:element type="xs:boolean" name="allow-overflow" minOccurs="0"/>
         </xs:choice>
     </xs:group>
@@ -215,32 +296,32 @@
         <xs:attribute name="id"/>
     </xs:complexType>
 
-    <xs:complexType name="labelType">
+    <xs:complexType name="owo-ui-label-component">
         <xs:complexContent>
             <xs:extension base="componentType">
                 <xs:choice maxOccurs="unbounded">
                     <xs:group ref="componentProps"/>
-                    <xs:element type="textType" name="text" minOccurs="0"/>
+                    <xs:element type="owo-ui-text" name="text" minOccurs="0"/>
                     <xs:element type="xs:integer" name="max-width" minOccurs="0"/>
-                    <xs:element type="colorType" name="color" minOccurs="0"/>
+                    <xs:element type="owo-ui-color" name="color" minOccurs="0"/>
                     <xs:element type="xs:boolean" name="shadow" minOccurs="0"/>
-                    <xs:element type="verticalAlignmentType" name="vertical-text-alignment" minOccurs="0"/>
-                    <xs:element type="horizontalAlignmentType" name="horizontal-text-alignment" minOccurs="0"/>
+                    <xs:element type="owo-ui-vertical-alignment" name="vertical-text-alignment" minOccurs="0"/>
+                    <xs:element type="owo-ui-horizontal-alignment" name="horizontal-text-alignment" minOccurs="0"/>
                 </xs:choice>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
 
-    <xs:complexType name="boxType">
+    <xs:complexType name="owo-ui-box-component">
         <xs:complexContent>
             <xs:extension base="componentType">
                 <xs:choice maxOccurs="unbounded">
                     <xs:group ref="componentProps"/>
                     <xs:choice minOccurs="0">
-                        <xs:element type="colorType" name="color"/>
+                        <xs:element type="owo-ui-color" name="color"/>
                         <xs:sequence>
-                            <xs:element type="colorType" name="start-color"/>
-                            <xs:element type="colorType" name="end-color"/>
+                            <xs:element type="owo-ui-color" name="start-color"/>
+                            <xs:element type="owo-ui-color" name="end-color"/>
                         </xs:sequence>
                     </xs:choice>
                     <xs:element type="xs:boolean" name="fill" minOccurs="0"/>
@@ -259,30 +340,30 @@
         </xs:complexContent>
     </xs:complexType>
 
-    <xs:complexType name="checkboxType">
+    <xs:complexType name="owo-ui-checkbox-component">
         <xs:complexContent>
             <xs:extension base="componentType">
                 <xs:choice maxOccurs="unbounded">
                     <xs:group ref="vanillaWidgetProps"/>
                     <xs:element type="xs:boolean" name="checked" minOccurs="0"/>
-                    <xs:element type="textType" name="text" minOccurs="0"/>
+                    <xs:element type="owo-ui-text" name="text" minOccurs="0"/>
                 </xs:choice>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
 
-    <xs:complexType name="buttonType">
+    <xs:complexType name="owo-ui-button-component">
         <xs:complexContent>
             <xs:extension base="componentType">
                 <xs:choice maxOccurs="unbounded">
                     <xs:group ref="vanillaWidgetProps"/>
-                    <xs:element type="textType" name="text" minOccurs="0"/>
+                    <xs:element type="owo-ui-text" name="text" minOccurs="0"/>
                 </xs:choice>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
 
-    <xs:complexType name="textFieldType">
+    <xs:complexType name="owo-ui-text-field-component">
         <xs:complexContent>
             <xs:extension base="componentType">
                 <xs:choice maxOccurs="unbounded">
@@ -294,19 +375,19 @@
         </xs:complexContent>
     </xs:complexType>
 
-    <xs:complexType name="sliderType">
+    <xs:complexType name="owo-ui-slider-component">
         <xs:complexContent>
             <xs:extension base="componentType">
                 <xs:choice maxOccurs="unbounded">
                     <xs:group ref="vanillaWidgetProps"/>
-                    <xs:element type="textType" name="text" minOccurs="0"/>
+                    <xs:element type="owo-ui-text" name="text" minOccurs="0"/>
                     <xs:element type="xs:double" name="value" minOccurs="0"/>
                 </xs:choice>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
 
-    <xs:complexType name="discreteSliderType">
+    <xs:complexType name="owo-ui-discrete-slider-component">
         <xs:complexContent>
             <xs:extension base="componentType">
                 <xs:choice maxOccurs="unbounded">
@@ -320,7 +401,7 @@
         </xs:complexContent>
     </xs:complexType>
 
-    <xs:complexType name="entityType">
+    <xs:complexType name="owo-ui-entity-component">
         <xs:complexContent>
             <xs:extension base="componentType">
                 <xs:choice maxOccurs="unbounded">
@@ -330,37 +411,37 @@
                     <xs:element type="xs:boolean" name="mouse-rotation" minOccurs="0"/>
                     <xs:element type="xs:boolean" name="scale-to-fit" minOccurs="0"/>
                 </xs:choice>
-                <xs:attribute name="type" type="identifierType" use="required"/>
+                <xs:attribute name="type" type="minecraft-identifier" use="required"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
 
-    <xs:complexType name="itemType">
+    <xs:complexType name="owo-ui-item-component">
         <xs:complexContent>
             <xs:extension base="componentType">
                 <xs:choice maxOccurs="unbounded">
                     <xs:group ref="componentProps"/>
-                    <xs:element type="identifierType" name="item" minOccurs="0"/>
+                    <xs:element type="minecraft-identifier" name="item" minOccurs="0"/>
                 </xs:choice>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
 
-    <xs:complexType name="spriteType">
+    <xs:complexType name="owo-ui-sprite-component">
         <xs:complexContent>
             <xs:extension base="componentType">
                 <xs:group ref="componentProps"/>
-                <xs:attribute name="atlas" type="identifierType" use="required"/>
-                <xs:attribute name="sprite" type="identifierType" use="required"/>
+                <xs:attribute name="atlas" type="minecraft-identifier" use="required"/>
+                <xs:attribute name="sprite" type="minecraft-identifier" use="required"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
 
-    <xs:complexType name="textureType">
+    <xs:complexType name="owo-ui-texture-component">
         <xs:complexContent>
             <xs:extension base="componentType">
                 <xs:group ref="componentProps"/>
-                <xs:attribute name="texture" type="identifierType" use="required"/>
+                <xs:attribute name="texture" type="minecraft-identifier" use="required"/>
                 <xs:attribute name="u" type="xs:integer"/>
                 <xs:attribute name="v" type="xs:integer"/>
                 <xs:attribute name="region-width" type="xs:integer"/>
@@ -371,26 +452,39 @@
         </xs:complexContent>
     </xs:complexType>
 
-    <xs:complexType name="flowLayoutType">
+    <xs:complexType name="owo-ui-flow-layout">
         <xs:complexContent>
             <xs:extension base="componentType">
                 <xs:sequence>
                     <xs:element type="componentList" name="children"/>
                     <xs:group ref="parentComponentProps" maxOccurs="unbounded"/>
                 </xs:sequence>
-                <xs:attribute name="direction" type="axisDirectionType" use="required"/>
+                <xs:attribute name="direction" type="owo-ui-axis-direction" use="required"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
 
-    <xs:complexType name="collapsibleContainerType">
+    <xs:complexType name="owo-ui-grid-layout">
+        <xs:complexContent>
+            <xs:extension base="componentType">
+                <xs:sequence>
+                    <xs:element type="componentList" name="children"/>
+                    <xs:group ref="parentComponentProps" maxOccurs="unbounded"/>
+                </xs:sequence>
+                <xs:attribute name="rows" type="xs:unsignedInt" use="required"/>
+                <xs:attribute name="columns" type="xs:unsignedInt" use="required"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="owo-ui-collapsible-container">
         <xs:complexContent>
             <xs:extension base="componentType">
                 <xs:sequence>
                     <xs:group ref="anyComponent"/>
                     <xs:choice maxOccurs="unbounded">
                         <xs:group ref="parentComponentProps"/>
-                        <xs:element type="textType" name="text" minOccurs="0"/>
+                        <xs:element type="owo-ui-text" name="text" minOccurs="0"/>
                     </xs:choice>
                 </xs:sequence>
                 <xs:attribute name="expanded" type="xs:boolean"/>
@@ -398,7 +492,7 @@
         </xs:complexContent>
     </xs:complexType>
 
-    <xs:complexType name="draggableContainerType">
+    <xs:complexType name="owo-ui-draggable-container">
         <xs:complexContent>
             <xs:extension base="componentType">
                 <xs:sequence>
@@ -412,7 +506,7 @@
         </xs:complexContent>
     </xs:complexType>
 
-    <xs:complexType name="scrollContainerType">
+    <xs:complexType name="owo-ui-scroll-container">
         <xs:complexContent>
             <xs:extension base="componentType">
                 <xs:sequence>
@@ -420,30 +514,11 @@
                     <xs:choice maxOccurs="unbounded">
                         <xs:group ref="parentComponentProps"/>
                         <xs:element type="xs:unsignedInt" name="scrollbar-thiccness" minOccurs="0"/>
-                        <xs:element type="colorType" name="scrollbar-color" minOccurs="0"/>
+                        <xs:element type="owo-ui-color" name="scrollbar-color" minOccurs="0"/>
                     </xs:choice>
                 </xs:sequence>
-                <xs:attribute name="direction" type="axisDirectionType" use="required"/>
+                <xs:attribute name="direction" type="owo-ui-axis-direction" use="required"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
-
-    <xs:complexType name="gridLayoutType">
-        <xs:complexContent>
-            <xs:extension base="componentType">
-                <xs:sequence>
-                    <xs:element type="componentList" name="children"/>
-                    <xs:group ref="parentComponentProps" maxOccurs="unbounded"/>
-                </xs:sequence>
-                <xs:attribute name="rows" type="xs:unsignedInt" use="required"/>
-                <xs:attribute name="columns" type="xs:unsignedInt" use="required"/>
-            </xs:extension>
-        </xs:complexContent>
-    </xs:complexType>
-
-    <!-- <xs:complexType name="templatesType">
-        <xs:sequence>
-            <xs:element type="the-boxType" name="the-box"/>
-        </xs:sequence>
-    </xs:complexType> -->
 </xs:schema>

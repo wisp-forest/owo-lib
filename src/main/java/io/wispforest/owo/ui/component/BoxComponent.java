@@ -1,6 +1,8 @@
 package io.wispforest.owo.ui.component;
 
 import io.wispforest.owo.ui.base.BaseComponent;
+import io.wispforest.owo.ui.core.AnimatableProperty;
+import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
@@ -15,28 +17,38 @@ public class BoxComponent extends BaseComponent {
     protected boolean fill = false;
     protected GradientDirection direction = GradientDirection.TOP_TO_BOTTOM;
 
-    protected int startColor = 0xFF000000;
-    protected int endColor = 0xFF000000;
+    protected AnimatableProperty<Color> startColor = AnimatableProperty.of(Color.BLACK);
+    protected AnimatableProperty<Color> endColor = AnimatableProperty.of(Color.BLACK);
 
     public BoxComponent(Sizing horizontalSizing, Sizing verticalSizing) {
         this.sizing(horizontalSizing, verticalSizing);
     }
 
     @Override
+    public void update(float delta, int mouseX, int mouseY) {
+        super.update(delta, mouseX, mouseY);
+        this.startColor.update(delta);
+        this.endColor.update(delta);
+    }
+
+    @Override
     public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+        final int startColor = this.startColor.get().argb();
+        final int endColor = this.endColor.get().argb();
+
         if (this.fill) {
             switch (this.direction) {
                 case TOP_TO_BOTTOM -> Drawer.drawGradientRect(matrices, this.x, this.y, this.width, this.height,
-                        this.startColor, this.startColor, this.endColor, this.endColor);
+                        startColor, startColor, endColor, endColor);
                 case RIGHT_TO_LEFT -> Drawer.drawGradientRect(matrices, this.x, this.y, this.width, this.height,
-                        this.endColor, this.startColor, this.startColor, this.endColor);
+                        endColor, startColor, startColor, endColor);
                 case BOTTOM_TO_TOP -> Drawer.drawGradientRect(matrices, this.x, this.y, this.width, this.height,
-                        this.endColor, this.endColor, this.startColor, this.startColor);
+                        endColor, endColor, startColor, startColor);
                 case LEFT_TO_RIGHT -> Drawer.drawGradientRect(matrices, this.x, this.y, this.width, this.height,
-                        this.startColor, this.endColor, this.endColor, this.startColor);
+                        startColor, endColor, endColor, startColor);
             }
         } else {
-            Drawer.drawRectOutline(matrices, this.x, this.y, this.width, this.height, this.startColor);
+            Drawer.drawRectOutline(matrices, this.x, this.y, this.width, this.height, startColor);
         }
     }
 
@@ -58,27 +70,27 @@ public class BoxComponent extends BaseComponent {
         return this.direction;
     }
 
-    public BoxComponent color(int color) {
-        this.startColor = color;
-        this.endColor = color;
+    public BoxComponent color(Color color) {
+        this.startColor.set(color);
+        this.endColor.set(color);
         return this;
     }
 
-    public BoxComponent startColor(int startColor) {
-        this.startColor = startColor;
+    public BoxComponent startColor(Color startColor) {
+        this.startColor.set(startColor);
         return this;
     }
 
-    public int startColor() {
+    public AnimatableProperty<Color> startColor() {
         return this.startColor;
     }
 
-    public BoxComponent endColor(int endColor) {
-        this.endColor = endColor;
+    public BoxComponent endColor(Color endColor) {
+        this.endColor.set(endColor);
         return this;
     }
 
-    public int endColor() {
+    public AnimatableProperty<Color> endColor() {
         return this.endColor;
     }
 
@@ -88,9 +100,9 @@ public class BoxComponent extends BaseComponent {
 
         UIParsing.expectChildren(element, children, "sizing");
 
-        UIParsing.apply(children, "color", UIParsing::parseColor, this::color);
-        UIParsing.apply(children, "start-color", UIParsing::parseColor, this::startColor);
-        UIParsing.apply(children, "end-color", UIParsing::parseColor, this::endColor);
+        UIParsing.apply(children, "color", Color::parse, this::color);
+        UIParsing.apply(children, "start-color", Color::parse, this::startColor);
+        UIParsing.apply(children, "end-color", Color::parse, this::endColor);
         UIParsing.apply(children, "fill", UIParsing::parseBool, this::fill);
         UIParsing.apply(children, "direction", UIParsing.parseEnum(GradientDirection.class), this::direction);
     }

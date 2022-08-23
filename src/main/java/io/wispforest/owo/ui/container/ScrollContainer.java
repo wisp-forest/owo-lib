@@ -230,7 +230,7 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
     public void parseProperties(UIModel model, Element element, Map<String, Element> children) {
         super.parseProperties(model, element, children);
         UIParsing.apply(children, "scrollbar-thiccness", UIParsing::parseUnsignedInt, this::scrollbarThiccness);
-        UIParsing.apply(children, "scrollbar-color", UIParsing::parseColor, this::scrollbarColor);
+        UIParsing.apply(children, "scrollbar-color", Color::parseAndPack, this::scrollbarColor);
     }
 
     public static ScrollContainer<?> parse(Element element) {

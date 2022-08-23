@@ -1,10 +1,7 @@
 package io.wispforest.owo.ui.component;
 
 import io.wispforest.owo.ui.base.BaseComponent;
-import io.wispforest.owo.ui.core.HorizontalAlignment;
-import io.wispforest.owo.ui.core.Size;
-import io.wispforest.owo.ui.core.Sizing;
-import io.wispforest.owo.ui.core.VerticalAlignment;
+import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.Drawer;
@@ -29,7 +26,7 @@ public class LabelComponent extends BaseComponent {
     protected VerticalAlignment verticalTextAlignment = VerticalAlignment.TOP;
     protected HorizontalAlignment horizontalTextAlignment = HorizontalAlignment.LEFT;
 
-    protected int color;
+    protected final AnimatableProperty<Color> color = AnimatableProperty.of(Color.WHITE);
     protected boolean shadow;
     protected int maxWidth;
 
@@ -37,7 +34,6 @@ public class LabelComponent extends BaseComponent {
         this.text = text;
         this.wrappedText = new ArrayList<>();
 
-        this.color = 0xFFFFFF;
         this.shadow = false;
         this.maxWidth = Integer.MAX_VALUE;
 
@@ -73,12 +69,12 @@ public class LabelComponent extends BaseComponent {
         return this.shadow;
     }
 
-    public LabelComponent color(int color) {
-        this.color = color;
+    public LabelComponent color(Color color) {
+        this.color.set(color);
         return this;
     }
 
-    public int color() {
+    public AnimatableProperty<Color> color() {
         return this.color;
     }
 
@@ -137,6 +133,12 @@ public class LabelComponent extends BaseComponent {
     }
 
     @Override
+    public void update(float delta, int mouseX, int mouseY) {
+        super.update(delta, mouseX, mouseY);
+        this.color.update(delta);
+    }
+
+    @Override
     public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
         int x = this.x;
         int y = this.y;
@@ -163,9 +165,9 @@ public class LabelComponent extends BaseComponent {
             }
 
             if (this.shadow) {
-                this.textRenderer.drawWithShadow(matrices, renderText, renderX, y + i * 11, this.color);
+                this.textRenderer.drawWithShadow(matrices, renderText, renderX, y + i * 11, this.color.get().argb());
             } else {
-                this.textRenderer.draw(matrices, renderText, renderX, y + i * 11, this.color);
+                this.textRenderer.draw(matrices, renderText, renderX, y + i * 11, this.color.get().argb());
             }
         }
     }
@@ -188,7 +190,7 @@ public class LabelComponent extends BaseComponent {
         super.parseProperties(model, element, children);
         UIParsing.apply(children, "text", UIParsing::parseText, this::text);
         UIParsing.apply(children, "max-width", UIParsing::parseUnsignedInt, this::maxWidth);
-        UIParsing.apply(children, "color", UIParsing::parseColor, this::color);
+        UIParsing.apply(children, "color", Color::parse, this::color);
         UIParsing.apply(children, "shadow", UIParsing::parseBool, this::shadow);
 
         UIParsing.apply(children, "vertical-text-alignment", VerticalAlignment::parse, this::verticalTextAlignment);

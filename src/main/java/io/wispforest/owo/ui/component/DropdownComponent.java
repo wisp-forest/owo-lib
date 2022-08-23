@@ -12,6 +12,7 @@ import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.UISounds;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -50,7 +51,7 @@ public class DropdownComponent extends HorizontalFlowLayout {
     }
 
     public DropdownComponent text(Text text) {
-        this.entries.child(Components.label(text).color(0xAFAFAF));
+        this.entries.child(Components.label(text).color(Color.ofFormatting(Formatting.GRAY)));
         return this;
     }
 

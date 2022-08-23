@@ -2,6 +2,7 @@ package io.wispforest.owo.ui.parsing;
 
 import io.wispforest.owo.ui.component.*;
 import io.wispforest.owo.ui.container.*;
+import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.Sizing;
 import net.minecraft.item.ItemStack;
@@ -100,24 +101,6 @@ public class UIParsing {
         }
 
         return map;
-    }
-
-
-    /**
-     * Tries to interpret the given node's text content as a color
-     * in {@code #RRGGBB} or {@code #AARRGGBB} format
-     *
-     * @return The parsed color as an unsigned integer
-     * @throws UIModelParsingException If the text content does not match
-     *                                 the expected color format
-     */
-    public static int parseColor(Node node) {
-        var text = node.getTextContent().strip();
-        if (text.matches("#([A-Fa-f\\d]{2}){3,4}")) {
-            return Integer.parseUnsignedInt(text.substring(1), 16);
-        } else {
-            throw new UIModelParsingException("Invalid color value '" + text + "', expected hex color of format #RRGGBB or #AARRGGBB");
-        }
     }
 
     /**

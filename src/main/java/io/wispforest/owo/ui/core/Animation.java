@@ -2,6 +2,8 @@ package io.wispforest.owo.ui.core;
 
 import net.minecraft.util.math.MathHelper;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class Animation<A extends Animatable<A>> {
@@ -23,6 +25,10 @@ public class Animation<A extends Animatable<A>> {
         this.easing = easing;
         this.from = from;
         this.to = to;
+    }
+
+    public static Composed compose(Animation<?>... elements) {
+        return new Composed(elements);
     }
 
     public void update(float delta) {
@@ -68,6 +74,26 @@ public class Animation<A extends Animatable<A>> {
                 case FORWARDS -> BACKWARDS;
                 case BACKWARDS -> FORWARDS;
             };
+        }
+    }
+
+    public static class Composed {
+        private final List<Animation<?>> elements;
+
+        private Composed(Animation<?>... elements) {
+            this.elements = Arrays.asList(elements);
+        }
+
+        public void forwards() {
+            this.elements.forEach(Animation::forwards);
+        }
+
+        public void backwards() {
+            this.elements.forEach(Animation::backwards);
+        }
+
+        public void reverse() {
+            this.elements.forEach(Animation::reverse);
         }
     }
 

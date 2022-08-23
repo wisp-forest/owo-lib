@@ -39,7 +39,7 @@ public class UiCategory implements DisplayCategory<Display> {
         inner.horizontalAlignment(HorizontalAlignment.CENTER).surface(Surface.flat(0xFF00FFAF));
 
         inner.child(Components.label(Text.of("A demonstration\ninside REI"))
-                .color(0)
+                .color(Color.BLACK)
                 .positioning(Positioning.absolute(3, 3))
         );
 

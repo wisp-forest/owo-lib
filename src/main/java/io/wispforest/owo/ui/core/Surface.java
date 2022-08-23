@@ -70,8 +70,8 @@ public interface Surface {
                     );
                 }
                 case "options-background" -> surface.and(OPTIONS_BACKGROUND);
-                case "outline" -> surface.and(outline(UIParsing.parseColor(child)));
-                case "flat" -> surface.and(flat(UIParsing.parseColor(child)));
+                case "outline" -> surface.and(outline(Color.parseAndPack(child)));
+                case "flat" -> surface.and(flat(Color.parseAndPack(child)));
                 default -> throw new UIModelParsingException("Unknown surface type '" + child.getNodeName() + "'");
             };
         }

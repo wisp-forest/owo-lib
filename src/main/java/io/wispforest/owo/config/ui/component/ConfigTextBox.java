@@ -1,5 +1,6 @@
 package io.wispforest.owo.config.ui.component;
 
+import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
@@ -124,7 +125,7 @@ public class ConfigTextBox extends TextFieldWidget implements OptionComponent {
     @Override
     public void parseProperties(UIModel model, Element element, Map<String, Element> children) {
         super.parseProperties(model, element, children);
-        UIParsing.apply(children, "invalid-color", UIParsing::parseColor, this::invalidColor);
-        UIParsing.apply(children, "valid-color", UIParsing::parseColor, this::validColor);
+        UIParsing.apply(children, "invalid-color", Color::parseAndPack, this::invalidColor);
+        UIParsing.apply(children, "valid-color", Color::parseAndPack, this::validColor);
     }
 }
