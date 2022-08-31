@@ -19,6 +19,13 @@ public interface Surface {
         Drawer.drawPanel(matrices, component.x(), component.y(), component.width(), component.height(), true);
     };
 
+    Surface VANILLA_TRANSLUCENT = (matrices, component) -> {
+        Drawer.drawGradientRect(matrices,
+                component.x(), component.y(), component.width(), component.height(),
+                0xC0101010, 0xC0101010, 0xD0101010, 0xD0101010
+        );
+    };
+
     Surface OPTIONS_BACKGROUND = (matrices, component) -> {
         RenderSystem.setShaderTexture(0, Drawer.OPTIONS_BACKGROUND_TEXTURE);
         RenderSystem.setShaderColor(64 / 255f, 64 / 255f, 64 / 255f, 1);
@@ -70,6 +77,7 @@ public interface Surface {
                     );
                 }
                 case "options-background" -> surface.and(OPTIONS_BACKGROUND);
+                case "vanilla-translucent" -> surface.and(VANILLA_TRANSLUCENT);
                 case "outline" -> surface.and(outline(Color.parseAndPack(child)));
                 case "flat" -> surface.and(flat(Color.parseAndPack(child)));
                 default -> throw new UIModelParsingException("Unknown surface type '" + child.getNodeName() + "'");

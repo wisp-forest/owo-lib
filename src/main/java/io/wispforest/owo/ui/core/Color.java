@@ -104,7 +104,7 @@ public record Color(float red, float green, float blue, float alpha) implements 
                         ? Color.ofRgb(Integer.parseUnsignedInt(text.substring(1), 16))
                         : Color.ofArgb(Integer.parseUnsignedInt(text.substring(1), 16));
             } else {
-                throw new UIModelParsingException("Invalid color value '" + text + "', expected hex color of format #RRGGBB or #AARRGGBB  or named text color");
+                throw new UIModelParsingException("Invalid color value '" + text + "', expected hex color of format #RRGGBB or #AARRGGBB or named text color");
             }
         }
     }

@@ -229,6 +229,14 @@
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
+            <xs:element name="vanilla-translucent">
+                <xs:annotation>
+                    <xs:documentation>
+                        The standard dark translucent background
+                        most Vanilla UIs use
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
             <xs:element type="owo-ui-color" name="outline">
                 <xs:annotation>
                     <xs:documentation>

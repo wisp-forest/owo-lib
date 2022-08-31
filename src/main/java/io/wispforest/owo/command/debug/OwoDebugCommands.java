@@ -7,8 +7,8 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.logging.LogUtils;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.command.EnumArgumentType;
-import io.wispforest.owo.mixin.ArgumentTypesInvoker;
 import io.wispforest.owo.ops.TextOps;
+import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.command.CommandSource;
@@ -21,6 +21,7 @@ import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
@@ -47,7 +48,7 @@ public class OwoDebugCommands {
     public static final int VALUE_BLUE = 0x94DAFF;
 
     public static void register() {
-        ArgumentTypesInvoker.owo$register(Registry.COMMAND_ARGUMENT_TYPE, "damage_source", DamageSourceArgumentType.class, ConstantArgumentSerializer.of(DamageSourceArgumentType::damageSource));
+        ArgumentTypeRegistry.registerArgumentType(new Identifier("owo", "damage_source"), DamageSourceArgumentType.class, ConstantArgumentSerializer.of(DamageSourceArgumentType::damageSource));
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
 

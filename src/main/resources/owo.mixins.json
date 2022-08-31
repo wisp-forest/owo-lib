@@ -4,7 +4,6 @@
   "package": "io.wispforest.owo.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
-    "ArgumentTypesInvoker",
     "ClientConnectionMixin",
     "Copenhagen",
     "ItemStackMixin",

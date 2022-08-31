@@ -12,6 +12,7 @@ public class Animation<A extends Animatable<A>> {
 
     private float delta = 0;
     private Direction direction = Direction.BACKWARDS;
+    private boolean looping = false;
 
     private final Consumer<A> setter;
     private final Easing easing;
@@ -32,9 +33,13 @@ public class Animation<A extends Animatable<A>> {
     }
 
     public void update(float delta) {
-        if (this.delta == this.direction.targetDelta) return;
+        if (this.delta == this.direction.targetDelta) {
+            if (this.looping) this.direction = this.direction.reversed();
+            else return;
+        }
 
         this.delta = MathHelper.clamp(this.delta + (delta * 50 / duration) * this.direction.multiplier, 0, 1);
+
         this.setter.accept(this.from.interpolate(this.to, this.easing.apply(this.delta)));
     }
 
@@ -51,6 +56,15 @@ public class Animation<A extends Animatable<A>> {
     public Animation<A> reverse() {
         this.direction = this.direction.reversed();
         return this;
+    }
+
+    public Animation<A> loop(boolean loop) {
+        this.looping = loop;
+        return this;
+    }
+
+    public boolean looping() {
+        return this.looping;
     }
 
     public Direction direction() {
@@ -94,6 +108,10 @@ public class Animation<A extends Animatable<A>> {
 
         public void reverse() {
             this.elements.forEach(Animation::reverse);
+        }
+
+        public void loop(boolean loop) {
+            this.elements.forEach(animation -> animation.loop(loop));
         }
     }
 

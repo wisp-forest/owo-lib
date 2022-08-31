@@ -7,11 +7,11 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import io.wispforest.owo.mixin.ArgumentTypesInvoker;
+import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.serialize.ConstantArgumentSerializer;
 import net.minecraft.text.Text;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.util.Identifier;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -50,7 +50,7 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<Enum<T>
      */
     public static <T extends Enum<T>> EnumArgumentType<T> create(Class<T> enumClass) {
         final var type = new EnumArgumentType<>(enumClass, "Invalid enum value '{}'");
-        ArgumentTypesInvoker.owo$register(Registry.COMMAND_ARGUMENT_TYPE, "owo:enum_" + enumClass.getName().toLowerCase(Locale.ROOT), type.getClass(), ConstantArgumentSerializer.of(() -> type));
+        ArgumentTypeRegistry.registerArgumentType(new Identifier("owo", "enum_" + enumClass.getName().toLowerCase(Locale.ROOT)), type.getClass(), ConstantArgumentSerializer.of(() -> type));
         return type;
     }
 
@@ -70,7 +70,7 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<Enum<T>
      */
     public static <T extends Enum<T>> EnumArgumentType<T> create(Class<T> enumClass, String noElementMessage) {
         final var type = new EnumArgumentType<>(enumClass, noElementMessage);
-        ArgumentTypesInvoker.owo$register(Registry.COMMAND_ARGUMENT_TYPE, "owo:enum_" + enumClass.getName().toLowerCase(Locale.ROOT), type.getClass(), ConstantArgumentSerializer.of(() -> type));
+        ArgumentTypeRegistry.registerArgumentType(new Identifier("owo", "enum_" + enumClass.getName().toLowerCase(Locale.ROOT)), type.getClass(), ConstantArgumentSerializer.of(() -> type));
         return type;
     }
 

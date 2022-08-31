@@ -106,12 +106,12 @@ public class ComponentTestScreen extends Screen {
         growingTextBox.mouseLeave().subscribe(growAnimation::backwards);
         growingTextBox.margins(Insets.vertical(5));
 
-        var weeAnimation = buttonPanel.positioning().animate(450, Easing.SINE, Positioning.relative(0, 100));
+        var weeAnimation = buttonPanel.positioning().animate(1000, Easing.CUBIC, Positioning.relative(0, 100));
         rootComponent.child(Containers.verticalFlow(Sizing.content(), Sizing.content())
                 .child(growingTextBox)
                 .child(new TextFieldWidget(this.client.textRenderer, 0, 0, 60, 20, Text.empty()).margins(Insets.vertical(5)))
                 .child(Components.button(Text.of("weeeee"), 0, 0, button -> {
-                    weeAnimation.reverse();
+                    weeAnimation.loop(!weeAnimation.looping());
                 }).sizing(Sizing.content()).margins(Insets.vertical(5)))
                 .child(Components.discreteSlider(Sizing.fill(10), 0, 1)
                         .snap(true)
