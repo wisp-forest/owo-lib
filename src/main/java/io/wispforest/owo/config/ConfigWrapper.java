@@ -114,7 +114,7 @@ public abstract class ConfigWrapper<C> {
      * Load the config represented by this wrapper from
      * its associated file, or create it if it does not exist
      */
-    @SuppressWarnings({"unchecked", "ConstantConditions"})
+    @SuppressWarnings({"unchecked"})
     public void load() {
         if (!Files.exists(this.fileLocation())) {
             this.save();
@@ -129,6 +129,12 @@ public abstract class ConfigWrapper<C> {
                 Object newValue;
 
                 final var clazz = option.clazz();
+                final var element = configObject.recursiveGet(JsonElement.class, option.key().asString());
+                if (element == null) {
+                    option.set(option.defaultValue());
+                    continue;
+                }
+
                 if (Map.class.isAssignableFrom(clazz)) {
                     var field = option.backingField().field();
 
@@ -137,7 +143,7 @@ public abstract class ConfigWrapper<C> {
                             (Map<Object, Object>) newValue,
                             ReflectionUtils.getTypeArgument(field.getGenericType(), 0),
                             ReflectionUtils.getTypeArgument(field.getGenericType(), 1),
-                            configObject.recursiveGet(JsonElement.class, option.key().asString()),
+                            element,
                             this.jankson.getMarshaller()
                     );
                 } else if (List.class.isAssignableFrom(clazz)) {
@@ -145,11 +151,11 @@ public abstract class ConfigWrapper<C> {
                     POJODeserializer.unpackCollection(
                             (Collection<Object>) newValue,
                             ReflectionUtils.getTypeArgument(option.backingField().field().getGenericType(), 0),
-                            configObject.recursiveGet(JsonElement.class, option.key().asString()),
+                            element,
                             this.jankson.getMarshaller()
                     );
                 } else {
-                    newValue = configObject.recursiveGet(clazz, option.key().asString());
+                    newValue = configObject.getMarshaller().marshall(clazz, element);
                 }
 
                 if (!option.verifyConstraint(newValue)) continue;
@@ -254,9 +260,9 @@ public abstract class ConfigWrapper<C> {
                 if (NumberReflection.isNumberType(fieldType)) {
                     Predicate<?> predicate;
                     if (fieldType == long.class || fieldType == Long.class) {
-                        predicate = o -> (Long) o >= annotation.min() && (Long) o <= annotation.max();
+                        predicate = o -> o != null && (Long) o >= annotation.min() && (Long) o <= annotation.max();
                     } else {
-                        predicate = o -> ((Number) o).doubleValue() >= annotation.min() && ((Number) o).doubleValue() <= annotation.max();
+                        predicate = o -> o != null && ((Number) o).doubleValue() >= annotation.min() && ((Number) o).doubleValue() <= annotation.max();
                     }
 
                     constraint = new Constraint("Range from " + annotation.min() + " to " + annotation.max(), predicate);
@@ -270,7 +276,7 @@ public abstract class ConfigWrapper<C> {
 
                 if (CharSequence.class.isAssignableFrom(fieldType)) {
                     var pattern = Pattern.compile(annotation.value());
-                    constraint = new Constraint("Regex " + annotation.value(), o -> pattern.matcher((CharSequence) o).matches());
+                    constraint = new Constraint("Regex " + annotation.value(), o -> o != null && pattern.matcher((CharSequence) o).matches());
                 } else {
                     throw new IllegalStateException("@RegexConstraint can only be applied to fields with a string representation");
                 }

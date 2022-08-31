@@ -128,7 +128,7 @@ public final class Option<T> {
     }
 
     /**
-     * Check whether the given value passes the constraint,
+     * Check whether the given value passes the constraint
      * of this option and emit a warning if it does not
      *
      * @param value The value to test
