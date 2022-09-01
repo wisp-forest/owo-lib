@@ -16,6 +16,7 @@ import java.util.Map;
 public class DraggableContainer<C extends Component> extends WrappingParentComponent<C> {
 
     protected int foreheadSize = 10;
+    protected boolean alwaysOnTop = false;
 
     protected int baseX = 0, baseY = 0;
     protected double xOffset = 0, yOffset = 0;
@@ -27,8 +28,17 @@ public class DraggableContainer<C extends Component> extends WrappingParentCompo
 
     @Override
     public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+        if (this.alwaysOnTop) matrices.translate(0, 0, 500);
         super.draw(matrices, mouseX, mouseY, partialTicks, delta);
         this.drawClipped(matrices, mouseX, mouseY, partialTicks, delta, Collections.singletonList(this.child));
+        if (this.alwaysOnTop) matrices.translate(0, 0, -500);
+    }
+
+    @Override
+    public void drawTooltip(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+        if (this.alwaysOnTop) matrices.translate(0, 0, 500);
+        super.drawTooltip(matrices, mouseX, mouseY, partialTicks, delta);
+        if (this.alwaysOnTop) matrices.translate(0, 0, -500);
     }
 
     @Override
@@ -85,9 +95,19 @@ public class DraggableContainer<C extends Component> extends WrappingParentCompo
         return this.foreheadSize;
     }
 
+    public DraggableContainer<C> alwaysOnTop(boolean alwaysOnTop) {
+        this.alwaysOnTop = alwaysOnTop;
+        return this;
+    }
+
+    public boolean alwaysOnTop() {
+        return this.alwaysOnTop;
+    }
+
     @Override
     public void parseProperties(UIModel model, Element element, Map<String, Element> children) {
         super.parseProperties(model, element, children);
         UIParsing.apply(children, "forehead-size", UIParsing::parseUnsignedInt, this::foreheadSize);
+        UIParsing.apply(children, "always-on-top", UIParsing::parseBool, this::alwaysOnTop);
     }
 }

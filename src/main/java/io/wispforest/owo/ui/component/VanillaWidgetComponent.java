@@ -35,7 +35,7 @@ public class VanillaWidgetComponent extends BaseComponent {
 
     @Override
     protected void applyVerticalContentSizing(Sizing sizing) {
-        if (this.widget instanceof ButtonWidget || this.widget instanceof CheckboxWidget || this.widget instanceof SliderComponent) {
+        if (this.widget instanceof ButtonWidget || this.widget instanceof CheckboxWidget || this.widget instanceof SliderComponent || this.widget instanceof TextFieldWidget) {
             this.height = 20;
         } else {
             super.applyVerticalContentSizing(sizing);
@@ -51,7 +51,7 @@ public class VanillaWidgetComponent extends BaseComponent {
         } else if (this.widget instanceof CheckboxWidget checkbox) {
             this.width = MinecraftClient.getInstance().textRenderer.getWidth(checkbox.getMessage()) + 24;
         } else {
-            super.applyVerticalContentSizing(sizing);
+            super.applyHorizontalContentSizing(sizing);
         }
 
         this.applyToWidget();
@@ -60,7 +60,7 @@ public class VanillaWidgetComponent extends BaseComponent {
     @Override
     public BaseComponent margins(Insets margins) {
         if (widget instanceof TextFieldWidget) {
-            return super.margins(Insets.of(margins.top() + 1, margins.bottom() + 1, margins.left() + 1, margins.right() + 1));
+            return super.margins(margins.add(1, 1, 1, 1));
         } else {
             return super.margins(margins);
         }

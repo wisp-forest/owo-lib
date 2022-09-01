@@ -123,6 +123,29 @@ public class Drawer extends DrawableHelper {
         }
     }
 
+    public static void drawText(MatrixStack matrices, Text text, float x, float y, float scale, int color) {
+        drawText(matrices, text, x, y, scale, color, TextAnchor.TOP_LEFT);
+    }
+
+    public static void drawText(MatrixStack matrices, Text text, float x, float y, float scale, int color, TextAnchor anchorPoint) {
+        final var textRenderer = MinecraftClient.getInstance().textRenderer;
+
+        matrices.push();
+        matrices.scale(scale, scale, 1);
+
+        switch (anchorPoint) {
+            case TOP_RIGHT -> x -= textRenderer.getWidth(text) * scale;
+            case BOTTOM_LEFT -> y -= textRenderer.fontHeight * scale;
+            case BOTTOM_RIGHT -> {
+                x -= textRenderer.getWidth(text) * scale;
+                y -= textRenderer.fontHeight * scale;
+            }
+        }
+
+        textRenderer.draw(matrices, text, x * (1 / scale), y * (1 / scale), color);
+        matrices.pop();
+    }
+
     public static void drawTooltip(MatrixStack matrices, int x, int y, List<TooltipComponent> tooltip) {
         ((ScreenInvoker) utilityScreen()).owo$renderTooltipFromComponents(matrices, tooltip, x, y);
     }
@@ -133,6 +156,10 @@ public class Drawer extends DrawableHelper {
 
     public static DebugDrawer debug() {
         return INSTANCE.debug;
+    }
+
+    public enum TextAnchor {
+        TOP_RIGHT, BOTTOM_RIGHT, TOP_LEFT, BOTTOM_LEFT
     }
 
     public static class DebugDrawer {

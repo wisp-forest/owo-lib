@@ -1,6 +1,7 @@
 package io.wispforest.owo.ui.core;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.util.Drawer;
 import net.minecraft.client.MinecraftClient;
@@ -134,18 +135,24 @@ public class OwoUIAdapter<T extends ParentComponent> implements Element, Drawabl
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float partialTicks) {
         final var delta = MinecraftClient.getInstance().getLastFrameDuration();
+        final var window = MinecraftClient.getInstance().getWindow();
 
         this.rootComponent.update(delta, mouseX, mouseY);
 
+        RenderSystem.enableDepthTest();
         GlStateManager._enableScissorTest();
+
+        GlStateManager._scissorBox(0, 0, window.getFramebufferWidth(), window.getFramebufferHeight());
         this.rootComponent.draw(matrices, mouseX, mouseY, partialTicks, delta);
+
         GlStateManager._disableScissorTest();
+        RenderSystem.disableDepthTest();
 
         this.rootComponent.drawTooltip(matrices, mouseX, mouseY, partialTicks, delta);
 
         final var hovered = this.rootComponent.childAt(mouseX, mouseY);
         if (!disposed && hovered != null && hovered.cursorStyle() != this.lastCursorStyle) {
-            GLFW.glfwSetCursor(MinecraftClient.getInstance().getWindow().getHandle(), this.cursors.get(hovered.cursorStyle()));
+            GLFW.glfwSetCursor(window.getHandle(), this.cursors.get(hovered.cursorStyle()));
             this.lastCursorStyle = hovered.cursorStyle();
         }
 

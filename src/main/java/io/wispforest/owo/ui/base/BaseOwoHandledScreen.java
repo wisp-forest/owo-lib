@@ -3,10 +3,16 @@ package io.wispforest.owo.ui.base;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.core.ParentComponent;
+import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.UIErrorToast;
+import io.wispforest.owo.util.pond.OwoSlotExtension;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,21 +20,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.function.BiFunction;
 
-/**
- * A minimal implementation of a Screen which fully
- * supports all aspects of the UI system. Implementing this class
- * is trivial, as you only need to provide implementations for
- * {@link #createAdapter()} to initialize the UI system and {@link #build(ParentComponent)}
- * which is where you declare your component hierarchy.
- * <p>
- * Should you be locked into a different superclass on your screen already,
- * you can easily copy all code from this class into your screen - as you
- * can see supporting the entire feature-set of owo-ui only requires
- * very few changes to how a vanilla screen works
- *
- * @param <R> The type of root component this screen uses
- */
-public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen {
+public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends ScreenHandler> extends HandledScreen<S> {
 
     /**
      * The UI adapter of this screen. This handles
@@ -44,12 +36,8 @@ public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen {
      */
     protected boolean invalid = false;
 
-    protected BaseOwoScreen(Text title) {
-        super(title);
-    }
-
-    protected BaseOwoScreen() {
-        this(Text.empty());
+    protected BaseOwoHandledScreen(S handler, PlayerInventory inventory, Text title) {
+        super(handler, inventory, title);
     }
 
     /**
@@ -73,6 +61,8 @@ public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen {
 
     @Override
     protected void init() {
+        super.init();
+
         if (this.invalid) return;
 
         if (this.uiAdapter != null) {
@@ -92,10 +82,70 @@ public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen {
         }
     }
 
+    /**
+     * Disables the slot at the given index. Note
+     * that this is hard override and the slot cannot
+     * re-enable itself
+     *
+     * @param index The index of the slot to disable
+     */
+    protected void disableSlot(int index) {
+        final var slot = (OwoSlotExtension) this.slotByIndex(index);
+        if (slot == null) return;
+
+        slot.owo$setDisabledOverride(true);
+    }
+
+    /**
+     * Enables the slot at the given index. Note
+     * that this is an override and cannot enable
+     * a slot that is disabled through its own will
+     *
+     * @param index The index of the slot to enable
+     */
+    protected void enableSlot(int index) {
+        final var slot = (OwoSlotExtension) this.slotByIndex(index);
+        if (slot == null) return;
+
+        slot.owo$setDisabledOverride(false);
+    }
+
+    protected boolean isSlotEnabled(int index) {
+        final var slot = (OwoSlotExtension) this.slotByIndex(index);
+        if (slot == null) return false;
+
+        return slot.owo$getDisabledOverride();
+    }
+
+    protected @Nullable Slot slotByIndex(int index) {
+        for (var slot : this.handler.slots) {
+            if (slot.getIndex() == index) return slot;
+        }
+
+        return null;
+    }
+
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (!this.invalid) {
             super.render(matrices, mouseX, mouseY, delta);
+
+            if (this.uiAdapter.enableInspector) {
+                matrices.translate(0, 0, 500);
+
+                for (var slot : this.handler.slots) {
+                    if (!slot.isEnabled()) continue;
+
+                    Drawer.drawText(matrices, Text.literal(String.valueOf(slot.getIndex())),
+                            this.x + slot.x + 15, this.y + slot.y + 15, .6f, 0x5800FF,
+                            Drawer.TextAnchor.BOTTOM_RIGHT
+                    );
+                }
+
+                matrices.translate(0, 0, -500);
+            }
+
+            this.drawMouseoverTooltip(matrices, mouseX, mouseY);
         } else {
             this.close();
         }
@@ -108,12 +158,12 @@ public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen {
             return true;
         }
 
-        return this.uiAdapter.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        return this.uiAdapter.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        return this.uiAdapter.mouseDragged(mouseX, mouseY, button, deltaX, deltaY) || super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
     }
 
     @Nullable
@@ -126,5 +176,9 @@ public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen {
     public void removed() {
         if (this.uiAdapter != null) this.uiAdapter.dispose();
         this.client.keyboard.setRepeatEvents(false);
+        super.removed();
     }
+
+    @Override
+    protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {}
 }

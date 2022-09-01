@@ -27,6 +27,7 @@
             <xs:element name="label" type="owo-ui-label-component"/>
             <xs:element name="button" type="owo-ui-button-component"/>
             <xs:element name="box" type="owo-ui-box-component"/>
+            <xs:element name="text-box" type="owo-ui-text-field-component"/>
             <xs:element name="entity" type="owo-ui-entity-component"/>
             <xs:element name="button" type="owo-ui-button-component"/>
             <xs:element name="slider" type="owo-ui-slider-component"/>
@@ -269,7 +270,7 @@
             </xs:documentation>
         </xs:annotation>
         <xs:restriction base="xs:string">
-            <xs:pattern value="([a-z0-9_.-]+:)?[a-z0-9_.-]+"/>
+            <xs:pattern value="([a-z0-9_.-]+:)?[a-z0-9/._-]+"/>
         </xs:restriction>
     </xs:simpleType>
 
@@ -508,6 +509,7 @@
                     <xs:choice maxOccurs="unbounded">
                         <xs:group ref="parentComponentProps"/>
                         <xs:element type="xs:unsignedInt" name="forehead-size" minOccurs="0"/>
+                        <xs:element type="xs:boolean" name="always-on-top" minOccurs="0"/>
                     </xs:choice>
                 </xs:sequence>
             </xs:extension>

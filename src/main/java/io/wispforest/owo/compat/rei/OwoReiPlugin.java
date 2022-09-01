@@ -1,6 +1,9 @@
 package io.wispforest.owo.compat.rei;
 
 import io.wispforest.owo.itemgroup.OwoItemGroup;
+import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
+import io.wispforest.owo.ui.core.Component;
+import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.util.pond.OwoCreativeInventoryScreenExtensions;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
@@ -10,6 +13,7 @@ import net.minecraft.item.ItemGroup;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public class OwoReiPlugin implements REIClientPlugin {
 
@@ -33,6 +37,21 @@ public class OwoReiPlugin implements REIClientPlugin {
                 rectangles.add(new Rectangle(xOffset, yOffset, 24, 24));
             }
 
+            return rectangles;
+        });
+
+        zones.register(BaseOwoHandledScreen.class, screen -> {
+            if (screen.children().isEmpty() || !(screen.children().get(0) instanceof OwoUIAdapter<?> adapter)) return List.of();
+            var rootComponent = adapter.rootComponent;
+            var children = new ArrayList<Component>();
+            rootComponent.collectChildren(children);
+            children.remove(rootComponent);
+
+            var rectangles = new ArrayList<Rectangle>();
+            children.forEach(component -> {
+                var size = component.fullSize();
+                rectangles.add(new Rectangle(component.x(), component.y(), size.width(), size.height()));
+            });
             return rectangles;
         });
     }

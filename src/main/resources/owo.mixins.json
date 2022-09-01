@@ -26,7 +26,9 @@
     "text.TranslatableTextContentMixin",
     "text.stapi.SystemDelegatedLanguageFixin",
     "tweaks.EulaReaderMixin",
-    "tweaks.LevelInfoMixin"
+    "tweaks.LevelInfoMixin",
+    "ui.SlotAccessor",
+    "ui.SlotMixin"
   ],
   "client": [
     "MinecraftClientMixin",
@@ -38,6 +40,7 @@
     "ui.CheckboxWidgetMixin",
     "ui.ClickableWidgetAccessor",
     "ui.ClickableWidgetMixin",
+    "ui.HandledScreenMixin",
     "ui.MinecraftClientMixin",
     "ui.ScreenInvoker",
     "ui.SliderWidgetMixin",

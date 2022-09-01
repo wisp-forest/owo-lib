@@ -55,7 +55,7 @@ public abstract class BaseUIModelScreen<R extends ParentComponent> extends BaseO
      * fetching the model - implement this interface and pass it
      * to the {@code super(...)} call in your constructor
      */
-    protected interface DataSource {
+    public interface DataSource {
 
         @Nullable
         UIModel get();

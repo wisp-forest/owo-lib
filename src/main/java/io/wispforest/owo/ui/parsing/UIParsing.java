@@ -285,7 +285,7 @@ public class UIParsing {
         // Container
         registerFactory("scroll", ScrollContainer::parse);
         registerFactory("collapsible", CollapsibleContainer::parse);
-        registerFactory("drag", element -> Containers.draggable(Sizing.content(), Sizing.content(), null));
+        registerFactory("draggable", element -> Containers.draggable(Sizing.content(), Sizing.content(), null));
 
         // Textures
         registerFactory("sprite", SpriteComponent::parse);

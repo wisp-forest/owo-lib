@@ -15,6 +15,8 @@ import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
 import io.wispforest.owo.text.CustomTextRegistry;
 import io.wispforest.owo.util.RegistryAccess;
 import io.wispforest.owo.util.TagInjector;
+import io.wispforest.uwu.client.EpicHandledModelScreen;
+import io.wispforest.uwu.client.EpicHandledScreen;
 import io.wispforest.uwu.config.BruhConfig;
 import io.wispforest.uwu.config.UwuConfig;
 import io.wispforest.uwu.items.UwuItems;
@@ -28,6 +30,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ingame.HandledScreens;
 import net.minecraft.command.argument.GameProfileArgumentType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -36,6 +39,7 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tag.BlockTags;
 import net.minecraft.tag.ItemTags;
@@ -62,6 +66,8 @@ public class Uwu implements ModInitializer {
     public static final Identifier GROUP_TEXTURE = new Identifier("uwu", "textures/gui/group.png");
     public static final Identifier OWO_ICON_TEXTURE = new Identifier("uwu", "textures/gui/icon.png");
     public static final Identifier ANIMATED_BUTTON_TEXTURE = new Identifier("uwu", "textures/gui/animated_icon_test.png");
+
+    public static final ScreenHandlerType<EpicScreenHandler> EPIC_SCREEN_HANDLER_TYPE = new ScreenHandlerType<>(EpicScreenHandler::new);
 
     public static final OwoItemGroup FOUR_TAB_GROUP = new OwoItemGroup(new Identifier("uwu", "four_tab_group")) {
         @Override
@@ -152,6 +158,8 @@ public class Uwu implements ModInitializer {
     public void onInitialize() {
 
         FieldRegistrationHandler.register(UwuItems.class, "uwu", true);
+//        HandledScreens.register(EPIC_SCREEN_HANDLER_TYPE, EpicHandledScreen::new);
+        HandledScreens.register(EPIC_SCREEN_HANDLER_TYPE, EpicHandledModelScreen::new);
 
         TagInjector.inject(Registry.BLOCK, BlockTags.BASE_STONE_OVERWORLD.id(), Blocks.GLASS);
         TagInjector.injectTagReference(Registry.ITEM, ItemTags.COALS.id(), ItemTags.FOX_FOOD.id());
