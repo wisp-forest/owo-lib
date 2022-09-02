@@ -52,6 +52,7 @@ public class NbtKey<T> {
     /**
      * @deprecated Use {@link NbtCarrier#put(NbtKey, T)} instead
      */
+    @Deprecated
     public void put(@NotNull NbtCompound nbt, T value) {
         this.type.setter.accept(nbt, this.key, value);
     }
@@ -59,6 +60,7 @@ public class NbtKey<T> {
     /**
      * @deprecated Use {@link NbtCarrier#delete(NbtKey)} instead
      */
+    @Deprecated
     public void delete(@NotNull NbtCompound nbt) {
         nbt.remove(this.key);
     }
@@ -66,6 +68,7 @@ public class NbtKey<T> {
     /**
      * @deprecated Use {@link NbtCarrier#has(NbtKey)} instead
      */
+    @Deprecated
     public boolean isIn(@NotNull NbtCompound nbt) {
         return nbt.contains(this.key, this.type.nbtEquivalent);
     }

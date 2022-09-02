@@ -417,7 +417,7 @@ public record PacketBufSerializer<T>(PacketByteBuf.PacketWriter<T> serializer, P
 
         registerCollectionProvider(Collection.class, HashSet::new);
         registerCollectionProvider(List.class, ArrayList::new);
-        registerCollectionProvider(Map.class, HashMap::new);
+        registerCollectionProvider(Map.class, LinkedHashMap::new);
     }
 
 }

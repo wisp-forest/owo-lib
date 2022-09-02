@@ -3,6 +3,7 @@ package io.wispforest.owo.ui.base;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.core.ParentComponent;
+import io.wispforest.owo.ui.inject.GreedyInputComponent;
 import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.UIErrorToast;
 import io.wispforest.owo.util.pond.OwoSlotExtension;
@@ -158,7 +159,9 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
             return true;
         }
 
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return this.uiAdapter.rootComponent.focusHandler().focused() instanceof GreedyInputComponent inputComponent
+                ? inputComponent.onKeyPress(keyCode, scanCode, modifiers)
+                : super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
