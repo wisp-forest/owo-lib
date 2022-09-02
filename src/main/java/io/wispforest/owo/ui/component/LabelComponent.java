@@ -121,15 +121,11 @@ public class LabelComponent extends BaseComponent {
     @Override
     public void inflate(Size space) {
         super.inflate(space);
-
-        if (this.horizontalSizing.get().method != Sizing.Method.CONTENT) {
-            this.maxWidth = width;
-            this.wrapLines();
-        }
+        this.wrapLines();
     }
 
     private void wrapLines() {
-        this.wrappedText = this.textRenderer.wrapLines(this.text, this.maxWidth);
+        this.wrappedText = this.textRenderer.wrapLines(this.text, this.horizontalSizing.get().method != Sizing.Method.CONTENT ? this.width : this.maxWidth);
     }
 
     @Override

@@ -2,7 +2,6 @@ package io.wispforest.owo.ui.parsing;
 
 import io.wispforest.owo.ui.component.*;
 import io.wispforest.owo.ui.container.*;
-import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.Sizing;
 import net.minecraft.item.ItemStack;
@@ -299,6 +298,7 @@ public class UIParsing {
         registerFactory("label", element -> Components.label(Text.empty()));
         registerFactory("box", element -> Components.box(Sizing.content(), Sizing.content()));
         registerFactory("button", element -> Components.button(Text.empty(), button -> {}));
+        registerFactory("textured-button", TexturedButtonComponent::parse);
         registerFactory("checkbox", element -> Components.checkbox(Text.empty()));
         registerFactory("text-box", element -> Components.textBox(Sizing.content()));
         registerFactory("slider", element -> Components.slider(Sizing.content()));

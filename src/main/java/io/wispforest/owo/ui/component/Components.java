@@ -34,6 +34,14 @@ public class Components {
     // Wrapped Vanilla Widgets
     // -----------------------
 
+    public static TexturedButtonComponent texturedButton(Identifier texture, Text message, int width, int height, int u, int v, int textureWidth, int textureHeight, ButtonWidget.PressAction onPress) {
+        return new TexturedButtonComponent(texture, width, height, u, v, textureWidth, textureHeight, message, onPress);
+    }
+
+    public static TexturedButtonComponent texturedButton(Identifier texture, Text message, int width, int height, int u, int v, ButtonWidget.PressAction onPress) {
+        return new TexturedButtonComponent(texture, width, height, u, v, 256, 256, message, onPress);
+    }
+
     public static ButtonWidget button(Text message, int width, int height, ButtonWidget.PressAction onPress) {
         return new ButtonWidget(0, 0, width, height, message, onPress);
     }

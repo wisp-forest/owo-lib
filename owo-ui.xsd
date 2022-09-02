@@ -26,6 +26,7 @@
         <xs:choice>
             <xs:element name="label" type="owo-ui-label-component"/>
             <xs:element name="button" type="owo-ui-button-component"/>
+            <xs:element name="textured-button" type="owo-ui-textured-button-component"/>
             <xs:element name="box" type="owo-ui-box-component"/>
             <xs:element name="text-box" type="owo-ui-text-field-component"/>
             <xs:element name="entity" type="owo-ui-entity-component"/>
@@ -368,6 +369,24 @@
                     <xs:group ref="vanillaWidgetProps"/>
                     <xs:element type="owo-ui-text" name="text" minOccurs="0"/>
                 </xs:choice>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="owo-ui-textured-button-component">
+        <xs:complexContent>
+            <xs:extension base="componentType">
+                <xs:choice maxOccurs="unbounded">
+                    <xs:group ref="vanillaWidgetProps"/>
+                    <xs:element type="owo-ui-text" name="text" minOccurs="0"/>
+                </xs:choice>
+                <xs:attribute name="texture" type="minecraft-identifier" use="required"/>
+                <xs:attribute name="width" type="xs:integer" use="required"/>
+                <xs:attribute name="height" type="xs:integer" use="required"/>
+                <xs:attribute name="u" type="xs:integer"/>
+                <xs:attribute name="v" type="xs:integer"/>
+                <xs:attribute name="texture-width" type="xs:integer"/>
+                <xs:attribute name="texture-height" type="xs:integer"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>

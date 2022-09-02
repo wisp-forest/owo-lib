@@ -21,6 +21,14 @@ public class Positioning implements Animatable<Positioning> {
         this.y = y;
     }
 
+    public Positioning withX(int x) {
+        return new Positioning(x, this.y, this.type);
+    }
+
+    public Positioning withY(int y) {
+        return new Positioning(this.x, y, this.type);
+    }
+
     @Override
     public Positioning interpolate(Positioning next, float delta) {
         if (next.type != this.type) {

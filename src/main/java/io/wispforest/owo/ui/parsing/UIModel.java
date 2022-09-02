@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Function;
+import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 
 /**
@@ -244,21 +245,23 @@ public class UIModel {
     }
 
     protected void applySubstitutions(Element template) {
-        final var parameterSupplier = this.expansionStack.peek().parameterSupplier;
+        var parameterSupplier = this.expansionStack.peek().parameterSupplier;
+        Function<MatchResult, String> replacer = matchResult -> {
+            final var paramName = matchResult.group().substring(2, matchResult.group().length() - 2);
+            final var substitution = parameterSupplier.apply(paramName);
+            if (substitution == null) throw new MissingFormatArgumentException("No substitution provided for template parameter '" + paramName + "'");
+            return substitution;
+        };
 
         for (var child : UIParsing.<Element>allChildrenOfType(template, Node.ELEMENT_NODE)) {
             for (var node : UIParsing.<Text>allChildrenOfType(child, Node.TEXT_NODE)) {
                 var textContent = node.getTextContent();
-                node.setTextContent(PARAMETER_PATTERN.matcher(textContent).replaceAll(
-                        matchResult -> parameterSupplier.apply(matchResult.group().substring(2, matchResult.group().length() - 2))
-                ));
+                node.setTextContent(PARAMETER_PATTERN.matcher(textContent).replaceAll(replacer));
             }
 
             for (int i = 0; i < child.getAttributes().getLength(); i++) {
                 var attr = (Attr) child.getAttributes().item(i);
-                attr.setValue(PARAMETER_PATTERN.matcher(attr.getValue()).replaceAll(
-                        matchResult -> parameterSupplier.apply(matchResult.group().substring(2, matchResult.group().length() - 2))
-                ));
+                attr.setValue(PARAMETER_PATTERN.matcher(attr.getValue()).replaceAll(replacer));
             }
             applySubstitutions(child);
         }
@@ -274,12 +277,16 @@ public class UIModel {
                 var expanded = childSupplier.apply(childId);
                 if (expanded != null) {
                     expanded = (Element) expanded.cloneNode(true);
+                    var expandedChildren = UIParsing.childElements(expanded);
+
                     for (var element : UIParsing.<Element>allChildrenOfType(child, Node.ELEMENT_NODE)) {
-                        if (expanded.getElementsByTagName(element.getNodeName()).getLength() != 0) continue;
+                        if (expandedChildren.containsKey(element.getTagName())) continue;
                         expanded.appendChild(element);
                     }
 
                     template.replaceChild(expanded, child);
+                } else {
+                    throw new IncompatibleUIModelException("No expansion provided for template child '" + childId + "'");
                 }
             }
 

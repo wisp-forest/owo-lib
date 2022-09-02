@@ -98,6 +98,12 @@ public class VanillaWidgetComponent extends BaseComponent {
     }
 
     @Override
+    public boolean onMouseUp(double mouseX, double mouseY, int button) {
+        return this.widget.mouseReleased(mouseX, mouseY, button)
+                | super.onMouseUp(mouseX, mouseY, button);
+    }
+
+    @Override
     public boolean onMouseScroll(double mouseX, double mouseY, double amount) {
         return this.widget.mouseScrolled(this.x + mouseX, this.y + mouseY, amount)
                 | super.onMouseScroll(mouseX, mouseY, amount);
@@ -117,7 +123,7 @@ public class VanillaWidgetComponent extends BaseComponent {
 
     @Override
     public boolean onKeyPress(int keyCode, int scanCode, int modifiers) {
-        return this.widget.onKeyPress(keyCode, scanCode, modifiers)
+        return this.widget.keyPressed(keyCode, scanCode, modifiers)
                 | super.onKeyPress(keyCode, scanCode, modifiers);
     }
 }

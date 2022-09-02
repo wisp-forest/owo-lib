@@ -28,12 +28,6 @@ public abstract class ClickableWidgetMixin implements ComponentStub {
     @Shadow
     protected abstract void setFocused(boolean focused);
 
-    @Shadow
-    public abstract boolean mouseClicked(double mouseX, double mouseY, int button);
-
-    @Shadow
-    public abstract boolean mouseReleased(double mouseX, double mouseY, int button);
-
     @Shadow public boolean active;
 
     @Unique
@@ -156,12 +150,12 @@ public abstract class ClickableWidgetMixin implements ComponentStub {
 
     @Override
     public boolean onMouseDown(double mouseX, double mouseY, int button) {
-        return this.mouseClicked(this.x() + mouseX, this.y() + mouseY, button);
+        return this.owo$getWrapper().onMouseDown(mouseX, mouseY, button);
     }
 
     @Override
     public boolean onMouseUp(double mouseX, double mouseY, int button) {
-        return this.mouseReleased(mouseX, mouseY, button);
+        return this.owo$getWrapper().onMouseUp(mouseX, mouseY, button);
     }
 
     @Override
@@ -211,22 +205,22 @@ public abstract class ClickableWidgetMixin implements ComponentStub {
 
     @Override
     public boolean onMouseScroll(double mouseX, double mouseY, double amount) {
-        return ((ClickableWidget) (Object) this).mouseScrolled(this.x() + mouseX, this.y() + mouseY, amount);
+        return this.owo$getWrapper().onMouseScroll(mouseX, mouseY, amount);
     }
 
     @Override
     public boolean onMouseDrag(double mouseX, double mouseY, double deltaX, double deltaY, int button) {
-        return ((ClickableWidget) (Object) this).mouseDragged(this.x() + mouseX, this.y() + mouseY, button, deltaX, deltaY);
+        return this.owo$getWrapper().onMouseDrag(mouseX, mouseY, deltaX, deltaY, button);
     }
 
     @Override
     public boolean onKeyPress(int keyCode, int scanCode, int modifiers) {
-        return ((ClickableWidget) (Object) this).keyPressed(keyCode, scanCode, modifiers);
+        return this.owo$getWrapper().onKeyPress(keyCode, scanCode, modifiers);
     }
 
     @Override
     public boolean onCharTyped(char chr, int modifiers) {
-        return ((ClickableWidget) (Object) this).charTyped(chr, modifiers);
+        return this.owo$getWrapper().onCharTyped(chr, modifiers);
     }
 
     @Override

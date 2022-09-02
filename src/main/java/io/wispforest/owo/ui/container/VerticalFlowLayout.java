@@ -1,6 +1,7 @@
 package io.wispforest.owo.ui.container;
 
 import io.wispforest.owo.ui.core.*;
+import io.wispforest.owo.ui.util.MountingHelper;
 import org.apache.commons.lang3.mutable.MutableInt;
 
 import java.util.ArrayList;
@@ -20,22 +21,20 @@ public class VerticalFlowLayout extends FlowLayout {
         final var padding = this.padding.get();
         final var childSpace = this.calculateChildSpace(space);
 
-        for (var child : children) {
-            this.mountChild(child, childSpace, c -> {
-                layout.add(child);
+        var mountState = MountingHelper.mountEarly(this::mountChild, this.children, childSpace, child -> {
+            layout.add(child);
 
-                child.inflate(childSpace);
-                child.mount(this,
-                        this.x + padding.left() + child.margins().get().left(),
-                        this.y + padding.top() + child.margins().get().top() + layoutHeight.intValue());
+            child.inflate(childSpace);
+            child.mount(this,
+                    this.x + padding.left() + child.margins().get().left(),
+                    this.y + padding.top() + child.margins().get().top() + layoutHeight.intValue());
 
-                final var childSize = child.fullSize();
-                layoutHeight.add(childSize.height());
-                if (childSize.width() > layoutWidth.intValue()) {
-                    layoutWidth.setValue(childSize.width());
-                }
-            });
-        }
+            final var childSize = child.fullSize();
+            layoutHeight.add(childSize.height());
+            if (childSize.width() > layoutWidth.intValue()) {
+                layoutWidth.setValue(childSize.width());
+            }
+        });
 
         this.contentSize = Size.of(layoutWidth.intValue(), layoutHeight.intValue());
         if (this.horizontalSizing.get().method == Sizing.Method.CONTENT) {
@@ -61,5 +60,7 @@ public class VerticalFlowLayout extends FlowLayout {
                 }
             }
         }
+
+        mountState.mountLate();
     }
 }
