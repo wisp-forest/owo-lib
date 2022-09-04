@@ -30,7 +30,7 @@ public class DraggableContainer<C extends Component> extends WrappingParentCompo
     public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
         if (this.alwaysOnTop) matrices.translate(0, 0, 500);
         super.draw(matrices, mouseX, mouseY, partialTicks, delta);
-        this.drawClipped(matrices, mouseX, mouseY, partialTicks, delta, Collections.singletonList(this.child));
+        this.drawChildren(matrices, mouseX, mouseY, partialTicks, delta, Collections.singletonList(this.child));
         if (this.alwaysOnTop) matrices.translate(0, 0, -500);
     }
 

@@ -39,6 +39,7 @@ public class TextureComponent extends BaseComponent {
     @Override
     public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
         RenderSystem.setShaderTexture(0, this.texture);
+        RenderSystem.enableDepthTest();
         Drawer.drawTexture(matrices, this.x, this.y, this.width, this.height, this.u, this.v, this.regionWidth, this.regionHeight, this.textureWidth, this.textureHeight);
     }
 

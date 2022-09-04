@@ -4,6 +4,8 @@ import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.OwoUIAdapter;
+import io.wispforest.owo.ui.core.ParentComponent;
+import io.wispforest.owo.ui.core.Surface;
 import io.wispforest.owo.util.pond.OwoCreativeInventoryScreenExtensions;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
@@ -49,6 +51,8 @@ public class OwoReiPlugin implements REIClientPlugin {
 
             var rectangles = new ArrayList<Rectangle>();
             children.forEach(component -> {
+                if (component instanceof ParentComponent parent && parent.surface() == Surface.BLANK) return;
+
                 var size = component.fullSize();
                 rectangles.add(new Rectangle(component.x(), component.y(), size.width(), size.height()));
             });

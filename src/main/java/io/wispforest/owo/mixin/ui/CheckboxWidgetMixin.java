@@ -1,5 +1,6 @@
 package io.wispforest.owo.mixin.ui;
 
+import io.wispforest.owo.ui.core.CursorStyle;
 import io.wispforest.owo.ui.inject.CheckboxWidgetExtension;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
@@ -32,5 +33,9 @@ public abstract class CheckboxWidgetMixin extends ClickableWidget implements Che
         super.parseProperties(model, element, children);
         UIParsing.apply(children, "checked", UIParsing::parseBool, this::checked);
         UIParsing.apply(children, "text", UIParsing::parseText, this::setMessage);
+    }
+
+    protected CursorStyle owo$preferredCursorStyle() {
+        return CursorStyle.HAND;
     }
 }

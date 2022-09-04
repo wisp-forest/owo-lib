@@ -39,8 +39,13 @@ public abstract class ButtonWidgetMixin extends ClickableWidget implements Butto
         return (ButtonWidget) (Object) this;
     }
 
-    @SuppressWarnings("ReferenceToMixin")
-    protected void owo$initializeWrapper() {
-        ((ClickableWidgetMixin)(Object)this).owo$wrapper.cursorStyle(CursorStyle.HAND);
+    @Override
+    public void update(float delta, int mouseX, int mouseY) {
+        super.update(delta, mouseX, mouseY);
+        this.cursorStyle(this.active ? CursorStyle.HAND : CursorStyle.POINTER);
+    }
+
+    protected CursorStyle owo$preferredCursorStyle() {
+        return CursorStyle.HAND;
     }
 }

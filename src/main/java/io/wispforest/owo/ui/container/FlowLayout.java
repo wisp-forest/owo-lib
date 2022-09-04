@@ -47,11 +47,23 @@ public abstract class FlowLayout extends BaseParentComponent {
         return this;
     }
 
+    @Override
     public FlowLayout removeChild(Component child) {
         if (this.children.remove(child)) {
             child.dismount(DismountReason.REMOVED);
             this.updateLayout();
         }
+
+        return this;
+    }
+
+    public FlowLayout clearChildren() {
+        for (var child : this.children) {
+            child.dismount(DismountReason.REMOVED);
+        }
+
+        this.children.clear();
+        this.updateLayout();
 
         return this;
     }
@@ -64,7 +76,7 @@ public abstract class FlowLayout extends BaseParentComponent {
     @Override
     public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
         super.draw(matrices, mouseX, mouseY, partialTicks, delta);
-        this.drawClipped(matrices, mouseX, mouseY, partialTicks, delta, this.children);
+        this.drawChildren(matrices, mouseX, mouseY, partialTicks, delta, this.children);
     }
 
     @Override

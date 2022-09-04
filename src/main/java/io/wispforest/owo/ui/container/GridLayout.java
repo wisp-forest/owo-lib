@@ -91,7 +91,7 @@ public class GridLayout extends BaseParentComponent {
     @Override
     public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
         super.draw(matrices, mouseX, mouseY, partialTicks, delta);
-        this.drawClipped(matrices, mouseX, mouseY, partialTicks, delta, this.nonNullChildren);
+        this.drawChildren(matrices, mouseX, mouseY, partialTicks, delta, this.nonNullChildren);
     }
 
     protected @Nullable Component getChild(int row, int column) {

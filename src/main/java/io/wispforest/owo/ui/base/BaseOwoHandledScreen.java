@@ -13,7 +13,6 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -91,10 +90,7 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
      * @param index The index of the slot to disable
      */
     protected void disableSlot(int index) {
-        final var slot = (OwoSlotExtension) this.slotByIndex(index);
-        if (slot == null) return;
-
-        slot.owo$setDisabledOverride(true);
+        ((OwoSlotExtension) this.handler.slots.get(index)).owo$setDisabledOverride(true);
     }
 
     /**
@@ -105,25 +101,11 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
      * @param index The index of the slot to enable
      */
     protected void enableSlot(int index) {
-        final var slot = (OwoSlotExtension) this.slotByIndex(index);
-        if (slot == null) return;
-
-        slot.owo$setDisabledOverride(false);
+        ((OwoSlotExtension) this.handler.slots.get(index)).owo$setDisabledOverride(false);
     }
 
     protected boolean isSlotEnabled(int index) {
-        final var slot = (OwoSlotExtension) this.slotByIndex(index);
-        if (slot == null) return false;
-
-        return slot.owo$getDisabledOverride();
-    }
-
-    protected @Nullable Slot slotByIndex(int index) {
-        for (var slot : this.handler.slots) {
-            if (slot.getIndex() == index) return slot;
-        }
-
-        return null;
+        return ((OwoSlotExtension) this.handler.slots.get(index)).owo$getDisabledOverride();
     }
 
     @Override
@@ -134,11 +116,16 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
             if (this.uiAdapter.enableInspector) {
                 matrices.translate(0, 0, 500);
 
-                for (var slot : this.handler.slots) {
+                for (int i = 0; i < this.handler.slots.size(); i++) {
+                    var slot = this.handler.slots.get(i);
                     if (!slot.isEnabled()) continue;
 
-                    Drawer.drawText(matrices, Text.literal(String.valueOf(slot.getIndex())),
-                            this.x + slot.x + 15, this.y + slot.y + 15, .6f, 0x5800FF,
+                    Drawer.drawText(matrices, Text.literal(String.valueOf(i)),
+                            this.x + slot.x + 15, this.y + slot.y + 9, .5f, 0x0096FF,
+                            Drawer.TextAnchor.BOTTOM_RIGHT
+                    );
+                    Drawer.drawText(matrices, Text.literal("(" + slot.getIndex() + ")"),
+                            this.x + slot.x + 15, this.y + slot.y + 15, .5f, 0x5800FF,
                             Drawer.TextAnchor.BOTTOM_RIGHT
                     );
                 }

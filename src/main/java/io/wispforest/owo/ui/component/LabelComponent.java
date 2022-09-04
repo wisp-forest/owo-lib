@@ -126,6 +126,7 @@ public class LabelComponent extends BaseComponent {
 
     private void wrapLines() {
         this.wrappedText = this.textRenderer.wrapLines(this.text, this.horizontalSizing.get().method != Sizing.Method.CONTENT ? this.width : this.maxWidth);
+        if (this.mounted) this.parent.onChildMutated(this);
     }
 
     @Override

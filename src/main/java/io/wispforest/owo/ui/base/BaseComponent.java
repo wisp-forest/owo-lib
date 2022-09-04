@@ -7,7 +7,6 @@ import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.Observable;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -20,6 +19,8 @@ public abstract class BaseComponent implements Component {
 
     @Nullable protected ParentComponent parent = null;
     @Nullable protected String id = null;
+    protected int zIndex = 0;
+
     protected boolean mounted = false;
 
     protected AnimatableProperty<Insets> margins = AnimatableProperty.of(Insets.none());
@@ -292,6 +293,17 @@ public abstract class BaseComponent implements Component {
     @Override
     public @Nullable String id() {
         return this.id;
+    }
+
+    @Override
+    public Component zIndex(int zIndex) {
+        this.zIndex = zIndex;
+        return this;
+    }
+
+    @Override
+    public int zIndex() {
+        return this.zIndex;
     }
 
     @Override

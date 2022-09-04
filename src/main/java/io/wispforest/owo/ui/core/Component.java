@@ -182,6 +182,19 @@ public interface Component extends PositionedRectangle {
     @Nullable List<TooltipComponent> tooltip();
 
     /**
+     * Set the Z-Index of this component. This is used
+     * for layering components during rendering
+     *
+     * @param zIndex The new Z-Index of this component
+     */
+    Component zIndex(int zIndex);
+
+    /**
+     * @return The current Z-Index of this component
+     */
+    int zIndex();
+
+    /**
      * Determine if this component should currently
      * render its tooltip
      *
@@ -416,7 +429,8 @@ public interface Component extends PositionedRectangle {
 
         UIParsing.apply(children, "margins", Insets::parse, this::margins);
         UIParsing.apply(children, "positioning", Positioning::parse, this::positioning);
-
+        UIParsing.apply(children, "z-index", UIParsing::parseSignedInt, this::zIndex);
+        UIParsing.apply(children, "cursor-style", UIParsing.parseEnum(CursorStyle.class), this::cursorStyle);
         UIParsing.apply(children, "tooltip-text", UIParsing::parseText, this::tooltip);
 
         if (children.containsKey("sizing")) {

@@ -33,6 +33,9 @@ public abstract class ClickableWidgetMixin implements ComponentStub {
     @Unique
     protected VanillaWidgetComponent owo$wrapper = null;
 
+    @Unique
+    protected CursorStyle preferredCursorStyle = CursorStyle.POINTER;
+
     @Override
     public void inflate(Size space) {
         this.owo$getWrapper().inflate(space);
@@ -146,6 +149,7 @@ public abstract class ClickableWidgetMixin implements ComponentStub {
     @Override
     public void update(float delta, int mouseX, int mouseY) {
         this.owo$getWrapper().update(delta, mouseX, mouseY);
+        this.cursorStyle(this.active ? this.owo$preferredCursorStyle() : CursorStyle.POINTER);
     }
 
     @Override
@@ -251,7 +255,8 @@ public abstract class ClickableWidgetMixin implements ComponentStub {
 
         UIParsing.apply(children, "margins", Insets::parse, this::margins);
         UIParsing.apply(children, "positioning", Positioning::parse, this::positioning);
-
+        UIParsing.apply(children, "z-index", UIParsing::parseSignedInt, this::zIndex);
+        UIParsing.apply(children, "cursor-style", UIParsing.parseEnum(CursorStyle.class), this::cursorStyle);
         UIParsing.apply(children, "tooltip-text", UIParsing::parseText, this::tooltip);
 
         if (children.containsKey("sizing")) {
@@ -286,6 +291,16 @@ public abstract class ClickableWidgetMixin implements ComponentStub {
     }
 
     @Override
+    public Component zIndex(int zIndex) {
+        return this.owo$getWrapper().zIndex(zIndex);
+    }
+
+    @Override
+    public int zIndex() {
+        return this.owo$getWrapper().zIndex();
+    }
+
+    @Override
     public Component id(@Nullable String id) {
         this.owo$getWrapper().id(id);
         return this;
@@ -300,11 +315,10 @@ public abstract class ClickableWidgetMixin implements ComponentStub {
     protected VanillaWidgetComponent owo$getWrapper() {
         if (this.owo$wrapper == null) {
             this.owo$wrapper = Components.wrapVanillaWidget((ClickableWidget) (Object) this);
-            this.owo$initializeWrapper();
         }
 
         return this.owo$wrapper;
     }
 
-    protected void owo$initializeWrapper() {}
+    protected abstract CursorStyle owo$preferredCursorStyle();
 }

@@ -1,7 +1,6 @@
 package io.wispforest.owo.ui.base;
 
 import io.wispforest.owo.ui.core.*;
-import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.FocusHandler;
 import io.wispforest.owo.ui.util.ScissorStack;
 import io.wispforest.owo.util.Observable;
@@ -332,7 +331,7 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
      *
      * @param children The list of children to draw
      */
-    protected void drawClipped(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta, List<Component> children) {
+    protected void drawChildren(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta, List<Component> children) {
         if (!this.allowOverflow) {
             var padding = this.padding.get();
             ScissorStack.push(this.x + padding.left(), this.y + padding.top(), this.width - padding.horizontal(), this.height - padding.vertical(), matrices);
@@ -341,11 +340,14 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
         var focusHandler = this.focusHandler();
         for (var child : children) {
             if (!ScissorStack.isVisible(child)) continue;
-            child.draw(matrices, mouseX, mouseY, partialTicks, delta);
+            matrices.translate(0, 0, child.zIndex());
 
+            child.draw(matrices, mouseX, mouseY, partialTicks, delta);
             if (focusHandler.lastFocusSource() == FocusSource.KEYBOARD_CYCLE && focusHandler.focused() == child) {
                 child.drawFocusHighlight(matrices, mouseX, mouseY, partialTicks, delta);
             }
+
+            matrices.translate(0, 0, -child.zIndex());
         }
 
         if (!this.allowOverflow) {

@@ -85,7 +85,7 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
         if (visualOffset > 9999999e-7 || visualOffset < .1e-6) visualOffset = 0;
 
         matrices.translate(this.direction.choose(visualOffset, 0), this.direction.choose(0, visualOffset), 0);
-        this.drawClipped(matrices, mouseX, mouseY, partialTicks, delta, Collections.singletonList(this.child));
+        this.drawChildren(matrices, mouseX, mouseY, partialTicks, delta, Collections.singletonList(this.child));
 
         matrices.pop();
 

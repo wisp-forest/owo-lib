@@ -16,7 +16,6 @@ import java.util.List;
  * which unconditionally throw - used for interface-injecting onto
  * vanilla widgets
  */
-@ApiStatus.Internal
 public interface ComponentStub extends Component {
 
     @Override
@@ -101,6 +100,16 @@ public interface ComponentStub extends Component {
 
     @Override
     default List<TooltipComponent> tooltip() {
+        throw new IllegalStateException("Interface stub method called");
+    }
+
+    @Override
+    default Component zIndex(int zIndex) {
+        throw new IllegalStateException("Interface stub method called");
+    }
+
+    @Override
+    default int zIndex() {
         throw new IllegalStateException("Interface stub method called");
     }
 

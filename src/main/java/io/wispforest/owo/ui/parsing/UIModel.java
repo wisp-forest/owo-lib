@@ -249,7 +249,7 @@ public class UIModel {
         Function<MatchResult, String> replacer = matchResult -> {
             final var paramName = matchResult.group().substring(2, matchResult.group().length() - 2);
             final var substitution = parameterSupplier.apply(paramName);
-            if (substitution == null) throw new MissingFormatArgumentException("No substitution provided for template parameter '" + paramName + "'");
+            if (substitution == null) throw new IncompatibleUIModelException("No substitution provided for template parameter '" + paramName + "'");
             return substitution;
         };
 

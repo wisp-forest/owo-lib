@@ -1,10 +1,12 @@
 package io.wispforest.owo.ui.util;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.core.Component;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.AffineTransformation;
+import net.minecraft.util.math.Vector4f;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
 
@@ -17,12 +19,22 @@ public class ScissorStack {
 
     public static void push(int x, int y, int width, int height, @Nullable MatrixStack matrices) {
         if (matrices != null) {
-            var transform = new AffineTransformation(matrices.peek().getPositionMatrix());
-            x += transform.getTranslation().getX();
-            y += transform.getTranslation().getY();
+            matrices.push();
+            matrices.multiplyPositionMatrix(RenderSystem.getModelViewMatrix());
 
-            width *= transform.getScale().getX();
-            height *= transform.getScale().getY();
+            var root = new Vector4f(x, y, 0, 1);
+            var end = new Vector4f(x + width, y + height, 0, 1);
+
+            root.transform(matrices.peek().getPositionMatrix());
+            end.transform(matrices.peek().getPositionMatrix());
+
+            x = (int) root.getX();
+            y = (int) root.getY();
+
+            width = (int) Math.ceil(end.getX() - root.getX());
+            height = (int) Math.ceil(end.getY() - root.getY());
+
+            matrices.pop();
         }
 
         if (STACK.isEmpty()) {

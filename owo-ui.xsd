@@ -281,6 +281,7 @@
             <xs:element type="owo-ui-positioning" name="positioning" minOccurs="0"/>
             <xs:element type="owo-ui-sizing" name="sizing" minOccurs="0"/>
             <xs:element type="owo-ui-text" name="tooltip-text" minOccurs="0"/>
+            <xs:element type="xs:integer" name="z-index" minOccurs="0"/>
         </xs:choice>
     </xs:group>
 
@@ -450,6 +451,7 @@
                 <xs:choice maxOccurs="unbounded">
                     <xs:group ref="componentProps"/>
                     <xs:element type="minecraft-identifier" name="item" minOccurs="0"/>
+                    <xs:element type="xs:boolean" name="show-overlay" minOccurs="0"/>
                 </xs:choice>
             </xs:extension>
         </xs:complexContent>

@@ -44,8 +44,7 @@ public abstract class SliderWidgetMixin extends ClickableWidget {
         );
     }
 
-    @SuppressWarnings("ReferenceToMixin")
-    protected void owo$initializeWrapper() {
-        ((ClickableWidgetMixin) (Object) this).owo$wrapper.cursorStyle(CursorStyle.MOVE);
+    protected CursorStyle owo$preferredCursorStyle() {
+        return CursorStyle.MOVE;
     }
 }

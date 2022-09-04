@@ -10,6 +10,7 @@ import io.wispforest.owo.ui.core.*;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
@@ -149,6 +150,8 @@ public class ComponentTestScreen extends Screen {
                 .lookAtCursor(true)
                 .scaleToFit(true)
         );
+
+        rootComponent.child(Components.item(new ItemStack(Items.EMERALD, 16)).showOverlay(true).positioning(Positioning.absolute(120, 30)));
 
         final var buttonGrid = Containers.grid(Sizing.content(), Sizing.content(), 3, 5);
         for (int row = 0; row < 3; row++) {

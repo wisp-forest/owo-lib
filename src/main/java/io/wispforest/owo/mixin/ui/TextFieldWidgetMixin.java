@@ -51,8 +51,7 @@ public abstract class TextFieldWidgetMixin extends ClickableWidget {
         }
     }
 
-    @SuppressWarnings("ReferenceToMixin")
-    protected void owo$initializeWrapper() {
-        ((ClickableWidgetMixin)(Object)this).owo$wrapper.cursorStyle(CursorStyle.TEXT);
+    protected CursorStyle owo$preferredCursorStyle() {
+        return CursorStyle.TEXT;
     }
 }

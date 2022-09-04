@@ -25,6 +25,7 @@ public class ItemComponent extends BaseComponent {
     protected final VertexConsumerProvider.Immediate entityBuffers;
     protected final ItemRenderer itemRenderer;
     protected ItemStack stack;
+    protected boolean showOverlay = false;
 
     protected ItemComponent(ItemStack stack) {
         this.entityBuffers = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
@@ -70,6 +71,7 @@ public class ItemComponent extends BaseComponent {
         modelView.pop();
         RenderSystem.applyModelViewMatrix();
 
+        if (this.showOverlay) this.itemRenderer.renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, this.stack, this.x, this.y);
         if (notSideLit) {
             DiffuseLighting.enableGuiDepthLighting();
         }
@@ -84,9 +86,19 @@ public class ItemComponent extends BaseComponent {
         return this.stack;
     }
 
+    public ItemComponent showOverlay(boolean drawOverlay) {
+        this.showOverlay = drawOverlay;
+        return this;
+    }
+
+    public boolean showOverlay() {
+        return this.showOverlay;
+    }
+
     @Override
     public void parseProperties(UIModel model, Element element, Map<String, Element> children) {
         super.parseProperties(model, element, children);
+        UIParsing.apply(children, "show-overlay", UIParsing::parseBool, this::showOverlay);
         UIParsing.apply(children, "item", UIParsing::parseIdentifier, itemId -> {
             var item = Registry.ITEM.getOrEmpty(itemId).orElseThrow(() -> new UIModelParsingException("Unknown item " + itemId));
             this.stack(item.getDefaultStack());
