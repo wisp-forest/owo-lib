@@ -25,11 +25,11 @@ public class MountingHelper {
         var lateChildren = new ArrayList<Component>();
 
         for (var child : children) {
-             if (child.positioning().get().type != Positioning.Type.RELATIVE) {
-                 sink.accept(child, childSpace, layoutFunc);
-             } else {
-                 lateChildren.add(child);
-             }
+            if (child.positioning().get().type != Positioning.Type.RELATIVE) {
+                sink.accept(child, childSpace, layoutFunc);
+            } else {
+                lateChildren.add(child);
+            }
         }
 
         return new MountingHelper(sink, lateChildren, childSpace);
@@ -37,7 +37,7 @@ public class MountingHelper {
 
     public void mountLate() {
         for (var child : lateChildren) {
-            this.sink.accept(child, this.childSpace, component -> { throw new IllegalStateException("A layout-positioned child was mounted late"); });
+            this.sink.accept(child, this.childSpace, component -> {throw new IllegalStateException("A layout-positioned child was mounted late");});
         }
         this.lateChildren.clear();
     }

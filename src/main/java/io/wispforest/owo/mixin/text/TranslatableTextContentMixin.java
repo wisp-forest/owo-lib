@@ -23,11 +23,13 @@ import java.util.Optional;
 public class TranslatableTextContentMixin {
     @Shadow private List<StringVisitable> translations;
 
-    @Shadow @Final private String key;
+    @Shadow
+    @Final
+    private String key;
 
     @Inject(method = {"visit(Lnet/minecraft/text/StringVisitable$Visitor;)Ljava/util/Optional;", "visit(Lnet/minecraft/text/StringVisitable$StyledVisitor;Lnet/minecraft/text/Style;)Ljava/util/Optional;"}, at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;"), cancellable = true)
     private <T> void enter(CallbackInfoReturnable<Optional<T>> cir) {
-        if (!TranslationContext.pushContent((TranslatableTextContent)(Object) this)) {
+        if (!TranslationContext.pushContent((TranslatableTextContent) (Object) this)) {
             Owo.LOGGER.warn("Detected translation reference cycle, replacing with empty");
             cir.setReturnValue(Optional.empty());
         }

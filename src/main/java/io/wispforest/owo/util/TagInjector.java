@@ -1,7 +1,5 @@
 package io.wispforest.owo.util;
 
-import net.minecraft.block.Block;
-import net.minecraft.item.Item;
 import net.minecraft.tag.TagEntry;
 import net.minecraft.tag.TagManagerLoader;
 import net.minecraft.util.Identifier;

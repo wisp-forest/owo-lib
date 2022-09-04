@@ -3,7 +3,6 @@ package io.wispforest.owo.text;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
-import org.jetbrains.annotations.ApiStatus;
 
 public interface CustomTextContentSerializer<T extends CustomTextContent> {
 

@@ -2,8 +2,8 @@ package io.wispforest.owo.mixin.text;
 
 import com.google.gson.*;
 import io.wispforest.owo.text.CustomTextContent;
-import io.wispforest.owo.text.CustomTextRegistry;
 import io.wispforest.owo.text.CustomTextContentSerializer;
+import io.wispforest.owo.text.CustomTextRegistry;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -24,9 +24,11 @@ public abstract class TextSerializerMixin {
     @Shadow
     public abstract MutableText deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException;
 
-    @Shadow protected abstract void addStyle(Style style, JsonObject json, JsonSerializationContext context);
+    @Shadow
+    protected abstract void addStyle(Style style, JsonObject json, JsonSerializationContext context);
 
-    @Shadow public abstract JsonElement serialize(Text text, Type type, JsonSerializationContext jsonSerializationContext);
+    @Shadow
+    public abstract JsonElement serialize(Text text, Type type, JsonSerializationContext jsonSerializationContext);
 
     @Inject(method = "deserialize(Lcom/google/gson/JsonElement;Ljava/lang/reflect/Type;Lcom/google/gson/JsonDeserializationContext;)Lnet/minecraft/text/MutableText;", at = @At(value = "INVOKE", target = "Lcom/google/gson/JsonObject;has(Ljava/lang/String;)Z"), cancellable = true)
     private void deserializeCustomText(JsonElement el, Type type, JsonDeserializationContext ctx, CallbackInfoReturnable<MutableText> cir) {

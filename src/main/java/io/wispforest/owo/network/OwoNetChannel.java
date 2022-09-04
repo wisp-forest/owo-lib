@@ -184,7 +184,7 @@ public class OwoNetChannel {
      * @see #serverHandle(PlayerEntity)
      * @see #serverHandle(MinecraftServer)
      * @see #serverHandle(ServerWorld, BlockPos)
-     * @see PacketBufSerializer#register(Class, PacketByteBuf.PacketWriter, PacketByteBuf.PacketReader) 
+     * @see PacketBufSerializer#register(Class, PacketByteBuf.PacketWriter, PacketByteBuf.PacketReader)
      */
     public <R extends Record> void registerClientboundDeferred(Class<R> messageClass) {
         int index = this.clientHandlers.size();
@@ -202,7 +202,7 @@ public class OwoNetChannel {
      * @param messageClass The type of packet data to send and serialize
      * @param handler      The handler that will receive the deserialized
      * @see #clientHandle()
-     * @see PacketBufSerializer#register(Class, PacketByteBuf.PacketWriter, PacketByteBuf.PacketReader) 
+     * @see PacketBufSerializer#register(Class, PacketByteBuf.PacketWriter, PacketByteBuf.PacketReader)
      */
     @SuppressWarnings("unchecked")
     public <R extends Record> void registerServerbound(Class<R> messageClass, ChannelHandler<R, ServerAccess> handler) {

@@ -4,9 +4,6 @@ import io.wispforest.owo.registration.annotations.RegistryNamespace;
 import io.wispforest.owo.util.ReflectionUtils;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
-import org.apache.logging.log4j.util.TriConsumer;
-
-import java.lang.reflect.Field;
 
 /**
  * Main hub for all interactions with implementations of

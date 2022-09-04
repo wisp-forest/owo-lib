@@ -2,8 +2,8 @@ package io.wispforest.owo.compat.rei;
 
 import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.core.ParentComponent;
-import io.wispforest.owo.ui.util.ScissorStack;
 import io.wispforest.owo.ui.core.Sizing;
+import io.wispforest.owo.ui.util.ScissorStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;

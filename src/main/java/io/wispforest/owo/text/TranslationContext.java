@@ -1,7 +1,6 @@
 package io.wispforest.owo.text;
 
 import net.minecraft.text.TranslatableTextContent;
-import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
 import java.util.List;

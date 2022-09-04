@@ -20,7 +20,8 @@ import java.util.Map;
 @Mixin(TextFieldWidget.class)
 public abstract class TextFieldWidgetMixin extends ClickableWidget {
 
-    @Shadow public abstract void setDrawsBackground(boolean drawsBackground);
+    @Shadow
+    public abstract void setDrawsBackground(boolean drawsBackground);
 
     public TextFieldWidgetMixin(int x, int y, int width, int height, Text message) {
         super(x, y, width, height, message);

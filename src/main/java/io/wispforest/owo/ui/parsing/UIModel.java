@@ -1,4 +1,3 @@
-
 package io.wispforest.owo.ui.parsing;
 
 import io.wispforest.owo.Owo;

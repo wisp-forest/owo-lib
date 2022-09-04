@@ -1,7 +1,7 @@
 package io.wispforest.owo.mixin.itemgroup;
 
-import io.wispforest.owo.util.pond.OwoItemExtensions;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
+import io.wispforest.owo.util.pond.OwoItemExtensions;
 import io.wispforest.owo.util.pond.OwoItemSettingsExtensions;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;

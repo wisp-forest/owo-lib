@@ -14,7 +14,8 @@ import org.spongepowered.asm.mixin.Shadow;
 public abstract class SystemDelegatedLanguageFixin implements TextLanguage {
     @Shadow private Language vanilla;
 
-    @Shadow protected abstract ServerLanguage getSystemLanguage();
+    @Shadow
+    protected abstract ServerLanguage getSystemLanguage();
 
     @Override
     public Text getText(String key) {
