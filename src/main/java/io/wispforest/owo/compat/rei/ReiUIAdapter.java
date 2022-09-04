@@ -41,17 +41,17 @@ public class ReiUIAdapter<T extends ParentComponent> extends Widget {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        return this.adapter.mouseClicked(mouseX - this.adapter.x, mouseY - this.adapter.y, button);
+        return this.adapter.mouseClicked(mouseX - this.adapter.x(), mouseY - this.adapter.y(), button);
     }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        return this.adapter.mouseScrolled(mouseX - this.adapter.x, mouseY - this.adapter.y, amount);
+        return this.adapter.mouseScrolled(mouseX - this.adapter.x(), mouseY - this.adapter.y(), amount);
     }
 
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float partialTicks) {
-        ScissorStack.push(this.adapter.x, this.adapter.y, this.adapter.width, this.adapter.height, matrices);
+        ScissorStack.push(this.adapter.x(), this.adapter.y(), this.adapter.width(), this.adapter.height(), matrices);
         this.adapter.render(matrices, mouseX, mouseY, partialTicks);
         ScissorStack.pop();
     }

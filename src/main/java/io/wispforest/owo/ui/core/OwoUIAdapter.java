@@ -37,8 +37,8 @@ public class OwoUIAdapter<T extends ParentComponent> implements Element, Drawabl
     protected CursorStyle lastCursorStyle = CursorStyle.POINTER;
     protected boolean disposed = false;
 
-    public final int x, y;
-    public final int width, height;
+    protected int x, y;
+    protected int width, height;
 
     public boolean enableInspector = false;
     public boolean globalInspector = false;
@@ -104,6 +104,15 @@ public class OwoUIAdapter<T extends ParentComponent> implements Element, Drawabl
         this.rootComponent.mount(null, this.x, this.y);
     }
 
+    public void moveAndResize(int x, int y, int width, int height) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+
+        this.inflateAndMount();
+    }
+
     /**
      * Dispose this UI adapter - this will destroy the cursor
      * objects held onto by this adapter and stop updating the cursor style
@@ -130,6 +139,22 @@ public class OwoUIAdapter<T extends ParentComponent> implements Element, Drawabl
      */
     public boolean toggleGlobalInspector() {
         return this.globalInspector = !this.globalInspector;
+    }
+
+    public int x() {
+        return this.x;
+    }
+
+    public int y() {
+        return this.y;
+    }
+
+    public int width() {
+        return this.width;
+    }
+
+    public int height() {
+        return this.height;
     }
 
     @Override

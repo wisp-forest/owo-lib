@@ -75,20 +75,24 @@ public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen {
     protected void init() {
         if (this.invalid) return;
 
+        // Check whether this screen was already initialized
         if (this.uiAdapter != null) {
-            this.uiAdapter.dispose();
-        }
+            // If it was, only resize the adapter instead of recreating it - this preserves UI state
+            this.uiAdapter.moveAndResize(0, 0, this.width, this.height);
+            // Re-add it as a child to circumvent vanilla clearing them
+            this.addDrawableChild(this.uiAdapter);
+        } else {
+            try {
+                this.uiAdapter = this.createAdapter();
+                this.build(this.uiAdapter.rootComponent);
 
-        try {
-            this.uiAdapter = this.createAdapter();
-            this.build(this.uiAdapter.rootComponent);
-
-            this.uiAdapter.inflateAndMount();
-            this.client.keyboard.setRepeatEvents(true);
-        } catch (Exception error) {
-            Owo.LOGGER.warn("Could not initialize owo screen", error);
-            UIErrorToast.report(error);
-            this.invalid = true;
+                this.uiAdapter.inflateAndMount();
+                this.client.keyboard.setRepeatEvents(true);
+            } catch (Exception error) {
+                Owo.LOGGER.warn("Could not initialize owo screen", error);
+                UIErrorToast.report(error);
+                this.invalid = true;
+            }
         }
     }
 
