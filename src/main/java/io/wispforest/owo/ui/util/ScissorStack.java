@@ -5,7 +5,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.core.Component;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.AffineTransformation;
 import net.minecraft.util.math.Vector4f;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
@@ -88,15 +87,28 @@ public class ScissorStack {
         if (scissorEnabled) GlStateManager._enableScissorTest();
     }
 
-    public static boolean isVisible(Component component) {
+    public static boolean isVisible(Component component, @Nullable MatrixStack matrices) {
         var top = STACK.peek();
         if (top == null) return true;
 
         var margins = component.margins().get();
-        return component.x() - margins.left() < top.x + top.width
-                && component.x() + component.width() + margins.right() > top.x
-                && component.y() - margins.top() < top.y + top.height
-                && component.y() + component.height() + margins.bottom() > top.y;
+        var root = new Vector4f(component.x() - margins.left(), component.y() - margins.top(), 0, 1);
+        var end = new Vector4f(component.x() + component.width() + margins.right(), component.y() + component.width() + margins.bottom(), 0, 1);
+
+        if (matrices != null) {
+            matrices.push();
+            matrices.multiplyPositionMatrix(RenderSystem.getModelViewMatrix());
+
+            root.transform(matrices.peek().getPositionMatrix());
+            end.transform(matrices.peek().getPositionMatrix());
+
+            matrices.pop();
+        }
+
+        return root.getX() < top.x + top.width
+                && end.getX() > top.x
+                && root.getY() < top.y + top.height
+                && end.getY() > top.y;
     }
 
     private static void applyState() {

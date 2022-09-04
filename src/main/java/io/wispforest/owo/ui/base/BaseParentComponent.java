@@ -339,7 +339,7 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
 
         var focusHandler = this.focusHandler();
         for (var child : children) {
-            if (!ScissorStack.isVisible(child)) continue;
+            if (!ScissorStack.isVisible(child, matrices)) continue;
             matrices.translate(0, 0, child.zIndex());
 
             child.draw(matrices, mouseX, mouseY, partialTicks, delta);

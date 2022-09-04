@@ -71,8 +71,7 @@ public class Hud {
     private static void initializeAdapter() {
         var window = MinecraftClient.getInstance().getWindow();
         adapter = OwoUIAdapter.createWithoutScreen(
-                0, 0, window.getScaledWidth(), window.getScaledHeight(),
-                adapter == null ? HudContainer::new : (sizing, sizing2) -> adapter.rootComponent
+                0, 0, window.getScaledWidth(), window.getScaledHeight(), HudContainer::new
         );
 
         adapter.inflateAndMount();
@@ -81,9 +80,7 @@ public class Hud {
     static {
         WindowResizeCallback.EVENT.register((client, window) -> {
             if (adapter == null) return;
-
-            adapter.dispose();
-            initializeAdapter();
+            adapter.moveAndResize(0, 0, window.getScaledWidth(), window.getScaledHeight());
         });
 
         HudRenderCallback.EVENT.register((matrixStack, tickDelta) -> {
