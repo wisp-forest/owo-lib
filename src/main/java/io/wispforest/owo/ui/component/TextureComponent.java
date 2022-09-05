@@ -2,12 +2,17 @@ package io.wispforest.owo.ui.component;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.base.BaseComponent;
+import io.wispforest.owo.ui.core.AnimatableProperty;
+import io.wispforest.owo.ui.core.PositionedRectangle;
 import io.wispforest.owo.ui.core.Sizing;
+import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.Drawer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import org.w3c.dom.Element;
+
+import java.util.Map;
 
 public class TextureComponent extends BaseComponent {
 
@@ -15,6 +20,8 @@ public class TextureComponent extends BaseComponent {
     protected final int u, v;
     protected final int regionWidth, regionHeight;
     protected final int textureWidth, textureHeight;
+
+    protected final AnimatableProperty<PositionedRectangle> visibleArea;
 
     protected TextureComponent(Identifier texture, int u, int v, int regionWidth, int regionHeight, int textureWidth, int textureHeight) {
         this.texture = texture;
@@ -24,6 +31,8 @@ public class TextureComponent extends BaseComponent {
         this.regionHeight = regionHeight;
         this.textureWidth = textureWidth;
         this.textureHeight = textureHeight;
+
+        this.visibleArea = AnimatableProperty.of(PositionedRectangle.of(0, 0, this.regionWidth, this.regionHeight));
     }
 
     @Override
@@ -37,10 +46,79 @@ public class TextureComponent extends BaseComponent {
     }
 
     @Override
+    public void update(float delta, int mouseX, int mouseY) {
+        super.update(delta, mouseX, mouseY);
+        this.visibleArea.update(delta);
+    }
+
+    @Override
     public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
         RenderSystem.setShaderTexture(0, this.texture);
         RenderSystem.enableDepthTest();
-        Drawer.drawTexture(matrices, this.x, this.y, this.width, this.height, this.u, this.v, this.regionWidth, this.regionHeight, this.textureWidth, this.textureHeight);
+
+        matrices.push();
+        matrices.translate(x, y, 0);
+        matrices.scale(this.width / (float) this.regionWidth, this.height / (float) this.regionHeight, 0);
+
+        var visibleArea = this.visibleArea.get();
+
+        int bottomEdge = Math.min(visibleArea.y() + visibleArea.height(), regionHeight);
+        int rightEdge = Math.min(visibleArea.x() + visibleArea.width(), regionWidth);
+
+        Drawer.drawTexture(matrices,
+                visibleArea.x(),
+                visibleArea.y(),
+                rightEdge - visibleArea.x(),
+                bottomEdge - visibleArea.y(),
+                this.u + visibleArea.x(),
+                this.v + visibleArea.y(),
+                rightEdge - visibleArea.x(),
+                bottomEdge - visibleArea.y(),
+                this.textureWidth, this.textureHeight
+        );
+
+        matrices.pop();
+    }
+
+    public TextureComponent visibleArea(PositionedRectangle visibleArea) {
+        this.visibleArea.set(visibleArea);
+        return this;
+    }
+
+    public TextureComponent resetVisibleArea() {
+        this.visibleArea(PositionedRectangle.of(0, 0, this.regionWidth, this.regionHeight));
+        return this;
+    }
+
+    public AnimatableProperty<PositionedRectangle> visibleArea() {
+        return this.visibleArea;
+    }
+
+    @Override
+    public void parseProperties(UIModel model, Element element, Map<String, Element> children) {
+        super.parseProperties(model, element, children);
+        if (children.containsKey("visible-area")) {
+            var areaChildren = UIParsing.childElements(children.get("visible-area"));
+
+            int x = 0, y = 0, width = this.regionWidth, height = this.regionHeight;
+            if (areaChildren.containsKey("x")) {
+                x = UIParsing.parseSignedInt(areaChildren.get("x"));
+            }
+
+            if (areaChildren.containsKey("y")) {
+                y = UIParsing.parseSignedInt(areaChildren.get("y"));
+            }
+
+            if (areaChildren.containsKey("width")) {
+                width = UIParsing.parseSignedInt(areaChildren.get("width"));
+            }
+
+            if (areaChildren.containsKey("height")) {
+                height = UIParsing.parseSignedInt(areaChildren.get("height"));
+            }
+
+            this.visibleArea(PositionedRectangle.of(x, y, width, height));
+        }
     }
 
     public static TextureComponent parse(Element element) {

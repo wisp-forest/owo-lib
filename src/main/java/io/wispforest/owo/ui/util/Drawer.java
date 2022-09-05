@@ -197,6 +197,7 @@ public class Drawer extends DrawableHelper {
          * @param onlyHovered Whether to only draw the inspector for the hovered widget
          */
         public void drawInspector(MatrixStack matrices, ParentComponent root, double mouseX, double mouseY, boolean onlyHovered) {
+            RenderSystem.disableDepthTest();
             var textRenderer = MinecraftClient.getInstance().textRenderer;
 
             var children = new ArrayList<Component>();
@@ -207,6 +208,7 @@ public class Drawer extends DrawableHelper {
             }
 
             for (var child : children) {
+                matrices.translate(0, 0, 1000);
                 if (child instanceof ParentComponent parentComponent) {
                     this.drawInsets(matrices, parentComponent.x(), parentComponent.y(), parentComponent.width(),
                             parentComponent.height(), parentComponent.padding().get().inverted(), 0xA70CECDD);
@@ -229,7 +231,10 @@ public class Drawer extends DrawableHelper {
                     textRenderer.draw(matrices, descriptor,
                             child.x() + 1, child.y() + child.height() + textRenderer.fontHeight + 2, 0xFFFFFF);
                 }
+                matrices.translate(0, 0, -1000);
             }
+
+            RenderSystem.enableDepthTest();
         }
     }
 

@@ -480,7 +480,19 @@
     <xs:complexType name="owo-ui-texture-component">
         <xs:complexContent>
             <xs:extension base="componentType">
-                <xs:group ref="componentProps"/>
+                <xs:choice>
+                    <xs:group ref="componentProps"/>
+                    <xs:element name="visible-area" minOccurs="0">
+                        <xs:complexType>
+                            <xs:all>
+                                <xs:element name="x" type="xs:unsignedInt"/>
+                                <xs:element name="y" type="xs:unsignedInt"/>
+                                <xs:element name="width" type="xs:unsignedInt"/>
+                                <xs:element name="height" type="xs:unsignedInt"/>
+                            </xs:all>
+                        </xs:complexType>
+                    </xs:element>
+                </xs:choice>
                 <xs:attribute name="texture" type="minecraft-identifier" use="required"/>
                 <xs:attribute name="u" type="xs:integer"/>
                 <xs:attribute name="v" type="xs:integer"/>

@@ -110,6 +110,23 @@ public class UIModel {
     }
 
     /**
+     * Create a UI adapter which contains the component hierarchy
+     * declared by this UI model, without the context of a screen
+     * <p>
+     * If there are components in your hierarchy you need to modify in
+     * code after the main hierarchy has been parsed, give them an id
+     * and look them up via {@link ParentComponent#childById(Class, String)}
+     *
+     * @param expectedRootComponentClass The class the created root component is expected to have.
+     *                                   Should this be violated, an exception is thrown. If there
+     *                                   are no specific expectations about the type of
+     *                                   root component to create, pass {@link Component}
+     */
+    public <T extends ParentComponent> OwoUIAdapter<T> createAdapterWithoutScreen(int x, int y, int width, int height, Class<T> expectedRootComponentClass) {
+        return OwoUIAdapter.createWithoutScreen(x, y, width, height, (horizontalSizing, verticalSizing) -> this.parseComponentTree(expectedRootComponentClass));
+    }
+
+    /**
      * Attempt to parse the given XMl element into a component,
      * expanding any templates encountered. If the XML does
      * not describe a valid component, a {@link UIModelParsingException}

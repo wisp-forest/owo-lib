@@ -1,9 +1,11 @@
 package io.wispforest.owo.ui.core;
 
+import net.minecraft.util.math.MathHelper;
+
 /**
  * Represents a rectangle positioned in 2D-space
  */
-public interface PositionedRectangle {
+public interface PositionedRectangle extends Animatable<PositionedRectangle> {
 
     /**
      * @return The x-coordinate of the top-left corner of this rectangle
@@ -30,6 +32,16 @@ public interface PositionedRectangle {
      */
     default boolean isInBoundingBox(double x, double y) {
         return x >= this.x() && x <= this.x() + this.width() && y >= this.y() && y <= this.y() + this.height();
+    }
+
+    @Override
+    default PositionedRectangle interpolate(PositionedRectangle next, float delta) {
+        return PositionedRectangle.of(
+                (int) MathHelper.lerp(delta, this.x(), next.x()),
+                (int) MathHelper.lerp(delta, this.y(), next.y()),
+                (int) MathHelper.lerp(delta, this.width(), next.width()),
+                (int) MathHelper.lerp(delta, this.height(), next.height())
+        );
     }
 
     static PositionedRectangle of(int x, int y, Size size) {

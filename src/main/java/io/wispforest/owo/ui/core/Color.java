@@ -46,6 +46,10 @@ public record Color(float red, float green, float blue, float alpha) implements 
         );
     }
 
+    public static Color ofHsv(float hue, float saturation, float value) {
+        return ofRgb(MathHelper.hsvToRgb(hue, saturation, value));
+    }
+
     public static Color ofFormatting(@NotNull Formatting formatting) {
         var colorValue = formatting.getColorValue();
         return ofRgb(colorValue == null ? 0 : colorValue);
