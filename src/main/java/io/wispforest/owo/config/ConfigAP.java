@@ -50,6 +50,8 @@ public class ConfigAP extends AbstractProcessor {
 
             {accessors}
 
+            {type_interfaces}
+
             }
             """;
 
@@ -72,6 +74,7 @@ public class ConfigAP extends AbstractProcessor {
             }
             """;
 
+    private final Set<TypeElement> nestTypes = new HashSet<>();
     private Map<TypeMirror, TypeMirror> primitivesToWrappers;
 
     @Override
@@ -142,7 +145,8 @@ public class ConfigAP extends AbstractProcessor {
             }
 
             if (typeElement != null && field.getAnnotation(Nest.class) != null) {
-                list.add(new NestField(fieldName, collectFields(parent.child(fieldName), typeElement, defaultHook)));
+                this.nestTypes.add(typeElement);
+                list.add(new NestField(fieldName, collectFields(parent.child(fieldName), typeElement, defaultHook), typeElement.getSimpleName().toString()));
             } else {
                 list.add(new ValueField(fieldName, parent.child(fieldName), field.asType(),
                         defaultHook || field.getAnnotation(Hook.class) != null));
@@ -160,6 +164,21 @@ public class ConfigAP extends AbstractProcessor {
 
         var accessorMethods = new Writer(new StringBuilder());
         var optionInstances = new Writer(new StringBuilder());
+        var typeInterfaces = new Writer(new StringBuilder());
+
+        for (var nestType : this.nestTypes) {
+            typeInterfaces.beginLine("public interface ").write(nestType.getSimpleName().toString()).endLine(" {");
+            typeInterfaces.beginBlock();
+            for (var enclosed : nestType.getEnclosedElements()) {
+                if (enclosed.getKind() != ElementKind.FIELD) continue;
+                if (enclosed.getAnnotation(Nest.class) != null) continue;
+
+                typeInterfaces.beginLine(enclosed.asType().toString()).write(" ").write(enclosed.getSimpleName().toString()).endLine("();");
+                typeInterfaces.beginLine("void ").write(enclosed.getSimpleName().toString()).write("(").write(enclosed.asType().toString()).endLine(" value);");
+            }
+            typeInterfaces.endBlock();
+            typeInterfaces.line("}");
+        }
 
         for (var field : fields) {
             field.appendAccessors(accessorMethods, optionInstances);
@@ -167,6 +186,7 @@ public class ConfigAP extends AbstractProcessor {
 
         return baseAccessor
                 .replace("{option_instances}", optionInstances.finish())
+                .replace("{type_interfaces}", typeInterfaces.finish())
                 .replace("{accessors}", accessorMethods.finish());
     }
 
@@ -225,13 +245,13 @@ public class ConfigAP extends AbstractProcessor {
         }
     }
 
-    private record NestField(String nestName, List<ConfigField> children) implements ConfigField {
+    private record NestField(String nestName, List<ConfigField> children, String typeName) implements ConfigField {
         @Override
         public void appendAccessors(Writer accessors, Writer optionInstances) {
             var nestClassName = capitalize(nestName);
 
             accessors.beginLine("public final ").write(nestClassName).write(" ").write(nestName).write(" = new ").write(nestClassName).endLine("();");
-            accessors.beginLine("public class ").write(nestClassName).endLine(" {");
+            accessors.beginLine("public class ").write(nestClassName).write(" implements ").write(typeName).endLine(" {");
             accessors.beginBlock();
             for (var child : children) {
                 child.appendAccessors(accessors, optionInstances);

@@ -129,6 +129,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
             var factory = this.factoryForOption(option);
             if (factory == null) {
                 Owo.LOGGER.warn("Could not create UI component for config option {}", option);
+                return;
             }
 
             var result = factory.make(this.model, option);
