@@ -108,6 +108,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
         rootComponent.childById(ButtonWidget.class, "done-button").onPress(button -> this.close());
         rootComponent.childById(ButtonWidget.class, "reload-button").onPress(button -> {
             this.config.load();
+            this.uiAdapter = null;
             this.clearAndInit();
 
             // TODO check if any options changed and warn

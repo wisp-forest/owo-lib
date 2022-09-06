@@ -129,12 +129,10 @@ public class ListOptionContainer<T> extends CollapsibleContainer implements Opti
             }
 
             container.child(box);
-
-            this.child(container);
             this.optionContainers.add(container);
         }
 
-        this.updateLayout();
+        this.children(this.optionContainers);
         this.refreshResetButton();
     }
 

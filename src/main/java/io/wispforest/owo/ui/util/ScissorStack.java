@@ -93,7 +93,7 @@ public class ScissorStack {
 
         var margins = component.margins().get();
         var root = new Vector4f(component.x() - margins.left(), component.y() - margins.top(), 0, 1);
-        var end = new Vector4f(component.x() + component.width() + margins.right(), component.y() + component.width() + margins.bottom(), 0, 1);
+        var end = new Vector4f(component.x() + component.width() + margins.right(), component.y() + component.height() + margins.bottom(), 0, 1);
 
         if (matrices != null) {
             matrices.push();

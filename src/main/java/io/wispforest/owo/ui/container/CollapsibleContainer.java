@@ -14,6 +14,7 @@ import org.lwjgl.glfw.GLFW;
 import org.w3c.dom.Element;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class CollapsibleContainer extends VerticalFlowLayout {
@@ -101,10 +102,28 @@ public class CollapsibleContainer extends VerticalFlowLayout {
     @Override
     public FlowLayout child(Component child) {
         this.collapsibleChildren.add(child);
+        if (this.expanded) super.child(child);
+        return this;
+    }
 
-        if (this.expanded) {
-            super.child(child);
-        }
+    @Override
+    public FlowLayout children(Collection<Component> children) {
+        this.collapsibleChildren.addAll(children);
+        if (this.expanded) super.children(children);
+        return this;
+    }
+
+    @Override
+    public FlowLayout child(int index, Component child) {
+        this.collapsibleChildren.add(index, child);
+        if (this.expanded) super.child(index + this.children.size() - this.collapsibleChildren.size(), child);
+        return this;
+    }
+
+    @Override
+    public FlowLayout children(int index, Collection<Component> children) {
+        this.collapsibleChildren.addAll(index, children);
+        if (this.expanded) super.children(index + this.children.size() - this.collapsibleChildren.size(), children);
         return this;
     }
 
