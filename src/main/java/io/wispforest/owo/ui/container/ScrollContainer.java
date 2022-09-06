@@ -140,7 +140,7 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
     public boolean onMouseScroll(double mouseX, double mouseY, double amount) {
         if (this.child.onMouseScroll(this.x + mouseX - this.child.x(), this.y + mouseY - this.child.y(), amount)) return true;
 
-        this.scrollOffset = MathHelper.clamp(this.scrollOffset - amount * 10, 0, this.maxScroll + 1);
+        this.scrollOffset = MathHelper.clamp(this.scrollOffset - amount * 15, 0, this.maxScroll + 1);
         this.lastScrollbarInteractTime = System.currentTimeMillis() + 1250;
         return true;
     }
@@ -151,6 +151,10 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
             this.scrollOffset = MathHelper.clamp(this.scrollOffset - 10, 0, this.maxScroll + 1);
         } else if (keyCode == this.direction.moreKeycode) {
             this.scrollOffset = MathHelper.clamp(this.scrollOffset + 10, 0, this.maxScroll + 1);
+        } else if (keyCode == GLFW.GLFW_KEY_PAGE_DOWN) {
+            this.scrollOffset = MathHelper.clamp(this.scrollOffset + this.direction.choose(this.width, this.height) * .8, 0, this.maxScroll + 1);
+        } else if (keyCode == GLFW.GLFW_KEY_PAGE_UP) {
+            this.scrollOffset = MathHelper.clamp(this.scrollOffset - this.direction.choose(this.width, this.height) * .8, 0, this.maxScroll + 1);
         }
 
         return false;
