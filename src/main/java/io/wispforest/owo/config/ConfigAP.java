@@ -309,6 +309,7 @@ public class ConfigAP extends AbstractProcessor {
         }
 
         public String finish() {
+            if (this.builder.isEmpty()) return "";
             if (this.builder.charAt(builder.length() - 1) == '\n') {
                 this.builder.deleteCharAt(this.builder.length() - 1);
             }
