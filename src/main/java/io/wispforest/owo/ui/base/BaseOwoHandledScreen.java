@@ -1,8 +1,11 @@
 package io.wispforest.owo.ui.base;
 
 import io.wispforest.owo.Owo;
+import io.wispforest.owo.mixin.ui.SlotAccessor;
 import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.core.ParentComponent;
+import io.wispforest.owo.ui.core.PositionedRectangle;
+import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.inject.GreedyInputComponent;
 import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.UIErrorToast;
@@ -13,10 +16,12 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.opengl.GL11;
 
 import java.util.function.BiFunction;
 
@@ -112,6 +117,17 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
         return ((OwoSlotExtension) this.handler.slots.get(index)).owo$getDisabledOverride();
     }
 
+    /**
+     * Wrap the slot and the given index in this screen's
+     * handler into a component, so it can be managed by the UI system
+     *
+     * @param index The index the slot occupies in the handler's slot list
+     * @return The wrapped slot
+     */
+    protected SlotComponent slotAsComponent(int index) {
+        return new SlotComponent(index);
+    }
+
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (!this.invalid) {
@@ -175,4 +191,63 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
 
     @Override
     protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {}
+
+    public class SlotComponent extends BaseComponent {
+
+        protected final Slot slot;
+        protected boolean didDraw = false;
+
+        protected SlotComponent(int index) {
+            this.slot = BaseOwoHandledScreen.this.handler.getSlot(index);
+        }
+
+        @Override
+        public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+            this.didDraw = true;
+
+            int[] scissor = new int[4];
+            GL11.glGetIntegerv(GL11.GL_SCISSOR_BOX, scissor);
+
+            ((OwoSlotExtension) this.slot).owo$setScissorArea(PositionedRectangle.of(
+                    scissor[0], scissor[1], scissor[2], scissor[3]
+            ));
+        }
+
+        @Override
+        public void drawTooltip(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+            if (!this.slot.hasStack()) {
+                super.drawTooltip(matrices, mouseX, mouseY, partialTicks, delta);
+            }
+
+            ((OwoSlotExtension) this.slot).owo$setDisabledOverride(!this.didDraw);
+            this.didDraw = false;
+        }
+
+        @Override
+        public boolean shouldDrawTooltip(double mouseX, double mouseY) {
+            return true;
+        }
+
+        @Override
+        protected void applyHorizontalContentSizing(Sizing sizing) {
+            this.width = 16;
+        }
+
+        @Override
+        protected void applyVerticalContentSizing(Sizing sizing) {
+            this.height = 16;
+        }
+
+        @Override
+        public void setX(int x) {
+            super.setX(x);
+            ((SlotAccessor) this.slot).owo$setX(x - BaseOwoHandledScreen.this.x);
+        }
+
+        @Override
+        public void setY(int y) {
+            super.setY(y);
+            ((SlotAccessor) this.slot).owo$setY(y - BaseOwoHandledScreen.this.y);
+        }
+    }
 }

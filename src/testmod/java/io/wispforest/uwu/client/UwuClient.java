@@ -78,6 +78,5 @@ public class UwuClient implements ClientModInitializer {
         });
     }
 
-    public record WeirdMessage(int e) {
-    }
+    public record WeirdMessage(int e) {}
 }

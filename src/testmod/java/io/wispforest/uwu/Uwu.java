@@ -158,8 +158,8 @@ public class Uwu implements ModInitializer {
     public void onInitialize() {
 
         FieldRegistrationHandler.register(UwuItems.class, "uwu", true);
-//        HandledScreens.register(EPIC_SCREEN_HANDLER_TYPE, EpicHandledScreen::new);
-        HandledScreens.register(EPIC_SCREEN_HANDLER_TYPE, EpicHandledModelScreen::new);
+        HandledScreens.register(EPIC_SCREEN_HANDLER_TYPE, EpicHandledScreen::new);
+//        HandledScreens.register(EPIC_SCREEN_HANDLER_TYPE, EpicHandledModelScreen::new);
 
         TagInjector.inject(Registry.BLOCK, BlockTags.BASE_STONE_OVERWORLD.id(), Blocks.GLASS);
         TagInjector.injectTagReference(Registry.ITEM, ItemTags.COALS.id(), ItemTags.FOX_FOOD.id());

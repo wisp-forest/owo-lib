@@ -1,7 +1,9 @@
 package io.wispforest.owo.mixin.ui;
 
+import io.wispforest.owo.ui.core.PositionedRectangle;
 import io.wispforest.owo.util.pond.OwoSlotExtension;
 import net.minecraft.screen.slot.Slot;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -14,6 +16,9 @@ public class SlotMixin implements OwoSlotExtension {
     @Unique
     private boolean owo$disabledOverride = false;
 
+    @Unique
+    private @Nullable PositionedRectangle owo$scissorArea = null;
+
     @Override
     public void owo$setDisabledOverride(boolean disabled) {
         this.owo$disabledOverride = disabled;
@@ -22,6 +27,16 @@ public class SlotMixin implements OwoSlotExtension {
     @Override
     public boolean owo$getDisabledOverride() {
         return this.owo$disabledOverride;
+    }
+
+    @Override
+    public void owo$setScissorArea(@Nullable PositionedRectangle scissor) {
+        this.owo$scissorArea = scissor;
+    }
+
+    @Override
+    public @Nullable PositionedRectangle owo$getScissorArea() {
+        return this.owo$scissorArea;
     }
 
     @Inject(method = "isEnabled", at = @At("TAIL"), cancellable = true)

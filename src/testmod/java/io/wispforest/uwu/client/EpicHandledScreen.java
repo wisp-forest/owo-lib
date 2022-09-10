@@ -55,6 +55,17 @@ public class EpicHandledScreen extends BaseOwoHandledScreen<FlowLayout, EpicScre
                                         }).tooltip(Text.literal("Disable"))).verticalAlignment(VerticalAlignment.CENTER).horizontalAlignment(HorizontalAlignment.CENTER))
                                 .allowOverflow(true)
                 ).alwaysOnTop(true).surface(Surface.DARK_PANEL).padding(Insets.of(5)).allowOverflow(true).positioning(Positioning.absolute(100, 100))
+        ).child(
+                Containers.verticalScroll(Sizing.content(), Sizing.fill(50), Containers.verticalFlow(Sizing.content(), Sizing.content())
+                        .child(this.slotAsComponent(0))
+                        .child(Components.box(Sizing.fixed(50), Sizing.fixed(35)).startColor(Color.RED).endColor(Color.BLUE).fill(true))
+                        .child(this.slotAsComponent(1))
+                        .child(Components.box(Sizing.fixed(50), Sizing.fixed(35)).startColor(Color.BLUE).endColor(Color.RED).fill(true))
+                        .child(this.slotAsComponent(2))
+                        .child(Components.box(Sizing.fixed(50), Sizing.fixed(35)).startColor(Color.RED).endColor(Color.BLUE).fill(true))
+                        .child(this.slotAsComponent(3))
+                        .child(Components.box(Sizing.fixed(50), Sizing.fixed(35)).startColor(Color.BLUE).endColor(Color.RED).fill(true))
+                ).positioning(Positioning.relative(75, 50)).surface(Surface.outline(0x77000000)).padding(Insets.of(1))
         ).surface(Surface.VANILLA_TRANSLUCENT).verticalAlignment(VerticalAlignment.CENTER).horizontalAlignment(HorizontalAlignment.CENTER);
     }
 

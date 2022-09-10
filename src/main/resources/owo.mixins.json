@@ -32,6 +32,8 @@
   ],
   "client": [
     "MinecraftClientMixin",
+    "itemgroup.AbstractInventoryScreenMixin",
+    "itemgroup.CreativeInventoryScreenAccessor",
     "itemgroup.CreativeInventoryScreenMixin",
     "text.TranslationStorageMixin",
     "tweaks.OperatingSystemMixin",
