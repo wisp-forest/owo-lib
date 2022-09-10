@@ -104,6 +104,7 @@ public abstract class ConfigWrapper<C> {
         if (this.loading) return;
 
         try {
+            this.fileLocation().getParent().toFile().mkdirs();
             Files.writeString(this.fileLocation(), this.jankson.toJson(this.instance).toJson(JsonGrammar.JANKSON), StandardCharsets.UTF_8);
         } catch (IOException e) {
             Owo.LOGGER.warn("Could not save config {}", this.name, e);
