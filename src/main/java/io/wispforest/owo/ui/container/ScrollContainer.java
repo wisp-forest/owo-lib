@@ -75,9 +75,13 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
 
         int newScrollPosition = this.direction.coordinateGetter.apply(this) - (int) this.currentScrollPosition;
         if (newScrollPosition != this.lastScrollPosition) {
-            this.direction.coordinateSetter.accept(this.child, newScrollPosition + (this.direction == ScrollDirection.VERTICAL ? this.padding.get().top() : this.padding.get().left()));
+            this.direction.coordinateSetter.accept(this.child, newScrollPosition + (this.direction == ScrollDirection.VERTICAL
+                    ? this.padding.get().top() + this.child.margins().get().top()
+                    : this.padding.get().left() + this.child.margins().get().left())
+            );
             this.lastScrollPosition = newScrollPosition;
         }
+
         // Draw, adding the fractional part of the offset via matrix translation
         matrices.push();
 
