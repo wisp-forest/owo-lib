@@ -5,6 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
+import net.minecraft.client.MinecraftClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -15,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Consumer;
 
 public class OwoSentinel {
@@ -35,7 +37,7 @@ public class OwoSentinel {
         if (FabricLoader.getInstance().isModLoaded("owo-impl")) return;
 
         try {
-            if (GraphicsEnvironment.isHeadless() || FORCE_HEADLESS) {
+            if (GraphicsEnvironment.isHeadless() || FORCE_HEADLESS || System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("mac")) {
                 SentinelConsole.run();
             } else {
                 SentinelWindow.open();
