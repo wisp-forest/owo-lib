@@ -39,9 +39,21 @@ public abstract class WrappingParentComponent<C extends Component> extends BaseP
     @Override
     public void layout(Size space) {
         this.child.inflate(this.calculateChildSpace(space));
+        this.child.mount(this, this.childMountX(), this.childMountY());
+    }
 
-        final var padding = this.padding.get();
-        this.child.mount(this, this.x + child.margins().get().left() + padding.left(), this.y + child.margins().get().top() + padding.top());
+    /**
+     * @return The x-coordinate at which to mount the child
+     */
+    protected int childMountX() {
+        return this.x + child.margins().get().left() + this.padding.get().left();
+    }
+
+    /**
+     * @return The y-coordinate at which to mount the child
+     */
+    protected int childMountY() {
+        return this.y + child.margins().get().top() + this.padding.get().top();
     }
 
     public WrappingParentComponent<C> child(C newChild) {

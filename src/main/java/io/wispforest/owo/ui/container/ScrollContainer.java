@@ -67,6 +67,16 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
     }
 
     @Override
+    protected int childMountX() {
+        return (int) (super.childMountX() - this.direction.choose(this.currentScrollPosition, 0));
+    }
+
+    @Override
+    protected int childMountY() {
+        return (int) (super.childMountY()  - this.direction.choose(0, this.currentScrollPosition));
+    }
+
+    @Override
     public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
         super.draw(matrices, mouseX, mouseY, partialTicks, delta);
 
@@ -110,7 +120,7 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
                 ? this.x + this.width - padding.right() - scrollbarThiccness
                 : this.y + this.height - padding.bottom() - scrollbarThiccness;
 
-        double scrollbarLength = ((float) selfSize / this.childSize) * contentSize;
+        double scrollbarLength = Math.floor(((float) selfSize / this.childSize) * contentSize);
         double scrollbarPosition = (this.currentScrollPosition / this.maxScroll) * (contentSize - scrollbarLength) + padding.top();
 
         final var progress = Easing.SINE.apply(MathHelper.clamp(this.lastScrollbarInteractTime - System.currentTimeMillis(), 0, 750) / 750f);
