@@ -62,9 +62,6 @@
       "net/minecraft/class_4185": [
         "io/wispforest/owo/ui/inject/ButtonWidgetExtension"
       ],
-      "net/minecraft/class_4286": [
-        "io/wispforest/owo/ui/inject/CheckboxWidgetExtension"
-      ],
       "net/minecraft/class_342": [
         "io/wispforest/owo/ui/inject/GreedyInputComponent"
       ]

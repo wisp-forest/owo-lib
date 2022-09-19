@@ -14,6 +14,10 @@ import org.w3c.dom.Element;
 
 import java.util.Map;
 
+/**
+ * @deprecated Replaced by {@link io.wispforest.owo.ui.component.ButtonComponent.Renderer#texture(Identifier, int, int, int, int)}
+ */
+@Deprecated(forRemoval = true)
 public class TexturedButtonComponent extends ButtonWidget {
 
     protected final Identifier texture;

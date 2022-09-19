@@ -2,13 +2,17 @@ package io.wispforest.uwu.client;
 
 import com.mojang.authlib.GameProfile;
 import io.wispforest.owo.ui.component.BoxComponent;
+import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.EntityComponent;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.core.*;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.EditBoxWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -45,6 +49,7 @@ public class ComponentTestScreen extends Screen {
                         .child(Components.button(Text.of("Dark Background"), 95, 20, button -> rootComponent.surface(Surface.flat(0x77000000))))
                         .child(Components.button(Text.of("No Background"), 95, 20, button -> rootComponent.surface(Surface.BLANK)).margins(Insets.vertical(5)))
                         .child(Components.button(Text.of("Dirt Background"), 95, 20, button -> rootComponent.surface(Surface.OPTIONS_BACKGROUND)))
+                        .child(Components.checkbox(Text.of("bruh")).onChanged(aBoolean -> this.client.player.sendMessage(Text.of("bruh: " + aBoolean))).margins(Insets.top(5)))
                         .padding(Insets.of(10))
                         .surface(Surface.flat(0x77000000))
                         .positioning(Positioning.relative(1, 1))
@@ -54,29 +59,42 @@ public class ComponentTestScreen extends Screen {
         var verticalAnimation = innerLayout.verticalSizing().animate(350, Easing.SINE, Sizing.content(50));
 
         innerLayout.child(Containers.verticalScroll(Sizing.content(), Sizing.fixed(50), Containers.verticalFlow(Sizing.content(), Sizing.content())
-                        .child(new BoxComponent(Sizing.fixed(20), Sizing.fixed(40)).margins(Insets.of(5)))
-                        .child(new BoxComponent(Sizing.fixed(45), Sizing.fixed(45)).margins(Insets.of(5)))
-                        .child(Components.textBox(Sizing.fixed(60)))
-                        .horizontalAlignment(HorizontalAlignment.RIGHT)
-                        .surface(Surface.flat(0x77000000)))
+                                .child(new BoxComponent(Sizing.fixed(20), Sizing.fixed(40)).margins(Insets.of(5)))
+                                .child(new BoxComponent(Sizing.fixed(45), Sizing.fixed(45)).margins(Insets.of(5)))
+                                .child(Components.textBox(Sizing.fixed(60)))
+                                .horizontalAlignment(HorizontalAlignment.RIGHT)
+                                .surface(Surface.flat(0x77000000)))
+                        .scrollbar(ScrollContainer.Scrollbar.vanilla())
+                        .fixedScrollbarLength(15)
+                        .scrollbarThiccness(12)
+                        .id("scrollnite")
                 )
-                .child(Components.button(Text.of("Expand"), 60, 20, button -> {
+                .child(Components.button(Text.of("+"), 12, 12, button -> {
                             verticalAnimation.reverse();
 
                             button.setMessage(verticalAnimation.direction() == Animation.Direction.FORWARDS
-                                    ? Text.of("Contract")
-                                    : Text.of("Expand")
+                                    ? Text.of("-")
+                                    : Text.of("+")
                             );
-                        }).margins(Insets.of(15, 15, 5, 5))
+                        }).margins(Insets.of(5))
                 )
                 .child(new BoxComponent(Sizing.fixed(40), Sizing.fixed(20)).margins(Insets.of(5)))
                 .horizontalAlignment(HorizontalAlignment.CENTER)
                 .verticalAlignment(VerticalAlignment.CENTER)
                 .padding(Insets.of(5));
 
+        final var editBox = new EditBoxWidget(MinecraftClient.getInstance().textRenderer,
+                0, 0, 75, 75, Text.literal("bruh"), Text.literal("b r u h")
+        );
+        editBox.sizing(Sizing.fixed(75));
+        editBox.setText("bruh");
+
+        innerLayout.child(editBox);
+
         rootComponent.child(Containers.horizontalScroll(Sizing.fill(20), Sizing.content(), innerLayout)
-                .scrollbarThiccness(5)
-                .surface(Surface.PANEL)
+                .scrollbarThiccness(6)
+                .scrollbar(ScrollContainer.Scrollbar.vanillaFlat())
+                .surface(Surface.DARK_PANEL)
                 .padding(Insets.of(3))
         );
 
@@ -111,13 +129,14 @@ public class ComponentTestScreen extends Screen {
         rootComponent.child(Containers.verticalFlow(Sizing.content(), Sizing.content())
                 .child(growingTextBox)
                 .child(new TextFieldWidget(this.client.textRenderer, 0, 0, 60, 20, Text.empty()).margins(Insets.vertical(5)))
-                .child(Components.button(Text.of("weeeee"), 0, 0, button -> {
+                .child(Components.button(Text.of("weeeee"), (ButtonComponent button) -> {
                     weeAnimation.loop(!weeAnimation.looping());
-                }).sizing(Sizing.content()).margins(Insets.vertical(5)))
-                .child(Components.discreteSlider(Sizing.fill(10), 0, 1)
+                }).renderer(ButtonComponent.Renderer.flat(0x77000000, 0x77070707, 0xA0000000)).sizing(Sizing.content()).margins(Insets.vertical(5)))
+                .child(Components.discreteSlider(Sizing.fill(10), 0, 5)
                         .snap(true)
                         .decimalPlaces(1)
-                        .message(value -> Text.translatable("text.ui.test_slider", value)))
+                        .message(value -> Text.translatable("text.ui.test_slider", value))
+                        .onChanged(aDouble -> this.client.player.sendMessage(Text.of("sliding towards " + aDouble))))
                 .padding(Insets.of(5))
                 .horizontalAlignment(HorizontalAlignment.CENTER)
                 .surface(Surface.DARK_PANEL)
@@ -153,13 +172,13 @@ public class ComponentTestScreen extends Screen {
 
         rootComponent.child(Components.item(new ItemStack(Items.EMERALD, 16)).showOverlay(true).positioning(Positioning.absolute(120, 30)));
 
-        final var buttonGrid = Containers.grid(Sizing.content(), Sizing.content(), 3, 5);
+        final var buttonGrid = Containers.grid(Sizing.content(), Sizing.fixed(85), 3, 5);
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 5; column++) {
                 buttonGrid.child(
                         Components.button(Text.of("" + (row * 5 + column)), 20, 20, button -> {
                             if (button.getMessage().getString().equals("11")) {
-                                buttonGrid.child(Components.button(Text.of("long boiii"), b -> buttonGrid.child(button, 2, 1)).margins(Insets.of(3)), 2, 1);
+                                buttonGrid.child(Components.button(Text.of("long boiii"), (ButtonComponent b) -> buttonGrid.child(button, 2, 1)).margins(Insets.of(3)), 2, 1);
                             } else if (button.getMessage().getString().equals("8")) {
                                 final var box = Components.textBox(Sizing.fill(10));
                                 box.setSuggestion("thicc boi");
@@ -183,18 +202,21 @@ public class ComponentTestScreen extends Screen {
         var data = IntStream.rangeClosed(1, 15).boxed().toList();
         rootComponent.child(
                 Containers.horizontalScroll(
-                                Sizing.fill(25),
+                                Sizing.fixed(26 * 7 + 8),
                                 Sizing.content(),
                                 Components.list(
                                         data,
-                                        flowLayout -> {},
-                                        integer -> Components.button(Text.literal(integer.toString()), button -> {}).margins(Insets.horizontal(3)).horizontalSizing(Sizing.fixed(20)),
+                                        flowLayout -> flowLayout.margins(Insets.bottom(10)),
+                                        integer -> Components.button(Text.literal(integer.toString()), (ButtonComponent button) -> {}).margins(Insets.horizontal(3)).horizontalSizing(Sizing.fixed(20)),
                                         false
                                 )
                         )
-                        .surface(Surface.DARK_PANEL)
-                        .padding(Insets.of(4))
-                        .margins(Insets.left(15))
+                        .scrollStep(26)
+                        .scrollbarThiccness(7)
+                        .scrollbar(ScrollContainer.Scrollbar.vanilla())
+                        .surface(Surface.PANEL)
+                        .padding(Insets.of(4, 5, 5, 5))
+                        .margins(Insets.bottom(5))
                         .positioning(Positioning.relative(50, 100))
         );
 

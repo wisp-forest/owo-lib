@@ -2,6 +2,7 @@ package io.wispforest.owo.config.ui.component;
 
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.config.annotation.Expanded;
+import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.CollapsibleContainer;
 import io.wispforest.owo.ui.container.Containers;
@@ -59,7 +60,7 @@ public class ListOptionContainer<T> extends CollapsibleContainer implements Opti
             this.titleLayout.child(addButton.margins(Insets.of(5)));
         }
 
-        this.resetButton = Components.button(Text.literal("⇄"), button -> {
+        this.resetButton = Components.button(Text.literal("⇄"), (ButtonComponent button) -> {
             this.backingList.clear();
             this.backingList.addAll(option.defaultValue());
 

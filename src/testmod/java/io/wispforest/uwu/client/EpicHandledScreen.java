@@ -2,6 +2,7 @@ package io.wispforest.uwu.client;
 
 import io.wispforest.owo.mixin.ui.SlotAccessor;
 import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
+import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
@@ -46,11 +47,11 @@ public class EpicHandledScreen extends BaseOwoHandledScreen<FlowLayout, EpicScre
                                         .horizontalSizing(Sizing.fixed(100)))
                                 .child(Components.entity(Sizing.fixed(100), EntityType.FROG, frogeNbt).scale(.75f).allowMouseRotation(true).tooltip(Text.literal(":)")))
                                 .child(Containers.horizontalFlow(Sizing.fixed(100), Sizing.content())
-                                        .child(Components.button(Text.of("✔"), button -> {
+                                        .child(Components.button(Text.of("✔"), (ButtonComponent button) -> {
                                             this.enableSlot(Integer.parseInt(selectBox.getText()));
                                         }).tooltip(Text.literal("Enable")))
                                         .child(selectBox.margins(Insets.horizontal(3)).tooltip(Text.literal("Slot Index")))
-                                        .child(Components.button(Text.of("❌"), button -> {
+                                        .child(Components.button(Text.of("❌"), (ButtonComponent button) -> {
                                             this.disableSlot(Integer.parseInt(selectBox.getText()));
                                         }).tooltip(Text.literal("Disable"))).verticalAlignment(VerticalAlignment.CENTER).horizontalAlignment(HorizontalAlignment.CENTER))
                                 .allowOverflow(true)

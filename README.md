@@ -49,7 +49,7 @@ You can check the latest version on the [Releases](https://github.com/wisp-fores
 
 owo is documented in two main ways:
  - There is rich, detailed JavaDoc throughout the entire codebase
- - There is a wiki with in-depth explanations and tutorials for most of owo's features over at https://docs.wispforest.io/owo/
+ - There is a wiki with in-depth explanations and tutorials for most of owo's features over at https://docs.wispforest.io/owo/features/
 
 ## Features
 

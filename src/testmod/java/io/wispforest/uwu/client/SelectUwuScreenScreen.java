@@ -2,6 +2,7 @@ package io.wispforest.uwu.client;
 
 import io.wispforest.owo.config.ui.ConfigScreen;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
+import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.VerticalFlowLayout;
@@ -34,10 +35,10 @@ public class SelectUwuScreenScreen extends BaseOwoScreen<VerticalFlowLayout> {
                 .surface(Surface.PANEL)
                 .horizontalAlignment(HorizontalAlignment.CENTER);
 
-        panel.child(Components.button(Text.literal("code demo"), button -> this.client.setScreen(new ComponentTestScreen())).margins(Insets.vertical(3)));
-        panel.child(Components.button(Text.literal("xml demo"), button -> this.client.setScreen(new TestParseScreen())).margins(Insets.vertical(3)));
-        panel.child(Components.button(Text.literal("code config"), button -> this.client.setScreen(new TestConfigScreen())).margins(Insets.vertical(3)));
-        panel.child(Components.button(Text.literal("xml config"), button -> this.client.setScreen(ConfigScreen.create(Uwu.CONFIG, null))).margins(Insets.vertical(3)));
+        panel.child(Components.button(Text.literal("code demo"), (ButtonComponent button) -> this.client.setScreen(new ComponentTestScreen())).margins(Insets.vertical(3)));
+        panel.child(Components.button(Text.literal("xml demo"), (ButtonComponent button) -> this.client.setScreen(new TestParseScreen())).margins(Insets.vertical(3)));
+        panel.child(Components.button(Text.literal("code config"), (ButtonComponent button) -> this.client.setScreen(new TestConfigScreen())).margins(Insets.vertical(3)));
+        panel.child(Components.button(Text.literal("xml config"), (ButtonComponent button) -> this.client.setScreen(ConfigScreen.create(Uwu.CONFIG, null))).margins(Insets.vertical(3)));
 
         this.uiAdapter.rootComponent.child(panel);
     }

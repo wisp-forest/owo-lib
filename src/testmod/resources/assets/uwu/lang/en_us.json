@@ -75,14 +75,14 @@
 
   "menu.returnToGame": {
     "text": "Back to Game",
-    "color": "red"
+    "color": "#FF5272"
   },
   "menu.returnToMenu": [
     "",
-    {"text": "Save", "color": "red"},
-    {"text": " and", "color": "#FFA500"},
-    {"text": " Quit", "color": "green"},
-    {"text": " to", "color": "blue"},
-    {"text": " Title", "color": "dark_blue"}
+    {"text": "Save", "color": "#52BDFF"},
+    {"text": " and", "color": "#52FFAA"},
+    {"text": " Quit", "color": "#FFEF52"},
+    {"text": " to", "color": "#FF9052"},
+    {"text": " Title", "color": "#FF5272"}
   ]
 }

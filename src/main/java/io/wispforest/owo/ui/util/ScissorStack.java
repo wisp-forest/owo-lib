@@ -14,27 +14,41 @@ import java.util.Deque;
 
 public class ScissorStack {
 
+    private static final MatrixStack EMPTY_STACK = new MatrixStack();
     private static final Deque<ScissorArea> STACK = new ArrayDeque<>();
 
+    public static void pushDirect(int x, int y, int width, int height) {
+        var window = MinecraftClient.getInstance().getWindow();
+        var scale = window.getScaleFactor();
+
+        push(
+                (int) (x / scale),
+                (int) (window.getScaledHeight() - (y / scale) - height / scale),
+                (int) (width / scale),
+                (int) (height / scale),
+                null
+        );
+    }
+
     public static void push(int x, int y, int width, int height, @Nullable MatrixStack matrices) {
-        if (matrices != null) {
-            matrices.push();
-            matrices.multiplyPositionMatrix(RenderSystem.getModelViewMatrix());
+        if (matrices == null) matrices = EMPTY_STACK;
 
-            var root = new Vector4f(x, y, 0, 1);
-            var end = new Vector4f(x + width, y + height, 0, 1);
+        matrices.push();
+        matrices.multiplyPositionMatrix(RenderSystem.getModelViewMatrix());
 
-            root.transform(matrices.peek().getPositionMatrix());
-            end.transform(matrices.peek().getPositionMatrix());
+        var root = new Vector4f(x, y, 0, 1);
+        var end = new Vector4f(x + width, y + height, 0, 1);
 
-            x = (int) root.getX();
-            y = (int) root.getY();
+        root.transform(matrices.peek().getPositionMatrix());
+        end.transform(matrices.peek().getPositionMatrix());
 
-            width = (int) Math.ceil(end.getX() - root.getX());
-            height = (int) Math.ceil(end.getY() - root.getY());
+        x = (int) root.getX();
+        y = (int) root.getY();
 
-            matrices.pop();
-        }
+        width = (int) Math.ceil(end.getX() - root.getX());
+        height = (int) Math.ceil(end.getY() - root.getY());
+
+        matrices.pop();
 
         if (STACK.isEmpty()) {
             STACK.push(new ScissorArea(x, y, width, height));
@@ -113,11 +127,12 @@ public class ScissorStack {
 
     private static void applyState() {
         var newFrame = STACK.peek();
-        var scale = MinecraftClient.getInstance().getWindow().getScaleFactor();
+        var window = MinecraftClient.getInstance().getWindow();
+        var scale = window.getScaleFactor();
 
         GL11.glScissor(
                 (int) (newFrame.x * scale),
-                (int) (MinecraftClient.getInstance().getWindow().getFramebufferHeight() - (newFrame.y * scale) - newFrame.height * scale),
+                (int) (window.getFramebufferHeight() - (newFrame.y * scale) - newFrame.height * scale),
                 (int) (newFrame.width * scale),
                 (int) (newFrame.height * scale)
         );

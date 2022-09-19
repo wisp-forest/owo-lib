@@ -34,20 +34,40 @@ public class Components {
     // Wrapped Vanilla Widgets
     // -----------------------
 
+    /**
+     * @deprecated Replaced by {@link io.wispforest.owo.ui.component.ButtonComponent.Renderer#texture(Identifier, int, int, int, int)}
+     */
     public static TexturedButtonComponent texturedButton(Identifier texture, Text message, int width, int height, int u, int v, int textureWidth, int textureHeight, ButtonWidget.PressAction onPress) {
         return new TexturedButtonComponent(texture, width, height, u, v, textureWidth, textureHeight, message, onPress);
     }
 
+    /**
+     * @deprecated Replaced by {@link io.wispforest.owo.ui.component.ButtonComponent.Renderer#texture(Identifier, int, int, int, int)}
+     */
     public static TexturedButtonComponent texturedButton(Identifier texture, Text message, int width, int height, int u, int v, ButtonWidget.PressAction onPress) {
         return new TexturedButtonComponent(texture, width, height, u, v, 256, 256, message, onPress);
     }
 
+    /**
+     * @deprecated Use {@link #button(Text, Consumer)} instead
+     */
+    @Deprecated(forRemoval = true)
     public static ButtonWidget button(Text message, int width, int height, ButtonWidget.PressAction onPress) {
-        return new ButtonWidget(0, 0, width, height, message, onPress);
+        return createWithSizing(() -> new ButtonComponent(message, onPress::onPress), Sizing.fixed(width), Sizing.fixed(height));
     }
 
+    /**
+     * @deprecated Use {@link #button(Text, Consumer)} instead
+     */
+    @Deprecated(forRemoval = true)
     public static ButtonWidget button(Text message, ButtonWidget.PressAction onPress) {
-        final var button = new ButtonWidget(0, 0, 0, 0, message, onPress);
+        final var button = new ButtonComponent(message, onPress::onPress);
+        button.sizing(Sizing.content(1), Sizing.content());
+        return button;
+    }
+
+    public static ButtonComponent button(Text message, Consumer<ButtonComponent> onPress) {
+        final var button = new ButtonComponent(message, onPress);
         button.sizing(Sizing.content(1), Sizing.content());
         return button;
     }

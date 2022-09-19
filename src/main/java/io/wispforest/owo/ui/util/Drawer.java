@@ -5,6 +5,7 @@ import io.wispforest.owo.mixin.ui.ScreenInvoker;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.ui.core.ParentComponent;
+import io.wispforest.owo.ui.core.Surface;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
@@ -28,6 +29,8 @@ import java.util.List;
  * statically accessible as well as extra convenience methods
  */
 public class Drawer extends DrawableHelper {
+
+    private static boolean recording = false;
 
     private static final Drawer INSTANCE = new Drawer();
     private final DebugDrawer debug = new DebugDrawer();
@@ -101,26 +104,7 @@ public class Drawer extends DrawableHelper {
      * @param dark     Whether to use the dark version of the panel texture
      */
     public static void drawPanel(MatrixStack matrices, int x, int y, int width, int height, boolean dark) {
-        RenderSystem.setShaderTexture(0, dark ? DARK_PANEL_TEXTURE : PANEL_TEXTURE);
-
-        drawTexture(matrices, x, y, 0, 0, 5, 5, 16, 16);
-        drawTexture(matrices, x + width - 5, y, 10, 0, 5, 5, 16, 16);
-        drawTexture(matrices, x, y + height - 5, 0, 10, 5, 5, 16, 16);
-        drawTexture(matrices, x + width - 5, y + height - 5, 10, 10, 5, 5, 16, 16);
-
-        if (width > 10 && height > 10) {
-            drawTexture(matrices, x + 5, y + 5, width - 10, height - 10, 5, 5, 5, 5, 16, 16);
-        }
-
-        if (width > 10) {
-            drawTexture(matrices, x + 5, y, width - 10, 5, 5, 0, 5, 5, 16, 16);
-            drawTexture(matrices, x + 5, y + height - 5, width - 10, 5, 5, 10, 5, 5, 16, 16);
-        }
-
-        if (height > 10) {
-            drawTexture(matrices, x, y + 5, 5, height - 10, 0, 5, 5, 5, 16, 16);
-            drawTexture(matrices, x + width - 5, y + 5, 5, height - 10, 10, 5, 5, 5, 16, 16);
-        }
+        (dark ? OwoNinePatchRenderers.DARK_PANEL : OwoNinePatchRenderers.LIGHT_PANEL).draw(matrices, x, y, width, height);
     }
 
     public static void drawText(MatrixStack matrices, Text text, float x, float y, float scale, int color) {
@@ -156,6 +140,19 @@ public class Drawer extends DrawableHelper {
 
     public static DebugDrawer debug() {
         return INSTANCE.debug;
+    }
+
+    public static void recordQuads() {
+        recording = true;
+    }
+
+    public static boolean recording() {
+        return recording;
+    }
+
+    public static void submitQuads() {
+        recording = false;
+        Tessellator.getInstance().draw();
     }
 
     public enum TextAnchor {
@@ -198,7 +195,8 @@ public class Drawer extends DrawableHelper {
          */
         public void drawInspector(MatrixStack matrices, ParentComponent root, double mouseX, double mouseY, boolean onlyHovered) {
             RenderSystem.disableDepthTest();
-            var textRenderer = MinecraftClient.getInstance().textRenderer;
+            var client = MinecraftClient.getInstance();
+            var textRenderer = client.textRenderer;
 
             var children = new ArrayList<Component>();
             if (!onlyHovered) {
@@ -219,17 +217,36 @@ public class Drawer extends DrawableHelper {
                 drawRectOutline(matrices, child.x(), child.y(), child.width(), child.height(), 0xFF3AB0FF);
 
                 if (onlyHovered) {
-                    textRenderer.draw(matrices, Text.of(child.getClass().getSimpleName() + (child.id() != null ? " '" + child.id() + "'" : "")),
-                            child.x() + 1, child.y() + child.height() + 1, 0xFFFFFF);
 
+                    int inspectorX = child.x() + 1;
+                    int inspectorY = child.y() + child.height() + child.margins().get().bottom() + 1;
+                    int inspectorHeight = textRenderer.fontHeight * 2 + 4;
+
+                    if (inspectorY > client.getWindow().getScaledHeight() - inspectorHeight) {
+                        inspectorY -= child.fullSize().height() + inspectorHeight + 1;
+                        if (inspectorY < 0) inspectorY = 1;
+                        if (child instanceof ParentComponent parentComponent) {
+                            inspectorX += parentComponent.padding().get().left();
+                            inspectorY += parentComponent.padding().get().top();
+                        }
+                    }
+
+                    final var nameText = Text.of(child.getClass().getSimpleName() + (child.id() != null ? " '" + child.id() + "'" : ""));
                     final var descriptor = Text.literal(child.x() + "," + child.y() + " (" + child.width() + "," + child.height() + ")"
                             + " <" + margins.top() + "," + margins.bottom() + "," + margins.left() + "," + margins.right() + "> ");
                     if (child instanceof ParentComponent parentComponent) {
                         var padding = parentComponent.padding().get();
                         descriptor.append(" >" + padding.top() + "," + padding.bottom() + "," + padding.left() + "," + padding.right() + "<");
                     }
+
+                    int width = Math.max(textRenderer.getWidth(nameText), textRenderer.getWidth(descriptor));
+                    fill(matrices,inspectorX, inspectorY, inspectorX + width + 3, inspectorY + inspectorHeight, 0xA7000000);
+                    drawRectOutline(matrices, inspectorX, inspectorY, width + 3, inspectorHeight, 0xA7000000);
+
+                    textRenderer.draw(matrices, nameText,
+                            inspectorX + 2, inspectorY + 2, 0xFFFFFF);
                     textRenderer.draw(matrices, descriptor,
-                            child.x() + 1, child.y() + child.height() + textRenderer.fontHeight + 2, 0xFFFFFF);
+                            inspectorX + 2, inspectorY + textRenderer.fontHeight + 2, 0xFFFFFF);
                 }
                 matrices.translate(0, 0, -1000);
             }

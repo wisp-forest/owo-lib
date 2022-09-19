@@ -31,6 +31,8 @@ import java.util.function.BiFunction;
  */
 public class OwoUIAdapter<T extends ParentComponent> implements Element, Drawable, Selectable {
 
+    private static boolean isRendering = false;
+
     public final T rootComponent;
 
     public final EnumMap<CursorStyle, Long> cursors = new EnumMap<>(CursorStyle.class);
@@ -159,30 +161,36 @@ public class OwoUIAdapter<T extends ParentComponent> implements Element, Drawabl
 
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float partialTicks) {
-        final var delta = MinecraftClient.getInstance().getLastFrameDuration();
-        final var window = MinecraftClient.getInstance().getWindow();
+        try {
+            isRendering = true;
 
-        this.rootComponent.update(delta, mouseX, mouseY);
+            final var delta = MinecraftClient.getInstance().getLastFrameDuration();
+            final var window = MinecraftClient.getInstance().getWindow();
 
-        RenderSystem.enableDepthTest();
-        GlStateManager._enableScissorTest();
+            this.rootComponent.update(delta, mouseX, mouseY);
 
-        GlStateManager._scissorBox(0, 0, window.getFramebufferWidth(), window.getFramebufferHeight());
-        this.rootComponent.draw(matrices, mouseX, mouseY, partialTicks, delta);
+            RenderSystem.enableDepthTest();
+            GlStateManager._enableScissorTest();
 
-        GlStateManager._disableScissorTest();
-        RenderSystem.disableDepthTest();
+            GlStateManager._scissorBox(0, 0, window.getFramebufferWidth(), window.getFramebufferHeight());
+            this.rootComponent.draw(matrices, mouseX, mouseY, partialTicks, delta);
 
-        this.rootComponent.drawTooltip(matrices, mouseX, mouseY, partialTicks, delta);
+            GlStateManager._disableScissorTest();
+            RenderSystem.disableDepthTest();
 
-        final var hovered = this.rootComponent.childAt(mouseX, mouseY);
-        if (!disposed && hovered != null && hovered.cursorStyle() != this.lastCursorStyle) {
-            GLFW.glfwSetCursor(window.getHandle(), this.cursors.get(hovered.cursorStyle()));
-            this.lastCursorStyle = hovered.cursorStyle();
-        }
+            this.rootComponent.drawTooltip(matrices, mouseX, mouseY, partialTicks, delta);
 
-        if (this.enableInspector) {
-            Drawer.debug().drawInspector(matrices, this.rootComponent, mouseX, mouseY, !this.globalInspector);
+            final var hovered = this.rootComponent.childAt(mouseX, mouseY);
+            if (!disposed && hovered != null && hovered.cursorStyle() != this.lastCursorStyle) {
+                GLFW.glfwSetCursor(window.getHandle(), this.cursors.get(hovered.cursorStyle()));
+                this.lastCursorStyle = hovered.cursorStyle();
+            }
+
+            if (this.enableInspector) {
+                Drawer.debug().drawInspector(matrices, this.rootComponent, mouseX, mouseY, !this.globalInspector);
+            }
+        } finally {
+            isRendering = false;
         }
     }
 
@@ -236,4 +244,8 @@ public class OwoUIAdapter<T extends ParentComponent> implements Element, Drawabl
 
     @Override
     public void appendNarrations(NarrationMessageBuilder builder) {}
+
+    public static boolean isRendering() {
+        return isRendering;
+    }
 }

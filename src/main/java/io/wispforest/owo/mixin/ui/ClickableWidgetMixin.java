@@ -10,7 +10,7 @@ import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.FocusHandler;
 import io.wispforest.owo.util.EventSource;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.gui.widget.*;
+import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -229,10 +229,7 @@ public abstract class ClickableWidgetMixin implements ComponentStub {
 
     @Override
     public boolean canFocus(FocusSource source) {
-        return (Object) this instanceof TextFieldWidget
-                || (Object) this instanceof SliderWidget
-                || (Object) this instanceof ButtonWidget
-                || (Object) this instanceof CheckboxWidget;
+        return true;
     }
 
     @Override
@@ -320,5 +317,7 @@ public abstract class ClickableWidgetMixin implements ComponentStub {
         return this.owo$wrapper;
     }
 
-    protected abstract CursorStyle owo$preferredCursorStyle();
+    protected CursorStyle owo$preferredCursorStyle() {
+        return CursorStyle.POINTER;
+    }
 }

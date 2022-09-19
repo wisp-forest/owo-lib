@@ -2,6 +2,7 @@ package io.wispforest.uwu.client;
 
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
+import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.core.*;
@@ -69,7 +70,7 @@ public class TestConfigScreen extends BaseOwoScreen<VerticalFlowLayout> {
             final var valueBox = Components.textBox(Sizing.fixed(80), option.value);
             valueLayout.child(valueBox.margins(Insets.horizontal(5)));
 
-            valueLayout.child(Components.button(Text.literal("⇄"), button -> {
+            valueLayout.child(Components.button(Text.literal("⇄"), (ButtonComponent button) -> {
                 valueBox.setText(option.value);
             }).margins(Insets.right(5)));
         }
