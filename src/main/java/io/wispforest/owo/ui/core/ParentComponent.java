@@ -121,6 +121,7 @@ public interface ParentComponent extends Component {
      */
     ParentComponent removeChild(Component child);
 
+    // TODO do not draw child tooltip when child is not visible
     @Override
     default void drawTooltip(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
         Component.super.drawTooltip(matrices, mouseX, mouseY, partialTicks, delta);

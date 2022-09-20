@@ -1,6 +1,7 @@
 package io.wispforest.owo.ui.component;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import io.wispforest.owo.ui.core.CursorStyle;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.Drawer;
@@ -40,6 +41,11 @@ public class ButtonComponent extends ButtonWidget {
         if (this.hovered) this.renderTooltip(matrices, mouseX, mouseY);
     }
 
+    public ButtonComponent onPress(Consumer<ButtonComponent> onPress) {
+        this.onPress((ButtonWidget button) -> onPress.accept((ButtonComponent) button));
+        return this;
+    }
+
     public ButtonComponent renderer(Renderer renderer) {
         this.renderer = renderer;
         return this;
@@ -58,10 +64,16 @@ public class ButtonComponent extends ButtonWidget {
         return this.textShadow;
     }
 
+    // TODO renderer parsing
     @Override
     public void parseProperties(UIModel model, Element element, Map<String, Element> children) {
         super.parseProperties(model, element, children);
+        UIParsing.apply(children, "text", UIParsing::parseText, this::setMessage);
         UIParsing.apply(children, "text-shadow", UIParsing::parseBool, this::textShadow);
+    }
+
+    protected CursorStyle owo$preferredCursorStyle() {
+        return CursorStyle.HAND;
     }
 
     @FunctionalInterface

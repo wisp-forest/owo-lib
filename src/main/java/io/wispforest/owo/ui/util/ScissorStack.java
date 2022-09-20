@@ -109,15 +109,15 @@ public class ScissorStack {
         var root = new Vector4f(component.x() - margins.left(), component.y() - margins.top(), 0, 1);
         var end = new Vector4f(component.x() + component.width() + margins.right(), component.y() + component.height() + margins.bottom(), 0, 1);
 
-        if (matrices != null) {
-            matrices.push();
-            matrices.multiplyPositionMatrix(RenderSystem.getModelViewMatrix());
+        if (matrices == null) matrices = EMPTY_STACK;
 
-            root.transform(matrices.peek().getPositionMatrix());
-            end.transform(matrices.peek().getPositionMatrix());
+        matrices.push();
+        matrices.multiplyPositionMatrix(RenderSystem.getModelViewMatrix());
 
-            matrices.pop();
-        }
+        root.transform(matrices.peek().getPositionMatrix());
+        end.transform(matrices.peek().getPositionMatrix());
+
+        matrices.pop();
 
         return root.getX() < top.x + top.width
                 && end.getX() > top.x

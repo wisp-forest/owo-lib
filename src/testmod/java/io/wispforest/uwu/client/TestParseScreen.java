@@ -40,7 +40,7 @@ public class TestParseScreen extends BaseUIModelScreen<FlowLayout> {
 //        });
 
         var allay = rootComponent.childById(EntityComponent.class, "allay");
-        var verticalAnimation = allay.verticalSizing().animate(450, Easing.CUBIC, Sizing.fixed(200));
+        var verticalAnimation = allay.verticalSizing().animate(450, Easing.EXPO, Sizing.fixed(200));
         var horizontalAnimation = allay.horizontalSizing().animate(450, Easing.CUBIC, Sizing.fixed(200));
 
         rootComponent.childById(ButtonWidget.class, "allay-button").onPress(button -> {
