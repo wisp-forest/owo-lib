@@ -235,11 +235,13 @@ public abstract class ClickableWidgetMixin implements ComponentStub {
     @Override
     public void onFocusGained(FocusSource source) {
         this.setFocused(source == FocusSource.KEYBOARD_CYCLE);
+        this.owo$getWrapper().onFocusGained(source);
     }
 
     @Override
     public void onFocusLost() {
         this.setFocused(false);
+        this.owo$getWrapper().onFocusLost();
     }
 
     @Override
