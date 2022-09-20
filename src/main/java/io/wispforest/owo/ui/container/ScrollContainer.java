@@ -3,6 +3,7 @@ package io.wispforest.owo.ui.container;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
+import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.OwoNinePatchRenderers;
@@ -13,6 +14,7 @@ import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import java.util.Collections;
 import java.util.Map;
@@ -266,14 +268,14 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
      */
     @Deprecated(forRemoval = true)
     public ScrollContainer<C> scrollbarColor(int scrollbarColor) {
-        Owo.LOGGER.warn("Deprecated method ScrollContainer#scrollbarColor(int) invoked by {}", ReflectionUtils.getCallingClassName(2));
+        Owo.debugWarn(Owo.LOGGER, "Deprecated method ScrollContainer#scrollbarColor(int) invoked by {}", ReflectionUtils.getCallingClassName(2));
         this.scrollbar(Scrollbar.flat(Color.ofArgb(scrollbarColor)));
         return this;
     }
 
     @Deprecated(forRemoval = true)
     public int scrollbarColor() {
-        Owo.LOGGER.warn("Deprecated method ScrollContainer#scrollbarColor() invoked by {}", ReflectionUtils.getCallingClassName(2));
+        Owo.debugWarn(Owo.LOGGER, "Deprecated method ScrollContainer#scrollbarColor() invoked by {}", ReflectionUtils.getCallingClassName(2));
         return 0;
     }
 
@@ -308,12 +310,18 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
         return this.fixedScrollbarLength;
     }
 
-    // TODO scrollbar parsing
     @Override
     public void parseProperties(UIModel model, Element element, Map<String, Element> children) {
         super.parseProperties(model, element, children);
+        UIParsing.apply(children, "fixed-scrollbar-length", UIParsing::parseUnsignedInt, this::fixedScrollbarLength);
         UIParsing.apply(children, "scrollbar-thiccness", UIParsing::parseUnsignedInt, this::scrollbarThiccness);
-        UIParsing.apply(children, "scrollbar-color", Color::parseAndPack, this::scrollbarColor);
+        UIParsing.apply(children, "scrollbar", Scrollbar::parse, this::scrollbar);
+
+        UIParsing.apply(children, "scroll-step", UIParsing::parseUnsignedInt, this::scrollStep);
+
+        UIParsing.apply(children, "scrollbar-color", Color::parseAndPack, integer -> {
+            Owo.debugWarn(Owo.LOGGER, "A UI model used the deprecated 'scrollbar-color' property. This is superseded by <scrollbar> <flat>{color}</flat> </scrollbar>");
+        });
     }
 
     public static ScrollContainer<?> parse(Element element) {
@@ -358,6 +366,19 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
         }
 
         void draw(MatrixStack matrixStack, int x, int y, int width, int height, int trackX, int trackY, int trackWidth, int trackHeight, long lastInteractTime, ScrollDirection direction);
+
+        static Scrollbar parse(Element element) {
+            var children = UIParsing.<Element>allChildrenOfType(element, Node.ELEMENT_NODE);
+            if (children.size() > 1) throw new UIModelParsingException("'scrollbar' declaration may only contain a single child");
+
+            var scrollbarElement = children.get(0);
+            return switch (scrollbarElement.getNodeName()) {
+                case "vanilla" -> vanilla();
+                case "vanilla-flat" -> vanillaFlat();
+                case "flat" -> flat(Color.parse(scrollbarElement));
+                default -> throw new UIModelParsingException("Unknown scrollbar type '" + scrollbarElement.getNodeName() + "'");
+            };
+        }
     }
 
     public enum ScrollDirection {

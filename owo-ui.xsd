@@ -166,9 +166,34 @@
             </xs:documentation>
         </xs:annotation>
 
-        <xs:restriction base="xs:string">
-            <xs:pattern value="#([A-Fa-f\d]{2}){3,4}"/>
-        </xs:restriction>
+        <xs:union>
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:pattern value="#([A-Fa-f\d]{2}){3,4}"/>
+                </xs:restriction>
+            </xs:simpleType>
+
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="black"/>
+                    <xs:enumeration value="dark-blue"/>
+                    <xs:enumeration value="dark-green"/>
+                    <xs:enumeration value="dark-aqua"/>
+                    <xs:enumeration value="dark-red"/>
+                    <xs:enumeration value="dark-purple"/>
+                    <xs:enumeration value="gold"/>
+                    <xs:enumeration value="gray"/>
+                    <xs:enumeration value="dark-gray"/>
+                    <xs:enumeration value="blue"/>
+                    <xs:enumeration value="green"/>
+                    <xs:enumeration value="aqua"/>
+                    <xs:enumeration value="red"/>
+                    <xs:enumeration value="light-purple"/>
+                    <xs:enumeration value="yellow"/>
+                    <xs:enumeration value="white"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:union>
     </xs:simpleType>
 
     <xs:simpleType name="owo-ui-vertical-alignment">
@@ -252,6 +277,36 @@
                         A flat rectangle of the specified color
                     </xs:documentation>
                 </xs:annotation>
+            </xs:element>
+        </xs:choice>
+    </xs:complexType>
+
+    <xs:complexType name="owo-ui-scrollbar">
+        <xs:choice>
+            <xs:element type="owo-ui-color" name="flat"/>
+            <xs:element name="vanilla"/>
+            <xs:element name="vanilla-flat"/>
+        </xs:choice>
+    </xs:complexType>
+
+    <xs:complexType name="owo-ui-button-renderer">
+        <xs:choice>
+            <xs:element name="vanilla"/>
+            <xs:element name="flat">
+                <xs:complexType>
+                    <xs:attribute type="owo-ui-color" name="color" use="required"/>
+                    <xs:attribute type="owo-ui-color" name="hovered-color" use="required"/>
+                    <xs:attribute type="owo-ui-color" name="disabled-color" use="required"/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="texture">
+                <xs:complexType>
+                    <xs:attribute type="minecraft-identifier" name="texture" use="required"/>
+                    <xs:attribute type="xs:unsignedInt" name="u" use="required"/>
+                    <xs:attribute type="xs:unsignedInt" name="v" use="required"/>
+                    <xs:attribute type="xs:unsignedInt" name="texture-width" use="required"/>
+                    <xs:attribute type="xs:unsignedInt" name="texture-height" use="required"/>
+                </xs:complexType>
             </xs:element>
         </xs:choice>
     </xs:complexType>
@@ -379,6 +434,7 @@
                 <xs:choice maxOccurs="unbounded">
                     <xs:group ref="vanillaWidgetProps"/>
                     <xs:element type="owo-ui-text" name="text" minOccurs="0"/>
+                    <xs:element type="owo-ui-button-renderer" name="renderer" minOccurs="0"/>
                 </xs:choice>
             </xs:extension>
         </xs:complexContent>
@@ -568,7 +624,9 @@
                     <xs:choice maxOccurs="unbounded">
                         <xs:group ref="parentComponentProps"/>
                         <xs:element type="xs:unsignedInt" name="scrollbar-thiccness" minOccurs="0"/>
+                        <xs:element type="xs:unsignedInt" name="fixed-scrollbar-length" minOccurs="0"/>
                         <xs:element type="owo-ui-color" name="scrollbar-color" minOccurs="0"/>
+                        <xs:element type="owo-ui-scrollbar" name="scrollbar" minOccurs="0"/>
                     </xs:choice>
                 </xs:sequence>
                 <xs:attribute name="direction" type="owo-ui-axis-direction" use="required"/>

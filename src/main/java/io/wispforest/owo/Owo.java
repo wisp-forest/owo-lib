@@ -65,6 +65,16 @@ public class Owo implements ModInitializer {
         OwoDebugCommands.register();
     }
 
+    public static void debugWarn(Logger logger, String message) {
+        if (!DEBUG) return;
+        logger.warn(message);
+    }
+
+    public static void debugWarn(Logger logger, String message, Object... params) {
+        if (!DEBUG) return;
+        logger.warn(message, params);
+    }
+
     public static MinecraftServer currentServer() {
         return SERVER;
     }

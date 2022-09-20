@@ -1,4 +1,4 @@
-<owo-ui>
+<owo-ui xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../../owo-ui.xsd">
     <components>
         <flow-layout direction="vertical">
             <children>
@@ -22,9 +22,9 @@
                         <flow-layout direction="vertical" id="option-panel-container">
                             <children>
                                 <scroll direction="vertical" id="option-panel-scroll">
-                                    <flow-layout direction="vertical" id="option-panel"/>
-
-                                    <scrollbar-thiccness>3</scrollbar-thiccness>
+                                    <flow-layout direction="vertical" id="option-panel">
+                                        <children/>
+                                    </flow-layout>
 
                                     <sizing>
                                         <horizontal method="fill">100</horizontal>
@@ -34,6 +34,12 @@
                                     <padding>
                                         <all>1</all>
                                     </padding>
+
+                                    <scrollbar-thiccness>14</scrollbar-thiccness>
+                                    <fixed-scrollbar-length>17</fixed-scrollbar-length>
+                                    <scrollbar>
+                                        <vanilla/>
+                                    </scrollbar>
                                 </scroll>
                             </children>
 
@@ -65,6 +71,10 @@
                             <margins>
                                 <right>5</right>
                             </margins>
+
+                            <renderer>
+                                <flat color="red" hovered-color="light-purple" disabled-color="black"/>
+                            </renderer>
                         </button>
 
                         <button id="done-button">

@@ -22,7 +22,9 @@ public record Color(float red, float green, float blue, float alpha) implements 
 
     private static final Map<String, Color> NAMED_TEXT_COLORS = Stream.of(Formatting.values())
             .filter(Formatting::isColor)
-            .collect(ImmutableMap.toImmutableMap(formatting -> formatting.getName().toLowerCase(Locale.ROOT), Color::ofFormatting));
+            .collect(ImmutableMap.toImmutableMap(formatting -> {
+                return formatting.getName().toLowerCase(Locale.ROOT).replace("_", "-");
+            }, Color::ofFormatting));
 
     public Color(float red, float green, float blue) {
         this(red, green, blue, 1f);

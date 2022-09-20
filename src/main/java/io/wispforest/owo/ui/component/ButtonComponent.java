@@ -1,8 +1,10 @@
 package io.wispforest.owo.ui.component;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.CursorStyle;
 import io.wispforest.owo.ui.parsing.UIModel;
+import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.OwoNinePatchRenderers;
@@ -12,6 +14,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import java.util.Map;
 import java.util.function.Consumer;
@@ -64,12 +67,12 @@ public class ButtonComponent extends ButtonWidget {
         return this.textShadow;
     }
 
-    // TODO renderer parsing
     @Override
     public void parseProperties(UIModel model, Element element, Map<String, Element> children) {
         super.parseProperties(model, element, children);
         UIParsing.apply(children, "text", UIParsing::parseText, this::setMessage);
         UIParsing.apply(children, "text-shadow", UIParsing::parseBool, this::textShadow);
+        UIParsing.apply(children, "renderer", Renderer::parse, this::renderer);
     }
 
     protected CursorStyle owo$preferredCursorStyle() {
@@ -120,5 +123,34 @@ public class ButtonComponent extends ButtonWidget {
         }
 
         void draw(MatrixStack matrices, ButtonComponent button, float delta);
+
+        static Renderer parse(Element element) {
+            var children = UIParsing.<Element>allChildrenOfType(element, Node.ELEMENT_NODE);
+            if (children.size() > 1) throw new UIModelParsingException("'renderer' declaration may only contain a single child");
+
+            var rendererElement = children.get(0);
+            return switch (rendererElement.getNodeName()) {
+                case "vanilla" -> VANILLA;
+                case "flat" -> {
+                    UIParsing.expectAttributes(rendererElement, "color", "hovered-color", "disabled-color");
+                    yield flat(
+                            Color.parseAndPack(rendererElement.getAttributeNode("color")),
+                            Color.parseAndPack(rendererElement.getAttributeNode("hovered-color")),
+                            Color.parseAndPack(rendererElement.getAttributeNode("disabled-color"))
+                    );
+                }
+                case "texture" -> {
+                    UIParsing.expectAttributes(rendererElement, "texture", "u", "v", "texture-width", "texture-height");
+                    yield texture(
+                            UIParsing.parseIdentifier(rendererElement.getAttributeNode("texture")),
+                            UIParsing.parseUnsignedInt(rendererElement.getAttributeNode("u")),
+                            UIParsing.parseUnsignedInt(rendererElement.getAttributeNode("v")),
+                            UIParsing.parseUnsignedInt(rendererElement.getAttributeNode("texture-width")),
+                            UIParsing.parseUnsignedInt(rendererElement.getAttributeNode("texture-height"))
+                    );
+                }
+                default -> throw new UIModelParsingException("Unknown button renderer '" + rendererElement.getNodeName() + "'");
+            };
+        }
     }
 }
