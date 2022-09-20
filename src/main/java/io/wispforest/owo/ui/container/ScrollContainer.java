@@ -308,6 +308,7 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
         return this.fixedScrollbarLength;
     }
 
+    // TODO scrollbar parsing
     @Override
     public void parseProperties(UIModel model, Element element, Map<String, Element> children) {
         super.parseProperties(model, element, children);
@@ -328,6 +329,8 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
             int scrollbarColor = color.argb();
 
             return (matrices, x, y, width, height, trackX, trackY, trackWidth, trackHeight, lastInteractTime, direction) -> {
+                if (height >= trackHeight) return;
+
                 final var progress = Easing.SINE.apply(MathHelper.clamp(lastInteractTime - System.currentTimeMillis(), 0, 750) / 750f);
                 int alpha = (int) (progress * (scrollbarColor >>> 24));
 
