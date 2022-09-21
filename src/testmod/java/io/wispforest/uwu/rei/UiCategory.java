@@ -2,9 +2,8 @@ package io.wispforest.uwu.rei;
 
 import io.wispforest.owo.compat.rei.ReiUIAdapter;
 import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.container.Containers;
-import io.wispforest.owo.ui.container.ScrollContainer;
+import io.wispforest.owo.ui.core.*;
 import io.wispforest.uwu.items.UwuItems;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.Renderer;

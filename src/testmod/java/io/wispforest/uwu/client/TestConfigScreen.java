@@ -3,13 +3,11 @@ package io.wispforest.uwu.client;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.ButtonComponent;
-import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.core.*;
-import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.Containers;
-import io.wispforest.owo.ui.container.ScrollContainer;
+import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.VerticalFlowLayout;
+import io.wispforest.owo.ui.core.*;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 

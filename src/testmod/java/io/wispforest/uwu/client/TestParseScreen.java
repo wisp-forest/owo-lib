@@ -1,16 +1,15 @@
 package io.wispforest.uwu.client;
 
 import io.wispforest.owo.ui.base.BaseUIModelScreen;
-import io.wispforest.owo.ui.component.*;
-import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.component.EntityComponent;
+import io.wispforest.owo.ui.component.ItemComponent;
+import io.wispforest.owo.ui.component.LabelComponent;
+import io.wispforest.owo.ui.component.TextureComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.core.*;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
-
-import java.util.Map;
 
 public class TestParseScreen extends BaseUIModelScreen<FlowLayout> {
 

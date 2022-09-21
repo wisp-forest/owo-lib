@@ -2,9 +2,9 @@ package io.wispforest.uwu.client;
 
 import io.wispforest.owo.ui.base.BaseUIModelScreen;
 import io.wispforest.owo.ui.component.SliderComponent;
-import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.VerticalFlowLayout;
+import io.wispforest.owo.ui.core.Component;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 

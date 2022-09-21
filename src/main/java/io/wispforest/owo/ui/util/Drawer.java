@@ -5,7 +5,6 @@ import io.wispforest.owo.mixin.ui.ScreenInvoker;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.ui.core.ParentComponent;
-import io.wispforest.owo.ui.core.Surface;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
@@ -240,7 +239,7 @@ public class Drawer extends DrawableHelper {
                     }
 
                     int width = Math.max(textRenderer.getWidth(nameText), textRenderer.getWidth(descriptor));
-                    fill(matrices,inspectorX, inspectorY, inspectorX + width + 3, inspectorY + inspectorHeight, 0xA7000000);
+                    fill(matrices, inspectorX, inspectorY, inspectorX + width + 3, inspectorY + inspectorHeight, 0xA7000000);
                     drawRectOutline(matrices, inspectorX, inspectorY, width + 3, inspectorHeight, 0xA7000000);
 
                     textRenderer.draw(matrices, nameText,
