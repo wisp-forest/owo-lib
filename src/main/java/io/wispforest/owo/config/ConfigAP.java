@@ -63,8 +63,7 @@ public class ConfigAP extends AbstractProcessor {
 
     private static final String SET_ACCESSOR_TEMPLATE = """
             public void {field_name}({field_type} value) {
-                instance.{field_key} = value;
-                {option_instance}.synchronizeWithBackingField();
+                {option_instance}.set(value);
             }
             """;
 
@@ -192,7 +191,6 @@ public class ConfigAP extends AbstractProcessor {
 
     private String makeGetAccessor(String fieldName, Option.Key fieldKey, TypeMirror fieldType) {
         return GET_ACCESSOR_TEMPLATE
-                .replace("{field_key}", fieldKey.asString())
                 .replace("{option_instance}", constantNameOf(fieldKey))
                 .replace("{field_name}", fieldName)
                 .replace("{field_type}", fieldType.toString());
@@ -200,7 +198,6 @@ public class ConfigAP extends AbstractProcessor {
 
     private String makeSetAccessor(String fieldName, Option.Key fieldKey, TypeMirror fieldType) {
         return SET_ACCESSOR_TEMPLATE
-                .replace("{field_key}", fieldKey.asString())
                 .replace("{option_instance}", constantNameOf(fieldKey))
                 .replace("{field_name}", fieldName)
                 .replace("{field_type}", fieldType.toString());
@@ -208,7 +205,6 @@ public class ConfigAP extends AbstractProcessor {
 
     private String makeSubscribe(String fieldName, Option.Key fieldKey, TypeMirror fieldType) {
         return SUBSCRIBE_TEMPLATE
-                .replace("{field_key}", fieldKey.asString())
                 .replace("{option_instance}", constantNameOf(fieldKey))
                 .replace("{field_name}", fieldName)
                 .replace("{field_type}", this.primitivesToWrappers.getOrDefault(fieldType, fieldType).toString());
@@ -249,6 +245,9 @@ public class ConfigAP extends AbstractProcessor {
         @Override
         public void appendAccessors(Writer accessors, Writer optionInstances) {
             var nestClassName = capitalize(nestName);
+            if (nestClassName.equals(typeName)) nestClassName += "_";
+
+            // TODO replace type interface with class and instantiate instead of one class per field
 
             accessors.beginLine("public final ").write(nestClassName).write(" ").write(nestName).write(" = new ").write(nestClassName).endLine("();");
             accessors.beginLine("public class ").write(nestClassName).write(" implements ").write(typeName).endLine(" {");
