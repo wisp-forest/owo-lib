@@ -36,6 +36,8 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.Predicate;
 
+// TODO search bar
+
 /**
  * A screen which generates components for each option in the
  * provided config. The general structure of the screen is determined

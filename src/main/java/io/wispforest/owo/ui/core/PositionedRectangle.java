@@ -34,6 +34,36 @@ public interface PositionedRectangle extends Animatable<PositionedRectangle> {
         return x >= this.x() && x <= this.x() + this.width() && y >= this.y() && y <= this.y() + this.height();
     }
 
+    default boolean intersects(PositionedRectangle other) {
+        return other.x() <= this.x() + this.width()
+                && other.x() + other.width() >= this.x()
+                && other.y() <= this.y() + this.height()
+                && other.y() + other.height() >= this.y();
+    }
+
+    default PositionedRectangle intersection(PositionedRectangle other) {
+
+        // my brain is fucking dead on the floor
+        // this code is really, really simple
+        // and honestly quite obvious
+        //
+        // my brain did not agree
+        // glisco, 2022
+
+        int leftEdge = Math.max(this.x(), other.x());
+        int topEdge = Math.max(this.y(), other.y());
+
+        int rightEdge = Math.min(this.x() + this.width(), other.x() + other.width());
+        int bottomEdge = Math.min(this.y() + this.height(), other.y() + other.height());
+
+        return of(
+                leftEdge,
+                topEdge,
+                Math.max(rightEdge - leftEdge, 0),
+                Math.max(bottomEdge - topEdge, 0)
+        );
+    }
+
     @Override
     default PositionedRectangle interpolate(PositionedRectangle next, float delta) {
         return PositionedRectangle.of(

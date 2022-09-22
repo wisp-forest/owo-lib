@@ -23,7 +23,7 @@ import java.util.*;
 @SupportedSourceVersion(SourceVersion.RELEASE_17)
 public class ConfigAP extends AbstractProcessor {
 
-    private static final String ACCESSOR_TEMPLATE = """
+    private static final String WRAPPER_TEMPLATE = """
             package {package};
 
             import io.wispforest.owo.config.ConfigWrapper;
@@ -156,7 +156,7 @@ public class ConfigAP extends AbstractProcessor {
     }
 
     private String makeWrapper(String wrapperClassName, String configClassName, List<ConfigField> fields) {
-        var baseAccessor = ACCESSOR_TEMPLATE
+        var baseWrapper = WRAPPER_TEMPLATE
                 .replace("{wrapper_class_name}", wrapperClassName)
                 .replace("{package}", configClassName.substring(0, configClassName.lastIndexOf(".")))
                 .replace("{config_class_name}", configClassName);
@@ -183,7 +183,7 @@ public class ConfigAP extends AbstractProcessor {
             field.appendAccessors(accessorMethods, optionInstances);
         }
 
-        return baseAccessor
+        return baseWrapper
                 .replace("{option_instances}", optionInstances.finish())
                 .replace("{type_interfaces}", typeInterfaces.finish())
                 .replace("{accessors}", accessorMethods.finish());

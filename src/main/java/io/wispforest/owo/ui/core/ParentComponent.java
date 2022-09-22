@@ -3,6 +3,7 @@ package io.wispforest.owo.ui.core;
 import io.wispforest.owo.ui.parsing.IncompatibleUIModelException;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
+import io.wispforest.owo.ui.util.ScissorStack;
 import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -121,14 +122,25 @@ public interface ParentComponent extends Component {
      */
     ParentComponent removeChild(Component child);
 
-    // TODO do not draw child tooltip when child is not visible
     @Override
     default void drawTooltip(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
         Component.super.drawTooltip(matrices, mouseX, mouseY, partialTicks, delta);
+
+        if (!this.allowOverflow()) {
+            var padding = this.padding().get();
+            ScissorStack.push(this.x() + padding.left(), this.y() + padding.top(), this.width() - padding.horizontal(), this.height() - padding.vertical(), matrices);
+        }
+
         for (var child : this.children()) {
+            if (!ScissorStack.isVisible(mouseX, mouseY, matrices)) continue;
+
             matrices.translate(0, 0, child.zIndex());
             child.drawTooltip(matrices, mouseX, mouseY, partialTicks, delta);
             matrices.translate(0, 0, -child.zIndex());
+        }
+
+        if (!this.allowOverflow()) {
+            ScissorStack.pop();
         }
     }
 

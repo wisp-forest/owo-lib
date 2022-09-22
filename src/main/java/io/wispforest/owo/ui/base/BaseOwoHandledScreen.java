@@ -192,6 +192,7 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
     @Override
     protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {}
 
+    // TODO adapt to tooltip rendering being culled
     public class SlotComponent extends BaseComponent {
 
         protected final Slot slot;
