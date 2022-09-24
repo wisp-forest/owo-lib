@@ -36,13 +36,11 @@ public class LabelComponent extends BaseComponent {
 
         this.shadow = false;
         this.maxWidth = Integer.MAX_VALUE;
-
-        this.wrapLines();
     }
 
     public LabelComponent text(Text text) {
         this.text = text;
-        this.wrapLines();
+        this.notifyParentIfMounted();
         return this;
     }
 
@@ -52,7 +50,7 @@ public class LabelComponent extends BaseComponent {
 
     public LabelComponent maxWidth(int maxWidth) {
         this.maxWidth = maxWidth;
-        this.wrapLines();
+        this.notifyParentIfMounted();
         return this;
     }
 
@@ -126,7 +124,6 @@ public class LabelComponent extends BaseComponent {
 
     private void wrapLines() {
         this.wrappedText = this.textRenderer.wrapLines(this.text, this.horizontalSizing.get().method != Sizing.Method.CONTENT ? this.width : this.maxWidth);
-        if (this.mounted) this.parent.onChildMutated(this);
     }
 
     @Override
