@@ -40,7 +40,7 @@ public class LabelComponent extends BaseComponent {
 
     public LabelComponent text(Text text) {
         this.text = text;
-        if (this.mounted) this.parent.onChildMutated(this);
+        this.notifyParentIfMounted();
         return this;
     }
 
@@ -50,7 +50,7 @@ public class LabelComponent extends BaseComponent {
 
     public LabelComponent maxWidth(int maxWidth) {
         this.maxWidth = maxWidth;
-        if (this.mounted) this.parent.onChildMutated(this);
+        this.notifyParentIfMounted();
         return this;
     }
 
