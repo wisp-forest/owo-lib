@@ -8,9 +8,14 @@ import com.mojang.logging.LogUtils;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.command.EnumArgumentType;
 import io.wispforest.owo.ops.TextOps;
+import io.wispforest.owo.renderdoc.RenderDoc;
+import io.wispforest.owo.renderdoc.RenderdocScreen;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.IdentifierArgumentType;
 import net.minecraft.command.argument.serialize.ConstantArgumentSerializer;
@@ -49,6 +54,29 @@ public class OwoDebugCommands {
 
     public static void register() {
         ArgumentTypeRegistry.registerArgumentType(new Identifier("owo", "damage_source"), DamageSourceArgumentType.class, ConstantArgumentSerializer.of(DamageSourceArgumentType::damageSource));
+
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
+            if (RenderDoc.isAvailable()) {
+                dispatcher.register(ClientCommandManager.literal("renderdoc").executes(context -> {
+                    MinecraftClient.getInstance().setScreen(new RenderdocScreen());
+                    return 1;
+                }).then(ClientCommandManager.literal("comment")
+                        .then(ClientCommandManager.argument("capture_index", IntegerArgumentType.integer(0))
+                                .then(ClientCommandManager.argument("comment", StringArgumentType.greedyString())
+                                        .executes(context -> {
+                                            var capture = RenderDoc.getCapture(IntegerArgumentType.getInteger(context, "capture_index"));
+                                            if (capture == null) {
+                                                context.getSource().sendError(TextOps.concat(Owo.PREFIX, Text.of("no such capture")));
+                                                return 0;
+                                            }
+
+                                            RenderDoc.setCaptureComments(capture, StringArgumentType.getString(context, "comment"));
+                                            context.getSource().sendFeedback(TextOps.concat(Owo.PREFIX, Text.of("comment updated")));
+
+                                            return 1;
+                                        })))));
+            }
+        });
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
 
