@@ -13,8 +13,8 @@ interface RenderdocLibrary extends Library {
     @Structure.FieldOrder({
             "GetAPIVersion", "SetCaptureOptionU32", "SetCaptureOptionF32", "GetCaptureOptionU32", "GetCaptureOptionF32", "SetFocusToggleKeys",
             "SetCaptureKeys", "GetOverlayBits", "MaskOverlayBits", "RemoveHooks", "UnloadCrashHandler", "SetCaptureFilePathTemplate", "GetCaptureFilePathTemplate",
-            "GetNumCaptures", "GetCapture", "TriggerCapture", "IsTargetControlConnected", "LaunchReplayUI", "ShowReplayUI", "SetActiveWindow", "StartFrameCapture",
-            "IsFrameCapturing", "EndFrameCapture", "DiscardFrameCapture", "TriggerMultiFrameCapture", "SetCaptureFileComments"
+            "GetNumCaptures", "GetCapture", "TriggerCapture", "IsTargetControlConnected", "LaunchReplayUI", "SetActiveWindow", "StartFrameCapture",
+            "IsFrameCapturing", "EndFrameCapture", "TriggerMultiFrameCapture", "SetCaptureFileComments", "DiscardFrameCapture", "ShowReplayUI"
     })
     class RenderdocApi extends Structure {
 
@@ -36,14 +36,14 @@ interface RenderdocLibrary extends Library {
         public pRENDERDOC_TriggerCapture TriggerCapture;
         public pRENDERDOC_IsTargetControlConnected IsTargetControlConnected;
         public pRENDERDOC_LaunchReplayUI LaunchReplayUI;
-        public pRENDERDOC_ShowReplayUI ShowReplayUI;
         public pRENDERDOC_SetActiveWindow SetActiveWindow;
         public pRENDERDOC_StartFrameCapture StartFrameCapture;
         public pRENDERDOC_IsFrameCapturing IsFrameCapturing;
         public pRENDERDOC_EndFrameCapture EndFrameCapture;
-        public pRENDERDOC_DiscardFrameCapture DiscardFrameCapture;
         public pRENDERDOC_TriggerMultiFrameCapture TriggerMultiFrameCapture;
         public pRENDERDOC_SetCaptureFileComments SetCaptureFileComments;
+        public pRENDERDOC_DiscardFrameCapture DiscardFrameCapture;
+        public pRENDERDOC_ShowReplayUI ShowReplayUI;
 
         public RenderdocApi(Pointer data) {
             super(data);

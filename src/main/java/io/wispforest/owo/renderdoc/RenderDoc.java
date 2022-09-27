@@ -1,5 +1,6 @@
 package io.wispforest.owo.renderdoc;
 
+import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.LongByReference;
@@ -7,13 +8,16 @@ import com.sun.jna.ptr.PointerByReference;
 import io.wispforest.owo.Owo;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.Map;
 
+@ApiStatus.Experimental
 @SuppressWarnings({"unused", "UnusedReturnValue"})
 public class RenderDoc {
 
@@ -24,7 +28,7 @@ public class RenderDoc {
         RenderdocLibrary.RenderdocApi apiInstance = null;
 
         try {
-            var renderdocLibrary = Native.load("renderdoc", RenderdocLibrary.class);
+            var renderdocLibrary = Native.load("renderdoc", RenderdocLibrary.class, Map.of(Library.OPTION_OPEN_FLAGS, 0x4 | 0x2));
             int initResult = renderdocLibrary.RENDERDOC_GetAPI(10500, apiPointer);
             if (initResult != 1) {
                 Owo.LOGGER.error("Could not connect to RenderDoc API, return code: {}", initResult);
@@ -43,10 +47,18 @@ public class RenderDoc {
         renderdoc = apiInstance;
     }
 
+    /**
+     * @return {@code true} if the RenderDoc dynamic library is loaded
+     * and owo has successfully connected to the API
+     */
     public static boolean isAvailable() {
         return renderdoc != null;
     }
 
+    /**
+     * @return The version of the RenderDoc API that owo is connected to,
+     * in &lt;major&gt;.&lt;minor&gt;.&lt;patch&gt; semver format
+     */
     public static String getAPIVersion() {
         if (renderdoc == null) return "not connected";
 
@@ -58,6 +70,14 @@ public class RenderDoc {
         return major.getValue() + "." + minor.getValue() + "." + patch.getValue();
     }
 
+    /**
+     * Set the value of a RenderDoc capture option
+     *
+     * @param option The option to modify
+     * @param value  The value to change the option to
+     * @return {@code true} if the value was correct and the option
+     * was successfully modified
+     */
     public static <T> boolean setCaptureOption(CaptureOption<T> option, T value) {
         if (renderdoc == null) return false;
 
@@ -70,6 +90,12 @@ public class RenderDoc {
         }
     }
 
+    /**
+     * Get the value of a RenderDoc capture option
+     *
+     * @param option The option to query
+     * @return The current value of the option
+     */
     @SuppressWarnings("unchecked")
     public static <T> T getCaptureOption(CaptureOption<T> option) {
         if (renderdoc == null) return null;
@@ -83,11 +109,19 @@ public class RenderDoc {
         }
     }
 
+    /**
+     * Set the hotkeys used to trigger a capture
+     */
     public static void setCaptureKeys(Key... keys) {
         if (renderdoc == null) return;
         renderdoc.SetCaptureKeys.call(Arrays.stream(keys).mapToInt(value -> value.keycode).toArray(), keys.length);
     }
 
+    /**
+     * Query the current configuration of the RenderDoc overlay
+     *
+     * @return All parts of the overlay which are currently enabled
+     */
     public static EnumSet<OverlayOption> getOverlayOptions() {
         if (renderdoc == null) return null;
 
@@ -101,6 +135,11 @@ public class RenderDoc {
         return set;
     }
 
+    /**
+     * Enable some parts of the RenderDoc overlay
+     *
+     * @param options The options to enable
+     */
     public static void enableOverlayOptions(OverlayOption... options) {
         if (renderdoc == null) return;
 
@@ -110,6 +149,11 @@ public class RenderDoc {
         renderdoc.MaskOverlayBits.call(new RenderdocLibrary.uint32_t(~0), new RenderdocLibrary.uint32_t(mask));
     }
 
+    /**
+     * Disable some parts of the RenderDoc overlay
+     *
+     * @param options The options to enable
+     */
     public static void disableOverlayOptions(OverlayOption... options) {
         if (renderdoc == null) return;
 
@@ -119,26 +163,47 @@ public class RenderDoc {
         renderdoc.MaskOverlayBits.call(new RenderdocLibrary.uint32_t(~mask), new RenderdocLibrary.uint32_t(0));
     }
 
+    /**
+     * Try to remove all RenderDoc hooks from the process. If this
+     * is called after a graphics API has been initialized, behavior
+     * is undefined
+     */
     public static void removeHooks() {
         if (renderdoc == null) return;
         renderdoc.RemoveHooks.call();
     }
 
+    /**
+     * Remove RenderDoc's crash handler from the process
+     */
     public static void unloadCrashHandler() {
         if (renderdoc == null) return;
         renderdoc.UnloadCrashHandler.call();
     }
 
+    /**
+     * Set the template used to generate new capture file names
+     */
     public static void setCaptureFilePathTemplate(String template) {
         if (renderdoc == null) return;
         renderdoc.SetCaptureFilePathTemplate.call(template);
     }
 
+    /**
+     * @return the template used to generate new capture file names
+     */
     public static String getCaptureFilePathTemplate() {
         if (renderdoc == null) return null;
         return renderdoc.GetCaptureFilePathTemplate.call();
     }
 
+    /**
+     * Query information about a specific capture
+     *
+     * @param index The index to query
+     * @return The path and timestamp of the capture at the given index,
+     * or {@code null} if no such capture exists
+     */
     public static Capture getCapture(int index) {
         if (renderdoc == null) return null;
 
@@ -154,31 +219,86 @@ public class RenderDoc {
         return new Capture(new String(filename, 0, filename.length - 1), Instant.ofEpochSecond(timestamp.getValue()));
     }
 
+    /**
+     * @return How many captures have been made
+     */
     public static int getNumCaptures() {
         if (renderdoc == null) return -1;
         return renderdoc.GetNumCaptures.call().intValue();
     }
 
+    /**
+     * Trigger a capture of the next frame, as
+     * if the user had pressed on the capture hotkeys
+     */
     public static void triggerCapture() {
         if (renderdoc == null) return;
         renderdoc.TriggerCapture.call();
     }
 
+    /**
+     * Immediately begin a capture
+     */
+    public static void startFrameCapture() {
+        if (renderdoc == null) return;
+        renderdoc.StartFrameCapture.call(null, null);
+    }
+
+    /**
+     * @return {@code true} if a capture is currently being performed
+     */
+    public static boolean isFrameCapturing() {
+        if (renderdoc == null) return false;
+        return renderdoc.IsFrameCapturing.call().intValue() == 1;
+    }
+
+    /**
+     * Immediately end an active capture
+     */
+    public static void endFrameCapture() {
+        if (renderdoc == null) return;
+        renderdoc.EndFrameCapture.call(null, null);
+    }
+
+    /**
+     * @return {@code true} if a RenderDoc replay UI
+     * instance is currently attached to this process
+     */
     public static boolean isReplayUIConnected() {
         if (renderdoc == null) return false;
         return renderdoc.IsTargetControlConnected.call().intValue() == 1;
     }
 
+    /**
+     * Open the RenderDoc replay UI
+     *
+     * @param connect {@code true} if the new UI instance should instantly
+     *                attach to this process
+     * @return The PID of the spawned process, or {@code 0} if the UI could not be opened
+     */
     public static int launchReplayUI(boolean connect) {
         if (renderdoc == null) return -1;
         return renderdoc.LaunchReplayUI.call(new RenderdocLibrary.uint32_t(connect ? 1 : 0), null).intValue();
     }
 
+    /**
+     * Request the currently connected replay UI to raise
+     * its window to the top - this is not guaranteed to work on every OS
+     *
+     * @return {@code true} if the UI tried to raise its window, {@code false}
+     * if some error occurred while passing on the command or no UI is connected
+     */
     public static boolean showReplayUI() {
         if (renderdoc == null) return false;
         return renderdoc.ShowReplayUI.call().intValue() == 1;
     }
 
+    /**
+     * Set the comments attached to a specific capture
+     *
+     * @param capture  The capture to modify, obtain with {@link #getCapture(int)}
+     * @param comments The new capture comments
+     */
     public static void setCaptureComments(Capture capture, String comments) {
         if (renderdoc == null) return;
         renderdoc.SetCaptureFileComments.call(capture.path, comments);
