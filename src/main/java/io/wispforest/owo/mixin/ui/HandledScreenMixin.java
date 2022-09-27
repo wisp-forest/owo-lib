@@ -54,7 +54,6 @@ public class HandledScreenMixin {
         var scissorArea = ((OwoSlotExtension) slot).owo$getScissorArea();
         if (scissorArea == null) return;
 
-        ((OwoSlotExtension) slot).owo$setScissorArea(null);
         GlStateManager._disableScissorTest();
     }
 

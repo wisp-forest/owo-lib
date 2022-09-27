@@ -192,7 +192,6 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
     @Override
     protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {}
 
-    // TODO adapt to tooltip rendering being culled
     public class SlotComponent extends BaseComponent {
 
         protected final Slot slot;
@@ -215,18 +214,24 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
         }
 
         @Override
-        public void drawTooltip(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
-            if (!this.slot.hasStack()) {
-                super.drawTooltip(matrices, mouseX, mouseY, partialTicks, delta);
-            }
+        public void update(float delta, int mouseX, int mouseY) {
+            super.update(delta, mouseX, mouseY);
 
             ((OwoSlotExtension) this.slot).owo$setDisabledOverride(!this.didDraw);
+
             this.didDraw = false;
         }
 
         @Override
+        public void drawTooltip(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+            if (!this.slot.hasStack()) {
+                super.drawTooltip(matrices, mouseX, mouseY, partialTicks, delta);
+            }
+        }
+
+        @Override
         public boolean shouldDrawTooltip(double mouseX, double mouseY) {
-            return true;
+            return super.shouldDrawTooltip(mouseX, mouseY);
         }
 
         @Override
