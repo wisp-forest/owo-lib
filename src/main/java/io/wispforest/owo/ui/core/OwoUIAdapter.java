@@ -3,6 +3,7 @@ package io.wispforest.owo.ui.core;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.Owo;
+import io.wispforest.owo.renderdoc.RenderDoc;
 import io.wispforest.owo.ui.util.Drawer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Drawable;
@@ -38,6 +39,7 @@ public class OwoUIAdapter<T extends ParentComponent> implements Element, Drawabl
     public final EnumMap<CursorStyle, Long> cursors = new EnumMap<>(CursorStyle.class);
     protected CursorStyle lastCursorStyle = CursorStyle.POINTER;
     protected boolean disposed = false;
+    protected boolean captureFrame = false;
 
     protected int x, y;
     protected int width, height;
@@ -164,6 +166,8 @@ public class OwoUIAdapter<T extends ParentComponent> implements Element, Drawabl
         try {
             isRendering = true;
 
+            if (this.captureFrame) RenderDoc.startFrameCapture();
+
             final var delta = MinecraftClient.getInstance().getLastFrameDuration();
             final var window = MinecraftClient.getInstance().getWindow();
 
@@ -189,8 +193,11 @@ public class OwoUIAdapter<T extends ParentComponent> implements Element, Drawabl
             if (this.enableInspector) {
                 Drawer.debug().drawInspector(matrices, this.rootComponent, mouseX, mouseY, !this.globalInspector);
             }
+
+            if (this.captureFrame) RenderDoc.endFrameCapture();
         } finally {
             isRendering = false;
+            this.captureFrame = false;
         }
     }
 
@@ -226,6 +233,12 @@ public class OwoUIAdapter<T extends ParentComponent> implements Element, Drawabl
                 this.toggleInspector();
             } else if ((modifiers & GLFW.GLFW_MOD_ALT) != 0) {
                 this.toggleGlobalInspector();
+            }
+        }
+
+        if (Owo.DEBUG && keyCode == GLFW.GLFW_KEY_R && RenderDoc.isAvailable()) {
+            if ((modifiers & GLFW.GLFW_MOD_ALT) != 0 && (modifiers & GLFW.GLFW_MOD_CONTROL) != 0) {
+                this.captureFrame = true;
             }
         }
 
