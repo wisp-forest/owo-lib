@@ -8,6 +8,7 @@ import com.sun.jna.ptr.PointerByReference;
 import io.wispforest.owo.Owo;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.minecraft.util.Util;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -27,21 +28,31 @@ public class RenderDoc {
         var apiPointer = new PointerByReference();
         RenderdocLibrary.RenderdocApi apiInstance = null;
 
-        try {
-            var renderdocLibrary = Native.load("renderdoc", RenderdocLibrary.class, Map.of(Library.OPTION_OPEN_FLAGS, 0x4 | 0x2));
-            int initResult = renderdocLibrary.RENDERDOC_GetAPI(10500, apiPointer);
-            if (initResult != 1) {
-                Owo.LOGGER.error("Could not connect to RenderDoc API, return code: {}", initResult);
-            } else {
-                apiInstance = new RenderdocLibrary.RenderdocApi(apiPointer.getValue());
+        var os = Util.getOperatingSystem();
 
-                var major = new IntByReference();
-                var minor = new IntByReference();
-                var patch = new IntByReference();
-                apiInstance.GetAPIVersion.call(major, minor, patch);
-                Owo.LOGGER.info("Connected to RenderDoc API v" + major.getValue() + "." + minor.getValue() + "." + patch.getValue());
+        if (os == Util.OperatingSystem.WINDOWS || os == Util.OperatingSystem.LINUX) {
+            try {
+                RenderdocLibrary renderdocLibrary;
+                if (os == Util.OperatingSystem.WINDOWS) {
+                    renderdocLibrary = Native.load("renderdoc", RenderdocLibrary.class);
+                } else {
+                    renderdocLibrary = Native.load("renderdoc", RenderdocLibrary.class, Map.of(Library.OPTION_OPEN_FLAGS, 0x4 | 0x2));
+                }
+
+                int initResult = renderdocLibrary.RENDERDOC_GetAPI(10500, apiPointer);
+                if (initResult != 1) {
+                    Owo.LOGGER.error("Could not connect to RenderDoc API, return code: {}", initResult);
+                } else {
+                    apiInstance = new RenderdocLibrary.RenderdocApi(apiPointer.getValue());
+
+                    var major = new IntByReference();
+                    var minor = new IntByReference();
+                    var patch = new IntByReference();
+                    apiInstance.GetAPIVersion.call(major, minor, patch);
+                    Owo.LOGGER.info("Connected to RenderDoc API v" + major.getValue() + "." + minor.getValue() + "." + patch.getValue());
+                }
+            } catch (UnsatisfiedLinkError ignored) {
             }
-        } catch (UnsatisfiedLinkError ignored) {
         }
 
         renderdoc = apiInstance;
