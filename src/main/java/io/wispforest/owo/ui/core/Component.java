@@ -15,6 +15,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -167,10 +169,25 @@ public interface Component extends PositionedRectangle {
 
     /**
      * Set the tooltip of this component to the given
+     * text, without any wrapping applied
+     */
+    default Component tooltip(@NotNull Collection<Text> tooltip) {
+        var components = new ArrayList<TooltipComponent>();
+        for (var line : tooltip) components.add(TooltipComponent.of(line.asOrderedText()));
+        this.tooltip(components);
+        return this;
+    }
+
+    /**
+     * Set the tooltip of this component to the given
      * text, wrapping at newline characters
      */
     default Component tooltip(@NotNull Text tooltip) {
-        this.tooltip(MinecraftClient.getInstance().textRenderer.wrapLines(tooltip, Integer.MAX_VALUE).stream().map(TooltipComponent::of).toList());
+        var components = new ArrayList<TooltipComponent>();
+        for (var line : MinecraftClient.getInstance().textRenderer.wrapLines(tooltip, Integer.MAX_VALUE)) {
+            components.add(TooltipComponent.of(line));
+        }
+        this.tooltip(components);
         return this;
     }
 
