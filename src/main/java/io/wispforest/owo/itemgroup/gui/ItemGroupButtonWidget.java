@@ -21,10 +21,6 @@ public class ItemGroupButtonWidget extends ButtonWidget {
         this.hoverReactive = hoverReactive;
     }
 
-    protected boolean shouldShowHighlight(boolean hovered) {
-        return (hoverReactive && hovered) || isSelected;
-    }
-
     @Override
     public void renderButton(MatrixStack matrixStack, int mouseX, int mouseY, float delta) {
         MinecraftClient minecraftClient = MinecraftClient.getInstance();
@@ -37,5 +33,13 @@ public class ItemGroupButtonWidget extends ButtonWidget {
 
         this.renderBackground(matrixStack, minecraftClient, mouseX, mouseY);
         this.definition.icon().render(matrixStack, this.x + 4, this.y + 4, mouseX, mouseY, delta);
+    }
+
+    protected boolean shouldShowHighlight(boolean hovered) {
+        return (hoverReactive && hovered) || isSelected;
+    }
+
+    public boolean trulyHovered() {
+        return this.hovered;
     }
 }

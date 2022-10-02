@@ -167,7 +167,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
     @Inject(at = @At("TAIL"), method = "render(Lnet/minecraft/client/util/math/MatrixStack;IIF)V")
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float delta, CallbackInfo cbi) {
         owo$buttons.forEach(button -> {
-            if (button.isHovered() && !button.isFocused()) renderTooltip(matrixStack, button.getMessage(), mouseX, mouseY);
+            if (button.trulyHovered()) renderTooltip(matrixStack, button.getMessage(), mouseX, mouseY);
         });
     }
 
