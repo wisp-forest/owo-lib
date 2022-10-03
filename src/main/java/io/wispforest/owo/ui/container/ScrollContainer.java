@@ -140,7 +140,9 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
         this.lastScrollbarLength = this.fixedScrollbarLength == 0
                 ? Math.floor(((float) selfSize / this.childSize) * contentSize)
                 : this.fixedScrollbarLength;
-        double scrollbarPosition = (this.currentScrollPosition / this.maxScroll) * (contentSize - this.lastScrollbarLength);
+        double scrollbarPosition = this.maxScroll != 0
+                ? (this.currentScrollPosition / this.maxScroll) * (contentSize - this.lastScrollbarLength)
+                : 0;
 
         if (this.direction == ScrollDirection.VERTICAL) {
             this.scrollbar.draw(matrices,
@@ -150,7 +152,8 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
                     (int) (this.lastScrollbarLength),
                     this.scrollbarOffset, this.y + padding.top(),
                     this.scrollbarThiccness, this.height - padding.vertical(),
-                    lastScrollbarInteractTime, this.direction
+                    lastScrollbarInteractTime, this.direction,
+                    this.maxScroll > 0
             );
         } else {
             this.scrollbar.draw(matrices,
@@ -160,7 +163,8 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
                     this.scrollbarThiccness,
                     this.x + padding.left(), this.scrollbarOffset,
                     this.width - padding.horizontal(), this.scrollbarThiccness,
-                    lastScrollbarInteractTime, this.direction
+                    lastScrollbarInteractTime, this.direction,
+                    this.maxScroll > 0
             );
         }
     }
@@ -336,8 +340,8 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
         static Scrollbar flat(Color color) {
             int scrollbarColor = color.argb();
 
-            return (matrices, x, y, width, height, trackX, trackY, trackWidth, trackHeight, lastInteractTime, direction) -> {
-                if (height >= trackHeight) return;
+            return (matrices, x, y, width, height, trackX, trackY, trackWidth, trackHeight, lastInteractTime, direction, active) -> {
+                if (!active) return;
 
                 final var progress = Easing.SINE.apply(MathHelper.clamp(lastInteractTime - System.currentTimeMillis(), 0, 750) / 750f);
                 int alpha = (int) (progress * (scrollbarColor >>> 24));
@@ -350,22 +354,26 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
         }
 
         static Scrollbar vanilla() {
-            return (matrixStack, x, y, width, height, trackX, trackY, trackWidth, trackHeight, lastInteractTime, direction) -> {
-                OwoNinePatchRenderers.VANILLA_SCROLLBAR_TRACK.draw(matrixStack, trackX, trackY, trackWidth, trackHeight);
-                (direction == ScrollDirection.VERTICAL
-                        ? OwoNinePatchRenderers.VERTICAL_VANILLA_SCROLLBAR
-                        : OwoNinePatchRenderers.HORIZONTAL_VANILLA_SCROLLBAR).draw(matrixStack, x + 1, y + 1, width - 2, height - 2);
+            return (matrices, x, y, width, height, trackX, trackY, trackWidth, trackHeight, lastInteractTime, direction, active) -> {
+                OwoNinePatchRenderers.VANILLA_SCROLLBAR_TRACK.draw(matrices, trackX, trackY, trackWidth, trackHeight);
+
+                var renderer = direction == ScrollDirection.VERTICAL
+                        ? active ? OwoNinePatchRenderers.VERTICAL_VANILLA_SCROLLBAR : OwoNinePatchRenderers.DISABLED_VERTICAL_VANILLA_SCROLLBAR
+                        : active ? OwoNinePatchRenderers.HORIZONTAL_VANILLA_SCROLLBAR : OwoNinePatchRenderers.DISABLED_HORIZONTAL_VANILLA_SCROLLBAR;
+
+                renderer.draw(matrices, x + 1, y + 1, width - 2, height - 2);
             };
         }
 
         static Scrollbar vanillaFlat() {
-            return (matrixStack, x, y, width, height, trackX, trackY, trackWidth, trackHeight, lastInteractTime, direction) -> {
-                Drawer.fill(matrixStack, trackX, trackY, trackX + trackWidth, trackY + trackHeight, Color.BLACK.argb());
-                OwoNinePatchRenderers.FLAT_VANILLA_SCROLLBAR.draw(matrixStack, x, y, width, height);
+            return (matrices, x, y, width, height, trackX, trackY, trackWidth, trackHeight, lastInteractTime, direction, active) -> {
+                Drawer.fill(matrices, trackX, trackY, trackX + trackWidth, trackY + trackHeight, Color.BLACK.argb());
+                OwoNinePatchRenderers.FLAT_VANILLA_SCROLLBAR.draw(matrices, x, y, width, height);
             };
         }
 
-        void draw(MatrixStack matrixStack, int x, int y, int width, int height, int trackX, int trackY, int trackWidth, int trackHeight, long lastInteractTime, ScrollDirection direction);
+        void draw(MatrixStack matrixStack, int x, int y, int width, int height, int trackX, int trackY, int trackWidth, int trackHeight,
+                  long lastInteractTime, ScrollDirection direction, boolean active);
 
         static Scrollbar parse(Element element) {
             var children = UIParsing.<Element>allChildrenOfType(element, Node.ELEMENT_NODE);
