@@ -26,7 +26,7 @@ public class TagInjector {
      * @return An immutable view of the planned tag injections.
      */
     public static Map<TagLocation, Set<TagEntry>> getInjections() {
-        return Collections.unmodifiableMap(new ForwardingMap<>() {
+        return new ForwardingMap<>() {
             @Override
             protected @NotNull Map<TagLocation, Set<TagEntry>> delegate() {
                 return Collections.unmodifiableMap(ADDITIONS);
@@ -36,7 +36,7 @@ public class TagInjector {
             public Set<TagEntry> get(@Nullable Object key) {
                 return Collections.unmodifiableSet(delegate().get(key));
             }
-        });
+        };
     }
 
     /**
