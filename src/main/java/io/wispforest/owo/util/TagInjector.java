@@ -1,7 +1,6 @@
 package io.wispforest.owo.util;
 
 import com.google.common.collect.ForwardingMap;
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.tag.TagEntry;
 import net.minecraft.tag.TagManagerLoader;
 import net.minecraft.util.Identifier;
