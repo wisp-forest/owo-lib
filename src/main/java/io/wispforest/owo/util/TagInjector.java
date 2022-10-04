@@ -1,10 +1,14 @@
 package io.wispforest.owo.util;
 
+import com.google.common.collect.ForwardingMap;
+import com.google.common.collect.ImmutableMap;
 import net.minecraft.tag.TagEntry;
 import net.minecraft.tag.TagManagerLoader;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Function;
@@ -16,6 +20,25 @@ public class TagInjector {
 
     @ApiStatus.Internal
     public static final HashMap<TagLocation, Set<TagEntry>> ADDITIONS = new HashMap<>();
+
+    /**
+     * Retrieves an unmodifiable map of all planned tag injections.
+     *
+     * @return An immutable view of the planned tag injections.
+     */
+    public static Map<TagLocation, Set<TagEntry>> getInjections() {
+        return Collections.unmodifiableMap(new ForwardingMap<>() {
+            @Override
+            protected @NotNull Map<TagLocation, Set<TagEntry>> delegate() {
+                return Collections.unmodifiableMap(ADDITIONS);
+            }
+
+            @Override
+            public Set<TagEntry> get(@Nullable Object key) {
+                return Collections.unmodifiableSet(delegate().get(key));
+            }
+        });
+    }
 
     /**
      * Injects the given Identifiers into the given Tag.
