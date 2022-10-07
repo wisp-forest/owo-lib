@@ -31,13 +31,13 @@ public interface PositionedRectangle extends Animatable<PositionedRectangle> {
      * @return {@code true} if this rectangle contains the given point
      */
     default boolean isInBoundingBox(double x, double y) {
-        return x >= this.x() && x <= this.x() + this.width() && y >= this.y() && y <= this.y() + this.height();
+        return x >= this.x() && x < this.x() + this.width() && y >= this.y() && y < this.y() + this.height();
     }
 
     default boolean intersects(PositionedRectangle other) {
-        return other.x() <= this.x() + this.width()
+        return other.x() < this.x() + this.width()
                 && other.x() + other.width() >= this.x()
-                && other.y() <= this.y() + this.height()
+                && other.y() < this.y() + this.height()
                 && other.y() + other.height() >= this.y();
     }
 
