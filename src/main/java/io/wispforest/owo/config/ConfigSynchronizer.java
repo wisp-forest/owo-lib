@@ -127,39 +127,41 @@ public class ConfigSynchronizer {
         Owo.LOGGER.info("Applying server overrides");
         var mismatchedOptions = new HashMap<Option<?>, Object>();
 
-        read(buf, (option, packetByteBuf) -> {
-            var mismatchedValue = option.read(packetByteBuf);
-            if (mismatchedValue != null) mismatchedOptions.put(option, mismatchedValue);
-        });
-
-        if (!mismatchedOptions.isEmpty()) {
-            Owo.LOGGER.error("Aborting connection, non-syncable config values were mismatched");
-            mismatchedOptions.forEach((option, serverValue) -> {
-                Owo.LOGGER.error("- Option {} in config '{}' has value '{}' but server requires '{}'",
-                        option.key().asString(), option.configName(), option.value(), serverValue);
+        if (!(client.isIntegratedServerRunning() && client.getServer().isSingleplayer())) {
+            read(buf, (option, packetByteBuf) -> {
+                var mismatchedValue = option.read(packetByteBuf);
+                if (mismatchedValue != null) mismatchedOptions.put(option, mismatchedValue);
             });
 
-            var errorMessage = Text.empty();
-            var optionsByConfig = HashMultimap.<String, Pair<Option<?>, Object>>create();
+            if (!mismatchedOptions.isEmpty()) {
+                Owo.LOGGER.error("Aborting connection, non-syncable config values were mismatched");
+                mismatchedOptions.forEach((option, serverValue) -> {
+                    Owo.LOGGER.error("- Option {} in config '{}' has value '{}' but server requires '{}'",
+                            option.key().asString(), option.configName(), option.value(), serverValue);
+                });
 
-            mismatchedOptions.forEach((option, serverValue) -> optionsByConfig.put(option.configName(), new Pair<>(option, serverValue)));
-            for (var configName : optionsByConfig.keys()) {
-                errorMessage.append(TextOps.withFormatting("in config ", Formatting.GRAY)).append(configName).append("\n");
-                for (var option : optionsByConfig.get(configName)) {
-                    errorMessage.append(Text.translatable(option.getLeft().translationKey()).formatted(Formatting.YELLOW)).append(" -> ");
-                    errorMessage.append(option.getLeft().value().toString()).append(TextOps.withFormatting(" (client)", Formatting.GRAY));
-                    errorMessage.append(TextOps.withFormatting(" / ", Formatting.DARK_GRAY));
-                    errorMessage.append(option.getRight().toString()).append(TextOps.withFormatting(" (server)", Formatting.GRAY)).append("\n");
+                var errorMessage = Text.empty();
+                var optionsByConfig = HashMultimap.<String, Pair<Option<?>, Object>>create();
+
+                mismatchedOptions.forEach((option, serverValue) -> optionsByConfig.put(option.configName(), new Pair<>(option, serverValue)));
+                for (var configName : optionsByConfig.keys()) {
+                    errorMessage.append(TextOps.withFormatting("in config ", Formatting.GRAY)).append(configName).append("\n");
+                    for (var option : optionsByConfig.get(configName)) {
+                        errorMessage.append(Text.translatable(option.getLeft().translationKey()).formatted(Formatting.YELLOW)).append(" -> ");
+                        errorMessage.append(option.getLeft().value().toString()).append(TextOps.withFormatting(" (client)", Formatting.GRAY));
+                        errorMessage.append(TextOps.withFormatting(" / ", Formatting.DARK_GRAY));
+                        errorMessage.append(option.getRight().toString()).append(TextOps.withFormatting(" (server)", Formatting.GRAY)).append("\n");
+                    }
+                    errorMessage.append("\n");
                 }
-                errorMessage.append("\n");
+
+                errorMessage.append(TextOps.withFormatting("these options could not be synchronized because\n", Formatting.GRAY));
+                errorMessage.append(TextOps.withFormatting("they require your client to be restarted\n", Formatting.GRAY));
+                errorMessage.append(TextOps.withFormatting("change them manually and restart if you want to join this server", Formatting.GRAY));
+
+                handler.getConnection().disconnect(TextOps.concat(PREFIX, errorMessage));
+                return;
             }
-
-            errorMessage.append(TextOps.withFormatting("these options could not be synchronized because\n", Formatting.GRAY));
-            errorMessage.append(TextOps.withFormatting("they require your client to be restarted\n", Formatting.GRAY));
-            errorMessage.append(TextOps.withFormatting("change them manually and restart if you want to join this server", Formatting.GRAY));
-
-            handler.getConnection().disconnect(TextOps.concat(PREFIX, errorMessage));
-            return;
         }
 
         Owo.LOGGER.info("Responding with client values");
@@ -183,7 +185,6 @@ public class ConfigSynchronizer {
         var earlyPhase = new Identifier("owo", "early");
         ServerPlayConnectionEvents.JOIN.addPhaseOrdering(earlyPhase, Event.DEFAULT_PHASE);
         ServerPlayConnectionEvents.JOIN.register(earlyPhase, (handler, sender, server) -> {
-            if (server.isSingleplayer()) return;
             Owo.LOGGER.info("Sending server config values to client");
 
             var packet = PacketByteBufs.create();
