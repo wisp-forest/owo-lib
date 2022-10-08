@@ -22,6 +22,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -266,7 +267,7 @@ public class UIModel {
             final var paramName = matchResult.group().substring(2, matchResult.group().length() - 2);
             final var substitution = parameterSupplier.apply(paramName);
             if (substitution == null) throw new IncompatibleUIModelException("No substitution provided for template parameter '" + paramName + "'");
-            return substitution;
+            return Matcher.quoteReplacement(substitution);
         };
 
         for (var child : UIParsing.<Element>allChildrenOfType(template, Node.ELEMENT_NODE)) {

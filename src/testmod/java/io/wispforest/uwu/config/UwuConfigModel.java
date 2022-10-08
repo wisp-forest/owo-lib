@@ -25,6 +25,8 @@ public class UwuConfigModel {
 
     public float floting = 6.9f;
 
+    public String thisIsAStringValue = "\\bruh?";
+
     @SectionHeader("bottom")
     public List<String> thereAreStringsHere = new ArrayList<>(List.of("yes", "no"));
 
