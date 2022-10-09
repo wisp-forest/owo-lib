@@ -1,5 +1,6 @@
 package io.wispforest.owo.ui.component;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.AnimatableProperty;
@@ -22,6 +23,7 @@ public class TextureComponent extends BaseComponent {
     protected final int textureWidth, textureHeight;
 
     protected final AnimatableProperty<PositionedRectangle> visibleArea;
+    protected boolean blend = false;
 
     protected TextureComponent(Identifier texture, int u, int v, int regionWidth, int regionHeight, int textureWidth, int textureHeight) {
         this.texture = texture;
@@ -56,6 +58,11 @@ public class TextureComponent extends BaseComponent {
         RenderSystem.setShaderTexture(0, this.texture);
         RenderSystem.enableDepthTest();
 
+        if (this.blend) {
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+        }
+
         matrices.push();
         matrices.translate(x, y, 0);
         matrices.scale(this.width / (float) this.regionWidth, this.height / (float) this.regionHeight, 0);
@@ -77,6 +84,10 @@ public class TextureComponent extends BaseComponent {
                 this.textureWidth, this.textureHeight
         );
 
+        if (this.blend) {
+            RenderSystem.disableBlend();
+        }
+
         matrices.pop();
     }
 
@@ -94,9 +105,21 @@ public class TextureComponent extends BaseComponent {
         return this.visibleArea;
     }
 
+    public TextureComponent blend(boolean blend) {
+        this.blend = blend;
+        return this;
+    }
+
+    public boolean blend() {
+        return this.blend;
+    }
+
     @Override
     public void parseProperties(UIModel model, Element element, Map<String, Element> children) {
         super.parseProperties(model, element, children);
+
+        UIParsing.apply(children, "blend", UIParsing::parseBool, this::blend);
+
         if (children.containsKey("visible-area")) {
             var areaChildren = UIParsing.childElements(children.get("visible-area"));
 

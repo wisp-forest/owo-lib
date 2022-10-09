@@ -536,15 +536,15 @@
     <xs:complexType name="owo-ui-texture-component">
         <xs:complexContent>
             <xs:extension base="componentType">
-                <xs:choice>
+                <xs:choice maxOccurs="unbounded">
                     <xs:group ref="componentProps"/>
                     <xs:element name="visible-area" minOccurs="0">
                         <xs:complexType>
                             <xs:all>
-                                <xs:element name="x" type="xs:unsignedInt"/>
-                                <xs:element name="y" type="xs:unsignedInt"/>
-                                <xs:element name="width" type="xs:unsignedInt"/>
-                                <xs:element name="height" type="xs:unsignedInt"/>
+                                <xs:element name="x" type="xs:unsignedInt" minOccurs="0"/>
+                                <xs:element name="y" type="xs:unsignedInt" minOccurs="0"/>
+                                <xs:element name="width" type="xs:unsignedInt" minOccurs="0"/>
+                                <xs:element name="height" type="xs:unsignedInt" minOccurs="0"/>
                             </xs:all>
                         </xs:complexType>
                     </xs:element>
