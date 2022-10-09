@@ -1,6 +1,7 @@
 package io.wispforest.owo.client;
 
 import io.wispforest.owo.Owo;
+import io.wispforest.owo.command.debug.OwoDebugCommands;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -45,5 +46,8 @@ public class OwoClient implements ClientModInitializer {
                 });
             }
         }
+
+        if (!Owo.DEBUG) return;
+        OwoDebugCommands.registerClient();
     }
 }

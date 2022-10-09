@@ -52,9 +52,7 @@ public class OwoDebugCommands {
     public static final int KEY_BLUE = 0x94B3FD;
     public static final int VALUE_BLUE = 0x94DAFF;
 
-    public static void register() {
-        ArgumentTypeRegistry.registerArgumentType(new Identifier("owo", "damage_source"), DamageSourceArgumentType.class, ConstantArgumentSerializer.of(DamageSourceArgumentType::damageSource));
-
+    public static void registerClient() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             if (RenderDoc.isAvailable()) {
                 dispatcher.register(ClientCommandManager.literal("renderdoc").executes(context -> {
@@ -77,6 +75,10 @@ public class OwoDebugCommands {
                                         })))));
             }
         });
+    }
+
+    public static void register() {
+        ArgumentTypeRegistry.registerArgumentType(new Identifier("owo", "damage_source"), DamageSourceArgumentType.class, ConstantArgumentSerializer.of(DamageSourceArgumentType::damageSource));
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
 
