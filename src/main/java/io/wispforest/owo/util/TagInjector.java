@@ -20,23 +20,26 @@ public class TagInjector {
     @ApiStatus.Internal
     public static final HashMap<TagLocation, Set<TagEntry>> ADDITIONS = new HashMap<>();
 
+
+    private static final Map<TagLocation, Set<TagEntry>> ADDITIONS_VIEW = new ForwardingMap<>() {
+        @Override
+        protected @NotNull Map<TagLocation, Set<TagEntry>> delegate() {
+            return Collections.unmodifiableMap(ADDITIONS);
+        }
+
+        @Override
+        public Set<TagEntry> get(@Nullable Object key) {
+            return Collections.unmodifiableSet(delegate().get(key));
+        }
+    };
+
     /**
      * Retrieves an unmodifiable map of all planned tag injections.
      *
      * @return An immutable view of the planned tag injections.
      */
     public static Map<TagLocation, Set<TagEntry>> getInjections() {
-        return new ForwardingMap<>() {
-            @Override
-            protected @NotNull Map<TagLocation, Set<TagEntry>> delegate() {
-                return Collections.unmodifiableMap(ADDITIONS);
-            }
-
-            @Override
-            public Set<TagEntry> get(@Nullable Object key) {
-                return Collections.unmodifiableSet(delegate().get(key));
-            }
-        };
+        return ADDITIONS_VIEW;
     }
 
     /**
