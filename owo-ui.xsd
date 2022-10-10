@@ -538,6 +538,7 @@
             <xs:extension base="componentType">
                 <xs:choice maxOccurs="unbounded">
                     <xs:group ref="componentProps"/>
+                    <xs:element name="blend" type="xs:boolean" minOccurs="0"/>
                     <xs:element name="visible-area" minOccurs="0">
                         <xs:complexType>
                             <xs:all>
