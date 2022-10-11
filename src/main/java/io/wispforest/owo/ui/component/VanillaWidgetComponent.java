@@ -99,7 +99,7 @@ public class VanillaWidgetComponent extends BaseComponent {
 
     @Override
     public boolean onMouseUp(double mouseX, double mouseY, int button) {
-        return this.widget.mouseReleased(mouseX, mouseY, button)
+        return this.widget.mouseReleased(this.x + mouseX, this.y + mouseY, button)
                 | super.onMouseUp(mouseX, mouseY, button);
     }
 

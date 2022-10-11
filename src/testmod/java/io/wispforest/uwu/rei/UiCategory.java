@@ -5,9 +5,11 @@ import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.uwu.items.UwuItems;
+import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
@@ -45,6 +47,8 @@ public class UiCategory implements DisplayCategory<Display> {
         var animation = inner.horizontalSizing().animate(250, Easing.SINE, Sizing.fill(65));
         inner.child(Components.button(Text.of("shrink"), 60, 20, button -> animation.forwards()).margins(Insets.vertical(25)));
         inner.child(Components.button(Text.of("grow"), 60, 20, button -> animation.backwards()).margins(Insets.vertical(25)));
+
+        inner.child(adapter.wrap(Widgets.createSlot(new Point(0, 0)).entry(EntryStacks.of(Items.ECHO_SHARD))));
 
         root.child(Containers.verticalScroll(Sizing.content(), Sizing.fill(100), inner));
 
