@@ -192,7 +192,7 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
     @Override
     public boolean onMouseDown(double mouseX, double mouseY, int button) {
         if (this.focusHandler != null) {
-            this.focusHandler.updateClickFocus(mouseX, mouseY);
+            this.focusHandler.updateClickFocus(this.x + mouseX, this.y + mouseY);
         }
 
         return ParentComponent.super.onMouseDown(mouseX, mouseY, button)
@@ -203,7 +203,7 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
     public boolean onMouseUp(double mouseX, double mouseY, int button) {
         if (this.focusHandler != null && this.focusHandler.focused() != null) {
             final var focused = this.focusHandler.focused();
-            return focused.onMouseUp(mouseX - focused.x(), mouseY - focused.y(), button);
+            return focused.onMouseUp(this.x + mouseX - focused.x(), this.y + mouseY - focused.y(), button);
         } else {
             return super.onMouseUp(mouseX, mouseY, button);
         }
@@ -218,7 +218,7 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
     public boolean onMouseDrag(double mouseX, double mouseY, double deltaX, double deltaY, int button) {
         if (this.focusHandler != null && this.focusHandler.focused() != null) {
             final var focused = this.focusHandler.focused();
-            return focused.onMouseDrag(mouseX - focused.x(), mouseY - focused.y(), deltaX, deltaY, button);
+            return focused.onMouseDrag(this.x + mouseX - focused.x(), this.y + mouseY - focused.y(), deltaX, deltaY, button);
         } else {
             return super.onMouseDrag(mouseX, mouseY, deltaX, deltaY, button);
         }
