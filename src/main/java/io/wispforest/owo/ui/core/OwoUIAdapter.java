@@ -46,6 +46,7 @@ public class OwoUIAdapter<T extends ParentComponent> implements Element, Drawabl
 
     public boolean enableInspector = false;
     public boolean globalInspector = false;
+    public int inspectorZOffset = 1000;
 
     protected OwoUIAdapter(int x, int y, int width, int height, T rootComponent) {
         this.x = x;
@@ -191,7 +192,9 @@ public class OwoUIAdapter<T extends ParentComponent> implements Element, Drawabl
             }
 
             if (this.enableInspector) {
+                matrices.translate(0, 0, this.inspectorZOffset);
                 Drawer.debug().drawInspector(matrices, this.rootComponent, mouseX, mouseY, !this.globalInspector);
+                matrices.translate(0, 0, -this.inspectorZOffset);
             }
 
             if (this.captureFrame) RenderDoc.endFrameCapture();

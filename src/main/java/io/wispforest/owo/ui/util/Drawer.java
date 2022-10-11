@@ -205,7 +205,6 @@ public class Drawer extends DrawableHelper {
             }
 
             for (var child : children) {
-                matrices.translate(0, 0, 1000);
                 if (child instanceof ParentComponent parentComponent) {
                     this.drawInsets(matrices, parentComponent.x(), parentComponent.y(), parentComponent.width(),
                             parentComponent.height(), parentComponent.padding().get().inverted(), 0xA70CECDD);
@@ -247,7 +246,6 @@ public class Drawer extends DrawableHelper {
                     textRenderer.draw(matrices, descriptor,
                             inspectorX + 2, inspectorY + textRenderer.fontHeight + 2, 0xFFFFFF);
                 }
-                matrices.translate(0, 0, -1000);
             }
 
             RenderSystem.enableDepthTest();
