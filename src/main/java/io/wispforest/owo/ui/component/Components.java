@@ -4,6 +4,9 @@ import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.Sizing;
+import net.minecraft.block.BlockEntityProvider;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
@@ -101,6 +104,27 @@ public class Components {
 
     public static ItemComponent item(ItemStack item) {
         return new ItemComponent(item);
+    }
+
+    public static BlockComponent block(BlockState state) {
+        return new BlockComponent(state, null);
+    }
+
+    public static BlockComponent block(BlockState state, BlockEntity blockEntity) {
+        return new BlockComponent(state, blockEntity);
+    }
+
+    public static BlockComponent block(BlockState state, @Nullable NbtCompound nbt) {
+        final var client = MinecraftClient.getInstance();
+
+        BlockEntity blockEntity = null;
+
+        if (state.getBlock() instanceof BlockEntityProvider provider) {
+            blockEntity = provider.createBlockEntity(client.player.getBlockPos(), state);
+            BlockComponent.prepareBlockEntity(state, blockEntity, nbt);
+        }
+
+        return new BlockComponent(state, blockEntity);
     }
 
     public static LabelComponent label(Text text) {

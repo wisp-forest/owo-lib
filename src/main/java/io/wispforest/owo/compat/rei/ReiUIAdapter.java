@@ -4,6 +4,7 @@ import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.util.ScissorStack;
+import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
@@ -14,8 +15,12 @@ import net.minecraft.client.util.math.MatrixStack;
 
 import java.util.List;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class ReiUIAdapter<T extends ParentComponent> extends Widget {
+
+    public static final Point LAYOUT = new Point(-69, -69);
 
     public final OwoUIAdapter<T> adapter;
 
@@ -37,6 +42,12 @@ public class ReiUIAdapter<T extends ParentComponent> extends Widget {
     }
 
     public <W extends WidgetWithBounds> ReiWidgetComponent wrap(W widget) {
+        return new ReiWidgetComponent(widget);
+    }
+
+    public <W extends WidgetWithBounds> ReiWidgetComponent wrap(Function<Point, W> widgetFactory, Consumer<W> widgetConfigurator) {
+        var widget = widgetFactory.apply(LAYOUT);
+        widgetConfigurator.accept(widget);
         return new ReiWidgetComponent(widget);
     }
 

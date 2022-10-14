@@ -27,6 +27,7 @@
     "text.stapi.SystemDelegatedLanguageFixin",
     "tweaks.EulaReaderMixin",
     "tweaks.LevelInfoMixin",
+    "ui.BlockEntityAccessor",
     "ui.SlotAccessor",
     "ui.SlotMixin"
   ],

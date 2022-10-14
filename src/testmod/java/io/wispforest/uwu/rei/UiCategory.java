@@ -1,6 +1,7 @@
 package io.wispforest.uwu.rei;
 
 import io.wispforest.owo.compat.rei.ReiUIAdapter;
+import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.core.*;
@@ -44,9 +45,13 @@ public class UiCategory implements DisplayCategory<Display> {
                 .positioning(Positioning.absolute(3, 3))
         );
 
-        var animation = inner.horizontalSizing().animate(250, Easing.SINE, Sizing.fill(65));
-        inner.child(Components.button(Text.of("shrink"), 60, 20, button -> animation.forwards()).margins(Insets.vertical(25)));
-        inner.child(Components.button(Text.of("grow"), 60, 20, button -> animation.backwards()).margins(Insets.vertical(25)));
+        var animation = inner.horizontalSizing().animate(250, Easing.QUADRATIC, Sizing.fill(65));
+        inner.child(Components.button(Text.of("shrink"), (ButtonComponent button) -> animation.forwards())
+                .margins(Insets.vertical(25))
+                .horizontalSizing(Sizing.fixed(60)));
+        inner.child(Components.button(Text.of("grow"), (ButtonComponent button) -> animation.backwards())
+                .margins(Insets.vertical(25))
+                .horizontalSizing(Sizing.fixed(60)));
 
         inner.child(adapter.wrap(Widgets.createSlot(new Point(0, 0)).entry(EntryStacks.of(Items.ECHO_SHARD))));
 
