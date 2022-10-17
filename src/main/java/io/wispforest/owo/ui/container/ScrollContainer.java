@@ -138,7 +138,7 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
                 : this.y + this.height - padding.bottom() - scrollbarThiccness;
 
         this.lastScrollbarLength = this.fixedScrollbarLength == 0
-                ? Math.floor(((float) selfSize / this.childSize) * contentSize)
+                ? Math.min(Math.floor(((float) selfSize / this.childSize) * contentSize), contentSize)
                 : this.fixedScrollbarLength;
         double scrollbarPosition = this.maxScroll != 0
                 ? (this.currentScrollPosition / this.maxScroll) * (contentSize - this.lastScrollbarLength)
@@ -204,6 +204,7 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
         double delta = this.direction.choose(deltaX, deltaY);
         double selfSize = this.direction.sizeGetter.apply(this) - this.direction.insetGetter.apply(this.padding.get());
         double scalar = (this.maxScroll) / (selfSize - this.lastScrollbarLength);
+        if (Double.isNaN(scalar)) scalar = 0;
 
         this.scrollBy(delta * scalar, true, false);
         this.scrollbaring = true;
