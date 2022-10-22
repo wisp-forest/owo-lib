@@ -22,6 +22,6 @@ public record ItemGroupTab(Icon icon, String name, TagKey<Item> contentTag,
     }
 
     public String getTranslationKey(String groupKey) {
-        return "itemGroup." + groupKey + ".tab." + name;
+        return groupKey + ".tab." + name;
     }
 }

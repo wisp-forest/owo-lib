@@ -8,6 +8,7 @@ import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
+import net.minecraft.class_7818;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -25,6 +26,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.Vec3f;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.Nullable;
@@ -32,6 +34,7 @@ import org.lwjgl.glfw.GLFW;
 import org.w3c.dom.Element;
 
 import java.util.Map;
+import java.util.UUID;
 
 public class EntityComponent<E extends Entity> extends BaseComponent {
 
@@ -204,6 +207,8 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
                     new ClientPlayNetworkHandler(MinecraftClient.getInstance(),
                             null,
                             new ClientConnection(NetworkSide.CLIENTBOUND),
+                            new class_7818(Util.NIL_UUID, null),
+                            null,
                             profile,
                             MinecraftClient.getInstance().createTelemetrySender()
                     ),

@@ -3,22 +3,22 @@ package io.wispforest.owo.itemgroup;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButtonWidget;
 import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
-import io.wispforest.owo.itemgroup.json.WrapperGroup;
 import io.wispforest.owo.util.pond.OwoItemExtensions;
 import net.fabricmc.api.EnvType;
-import net.fabricmc.fabric.impl.item.group.ItemGroupExtensions;
+import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.item.*;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemConvertible;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.item.Items;
+import net.minecraft.resource.featuretoggle.FeatureSet;
 import net.minecraft.tag.TagKey;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.registry.Registry;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.BiConsumer;
 
 /**
@@ -32,9 +32,9 @@ import java.util.function.BiConsumer;
  * Credits to Lemonszz for originally writing this for Biome Makeover.
  * Adapted from Azagwens implementation
  */
-public abstract class OwoItemGroup extends ItemGroup {
+public abstract class OwoItemGroup extends FabricItemGroup {
 
-    public static final BiConsumer<Item, DefaultedList<ItemStack>> DEFAULT_STACK_GENERATOR = (item, stacks) -> stacks.add(item.getDefaultStack());
+    public static final BiConsumer<Item, Entries> DEFAULT_STACK_GENERATOR = (item, stacks) -> stacks.add(item.getDefaultStack());
 
     public final List<ItemGroupTab> tabs = new ArrayList<>();
     public final List<ItemGroupButton> buttons = new ArrayList<>();
@@ -48,28 +48,19 @@ public abstract class OwoItemGroup extends ItemGroup {
     private boolean displayTabNamesAsTitle = true;
     private boolean displaySingleTab = false;
 
-    /**
-     * Creates a new instance. This also automatically registers the group
-     * (basically like calling {@code build()} on Fabric's builder),
-     * so be careful when and how you invoke this
-     *
-     * @param id The id this group should use. Will be formatted as {@code <namespace>.<path>}
-     */
     protected OwoItemGroup(Identifier id) {
-        super(createTabIndex(), String.format("%s.%s", id.getNamespace(), id.getPath()));
+        super(id);
     }
 
     /**
-     * Creates a new instance from the given name at the given index, without ensuring that
-     * there is space in the array or the name is valid. Used by {@link WrapperGroup}
-     * to replace an existing group
+     * Called from {@link #initialize()} to register tabs and buttons
      *
-     * @apiNote This should not be used from the outside, unless there is a very specific need to
+     * @see #addTab(Icon, String, TagKey)
+     * @see #addButton(ItemGroupButton)
      */
-    @ApiStatus.Internal
-    protected OwoItemGroup(int index, String name) {
-        super(index, name);
-    }
+    protected abstract void setup();
+
+    // ---------
 
     /**
      * Executes {@link #setup()} and makes sure this item group is ready for use
@@ -128,14 +119,6 @@ public abstract class OwoItemGroup extends ItemGroup {
     }
 
     /**
-     * @deprecated Use {@link #setTabStackHeight(int)} instead
-     */
-    @Deprecated(forRemoval = true)
-    protected void setStackHeight(int tabStackHeight) {
-        this.tabStackHeight = tabStackHeight;
-    }
-
-    /**
      * Sets how many tab buttons may be displayed in a single
      * column to the left of the creative inventory
      */
@@ -166,18 +149,11 @@ public abstract class OwoItemGroup extends ItemGroup {
         this.displayTabNamesAsTitle = false;
     }
 
-    /**
-     * Called from {@link #initialize()} to register tabs and buttons
-     *
-     * @see #addTab(Icon, String, TagKey)
-     * @see #addButton(ItemGroupButton)
-     */
-    protected abstract void setup();
-
     // Getters and setters
 
     public void setSelectedTab(int selectedTab) {
         this.selectedTab = selectedTab;
+        this.clearStacks();
     }
 
     public ItemGroupTab getSelectedTab() {
@@ -219,23 +195,19 @@ public abstract class OwoItemGroup extends ItemGroup {
     // Utility
 
     @Override
-    public void appendStacks(DefaultedList<ItemStack> stacks) {
+    protected void addItems(FeatureSet enabledFeatures, Entries entries) {
         if (!initialized) throw new IllegalStateException("Owo item group not initialized, was 'initialize()' called?");
         Registry.ITEM.stream().filter(this::includes).forEach(item -> {
-            ((OwoItemExtensions) item).owo$stackGenerator().accept(item, stacks);
+            ((OwoItemExtensions) item).owo$stackGenerator().accept(item, entries);
         });
     }
 
     protected boolean includes(Item item) {
-        if (tabs.size() > 1)
-            return getSelectedTab().includes(item) || (item.getGroup() == this && ((OwoItemExtensions) item).owo$tab() == this.getSelectedTabIndex());
-        else
-            return item.getGroup() != null && Objects.equals(item.getGroup().getName(), this.getName());
-    }
+        var group = ((OwoItemExtensions) item).owo$group();
 
-    private static int createTabIndex() {
-        ((ItemGroupExtensions) ItemGroup.BUILDING_BLOCKS).fabric_expandArray();
-        return ItemGroup.GROUPS.length - 1;
+        return tabs.size() > 1
+                ? this.getSelectedTab().includes(item) || (group == this && ((OwoItemExtensions) item).owo$tab() == this.getSelectedTabIndex())
+                : group == this;
     }
 
     /**

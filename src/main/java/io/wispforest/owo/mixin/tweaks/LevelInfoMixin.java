@@ -2,6 +2,7 @@ package io.wispforest.owo.mixin.tweaks;
 
 import io.wispforest.owo.Owo;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.class_7712;
 import net.minecraft.resource.DataPackSettings;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameMode;
@@ -22,7 +23,7 @@ public class LevelInfoMixin {
     private GameRules gameRules;
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void simulationIsForNerds(String name, GameMode gameMode, boolean hardcore, Difficulty difficulty, boolean allowCommands, GameRules gameRules, DataPackSettings dataPackSettings, CallbackInfo ci) {
+    private void simulationIsForNerds(String name, GameMode gameMode, boolean hardcore, Difficulty difficulty, boolean allowCommands, GameRules gameRules, class_7712 arg, CallbackInfo ci) {
         if (!(Owo.DEBUG && FabricLoader.getInstance().isDevelopmentEnvironment())) return;
 
         this.gameRules.get(GameRules.DO_DAYLIGHT_CYCLE).set(false, null);

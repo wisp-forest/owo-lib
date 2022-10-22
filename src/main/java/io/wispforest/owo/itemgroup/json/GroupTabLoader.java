@@ -7,8 +7,9 @@ import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
 import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
 import io.wispforest.owo.moddata.ModDataConsumer;
 import io.wispforest.owo.util.pond.OwoItemExtensions;
+import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemGroups;
 import net.minecraft.tag.TagKey;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
@@ -20,7 +21,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 /**
  * Manages loading and adding JSON-based tabs to preexisting {@code ItemGroup}s
@@ -32,26 +32,19 @@ import java.util.function.Supplier;
 @ApiStatus.Internal
 public class GroupTabLoader implements ModDataConsumer {
 
-    private static final Map<String, Pair<List<ItemGroupTab>, List<ItemGroupButton>>> CACHED_BUTTONS = new HashMap<>();
+    private static final Map<Identifier, Pair<List<ItemGroupTab>, List<ItemGroupButton>>> CACHED_BUTTONS = new HashMap<>();
 
-    public GroupTabLoader() {}
+    public static void onGroupCreated(FabricItemGroup group) {
+        if (!CACHED_BUTTONS.containsKey(group.getId())) return;
 
-    public static ItemGroup onGroupCreated(String name, int index, Supplier<ItemStack> icon) {
-        if (!CACHED_BUTTONS.containsKey(name)) return null;
-        final var cache = CACHED_BUTTONS.remove(name);
-        final var wrapperGroup = new WrapperGroup(index, name, cache.getLeft(), cache.getRight(), icon);
+        var cache = CACHED_BUTTONS.remove(group.getId());
+        var wrapperGroup = new WrapperGroup(group, cache.getLeft(), cache.getRight());
         wrapperGroup.initialize();
-        return wrapperGroup;
-    }
-
-    @Override
-    public String getDataSubdirectory() {
-        return "item_group_tabs";
     }
 
     @Override
     public void acceptParsedFile(Identifier id, JsonObject json) {
-        String targetGroup = JsonHelper.getString(json, "target_group");
+        var targetGroup = new Identifier(JsonHelper.getString(json, "target_group"));
 
         var tabsArray = JsonHelper.getArray(json, "tabs", new JsonArray());
         var buttonsArray = JsonHelper.getArray(json, "buttons", new JsonArray());
@@ -84,19 +77,20 @@ public class GroupTabLoader implements ModDataConsumer {
             createdButtons.add(ItemGroupButton.link(Icon.of(ItemGroupButton.ICONS_TEXTURE, u, v, 64, 64), name, link));
         });
 
-        for (ItemGroup group : ItemGroup.GROUPS) {
-            if (!group.getName().equals(targetGroup)) continue;
+        for (ItemGroup group : ItemGroups.GROUPS) {
+            if (!group.getId().equals(targetGroup)) continue;
 
             if (group instanceof WrapperGroup wrapper) {
                 wrapper.addTabs(createdTabs);
                 wrapper.addButtons(createdButtons);
             } else {
-                final var wrappedGroup = new WrapperGroup(group.getIndex(), group.getName(), createdTabs, createdButtons, group::createIcon);
+                final var wrappedGroup = new WrapperGroup(group, createdTabs, createdButtons);
                 wrappedGroup.initialize();
 
                 for (var item : Registry.ITEM) {
-                    if (item.getGroup() != group) continue;
-                    ((OwoItemExtensions) item).owo$setItemGroup(wrappedGroup);
+                    final var extensions = (OwoItemExtensions) item;
+                    if (extensions.owo$group() != group) continue;
+                    extensions.owo$setGroup(wrappedGroup);
                 }
             }
 
@@ -104,6 +98,11 @@ public class GroupTabLoader implements ModDataConsumer {
         }
 
         CACHED_BUTTONS.put(targetGroup, new Pair<>(createdTabs, createdButtons));
+    }
+
+    @Override
+    public String getDataSubdirectory() {
+        return "item_group_tabs";
     }
 
 }

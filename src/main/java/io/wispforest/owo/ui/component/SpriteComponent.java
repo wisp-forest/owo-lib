@@ -20,17 +20,17 @@ public class SpriteComponent extends BaseComponent {
 
     @Override
     protected void applyHorizontalContentSizing(Sizing sizing) {
-        this.width = this.sprite.getWidth();
+        this.width = this.sprite.method_45851().method_45807();
     }
 
     @Override
     protected void applyVerticalContentSizing(Sizing sizing) {
-        this.height = this.sprite.getHeight();
+        this.height = this.sprite.method_45851().method_45815();
     }
 
     @Override
     public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
-        RenderSystem.setShaderTexture(0, this.sprite.getAtlas().getId());
+        RenderSystem.setShaderTexture(0, this.sprite.method_45852());
         Drawer.drawSprite(matrices, this.x, this.y, 0, this.width, this.height, this.sprite);
     }
 

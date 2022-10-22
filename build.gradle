@@ -128,11 +128,12 @@ loom {
 }
 
 dependencies {
-    modLocalRuntime("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}")
+//    modLocalRuntime("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}")
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}")
-    modLocalRuntime "dev.architectury:architectury-fabric:6.2.43"
+//    modLocalRuntime "dev.architectury:architectury-fabric:6.2.43"
 
-    modLocalRuntime modCompileOnly("com.terraformersmc:modmenu:${project.modmenu_version}")
+    modCompileOnly("com.terraformersmc:modmenu:${project.modmenu_version}")
+//    modLocalRuntime("com.terraformersmc:modmenu:${project.modmenu_version}")
 
     modLocalRuntime "maven.modrinth:lazydfu:0.1.2"
 

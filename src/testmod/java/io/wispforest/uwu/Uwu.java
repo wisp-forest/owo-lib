@@ -23,8 +23,8 @@ import io.wispforest.uwu.network.*;
 import io.wispforest.uwu.text.BasedTextContent;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.block.Blocks;
@@ -38,6 +38,7 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.resource.featuretoggle.FeatureSet;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tag.BlockTags;
@@ -78,7 +79,7 @@ public class Uwu implements ModInitializer {
             addTab(Icon.of(Items.AMETHYST_SHARD), "tab_3", null);
             addTab(Icon.of(Items.GOLD_INGOT), "tab_4", null);
 
-            addButton(ItemGroupButton.github("https://github.com/glisco03/owo-lib"));
+            addButton(ItemGroupButton.github("https://github.com/wisp-forest/owo-lib"));
 
             setButtonStackHeight(1);
         }
@@ -126,7 +127,17 @@ public class Uwu implements ModInitializer {
         }
     };
 
-    public static final ItemGroup VANILLA_GROUP = FabricItemGroupBuilder.build(new Identifier("uwu", "vanilla_group"), Items.ACACIA_BOAT::getDefaultStack);
+    public static final ItemGroup VANILLA_GROUP = new FabricItemGroup(new Identifier("uwu", "vanilla_group")) {
+        @Override
+        public ItemStack createIcon() {
+            return Items.ACACIA_BOAT.getDefaultStack();
+        }
+
+        @Override
+        protected void addItems(FeatureSet enabledFeatures, Entries entries) {
+
+        }
+    };
 
     public static final OwoNetChannel CHANNEL = OwoNetChannel.create(new Identifier("uwu", "uwu"));
 

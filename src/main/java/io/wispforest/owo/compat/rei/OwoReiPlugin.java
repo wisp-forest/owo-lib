@@ -11,7 +11,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
-import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemGroups;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,7 +22,7 @@ public class OwoReiPlugin implements REIClientPlugin {
     @Override
     public void registerExclusionZones(ExclusionZones zones) {
         zones.register(CreativeInventoryScreen.class, screen -> {
-            var group = ItemGroup.GROUPS[screen.getSelectedTab()];
+            var group = ItemGroups.GROUPS[screen.getSelectedTab()];
             if (!(group instanceof OwoItemGroup owoGroup)) return Collections.emptySet();
             if (owoGroup.getButtons().isEmpty()) return Collections.emptySet();
 

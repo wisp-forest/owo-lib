@@ -1,15 +1,13 @@
 package io.wispforest.owo.itemgroup;
 
-import io.wispforest.owo.util.pond.OwoItemSettingsExtensions;
 import net.fabricmc.fabric.api.item.v1.CustomDamageHandler;
 import net.fabricmc.fabric.api.item.v1.EquipmentSlotProvider;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.item.FoodComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.Rarity;
-import net.minecraft.util.collection.DefaultedList;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiConsumer;
 
@@ -20,22 +18,43 @@ import java.util.function.BiConsumer;
  */
 public class OwoItemSettings extends FabricItemSettings {
 
-    public OwoItemSettings tab(int tab) {
-        ((OwoItemSettingsExtensions) this).owo$setTab(tab);
+
+    private int tab = 0;
+    @Nullable private OwoItemGroup group = null;
+    @Nullable private BiConsumer<Item, ItemGroup.Entries> stackGenerator = null;
+
+    /**
+     * @param group The item group this
+     */
+    public OwoItemSettings group(OwoItemGroup group) {
+        this.group = group;
         return this;
     }
 
-    public int getTab() {
-        return ((OwoItemSettingsExtensions) this).owo$tab();
+    public OwoItemGroup group() {
+        return this.group;
+    }
+
+    public OwoItemSettings tab(int tab) {
+        this.tab = tab;
+        return this;
+    }
+
+    public int tab() {
+        return this.tab;
     }
 
     /**
      * @param generator The function this item uses for creating stacks in the
      *                  {@link OwoItemGroup} it is in, by default this will be {@link OwoItemGroup#DEFAULT_STACK_GENERATOR}
      */
-    public OwoItemSettings stackGenerator(BiConsumer<Item, DefaultedList<ItemStack>> generator) {
-        ((OwoItemSettingsExtensions) this).owo$setStackGenerator(generator);
+    public OwoItemSettings stackGenerator(BiConsumer<Item, ItemGroup.Entries> generator) {
+        this.stackGenerator = generator;
         return this;
+    }
+
+    public BiConsumer<Item, ItemGroup.Entries> stackGenerator() {
+        return this.stackGenerator;
     }
 
     @Override
@@ -71,11 +90,6 @@ public class OwoItemSettings extends FabricItemSettings {
     @Override
     public OwoItemSettings recipeRemainder(Item recipeRemainder) {
         return (OwoItemSettings) super.recipeRemainder(recipeRemainder);
-    }
-
-    @Override
-    public OwoItemSettings group(ItemGroup group) {
-        return (OwoItemSettings) super.group(group);
     }
 
     @Override

@@ -57,6 +57,6 @@ public record ItemGroupButton(Icon icon, String name, Runnable action) implement
 
     @Override
     public String getTranslationKey(String groupKey) {
-        return "itemGroup." + groupKey + ".button." + name;
+        return groupKey + ".button." + name;
     }
 }
