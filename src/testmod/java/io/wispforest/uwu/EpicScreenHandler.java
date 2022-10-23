@@ -1,6 +1,7 @@
 package io.wispforest.uwu;
 
 import io.wispforest.owo.client.screens.ScreenUtils;
+import io.wispforest.owo.client.screens.SlotGenerator;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -19,7 +20,7 @@ public class EpicScreenHandler extends ScreenHandler {
     public EpicScreenHandler(int syncId, PlayerInventory inventory, ScreenHandlerContext context) {
         super(Uwu.EPIC_SCREEN_HANDLER_TYPE, syncId);
         this.context = context;
-        ScreenUtils.generatePlayerSlots(8, 84, inventory, this::addSlot);
+        SlotGenerator.begin(this::addSlot, 8, 84).playerInventory(inventory);
     }
 
     @Override

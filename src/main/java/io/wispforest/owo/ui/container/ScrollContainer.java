@@ -267,23 +267,6 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
         return this.scrollbarThiccness;
     }
 
-    /**
-     * @deprecated Use {@link #scrollbar(Scrollbar)} with
-     * {@link Scrollbar#flat(Color)} instead
-     */
-    @Deprecated(forRemoval = true)
-    public ScrollContainer<C> scrollbarColor(int scrollbarColor) {
-        Owo.debugWarn(Owo.LOGGER, "Deprecated method ScrollContainer#scrollbarColor(int) invoked by {}", ReflectionUtils.getCallingClassName(2));
-        this.scrollbar(Scrollbar.flat(Color.ofArgb(scrollbarColor)));
-        return this;
-    }
-
-    @Deprecated(forRemoval = true)
-    public int scrollbarColor() {
-        Owo.debugWarn(Owo.LOGGER, "Deprecated method ScrollContainer#scrollbarColor() invoked by {}", ReflectionUtils.getCallingClassName(2));
-        return 0;
-    }
-
     public ScrollContainer<C> scrollbar(Scrollbar scrollbar) {
         this.scrollbar = scrollbar;
         return this;

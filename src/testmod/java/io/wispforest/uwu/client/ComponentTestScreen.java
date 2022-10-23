@@ -48,9 +48,9 @@ public class ComponentTestScreen extends Screen {
 
         rootComponent.child(
                 Containers.verticalFlow(Sizing.content(), Sizing.content())
-                        .child(Components.button(Text.of("Dark Background"), 95, 20, button -> rootComponent.surface(Surface.flat(0x77000000))))
-                        .child(Components.button(Text.of("No Background"), 95, 20, button -> rootComponent.surface(Surface.BLANK)).margins(Insets.vertical(5)))
-                        .child(Components.button(Text.of("Dirt Background"), 95, 20, button -> rootComponent.surface(Surface.OPTIONS_BACKGROUND)))
+                        .child(Components.button(Text.of("Dark Background"), button -> rootComponent.surface(Surface.flat(0x77000000))).horizontalSizing(Sizing.fixed(95)))
+                        .child(Components.button(Text.of("No Background"), button -> rootComponent.surface(Surface.BLANK)).margins(Insets.vertical(5)).horizontalSizing(Sizing.fixed(95)))
+                        .child(Components.button(Text.of("Dirt Background"), button -> rootComponent.surface(Surface.OPTIONS_BACKGROUND)).horizontalSizing(Sizing.fixed(95)))
                         .child(Components.checkbox(Text.of("bruh")).onChanged(aBoolean -> this.client.player.sendMessage(Text.of("bruh: " + aBoolean))).margins(Insets.top(5)))
                         .padding(Insets.of(10))
                         .surface(Surface.flat(0x77000000))
@@ -71,14 +71,14 @@ public class ComponentTestScreen extends Screen {
                         .scrollbarThiccness(12)
                         .id("scrollnite")
                 )
-                .child(Components.button(Text.of("+"), 12, 12, button -> {
+                .child(Components.button(Text.of("+"), (ButtonComponent button) -> {
                             verticalAnimation.reverse();
 
                             button.setMessage(verticalAnimation.direction() == Animation.Direction.FORWARDS
                                     ? Text.of("-")
                                     : Text.of("+")
                             );
-                        }).margins(Insets.of(5))
+                        }).margins(Insets.of(5)).sizing(Sizing.fixed(12))
                 )
                 .child(new BoxComponent(Sizing.fixed(40), Sizing.fixed(20)).margins(Insets.of(5)))
                 .horizontalAlignment(HorizontalAlignment.CENTER)
@@ -113,8 +113,8 @@ public class ComponentTestScreen extends Screen {
 
         final var buttonPanel = Containers.horizontalFlow(Sizing.content(), Sizing.content())
                 .child(Components.label(Text.of("A horizontal Flow Layout\nwith a dark panel")).margins(Insets.of(5)))
-                .child(Components.button(Text.of("⇄"), 20, 20, button -> this.clearAndInit()))
-                .child(Components.button(Text.of("X"), 20, 20, button -> this.close()))
+                .child(Components.button(Text.of("⇄"), button -> this.clearAndInit()).sizing(Sizing.fixed(20)))
+                .child(Components.button(Text.of("X"), button -> this.close()).sizing(Sizing.fixed(20)))
                 .positioning(Positioning.relative(100, 0))
                 .verticalAlignment(VerticalAlignment.CENTER)
                 .surface(Surface.DARK_PANEL)
@@ -182,7 +182,7 @@ public class ComponentTestScreen extends Screen {
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 5; column++) {
                 buttonGrid.child(
-                        Components.button(Text.of("" + (row * 5 + column)), 20, 20, button -> {
+                        Components.button(Text.of("" + (row * 5 + column)), (ButtonComponent button) -> {
                             if (button.getMessage().getString().equals("11")) {
                                 buttonGrid.child(Components.button(Text.of("long boiii"), (ButtonComponent b) -> buttonGrid.child(button, 2, 1)).margins(Insets.of(3)), 2, 1);
                             } else if (button.getMessage().getString().equals("8")) {
@@ -192,7 +192,7 @@ public class ComponentTestScreen extends Screen {
 
                                 buttonGrid.child(box.margins(Insets.of(3)), 1, 3);
                             }
-                        }).margins(Insets.of(3)),
+                        }).margins(Insets.of(3)).sizing(Sizing.fixed(3)),
                         row, column
                 );
             }

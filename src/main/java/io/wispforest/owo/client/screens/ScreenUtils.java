@@ -16,39 +16,6 @@ import java.util.function.Consumer;
 public class ScreenUtils {
 
     /**
-     * Generate a grid of slots with indices ascending
-     * left-to-right, top-to-bottom
-     *
-     * @param anchorX      The {@code x} coordinate of the top-, leftmost slot
-     * @param anchorY      The {@code y} coordinate of the top-, leftmost slot
-     * @param inventory    The inventory to associate the slots with
-     * @param slotConsumer Some method that accepts the generated slots
-     */
-    @Deprecated(forRemoval = true)
-    public static void generateSlotGrid(int anchorX, int anchorY, int width, int height, int startIndex, Inventory inventory, Consumer<Slot> slotConsumer) {
-        for (int row = 0; row < height; row++) {
-            for (int column = 0; column < width; column++) {
-                slotConsumer.accept(new Slot(inventory, startIndex + row * width + column, anchorX + column * 18, anchorY + row * 18));
-            }
-        }
-    }
-
-    /**
-     * Generate the player inventory and hotbar
-     * slots seen in most normal inventory screens
-     *
-     * @param anchorX         The {@code x} coordinate of the top-, leftmost slot
-     * @param anchorY         The {@code y} coordinate of the top-, leftmost slot
-     * @param playerInventory The inventory to associate the slots with
-     * @param slotConsumer    Some method that accepts the generated slots
-     */
-    @Deprecated(forRemoval = true)
-    public static void generatePlayerSlots(int anchorX, int anchorY, PlayerInventory playerInventory, Consumer<Slot> slotConsumer) {
-        generateSlotGrid(anchorX, anchorY, 9, 3, 9, playerInventory, slotConsumer);
-        generateSlotGrid(anchorX, anchorY + 58, 9, 1, 0, playerInventory, slotConsumer);
-    }
-
-    /**
      * Can be used as an implementation of {@link net.minecraft.screen.ScreenHandler#transferSlot(PlayerEntity, int)}
      * for simple screens with a lower (player) and upper (main) inventory
      *

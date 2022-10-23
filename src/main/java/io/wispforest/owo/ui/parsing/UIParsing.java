@@ -298,7 +298,6 @@ public class UIParsing {
         registerFactory("label", element -> Components.label(Text.empty()));
         registerFactory("box", element -> Components.box(Sizing.content(), Sizing.content()));
         registerFactory("button", element -> Components.button(Text.empty(), (ButtonComponent button) -> {}));
-        registerFactory("textured-button", TexturedButtonComponent::parse);
         registerFactory("checkbox", element -> Components.checkbox(Text.empty()));
         registerFactory("text-box", element -> Components.textBox(Sizing.content()));
         registerFactory("slider", element -> Components.slider(Sizing.content()));
