@@ -13,6 +13,7 @@ import net.minecraft.item.ItemGroup;
 import net.minecraft.item.Items;
 import net.minecraft.resource.featuretoggle.FeatureSet;
 import net.minecraft.tag.TagKey;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.Nullable;
@@ -36,6 +37,8 @@ public abstract class OwoItemGroup extends FabricItemGroup {
 
     public static final BiConsumer<Item, Entries> DEFAULT_STACK_GENERATOR = (item, stacks) -> stacks.add(item.getDefaultStack());
 
+    protected static final ItemGroupTab PLACEHOLDER_TAB = new ItemGroupTab(Icon.of(Items.AIR), Text.empty(), (f, e) -> {}, ItemGroupTab.DEFAULT_TEXTURE, false);
+
     public final List<ItemGroupTab> tabs = new ArrayList<>();
     public final List<ItemGroupButton> buttons = new ArrayList<>();
 
@@ -45,7 +48,7 @@ public abstract class OwoItemGroup extends FabricItemGroup {
     private int tabStackHeight = 4;
     private int buttonStackHeight = 4;
     private Identifier customTexture = null;
-    private boolean displayTabNamesAsTitle = true;
+    private boolean useDynamicTitle = true;
     private boolean displaySingleTab = false;
 
     protected OwoItemGroup(Identifier id) {
@@ -55,7 +58,7 @@ public abstract class OwoItemGroup extends FabricItemGroup {
     /**
      * Called from {@link #initialize()} to register tabs and buttons
      *
-     * @see #addTab(Icon, String, TagKey)
+     * @see #addTab(Icon, String, TagKey, boolean)
      * @see #addButton(ItemGroupButton)
      */
     protected abstract void setup();
@@ -69,10 +72,11 @@ public abstract class OwoItemGroup extends FabricItemGroup {
      * show up correctly
      */
     public void initialize() {
-        if (initialized) return;
+        if (this.initialized) return;
 
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) setup();
-        if (tabs.size() == 0) this.addTab(Icon.of(Items.AIR), "based_placeholder_tab", null);
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) this.setup();
+        if (tabs.size() == 0) this.tabs.add(PLACEHOLDER_TAB);
+
         this.initialized = true;
     }
 
@@ -81,9 +85,9 @@ public abstract class OwoItemGroup extends FabricItemGroup {
      * the right side of the creative menu
      *
      * @param button The button to add
-     * @see ItemGroupButton#link(Icon, String, String)
-     * @see ItemGroupButton#curseforge(String)
-     * @see ItemGroupButton#discord(String)
+     *               //     * @see ItemGroupButton#link(Icon, String, String)
+     *               //     * @see ItemGroupButton#curseforge(String)
+     *               //     * @see ItemGroupButton#discord(String)
      */
     protected void addButton(ItemGroupButton button) {
         this.buttons.add(button);
@@ -98,8 +102,16 @@ public abstract class OwoItemGroup extends FabricItemGroup {
      * @param texture    The texture to use for drawing the button
      * @see Icon#of(ItemConvertible)
      */
-    protected void addTab(Icon icon, String name, TagKey<Item> contentTag, Identifier texture) {
-        this.tabs.add(new ItemGroupTab(icon, name, contentTag, texture));
+    protected void addTab(Icon icon, String name, @Nullable TagKey<Item> contentTag, Identifier texture, boolean primary) {
+        this.tabs.add(new ItemGroupTab(
+                icon,
+                ButtonDefinition.tooltipFor(this, "tab", name),
+                contentTag == null
+                        ? (features, entries) -> {}
+                        : (features, entries) -> Registry.ITEM.stream().filter(item -> item.getRegistryEntry().isIn(contentTag)).forEach(entries::add),
+                texture,
+                false
+        ));
     }
 
     /**
@@ -110,8 +122,8 @@ public abstract class OwoItemGroup extends FabricItemGroup {
      * @param contentTag The tag used for filling this tab
      * @see Icon#of(ItemConvertible)
      */
-    protected void addTab(Icon icon, String name, @Nullable TagKey<Item> contentTag) {
-        addTab(icon, name, contentTag, ItemGroupTab.DEFAULT_TEXTURE);
+    protected void addTab(Icon icon, String name, @Nullable TagKey<Item> contentTag, boolean primary) {
+        addTab(icon, name, contentTag, ItemGroupTab.DEFAULT_TEXTURE, false);
     }
 
     protected void setCustomTexture(Identifier texture) {
@@ -146,7 +158,7 @@ public abstract class OwoItemGroup extends FabricItemGroup {
      * currently selected tab - instead always the name of the group itself
      */
     protected void keepStaticTitle() {
-        this.displayTabNamesAsTitle = false;
+        this.useDynamicTitle = false;
     }
 
     // Getters and setters
@@ -176,12 +188,12 @@ public abstract class OwoItemGroup extends FabricItemGroup {
         return buttonStackHeight;
     }
 
-    public boolean shouldDisplayTabNamesAsTitle() {
-        return displayTabNamesAsTitle && this.tabs.size() > 1;
+    public boolean hasDynamicTitle() {
+        return this.useDynamicTitle && (this.tabs.size() > 1 || this.shouldDisplaySingleTab());
     }
 
     public boolean shouldDisplaySingleTab() {
-        return displaySingleTab;
+        return this.displaySingleTab;
     }
 
     public List<ItemGroupButton> getButtons() {
@@ -196,18 +208,12 @@ public abstract class OwoItemGroup extends FabricItemGroup {
 
     @Override
     protected void addItems(FeatureSet enabledFeatures, Entries entries) {
-        if (!initialized) throw new IllegalStateException("Owo item group not initialized, was 'initialize()' called?");
-        Registry.ITEM.stream().filter(this::includes).forEach(item -> {
-            ((OwoItemExtensions) item).owo$stackGenerator().accept(item, entries);
-        });
-    }
+        if (!this.initialized) throw new IllegalStateException("oωo item group not initialized, was 'initialize()' called?");
+        this.getSelectedTab().contentSupplier().accept(enabledFeatures, entries);
 
-    protected boolean includes(Item item) {
-        var group = ((OwoItemExtensions) item).owo$group();
-
-        return tabs.size() > 1
-                ? this.getSelectedTab().includes(item) || (group == this && ((OwoItemExtensions) item).owo$tab() == this.getSelectedTabIndex())
-                : group == this;
+        Registry.ITEM.stream()
+                .filter(item -> ((OwoItemExtensions) item).owo$group() == this && ((OwoItemExtensions) item).owo$tab() == this.selectedTab)
+                .forEach(item -> ((OwoItemExtensions) item).owo$stackGenerator().accept(item, entries));
     }
 
     /**
@@ -220,6 +226,14 @@ public abstract class OwoItemGroup extends FabricItemGroup {
 
         Identifier texture();
 
-        String getTranslationKey(String groupKey);
+        Text tooltip();
+
+        static Text tooltipFor(ItemGroup group, String component, String componentName) {
+            var groupId = group.getId().getNamespace().equals("minecraft")
+                    ? group.getId().getPath()
+                    : group.getId().getNamespace() + "." + group.getId().getPath();
+
+            return Text.translatable("itemGroup." + groupId + "." + component + "." + componentName);
+        }
     }
 }

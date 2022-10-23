@@ -1,5 +1,6 @@
 package io.wispforest.owo.itemgroup.json;
 
+import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
 import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
@@ -26,6 +27,7 @@ import java.util.List;
 public class WrapperGroup extends OwoItemGroup {
 
     private final ItemGroup parent;
+    private boolean extension = false;
 
     public WrapperGroup(ItemGroup parent, List<ItemGroupTab> tabs, List<ItemGroupButton> buttons) {
         super(new Identifier("owo", "wrapper"));
@@ -49,6 +51,23 @@ public class WrapperGroup extends OwoItemGroup {
 
     public void addButtons(Collection<ItemGroupButton> buttons) {
         this.buttons.addAll(buttons);
+    }
+
+    public void markExtension() {
+        if (this.extension) return;
+        this.extension = true;
+
+        if (this.tabs.get(0) == PLACEHOLDER_TAB) {
+            this.tabs.remove(0);
+        }
+
+        this.tabs.add(0, new ItemGroupTab(
+                Icon.of(this.parent.createIcon()),
+                this.parent.getDisplayName(),
+                (featureSet, entries) -> this.parent.getDisplayStacks(featureSet).forEach(entries::add),
+                ItemGroupTab.DEFAULT_TEXTURE,
+                true
+        ));
     }
 
     @Override

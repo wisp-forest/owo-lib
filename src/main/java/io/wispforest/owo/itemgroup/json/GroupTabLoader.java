@@ -3,6 +3,7 @@ package io.wispforest.owo.itemgroup.json;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import io.wispforest.owo.itemgroup.Icon;
+import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
 import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
 import io.wispforest.owo.moddata.ModDataConsumer;
@@ -13,13 +14,11 @@ import net.minecraft.item.ItemGroups;
 import net.minecraft.tag.TagKey;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
-import net.minecraft.util.Pair;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,24 +31,38 @@ import java.util.Map;
 @ApiStatus.Internal
 public class GroupTabLoader implements ModDataConsumer {
 
-    private static final Map<Identifier, Pair<List<ItemGroupTab>, List<ItemGroupButton>>> CACHED_BUTTONS = new HashMap<>();
+    public static final GroupTabLoader INSTANCE = new GroupTabLoader();
+
+    private static final Map<Identifier, JsonObject> BUFFERED_GROUPS = new HashMap<>();
+
+    private GroupTabLoader() {}
 
     public static void onGroupCreated(FabricItemGroup group) {
-        if (!CACHED_BUTTONS.containsKey(group.getId())) return;
-
-        var cache = CACHED_BUTTONS.remove(group.getId());
-        var wrapperGroup = new WrapperGroup(group, cache.getLeft(), cache.getRight());
-        wrapperGroup.initialize();
+        if (!BUFFERED_GROUPS.containsKey(group.getId())) return;
+        INSTANCE.acceptParsedFile(group.getId(), BUFFERED_GROUPS.remove(group.getId()));
     }
 
     @Override
     public void acceptParsedFile(Identifier id, JsonObject json) {
-        var targetGroup = new Identifier(JsonHelper.getString(json, "target_group"));
+        var targetGroupId = new Identifier(JsonHelper.getString(json, "target_group"));
+
+        ItemGroup searchGroup = null;
+        for (ItemGroup group : ItemGroups.GROUPS) {
+            if (group.getId().equals(targetGroupId)) {
+                searchGroup = group;
+                break;
+            }
+        }
+
+        if (searchGroup == null) {
+            BUFFERED_GROUPS.put(targetGroupId, json);
+            return;
+        }
+
+        final var targetGroup = searchGroup;
 
         var tabsArray = JsonHelper.getArray(json, "tabs", new JsonArray());
-        var buttonsArray = JsonHelper.getArray(json, "buttons", new JsonArray());
-        var createdTabs = new ArrayList<ItemGroupTab>();
-        var createdButtons = new ArrayList<ItemGroupButton>();
+        var tabs = new ArrayList<ItemGroupTab>();
 
         tabsArray.forEach(jsonElement -> {
             if (!jsonElement.isJsonObject()) return;
@@ -61,8 +74,17 @@ public class GroupTabLoader implements ModDataConsumer {
             var icon = Registry.ITEM.get(new Identifier(JsonHelper.getString(tabObject, "icon")));
             var name = JsonHelper.getString(tabObject, "name");
 
-            createdTabs.add(new ItemGroupTab(Icon.of(icon), name, tag, texture));
+            tabs.add(new ItemGroupTab(
+                    Icon.of(icon),
+                    OwoItemGroup.ButtonDefinition.tooltipFor(targetGroup, "tab", name),
+                    (features, entries) -> Registry.ITEM.stream().filter(item -> item.getRegistryEntry().isIn(tag)).forEach(entries::add),
+                    texture,
+                    false
+            ));
         });
+
+        var buttonsArray = JsonHelper.getArray(json, "buttons", new JsonArray());
+        var buttons = new ArrayList<ItemGroupButton>();
 
         buttonsArray.forEach(jsonElement -> {
             if (!jsonElement.isJsonObject()) return;
@@ -74,30 +96,31 @@ public class GroupTabLoader implements ModDataConsumer {
             int u = JsonHelper.getInt(buttonObject, "texture_u");
             int v = JsonHelper.getInt(buttonObject, "texture_v");
 
-            createdButtons.add(ItemGroupButton.link(Icon.of(ItemGroupButton.ICONS_TEXTURE, u, v, 64, 64), name, link));
+            int textureWidth = JsonHelper.getInt(buttonObject, "texture_width", 64);
+            int textureHeight = JsonHelper.getInt(buttonObject, "texture_height", 64);
+
+            final var textureId = JsonHelper.getString(buttonObject, "texture", null);
+            var texture = textureId == null
+                    ? ItemGroupButton.ICONS_TEXTURE
+                    : new Identifier(textureId);
+
+            buttons.add(ItemGroupButton.link(targetGroup, Icon.of(texture, u, v, textureWidth, textureHeight), name, link));
         });
 
-        for (ItemGroup group : ItemGroups.GROUPS) {
-            if (!group.getId().equals(targetGroup)) continue;
+        if (targetGroup instanceof WrapperGroup wrapper) {
+            wrapper.addTabs(tabs);
+            wrapper.addButtons(buttons);
 
-            if (group instanceof WrapperGroup wrapper) {
-                wrapper.addTabs(createdTabs);
-                wrapper.addButtons(createdButtons);
-            } else {
-                final var wrappedGroup = new WrapperGroup(group, createdTabs, createdButtons);
-                wrappedGroup.initialize();
+            if (JsonHelper.getBoolean(json, "extend", false)) wrapper.markExtension();
+        } else {
+            var wrapper = new WrapperGroup(targetGroup, tabs, buttons);
+            wrapper.initialize();
+            if (JsonHelper.getBoolean(json, "extend", false)) wrapper.markExtension();
 
-                for (var item : Registry.ITEM) {
-                    final var extensions = (OwoItemExtensions) item;
-                    if (extensions.owo$group() != group) continue;
-                    extensions.owo$setGroup(wrappedGroup);
-                }
-            }
-
-            return;
+            Registry.ITEM.stream()
+                    .filter(item -> ((OwoItemExtensions) item).owo$group() == targetGroup)
+                    .forEach(item -> ((OwoItemExtensions) item).owo$setGroup(targetGroup));
         }
-
-        CACHED_BUTTONS.put(targetGroup, new Pair<>(createdTabs, createdButtons));
     }
 
     @Override

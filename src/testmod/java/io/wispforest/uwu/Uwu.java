@@ -72,16 +72,16 @@ public class Uwu implements ModInitializer {
     public static final OwoItemGroup FOUR_TAB_GROUP = new OwoItemGroup(new Identifier("uwu", "four_tab_group")) {
         @Override
         protected void setup() {
-            keepStaticTitle();
+            this.keepStaticTitle();
 
-            addTab(Icon.of(ANIMATED_BUTTON_TEXTURE, 32, 1000, true), "tab_1", null);
-            addTab(Icon.of(Items.EMERALD), "tab_2", TAB_2_CONTENT);
-            addTab(Icon.of(Items.AMETHYST_SHARD), "tab_3", null);
-            addTab(Icon.of(Items.GOLD_INGOT), "tab_4", null);
+            this.addTab(Icon.of(ANIMATED_BUTTON_TEXTURE, 32, 1000, false), "tab_1", null, true);
+            this.addTab(Icon.of(Items.EMERALD), "tab_2", TAB_2_CONTENT, false);
+            this.addTab(Icon.of(Items.AMETHYST_SHARD), "tab_3", null, false);
+            this.addTab(Icon.of(Items.GOLD_INGOT), "tab_4", null, false);
 
-            addButton(ItemGroupButton.github("https://github.com/wisp-forest/owo-lib"));
+            this.addButton(ItemGroupButton.github(this, "https://github.com/wisp-forest/owo-lib"));
 
-            setButtonStackHeight(1);
+            this.setButtonStackHeight(1);
         }
 
         @Override
@@ -93,17 +93,17 @@ public class Uwu implements ModInitializer {
     public static final OwoItemGroup SIX_TAB_GROUP = new OwoItemGroup(new Identifier("uwu", "six_tab_group")) {
         @Override
         protected void setup() {
-            setTabStackHeight(3);
-            setCustomTexture(GROUP_TEXTURE);
+            this.setTabStackHeight(3);
+            this.setCustomTexture(GROUP_TEXTURE);
 
-            addTab(Icon.of(Items.DIAMOND), "tab_1", null);
-            addTab(Icon.of(Items.EMERALD), "tab_2", null);
-            addTab(Icon.of(Items.AMETHYST_SHARD), "tab_3", null);
-            addTab(Icon.of(Items.GOLD_INGOT), "tab_4", null);
-            addTab(Icon.of(Items.IRON_INGOT), "tab_5", null);
-            addTab(Icon.of(Items.QUARTZ), "tab_6", null);
+            this.addTab(Icon.of(Items.DIAMOND), "tab_1", null, true);
+            this.addTab(Icon.of(Items.EMERALD), "tab_2", null, false);
+            this.addTab(Icon.of(Items.AMETHYST_SHARD), "tab_3", null, false);
+            this.addTab(Icon.of(Items.GOLD_INGOT), "tab_4", null, false);
+            this.addTab(Icon.of(Items.IRON_INGOT), "tab_5", null, false);
+            this.addTab(Icon.of(Items.QUARTZ), "tab_6", null, false);
 
-            addButton(new ItemGroupButton(Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16), "owo", () -> {
+            addButton(new ItemGroupButton(this, Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16), "owo", () -> {
                 MinecraftClient.getInstance().player.sendMessage(Text.of("oωo button pressed!"), false);
             }));
         }
@@ -117,8 +117,8 @@ public class Uwu implements ModInitializer {
     public static final OwoItemGroup SINGLE_TAB_GROUP = new OwoItemGroup(new Identifier("uwu", "single_tab_group")) {
         @Override
         protected void setup() {
-            displaySingleTab();
-            addTab(Icon.of(Items.SPONGE), "tab_1", null);
+            this.displaySingleTab();
+            this.addTab(Icon.of(Items.SPONGE), "tab_1", null, true);
         }
 
         @Override
@@ -134,9 +134,7 @@ public class Uwu implements ModInitializer {
         }
 
         @Override
-        protected void addItems(FeatureSet enabledFeatures, Entries entries) {
-
-        }
+        protected void addItems(FeatureSet enabledFeatures, Entries entries) {}
     };
 
     public static final OwoNetChannel CHANNEL = OwoNetChannel.create(new Identifier("uwu", "uwu"));

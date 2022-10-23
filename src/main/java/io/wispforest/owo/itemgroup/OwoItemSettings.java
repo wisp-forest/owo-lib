@@ -11,17 +11,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiConsumer;
 
-/**
- * A wrapper for {@link ItemGroup} that provides easy access to the methods implemented onto
- * it from {@link OwoItemSettingsExtensions} for defining the tab of item in a tabbed group
- * as well as the function used for actually adding stacks
- */
 public class OwoItemSettings extends FabricItemSettings {
 
-
+    @Nullable
+    private OwoItemGroup group = null;
     private int tab = 0;
-    @Nullable private OwoItemGroup group = null;
-    @Nullable private BiConsumer<Item, ItemGroup.Entries> stackGenerator = null;
+    private BiConsumer<Item, ItemGroup.Entries> stackGenerator = OwoItemGroup.DEFAULT_STACK_GENERATOR;
 
     /**
      * @param group The item group this

@@ -1,9 +1,10 @@
 {
-  "target_group": "misc",
+  "target_group": "minecraft:crafting",
+  "extend": true,
   "tabs": [
     {
       "tag": "minecraft:diamond_ores",
-      "name": "tab_0",
+      "name": "extra_ores",
       "icon": "minecraft:deepslate"
     }
   ]

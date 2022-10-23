@@ -111,8 +111,16 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 
     @ModifyArg(method = "drawForeground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/font/TextRenderer;draw(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/text/Text;FFI)I"))
     private Text injectTabNameAsTitle(Text original) {
-        if (!(ItemGroups.GROUPS[selectedTab] instanceof OwoItemGroup owoGroup) || !owoGroup.shouldDisplayTabNamesAsTitle()) return original;
-        return owo$buttons.get(owoGroup.getSelectedTabIndex()).getMessage();
+        if (!(ItemGroups.GROUPS[selectedTab] instanceof OwoItemGroup owoGroup) || !owoGroup.hasDynamicTitle()) return original;
+        if (owoGroup.getSelectedTab().primary()) {
+            return owoGroup.getSelectedTab().name();
+        } else {
+            return Text.translatable(
+                    "text.owo.itemGroup.tab_template",
+                    owoGroup.getDisplayName(),
+                    owoGroup.getSelectedTab().name()
+            );
+        }
     }
 
     // ---------------
@@ -138,7 +146,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
                     int xOffset = this.x - 27 - (i / tabStackHeight) * 26;
                     int yOffset = tabRootY + 10 + (i % tabStackHeight) * 30;
 
-                    var tabButton = new ItemGroupButtonWidget(xOffset, yOffset, false, tab, group.getDisplayName(), owo$createSelectAction(this, owoGroup, i));
+                    var tabButton = new ItemGroupButtonWidget(xOffset, yOffset, false, tab, owo$createSelectAction(this, owoGroup, i));
 
                     if (i == owoGroup.getSelectedTabIndex()) tabButton.isSelected = true;
 
@@ -157,7 +165,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
                 int xOffset = this.x + 198 + (i / buttonStackHeight) * 26;
                 int yOffset = tabRootY + 10 + (i % buttonStackHeight) * 30;
 
-                var tabButton = new ItemGroupButtonWidget(xOffset, yOffset, true, button, group.getDisplayName(), button1 -> button.action().run());
+                var tabButton = new ItemGroupButtonWidget(xOffset, yOffset, true, button, button1 -> button.action().run());
 
                 owo$buttons.add(tabButton);
                 this.addDrawableChild(tabButton);

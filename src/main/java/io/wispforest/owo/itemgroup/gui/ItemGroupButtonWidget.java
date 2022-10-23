@@ -5,8 +5,6 @@ import io.wispforest.owo.itemgroup.OwoItemGroup;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableTextContent;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
@@ -16,11 +14,8 @@ public class ItemGroupButtonWidget extends ButtonWidget {
     private final OwoItemGroup.ButtonDefinition definition;
     private final boolean hoverReactive;
 
-    public ItemGroupButtonWidget(int x, int y, boolean hoverReactive, OwoItemGroup.ButtonDefinition definition, Text groupName, PressAction onPress) {
-        super(x, y, 24, 24, Text.translatable(definition.getTranslationKey(groupName.getContent() instanceof TranslatableTextContent translatable
-                ? translatable.getKey()
-                : groupName.getString()
-        )), onPress);
+    public ItemGroupButtonWidget(int x, int y, boolean hoverReactive, OwoItemGroup.ButtonDefinition definition, PressAction onPress) {
+        super(x, y, 24, 24, definition.tooltip(), onPress);
         this.definition = definition;
         this.hoverReactive = hoverReactive;
     }

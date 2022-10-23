@@ -1,0 +1,15 @@
+{
+  "target_group": "minecraft:consumables",
+  "extend": true,
+  "buttons": [
+    {
+      "name": "consume",
+      "link": "https://www.powerthesaurus.org/consume/synonyms",
+      "texture": "minecraft:textures/block/sculk_catalyst_top.png",
+      "texture_u": 0,
+      "texture_v": 0,
+      "texture_width": 16,
+      "texture_height": 16
+    }
+  ]
+}
