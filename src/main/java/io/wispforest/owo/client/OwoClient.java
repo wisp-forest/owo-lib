@@ -2,6 +2,8 @@ package io.wispforest.owo.client;
 
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.command.debug.OwoDebugCommands;
+import io.wispforest.owo.itemgroup.json.GroupTabLoader;
+import io.wispforest.owo.moddata.ModDataLoader;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -34,6 +36,8 @@ public class OwoClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        ModDataLoader.load(GroupTabLoader.INSTANCE);
+
         final var renderdocPath = System.getProperty("owo.renderdocPath");
         if (renderdocPath != null) {
             if (Util.getOperatingSystem() == Util.OperatingSystem.WINDOWS) {
@@ -48,6 +52,6 @@ public class OwoClient implements ClientModInitializer {
         }
 
         if (!Owo.DEBUG) return;
-        OwoDebugCommands.registerClient();
+        OwoDebugCommands.Client.register();
     }
 }

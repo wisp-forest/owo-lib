@@ -13,6 +13,7 @@ import io.wispforest.uwu.network.UwuOptionalNetExample;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.minecraft.client.gui.screen.ingame.HandledScreens;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Items;
@@ -29,6 +30,9 @@ public class UwuClient implements ClientModInitializer {
     public void onInitializeClient() {
         UwuNetworkExample.Client.init();
         UwuOptionalNetExample.Client.init();
+
+        HandledScreens.register(Uwu.EPIC_SCREEN_HANDLER_TYPE, EpicHandledScreen::new);
+//        HandledScreens.register(EPIC_SCREEN_HANDLER_TYPE, EpicHandledModelScreen::new);
 
         final var binding = new KeyBinding("key.uwu.hud_test", GLFW.GLFW_KEY_J, "misc");
         KeyBindingHelper.registerKeyBinding(binding);

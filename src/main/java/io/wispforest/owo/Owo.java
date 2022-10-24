@@ -49,7 +49,6 @@ public class Owo implements ModInitializer {
     @Override
     @ApiStatus.Internal
     public void onInitialize() {
-        ModDataLoader.load(GroupTabLoader.INSTANCE);
         LootOps.registerListener();
         InsertingTextContent.init();
 
