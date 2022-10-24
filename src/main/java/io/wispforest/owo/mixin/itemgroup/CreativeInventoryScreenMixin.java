@@ -3,7 +3,10 @@ package io.wispforest.owo.mixin.itemgroup;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButtonWidget;
+import io.wispforest.owo.ui.core.CursorStyle;
+import io.wispforest.owo.ui.util.CursorAdapter;
 import io.wispforest.owo.util.pond.OwoCreativeInventoryScreenExtensions;
+import net.fabricmc.fabric.mixin.screen.ScreenAccessor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
@@ -23,6 +26,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,11 +41,16 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
     @Final
     private static Identifier TEXTURE;
 
+    @Shadow protected abstract void init();
+
     @Unique
     private final List<ItemGroupButtonWidget> owo$buttons = new ArrayList<>();
 
     @Unique
     private OwoItemGroup owo$owoGroup = null;
+
+    @Unique
+    private final CursorAdapter owo$cursorAdapter = CursorAdapter.ofClientWindow();;
 
     // ----------
     // Background
@@ -94,13 +103,23 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 
     @ModifyArg(method = "renderTabIcon", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/CreativeInventoryScreen;drawTexture(Lnet/minecraft/client/util/math/MatrixStack;IIIIII)V"), index = 3)
     private int injectCustomTabTextureLocation(int original) {
-        if (owo$owoGroup == null) return original;
-        return owo$owoGroup.getColumn() == 0 ? 195 : 223;
+        if (this.owo$owoGroup == null) return original;
+        return this.owo$owoGroup.getColumn() == 0 ? 195 : 223;
+    }
+
+    @Inject(method = "renderTabIcon", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemGroup;getIcon()Lnet/minecraft/item/ItemStack;"), locals = LocalCapture.CAPTURE_FAILHARD)
+    private void renderOwoIcon(MatrixStack matrices, ItemGroup group, CallbackInfo ci, boolean bl, boolean bl2, int i, int j, int k, int l, int m) {
+        if (!(group instanceof OwoItemGroup owoGroup)) return;
+
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        owoGroup.icon().render(matrices, l, m, 0, 0, 0);
+        RenderSystem.disableBlend();
     }
 
     @Inject(method = "renderTabIcon", at = @At("RETURN"))
     private void restoreTabTexture(MatrixStack matrices, ItemGroup group, CallbackInfo ci) {
-        if (owo$owoGroup == null) return;
+        if (this.owo$owoGroup == null) return;
         this.owo$owoGroup = null;
         RenderSystem.setShaderTexture(0, TEXTURE);
     }
@@ -174,10 +193,27 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
     }
 
     @Inject(at = @At("TAIL"), method = "render(Lnet/minecraft/client/util/math/MatrixStack;IIF)V")
-    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float delta, CallbackInfo cbi) {
-        owo$buttons.forEach(button -> {
-            if (button.trulyHovered()) renderTooltip(matrixStack, button.getMessage(), mouseX, mouseY);
-        });
+    private void render(MatrixStack matrixStack, int mouseX, int mouseY, float delta, CallbackInfo cbi) {
+        boolean anyButtonHovered = false;
+
+        for (var button : owo$buttons) {
+            if (button.trulyHovered()) {
+                renderTooltip(matrixStack, button.getMessage(), mouseX, mouseY);
+                anyButtonHovered = true;
+            }
+        }
+
+        this.owo$cursorAdapter.applyStyle(anyButtonHovered ? CursorStyle.HAND : CursorStyle.NONE);
+    }
+
+    @Inject(method = "init", at = @At("HEAD"))
+    private void createCursorAdapter(CallbackInfo ci) {
+//        this.owo$cursorAdapter = CursorAdapter.ofClientWindow();
+    }
+
+    @Inject(method = "removed", at = @At("HEAD"))
+    private void disposeCursorAdapter(CallbackInfo ci) {
+        this.owo$cursorAdapter.dispose();
     }
 
     @Override
@@ -191,10 +227,10 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
     }
 
     @Unique
-    private static ButtonWidget.PressAction owo$createSelectAction(Screen targetScreen, OwoItemGroup group, int targetTabIndex) {
+    private ButtonWidget.PressAction owo$createSelectAction(Screen targetScreen, OwoItemGroup group, int targetTabIndex) {
         return button -> {
             group.setSelectedTab(targetTabIndex);
-            MinecraftClient.getInstance().setScreen(targetScreen);
+            this.clearAndInit();
             ((ItemGroupButtonWidget) button).isSelected = true;
         };
     }

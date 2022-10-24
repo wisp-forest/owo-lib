@@ -4,6 +4,11 @@ import org.lwjgl.glfw.GLFW;
 
 public enum CursorStyle {
     /**
+     * The default cursor style defined by
+     * the operating system
+     */
+    NONE(0),
+    /**
      * The default arrow-style pointing cursor
      */
     POINTER(GLFW.GLFW_ARROW_CURSOR),

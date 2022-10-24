@@ -18,8 +18,14 @@ public class OwoItemSettings extends FabricItemSettings {
     private int tab = 0;
     private BiConsumer<Item, ItemGroup.Entries> stackGenerator = OwoItemGroup.DEFAULT_STACK_GENERATOR;
 
+    public OwoItemSettings group(ItemGroupReference ref) {
+        this.group = ref.group();
+        this.tab = ref.tab();
+        return this;
+    }
+
     /**
-     * @param group The item group this
+     * @param group The item group this item should appear in
      */
     public OwoItemSettings group(OwoItemGroup group) {
         this.group = group;

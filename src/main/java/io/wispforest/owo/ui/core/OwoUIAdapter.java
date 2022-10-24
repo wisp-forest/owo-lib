@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.renderdoc.RenderDoc;
+import io.wispforest.owo.ui.util.CursorAdapter;
 import io.wispforest.owo.ui.util.Drawer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Drawable;
@@ -14,7 +15,6 @@ import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.util.math.MatrixStack;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.EnumMap;
 import java.util.function.BiFunction;
 
 /**
@@ -35,9 +35,8 @@ public class OwoUIAdapter<T extends ParentComponent> implements Element, Drawabl
     private static boolean isRendering = false;
 
     public final T rootComponent;
+    public final CursorAdapter cursorAdapter;
 
-    public final EnumMap<CursorStyle, Long> cursors = new EnumMap<>(CursorStyle.class);
-    protected CursorStyle lastCursorStyle = CursorStyle.POINTER;
     protected boolean disposed = false;
     protected boolean captureFrame = false;
 
@@ -54,10 +53,7 @@ public class OwoUIAdapter<T extends ParentComponent> implements Element, Drawabl
         this.width = width;
         this.height = height;
 
-        for (var style : CursorStyle.values()) {
-            this.cursors.put(style, GLFW.glfwCreateStandardCursor(style.glfw));
-        }
-
+        this.cursorAdapter = CursorAdapter.ofClientWindow();
         this.rootComponent = rootComponent;
     }
 
@@ -125,10 +121,7 @@ public class OwoUIAdapter<T extends ParentComponent> implements Element, Drawabl
      * After this method has executed, this adapter can safely be garbage-collected
      */
     public void dispose() {
-        if (this.disposed) return;
-
-        this.cursors.values().forEach(GLFW::glfwDestroyCursor);
-        this.disposed = true;
+        this.cursorAdapter.dispose();
     }
 
     /**
@@ -186,9 +179,8 @@ public class OwoUIAdapter<T extends ParentComponent> implements Element, Drawabl
             this.rootComponent.drawTooltip(matrices, mouseX, mouseY, partialTicks, delta);
 
             final var hovered = this.rootComponent.childAt(mouseX, mouseY);
-            if (!disposed && hovered != null && hovered.cursorStyle() != this.lastCursorStyle) {
-                GLFW.glfwSetCursor(window.getHandle(), this.cursors.get(hovered.cursorStyle()));
-                this.lastCursorStyle = hovered.cursorStyle();
+            if (!disposed && hovered != null) {
+                this.cursorAdapter.applyStyle(hovered.cursorStyle());
             }
 
             if (this.enableInspector) {

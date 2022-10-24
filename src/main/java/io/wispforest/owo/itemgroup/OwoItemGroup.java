@@ -7,10 +7,7 @@ import io.wispforest.owo.util.pond.OwoItemExtensions;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemConvertible;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.Items;
+import net.minecraft.item.*;
 import net.minecraft.resource.featuretoggle.FeatureSet;
 import net.minecraft.tag.TagKey;
 import net.minecraft.text.Text;
@@ -42,6 +39,8 @@ public abstract class OwoItemGroup extends FabricItemGroup {
     public final List<ItemGroupTab> tabs = new ArrayList<>();
     public final List<ItemGroupButton> buttons = new ArrayList<>();
 
+    private Icon icon = null;
+
     private int selectedTab = 0;
     private boolean initialized = false;
 
@@ -62,6 +61,8 @@ public abstract class OwoItemGroup extends FabricItemGroup {
      * @see #addButton(ItemGroupButton)
      */
     protected abstract void setup();
+
+    protected abstract Icon makeIcon();
 
     // ---------
 
@@ -110,7 +111,7 @@ public abstract class OwoItemGroup extends FabricItemGroup {
                         ? (features, entries) -> {}
                         : (features, entries) -> Registry.ITEM.stream().filter(item -> item.getRegistryEntry().isIn(contentTag)).forEach(entries::add),
                 texture,
-                false
+                primary
         ));
     }
 
@@ -123,7 +124,7 @@ public abstract class OwoItemGroup extends FabricItemGroup {
      * @see Icon#of(ItemConvertible)
      */
     protected void addTab(Icon icon, String name, @Nullable TagKey<Item> contentTag, boolean primary) {
-        addTab(icon, name, contentTag, ItemGroupTab.DEFAULT_TEXTURE, false);
+        addTab(icon, name, contentTag, ItemGroupTab.DEFAULT_TEXTURE, primary);
     }
 
     protected void setCustomTexture(Identifier texture) {
@@ -204,6 +205,12 @@ public abstract class OwoItemGroup extends FabricItemGroup {
         return index < this.tabs.size() ? this.tabs.get(index) : null;
     }
 
+    public Icon icon() {
+        return this.icon == null
+                ? this.icon = this.makeIcon()
+                : this.icon;
+    }
+
     // Utility
 
     @Override
@@ -214,6 +221,11 @@ public abstract class OwoItemGroup extends FabricItemGroup {
         Registry.ITEM.stream()
                 .filter(item -> ((OwoItemExtensions) item).owo$group() == this && ((OwoItemExtensions) item).owo$tab() == this.selectedTab)
                 .forEach(item -> ((OwoItemExtensions) item).owo$stackGenerator().accept(item, entries));
+    }
+
+    @Override
+    public ItemStack createIcon() {
+        return ItemStack.EMPTY;
     }
 
     /**

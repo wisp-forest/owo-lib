@@ -42,7 +42,7 @@ public abstract class BaseComponent implements Component {
     protected final EventStream<MouseLeave> mouseLeaveEvents = UIEvents.newMouseLeaveStream();
     protected boolean hovered = false;
 
-    protected CursorStyle cursorStyle = CursorStyle.POINTER;
+    protected CursorStyle cursorStyle = CursorStyle.NONE;
     protected List<TooltipComponent> tooltip = List.of();
 
     protected int x, y;

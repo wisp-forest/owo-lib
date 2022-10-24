@@ -85,8 +85,8 @@ public class Uwu implements ModInitializer {
         }
 
         @Override
-        public ItemStack createIcon() {
-            return new ItemStack(Items.AXOLOTL_BUCKET);
+        public Icon makeIcon() {
+            return Icon.of(Items.AXOLOTL_BUCKET);
         }
     };
 
@@ -103,14 +103,14 @@ public class Uwu implements ModInitializer {
             this.addTab(Icon.of(Items.IRON_INGOT), "tab_5", null, false);
             this.addTab(Icon.of(Items.QUARTZ), "tab_6", null, false);
 
-            addButton(new ItemGroupButton(this, Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16), "owo", () -> {
+            this.addButton(new ItemGroupButton(this, Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16), "owo", () -> {
                 MinecraftClient.getInstance().player.sendMessage(Text.of("oωo button pressed!"), false);
             }));
         }
 
         @Override
-        public ItemStack createIcon() {
-            return new ItemStack(Items.POWDER_SNOW_BUCKET);
+        public Icon makeIcon() {
+            return Icon.of(Items.POWDER_SNOW_BUCKET);
         }
     };
 
@@ -122,8 +122,8 @@ public class Uwu implements ModInitializer {
         }
 
         @Override
-        public ItemStack createIcon() {
-            return new ItemStack(Items.SPYGLASS);
+        public Icon makeIcon() {
+            return Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16);
         }
     };
 
@@ -238,15 +238,13 @@ public class Uwu implements ModInitializer {
         UwuOptionalNetExample.init();
     }
 
-    public record OtherTestMessage(BlockPos pos, String message) {
-    }
+    public record OtherTestMessage(BlockPos pos, String message) {}
 
     public record TestMessage(String string, Integer integer, Long along, ItemStack stack, Short ashort, Byte bite,
                               BlockPos pos, Float afloat, Double adouble, Boolean aboolean, Identifier identifier,
                               Map<String, Integer> map,
                               int[] arr1, String[] arr2, short[] arr3, long[] arr4, byte[] arr5,
                               Optional<String> optional1, Optional<String> optional2,
-                              List<BlockPos> posses, SealedTestClass sealed1, SealedTestClass sealed2) {
-    }
+                              List<BlockPos> posses, SealedTestClass sealed1, SealedTestClass sealed2) {}
 
 }

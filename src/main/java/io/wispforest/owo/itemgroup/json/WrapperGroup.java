@@ -88,6 +88,13 @@ public class WrapperGroup extends OwoItemGroup {
     protected void setup() {}
 
     @Override
+    protected Icon makeIcon() {
+        return this.parent instanceof OwoItemGroup owoGroup
+                ? owoGroup.icon()
+                : Icon.of(this.createIcon());
+    }
+
+    @Override
     public ItemStack createIcon() {
         return this.parent.createIcon();
     }

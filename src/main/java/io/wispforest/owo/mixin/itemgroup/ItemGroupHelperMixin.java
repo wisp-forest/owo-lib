@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @SuppressWarnings("UnstableApiUsage")
-@Mixin(ItemGroupHelper.class)
+@Mixin(value = ItemGroupHelper.class, remap = false)
 public class ItemGroupHelperMixin {
 
     @Inject(method = "appendItemGroup", at = @At("TAIL"))
