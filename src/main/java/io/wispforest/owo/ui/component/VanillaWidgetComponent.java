@@ -79,11 +79,13 @@ public class VanillaWidgetComponent extends BaseComponent {
     }
 
     private void applyToWidget() {
-        this.widget.x = this.x;
-        this.widget.y = this.y;
+        var accessor = (ClickableWidgetAccessor) this.widget;
 
-        this.widget.setWidth(this.width);
-        ((ClickableWidgetAccessor) this.widget).owo$setHeight(this.height);
+        accessor.owo$setX(this.x);
+        accessor.owo$setY(this.y);
+
+        accessor.owo$setWidth(this.width);
+        accessor.owo$setHeight(this.height);
     }
 
     @Override

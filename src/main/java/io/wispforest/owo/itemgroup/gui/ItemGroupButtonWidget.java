@@ -25,13 +25,13 @@ public class ItemGroupButtonWidget extends ButtonWidget {
         var client = MinecraftClient.getInstance();
 
         RenderSystem.setShaderTexture(0, definition.texture());
-        drawTexture(matrixStack, this.x, this.y, 0, (shouldShowHighlight(hovered) ? 1 : 0) * height, this.width, this.height, 64, 64);
+        drawTexture(matrixStack, this.method_46426(), this.method_46427(), 0, (shouldShowHighlight(hovered) ? 1 : 0) * height, this.width, this.height, 64, 64);
         this.renderBackground(matrixStack, client, mouseX, mouseY);
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
 
-        this.definition.icon().render(matrixStack, this.x + 4, this.y + 4, mouseX, mouseY, delta);
+        this.definition.icon().render(matrixStack, this.method_46426() + 4, this.method_46427() + 4, mouseX, mouseY, delta);
 
         RenderSystem.disableBlend();
     }

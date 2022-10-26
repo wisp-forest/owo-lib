@@ -37,9 +37,9 @@ public class ButtonComponent extends ButtonWidget {
         int color = this.active ? 0xffffff : 0xa0a0a0;
 
         if (this.textShadow) {
-            Drawer.drawCenteredText(matrices, textRenderer, this.getMessage(), this.x + this.width / 2, this.y + (this.height - 8) / 2, color);
+            Drawer.drawCenteredText(matrices, textRenderer, this.getMessage(), this.method_46426() + this.width / 2, this.method_46427() + (this.height - 8) / 2, color);
         } else {
-            textRenderer.draw(matrices, this.getMessage(), this.x + this.width / 2f - textRenderer.getWidth(this.getMessage()) / 2f, this.y + (this.height - 8) / 2f, color);
+            textRenderer.draw(matrices, this.getMessage(), this.method_46426() + this.width / 2f - textRenderer.getWidth(this.getMessage()) / 2f, this.method_46427() + (this.height - 8) / 2f, color);
         }
 
         if (this.hovered) this.renderTooltip(matrices, mouseX, mouseY);
@@ -85,12 +85,12 @@ public class ButtonComponent extends ButtonWidget {
         Renderer VANILLA = (matrices, button, delta) -> {
             if (button.active) {
                 if (button.hovered) {
-                    OwoNinePatchRenderers.HOVERED_BUTTON.draw(matrices, button.x, button.y, button.width, button.height);
+                    OwoNinePatchRenderers.HOVERED_BUTTON.draw(matrices, button.method_46426(), button.method_46427(), button.width, button.height);
                 } else {
-                    OwoNinePatchRenderers.ACTIVE_BUTTON.draw(matrices, button.x, button.y, button.width, button.height);
+                    OwoNinePatchRenderers.ACTIVE_BUTTON.draw(matrices, button.method_46426(), button.method_46427(), button.width, button.height);
                 }
             } else {
-                OwoNinePatchRenderers.BUTTON_DISABLED.draw(matrices, button.x, button.y, button.width, button.height);
+                OwoNinePatchRenderers.BUTTON_DISABLED.draw(matrices, button.method_46426(), button.method_46427(), button.width, button.height);
             }
         };
 
@@ -98,12 +98,12 @@ public class ButtonComponent extends ButtonWidget {
             return (matrices, button, delta) -> {
                 if (button.active) {
                     if (button.hovered) {
-                        Drawer.fill(matrices, button.x, button.y, button.x + button.width, button.y + button.height, hoveredColor);
+                        Drawer.fill(matrices, button.method_46426(), button.method_46427(), button.method_46426() + button.width, button.method_46427() + button.height, hoveredColor);
                     } else {
-                        Drawer.fill(matrices, button.x, button.y, button.x + button.width, button.y + button.height, color);
+                        Drawer.fill(matrices, button.method_46426(), button.method_46427(), button.method_46426() + button.width, button.method_46427() + button.height, color);
                     }
                 } else {
-                    Drawer.fill(matrices, button.x, button.y, button.x + button.width, button.y + button.height, disabledColor);
+                    Drawer.fill(matrices, button.method_46426(), button.method_46427(), button.method_46426() + button.width, button.method_46427() + button.height, disabledColor);
                 }
             };
         }
@@ -119,7 +119,7 @@ public class ButtonComponent extends ButtonWidget {
 
                 RenderSystem.enableDepthTest();
                 RenderSystem.setShaderTexture(0, texture);
-                Drawer.drawTexture(matrices, button.x, button.y, u, renderV, button.width, button.height, textureWidth, textureHeight);
+                Drawer.drawTexture(matrices, button.method_46426(), button.method_46427(), u, renderV, button.width, button.height, textureWidth, textureHeight);
             };
         }
 

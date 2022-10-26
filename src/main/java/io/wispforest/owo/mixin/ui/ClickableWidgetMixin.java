@@ -16,6 +16,9 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.w3c.dom.Element;
 
 import java.util.List;
@@ -317,6 +320,33 @@ public abstract class ClickableWidgetMixin implements ComponentStub {
         }
 
         return this.owo$wrapper;
+    }
+
+    @Inject(method = "setWidth", at = @At("HEAD"), cancellable = true)
+    private void applyWidthToWrapper(int width, CallbackInfo ci) {
+        var wrapper = this.owo$wrapper;
+        if (wrapper != null) {
+            wrapper.horizontalSizing(Sizing.fixed(width));
+            ci.cancel();
+        }
+    }
+
+    @Inject(method = "method_46421", at = @At("HEAD"), cancellable = true)
+    private void applyXToWrapper(int x, CallbackInfo ci) {
+        var wrapper = this.owo$wrapper;
+        if (wrapper != null) {
+            wrapper.setX(x);
+            ci.cancel();
+        }
+    }
+
+    @Inject(method = "method_46419", at = @At("HEAD"), cancellable = true)
+    private void applyYToWrapper(int y, CallbackInfo ci) {
+        var wrapper = this.owo$wrapper;
+        if (wrapper != null) {
+            wrapper.setY(y);
+            ci.cancel();
+        }
     }
 
     protected CursorStyle owo$preferredCursorStyle() {
