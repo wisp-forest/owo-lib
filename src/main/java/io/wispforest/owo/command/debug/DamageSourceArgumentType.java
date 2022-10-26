@@ -38,13 +38,10 @@ public class DamageSourceArgumentType implements ArgumentType<DamageSource> {
             .put("generic", DamageSource.GENERIC)
             .put("magic", DamageSource.MAGIC)
             .put("wither", DamageSource.WITHER)
-            .put("anvil", DamageSource.ANVIL)
-            .put("falling_block", DamageSource.FALLING_BLOCK)
             .put("dragon_breath", DamageSource.DRAGON_BREATH)
             .put("dryout", DamageSource.DRYOUT)
             .put("sweet_berry_bush", DamageSource.SWEET_BERRY_BUSH)
             .put("freeze", DamageSource.FREEZE)
-            .put("falling_stalactite", DamageSource.FALLING_STALACTITE)
             .put("stalagmite", DamageSource.STALAGMITE).build();
 
     public static DamageSourceArgumentType damageSource() {

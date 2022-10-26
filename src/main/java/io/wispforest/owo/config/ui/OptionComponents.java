@@ -6,6 +6,7 @@ import io.wispforest.owo.config.ui.component.ConfigEnumButton;
 import io.wispforest.owo.config.ui.component.ConfigSlider;
 import io.wispforest.owo.config.ui.component.ConfigTextBox;
 import io.wispforest.owo.config.ui.component.ConfigToggleButton;
+import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.parsing.UIModel;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -23,7 +24,7 @@ public class OptionComponents {
         );
 
         var valueBox = optionComponent.childById(ConfigTextBox.class, "value-box");
-        var resetButton = optionComponent.childById(ButtonWidget.class, "reset-button");
+        var resetButton = optionComponent.childById(ButtonComponent.class, "reset-button");
 
         if (option.detached()) {
             resetButton.active = false;
@@ -57,7 +58,7 @@ public class OptionComponents {
         valueSlider.min(min).max(max).decimalPlaces(withDecimals ? 2 : 0).snap(!withDecimals).setFromDiscreteValue(value.doubleValue());
         valueSlider.valueType(option.clazz());
 
-        var resetButton = optionComponent.childById(ButtonWidget.class, "reset-button");
+        var resetButton = optionComponent.childById(ButtonComponent.class, "reset-button");
 
         if (option.detached()) {
             resetButton.active = false;
@@ -84,7 +85,7 @@ public class OptionComponents {
         );
 
         var toggleButton = optionComponent.childById(ConfigToggleButton.class, "toggle-button");
-        var resetButton = optionComponent.childById(ButtonWidget.class, "reset-button");
+        var resetButton = optionComponent.childById(ButtonComponent.class, "reset-button");
 
         toggleButton.enabled(option.value());
 
@@ -111,7 +112,7 @@ public class OptionComponents {
         );
 
         var enumButton = optionComponent.childById(ConfigEnumButton.class, "enum-button");
-        var resetButton = optionComponent.childById(ButtonWidget.class, "reset-button");
+        var resetButton = optionComponent.childById(ButtonComponent.class, "reset-button");
 
         enumButton.init(option, option.value().ordinal());
 

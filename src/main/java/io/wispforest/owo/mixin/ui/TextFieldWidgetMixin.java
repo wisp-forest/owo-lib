@@ -42,15 +42,15 @@ public abstract class TextFieldWidgetMixin extends ClickableWidget {
         UIParsing.apply(children, "show-background", UIParsing::parseBool, this::setDrawsBackground);
     }
 
-    @SuppressWarnings("ReferenceToMixin")
-    @Inject(method = "setX", at = @At("HEAD"), cancellable = true)
-    private void applyToWrapper(int x, CallbackInfo ci) {
-        final var wrapper = ((ClickableWidgetMixin) (Object) this).owo$wrapper;
-        if (wrapper != null) {
-            wrapper.setX(x);
-            ci.cancel();
-        }
-    }
+//    @SuppressWarnings("ReferenceToMixin")
+//    @Inject(method = "setX", at = @At("HEAD"), cancellable = true)
+//    private void applyToWrapper(int x, CallbackInfo ci) {
+//        final var wrapper = ((ClickableWidgetMixin) (Object) this).owo$wrapper;
+//        if (wrapper != null) {
+//            wrapper.setX(x);
+//            ci.cancel();
+//        }
+//    }
 
     protected CursorStyle owo$preferredCursorStyle() {
         return CursorStyle.TEXT;

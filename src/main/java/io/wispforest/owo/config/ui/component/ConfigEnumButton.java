@@ -1,9 +1,9 @@
 package io.wispforest.owo.config.ui.component;
 
 import io.wispforest.owo.config.Option;
+import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.core.Sizing;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -12,7 +12,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.Locale;
 
 @ApiStatus.Internal
-public class ConfigEnumButton extends ButtonWidget implements OptionComponent {
+public class ConfigEnumButton extends ButtonComponent implements OptionComponent {
 
     @Nullable protected Option<? extends Enum<?>> backingOption = null;
     @Nullable protected Enum<?>[] backingValues = null;
@@ -21,7 +21,7 @@ public class ConfigEnumButton extends ButtonWidget implements OptionComponent {
     protected boolean wasRightClicked = false;
 
     public ConfigEnumButton() {
-        super(0, 0, 0, 0, Text.empty(), button -> {});
+        super(Text.empty(), button -> {});
         this.verticalSizing(Sizing.fixed(20));
         this.updateMessage();
     }

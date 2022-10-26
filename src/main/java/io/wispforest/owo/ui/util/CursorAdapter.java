@@ -13,8 +13,8 @@ public class CursorAdapter {
 
     protected final EnumMap<CursorStyle, Long> cursors = new EnumMap<>(CursorStyle.class);
     protected final long windowHandle;
-    protected CursorStyle lastCursorStyle = CursorStyle.POINTER;
 
+    protected CursorStyle lastCursorStyle = CursorStyle.POINTER;
     protected boolean disposed = false;
 
     protected CursorAdapter(long windowHandle) {

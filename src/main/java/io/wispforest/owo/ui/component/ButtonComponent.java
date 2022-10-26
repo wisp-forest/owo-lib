@@ -1,6 +1,7 @@
 package io.wispforest.owo.ui.component;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import io.wispforest.owo.mixin.ui.ButtonWidgetAccessor;
 import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.CursorStyle;
 import io.wispforest.owo.ui.parsing.UIModel;
@@ -25,7 +26,7 @@ public class ButtonComponent extends ButtonWidget {
     protected boolean textShadow = true;
 
     protected ButtonComponent(Text message, Consumer<ButtonComponent> onPress) {
-        super(0, 0, 0, 0, message, button -> onPress.accept((ButtonComponent) button));
+        super(0, 0, 0, 0, message, button -> onPress.accept((ButtonComponent) button), ButtonWidget.EMPTY, ButtonWidget.field_40754);
     }
 
     @Override
@@ -45,7 +46,7 @@ public class ButtonComponent extends ButtonWidget {
     }
 
     public ButtonComponent onPress(Consumer<ButtonComponent> onPress) {
-        this.onPress((ButtonWidget button) -> onPress.accept((ButtonComponent) button));
+        ((ButtonWidgetAccessor)this).owo$setOnPress(button -> onPress.accept((ButtonComponent) button));
         return this;
     }
 

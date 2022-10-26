@@ -41,7 +41,7 @@
     "tweaks.OperatingSystemMixin",
     "tweaks.TextFieldWidgetMixin",
     "ui.BufferBuilderMixin",
-    "ui.ButtonWidgetMixin",
+    "ui.ButtonWidgetAccessor",
     "ui.ChatScreenMixin",
     "ui.CheckboxWidgetAccessor",
     "ui.ClickableWidgetAccessor",

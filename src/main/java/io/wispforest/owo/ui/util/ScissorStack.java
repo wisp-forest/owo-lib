@@ -6,8 +6,8 @@ import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.PositionedRectangle;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.Vector4f;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayDeque;
@@ -118,14 +118,14 @@ public class ScissorStack {
         var root = new Vector4f(x, y, 0, 1);
         var end = new Vector4f(x + width, y + height, 0, 1);
 
-        root.transform(matrices.peek().getPositionMatrix());
-        end.transform(matrices.peek().getPositionMatrix());
+        root.mul(matrices.peek().getPositionMatrix());
+        end.mul(matrices.peek().getPositionMatrix());
 
-        x = (int) root.getX();
-        y = (int) root.getY();
+        x = (int) root.x;
+        y = (int) root.y;
 
-        width = (int) Math.ceil(end.getX() - root.getX());
-        height = (int) Math.ceil(end.getY() - root.getY());
+        width = (int) Math.ceil(end.x - root.x);
+        height = (int) Math.ceil(end.y - root.y);
 
         matrices.pop();
 

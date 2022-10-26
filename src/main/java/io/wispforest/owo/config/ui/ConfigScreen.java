@@ -9,6 +9,7 @@ import io.wispforest.owo.config.annotation.RestartRequired;
 import io.wispforest.owo.config.annotation.SectionHeader;
 import io.wispforest.owo.config.ui.component.*;
 import io.wispforest.owo.ui.base.BaseUIModelScreen;
+import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.Containers;
@@ -22,7 +23,6 @@ import io.wispforest.owo.util.NumberReflection;
 import io.wispforest.owo.util.ReflectionUtils;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
@@ -107,8 +107,8 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
             rootComponent.surface(Surface.OPTIONS_BACKGROUND);
         }
 
-        rootComponent.childById(ButtonWidget.class, "done-button").onPress(button -> this.close());
-        rootComponent.childById(ButtonWidget.class, "reload-button").onPress(button -> {
+        rootComponent.childById(ButtonComponent.class, "done-button").onPress(button -> this.close());
+        rootComponent.childById(ButtonComponent.class, "reload-button").onPress(button -> {
             this.config.load();
             this.uiAdapter = null;
             this.clearAndInit();

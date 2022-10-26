@@ -2,6 +2,7 @@ package io.wispforest.uwu.client;
 
 import io.wispforest.owo.ui.base.BaseUIModelHandledScreen;
 import io.wispforest.owo.ui.base.BaseUIModelScreen;
+import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.uwu.EpicScreenHandler;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -20,7 +21,7 @@ public class EpicHandledModelScreen extends BaseUIModelHandledScreen<FlowLayout,
         var indexField = rootComponent.childById(TextFieldWidget.class, "index-field");
         indexField.setTextPredicate(s -> s.matches("\\d*"));
 
-        rootComponent.childById(ButtonWidget.class, "enable-button").onPress(button -> this.enableSlot(Integer.parseInt(indexField.getText())));
-        rootComponent.childById(ButtonWidget.class, "disable-button").onPress(button -> this.disableSlot(Integer.parseInt(indexField.getText())));
+        rootComponent.childById(ButtonComponent.class, "enable-button").onPress(button -> this.enableSlot(Integer.parseInt(indexField.getText())));
+        rootComponent.childById(ButtonComponent.class, "disable-button").onPress(button -> this.disableSlot(Integer.parseInt(indexField.getText())));
     }
 }

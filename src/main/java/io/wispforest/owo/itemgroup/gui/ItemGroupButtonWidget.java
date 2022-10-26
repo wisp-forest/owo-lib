@@ -15,23 +15,25 @@ public class ItemGroupButtonWidget extends ButtonWidget {
     private final boolean hoverReactive;
 
     public ItemGroupButtonWidget(int x, int y, boolean hoverReactive, OwoItemGroup.ButtonDefinition definition, PressAction onPress) {
-        super(x, y, 24, 24, definition.tooltip(), onPress);
+        super(x, y, 24, 24, definition.tooltip(), onPress, ButtonWidget.EMPTY, ButtonWidget.field_40754);
         this.definition = definition;
         this.hoverReactive = hoverReactive;
     }
 
     @Override
     public void renderButton(MatrixStack matrixStack, int mouseX, int mouseY, float delta) {
-        MinecraftClient minecraftClient = MinecraftClient.getInstance();
+        var client = MinecraftClient.getInstance();
 
         RenderSystem.setShaderTexture(0, definition.texture());
-        RenderSystem.setShaderColor(1, 1, 1, 1);
-        RenderSystem.enableBlend();
-
         drawTexture(matrixStack, this.x, this.y, 0, (shouldShowHighlight(hovered) ? 1 : 0) * height, this.width, this.height, 64, 64);
+        this.renderBackground(matrixStack, client, mouseX, mouseY);
 
-        this.renderBackground(matrixStack, minecraftClient, mouseX, mouseY);
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+
         this.definition.icon().render(matrixStack, this.x + 4, this.y + 4, mouseX, mouseY, delta);
+
+        RenderSystem.disableBlend();
     }
 
     protected boolean shouldShowHighlight(boolean hovered) {

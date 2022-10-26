@@ -8,7 +8,7 @@ import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
-import net.minecraft.class_7818;
+import net.minecraft.class_7833;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -26,15 +26,13 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.Vec3f;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.w3c.dom.Element;
 
 import java.util.Map;
-import java.util.UUID;
 
 public class EntityComponent<E extends Entity> extends BaseComponent {
 
@@ -92,14 +90,14 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
 
             // We make sure the xRotation never becomes 0, as the lighting otherwise becomes very unhappy
             if (xRotation == 0) xRotation = .1f;
-            matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(xRotation * .15f));
-            matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(yRotation * .15f));
+            matrices.multiply(class_7833.field_40714.rotationDegrees(xRotation * .15f));
+            matrices.multiply(class_7833.field_40716.rotationDegrees(yRotation * .15f));
         } else {
-            matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(35));
-            matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-45 + this.mouseRotation));
+            matrices.multiply(class_7833.field_40714.rotationDegrees(35));
+            matrices.multiply(class_7833.field_40716.rotationDegrees(-45 + this.mouseRotation));
         }
 
-        RenderSystem.setShaderLights(new Vec3f(.15f, 1, 0), new Vec3f(.15f, -1, 0));
+        RenderSystem.setShaderLights(new Vector3f(.15f, 1, 0), new Vector3f(.15f, -1, 0));
         this.dispatcher.setRenderShadows(false);
         this.dispatcher.render(this.entity, 0, 0, 0, 0, 0, matrices, this.entityBuffers, LightmapTextureManager.MAX_LIGHT_COORDINATE);
         this.dispatcher.setRenderShadows(true);
@@ -207,7 +205,6 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
                     new ClientPlayNetworkHandler(MinecraftClient.getInstance(),
                             null,
                             new ClientConnection(NetworkSide.CLIENTBOUND),
-                            new class_7818(Util.NIL_UUID, null),
                             null,
                             profile,
                             MinecraftClient.getInstance().createTelemetrySender()

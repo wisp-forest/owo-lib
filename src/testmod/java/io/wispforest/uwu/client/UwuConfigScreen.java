@@ -1,6 +1,7 @@
 package io.wispforest.uwu.client;
 
 import io.wispforest.owo.ui.base.BaseUIModelScreen;
+import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.SliderComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.VerticalFlowLayout;
@@ -38,7 +39,7 @@ public class UwuConfigScreen extends BaseUIModelScreen<FlowLayout> {
         );
 
         var valueBox = option.childById(TextFieldWidget.class, "value-box");
-        option.childById(ButtonWidget.class, "reset-button").onPress(button -> {
+        option.childById(ButtonComponent.class, "reset-button").onPress(button -> {
             valueBox.setText(String.valueOf(index * index));
         });
 
@@ -57,7 +58,7 @@ public class UwuConfigScreen extends BaseUIModelScreen<FlowLayout> {
         var valueSlider = option.childById(SliderComponent.class, "value-slider");
         valueSlider.value((index * index) / 625d);
 
-        option.childById(ButtonWidget.class, "reset-button").onPress(button -> {
+        option.childById(ButtonComponent.class, "reset-button").onPress(button -> {
             valueSlider.value((index * index) / 625d);
         });
 

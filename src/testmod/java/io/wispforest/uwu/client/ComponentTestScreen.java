@@ -182,9 +182,9 @@ public class ComponentTestScreen extends Screen {
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 5; column++) {
                 buttonGrid.child(
-                        Components.button(Text.of("" + (row * 5 + column)), (ButtonComponent button) -> {
+                        Components.button(Text.of("" + (row * 5 + column)), button -> {
                             if (button.getMessage().getString().equals("11")) {
-                                buttonGrid.child(Components.button(Text.of("long boiii"), (ButtonComponent b) -> buttonGrid.child(button, 2, 1)).margins(Insets.of(3)), 2, 1);
+                                buttonGrid.child(Components.button(Text.of("long boiii"), b -> buttonGrid.child(button, 2, 1)).margins(Insets.of(3)), 2, 1);
                             } else if (button.getMessage().getString().equals("8")) {
                                 final var box = Components.textBox(Sizing.fill(10));
                                 box.setSuggestion("thicc boi");
@@ -192,7 +192,7 @@ public class ComponentTestScreen extends Screen {
 
                                 buttonGrid.child(box.margins(Insets.of(3)), 1, 3);
                             }
-                        }).margins(Insets.of(3)).sizing(Sizing.fixed(3)),
+                        }).margins(Insets.of(3)).sizing(Sizing.fixed(20)),
                         row, column
                 );
             }

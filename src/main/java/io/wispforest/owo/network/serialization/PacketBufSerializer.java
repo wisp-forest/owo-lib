@@ -16,9 +16,9 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3f;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
@@ -409,7 +409,7 @@ public record PacketBufSerializer<T>(PacketByteBuf.PacketWriter<T> serializer, P
         });
 
         register(Vec3d.class, VectorSerializer::write, VectorSerializer::read);
-        register(Vec3f.class, VectorSerializer::writef, VectorSerializer::readf);
+        register(Vector3f.class, VectorSerializer::writef, VectorSerializer::readf);
 
         // -----------
         // Collections

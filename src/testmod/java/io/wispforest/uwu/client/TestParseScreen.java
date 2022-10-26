@@ -1,10 +1,7 @@
 package io.wispforest.uwu.client;
 
 import io.wispforest.owo.ui.base.BaseUIModelScreen;
-import io.wispforest.owo.ui.component.EntityComponent;
-import io.wispforest.owo.ui.component.ItemComponent;
-import io.wispforest.owo.ui.component.LabelComponent;
-import io.wispforest.owo.ui.component.TextureComponent;
+import io.wispforest.owo.ui.component.*;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.core.*;
@@ -34,7 +31,7 @@ public class TestParseScreen extends BaseUIModelScreen<FlowLayout> {
 //                .horizontalAlignment(HorizontalAlignment.CENTER)
 //        );
 //
-//        rootComponent.childById(ButtonWidget.class, "the-button").onPress(button -> {
+//        rootComponent.childById(ButtonComponent.class, "the-button").onPress(button -> {
 //            System.out.println("click");
 //        });
 
@@ -42,7 +39,7 @@ public class TestParseScreen extends BaseUIModelScreen<FlowLayout> {
         var verticalAnimation = allay.verticalSizing().animate(450, Easing.EXPO, Sizing.fixed(200));
         var horizontalAnimation = allay.horizontalSizing().animate(450, Easing.CUBIC, Sizing.fixed(200));
 
-        rootComponent.childById(ButtonWidget.class, "allay-button").onPress(button -> {
+        rootComponent.childById(ButtonComponent.class, "allay-button").onPress(button -> {
             verticalAnimation.reverse();
             horizontalAnimation.reverse();
             button.setMessage(Text.of(button.getMessage().getString().equals("+") ? "-" : "+"));
@@ -53,11 +50,11 @@ public class TestParseScreen extends BaseUIModelScreen<FlowLayout> {
 
         var stretchAnimation = rootComponent.childById(ItemComponent.class, "stretch-item")
                 .verticalSizing().animate(500, Easing.CUBIC, Sizing.fixed(300));
-        rootComponent.childById(ButtonWidget.class, "stretch-button").onPress(button -> stretchAnimation.reverse());
+        rootComponent.childById(ButtonComponent.class, "stretch-button").onPress(button -> stretchAnimation.reverse());
 
         var flyAnimation = rootComponent.childById(ScrollContainer.class, "fly")
                 .positioning().animate(350, Easing.QUADRATIC, Positioning.relative(85, 35));
-        rootComponent.childById(ButtonWidget.class, "fly-button").onPress(button -> flyAnimation.reverse());
+        rootComponent.childById(ButtonComponent.class, "fly-button").onPress(button -> flyAnimation.reverse());
 
         var growLabel = rootComponent.childById(LabelComponent.class, "grow-label");
         var growAnimation = growLabel.margins().animate(250, Easing.SINE, Insets.of(15));

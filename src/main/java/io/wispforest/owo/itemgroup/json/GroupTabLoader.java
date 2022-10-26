@@ -26,7 +26,7 @@ import java.util.Map;
  * without needing to depend on owo
  * <p>
  * This is used instead of a {@link net.minecraft.resource.JsonDataLoader} because
- * it needs to load on the client as well
+ * it needs to load on the client
  */
 @ApiStatus.Internal
 public class GroupTabLoader implements ModDataConsumer {

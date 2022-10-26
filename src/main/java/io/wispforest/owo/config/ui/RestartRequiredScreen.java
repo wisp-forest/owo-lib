@@ -1,6 +1,7 @@
 package io.wispforest.owo.config.ui;
 
 import io.wispforest.owo.ui.base.BaseUIModelScreen;
+import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Surface;
 import net.minecraft.client.MinecraftClient;
@@ -31,10 +32,10 @@ public class RestartRequiredScreen extends BaseUIModelScreen<FlowLayout> {
             rootComponent.surface(Surface.OPTIONS_BACKGROUND);
         }
 
-        rootComponent.childById(ButtonWidget.class, "exit-button")
+        rootComponent.childById(ButtonComponent.class, "exit-button")
                 .onPress(button -> MinecraftClient.getInstance().scheduleStop());
 
-        rootComponent.childById(ButtonWidget.class, "ignore-button")
+        rootComponent.childById(ButtonComponent.class, "ignore-button")
                 .onPress(button -> this.close());
     }
 }
