@@ -590,9 +590,8 @@
         <xs:complexContent>
             <xs:extension base="componentType">
                 <xs:sequence>
-                    <xs:group ref="anyComponent"/>
+                    <xs:element type="componentList" name="children"/>
                     <xs:choice maxOccurs="unbounded">
-                        <xs:element type="componentList" name="children"/>
                         <xs:group ref="parentComponentProps"/>
                         <xs:element type="owo-ui-text" name="text" minOccurs="0"/>
                     </xs:choice>
