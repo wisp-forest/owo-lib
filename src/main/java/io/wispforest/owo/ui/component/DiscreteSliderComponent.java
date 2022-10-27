@@ -29,7 +29,7 @@ public class DiscreteSliderComponent extends SliderComponent {
 
     @Override
     protected void applyValue() {
-        this.listeners.set(this.discreteValue());
+        this.changedEvents.sink().onChanged(this.discreteValue());
     }
 
     @Override

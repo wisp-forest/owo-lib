@@ -29,17 +29,17 @@ public abstract class BaseComponent implements Component {
     protected AnimatableProperty<Sizing> horizontalSizing = AnimatableProperty.of(Sizing.content());
     protected AnimatableProperty<Sizing> verticalSizing = AnimatableProperty.of(Sizing.content());
 
-    protected final EventStream<MouseDown> mouseDownEvents = UIEvents.newMouseDownStream();
-    protected final EventStream<MouseUp> mouseUpEvents = UIEvents.newMouseUpStream();
-    protected final EventStream<MouseScroll> mouseScrollEvents = UIEvents.newMouseScrollStream();
-    protected final EventStream<MouseDrag> mouseDragEvents = UIEvents.newMouseDragStream();
-    protected final EventStream<KeyPress> keyPressEvents = UIEvents.newKeyPressStream();
-    protected final EventStream<CharTyped> charTypedEvents = UIEvents.newCharTypedStream();
-    protected final EventStream<FocusGained> focusGainedEvents = UIEvents.newFocusGainedStream();
-    protected final EventStream<FocusLost> focusLostEvents = UIEvents.newFocusLostStream();
+    protected final EventStream<MouseDown> mouseDownEvents = MouseDown.newStream();
+    protected final EventStream<MouseUp> mouseUpEvents = MouseUp.newStream();
+    protected final EventStream<MouseScroll> mouseScrollEvents = MouseScroll.newStream();
+    protected final EventStream<MouseDrag> mouseDragEvents = MouseDrag.newStream();
+    protected final EventStream<KeyPress> keyPressEvents = KeyPress.newStream();
+    protected final EventStream<CharTyped> charTypedEvents = CharTyped.newStream();
+    protected final EventStream<FocusGained> focusGainedEvents = FocusGained.newStream();
+    protected final EventStream<FocusLost> focusLostEvents = FocusLost.newStream();
 
-    protected final EventStream<MouseEnter> mouseEnterEvents = UIEvents.newMouseEnterStream();
-    protected final EventStream<MouseLeave> mouseLeaveEvents = UIEvents.newMouseLeaveStream();
+    protected final EventStream<MouseEnter> mouseEnterEvents = MouseEnter.newStream();
+    protected final EventStream<MouseLeave> mouseLeaveEvents = MouseLeave.newStream();
     protected boolean hovered = false;
 
     protected CursorStyle cursorStyle = CursorStyle.NONE;

@@ -3,7 +3,8 @@ package io.wispforest.owo.ui.component;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
-import io.wispforest.owo.util.Observable;
+import io.wispforest.owo.util.EventSource;
+import io.wispforest.owo.util.EventStream;
 import net.minecraft.client.gui.widget.SliderWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
@@ -15,22 +16,28 @@ import java.util.function.Function;
 
 public class SliderComponent extends SliderWidget {
 
-    protected final Observable<Double> listeners;
-    protected Function<String, Text> messageProvider;
+    protected final EventStream<OnChanged> changedEvents = OnChanged.newStream();
+    protected final EventStream<OnSlideEnd> slideEndEvents = OnSlideEnd.newStream();
+
+    protected Function<String, Text> messageProvider = value -> Text.empty();
+    protected double scrollStep = .05;
 
     protected SliderComponent(Sizing horizontalSizing) {
         super(0, 0, 0, 0, Text.empty(), 0);
-
-        this.messageProvider = value -> Text.empty();
-        this.listeners = Observable.of(this.value);
 
         this.sizing(horizontalSizing, Sizing.fixed(20));
     }
 
     public SliderComponent value(double value) {
-        this.value = value;
-        this.updateMessage();
-        this.applyValue();
+        value = MathHelper.clamp(value, 0, 1);
+
+        if (this.value != value) {
+            this.value = value;
+
+            this.updateMessage();
+            this.applyValue();
+        }
+
         return this;
     }
 
@@ -38,8 +45,12 @@ public class SliderComponent extends SliderWidget {
         return this.value;
     }
 
+    /**
+     * @deprecated Use {@code onChanged().subscribe(...)} instead
+     */
+    @Deprecated(forRemoval = true)
     public SliderComponent onChanged(Consumer<Double> listener) {
-        this.listeners.observe(listener);
+        this.changedEvents.source().subscribe(listener::accept);
         return this;
     }
 
@@ -49,6 +60,23 @@ public class SliderComponent extends SliderWidget {
         return this;
     }
 
+    public SliderComponent scrollStep(double scrollStep) {
+        this.scrollStep = scrollStep;
+        return this;
+    }
+
+    public double scrollStep() {
+        return this.scrollStep;
+    }
+
+    public EventSource<OnChanged> onChanged() {
+        return this.changedEvents.source();
+    }
+
+    public EventSource<OnSlideEnd> slideEnd() {
+        return this.slideEndEvents.source();
+    }
+
     @Override
     protected void updateMessage() {
         this.setMessage(this.messageProvider.apply(String.valueOf(this.value)));
@@ -56,17 +84,23 @@ public class SliderComponent extends SliderWidget {
 
     @Override
     protected void applyValue() {
-        this.listeners.set(this.value);
+        this.changedEvents.sink().onChanged(this.value);
     }
 
     @Override
     public boolean onMouseScroll(double mouseX, double mouseY, double amount) {
         if (!this.active) return super.onMouseScroll(mouseX, mouseY, amount);
 
-        this.value(MathHelper.clamp(this.value + .05 * amount, 0, 1));
+        this.value(this.value + this.scrollStep * amount);
 
         super.onMouseScroll(mouseX, mouseY, amount);
         return true;
+    }
+
+    @Override
+    public boolean onMouseUp(double mouseX, double mouseY, int button) {
+        this.slideEndEvents.sink().onSlideEnd();
+        return super.onMouseUp(mouseX, mouseY, button);
     }
 
     @Override
@@ -106,7 +140,36 @@ public class SliderComponent extends SliderWidget {
      */
     @Override
     @Deprecated
-    public void setMessage(Text message) {
+    public final void setMessage(Text message) {
         super.setMessage(message);
+    }
+
+    public SliderComponent configure(Consumer<SliderComponent> closure) {
+        closure.accept(this);
+        return this;
+    }
+
+    public interface OnChanged {
+        void onChanged(double value);
+
+        static EventStream<OnChanged> newStream() {
+            return new EventStream<>(listeners -> value -> {
+                for (var listener : listeners) {
+                    listener.onChanged(value);
+                }
+            });
+        }
+    }
+
+    public interface OnSlideEnd {
+        void onSlideEnd();
+
+        static EventStream<OnSlideEnd> newStream() {
+            return new EventStream<>(listeners -> () -> {
+                for (var listener : listeners) {
+                    listener.onSlideEnd();
+                }
+            });
+        }
     }
 }

@@ -138,7 +138,9 @@ public class ComponentTestScreen extends Screen {
                         .snap(true)
                         .decimalPlaces(1)
                         .message(value -> Text.translatable("text.ui.test_slider", value))
-                        .onChanged(aDouble -> this.client.player.sendMessage(Text.of("sliding towards " + aDouble))))
+                        .configure(slider -> {
+                            slider.onChanged().subscribe(value -> this.client.player.sendMessage(Text.of("sliding towards " + value)));
+                        }))
                 .padding(Insets.of(5))
                 .horizontalAlignment(HorizontalAlignment.CENTER)
                 .surface(Surface.DARK_PANEL)

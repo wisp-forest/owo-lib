@@ -1,6 +1,7 @@
 package io.wispforest.owo.mixin.ui;
 
 import io.wispforest.owo.ui.component.DiscreteSliderComponent;
+import io.wispforest.owo.ui.component.SliderComponent;
 import io.wispforest.owo.ui.core.CursorStyle;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.SliderWidget;
@@ -9,6 +10,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.math.BigDecimal;
@@ -20,8 +22,16 @@ public abstract class SliderWidgetMixin extends ClickableWidget {
     @Shadow
     protected abstract void setValue(double value);
 
+    @Shadow protected double value;
+
     public SliderWidgetMixin(int x, int y, int width, int height, Text message) {
         super(x, y, width, height, message);
+    }
+
+    @ModifyArg(method = "keyPressed", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/SliderWidget;setValue(D)V"))
+    private double injectCustomStep(double value) {
+        if (!((Object) this instanceof SliderComponent slider)) return value;
+        return this.value + Math.signum(value - this.value) * slider.scrollStep();
     }
 
     @Inject(method = "setValueFromMouse", at = @At("HEAD"), cancellable = true)
