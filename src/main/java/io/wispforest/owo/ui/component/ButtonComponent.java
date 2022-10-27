@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.mixin.ui.ButtonWidgetAccessor;
 import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.CursorStyle;
+import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
@@ -27,6 +28,7 @@ public class ButtonComponent extends ButtonWidget {
 
     protected ButtonComponent(Text message, Consumer<ButtonComponent> onPress) {
         super(0, 0, 0, 0, message, button -> onPress.accept((ButtonComponent) button), ButtonWidget.EMPTY, ButtonWidget.field_40754);
+        this.sizing(Sizing.content());
     }
 
     @Override

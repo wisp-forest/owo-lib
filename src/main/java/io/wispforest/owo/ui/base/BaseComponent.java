@@ -55,35 +55,37 @@ public abstract class BaseComponent implements Component {
     }
 
     /**
-     * Set the horizontal size of this component, based on its content
+     * @return The horizontal size this component needs to fit its contents
      */
-    protected void applyHorizontalContentSizing(Sizing sizing) {
-        throw new UnsupportedOperationException(this.getClass().getSimpleName() + " does not support horizontal Sizing.content()");
+    protected int determineHorizontalContentSize(Sizing sizing) {
+        throw new UnsupportedOperationException(this.getClass().getSimpleName() + " does not support Sizing.content() on the horizontal axis");
     }
 
     /**
-     * Set the vertical size of this component, based on its content
+     * @return The vertical size this component needs to fit its contents
      */
-    protected void applyVerticalContentSizing(Sizing sizing) {
-        throw new UnsupportedOperationException(this.getClass().getSimpleName() + " does not support vertical Sizing.content()");
+    protected int determineVerticalContentSize(Sizing sizing) {
+        throw new UnsupportedOperationException(this.getClass().getSimpleName() + " does not support Sizing.content() on the vertical axis");
     }
 
     @Override
     public void inflate(Size space) {
         this.space = space;
+        this.applySizing();
+    }
 
+    /**
+     * Calculate and apply the sizing of this component
+     * according to the last known expansion space
+     */
+    protected void applySizing() {
         final var horizontalSizing = this.horizontalSizing.get();
         final var verticalSizing = this.verticalSizing.get();
 
         final var margins = this.margins.get();
 
-        if (horizontalSizing.method == Sizing.Method.CONTENT) {
-            verticalSizing.inflate(space.height() - margins.vertical(), height -> this.height = height, this::applyVerticalContentSizing);
-            horizontalSizing.inflate(space.width() - margins.horizontal(), width -> this.width = width, this::applyHorizontalContentSizing);
-        } else {
-            horizontalSizing.inflate(space.width() - margins.horizontal(), width -> this.width = width, this::applyHorizontalContentSizing);
-            verticalSizing.inflate(space.height() - margins.vertical(), height -> this.height = height, this::applyVerticalContentSizing);
-        }
+        this.width = horizontalSizing.inflate(this.space.width() - margins.horizontal(), this::determineHorizontalContentSize);
+        this.height = verticalSizing.inflate(this.space.height() - margins.vertical(), this::determineVerticalContentSize);
     }
 
     protected void notifyParentIfMounted() {
@@ -95,13 +97,15 @@ public abstract class BaseComponent implements Component {
     public void update(float delta, int mouseX, int mouseY) {
         Component.super.update(delta, mouseX, mouseY);
 
-        if (this.hovered != this.isInBoundingBox(mouseX, mouseY)) {
-            if (this.hovered) {
-                this.mouseLeaveEvents.sink().onMouseLeave();
-            } else {
+        boolean nowHovered = this.isInBoundingBox(mouseX, mouseY);
+        if (this.hovered != nowHovered) {
+            this.hovered = nowHovered;
+
+            if (nowHovered) {
                 this.mouseEnterEvents.sink().onMouseEnter();
+            } else {
+                this.mouseLeaveEvents.sink().onMouseLeave();
             }
-            this.hovered = this.isInBoundingBox(mouseX, mouseY);
         }
     }
 

@@ -38,9 +38,7 @@ public class Components {
     // -----------------------
 
     public static ButtonComponent button(Text message, Consumer<ButtonComponent> onPress) {
-        final var button = new ButtonComponent(message, onPress);
-        button.sizing(Sizing.content(1), Sizing.content());
-        return button;
+        return new ButtonComponent(message, onPress);
     }
 
     public static TextFieldWidget textBox(Sizing horizontalSizing) {

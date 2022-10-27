@@ -95,7 +95,7 @@ public class LabelComponent extends BaseComponent {
     }
 
     @Override
-    protected void applyHorizontalContentSizing(Sizing sizing) {
+    protected int determineHorizontalContentSize(Sizing sizing) {
         int widestText = 0;
         for (var line : this.wrappedText) {
             int width = this.textRenderer.getWidth(line);
@@ -104,26 +104,26 @@ public class LabelComponent extends BaseComponent {
 
         if (widestText > this.maxWidth) {
             this.wrapLines();
-            this.applyHorizontalContentSizing(sizing);
+            return this.determineHorizontalContentSize(sizing);
         } else {
-            this.width = widestText + sizing.value * 2;
+            return widestText;
         }
     }
 
     @Override
-    protected void applyVerticalContentSizing(Sizing sizing) {
+    protected int determineVerticalContentSize(Sizing sizing) {
         this.wrapLines();
-        this.height = (this.wrappedText.size() * (this.textRenderer.fontHeight + 2)) - 2 + sizing.value * 2;
+        return (this.wrappedText.size() * (this.textRenderer.fontHeight + 2)) - 2;
     }
 
     @Override
     public void inflate(Size space) {
-        super.inflate(space);
         this.wrapLines();
+        super.inflate(space);
     }
 
     private void wrapLines() {
-        this.wrappedText = this.textRenderer.wrapLines(this.text, this.horizontalSizing.get().method != Sizing.Method.CONTENT ? this.width : this.maxWidth);
+        this.wrappedText = this.textRenderer.wrapLines(this.text, this.horizontalSizing.get().isContent() ? this.maxWidth : this.width);
     }
 
     @Override
@@ -137,10 +137,10 @@ public class LabelComponent extends BaseComponent {
         int x = this.x;
         int y = this.y;
 
-        if (this.horizontalSizing.get().method == Sizing.Method.CONTENT) {
+        if (this.horizontalSizing.get().isContent()) {
             x += this.horizontalSizing.get().value;
         }
-        if (this.verticalSizing.get().method == Sizing.Method.CONTENT) {
+        if (this.verticalSizing.get().isContent()) {
             y += this.verticalSizing.get().value;
         }
 

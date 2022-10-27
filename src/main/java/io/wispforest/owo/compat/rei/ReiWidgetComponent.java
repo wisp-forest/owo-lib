@@ -30,13 +30,13 @@ public class ReiWidgetComponent extends BaseComponent {
     }
 
     @Override
-    protected void applyHorizontalContentSizing(Sizing sizing) {
-        this.width = this.widget.getBounds().getWidth();
+    protected int determineHorizontalContentSize(Sizing sizing) {
+        return this.widget.getBounds().getWidth();
     }
 
     @Override
-    protected void applyVerticalContentSizing(Sizing sizing) {
-        this.height = this.widget.getBounds().getHeight();
+    protected int determineVerticalContentSize(Sizing sizing) {
+        return this.widget.getBounds().getHeight();
     }
 
     @Override

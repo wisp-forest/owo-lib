@@ -7,7 +7,6 @@ import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.OwoNinePatchRenderers;
-import io.wispforest.owo.util.ReflectionUtils;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.MathHelper;
@@ -49,18 +48,18 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
     }
 
     @Override
-    protected void applyHorizontalContentSizing(Sizing sizing) {
+    protected int determineHorizontalContentSize(Sizing sizing) {
         if (this.direction == ScrollDirection.VERTICAL) {
-            super.applyHorizontalContentSizing(sizing);
+            return super.determineHorizontalContentSize(sizing);
         } else {
             throw new UnsupportedOperationException("Horizontal ScrollContainer cannot be horizontally content-sized");
         }
     }
 
     @Override
-    protected void applyVerticalContentSizing(Sizing sizing) {
+    protected int determineVerticalContentSize(Sizing sizing) {
         if (this.direction == ScrollDirection.HORIZONTAL) {
-            super.applyVerticalContentSizing(sizing);
+            return super.determineVerticalContentSize(sizing);
         } else {
             throw new UnsupportedOperationException("Vertical ScrollContainer cannot be vertically content-sized");
         }

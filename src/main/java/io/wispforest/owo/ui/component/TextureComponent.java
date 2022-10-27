@@ -37,13 +37,13 @@ public class TextureComponent extends BaseComponent {
     }
 
     @Override
-    protected void applyHorizontalContentSizing(Sizing sizing) {
-        this.width = this.regionWidth;
+    protected int determineHorizontalContentSize(Sizing sizing) {
+        return this.regionWidth;
     }
 
     @Override
-    protected void applyVerticalContentSizing(Sizing sizing) {
-        this.height = this.regionHeight;
+    protected int determineVerticalContentSize(Sizing sizing) {
+        return this.regionHeight;
     }
 
     @Override

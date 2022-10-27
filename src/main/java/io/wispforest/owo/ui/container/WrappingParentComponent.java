@@ -27,13 +27,13 @@ public abstract class WrappingParentComponent<C extends Component> extends BaseP
     }
 
     @Override
-    protected void applyHorizontalContentSizing(Sizing sizing) {
-        this.width = this.child.fullSize().width() + this.padding.get().horizontal();
+    protected int determineHorizontalContentSize(Sizing sizing) {
+        return this.child.fullSize().width() + this.padding.get().horizontal();
     }
 
     @Override
-    protected void applyVerticalContentSizing(Sizing sizing) {
-        this.height = this.child.fullSize().height() + this.padding.get().vertical();
+    protected int determineVerticalContentSize(Sizing sizing) {
+        return this.child.fullSize().height() + this.padding.get().vertical();
     }
 
     @Override

@@ -37,12 +37,12 @@ public class VerticalFlowLayout extends FlowLayout {
         });
 
         this.contentSize = Size.of(layoutWidth.intValue(), layoutHeight.intValue());
-        if (this.horizontalSizing.get().method == Sizing.Method.CONTENT) {
-            this.applyHorizontalContentSizing(this.horizontalSizing.get());
+        if (this.horizontalSizing.get().isContent()) {
+            this.width = this.determineHorizontalContentSize(this.horizontalSizing.get());
         }
 
-        if (this.verticalSizing.get().method == Sizing.Method.CONTENT) {
-            this.applyVerticalContentSizing(this.verticalSizing.get());
+        if (this.verticalSizing.get().isContent()) {
+            this.height = this.determineVerticalContentSize(this.verticalSizing.get());
         }
 
         if (this.horizontalAlignment() != HorizontalAlignment.LEFT) {

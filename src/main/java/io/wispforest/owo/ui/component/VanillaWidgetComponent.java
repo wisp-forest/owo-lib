@@ -4,6 +4,7 @@ import io.wispforest.owo.mixin.ui.ClickableWidgetAccessor;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.ui.core.ParentComponent;
+import io.wispforest.owo.ui.core.Size;
 import io.wispforest.owo.ui.core.Sizing;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -34,27 +35,23 @@ public class VanillaWidgetComponent extends BaseComponent {
     }
 
     @Override
-    protected void applyVerticalContentSizing(Sizing sizing) {
+    protected int determineVerticalContentSize(Sizing sizing) {
         if (this.widget instanceof ButtonWidget || this.widget instanceof CheckboxWidget || this.widget instanceof SliderComponent || this.widget instanceof TextFieldWidget) {
-            this.height = 20;
+            return 20;
         } else {
-            super.applyVerticalContentSizing(sizing);
+            return super.determineVerticalContentSize(sizing);
         }
-
-        this.applyToWidget();
     }
 
     @Override
-    protected void applyHorizontalContentSizing(Sizing sizing) {
+    protected int determineHorizontalContentSize(Sizing sizing) {
         if (this.widget instanceof ButtonWidget button) {
-            this.width = MinecraftClient.getInstance().textRenderer.getWidth(button.getMessage()) + 6 + sizing.value * 2;
+            return MinecraftClient.getInstance().textRenderer.getWidth(button.getMessage()) + 8;
         } else if (this.widget instanceof CheckboxWidget checkbox) {
-            this.width = MinecraftClient.getInstance().textRenderer.getWidth(checkbox.getMessage()) + 24;
+            return MinecraftClient.getInstance().textRenderer.getWidth(checkbox.getMessage()) + 24;
         } else {
-            super.applyHorizontalContentSizing(sizing);
+            return super.determineHorizontalContentSize(sizing);
         }
-
-        this.applyToWidget();
     }
 
     @Override
@@ -64,6 +61,12 @@ public class VanillaWidgetComponent extends BaseComponent {
         } else {
             return super.margins(margins);
         }
+    }
+
+    @Override
+    public void inflate(Size space) {
+        super.inflate(space);
+        this.applyToWidget();
     }
 
     @Override

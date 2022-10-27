@@ -176,17 +176,7 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
 
     @Override
     public void onChildMutated(Component child) {
-        var previousSize = this.fullSize();
-        this.inflate(this.space);
-
-        if (this.parent != null && !previousSize.equals(this.fullSize())) {
-            this.parent.onChildMutated(this);
-        }
-    }
-
-    @Override
-    public boolean canFocus(FocusSource source) {
-        return false;
+        this.updateLayout();
     }
 
     @Override
@@ -278,13 +268,7 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
      */
     protected Size childMountingOffset() {
         var padding = this.padding.get();
-        var horizontalSizing = this.horizontalSizing.get();
-        var verticalSizing = this.verticalSizing.get();
-
-        return Size.of(
-                padding.left() + (horizontalSizing.method == Sizing.Method.CONTENT ? horizontalSizing.value : 0),
-                padding.top() + (verticalSizing.method == Sizing.Method.CONTENT ? verticalSizing.value : 0)
-        );
+        return Size.of(padding.left(), padding.top());
     }
 
     /**
@@ -327,7 +311,7 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
     /**
      * Draw the children of this component along with
      * their focus outline and tooltip, optionally clipping
-     * them if {@link #allowOverflow} is {@code true}
+     * them if {@link #allowOverflow} is {@code false}
      *
      * @param children The list of children to draw
      */
@@ -366,8 +350,8 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
         final var padding = this.padding.get();
 
         return Size.of(
-                this.horizontalSizing.get().method == Sizing.Method.CONTENT ? thisSpace.width() - padding.horizontal() : this.width - padding.horizontal(),
-                this.verticalSizing.get().method == Sizing.Method.CONTENT ? thisSpace.height() - padding.vertical() : this.height - padding.vertical()
+                this.horizontalSizing.get().isContent() ? thisSpace.width() - padding.horizontal() : this.width - padding.horizontal(),
+                this.verticalSizing.get().isContent() ? thisSpace.height() - padding.vertical() : this.height - padding.vertical()
         );
     }
 

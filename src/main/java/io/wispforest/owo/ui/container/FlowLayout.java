@@ -23,13 +23,13 @@ public abstract class FlowLayout extends BaseParentComponent {
     }
 
     @Override
-    protected void applyHorizontalContentSizing(Sizing sizing) {
-        this.width = this.contentSize.width() + this.padding.get().horizontal() + sizing.value * 2;
+    protected int determineHorizontalContentSize(Sizing sizing) {
+        return this.contentSize.width() + this.padding.get().horizontal();
     }
 
     @Override
-    protected void applyVerticalContentSizing(Sizing sizing) {
-        this.height = this.contentSize.height() + this.padding.get().vertical() + sizing.value * 2;
+    protected int determineVerticalContentSize(Sizing sizing) {
+        return this.contentSize.height() + this.padding.get().vertical();
     }
 
     public FlowLayout child(Component child) {

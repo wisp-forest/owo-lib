@@ -7,7 +7,7 @@ import org.w3c.dom.Element;
 
 import java.util.Locale;
 import java.util.Objects;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class Sizing implements Animatable<Sizing> {
 
@@ -25,16 +25,15 @@ public class Sizing implements Animatable<Sizing> {
      * Inflate into the given space
      *
      * @param space               The available space
-     * @param sizeSetter          A function for setting the size of the component
      * @param contentSizeFunction A function for making the component set the
      *                            size based on its content
      */
-    public void inflate(int space, Consumer<Integer> sizeSetter, Consumer<Sizing> contentSizeFunction) {
-        switch (this.method) {
-            case FIXED -> sizeSetter.accept(this.value);
-            case FILL -> sizeSetter.accept(Math.round((this.value / 100f) * space));
-            case CONTENT -> contentSizeFunction.accept(this);
-        }
+    public int inflate(int space, Function<Sizing, Integer> contentSizeFunction) {
+        return switch (this.method) {
+            case FIXED -> this.value;
+            case FILL -> Math.round((this.value / 100f) * space);
+            case CONTENT -> contentSizeFunction.apply(this) + this.value * 2;
+        };
     }
 
     public static Sizing fixed(int value) {
@@ -65,6 +64,10 @@ public class Sizing implements Animatable<Sizing> {
      */
     public static Sizing fill(int percent) {
         return new Sizing(percent, Method.FILL);
+    }
+
+    public boolean isContent() {
+        return this.method == Method.CONTENT;
     }
 
     @Override
