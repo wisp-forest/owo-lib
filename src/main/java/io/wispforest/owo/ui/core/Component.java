@@ -260,6 +260,34 @@ public interface Component extends PositionedRectangle {
         return this.parent() != null;
     }
 
+    /**
+     * Execute the given closure immediately with this
+     * component as the argument. This is primarily useful for calling
+     * methods that don't return the component and could thus not be
+     * called inline when constructing the UI Tree.
+     * <p>
+     * All state updates emitted during execution of the closure are deferred
+     * and consolidated into a single update that's emitted after execution has
+     * finished. Thus, you can also employ this to update multiple properties
+     * on a component more efficiently.
+     * <p>
+     * <b>It is imperative that the type parameter be declared to a type that
+     * this component can be represented as - otherwise an exception is thrown</b>
+     * <p>
+     * Example:
+     * <pre>
+     * container.child(Components.label(Text.of("Click")).&lt;LabelComponent&gt;configure(label -> {
+     *     label.mouseDown().subscribe((mouseX, mouseY, button) -> {
+     *         System.out.println("Click");
+     *         return true;
+     *     });
+     * }));
+     * </pre>
+     *
+     * @param closure The closure to execute
+     * @param <C>     A type this component can be represented as
+     * @return This component
+     */
     <C extends Component> C configure(Consumer<C> closure);
 
     /**
