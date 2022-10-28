@@ -12,6 +12,10 @@ import org.w3c.dom.Element;
 
 import java.util.Map;
 
+/**
+ * A colored rectangle either filled or outlined
+ * by a given color or gradient
+ */
 public class BoxComponent extends BaseComponent {
 
     protected boolean fill = false;
@@ -52,44 +56,79 @@ public class BoxComponent extends BaseComponent {
         }
     }
 
+    /**
+     * Set whether this component should be
+     * filled with color or outlined
+     */
     public BoxComponent fill(boolean fill) {
         this.fill = fill;
         return this;
     }
 
+    /**
+     * @return {@code true} if this component is currently
+     * filled with color, {@code false} if it is outlined
+     */
     public boolean fill() {
         return this.fill;
     }
 
+    /**
+     * Set the direction in which the gradient inside
+     * this component should travel
+     */
     public BoxComponent direction(GradientDirection direction) {
         this.direction = direction;
         return this;
     }
 
+    /**
+     * @return The direction in which the gradient inside
+     * this component currently travels
+     */
     public GradientDirection direction() {
         return this.direction;
     }
 
+    /**
+     * Set the color of this component. Equivalent to calling
+     * both {@link #startColor(Color)} and {@link #endColor(Color)}
+     *
+     * @param color The start and end color of this
+     *              component's color gradient
+     */
     public BoxComponent color(Color color) {
         this.startColor.set(color);
         this.endColor.set(color);
         return this;
     }
 
+    /**
+     * Set the start color of this component's gradient
+     */
     public BoxComponent startColor(Color startColor) {
         this.startColor.set(startColor);
         return this;
     }
 
+    /**
+     * @return The current start color of this component's gradient
+     */
     public AnimatableProperty<Color> startColor() {
         return this.startColor;
     }
 
+    /**
+     * Set the end color of this component's gradient
+     */
     public BoxComponent endColor(Color endColor) {
         this.endColor.set(endColor);
         return this;
     }
 
+    /**
+     * @return The current end color of this component's gradient
+     */
     public AnimatableProperty<Color> endColor() {
         return this.endColor;
     }

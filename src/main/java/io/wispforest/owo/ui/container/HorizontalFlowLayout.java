@@ -30,11 +30,13 @@ public class HorizontalFlowLayout extends FlowLayout {
                     this.y + padding.top() + child.margins().get().top());
 
             final var childSize = child.fullSize();
-            layoutWidth.add(childSize.width());
+            layoutWidth.add(childSize.width() + this.gap);
             if (childSize.height() > layoutHeight.intValue()) {
                 layoutHeight.setValue(childSize.height());
             }
         });
+
+        layoutWidth.subtract(this.gap);
 
         this.contentSize = Size.of(layoutWidth.intValue(), layoutHeight.intValue());
         this.applySizing();

@@ -1,6 +1,5 @@
 package io.wispforest.owo.ui.container;
 
-import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
@@ -252,34 +251,61 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
         return this.isInBoundingBox(mouseX, mouseY) && this.direction.choose(mouseY, mouseX) >= this.scrollbarOffset;
     }
 
+    /**
+     * Scroll to the given component, trying to align it
+     * to the top of this container
+     */
     public ScrollContainer<C> scrollTo(Component component) {
         this.scrollOffset = MathHelper.clamp(this.scrollOffset - (this.y - component.y() + component.margins().get().top()), 0, this.maxScroll);
         return this;
     }
 
+    /**
+     * Set the thickness of this container's scrollbar,
+     * in logical pixels
+     */
     public ScrollContainer<C> scrollbarThiccness(int scrollbarThiccness) {
         this.scrollbarThiccness = scrollbarThiccness;
         return this;
     }
 
+    /**
+     * @return The thickness of this container's scrollbar,
+     * in logical pixels
+     */
     public int scrollbarThiccness() {
         return this.scrollbarThiccness;
     }
 
+    /**
+     * Set the scrollbar this container should display. To create one,
+     * look at the static methods on {@link Scrollbar} or use a lambda
+     */
     public ScrollContainer<C> scrollbar(Scrollbar scrollbar) {
         this.scrollbar = scrollbar;
         return this;
     }
 
+    /**
+     * @return The scrollbar this container is currently displaying
+     */
     public Scrollbar scrollbar() {
         return this.scrollbar;
     }
 
+    /**
+     * Set the increment, or step size, this container should scroll
+     * by. If this is anything other than {@code 0}, all scrolling in
+     * this container will snap to the closest multiple of this value
+     */
     public ScrollContainer<C> scrollStep(int scrollStep) {
         this.scrollStep = scrollStep;
         return this;
     }
 
+    /**
+     * @return The current scroll step size of this container
+     */
     public int scrollStep() {
         return this.scrollStep;
     }
@@ -293,6 +319,10 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
         return this;
     }
 
+    /**
+     * @return The current fixed length of this container's scrollbar,
+     * or {@code 0} if it adjusts based on the content
+     */
     public int fixedScrollbarLength() {
         return this.fixedScrollbarLength;
     }
@@ -305,10 +335,6 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
         UIParsing.apply(children, "scrollbar", Scrollbar::parse, this::scrollbar);
 
         UIParsing.apply(children, "scroll-step", UIParsing::parseUnsignedInt, this::scrollStep);
-
-        UIParsing.apply(children, "scrollbar-color", Color::parseAndPack, integer -> {
-            Owo.debugWarn(Owo.LOGGER, "A UI model used the deprecated 'scrollbar-color' property. This is superseded by <scrollbar> <flat>{color}</flat> </scrollbar>");
-        });
     }
 
     public static ScrollContainer<?> parse(Element element) {
@@ -320,6 +346,9 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
     @FunctionalInterface
     public interface Scrollbar {
 
+        /**
+         * A rectangular scrollbar filled with the given color
+         */
         static Scrollbar flat(Color color) {
             int scrollbarColor = color.argb();
 
@@ -336,6 +365,9 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
             };
         }
 
+        /**
+         * The vanilla scrollbar used by the creative inventory screen
+         */
         static Scrollbar vanilla() {
             return (matrices, x, y, width, height, trackX, trackY, trackWidth, trackHeight, lastInteractTime, direction, active) -> {
                 OwoNinePatchRenderers.VANILLA_SCROLLBAR_TRACK.draw(matrices, trackX, trackY, trackWidth, trackHeight);
@@ -348,6 +380,10 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
             };
         }
 
+        /**
+         * The more flat looking vanilla scrollbar used in the
+         * game options screens
+         */
         static Scrollbar vanillaFlat() {
             return (matrices, x, y, width, height, trackX, trackY, trackWidth, trackHeight, lastInteractTime, direction, active) -> {
                 Drawer.fill(matrices, trackX, trackY, trackX + trackWidth, trackY + trackHeight, Color.BLACK.argb());

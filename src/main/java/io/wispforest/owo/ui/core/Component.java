@@ -253,14 +253,6 @@ public interface Component extends PositionedRectangle {
     void dismount(DismountReason reason);
 
     /**
-     * @return {@code true} if this component currently has a parent
-     */
-    @Contract(pure = true)
-    default boolean hasParent() {
-        return this.parent() != null;
-    }
-
-    /**
      * Execute the given closure immediately with this
      * component as the argument. This is primarily useful for calling
      * methods that don't return the component and could thus not be
@@ -268,8 +260,8 @@ public interface Component extends PositionedRectangle {
      * <p>
      * All state updates emitted during execution of the closure are deferred
      * and consolidated into a single update that's emitted after execution has
-     * finished. Thus, you can also employ this to update multiple properties
-     * on a component more efficiently.
+     * finished. Thus, you can also employ this to efficiently update multiple
+     * properties on a component.
      * <p>
      * <b>It is imperative that the type parameter be declared to a type that
      * this component can be represented as - otherwise an exception is thrown</b>
@@ -289,6 +281,14 @@ public interface Component extends PositionedRectangle {
      * @return This component
      */
     <C extends Component> C configure(Consumer<C> closure);
+
+    /**
+     * @return {@code true} if this component currently has a parent
+     */
+    @Contract(pure = true)
+    default boolean hasParent() {
+        return this.parent() != null;
+    }
 
     /**
      * Called when the mouse has been clicked inside

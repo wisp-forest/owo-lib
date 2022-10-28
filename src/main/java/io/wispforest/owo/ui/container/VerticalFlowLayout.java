@@ -30,11 +30,13 @@ public class VerticalFlowLayout extends FlowLayout {
                     this.y + padding.top() + child.margins().get().top() + layoutHeight.intValue());
 
             final var childSize = child.fullSize();
-            layoutHeight.add(childSize.height());
+            layoutHeight.add(childSize.height() + this.gap);
             if (childSize.width() > layoutWidth.intValue()) {
                 layoutWidth.setValue(childSize.width());
             }
         });
+
+        layoutHeight.subtract(this.gap);
 
         this.contentSize = Size.of(layoutWidth.intValue(), layoutHeight.intValue());
         this.applySizing();

@@ -122,23 +122,22 @@ public class ComponentTestScreen extends Screen {
         final var growAnimation = growingTextBox.horizontalSizing().animate(500, Easing.SINE, Sizing.fixed(80));
         growingTextBox.mouseEnter().subscribe(growAnimation::forwards);
         growingTextBox.mouseLeave().subscribe(growAnimation::backwards);
-        growingTextBox.margins(Insets.vertical(5));
 
         var weeAnimation = buttonPanel.positioning().animate(1000, Easing.CUBIC, Positioning.relative(0, 100));
         rootComponent.child(Containers.verticalFlow(Sizing.content(), Sizing.content())
                 .child(growingTextBox)
-                .child(new TextFieldWidget(this.client.textRenderer, 0, 0, 60, 20, Text.empty()).margins(Insets.vertical(5)))
-                .child(Components.button(Text.of("weeeee"), (ButtonComponent button) -> {
+                .child(new TextFieldWidget(this.client.textRenderer, 0, 0, 60, 20, Text.empty()))
+                .child(Components.button(Text.of("weeeee"), button -> {
                     weeAnimation.loop(!weeAnimation.looping());
-                }).renderer(ButtonComponent.Renderer.flat(0x77000000, 0x77070707, 0xA0000000)).sizing(Sizing.content()).margins(Insets.vertical(5)))
-                .child(Components.discreteSlider(Sizing.fill(10), 0, 5).<DiscreteSliderComponent>configure(slider -> {
-                            slider.snap(true)
-                                    .decimalPlaces(1)
-                                    .message(value -> Text.translatable("text.ui.test_slider", value))
-                                    .onChanged().subscribe(value -> this.client.player.sendMessage(Text.of("sliding towards " + value)));
-                        })
-                )
-                .padding(Insets.of(5))
+                }).renderer(ButtonComponent.Renderer.flat(0x77000000, 0x77070707, 0xA0000000)).sizing(Sizing.content()))
+                .child(Components.discreteSlider(Sizing.fill(10), 0, 5).<DiscreteSliderComponent>configure(
+                        slider -> slider.snap(true)
+                                .decimalPlaces(1)
+                                .message(value -> Text.translatable("text.ui.test_slider", value))
+                                .onChanged().subscribe(value -> this.client.player.sendMessage(Text.of("sliding towards " + value)))
+                ))
+                .gap(10)
+                .padding(Insets.both(5, 10))
                 .horizontalAlignment(HorizontalAlignment.CENTER)
                 .surface(Surface.DARK_PANEL)
         );

@@ -51,10 +51,10 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
     }
 
     /**
-     * Update the state of this component
-     * before drawing the next frame. This method is separated out from
-     * {@link #update(float, int, int)} to enforce the task queue always
-     * being run last
+     * Update the state of this component before drawing
+     * the next frame. This method is separated from
+     * {@link #update(float, int, int)} to enforce the task
+     * queue always being run last
      *
      * @param delta  The duration of the last frame, in partial ticks
      * @param mouseX The mouse pointer's x-coordinate
