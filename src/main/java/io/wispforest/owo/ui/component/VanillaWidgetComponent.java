@@ -2,16 +2,15 @@ package io.wispforest.owo.ui.component;
 
 import io.wispforest.owo.mixin.ui.ClickableWidgetAccessor;
 import io.wispforest.owo.ui.base.BaseComponent;
-import io.wispforest.owo.ui.core.Insets;
-import io.wispforest.owo.ui.core.ParentComponent;
-import io.wispforest.owo.ui.core.Size;
-import io.wispforest.owo.ui.core.Sizing;
+import io.wispforest.owo.ui.core.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CheckboxWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.math.MatrixStack;
+
+import java.util.function.Consumer;
 
 public class VanillaWidgetComponent extends BaseComponent {
 
@@ -89,6 +88,21 @@ public class VanillaWidgetComponent extends BaseComponent {
 
         accessor.owo$setWidth(this.width);
         accessor.owo$setHeight(this.height);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <C extends Component> C configure(Consumer<C> closure) {
+        try {
+            this.runAndDeferEvents(() -> closure.accept((C) this.widget));
+        } catch (ClassCastException theUserDidBadItWasNotMyFault) {
+            throw new IllegalArgumentException(
+                    "Invalid target class passed when configuring component of type " + this.getClass().getSimpleName(),
+                    theUserDidBadItWasNotMyFault
+            );
+        }
+
+        return (C) this.widget;
     }
 
     @Override

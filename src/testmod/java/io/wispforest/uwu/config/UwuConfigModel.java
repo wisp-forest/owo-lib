@@ -21,6 +21,7 @@ public class UwuConfigModel {
 
     @Nest
     @Expanded
+    @SectionHeader("nesting_yo?")
     public Nested nestingTime = new Nested();
 
     public float floting = 6.9f;

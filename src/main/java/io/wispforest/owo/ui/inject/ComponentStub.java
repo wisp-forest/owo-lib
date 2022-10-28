@@ -1,5 +1,6 @@
 package io.wispforest.owo.ui.inject;
 
+import io.wispforest.owo.ui.component.VanillaWidgetComponent;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.event.*;
 import io.wispforest.owo.ui.util.FocusHandler;
@@ -9,6 +10,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Stub-version of component which adds implementations for all methods
@@ -124,6 +126,11 @@ public interface ComponentStub extends Component {
 
     @Override
     default void dismount(DismountReason reason) {
+        throw new IllegalStateException("Interface stub method called");
+    }
+
+    @Override
+    default <C extends Component> C configure(Consumer<C> closure) {
         throw new IllegalStateException("Interface stub method called");
     }
 
@@ -244,6 +251,10 @@ public interface ComponentStub extends Component {
 
     @Override
     default @Nullable String id() {
+        throw new IllegalStateException("Interface stub method called");
+    }
+
+    default VanillaWidgetComponent widgetWrapper() {
         throw new IllegalStateException("Interface stub method called");
     }
 }

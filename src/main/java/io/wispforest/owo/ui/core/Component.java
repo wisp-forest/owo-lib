@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public interface Component extends PositionedRectangle {
 
@@ -258,6 +259,8 @@ public interface Component extends PositionedRectangle {
     default boolean hasParent() {
         return this.parent() != null;
     }
+
+    <C extends Component> C configure(Consumer<C> closure);
 
     /**
      * Called when the mouse has been clicked inside

@@ -23,6 +23,7 @@ import org.w3c.dom.Element;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 @SuppressWarnings("ConstantConditions")
 @Mixin(ClickableWidget.class)
@@ -248,6 +249,11 @@ public abstract class ClickableWidgetMixin implements ComponentStub {
     }
 
     @Override
+    public <C extends Component> C configure(Consumer<C> closure) {
+        return this.owo$getWrapper().configure(closure);
+    }
+
+    @Override
     public void parseProperties(UIModel spec, Element element, Map<String, Element> children) {
         // --- copied from Component, because you can't invoke interface super methods in mixins - very cool ---
 
@@ -319,6 +325,11 @@ public abstract class ClickableWidgetMixin implements ComponentStub {
             this.owo$wrapper = Components.wrapVanillaWidget((ClickableWidget) (Object) this);
         }
 
+        return this.owo$wrapper;
+    }
+
+    @Override
+    public @Nullable VanillaWidgetComponent widgetWrapper() {
         return this.owo$wrapper;
     }
 

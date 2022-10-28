@@ -10,6 +10,7 @@ import net.minecraft.client.gui.tooltip.TooltipComponent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * The reference implementation of the {@link Component} interface,
@@ -22,6 +23,8 @@ public abstract class BaseComponent implements Component {
     protected int zIndex = 0;
 
     protected boolean mounted = false;
+
+    protected int batchedEvents = 0;
 
     protected AnimatableProperty<Insets> margins = AnimatableProperty.of(Insets.none());
 
@@ -90,7 +93,41 @@ public abstract class BaseComponent implements Component {
 
     protected void notifyParentIfMounted() {
         if (!this.hasParent()) return;
+
+        if (this.batchedEvents > 0) {
+            this.batchedEvents++;
+            return;
+        }
+
         this.parent.onChildMutated(this);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <C extends Component> C configure(Consumer<C> closure) {
+        try {
+            this.runAndDeferEvents(() -> closure.accept((C) this));
+        } catch (ClassCastException theUserDidBadItWasNotMyFault) {
+            throw new IllegalArgumentException(
+                    "Invalid target class passed when configuring component of type " + this.getClass().getSimpleName(),
+                    theUserDidBadItWasNotMyFault
+            );
+        }
+
+        return (C) this;
+    }
+
+    protected void runAndDeferEvents(Runnable action) {
+        try {
+            this.batchedEvents = 1;
+            action.run();
+        } finally {
+            if (this.batchedEvents > 1) {
+                this.notifyParentIfMounted();
+            }
+
+            this.batchedEvents = 0;
+        }
     }
 
     @Override

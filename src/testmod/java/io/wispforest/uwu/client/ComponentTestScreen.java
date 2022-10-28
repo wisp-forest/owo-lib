@@ -1,10 +1,7 @@
 package io.wispforest.uwu.client;
 
 import com.mojang.authlib.GameProfile;
-import io.wispforest.owo.ui.component.BoxComponent;
-import io.wispforest.owo.ui.component.ButtonComponent;
-import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.component.EntityComponent;
+import io.wispforest.owo.ui.component.*;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.ScrollContainer;
@@ -134,13 +131,13 @@ public class ComponentTestScreen extends Screen {
                 .child(Components.button(Text.of("weeeee"), (ButtonComponent button) -> {
                     weeAnimation.loop(!weeAnimation.looping());
                 }).renderer(ButtonComponent.Renderer.flat(0x77000000, 0x77070707, 0xA0000000)).sizing(Sizing.content()).margins(Insets.vertical(5)))
-                .child(Components.discreteSlider(Sizing.fill(10), 0, 5)
-                        .snap(true)
-                        .decimalPlaces(1)
-                        .message(value -> Text.translatable("text.ui.test_slider", value))
-                        .configure(slider -> {
-                            slider.onChanged().subscribe(value -> this.client.player.sendMessage(Text.of("sliding towards " + value)));
-                        }))
+                .child(Components.discreteSlider(Sizing.fill(10), 0, 5).<DiscreteSliderComponent>configure(slider -> {
+                            slider.snap(true)
+                                    .decimalPlaces(1)
+                                    .message(value -> Text.translatable("text.ui.test_slider", value))
+                                    .onChanged().subscribe(value -> this.client.player.sendMessage(Text.of("sliding towards " + value)));
+                        })
+                )
                 .padding(Insets.of(5))
                 .horizontalAlignment(HorizontalAlignment.CENTER)
                 .surface(Surface.DARK_PANEL)

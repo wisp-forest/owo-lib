@@ -144,11 +144,6 @@ public class SliderComponent extends SliderWidget {
         super.setMessage(message);
     }
 
-    public SliderComponent configure(Consumer<SliderComponent> closure) {
-        closure.accept(this);
-        return this;
-    }
-
     public interface OnChanged {
         void onChanged(double value);
 
