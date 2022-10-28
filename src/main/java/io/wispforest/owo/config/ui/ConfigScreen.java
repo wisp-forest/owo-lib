@@ -148,6 +148,10 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
             );
 
             if (!containers.containsKey(parentKey) && containers.containsKey(parentKey.parent())) {
+                if (this.config.fieldForKey(parentKey).isAnnotationPresent(SectionHeader.class)) {
+                    this.appendSection(sections, this.config.fieldForKey(parentKey), containers.get(parentKey.parent()));
+                }
+
                 containers.put(parentKey, container);
                 containers.get(parentKey.parent()).child(container);
             }
@@ -175,15 +179,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
             }
 
             if (option.backingField().hasAnnotation(SectionHeader.class)) {
-                var translationKey = "text.config." + this.config.name() + ".section."
-                        + option.backingField().getAnnotation(SectionHeader.class).value();
-
-                final var header = this.model.expandTemplate(FlowLayout.class, "section-header", Map.of());
-                header.childById(LabelComponent.class, "header").text(Text.translatable(translationKey).formatted(Formatting.YELLOW, Formatting.BOLD));
-
-                sections.put(header, Text.translatable(translationKey));
-
-                container.child(header);
+                this.appendSection(sections, option.backingField().field(), container);
             }
 
             container.child(result.baseComponent());
@@ -243,6 +239,18 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
 
             rootComponent.childById(FlowLayout.class, "main-panel").child(buttonPanel);
         }
+    }
+
+    protected void appendSection(Map<Component, Text> sections, Field field, FlowLayout container) {
+        var translationKey = "text.config." + this.config.name() + ".section."
+                + field.getAnnotation(SectionHeader.class).value();
+
+        final var header = this.model.expandTemplate(FlowLayout.class, "section-header", Map.of());
+        header.childById(LabelComponent.class, "header").text(Text.translatable(translationKey).formatted(Formatting.YELLOW, Formatting.BOLD));
+
+        sections.put(header, Text.translatable(translationKey));
+
+        container.child(header);
     }
 
     @Override
