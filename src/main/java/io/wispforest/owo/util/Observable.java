@@ -54,6 +54,7 @@ public class Observable<T> {
      * @param observer    The observer to notify
      * @param observables The list of observable to observe
      */
+    @SafeVarargs
     public static <T> void observeAll(Consumer<T> observer, Observable<T>... observables) {
         for (var observable : observables) {
             observable.observe(observer);
@@ -91,7 +92,7 @@ public class Observable<T> {
         this.observers.add(observer);
     }
 
-    private void notifyObservers(T value) {
+    protected void notifyObservers(T value) {
         for (var observer : this.observers) {
             observer.accept(value);
         }

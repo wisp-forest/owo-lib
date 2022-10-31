@@ -9,6 +9,7 @@
     "ItemStackMixin",
     "NbtCompoundMixin",
     "ScreenHandlerInvoker",
+    "ScreenHandlerMixin",
     "ServerPlayerEntityMixin",
     "SimpleRegistryMixin",
     "TagGroupLoaderMixin",
