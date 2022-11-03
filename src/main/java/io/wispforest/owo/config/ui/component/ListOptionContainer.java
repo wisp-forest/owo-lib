@@ -125,8 +125,6 @@ public class ListOptionContainer<T> extends CollapsibleContainer implements Opti
 
             if (NumberReflection.isNumberType(listType)) {
                 box.configureForNumber((Class<? extends Number>) listType);
-            } else if (this.backingOption.constraint() != null) {
-                box.applyPredicate(this.backingOption.constraint().predicate());
             }
 
             container.child(box);

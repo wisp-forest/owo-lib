@@ -24,6 +24,9 @@ public class UwuConfigModel {
     @SectionHeader("nesting_yo?")
     public Nested nestingTime = new Nested();
 
+    @PredicateConstraint("predicateFunction")
+    public List<String> someOption = new ArrayList<>(List.of("1", "2", "3", "4", "5"));
+
     public float floting = 6.9f;
 
     public String thisIsAStringValue = "\\bruh?";
@@ -55,5 +58,13 @@ public class UwuConfigModel {
 
     public enum WowValues {
         FIRST, SECOND, THIRD, FOURTH;
+    }
+
+    // so we declare a predicate method
+    public static boolean predicateFunction(List<String> list) {
+        // and do the check in here
+        // this could be arbitrarily complex code, but
+        // we'll keep it simple for this demonstration
+        return list.size() == 5;
     }
 }
