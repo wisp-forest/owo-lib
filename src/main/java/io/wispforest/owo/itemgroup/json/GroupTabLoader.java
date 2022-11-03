@@ -77,7 +77,7 @@ public class GroupTabLoader implements ModDataConsumer {
             tabs.add(new ItemGroupTab(
                     Icon.of(icon),
                     OwoItemGroup.ButtonDefinition.tooltipFor(targetGroup, "tab", name),
-                    (features, entries) -> Registry.ITEM.stream().filter(item -> item.getRegistryEntry().isIn(tag)).forEach(entries::add),
+                    (features, entries, hasPermissions) -> Registry.ITEM.stream().filter(item -> item.getRegistryEntry().isIn(tag)).forEach(entries::add),
                     texture,
                     false
             ));

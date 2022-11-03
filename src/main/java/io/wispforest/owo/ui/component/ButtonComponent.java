@@ -27,7 +27,7 @@ public class ButtonComponent extends ButtonWidget {
     protected boolean textShadow = true;
 
     protected ButtonComponent(Text message, Consumer<ButtonComponent> onPress) {
-        super(0, 0, 0, 0, message, button -> onPress.accept((ButtonComponent) button), ButtonWidget.EMPTY, ButtonWidget.field_40754);
+        super(0, 0, 0, 0, message, button -> onPress.accept((ButtonComponent) button), ButtonWidget.EMPTY_TOOLTIP, ButtonWidget.DEFAULT_NARRATION_SUPPLIER);
         this.sizing(Sizing.content());
     }
 
@@ -39,16 +39,16 @@ public class ButtonComponent extends ButtonWidget {
         int color = this.active ? 0xffffff : 0xa0a0a0;
 
         if (this.textShadow) {
-            Drawer.drawCenteredText(matrices, textRenderer, this.getMessage(), this.method_46426() + this.width / 2, this.method_46427() + (this.height - 8) / 2, color);
+            Drawer.drawCenteredText(matrices, textRenderer, this.getMessage(), this.getX() + this.width / 2, this.getY() + (this.height - 8) / 2, color);
         } else {
-            textRenderer.draw(matrices, this.getMessage(), this.method_46426() + this.width / 2f - textRenderer.getWidth(this.getMessage()) / 2f, this.method_46427() + (this.height - 8) / 2f, color);
+            textRenderer.draw(matrices, this.getMessage(), this.getX() + this.width / 2f - textRenderer.getWidth(this.getMessage()) / 2f, this.getY() + (this.height - 8) / 2f, color);
         }
 
         if (this.hovered) this.renderTooltip(matrices, mouseX, mouseY);
     }
 
     public ButtonComponent onPress(Consumer<ButtonComponent> onPress) {
-        ((ButtonWidgetAccessor)this).owo$setOnPress(button -> onPress.accept((ButtonComponent) button));
+        ((ButtonWidgetAccessor) this).owo$setOnPress(button -> onPress.accept((ButtonComponent) button));
         return this;
     }
 
@@ -89,12 +89,12 @@ public class ButtonComponent extends ButtonWidget {
 
             if (button.active) {
                 if (button.hovered) {
-                    OwoNinePatchRenderers.HOVERED_BUTTON.draw(matrices, button.method_46426(), button.method_46427(), button.width, button.height);
+                    OwoNinePatchRenderers.HOVERED_BUTTON.draw(matrices, button.getX(), button.getY(), button.width, button.height);
                 } else {
-                    OwoNinePatchRenderers.ACTIVE_BUTTON.draw(matrices, button.method_46426(), button.method_46427(), button.width, button.height);
+                    OwoNinePatchRenderers.ACTIVE_BUTTON.draw(matrices, button.getX(), button.getY(), button.width, button.height);
                 }
             } else {
-                OwoNinePatchRenderers.BUTTON_DISABLED.draw(matrices, button.method_46426(), button.method_46427(), button.width, button.height);
+                OwoNinePatchRenderers.BUTTON_DISABLED.draw(matrices, button.getX(), button.getY(), button.width, button.height);
             }
         };
 
@@ -104,12 +104,12 @@ public class ButtonComponent extends ButtonWidget {
 
                 if (button.active) {
                     if (button.hovered) {
-                        Drawer.fill(matrices, button.method_46426(), button.method_46427(), button.method_46426() + button.width, button.method_46427() + button.height, hoveredColor);
+                        Drawer.fill(matrices, button.getX(), button.getY(), button.getX() + button.width, button.getY() + button.height, hoveredColor);
                     } else {
-                        Drawer.fill(matrices, button.method_46426(), button.method_46427(), button.method_46426() + button.width, button.method_46427() + button.height, color);
+                        Drawer.fill(matrices, button.getX(), button.getY(), button.getX() + button.width, button.getY() + button.height, color);
                     }
                 } else {
-                    Drawer.fill(matrices, button.method_46426(), button.method_46427(), button.method_46426() + button.width, button.method_46427() + button.height, disabledColor);
+                    Drawer.fill(matrices, button.getX(), button.getY(), button.getX() + button.width, button.getY() + button.height, disabledColor);
                 }
             };
         }
@@ -125,7 +125,7 @@ public class ButtonComponent extends ButtonWidget {
 
                 RenderSystem.enableDepthTest();
                 RenderSystem.setShaderTexture(0, texture);
-                Drawer.drawTexture(matrices, button.method_46426(), button.method_46427(), u, renderV, button.width, button.height, textureWidth, textureHeight);
+                Drawer.drawTexture(matrices, button.getX(), button.getY(), u, renderV, button.width, button.height, textureWidth, textureHeight);
             };
         }
 

@@ -6,10 +6,10 @@ import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.UISounds;
-import net.minecraft.class_7833;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.math.RotationAxis;
 import org.lwjgl.glfw.GLFW;
 import org.w3c.dom.Element;
 
@@ -162,7 +162,7 @@ public class CollapsibleContainer extends VerticalFlowLayout {
         public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
             matrices.push();
             matrices.translate(this.x + this.width / 2f - 1, this.y + this.height / 2f - 1, 0);
-            matrices.multiply(class_7833.field_40718.rotationDegrees(this.rotation));
+            matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(this.rotation));
             matrices.translate(-(this.x + this.width / 2f - 1), -(this.y + this.height / 2f - 1), 0);
 
             super.draw(matrices, mouseX, mouseY, partialTicks, delta);

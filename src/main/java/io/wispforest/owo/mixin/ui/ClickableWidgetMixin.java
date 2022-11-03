@@ -121,18 +121,8 @@ public abstract class ClickableWidgetMixin implements ComponentStub {
     }
 
     @Override
-    public void setX(int x) {
-        this.owo$getWrapper().setX(x);
-    }
-
-    @Override
     public int y() {
         return this.owo$getWrapper().y();
-    }
-
-    @Override
-    public void setY(int y) {
-        this.owo$getWrapper().setY(y);
     }
 
     @Override
@@ -342,7 +332,7 @@ public abstract class ClickableWidgetMixin implements ComponentStub {
         }
     }
 
-    @Inject(method = "method_46421", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "setX", at = @At("HEAD"), cancellable = true)
     private void applyXToWrapper(int x, CallbackInfo ci) {
         var wrapper = this.owo$wrapper;
         if (wrapper != null) {
@@ -351,7 +341,7 @@ public abstract class ClickableWidgetMixin implements ComponentStub {
         }
     }
 
-    @Inject(method = "method_46419", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "setY", at = @At("HEAD"), cancellable = true)
     private void applyYToWrapper(int y, CallbackInfo ci) {
         var wrapper = this.owo$wrapper;
         if (wrapper != null) {

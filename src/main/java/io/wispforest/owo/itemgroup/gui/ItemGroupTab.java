@@ -18,7 +18,7 @@ import java.util.function.BiConsumer;
 public record ItemGroupTab(
         Icon icon,
         Text name,
-        BiConsumer<FeatureSet, ItemGroup.Entries> contentSupplier,
+        ContentSupplier contentSupplier,
         Identifier texture,
         boolean primary
 ) implements OwoItemGroup.ButtonDefinition {
@@ -28,5 +28,10 @@ public record ItemGroupTab(
     @Override
     public Text tooltip() {
         return this.name;
+    }
+
+    @FunctionalInterface
+    public interface ContentSupplier {
+        void addItems(FeatureSet enabledFeatures, ItemGroup.Entries entries, boolean hasPermissions);
     }
 }

@@ -3,6 +3,7 @@ package io.wispforest.owo.itemgroup;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButtonWidget;
 import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
+import io.wispforest.owo.mixin.itemgroup.ItemGroupAccessor;
 import io.wispforest.owo.util.pond.OwoItemExtensions;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
@@ -34,7 +35,7 @@ public abstract class OwoItemGroup extends FabricItemGroup {
 
     public static final BiConsumer<Item, Entries> DEFAULT_STACK_GENERATOR = (item, stacks) -> stacks.add(item.getDefaultStack());
 
-    protected static final ItemGroupTab PLACEHOLDER_TAB = new ItemGroupTab(Icon.of(Items.AIR), Text.empty(), (f, e) -> {}, ItemGroupTab.DEFAULT_TEXTURE, false);
+    protected static final ItemGroupTab PLACEHOLDER_TAB = new ItemGroupTab(Icon.of(Items.AIR), Text.empty(), (b, r, u) -> {}, ItemGroupTab.DEFAULT_TEXTURE, false);
 
     public final List<ItemGroupTab> tabs = new ArrayList<>();
     public final List<ItemGroupButton> buttons = new ArrayList<>();
@@ -108,8 +109,8 @@ public abstract class OwoItemGroup extends FabricItemGroup {
                 icon,
                 ButtonDefinition.tooltipFor(this, "tab", name),
                 contentTag == null
-                        ? (features, entries) -> {}
-                        : (features, entries) -> Registry.ITEM.stream().filter(item -> item.getRegistryEntry().isIn(contentTag)).forEach(entries::add),
+                        ? (features, entries, hasPermissions) -> {}
+                        : (features, entries, hasPermissions) -> Registry.ITEM.stream().filter(item -> item.getRegistryEntry().isIn(contentTag)).forEach(entries::add),
                 texture,
                 primary
         ));
@@ -166,7 +167,8 @@ public abstract class OwoItemGroup extends FabricItemGroup {
 
     public void setSelectedTab(int selectedTab) {
         this.selectedTab = selectedTab;
-        this.clearStacks();
+        ((ItemGroupAccessor) this).owo$setDisplayStacks(null);
+        ((ItemGroupAccessor) this).owo$searchTabStacks(null);
     }
 
     public ItemGroupTab getSelectedTab() {
@@ -214,9 +216,9 @@ public abstract class OwoItemGroup extends FabricItemGroup {
     // Utility
 
     @Override
-    protected void addItems(FeatureSet enabledFeatures, Entries entries) {
+    protected void addItems(FeatureSet enabledFeatures, Entries entries, boolean hasPermissions) {
         if (!this.initialized) throw new IllegalStateException("oωo item group not initialized, was 'initialize()' called?");
-        this.getSelectedTab().contentSupplier().accept(enabledFeatures, entries);
+        this.getSelectedTab().contentSupplier().addItems(enabledFeatures, entries, hasPermissions);
 
         Registry.ITEM.stream()
                 .filter(item -> ((OwoItemExtensions) item).owo$group() == this && ((OwoItemExtensions) item).owo$tab() == this.selectedTab)

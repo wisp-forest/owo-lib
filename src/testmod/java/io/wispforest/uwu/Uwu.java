@@ -15,7 +15,6 @@ import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
 import io.wispforest.owo.text.CustomTextRegistry;
 import io.wispforest.owo.util.RegistryAccess;
 import io.wispforest.owo.util.TagInjector;
-import io.wispforest.uwu.client.EpicHandledScreen;
 import io.wispforest.uwu.config.BruhConfig;
 import io.wispforest.uwu.config.UwuConfig;
 import io.wispforest.uwu.items.UwuItems;
@@ -29,7 +28,6 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ingame.HandledScreens;
 import net.minecraft.command.argument.GameProfileArgumentType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -134,7 +132,7 @@ public class Uwu implements ModInitializer {
         }
 
         @Override
-        protected void addItems(FeatureSet enabledFeatures, Entries entries) {}
+        protected void addItems(FeatureSet enabledFeatures, Entries entries, boolean hasPermissions) {}
     };
 
     public static final OwoNetChannel CHANNEL = OwoNetChannel.create(new Identifier("uwu", "uwu"));

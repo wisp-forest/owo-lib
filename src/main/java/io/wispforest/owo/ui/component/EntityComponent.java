@@ -8,7 +8,6 @@ import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
-import net.minecraft.class_7833;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -26,6 +25,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
@@ -90,11 +90,11 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
 
             // We make sure the xRotation never becomes 0, as the lighting otherwise becomes very unhappy
             if (xRotation == 0) xRotation = .1f;
-            matrices.multiply(class_7833.field_40714.rotationDegrees(xRotation * .15f));
-            matrices.multiply(class_7833.field_40716.rotationDegrees(yRotation * .15f));
+            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(xRotation * .15f));
+            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(yRotation * .15f));
         } else {
-            matrices.multiply(class_7833.field_40714.rotationDegrees(35));
-            matrices.multiply(class_7833.field_40716.rotationDegrees(-45 + this.mouseRotation));
+            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(35));
+            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-45 + this.mouseRotation));
         }
 
         RenderSystem.setShaderLights(new Vector3f(.15f, 1, 0), new Vector3f(.15f, -1, 0));

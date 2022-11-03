@@ -15,7 +15,7 @@ public class ItemGroupButtonWidget extends ButtonWidget {
     private final boolean hoverReactive;
 
     public ItemGroupButtonWidget(int x, int y, boolean hoverReactive, OwoItemGroup.ButtonDefinition definition, PressAction onPress) {
-        super(x, y, 24, 24, definition.tooltip(), onPress, ButtonWidget.EMPTY, ButtonWidget.field_40754);
+        super(x, y, 24, 24, definition.tooltip(), onPress, ButtonWidget.EMPTY_TOOLTIP, ButtonWidget.DEFAULT_NARRATION_SUPPLIER);
         this.definition = definition;
         this.hoverReactive = hoverReactive;
     }
@@ -25,13 +25,13 @@ public class ItemGroupButtonWidget extends ButtonWidget {
         var client = MinecraftClient.getInstance();
 
         RenderSystem.setShaderTexture(0, definition.texture());
-        drawTexture(matrixStack, this.method_46426(), this.method_46427(), 0, (shouldShowHighlight(hovered) ? 1 : 0) * height, this.width, this.height, 64, 64);
+        drawTexture(matrixStack, this.getX(), this.getY(), 0, (shouldShowHighlight(hovered) ? 1 : 0) * height, this.width, this.height, 64, 64);
         this.renderBackground(matrixStack, client, mouseX, mouseY);
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
 
-        this.definition.icon().render(matrixStack, this.method_46426() + 4, this.method_46427() + 4, mouseX, mouseY, delta);
+        this.definition.icon().render(matrixStack, this.getX() + 4, this.getY() + 4, mouseX, mouseY, delta);
 
         RenderSystem.disableBlend();
     }

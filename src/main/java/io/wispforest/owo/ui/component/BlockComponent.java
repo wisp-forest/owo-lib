@@ -6,13 +6,13 @@ import io.wispforest.owo.ui.base.BaseComponent;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.class_7833;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.util.math.RotationAxis;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
@@ -36,8 +36,8 @@ public class BlockComponent extends BaseComponent {
         matrices.translate(x + this.width / 2f, y + this.height / 2f, 100);
         matrices.scale(40 * this.width / 64f, -40 * this.height / 64f, 40);
 
-        matrices.multiply(class_7833.field_40714.rotationDegrees(30));
-        matrices.multiply(class_7833.field_40716.rotationDegrees(45 + 180));
+        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(30));
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(45 + 180));
 
         matrices.translate(-.5, -.5, -.5);
 

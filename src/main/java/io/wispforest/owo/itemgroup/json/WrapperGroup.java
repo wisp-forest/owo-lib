@@ -64,24 +64,24 @@ public class WrapperGroup extends OwoItemGroup {
         this.tabs.add(0, new ItemGroupTab(
                 Icon.of(this.parent.createIcon()),
                 this.parent.getDisplayName(),
-                (featureSet, entries) -> this.parent.getDisplayStacks(featureSet).forEach(entries::add),
+                (featureSet, entries, hasPermissions) -> this.parent.getDisplayStacks(featureSet, hasPermissions).forEach(entries::add),
                 ItemGroupTab.DEFAULT_TEXTURE,
                 true
         ));
     }
 
     @Override
-    public ItemStackSet getDisplayStacks(FeatureSet enabledFeatures) {
+    public ItemStackSet getDisplayStacks(FeatureSet enabledFeatures, boolean hasPermissions) {
         return this.tabs.size() < 2
-                ? parent.getDisplayStacks(enabledFeatures)
-                : super.getDisplayStacks(enabledFeatures);
+                ? parent.getDisplayStacks(enabledFeatures, hasPermissions)
+                : super.getDisplayStacks(enabledFeatures, hasPermissions);
     }
 
     @Override
-    public ItemStackSet getSearchTabStacks(FeatureSet enabledFeatures) {
+    public ItemStackSet getSearchTabStacks(FeatureSet enabledFeatures, boolean hasPermissions) {
         return this.tabs.size() < 2
-                ? parent.getSearchTabStacks(enabledFeatures)
-                : super.getSearchTabStacks(enabledFeatures);
+                ? parent.getSearchTabStacks(enabledFeatures, hasPermissions)
+                : super.getSearchTabStacks(enabledFeatures, hasPermissions);
     }
 
     @Override
