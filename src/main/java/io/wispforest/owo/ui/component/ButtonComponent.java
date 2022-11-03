@@ -85,6 +85,8 @@ public class ButtonComponent extends ButtonWidget {
     @FunctionalInterface
     public interface Renderer {
         Renderer VANILLA = (matrices, button, delta) -> {
+            RenderSystem.enableDepthTest();
+
             if (button.active) {
                 if (button.hovered) {
                     OwoNinePatchRenderers.HOVERED_BUTTON.draw(matrices, button.method_46426(), button.method_46427(), button.width, button.height);
@@ -98,6 +100,8 @@ public class ButtonComponent extends ButtonWidget {
 
         static Renderer flat(int color, int hoveredColor, int disabledColor) {
             return (matrices, button, delta) -> {
+                RenderSystem.enableDepthTest();
+
                 if (button.active) {
                     if (button.hovered) {
                         Drawer.fill(matrices, button.method_46426(), button.method_46427(), button.method_46426() + button.width, button.method_46427() + button.height, hoveredColor);
