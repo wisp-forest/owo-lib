@@ -1,6 +1,7 @@
 package io.wispforest.owo.client;
 
 import io.wispforest.owo.Owo;
+import io.wispforest.owo.client.screens.ScreenInternals;
 import io.wispforest.owo.command.debug.OwoDebugCommands;
 import io.wispforest.owo.itemgroup.json.GroupTabLoader;
 import io.wispforest.owo.moddata.ModDataLoader;
@@ -50,6 +51,8 @@ public class OwoClient implements ClientModInitializer {
                 });
             }
         }
+
+        ScreenInternals.Client.init();
 
         if (!Owo.DEBUG) return;
         OwoDebugCommands.Client.register();

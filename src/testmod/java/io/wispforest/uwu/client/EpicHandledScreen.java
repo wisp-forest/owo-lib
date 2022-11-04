@@ -4,6 +4,7 @@ import io.wispforest.owo.mixin.ui.SlotAccessor;
 import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.Components;
+import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.*;
@@ -17,6 +18,8 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 public class EpicHandledScreen extends BaseOwoHandledScreen<FlowLayout, EpicScreenHandler> {
+    private LabelComponent numberLabel;
+
 
     public EpicHandledScreen(EpicScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
@@ -68,6 +71,13 @@ public class EpicHandledScreen extends BaseOwoHandledScreen<FlowLayout, EpicScre
                         .child(Components.box(Sizing.fixed(50), Sizing.fixed(35)).startColor(Color.BLUE).endColor(Color.RED).fill(true))
                 ).positioning(Positioning.relative(75, 50)).surface(Surface.outline(0x77000000)).padding(Insets.of(1))
         ).surface(Surface.VANILLA_TRANSLUCENT).verticalAlignment(VerticalAlignment.CENTER).horizontalAlignment(HorizontalAlignment.CENTER);
+
+        rootComponent.child(
+            (numberLabel = Components.label(Text.literal(handler.epicNumber.get())))
+                .positioning(Positioning.absolute(0, 0))
+        );
+
+        handler.epicNumber.observe(value -> numberLabel.text(Text.literal(value)));
     }
 
     @Override

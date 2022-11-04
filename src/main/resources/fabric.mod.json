@@ -61,6 +61,9 @@
       ],
       "net/minecraft/class_342": [
         "io/wispforest/owo/ui/inject/GreedyInputComponent"
+      ],
+      "net/minecraft/class_1703": [
+        "io/wispforest/owo/client/screens/OwoScreenHandler"
       ]
     }
   }

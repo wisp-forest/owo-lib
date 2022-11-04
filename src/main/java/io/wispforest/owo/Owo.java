@@ -1,8 +1,7 @@
 package io.wispforest.owo;
 
+import io.wispforest.owo.client.screens.ScreenInternals;
 import io.wispforest.owo.command.debug.OwoDebugCommands;
-import io.wispforest.owo.itemgroup.json.GroupTabLoader;
-import io.wispforest.owo.moddata.ModDataLoader;
 import io.wispforest.owo.ops.LootOps;
 import io.wispforest.owo.text.InsertingTextContent;
 import io.wispforest.owo.ui.parsing.UIModelLoader;
@@ -51,6 +50,7 @@ public class Owo implements ModInitializer {
     public void onInitialize() {
         LootOps.registerListener();
         InsertingTextContent.init();
+        ScreenInternals.init();
 
         ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new UIModelLoader());
 
