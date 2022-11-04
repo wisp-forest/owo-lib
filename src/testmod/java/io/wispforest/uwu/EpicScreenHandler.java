@@ -9,6 +9,7 @@ import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
+import net.minecraft.screen.slot.SlotActionType;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -33,6 +34,25 @@ public class EpicScreenHandler extends ScreenHandler {
 
         this.epicNumber = addProperty(String.class, "");
         this.epicNumber.set(generateEpicName());
+
+        addClientboundPacket(MaldPacket.class, this::handleMald);
+        addServerboundPacket(EpicPacket.class, this::handleEpic);
+    }
+
+    private void handleMald(MaldPacket r) {
+        sendPacket(new EpicPacket(r.number));
+    }
+
+    private void handleEpic(EpicPacket r) {
+        this.epicNumber.set(generateEpicName() + " " + r.number);
+    }
+
+    @Override
+    public void onSlotClick(int slotIndex, int button, SlotActionType actionType, PlayerEntity player) {
+        if (!player.world.isClient)
+            sendPacket(new MaldPacket(slotIndex));
+
+        super.onSlotClick(slotIndex, button, actionType, player);
     }
 
     // made originally by det hoonter tm
@@ -53,9 +73,6 @@ public class EpicScreenHandler extends ScreenHandler {
 
     @Override
     public ItemStack transferSlot(PlayerEntity player, int index) {
-        if (!player.world.isClient)
-            this.epicNumber.set(generateEpicName());
-
         return ScreenUtils.handleSlotTransfer(this, index, 4);
     }
 
@@ -63,4 +80,8 @@ public class EpicScreenHandler extends ScreenHandler {
     public boolean canUse(PlayerEntity player) {
         return true;
     }
+
+    public record EpicPacket(int number) { }
+
+    public record MaldPacket(int number) { }
 }
