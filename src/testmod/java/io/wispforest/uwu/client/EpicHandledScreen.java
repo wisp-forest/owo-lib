@@ -73,11 +73,11 @@ public class EpicHandledScreen extends BaseOwoHandledScreen<FlowLayout, EpicScre
         ).surface(Surface.VANILLA_TRANSLUCENT).verticalAlignment(VerticalAlignment.CENTER).horizontalAlignment(HorizontalAlignment.CENTER);
 
         rootComponent.child(
-            (numberLabel = Components.label(Text.literal(handler.epicNumber.get().toString())))
+            (numberLabel = Components.label(Text.literal(handler.epicNumber.get())))
                 .positioning(Positioning.absolute(0, 0))
         );
 
-        handler.epicNumber.observe(value -> numberLabel.text(Text.literal(value.toString())));
+        handler.epicNumber.observe(value -> numberLabel.text(Text.literal(value)));
     }
 
     @Override
