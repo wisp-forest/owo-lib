@@ -225,7 +225,11 @@ public abstract class OwoItemGroup extends FabricItemGroup {
                 .forEach(item -> ((OwoItemExtensions) item).owo$stackGenerator().accept(item, entries));
     }
 
+    /**
+     * @deprecated Override and use {@link #makeIcon()} instead
+     */
     @Override
+    @Deprecated(forRemoval = true)
     public ItemStack createIcon() {
         return ItemStack.EMPTY;
     }
