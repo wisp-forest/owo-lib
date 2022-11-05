@@ -2,10 +2,13 @@ package io.wispforest.owo.config.ui.component;
 
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.config.annotation.Expanded;
+import io.wispforest.owo.ops.TextOps;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.Components;
+import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.CollapsibleContainer;
 import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.owo.util.NumberReflection;
@@ -24,7 +27,6 @@ public class ListOptionContainer<T> extends CollapsibleContainer implements Opti
     protected final Option<List<T>> backingOption;
     protected final List<T> backingList;
 
-    protected final List<Component> optionContainers = new ArrayList<>();
     protected final ButtonWidget resetButton;
 
     @SuppressWarnings("unchecked")
@@ -39,25 +41,33 @@ public class ListOptionContainer<T> extends CollapsibleContainer implements Opti
         this.backingList = new ArrayList<>(option.value());
 
         this.padding(this.padding.get().add(0, 5, 0, 0));
-        this.titleLayout.padding(Insets.top(5));
 
         this.titleLayout.horizontalSizing(Sizing.fill(100));
         this.titleLayout.verticalSizing(Sizing.fixed(30));
         this.titleLayout.verticalAlignment(VerticalAlignment.CENTER);
 
         if (!option.detached()) {
-            var addButton = Components.label(Text.literal("Add entry").formatted(Formatting.GRAY));
-            addButton.cursorStyle(CursorStyle.HAND);
-            addButton.mouseEnter().subscribe(() -> addButton.text(addButton.text().copy().styled(style -> style.withColor(Formatting.YELLOW))));
-            addButton.mouseLeave().subscribe(() -> addButton.text(addButton.text().copy().styled(style -> style.withColor(Formatting.GRAY))));
-            addButton.mouseDown().subscribe((mouseX, mouseY, button) -> {
-                this.backingList.add((T) "");
-                this.refreshOptions();
-                UISounds.playInteractionSound();
+            this.titleLayout.child(Components.label(Text.translatable("text.owo.config.list.add_entry").formatted(Formatting.GRAY)).<LabelComponent>configure(label -> {
+                label.cursorStyle(CursorStyle.HAND);
 
-                return true;
-            });
-            this.titleLayout.child(addButton.margins(Insets.of(5)));
+                label.mouseEnter().subscribe(() -> label.text(label.text().copy().styled(style -> style.withColor(Formatting.YELLOW))));
+                label.mouseLeave().subscribe(() -> label.text(label.text().copy().styled(style -> style.withColor(Formatting.GRAY))));
+                label.mouseDown().subscribe((mouseX, mouseY, button) -> {
+                    UISounds.playInteractionSound();
+                    this.backingList.add((T) "");
+
+                    if (!this.expanded) this.toggleExpansion();
+                    this.refreshOptions();
+
+                    var lastEntry = (ParentComponent) this.collapsibleChildren.get(this.collapsibleChildren.size() - 1);
+                    this.focusHandler().focus(
+                            lastEntry.children().get(lastEntry.children().size() - 1),
+                            FocusSource.MOUSE_CLICK
+                    );
+
+                    return true;
+                });
+            }));
         }
 
         this.resetButton = Components.button(Text.literal("⇄"), (ButtonComponent button) -> {
@@ -69,17 +79,15 @@ public class ListOptionContainer<T> extends CollapsibleContainer implements Opti
         });
         this.resetButton.margins(Insets.right(10));
         this.resetButton.positioning(Positioning.relative(100, 50));
-        this.refreshResetButton();
         this.titleLayout.child(resetButton);
+        this.refreshResetButton();
 
         this.refreshOptions();
     }
 
     @SuppressWarnings({"unchecked", "ConstantConditions"})
     protected void refreshOptions() {
-        this.collapsibleChildren.removeAll(this.optionContainers);
-        this.children.removeAll(this.optionContainers);
-        this.optionContainers.clear();
+        this.collapsibleChildren.clear();
 
         var listType = ReflectionUtils.getTypeArgument(this.backingOption.backingField().field().getGenericType(), 0);
         for (int i = 0; i < this.backingList.size(); i++) {
@@ -87,12 +95,12 @@ public class ListOptionContainer<T> extends CollapsibleContainer implements Opti
             container.verticalAlignment(VerticalAlignment.CENTER);
 
             int optionIndex = i;
-            final var label = Components.label(Text.literal("- ").formatted(Formatting.GRAY));
+            final var label = Components.label(TextOps.withFormatting("- ", Formatting.GRAY));
             label.margins(Insets.left(10));
             if (!this.backingOption.detached()) {
                 label.cursorStyle(CursorStyle.HAND);
-                label.mouseEnter().subscribe(() -> label.text(Text.literal("x ").formatted(Formatting.GRAY)));
-                label.mouseLeave().subscribe(() -> label.text(Text.literal("- ").formatted(Formatting.GRAY)));
+                label.mouseEnter().subscribe(() -> label.text(TextOps.withFormatting("x ", Formatting.GRAY)));
+                label.mouseLeave().subscribe(() -> label.text(TextOps.withFormatting("- ", Formatting.GRAY)));
                 label.mouseDown().subscribe((mouseX, mouseY, button) -> {
                     this.backingList.remove(optionIndex);
                     this.refreshResetButton();
@@ -128,10 +136,13 @@ public class ListOptionContainer<T> extends CollapsibleContainer implements Opti
             }
 
             container.child(box);
-            this.optionContainers.add(container);
+            this.collapsibleChildren.add(container);
         }
 
-        this.children(this.optionContainers);
+        this.contentLayout.<FlowLayout>configure(layout -> {
+            layout.clearChildren();
+            if (this.expanded) layout.children(this.collapsibleChildren);
+        });
         this.refreshResetButton();
     }
 

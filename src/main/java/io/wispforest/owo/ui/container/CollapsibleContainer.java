@@ -32,39 +32,46 @@ public class CollapsibleContainer extends VerticalFlowLayout {
 
     protected final SpinnyBoiComponent spinnyBoi;
     protected final FlowLayout titleLayout;
+    protected final FlowLayout contentLayout;
 
     protected CollapsibleContainer(Sizing horizontalSizing, Sizing verticalSizing, Text title, boolean expanded) {
         super(horizontalSizing, verticalSizing);
-        this.surface(SURFACE);
-        this.padding(Insets.left(15));
+
+        // Title
 
         this.titleLayout = Containers.horizontalFlow(Sizing.content(), Sizing.content());
-        this.titleLayout.padding(Insets.vertical(5));
-        this.titleLayout.margins(Insets.left(-7));
+        this.titleLayout.padding(Insets.of(5, 5, 5, 0));
         this.allowOverflow(true);
-
-        this.spinnyBoi = new SpinnyBoiComponent();
-        this.titleLayout.child(spinnyBoi);
 
         title = title.copy().formatted(Formatting.UNDERLINE);
         this.titleLayout.child(Components.label(title).cursorStyle(CursorStyle.HAND));
+
+        this.spinnyBoi = new SpinnyBoiComponent();
+        this.titleLayout.child(spinnyBoi);
 
         this.expanded = expanded;
         this.spinnyBoi.targetRotation = expanded ? 90 : 0;
         this.spinnyBoi.rotation = this.spinnyBoi.targetRotation;
 
         super.child(this.titleLayout);
+
+        // Content
+
+        this.contentLayout = Containers.verticalFlow(Sizing.content(), Sizing.content());
+        this.contentLayout.padding(Insets.left(15));
+        this.contentLayout.surface(SURFACE);
+
+        super.child(this.contentLayout);
     }
 
     protected void toggleExpansion() {
         if (expanded) {
-            this.children.removeAll(collapsibleChildren);
+            this.contentLayout.clearChildren();
             this.spinnyBoi.targetRotation = 0;
         } else {
-            this.children.addAll(this.collapsibleChildren);
+            this.contentLayout.children(this.collapsibleChildren);
             this.spinnyBoi.targetRotation = 90;
         }
-        this.updateLayout();
 
         this.expanded = !this.expanded;
     }
@@ -102,35 +109,35 @@ public class CollapsibleContainer extends VerticalFlowLayout {
     @Override
     public FlowLayout child(Component child) {
         this.collapsibleChildren.add(child);
-        if (this.expanded) super.child(child);
+        if (this.expanded) this.contentLayout.child(child);
         return this;
     }
 
     @Override
     public FlowLayout children(Collection<Component> children) {
         this.collapsibleChildren.addAll(children);
-        if (this.expanded) super.children(children);
+        if (this.expanded) this.contentLayout.children(children);
         return this;
     }
 
     @Override
     public FlowLayout child(int index, Component child) {
         this.collapsibleChildren.add(index, child);
-        if (this.expanded) super.child(index + this.children.size() - this.collapsibleChildren.size(), child);
+        if (this.expanded) this.contentLayout.child(index, child);
         return this;
     }
 
     @Override
     public FlowLayout children(int index, Collection<Component> children) {
         this.collapsibleChildren.addAll(index, children);
-        if (this.expanded) super.children(index + this.children.size() - this.collapsibleChildren.size(), children);
+        if (this.expanded) this.contentLayout.children(index, children);
         return this;
     }
 
     @Override
     public FlowLayout removeChild(Component child) {
         this.collapsibleChildren.remove(child);
-        return super.removeChild(child);
+        return this.contentLayout.removeChild(child);
     }
 
     public static CollapsibleContainer parse(Element element) {
@@ -149,7 +156,8 @@ public class CollapsibleContainer extends VerticalFlowLayout {
 
         public SpinnyBoiComponent() {
             super(Text.literal(">"));
-            this.margins(Insets.horizontal(4));
+            this.margins(Insets.of(0, 0, 5, 10));
+            this.cursorStyle(CursorStyle.HAND);
         }
 
         @Override
