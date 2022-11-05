@@ -32,25 +32,25 @@ public class EpicScreenHandler extends ScreenHandler {
             .grid(new SimpleInventory(4), 0, 4, 1)
             .playerInventory(inventory);
 
-        this.epicNumber = addProperty(String.class, "");
+        this.epicNumber = this.createProperty(String.class, "");
         this.epicNumber.set(generateEpicName());
 
-        addClientboundPacket(MaldPacket.class, this::handleMald);
-        addServerboundPacket(EpicPacket.class, this::handleEpic);
+        this.addClientboundMessage(MaldMessage.class, this::handleMald);
+        this.addServerboundMessage(EpicMessage.class, this::handleEpic);
     }
 
-    private void handleMald(MaldPacket r) {
-        sendPacket(new EpicPacket(r.number));
+    private void handleMald(MaldMessage r) {
+        this.sendMessage(new EpicMessage(r.number));
     }
 
-    private void handleEpic(EpicPacket r) {
+    private void handleEpic(EpicMessage r) {
         this.epicNumber.set(generateEpicName() + " " + r.number);
     }
 
     @Override
     public void onSlotClick(int slotIndex, int button, SlotActionType actionType, PlayerEntity player) {
         if (!player.world.isClient)
-            sendPacket(new MaldPacket(slotIndex));
+            this.sendMessage(new MaldMessage(slotIndex));
 
         super.onSlotClick(slotIndex, button, actionType, player);
     }
@@ -81,7 +81,7 @@ public class EpicScreenHandler extends ScreenHandler {
         return true;
     }
 
-    public record EpicPacket(int number) { }
+    public record EpicMessage(int number) { }
 
-    public record MaldPacket(int number) { }
+    public record MaldMessage(int number) { }
 }
