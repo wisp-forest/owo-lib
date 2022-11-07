@@ -166,11 +166,30 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
     protected void updateLayout() {
         if (!this.mounted) return;
 
+        if (this.batchedEvents > 0) {
+            this.batchedEvents++;
+            return;
+        }
+
         var previousSize = this.fullSize();
         this.inflate(this.space);
 
         if (!previousSize.equals(this.fullSize()) && this.parent != null) {
             this.parent.onChildMutated(this);
+        }
+    }
+
+    @Override
+    protected void runAndDeferEvents(Runnable action) {
+        try {
+            this.batchedEvents = 1;
+            action.run();
+        } finally {
+            if (this.batchedEvents > 1) {
+                this.updateLayout();
+            }
+
+            this.batchedEvents = 0;
         }
     }
 

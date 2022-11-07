@@ -129,6 +129,13 @@ public class ComponentTestScreen extends Screen {
                 .child(new TextFieldWidget(this.client.textRenderer, 0, 0, 60, 20, Text.empty()))
                 .child(Components.button(Text.of("weeeee"), button -> {
                     weeAnimation.loop(!weeAnimation.looping());
+                    rootComponent.<FlowLayout>configure(layout -> {
+                        var padding = layout.padding().get();
+                        for (int i = 0; i < 696969; i++) {
+                            layout.padding(Insets.of(i));
+                        }
+                        layout.padding(padding.add(5,5 ,5, 5));
+                    });
                 }).renderer(ButtonComponent.Renderer.flat(0x77000000, 0x77070707, 0xA0000000)).sizing(Sizing.content()))
                 .child(Components.discreteSlider(Sizing.fill(10), 0, 5).<DiscreteSliderComponent>configure(
                         slider -> slider.snap(true)
