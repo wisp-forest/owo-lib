@@ -148,9 +148,9 @@ public class SliderComponent extends SliderWidget {
         void onChanged(double value);
 
         static EventStream<OnChanged> newStream() {
-            return new EventStream<>(listeners -> value -> {
-                for (var listener : listeners) {
-                    listener.onChanged(value);
+            return new EventStream<>(subscribers -> value -> {
+                for (var subscriber : subscribers) {
+                    subscriber.onChanged(value);
                 }
             });
         }
@@ -160,9 +160,9 @@ public class SliderComponent extends SliderWidget {
         void onSlideEnd();
 
         static EventStream<OnSlideEnd> newStream() {
-            return new EventStream<>(listeners -> () -> {
-                for (var listener : listeners) {
-                    listener.onSlideEnd();
+            return new EventStream<>(subscribers -> () -> {
+                for (var subscriber : subscribers) {
+                    subscriber.onSlideEnd();
                 }
             });
         }

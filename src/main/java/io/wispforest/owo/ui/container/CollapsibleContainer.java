@@ -6,6 +6,8 @@ import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.UISounds;
+import io.wispforest.owo.util.EventSource;
+import io.wispforest.owo.util.EventStream;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -26,6 +28,8 @@ public class CollapsibleContainer extends VerticalFlowLayout {
             component.y() + component.height(),
             0x77FFFFFF
     );
+
+    protected final EventStream<OnToggled> toggledEvents = OnToggled.newStream();
 
     protected List<Component> collapsibleChildren = new ArrayList<>();
     protected boolean expanded;
@@ -64,6 +68,10 @@ public class CollapsibleContainer extends VerticalFlowLayout {
         super.child(this.contentLayout);
     }
 
+    public EventSource<OnToggled> onToggled() {
+        return this.toggledEvents.source();
+    }
+
     protected void toggleExpansion() {
         if (expanded) {
             this.contentLayout.clearChildren();
@@ -74,6 +82,7 @@ public class CollapsibleContainer extends VerticalFlowLayout {
         }
 
         this.expanded = !this.expanded;
+        this.toggledEvents.sink().onToggle(this.expanded);
     }
 
     @Override
@@ -147,6 +156,18 @@ public class CollapsibleContainer extends VerticalFlowLayout {
         return element.getAttribute("expanded").equals("true")
                 ? Containers.collapsible(Sizing.content(), Sizing.content(), title, true)
                 : Containers.collapsible(Sizing.content(), Sizing.content(), title, false);
+    }
+
+    public interface OnToggled {
+        void onToggle(boolean nowExpanded);
+
+        static EventStream<OnToggled> newStream() {
+            return new EventStream<>(subscribers -> nowExpanded -> {
+                for (var subscriber : subscribers) {
+                    subscriber.onToggle(nowExpanded);
+                }
+            });
+        }
     }
 
     protected static class SpinnyBoiComponent extends LabelComponent {
