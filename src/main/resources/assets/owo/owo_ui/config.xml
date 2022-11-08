@@ -1,4 +1,5 @@
-<owo-ui>
+<owo-ui xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/wisp-forest/owo-lib/1.19.3/owo-ui.xsd">
     <components>
         <flow-layout direction="vertical">
             <children>
@@ -57,6 +58,53 @@
 
                 <flow-layout direction="horizontal">
                     <children>
+                        <flow-layout direction="horizontal">
+                            <children>
+                                <texture texture="owo:textures/gui/config_search.png"
+                                         texture-width="16" texture-height="16"
+                                         region-width="16" region-height="16">
+                                    <margins>
+                                        <all>2</all>
+                                    </margins>
+                                </texture>
+
+                                <flow-layout direction="horizontal">
+                                    <children>
+                                        <text-box id="search-field">
+                                            <show-background>false</show-background>
+                                            <max-length>128</max-length>
+
+                                            <sizing>
+                                                <horizontal method="fill">50</horizontal>
+                                                <vertical method="fixed">9</vertical>
+                                            </sizing>
+                                        </text-box>
+
+                                        <label id="search-match-indicator">
+<!--                                            <shadow>true</shadow>-->
+                                            <margins>y
+                                                <horizontal>5</horizontal>
+                                            </margins>
+                                        </label>
+                                    </children>
+
+                                    <surface>
+                                        <vanilla-translucent/>
+                                    </surface>
+
+                                    <vertical-alignment>center</vertical-alignment>
+
+                                    <padding>
+                                        <all>3</all>
+                                    </padding>
+                                </flow-layout>
+                            </children>
+
+                            <vertical-alignment>center</vertical-alignment>
+
+                            <positioning type="relative">0,50</positioning>
+                        </flow-layout>
+
                         <button id="reload-button">
                             <text translate="true">text.owo.config.button.reload</text>
                             <sizing>
@@ -103,7 +151,7 @@
         <config-option>
             <flow-layout direction="horizontal">
                 <children>
-                    <label>
+                    <label id="option-name">
                         <text translate="true">{{config-option-name}}</text>
                         <positioning type="relative">0,50</positioning>
                         <shadow>true</shadow>

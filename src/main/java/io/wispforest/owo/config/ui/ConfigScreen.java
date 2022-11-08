@@ -8,22 +8,23 @@ import io.wispforest.owo.config.annotation.Expanded;
 import io.wispforest.owo.config.annotation.RestartRequired;
 import io.wispforest.owo.config.annotation.SectionHeader;
 import io.wispforest.owo.config.ui.component.*;
+import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.base.BaseUIModelScreen;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
-import io.wispforest.owo.ui.container.Containers;
-import io.wispforest.owo.ui.container.FlowLayout;
-import io.wispforest.owo.ui.container.ScrollContainer;
-import io.wispforest.owo.ui.container.VerticalFlowLayout;
+import io.wispforest.owo.ui.container.*;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIParsing;
+import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.owo.util.NumberReflection;
 import io.wispforest.owo.util.ReflectionUtils;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
+import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -31,12 +32,11 @@ import net.minecraft.util.Identifier;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.Predicate;
-
-// TODO search bar
 
 /**
  * A screen which generates components for each option in the
@@ -66,6 +66,10 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
     protected final Screen parent;
     protected final ConfigWrapper<?> config;
     @SuppressWarnings("rawtypes") protected final Map<Option, OptionComponent> options = new HashMap<>();
+
+    protected String lastSearchFieldText = "";
+    protected @Nullable SearchMatches currentMatches = null;
+    protected int currentMatchIndex = 0;
 
     protected ConfigScreen(Identifier modelId, ConfigWrapper<?> config, @Nullable Screen parent) {
         super(FlowLayout.class, DataSource.asset(modelId));
@@ -122,6 +126,70 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
         var containers = new HashMap<Option.Key, VerticalFlowLayout>();
         containers.put(Option.Key.ROOT, optionPanel);
 
+        rootComponent.childById(TextFieldWidget.class, "search-field").<TextFieldWidget>configure(searchField -> {
+            var matchIndicator = rootComponent.childById(LabelComponent.class, "search-match-indicator");
+            var optionScroll = rootComponent.childById(ScrollContainer.class, "option-panel-scroll");
+
+            var searchHint = I18n.translate("text.owo.config.search");
+            searchField.setSuggestion(searchHint);
+            searchField.setChangedListener(s -> {
+                searchField.setSuggestion(s.isEmpty() ? searchHint : "");
+                if (!s.equals(this.lastSearchFieldText)) {
+                    searchField.setEditableColor(TextFieldWidget.DEFAULT_EDITABLE_COLOR);
+                    matchIndicator.text(Text.empty());
+                }
+            });
+
+            searchField.keyPress().subscribe((keyCode, scanCode, modifiers) -> {
+                if (keyCode != GLFW.GLFW_KEY_ENTER) return false;
+
+                var query = searchField.getText().toLowerCase(Locale.ROOT);
+                if (query.isBlank()) return false;
+
+                if (this.currentMatches != null && this.currentMatches.query.equals(query)) {
+                    this.currentMatchIndex = (this.currentMatchIndex + 1) % this.currentMatches.matches.size();
+                } else {
+                    var splitQuery = query.split(" ");
+
+                    this.currentMatchIndex = 0;
+                    this.currentMatches = new SearchMatches(query, this.collectSearchAnchors(optionScroll)
+                            .stream()
+                            .filter(anchor -> Arrays.stream(splitQuery).allMatch(anchor.currentSearchText()::contains))
+                            .toList());
+                }
+
+                if (this.currentMatches == null || this.currentMatches.matches.isEmpty()) {
+                    matchIndicator.text(Text.translatable("text.owo.config.search.no_matches"));
+                    searchField.setEditableColor(0xEB1D36);
+                } else {
+                    matchIndicator.text(Text.translatable("text.owo.config.search.matches", this.currentMatchIndex + 1, this.currentMatches.matches.size()));
+                    searchField.setEditableColor(0x28FFBF);
+
+                    var selectedMatch = this.currentMatches.matches.get(this.currentMatchIndex);
+                    var anchorFrame = selectedMatch.anchorFrame();
+
+                    if (anchorFrame instanceof FlowLayout flow) {
+                        flow.child(0, selectedMatch.configure(new SearchHighlighterComponent()));
+                    }
+
+                    var key = selectedMatch.key();
+                    while (!key.isRoot()) {
+                        if (containers.get(key) instanceof CollapsibleContainer collapsible && !collapsible.expanded()) {
+                            collapsible.toggleExpansion();
+                        }
+
+                        key = key.parent();
+                    }
+
+                    if (anchorFrame.y() < optionScroll.y() || anchorFrame.y() + anchorFrame.height() > optionScroll.y() + optionScroll.height()) {
+                        optionScroll.scrollTo(selectedMatch.anchorFrame());
+                    }
+                }
+
+                return true;
+            });
+        });
+
         this.config.forEachOption(option -> {
             if (option.backingField().hasAnnotation(ExcludeFromScreen.class)) return;
 
@@ -144,7 +212,16 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                             Sizing.fill(100), Sizing.content(),
                             Text.translatable("text.config." + this.config.name() + ".category." + parentKey.asString()),
                             expanded
-                    )
+                    ).<CollapsibleContainer>configure(nestedContainer -> {
+                        nestedContainer.titleLayout().child(new SearchAnchorComponent(
+                                nestedContainer.titleLayout(),
+                                option.key(),
+                                () -> I18n.translate("text.config." + this.config.name() + ".category." + parentKey.asString())
+                        ).highlightConfigurator(highlight ->
+                                highlight.positioning(Positioning.absolute(-5, -5))
+                                        .verticalSizing(Sizing.fixed(19))
+                        ));
+                    })
             );
 
             if (!containers.containsKey(parentKey) && containers.containsKey(parentKey.parent())) {
@@ -246,11 +323,46 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                 + field.getAnnotation(SectionHeader.class).value();
 
         final var header = this.model.expandTemplate(FlowLayout.class, "section-header", Map.of());
-        header.childById(LabelComponent.class, "header").text(Text.translatable(translationKey).formatted(Formatting.YELLOW, Formatting.BOLD));
+        header.childById(LabelComponent.class, "header").<LabelComponent>configure(label -> {
+            label.text(Text.translatable(translationKey).formatted(Formatting.YELLOW, Formatting.BOLD));
+            header.child(new SearchAnchorComponent(header, Option.Key.ROOT, () -> label.text().getString()));
+        });
 
         sections.put(header, Text.translatable(translationKey));
 
         container.child(header);
+    }
+
+    protected List<SearchAnchorComponent> collectSearchAnchors(ParentComponent root) {
+        var discovered = new ArrayList<SearchAnchorComponent>();
+        var candidates = new ArrayDeque<>(root.children());
+
+        while (!candidates.isEmpty()) {
+            var candidate = candidates.poll();
+            if (candidate instanceof CollapsibleContainer collapsible) {
+                candidates.addAll(collapsible.children());
+                if (!collapsible.expanded()) candidates.addAll(collapsible.collapsibleChildren());
+            } else if (candidate instanceof ParentComponent parentComponent) {
+                candidates.addAll(parentComponent.children());
+            } else if (candidate instanceof SearchAnchorComponent anchor) {
+                discovered.add(anchor);
+            }
+        }
+
+        return discovered;
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (keyCode == GLFW.GLFW_KEY_F && ((modifiers & GLFW.GLFW_MOD_CONTROL) != 0)) {
+            this.uiAdapter.rootComponent.focusHandler().focus(
+                    this.uiAdapter.rootComponent.childById(Component.class, "search-field"),
+                    Component.FocusSource.MOUSE_CLICK
+            );
+            return true;
+        } else {
+            return super.keyPressed(keyCode, scanCode, modifiers);
+        }
     }
 
     @Override
@@ -304,6 +416,50 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
         UIParsing.registerFactory("config-toggle-button", element -> new ConfigToggleButton());
         UIParsing.registerFactory("config-enum-button", element -> new ConfigEnumButton());
         UIParsing.registerFactory("config-text-box", element -> new ConfigTextBox());
+    }
+
+    private record SearchMatches(String query, List<SearchAnchorComponent> matches) {}
+
+    public static class SearchHighlighterComponent extends BaseComponent {
+
+        private final Color startColor = Color.ofArgb(0x008d9be0);
+        private final Color endColor = Color.ofArgb(0x4c8d9be0);
+
+        private float age = 0;
+
+        public SearchHighlighterComponent() {
+            this.positioning(Positioning.absolute(0, 0));
+            this.sizing(Sizing.fill(100), Sizing.fill(100));
+        }
+
+        @Override
+        public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+            final var mainColor = startColor.interpolate(endColor, (float) Math.sin(age / 25 * Math.PI)).argb();
+
+            int segmentWidth = (int) (this.width * .3f);
+            int baseX = (int) ((this.x - segmentWidth) + (Easing.CUBIC.apply(this.age / 25)) * (this.width + segmentWidth * 2));
+
+            Drawer.drawGradientRect(matrices,
+                    baseX - segmentWidth, this.y,
+                    segmentWidth, this.height,
+                    0, mainColor,
+                    mainColor, 0
+            );
+            Drawer.drawGradientRect(matrices,
+                    baseX, this.y,
+                    segmentWidth, this.height,
+                    mainColor, 0,
+                    0, mainColor
+            );
+        }
+
+        @Override
+        public void update(float delta, int mouseX, int mouseY) {
+            super.update(delta, mouseX, mouseY);
+            if ((this.age += delta) > 25) {
+                this.parent.queue(() -> this.parent.removeChild(this));
+            }
+        }
     }
 
     private static boolean isStringOrNumberList(Field field) {

@@ -14,12 +14,15 @@ import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.owo.util.NumberReflection;
 import io.wispforest.owo.util.ReflectionUtils;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @ApiStatus.Internal
 public class ListOptionContainer<T> extends CollapsibleContainer implements OptionComponent {
@@ -83,6 +86,13 @@ public class ListOptionContainer<T> extends CollapsibleContainer implements Opti
         this.refreshResetButton();
 
         this.refreshOptions();
+
+        this.titleLayout.child(new SearchAnchorComponent(
+                this.titleLayout,
+                option.key(),
+                () -> I18n.translate("text.config." + option.configName() + ".option." + option.key().asString()),
+                () -> this.backingList.stream().map(Objects::toString).collect(Collectors.joining())
+        ));
     }
 
     @SuppressWarnings({"unchecked", "ConstantConditions"})

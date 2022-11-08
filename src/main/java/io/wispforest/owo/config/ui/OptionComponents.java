@@ -2,14 +2,11 @@ package io.wispforest.owo.config.ui;
 
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.config.annotation.RangeConstraint;
-import io.wispforest.owo.config.ui.component.ConfigEnumButton;
-import io.wispforest.owo.config.ui.component.ConfigSlider;
-import io.wispforest.owo.config.ui.component.ConfigTextBox;
-import io.wispforest.owo.config.ui.component.ConfigToggleButton;
+import io.wispforest.owo.config.ui.component.*;
 import io.wispforest.owo.ui.component.ButtonComponent;
+import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.parsing.UIModel;
-import net.minecraft.client.gui.widget.ButtonWidget;
 
 import java.util.Map;
 import java.util.function.Consumer;
@@ -40,6 +37,13 @@ public class OptionComponents {
         }
 
         processor.accept(valueBox);
+
+        optionComponent.child(new SearchAnchorComponent(
+                optionComponent,
+                option.key(),
+                () -> optionComponent.childById(LabelComponent.class, "option-name").text().getString(),
+                valueBox::getText
+        ));
 
         return new OptionComponentFactory.Result(optionComponent, valueBox);
     }
@@ -75,6 +79,13 @@ public class OptionComponents {
             });
         }
 
+        optionComponent.child(new SearchAnchorComponent(
+                optionComponent,
+                option.key(),
+                () -> optionComponent.childById(LabelComponent.class, "option-name").text().getString(),
+                () -> valueSlider.getMessage().getString()
+        ));
+
         return new OptionComponentFactory.Result(optionComponent, valueSlider);
     }
 
@@ -102,6 +113,13 @@ public class OptionComponents {
             toggleButton.onPress(button -> resetButton.active = toggleButton.parsedValue() != option.defaultValue());
         }
 
+        optionComponent.child(new SearchAnchorComponent(
+                optionComponent,
+                option.key(),
+                () -> optionComponent.childById(LabelComponent.class, "option-name").text().getString(),
+                () -> toggleButton.getMessage().getString()
+        ));
+
         return new OptionComponentFactory.Result(optionComponent, toggleButton);
     }
 
@@ -128,6 +146,13 @@ public class OptionComponents {
 
             enumButton.onPress(button -> resetButton.active = enumButton.parsedValue() != option.defaultValue());
         }
+
+        optionComponent.child(new SearchAnchorComponent(
+                optionComponent,
+                option.key(),
+                () -> optionComponent.childById(LabelComponent.class, "option-name").text().getString(),
+                () -> enumButton.getMessage().getString()
+        ));
 
         return new OptionComponentFactory.Result(optionComponent, enumButton);
     }
