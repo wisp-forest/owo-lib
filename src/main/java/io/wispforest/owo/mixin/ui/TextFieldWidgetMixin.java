@@ -23,6 +23,8 @@ public abstract class TextFieldWidgetMixin extends ClickableWidget {
     @Shadow
     public abstract void setDrawsBackground(boolean drawsBackground);
 
+    @Shadow public abstract void setMaxLength(int maxLength);
+
     public TextFieldWidgetMixin(int x, int y, int width, int height, Text message) {
         super(x, y, width, height, message);
     }
@@ -40,6 +42,7 @@ public abstract class TextFieldWidgetMixin extends ClickableWidget {
             ((TextFieldWidget) (Object) this).setCursorToStart();
         });
         UIParsing.apply(children, "show-background", UIParsing::parseBool, this::setDrawsBackground);
+        UIParsing.apply(children, "max-length", UIParsing::parseUnsignedInt, this::setMaxLength);
     }
 
 //    @SuppressWarnings("ReferenceToMixin")

@@ -464,6 +464,7 @@
                 <xs:choice maxOccurs="unbounded">
                     <xs:group ref="vanillaWidgetProps"/>
                     <xs:element type="xs:string" name="text" minOccurs="0"/>
+                    <xs:element type="xs:unsignedInt" name="max-length" minOccurs="0"/>
                     <xs:element type="xs:boolean" name="show-background" minOccurs="0"/>
                 </xs:choice>
             </xs:extension>
