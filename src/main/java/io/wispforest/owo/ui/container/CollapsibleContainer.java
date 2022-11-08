@@ -17,6 +17,7 @@ import org.w3c.dom.Element;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 public class CollapsibleContainer extends VerticalFlowLayout {
@@ -32,6 +33,7 @@ public class CollapsibleContainer extends VerticalFlowLayout {
     protected final EventStream<OnToggled> toggledEvents = OnToggled.newStream();
 
     protected List<Component> collapsibleChildren = new ArrayList<>();
+    protected List<Component> collapsibleChildrenView = Collections.unmodifiableList(this.collapsibleChildren);
     protected boolean expanded;
 
     protected final SpinnyBoiComponent spinnyBoi;
@@ -68,11 +70,23 @@ public class CollapsibleContainer extends VerticalFlowLayout {
         super.child(this.contentLayout);
     }
 
+    public FlowLayout titleLayout() {
+        return this.titleLayout;
+    }
+
+    public List<Component> collapsibleChildren() {
+        return this.collapsibleChildrenView;
+    }
+
+    public boolean expanded() {
+        return this.expanded;
+    }
+
     public EventSource<OnToggled> onToggled() {
         return this.toggledEvents.source();
     }
 
-    protected void toggleExpansion() {
+    public void toggleExpansion() {
         if (expanded) {
             this.contentLayout.clearChildren();
             this.spinnyBoi.targetRotation = 0;
