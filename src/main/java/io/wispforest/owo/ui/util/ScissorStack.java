@@ -11,6 +11,7 @@ import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
 
 public class ScissorStack {
@@ -50,16 +51,16 @@ public class ScissorStack {
         }
 
         STACK.pop();
-
-        if (STACK.isEmpty()) {
-            var window = MinecraftClient.getInstance().getWindow();
-            GL11.glScissor(0, 0, window.getFramebufferWidth(), window.getFramebufferHeight());
-        } else {
-            applyState();
-        }
+        applyState();
     }
 
     private static void applyState() {
+        if (STACK.isEmpty()) {
+            var window = MinecraftClient.getInstance().getWindow();
+            GL11.glScissor(0, 0, window.getFramebufferWidth(), window.getFramebufferHeight());
+            return;
+        }
+
         if (!GL11.glIsEnabled(GL11.GL_SCISSOR_TEST)) return;
 
         var newFrame = STACK.peek();
@@ -80,6 +81,20 @@ public class ScissorStack {
         if (scissorEnabled) GlStateManager._disableScissorTest();
         action.run();
         if (scissorEnabled) GlStateManager._enableScissorTest();
+    }
+
+    public static void popFramesAndDraw(int maxPopFrames, Runnable action) {
+        var previousFrames = new ArrayList<PositionedRectangle>();
+        while (maxPopFrames > 1 && STACK.size() > 1) {
+            previousFrames.add(0, STACK.pop());
+            maxPopFrames--;
+        }
+
+        applyState();
+        action.run();
+
+        previousFrames.forEach(STACK::push);
+        applyState();
     }
 
     public static boolean isVisible(int x, int y, @Nullable MatrixStack matrices) {
