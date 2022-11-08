@@ -37,9 +37,6 @@ public abstract class ClickableWidgetMixin implements ComponentStub {
     @Unique
     protected VanillaWidgetComponent owo$wrapper = null;
 
-    @Unique
-    protected CursorStyle preferredCursorStyle = CursorStyle.POINTER;
-
     @Override
     public void inflate(Size space) {
         this.owo$getWrapper().inflate(space);

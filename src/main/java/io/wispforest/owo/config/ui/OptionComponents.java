@@ -70,7 +70,7 @@ public class OptionComponents {
                 button.active = false;
             });
 
-            valueSlider.onChanged(newValue -> {
+            valueSlider.onChanged().subscribe(newValue -> {
                 resetButton.active = (withDecimals ? newValue : Math.round(newValue)) != option.defaultValue().doubleValue();
             });
         }

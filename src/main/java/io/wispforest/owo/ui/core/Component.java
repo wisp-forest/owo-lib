@@ -290,6 +290,14 @@ public interface Component extends PositionedRectangle {
         return this.parent() != null;
     }
 
+    default ParentComponent root() {
+        var root = this.parent();
+        if (root == null) return null;
+
+        while (root.hasParent()) root = root.parent();
+        return root;
+    }
+
     /**
      * Called when the mouse has been clicked inside
      * the bounding box of this component

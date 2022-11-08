@@ -69,6 +69,15 @@ public class SliderComponent extends SliderWidget {
         return this.scrollStep;
     }
 
+    public SliderComponent active(boolean active) {
+        this.active = active;
+        return this;
+    }
+
+    public boolean active() {
+        return this.active;
+    }
+
     public EventSource<OnChanged> onChanged() {
         return this.changedEvents.source();
     }

@@ -70,6 +70,15 @@ public class ButtonComponent extends ButtonWidget {
         return this.textShadow;
     }
 
+    public ButtonComponent active(boolean active) {
+        this.active = active;
+        return this;
+    }
+
+    public boolean active() {
+        return this.active;
+    }
+
     @Override
     public void parseProperties(UIModel model, Element element, Map<String, Element> children) {
         super.parseProperties(model, element, children);
