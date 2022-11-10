@@ -29,14 +29,14 @@ public class UwuOptionalNetExample {
 
             CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> {
                 dispatcher.register(literal("test_optional_channels")
-                    .executes(context -> {
-                        ServerPlayerEntity player = context.getSource().getPlayer();
+                        .executes(context -> {
+                            ServerPlayerEntity player = context.getSource().getPlayer();
 
-                        if (serverChannel.canSendToPlayer(player))
-                            serverChannel.serverHandle(player).send(new StringPacket("Based™"));
+                            if (serverChannel.canSendToPlayer(player))
+                                serverChannel.serverHandle(player).send(new StringPacket("Based™"));
 
-                        return 0;
-                    }));
+                            return 0;
+                        }));
             });
 
             if (CLIENT_CHANNEL_IN_SERVER) {

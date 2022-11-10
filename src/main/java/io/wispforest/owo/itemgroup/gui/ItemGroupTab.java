@@ -8,8 +8,6 @@ import net.minecraft.resource.featuretoggle.FeatureSet;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
-import java.util.function.BiConsumer;
-
 /**
  * Represents a tab inside an {@link OwoItemGroup} that contains all items in the
  * passed {@code contentTag}. If you want to use {@link OwoItemSettings#tab(int)} to

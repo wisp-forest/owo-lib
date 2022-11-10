@@ -15,7 +15,7 @@ public class ItemGroupButtonWidget extends ButtonWidget {
     private final boolean hoverReactive;
 
     public ItemGroupButtonWidget(int x, int y, boolean hoverReactive, OwoItemGroup.ButtonDefinition definition, PressAction onPress) {
-        super(x, y, 24, 24, definition.tooltip(), onPress, ButtonWidget.EMPTY_TOOLTIP, ButtonWidget.DEFAULT_NARRATION_SUPPLIER);
+        super(x, y, 24, 24, definition.tooltip(), onPress, ButtonWidget.DEFAULT_NARRATION_SUPPLIER);
         this.definition = definition;
         this.hoverReactive = hoverReactive;
     }

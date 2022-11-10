@@ -1,5 +1,5 @@
 {
-  "target_group": "minecraft:consumables",
+  "target_group": "minecraft:food_and_drink",
   "extend": true,
   "buttons": [
     {

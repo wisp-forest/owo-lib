@@ -5,6 +5,7 @@ import net.minecraft.block.Block;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registries;
 import net.minecraft.util.registry.Registry;
 
 import java.lang.annotation.ElementType;
@@ -17,7 +18,7 @@ public interface BlockRegistryContainer extends AutoRegistryContainer<Block> {
 
     @Override
     default Registry<Block> getRegistry() {
-        return Registry.BLOCK;
+        return Registries.BLOCK;
     }
 
     @Override
@@ -28,7 +29,7 @@ public interface BlockRegistryContainer extends AutoRegistryContainer<Block> {
     @Override
     default void postProcessField(String namespace, Block value, String identifier, Field field) {
         if (field.isAnnotationPresent(NoBlockItem.class)) return;
-        Registry.register(Registry.ITEM, new Identifier(namespace, identifier), createBlockItem(value, identifier));
+        Registry.register(Registries.ITEM, new Identifier(namespace, identifier), createBlockItem(value, identifier));
     }
 
     /**

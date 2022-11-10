@@ -29,7 +29,7 @@ public class UwuTestStickItem extends Item {
             (compound, s, text) -> compound.putString(s, Text.Serializer.toJson(text))));
 
     public UwuTestStickItem() {
-        super(new OwoItemSettings().group(Uwu.SIX_TAB_GROUP).tab(3).maxCount(1)
+        super(new OwoItemSettings()/*.group(Uwu.SIX_TAB_GROUP)*/.tab(3).maxCount(1)
                 .stackGenerator(OwoItemGroup.DEFAULT_STACK_GENERATOR.andThen((item, stacks) -> {
                     final var stack = new ItemStack(item);
                     stack.setCustomName(Text.literal("the stick of the test").styled(style -> style.withItalic(false)));

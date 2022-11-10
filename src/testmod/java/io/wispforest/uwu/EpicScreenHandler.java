@@ -29,8 +29,8 @@ public class EpicScreenHandler extends ScreenHandler {
         super(Uwu.EPIC_SCREEN_HANDLER_TYPE, syncId);
         this.context = context;
         SlotGenerator.begin(this::addSlot, 8, 84)
-            .grid(new SimpleInventory(4), 0, 4, 1)
-            .playerInventory(inventory);
+                .grid(new SimpleInventory(4), 0, 4, 1)
+                .playerInventory(inventory);
 
         this.epicNumber = this.createProperty(String.class, "");
         this.epicNumber.set(generateEpicName());
@@ -72,7 +72,7 @@ public class EpicScreenHandler extends ScreenHandler {
     }
 
     @Override
-    public ItemStack transferSlot(PlayerEntity player, int index) {
+    public ItemStack quickMove(PlayerEntity player, int index) {
         return ScreenUtils.handleSlotTransfer(this, index, 4);
     }
 
@@ -81,7 +81,7 @@ public class EpicScreenHandler extends ScreenHandler {
         return true;
     }
 
-    public record EpicMessage(int number) { }
+    public record EpicMessage(int number) {}
 
-    public record MaldMessage(int number) { }
+    public record MaldMessage(int number) {}
 }

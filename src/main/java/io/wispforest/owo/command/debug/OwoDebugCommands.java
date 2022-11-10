@@ -32,7 +32,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.Registries;
 import net.minecraft.world.poi.PointOfInterestStorage;
 import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.event.Level;
@@ -47,7 +47,7 @@ public class OwoDebugCommands {
             EnumArgumentType.create(Level.class, "'{}' is not a valid logging level");
 
     private static final SuggestionProvider<ServerCommandSource> POI_TYPES =
-            (context, builder) -> CommandSource.suggestIdentifiers(Registry.POINT_OF_INTEREST_TYPE.getIds(), builder);
+            (context, builder) -> CommandSource.suggestIdentifiers(Registries.POINT_OF_INTEREST_TYPE.getIds(), builder);
 
     private static final SimpleCommandExceptionType NO_POI_TYPE = new SimpleCommandExceptionType(Text.of("Invalid POI type"));
     public static final int GENERAL_PURPLE = 0xB983FF;
@@ -70,7 +70,7 @@ public class OwoDebugCommands {
             dispatcher.register(literal("query-poi").then(argument("poi_type", IdentifierArgumentType.identifier()).suggests(POI_TYPES)
                     .then(argument("radius", IntegerArgumentType.integer()).executes(context -> {
                         var player = context.getSource().getPlayer();
-                        var poiType = Registry.POINT_OF_INTEREST_TYPE.getOrEmpty(IdentifierArgumentType.getIdentifier(context, "poi_type"))
+                        var poiType = Registries.POINT_OF_INTEREST_TYPE.getOrEmpty(IdentifierArgumentType.getIdentifier(context, "poi_type"))
                                 .orElseThrow(NO_POI_TYPE::create);
 
                         var entries = ((ServerWorld) player.world).getPointOfInterestStorage().getInCircle(type -> type.value() == poiType,
@@ -82,7 +82,7 @@ public class OwoDebugCommands {
                         for (var entry : entries) {
 
                             final var entryPos = entry.getPos();
-                            final var blockId = Registry.BLOCK.getId(player.world.getBlockState(entryPos).getBlock()).toString();
+                            final var blockId = Registries.BLOCK.getId(player.world.getBlockState(entryPos).getBlock()).toString();
                             final var posString = "(" + entryPos.getX() + " " + entryPos.getY() + " " + entryPos.getZ() + ")";
 
                             final var message = TextOps.withColor("-> §" + blockId + " §" + posString,

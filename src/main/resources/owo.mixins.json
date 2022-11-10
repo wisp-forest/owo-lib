@@ -13,7 +13,6 @@
     "ServerPlayerEntityMixin",
     "SimpleRegistryMixin",
     "TagGroupLoaderMixin",
-    "itemgroup.FabricItemGroupAccessor",
     "itemgroup.ItemGroupAccessor",
     "itemgroup.ItemGroupHelperMixin",
     "itemgroup.ItemMixin",

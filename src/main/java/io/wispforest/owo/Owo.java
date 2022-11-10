@@ -14,6 +14,7 @@ import net.minecraft.resource.ResourceType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.registry.Registries;
 import net.minecraft.util.registry.Registry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -57,7 +58,7 @@ public class Owo implements ModInitializer {
         ServerLifecycleEvents.SERVER_STARTING.register(server -> SERVER = server);
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> SERVER = null);
 
-        Registry.register(Registry.SOUND_EVENT, UISounds.UI_INTERACTION.getId(), UISounds.UI_INTERACTION);
+        Registry.register(Registries.SOUND_EVENT, UISounds.UI_INTERACTION.getId(), UISounds.UI_INTERACTION);
 
         if (!DEBUG) return;
 

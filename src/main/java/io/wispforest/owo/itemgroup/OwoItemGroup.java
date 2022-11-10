@@ -6,19 +6,19 @@ import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
 import io.wispforest.owo.mixin.itemgroup.ItemGroupAccessor;
 import io.wispforest.owo.util.pond.OwoItemExtensions;
 import net.fabricmc.api.EnvType;
-import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.item.*;
 import net.minecraft.resource.featuretoggle.FeatureSet;
 import net.minecraft.tag.TagKey;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.Registries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 /**
  * A custom implementation of {@link ItemGroup} that supports multiple sub-tabs
@@ -31,7 +31,7 @@ import java.util.function.BiConsumer;
  * Credits to Lemonszz for originally writing this for Biome Makeover.
  * Adapted from Azagwens implementation
  */
-public abstract class OwoItemGroup extends FabricItemGroup {
+public abstract class OwoItemGroup extends ItemGroup {
 
     public static final BiConsumer<Item, Entries> DEFAULT_STACK_GENERATOR = (item, stacks) -> stacks.add(item.getDefaultStack());
 
@@ -51,8 +51,16 @@ public abstract class OwoItemGroup extends FabricItemGroup {
     private boolean useDynamicTitle = true;
     private boolean displaySingleTab = false;
 
-    protected OwoItemGroup(Identifier id) {
-        super(id);
+    protected OwoItemGroup(Row row, int column, Type type, Text displayName, Supplier<ItemStack> iconSupplier, EntryCollector entryCollector) {
+        super(row, column, type, displayName, iconSupplier, entryCollector);
+        ((ItemGroupAccessor) this).owo$setEntryCollector((enabledFeatures, entries, operatorEnabled) -> {
+            if (!this.initialized) throw new IllegalStateException("oωo item group not initialized, was 'initialize()' called?");
+            this.getSelectedTab().contentSupplier().addItems(enabledFeatures, entries, operatorEnabled);
+
+            Registries.ITEM.stream()
+                    .filter(item -> ((OwoItemExtensions) item).owo$group() == this && ((OwoItemExtensions) item).owo$tab() == this.selectedTab)
+                    .forEach(item -> ((OwoItemExtensions) item).owo$stackGenerator().accept(item, entries));
+        });
     }
 
     /**
@@ -110,7 +118,7 @@ public abstract class OwoItemGroup extends FabricItemGroup {
                 ButtonDefinition.tooltipFor(this, "tab", name),
                 contentTag == null
                         ? (features, entries, hasPermissions) -> {}
-                        : (features, entries, hasPermissions) -> Registry.ITEM.stream().filter(item -> item.getRegistryEntry().isIn(contentTag)).forEach(entries::add),
+                        : (features, entries, hasPermissions) -> Registries.ITEM.stream().filter(item -> item.getRegistryEntry().isIn(contentTag)).forEach(entries::add),
                 texture,
                 primary
         ));
@@ -165,10 +173,9 @@ public abstract class OwoItemGroup extends FabricItemGroup {
 
     // Getters and setters
 
-    public void setSelectedTab(int selectedTab) {
+    public void setSelectedTab(int selectedTab, FeatureSet enabledFeatures, boolean operatorEnabled) {
         this.selectedTab = selectedTab;
-        ((ItemGroupAccessor) this).owo$setDisplayStacks(null);
-        ((ItemGroupAccessor) this).owo$searchTabStacks(null);
+        this.updateEntries(enabledFeatures, operatorEnabled);
     }
 
     public ItemGroupTab getSelectedTab() {
@@ -214,25 +221,6 @@ public abstract class OwoItemGroup extends FabricItemGroup {
     }
 
     // Utility
-
-    @Override
-    protected void addItems(FeatureSet enabledFeatures, Entries entries, boolean hasPermissions) {
-        if (!this.initialized) throw new IllegalStateException("oωo item group not initialized, was 'initialize()' called?");
-        this.getSelectedTab().contentSupplier().addItems(enabledFeatures, entries, hasPermissions);
-
-        Registry.ITEM.stream()
-                .filter(item -> ((OwoItemExtensions) item).owo$group() == this && ((OwoItemExtensions) item).owo$tab() == this.selectedTab)
-                .forEach(item -> ((OwoItemExtensions) item).owo$stackGenerator().accept(item, entries));
-    }
-
-    /**
-     * @deprecated Override and use {@link #makeIcon()} instead
-     */
-    @Override
-    @Deprecated(forRemoval = true)
-    public ItemStack createIcon() {
-        return ItemStack.EMPTY;
-    }
 
     /**
      * Defines a button's appearance and translation key

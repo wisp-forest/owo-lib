@@ -4,18 +4,15 @@ import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
 import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
-import io.wispforest.owo.mixin.itemgroup.FabricItemGroupAccessor;
-import net.fabricmc.fabric.mixin.itemgroup.ItemGroupAccessor;
+import io.wispforest.owo.mixin.itemgroup.ItemGroupAccessor;
+import net.fabricmc.fabric.impl.itemgroup.FabricItemGroup;
 import net.fabricmc.fabric.mixin.itemgroup.ItemGroupsAccessor;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemGroups;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemStackSet;
-import net.minecraft.resource.featuretoggle.FeatureSet;
 import net.minecraft.util.Identifier;
-import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -30,19 +27,22 @@ public class WrapperGroup extends OwoItemGroup {
     private boolean extension = false;
 
     public WrapperGroup(ItemGroup parent, List<ItemGroupTab> tabs, List<ItemGroupButton> buttons) {
-        super(new Identifier("owo", "wrapper"));
+        super(parent.getRow(), parent.getColumn(), parent.getType(), parent.getDisplayName(), parent::getIcon, ((io.wispforest.owo.mixin.itemgroup.ItemGroupAccessor) parent).owo$getEntryCollector());
 
-        ItemGroups.GROUPS[parent.getIndex()] = this;
-        ((ItemGroupAccessor) this).setIndex(parent.getIndex());
-        ((io.wispforest.owo.mixin.itemgroup.ItemGroupAccessor) this).owo$setDisplayName(parent.getDisplayName());
-
-        ItemGroupsAccessor.setGroups(ArrayUtils.remove(ItemGroups.GROUPS, ItemGroups.GROUPS.length - 1));
-        ((FabricItemGroupAccessor) this).owo$setId(parent.getId());
+        var groups = new ArrayList<>(ItemGroups.getGroups());
+        groups.set(groups.indexOf(parent), this);
+        ItemGroupsAccessor.setGroups(groups);
+        ((FabricItemGroup) this).setPage(((FabricItemGroup) parent).getPage());
 
         this.parent = parent;
 
         this.tabs.addAll(tabs);
         this.buttons.addAll(buttons);
+    }
+
+    @Override
+    public Identifier getId() {
+        return this.parent.getId();
     }
 
     public void addTabs(Collection<ItemGroupTab> tabs) {
@@ -62,26 +62,12 @@ public class WrapperGroup extends OwoItemGroup {
         }
 
         this.tabs.add(0, new ItemGroupTab(
-                Icon.of(this.parent.createIcon()),
+                Icon.of(this.parent.getIcon()),
                 this.parent.getDisplayName(),
-                (featureSet, entries, hasPermissions) -> this.parent.getDisplayStacks(featureSet, hasPermissions).forEach(entries::add),
+                ((ItemGroupAccessor) this.parent).owo$getEntryCollector()::accept,
                 ItemGroupTab.DEFAULT_TEXTURE,
                 true
         ));
-    }
-
-    @Override
-    public ItemStackSet getDisplayStacks(FeatureSet enabledFeatures, boolean hasPermissions) {
-        return this.tabs.size() < 2
-                ? parent.getDisplayStacks(enabledFeatures, hasPermissions)
-                : super.getDisplayStacks(enabledFeatures, hasPermissions);
-    }
-
-    @Override
-    public ItemStackSet getSearchTabStacks(FeatureSet enabledFeatures, boolean hasPermissions) {
-        return this.tabs.size() < 2
-                ? parent.getSearchTabStacks(enabledFeatures, hasPermissions)
-                : super.getSearchTabStacks(enabledFeatures, hasPermissions);
     }
 
     @Override
@@ -91,11 +77,6 @@ public class WrapperGroup extends OwoItemGroup {
     protected Icon makeIcon() {
         return this.parent instanceof OwoItemGroup owoGroup
                 ? owoGroup.icon()
-                : Icon.of(this.createIcon());
-    }
-
-    @Override
-    public ItemStack createIcon() {
-        return this.parent.createIcon();
+                : Icon.of(this.getIcon());
     }
 }

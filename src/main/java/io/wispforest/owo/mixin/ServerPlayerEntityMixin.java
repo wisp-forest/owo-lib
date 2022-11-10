@@ -28,6 +28,6 @@ public class ServerPlayerEntityMixin implements ConfigSynchronizer.ServerPlayerE
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "onScreenHandlerOpened", at = @At("HEAD"))
     private void attachScreenHandler(ScreenHandler screenHandler, CallbackInfo ci) {
-        ((OwoScreenHandlerExtension) screenHandler).owo$attachToPlayer((ServerPlayerEntity)(Object) this);
+        ((OwoScreenHandlerExtension) screenHandler).owo$attachToPlayer((ServerPlayerEntity) (Object) this);
     }
 }

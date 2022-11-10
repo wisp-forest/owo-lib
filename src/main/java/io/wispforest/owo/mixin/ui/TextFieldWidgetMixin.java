@@ -9,9 +9,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.w3c.dom.Element;
 
 import java.util.Map;
@@ -23,7 +20,8 @@ public abstract class TextFieldWidgetMixin extends ClickableWidget {
     @Shadow
     public abstract void setDrawsBackground(boolean drawsBackground);
 
-    @Shadow public abstract void setMaxLength(int maxLength);
+    @Shadow
+    public abstract void setMaxLength(int maxLength);
 
     public TextFieldWidgetMixin(int x, int y, int width, int height, Text message) {
         super(x, y, width, height, message);

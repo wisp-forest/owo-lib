@@ -1,4 +1,3 @@
-
 package io.wispforest.uwu.network;
 
 import io.wispforest.owo.network.serialization.RecordSerializer;

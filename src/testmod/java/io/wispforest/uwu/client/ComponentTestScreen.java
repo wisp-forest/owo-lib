@@ -134,7 +134,7 @@ public class ComponentTestScreen extends Screen {
                         for (int i = 0; i < 696969; i++) {
                             layout.padding(Insets.of(i));
                         }
-                        layout.padding(padding.add(5,5 ,5, 5));
+                        layout.padding(padding.add(5, 5, 5, 5));
                     });
                 }).renderer(ButtonComponent.Renderer.flat(0x77000000, 0x77070707, 0xA0000000)).sizing(Sizing.content()))
                 .child(Components.discreteSlider(Sizing.fill(10), 0, 5).<DiscreteSliderComponent>configure(

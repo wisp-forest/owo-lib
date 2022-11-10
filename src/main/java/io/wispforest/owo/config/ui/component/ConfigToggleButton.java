@@ -2,7 +2,6 @@ package io.wispforest.owo.config.ui.component;
 
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.core.Sizing;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.ApiStatus;
 

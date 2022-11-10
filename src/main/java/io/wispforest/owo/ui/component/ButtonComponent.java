@@ -27,7 +27,7 @@ public class ButtonComponent extends ButtonWidget {
     protected boolean textShadow = true;
 
     protected ButtonComponent(Text message, Consumer<ButtonComponent> onPress) {
-        super(0, 0, 0, 0, message, button -> onPress.accept((ButtonComponent) button), ButtonWidget.EMPTY_TOOLTIP, ButtonWidget.DEFAULT_NARRATION_SUPPLIER);
+        super(0, 0, 0, 0, message, button -> onPress.accept((ButtonComponent) button), ButtonWidget.DEFAULT_NARRATION_SUPPLIER);
         this.sizing(Sizing.content());
     }
 
@@ -44,7 +44,8 @@ public class ButtonComponent extends ButtonWidget {
             textRenderer.draw(matrices, this.getMessage(), this.getX() + this.width / 2f - textRenderer.getWidth(this.getMessage()) / 2f, this.getY() + (this.height - 8) / 2f, color);
         }
 
-        if (this.hovered) this.renderTooltip(matrices, mouseX, mouseY);
+        // TODO bruh?
+//        if (this.hovered) this.renderTooltip(matrices, mouseX, mouseY);
     }
 
     public ButtonComponent onPress(Consumer<ButtonComponent> onPress) {

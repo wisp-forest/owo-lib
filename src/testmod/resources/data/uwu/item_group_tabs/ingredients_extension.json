@@ -1,5 +1,5 @@
 {
-  "target_group": "minecraft:crafting",
+  "target_group": "minecraft:ingredients",
   "extend": true,
   "tabs": [
     {

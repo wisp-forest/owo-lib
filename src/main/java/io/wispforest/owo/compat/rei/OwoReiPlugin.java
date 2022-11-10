@@ -1,6 +1,7 @@
 package io.wispforest.owo.compat.rei;
 
 import io.wispforest.owo.itemgroup.OwoItemGroup;
+import io.wispforest.owo.mixin.itemgroup.CreativeInventoryScreenAccessor;
 import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.OwoUIAdapter;
@@ -11,7 +12,6 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
-import net.minecraft.item.ItemGroups;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,7 +22,7 @@ public class OwoReiPlugin implements REIClientPlugin {
     @Override
     public void registerExclusionZones(ExclusionZones zones) {
         zones.register(CreativeInventoryScreen.class, screen -> {
-            var group = ItemGroups.GROUPS[screen.getSelectedTab()];
+            var group = CreativeInventoryScreenAccessor.owo$getSelectedTab();
             if (!(group instanceof OwoItemGroup owoGroup)) return Collections.emptySet();
             if (owoGroup.getButtons().isEmpty()) return Collections.emptySet();
 

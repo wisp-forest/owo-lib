@@ -26,7 +26,7 @@ import net.minecraft.network.ClientConnection;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.Registries;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
@@ -189,7 +189,7 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
     public static EntityComponent<?> parse(Element element) {
         UIParsing.expectAttributes(element, "type");
         var entityId = UIParsing.parseIdentifier(element.getAttributeNode("type"));
-        var entityType = Registry.ENTITY_TYPE.getOrEmpty(entityId).orElseThrow(() -> new UIModelParsingException("Unknown entity type " + entityId));
+        var entityType = Registries.ENTITY_TYPE.getOrEmpty(entityId).orElseThrow(() -> new UIModelParsingException("Unknown entity type " + entityId));
 
         return new EntityComponent<>(Sizing.content(), entityType, null);
     }

@@ -1,8 +1,8 @@
 package io.wispforest.owo.mixin;
 
-import io.wispforest.owo.client.screens.ScreenhandlerMessageData;
 import io.wispforest.owo.client.screens.OwoScreenHandler;
 import io.wispforest.owo.client.screens.ScreenInternals;
+import io.wispforest.owo.client.screens.ScreenhandlerMessageData;
 import io.wispforest.owo.client.screens.SyncedProperty;
 import io.wispforest.owo.network.NetworkException;
 import io.wispforest.owo.network.serialization.PacketBufSerializer;
