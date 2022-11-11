@@ -2,6 +2,9 @@ package io.wispforest.uwu;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.authlib.GameProfile;
+import io.wispforest.owo.itemgroup.Icon;
+import io.wispforest.owo.itemgroup.OwoItemGroup;
+import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
 import io.wispforest.owo.network.OwoNetChannel;
 import io.wispforest.owo.offline.OfflineAdvancementLookup;
 import io.wispforest.owo.offline.OfflineDataLookup;
@@ -24,6 +27,7 @@ import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.argument.GameProfileArgumentType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -63,63 +67,40 @@ public class Uwu implements ModInitializer {
 
     public static final ScreenHandlerType<EpicScreenHandler> EPIC_SCREEN_HANDLER_TYPE = new ScreenHandlerType<>(EpicScreenHandler::new);
 
-//    public static final OwoItemGroup FOUR_TAB_GROUP = new OwoItemGroup(new Identifier("uwu", "four_tab_group")) {
-//        @Override
-//        protected void setup() {
-//            this.keepStaticTitle();
-//
-//            this.addTab(Icon.of(ANIMATED_BUTTON_TEXTURE, 32, 1000, false), "tab_1", null, true);
-//            this.addTab(Icon.of(Items.EMERALD), "tab_2", TAB_2_CONTENT, false);
-//            this.addTab(Icon.of(Items.AMETHYST_SHARD), "tab_3", null, false);
-//            this.addTab(Icon.of(Items.GOLD_INGOT), "tab_4", null, false);
-//
-//            this.addButton(ItemGroupButton.github(this, "https://github.com/wisp-forest/owo-lib"));
-//
-//            this.setButtonStackHeight(1);
-//        }
-//
-//        @Override
-//        public Icon makeIcon() {
-//            return Icon.of(Items.AXOLOTL_BUCKET);
-//        }
-//    };
-//
-//    public static final OwoItemGroup SIX_TAB_GROUP = new OwoItemGroup(new Identifier("uwu", "six_tab_group")) {
-//        @Override
-//        protected void setup() {
-//            this.setTabStackHeight(3);
-//            this.setCustomTexture(GROUP_TEXTURE);
-//
-//            this.addTab(Icon.of(Items.DIAMOND), "tab_1", null, true);
-//            this.addTab(Icon.of(Items.EMERALD), "tab_2", null, false);
-//            this.addTab(Icon.of(Items.AMETHYST_SHARD), "tab_3", null, false);
-//            this.addTab(Icon.of(Items.GOLD_INGOT), "tab_4", null, false);
-//            this.addTab(Icon.of(Items.IRON_INGOT), "tab_5", null, false);
-//            this.addTab(Icon.of(Items.QUARTZ), "tab_6", null, false);
-//
-//            this.addButton(new ItemGroupButton(this, Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16), "owo", () -> {
-//                MinecraftClient.getInstance().player.sendMessage(Text.of("oωo button pressed!"), false);
-//            }));
-//        }
-//
-//        @Override
-//        public Icon makeIcon() {
-//            return Icon.of(Items.POWDER_SNOW_BUCKET);
-//        }
-//    };
-//
-//    public static final OwoItemGroup SINGLE_TAB_GROUP = new OwoItemGroup(new Identifier("uwu", "single_tab_group")) {
-//        @Override
-//        protected void setup() {
-//            this.displaySingleTab();
-//            this.addTab(Icon.of(Items.SPONGE), "tab_1", null, true);
-//        }
-//
-//        @Override
-//        public Icon makeIcon() {
-//            return Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16);
-//        }
-//    };
+    public static final OwoItemGroup FOUR_TAB_GROUP = OwoItemGroup.builder(new Identifier("uwu", "four_tab_group"), () -> Icon.of(Items.AXOLOTL_BUCKET))
+            .disableDynamicTitle()
+            .buttonStackHeight(1)
+            .initializer(group -> {
+                group.addTab(Icon.of(ANIMATED_BUTTON_TEXTURE, 32, 1000, false), "tab_1", null, true);
+                group.addTab(Icon.of(Items.EMERALD), "tab_2", TAB_2_CONTENT, false);
+                group.addTab(Icon.of(Items.AMETHYST_SHARD), "tab_3", null, false);
+                group.addTab(Icon.of(Items.GOLD_INGOT), "tab_4", null, false);
+
+                group.addButton(ItemGroupButton.github(group, "https://github.com/wisp-forest/owo-lib"));
+            })
+            .build();
+
+    public static final OwoItemGroup SIX_TAB_GROUP = OwoItemGroup.builder(new Identifier("uwu", "six_tab_group"), () -> Icon.of(Items.POWDER_SNOW_BUCKET))
+            .tabStackHeight(3)
+            .customTexture(GROUP_TEXTURE)
+            .initializer(group -> {
+                group.addTab(Icon.of(Items.DIAMOND), "tab_1", null, true);
+                group.addTab(Icon.of(Items.EMERALD), "tab_2", null, false);
+                group.addTab(Icon.of(Items.AMETHYST_SHARD), "tab_3", null, false);
+                group.addTab(Icon.of(Items.GOLD_INGOT), "tab_4", null, false);
+                group.addTab(Icon.of(Items.IRON_INGOT), "tab_5", null, false);
+                group.addTab(Icon.of(Items.QUARTZ), "tab_6", null, false);
+
+                group.addButton(new ItemGroupButton(group, Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16), "owo", () -> {
+                    MinecraftClient.getInstance().player.sendMessage(Text.of("oωo button pressed!"), false);
+                }));
+            })
+            .build();
+
+    public static final OwoItemGroup SINGLE_TAB_GROUP = OwoItemGroup.builder(new Identifier("uwu", "single_tab_group"), () -> Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16))
+            .displaySingleTab()
+            .initializer(group -> group.addTab(Icon.of(Items.SPONGE), "tab_1", null, true))
+            .build();
 
     public static final ItemGroup VANILLA_GROUP = FabricItemGroup.builder(new Identifier("uwu", "vanilla_group"))
             .icon(Items.ACACIA_BOAT::getDefaultStack)
@@ -159,9 +140,9 @@ public class Uwu implements ModInitializer {
         TagInjector.inject(Registries.BLOCK, BlockTags.BASE_STONE_OVERWORLD.id(), Blocks.GLASS);
         TagInjector.injectTagReference(Registries.ITEM, ItemTags.COALS.id(), ItemTags.FOX_FOOD.id());
 
-//        FOUR_TAB_GROUP.initialize();
-//        SIX_TAB_GROUP.initialize();
-//        SINGLE_TAB_GROUP.initialize();
+        FOUR_TAB_GROUP.initialize();
+        SIX_TAB_GROUP.initialize();
+        SINGLE_TAB_GROUP.initialize();
 
         CHANNEL.registerClientbound(TestMessage.class, (message, access) -> {
             access.player().sendMessage(Text.of(message.string), false);

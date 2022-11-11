@@ -1,7 +1,7 @@
 package io.wispforest.owo.util.pond;
 
 import io.wispforest.owo.itemgroup.OwoItemGroup;
-import io.wispforest.owo.itemgroup.json.GroupTabLoader;
+import io.wispforest.owo.itemgroup.json.OwoItemGroupLoader;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import org.jetbrains.annotations.Nullable;
@@ -22,7 +22,7 @@ public interface OwoItemExtensions {
     BiConsumer<Item, ItemGroup.Entries> owo$stackGenerator();
 
     /**
-     * Sets the group of this item, used by {@link GroupTabLoader} to ensure
+     * Sets the group of this item, used by {@link OwoItemGroupLoader} to ensure
      * all {@code ItemGroup} references in items are correct for data-driven owo groups
      *
      * @param group The group to replace the current on with

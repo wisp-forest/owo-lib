@@ -27,12 +27,16 @@ public class WrapperGroup extends OwoItemGroup {
     private boolean extension = false;
 
     public WrapperGroup(ItemGroup parent, List<ItemGroupTab> tabs, List<ItemGroupButton> buttons) {
-        super(parent.getRow(), parent.getColumn(), parent.getType(), parent.getDisplayName(), parent::getIcon, ((io.wispforest.owo.mixin.itemgroup.ItemGroupAccessor) parent).owo$getEntryCollector());
+        super(parent.getId(), owoItemGroup -> {}, () -> Icon.of(parent.getIcon()), 4, 4, null, true, false);
 
         var groups = new ArrayList<>(ItemGroups.getGroups());
         groups.set(groups.indexOf(parent), this);
         ItemGroupsAccessor.setGroups(groups);
         ((FabricItemGroup) this).setPage(((FabricItemGroup) parent).getPage());
+
+        ((ItemGroupAccessor)this).owo$setDisplayName(parent.getDisplayName());
+        ((net.fabricmc.fabric.mixin.itemgroup.ItemGroupAccessor)this).setColumn(parent.getColumn());
+        ((net.fabricmc.fabric.mixin.itemgroup.ItemGroupAccessor)this).setRow(parent.getRow());
 
         this.parent = parent;
 
@@ -68,15 +72,5 @@ public class WrapperGroup extends OwoItemGroup {
                 ItemGroupTab.DEFAULT_TEXTURE,
                 true
         ));
-    }
-
-    @Override
-    protected void setup() {}
-
-    @Override
-    protected Icon makeIcon() {
-        return this.parent instanceof OwoItemGroup owoGroup
-                ? owoGroup.icon()
-                : Icon.of(this.getIcon());
     }
 }

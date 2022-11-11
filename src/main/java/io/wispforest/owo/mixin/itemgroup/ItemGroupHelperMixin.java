@@ -1,6 +1,6 @@
 package io.wispforest.owo.mixin.itemgroup;
 
-import io.wispforest.owo.itemgroup.json.GroupTabLoader;
+import io.wispforest.owo.itemgroup.json.OwoItemGroupLoader;
 import net.fabricmc.fabric.impl.itemgroup.ItemGroupHelper;
 import net.minecraft.item.ItemGroup;
 import org.spongepowered.asm.mixin.Mixin;
@@ -14,7 +14,7 @@ public class ItemGroupHelperMixin {
 
     @Inject(method = "appendItemGroup", at = @At("TAIL"))
     private static void injectWrappers(ItemGroup itemGroup, CallbackInfo ci) {
-        GroupTabLoader.onGroupCreated(itemGroup);
+        OwoItemGroupLoader.onGroupCreated(itemGroup);
     }
 
 }

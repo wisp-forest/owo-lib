@@ -29,13 +29,13 @@ import java.util.Map;
  * it needs to load on the client
  */
 @ApiStatus.Internal
-public class GroupTabLoader implements ModDataConsumer {
+public class OwoItemGroupLoader implements ModDataConsumer {
 
-    public static final GroupTabLoader INSTANCE = new GroupTabLoader();
+    public static final OwoItemGroupLoader INSTANCE = new OwoItemGroupLoader();
 
     private static final Map<Identifier, JsonObject> BUFFERED_GROUPS = new HashMap<>();
 
-    private GroupTabLoader() {}
+    private OwoItemGroupLoader() {}
 
     public static void onGroupCreated(ItemGroup group) {
         if (!BUFFERED_GROUPS.containsKey(group.getId())) return;

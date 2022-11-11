@@ -6,6 +6,7 @@ import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
 import io.wispforest.owo.mixin.itemgroup.ItemGroupAccessor;
 import io.wispforest.owo.util.pond.OwoItemExtensions;
 import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.impl.itemgroup.ItemGroupHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.item.*;
 import net.minecraft.resource.featuretoggle.FeatureSet;
@@ -18,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -40,19 +42,32 @@ public abstract class OwoItemGroup extends ItemGroup {
     public final List<ItemGroupTab> tabs = new ArrayList<>();
     public final List<ItemGroupButton> buttons = new ArrayList<>();
 
-    private Icon icon = null;
+    private Identifier id;
+    private final Consumer<OwoItemGroup> initializer;
+
+    private final Supplier<Icon> iconSupplier;
+    private Icon icon;
 
     private int selectedTab = 0;
     private boolean initialized = false;
 
-    private int tabStackHeight = 4;
-    private int buttonStackHeight = 4;
-    private Identifier customTexture = null;
-    private boolean useDynamicTitle = true;
-    private boolean displaySingleTab = false;
+    private final int tabStackHeight;
+    private final int buttonStackHeight;
+    private final Identifier customTexture;
+    private final boolean useDynamicTitle;
+    private final boolean displaySingleTab;
 
-    protected OwoItemGroup(Row row, int column, Type type, Text displayName, Supplier<ItemStack> iconSupplier, EntryCollector entryCollector) {
-        super(row, column, type, displayName, iconSupplier, entryCollector);
+    protected OwoItemGroup(Identifier id, Consumer<OwoItemGroup> initializer, Supplier<Icon> iconSupplier, int tabStackHeight, int buttonStackHeight, @Nullable Identifier customTexture, boolean useDynamicTitle, boolean displaySingleTab) {
+        super(null, -1, Type.CATEGORY, Text.translatable("itemGroup.%s.%s".formatted(id.getNamespace(), id.getPath())), () -> ItemStack.EMPTY, (enabledFeatures, entries, operatorEnabled) -> {});
+        this.id = id;
+        this.initializer = initializer;
+        this.iconSupplier = iconSupplier;
+        this.tabStackHeight = tabStackHeight;
+        this.buttonStackHeight = buttonStackHeight;
+        this.customTexture = customTexture;
+        this.useDynamicTitle = useDynamicTitle;
+        this.displaySingleTab = displaySingleTab;
+
         ((ItemGroupAccessor) this).owo$setEntryCollector((enabledFeatures, entries, operatorEnabled) -> {
             if (!this.initialized) throw new IllegalStateException("oωo item group not initialized, was 'initialize()' called?");
             this.getSelectedTab().contentSupplier().addItems(enabledFeatures, entries, operatorEnabled);
@@ -63,20 +78,14 @@ public abstract class OwoItemGroup extends ItemGroup {
         });
     }
 
-    /**
-     * Called from {@link #initialize()} to register tabs and buttons
-     *
-     * @see #addTab(Icon, String, TagKey, boolean)
-     * @see #addButton(ItemGroupButton)
-     */
-    protected abstract void setup();
-
-    protected abstract Icon makeIcon();
+    public static Builder builder(Identifier id, Supplier<Icon> iconSupplier) {
+        return new Builder(id, iconSupplier);
+    }
 
     // ---------
 
     /**
-     * Executes {@link #setup()} and makes sure this item group is ready for use
+     * Executes {@link #initializer} and makes sure this item group is ready for use
      * <p>
      * Call this after all of your items have been registered to make sure your icons
      * show up correctly
@@ -84,7 +93,7 @@ public abstract class OwoItemGroup extends ItemGroup {
     public void initialize() {
         if (this.initialized) return;
 
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) this.setup();
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) this.initializer.accept(this);
         if (tabs.size() == 0) this.tabs.add(PLACEHOLDER_TAB);
 
         this.initialized = true;
@@ -95,11 +104,11 @@ public abstract class OwoItemGroup extends ItemGroup {
      * the right side of the creative menu
      *
      * @param button The button to add
-     *               //     * @see ItemGroupButton#link(Icon, String, String)
-     *               //     * @see ItemGroupButton#curseforge(String)
-     *               //     * @see ItemGroupButton#discord(String)
+     * @see ItemGroupButton#link(ItemGroup, Icon, String, String)
+     * @see ItemGroupButton#curseforge(ItemGroup, String)
+     * @see ItemGroupButton#discord(ItemGroup, String)
      */
-    protected void addButton(ItemGroupButton button) {
+    public void addButton(ItemGroupButton button) {
         this.buttons.add(button);
     }
 
@@ -112,7 +121,7 @@ public abstract class OwoItemGroup extends ItemGroup {
      * @param texture    The texture to use for drawing the button
      * @see Icon#of(ItemConvertible)
      */
-    protected void addTab(Icon icon, String name, @Nullable TagKey<Item> contentTag, Identifier texture, boolean primary) {
+    public void addTab(Icon icon, String name, @Nullable TagKey<Item> contentTag, Identifier texture, boolean primary) {
         this.tabs.add(new ItemGroupTab(
                 icon,
                 ButtonDefinition.tooltipFor(this, "tab", name),
@@ -132,43 +141,8 @@ public abstract class OwoItemGroup extends ItemGroup {
      * @param contentTag The tag used for filling this tab
      * @see Icon#of(ItemConvertible)
      */
-    protected void addTab(Icon icon, String name, @Nullable TagKey<Item> contentTag, boolean primary) {
+    public void addTab(Icon icon, String name, @Nullable TagKey<Item> contentTag, boolean primary) {
         addTab(icon, name, contentTag, ItemGroupTab.DEFAULT_TEXTURE, primary);
-    }
-
-    protected void setCustomTexture(Identifier texture) {
-        this.customTexture = texture;
-    }
-
-    /**
-     * Sets how many tab buttons may be displayed in a single
-     * column to the left of the creative inventory
-     */
-    protected void setTabStackHeight(int tabStackHeight) {
-        this.tabStackHeight = tabStackHeight;
-    }
-
-    /**
-     * Sets how many buttons may be displayed in a single
-     * column to the right of the creative inventory
-     */
-    protected void setButtonStackHeight(int buttonStackHeight) {
-        this.buttonStackHeight = buttonStackHeight;
-    }
-
-    /**
-     * Display a tab button, even if only a single tab is registered
-     */
-    protected void displaySingleTab() {
-        this.displaySingleTab = true;
-    }
-
-    /**
-     * Do not change the title of the group to the name of the
-     * currently selected tab - instead always the name of the group itself
-     */
-    protected void keepStaticTitle() {
-        this.useDynamicTitle = false;
     }
 
     // Getters and setters
@@ -216,8 +190,72 @@ public abstract class OwoItemGroup extends ItemGroup {
 
     public Icon icon() {
         return this.icon == null
-                ? this.icon = this.makeIcon()
+                ? this.icon = this.iconSupplier.get()
                 : this.icon;
+    }
+
+    @Override
+    public boolean shouldDisplay() {
+        return true;
+    }
+
+    @Override
+    public Identifier getId() {
+        return this.id;
+    }
+
+    public static class Builder {
+
+        private final Identifier id;
+        private final Supplier<Icon> iconSupplier;
+
+        private Consumer<OwoItemGroup> initializer = owoItemGroup -> {};
+        private int tabStackHeight = 4;
+        private int buttonStackHeight = 4;
+        private @Nullable Identifier customTexture = null;
+        private boolean useDynamicTitle = true;
+        private boolean displaySingleTab = false;
+
+        private Builder(Identifier id, Supplier<Icon> iconSupplier) {
+            this.id = id;
+            this.iconSupplier = iconSupplier;
+        }
+
+        public Builder initializer(Consumer<OwoItemGroup> initializer) {
+            this.initializer = initializer;
+            return this;
+        }
+
+        public Builder tabStackHeight(int tabStackHeight) {
+            this.tabStackHeight = tabStackHeight;
+            return this;
+        }
+
+        public Builder buttonStackHeight(int buttonStackHeight) {
+            this.buttonStackHeight = buttonStackHeight;
+            return this;
+        }
+
+        public Builder customTexture(@Nullable Identifier customTexture) {
+            this.customTexture = customTexture;
+            return this;
+        }
+
+        public Builder disableDynamicTitle() {
+            this.useDynamicTitle = false;
+            return this;
+        }
+
+        public Builder displaySingleTab() {
+            this.displaySingleTab = true;
+            return this;
+        }
+
+        public OwoItemGroup build() {
+            final var group = new OwoItemGroup(id, initializer, iconSupplier, tabStackHeight, buttonStackHeight, customTexture, useDynamicTitle, displaySingleTab) {};
+            ItemGroupHelper.appendItemGroup(group);
+            return group;
+        }
     }
 
     // Utility
@@ -228,12 +266,12 @@ public abstract class OwoItemGroup extends ItemGroup {
      * Used by {@link ItemGroupButtonWidget}
      */
     public interface ButtonDefinition {
+
         Icon icon();
 
         Identifier texture();
 
         Text tooltip();
-
         static Text tooltipFor(ItemGroup group, String component, String componentName) {
             var groupId = group.getId().getNamespace().equals("minecraft")
                     ? group.getId().getPath()
@@ -241,5 +279,6 @@ public abstract class OwoItemGroup extends ItemGroup {
 
             return Text.translatable("itemGroup." + groupId + "." + component + "." + componentName);
         }
+
     }
 }
