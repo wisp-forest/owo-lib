@@ -37,6 +37,7 @@
     "itemgroup.AbstractInventoryScreenMixin",
     "itemgroup.CreativeInventoryScreenAccessor",
     "itemgroup.CreativeInventoryScreenMixin",
+    "itemgroup.MixinCreativeInventoryScreenMixin",
     "text.TranslationStorageMixin",
     "tweaks.OperatingSystemMixin",
     "tweaks.TextFieldWidgetMixin",
