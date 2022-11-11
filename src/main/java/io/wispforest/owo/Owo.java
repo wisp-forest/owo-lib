@@ -6,6 +6,7 @@ import io.wispforest.owo.ops.LootOps;
 import io.wispforest.owo.text.InsertingTextContent;
 import io.wispforest.owo.ui.parsing.UIModelLoader;
 import io.wispforest.owo.ui.util.UISounds;
+import io.wispforest.owo.util.Wisdom;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
@@ -59,6 +60,8 @@ public class Owo implements ModInitializer {
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> SERVER = null);
 
         Registry.register(Registries.SOUND_EVENT, UISounds.UI_INTERACTION.getId(), UISounds.UI_INTERACTION);
+
+        Wisdom.spread();
 
         if (!DEBUG) return;
 
