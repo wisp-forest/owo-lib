@@ -133,7 +133,7 @@ dependencies {
 //    modLocalRuntime "dev.architectury:architectury-fabric:6.2.43"
 
     modCompileOnly("com.terraformersmc:modmenu:${project.modmenu_version}")
-//    modLocalRuntime("com.terraformersmc:modmenu:${project.modmenu_version}")
+    modLocalRuntime("com.terraformersmc:modmenu:${project.modmenu_version}")
 
     modLocalRuntime "maven.modrinth:lazydfu:0.1.2"
 
