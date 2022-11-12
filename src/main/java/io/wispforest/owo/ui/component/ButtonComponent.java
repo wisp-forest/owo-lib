@@ -2,6 +2,7 @@ package io.wispforest.owo.ui.component;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.mixin.ui.ButtonWidgetAccessor;
+import io.wispforest.owo.mixin.ui.ClickableWidgetAccessor;
 import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.CursorStyle;
 import io.wispforest.owo.ui.core.Sizing;
@@ -44,8 +45,8 @@ public class ButtonComponent extends ButtonWidget {
             textRenderer.draw(matrices, this.getMessage(), this.getX() + this.width / 2f - textRenderer.getWidth(this.getMessage()) / 2f, this.getY() + (this.height - 8) / 2f, color);
         }
 
-        // TODO bruh?
-//        if (this.hovered) this.renderTooltip(matrices, mouseX, mouseY);
+        var tooltip = ((ClickableWidgetAccessor)this).owo$getTooltip();
+        if (this.hovered && tooltip != null) Drawer.utilityScreen().renderOrderedTooltip(matrices, tooltip.method_47405(MinecraftClient.getInstance()), mouseX, mouseY);
     }
 
     public ButtonComponent onPress(Consumer<ButtonComponent> onPress) {
