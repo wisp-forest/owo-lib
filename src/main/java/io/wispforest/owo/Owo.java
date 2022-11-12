@@ -40,11 +40,14 @@ public class Owo implements ModInitializer {
             .append(Text.literal(" > ").formatted(Formatting.GRAY));
 
     static {
-        if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
-            DEBUG = !Boolean.getBoolean("owo.forceDisableDebug");
-        } else {
-            DEBUG = Boolean.getBoolean("owo.debug");
+        boolean debug = FabricLoader.getInstance().isDevelopmentEnvironment();
+        if (System.getProperty("owo.debug") != null) debug = Boolean.getBoolean("owo.debug");
+        if (Boolean.getBoolean("owo.forceDisableDebug")) {
+            LOGGER.warn("Deprecated system property 'owo.forceDisableDebug=true' was used - use 'owo.debug=false' instead");
+            debug = false;
         }
+
+        DEBUG = debug;
     }
 
     @Override
@@ -68,11 +71,13 @@ public class Owo implements ModInitializer {
         OwoDebugCommands.register();
     }
 
+    @ApiStatus.Internal
     public static void debugWarn(Logger logger, String message) {
         if (!DEBUG) return;
         logger.warn(message);
     }
 
+    @ApiStatus.Internal
     public static void debugWarn(Logger logger, String message, Object... params) {
         if (!DEBUG) return;
         logger.warn(message, params);
