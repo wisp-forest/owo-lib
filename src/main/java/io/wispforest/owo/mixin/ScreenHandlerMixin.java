@@ -7,6 +7,8 @@ import io.wispforest.owo.client.screens.SyncedProperty;
 import io.wispforest.owo.network.NetworkException;
 import io.wispforest.owo.network.serialization.PacketBufSerializer;
 import io.wispforest.owo.util.pond.OwoScreenHandlerExtension;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -14,6 +16,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -103,8 +106,13 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
                 throw new NetworkException("Tried to send serverbound message on the client");
             }
 
-            ClientPlayNetworking.send(ScreenInternals.LOCAL_PACKET, buf);
+            this.owo$sendToServer(ScreenInternals.LOCAL_PACKET, buf);
         }
+    }
+
+    @Environment(EnvType.CLIENT)
+    private void owo$sendToServer(Identifier channel, PacketByteBuf data) {
+        ClientPlayNetworking.send(channel, data);
     }
 
     @Override
