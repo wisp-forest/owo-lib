@@ -29,6 +29,7 @@
   "text.config.uwu.option.regex": "Regex'd",
   "text.config.uwu.option.regex.tooltip": "Regex tooltip, this is epic",
   "text.config.uwu.category.nestingTime": "Nesting Time",
+  "text.config.uwu.category.nestingTime.tooltip": "Yep, it's nesting Time",
   "text.config.uwu.option.nestingTime.togglee": "Togglee",
   "text.config.uwu.option.nestingTime.yesThisIsAlsoNested": "Yes this is also nested",
   "text.config.uwu.option.nestingTime.nestedIntegers": "A nested List of Integers",

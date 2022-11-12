@@ -48,8 +48,6 @@ import java.util.regex.Pattern;
  */
 public abstract class ConfigWrapper<C> {
 
-    @Environment(EnvType.CLIENT)
-    private static final Map<String, Function<Screen, ConfigScreen>> CONFIG_SCREEN_PROVIDERS = new HashMap<>();
     private static final Map<String, Class<?>> KNOWN_CONFIG_CLASSES = new HashMap<>();
 
     protected final String name;
@@ -78,7 +76,7 @@ public abstract class ConfigWrapper<C> {
 
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT && clazz.isAnnotationPresent(Modmenu.class)) {
             var modmenuAnnotation = clazz.getAnnotation(Modmenu.class);
-            CONFIG_SCREEN_PROVIDERS.put(
+            ConfigScreen.registerModmenuProvider(
                     modmenuAnnotation.modId(),
                     screen -> ConfigScreen.createWithCustomModel(new Identifier(modmenuAnnotation.uiModelId()), this, screen)
             );
@@ -346,10 +344,6 @@ public abstract class ConfigWrapper<C> {
         } catch (Throwable e) {
             throw new RuntimeException("Could not invoke predicate", e);
         }
-    }
-
-    public static void forEachScreenProvider(BiConsumer<String, Function<Screen, ConfigScreen>> action) {
-        CONFIG_SCREEN_PROVIDERS.forEach(action);
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})

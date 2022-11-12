@@ -48,7 +48,7 @@ public class Wisdom {
     );
 
     public static void spread() {
-        Owo.LOGGER.info("today's oωo wisdom: " + Util.getRandom(ALL_THE_WISDOM, CRYSTAL_BALL));
+        Owo.LOGGER.info(Util.getRandom(ALL_THE_WISDOM, CRYSTAL_BALL));
     }
 
 }

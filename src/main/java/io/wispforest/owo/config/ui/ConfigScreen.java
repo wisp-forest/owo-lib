@@ -36,6 +36,8 @@ import org.lwjgl.glfw.GLFW;
 
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -54,6 +56,8 @@ import java.util.function.Predicate;
 public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
 
     public static final Identifier DEFAULT_MODEL_ID = new Identifier("owo", "config");
+
+    private static final Map<String, Function<Screen, ? extends ConfigScreen>> CONFIG_SCREEN_PROVIDERS = new HashMap<>();
 
     private static final Map<Predicate<Option<?>>, OptionComponentFactory<?>> DEFAULT_FACTORIES = new HashMap<>();
     /**
@@ -99,6 +103,16 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
      */
     public static ConfigScreen createWithCustomModel(Identifier modelId, ConfigWrapper<?> config, @Nullable Screen parent) {
         return new ConfigScreen(modelId, config, parent);
+    }
+
+    public static <S extends ConfigScreen> void registerModmenuProvider(String modId, Function<Screen, S> supplier) {
+        if (CONFIG_SCREEN_PROVIDERS.put(modId, supplier) != null) {
+            throw new IllegalStateException("Tried to register ModMenu provider for mod id " + modId + " twice");
+        }
+    }
+
+    public static void forEachModmenuProvider(BiConsumer<String, Function<Screen, ? extends ConfigScreen>> action) {
+        CONFIG_SCREEN_PROVIDERS.forEach(action);
     }
 
     @Override
@@ -213,10 +227,15 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                             Text.translatable("text.config." + this.config.name() + ".category." + parentKey.asString()),
                             expanded
                     ).<CollapsibleContainer>configure(nestedContainer -> {
+                        final var categoryKey = "text.config." + this.config.name() + ".category." + parentKey.asString();
+                        if (I18n.hasTranslation(categoryKey + ".tooltip")) {
+                            nestedContainer.titleLayout().tooltip(Text.translatable(categoryKey + ".tooltip"));
+                        }
+
                         nestedContainer.titleLayout().child(new SearchAnchorComponent(
                                 nestedContainer.titleLayout(),
                                 option.key(),
-                                () -> I18n.translate("text.config." + this.config.name() + ".category." + parentKey.asString())
+                                () -> I18n.translate(categoryKey)
                         ).highlightConfigurator(highlight ->
                                 highlight.positioning(Positioning.absolute(-5, -5))
                                         .verticalSizing(Sizing.fixed(19))

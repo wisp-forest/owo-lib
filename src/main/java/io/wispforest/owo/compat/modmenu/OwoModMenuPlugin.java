@@ -2,7 +2,7 @@ package io.wispforest.owo.compat.modmenu;
 
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
-import io.wispforest.owo.config.ConfigWrapper;
+import io.wispforest.owo.config.ui.ConfigScreen;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -16,7 +16,7 @@ public class OwoModMenuPlugin implements ModMenuApi {
     public Map<String, ConfigScreenFactory<?>> getProvidedConfigScreenFactories() {
         return Util.make(
                 new HashMap<>(),
-                map -> ConfigWrapper.forEachScreenProvider((s, provider) -> map.put(s, provider::apply))
+                map -> ConfigScreen.forEachModmenuProvider((s, provider) -> map.put(s, provider::apply))
         );
     }
 }
