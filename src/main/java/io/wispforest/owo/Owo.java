@@ -27,7 +27,7 @@ public class Owo implements ModInitializer {
 
     /**
      * Whether oωo debug is enabled, this defaults to {@code true} in a development environment.
-     * To override that behaviour, add the {@code -Dowo.forceDisableDebug=true} java argument
+     * To override that behavior, add the {@code -Dowo.debug=false} java argument
      */
     public static final boolean DEBUG;
     public static final Logger LOGGER = LogManager.getLogger("owo");
@@ -83,6 +83,11 @@ public class Owo implements ModInitializer {
         logger.warn(message, params);
     }
 
+    /**
+     * @return The currently active minecraft server instance. If running
+     * on a physical client, this will return the integrated server while in
+     * a local singleplayer world and {@code null} otherwise
+     */
     public static MinecraftServer currentServer() {
         return SERVER;
     }

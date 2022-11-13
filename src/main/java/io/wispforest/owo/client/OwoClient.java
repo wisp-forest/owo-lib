@@ -3,16 +3,18 @@ package io.wispforest.owo.client;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.client.screens.ScreenInternals;
 import io.wispforest.owo.command.debug.OwoDebugCommands;
+import io.wispforest.owo.config.OwoConfigCommand;
 import io.wispforest.owo.itemgroup.json.OwoItemGroupLoader;
 import io.wispforest.owo.moddata.ModDataLoader;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.ApiStatus;
 
-@Environment(EnvType.CLIENT)
 @ApiStatus.Internal
+@Environment(EnvType.CLIENT)
 public class OwoClient implements ClientModInitializer {
 
     private static final String LINUX_RENDERDOC_WARNING = """
@@ -53,6 +55,8 @@ public class OwoClient implements ClientModInitializer {
         }
 
         ScreenInternals.Client.init();
+
+        ClientCommandRegistrationCallback.EVENT.register(OwoConfigCommand::register);
 
         if (!Owo.DEBUG) return;
         OwoDebugCommands.Client.register();

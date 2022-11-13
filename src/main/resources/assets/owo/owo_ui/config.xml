@@ -23,7 +23,9 @@
                         <flow-layout direction="vertical" id="option-panel-container">
                             <children>
                                 <scroll direction="vertical" id="option-panel-scroll">
-                                    <flow-layout direction="vertical" id="option-panel"/>
+                                    <flow-layout direction="vertical" id="option-panel">
+                                        <children/>
+                                    </flow-layout>
 
                                     <scrollbar-thiccness>3</scrollbar-thiccness>
 
@@ -81,8 +83,7 @@
                                         </text-box>
 
                                         <label id="search-match-indicator">
-<!--                                            <shadow>true</shadow>-->
-                                            <margins>y
+                                            <margins>
                                                 <horizontal>5</horizontal>
                                             </margins>
                                         </label>

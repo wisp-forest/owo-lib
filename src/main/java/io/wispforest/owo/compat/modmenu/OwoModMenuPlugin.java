@@ -16,7 +16,7 @@ public class OwoModMenuPlugin implements ModMenuApi {
     public Map<String, ConfigScreenFactory<?>> getProvidedConfigScreenFactories() {
         return Util.make(
                 new HashMap<>(),
-                map -> ConfigScreen.forEachModmenuProvider((s, provider) -> map.put(s, provider::apply))
+                map -> ConfigScreen.forEachProvider((s, provider) -> map.put(s, provider::apply))
         );
     }
 }

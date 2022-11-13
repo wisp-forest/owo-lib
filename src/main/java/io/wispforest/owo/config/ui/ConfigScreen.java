@@ -106,20 +106,34 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
     }
 
     /**
-     * Register the given config screen provider for ModMenu. If a provider
-     * is already registered, an exception is thrown
+     * Register the given config screen provider. This is primarily
+     * used for making your config available in ModMenu and to the
+     * {@code /owo-config} command, although other places my use it as well
      *
      * @param modId    The mod id for which to supply a config screen
      * @param supplier The supplier to register - this gets the parent screen
      *                 as argument
+     * @throws IllegalArgumentException If a config screen provider is
+     *                                  already registered for the given mod id
      */
-    public static <S extends ConfigScreen> void registerModmenuProvider(String modId, Function<Screen, S> supplier) {
+    public static <S extends ConfigScreen> void registerProvider(String modId, Function<Screen, S> supplier) {
         if (CONFIG_SCREEN_PROVIDERS.put(modId, supplier) != null) {
-            throw new IllegalStateException("Tried to register ModMenu provider for mod id " + modId + " twice");
+            throw new IllegalArgumentException("Tried to register config screen provider for mod id " + modId + " twice");
         }
     }
 
-    public static void forEachModmenuProvider(BiConsumer<String, Function<Screen, ? extends ConfigScreen>> action) {
+    /**
+     * Get the config screen provider associated with
+     * the given mod id
+     *
+     * @return The associated config screen provider, or {@code null} if
+     * none is registered
+     */
+    public static @Nullable Function<Screen, ? extends ConfigScreen> getProvider(String modId) {
+        return CONFIG_SCREEN_PROVIDERS.get(modId);
+    }
+
+    public static void forEachProvider(BiConsumer<String, Function<Screen, ? extends ConfigScreen>> action) {
         CONFIG_SCREEN_PROVIDERS.forEach(action);
     }
 
