@@ -62,8 +62,6 @@ public class Owo implements ModInitializer {
         ServerLifecycleEvents.SERVER_STARTING.register(server -> SERVER = server);
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> SERVER = null);
 
-        Registry.register(Registries.SOUND_EVENT, UISounds.UI_INTERACTION.getId(), UISounds.UI_INTERACTION);
-
         Wisdom.spread();
 
         if (!DEBUG) return;
