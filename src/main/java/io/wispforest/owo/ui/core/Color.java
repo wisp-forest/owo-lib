@@ -75,6 +75,12 @@ public record Color(float red, float green, float blue, float alpha) implements 
                 | (int) (this.blue * 255);
     }
 
+    public String asHexString(boolean includeAlpha) {
+        return includeAlpha
+                ? String.format("#%08X", this.argb())
+                : String.format("#%06X", this.rgb());
+    }
+
     @Override
     public Color interpolate(Color next, float delta) {
         return new Color(
