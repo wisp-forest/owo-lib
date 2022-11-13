@@ -105,6 +105,14 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
         return new ConfigScreen(modelId, config, parent);
     }
 
+    /**
+     * Register the given config screen provider for ModMenu. If a provider
+     * is already registered, an exception is thrown
+     *
+     * @param modId    The mod id for which to supply a config screen
+     * @param supplier The supplier to register - this gets the parent screen
+     *                 as argument
+     */
     public static <S extends ConfigScreen> void registerModmenuProvider(String modId, Function<Screen, S> supplier) {
         if (CONFIG_SCREEN_PROVIDERS.put(modId, supplier) != null) {
             throw new IllegalStateException("Tried to register ModMenu provider for mod id " + modId + " twice");
