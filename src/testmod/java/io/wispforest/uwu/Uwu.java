@@ -16,8 +16,10 @@ import io.wispforest.owo.text.CustomTextRegistry;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.EntityComponent;
 import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.ui.core.Sizing;
+import io.wispforest.owo.ui.core.VerticalAlignment;
 import io.wispforest.owo.ui.layers.Layer;
 import io.wispforest.owo.ui.layers.Layers;
 import io.wispforest.owo.ui.util.UISounds;
@@ -31,6 +33,7 @@ import io.wispforest.uwu.text.BasedTextContent;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.advancement.AdvancementProgress;
@@ -38,6 +41,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.command.argument.GameProfileArgumentType;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.passive.AllayEntity;
@@ -55,6 +59,7 @@ import net.minecraft.tag.ItemTags;
 import net.minecraft.tag.TagKey;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableTextContent;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -178,21 +183,26 @@ public class Uwu implements ModInitializer {
 
         Layers.push(GameMenuScreen.class, Containers::verticalFlow, instance -> {
             instance.adapter.rootComponent.child(
-                    Components.entity(Sizing.fixed(20), EntityType.ALLAY, null).<EntityComponent<AllayEntity>>configure(component -> {
-                        component.allowMouseRotation(true)
-                                .scale(.75f)
-                                .margins(Insets.left(5));
+                    Containers.horizontalFlow(Sizing.content(), Sizing.content())
+                            .child(Components.entity(Sizing.fixed(20), EntityType.ALLAY, null).<EntityComponent<AllayEntity>>configure(component -> {
+                                component.allowMouseRotation(true)
+                                        .scale(.75f);
 
-                        instance.queryWidgetPosition(widget -> {
-                            if (!(widget instanceof ButtonWidget button)) return false;
-                            return button.getMessage().getContent() instanceof TranslatableTextContent translatable && translatable.getKey().equals("menu.shareToLan");
-                        }, Layer.Instance.Anchor.TOP_RIGHT, component::positioning);
+                                component.mouseDown().subscribe((mouseX, mouseY, button) -> {
+                                    UISounds.playInteractionSound();
+                                    return true;
+                                });
+                            })).child(Components.textBox(Sizing.fixed(100), "allay text").<TextFieldWidget>configure(textBox -> {
+                                textBox.verticalSizing(Sizing.fixed(9));
+                                textBox.setDrawsBackground(false);
+                            })).<FlowLayout>configure(layout -> {
+                                layout.gap(5).margins(Insets.left(5)).verticalAlignment(VerticalAlignment.CENTER);
 
-                        component.mouseDown().subscribe((mouseX, mouseY, button) -> {
-                            UISounds.playInteractionSound();
-                            return true;
-                        });
-                    })
+                                instance.queryWidgetPosition(widget -> {
+                                    if (!(widget instanceof ButtonWidget button)) return false;
+                                    return button.getMessage().getContent() instanceof TranslatableTextContent translatable && translatable.getKey().equals("menu.shareToLan");
+                                }, Layer.Instance.Anchor.TOP_RIGHT, layout::positioning);
+                            })
             );
         });
 

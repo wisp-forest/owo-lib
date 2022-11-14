@@ -42,7 +42,7 @@ public abstract class OwoItemGroup extends ItemGroup {
     public final List<ItemGroupTab> tabs = new ArrayList<>();
     public final List<ItemGroupButton> buttons = new ArrayList<>();
 
-    private Identifier id;
+    private final Identifier id;
     private final Consumer<OwoItemGroup> initializer;
 
     private final Supplier<Icon> iconSupplier;
