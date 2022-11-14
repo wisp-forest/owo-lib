@@ -30,11 +30,11 @@ import java.util.function.BiFunction;
  *
  * @see io.wispforest.owo.ui.base.BaseOwoScreen
  */
-public class OwoUIAdapter<T extends ParentComponent> implements Element, Drawable, Selectable {
+public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawable, Selectable {
 
     private static boolean isRendering = false;
 
-    public final T rootComponent;
+    public final R rootComponent;
     public final CursorAdapter cursorAdapter;
 
     protected boolean disposed = false;
@@ -47,7 +47,7 @@ public class OwoUIAdapter<T extends ParentComponent> implements Element, Drawabl
     public boolean globalInspector = false;
     public int inspectorZOffset = 1000;
 
-    protected OwoUIAdapter(int x, int y, int width, int height, T rootComponent) {
+    protected OwoUIAdapter(int x, int y, int width, int height, R rootComponent) {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -64,10 +64,10 @@ public class OwoUIAdapter<T extends ParentComponent> implements Element, Drawabl
      *
      * @param screen             The screen for which to create an adapter
      * @param rootComponentMaker A function which will create the root component of this screen
-     * @param <T>                The type of root component the created adapter will use
+     * @param <R>                The type of root component the created adapter will use
      * @return The new UI adapter, already set up for the given screen
      */
-    public static <T extends ParentComponent> OwoUIAdapter<T> create(Screen screen, BiFunction<Sizing, Sizing, T> rootComponentMaker) {
+    public static <R extends ParentComponent> OwoUIAdapter<R> create(Screen screen, BiFunction<Sizing, Sizing, R> rootComponentMaker) {
         var rootComponent = rootComponentMaker.apply(Sizing.fill(100), Sizing.fill(100));
 
         var adapter = new OwoUIAdapter<>(0, 0, screen.width, screen.height, rootComponent);
@@ -86,10 +86,10 @@ public class OwoUIAdapter<T extends ParentComponent> implements Element, Drawabl
      * @param width              The width of the available area, in pixels
      * @param height             The height of the available area, in pixels
      * @param rootComponentMaker A function which will create the root component of the adapter
-     * @param <T>                The type of root component the created adapter will use
+     * @param <R>                The type of root component the created adapter will use
      * @return The new UI adapter, ready for layout inflation
      */
-    public static <T extends ParentComponent> OwoUIAdapter<T> createWithoutScreen(int x, int y, int width, int height, BiFunction<Sizing, Sizing, T> rootComponentMaker) {
+    public static <R extends ParentComponent> OwoUIAdapter<R> createWithoutScreen(int x, int y, int width, int height, BiFunction<Sizing, Sizing, R> rootComponentMaker) {
         var rootComponent = rootComponentMaker.apply(Sizing.fill(100), Sizing.fill(100));
         return new OwoUIAdapter<>(x, y, width, height, rootComponent);
     }

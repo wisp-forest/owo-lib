@@ -13,6 +13,13 @@ import io.wispforest.owo.particles.systems.ParticleSystem;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
 import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
 import io.wispforest.owo.text.CustomTextRegistry;
+import io.wispforest.owo.ui.component.Components;
+import io.wispforest.owo.ui.component.EntityComponent;
+import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.core.Positioning;
+import io.wispforest.owo.ui.core.Sizing;
+import io.wispforest.owo.ui.layers.Layers;
+import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.owo.util.RegistryAccess;
 import io.wispforest.owo.util.TagInjector;
 import io.wispforest.uwu.config.BruhConfig;
@@ -28,7 +35,11 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.GameMenuScreen;
+import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.command.argument.GameProfileArgumentType;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.passive.FrogEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -42,6 +53,7 @@ import net.minecraft.tag.BlockTags;
 import net.minecraft.tag.ItemTags;
 import net.minecraft.tag.TagKey;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableTextContent;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -162,6 +174,24 @@ public class Uwu implements ModInitializer {
 
         System.out.println(RegistryAccess.getEntry(Registries.ITEM, Items.ACACIA_BOAT));
         System.out.println(RegistryAccess.getEntry(Registries.ITEM, new Identifier("acacia_planks")));
+
+        Layers.push(GameMenuScreen.class, Containers::verticalFlow, (adapter, positioner) -> {
+            adapter.rootComponent.child(
+                    Components.entity(Sizing.fixed(100), EntityType.FROG, null).<EntityComponent<FrogEntity>>configure(component -> {
+                        component.allowMouseRotation(true)
+                                .scale(.75f)
+                                .positioning(positioner.nextTo(widget -> {
+                                    if (!(widget instanceof ButtonWidget button)) return false;
+                                    return button.getMessage().getContent() instanceof TranslatableTextContent translatable && translatable.getKey().equals("menu.shareToLan");
+                                }));
+
+                        component.mouseDown().subscribe((mouseX, mouseY, button) -> {
+                            UISounds.playInteractionSound();
+                            return true;
+                        });
+                    })
+            );
+        });
 
         CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> {
             dispatcher.register(

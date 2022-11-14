@@ -48,12 +48,17 @@
     "ui.ClickableWidgetAccessor",
     "ui.ClickableWidgetMixin",
     "ui.DrawableHelperMixin",
+    "ui.layers.GameRendererMixin",
     "ui.HandledScreenMixin",
+    "ui.layers.KeyboardMixin",
     "ui.MinecraftClientMixin",
+    "ui.layers.MouseMixin",
     "ui.RenderSystemMixin",
     "ui.ScreenInvoker",
+    "ui.layers.ScreenMixin",
     "ui.SliderWidgetMixin",
-    "ui.TextFieldWidgetMixin"
+    "ui.TextFieldWidgetMixin",
+    "ui.layers.WrapperWidgetInvoker"
   ],
   "server": [
     "MainMixin"
