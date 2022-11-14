@@ -23,6 +23,19 @@ public class GameRendererMixin {
             method = "render",
             at = @At(
                     value = "INVOKE",
+                    target = "Lnet/minecraft/client/gui/screen/Screen;method_47413(Lnet/minecraft/client/util/math/MatrixStack;IIF)V"
+            )
+    )
+    private void renderLayers(float tickDelta, long startTime, boolean tick, CallbackInfo ci) {
+        for (var layer : ((OwoScreenExtension) this.client.currentScreen).owo$getLayers()) {
+            if (layer.aggressivePositioning) layer.dispatchLayoutUpdates();
+        }
+    }
+
+    @Inject(
+            method = "render",
+            at = @At(
+                    value = "INVOKE",
                     target = "Lnet/minecraft/client/gui/screen/Screen;method_47413(Lnet/minecraft/client/util/math/MatrixStack;IIF)V",
                     shift = At.Shift.AFTER
             ),
