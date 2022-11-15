@@ -33,7 +33,6 @@ import io.wispforest.uwu.text.BasedTextContent;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.advancement.AdvancementProgress;
@@ -59,7 +58,6 @@ import net.minecraft.tag.ItemTags;
 import net.minecraft.tag.TagKey;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableTextContent;
-import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -181,7 +179,7 @@ public class Uwu implements ModInitializer {
         System.out.println(RegistryAccess.getEntry(Registries.ITEM, Items.ACACIA_BOAT));
         System.out.println(RegistryAccess.getEntry(Registries.ITEM, new Identifier("acacia_planks")));
 
-        Layers.push(GameMenuScreen.class, Containers::verticalFlow, instance -> {
+        Layers.push(Containers::verticalFlow, instance -> {
             instance.adapter.rootComponent.child(
                     Containers.horizontalFlow(Sizing.content(), Sizing.content())
                             .child(Components.entity(Sizing.fixed(20), EntityType.ALLAY, null).<EntityComponent<AllayEntity>>configure(component -> {
@@ -198,13 +196,13 @@ public class Uwu implements ModInitializer {
                             })).<FlowLayout>configure(layout -> {
                                 layout.gap(5).margins(Insets.left(5)).verticalAlignment(VerticalAlignment.CENTER);
 
-                                instance.queryWidgetPosition(widget -> {
+                                instance.alignComponentToWidget(widget -> {
                                     if (!(widget instanceof ButtonWidget button)) return false;
                                     return button.getMessage().getContent() instanceof TranslatableTextContent translatable && translatable.getKey().equals("menu.shareToLan");
-                                }, Layer.Instance.Anchor.TOP_RIGHT, layout::positioning);
+                                }, Layer.Instance.AnchorSide.RIGHT, 0, layout);
                             })
             );
-        });
+        }, GameMenuScreen.class);
 
         CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> {
             dispatcher.register(

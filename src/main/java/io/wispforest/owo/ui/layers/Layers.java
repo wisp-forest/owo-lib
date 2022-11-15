@@ -23,9 +23,12 @@ public final class Layers {
 
     private static final Multimap<Class<? extends Screen>, Layer<?, ?>> LAYERS = HashMultimap.create();
 
-    public static <S extends Screen, R extends ParentComponent> Layer<S, R> push(Class<S> screenClass, BiFunction<Sizing, Sizing, R> rootComponentMaker, Consumer<Layer<S, R>.Instance> instanceInitializer) {
+    @SafeVarargs
+    public static <S extends Screen, R extends ParentComponent> Layer<S, R> push(BiFunction<Sizing, Sizing, R> rootComponentMaker, Consumer<Layer<S, R>.Instance> instanceInitializer, Class<? extends S>... screenClasses) {
         final var layer = new Layer<>(rootComponentMaker, instanceInitializer);
-        LAYERS.put(screenClass, layer);
+        for (var screenClass : screenClasses) {
+            LAYERS.put(screenClass, layer);
+        }
         return layer;
     }
 
@@ -41,8 +44,14 @@ public final class Layers {
 
     static {
         ScreenEvents.AFTER_INIT.addPhaseOrdering(Event.DEFAULT_PHASE, INIT_PHASE);
-        ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
+        ScreenEvents.AFTER_INIT.register(INIT_PHASE, (client, screen, scaledWidth, scaledHeight) -> {
             ((OwoScreenExtension) screen).owo$updateLayers();
+
+            ScreenEvents.remove(screen).register(bruh -> {
+                for (var instance : getInstances(screen)) {
+                    instance.adapter.dispose();
+                }
+            });
 
             ScreenEvents.beforeRender(screen).register((bruh, matrices, mouseX, mouseY, tickDelta) -> {
                 for (var instance : getInstances(screen)) {

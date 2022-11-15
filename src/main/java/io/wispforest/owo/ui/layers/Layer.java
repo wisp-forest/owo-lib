@@ -1,10 +1,7 @@
 package io.wispforest.owo.ui.layers;
 
 import io.wispforest.owo.mixin.ui.layers.WrapperWidgetInvoker;
-import io.wispforest.owo.ui.core.OwoUIAdapter;
-import io.wispforest.owo.ui.core.ParentComponent;
-import io.wispforest.owo.ui.core.Positioning;
-import io.wispforest.owo.ui.core.Sizing;
+import io.wispforest.owo.ui.core.*;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ClickableWidget;
@@ -32,14 +29,14 @@ public class Layer<S extends Screen, R extends ParentComponent> {
 
     public class Instance {
 
-        public final Screen screen;
+        public final S screen;
         public final OwoUIAdapter<R> adapter;
 
         public boolean aggressivePositioning = false;
 
         protected final List<Runnable> layoutUpdaters = new ArrayList<>();
 
-        protected Instance(Screen screen) {
+        protected Instance(S screen) {
             this.screen = screen;
             this.adapter = OwoUIAdapter.createWithoutScreen(0, 0, screen.width, screen.height, Layer.this.rootComponentMaker);
             Layer.this.instanceInitializer.accept(this);
@@ -63,21 +60,34 @@ public class Layer<S extends Screen, R extends ParentComponent> {
             return widget;
         }
 
-        public void queryWidgetPosition(Predicate<ClickableWidget> locator, Anchor anchor, Consumer<Positioning> positioner) {
+        public void alignComponentToWidget(Predicate<ClickableWidget> locator, AnchorSide anchor, float justification, Component component) {
             this.layoutUpdaters.add(() -> {
                 var widget = this.queryWidget(locator);
 
                 if (widget == null) {
-                    positioner.accept(Positioning.absolute(0, 0));
+                    component.positioning(Positioning.absolute(0, 0));
                     return;
                 }
 
+                var size = component.fullSize();
                 switch (anchor) {
-                    case TOP_LEFT -> positioner.accept(Positioning.absolute(widget.getX(), widget.getY()));
-                    case BOTTOM_LEFT -> positioner.accept(Positioning.absolute(widget.getX(), widget.getY() + widget.getHeight()));
-                    case TOP_RIGHT -> positioner.accept(Positioning.absolute(widget.getX() + widget.getWidth(), widget.getY()));
-                    case BOTTOM_RIGHT -> positioner.accept(Positioning.absolute(widget.getX() + widget.getWidth(), widget.getY() + widget.getHeight()));
-                };
+                    case TOP -> component.positioning(Positioning.absolute(
+                            (int) (widget.getX() + (widget.getWidth() - size.width()) * justification),
+                            widget.getY() - size.height()
+                    ));
+                    case RIGHT -> component.positioning(Positioning.absolute(
+                            widget.getX() + widget.getWidth(),
+                            (int) (widget.getY() + (widget.getHeight() - size.height()) * justification)
+                    ));
+                    case BOTTOM -> component.positioning(Positioning.absolute(
+                            (int) (widget.getX() + (widget.getWidth() - size.width()) * justification),
+                            widget.getY() + widget.getHeight()
+                    ));
+                    case LEFT -> component.positioning(Positioning.absolute(
+                            widget.getX() - size.width(),
+                            (int) (widget.getY() + (widget.getHeight() - size.height()) * justification)
+                    ));
+                }
             });
         }
 
@@ -94,8 +104,8 @@ public class Layer<S extends Screen, R extends ParentComponent> {
             }
         }
 
-        public enum Anchor {
-            TOP_LEFT, TOP_RIGHT, BOTTOM_RIGHT, BOTTOM_LEFT
+        public enum AnchorSide {
+            TOP, BOTTOM, LEFT, RIGHT
         }
     }
 
