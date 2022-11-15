@@ -54,7 +54,6 @@
     "ui.ScreenInvoker",
     "ui.SliderWidgetMixin",
     "ui.TextFieldWidgetMixin",
-    "ui.layers.GameRendererMixin",
     "ui.layers.KeyboardMixin",
     "ui.layers.MouseMixin",
     "ui.layers.ScreenMixin",
