@@ -123,10 +123,9 @@ public abstract class BaseComponent implements Component {
             action.run();
         } finally {
             if (this.batchedEvents > 1) {
+                this.batchedEvents = 0;
                 this.notifyParentIfMounted();
             }
-
-            this.batchedEvents = 0;
         }
     }
 

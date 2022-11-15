@@ -186,10 +186,9 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
             action.run();
         } finally {
             if (this.batchedEvents > 1) {
+                this.batchedEvents = 0;
                 this.updateLayout();
             }
-
-            this.batchedEvents = 0;
         }
     }
 

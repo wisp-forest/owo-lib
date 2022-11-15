@@ -194,11 +194,11 @@ public class Uwu implements ModInitializer {
                                 textBox.verticalSizing(Sizing.fixed(9));
                                 textBox.setDrawsBackground(false);
                             })).<FlowLayout>configure(layout -> {
-                                layout.gap(5).margins(Insets.left(5)).verticalAlignment(VerticalAlignment.CENTER);
+                                layout.gap(5).margins(Insets.left(4)).verticalAlignment(VerticalAlignment.CENTER);
 
                                 instance.alignComponentToWidget(widget -> {
                                     if (!(widget instanceof ButtonWidget button)) return false;
-                                    return button.getMessage().getContent() instanceof TranslatableTextContent translatable && translatable.getKey().equals("menu.shareToLan");
+                                    return button.getMessage().getContent() instanceof TranslatableTextContent translatable && translatable.getKey().equals("menu.reportBugs");
                                 }, Layer.Instance.AnchorSide.RIGHT, 0, layout);
                             })
             );
