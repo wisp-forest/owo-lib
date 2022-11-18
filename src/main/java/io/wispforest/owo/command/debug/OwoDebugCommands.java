@@ -10,6 +10,7 @@ import io.wispforest.owo.command.EnumArgumentType;
 import io.wispforest.owo.ops.TextOps;
 import io.wispforest.owo.renderdoc.RenderDoc;
 import io.wispforest.owo.renderdoc.RenderdocScreen;
+import io.wispforest.owo.ui.hud.HudInspectorScreen;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
@@ -149,6 +150,12 @@ public class OwoDebugCommands {
     public static class Client {
         public static void register() {
             ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
+                dispatcher.register(ClientCommandManager.literal("owo-hud-inspect")
+                        .executes(context -> {
+                            MinecraftClient.getInstance().setScreen(new HudInspectorScreen());
+                            return 0;
+                        }));
+
                 if (RenderDoc.isAvailable()) {
                     dispatcher.register(ClientCommandManager.literal("renderdoc").executes(context -> {
                         MinecraftClient.getInstance().setScreen(new RenderdocScreen());

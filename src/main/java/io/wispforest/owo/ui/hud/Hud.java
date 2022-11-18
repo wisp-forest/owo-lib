@@ -21,7 +21,8 @@ import java.util.function.Supplier;
  */
 public class Hud {
 
-    private static @Nullable OwoUIAdapter<FlowLayout> adapter = null;
+    static @Nullable OwoUIAdapter<FlowLayout> adapter = null;
+    static boolean suppress = false;
 
     private static final Map<Identifier, Component> activeComponents = new HashMap<>();
     private static final Map<Identifier, Supplier<Component>> pendingComponents = new HashMap<>();
@@ -84,6 +85,8 @@ public class Hud {
         });
 
         HudRenderCallback.EVENT.register((matrixStack, tickDelta) -> {
+            if (suppress) return;
+
             if (!pendingComponents.isEmpty()) {
                 if (adapter == null) initializeAdapter();
 
