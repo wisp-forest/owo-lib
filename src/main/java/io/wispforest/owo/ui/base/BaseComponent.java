@@ -125,6 +125,8 @@ public abstract class BaseComponent implements Component {
             if (this.batchedEvents > 1) {
                 this.batchedEvents = 0;
                 this.notifyParentIfMounted();
+            } else {
+                this.batchedEvents = 0;
             }
         }
     }

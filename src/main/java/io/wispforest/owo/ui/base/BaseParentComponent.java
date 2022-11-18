@@ -188,6 +188,8 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
             if (this.batchedEvents > 1) {
                 this.batchedEvents = 0;
                 this.updateLayout();
+            } else {
+                this.batchedEvents = 0;
             }
         }
     }
