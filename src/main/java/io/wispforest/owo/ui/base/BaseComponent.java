@@ -43,7 +43,9 @@ public abstract class BaseComponent implements Component {
 
     protected final EventStream<MouseEnter> mouseEnterEvents = MouseEnter.newStream();
     protected final EventStream<MouseLeave> mouseLeaveEvents = MouseLeave.newStream();
+
     protected boolean hovered = false;
+    protected boolean dirty = false;
 
     protected CursorStyle cursorStyle = CursorStyle.NONE;
     protected List<TooltipComponent> tooltip = List.of();
@@ -75,6 +77,7 @@ public abstract class BaseComponent implements Component {
     public void inflate(Size space) {
         this.space = space;
         this.applySizing();
+        this.dirty = false;
     }
 
     /**
@@ -99,6 +102,7 @@ public abstract class BaseComponent implements Component {
             return;
         }
 
+        this.dirty = true;
         this.parent.onChildMutated(this);
     }
 

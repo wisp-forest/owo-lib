@@ -152,6 +152,7 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
 
     @Override
     public void inflate(Size space) {
+        if (this.space.equals(space) && !this.dirty) return;
         this.space = space;
 
         for (var child : this.children()) {
@@ -172,6 +173,8 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
         }
 
         var previousSize = this.fullSize();
+
+        this.dirty = true;
         this.inflate(this.space);
 
         if (!previousSize.equals(this.fullSize()) && this.parent != null) {
