@@ -409,8 +409,8 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
     }
 
     public enum ScrollDirection {
-        VERTICAL(Component::height, Component::setY, Component::y, Insets::vertical, GLFW.GLFW_KEY_UP, GLFW.GLFW_KEY_DOWN),
-        HORIZONTAL(Component::width, Component::setX, Component::x, Insets::horizontal, GLFW.GLFW_KEY_LEFT, GLFW.GLFW_KEY_RIGHT);
+        VERTICAL(Component::height, Component::updateY, Component::y, Insets::vertical, GLFW.GLFW_KEY_UP, GLFW.GLFW_KEY_DOWN),
+        HORIZONTAL(Component::width, Component::updateX, Component::x, Insets::horizontal, GLFW.GLFW_KEY_LEFT, GLFW.GLFW_KEY_RIGHT);
 
         public final Function<Component, Integer> sizeGetter;
         public final BiConsumer<Component, Integer> coordinateSetter;

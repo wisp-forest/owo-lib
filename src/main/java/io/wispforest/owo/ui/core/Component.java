@@ -534,7 +534,7 @@ public interface Component extends PositionedRectangle {
      * @see #positioning(Positioning)
      * @see #margins(Insets)
      */
-    void setX(int x);
+    void updateX(int x);
 
     /**
      * @return The current y-coordinate of the top-left
@@ -558,7 +558,7 @@ public interface Component extends PositionedRectangle {
      * @see #positioning(Positioning)
      * @see #margins(Insets)
      */
-    void setY(int y);
+    void updateY(int y);
 
     /**
      * Set the coordinates of the top-left corner of the
@@ -575,8 +575,8 @@ public interface Component extends PositionedRectangle {
      * @see #margins(Insets)
      */
     default void moveTo(int x, int y) {
-        this.setX(x);
-        this.setY(y);
+        this.updateX(x);
+        this.updateY(y);
     }
 
     enum FocusSource {

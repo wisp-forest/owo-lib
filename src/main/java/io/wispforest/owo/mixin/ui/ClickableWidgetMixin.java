@@ -329,22 +329,14 @@ public abstract class ClickableWidgetMixin implements ComponentStub {
         }
     }
 
-    @Inject(method = "setX", at = @At("HEAD"), cancellable = true)
-    private void applyXToWrapper(int x, CallbackInfo ci) {
-        var wrapper = this.owo$wrapper;
-        if (wrapper != null) {
-            wrapper.setX(x);
-            ci.cancel();
-        }
+    @Override
+    public void updateX(int x) {
+        this.owo$getWrapper().updateX(x);
     }
 
-    @Inject(method = "setY", at = @At("HEAD"), cancellable = true)
-    private void applyYToWrapper(int y, CallbackInfo ci) {
-        var wrapper = this.owo$wrapper;
-        if (wrapper != null) {
-            wrapper.setY(y);
-            ci.cancel();
-        }
+    @Override
+    public void updateY(int y) {
+        this.owo$getWrapper().updateY(y);
     }
 
     protected CursorStyle owo$preferredCursorStyle() {

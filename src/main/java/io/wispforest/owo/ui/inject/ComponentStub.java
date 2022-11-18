@@ -230,7 +230,7 @@ public interface ComponentStub extends Component {
     }
 
     @Override
-    default void setX(int x) {
+    default void updateX(int x) {
         throw new IllegalStateException("Interface stub method called");
     }
 
@@ -240,7 +240,7 @@ public interface ComponentStub extends Component {
     }
 
     @Override
-    default void setY(int y) {
+    default void updateY(int y) {
         throw new IllegalStateException("Interface stub method called");
     }
 

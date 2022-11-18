@@ -267,14 +267,14 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
         }
 
         @Override
-        public void setX(int x) {
-            super.setX(x);
+        public void updateX(int x) {
+            super.updateX(x);
             ((SlotAccessor) this.slot).owo$setX(x - BaseOwoHandledScreen.this.x);
         }
 
         @Override
-        public void setY(int y) {
-            super.setY(y);
+        public void updateY(int y) {
+            super.updateY(y);
             ((SlotAccessor) this.slot).owo$setY(y - BaseOwoHandledScreen.this.y);
         }
     }

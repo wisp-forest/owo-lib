@@ -43,16 +43,16 @@ public class HorizontalFlowLayout extends FlowLayout {
 
         if (this.verticalAlignment() != VerticalAlignment.TOP) {
             for (var component : layout) {
-                component.setY(component.y() + this.verticalAlignment().align(component.fullSize().height(), this.height - padding.vertical()));
+                component.updateY(component.y() + this.verticalAlignment().align(component.fullSize().height(), this.height - padding.vertical()));
             }
         }
 
         if (this.horizontalAlignment() != HorizontalAlignment.LEFT) {
             for (var component : layout) {
                 if (this.horizontalAlignment() == HorizontalAlignment.CENTER) {
-                    component.setX(component.x() + (this.width - padding.horizontal() - layoutWidth.intValue()) / 2);
+                    component.updateX(component.x() + (this.width - padding.horizontal() - layoutWidth.intValue()) / 2);
                 } else {
-                    component.setX(component.x() + (this.width - padding.horizontal() - layoutWidth.intValue()));
+                    component.updateX(component.x() + (this.width - padding.horizontal() - layoutWidth.intValue()));
                 }
             }
         }

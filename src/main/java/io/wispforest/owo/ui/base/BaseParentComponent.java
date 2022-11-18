@@ -260,22 +260,22 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
     }
 
     @Override
-    public void setX(int x) {
+    public void updateX(int x) {
         int offset = x - this.x;
-        super.setX(x);
+        super.updateX(x);
 
         for (var child : this.children()) {
-            child.setX(child.x() + offset);
+            child.updateX(child.x() + offset);
         }
     }
 
     @Override
-    public void setY(int y) {
+    public void updateY(int y) {
         int offset = y - this.y;
-        super.setY(y);
+        super.updateY(y);
 
         for (var child : this.children()) {
-            child.setY(child.y() + offset);
+            child.updateY(child.y() + offset);
         }
     }
 

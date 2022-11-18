@@ -352,7 +352,7 @@ public abstract class BaseComponent implements Component {
     }
 
     @Override
-    public void setX(int x) {
+    public void updateX(int x) {
         this.x = x;
     }
 
@@ -362,7 +362,7 @@ public abstract class BaseComponent implements Component {
     }
 
     @Override
-    public void setY(int y) {
+    public void updateY(int y) {
         this.y = y;
     }
 
