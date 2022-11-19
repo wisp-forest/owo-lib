@@ -141,7 +141,7 @@ public abstract class ConfigWrapper<C> {
                             element,
                             this.jankson.getMarshaller()
                     );
-                } else if (List.class.isAssignableFrom(clazz)) {
+                } else if (List.class.isAssignableFrom(clazz) || Set.class.isAssignableFrom(clazz)) {
                     newValue = TypeMagic.createAndCast(clazz);
                     POJODeserializer.unpackCollection(
                             (Collection<Object>) newValue,

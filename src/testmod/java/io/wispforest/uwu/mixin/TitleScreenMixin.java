@@ -23,7 +23,7 @@ public abstract class TitleScreenMixin extends Screen {
     private void injectUwuConfigScreen(ButtonWidget button, CallbackInfo ci) {
         if (!Screen.hasAltDown()) return;
 
-        MinecraftClient.getInstance().setScreen(ConfigScreen.create(Uwu.CONFIG, this));
+        MinecraftClient.getInstance().setScreen(ConfigScreen.create(Uwu.BRUHHHHH, this));
         ci.cancel();
     }
 
