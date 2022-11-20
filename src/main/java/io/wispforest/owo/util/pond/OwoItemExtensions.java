@@ -4,7 +4,8 @@ import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.json.OwoItemGroupLoader;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.collection.DefaultedList;
 
 import java.util.function.BiConsumer;
 
@@ -19,7 +20,7 @@ public interface OwoItemExtensions {
      * @return The function used for adding stacks of
      * this item to an {@link OwoItemGroup} it resides in
      */
-    BiConsumer<Item, ItemGroup.Entries> owo$stackGenerator();
+    BiConsumer<Item, DefaultedList<ItemStack>> owo$stackGenerator();
 
     /**
      * Sets the group of this item, used by {@link OwoItemGroupLoader} to ensure
@@ -28,10 +29,5 @@ public interface OwoItemExtensions {
      * @param group The group to replace the current on with
      */
     void owo$setGroup(ItemGroup group);
-
-    /**
-     * @return The item group this item should reside in
-     */
-    @Nullable ItemGroup owo$group();
 
 }

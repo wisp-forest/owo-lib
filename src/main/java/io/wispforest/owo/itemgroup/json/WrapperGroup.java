@@ -4,15 +4,10 @@ import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
 import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
-import io.wispforest.owo.mixin.itemgroup.ItemGroupAccessor;
-import net.fabricmc.fabric.impl.itemgroup.FabricItemGroup;
-import net.fabricmc.fabric.mixin.itemgroup.ItemGroupsAccessor;
 import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemGroups;
-import net.minecraft.util.Identifier;
+import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -27,26 +22,15 @@ public class WrapperGroup extends OwoItemGroup {
     private boolean extension = false;
 
     public WrapperGroup(ItemGroup parent, List<ItemGroupTab> tabs, List<ItemGroupButton> buttons) {
-        super(parent.getId(), owoItemGroup -> {}, () -> Icon.of(parent.getIcon()), 4, 4, null, true, false);
+        super(parent.getIndex(), parent.getName());
 
-        var groups = new ArrayList<>(ItemGroups.getGroups());
-        groups.set(groups.indexOf(parent), this);
-        ItemGroupsAccessor.setGroups(groups);
-        ((FabricItemGroup) this).setPage(((FabricItemGroup) parent).getPage());
+        this.tabs.clear();
+        this.tabs.addAll(tabs);
 
-        ((ItemGroupAccessor)this).owo$setDisplayName(parent.getDisplayName());
-        ((net.fabricmc.fabric.mixin.itemgroup.ItemGroupAccessor)this).setColumn(parent.getColumn());
-        ((net.fabricmc.fabric.mixin.itemgroup.ItemGroupAccessor)this).setRow(parent.getRow());
+        this.buttons.clear();
+        this.buttons.addAll(buttons);
 
         this.parent = parent;
-
-        this.tabs.addAll(tabs);
-        this.buttons.addAll(buttons);
-    }
-
-    @Override
-    public Identifier getId() {
-        return this.parent.getId();
     }
 
     public void addTabs(Collection<ItemGroupTab> tabs) {
@@ -68,9 +52,17 @@ public class WrapperGroup extends OwoItemGroup {
         this.tabs.add(0, new ItemGroupTab(
                 Icon.of(this.parent.getIcon()),
                 this.parent.getDisplayName(),
-                ((ItemGroupAccessor) this.parent).owo$getEntryCollector()::accept,
+                this.parent::appendStacks,
                 ItemGroupTab.DEFAULT_TEXTURE,
                 true
         ));
+    }
+
+    @Override
+    protected void setup() {}
+
+    @Override
+    public ItemStack createIcon() {
+        return this.parent.createIcon();
     }
 }

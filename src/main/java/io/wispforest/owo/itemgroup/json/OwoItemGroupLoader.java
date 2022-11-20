@@ -8,13 +8,12 @@ import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
 import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
 import io.wispforest.owo.moddata.ModDataConsumer;
 import io.wispforest.owo.util.pond.OwoItemExtensions;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemGroups;
 import net.minecraft.tag.TagKey;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
-import net.minecraft.util.registry.Registries;
-import net.minecraft.util.registry.RegistryKeys;
+import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
@@ -33,22 +32,26 @@ public class OwoItemGroupLoader implements ModDataConsumer {
 
     public static final OwoItemGroupLoader INSTANCE = new OwoItemGroupLoader();
 
-    private static final Map<Identifier, JsonObject> BUFFERED_GROUPS = new HashMap<>();
+    private static final Map<String, JsonObject> BUFFERED_GROUPS = new HashMap<>();
 
     private OwoItemGroupLoader() {}
 
-    public static void onGroupCreated(ItemGroup group) {
-        if (!BUFFERED_GROUPS.containsKey(group.getId())) return;
-        INSTANCE.acceptParsedFile(group.getId(), BUFFERED_GROUPS.remove(group.getId()));
+    public static ItemGroup onGroupCreated(ItemGroup group) {
+        if (!BUFFERED_GROUPS.containsKey(group.getName())) return null;
+        return INSTANCE.loadGroup(BUFFERED_GROUPS.remove(group.getName()));
     }
 
     @Override
     public void acceptParsedFile(Identifier id, JsonObject json) {
-        var targetGroupId = new Identifier(JsonHelper.getString(json, "target_group"));
+        loadGroup(json);
+    }
+
+    protected ItemGroup loadGroup(JsonObject json) {
+        var targetGroupId = JsonHelper.getString(json, "target_group");
 
         ItemGroup searchGroup = null;
-        for (ItemGroup group : ItemGroups.getGroups()) {
-            if (group.getId().equals(targetGroupId)) {
+        for (ItemGroup group : ItemGroup.GROUPS) {
+            if (group.getName().equals(targetGroupId)) {
                 searchGroup = group;
                 break;
             }
@@ -56,7 +59,7 @@ public class OwoItemGroupLoader implements ModDataConsumer {
 
         if (searchGroup == null) {
             BUFFERED_GROUPS.put(targetGroupId, json);
-            return;
+            return null;
         }
 
         final var targetGroup = searchGroup;
@@ -70,14 +73,14 @@ public class OwoItemGroupLoader implements ModDataConsumer {
 
             var texture = new Identifier(JsonHelper.getString(tabObject, "texture", ItemGroupTab.DEFAULT_TEXTURE.toString()));
 
-            var tag = TagKey.of(RegistryKeys.ITEM, new Identifier(JsonHelper.getString(tabObject, "tag")));
-            var icon = Registries.ITEM.get(new Identifier(JsonHelper.getString(tabObject, "icon")));
+            var tag = TagKey.of(Registry.ITEM_KEY, new Identifier(JsonHelper.getString(tabObject, "tag")));
+            var icon = Registry.ITEM.get(new Identifier(JsonHelper.getString(tabObject, "icon")));
             var name = JsonHelper.getString(tabObject, "name");
 
             tabs.add(new ItemGroupTab(
                     Icon.of(icon),
                     OwoItemGroup.ButtonDefinition.tooltipFor(targetGroup, "tab", name),
-                    (features, entries, hasPermissions) -> Registries.ITEM.stream().filter(item -> item.getRegistryEntry().isIn(tag)).forEach(entries::add),
+                    stacks -> Registry.ITEM.stream().filter(item -> item.getRegistryEntry().isIn(tag)).map(Item::getDefaultStack).forEach(stacks::add),
                     texture,
                     false
             ));
@@ -104,7 +107,7 @@ public class OwoItemGroupLoader implements ModDataConsumer {
                     ? ItemGroupButton.ICONS_TEXTURE
                     : new Identifier(textureId);
 
-            buttons.add(ItemGroupButton.link(targetGroup, Icon.of(texture, u, v, textureWidth, textureHeight), name, link));
+            buttons.add(ItemGroupButton.link(Icon.of(texture, u, v, textureWidth, textureHeight), name, link));
         });
 
         if (targetGroup instanceof WrapperGroup wrapper) {
@@ -112,14 +115,18 @@ public class OwoItemGroupLoader implements ModDataConsumer {
             wrapper.addButtons(buttons);
 
             if (JsonHelper.getBoolean(json, "extend", false)) wrapper.markExtension();
+
+            return wrapper;
         } else {
             var wrapper = new WrapperGroup(targetGroup, tabs, buttons);
             wrapper.initialize();
             if (JsonHelper.getBoolean(json, "extend", false)) wrapper.markExtension();
 
-            Registries.ITEM.stream()
-                    .filter(item -> ((OwoItemExtensions) item).owo$group() == targetGroup)
+            Registry.ITEM.stream()
+                    .filter(item -> item.getGroup() == targetGroup)
                     .forEach(item -> ((OwoItemExtensions) item).owo$setGroup(targetGroup));
+
+            return wrapper;
         }
     }
 

@@ -41,7 +41,7 @@ public abstract class SliderWidgetMixin extends ClickableWidget {
 
         ci.cancel();
 
-        double value = (mouseX - (this.getX() + 4d)) / (this.width - 8d);
+        double value = (mouseX - (this.x + 4d)) / (this.width - 8d);
         double min = discrete.min(), max = discrete.max();
         int decimalPlaces = discrete.decimalPlaces();
 

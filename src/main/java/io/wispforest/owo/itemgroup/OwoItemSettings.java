@@ -6,34 +6,21 @@ import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.item.FoodComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.Rarity;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.util.collection.DefaultedList;
 
 import java.util.function.BiConsumer;
 
 public class OwoItemSettings extends FabricItemSettings {
 
-    @Nullable
-    private OwoItemGroup group = null;
     private int tab = 0;
-    private BiConsumer<Item, ItemGroup.Entries> stackGenerator = OwoItemGroup.DEFAULT_STACK_GENERATOR;
+    private BiConsumer<Item, DefaultedList<ItemStack>> stackGenerator = OwoItemGroup.DEFAULT_STACK_GENERATOR;
 
     public OwoItemSettings group(ItemGroupReference ref) {
-        this.group = ref.group();
+        this.group(ref.group());
         this.tab = ref.tab();
         return this;
-    }
-
-    /**
-     * @param group The item group this item should appear in
-     */
-    public OwoItemSettings group(OwoItemGroup group) {
-        this.group = group;
-        return this;
-    }
-
-    public OwoItemGroup group() {
-        return this.group;
     }
 
     public OwoItemSettings tab(int tab) {
@@ -45,16 +32,22 @@ public class OwoItemSettings extends FabricItemSettings {
         return this.tab;
     }
 
+    @Override
+    public OwoItemSettings group(ItemGroup group) {
+        super.group(group);
+        return this;
+    }
+
     /**
      * @param generator The function this item uses for creating stacks in the
      *                  {@link OwoItemGroup} it is in, by default this will be {@link OwoItemGroup#DEFAULT_STACK_GENERATOR}
      */
-    public OwoItemSettings stackGenerator(BiConsumer<Item, ItemGroup.Entries> generator) {
+    public OwoItemSettings stackGenerator(BiConsumer<Item, DefaultedList<ItemStack>> generator) {
         this.stackGenerator = generator;
         return this;
     }
 
-    public BiConsumer<Item, ItemGroup.Entries> stackGenerator() {
+    public BiConsumer<Item, DefaultedList<ItemStack>> stackGenerator() {
         return this.stackGenerator;
     }
 

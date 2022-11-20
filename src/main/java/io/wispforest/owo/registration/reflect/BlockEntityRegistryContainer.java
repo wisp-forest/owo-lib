@@ -1,14 +1,13 @@
 package io.wispforest.owo.registration.reflect;
 
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.util.registry.Registries;
 import net.minecraft.util.registry.Registry;
 
 public interface BlockEntityRegistryContainer extends AutoRegistryContainer<BlockEntityType<?>> {
 
     @Override
     default Registry<BlockEntityType<?>> getRegistry() {
-        return Registries.BLOCK_ENTITY_TYPE;
+        return Registry.BLOCK_ENTITY_TYPE;
     }
 
     @Override

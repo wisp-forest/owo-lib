@@ -15,7 +15,7 @@ import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.registry.Registries;
+import net.minecraft.util.registry.Registry;
 import org.w3c.dom.Element;
 
 import java.util.Map;
@@ -100,7 +100,7 @@ public class ItemComponent extends BaseComponent {
         super.parseProperties(model, element, children);
         UIParsing.apply(children, "show-overlay", UIParsing::parseBool, this::showOverlay);
         UIParsing.apply(children, "item", UIParsing::parseIdentifier, itemId -> {
-            var item = Registries.ITEM.getOrEmpty(itemId).orElseThrow(() -> new UIModelParsingException("Unknown item " + itemId));
+            var item = Registry.ITEM.getOrEmpty(itemId).orElseThrow(() -> new UIModelParsingException("Unknown item " + itemId));
             this.stack(item.getDefaultStack());
         });
     }

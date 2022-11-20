@@ -17,7 +17,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.registry.Registries;
 import net.minecraft.util.registry.Registry;
 
 import java.util.regex.Pattern;
@@ -57,7 +56,7 @@ public class DumpdataCommand {
         final var stack = source.getPlayer().getMainHandStack();
 
         informationHeader(source, "Item");
-        sendIdentifier(source, stack.getItem(), Registries.ITEM);
+        sendIdentifier(source, stack.getItem(), Registry.ITEM);
 
         if (stack.getItem().isDamageable()) {
             feedback(source, TextOps.withColor("Durability: §" + stack.getItem().getMaxDamage(),
@@ -98,7 +97,7 @@ public class DumpdataCommand {
         final var entity = target.getEntity();
 
         informationHeader(source, "Entity");
-        sendIdentifier(source, entity.getType(), Registries.ENTITY_TYPE);
+        sendIdentifier(source, entity.getType(), Registry.ENTITY_TYPE);
 
         feedback(source, TextOps.withFormatting("NBT" + formatPath(path) + ": ", Formatting.GRAY)
                 .append(NbtHelper.toPrettyPrintedText(getPath(entity.writeNbt(new NbtCompound()), path))));
@@ -125,7 +124,7 @@ public class DumpdataCommand {
         final var blockStateString = blockState.toString();
 
         informationHeader(source, "Block");
-        sendIdentifier(source, blockState.getBlock(), Registries.BLOCK);
+        sendIdentifier(source, blockState.getBlock(), Registry.BLOCK);
 
         if (blockStateString.contains("[")) {
             feedback(source, TextOps.withFormatting("State properties: ", Formatting.GRAY));

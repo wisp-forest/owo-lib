@@ -3,10 +3,13 @@ package io.wispforest.owo.itemgroup.gui;
 import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.OwoItemSettings;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.resource.featuretoggle.FeatureSet;
+import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableTextContent;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.collection.DefaultedList;
+
+import java.util.function.Consumer;
 
 /**
  * Represents a tab inside an {@link OwoItemGroup} that contains all items in the
@@ -16,7 +19,7 @@ import net.minecraft.util.Identifier;
 public record ItemGroupTab(
         Icon icon,
         Text name,
-        ContentSupplier contentSupplier,
+        Consumer<DefaultedList<ItemStack>> contentSupplier,
         Identifier texture,
         boolean primary
 ) implements OwoItemGroup.ButtonDefinition {
@@ -24,12 +27,9 @@ public record ItemGroupTab(
     public static final Identifier DEFAULT_TEXTURE = new Identifier("owo", "textures/gui/tabs.png");
 
     @Override
-    public Text tooltip() {
-        return this.name;
-    }
-
-    @FunctionalInterface
-    public interface ContentSupplier {
-        void addItems(FeatureSet enabledFeatures, ItemGroup.Entries entries, boolean hasPermissions);
+    public String getTranslationKey(String groupKey) {
+        return this.name.getContent() instanceof TranslatableTextContent translatable
+                ? translatable.getKey()
+                : this.name.getString();
     }
 }

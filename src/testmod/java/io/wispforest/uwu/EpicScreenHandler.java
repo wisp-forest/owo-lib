@@ -72,7 +72,7 @@ public class EpicScreenHandler extends ScreenHandler {
     }
 
     @Override
-    public ItemStack quickMove(PlayerEntity player, int index) {
+    public ItemStack transferSlot(PlayerEntity player, int index) {
         return ScreenUtils.handleSlotTransfer(this, index, 4);
     }
 

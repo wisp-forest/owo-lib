@@ -1,6 +1,5 @@
 package io.wispforest.owo.ui.layers;
 
-import io.wispforest.owo.mixin.ui.layers.WrapperWidgetInvoker;
 import io.wispforest.owo.ui.core.*;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
@@ -72,20 +71,20 @@ public class Layer<S extends Screen, R extends ParentComponent> {
                 var size = component.fullSize();
                 switch (anchor) {
                     case TOP -> component.positioning(Positioning.absolute(
-                            (int) (widget.getX() + (widget.getWidth() - size.width()) * justification),
-                            widget.getY() - size.height()
+                            (int) (widget.x + (widget.getWidth() - size.width()) * justification),
+                            widget.y - size.height()
                     ));
                     case RIGHT -> component.positioning(Positioning.absolute(
-                            widget.getX() + widget.getWidth(),
-                            (int) (widget.getY() + (widget.getHeight() - size.height()) * justification)
+                            widget.x + widget.getWidth(),
+                            (int) (widget.y + (widget.getHeight() - size.height()) * justification)
                     ));
                     case BOTTOM -> component.positioning(Positioning.absolute(
-                            (int) (widget.getX() + (widget.getWidth() - size.width()) * justification),
-                            widget.getY() + widget.getHeight()
+                            (int) (widget.x + (widget.getWidth() - size.width()) * justification),
+                            widget.y + widget.getHeight()
                     ));
                     case LEFT -> component.positioning(Positioning.absolute(
-                            widget.getX() - size.width(),
-                            (int) (widget.getY() + (widget.getHeight() - size.height()) * justification)
+                            widget.x - size.width(),
+                            (int) (widget.y + (widget.getHeight() - size.height()) * justification)
                     ));
                 }
             });
@@ -97,11 +96,11 @@ public class Layer<S extends Screen, R extends ParentComponent> {
 
         private static void collectChildren(Element element, List<ClickableWidget> children) {
             if (element instanceof ClickableWidget widget) children.add(widget);
-            if (element instanceof WrapperWidgetInvoker wrapper) {
-                for (var widget : wrapper.owo$wrappedWidgets()) {
-                    collectChildren(widget, children);
-                }
-            }
+//            if (element instanceof WrapperWidgetInvoker wrapper) {
+//                for (var widget : wrapper.owo$wrappedWidgets()) {
+//                    collectChildren(widget, children);
+//                }
+//            }
         }
 
         public enum AnchorSide {

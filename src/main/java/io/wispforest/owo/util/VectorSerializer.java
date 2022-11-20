@@ -3,11 +3,11 @@ package io.wispforest.owo.util;
 import net.minecraft.nbt.*;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.math.Vec3d;
-import org.joml.Vector3f;
+import net.minecraft.util.math.Vec3f;
 
 /**
  * Utility class for reading and storing {@link Vec3d} and
- * {@link Vector3f} from and into {@link net.minecraft.nbt.NbtCompound}
+ * {@link Vec3f} from and into {@link net.minecraft.nbt.NbtCompound}
  */
 public class VectorSerializer {
 
@@ -41,12 +41,12 @@ public class VectorSerializer {
      * @param key   The key to use
      * @return {@code nbt}
      */
-    public static NbtCompound putf(NbtCompound nbt, String key, Vector3f vec3f) {
+    public static NbtCompound putf(NbtCompound nbt, String key, Vec3f vec3f) {
 
         NbtList vectorArray = new NbtList();
-        vectorArray.add(NbtFloat.of(vec3f.x));
-        vectorArray.add(NbtFloat.of(vec3f.y));
-        vectorArray.add(NbtFloat.of(vec3f.z));
+        vectorArray.add(NbtFloat.of(vec3f.getX()));
+        vectorArray.add(NbtFloat.of(vec3f.getY()));
+        vectorArray.add(NbtFloat.of(vec3f.getZ()));
 
         nbt.put(key, vectorArray);
 
@@ -79,14 +79,14 @@ public class VectorSerializer {
      * @param key The key the read from
      * @return The deserialized vector
      */
-    public static Vector3f getf(NbtCompound nbt, String key) {
+    public static Vec3f getf(NbtCompound nbt, String key) {
 
         NbtList vectorArray = nbt.getList(key, NbtElement.FLOAT_TYPE);
         float x = vectorArray.getFloat(0);
         float y = vectorArray.getFloat(1);
         float z = vectorArray.getFloat(2);
 
-        return new Vector3f(x, y, z);
+        return new Vec3f(x, y, z);
     }
 
     /**
@@ -107,10 +107,10 @@ public class VectorSerializer {
      * @param vec3f  The vector to write
      * @param buffer The packet buffer to write into
      */
-    public static void writef(PacketByteBuf buffer, Vector3f vec3f) {
-        buffer.writeFloat(vec3f.x);
-        buffer.writeFloat(vec3f.y);
-        buffer.writeFloat(vec3f.z);
+    public static void writef(PacketByteBuf buffer, Vec3f vec3f) {
+        buffer.writeFloat(vec3f.getX());
+        buffer.writeFloat(vec3f.getY());
+        buffer.writeFloat(vec3f.getZ());
     }
 
     /**
@@ -129,8 +129,8 @@ public class VectorSerializer {
      * @param buffer The buffer to read from
      * @return The deserialized vector
      */
-    public static Vector3f readf(PacketByteBuf buffer) {
-        return new Vector3f(buffer.readFloat(), buffer.readFloat(), buffer.readFloat());
+    public static Vec3f readf(PacketByteBuf buffer) {
+        return new Vec3f(buffer.readFloat(), buffer.readFloat(), buffer.readFloat());
     }
 
 }

@@ -25,10 +25,9 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.registry.Registries;
+import net.minecraft.util.math.Vec3f;
+import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.w3c.dom.Element;
 
@@ -94,14 +93,14 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
 
             // We make sure the xRotation never becomes 0, as the lighting otherwise becomes very unhappy
             if (xRotation == 0) xRotation = .1f;
-            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(xRotation * .15f));
-            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(yRotation * .15f));
+            matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(xRotation * .15f));
+            matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(yRotation * .15f));
         } else {
-            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(35));
-            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-45 + this.mouseRotation));
+            matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(35));
+            matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-45 + this.mouseRotation));
         }
 
-        RenderSystem.setShaderLights(new Vector3f(.15f, 1, 0), new Vector3f(.15f, -1, 0));
+        RenderSystem.setShaderLights(new Vec3f(.15f, 1, 0), new Vec3f(.15f, -1, 0));
         this.dispatcher.setRenderShadows(false);
         this.dispatcher.render(this.entity, 0, 0, 0, 0, 0, matrices, this.entityBuffers, LightmapTextureManager.MAX_LIGHT_COORDINATE);
         this.dispatcher.setRenderShadows(true);
@@ -202,7 +201,7 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
     public static EntityComponent<?> parse(Element element) {
         UIParsing.expectAttributes(element, "type");
         var entityId = UIParsing.parseIdentifier(element.getAttributeNode("type"));
-        var entityType = Registries.ENTITY_TYPE.getOrEmpty(entityId).orElseThrow(() -> new UIModelParsingException("Unknown entity type " + entityId));
+        var entityType = Registry.ENTITY_TYPE.getOrEmpty(entityId).orElseThrow(() -> new UIModelParsingException("Unknown entity type " + entityId));
 
         return new EntityComponent<>(Sizing.content(), entityType, null);
     }
@@ -218,7 +217,6 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
                     new ClientPlayNetworkHandler(MinecraftClient.getInstance(),
                             null,
                             new ClientConnection(NetworkSide.CLIENTBOUND),
-                            null,
                             profile,
                             MinecraftClient.getInstance().createTelemetrySender()
                     ),

@@ -7,7 +7,6 @@ import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.core.*;
 import net.minecraft.block.Blocks;
-import net.minecraft.class_7919;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
@@ -78,7 +77,6 @@ public class ComponentTestScreen extends Screen {
                                     : Text.of("+")
                             );
                         }).<ButtonComponent>configure(button -> {
-                            button.method_47400(class_7919.method_47407(Text.of("a vanilla tooltip")));
                             button.margins(Insets.of(5)).sizing(Sizing.fixed(12));
                         })
                 )

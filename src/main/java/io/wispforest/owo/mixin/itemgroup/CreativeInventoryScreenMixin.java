@@ -11,10 +11,8 @@ import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemGroup;
-import net.minecraft.resource.featuretoggle.FeatureSet;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Final;
@@ -25,7 +23,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,18 +31,13 @@ import java.util.List;
 public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScreen<CreativeInventoryScreen.CreativeScreenHandler> implements OwoCreativeInventoryScreenExtensions {
 
     @Shadow
-    private static ItemGroup selectedTab;
-
-    @Shadow
     @Final
     private static Identifier TEXTURE;
 
     @Shadow
     protected abstract void init();
 
-    @Shadow
-    protected abstract boolean shouldShowOperatorTab(PlayerEntity player);
-
+    @Shadow private static int selectedTab;
     @Unique
     private final List<ItemGroupButtonWidget> owo$buttons = new ArrayList<>();
 
@@ -53,15 +45,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
     private OwoItemGroup owo$owoGroup = null;
 
     @Unique
-    private FeatureSet owo$enabledFeatures = null;
-
-    @Unique
     private final CursorAdapter owo$cursorAdapter = CursorAdapter.ofClientWindow();
-
-    @Inject(method = "<init>", at = @At("TAIL"))
-    private void captureFeatures(PlayerEntity player, FeatureSet enabledFeatures, boolean operatorTabEnabled, CallbackInfo ci) {
-        this.owo$enabledFeatures = enabledFeatures;
-    }
 
     // ----------
     // Background
@@ -69,7 +53,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 
     @ModifyArg(method = "drawBackground", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderTexture(ILnet/minecraft/util/Identifier;)V", ordinal = 1))
     private Identifier injectCustomGroupTexture(Identifier original) {
-        if (!(selectedTab instanceof OwoItemGroup owoGroup) || owoGroup.getCustomTexture() == null) return original;
+        if (!(ItemGroup.GROUPS[selectedTab] instanceof OwoItemGroup owoGroup) || owoGroup.getCustomTexture() == null) return original;
         return owoGroup.getCustomTexture();
     }
 
@@ -79,7 +63,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 
     @ModifyArg(method = "drawBackground", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderTexture(ILnet/minecraft/util/Identifier;)V", ordinal = 2))
     private Identifier injectCustomScrollbarTexture(Identifier original) {
-        if (!(selectedTab instanceof OwoItemGroup owoGroup) || owoGroup.getCustomTexture() == null) return original;
+        if (!(ItemGroup.GROUPS[selectedTab] instanceof OwoItemGroup owoGroup) || owoGroup.getCustomTexture() == null) return original;
         this.owo$owoGroup = owoGroup;
         return owoGroup.getCustomTexture();
     }
@@ -118,16 +102,6 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
         return this.owo$owoGroup.getColumn() == 0 ? 195 : 223;
     }
 
-    @Inject(method = "renderTabIcon", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemGroup;getIcon()Lnet/minecraft/item/ItemStack;"), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void renderOwoIcon(MatrixStack matrices, ItemGroup group, CallbackInfo ci, boolean bl, boolean bl2, int i, int j, int k, int l, int m) {
-        if (!(group instanceof OwoItemGroup owoGroup)) return;
-
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        owoGroup.icon().render(matrices, l, m, 0, 0, 0);
-        RenderSystem.disableBlend();
-    }
-
     @Inject(method = "renderTabIcon", at = @At("RETURN"))
     private void restoreTabTexture(MatrixStack matrices, ItemGroup group, CallbackInfo ci) {
         if (this.owo$owoGroup == null) return;
@@ -141,7 +115,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 
     @ModifyArg(method = "drawForeground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/font/TextRenderer;draw(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/text/Text;FFI)I"))
     private Text injectTabNameAsTitle(Text original) {
-        if (!(selectedTab instanceof OwoItemGroup owoGroup) || !owoGroup.hasDynamicTitle()) return original;
+        if (!(ItemGroup.GROUPS[selectedTab] instanceof OwoItemGroup owoGroup) || !owoGroup.shouldDisplayTabNamesAsTitle()) return original;
         if (owoGroup.getSelectedTab().primary()) {
             return owoGroup.getSelectedTab().name();
         } else {
@@ -176,7 +150,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
                     int xOffset = this.x - 27 - (i / tabStackHeight) * 26;
                     int yOffset = tabRootY + 10 + (i % tabStackHeight) * 30;
 
-                    var tabButton = new ItemGroupButtonWidget(xOffset, yOffset, false, tab, owo$createSelectAction(this, owoGroup, i));
+                    var tabButton = new ItemGroupButtonWidget(xOffset, yOffset, false, tab, group.getName(), owo$createSelectAction(this, owoGroup, i));
 
                     if (i == owoGroup.getSelectedTabIndex()) tabButton.isSelected = true;
 
@@ -195,7 +169,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
                 int xOffset = this.x + 198 + (i / buttonStackHeight) * 26;
                 int yOffset = tabRootY + 10 + (i % buttonStackHeight) * 30;
 
-                var tabButton = new ItemGroupButtonWidget(xOffset, yOffset, true, button, button1 -> button.action().run());
+                var tabButton = new ItemGroupButtonWidget(xOffset, yOffset, true, button, group.getName(), button1 -> button.action().run());
 
                 owo$buttons.add(tabButton);
                 this.addDrawableChild(tabButton);
@@ -240,7 +214,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
     @Unique
     private ButtonWidget.PressAction owo$createSelectAction(Screen targetScreen, OwoItemGroup group, int targetTabIndex) {
         return button -> {
-            group.setSelectedTab(targetTabIndex, this.owo$enabledFeatures, this.shouldShowOperatorTab(this.handler.player()));
+            group.setSelectedTab(targetTabIndex);
             this.clearAndInit();
             ((ItemGroupButtonWidget) button).isSelected = true;
         };

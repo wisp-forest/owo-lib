@@ -16,9 +16,9 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.registry.Registries;
+import net.minecraft.util.math.Vec3f;
+import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3f;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
@@ -399,17 +399,17 @@ public record PacketBufSerializer<T>(PacketByteBuf.PacketWriter<T> serializer, P
         register(Text.class, PacketByteBuf::writeText, PacketByteBuf::readText);
 
         PacketBufSerializer.register(ParticleEffect.class, (buf, particleEffect) -> {
-            buf.writeInt(Registries.PARTICLE_TYPE.getRawId(particleEffect.getType()));
+            buf.writeInt(Registry.PARTICLE_TYPE.getRawId(particleEffect.getType()));
             particleEffect.write(buf);
         }, buf -> {
             //noinspection rawtypes
-            final ParticleType particleType = Registries.PARTICLE_TYPE.get(buf.readInt());
+            final ParticleType particleType = Registry.PARTICLE_TYPE.get(buf.readInt());
             //noinspection unchecked, ConstantConditions
             return particleType.getParametersFactory().read(particleType, buf);
         });
 
         register(Vec3d.class, VectorSerializer::write, VectorSerializer::read);
-        register(Vector3f.class, VectorSerializer::writef, VectorSerializer::readf);
+        register(Vec3f.class, VectorSerializer::writef, VectorSerializer::readf);
 
         // -----------
         // Collections

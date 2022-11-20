@@ -3,17 +3,19 @@ package io.wispforest.owo.itemgroup;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButtonWidget;
 import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
-import io.wispforest.owo.mixin.itemgroup.ItemGroupAccessor;
+import io.wispforest.owo.itemgroup.json.WrapperGroup;
 import io.wispforest.owo.util.pond.OwoItemExtensions;
 import net.fabricmc.api.EnvType;
-import net.fabricmc.fabric.impl.itemgroup.ItemGroupHelper;
+import net.fabricmc.fabric.impl.item.group.ItemGroupExtensions;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.item.*;
-import net.minecraft.resource.featuretoggle.FeatureSet;
 import net.minecraft.tag.TagKey;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableTextContent;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registries;
+import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.util.registry.Registry;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -35,57 +37,46 @@ import java.util.function.Supplier;
  */
 public abstract class OwoItemGroup extends ItemGroup {
 
-    public static final BiConsumer<Item, Entries> DEFAULT_STACK_GENERATOR = (item, stacks) -> stacks.add(item.getDefaultStack());
+    public static final BiConsumer<Item, DefaultedList<ItemStack>> DEFAULT_STACK_GENERATOR = (item, stacks) -> stacks.add(item.getDefaultStack());
 
-    protected static final ItemGroupTab PLACEHOLDER_TAB = new ItemGroupTab(Icon.of(Items.AIR), Text.empty(), (b, r, u) -> {}, ItemGroupTab.DEFAULT_TEXTURE, false);
+    protected static final ItemGroupTab PLACEHOLDER_TAB = new ItemGroupTab(Icon.of(Items.AIR), Text.empty(), (bruh) -> {}, ItemGroupTab.DEFAULT_TEXTURE, false);
 
     public final List<ItemGroupTab> tabs = new ArrayList<>();
     public final List<ItemGroupButton> buttons = new ArrayList<>();
 
-    private final Identifier id;
-    private final Consumer<OwoItemGroup> initializer;
-
-    private final Supplier<Icon> iconSupplier;
-    private Icon icon;
-
     private int selectedTab = 0;
     private boolean initialized = false;
 
-    private final int tabStackHeight;
-    private final int buttonStackHeight;
-    private final Identifier customTexture;
-    private final boolean useDynamicTitle;
-    private final boolean displaySingleTab;
+    private int tabStackHeight = 4;
+    private int buttonStackHeight = 4;
+    private Identifier customTexture = null;
+    private boolean useDynamicTitle = true;
+    private boolean displaySingleTab = false;
 
-    protected OwoItemGroup(Identifier id, Consumer<OwoItemGroup> initializer, Supplier<Icon> iconSupplier, int tabStackHeight, int buttonStackHeight, @Nullable Identifier customTexture, boolean useDynamicTitle, boolean displaySingleTab) {
-        super(null, -1, Type.CATEGORY, Text.translatable("itemGroup.%s.%s".formatted(id.getNamespace(), id.getPath())), () -> ItemStack.EMPTY, (enabledFeatures, entries, operatorEnabled) -> {});
-        this.id = id;
-        this.initializer = initializer;
-        this.iconSupplier = iconSupplier;
-        this.tabStackHeight = tabStackHeight;
-        this.buttonStackHeight = buttonStackHeight;
-        this.customTexture = customTexture;
-        this.useDynamicTitle = useDynamicTitle;
-        this.displaySingleTab = displaySingleTab;
-
-        ((ItemGroupAccessor) this).owo$setEntryCollector((enabledFeatures, entries, operatorEnabled) -> {
-            if (!this.initialized) throw new IllegalStateException("oωo item group not initialized, was 'initialize()' called?");
-            this.getSelectedTab().contentSupplier().addItems(enabledFeatures, entries, operatorEnabled);
-
-            Registries.ITEM.stream()
-                    .filter(item -> ((OwoItemExtensions) item).owo$group() == this && ((OwoItemExtensions) item).owo$tab() == this.selectedTab)
-                    .forEach(item -> ((OwoItemExtensions) item).owo$stackGenerator().accept(item, entries));
-        });
+    protected OwoItemGroup(Identifier id) {
+        super(createTabIndex(), String.format("%s.%s", id.getNamespace(), id.getPath()));
     }
 
-    public static Builder builder(Identifier id, Supplier<Icon> iconSupplier) {
+    /**
+     * Creates a new instance from the given name at the given index, without ensuring that
+     * there is space in the array or the name is valid. Used by {@link WrapperGroup}
+     * to replace an existing group
+     *
+     * @apiNote This should not be used from the outside, unless there is a very specific need to
+     */
+    @ApiStatus.Internal
+    protected OwoItemGroup(int index, String name) {
+        super(index, name);
+    }
+
+    public static Builder builder(Identifier id, Supplier<ItemStack> iconSupplier) {
         return new Builder(id, iconSupplier);
     }
 
     // ---------
 
     /**
-     * Executes {@link #initializer} and makes sure this item group is ready for use
+     * Executes {@link #setup()} and makes sure this item group is ready for use
      * <p>
      * Call this after all of your items have been registered to make sure your icons
      * show up correctly
@@ -93,7 +84,7 @@ public abstract class OwoItemGroup extends ItemGroup {
     public void initialize() {
         if (this.initialized) return;
 
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) this.initializer.accept(this);
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) this.setup();
         if (tabs.size() == 0) this.tabs.add(PLACEHOLDER_TAB);
 
         this.initialized = true;
@@ -104,9 +95,9 @@ public abstract class OwoItemGroup extends ItemGroup {
      * the right side of the creative menu
      *
      * @param button The button to add
-     * @see ItemGroupButton#link(ItemGroup, Icon, String, String)
-     * @see ItemGroupButton#curseforge(ItemGroup, String)
-     * @see ItemGroupButton#discord(ItemGroup, String)
+     * @see ItemGroupButton#link(Icon, String, String)
+     * @see ItemGroupButton#curseforge(String)
+     * @see ItemGroupButton#discord(String)
      */
     public void addButton(ItemGroupButton button) {
         this.buttons.add(button);
@@ -126,8 +117,8 @@ public abstract class OwoItemGroup extends ItemGroup {
                 icon,
                 ButtonDefinition.tooltipFor(this, "tab", name),
                 contentTag == null
-                        ? (features, entries, hasPermissions) -> {}
-                        : (features, entries, hasPermissions) -> Registries.ITEM.stream().filter(item -> item.getRegistryEntry().isIn(contentTag)).forEach(entries::add),
+                        ? (stacks) -> {}
+                        : (stacks) -> Registry.ITEM.stream().filter(item -> item.getRegistryEntry().isIn(contentTag)).map(Item::getDefaultStack).forEach(stacks::add),
                 texture,
                 primary
         ));
@@ -145,11 +136,89 @@ public abstract class OwoItemGroup extends ItemGroup {
         addTab(icon, name, contentTag, ItemGroupTab.DEFAULT_TEXTURE, primary);
     }
 
+    /**
+     * Adds a new tab to this group
+     *
+     * @param icon       The icon to use
+     * @param name       The name of the tab, used for the translation key
+     * @param contentTag The tag used for filling this tab
+     * @see Icon#of(ItemConvertible)
+     */
+    @Deprecated
+    public void addTab(Icon icon, String name, @Nullable TagKey<Item> contentTag, Identifier texture) {
+        addTab(icon, name, contentTag, texture, false);
+    }
+
+    /**
+     * Adds a new tab to this group, using the default button texture
+     *
+     * @param icon       The icon to use
+     * @param name       The name of the tab, used for the translation key
+     * @param contentTag The tag used for filling this tab
+     * @see Icon#of(ItemConvertible)
+     */
+    @Deprecated
+    public void addTab(Icon icon, String name, @Nullable TagKey<Item> contentTag) {
+        addTab(icon, name, contentTag, ItemGroupTab.DEFAULT_TEXTURE, false);
+    }
+
+    protected void setCustomTexture(Identifier texture) {
+        this.customTexture = texture;
+    }
+
+    /**
+     * Sets how many tab buttons may be displayed in a single
+     * column to the left of the creative inventory
+     */
+    protected void setTabStackHeight(int tabStackHeight) {
+        this.tabStackHeight = tabStackHeight;
+    }
+
+    /**
+     * Sets how many buttons may be displayed in a single
+     * column to the right of the creative inventory
+     */
+    protected void setButtonStackHeight(int buttonStackHeight) {
+        this.buttonStackHeight = buttonStackHeight;
+    }
+
+    /**
+     * Display a tab button, even if only a single tab is registered
+     */
+    protected void displaySingleTab() {
+        this.displaySingleTab = true;
+    }
+
+    /**
+     * Do not change the title of the group to the name of the
+     * currently selected tab - instead always the name of the group itself
+     */
+    protected void keepStaticTitle() {
+        this.useDynamicTitle = false;
+    }
+
+    /**
+     * Called from {@link #initialize()} to register tabs and buttons
+     *
+     * @see #addTab(Icon, String, TagKey)
+     * @see #addButton(ItemGroupButton)
+     */
+    protected abstract void setup();
+
+    @Override
+    public void appendStacks(DefaultedList<ItemStack> stacks) {
+        if (!this.initialized) throw new IllegalStateException("oωo item group not initialized, was 'initialize()' called?");
+        this.getSelectedTab().contentSupplier().accept(stacks);
+
+        Registry.ITEM.stream()
+                .filter(item -> item.getGroup() == this && ((OwoItemExtensions) item).owo$tab() == this.selectedTab)
+                .forEach(item -> ((OwoItemExtensions) item).owo$stackGenerator().accept(item, stacks));
+    }
+
     // Getters and setters
 
-    public void setSelectedTab(int selectedTab, FeatureSet enabledFeatures, boolean operatorEnabled) {
+    public void setSelectedTab(int selectedTab) {
         this.selectedTab = selectedTab;
-        this.updateEntries(enabledFeatures, operatorEnabled);
     }
 
     public ItemGroupTab getSelectedTab() {
@@ -172,7 +241,7 @@ public abstract class OwoItemGroup extends ItemGroup {
         return buttonStackHeight;
     }
 
-    public boolean hasDynamicTitle() {
+    public boolean shouldDisplayTabNamesAsTitle() {
         return this.useDynamicTitle && (this.tabs.size() > 1 || this.shouldDisplaySingleTab());
     }
 
@@ -188,26 +257,17 @@ public abstract class OwoItemGroup extends ItemGroup {
         return index < this.tabs.size() ? this.tabs.get(index) : null;
     }
 
-    public Icon icon() {
-        return this.icon == null
-                ? this.icon = this.iconSupplier.get()
-                : this.icon;
-    }
+    // Utility
 
-    @Override
-    public boolean shouldDisplay() {
-        return true;
-    }
-
-    @Override
-    public Identifier getId() {
-        return this.id;
+    private static int createTabIndex() {
+        ((ItemGroupExtensions) ItemGroup.BUILDING_BLOCKS).fabric_expandArray();
+        return ItemGroup.GROUPS.length - 1;
     }
 
     public static class Builder {
 
         private final Identifier id;
-        private final Supplier<Icon> iconSupplier;
+        private final Supplier<ItemStack> iconSupplier;
 
         private Consumer<OwoItemGroup> initializer = owoItemGroup -> {};
         private int tabStackHeight = 4;
@@ -216,7 +276,7 @@ public abstract class OwoItemGroup extends ItemGroup {
         private boolean useDynamicTitle = true;
         private boolean displaySingleTab = false;
 
-        private Builder(Identifier id, Supplier<Icon> iconSupplier) {
+        private Builder(Identifier id, Supplier<ItemStack> iconSupplier) {
             this.id = id;
             this.iconSupplier = iconSupplier;
         }
@@ -252,13 +312,25 @@ public abstract class OwoItemGroup extends ItemGroup {
         }
 
         public OwoItemGroup build() {
-            final var group = new OwoItemGroup(id, initializer, iconSupplier, tabStackHeight, buttonStackHeight, customTexture, useDynamicTitle, displaySingleTab) {};
-            ItemGroupHelper.appendItemGroup(group);
-            return group;
+            return new OwoItemGroup(id) {
+                @Override
+                public ItemStack createIcon() {
+                    return iconSupplier.get();
+                }
+
+                @Override
+                protected void setup() {
+                    initializer.accept(this);
+                    this.setTabStackHeight(Builder.this.tabStackHeight);
+                    this.setButtonStackHeight(Builder.this.buttonStackHeight);
+                    this.setCustomTexture(Builder.this.customTexture);
+
+                    if (!Builder.this.useDynamicTitle) this.keepStaticTitle();
+                    if (!Builder.this.displaySingleTab) this.displaySingleTab();
+                }
+            };
         }
     }
-
-    // Utility
 
     /**
      * Defines a button's appearance and translation key
@@ -271,13 +343,14 @@ public abstract class OwoItemGroup extends ItemGroup {
 
         Identifier texture();
 
-        Text tooltip();
-        static Text tooltipFor(ItemGroup group, String component, String componentName) {
-            var groupId = group.getId().getNamespace().equals("minecraft")
-                    ? group.getId().getPath()
-                    : group.getId().getNamespace() + "." + group.getId().getPath();
+        String getTranslationKey(String groupKey);
 
-            return Text.translatable("itemGroup." + groupId + "." + component + "." + componentName);
+        static Text tooltipFor(ItemGroup group, String component, String componentName) {
+            var groupTranslationKey = group.getDisplayName().getContent() instanceof TranslatableTextContent translatable
+                    ? translatable.getKey()
+                    : group.getDisplayName().getString();
+
+            return Text.translatable(groupTranslationKey + "." + component + "." + componentName);
         }
 
     }

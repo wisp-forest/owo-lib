@@ -32,8 +32,8 @@ import io.wispforest.uwu.network.*;
 import io.wispforest.uwu.text.BasedTextContent;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.block.Blocks;
@@ -61,8 +61,7 @@ import net.minecraft.text.TranslatableTextContent;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.registry.Registries;
-import net.minecraft.util.registry.RegistryKeys;
+import net.minecraft.util.registry.Registry;
 
 import java.util.Collections;
 import java.util.List;
@@ -76,14 +75,14 @@ public class Uwu implements ModInitializer {
 
     public static final boolean WE_TESTEN_HANDSHAKE = false;
 
-    public static final TagKey<Item> TAB_2_CONTENT = TagKey.of(RegistryKeys.ITEM, new Identifier("uwu", "tab_2_content"));
+    public static final TagKey<Item> TAB_2_CONTENT = TagKey.of(Registry.ITEM_KEY, new Identifier("uwu", "tab_2_content"));
     public static final Identifier GROUP_TEXTURE = new Identifier("uwu", "textures/gui/group.png");
     public static final Identifier OWO_ICON_TEXTURE = new Identifier("uwu", "textures/gui/icon.png");
     public static final Identifier ANIMATED_BUTTON_TEXTURE = new Identifier("uwu", "textures/gui/animated_icon_test.png");
 
     public static final ScreenHandlerType<EpicScreenHandler> EPIC_SCREEN_HANDLER_TYPE = new ScreenHandlerType<>(EpicScreenHandler::new);
 
-    public static final OwoItemGroup FOUR_TAB_GROUP = OwoItemGroup.builder(new Identifier("uwu", "four_tab_group"), () -> Icon.of(Items.AXOLOTL_BUCKET))
+    public static final OwoItemGroup FOUR_TAB_GROUP = OwoItemGroup.builder(new Identifier("uwu", "four_tab_group"), Items.AXOLOTL_BUCKET::getDefaultStack)
             .disableDynamicTitle()
             .buttonStackHeight(1)
             .initializer(group -> {
@@ -92,11 +91,11 @@ public class Uwu implements ModInitializer {
                 group.addTab(Icon.of(Items.AMETHYST_SHARD), "tab_3", null, false);
                 group.addTab(Icon.of(Items.GOLD_INGOT), "tab_4", null, false);
 
-                group.addButton(ItemGroupButton.github(group, "https://github.com/wisp-forest/owo-lib"));
+                group.addButton(ItemGroupButton.github("https://github.com/wisp-forest/owo-lib"));
             })
             .build();
 
-    public static final OwoItemGroup SIX_TAB_GROUP = OwoItemGroup.builder(new Identifier("uwu", "six_tab_group"), () -> Icon.of(Items.POWDER_SNOW_BUCKET))
+    public static final OwoItemGroup SIX_TAB_GROUP = OwoItemGroup.builder(new Identifier("uwu", "six_tab_group"), Items.POWDER_SNOW_BUCKET::getDefaultStack)
             .tabStackHeight(3)
             .customTexture(GROUP_TEXTURE)
             .initializer(group -> {
@@ -107,20 +106,20 @@ public class Uwu implements ModInitializer {
                 group.addTab(Icon.of(Items.IRON_INGOT), "tab_5", null, false);
                 group.addTab(Icon.of(Items.QUARTZ), "tab_6", null, false);
 
-                group.addButton(new ItemGroupButton(group, Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16), "owo", () -> {
+                group.addButton(new ItemGroupButton(Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16), "owo", () -> {
                     MinecraftClient.getInstance().player.sendMessage(Text.of("oωo button pressed!"), false);
                 }));
             })
             .build();
 
-    public static final OwoItemGroup SINGLE_TAB_GROUP = OwoItemGroup.builder(new Identifier("uwu", "single_tab_group"), () -> Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16))
+    public static final OwoItemGroup SINGLE_TAB_GROUP = OwoItemGroup.builder(new Identifier("uwu", "single_tab_group"), Items.AMETHYST_SHARD::getDefaultStack)
             .displaySingleTab()
             .initializer(group -> group.addTab(Icon.of(Items.SPONGE), "tab_1", null, true))
             .build();
 
-    public static final ItemGroup VANILLA_GROUP = FabricItemGroup.builder(new Identifier("uwu", "vanilla_group"))
+    public static final ItemGroup VANILLA_GROUP = FabricItemGroupBuilder.create(new Identifier("uwu", "vanilla_group"))
             .icon(Items.ACACIA_BOAT::getDefaultStack)
-            .entries((enabledFeatures, entries, operatorEnabled) -> entries.add(Items.MANGROVE_CHEST_BOAT))
+            .appendItems((itemStacks, group) -> itemStacks.add(Items.MANGROVE_CHEST_BOAT.getDefaultStack()))
             .build();
 
     public static final OwoNetChannel CHANNEL = OwoNetChannel.create(new Identifier("uwu", "uwu"));
@@ -153,8 +152,8 @@ public class Uwu implements ModInitializer {
 
         FieldRegistrationHandler.register(UwuItems.class, "uwu", true);
 
-        TagInjector.inject(Registries.BLOCK, BlockTags.BASE_STONE_OVERWORLD.id(), Blocks.GLASS);
-        TagInjector.injectTagReference(Registries.ITEM, ItemTags.COALS.id(), ItemTags.FOX_FOOD.id());
+        TagInjector.inject(Registry.BLOCK, BlockTags.BASE_STONE_OVERWORLD.id(), Blocks.GLASS);
+        TagInjector.injectTagReference(Registry.ITEM, ItemTags.COALS.id(), ItemTags.FOX_FOOD.id());
 
         FOUR_TAB_GROUP.initialize();
         SIX_TAB_GROUP.initialize();
@@ -176,8 +175,8 @@ public class Uwu implements ModInitializer {
             new ParticleSystemController(new Identifier("uwu", "server_only_particles"));
         }
 
-        System.out.println(RegistryAccess.getEntry(Registries.ITEM, Items.ACACIA_BOAT));
-        System.out.println(RegistryAccess.getEntry(Registries.ITEM, new Identifier("acacia_planks")));
+        System.out.println(RegistryAccess.getEntry(Registry.ITEM, Items.ACACIA_BOAT));
+        System.out.println(RegistryAccess.getEntry(Registry.ITEM, new Identifier("acacia_planks")));
 
         Layers.push(Containers::verticalFlow, instance -> {
             instance.adapter.rootComponent.child(

@@ -1,5 +1,5 @@
 {
-  "target_group": "minecraft:ingredients",
+  "target_group": "misc",
   "extend": true,
   "tabs": [
     {

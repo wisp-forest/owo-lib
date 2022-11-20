@@ -5,6 +5,8 @@ import io.wispforest.owo.itemgroup.OwoItemSettings;
 import io.wispforest.owo.util.pond.OwoItemExtensions;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.collection.DefaultedList;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -24,14 +26,13 @@ public class ItemMixin implements OwoItemExtensions {
     private int owo$tab = -1;
 
     @Unique
-    private BiConsumer<Item, ItemGroup.Entries> owo$stackGenerator = OwoItemGroup.DEFAULT_STACK_GENERATOR;
+    private BiConsumer<Item, DefaultedList<ItemStack>> owo$stackGenerator = OwoItemGroup.DEFAULT_STACK_GENERATOR;
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void grabTab(Item.Settings settings, CallbackInfo ci) {
         if (settings instanceof OwoItemSettings owoSettings) {
             this.owo$tab = owoSettings.tab();
             this.owo$stackGenerator = owoSettings.stackGenerator();
-            this.owo$group = owoSettings.group();
         }
     }
 
@@ -41,17 +42,12 @@ public class ItemMixin implements OwoItemExtensions {
     }
 
     @Override
-    public BiConsumer<Item, ItemGroup.Entries> owo$stackGenerator() {
+    public BiConsumer<Item, DefaultedList<ItemStack>> owo$stackGenerator() {
         return owo$stackGenerator;
     }
 
     @Override
     public void owo$setGroup(ItemGroup group) {
         this.owo$group = group;
-    }
-
-    @Override
-    public @Nullable ItemGroup owo$group() {
-        return this.owo$group;
     }
 }
