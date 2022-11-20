@@ -9,7 +9,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.entity.Entity;
@@ -40,18 +39,13 @@ public class Components {
         return new ButtonComponent(message, onPress);
     }
 
-    public static TextFieldWidget textBox(Sizing horizontalSizing) {
-        return createWithSizing(
-                () -> new TextFieldWidget(MinecraftClient.getInstance().textRenderer, 0, 0, 0, 0, Text.empty()),
-                horizontalSizing,
-                Sizing.fixed(20)
-        );
+    public static TextBoxComponent textBox(Sizing horizontalSizing) {
+        return new TextBoxComponent(horizontalSizing);
     }
 
-    public static TextFieldWidget textBox(Sizing horizontalSizing, String text) {
-        final var textBox = textBox(horizontalSizing);
-        textBox.setText(text);
-        textBox.setCursorToStart();
+    public static TextBoxComponent textBox(Sizing horizontalSizing, String text) {
+        var textBox = new TextBoxComponent(horizontalSizing);
+        textBox.text(text);
         return textBox;
     }
 

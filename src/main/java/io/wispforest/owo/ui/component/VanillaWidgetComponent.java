@@ -1,6 +1,7 @@
 package io.wispforest.owo.ui.component;
 
 import io.wispforest.owo.mixin.ui.ClickableWidgetAccessor;
+import io.wispforest.owo.mixin.ui.TextFieldWidgetAccessor;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.*;
 import net.minecraft.client.MinecraftClient;
@@ -35,8 +36,14 @@ public class VanillaWidgetComponent extends BaseComponent {
 
     @Override
     protected int determineVerticalContentSize(Sizing sizing) {
-        if (this.widget instanceof ButtonWidget || this.widget instanceof CheckboxWidget || this.widget instanceof SliderComponent || this.widget instanceof TextFieldWidget) {
+        if (this.widget instanceof ButtonWidget || this.widget instanceof CheckboxWidget || this.widget instanceof SliderComponent) {
             return 20;
+        } else if (this.widget instanceof TextFieldWidget textField) {
+            if (((TextFieldWidgetAccessor) textField).owo$drawsBackground()) {
+                return 20;
+            } else {
+                return 9;
+            }
         } else {
             return super.determineVerticalContentSize(sizing);
         }
@@ -103,6 +110,11 @@ public class VanillaWidgetComponent extends BaseComponent {
         }
 
         return (C) this.widget;
+    }
+
+    @Override
+    public void notifyParentIfMounted() {
+        super.notifyParentIfMounted();
     }
 
     @Override

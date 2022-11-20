@@ -2,5 +2,7 @@ accessWidener v2 named
 
 accessible method net/minecraft/client/gui/screen/Screen addDrawableChild (Lnet/minecraft/client/gui/Element;)Lnet/minecraft/client/gui/Element;
 
+extendable method net/minecraft/client/gui/widget/TextFieldWidget onChanged (Ljava/lang/String;)V
+
 extendable method net/minecraft/item/ItemGroup <init> (Lnet/minecraft/item/ItemGroup$Row;ILnet/minecraft/item/ItemGroup$Type;Lnet/minecraft/text/Text;Ljava/util/function/Supplier;Lnet/minecraft/item/ItemGroup$EntryCollector;)V
 transitive-accessible class net/minecraft/item/ItemGroup$Entries
