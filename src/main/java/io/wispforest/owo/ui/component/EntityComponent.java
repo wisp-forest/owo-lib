@@ -33,6 +33,7 @@ import org.lwjgl.glfw.GLFW;
 import org.w3c.dom.Element;
 
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class EntityComponent<E extends Entity> extends BaseComponent {
 
@@ -45,6 +46,7 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
     protected boolean lookAtCursor = false;
     protected boolean allowMouseRotation = false;
     protected boolean scaleToFit = false;
+    protected Consumer<MatrixStack> transform = matrixStack -> {};
 
     protected EntityComponent(Sizing sizing, E entity) {
         final var client = MinecraftClient.getInstance();
@@ -76,6 +78,8 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
         matrices.scale(75 * this.scale * this.width / 64f, -75 * this.scale * this.height / 64f, 75 * this.scale);
 
         matrices.translate(0, entity.getHeight() / -2f, 0);
+
+        this.transform.accept(matrices);
 
         if (this.lookAtCursor) {
             float xRotation = (float) Math.toDegrees(Math.atan((mouseY - this.y - this.height / 2f) / 40f));
@@ -165,6 +169,15 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
 
     public boolean scaleToFit() {
         return this.scaleToFit;
+    }
+
+    public EntityComponent<E> transform(Consumer<MatrixStack> transform) {
+        this.transform = transform;
+        return this;
+    }
+
+    public Consumer<MatrixStack> transform() {
+        return transform;
     }
 
     @Override
