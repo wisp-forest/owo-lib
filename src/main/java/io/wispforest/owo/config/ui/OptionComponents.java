@@ -33,7 +33,7 @@ public class OptionComponents {
                 button.active = false;
             });
 
-            valueBox.setChangedListener(s -> resetButton.active = !s.equals(option.defaultValue().toString()));
+            valueBox.onChanged().subscribe(s -> resetButton.active = !s.equals(option.defaultValue().toString()));
         }
 
         processor.accept(valueBox);
