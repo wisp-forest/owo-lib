@@ -1,38 +1,32 @@
 package io.wispforest.owo.config.ui.component;
 
+import io.wispforest.owo.ui.component.TextBoxComponent;
 import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.util.NumberReflection;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.text.Text;
 import org.jetbrains.annotations.ApiStatus;
 import org.w3c.dom.Element;
 
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 @ApiStatus.Internal
 @SuppressWarnings("UnusedReturnValue")
-public class ConfigTextBox extends TextFieldWidget implements OptionComponent {
+public class ConfigTextBox extends TextBoxComponent implements OptionComponent {
 
     protected int invalidColor = 0xEB1D36, validColor = 0x28FFBF;
     protected Function<String, Object> valueParser = s -> s;
     protected Predicate<String> inputPredicate = s -> true, applyPredicate = s -> true;
-    protected Consumer<String> externalListener = s -> {};
 
     public ConfigTextBox() {
-        super(MinecraftClient.getInstance().textRenderer, 0, 0, 0, 0, Text.empty());
-        this.verticalSizing(Sizing.fixed(20));
+        super(Sizing.fixed(0));
         this.setMaxLength(Integer.MAX_VALUE);
 
-        super.setChangedListener(s -> {
+        this.textValue.observe(s -> {
             this.setEditableColor(this.applyPredicate.test(s) ? this.validColor : this.invalidColor);
-            this.externalListener.accept(s);
         });
     }
 
@@ -69,11 +63,6 @@ public class ConfigTextBox extends TextFieldWidget implements OptionComponent {
     @Override
     public Object parsedValue() {
         return this.valueParser.apply(this.getText());
-    }
-
-    @Override
-    public void setChangedListener(Consumer<String> changedListener) {
-        this.externalListener = changedListener;
     }
 
     public ConfigTextBox inputPredicate(Predicate<String> inputPredicate) {

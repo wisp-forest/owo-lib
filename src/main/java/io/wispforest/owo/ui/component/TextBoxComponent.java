@@ -5,6 +5,7 @@ import io.wispforest.owo.ui.core.CursorStyle;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
+import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.Observable;
 import net.minecraft.client.MinecraftClient;
@@ -60,8 +61,8 @@ public class TextBoxComponent extends TextFieldWidget {
         this.textValue.set(newText);
     }
 
-    public EventStream<OnChanged> onChanged() {
-        return changedEvents;
+    public EventSource<OnChanged> onChanged() {
+        return changedEvents.source();
     }
 
     public TextBoxComponent text(String text) {
