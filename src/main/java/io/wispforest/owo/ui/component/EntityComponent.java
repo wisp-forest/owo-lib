@@ -24,14 +24,15 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.NetworkSide;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.registry.Registries;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.w3c.dom.Element;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -220,7 +221,7 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
                             new ClientConnection(NetworkSide.CLIENTBOUND),
                             null,
                             profile,
-                            MinecraftClient.getInstance().createTelemetrySender()
+                            MinecraftClient.getInstance().method_47601().method_47706(false, Duration.ZERO)
                     ),
                     null, null, false, false
             );

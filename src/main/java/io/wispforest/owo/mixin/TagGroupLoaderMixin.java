@@ -1,8 +1,8 @@
 package io.wispforest.owo.mixin;
 
 import io.wispforest.owo.util.TagInjector;
+import net.minecraft.registry.tag.TagGroupLoader;
 import net.minecraft.resource.ResourceManager;
-import net.minecraft.tag.TagGroupLoader;
 import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

@@ -1,7 +1,7 @@
 package io.wispforest.owo.registration;
 
+import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 import java.util.ArrayList;
 import java.util.Collection;

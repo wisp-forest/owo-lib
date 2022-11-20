@@ -46,7 +46,7 @@ public class ButtonComponent extends ButtonWidget {
         }
 
         var tooltip = ((ClickableWidgetAccessor)this).owo$getTooltip();
-        if (this.hovered && tooltip != null) Drawer.utilityScreen().renderOrderedTooltip(matrices, tooltip.method_47405(MinecraftClient.getInstance()), mouseX, mouseY);
+        if (this.hovered && tooltip != null) Drawer.utilityScreen().renderOrderedTooltip(matrices, tooltip.getLines(MinecraftClient.getInstance()), mouseX, mouseY);
     }
 
     public ButtonComponent onPress(Consumer<ButtonComponent> onPress) {

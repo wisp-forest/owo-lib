@@ -2,8 +2,8 @@ package io.wispforest.owo.mixin;
 
 import io.wispforest.owo.util.RegistryAccess;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.RegistryEntry;
-import net.minecraft.util.registry.SimpleRegistry;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.SimpleRegistry;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

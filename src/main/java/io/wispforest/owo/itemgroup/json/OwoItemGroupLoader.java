@@ -10,11 +10,11 @@ import io.wispforest.owo.moddata.ModDataConsumer;
 import io.wispforest.owo.util.pond.OwoItemExtensions;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemGroups;
-import net.minecraft.tag.TagKey;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
-import net.minecraft.util.registry.Registries;
-import net.minecraft.util.registry.RegistryKeys;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;

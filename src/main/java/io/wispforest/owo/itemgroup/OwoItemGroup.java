@@ -9,11 +9,11 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.impl.itemgroup.ItemGroupHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.item.*;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.resource.featuretoggle.FeatureSet;
-import net.minecraft.tag.TagKey;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;

@@ -84,7 +84,7 @@ public class Drawer extends DrawableHelper {
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
 
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);
+        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
         Tessellator.getInstance().draw();
 
         RenderSystem.disableBlend();

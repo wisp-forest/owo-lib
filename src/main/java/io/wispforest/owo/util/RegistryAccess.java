@@ -1,9 +1,9 @@
 package io.wispforest.owo.util;
 
+import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryEntry;
-import net.minecraft.util.registry.SimpleRegistry;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.SimpleRegistry;
 import org.jetbrains.annotations.Nullable;
 
 public class RegistryAccess {

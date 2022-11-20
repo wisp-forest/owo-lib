@@ -82,7 +82,6 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
                 this.build(this.uiAdapter.rootComponent);
 
                 this.uiAdapter.inflateAndMount();
-                this.client.keyboard.setRepeatEvents(true);
             } catch (Exception error) {
                 Owo.LOGGER.warn("Could not initialize owo screen", error);
                 UIErrorToast.report(error);
@@ -207,7 +206,6 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
     @Override
     public void removed() {
         if (this.uiAdapter != null) this.uiAdapter.dispose();
-        this.client.keyboard.setRepeatEvents(false);
         super.removed();
     }
 

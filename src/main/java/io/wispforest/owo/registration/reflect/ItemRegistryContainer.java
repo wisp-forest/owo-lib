@@ -1,8 +1,8 @@
 package io.wispforest.owo.registration.reflect;
 
 import net.minecraft.item.Item;
-import net.minecraft.util.registry.Registries;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 
 public interface ItemRegistryContainer extends AutoRegistryContainer<Item> {
     @Override

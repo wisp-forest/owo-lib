@@ -2,8 +2,8 @@ package io.wispforest.owo.registration.reflect;
 
 import io.wispforest.owo.registration.annotations.RegistryNamespace;
 import io.wispforest.owo.util.ReflectionUtils;
+import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 /**
  * Main hub for all interactions with implementations of
