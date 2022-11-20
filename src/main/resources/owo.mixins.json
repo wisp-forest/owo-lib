@@ -31,7 +31,7 @@
     "ui.RenderSystemMixin",
     "ui.ScreenInvoker",
     "ui.SliderWidgetMixin",
-    "ui.TextFieldWidgetMixin",
+    "ui.TextFieldWidgetAccessor",
     "ui.layers.KeyboardMixin",
     "ui.layers.MouseMixin",
     "ui.layers.ScreenMixin"

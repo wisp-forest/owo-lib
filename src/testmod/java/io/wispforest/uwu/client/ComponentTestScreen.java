@@ -129,7 +129,7 @@ public class ComponentTestScreen extends Screen {
         var weeAnimation = buttonPanel.positioning().animate(1000, Easing.CUBIC, Positioning.relative(0, 100));
         rootComponent.child(Containers.verticalFlow(Sizing.content(), Sizing.content())
                 .child(growingTextBox)
-                .child(new TextFieldWidget(this.client.textRenderer, 0, 0, 60, 20, Text.empty()))
+                .child(Components.textBox(Sizing.fixed(60)))
                 .child(Components.button(Text.of("weeeee"), button -> {
                     weeAnimation.loop(!weeAnimation.looping());
                     rootComponent.<FlowLayout>configure(layout -> {
