@@ -17,14 +17,38 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
+/**
+ * A system for adding owo-ui components onto existing screens.
+ * <p>
+ * You can create a new layer by calling {@link #add(BiFunction, Consumer, Class[])}. The
+ * second argument to this function is the instance initializer, which is where you configure
+ * instances of your layer added onto screens when they get initialized. This is the place to
+ * configure the UI adapter of your layer as well as building your UI tree onto the root
+ * component of said adapter
+ * <p>
+ * Just like proper owo-ui screens, layers preserve state when the client's window
+ * is resized - they are only initialized once, when the screen is first opened
+ */
 public final class Layers {
 
+    /**
+     * The event phase during which owo-ui layer instances are created and
+     * initialized. This runs after the default phase
+     */
     public static Identifier INIT_PHASE = new Identifier("owo", "init-layers");
 
     private static final Multimap<Class<? extends Screen>, Layer<?, ?>> LAYERS = HashMultimap.create();
 
+    /**
+     * Add a new layer to the given screens
+     *
+     * @param rootComponentMaker  A function which will create the root component of this layer
+     * @param instanceInitializer A function which will initialize any instances of this layer which get created.
+     *                            This is where you add components or configure the UI adapter of the generated layer instance
+     * @param screenClasses       The screens onto which to add the new layer
+     */
     @SafeVarargs
-    public static <S extends Screen, R extends ParentComponent> Layer<S, R> push(BiFunction<Sizing, Sizing, R> rootComponentMaker, Consumer<Layer<S, R>.Instance> instanceInitializer, Class<? extends S>... screenClasses) {
+    public static <S extends Screen, R extends ParentComponent> Layer<S, R> add(BiFunction<Sizing, Sizing, R> rootComponentMaker, Consumer<Layer<S, R>.Instance> instanceInitializer, Class<? extends S>... screenClasses) {
         final var layer = new Layer<>(rootComponentMaker, instanceInitializer);
         for (var screenClass : screenClasses) {
             LAYERS.put(screenClass, layer);
@@ -32,11 +56,17 @@ public final class Layers {
         return layer;
     }
 
+    /**
+     * Get all layers associated with a given screen
+     */
     @SuppressWarnings("unchecked")
     public static <S extends Screen> Collection<Layer<S, ?>> getLayers(Class<S> screenClass) {
         return (Collection<Layer<S, ?>>) (Object) LAYERS.get(screenClass);
     }
 
+    /**
+     * Get all layer instances currently present on the given screen
+     */
     @SuppressWarnings("unchecked")
     public static <S extends Screen> List<Layer<S, ?>.Instance> getInstances(S screen) {
         return (List<Layer<S, ?>.Instance>) (Object) ((OwoScreenExtension) screen).owo$getLayersView();

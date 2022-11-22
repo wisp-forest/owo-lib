@@ -5,6 +5,7 @@ import io.wispforest.owo.ui.core.*;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ClickableWidget;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -29,9 +30,21 @@ public class Layer<S extends Screen, R extends ParentComponent> {
 
     public class Instance {
 
+        /**
+         * The screen this instance is attached to
+         */
         public final S screen;
+
+        /**
+         * The UI adapter of this instance - get the {@link OwoUIAdapter#rootComponent}
+         * from this to start building your UI tree
+         */
         public final OwoUIAdapter<R> adapter;
 
+        /**
+         * Whether this layer should aggressively update widget-relative
+         * positioning every frame - useful if the targeted widget moves frequently
+         */
         public boolean aggressivePositioning = false;
 
         protected final List<Runnable> layoutUpdaters = new ArrayList<>();
@@ -42,10 +55,17 @@ public class Layer<S extends Screen, R extends ParentComponent> {
             Layer.this.instanceInitializer.accept(this);
         }
 
+        @ApiStatus.Internal
         public void resize(int width, int height) {
             this.adapter.moveAndResize(0, 0, width, height);
         }
 
+        /**
+         * Find a widget in the attached screen's widget tree
+         *
+         * @param locator A predicate to match which identifies the targeted widget
+         * @return The targeted widget, or {@link null} if the predicate was never matched
+         */
         public @Nullable ClickableWidget queryWidget(Predicate<ClickableWidget> locator) {
             var widgets = new ArrayList<ClickableWidget>();
             for (var element : this.screen.children()) collectChildren(element, widgets);
@@ -60,6 +80,19 @@ public class Layer<S extends Screen, R extends ParentComponent> {
             return widget;
         }
 
+        /**
+         * Align the given component to a widget in the attached screen's
+         * widget tree. The widget is located by passing the locator predicate to
+         * {@link #queryWidget(Predicate)} and getting the position of the resulted widget.
+         * <p>
+         * If no widget can be found, the component gets positioned at 0,0
+         *
+         * @param locator       A predicate to match which identifies the targeted widget
+         * @param anchor        On which side of the targeted widget to anchor the component
+         * @param justification How far along the anchor side of the widget in positive axis direction
+         *                      to position the component
+         * @param component     The component to position
+         */
         public void alignComponentToWidget(Predicate<ClickableWidget> locator, AnchorSide anchor, float justification, Component component) {
             this.layoutUpdaters.add(() -> {
                 var widget = this.queryWidget(locator);
@@ -91,6 +124,7 @@ public class Layer<S extends Screen, R extends ParentComponent> {
             });
         }
 
+        @ApiStatus.Internal
         public void dispatchLayoutUpdates() {
             this.layoutUpdaters.forEach(Runnable::run);
         }

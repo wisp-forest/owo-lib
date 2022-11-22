@@ -179,7 +179,7 @@ public class Uwu implements ModInitializer {
         System.out.println(RegistryAccess.getEntry(Registries.ITEM, Items.ACACIA_BOAT));
         System.out.println(RegistryAccess.getEntry(Registries.ITEM, new Identifier("acacia_planks")));
 
-        Layers.push(Containers::verticalFlow, instance -> {
+        Layers.add(Containers::verticalFlow, instance -> {
             instance.adapter.rootComponent.child(
                     Containers.horizontalFlow(Sizing.content(), Sizing.content())
                             .child(Components.entity(Sizing.fixed(20), EntityType.ALLAY, null).<EntityComponent<AllayEntity>>configure(component -> {
