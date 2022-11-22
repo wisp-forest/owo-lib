@@ -47,8 +47,6 @@ public class TextBoxComponent extends TextFieldWidget {
         // noop, since TextFieldWidget already does this
     }
 
-
-
     @Override
     public void setDrawsBackground(boolean drawsBackground) {
         super.setDrawsBackground(drawsBackground);
