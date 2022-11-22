@@ -58,6 +58,14 @@ public class ComponentTestScreen extends Screen {
         final var innerLayout = Containers.verticalFlow(Sizing.content(100), Sizing.content());
         var verticalAnimation = innerLayout.verticalSizing().animate(350, Easing.SINE, Sizing.content(50));
 
+        final var bruh = Components.box(Sizing.fixed(150), Sizing.fixed(20));
+        bruh.horizontalSizing().animate(5000, Easing.QUARTIC, Sizing.fixed(10)).forwards();
+        innerLayout.child(bruh);
+
+        final var otherBox = Containers.verticalFlow(Sizing.fixed(150), Sizing.fixed(20));
+        otherBox.surface(Surface.flat(Color.BLACK.argb())).horizontalSizing().animate(5000, Easing.QUARTIC, Sizing.fixed(10)).forwards();
+        innerLayout.child(otherBox);
+
         innerLayout.child(Containers.verticalScroll(Sizing.content(), Sizing.fixed(50), Containers.verticalFlow(Sizing.content(), Sizing.content())
                                 .child(new BoxComponent(Sizing.fixed(20), Sizing.fixed(40)).margins(Insets.of(5)))
                                 .child(new BoxComponent(Sizing.fixed(45), Sizing.fixed(45)).margins(Insets.of(5)))
