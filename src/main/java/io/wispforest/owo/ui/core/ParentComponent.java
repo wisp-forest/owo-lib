@@ -174,13 +174,16 @@ public interface ParentComponent extends Component {
         return false;
     }
 
+    /**
+     * @apiNote When overriding update and calling {@code ParentComponent.super.update()},
+     * ensure that {@link Component#update(float, int, int)} is called as well, through some means
+     */
     @Override
     default void update(float delta, int mouseX, int mouseY) {
-        Component.super.update(delta, mouseX, mouseY);
         this.padding().update(delta);
 
-        for (var child : this.children()) {
-            child.update(delta, mouseX, mouseY);
+        for (int i = 0; i < this.children().size(); i++) {
+            this.children().get(i).update(delta, mouseX, mouseY);
         }
     }
 
