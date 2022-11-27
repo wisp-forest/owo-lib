@@ -178,31 +178,6 @@ public class Uwu implements ModInitializer {
         System.out.println(RegistryAccess.getEntry(Registry.ITEM, Items.ACACIA_BOAT));
         System.out.println(RegistryAccess.getEntry(Registry.ITEM, new Identifier("acacia_planks")));
 
-        Layers.add(Containers::verticalFlow, instance -> {
-            instance.adapter.rootComponent.child(
-                    Containers.horizontalFlow(Sizing.content(), Sizing.content())
-                            .child(Components.entity(Sizing.fixed(20), EntityType.ALLAY, null).<EntityComponent<AllayEntity>>configure(component -> {
-                                component.allowMouseRotation(true)
-                                        .scale(.75f);
-
-                                component.mouseDown().subscribe((mouseX, mouseY, button) -> {
-                                    UISounds.playInteractionSound();
-                                    return true;
-                                });
-                            })).child(Components.textBox(Sizing.fixed(100), "allay text").<TextFieldWidget>configure(textBox -> {
-                                textBox.verticalSizing(Sizing.fixed(9));
-                                textBox.setDrawsBackground(false);
-                            })).<FlowLayout>configure(layout -> {
-                                layout.gap(5).margins(Insets.left(4)).verticalAlignment(VerticalAlignment.CENTER);
-
-                                instance.alignComponentToWidget(widget -> {
-                                    if (!(widget instanceof ButtonWidget button)) return false;
-                                    return button.getMessage().getContent() instanceof TranslatableTextContent translatable && translatable.getKey().equals("menu.reportBugs");
-                                }, Layer.Instance.AnchorSide.RIGHT, 0, layout);
-                            })
-            );
-        }, GameMenuScreen.class);
-
         CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> {
             dispatcher.register(
                     literal("show_nbt")
