@@ -10,7 +10,7 @@ import net.minecraft.util.Identifier;
 
 public class UISounds {
 
-    public static final SoundEvent UI_INTERACTION = new SoundEvent(new Identifier("owo", "ui.owo.interaction"));
+    public static final SoundEvent UI_INTERACTION = SoundEvent.of(new Identifier("owo", "ui.owo.interaction"));
 
     @Environment(EnvType.CLIENT)
     public static void playButtonSound() {

@@ -221,7 +221,7 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
                             new ClientConnection(NetworkSide.CLIENTBOUND),
                             null,
                             profile,
-                            MinecraftClient.getInstance().method_47601().method_47706(false, Duration.ZERO)
+                            MinecraftClient.getInstance().getTelemetryManager().createWorldSession(false, Duration.ZERO)
                     ),
                     null, null, false, false
             );

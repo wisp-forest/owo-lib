@@ -9,6 +9,7 @@ import io.wispforest.owo.ui.event.WindowResizeCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.Tessellator;
@@ -130,7 +131,7 @@ public class Drawer extends DrawableHelper {
     }
 
     public static void drawTooltip(MatrixStack matrices, int x, int y, List<TooltipComponent> tooltip) {
-        ((ScreenInvoker) utilityScreen()).owo$renderTooltipFromComponents(matrices, tooltip, x, y);
+        ((ScreenInvoker) utilityScreen()).owo$renderTooltipFromComponents(matrices, tooltip, x, y, HoveredTooltipPositioner.INSTANCE);
     }
 
     public static UtilityScreen utilityScreen() {
