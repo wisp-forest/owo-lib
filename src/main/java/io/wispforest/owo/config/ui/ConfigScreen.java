@@ -183,7 +183,11 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                 if (query.isBlank()) return false;
 
                 if (this.currentMatches != null && this.currentMatches.query.equals(query)) {
-                    this.currentMatchIndex = (this.currentMatchIndex + 1) % this.currentMatches.matches.size();
+                    if (this.currentMatches.matches().isEmpty()) {
+                        this.currentMatchIndex = -1;
+                    } else {
+                        this.currentMatchIndex = (this.currentMatchIndex + 1) % this.currentMatches.matches.size();
+                    }
                 } else {
                     var splitQuery = query.split(" ");
 
