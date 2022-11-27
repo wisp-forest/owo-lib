@@ -204,17 +204,26 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                     var selectedMatch = this.currentMatches.matches.get(this.currentMatchIndex);
                     var anchorFrame = selectedMatch.anchorFrame();
 
-                    if (anchorFrame instanceof FlowLayout flow) {
-                        flow.child(0, selectedMatch.configure(new SearchHighlighterComponent()));
-                    }
-
+                    // we specifically build the path backwards, so we can then iterate
+                    // it root -> key, otherwise we could potentially be manipulating
+                    // unmounted components which is absolutely not desirable
+                    var pathToRoot = new ArrayDeque<Option.Key>();
                     var key = selectedMatch.key();
                     while (!key.isRoot()) {
-                        if (containers.get(key) instanceof CollapsibleContainer collapsible && !collapsible.expanded()) {
+                        pathToRoot.push(key);
+                        key = key.parent();
+                    }
+
+                    while (!pathToRoot.isEmpty()) {
+                        if (containers.get(pathToRoot.pop()) instanceof CollapsibleContainer collapsible && !collapsible.expanded()) {
                             collapsible.toggleExpansion();
                         }
+                    }
 
-                        key = key.parent();
+                    // in the same vein, the component is mounted after the layout is fully
+                    // restored, as we would otherwise be mounting onto a partially-built subtree
+                    if (anchorFrame instanceof FlowLayout flow) {
+                        flow.child(0, selectedMatch.configure(new SearchHighlighterComponent()));
                     }
 
                     if (anchorFrame.y() < optionScroll.y() || anchorFrame.y() + anchorFrame.height() > optionScroll.y() + optionScroll.height()) {
