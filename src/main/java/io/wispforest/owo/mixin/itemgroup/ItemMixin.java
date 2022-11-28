@@ -23,7 +23,7 @@ public class ItemMixin implements OwoItemExtensions {
     protected ItemGroup owo$group = null;
 
     @Unique
-    private int owo$tab = -1;
+    private int owo$tab = 0;
 
     @Unique
     private BiConsumer<Item, DefaultedList<ItemStack>> owo$stackGenerator = OwoItemGroup.DEFAULT_STACK_GENERATOR;
