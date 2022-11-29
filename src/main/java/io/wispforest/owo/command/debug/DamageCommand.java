@@ -84,3 +84,5 @@ public class DamageCommand {
         return (int) Math.floor(amount);
     }
 }
+
+//chyz was here
