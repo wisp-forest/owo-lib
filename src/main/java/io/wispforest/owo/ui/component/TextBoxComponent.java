@@ -53,12 +53,6 @@ public class TextBoxComponent extends TextFieldWidget {
         this.showsBackground.set(drawsBackground);
     }
 
-    @Override
-    protected void onChanged(String newText) {
-        super.onChanged(newText);
-        this.textValue.set(newText);
-    }
-
     public EventSource<OnChanged> onChanged() {
         return changedEvents.source();
     }
