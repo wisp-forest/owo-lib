@@ -71,10 +71,7 @@ public abstract class OwoItemGroup extends ItemGroup {
         ((ItemGroupAccessor) this).owo$setEntryCollector((enabledFeatures, entries, operatorEnabled) -> {
             if (!this.initialized) throw new IllegalStateException("oωo item group not initialized, was 'initialize()' called?");
             this.getSelectedTab().contentSupplier().addItems(enabledFeatures, entries, operatorEnabled);
-
-            Registries.ITEM.stream()
-                    .filter(item -> ((OwoItemExtensions) item).owo$group() == this && ((OwoItemExtensions) item).owo$tab() == this.selectedTab)
-                    .forEach(item -> ((OwoItemExtensions) item).owo$stackGenerator().accept(item, entries));
+            this.collectItemsFromRegistry(entries, true);
         });
     }
 
@@ -143,6 +140,53 @@ public abstract class OwoItemGroup extends ItemGroup {
      */
     public void addTab(Icon icon, String name, @Nullable TagKey<Item> contentTag, boolean primary) {
         addTab(icon, name, contentTag, ItemGroupTab.DEFAULT_TEXTURE, primary);
+    }
+
+    /**
+     * Adds a new tab to this group, using the default button texture
+     *
+     * @param icon            The icon to use
+     * @param name            The name of the tab, used for the translation key
+     * @param contentSupplier The function used for filling this tab
+     * @param texture    The texture to use for drawing the button
+     * @see Icon#of(ItemConvertible)
+     */
+    public void addCustomTab(Icon icon, String name, ItemGroupTab.ContentSupplier contentSupplier, Identifier texture, boolean primary) {
+        this.tabs.add(new ItemGroupTab(
+                icon,
+                ButtonDefinition.tooltipFor(this, "tab", name),
+                contentSupplier, texture, primary
+        ));
+    }
+
+    /**
+     * Adds a new tab to this group
+     *
+     * @param icon            The icon to use
+     * @param name            The name of the tab, used for the translation key
+     * @param contentSupplier The function used for filling this tab
+     * @see Icon#of(ItemConvertible)
+     */
+    public void addCustomTab(Icon icon, String name, ItemGroupTab.ContentSupplier contentSupplier, boolean primary) {
+        this.addCustomTab(icon, name, contentSupplier, ItemGroupTab.DEFAULT_TEXTURE, primary);
+    }
+
+    @Override
+    public void updateEntries(FeatureSet enabledFeatures, boolean operatorEnabled) {
+        super.updateEntries(enabledFeatures, operatorEnabled);
+
+        var searchEntries = new SearchOnlyEntries(this, enabledFeatures);
+
+        this.collectItemsFromRegistry(searchEntries, false);
+        this.tabs.forEach(tab -> tab.contentSupplier().addItems(enabledFeatures, searchEntries, operatorEnabled));
+
+        ((ItemGroupAccessor) this).owo$setSearchTabStacks(searchEntries.searchTabStacks);
+    }
+
+    protected void collectItemsFromRegistry(Entries entries, boolean matchTab) {
+        Registries.ITEM.stream()
+                .filter(item -> ((OwoItemExtensions) item).owo$group() == this && (!matchTab || ((OwoItemExtensions) item).owo$tab() == this.selectedTab))
+                .forEach(item -> ((OwoItemExtensions) item).owo$stackGenerator().accept(item, entries));
     }
 
     // Getters and setters
@@ -258,6 +302,19 @@ public abstract class OwoItemGroup extends ItemGroup {
         }
     }
 
+    protected static class SearchOnlyEntries extends EntriesImpl {
+
+        public SearchOnlyEntries(ItemGroup group, FeatureSet enabledFeatures) {
+            super(group, enabledFeatures);
+        }
+
+        @Override
+        public void add(ItemStack stack, StackVisibility visibility) {
+            if (visibility == StackVisibility.PARENT_TAB_ONLY) return;
+            super.add(stack, StackVisibility.SEARCH_TAB_ONLY);
+        }
+    }
+
     // Utility
 
     /**
@@ -272,6 +329,7 @@ public abstract class OwoItemGroup extends ItemGroup {
         Identifier texture();
 
         Text tooltip();
+
         static Text tooltipFor(ItemGroup group, String component, String componentName) {
             var groupId = group.getId().getNamespace().equals("minecraft")
                     ? group.getId().getPath()
