@@ -61,6 +61,10 @@ public class ComponentTestScreen extends Screen {
         final var innerLayout = Containers.verticalFlow(Sizing.content(100), Sizing.content());
         var verticalAnimation = innerLayout.verticalSizing().animate(350, Easing.SINE, Sizing.content(50));
 
+        verticalAnimation.finished().subscribe((direction, looping) -> {
+            client.inGameHud.getChatHud().addMessage(Text.literal("vertical animation finished in direction " + direction.name()));
+        });
+
         final var bruh = Components.box(Sizing.fixed(150), Sizing.fixed(20));
         bruh.horizontalSizing().animate(5000, Easing.QUARTIC, Sizing.fixed(10)).forwards();
         innerLayout.child(bruh);
