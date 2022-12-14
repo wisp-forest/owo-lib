@@ -69,7 +69,7 @@ public final class Layers {
      */
     @SuppressWarnings("unchecked")
     public static <S extends Screen> List<Layer<S, ?>.Instance> getInstances(S screen) {
-        return (List<Layer<S, ?>.Instance>) (Object) ((OwoScreenExtension) screen).owo$getLayersView();
+        return (List<Layer<S, ?>.Instance>) (Object) ((OwoScreenExtension) screen).owo$getInstancesView();
     }
 
     static {

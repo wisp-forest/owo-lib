@@ -2,6 +2,7 @@ package io.wispforest.owo.ui.layers;
 
 import io.wispforest.owo.mixin.ui.layers.WrapperWidgetInvoker;
 import io.wispforest.owo.ui.core.*;
+import io.wispforest.owo.util.pond.OwoScreenExtension;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ClickableWidget;
@@ -26,6 +27,10 @@ public class Layer<S extends Screen, R extends ParentComponent> {
 
     public Instance instantiate(S screen) {
         return new Instance(screen);
+    }
+
+    public Instance getInstance(S screen) {
+        return ((OwoScreenExtension) screen).owo$getInstance(this);
     }
 
     public class Instance {
