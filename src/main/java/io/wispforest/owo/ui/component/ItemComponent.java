@@ -6,7 +6,10 @@ import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
+import net.fabricmc.fabric.api.client.rendering.v1.TooltipComponentCallback;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.tooltip.TooltipComponent;
+import net.minecraft.client.item.TooltipContext;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.OverlayTexture;
@@ -14,11 +17,17 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
+import net.minecraft.text.Text;
+import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class ItemComponent extends BaseComponent {
 
@@ -93,6 +102,37 @@ public class ItemComponent extends BaseComponent {
 
     public boolean showOverlay() {
         return this.showOverlay;
+    }
+
+    /**
+     * Obtain the full item stack tooltip, including custom components
+     * provided via {@link net.minecraft.item.Item#getTooltipData(ItemStack)}
+     *
+     * @param stack   The item stack from which to obtain the tooltip
+     * @param player  The player to use for context, may be {@code null}
+     * @param context The tooltip context - {@code null} to fall back to the default provided by
+     *                {@link net.minecraft.client.option.GameOptions#advancedItemTooltips}
+     */
+    public static List<TooltipComponent> tooltipFromItem(ItemStack stack, @Nullable PlayerEntity player, @Nullable TooltipContext context) {
+        if (context == null) {
+            context = MinecraftClient.getInstance().options.advancedItemTooltips ? TooltipContext.ADVANCED : TooltipContext.BASIC;
+        }
+
+        var tooltip = new ArrayList<TooltipComponent>();
+        stack.getTooltip(player, context)
+                .stream()
+                .map(Text::asOrderedText)
+                .map(TooltipComponent::of)
+                .forEach(tooltip::add);
+
+        stack.getTooltipData().ifPresent(data -> {
+            tooltip.add(1, Objects.requireNonNullElseGet(
+                    TooltipComponentCallback.EVENT.invoker().getComponent(data),
+                    () -> TooltipComponent.of(data)
+            ));
+        });
+
+        return tooltip;
     }
 
     @Override

@@ -193,7 +193,16 @@ public class ComponentTestScreen extends Screen {
                 Components.block(Blocks.FURNACE.getDefaultState(), (NbtCompound) null).sizing(Sizing.fixed(100))
         );
 
-        rootComponent.child(Components.item(new ItemStack(Items.EMERALD, 16)).showOverlay(true).positioning(Positioning.absolute(120, 30)));
+        var bundle = Items.BUNDLE.getDefaultStack();
+        var itemList = new NbtList();
+        itemList.add(new ItemStack(Items.EMERALD, 16).writeNbt(new NbtCompound()));
+        bundle.getOrCreateNbt().put("Items", itemList);
+
+        rootComponent.child(Components.item(new ItemStack(Items.EMERALD, 16))
+                .showOverlay(true)
+                .positioning(Positioning.absolute(120, 30))
+                .tooltip(ItemComponent.tooltipFromItem(bundle, this.client.player, null))
+        );
 
         final var buttonGrid = Containers.grid(Sizing.content(), Sizing.fixed(85), 3, 5);
         for (int row = 0; row < 3; row++) {
