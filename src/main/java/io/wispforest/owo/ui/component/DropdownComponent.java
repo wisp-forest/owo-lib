@@ -1,7 +1,9 @@
 package io.wispforest.owo.ui.component;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.base.BaseComponent;
+import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.HorizontalFlowLayout;
 import io.wispforest.owo.ui.container.VerticalFlowLayout;
@@ -10,6 +12,7 @@ import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.UISounds;
+import io.wispforest.owo.util.ReflectionUtils;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -24,24 +27,44 @@ import java.util.function.Function;
 public class DropdownComponent extends HorizontalFlowLayout {
 
     protected static final Identifier ICONS_TEXTURE = new Identifier("owo", "textures/gui/dropdown_icons.png");
-    protected final EntryList entries;
-    protected boolean requiresHover = false;
+    protected final VerticalFlowLayout entries;
+    protected boolean closeWhenNotHovered = false;
 
     protected DropdownComponent(Sizing horizontalSizing) {
         super(Sizing.content(), Sizing.content());
 
-        this.entries = new EntryList(horizontalSizing);
+        this.entries = Containers.verticalFlow(horizontalSizing, Sizing.content());
+        this.entries.padding(Insets.of(1));
+        this.entries.allowOverflow(true);
+        this.entries.surface(Surface.flat(0xA7000000).and(Surface.outline(0xA7FFFFFF)));
+
         this.child(this.entries);
+    }
+
+    @Override
+    public ParentComponent surface(Surface surface) {
+        return this.entries.surface(surface);
     }
 
     @Override
     public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
         super.draw(matrices, mouseX, mouseY, partialTicks, delta);
-        if (this.requiresHover && !this.isInBoundingBox(mouseX, mouseY)) {
+        if (this.closeWhenNotHovered && !this.isInBoundingBox(mouseX, mouseY)) {
             this.queue(() -> {
-                this.requiresHover(false);
+                this.closeWhenNotHovered(false);
                 this.parent.removeChild(this);
             });
+        }
+    }
+
+    @Override
+    public void layout(Size space) {
+        super.layout(space);
+
+        var entries = this.entries.children();
+        for (int i = 0; i < entries.size(); i++) {
+            if (!(entries.get(i) instanceof ResizeableComponent sizeable)) continue;
+            sizeable.setWidth(this.entries.width() - this.entries.padding().get().horizontal());
         }
     }
 
@@ -51,24 +74,24 @@ public class DropdownComponent extends HorizontalFlowLayout {
     }
 
     public DropdownComponent text(Text text) {
-        this.entries.child(Components.label(text).color(Color.ofFormatting(Formatting.GRAY)));
+        this.entries.child(Components.label(text).color(Color.ofFormatting(Formatting.GRAY)).margins(Insets.of(2)));
         return this;
     }
 
     public DropdownComponent button(Text text, Consumer<DropdownComponent> onClick) {
-        this.entries.child(new Button(text, onClick));
+        this.entries.child(new Button(this, text, onClick).margins(Insets.of(2)));
         return this;
     }
 
     public DropdownComponent checkbox(Text text, boolean state, Consumer<Boolean> onClick) {
-        this.entries.child(new Checkbox(text, state, onClick));
+        this.entries.child(new Checkbox(this, text, state, onClick).margins(Insets.of(2)));
         return this;
     }
 
     public DropdownComponent nested(Text text, Sizing horizontalSizing, Consumer<DropdownComponent> builder) {
         var nested = new DropdownComponent(horizontalSizing);
         builder.accept(nested);
-        this.entries.child(new NestEntry(text, nested));
+        this.entries.child(new NestEntry(this, text, nested).margins(Insets.of(2)));
         return this;
     }
 
@@ -76,7 +99,7 @@ public class DropdownComponent extends HorizontalFlowLayout {
     public FlowLayout removeChild(Component child) {
         if (child == this.entries) {
             this.queue(() -> {
-                this.requiresHover(false);
+                this.closeWhenNotHovered(false);
                 this.parent.removeChild(this);
             });
         }
@@ -86,28 +109,41 @@ public class DropdownComponent extends HorizontalFlowLayout {
     protected static void drawIconFromTexture(MatrixStack matrices, ParentComponent dropdown, int y, int u, int v) {
         RenderSystem.setShaderTexture(0, ICONS_TEXTURE);
         Drawer.drawTexture(matrices,
-                dropdown.x() + dropdown.width() - dropdown.padding().get().right() - 10,
-                y,
+                dropdown.x() + dropdown.width() - dropdown.padding().get().right() - 10, y,
                 u, v,
                 9, 9,
                 32, 32
         );
     }
 
-    public boolean requiresHover() {
-        return this.requiresHover;
+    @Deprecated(forRemoval = true)
+    public DropdownComponent requiresHover(boolean requiresHover) {
+        Owo.debugWarn(Owo.LOGGER, "Dropdown property 'closeWhenNotHovered' was modified via deprecated method 'requiresHover' by {}", ReflectionUtils.getCallingClassName(2));
+        return this.closeWhenNotHovered(requiresHover);
     }
 
-    public DropdownComponent requiresHover(boolean requiresHover) {
-        this.requiresHover = requiresHover;
+    @Deprecated(forRemoval = true)
+    public boolean requiresHover() {
+        Owo.debugWarn(Owo.LOGGER, "Dropdown property 'closeWhenNotHovered' was queried via deprecated method 'requiresHover' by {}", ReflectionUtils.getCallingClassName(2));
+        return this.closeWhenNotHovered();
+    }
+
+    public DropdownComponent closeWhenNotHovered(boolean closeWhenNotHovered) {
+        this.closeWhenNotHovered = closeWhenNotHovered;
         return this;
+    }
+
+    public boolean closeWhenNotHovered() {
+        return this.closeWhenNotHovered;
     }
 
     @Override
     public void parseProperties(UIModel model, Element element, Map<String, Element> children) {
         super.parseProperties(model, element, children);
         UIParsing.apply(children, "entries", Function.identity(), this::parseAndApplyEntries);
+
         UIParsing.apply(children, "requires-hover", UIParsing::parseBool, this::requiresHover);
+        UIParsing.apply(children, "close-when-not-hovered", UIParsing::parseBool, this::closeWhenNotHovered);
     }
 
     protected void parseAndApplyEntries(Element container) {
@@ -143,38 +179,31 @@ public class DropdownComponent extends HorizontalFlowLayout {
         }
     }
 
-    public static class EntryList extends VerticalFlowLayout {
-
-        protected EntryList(Sizing horizontalSizing) {
-            super(horizontalSizing, Sizing.content());
-            this.padding(Insets.of(2));
-            this.allowOverflow(true);
-        }
-
-        @Override
-        public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
-            Drawer.fill(matrices, this.x, this.y, this.x + this.width, this.y + this.height, 0x77000000);
-            Drawer.drawRectOutline(matrices, this.x, this.y, this.width, this.height, 0x77FFFFFF);
-            super.draw(matrices, mouseX, mouseY, partialTicks, delta);
-        }
+    protected interface ResizeableComponent {
+        void setWidth(int width);
     }
 
-    protected static class Divider extends BaseComponent {
+    protected static class Divider extends BaseComponent implements ResizeableComponent {
 
         public Divider() {
-            this.verticalSizing(Sizing.fixed(1));
-            this.horizontalSizing(Sizing.fixed(1));
+            this.sizing(Sizing.fixed(1));
         }
 
         @Override
         public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+            var margins = this.margins.get();
             Drawer.fill(matrices,
-                    this.x - 1,
-                    this.y + this.height / 2,
-                    this.x + this.parent.width() - this.parent.padding().get().horizontal() + 1,
-                    this.y + this.height / 2 + 1,
-                    0x77FFFFFF
+                    this.x - margins.left(),
+                    this.y - margins.top(),
+                    this.x + this.width + margins.right(),
+                    this.y + this.height + margins.bottom(),
+                    0xA7FFFFFF
             );
+        }
+
+        @Override
+        public void setWidth(int width) {
+            this.width = width;
         }
     }
 
@@ -182,17 +211,16 @@ public class DropdownComponent extends HorizontalFlowLayout {
 
         private final DropdownComponent child;
 
-        protected NestEntry(Text text, DropdownComponent child) {
+        protected NestEntry(DropdownComponent parentDropdown, Text text, DropdownComponent child) {
             super(text);
             this.child = child;
 
             this.mouseEnter().subscribe(() -> {
-                final var dropdown = (DropdownComponent) this.parent.parent();
-                child.margins(Insets.top(this.y - dropdown.y));
+                child.margins(Insets.top(this.y - parentDropdown.y));
 
-                dropdown.queue(() -> {
-                    dropdown.removeChild(child);
-                    dropdown.child(child);
+                parentDropdown.queue(() -> {
+                    parentDropdown.removeChild(child);
+                    parentDropdown.child(child);
                 });
             });
         }
@@ -202,7 +230,7 @@ public class DropdownComponent extends HorizontalFlowLayout {
             super.draw(matrices, mouseX, mouseY, partialTicks, delta);
             drawIconFromTexture(matrices, this.parent, this.y, 0, 16);
 
-            this.child.requiresHover(!PositionedRectangle.of(this.x, this.y, this.parent.width(), this.height).isInBoundingBox(mouseX, mouseY));
+            this.child.closeWhenNotHovered(!PositionedRectangle.of(this.x, this.y, this.parent.width(), this.height).isInBoundingBox(mouseX, mouseY));
         }
 
         @Override
@@ -211,21 +239,29 @@ public class DropdownComponent extends HorizontalFlowLayout {
         }
     }
 
-    protected static class Button extends LabelComponent {
+    protected static class Button extends LabelComponent implements ResizeableComponent {
+
+        protected final DropdownComponent parentDropdown;
         protected Consumer<DropdownComponent> onClick;
 
-        protected Button(Text text, Consumer<DropdownComponent> onClick) {
+        protected Button(DropdownComponent parentDropdown, Text text, Consumer<DropdownComponent> onClick) {
             super(text);
             this.onClick = onClick;
+            this.parentDropdown = parentDropdown;
+
             this.margins(Insets.vertical(1));
             this.cursorStyle(CursorStyle.HAND);
+        }
+
+        public void setWidth(int width) {
+            this.width = width;
         }
 
         @Override
         public boolean onMouseDown(double mouseX, double mouseY, int button) {
             super.onMouseDown(mouseX, mouseY, button);
 
-            this.onClick.accept((DropdownComponent) this.parent.parent());
+            this.onClick.accept(this.parentDropdown);
             this.playInteractionSound();
 
             return true;
@@ -236,9 +272,9 @@ public class DropdownComponent extends HorizontalFlowLayout {
             if (this.isInBoundingBox(mouseX, mouseY)) {
                 var margins = this.margins.get();
                 Drawer.fill(matrices,
-                        this.x - margins.top(),
-                        this.y - 1,
-                        this.x + this.parent.width() - this.parent.padding().get().horizontal() + 1,
+                        this.x - margins.left(),
+                        this.y - margins.top(),
+                        this.x + this.width + margins.right(),
                         this.y + this.height + margins.bottom(),
                         0x44FFFFFF
                 );
@@ -256,8 +292,8 @@ public class DropdownComponent extends HorizontalFlowLayout {
 
         protected boolean state;
 
-        public Checkbox(Text text, boolean state, Consumer<Boolean> onClick) {
-            super(text, dropdownComponent -> {});
+        public Checkbox(DropdownComponent parentDropdown, Text text, boolean state, Consumer<Boolean> onClick) {
+            super(parentDropdown, text, dropdownComponent -> {});
 
             this.state = state;
             this.onClick = dropdownComponent -> {

@@ -13,7 +13,6 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.EditBoxWidget;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -163,34 +162,35 @@ public class ComponentTestScreen extends Screen {
                 .surface(Surface.DARK_PANEL)
         );
 
-//        var dropdown = new DropdownComponent(Sizing.content())
-//                .checkbox(Text.of("more checking"), true)
-//                .text(Text.of("hahayes"))
-//                .button(Text.of("epic button"), dropdownComponent -> {})
-//                .divider()
-//                .text(Text.of("very good"))
-//                .checkbox(Text.of("checking time"), false)
-//                .nested(Text.of("nested entry"), Sizing.content(), nested -> {
-//                    nested.text(Text.of("nest title"))
-//                            .divider()
-//                            .button(Text.of("nest button"), dropdownComponent -> {});
-//                });
-//
-//        var dropdownButton = Components.button(Text.of("Dropdown"), button -> {
-//            if (dropdown.hasParent()) return;
-//            rootComponent.child(dropdown.positioning(Positioning.absolute(button.x(), button.y() + button.height())));
-//        }).margins(Insets.horizontal(8));
-//        dropdown.mouseLeave().subscribe(() -> dropdown.requiresHover(true));
-//
-//        rootComponent.child(dropdownButton);
+        var dropdown = Components.dropdown(Sizing.content())
+                .checkbox(Text.of("more checking"), true, aBoolean -> {})
+                .text(Text.of("hahayes"))
+                .button(Text.of("epic button"), dropdownComponent -> {})
+                .divider()
+                .text(Text.of("very good"))
+                .checkbox(Text.of("checking time"), false, aBoolean -> {})
+                .nested(Text.of("nested entry"), Sizing.content(), nested -> {
+                    nested.text(Text.of("nest title"))
+                            .divider()
+                            .button(Text.of("nest button"), dropdownComponent -> {});
+                });
 
-        var pig = (PlayerEntity) EntityComponent.createRenderablePlayer(new GameProfile(UUID.fromString("09de8a6d-86bf-4c15-bb93-ce3384ce4e96"), "chyzman"));
-        pig.setFireTicks(20);
+        var dropdownButton = Components.button(Text.of("Dropdown"), button -> {
+            if (dropdown.hasParent()) return;
+            rootComponent.child(dropdown.positioning(Positioning.absolute(button.x(), button.y() + button.height())));
+        }).margins(Insets.horizontal(8));
+        dropdown.mouseLeave().subscribe(() -> dropdown.closeWhenNotHovered(true));
+
+        rootComponent.child(dropdownButton);
+
+        // i knew it all along, chyz truly is a pig
+        var pig = EntityComponent.createRenderablePlayer(new GameProfile(UUID.fromString("09de8a6d-86bf-4c15-bb93-ce3384ce4e96"), "chyzman"));
         pig.setOnFire(true);
 
         rootComponent.child(
                 Components.entity(Sizing.fixed(100), pig)
                         .allowMouseRotation(true)
+                        .scaleToFit(true)
                         .showNametag(true)
         );
 
