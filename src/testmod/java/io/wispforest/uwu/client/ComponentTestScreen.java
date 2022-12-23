@@ -13,9 +13,11 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.EditBoxWidget;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
@@ -182,11 +184,14 @@ public class ComponentTestScreen extends Screen {
 //
 //        rootComponent.child(dropdownButton);
 
-        rootComponent.child(Components.entity(
-                        Sizing.fixed(100),
-                        EntityComponent.createRenderablePlayer(new GameProfile(UUID.fromString("09de8a6d-86bf-4c15-bb93-ce3384ce4e96"), "chyzman")))
-                .lookAtCursor(true)
-                .scaleToFit(true)
+        var pig = (PlayerEntity) EntityComponent.createRenderablePlayer(new GameProfile(UUID.fromString("09de8a6d-86bf-4c15-bb93-ce3384ce4e96"), "chyzman"));
+        pig.setFireTicks(20);
+        pig.setOnFire(true);
+
+        rootComponent.child(
+                Components.entity(Sizing.fixed(100), pig)
+                        .allowMouseRotation(true)
+                        .showNametag(true)
         );
 
         rootComponent.child(

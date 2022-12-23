@@ -49,6 +49,8 @@
     "ui.ClickableWidgetAccessor",
     "ui.ClickableWidgetMixin",
     "ui.DrawableHelperMixin",
+    "ui.EntityRenderDispatcherMixin",
+    "ui.EntityRendererMixin",
     "ui.HandledScreenMixin",
     "ui.MinecraftClientMixin",
     "ui.RenderSystemMixin",

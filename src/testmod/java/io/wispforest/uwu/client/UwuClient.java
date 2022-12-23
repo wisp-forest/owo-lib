@@ -110,7 +110,7 @@ public class UwuClient implements ClientModInitializer {
 
                                 instance.alignComponentToWidget(widget -> {
                                     if (!(widget instanceof ButtonWidget button)) return false;
-                                    return button.getMessage().getContent() instanceof TranslatableTextContent translatable && translatable.getKey().equals("menu.reportBugs");
+                                    return button.getMessage().getContent() instanceof TranslatableTextContent translatable && translatable.getKey().equals("gui.stats");
                                 }, Layer.Instance.AnchorSide.RIGHT, 0, layout);
                             })
             );

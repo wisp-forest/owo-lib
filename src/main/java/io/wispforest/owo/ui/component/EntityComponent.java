@@ -8,6 +8,7 @@ import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
+import io.wispforest.owo.util.pond.OwoEntityRenderDispatcherExtension;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -47,6 +48,7 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
     protected boolean lookAtCursor = false;
     protected boolean allowMouseRotation = false;
     protected boolean scaleToFit = false;
+    protected boolean showNametag = false;
     protected Consumer<MatrixStack> transform = matrixStack -> {};
 
     protected EntityComponent(Sizing sizing, E entity) {
@@ -59,6 +61,7 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
         this.sizing(sizing);
     }
 
+    @SuppressWarnings("DataFlowIssue")
     protected EntityComponent(Sizing sizing, EntityType<E> type, @Nullable NbtCompound nbt) {
         final var client = MinecraftClient.getInstance();
         this.dispatcher = client.getEntityRenderDispatcher();
@@ -102,6 +105,10 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
             matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-45 + this.mouseRotation));
         }
 
+        var dispatcher = ((OwoEntityRenderDispatcherExtension) this.dispatcher);
+        dispatcher.owo$setCounterRotate(true);
+        dispatcher.owo$setShowNametag(this.showNametag);
+
         RenderSystem.setShaderLights(new Vector3f(.15f, 1, 0), new Vector3f(.15f, -1, 0));
         this.dispatcher.setRenderShadows(false);
         this.dispatcher.render(this.entity, 0, 0, 0, 0, 0, matrices, this.entityBuffers, LightmapTextureManager.MAX_LIGHT_COORDINATE);
@@ -110,6 +117,9 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
         DiffuseLighting.enableGuiDepthLighting();
 
         matrices.pop();
+
+        dispatcher.owo$setCounterRotate(false);
+        dispatcher.owo$setShowNametag(true);
     }
 
     @Override
@@ -179,6 +189,15 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
 
     public Consumer<MatrixStack> transform() {
         return transform;
+    }
+
+    public EntityComponent<E> showNametag(boolean showNametag) {
+        this.showNametag = showNametag;
+        return this;
+    }
+
+    public boolean showNametag() {
+        return showNametag;
     }
 
     @Override
