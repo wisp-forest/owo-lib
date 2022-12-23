@@ -227,12 +227,12 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
         return new EntityComponent<>(Sizing.content(), entityType, null);
     }
 
-    protected static class RenderablePlayerEntity extends ClientPlayerEntity {
+    public static class RenderablePlayerEntity extends ClientPlayerEntity {
 
         protected Identifier skinTextureId = null;
         protected String model = null;
 
-        public RenderablePlayerEntity(GameProfile profile) {
+        protected RenderablePlayerEntity(GameProfile profile) {
             super(MinecraftClient.getInstance(),
                     MinecraftClient.getInstance().world,
                     new ClientPlayNetworkHandler(MinecraftClient.getInstance(),
@@ -264,7 +264,6 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
         public Identifier getSkinTexture() {
             return this.skinTextureId != null ? this.skinTextureId : super.getSkinTexture();
         }
-
 
         @Override
         public boolean isPartVisible(PlayerModelPart modelPart) {
