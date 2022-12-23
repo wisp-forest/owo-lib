@@ -41,6 +41,7 @@
     "text.TranslationStorageMixin",
     "tweaks.OperatingSystemMixin",
     "tweaks.TextFieldWidgetMixin",
+    "ui.BaseOwoHandledScreenAccessor",
     "ui.BufferBuilderMixin",
     "ui.ButtonWidgetAccessor",
     "ui.ChatScreenMixin",
