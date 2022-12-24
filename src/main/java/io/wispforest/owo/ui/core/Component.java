@@ -290,12 +290,27 @@ public interface Component extends PositionedRectangle {
         return this.parent() != null;
     }
 
+    /**
+     * @return The root component of this component's
+     * tree, or {@code null} if this component is not mounted
+     */
     default ParentComponent root() {
         var root = this.parent();
         if (root == null) return null;
 
         while (root.hasParent()) root = root.parent();
         return root;
+    }
+
+    /**
+     * Remove this component from its parent, if
+     * it is currently mounted
+     */
+    default void remove() {
+        if (!this.hasParent()) return;
+        this.parent().queue(() -> {
+            this.parent().removeChild(this);
+        });
     }
 
     /**
