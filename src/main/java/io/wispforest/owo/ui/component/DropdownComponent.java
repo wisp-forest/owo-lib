@@ -13,14 +13,18 @@ import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.owo.util.ReflectionUtils;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -39,6 +43,46 @@ public class DropdownComponent extends HorizontalFlowLayout {
         this.entries.surface(Surface.flat(0xA7000000).and(Surface.outline(0xA7FFFFFF)));
 
         this.child(this.entries);
+    }
+
+    /**
+     * Open a context menu at the given location in the given screen,
+     * adjusting the position if needed to avoid overflowing screen space
+     *
+     * @param screen        The screen on which to operate
+     * @param rootComponent The root component onto which to mount the dropdown
+     * @param mountFunction The mounting function to use
+     * @param mouseX        The x-coordinate at which to open the dropdown
+     * @param mouseY        The y-coordinate at which to open the dropdown
+     * @param builder       A function to add entries to the dropdown
+     */
+    public static <R extends ParentComponent> DropdownComponent openContextMenu(Screen screen, R rootComponent, BiConsumer<R, DropdownComponent> mountFunction, double mouseX, double mouseY, Consumer<DropdownComponent> builder) {
+        var dropdown = new DropdownComponent(Sizing.content());
+        builder.accept(dropdown);
+
+        mountFunction.accept(rootComponent, dropdown);
+
+        int xLocation = (int) mouseX - rootComponent.x();
+        int yLocation = (int) mouseY - rootComponent.y();
+
+        if (xLocation + dropdown.width() > screen.width) {
+            xLocation -= xLocation + dropdown.width() - screen.width;
+        }
+        if (yLocation + dropdown.height() > screen.height) {
+            yLocation -= yLocation + dropdown.height() - screen.height;
+        }
+
+        dropdown.positioning(Positioning.absolute(xLocation, yLocation));
+
+        var dismounted = new MutableBoolean(false);
+        ScreenMouseEvents.beforeMouseClick(screen).register((screen_, mouseX_, mouseY_, button) -> {
+            if (dismounted.isTrue() || dropdown.isInBoundingBox(mouseX_, mouseY_)) return;
+
+            rootComponent.removeChild(dropdown);
+            dismounted.setTrue();
+        });
+
+        return dropdown;
     }
 
     @Override

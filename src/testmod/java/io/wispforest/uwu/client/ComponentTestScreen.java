@@ -183,6 +183,17 @@ public class ComponentTestScreen extends Screen {
 
         rootComponent.child(dropdownButton);
 
+        rootComponent.mouseDown().subscribe((mouseX, mouseY, button) -> {
+            if (button != GLFW.GLFW_MOUSE_BUTTON_RIGHT) return false;
+            DropdownComponent.openContextMenu(this, rootComponent, FlowLayout::child, mouseX, mouseY, contextMenu -> {
+                contextMenu.text(Text.literal("That's a context menu"));
+                contextMenu.checkbox(Text.literal("Yup"), true, aBoolean -> {});
+                contextMenu.divider();
+                contextMenu.button(Text.literal("Delet"), Component::remove);
+            });
+            return true;
+        });
+
         // i knew it all along, chyz truly is a pig
         var pig = EntityComponent.createRenderablePlayer(new GameProfile(UUID.fromString("09de8a6d-86bf-4c15-bb93-ce3384ce4e96"), "chyzman"));
         pig.setOnFire(true);
