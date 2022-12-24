@@ -150,16 +150,6 @@ public class DropdownComponent extends HorizontalFlowLayout {
         return super.removeChild(child);
     }
 
-    protected static void drawIconFromTexture(MatrixStack matrices, ParentComponent dropdown, int y, int u, int v) {
-        RenderSystem.setShaderTexture(0, ICONS_TEXTURE);
-        Drawer.drawTexture(matrices,
-                dropdown.x() + dropdown.width() - dropdown.padding().get().right() - 10, y,
-                u, v,
-                9, 9,
-                32, 32
-        );
-    }
-
     @Deprecated(forRemoval = true)
     public DropdownComponent requiresHover(boolean requiresHover) {
         Owo.debugWarn(Owo.LOGGER, "Dropdown property 'closeWhenNotHovered' was modified via deprecated method 'requiresHover' by {}", ReflectionUtils.getCallingClassName(2));
@@ -221,6 +211,16 @@ public class DropdownComponent extends HorizontalFlowLayout {
                 }
             }
         }
+    }
+
+    protected static void drawIconFromTexture(MatrixStack matrices, ParentComponent dropdown, int y, int u, int v) {
+        RenderSystem.setShaderTexture(0, ICONS_TEXTURE);
+        Drawer.drawTexture(matrices,
+                dropdown.x() + dropdown.width() - dropdown.padding().get().right() - 10, y,
+                u, v,
+                9, 9,
+                32, 32
+        );
     }
 
     protected interface ResizeableComponent {

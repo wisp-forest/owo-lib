@@ -41,6 +41,7 @@
             <xs:element name="draggable" type="owo-ui-draggable-container"/>
             <xs:element name="flow-layout" type="owo-ui-flow-layout"/>
             <xs:element name="scroll" type="owo-ui-scroll-container"/>
+            <xs:element name="dropdown" type="owo-ui-dropdown-component"/>
             <xs:element name="template">
                 <xs:complexType>
                     <xs:sequence minOccurs="0" maxOccurs="unbounded">
@@ -286,6 +287,38 @@
             <xs:element type="owo-ui-color" name="flat"/>
             <xs:element name="vanilla"/>
             <xs:element name="vanilla-flat"/>
+        </xs:choice>
+    </xs:complexType>
+
+    <xs:complexType name="owo-ui-dropdown-entries">
+        <xs:choice maxOccurs="unbounded">
+            <xs:element name="divider"/>
+            <xs:element type="owo-ui-text" name="text"/>
+            <xs:element name="button">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element type="owo-ui-text" name="text"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="checkbox">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element type="owo-ui-text" name="text"/>
+                        <xs:element type="xs:boolean" name="checked"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="nested">
+                <xs:complexType>
+                    <xs:complexContent>
+                        <xs:extension base="owo-ui-dropdown-entries">
+                            <xs:attribute type="xs:string" name="name"/>
+                            <xs:attribute type="xs:boolean" name="translate"/>
+                        </xs:extension>
+                    </xs:complexContent>
+                </xs:complexType>
+            </xs:element>
         </xs:choice>
     </xs:complexType>
 
@@ -558,6 +591,20 @@
                 <xs:attribute name="region-height" type="xs:integer"/>
                 <xs:attribute name="texture-width" type="xs:integer"/>
                 <xs:attribute name="texture-height" type="xs:integer"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="owo-ui-dropdown-component">
+        <xs:complexContent>
+            <xs:extension base="componentType">
+                <xs:sequence>
+                    <xs:choice maxOccurs="unbounded">
+                        <xs:group ref="parentComponentProps"/>
+                        <xs:element type="xs:boolean" name="close-when-not-hovered" minOccurs="0"/>
+                        <xs:element type="owo-ui-dropdown-entries" name="entries" minOccurs="0"/>
+                    </xs:choice>
+                </xs:sequence>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
