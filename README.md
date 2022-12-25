@@ -45,6 +45,28 @@ dependencies {
     include "io.wispforest:owo-sentinel:${project.owo_version}"
 }
 ```
+
+<details>
+<summary><strong>Kotlin DSL</strong></summary>
+    
+```kotlin
+repositories {
+    maven("https://maven.wispforest.io")
+}
+    
+dependencies {
+    modImplementation("io.wispforest:owo-lib:${properties["owo_version"]}")
+    // only if you plan to use owo-config
+    annotationProcessor("io.wispforest:owo-lib:${properties["owo_version"]}")
+    
+    // include this if you don't want force your users to install owo
+    // sentinel will warn them and give the option to download it automatically
+    include("io.wispforest:owo-sentinel:${properties["owo_version"]}")
+} 
+```
+    
+</details>
+
 You can check the latest version on the [Releases](https://github.com/wisp-forest/owo-lib/releases) page
 
 owo is documented in two main ways:
