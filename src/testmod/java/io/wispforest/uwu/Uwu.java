@@ -1,5 +1,6 @@
 package io.wispforest.uwu;
 
+import blue.endless.jankson.JsonPrimitive;
 import com.google.common.collect.ImmutableList;
 import com.mojang.authlib.GameProfile;
 import io.wispforest.owo.itemgroup.Icon;
@@ -13,6 +14,7 @@ import io.wispforest.owo.particles.systems.ParticleSystem;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
 import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
 import io.wispforest.owo.text.CustomTextRegistry;
+import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.util.RegistryAccess;
 import io.wispforest.owo.util.TagInjector;
 import io.wispforest.uwu.config.BruhConfig;
@@ -130,7 +132,9 @@ public class Uwu implements ModInitializer {
     });
 
     public static final UwuConfig CONFIG = UwuConfig.createAndLoad();
-    public static final BruhConfig BRUHHHHH = BruhConfig.createAndLoad();
+    public static final BruhConfig BRUHHHHH = BruhConfig.createAndLoad(builder -> {
+        builder.registerSerializer(Color.class, (color, marshaller) -> new JsonPrimitive("bruv"));
+    });
 
     @Override
     public void onInitialize() {

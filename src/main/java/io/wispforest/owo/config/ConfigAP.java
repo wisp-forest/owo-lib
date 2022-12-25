@@ -26,6 +26,7 @@ public class ConfigAP extends AbstractProcessor {
     private static final String WRAPPER_TEMPLATE = """
             package {package};
 
+            import blue.endless.jankson.Jankson;
             import io.wispforest.owo.config.ConfigWrapper;
             import io.wispforest.owo.config.Option;
             import io.wispforest.owo.util.Observable;
@@ -42,8 +43,18 @@ public class ConfigAP extends AbstractProcessor {
                     super({config_class_name}.class);
                 }
 
+                private {wrapper_class_name}(Consumer<Jankson.Builder> janksonBuilder) {
+                    super({config_class_name}.class, janksonBuilder);
+                }
+
                 public static {wrapper_class_name} createAndLoad() {
                     var wrapper = new {wrapper_class_name}();
+                    wrapper.load();
+                    return wrapper;
+                }
+
+                public static {wrapper_class_name} createAndLoad(Consumer<Jankson.Builder> janksonBuilder) {
+                    var wrapper = new {wrapper_class_name}(janksonBuilder);
                     wrapper.load();
                     return wrapper;
                 }
