@@ -48,7 +48,17 @@ public class OptionComponents {
         return new OptionComponentFactory.Result(optionComponent, valueBox);
     }
 
+    /**
+     * @deprecated Use {@link #createSlider} instead
+     */
+    @Deprecated(forRemoval = true)
     public static OptionComponentFactory.Result createSlider(UIModel model, Option<? extends Number> option, boolean withDecimals) {
+        return createSlider(model, option, withDecimals ? 2 : 0);
+    }
+
+    public static OptionComponentFactory.Result createSlider(UIModel model, Option<? extends Number> option, int decimalPlaces) {
+        boolean withDecimals = decimalPlaces > 0;
+
         var value = option.value();
         var optionComponent = model.expandTemplate(FlowLayout.class,
                 "range-config-option",
@@ -59,7 +69,7 @@ public class OptionComponents {
         double min = constraint.min(), max = constraint.max();
 
         var valueSlider = optionComponent.childById(ConfigSlider.class, "value-slider");
-        valueSlider.min(min).max(max).decimalPlaces(withDecimals ? 2 : 0).snap(!withDecimals).setFromDiscreteValue(value.doubleValue());
+        valueSlider.min(min).max(max).decimalPlaces(decimalPlaces).snap(!withDecimals).setFromDiscreteValue(value.doubleValue());
         valueSlider.valueType(option.clazz());
 
         var resetButton = optionComponent.childById(ButtonComponent.class, "reset-button");

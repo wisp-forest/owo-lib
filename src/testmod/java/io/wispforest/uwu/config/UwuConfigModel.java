@@ -27,6 +27,7 @@ public class UwuConfigModel {
     @PredicateConstraint("predicateFunction")
     public List<String> someOption = new ArrayList<>(List.of("1", "2", "3", "4", "5"));
 
+    @RangeConstraint(min = 0, max = 10, decimalPlaces = 1)
     public float floting = 6.9f;
 
     public String thisIsAStringValue = "\\bruh?";

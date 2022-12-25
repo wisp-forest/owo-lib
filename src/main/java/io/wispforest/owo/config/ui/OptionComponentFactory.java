@@ -23,10 +23,14 @@ public interface OptionComponentFactory<T> {
 
     OptionComponentFactory<? extends Number> NUMBER = (model, option) -> {
         var field = option.backingField().field();
-        var floatingPoint = NumberReflection.isFloatingPointType(field.getType());
 
         if (field.isAnnotationPresent(RangeConstraint.class)) {
-            return OptionComponents.createSlider(model, option, floatingPoint);
+            return OptionComponents.createSlider(
+                    model, option,
+                    NumberReflection.isFloatingPointType(field.getType())
+                            ? field.getAnnotation(RangeConstraint.class).decimalPlaces()
+                            : 0
+            );
         } else {
             return OptionComponents.createTextBox(model, option, configTextBox -> {
                 configTextBox.configureForNumber(option.clazz());
