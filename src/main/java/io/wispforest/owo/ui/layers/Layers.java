@@ -35,7 +35,7 @@ public final class Layers {
      * The event phase during which owo-ui layer instances are created and
      * initialized. This runs after the default phase
      */
-    public static Identifier INIT_PHASE = new Identifier("owo", "init-layers");
+    public static final Identifier INIT_PHASE = new Identifier("owo", "init-layers");
 
     private static final Multimap<Class<? extends Screen>, Layer<?, ?>> LAYERS = HashMultimap.create();
 

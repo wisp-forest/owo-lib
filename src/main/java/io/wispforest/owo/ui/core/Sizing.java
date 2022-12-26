@@ -81,7 +81,7 @@ public class Sizing implements Animatable<Sizing> {
     }
 
     public enum Method {
-        FIXED, CONTENT, FILL;
+        FIXED, CONTENT, FILL
     }
 
     public static Sizing parse(Element sizingElement) {

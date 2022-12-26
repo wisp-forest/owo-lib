@@ -20,10 +20,10 @@ import java.util.function.Consumer;
  */
 public abstract class BaseParentComponent extends BaseComponent implements ParentComponent {
 
-    protected Observable<VerticalAlignment> verticalAlignment = Observable.of(VerticalAlignment.TOP);
-    protected Observable<HorizontalAlignment> horizontalAlignment = Observable.of(HorizontalAlignment.LEFT);
+    protected final Observable<VerticalAlignment> verticalAlignment = Observable.of(VerticalAlignment.TOP);
+    protected final Observable<HorizontalAlignment> horizontalAlignment = Observable.of(HorizontalAlignment.LEFT);
 
-    protected AnimatableProperty<Insets> padding = AnimatableProperty.of(Insets.none());
+    protected final AnimatableProperty<Insets> padding = AnimatableProperty.of(Insets.none());
 
     protected @Nullable FocusHandler focusHandler = null;
     protected @Nullable ArrayList<Runnable> taskQueue = null;

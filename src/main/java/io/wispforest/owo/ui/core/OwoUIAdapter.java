@@ -122,6 +122,7 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
      */
     public void dispose() {
         this.cursorAdapter.dispose();
+        this.disposed = true;
     }
 
     /**

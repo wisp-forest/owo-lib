@@ -21,8 +21,8 @@ public class BoxComponent extends BaseComponent {
     protected boolean fill = false;
     protected GradientDirection direction = GradientDirection.TOP_TO_BOTTOM;
 
-    protected AnimatableProperty<Color> startColor = AnimatableProperty.of(Color.BLACK);
-    protected AnimatableProperty<Color> endColor = AnimatableProperty.of(Color.BLACK);
+    protected final AnimatableProperty<Color> startColor = AnimatableProperty.of(Color.BLACK);
+    protected final AnimatableProperty<Color> endColor = AnimatableProperty.of(Color.BLACK);
 
     public BoxComponent(Sizing horizontalSizing, Sizing verticalSizing) {
         this.sizing(horizontalSizing, verticalSizing);

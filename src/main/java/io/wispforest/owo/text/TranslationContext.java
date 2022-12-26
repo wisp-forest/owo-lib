@@ -30,7 +30,7 @@ public class TranslationContext {
     public static TranslatableTextContent getCurrent() {
         var stack = translationStack.get();
 
-        if (stack.size() <= 0)
+        if (stack.size() == 0)
             return null;
         else
             return stack.get(stack.size() - 1);

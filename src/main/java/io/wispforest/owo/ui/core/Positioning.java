@@ -80,7 +80,7 @@ public class Positioning implements Animatable<Positioning> {
     }
 
     public enum Type {
-        RELATIVE, ABSOLUTE, LAYOUT;
+        RELATIVE, ABSOLUTE, LAYOUT
     }
 
     public static Positioning parse(Element positioningElement) {

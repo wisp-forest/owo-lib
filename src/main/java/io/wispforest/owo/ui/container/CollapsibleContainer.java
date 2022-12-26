@@ -32,8 +32,8 @@ public class CollapsibleContainer extends VerticalFlowLayout {
 
     protected final EventStream<OnToggled> toggledEvents = OnToggled.newStream();
 
-    protected List<Component> collapsibleChildren = new ArrayList<>();
-    protected List<Component> collapsibleChildrenView = Collections.unmodifiableList(this.collapsibleChildren);
+    protected final List<Component> collapsibleChildren = new ArrayList<>();
+    protected final List<Component> collapsibleChildrenView = Collections.unmodifiableList(this.collapsibleChildren);
     protected boolean expanded;
 
     protected final SpinnyBoiComponent spinnyBoi;

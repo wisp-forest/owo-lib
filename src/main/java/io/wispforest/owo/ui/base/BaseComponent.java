@@ -26,11 +26,11 @@ public abstract class BaseComponent implements Component {
 
     protected int batchedEvents = 0;
 
-    protected AnimatableProperty<Insets> margins = AnimatableProperty.of(Insets.none());
+    protected final AnimatableProperty<Insets> margins = AnimatableProperty.of(Insets.none());
 
-    protected AnimatableProperty<Positioning> positioning = AnimatableProperty.of(Positioning.layout());
-    protected AnimatableProperty<Sizing> horizontalSizing = AnimatableProperty.of(Sizing.content());
-    protected AnimatableProperty<Sizing> verticalSizing = AnimatableProperty.of(Sizing.content());
+    protected final AnimatableProperty<Positioning> positioning = AnimatableProperty.of(Positioning.layout());
+    protected final AnimatableProperty<Sizing> horizontalSizing = AnimatableProperty.of(Sizing.content());
+    protected final AnimatableProperty<Sizing> verticalSizing = AnimatableProperty.of(Sizing.content());
 
     protected final EventStream<MouseDown> mouseDownEvents = MouseDown.newStream();
     protected final EventStream<MouseUp> mouseUpEvents = MouseUp.newStream();

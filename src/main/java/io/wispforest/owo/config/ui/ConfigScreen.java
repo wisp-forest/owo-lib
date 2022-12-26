@@ -62,7 +62,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
     private static final Map<Predicate<Option<?>>, OptionComponentFactory<?>> DEFAULT_FACTORIES = new HashMap<>();
     /**
      * A set of extra option factories - add to this if you want to override
-     * some of the default factories or add extra ones for specific config options
+     * some default factories or add extra ones for specific config options
      * the standard ones don't support
      */
     protected final Map<Predicate<Option<?>>, OptionComponentFactory<?>> extraFactories = new HashMap<>();
