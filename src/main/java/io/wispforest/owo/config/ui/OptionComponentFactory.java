@@ -3,7 +3,7 @@ package io.wispforest.owo.config.ui;
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.config.annotation.RangeConstraint;
 import io.wispforest.owo.config.ui.component.ListOptionContainer;
-import io.wispforest.owo.config.ui.component.OptionComponent;
+import io.wispforest.owo.config.ui.component.OptionValueProvider;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.util.NumberReflection;
@@ -12,7 +12,7 @@ import net.minecraft.util.Identifier;
 import java.util.List;
 
 /**
- * A function which creates an instance of {@link OptionComponent}
+ * A function which creates an instance of {@link OptionValueProvider}
  * fitting for the given config option. Whatever component is created
  * should accurately reflect if the option is currently detached
  * and thus immutable - ideally it is non-interactable
@@ -25,7 +25,7 @@ public interface OptionComponentFactory<T> {
         var field = option.backingField().field();
 
         if (field.isAnnotationPresent(RangeConstraint.class)) {
-            return OptionComponents.createSlider(
+            return OptionComponents.createRangeControls(
                     model, option,
                     NumberReflection.isFloatingPointType(field.getType())
                             ? field.getAnnotation(RangeConstraint.class).decimalPlaces()
@@ -76,5 +76,5 @@ public interface OptionComponentFactory<T> {
      */
     Result make(UIModel model, Option<T> option);
 
-    record Result(Component baseComponent, OptionComponent optionContainer) {}
+    record Result(Component baseComponent, OptionValueProvider optionProvider) {}
 }

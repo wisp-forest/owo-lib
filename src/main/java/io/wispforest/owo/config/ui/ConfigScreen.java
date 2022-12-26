@@ -69,7 +69,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
 
     protected final Screen parent;
     protected final ConfigWrapper<?> config;
-    @SuppressWarnings("rawtypes") protected final Map<Option, OptionComponent> options = new HashMap<>();
+    @SuppressWarnings("rawtypes") protected final Map<Option, OptionValueProvider> options = new HashMap<>();
 
     protected String lastSearchFieldText = "";
     protected @Nullable SearchMatches currentMatches = null;
@@ -252,7 +252,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
             }
 
             var result = factory.make(this.model, option);
-            this.options.put(option, result.optionContainer());
+            this.options.put(option, result.optionProvider());
 
             var expanded = !parentKey.isRoot() && this.config.fieldForKey(parentKey).isAnnotationPresent(Expanded.class);
             var container = containers.getOrDefault(
@@ -355,8 +355,8 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                 if (buttonPanel.horizontalSizing().animation() == null) {
                     int percentage = Math.min(Math.round(((widestText.intValue() + 25f) / panelContainer.width()) * 100), 50);
 
-                    buttonPanel.horizontalSizing().animate(650, Easing.CUBIC, Sizing.fill(percentage));
-                    panelContainer.horizontalSizing().animate(650, Easing.CUBIC, Sizing.fill(100 - percentage));
+                    buttonPanel.horizontalSizing().animate(350, Easing.CUBIC, Sizing.fill(percentage));
+                    panelContainer.horizontalSizing().animate(350, Easing.CUBIC, Sizing.fill(100 - percentage));
                 }
 
                 buttonPanel.horizontalSizing().animation().reverse();

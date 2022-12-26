@@ -14,7 +14,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.Locale;
 
 @ApiStatus.Internal
-public class ConfigEnumButton extends ButtonComponent implements OptionComponent {
+public class ConfigEnumButton extends ButtonComponent implements OptionValueProvider {
 
     @Nullable protected Option<? extends Enum<?>> backingOption = null;
     @Nullable protected Enum<?>[] backingValues = null;

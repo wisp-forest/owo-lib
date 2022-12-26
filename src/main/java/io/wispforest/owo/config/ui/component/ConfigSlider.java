@@ -6,7 +6,7 @@ import io.wispforest.owo.util.NumberReflection;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
-public class ConfigSlider extends DiscreteSliderComponent implements OptionComponent {
+public class ConfigSlider extends DiscreteSliderComponent implements OptionValueProvider {
 
     protected Class<? extends Number> valueType;
 

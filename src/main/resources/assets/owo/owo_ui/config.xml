@@ -149,48 +149,6 @@
     </components>
 
     <templates>
-        <config-option>
-            <flow-layout direction="horizontal">
-                <children>
-                    <label id="option-name">
-                        <text translate="true">{{config-option-name}}</text>
-                        <positioning type="relative">0,50</positioning>
-                        <shadow>true</shadow>
-                    </label>
-
-                    <flow-layout direction="horizontal">
-                        <children>
-                            <template-child id="value-container">
-                                <sizing>
-                                    <horizontal method="fixed">120</horizontal>
-                                </sizing>
-                            </template-child>
-
-                            <button id="reset-button">
-                                <text>⇄</text>
-                                <margins>
-                                    <horizontal>5</horizontal>
-                                </margins>
-                            </button>
-                        </children>
-
-                        <positioning type="relative">100,50</positioning>
-                        <vertical-alignment>center</vertical-alignment>
-                    </flow-layout>
-                </children>
-
-                <sizing>
-                    <horizontal method="fill">100</horizontal>
-                    <vertical method="fixed">32</vertical>
-                </sizing>
-
-                <padding>
-                    <all>5</all>
-                </padding>
-
-            </flow-layout>
-        </config-option>
-
         <section-header>
             <flow-layout direction="horizontal">
                 <children>
@@ -265,6 +223,55 @@
             </flow-layout>
         </section-buttons>
 
+        <config-option-base>
+            <flow-layout direction="horizontal">
+                <children>
+                    <label id="option-name">
+                        <text translate="true">{{config-option-name}}</text>
+                        <positioning type="relative">0,50</positioning>
+                        <shadow>true</shadow>
+                    </label>
+
+                    <template-child id="controls">
+                        <positioning type="relative">100,50</positioning>
+                        <vertical-alignment>center</vertical-alignment>
+                    </template-child>
+                </children>
+
+                <sizing>
+                    <horizontal method="fill">100</horizontal>
+                    <vertical method="fixed">32</vertical>
+                </sizing>
+
+                <padding>
+                    <all>5</all>
+                </padding>
+            </flow-layout>
+        </config-option-base>
+
+        <config-option>
+            <template name="config-option-base">
+                <child id="controls">
+                    <flow-layout direction="horizontal" id="controls-flow">
+                        <children>
+                            <template-child id="value-container">
+                                <sizing>
+                                    <horizontal method="fixed">120</horizontal>
+                                </sizing>
+                            </template-child>
+
+                            <button id="reset-button">
+                                <text>⇄</text>
+                                <margins>
+                                    <horizontal>5</horizontal>
+                                </margins>
+                            </button>
+                        </children>
+                    </flow-layout>
+                </child>
+            </template>
+        </config-option>
+
         <text-box-config-option>
             <template name="config-option">
                 <child id="value-container">
@@ -292,17 +299,51 @@
         </enum-config-option>
 
         <range-config-option>
-            <template name="config-option">
-                <child id="value-container">
-                    <config-slider id="value-slider">
-                        <margins>
-                            <all>1</all>
-                        </margins>
-                    </config-slider>
+            <template name="config-option-base">
+                <child id="controls">
+                    <flow-layout direction="horizontal" id="controls-flow">
+                        <children>
+                            <button id="toggle-button">
+                                <text>✎</text>
+                                <tooltip-text translate="true">text.owo.config.button.range.edit_as_text</tooltip-text>
+
+                                <renderer>
+                                    <flat color="#00000000" hovered-color="#77000000" disabled-color="#00000000"/>
+                                </renderer>
+
+                                <sizing>
+                                    <vertical method="fixed">16</vertical>
+                                </sizing>
+                            </button>
+
+                            <flow-layout direction="horizontal" id="slider-controls">
+                                <children>
+                                    <config-slider id="value-slider">
+                                        <margins>
+                                            <all>1</all>
+                                        </margins>
+                                        <sizing>
+                                            <horizontal method="fixed">120</horizontal>
+                                        </sizing>
+                                    </config-slider>
+
+                                    <button id="reset-button">
+                                        <text>⇄</text>
+                                        <margins>
+                                            <horizontal>5</horizontal>
+                                        </margins>
+                                    </button>
+                                </children>
+
+                                <vertical-alignment>center</vertical-alignment>
+                            </flow-layout>
+                        </children>
+
+                        <gap>2</gap>
+                    </flow-layout>
                 </child>
             </template>
         </range-config-option>
     </templates>
-
 </owo-ui>
 

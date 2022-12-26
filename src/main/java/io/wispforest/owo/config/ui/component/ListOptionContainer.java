@@ -25,7 +25,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @ApiStatus.Internal
-public class ListOptionContainer<T> extends CollapsibleContainer implements OptionComponent {
+public class ListOptionContainer<T> extends CollapsibleContainer implements OptionValueProvider {
 
     protected final Option<List<T>> backingOption;
     protected final List<T> backingList;

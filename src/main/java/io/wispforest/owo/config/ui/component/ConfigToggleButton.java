@@ -6,7 +6,7 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
-public class ConfigToggleButton extends ButtonComponent implements OptionComponent {
+public class ConfigToggleButton extends ButtonComponent implements OptionValueProvider {
 
     protected static final Text ENABLED_MESSAGE = Text.translatable("text.owo.config.boolean_toggle.enabled");
     protected static final Text DISABLED_MESSAGE = Text.translatable("text.owo.config.boolean_toggle.disabled");

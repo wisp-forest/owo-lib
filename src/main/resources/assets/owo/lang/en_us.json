@@ -10,6 +10,8 @@
   "text.owo.config.must_restart": "Some changes you made require a restart to apply",
   "text.owo.config.button.exit_minecraft": "Exit Minecraft",
   "text.owo.config.button.ignore_restart": "Restart later",
+  "text.owo.config.button.range.edit_as_text": "Edit as text",
+  "text.owo.config.button.range.edit_with_slider": "Edit with slider",
   "text.owo.config.applies_after_restart": [
     {
       "text": "⏻ ",

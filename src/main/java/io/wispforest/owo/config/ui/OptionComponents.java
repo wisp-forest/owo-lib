@@ -6,7 +6,11 @@ import io.wispforest.owo.config.ui.component.*;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.core.ParentComponent;
+import io.wispforest.owo.ui.core.Positioning;
 import io.wispforest.owo.ui.parsing.UIModel;
+import net.minecraft.text.Text;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 
 import java.util.Map;
 import java.util.function.Consumer;
@@ -49,15 +53,19 @@ public class OptionComponents {
     }
 
     /**
-     * @deprecated Use {@link #createSlider} instead
+     * @deprecated Use {@link #createRangeControls} instead
      */
     @Deprecated(forRemoval = true)
     public static OptionComponentFactory.Result createSlider(UIModel model, Option<? extends Number> option, boolean withDecimals) {
-        return createSlider(model, option, withDecimals ? 2 : 0);
+        return createRangeControls(model, option, withDecimals ? 2 : 0);
     }
 
-    public static OptionComponentFactory.Result createSlider(UIModel model, Option<? extends Number> option, int decimalPlaces) {
+    public static OptionComponentFactory.Result createRangeControls(UIModel model, Option<? extends Number> option, int decimalPlaces) {
         boolean withDecimals = decimalPlaces > 0;
+
+        // ------------
+        // Slider setup
+        // ------------
 
         var value = option.value();
         var optionComponent = model.expandTemplate(FlowLayout.class,
@@ -68,35 +76,94 @@ public class OptionComponents {
         var constraint = option.backingField().field().getAnnotation(RangeConstraint.class);
         double min = constraint.min(), max = constraint.max();
 
-        var valueSlider = optionComponent.childById(ConfigSlider.class, "value-slider");
-        valueSlider.min(min).max(max).decimalPlaces(decimalPlaces).snap(!withDecimals).setFromDiscreteValue(value.doubleValue());
-        valueSlider.valueType(option.clazz());
+        var sliderInput = optionComponent.childById(ConfigSlider.class, "value-slider");
+        sliderInput.min(min).max(max).decimalPlaces(decimalPlaces).snap(!withDecimals).setFromDiscreteValue(value.doubleValue());
+        sliderInput.valueType(option.clazz());
 
         var resetButton = optionComponent.childById(ButtonComponent.class, "reset-button");
 
         if (option.detached()) {
             resetButton.active = false;
-            valueSlider.active = false;
+            sliderInput.active = false;
         } else {
             resetButton.active = (withDecimals ? value.doubleValue() : Math.round(value.doubleValue())) != option.defaultValue().doubleValue();
             resetButton.onPress(button -> {
-                valueSlider.setFromDiscreteValue(option.defaultValue().doubleValue());
+                sliderInput.setFromDiscreteValue(option.defaultValue().doubleValue());
                 button.active = false;
             });
 
-            valueSlider.onChanged().subscribe(newValue -> {
+            sliderInput.onChanged().subscribe(newValue -> {
                 resetButton.active = (withDecimals ? newValue : Math.round(newValue)) != option.defaultValue().doubleValue();
             });
         }
+
+        // ------------------------------------
+        // Component handles and text box setup
+        // ------------------------------------
+
+        var sliderControls = optionComponent.childById(FlowLayout.class, "slider-controls");
+        var textControls = ((ParentComponent) createTextBox(model, option, configTextBox -> {
+            configTextBox.configureForNumber(option.clazz());
+
+            var predicate = configTextBox.applyPredicate();
+            configTextBox.applyPredicate(predicate.and(s -> {
+                final var parsed = Double.parseDouble(s);
+                return parsed >= min && parsed <= max;
+            }));
+        }).baseComponent()).childById(FlowLayout.class, "controls-flow").positioning(Positioning.layout());
+        var textInput = textControls.childById(ConfigTextBox.class, "value-box");
+
+        // ------------
+        // Toggle setup
+        // ------------
+
+        var controlsLayout = optionComponent.childById(FlowLayout.class, "controls-flow");
+        var toggleButton = optionComponent.childById(ButtonComponent.class, "toggle-button");
+
+        var textMode = new MutableBoolean(false);
+        toggleButton.onPress(button -> {
+            textMode.setValue(textMode.isFalse());
+
+            if (textMode.isTrue()) {
+                sliderControls.remove();
+                textInput.text(String.valueOf(sliderInput.discreteValue()));
+
+                controlsLayout.child(textControls);
+            } else {
+                textControls.remove();
+                sliderInput.setFromDiscreteValue(((Number) textInput.parsedValue()).doubleValue());
+
+                controlsLayout.child(sliderControls);
+            }
+
+            button.tooltip(textMode.isTrue()
+                    ? Text.translatable("text.owo.config.button.range.edit_with_slider")
+                    : Text.translatable("text.owo.config.button.range.edit_as_text")
+            );
+        });
 
         optionComponent.child(new SearchAnchorComponent(
                 optionComponent,
                 option.key(),
                 () -> optionComponent.childById(LabelComponent.class, "option-name").text().getString(),
-                () -> valueSlider.getMessage().getString()
+                () -> textMode.isTrue() ? textInput.getText() : sliderInput.getMessage().getString()
         ));
 
-        return new OptionComponentFactory.Result(optionComponent, valueSlider);
+        return new OptionComponentFactory.Result(optionComponent, new OptionValueProvider() {
+            @Override
+            public boolean isValid() {
+                return textMode.isTrue()
+                        ? textInput.isValid()
+                        : sliderInput.isValid();
+            }
+
+            @Override
+            public Object parsedValue() {
+                return textMode.isTrue()
+                        ? textInput.parsedValue()
+                        : sliderInput.parsedValue();
+            }
+        });
     }
 
     public static OptionComponentFactory.Result createToggleButton(UIModel model, Option<Boolean> option) {
