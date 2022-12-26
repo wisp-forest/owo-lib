@@ -13,6 +13,7 @@ import io.wispforest.owo.ui.base.BaseUIModelScreen;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
+import io.wispforest.owo.ui.component.TextBoxComponent;
 import io.wispforest.owo.ui.container.*;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIParsing;
@@ -22,7 +23,6 @@ import io.wispforest.owo.util.NumberReflection;
 import io.wispforest.owo.util.ReflectionUtils;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.OrderedText;
@@ -162,16 +162,16 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
         var containers = new HashMap<Option.Key, VerticalFlowLayout>();
         containers.put(Option.Key.ROOT, optionPanel);
 
-        rootComponent.childById(TextFieldWidget.class, "search-field").<TextFieldWidget>configure(searchField -> {
+        rootComponent.childById(TextBoxComponent.class, "search-field").<TextBoxComponent>configure(searchField -> {
             var matchIndicator = rootComponent.childById(LabelComponent.class, "search-match-indicator");
             var optionScroll = rootComponent.childById(ScrollContainer.class, "option-panel-scroll");
 
             var searchHint = I18n.translate("text.owo.config.search");
             searchField.setSuggestion(searchHint);
-            searchField.setChangedListener(s -> {
+            searchField.onChanged().subscribe(s -> {
                 searchField.setSuggestion(s.isEmpty() ? searchHint : "");
                 if (!s.equals(this.lastSearchFieldText)) {
-                    searchField.setEditableColor(TextFieldWidget.DEFAULT_EDITABLE_COLOR);
+                    searchField.setEditableColor(TextBoxComponent.DEFAULT_EDITABLE_COLOR);
                     matchIndicator.text(Text.empty());
                 }
             });
