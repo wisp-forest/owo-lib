@@ -140,6 +140,8 @@ public abstract class FlowLayout extends BaseParentComponent {
     public void parseProperties(UIModel model, Element element, Map<String, Element> children) {
         super.parseProperties(model, element, children);
 
+        UIParsing.apply(children, "gap", UIParsing::parseSignedInt, this::gap);
+
         final var components = UIParsing
                 .get(children, "children", e -> UIParsing.<Element>allChildrenOfType(e, Node.ELEMENT_NODE))
                 .orElse(Collections.emptyList());

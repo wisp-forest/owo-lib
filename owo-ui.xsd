@@ -614,7 +614,10 @@
             <xs:extension base="componentType">
                 <xs:sequence>
                     <xs:element type="componentList" name="children"/>
-                    <xs:group ref="parentComponentProps" maxOccurs="unbounded"/>
+                    <xs:choice maxOccurs="unbounded">
+                        <xs:element type="xs:integer" name="gap" minOccurs="0"/>
+                        <xs:group ref="parentComponentProps" maxOccurs="unbounded"/>
+                    </xs:choice>
                 </xs:sequence>
                 <xs:attribute name="direction" type="owo-ui-axis-direction" use="required"/>
             </xs:extension>
