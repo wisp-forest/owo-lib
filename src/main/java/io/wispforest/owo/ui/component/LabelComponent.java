@@ -5,6 +5,7 @@ import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.Drawer;
+import io.wispforest.owo.util.pond.OwoTextRendererExtension;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.util.math.MatrixStack;
@@ -134,35 +135,41 @@ public class LabelComponent extends BaseComponent {
 
     @Override
     public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
-        int x = this.x;
-        int y = this.y;
+        try {
+            int x = this.x;
+            int y = this.y;
 
-        if (this.horizontalSizing.get().isContent()) {
-            x += this.horizontalSizing.get().value;
-        }
-        if (this.verticalSizing.get().isContent()) {
-            y += this.verticalSizing.get().value;
-        }
-
-        switch (this.verticalTextAlignment) {
-            case CENTER -> y += (this.height - ((this.wrappedText.size() * (this.textRenderer.fontHeight + 2)) - 2)) / 2;
-            case BOTTOM -> y += this.height - ((this.wrappedText.size() * (this.textRenderer.fontHeight + 2)) - 2);
-        }
-
-        for (int i = 0; i < this.wrappedText.size(); i++) {
-            var renderText = this.wrappedText.get(i);
-            int renderX = x;
-
-            switch (this.horizontalTextAlignment) {
-                case CENTER -> renderX += (this.width - this.textRenderer.getWidth(renderText)) / 2;
-                case RIGHT -> renderX += this.width - this.textRenderer.getWidth(renderText);
+            if (this.horizontalSizing.get().isContent()) {
+                x += this.horizontalSizing.get().value;
+            }
+            if (this.verticalSizing.get().isContent()) {
+                y += this.verticalSizing.get().value;
             }
 
-            if (this.shadow) {
-                this.textRenderer.drawWithShadow(matrices, renderText, renderX, y + i * 11, this.color.get().argb());
-            } else {
-                this.textRenderer.draw(matrices, renderText, renderX, y + i * 11, this.color.get().argb());
+            switch (this.verticalTextAlignment) {
+                case CENTER -> y += (this.height - ((this.wrappedText.size() * (this.textRenderer.fontHeight + 2)) - 2)) / 2;
+                case BOTTOM -> y += this.height - ((this.wrappedText.size() * (this.textRenderer.fontHeight + 2)) - 2);
             }
+
+            ((OwoTextRendererExtension) this.textRenderer).owo$beginCache();
+
+            for (int i = 0; i < this.wrappedText.size(); i++) {
+                var renderText = this.wrappedText.get(i);
+                int renderX = x;
+
+                switch (this.horizontalTextAlignment) {
+                    case CENTER -> renderX += (this.width - this.textRenderer.getWidth(renderText)) / 2;
+                    case RIGHT -> renderX += this.width - this.textRenderer.getWidth(renderText);
+                }
+
+                if (this.shadow) {
+                    this.textRenderer.drawWithShadow(matrices, renderText, renderX, y + i * 11, this.color.get().argb());
+                } else {
+                    this.textRenderer.draw(matrices, renderText, renderX, y + i * 11, this.color.get().argb());
+                }
+            }
+        } finally {
+            ((OwoTextRendererExtension) this.textRenderer).owo$submitCache();
         }
     }
 
