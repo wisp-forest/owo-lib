@@ -53,13 +53,9 @@ public class OwoSentinel {
     public static List<String> listOwoDependents() {
         var list = new ArrayList<String>();
 
-        if (FabricLoader.getInstance().isModLoaded("quilt_loader")) {
-            return List.of("At least one of them. Quilt currently does not", "allow us to collect more info.", "We're sorry");
-        }
-
         for (var mod : FabricLoader.getInstance().getAllMods()) {
             for (var dependency : mod.getMetadata().getDependencies()) {
-                if (!dependency.getModId().equals("owo")) continue;
+                if (!dependency.getModId().equals("owo") && !dependency.getModId().equals("owo-lib")) continue;
                 list.add(mod.getMetadata().getName());
             }
         }
