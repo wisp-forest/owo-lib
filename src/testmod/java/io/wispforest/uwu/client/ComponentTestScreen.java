@@ -219,6 +219,17 @@ public class ComponentTestScreen extends Screen {
                                 Color.ofArgb(0x99000000),
                                 Color.ofArgb(0x99000000)
                         );
+
+                        var time = (System.currentTimeMillis() / 1000d) % (Math.PI * 2);
+                        Drawer.drawLine(
+                                matrices,
+                                (int) (this.x + this.width / 2 + Math.cos(time) * this.width / 2),
+                                (int) (this.y + this.height / 2 + Math.sin(time) * this.height / 2),
+                                (int) (this.x + this.width / 2 + Math.sin(time) * this.width / 2),
+                                (int) (this.y + this.height / 2 + Math.cos(time) * this.height / 2),
+                                1,
+                                Color.BLUE
+                        );
                     }
                 }.positioning(Positioning.relative(50, 50)).sizing(Sizing.fixed(350))
         );

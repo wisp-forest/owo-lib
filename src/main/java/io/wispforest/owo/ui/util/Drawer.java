@@ -22,6 +22,7 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector2d;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -113,23 +114,44 @@ public class Drawer extends DrawableHelper {
         drawText(matrices, text, x, y, scale, color, TextAnchor.TOP_LEFT);
     }
 
-    public static void drawCircle(MatrixStack matrices, int centerX, int centerY, int subdivisions, double radius, Color color) {
-        drawCircle(matrices, centerX, centerY, 0, 360, subdivisions, radius, color);
+    public static void drawLine(MatrixStack matrices, int x1, int y1, int x2, int y2, double thiccness, Color color) {
+        var offset = new Vector2d(x2 - x1, y2 - y1).perpendicular().normalize().mul(thiccness * .5d);
+
+        var buffer = Tessellator.getInstance().getBuffer();
+        var matrix = matrices.peek().getPositionMatrix();
+        int vColor = color.argb();
+
+        buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
+
+        buffer.vertex(matrix, (float) (x1 + offset.x), (float) (y1 + offset.y), 0).color(vColor).next();
+        buffer.vertex(matrix, (float) (x1 - offset.x), (float) (y1 - offset.y), 0).color(vColor).next();
+        buffer.vertex(matrix, (float) (x2 - offset.x), (float) (y2 - offset.y), 0).color(vColor).next();
+        buffer.vertex(matrix, (float) (x2 + offset.x), (float) (y2 + offset.y), 0).color(vColor).next();
+
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+
+        Tessellator.getInstance().draw();
     }
 
-    public static void drawCircle(MatrixStack matrices, int centerX, int centerY, double angleFrom, double angleTo, int subdivisions, double radius, Color color) {
+    public static void drawCircle(MatrixStack matrices, int centerX, int centerY, int segments, double radius, Color color) {
+        drawCircle(matrices, centerX, centerY, 0, 360, segments, radius, color);
+    }
+
+    public static void drawCircle(MatrixStack matrices, int centerX, int centerY, double angleFrom, double angleTo, int segments, double radius, Color color) {
         Preconditions.checkArgument(angleFrom < angleTo, "angleFrom must be less than angleTo");
 
         var buffer = Tessellator.getInstance().getBuffer();
         var matrix = matrices.peek().getPositionMatrix();
 
-        double angleStep = Math.toRadians(angleTo - angleFrom) / subdivisions;
+        double angleStep = Math.toRadians(angleTo - angleFrom) / segments;
         int vColor = color.argb();
 
         buffer.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
         buffer.vertex(matrix, centerX, centerY, 0).color(vColor).next();
 
-        for (int i = subdivisions; i >= 0; i--) {
+        for (int i = segments; i >= 0; i--) {
             double theta = Math.toRadians(angleFrom) + i * angleStep;
             buffer.vertex(matrix, (float) (centerX - Math.cos(theta) * radius), (float) (centerY - Math.sin(theta) * radius), 0)
                     .color(vColor).next();
@@ -142,24 +164,24 @@ public class Drawer extends DrawableHelper {
         Tessellator.getInstance().draw();
     }
 
-    public static void drawRing(MatrixStack matrices, int centerX, int centerY, int subdivisions, double innerRadius, double outerRadius, Color innerColor, Color outerColor) {
-        drawRing(matrices, centerX, centerY, 0d, 360d, subdivisions, innerRadius, outerRadius, innerColor, outerColor);
+    public static void drawRing(MatrixStack matrices, int centerX, int centerY, int segments, double innerRadius, double outerRadius, Color innerColor, Color outerColor) {
+        drawRing(matrices, centerX, centerY, 0d, 360d, segments, innerRadius, outerRadius, innerColor, outerColor);
     }
 
-    public static void drawRing(MatrixStack matrices, int centerX, int centerY, double angleFrom, double angleTo, int subdivisions, double innerRadius, double outerRadius, Color innerColor, Color outerColor) {
+    public static void drawRing(MatrixStack matrices, int centerX, int centerY, double angleFrom, double angleTo, int segments, double innerRadius, double outerRadius, Color innerColor, Color outerColor) {
         Preconditions.checkArgument(angleFrom < angleTo, "angleFrom must be less than angleTo");
         Preconditions.checkArgument(innerRadius < outerRadius, "innerRadius must be less than outerRadius");
 
         var buffer = Tessellator.getInstance().getBuffer();
         var matrix = matrices.peek().getPositionMatrix();
 
-        double angleStep = Math.toRadians(angleTo - angleFrom) / subdivisions;
+        double angleStep = Math.toRadians(angleTo - angleFrom) / segments;
         int inColor = innerColor.argb();
         int outColor = outerColor.argb();
 
         buffer.begin(VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR);
 
-        for (int i = 0; i <= subdivisions; i++) {
+        for (int i = 0; i <= segments; i++) {
             double theta = Math.toRadians(angleFrom) + i * angleStep;
 
             buffer.vertex(matrix, (float) (centerX - Math.cos(theta) * outerRadius), (float) (centerY - Math.sin(theta) * outerRadius), 0)
