@@ -1,7 +1,9 @@
 package io.wispforest.owo.ui.util;
 
+import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.mixin.ui.ScreenInvoker;
+import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.ui.core.ParentComponent;
@@ -109,6 +111,68 @@ public class Drawer extends DrawableHelper {
 
     public static void drawText(MatrixStack matrices, Text text, float x, float y, float scale, int color) {
         drawText(matrices, text, x, y, scale, color, TextAnchor.TOP_LEFT);
+    }
+
+    public static void drawCircle(MatrixStack matrices, int centerX, int centerY, int subdivisions, double radius, Color color) {
+        drawCircle(matrices, centerX, centerY, 0, 360, subdivisions, radius, color);
+    }
+
+    public static void drawCircle(MatrixStack matrices, int centerX, int centerY, double angleFrom, double angleTo, int subdivisions, double radius, Color color) {
+        Preconditions.checkArgument(angleFrom < angleTo, "angleFrom must be less than angleTo");
+
+        var buffer = Tessellator.getInstance().getBuffer();
+        var matrix = matrices.peek().getPositionMatrix();
+
+        double angleStep = Math.toRadians(angleTo - angleFrom) / subdivisions;
+        int vColor = color.argb();
+
+        buffer.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
+        buffer.vertex(matrix, centerX, centerY, 0).color(vColor).next();
+
+        for (int i = subdivisions; i >= 0; i--) {
+            double theta = Math.toRadians(angleFrom) + i * angleStep;
+            buffer.vertex(matrix, (float) (centerX - Math.cos(theta) * radius), (float) (centerY - Math.sin(theta) * radius), 0)
+                    .color(vColor).next();
+        }
+
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+
+        Tessellator.getInstance().draw();
+    }
+
+    public static void drawRing(MatrixStack matrices, int centerX, int centerY, int subdivisions, double innerRadius, double outerRadius, Color innerColor, Color outerColor) {
+        drawRing(matrices, centerX, centerY, 0d, 360d, subdivisions, innerRadius, outerRadius, innerColor, outerColor);
+    }
+
+    public static void drawRing(MatrixStack matrices, int centerX, int centerY, double angleFrom, double angleTo, int subdivisions, double innerRadius, double outerRadius, Color innerColor, Color outerColor) {
+        Preconditions.checkArgument(angleFrom < angleTo, "angleFrom must be less than angleTo");
+        Preconditions.checkArgument(innerRadius < outerRadius, "innerRadius must be less than outerRadius");
+
+        var buffer = Tessellator.getInstance().getBuffer();
+        var matrix = matrices.peek().getPositionMatrix();
+
+        double angleStep = Math.toRadians(angleTo - angleFrom) / subdivisions;
+        int inColor = innerColor.argb();
+        int outColor = outerColor.argb();
+
+        buffer.begin(VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR);
+
+        for (int i = 0; i <= subdivisions; i++) {
+            double theta = Math.toRadians(angleFrom) + i * angleStep;
+
+            buffer.vertex(matrix, (float) (centerX - Math.cos(theta) * outerRadius), (float) (centerY - Math.sin(theta) * outerRadius), 0)
+                    .color(outColor).next();
+            buffer.vertex(matrix, (float) (centerX - Math.cos(theta) * innerRadius), (float) (centerY - Math.sin(theta) * innerRadius), 0)
+                    .color(inColor).next();
+        }
+
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+
+        Tessellator.getInstance().draw();
     }
 
     public static void drawText(MatrixStack matrices, Text text, float x, float y, float scale, int color, TextAnchor anchorPoint) {

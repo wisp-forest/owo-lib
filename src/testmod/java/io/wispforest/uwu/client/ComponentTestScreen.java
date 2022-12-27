@@ -1,11 +1,13 @@
 package io.wispforest.uwu.client;
 
 import com.mojang.authlib.GameProfile;
+import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.component.*;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.core.*;
+import io.wispforest.owo.ui.util.Drawer;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
@@ -193,6 +195,33 @@ public class ComponentTestScreen extends Screen {
             });
             return true;
         });
+
+        rootComponent.child(
+                new BaseComponent() {
+                    @Override
+                    public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+                        Drawer.drawCircle(
+                                matrices,
+                                this.x + this.width / 2,
+                                this.y + this.height / 2,
+                                75,
+                                this.width / 2f,
+                                Color.ofArgb(0x99000000)
+                        );
+
+                        Drawer.drawRing(
+                                matrices,
+                                this.x + this.width / 2,
+                                this.y + this.height / 2,
+                                75,
+                                (this.width - 125) / 2f,
+                                this.width / 2f,
+                                Color.ofArgb(0x99000000),
+                                Color.ofArgb(0x99000000)
+                        );
+                    }
+                }.positioning(Positioning.relative(50, 50)).sizing(Sizing.fixed(350))
+        );
 
         // i knew it all along, chyz truly is a pig
         var pig = EntityComponent.createRenderablePlayer(new GameProfile(UUID.fromString("09de8a6d-86bf-4c15-bb93-ce3384ce4e96"), "chyzman"));
