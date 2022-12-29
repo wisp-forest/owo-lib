@@ -16,7 +16,7 @@ import java.util.function.Consumer;
  * entries are present or not. Use {@link #get(Registry)}
  * to obtain the instance for a given registry
  */
-public class RegistryHelper<T> {
+public final class RegistryHelper<T> {
 
     private static final Map<Registry<?>, RegistryHelper<?>> INSTANCES = new HashMap<>();
 

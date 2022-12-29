@@ -36,7 +36,7 @@ import java.util.function.Consumer;
 import java.util.function.ToIntFunction;
 
 @ApiStatus.Internal
-public class OwoHandshake {
+public final class OwoHandshake {
 
     @SuppressWarnings("unchecked")
     private static final PacketBufSerializer<Map<Identifier, Integer>> RESPONSE_SERIALIZER =
@@ -49,6 +49,8 @@ public class OwoHandshake {
     private static final boolean ENABLED = !Boolean.getBoolean("owo.handshake.disable");
     private static boolean HANDSHAKE_REQUIRED = false;
     private static boolean QUERY_RECEIVED = false;
+
+    private OwoHandshake() {}
 
     // ------------
     // Registration

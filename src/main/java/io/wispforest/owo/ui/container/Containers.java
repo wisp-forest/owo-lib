@@ -4,7 +4,9 @@ import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.Sizing;
 import net.minecraft.text.Text;
 
-public class Containers {
+public final class Containers {
+
+    private Containers() {}
 
     // ------
     // Layout

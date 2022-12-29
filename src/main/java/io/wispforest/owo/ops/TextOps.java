@@ -8,7 +8,9 @@ import net.minecraft.util.Formatting;
  * A collection of common operations
  * for working with and stylizing {@link Text}
  */
-public class TextOps {
+public final class TextOps {
+
+    private TextOps() {}
 
     /**
      * Appends the {@code text} onto the {@code prefix} without
@@ -96,7 +98,7 @@ public class TextOps {
     /**
      * Determine the width of the given iterable of texts,
      * which is defined as the width of the widest text
-     * int the iterable
+     * in the iterable
      *
      * @param renderer The text renderer responsible for rendering
      *                 the text later on
@@ -112,7 +114,7 @@ public class TextOps {
     /**
      * Determine the width of the given iterable of texts,
      * which is defined as the width of the widest text
-     * int the iterable
+     * in the iterable
      *
      * @param renderer The text renderer responsible for rendering
      *                 the text later on

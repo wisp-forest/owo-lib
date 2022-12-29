@@ -14,7 +14,7 @@ import java.util.function.Consumer;
 
 /**
  * Stub-version of component which adds implementations for all methods
- * which unconditionally throw - used for interface-injecting onto
+ * that unconditionally throw - used for interface-injecting onto
  * vanilla widgets
  */
 public interface ComponentStub extends Component {

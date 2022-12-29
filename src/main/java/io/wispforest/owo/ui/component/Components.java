@@ -29,7 +29,9 @@ import java.util.function.Supplier;
 /**
  * Utility methods for creating UI components
  */
-public class Components {
+public final class Components {
+
+    private Components() {}
 
     // -----------------------
     // Wrapped Vanilla Widgets

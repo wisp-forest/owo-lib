@@ -10,7 +10,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 @ApiStatus.Internal
-public class RecipeRemainderStorage {
+public final class RecipeRemainderStorage {
+
+    private RecipeRemainderStorage() {}
+
     private static final Map<Identifier, Map<Item, ItemStack>> REMAINDERS = new HashMap<>();
 
     public static void store(Identifier recipe, Map<Item, ItemStack> remainders) {

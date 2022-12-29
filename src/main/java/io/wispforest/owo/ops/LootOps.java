@@ -22,7 +22,9 @@ import java.util.function.Supplier;
  * A simple utility class to make injecting simple items or
  * ItemStacks into one or multiple LootTables a one-line operation
  */
-public class LootOps {
+public final class LootOps {
+
+    private LootOps() {}
 
     private static final Map<Identifier[], Supplier<LootPoolEntry>> ADDITIONS = new HashMap<>();
 

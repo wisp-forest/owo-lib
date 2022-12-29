@@ -7,7 +7,9 @@ import net.minecraft.world.World;
 /**
  * Utility class for getting random offsets within a {@link World}
  */
-public class VectorRandomUtils {
+public final class VectorRandomUtils {
+
+    private VectorRandomUtils() {}
 
     /**
      * Generates a random point centered on the given block

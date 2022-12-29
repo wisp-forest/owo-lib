@@ -3,7 +3,9 @@ package io.wispforest.owo.ui.util;
 import io.wispforest.owo.ui.core.Size;
 import net.minecraft.util.Identifier;
 
-public class OwoNinePatchRenderers {
+public final class OwoNinePatchRenderers {
+
+    private OwoNinePatchRenderers() {}
 
     // Scrollbar central
 

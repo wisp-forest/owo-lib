@@ -34,7 +34,7 @@ import java.util.function.Consumer;
  *
  * @author BasiqueEvangelist
  */
-public class OfflineAdvancementLookup {
+public final class OfflineAdvancementLookup {
 
     private OfflineAdvancementLookup() {}
 

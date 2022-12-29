@@ -26,7 +26,7 @@ import java.util.function.Function;
  * @param <R> The type of record this serializer can handle
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
-public class RecordSerializer<R extends Record> {
+public final class RecordSerializer<R extends Record> {
 
     private static final Map<Class<?>, RecordSerializer<?>> SERIALIZERS = new HashMap<>();
 

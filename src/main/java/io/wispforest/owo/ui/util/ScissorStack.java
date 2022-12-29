@@ -14,10 +14,12 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 
-public class ScissorStack {
+public final class ScissorStack {
 
     private static final MatrixStack EMPTY_STACK = new MatrixStack();
     private static final Deque<PositionedRectangle> STACK = new ArrayDeque<>();
+
+    private ScissorStack() {}
 
     public static void pushDirect(int x, int y, int width, int height) {
         var window = MinecraftClient.getInstance().getWindow();

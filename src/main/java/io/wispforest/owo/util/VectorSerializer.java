@@ -9,7 +9,9 @@ import org.joml.Vector3f;
  * Utility class for reading and storing {@link Vec3d} and
  * {@link Vector3f} from and into {@link net.minecraft.nbt.NbtCompound}
  */
-public class VectorSerializer {
+public final class VectorSerializer {
+
+    private VectorSerializer() {}
 
     /**
      * Stores the given vector  as an array at the

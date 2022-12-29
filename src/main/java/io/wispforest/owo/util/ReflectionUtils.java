@@ -11,7 +11,10 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 @ApiStatus.Experimental
-public class ReflectionUtils {
+public final class ReflectionUtils {
+
+    private ReflectionUtils() {}
+
     /**
      * Tries to instantiate the given class with a zero-args constructor call,
      * throws a {@link RuntimeException} if it fails
@@ -24,7 +27,6 @@ public class ReflectionUtils {
         try {
             return clazz.getConstructor().newInstance();
         } catch (InstantiationException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            e.printStackTrace();
             throw new RuntimeException((e instanceof NoSuchMethodException ? "No zero-args constructor defined on class " : "Could not instantiate class ") + clazz, e);
         }
     }

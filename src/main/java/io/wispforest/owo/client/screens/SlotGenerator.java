@@ -6,7 +6,7 @@ import net.minecraft.screen.slot.Slot;
 
 import java.util.function.Consumer;
 
-public class SlotGenerator {
+public final class SlotGenerator {
 
     private int anchorX, anchorY;
     private int horizontalSpacing = 0;

@@ -15,11 +15,10 @@ import java.util.function.Function;
 /**
  * A simple utility for inserting values into Tags at runtime
  */
-public class TagInjector {
+public final class TagInjector {
 
     @ApiStatus.Internal
     public static final HashMap<TagLocation, Set<TagEntry>> ADDITIONS = new HashMap<>();
-
 
     private static final Map<TagLocation, Set<TagEntry>> ADDITIONS_VIEW = new ForwardingMap<>() {
         @Override
@@ -32,6 +31,8 @@ public class TagInjector {
             return Collections.unmodifiableSet(delegate().get(key));
         }
     };
+
+    private TagInjector() {}
 
     /**
      * Retrieves an unmodifiable map of all planned tag injections.

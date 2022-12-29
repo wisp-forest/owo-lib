@@ -7,7 +7,9 @@ import net.minecraft.util.math.random.Random;
 
 import java.util.List;
 
-public class Wisdom {
+public final class Wisdom {
+
+    private Wisdom() {}
 
     private static final Random CRYSTAL_BALL = Random.create();
     public static final List<String> ALL_THE_WISDOM = ImmutableList.of(

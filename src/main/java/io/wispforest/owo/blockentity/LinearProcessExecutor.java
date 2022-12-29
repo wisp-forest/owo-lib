@@ -46,19 +46,19 @@ public class LinearProcessExecutor<T> {
     }
 
     public void tick() {
-        if (eventTable == null) throw new IllegalStateException("Illegal attempt to tick unconfigured executor");
+        if (this.eventTable == null) throw new IllegalStateException("Illegal attempt to tick unconfigured executor");
 
-        if (!running()) return;
+        if (!this.running()) return;
 
-        if (cancelIfAppropriate()) return;
-        if (finishIfAppropriate()) return;
+        if (this.cancelIfAppropriate()) return;
+        if (this.finishIfAppropriate()) return;
 
         int tableIndex = processTick - 1;
 
-        if (eventTable.containsKey(tableIndex)) eventTable.get(tableIndex).accept(this, this.target);
-        if (processStepTable.containsKey(tableIndex)) activeSteps.add(processStepTable.get(tableIndex).createInfo(tableIndex));
+        if (this.eventTable.containsKey(tableIndex)) this.eventTable.get(tableIndex).accept(this, this.target);
+        if (this.processStepTable.containsKey(tableIndex)) this.activeSteps.add(this.processStepTable.get(tableIndex).createInfo(tableIndex));
 
-        activeSteps.removeIf(stepInfo -> !stepInfo.tick(this));
+        this.activeSteps.removeIf(stepInfo -> !stepInfo.tick(this));
 
         this.processTick++;
     }
@@ -128,7 +128,7 @@ public class LinearProcessExecutor<T> {
 
     private boolean cancelIfAppropriate() {
         if (this.condition.test(this)) return false;
-        cancel();
+        this.cancel();
         return true;
     }
 
