@@ -4,6 +4,7 @@ import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
+import io.wispforest.owo.ui.util.Delta;
 import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.OwoNinePatchRenderers;
 import net.minecraft.client.gui.DrawableHelper;
@@ -85,12 +86,16 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
     }
 
     @Override
+    protected void parentUpdate(float delta, int mouseX, int mouseY) {
+        super.parentUpdate(delta, mouseX, mouseY);
+        this.currentScrollPosition += Delta.compute(this.currentScrollPosition, this.scrollOffset, delta * .5);
+    }
+
+    @Override
     public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
         super.draw(matrices, mouseX, mouseY, partialTicks, delta);
 
-        // Update scroll position and update child
-        this.currentScrollPosition += (this.scrollOffset - this.currentScrollPosition) * .5 * delta;
-
+        // Update child
         int effectiveScrollOffset = this.scrollStep > 0
                 ? ((int) this.scrollOffset / this.scrollStep) * this.scrollStep
                 : (int) this.currentScrollPosition;

@@ -4,6 +4,7 @@ import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIParsing;
+import io.wispforest.owo.ui.util.Delta;
 import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.owo.util.EventSource;
@@ -198,7 +199,7 @@ public class CollapsibleContainer extends VerticalFlowLayout {
         @Override
         public void update(float delta, int mouseX, int mouseY) {
             super.update(delta, mouseX, mouseY);
-            this.rotation += (this.targetRotation - this.rotation) * delta * .65;
+            this.rotation += Delta.compute(this.rotation, this.targetRotation, delta * .65);
         }
 
         @Override
