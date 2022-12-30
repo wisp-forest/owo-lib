@@ -236,12 +236,16 @@ public class ComponentTestScreen extends Screen {
 //                        Drawer.drawSpectrum(matrices, this.x, this.y, this.width, (int) (this.height * (Math.sin(time) * .5 + .5)), true);
 //                    }
 //                }.positioning(Positioning.relative(50, 50)).sizing(Sizing.fixed(350))
-                new ColorPickerComponent()
-                        .selectorWidth(50)
-                        .showAlpha(true)
-                        .selectedColor(Color.ofArgb(0x7F3955E5))
-                        .positioning(Positioning.relative(0, 0))
-                        .sizing(Sizing.fill(100))
+                Components.button(Text.of("overlay"), button -> {
+                    rootComponent.child(Containers.overlay(
+                            Containers.verticalFlow(Sizing.content(), Sizing.content())
+                                    .child(new ColorPickerComponent()
+                                            .showAlpha(true)
+                                            .selectedColor(Color.ofArgb(0x7F3955E5))
+                                            .sizing(Sizing.fixed(160), Sizing.fixed(100))
+                                    ).padding(Insets.of(5)).surface(Surface.DARK_PANEL)
+                    ));
+                })
         );
 
         // i knew it all along, chyz truly is a pig

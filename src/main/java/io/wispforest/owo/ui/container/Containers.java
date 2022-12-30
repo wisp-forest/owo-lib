@@ -48,4 +48,8 @@ public final class Containers {
         return new CollapsibleContainer(horizontalSizing, verticalSizing, title, expanded);
     }
 
+    public static <C extends Component> OverlayContainer<C> overlay(C child) {
+        return new OverlayContainer<>(child);
+    }
+
 }
