@@ -3,6 +3,7 @@ package io.wispforest.owo.ui.util;
 import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.mixin.ui.ScreenInvoker;
+import io.wispforest.owo.shader.HsvProgram;
 import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.Insets;
@@ -108,6 +109,24 @@ public class Drawer extends DrawableHelper {
      */
     public static void drawPanel(MatrixStack matrices, int x, int y, int width, int height, boolean dark) {
         (dark ? OwoNinePatchRenderers.DARK_PANEL : OwoNinePatchRenderers.LIGHT_PANEL).draw(matrices, x, y, width, height);
+    }
+
+    public static void drawSpectrum(MatrixStack matrices, int x, int y, int width, int height, boolean vertical) {
+        var buffer = Tessellator.getInstance().getBuffer();
+        var matrix = matrices.peek().getPositionMatrix();
+
+        buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
+        buffer.vertex(matrix, x, y, 0).color(1f, 1f, 1f, 1f).next();
+        buffer.vertex(matrix, x, y + height, 0).color(0f, 1f, 1f, 1f).next();
+        buffer.vertex(matrix, x + width, y + height, 0).color(0f, 1f, 1f, 1f).next();
+        buffer.vertex(matrix, x + width, y, 0).color(1f, 1f, 1f, 1f).next();
+
+        RenderSystem.disableTexture();
+
+        HsvProgram.INSTANCE.use();
+        Tessellator.getInstance().draw();
+
+        RenderSystem.enableTexture();
     }
 
     public static void drawText(MatrixStack matrices, Text text, float x, float y, float scale, int color) {

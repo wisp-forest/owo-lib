@@ -6,6 +6,7 @@ import io.wispforest.owo.command.debug.OwoDebugCommands;
 import io.wispforest.owo.config.OwoConfigCommand;
 import io.wispforest.owo.itemgroup.json.OwoItemGroupLoader;
 import io.wispforest.owo.moddata.ModDataLoader;
+import io.wispforest.owo.shader.HsvProgram;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -55,6 +56,7 @@ public class OwoClient implements ClientModInitializer {
         }
 
         ScreenInternals.Client.init();
+        HsvProgram.init();
 
         ClientCommandRegistrationCallback.EVENT.register(OwoConfigCommand::register);
 
