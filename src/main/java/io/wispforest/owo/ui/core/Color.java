@@ -49,7 +49,12 @@ public record Color(float red, float green, float blue, float alpha) implements 
     }
 
     public static Color ofHsv(float hue, float saturation, float value) {
-        return ofRgb(MathHelper.hsvToRgb(hue, saturation, value));
+        // we call .5e-7f the magic "do not turn a hue value of 1f into yellow" constant
+        return ofRgb(MathHelper.hsvToRgb(hue - .5e-7f, saturation, value));
+    }
+
+    public static Color ofHsv(float hue, float saturation, float value, float alpha) {
+        return ofArgb((int) (alpha * 255) << 24 | MathHelper.hsvToRgb(hue, saturation, value));
     }
 
     public static Color ofFormatting(@NotNull Formatting formatting) {
@@ -73,6 +78,41 @@ public record Color(float red, float green, float blue, float alpha) implements 
                 | (int) (this.red * 255) << 16
                 | (int) (this.green * 255) << 8
                 | (int) (this.blue * 255);
+    }
+
+    public float[] hsv() {
+        float hue, saturation, value;
+
+        float cmax = Math.max(Math.max(this.red, this.green), this.blue);
+        float cmin = Math.min(Math.min(this.red, this.green), this.blue);
+
+        value = cmax;
+        if (cmax != 0) {
+            saturation = (cmax - cmin) / cmax;
+        } else {
+            saturation = 0;
+        }
+
+        if (saturation == 0) {
+            hue = 0;
+        } else {
+            float redc = (cmax - this.red) / (cmax - cmin);
+            float greenc = (cmax - this.green) / (cmax - cmin);
+            float bluec = (cmax - this.blue) / (cmax - cmin);
+
+            if (this.red == cmax) {
+                hue = bluec - greenc;
+            } else if (this.green == cmax)
+                hue = 2.0f + redc - bluec;
+            else {
+                hue = 4.0f + greenc - redc;
+            }
+
+            hue = hue / 6.0f;
+            if (hue < 0) hue = hue + 1.0f;
+        }
+
+        return new float[]{hue, saturation, value, this.alpha};
     }
 
     public String asHexString(boolean includeAlpha) {
