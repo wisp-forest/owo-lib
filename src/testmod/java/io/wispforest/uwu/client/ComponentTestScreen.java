@@ -1,13 +1,11 @@
 package io.wispforest.uwu.client;
 
 import com.mojang.authlib.GameProfile;
-import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.component.*;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.core.*;
-import io.wispforest.owo.ui.util.Drawer;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
@@ -201,41 +199,49 @@ public class ComponentTestScreen extends Screen {
         });
 
         rootComponent.child(
-                new BaseComponent() {
-                    @Override
-                    public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
-                        Drawer.drawCircle(
-                                matrices,
-                                this.x + this.width / 2,
-                                this.y + this.height / 2,
-                                75,
-                                this.width / 2f,
-                                Color.ofArgb(0x99000000)
-                        );
-
-                        Drawer.drawRing(
-                                matrices,
-                                this.x + this.width / 2,
-                                this.y + this.height / 2,
-                                75,
-                                (this.width - 125) / 2f,
-                                this.width / 2f,
-                                Color.ofArgb(0x99000000),
-                                Color.ofArgb(0x99000000)
-                        );
-
-                        var time = (System.currentTimeMillis() / 1000d) % (Math.PI * 2);
-                        Drawer.drawLine(
-                                matrices,
-                                (int) (this.x + this.width / 2 + Math.cos(time) * this.width / 2),
-                                (int) (this.y + this.height / 2 + Math.sin(time) * this.height / 2),
-                                (int) (this.x + this.width / 2 + Math.sin(time) * this.width / 2),
-                                (int) (this.y + this.height / 2 + Math.cos(time) * this.height / 2),
-                                1,
-                                Color.BLUE
-                        );
-                    }
-                }.positioning(Positioning.relative(50, 50)).sizing(Sizing.fixed(350))
+//                new BaseComponent() {
+//                    @Override
+//                    public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+//                        Drawer.drawCircle(
+//                                matrices,
+//                                this.x + this.width / 2,
+//                                this.y + this.height / 2,
+//                                75,
+//                                this.width / 2f,
+//                                Color.ofArgb(0x99000000)
+//                        );
+//
+//                        Drawer.drawRing(
+//                                matrices,
+//                                this.x + this.width / 2,
+//                                this.y + this.height / 2,
+//                                75,
+//                                (this.width - 125) / 2f,
+//                                this.width / 2f,
+//                                Color.ofArgb(0x99000000),
+//                                Color.ofArgb(0x99000000)
+//                        );
+//
+//                        var time = (System.currentTimeMillis() / 1000d) % (Math.PI * 2);
+//                        Drawer.drawLine(
+//                                matrices,
+//                                (int) (this.x + this.width / 2 + Math.cos(time) * this.width / 2),
+//                                (int) (this.y + this.height / 2 + Math.sin(time) * this.height / 2),
+//                                (int) (this.x + this.width / 2 + Math.sin(time) * this.width / 2),
+//                                (int) (this.y + this.height / 2 + Math.cos(time) * this.height / 2),
+//                                1,
+//                                Color.BLUE
+//                        );
+//
+//                        Drawer.drawSpectrum(matrices, this.x, this.y, this.width, (int) (this.height * (Math.sin(time) * .5 + .5)), true);
+//                    }
+//                }.positioning(Positioning.relative(50, 50)).sizing(Sizing.fixed(350))
+                new ColorPickerComponent()
+                        .selectorWidth(50)
+                        .showAlpha(true)
+                        .selectedColor(Color.ofArgb(0x7F3955E5))
+                        .positioning(Positioning.relative(0, 0))
+                        .sizing(Sizing.fill(100))
         );
 
         // i knew it all along, chyz truly is a pig
