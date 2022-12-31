@@ -54,7 +54,8 @@ public record Color(float red, float green, float blue, float alpha) implements 
     }
 
     public static Color ofHsv(float hue, float saturation, float value, float alpha) {
-        return ofArgb((int) (alpha * 255) << 24 | MathHelper.hsvToRgb(hue, saturation, value));
+        // we call .5e-7f the magic "do not turn a hue value of 1f into yellow" constant
+        return ofArgb((int) (alpha * 255) << 24 | MathHelper.hsvToRgb(hue - .5e-7f, saturation, value));
     }
 
     public static Color ofFormatting(@NotNull Formatting formatting) {
