@@ -126,7 +126,7 @@ public class OptionComponents {
 
             if (textMode.isTrue()) {
                 sliderControls.remove();
-                textInput.text(String.valueOf(sliderInput.discreteValue()));
+                textInput.text(sliderInput.decimalPlaces() == 0 ? String.valueOf((int) sliderInput.discreteValue()) : String.valueOf(sliderInput.discreteValue()));
 
                 controlsLayout.child(textControls);
             } else {
