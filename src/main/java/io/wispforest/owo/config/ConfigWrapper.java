@@ -11,6 +11,7 @@ import blue.endless.jankson.magic.TypeMagic;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.annotation.*;
 import io.wispforest.owo.config.ui.ConfigScreen;
+import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.util.NumberReflection;
 import io.wispforest.owo.util.Observable;
 import io.wispforest.owo.util.ReflectionUtils;
@@ -65,7 +66,9 @@ public abstract class ConfigWrapper<C> {
 
         var builder = Jankson.builder()
                 .registerSerializer(Identifier.class, (identifier, marshaller) -> new JsonPrimitive(identifier.toString()))
-                .registerDeserializer(JsonPrimitive.class, Identifier.class, (jsonPrimitive, m) -> Identifier.tryParse(jsonPrimitive.asString()));
+                .registerDeserializer(JsonPrimitive.class, Identifier.class, (primitive, m) -> Identifier.tryParse(primitive.asString()))
+                .registerSerializer(Color.class, (color, marshaller) -> new JsonPrimitive(color.asHexString(true)))
+                .registerDeserializer(JsonPrimitive.class, Color.class, (primitive, m) -> Color.ofArgb(Integer.parseUnsignedInt(primitive.asString().substring(1), 16)));
         janksonBuilder.accept(builder);
         this.jankson = builder.build();
 

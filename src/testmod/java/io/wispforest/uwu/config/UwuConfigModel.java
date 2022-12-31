@@ -3,6 +3,7 @@ package io.wispforest.uwu.config;
 import blue.endless.jankson.Comment;
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.config.annotation.*;
+import io.wispforest.owo.ui.core.Color;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +38,11 @@ public class UwuConfigModel {
 
     @RestartRequired
     public WowValues broTheresAnEnum = WowValues.FIRST;
+
+    public Color anEpicColor = Color.BLUE;
+
+    @WithAlpha
+    public Color anEpicColorWithAlpha = Color.GREEN;
 
     @ExcludeFromScreen
     public String noSeeingThis = "yep, never";

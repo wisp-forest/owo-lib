@@ -344,6 +344,83 @@
                 </child>
             </template>
         </range-config-option>
+
+        <color-picker-panel>
+            <flow-layout direction="vertical">
+                <children>
+                    <label>
+                        <text>Choose color</text>
+                        <shadow>true</shadow>
+                        <margins>
+                            <top>3</top>
+                        </margins>
+                    </label>
+
+                    <color-picker id="color-picker">
+                        <show-alpha>{{with-alpha}}</show-alpha>
+                        <selected-color>{{color}}</selected-color>
+                        <sizing>
+                            <horizontal method="fixed">160</horizontal>
+                            <vertical method="fixed">100</vertical>
+                        </sizing>
+                    </color-picker>
+
+                    <flow-layout direction="horizontal">
+                        <children>
+                            <box>
+                                <fill>true</fill>
+                                <color>{{color}}</color>
+                                <sizing>
+                                    <horizontal method="fixed">80</horizontal>
+                                    <vertical method="fixed">15</vertical>
+                                </sizing>
+                            </box>
+                            <box id="current-color">
+                                <fill>true</fill>
+                                <color>{{color}}</color>
+                                <sizing>
+                                    <horizontal method="fixed">80</horizontal>
+                                    <vertical method="fixed">15</vertical>
+                                </sizing>
+                            </box>
+                        </children>
+                    </flow-layout>
+
+                    <flow-layout direction="horizontal">
+                        <children>
+                            <button id="cancel-button">
+                                <text>❌</text>
+                                <sizing>
+                                    <horizontal method="fixed">50</horizontal>
+                                    <vertical method="fixed">14</vertical>
+                                </sizing>
+                            </button>
+
+                            <button id="confirm-button">
+                                <text>✔</text>
+                                <sizing>
+                                    <horizontal method="fixed">50</horizontal>
+                                    <vertical method="fixed">14</vertical>
+                                </sizing>
+                            </button>
+                        </children>
+
+                        <gap>10</gap>
+                    </flow-layout>
+                </children>
+
+                <horizontal-alignment>center</horizontal-alignment>
+
+                <gap>5</gap>
+                <padding>
+                    <all>5</all>
+                </padding>
+                <surface>
+                    <panel dark="true"/>
+                </surface>
+            </flow-layout>
+        </color-picker-panel>
+
     </templates>
 </owo-ui>
 
