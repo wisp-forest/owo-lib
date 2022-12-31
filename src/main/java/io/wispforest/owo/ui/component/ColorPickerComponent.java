@@ -3,7 +3,10 @@ package io.wispforest.owo.ui.component;
 import io.wispforest.owo.shader.HsvProgram;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.Color;
+import io.wispforest.owo.ui.parsing.UIModel;
+import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.Drawer;
+import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.Observable;
 import net.minecraft.client.render.Tessellator;
@@ -11,6 +14,9 @@ import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.MathHelper;
+import org.w3c.dom.Element;
+
+import java.util.Map;
 
 public class ColorPickerComponent extends BaseComponent {
 
@@ -114,12 +120,12 @@ public class ColorPickerComponent extends BaseComponent {
             this.alpha = 1f - (float) (mouseY / this.renderHeight());
         } else if (mouseX >= this.hueSelectorX()) {
             this.hue = 1f - (float) (mouseY / this.renderHeight());
-        } else if (mouseX <= this.colorAreaWidth()) {
-            this.saturation = (float) (mouseX / this.colorAreaWidth());
+        } else {
+            this.saturation = Math.min(1f, (float) (mouseX / this.colorAreaWidth()));
             this.value = 1f - (float) (mouseY / this.renderHeight());
         }
 
-        this.selectedColor.set(Color.ofHsv(this.hue, this.saturation, this.value));
+        this.selectedColor.set(Color.ofHsv(this.hue, this.saturation, this.value, this.alpha));
     }
 
     protected int renderX() {
@@ -177,6 +183,10 @@ public class ColorPickerComponent extends BaseComponent {
         return this;
     }
 
+    public Color selectedColor() {
+        return this.selectedColor.get();
+    }
+
     public ColorPickerComponent selectorWidth(int selectorWidth) {
         this.selectorWidth = selectorWidth;
         return this;
@@ -202,6 +212,20 @@ public class ColorPickerComponent extends BaseComponent {
 
     public boolean showAlpha() {
         return showAlpha;
+    }
+
+    public EventSource<OnChanged> onChanged() {
+        return this.changedEvents.source();
+    }
+
+    @Override
+    public void parseProperties(UIModel model, Element element, Map<String, Element> children) {
+        super.parseProperties(model, element, children);
+
+        UIParsing.apply(children, "show-alpha", UIParsing::parseBool, this::showAlpha);
+        UIParsing.apply(children, "selector-width", UIParsing::parseUnsignedInt, this::selectorWidth);
+        UIParsing.apply(children, "selector-padding", UIParsing::parseUnsignedInt, this::selectorPadding);
+        UIParsing.apply(children, "selected-color", Color::parse, this::selectedColor);
     }
 
     public interface OnChanged {

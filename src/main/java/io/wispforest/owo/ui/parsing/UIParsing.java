@@ -303,6 +303,7 @@ public class UIParsing {
         registerFactory("slider", element -> Components.slider(Sizing.content()));
         registerFactory("discrete-slider", DiscreteSliderComponent::parse);
         registerFactory("dropdown", element -> Components.dropdown(Sizing.content()));
+        registerFactory("color-picker", element -> new ColorPickerComponent());
     }
 
 }

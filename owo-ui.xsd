@@ -42,6 +42,7 @@
             <xs:element name="flow-layout" type="owo-ui-flow-layout"/>
             <xs:element name="scroll" type="owo-ui-scroll-container"/>
             <xs:element name="dropdown" type="owo-ui-dropdown-component"/>
+            <xs:element name="color-picker" type="owo-color-picker-component"/>
             <xs:element name="template">
                 <xs:complexType>
                     <xs:sequence minOccurs="0" maxOccurs="unbounded">
@@ -499,6 +500,20 @@
                     <xs:element type="xs:string" name="text" minOccurs="0"/>
                     <xs:element type="xs:unsignedInt" name="max-length" minOccurs="0"/>
                     <xs:element type="xs:boolean" name="show-background" minOccurs="0"/>
+                </xs:choice>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="owo-color-picker-component">
+        <xs:complexContent>
+            <xs:extension base="componentType">
+                <xs:choice maxOccurs="unbounded">
+                    <xs:group ref="componentProps"/>
+                    <xs:element type="xs:unsignedInt" name="selector-width" minOccurs="0"/>
+                    <xs:element type="xs:unsignedInt" name="selector-padding" minOccurs="0"/>
+                    <xs:element type="xs:boolean" name="show-alpha" minOccurs="0"/>
+                    <xs:element type="owo-ui-color" name="selected-color" minOccurs="0"/>
                 </xs:choice>
             </xs:extension>
         </xs:complexContent>
