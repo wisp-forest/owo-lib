@@ -24,6 +24,9 @@ public class OverlayContainer<C extends Component> extends WrappingParentCompone
     }
 
     @Override
+    public void drawFocusHighlight(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {}
+
+    @Override
     public void mount(ParentComponent parent, int x, int y) {
         super.mount(parent, x, y);
         this.parent.focusHandler().focus(this, FocusSource.KEYBOARD_CYCLE);
@@ -45,6 +48,7 @@ public class OverlayContainer<C extends Component> extends WrappingParentCompone
     public boolean onKeyPress(int keyCode, int scanCode, int modifiers) {
         boolean handled = super.onKeyPress(keyCode, scanCode, modifiers);
 
+        // TODO properly receive this event in the first place
         if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
             this.remove();
             return true;
