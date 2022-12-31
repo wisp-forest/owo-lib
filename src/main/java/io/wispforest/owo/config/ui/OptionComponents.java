@@ -6,7 +6,6 @@ import io.wispforest.owo.config.ui.component.*;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
-import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.core.Positioning;
 import io.wispforest.owo.ui.parsing.UIModel;
 import net.minecraft.text.Text;
@@ -54,18 +53,18 @@ public class OptionComponents {
                 valueBox::getText
         ));
 
-        return new OptionComponentFactory.Result(optionComponent, valueBox);
+        return new OptionComponentFactory.Result<>(optionComponent, valueBox);
     }
 
     /**
      * @deprecated Use {@link #createRangeControls} instead
      */
     @Deprecated(forRemoval = true)
-    public static OptionComponentFactory.Result createSlider(UIModel model, Option<? extends Number> option, boolean withDecimals) {
+    public static OptionComponentFactory.Result<FlowLayout, OptionValueProvider> createSlider(UIModel model, Option<? extends Number> option, boolean withDecimals) {
         return createRangeControls(model, option, withDecimals ? 2 : 0);
     }
 
-    public static OptionComponentFactory.Result createRangeControls(UIModel model, Option<? extends Number> option, int decimalPlaces) {
+    public static OptionComponentFactory.Result<FlowLayout, OptionValueProvider> createRangeControls(UIModel model, Option<? extends Number> option, int decimalPlaces) {
         boolean withDecimals = decimalPlaces > 0;
 
         // ------------
@@ -107,7 +106,7 @@ public class OptionComponents {
         // ------------------------------------
 
         var sliderControls = optionComponent.childById(FlowLayout.class, "slider-controls");
-        var textControls = ((ParentComponent) createTextBox(model, option, configTextBox -> {
+        var textControls = createTextBox(model, option, configTextBox -> {
             configTextBox.configureForNumber(option.clazz());
 
             var predicate = configTextBox.applyPredicate();
@@ -115,7 +114,7 @@ public class OptionComponents {
                 final var parsed = Double.parseDouble(s);
                 return parsed >= min && parsed <= max;
             }));
-        }).baseComponent()).childById(FlowLayout.class, "controls-flow").positioning(Positioning.layout());
+        }).baseComponent().childById(FlowLayout.class, "controls-flow").positioning(Positioning.layout());
         var textInput = textControls.childById(ConfigTextBox.class, "value-box");
 
         // ------------
@@ -154,7 +153,7 @@ public class OptionComponents {
                 () -> textMode.isTrue() ? textInput.getText() : sliderInput.getMessage().getString()
         ));
 
-        return new OptionComponentFactory.Result(optionComponent, new OptionValueProvider() {
+        return new OptionComponentFactory.Result<>(optionComponent, new OptionValueProvider() {
             @Override
             public boolean isValid() {
                 return textMode.isTrue()
@@ -171,7 +170,7 @@ public class OptionComponents {
         });
     }
 
-    public static OptionComponentFactory.Result createToggleButton(UIModel model, Option<Boolean> option) {
+    public static OptionComponentFactory.Result<FlowLayout, ConfigToggleButton> createToggleButton(UIModel model, Option<Boolean> option) {
         var optionComponent = model.expandTemplate(FlowLayout.class,
                 "boolean-toggle-config-option",
                 packParameters(option.translationKey(), option.value().toString())
@@ -202,10 +201,10 @@ public class OptionComponents {
                 () -> toggleButton.getMessage().getString()
         ));
 
-        return new OptionComponentFactory.Result(optionComponent, toggleButton);
+        return new OptionComponentFactory.Result<>(optionComponent, toggleButton);
     }
 
-    public static OptionComponentFactory.Result createEnumButton(UIModel model, Option<? extends Enum<?>> option) {
+    public static OptionComponentFactory.Result<FlowLayout, ConfigEnumButton> createEnumButton(UIModel model, Option<? extends Enum<?>> option) {
         var optionComponent = model.expandTemplate(FlowLayout.class,
                 "enum-config-option",
                 packParameters(option.translationKey(), option.value().toString())
@@ -236,7 +235,7 @@ public class OptionComponents {
                 () -> enumButton.getMessage().getString()
         ));
 
-        return new OptionComponentFactory.Result(optionComponent, enumButton);
+        return new OptionComponentFactory.Result<>(optionComponent, enumButton);
     }
 
     public static Map<String, String> packParameters(String name, String value) {
@@ -245,5 +244,4 @@ public class OptionComponents {
                 "config-option-value", value
         );
     }
-
 }

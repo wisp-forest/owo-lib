@@ -74,7 +74,7 @@ public interface OptionComponentFactory<T> {
      * @return The option component as well as a potential wrapping
      * component, this simply be the option component itself
      */
-    Result make(UIModel model, Option<T> option);
+    Result<?, ?> make(UIModel model, Option<T> option);
 
-    record Result(Component baseComponent, OptionValueProvider optionProvider) {}
+    record Result<B extends Component, P extends OptionValueProvider>(B baseComponent, P optionProvider) {}
 }
