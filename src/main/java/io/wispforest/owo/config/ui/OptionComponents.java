@@ -14,14 +14,19 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 @SuppressWarnings("ConstantConditions")
 public class OptionComponents {
 
-    public static OptionComponentFactory.Result createTextBox(UIModel model, Option<?> option, Consumer<ConfigTextBox> processor) {
+    public static OptionComponentFactory.Result<FlowLayout, ConfigTextBox> createTextBox(UIModel model, Option<?> option, Consumer<ConfigTextBox> processor) {
+        return createTextBox(model, option, Object::toString, processor);
+    }
+
+    public static <T> OptionComponentFactory.Result<FlowLayout, ConfigTextBox> createTextBox(UIModel model, Option<T> option, Function<T, String> toStringFunction, Consumer<ConfigTextBox> processor) {
         var optionComponent = model.expandTemplate(FlowLayout.class,
                 "text-box-config-option",
-                packParameters(option.translationKey(), option.value().toString())
+                packParameters(option.translationKey(), toStringFunction.apply(option.value()))
         );
 
         var valueBox = optionComponent.childById(ConfigTextBox.class, "value-box");
@@ -31,13 +36,13 @@ public class OptionComponents {
             resetButton.active = false;
             valueBox.setEditable(false);
         } else {
-            resetButton.active = !valueBox.getText().equals(option.defaultValue().toString());
+            resetButton.active = !valueBox.getText().equals(toStringFunction.apply(option.defaultValue()));
             resetButton.onPress(button -> {
-                valueBox.setText(option.defaultValue().toString());
+                valueBox.setText(toStringFunction.apply(option.defaultValue()));
                 button.active = false;
             });
 
-            valueBox.onChanged().subscribe(s -> resetButton.active = !s.equals(option.defaultValue().toString()));
+            valueBox.onChanged().subscribe(s -> resetButton.active = !s.equals(toStringFunction.apply(option.defaultValue())));
         }
 
         processor.accept(valueBox);
