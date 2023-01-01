@@ -39,11 +39,14 @@ public class FocusHandler {
         allChildren.removeIf(component -> !component.canFocus(Component.FocusSource.KEYBOARD_CYCLE));
         if (allChildren.isEmpty()) return;
 
-        int index = (this.focused == null ? 0 : allChildren.indexOf(this.focused)) + (forwards ? 1 : -1);
-        if (index >= allChildren.size()) index -= allChildren.size();
-        if (index < 0) index += allChildren.size();
+        int newIndex = this.focused == null
+                ? forwards ? 0 : allChildren.size() - 1
+                : (allChildren.indexOf(this.focused)) + (forwards ? 1 : -1);
 
-        this.focus(allChildren.get(index), Component.FocusSource.KEYBOARD_CYCLE);
+        if (newIndex >= allChildren.size()) newIndex -= allChildren.size();
+        if (newIndex < 0) newIndex += allChildren.size();
+
+        this.focus(allChildren.get(newIndex), Component.FocusSource.KEYBOARD_CYCLE);
     }
 
     public void moveFocus(int keyCode) {
