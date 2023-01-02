@@ -5,6 +5,7 @@ import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.Drawer;
+import io.wispforest.owo.ui.util.SpriteUtilInvoker;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.client.util.math.MatrixStack;
@@ -30,6 +31,8 @@ public class SpriteComponent extends BaseComponent {
 
     @Override
     public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+        SpriteUtilInvoker.markSpriteActive(this.sprite);
+
         RenderSystem.setShaderTexture(0, this.sprite.getAtlasId());
         Drawer.drawSprite(matrices, this.x, this.y, 0, this.width, this.height, this.sprite);
     }
