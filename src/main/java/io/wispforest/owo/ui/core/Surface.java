@@ -1,9 +1,13 @@
 package io.wispforest.owo.ui.core;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import io.wispforest.owo.client.OwoClient;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.Drawer;
+import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexFormat;
+import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import org.w3c.dom.Element;
@@ -31,6 +35,24 @@ public interface Surface {
         RenderSystem.setShaderColor(64 / 255f, 64 / 255f, 64 / 255f, 1);
         Drawer.drawTexture(matrices, component.x(), component.y(), 0, 0, component.width(), component.height(), 32, 32);
         RenderSystem.setShaderColor(1, 1, 1, 1);
+    };
+
+    Surface GAUSSIAN = (matrices, component) -> {
+        var buffer = Tessellator.getInstance().getBuffer();
+        var matrix = matrices.peek().getPositionMatrix();
+
+        buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION);
+        buffer.vertex(matrix, component.x(), component.y(), 0).next();
+        buffer.vertex(matrix, component.x(), component.y() + component.height(), 0).next();
+        buffer.vertex(matrix, component.x() + component.width(), component.y() + component.height(), 0).next();
+        buffer.vertex(matrix, component.x() + component.width(), component.y(), 0).next();
+
+        RenderSystem.disableTexture();
+
+        OwoClient.GAUSSIAN_PROGRAM.use();
+        Tessellator.getInstance().draw();
+
+        RenderSystem.enableTexture();
     };
 
     Surface BLANK = (matrices, component) -> {};

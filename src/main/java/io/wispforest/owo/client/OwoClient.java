@@ -6,11 +6,14 @@ import io.wispforest.owo.command.debug.OwoDebugCommands;
 import io.wispforest.owo.config.OwoConfigCommand;
 import io.wispforest.owo.itemgroup.json.OwoItemGroupLoader;
 import io.wispforest.owo.moddata.ModDataLoader;
-import io.wispforest.owo.shader.HsvProgram;
+import io.wispforest.owo.shader.GaussianProgram;
+import io.wispforest.owo.shader.GlProgram;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.minecraft.client.render.VertexFormats;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -38,6 +41,9 @@ public class OwoClient implements ClientModInitializer {
             Ignored 'owo.renderdocPath' property as this Minecraft instance is not running on Windows.
             ========================================""";
 
+    public static final GlProgram HSV_PROGRAM = new GlProgram(new Identifier("owo", "spectrum"), VertexFormats.POSITION_COLOR);
+    public static final GaussianProgram GAUSSIAN_PROGRAM = new GaussianProgram();
+
     @Override
     public void onInitializeClient() {
         ModDataLoader.load(OwoItemGroupLoader.INSTANCE);
@@ -56,7 +62,6 @@ public class OwoClient implements ClientModInitializer {
         }
 
         ScreenInternals.Client.init();
-        HsvProgram.init();
 
         ClientCommandRegistrationCallback.EVENT.register(OwoConfigCommand::register);
 

@@ -158,12 +158,15 @@ public class ComponentTestScreen extends Screen {
                         slider -> slider.snap(true)
                                 .decimalPlaces(1)
                                 .message(value -> Text.translatable("text.ui.test_slider", value))
-                                .onChanged().subscribe(value -> this.client.player.sendMessage(Text.of("sliding towards " + value)))
+                                .onChanged().subscribe(value -> {
+                                    slider.parent().surface(value > 2.5 ? Surface.DARK_PANEL : Surface.GAUSSIAN);
+                                    this.client.player.sendMessage(Text.of("sliding towards " + value));
+                                })
                 ))
                 .gap(10)
                 .padding(Insets.both(5, 10))
                 .horizontalAlignment(HorizontalAlignment.CENTER)
-                .surface(Surface.DARK_PANEL)
+                .surface(Surface.GAUSSIAN)
         );
 
         var dropdown = Components.dropdown(Sizing.content())

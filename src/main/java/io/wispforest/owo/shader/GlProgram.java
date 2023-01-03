@@ -1,5 +1,6 @@
 package io.wispforest.owo.shader;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.mixin.shader.ShaderProgramAccessor;
 import net.minecraft.client.gl.GlUniform;
 import net.minecraft.client.gl.ShaderProgram;
@@ -15,13 +16,13 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public abstract class GlProgram {
+public class GlProgram {
 
     private static final List<Pair<Function<ResourceFactory, ShaderProgram>, Consumer<ShaderProgram>>> REGISTERED_PROGRAMS = new ArrayList<>();
 
     protected ShaderProgram backingProgram;
 
-    protected GlProgram(Identifier id, VertexFormat vertexFormat) {
+    public GlProgram(Identifier id, VertexFormat vertexFormat) {
         REGISTERED_PROGRAMS.add(new Pair<>(
                 resourceFactory -> {
                     try {
@@ -32,12 +33,16 @@ public abstract class GlProgram {
                 },
                 program -> {
                     this.backingProgram = program;
-                    this.loadUniforms();
+                    this.setup();
                 }
         ));
     }
 
-    protected void loadUniforms() {};
+    public void use() {
+        RenderSystem.setShader(() -> this.backingProgram);
+    }
+
+    protected void setup() {}
 
     protected @Nullable GlUniform findUniform(String name) {
         return ((ShaderProgramAccessor) this.backingProgram).owo$getLoadedUniforms().get(name);

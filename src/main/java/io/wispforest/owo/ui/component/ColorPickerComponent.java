@@ -1,6 +1,6 @@
 package io.wispforest.owo.ui.component;
 
-import io.wispforest.owo.shader.HsvProgram;
+import io.wispforest.owo.client.OwoClient;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.parsing.UIModel;
@@ -54,7 +54,7 @@ public class ColorPickerComponent extends BaseComponent {
         buffer.vertex(matrix, this.renderX() + this.colorAreaWidth(), this.renderY(), 0)
                 .color(this.hue, 1f, 1f, 1f).next();
 
-        HsvProgram.INSTANCE.use();
+        OwoClient.HSV_PROGRAM.use();
         Tessellator.getInstance().draw();
 
         Drawer.drawRectOutline(
