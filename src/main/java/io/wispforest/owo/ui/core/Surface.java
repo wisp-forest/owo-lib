@@ -37,23 +37,26 @@ public interface Surface {
         RenderSystem.setShaderColor(1, 1, 1, 1);
     };
 
-    Surface GAUSSIAN = (matrices, component) -> {
-        var buffer = Tessellator.getInstance().getBuffer();
-        var matrix = matrices.peek().getPositionMatrix();
+    static Surface blur(float quality, float size) {
+        return (matrices, component) -> {
+            var buffer = Tessellator.getInstance().getBuffer();
+            var matrix = matrices.peek().getPositionMatrix();
 
-        buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION);
-        buffer.vertex(matrix, component.x(), component.y(), 0).next();
-        buffer.vertex(matrix, component.x(), component.y() + component.height(), 0).next();
-        buffer.vertex(matrix, component.x() + component.width(), component.y() + component.height(), 0).next();
-        buffer.vertex(matrix, component.x() + component.width(), component.y(), 0).next();
+            buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION);
+            buffer.vertex(matrix, component.x(), component.y(), 0).next();
+            buffer.vertex(matrix, component.x(), component.y() + component.height(), 0).next();
+            buffer.vertex(matrix, component.x() + component.width(), component.y() + component.height(), 0).next();
+            buffer.vertex(matrix, component.x() + component.width(), component.y(), 0).next();
 
-        RenderSystem.disableTexture();
+            RenderSystem.disableTexture();
 
-        OwoClient.GAUSSIAN_PROGRAM.use();
-        Tessellator.getInstance().draw();
+            OwoClient.BLUR_PROGRAM.setParameters(16, quality, size);
+            OwoClient.BLUR_PROGRAM.use();
+            Tessellator.getInstance().draw();
 
-        RenderSystem.enableTexture();
-    };
+            RenderSystem.enableTexture();
+        };
+    }
 
     Surface BLANK = (matrices, component) -> {};
 

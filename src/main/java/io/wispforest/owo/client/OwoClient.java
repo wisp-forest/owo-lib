@@ -6,7 +6,7 @@ import io.wispforest.owo.command.debug.OwoDebugCommands;
 import io.wispforest.owo.config.OwoConfigCommand;
 import io.wispforest.owo.itemgroup.json.OwoItemGroupLoader;
 import io.wispforest.owo.moddata.ModDataLoader;
-import io.wispforest.owo.shader.GaussianProgram;
+import io.wispforest.owo.shader.BlurProgram;
 import io.wispforest.owo.shader.GlProgram;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
@@ -42,7 +42,7 @@ public class OwoClient implements ClientModInitializer {
             ========================================""";
 
     public static final GlProgram HSV_PROGRAM = new GlProgram(new Identifier("owo", "spectrum"), VertexFormats.POSITION_COLOR);
-    public static final GaussianProgram GAUSSIAN_PROGRAM = new GaussianProgram();
+    public static final BlurProgram BLUR_PROGRAM = new BlurProgram();
 
     @Override
     public void onInitializeClient() {

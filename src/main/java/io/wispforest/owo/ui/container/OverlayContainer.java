@@ -14,7 +14,7 @@ public class OverlayContainer<C extends Component> extends WrappingParentCompone
         super(Sizing.fill(100), Sizing.fill(100), child);
 
         this.positioning(Positioning.absolute(0, 0));
-        this.surface(Surface.VANILLA_TRANSLUCENT);
+        this.surface(Surface.blur(3, 8));
     }
 
     @Override
