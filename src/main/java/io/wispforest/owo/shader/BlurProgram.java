@@ -18,7 +18,7 @@ public class BlurProgram extends GlProgram {
     private Framebuffer input;
 
     public BlurProgram() {
-        super(new Identifier("owo", "gaussian"), VertexFormats.POSITION);
+        super(new Identifier("owo", "blur"), VertexFormats.POSITION);
 
         WindowResizeCallback.EVENT.register((client, window) -> {
             if (this.input == null) return;
