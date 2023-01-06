@@ -4,8 +4,6 @@ import io.wispforest.owo.ui.core.*;
 import net.minecraft.client.util.math.MatrixStack;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.List;
-
 public class OverlayContainer<C extends Component> extends WrappingParentComponent<C> {
 
     protected boolean closeOnClick = true;
@@ -14,13 +12,13 @@ public class OverlayContainer<C extends Component> extends WrappingParentCompone
         super(Sizing.fill(100), Sizing.fill(100), child);
 
         this.positioning(Positioning.absolute(0, 0));
-        this.surface(Surface.blur(3, 8));
+        this.surface(Surface.VANILLA_TRANSLUCENT);
     }
 
     @Override
     public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
         super.draw(matrices, mouseX, mouseY, partialTicks, delta);
-        this.drawChildren(matrices, mouseX, mouseY, partialTicks, delta, List.of(this.child));
+        this.drawChildren(matrices, mouseX, mouseY, partialTicks, delta, this.childView);
     }
 
     @Override

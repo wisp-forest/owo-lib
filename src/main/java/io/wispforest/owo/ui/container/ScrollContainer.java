@@ -15,7 +15,6 @@ import org.lwjgl.glfw.GLFW;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -119,7 +118,7 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
         if (visualOffset > 9999999e-7 || visualOffset < .1e-6) visualOffset = 0;
 
         matrices.translate(this.direction.choose(visualOffset, 0), this.direction.choose(0, visualOffset), 0);
-        this.drawChildren(matrices, mouseX, mouseY, partialTicks, delta, Collections.singletonList(this.child));
+        this.drawChildren(matrices, mouseX, mouseY, partialTicks, delta, this.childView);
 
         matrices.pop();
 
