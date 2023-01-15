@@ -74,28 +74,28 @@ public final class Layers {
 
     static {
         ScreenEvents.AFTER_INIT.addPhaseOrdering(Event.DEFAULT_PHASE, INIT_PHASE);
-        ScreenEvents.AFTER_INIT.register(INIT_PHASE, (client, screen, scaledWidth, scaledHeight) -> {
-            ((OwoScreenExtension) screen).owo$updateLayers();
+        ScreenEvents.AFTER_INIT.register(INIT_PHASE, (client, screeen, scaledWidth, scaledHeight) -> {
+            ((OwoScreenExtension) screeen).owo$updateLayers();
 
-            ScreenEvents.remove(screen).register(bruh -> {
+            ScreenEvents.remove(screeen).register(screen -> {
                 for (var instance : getInstances(screen)) {
                     instance.adapter.dispose();
                 }
             });
 
-            ScreenEvents.beforeRender(screen).register((bruh, matrices, mouseX, mouseY, tickDelta) -> {
+            ScreenEvents.beforeRender(screeen).register((screen, matrices, mouseX, mouseY, tickDelta) -> {
                 for (var instance : getInstances(screen)) {
                     if (instance.aggressivePositioning) instance.dispatchLayoutUpdates();
                 }
             });
 
-            ScreenEvents.afterRender(screen).register((bruh, matrices, mouseX, mouseY, tickDelta) -> {
+            ScreenEvents.afterRender(screeen).register((screen, matrices, mouseX, mouseY, tickDelta) -> {
                 for (var instance : getInstances(screen)) {
                     instance.adapter.render(matrices, mouseX, mouseY, tickDelta);
                 }
             });
 
-            ScreenMouseEvents.allowMouseClick(screen).register((bruh, mouseX, mouseY, button) -> {
+            ScreenMouseEvents.allowMouseClick(screeen).register((screen, mouseX, mouseY, button) -> {
                 boolean handled;
                 for (var instance : getInstances(screen)) {
                     handled = instance.adapter.mouseClicked(mouseX, mouseY, button);
@@ -105,7 +105,7 @@ public final class Layers {
                 return true;
             });
 
-            ScreenMouseEvents.allowMouseRelease(screen).register((bruh, mouseX, mouseY, button) -> {
+            ScreenMouseEvents.allowMouseRelease(screeen).register((screen, mouseX, mouseY, button) -> {
                 boolean handled;
                 for (var instance : getInstances(screen)) {
                     handled = instance.adapter.mouseReleased(mouseX, mouseY, button);
@@ -115,7 +115,7 @@ public final class Layers {
                 return true;
             });
 
-            ScreenMouseEvents.allowMouseScroll(screen).register((bruh, mouseX, mouseY, horizontalAmount, verticalAmount) -> {
+            ScreenMouseEvents.allowMouseScroll(screeen).register((screen, mouseX, mouseY, horizontalAmount, verticalAmount) -> {
                 boolean handled;
                 for (var instance : getInstances(screen)) {
                     handled = instance.adapter.mouseScrolled(mouseX, mouseY, verticalAmount);
@@ -125,7 +125,7 @@ public final class Layers {
                 return true;
             });
 
-            ScreenKeyboardEvents.allowKeyPress(screen).register((bruh, key, scancode, modifiers) -> {
+            ScreenKeyboardEvents.allowKeyPress(screeen).register((screen, key, scancode, modifiers) -> {
                 boolean handled;
                 for (var instance : getInstances(screen)) {
                     handled = instance.adapter.keyPressed(key, scancode, modifiers);
@@ -135,7 +135,7 @@ public final class Layers {
                 return true;
             });
 
-            ScreenKeyboardEvents.allowKeyRelease(screen).register((bruh, key, scancode, modifiers) -> {
+            ScreenKeyboardEvents.allowKeyRelease(screeen).register((screen, key, scancode, modifiers) -> {
                 boolean handled;
                 for (var instance : getInstances(screen)) {
                     handled = instance.adapter.keyReleased(key, scancode, modifiers);
