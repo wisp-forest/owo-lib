@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import io.wispforest.owo.ui.component.*;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.container.RenderEffectWrapper;
 import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.core.*;
 import net.minecraft.block.Blocks;
@@ -12,6 +13,8 @@ import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.EditBoxWidget;
+import net.minecraft.client.texture.SpriteAtlasTexture;
+import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -20,6 +23,8 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.RotationAxis;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -35,6 +40,7 @@ import java.util.stream.IntStream;
 public class ComponentTestScreen extends Screen {
 
     private OwoUIAdapter<FlowLayout> uiAdapter = null;
+    private RenderEffectWrapper<?>.RenderEffectSlot fadeSlot = null;
 
     public ComponentTestScreen() {
         super(Text.empty());
@@ -188,7 +194,21 @@ public class ComponentTestScreen extends Screen {
         }).margins(Insets.horizontal(8));
         dropdown.mouseLeave().subscribe(() -> dropdown.closeWhenNotHovered(true));
 
-        rootComponent.child(dropdownButton);
+        rootComponent.child(
+                Containers.renderEffect(
+                        Containers.verticalFlow(Sizing.content(), Sizing.content())
+                                .child(Containers.renderEffect(
+                                        Components.sprite(new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, new Identifier("block/stone"))).margins(Insets.of(5))
+                                ).<RenderEffectWrapper<?>>configure(wrapper -> {
+                                    wrapper.effect(RenderEffectWrapper.RenderEffect.rotate(RotationAxis.POSITIVE_Z, -45));
+                                    wrapper.effect(RenderEffectWrapper.RenderEffect.color(Color.ofHsv(.5f, 1f, 1f)));
+                                }))
+                                .child(dropdownButton)
+                ).<RenderEffectWrapper<?>>configure(wrapper -> {
+                    wrapper.effect(RenderEffectWrapper.RenderEffect.rotate(RotationAxis.POSITIVE_Z, 90f));
+                    this.fadeSlot = wrapper.effect(RenderEffectWrapper.RenderEffect.color(Color.WHITE));
+                })
+        );
 
         rootComponent.mouseDown().subscribe((mouseX, mouseY, button) -> {
             if (button != GLFW.GLFW_MOUSE_BUTTON_RIGHT) return false;
@@ -336,6 +356,10 @@ public class ComponentTestScreen extends Screen {
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         super.render(matrices, mouseX, mouseY, delta);
+        this.fadeSlot.update(RenderEffectWrapper.RenderEffect.color(new Color(
+                1f, 1f, 1f,
+                (float) (Math.sin(System.currentTimeMillis() / 1000d) * .5 + .5)
+        )));
     }
 
     @Override

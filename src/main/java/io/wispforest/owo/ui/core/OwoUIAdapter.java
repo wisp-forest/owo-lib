@@ -120,6 +120,7 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
      * <p>
      * After this method has executed, this adapter can safely be garbage-collected
      */
+    // TODO properly dispose root component
     public void dispose() {
         this.cursorAdapter.dispose();
         this.disposed = true;
