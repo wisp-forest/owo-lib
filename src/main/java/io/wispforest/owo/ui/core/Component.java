@@ -245,6 +245,12 @@ public interface Component extends PositionedRectangle {
      * Called when this component is being dismounted from its
      * parent. This usually happens because the layout is being recalculated
      * or the child has been removed - useful for releasing resources for example
+     * <p>
+     * <b>Note:</b> It is currently not guaranteed in any way that this method is
+     * invoked when the component tree becomes itself unreachable. You may still override
+     * this method to release resources if it becomes certain at an early point that
+     * they're not needed anymore, but generally resource management stays the responsibility
+     * of the individual component for the time being
      *
      * @param reason Why the component is being dismounted. If this is
      *               {@link DismountReason#LAYOUT_INFLATION}, resources should still be held onto
