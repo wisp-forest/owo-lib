@@ -26,6 +26,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.RotationAxis;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.IOException;
@@ -205,7 +206,9 @@ public class ComponentTestScreen extends Screen {
                                 }))
                                 .child(dropdownButton)
                 ).<RenderEffectWrapper<?>>configure(wrapper -> {
-                    wrapper.effect(RenderEffectWrapper.RenderEffect.rotate(RotationAxis.POSITIVE_Z, 90f));
+                    wrapper.effect(RenderEffectWrapper.RenderEffect.transform(matrices -> matrices.translate(0, 25, 0)));
+
+                    wrapper.effect(RenderEffectWrapper.RenderEffect.rotate(90f));
                     this.fadeSlot = wrapper.effect(RenderEffectWrapper.RenderEffect.color(Color.WHITE));
                 })
         );

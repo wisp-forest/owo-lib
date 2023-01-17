@@ -14,10 +14,12 @@ import net.minecraft.client.gl.SimpleFramebuffer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.RotationAxis;
 import org.jetbrains.annotations.ApiStatus;
+import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL30;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * An experimental wrapper component that allows arbitrary rendering
@@ -215,6 +217,39 @@ public class RenderEffectWrapper<C extends Component> extends WrappingParentComp
                 @Override
                 public void cleanup(Component component, MatrixStack matrices, float partialTicks, float delta) {
                     RenderSystem.setShaderColor(colors[0], colors[1], colors[2], colors[3]);
+                }
+            };
+        }
+
+        /**
+         * Create an effect instance which applies the given transformation
+         * matrix before the component is rendered
+         *
+         * @param transform The transformation matrix to apply
+         */
+        static RenderEffect transform(Matrix4f transform) {
+            return transform(matrices -> {
+                matrices.multiplyPositionMatrix(transform);
+            });
+        }
+
+        /**
+         * Create an effect instance which invokes the given transform
+         * function with the matrix stack before the component is rendered
+         *
+         * @param transform The transform function to apply
+         */
+        static RenderEffect transform(Consumer<MatrixStack> transform) {
+            return new RenderEffect() {
+                @Override
+                public void setup(Component component, MatrixStack matrices, float partialTicks, float delta) {
+                    matrices.push();
+                    transform.accept(matrices);
+                }
+
+                @Override
+                public void cleanup(Component component, MatrixStack matrices, float partialTicks, float delta) {
+                    matrices.pop();
                 }
             };
         }
