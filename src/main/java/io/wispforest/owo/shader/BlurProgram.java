@@ -1,5 +1,6 @@
 package io.wispforest.owo.shader;
 
+import io.wispforest.owo.ui.core.Surface;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
@@ -9,6 +10,11 @@ import net.minecraft.client.render.VertexFormats;
 import net.minecraft.util.Identifier;
 import org.lwjgl.opengl.GL30;
 
+/**
+ * A simple GlProgram implementation that applies an approximate gaussian
+ * blur to the quads it draws. Look at {@link Surface#blur(float, float)} for a
+ * reference implementation
+ */
 public class BlurProgram extends GlProgram {
 
     private GlUniform inputResolution;
