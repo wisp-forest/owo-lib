@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(EntityRenderDispatcher.class)
 public class EntityRenderDispatcherMixin implements OwoEntityRenderDispatcherExtension {
 
-    private boolean owo$showNametag = false;
+    private boolean owo$showNametag = true;
     private boolean owo$counterRotate = false;
 
     @Override

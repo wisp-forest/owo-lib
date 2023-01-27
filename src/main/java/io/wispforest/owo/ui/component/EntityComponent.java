@@ -105,7 +105,7 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
             matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-45 + this.mouseRotation));
         }
 
-        var dispatcher = ((OwoEntityRenderDispatcherExtension) this.dispatcher);
+        var dispatcher = (OwoEntityRenderDispatcherExtension) this.dispatcher;
         dispatcher.owo$setCounterRotate(true);
         dispatcher.owo$setShowNametag(this.showNametag);
 

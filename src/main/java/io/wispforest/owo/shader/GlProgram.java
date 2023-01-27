@@ -18,8 +18,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * A simple wrapper around Minecraft's built-in code shaders. In order to load and use
- * a custom shader from your resources, place it in {@code assets/&lt;mod id&gt;/shaders/core/}.
+ * A simple wrapper around Minecraft's built-in core shaders. In order to load and use
+ * a custom shader from your resources, place it in {@code assets/<mod id>/shaders/core/}.
  * You can look up the required files and their format on <a href="https://minecraft.fandom.com/wiki/Shaders">the Minecraft Wiki</a>
  * <p>
  * This wrapper fully supports custom uniforms. If you require any, extend this class, then grab the
