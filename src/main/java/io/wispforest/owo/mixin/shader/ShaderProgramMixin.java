@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 @Mixin(ShaderProgram.class)
 public class ShaderProgramMixin {
 
-    @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Identifier;<init>(Ljava/lang/String;)V"))
+    @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Identifier;<init>(Ljava/lang/String;)V"), require = 0)
     private String fixIdentifier(String id) {
         if (OwoClient.SATIN_LOADED) return id;
 
@@ -19,7 +19,7 @@ public class ShaderProgramMixin {
         return splitName[0].replace("shaders/core/", "") + ":" + "shaders/core/" + splitName[1];
     }
 
-    @ModifyArg(method = "loadShader", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Identifier;<init>(Ljava/lang/String;)V"))
+    @ModifyArg(method = "loadShader", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Identifier;<init>(Ljava/lang/String;)V"), require = 0)
     private static String fixMoreIdentifiers(String id) {
         if (OwoClient.SATIN_LOADED) return id;
 
