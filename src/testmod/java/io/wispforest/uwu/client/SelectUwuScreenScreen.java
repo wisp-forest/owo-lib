@@ -6,21 +6,20 @@ import io.wispforest.owo.ui.base.BaseUIModelScreen;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
-import io.wispforest.owo.ui.container.VerticalFlowLayout;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.uwu.Uwu;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 
-public class SelectUwuScreenScreen extends BaseOwoScreen<VerticalFlowLayout> {
+public class SelectUwuScreenScreen extends BaseOwoScreen<FlowLayout> {
 
     @Override
-    protected @NotNull OwoUIAdapter<VerticalFlowLayout> createAdapter() {
+    protected @NotNull OwoUIAdapter<FlowLayout> createAdapter() {
         return OwoUIAdapter.create(this, Containers::verticalFlow);
     }
 
     @Override
-    protected void build(VerticalFlowLayout rootComponent) {
+    protected void build(FlowLayout rootComponent) {
         this.uiAdapter.rootComponent.surface(Surface.flat(0x77000000))
                 .verticalAlignment(VerticalAlignment.CENTER)
                 .horizontalAlignment(HorizontalAlignment.CENTER);

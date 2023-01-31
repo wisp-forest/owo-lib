@@ -4,7 +4,6 @@ import io.wispforest.owo.ui.base.BaseUIModelScreen;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.SliderComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
-import io.wispforest.owo.ui.container.VerticalFlowLayout;
 import io.wispforest.owo.ui.core.Component;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 
@@ -18,7 +17,7 @@ public class UwuConfigScreen extends BaseUIModelScreen<FlowLayout> {
 
     @Override
     protected void build(FlowLayout rootComponent) {
-        var panel = rootComponent.childById(VerticalFlowLayout.class, "config-panel");
+        var panel = rootComponent.childById(FlowLayout.class, "config-panel");
 
         for (int i = 1; i <= 25; i++) {
             panel.child(i % 2 == 0

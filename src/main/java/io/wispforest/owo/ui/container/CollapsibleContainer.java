@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public class CollapsibleContainer extends VerticalFlowLayout {
+public class CollapsibleContainer extends FlowLayout {
 
     public static final Surface SURFACE = (matrices, component) -> Drawer.fill(matrices,
             component.x() + 5,
@@ -42,7 +42,7 @@ public class CollapsibleContainer extends VerticalFlowLayout {
     protected final FlowLayout contentLayout;
 
     protected CollapsibleContainer(Sizing horizontalSizing, Sizing verticalSizing, Text title, boolean expanded) {
-        super(horizontalSizing, verticalSizing);
+        super(horizontalSizing, verticalSizing, Algorithm.VERTICAL);
 
         // Title
 

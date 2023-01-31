@@ -5,8 +5,6 @@ import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
-import io.wispforest.owo.ui.container.HorizontalFlowLayout;
-import io.wispforest.owo.ui.container.VerticalFlowLayout;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
@@ -28,14 +26,14 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class DropdownComponent extends HorizontalFlowLayout {
+public class DropdownComponent extends FlowLayout {
 
     protected static final Identifier ICONS_TEXTURE = new Identifier("owo", "textures/gui/dropdown_icons.png");
-    protected final VerticalFlowLayout entries;
+    protected final FlowLayout entries;
     protected boolean closeWhenNotHovered = false;
 
     protected DropdownComponent(Sizing horizontalSizing) {
-        super(Sizing.content(), Sizing.content());
+        super(Sizing.content(), Sizing.content(), Algorithm.HORIZONTAL);
 
         this.entries = Containers.verticalFlow(horizontalSizing, Sizing.content());
         this.entries.padding(Insets.of(1));

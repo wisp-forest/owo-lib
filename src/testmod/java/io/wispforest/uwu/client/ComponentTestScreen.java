@@ -26,7 +26,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.RotationAxis;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.IOException;
@@ -274,6 +273,7 @@ public class ComponentTestScreen extends Screen {
                 })
         );
 
+
         // i knew it all along, chyz truly is a pig
         var pig = EntityComponent.createRenderablePlayer(new GameProfile(UUID.fromString("09de8a6d-86bf-4c15-bb93-ce3384ce4e96"), "chyzman"));
         pig.setOnFire(true);
@@ -347,6 +347,17 @@ public class ComponentTestScreen extends Screen {
                         .margins(Insets.bottom(5))
                         .positioning(Positioning.relative(50, 100))
         );
+
+        // infinity scroll test
+//        rootComponent.child(
+//                Containers.verticalScroll(Sizing.fixed(243), Sizing.fixed(145),
+//                        Components.box(Sizing.fixed(235), Sizing.fixed(144))
+//                                .startColor(Color.GREEN)
+//                                .endColor(Color.BLUE)
+//                                .direction(BoxComponent.GradientDirection.TOP_TO_BOTTOM)
+//                                .fill(true)
+//                ).padding(Insets.of(4)).positioning(Positioning.absolute(150, 40))
+//        );
 
         rootComponent.child(buttonPanel);
         rootComponent.surface(Surface.flat(0x77000000))

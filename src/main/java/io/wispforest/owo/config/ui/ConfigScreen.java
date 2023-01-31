@@ -156,10 +156,10 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
             // TODO check if any options changed and warn
         });
 
-        var optionPanel = rootComponent.childById(VerticalFlowLayout.class, "option-panel");
+        var optionPanel = rootComponent.childById(FlowLayout.class, "option-panel");
         var sections = new LinkedHashMap<Component, Text>();
 
-        var containers = new HashMap<Option.Key, VerticalFlowLayout>();
+        var containers = new HashMap<Option.Key, FlowLayout>();
         containers.put(Option.Key.ROOT, optionPanel);
 
         rootComponent.childById(TextBoxComponent.class, "search-field").<TextBoxComponent>configure(searchField -> {
