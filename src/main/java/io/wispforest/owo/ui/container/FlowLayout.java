@@ -139,7 +139,11 @@ public class FlowLayout extends BaseParentComponent {
      * should insert between all child components
      */
     public FlowLayout gap(int gap) {
-        this.gap = gap;
+        int oldGap = this.gap;
+        if (oldGap != gap) {
+            this.gap = gap;
+            this.updateLayout();
+        }
         return this;
     }
 
