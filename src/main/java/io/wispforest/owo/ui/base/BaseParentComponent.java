@@ -162,6 +162,7 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
         super.inflate(space);
         this.layout(space);
         super.inflate(space);
+        this.layout(space);
     }
 
     protected void updateLayout() {
