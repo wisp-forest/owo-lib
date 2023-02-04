@@ -132,12 +132,12 @@ public class ComponentTestScreen extends Screen {
         );
 
         final var buttonPanel = Containers.horizontalFlow(Sizing.content(), Sizing.content())
-                .child(Components.label(Text.of("A horizontal Flow Layout\nwith a dark panel")).margins(Insets.of(5)))
+                .child(Components.label(Text.of("A horizontal Flow Layout\nthat's a tooltip?")).margins(Insets.of(5)))
                 .child(Components.button(Text.of("⇄"), button -> this.clearAndInit()).sizing(Sizing.fixed(20)))
                 .child(Components.button(Text.of("X"), button -> this.close()).sizing(Sizing.fixed(20)))
                 .positioning(Positioning.relative(100, 0))
                 .verticalAlignment(VerticalAlignment.CENTER)
-                .surface(Surface.DARK_PANEL)
+                .surface(Surface.TOOLTIP)
                 .padding(Insets.of(5))
                 .margins(Insets.of(10));
 

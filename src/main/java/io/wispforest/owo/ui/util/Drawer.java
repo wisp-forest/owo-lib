@@ -14,15 +14,13 @@ import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.render.GameRenderer;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 import org.joml.Vector2d;
 
 import java.util.ArrayList;
@@ -237,6 +235,14 @@ public class Drawer extends DrawableHelper {
 
     public static void drawTooltip(MatrixStack matrices, int x, int y, List<TooltipComponent> tooltip) {
         ((ScreenInvoker) utilityScreen()).owo$renderTooltipFromComponents(matrices, tooltip, x, y, HoveredTooltipPositioner.INSTANCE);
+    }
+
+    public static void fillGradient(Matrix4f matrix, BufferBuilder builder, int startX, int startY, int endX, int endY, int z, int colorStart, int colorEnd) {
+        DrawableHelper.fillGradient(matrix, builder, startX, startY, endX, endY, z, colorStart, colorEnd);
+    }
+
+    protected static void fillGradient(MatrixStack matrices, int startX, int startY, int endX, int endY, int colorStart, int colorEnd, int z) {
+        DrawableHelper.fillGradient(matrices, startX, startY, endX, endY, colorStart, colorEnd, z);
     }
 
     public static UtilityScreen utilityScreen() {

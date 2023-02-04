@@ -5,6 +5,8 @@ import io.wispforest.owo.client.OwoClient;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.Drawer;
+import net.minecraft.client.gui.tooltip.TooltipBackgroundRenderer;
+import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormats;
@@ -35,6 +37,19 @@ public interface Surface {
         RenderSystem.setShaderColor(64 / 255f, 64 / 255f, 64 / 255f, 1);
         Drawer.drawTexture(matrices, component.x(), component.y(), 0, 0, component.width(), component.height(), 32, 32);
         RenderSystem.setShaderColor(1, 1, 1, 1);
+    };
+
+    Surface TOOLTIP = (matrices, component) -> {
+        var buffer = Tessellator.getInstance().getBuffer();
+        buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
+
+        TooltipBackgroundRenderer.render(Drawer::fillGradient, matrices.peek().getPositionMatrix(), buffer, component.x() + 4, component.y() + 4, component.width() - 8, component.height() - 8, 0);
+
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+
+        Tessellator.getInstance().draw();
     };
 
     static Surface blur(float quality, float size) {
