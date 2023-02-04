@@ -266,6 +266,14 @@
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
+            <xs:element name="tooltip">
+                <xs:annotation>
+                    <xs:documentation>
+                        The same renderer used by vanilla item
+                        and UI element tooltips
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
             <xs:element type="owo-ui-color" name="outline">
                 <xs:annotation>
                     <xs:documentation>
