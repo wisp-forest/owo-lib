@@ -6,6 +6,7 @@ import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.MountingHelper;
+import io.wispforest.owo.util.Observable;
 import net.minecraft.client.util.math.MatrixStack;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.w3c.dom.Element;
@@ -20,11 +21,13 @@ public class FlowLayout extends BaseParentComponent {
     protected final Algorithm algorithm;
 
     protected Size contentSize = Size.zero();
-    protected int gap = 0;
+    protected Observable<Integer> gap = Observable.of(0);
 
     protected FlowLayout(Sizing horizontalSizing, Sizing verticalSizing, Algorithm algorithm) {
         super(horizontalSizing, verticalSizing);
         this.algorithm = algorithm;
+
+        this.gap.observe(integer -> this.updateLayout());
     }
 
     /**
@@ -139,7 +142,7 @@ public class FlowLayout extends BaseParentComponent {
      * should insert between all child components
      */
     public FlowLayout gap(int gap) {
-        this.gap = gap;
+        this.gap.set(gap);
         return this;
     }
 
@@ -148,7 +151,7 @@ public class FlowLayout extends BaseParentComponent {
      * inserts between all child components
      */
     public int gap() {
-        return this.gap;
+        return this.gap.get();
     }
 
     @Override
@@ -192,22 +195,23 @@ public class FlowLayout extends BaseParentComponent {
             final var padding = container.padding.get();
             final var childSpace = container.calculateChildSpace(container.space);
 
+            container.children.forEach(child -> child.inflate(childSpace));
+
             var mountState = MountingHelper.mountEarly(container::mountChild, container.children, childSpace, child -> {
                 layout.add(child);
 
-                child.inflate(childSpace);
                 child.mount(container,
                         container.x + padding.left() + child.margins().get().left() + layoutWidth.intValue(),
                         container.y + padding.top() + child.margins().get().top());
 
                 final var childSize = child.fullSize();
-                layoutWidth.add(childSize.width() + container.gap);
+                layoutWidth.add(childSize.width() + container.gap());
                 if (childSize.height() > layoutHeight.intValue()) {
                     layoutHeight.setValue(childSize.height());
                 }
             });
 
-            layoutWidth.subtract(container.gap);
+            layoutWidth.subtract(container.gap());
 
             container.contentSize = Size.of(layoutWidth.intValue(), layoutHeight.intValue());
             container.applySizing();
@@ -239,22 +243,23 @@ public class FlowLayout extends BaseParentComponent {
             final var padding = container.padding.get();
             final var childSpace = container.calculateChildSpace(container.space);
 
+            container.children.forEach(child -> child.inflate(childSpace));
+
             var mountState = MountingHelper.mountEarly(container::mountChild, container.children, childSpace, child -> {
                 layout.add(child);
 
-                child.inflate(childSpace);
                 child.mount(container,
                         container.x + padding.left() + child.margins().get().left(),
                         container.y + padding.top() + child.margins().get().top() + layoutHeight.intValue());
 
                 final var childSize = child.fullSize();
-                layoutHeight.add(childSize.height() + container.gap);
+                layoutHeight.add(childSize.height() + container.gap());
                 if (childSize.width() > layoutWidth.intValue()) {
                     layoutWidth.setValue(childSize.width());
                 }
             });
 
-            layoutHeight.subtract(container.gap);
+            layoutHeight.subtract(container.gap());
 
             container.contentSize = Size.of(layoutWidth.intValue(), layoutHeight.intValue());
             container.applySizing();
