@@ -63,6 +63,7 @@
     "ui.TextFieldWidgetAccessor",
     "ui.TextFieldWidgetMixin",
     "ui.TextRendererMixin",
+    "ui.ItemRendererMixin",
     "ui.layers.KeyboardMixin",
     "ui.layers.MouseMixin",
     "ui.layers.ScreenMixin",

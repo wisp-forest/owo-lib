@@ -1,11 +1,11 @@
 package io.wispforest.owo.ui.component;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
+import io.wispforest.owo.ui.util.ItemRendererExtension;
 import net.fabricmc.fabric.api.client.rendering.v1.TooltipComponentCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
@@ -55,35 +55,28 @@ public class ItemComponent extends BaseComponent {
     @Override
     public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
         final boolean notSideLit = !this.itemRenderer.getModel(this.stack, null, null, 0).isSideLit();
-        if (notSideLit) {
-            DiffuseLighting.disableGuiDepthLighting();
-        }
+        if (notSideLit) DiffuseLighting.disableGuiDepthLighting();
 
-        var modelView = RenderSystem.getModelViewStack();
-        modelView.push();
+        matrices.push();
 
         // Translate to the root of the component
-        modelView.translate(x, y, 100);
+        matrices.translate(x, y, 0);
 
         // Scale according to component size and translate to the center
-        modelView.scale(this.width / 16f, this.height / 16f, 1);
-        modelView.translate(8.0, 8.0, 0.0);
+        matrices.scale(this.width / 16f, this.height / 16f, 1);
+        matrices.translate(8.0, 8.0, 0.0);
 
         // Vanilla scaling and y inversion
-        modelView.scale(16, -16, 16);
-        RenderSystem.applyModelViewMatrix();
+        matrices.scale(16, -16, 16);
 
         this.itemRenderer.renderItem(this.stack, ModelTransformation.Mode.GUI, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, new MatrixStack(), entityBuffers, 0);
         this.entityBuffers.draw();
 
         // Clean up
-        modelView.pop();
-        RenderSystem.applyModelViewMatrix();
+        matrices.pop();
 
-        if (this.showOverlay) this.itemRenderer.renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, this.stack, this.x, this.y);
-        if (notSideLit) {
-            DiffuseLighting.enableGuiDepthLighting();
-        }
+        if (this.showOverlay) ((ItemRendererExtension) this.itemRenderer).renderGuiItemOverlay(matrices, MinecraftClient.getInstance().textRenderer, this.stack, 0, 0, 1);
+        if (notSideLit) DiffuseLighting.enableGuiDepthLighting();
     }
 
     public ItemComponent stack(ItemStack stack) {
