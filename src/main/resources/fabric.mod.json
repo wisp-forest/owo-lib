@@ -14,7 +14,6 @@
     "sources": "https://github.com/wisp-forest/owo-lib/",
     "issues": "https://github.com/wisp-forest/owo-lib/issues"
   },
-  },
   "license": "MIT",
   "icon": "assets/owo/icon.png",
   "environment": "*",
