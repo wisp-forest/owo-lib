@@ -1,0 +1,79 @@
+{
+  "owo.wiki": "Вики",
+  "modmenu.descriptionTranslation.owo": "әйе бу начар мин беләм",
+  "modmenu.summaryTranslation.owo": "әйе бу начар мин беләм",
+  "text.owo.itemGroup.tab_template": [
+    { "index": 0 },
+    { "text": " > ", "color": "gray" },
+    { "index": 1, "color": "dark_gray" }
+  ],
+  "text.owo.config.search": "Эзләү...",
+  "text.owo.config.search.matches": "%$2d нәтиҗәдән %$1d нәтиҗә",
+  "text.owo.config.search.no_matches": "Нәтиҗәләр юк",
+  "text.owo.config.must_restart": "Сез керткән кайбер үзгәрешләр куллану өчен яңадан йөкләүне таләп итә",
+  "text.owo.config.button.exit_minecraft": "Minecraft-тан чыгу",
+  "text.owo.config.button.ignore_restart": "Яңадан кушу соңрак",
+  "text.owo.config.button.range.edit_as_text": "Текст сыман үзгәртү",
+  "text.owo.config.button.range.edit_with_slider": "Шудырма белән үзгәртү",
+  "text.owo.config.applies_after_restart": [
+    {
+      "text": "⏻ ",
+      "color": "#FAEA48"
+    },
+    {
+      "text": "Бу көйләү яңадан йөкләүдән соң кулланыла",
+      "color": "gray"
+    }
+  ],
+  "text.owo.config.managed_by_server": [
+    {
+      "text": "⚑ ",
+      "color": "#EB1D36"
+    },
+    {
+      "text": "Бу көйләү сервер белән идарә ителә\n   Үзгәртү өчен өзелегез",
+      "color": "gray"
+    }
+  ],
+  "text.owo.config.button.reload": "Яңадан йөкләү",
+  "text.owo.config.button.done": "Булды",
+  "text.owo.config.sections": [
+    {
+      "text": "Бүлекләр",
+      "underlined": true
+    }
+  ],
+  "text.owo.config.list.add_entry": "Элементны өстәү",
+  "text.owo.config.boolean_toggle.enabled": [
+    "",
+    {
+      "text": "[",
+      "color": "gray"
+    },
+    {
+      "text": "✔",
+      "color": "#28FFBF"
+    },
+    {
+      "text": "]",
+      "color": "gray"
+    },
+    " Кушык"
+  ],
+  "text.owo.config.boolean_toggle.disabled": [
+    "",
+    {
+      "text": "[",
+      "color": "gray"
+    },
+    {
+      "text": "❌",
+      "color": "#EB1D36"
+    },
+    {
+      "text": "]",
+      "color": "gray"
+    },
+    " Сүнек"
+  ]
+}
