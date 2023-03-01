@@ -62,6 +62,8 @@ public class ItemComponent extends BaseComponent {
         // Translate to the root of the component
         matrices.translate(x, y, 0);
 
+        matrices.push();
+
         // Scale according to component size and translate to the center
         matrices.scale(this.width / 16f, this.height / 16f, 1);
         matrices.translate(8.0, 8.0, 0.0);
@@ -69,14 +71,17 @@ public class ItemComponent extends BaseComponent {
         // Vanilla scaling and y inversion
         matrices.scale(16, -16, 16);
 
-        this.itemRenderer.renderItem(this.stack, ModelTransformation.Mode.GUI, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, new MatrixStack(), entityBuffers, 0);
+        this.itemRenderer.renderItem(this.stack, ModelTransformation.Mode.GUI, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, matrices, entityBuffers, 0);
         this.entityBuffers.draw();
 
-        // Clean up
+        // Use base translations of components x, y
         matrices.pop();
 
         if (this.showOverlay) ((ItemRendererExtension) this.itemRenderer).renderGuiItemOverlay(matrices, MinecraftClient.getInstance().textRenderer, this.stack, 0, 0, 1);
         if (notSideLit) DiffuseLighting.enableGuiDepthLighting();
+
+        // Final Clean up
+        matrices.pop();
     }
 
     public ItemComponent stack(ItemStack stack) {
