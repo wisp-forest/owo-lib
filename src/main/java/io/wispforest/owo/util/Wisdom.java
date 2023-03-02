@@ -47,7 +47,8 @@ public final class Wisdom {
             "I think that's not the only reason Spectrum isn't compatible with Quilt",
             "My Seethenhagen factory makes 331 pounds of licorice per hour",
             "chyz: now i just need to painstakingly move jerry (the little tiny lil fella tiny guy man button) to correct spot when recipe book is opened",
-            "chyz: bro, can you stop breathing"
+            "chyz: bro, can you stop breathing",
+            "Noaaan: It's surprising how much knowledge is lost by the simple fact that people don't know it"
     );
 
     public static void spread() {
