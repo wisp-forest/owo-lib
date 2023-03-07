@@ -118,7 +118,7 @@ public class ParticleSystemController {
         VectorSerializer.write(buf, pos);
         particleSystem.adapter.serializer().accept(buf, data);
 
-        for (var player : PlayerLookup.tracking(world, new BlockPos(pos))) {
+        for (var player : PlayerLookup.tracking(world, BlockPos.ofFloored(pos))) {
             ServerPlayNetworking.send(player, channelId, buf);
         }
     }

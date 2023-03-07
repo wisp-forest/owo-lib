@@ -240,7 +240,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
     @Unique
     private ButtonWidget.PressAction owo$createSelectAction(Screen targetScreen, OwoItemGroup group, int targetTabIndex) {
         return button -> {
-            group.setSelectedTab(targetTabIndex, this.owo$enabledFeatures, this.shouldShowOperatorTab(this.handler.player()));
+            group.setSelectedTab(targetTabIndex, new ItemGroup.DisplayContext(this.owo$enabledFeatures, this.shouldShowOperatorTab(this.handler.player()), this.handler.player().world.getRegistryManager()));
             this.clearAndInit();
             ((ItemGroupButtonWidget) button).isSelected = true;
         };

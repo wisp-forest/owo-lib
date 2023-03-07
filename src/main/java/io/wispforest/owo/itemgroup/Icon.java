@@ -59,7 +59,7 @@ public interface Icon {
 
         @Override
         public void render(MatrixStack matrixStack, int x, int y, int mouseX, int mouseY, float delta) {
-            MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(stack, x, y);
+            MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(matrixStack, stack, x, y);
         }
     }
 

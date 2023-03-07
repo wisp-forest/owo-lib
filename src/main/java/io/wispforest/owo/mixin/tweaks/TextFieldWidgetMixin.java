@@ -1,7 +1,6 @@
 package io.wispforest.owo.mixin.tweaks;
 
 import io.wispforest.owo.Owo;
-import io.wispforest.owo.ui.inject.ComponentStub;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
@@ -13,13 +12,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(TextFieldWidget.class)
-public abstract class TextFieldWidgetMixin extends ClickableWidget implements ComponentStub {
+public abstract class TextFieldWidgetMixin extends ClickableWidget {
 
     @Shadow
     private String text;
-
-    @Shadow
-    public abstract void setTextFieldFocused(boolean focused);
 
     public TextFieldWidgetMixin(int x, int y, int width, int height, Text message) {
         super(x, y, width, height, message);
@@ -43,12 +39,6 @@ public abstract class TextFieldWidgetMixin extends ClickableWidget implements Co
         }
 
         cir.setReturnValue(cursorPosition);
-    }
-
-    @Override
-    public void onFocusGained(FocusSource source) {
-        super.onFocusGained(source);
-        this.setTextFieldFocused(true);
     }
 
     @Unique

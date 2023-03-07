@@ -1,11 +1,11 @@
 package io.wispforest.owo.ui.layers;
 
-import io.wispforest.owo.mixin.ui.layers.WrapperWidgetInvoker;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.util.pond.OwoScreenExtension;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.gui.widget.LayoutWidget;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -136,10 +136,8 @@ public class Layer<S extends Screen, R extends ParentComponent> {
 
         private static void collectChildren(Element element, List<ClickableWidget> children) {
             if (element instanceof ClickableWidget widget) children.add(widget);
-            if (element instanceof WrapperWidgetInvoker wrapper) {
-                for (var widget : wrapper.owo$wrappedWidgets()) {
-                    collectChildren(widget, children);
-                }
+            if (element instanceof LayoutWidget layout) {
+                layout.forEachChild(child -> collectChildren(child, children));
             }
         }
 

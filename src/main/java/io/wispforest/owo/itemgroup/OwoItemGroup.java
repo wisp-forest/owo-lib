@@ -37,7 +37,7 @@ public abstract class OwoItemGroup extends ItemGroup {
 
     public static final BiConsumer<Item, Entries> DEFAULT_STACK_GENERATOR = (item, stacks) -> stacks.add(item.getDefaultStack());
 
-    protected static final ItemGroupTab PLACEHOLDER_TAB = new ItemGroupTab(Icon.of(Items.AIR), Text.empty(), (b, r, u) -> {}, ItemGroupTab.DEFAULT_TEXTURE, false);
+    protected static final ItemGroupTab PLACEHOLDER_TAB = new ItemGroupTab(Icon.of(Items.AIR), Text.empty(), (br, uh) -> {}, ItemGroupTab.DEFAULT_TEXTURE, false);
 
     public final List<ItemGroupTab> tabs = new ArrayList<>();
     public final List<ItemGroupButton> buttons = new ArrayList<>();
@@ -58,7 +58,7 @@ public abstract class OwoItemGroup extends ItemGroup {
     private final boolean displaySingleTab;
 
     protected OwoItemGroup(Identifier id, Consumer<OwoItemGroup> initializer, Supplier<Icon> iconSupplier, int tabStackHeight, int buttonStackHeight, @Nullable Identifier customTexture, boolean useDynamicTitle, boolean displaySingleTab) {
-        super(null, -1, Type.CATEGORY, Text.translatable("itemGroup.%s.%s".formatted(id.getNamespace(), id.getPath())), () -> ItemStack.EMPTY, (enabledFeatures, entries, operatorEnabled) -> {});
+        super(null, -1, Type.CATEGORY, Text.translatable("itemGroup.%s.%s".formatted(id.getNamespace(), id.getPath())), () -> ItemStack.EMPTY, (displayContext, entries) -> {});
         this.id = id;
         this.initializer = initializer;
         this.iconSupplier = iconSupplier;
@@ -68,9 +68,9 @@ public abstract class OwoItemGroup extends ItemGroup {
         this.useDynamicTitle = useDynamicTitle;
         this.displaySingleTab = displaySingleTab;
 
-        ((ItemGroupAccessor) this).owo$setEntryCollector((enabledFeatures, entries, operatorEnabled) -> {
+        ((ItemGroupAccessor) this).owo$setEntryCollector((context, entries) -> {
             if (!this.initialized) throw new IllegalStateException("oωo item group not initialized, was 'initialize()' called?");
-            this.getSelectedTab().contentSupplier().addItems(enabledFeatures, entries, operatorEnabled);
+            this.getSelectedTab().contentSupplier().addItems(context, entries);
             this.collectItemsFromRegistry(entries, true);
         });
     }
@@ -123,8 +123,8 @@ public abstract class OwoItemGroup extends ItemGroup {
                 icon,
                 ButtonDefinition.tooltipFor(this, "tab", name),
                 contentTag == null
-                        ? (features, entries, hasPermissions) -> {}
-                        : (features, entries, hasPermissions) -> Registries.ITEM.stream().filter(item -> item.getRegistryEntry().isIn(contentTag)).forEach(entries::add),
+                        ? (context, entries) -> {}
+                        : (context, entries) -> Registries.ITEM.stream().filter(item -> item.getRegistryEntry().isIn(contentTag)).forEach(entries::add),
                 texture,
                 primary
         ));
@@ -172,13 +172,13 @@ public abstract class OwoItemGroup extends ItemGroup {
     }
 
     @Override
-    public void updateEntries(FeatureSet enabledFeatures, boolean operatorEnabled) {
-        super.updateEntries(enabledFeatures, operatorEnabled);
+    public void updateEntries(DisplayContext context) {
+        super.updateEntries(context);
 
-        var searchEntries = new SearchOnlyEntries(this, enabledFeatures);
+        var searchEntries = new SearchOnlyEntries(this, context.enabledFeatures());
 
         this.collectItemsFromRegistry(searchEntries, false);
-        this.tabs.forEach(tab -> tab.contentSupplier().addItems(enabledFeatures, searchEntries, operatorEnabled));
+        this.tabs.forEach(tab -> tab.contentSupplier().addItems(context, searchEntries));
 
         ((ItemGroupAccessor) this).owo$setSearchTabStacks(searchEntries.searchTabStacks);
     }
@@ -191,9 +191,9 @@ public abstract class OwoItemGroup extends ItemGroup {
 
     // Getters and setters
 
-    public void setSelectedTab(int selectedTab, FeatureSet enabledFeatures, boolean operatorEnabled) {
+    public void setSelectedTab(int selectedTab, DisplayContext context) {
         this.selectedTab = selectedTab;
-        this.updateEntries(enabledFeatures, operatorEnabled);
+        this.updateEntries(context);
     }
 
     public ItemGroupTab getSelectedTab() {

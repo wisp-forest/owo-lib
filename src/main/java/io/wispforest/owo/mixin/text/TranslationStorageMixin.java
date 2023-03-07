@@ -43,32 +43,32 @@ public class TranslationStorageMixin implements TextLanguage {
         this.translations = builder.build();
     }
 
-    @Inject(method = "load(Lnet/minecraft/resource/ResourceManager;Ljava/util/List;)Lnet/minecraft/client/resource/language/TranslationStorage;", at = @At("HEAD"))
-    private static void initTextMap(ResourceManager resourceManager, List<LanguageDefinition> definitions, CallbackInfoReturnable<TranslationStorage> cir) {
+    @Inject(method = "load(Lnet/minecraft/resource/ResourceManager;Ljava/util/List;Z)Lnet/minecraft/client/resource/language/TranslationStorage;", at = @At("HEAD"))
+    private static void initTextMap(ResourceManager resourceManager, List<LanguageDefinition> definitions, boolean leftToRight, CallbackInfoReturnable<TranslationStorage> cir) {
         owo$buildingTextMap = new HashMap<>();
         LanguageAccess.textConsumer = owo$buildingTextMap::put;
     }
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void onInit(Map<String, String> translations, boolean rightToLeft, CallbackInfo ci) {
-        owo$textMap = owo$buildingTextMap;
+        this.owo$textMap = owo$buildingTextMap;
         owo$buildingTextMap = null;
     }
 
     @Inject(method = "hasTranslation", at = @At("HEAD"), cancellable = true)
     private void hasTranslation(String key, CallbackInfoReturnable<Boolean> cir) {
-        if (owo$textMap.containsKey(key))
+        if (this.owo$textMap.containsKey(key))
             cir.setReturnValue(true);
     }
 
     @Inject(method = "get", at = @At("HEAD"), cancellable = true)
-    private void get(String key, CallbackInfoReturnable<String> cir) {
-        if (owo$textMap.containsKey(key))
-            cir.setReturnValue(owo$textMap.get(key).getString());
+    private void get(String key, String fallback, CallbackInfoReturnable<String> cir) {
+        if (this.owo$textMap.containsKey(key))
+            cir.setReturnValue(this.owo$textMap.get(key).getString());
     }
 
     @Override
     public Text getText(String key) {
-        return owo$textMap.get(key);
+        return this.owo$textMap.get(key);
     }
 }

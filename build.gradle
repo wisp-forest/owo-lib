@@ -1,4 +1,5 @@
 //file:noinspection GradlePackageVersionRange
+//file:noinspection GradlePackageVersionRange
 plugins {
     id 'fabric-loom' version '0.12-SNAPSHOT'
     id 'maven-publish'
@@ -128,13 +129,11 @@ loom {
 }
 
 dependencies {
-    modLocalRuntime("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}")
+//    modLocalRuntime("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}")
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}")
 
     modCompileOnly("com.terraformersmc:modmenu:${project.modmenu_version}")
     modLocalRuntime("com.terraformersmc:modmenu:${project.modmenu_version}")
-
-    modLocalRuntime "maven.modrinth:lazydfu:0.1.2"
 
     implementation include("blue.endless:jankson:${project.jankson_version}")
 

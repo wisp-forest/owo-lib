@@ -1,5 +1,6 @@
 package io.wispforest.owo.network;
 
+import io.wispforest.owo.mixin.NetworkHandlerAccessor;
 import io.wispforest.owo.network.serialization.PacketBufSerializer;
 import io.wispforest.owo.network.serialization.RecordSerializer;
 import io.wispforest.owo.util.OwoFreezer;
@@ -219,7 +220,7 @@ public class OwoNetChannel {
         if (required) return true;
 
         return OwoHandshake.isValid() ?
-                getChannelSet(networkHandler.connection).contains(this.packetId)
+                getChannelSet(((NetworkHandlerAccessor) networkHandler).owo$getConnection()).contains(this.packetId)
                 : ServerPlayNetworking.canSend(networkHandler, this.packetId);
     }
 

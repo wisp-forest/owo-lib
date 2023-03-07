@@ -63,13 +63,9 @@ public interface Surface {
             buffer.vertex(matrix, component.x() + component.width(), component.y() + component.height(), 0).next();
             buffer.vertex(matrix, component.x() + component.width(), component.y(), 0).next();
 
-            RenderSystem.disableTexture();
-
             OwoClient.BLUR_PROGRAM.setParameters(16, quality, size);
             OwoClient.BLUR_PROGRAM.use();
             Tessellator.getInstance().draw();
-
-            RenderSystem.enableTexture();
         };
     }
 

@@ -204,6 +204,14 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
     }
 
     @Override
+    public void setFocused(boolean focused) {}
+
+    @Override
+    public boolean isFocused() {
+        return true;
+    }
+
+    @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         return this.rootComponent.onMouseDown(mouseX, mouseY, button);
     }

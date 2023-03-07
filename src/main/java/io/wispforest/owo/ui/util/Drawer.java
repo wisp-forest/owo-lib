@@ -83,7 +83,6 @@ public class Drawer extends DrawableHelper {
         buffer.vertex(matrix, x, y + height, 0).color(bottomLeftColor).next();
         buffer.vertex(matrix, x + width, y + height, 0).color(bottomRightColor).next();
 
-        RenderSystem.disableTexture();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
 
@@ -91,7 +90,6 @@ public class Drawer extends DrawableHelper {
         Tessellator.getInstance().draw();
 
         RenderSystem.disableBlend();
-        RenderSystem.enableTexture();
     }
 
     /**
@@ -119,12 +117,8 @@ public class Drawer extends DrawableHelper {
         buffer.vertex(matrix, x + width, y + height, 0).color(0f, 1f, 1f, 1f).next();
         buffer.vertex(matrix, x + width, y, 0).color(vertical ? 1f : 0f, 1f, 1f, 1f).next();
 
-        RenderSystem.disableTexture();
-
         OwoClient.HSV_PROGRAM.use();
         Tessellator.getInstance().draw();
-
-        RenderSystem.enableTexture();
     }
 
     public static void drawText(MatrixStack matrices, Text text, float x, float y, float scale, int color) {

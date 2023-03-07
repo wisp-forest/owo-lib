@@ -40,13 +40,14 @@ public class ButtonComponent extends ButtonWidget {
         int color = this.active ? 0xffffff : 0xa0a0a0;
 
         if (this.textShadow) {
-            Drawer.drawCenteredText(matrices, textRenderer, this.getMessage(), this.getX() + this.width / 2, this.getY() + (this.height - 8) / 2, color);
+            Drawer.drawCenteredTextWithShadow(matrices, textRenderer, this.getMessage(), this.getX() + this.width / 2, this.getY() + (this.height - 8) / 2, color);
         } else {
             textRenderer.draw(matrices, this.getMessage(), this.getX() + this.width / 2f - textRenderer.getWidth(this.getMessage()) / 2f, this.getY() + (this.height - 8) / 2f, color);
         }
 
-        var tooltip = ((ClickableWidgetAccessor)this).owo$getTooltip();
-        if (this.hovered && tooltip != null) Drawer.utilityScreen().renderOrderedTooltip(matrices, tooltip.getLines(MinecraftClient.getInstance()), mouseX, mouseY);
+        var tooltip = ((ClickableWidgetAccessor) this).owo$getTooltip();
+        if (this.hovered && tooltip != null)
+            Drawer.utilityScreen().renderOrderedTooltip(matrices, tooltip.getLines(MinecraftClient.getInstance()), mouseX, mouseY);
     }
 
     public ButtonComponent onPress(Consumer<ButtonComponent> onPress) {

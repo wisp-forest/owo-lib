@@ -91,7 +91,10 @@ public final class Layers {
 
             ScreenEvents.afterRender(screeen).register((screen, matrices, mouseX, mouseY, tickDelta) -> {
                 for (var instance : getInstances(screen)) {
+                    matrices.push();
+                    matrices.translate(0, 0, 2000);
                     instance.adapter.render(matrices, mouseX, mouseY, tickDelta);
+                    matrices.pop();
                 }
             });
 
