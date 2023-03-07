@@ -3,7 +3,8 @@ package io.wispforest.owo.network;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import io.wispforest.owo.Owo;
-import io.wispforest.owo.mixin.NetworkHandlerAccessor;
+import io.wispforest.owo.mixin.ClientLoginNetworkHandlerAccessor;
+import io.wispforest.owo.mixin.ServerLoginNetworkHandlerAccessor;
 import io.wispforest.owo.network.serialization.PacketBufSerializer;
 import io.wispforest.owo.ops.TextOps;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
@@ -106,7 +107,7 @@ public final class OwoHandshake {
 
         if (buf.readableBytes() > 0) {
             final var serverOptionalChannels = RESPONSE_SERIALIZER.deserializer().apply(buf);
-            ((OwoClientConnectionExtension) ((NetworkHandlerAccessor) clientLoginNetworkHandler).owo$getConnection()).owo$setChannelSet(filterOptionalServices(serverOptionalChannels, OwoNetChannel.REGISTERED_CHANNELS, OwoHandshake::hashChannel));
+            ((OwoClientConnectionExtension) ((ClientLoginNetworkHandlerAccessor) clientLoginNetworkHandler).owo$getConnection()).owo$setChannelSet(filterOptionalServices(serverOptionalChannels, OwoNetChannel.REGISTERED_CHANNELS, OwoHandshake::hashChannel));
         }
 
         var response = PacketByteBufs.create();
@@ -141,7 +142,7 @@ public final class OwoHandshake {
 
         if (buf.readableBytes() > 0) {
             final var clientOptionalChannels = RESPONSE_SERIALIZER.deserializer().apply(buf);
-            ((OwoClientConnectionExtension) ((NetworkHandlerAccessor) handler).owo$getConnection()).owo$setChannelSet(filterOptionalServices(clientOptionalChannels, OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel));
+            ((OwoClientConnectionExtension) ((ServerLoginNetworkHandlerAccessor) handler).owo$getConnection()).owo$setChannelSet(filterOptionalServices(clientOptionalChannels, OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel));
         }
 
         Owo.LOGGER.info("[Handshake] Handshake completed successfully");

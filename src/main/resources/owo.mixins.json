@@ -8,10 +8,11 @@
     "Copenhagen",
     "ItemStackMixin",
     "NbtCompoundMixin",
-    "NetworkHandlerAccessor",
     "ScreenHandlerInvoker",
     "ScreenHandlerMixin",
+    "ServerLoginNetworkHandlerAccessor",
     "ServerPlayerEntityMixin",
+    "ServerPlayNetworkHandlerAccessor",
     "SimpleRegistryMixin",
     "TagGroupLoaderMixin",
     "itemgroup.ItemGroupAccessor",
@@ -34,6 +35,7 @@
     "ui.SlotMixin"
   ],
   "client": [
+    "ClientLoginNetworkHandlerAccessor",
     "MinecraftClientMixin",
     "itemgroup.AbstractInventoryScreenMixin",
     "itemgroup.CreativeInventoryScreenAccessor",
