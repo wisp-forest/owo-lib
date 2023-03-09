@@ -14,6 +14,7 @@ import io.wispforest.owo.ui.util.OwoNinePatchRenderers;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.data.client.BlockStateVariantMap;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.w3c.dom.Element;
@@ -21,6 +22,8 @@ import org.w3c.dom.Node;
 
 import java.util.Map;
 import java.util.function.Consumer;
+
+import net.minecraft.data.client.BlockStateVariantMap.QuintFunction;
 
 public class ButtonComponent extends ButtonWidget {
 
@@ -39,10 +42,13 @@ public class ButtonComponent extends ButtonWidget {
         var textRenderer = MinecraftClient.getInstance().textRenderer;
         int color = this.active ? 0xffffff : 0xa0a0a0;
 
+        int x = Math.round(this.getX() + this.width / 2f - textRenderer.getWidth(this.getMessage()) / 2f);
+        int y = Math.round(this.getY() + (this.height - 8) / 2f);
+
         if (this.textShadow) {
-            Drawer.drawCenteredText(matrices, textRenderer, this.getMessage(), this.getX() + this.width / 2, this.getY() + (this.height - 8) / 2, color);
+            textRenderer.drawWithShadow(matrices, this.getMessage(), x, y, color);
         } else {
-            textRenderer.draw(matrices, this.getMessage(), this.getX() + this.width / 2f - textRenderer.getWidth(this.getMessage()) / 2f, this.getY() + (this.height - 8) / 2f, color);
+            textRenderer.draw(matrices, this.getMessage(), x, y, color);
         }
 
         var tooltip = ((ClickableWidgetAccessor)this).owo$getTooltip();
