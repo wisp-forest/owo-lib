@@ -14,17 +14,7 @@ public class ShaderProgramMixin {
         if (OwoClient.SATIN_LOADED) return id;
 
         var splitName = id.split(":");
-        if (splitName.length != 2) return id;
-
-        return splitName[0].replace("shaders/core/", "") + ":" + "shaders/core/" + splitName[1];
-    }
-
-    @ModifyArg(method = "loadShader", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Identifier;<init>(Ljava/lang/String;)V"), require = 0)
-    private static String fixMoreIdentifiers(String id) {
-        if (OwoClient.SATIN_LOADED) return id;
-
-        var splitName = id.split(":");
-        if (splitName.length != 2) return id;
+        if (splitName.length != 2 || !splitName[0].startsWith("shaders/core/")) return id;
 
         return splitName[0].replace("shaders/core/", "") + ":" + "shaders/core/" + splitName[1];
     }
