@@ -37,7 +37,7 @@
   "accessWidener": "owo.accesswidener",
   "depends": {
     "fabricloader": "*",
-    "fabric": "*",
+    "fabric": ">=0.76",
     "minecraft": ">=1.19"
   },
   "custom": {
