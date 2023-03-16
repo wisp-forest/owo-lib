@@ -1,5 +1,4 @@
 //file:noinspection GradlePackageVersionRange
-//file:noinspection GradlePackageVersionRange
 plugins {
     id 'fabric-loom' version '0.12-SNAPSHOT'
     id 'maven-publish'
@@ -135,7 +134,7 @@ dependencies {
     modCompileOnly("com.terraformersmc:modmenu:${project.modmenu_version}")
     modLocalRuntime("com.terraformersmc:modmenu:${project.modmenu_version}")
 
-    implementation include("blue.endless:jankson:${project.jankson_version}")
+    api(include("blue.endless:jankson:${project.jankson_version}"))
 
     modCompileOnly "fr.catcore:server-translations-api:${project.stapi_version}"
 
