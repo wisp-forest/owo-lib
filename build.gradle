@@ -136,7 +136,7 @@ dependencies {
 
     modLocalRuntime "maven.modrinth:lazydfu:0.1.2"
 
-    implementation include("blue.endless:jankson:${project.jankson_version}")
+    api(include("blue.endless:jankson:${project.jankson_version}"))
 
     modCompileOnly "fr.catcore:server-translations-api:${project.stapi_version}"
 
