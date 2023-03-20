@@ -27,10 +27,7 @@ import java.util.function.Consumer;
 
 @SuppressWarnings("ConstantConditions")
 @Mixin(ClickableWidget.class)
-public abstract class ClickableWidgetMixin implements ComponentStub {
-
-    @Shadow
-    protected abstract void setFocused(boolean focused);
+public abstract class ClickableWidgetMixin implements ComponentStub, net.minecraft.client.gui.Element {
 
     @Shadow public boolean active;
 
