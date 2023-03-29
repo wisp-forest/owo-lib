@@ -21,6 +21,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 import org.w3c.dom.Element;
 
 import java.util.ArrayList;
@@ -68,7 +69,8 @@ public class ItemComponent extends BaseComponent {
         matrices.translate(8.0, 8.0, 0.0);
 
         // Vanilla scaling and y inversion
-        matrices.scale(16, -16, 16);
+        matrices.multiplyPositionMatrix((new Matrix4f()).scaling(1.0F, -1.0F, 1.0F));
+        matrices.scale(16, 16, 16);
 
         this.itemRenderer.renderItem(this.stack, ModelTransformationMode.GUI, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, matrices, entityBuffers, null, 0);
         this.entityBuffers.draw();
