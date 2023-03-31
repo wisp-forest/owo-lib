@@ -193,7 +193,7 @@ public abstract class ConfigWrapper<C> {
                 clazz = clazz.getDeclaredField(path.remove(0)).getType();
             }
 
-            return clazz.getField(path.get(0));
+            return clazz.getDeclaredField(path.get(0));
         } catch (NoSuchFieldException e) {
             return null;
         }
@@ -295,12 +295,13 @@ public abstract class ConfigWrapper<C> {
                     throw new NoSuchMethodException("Return type of predicate implementation '" + annotation.value() + "' must be 'boolean'");
                 }
 
-                if (!Modifier.isStatic(method.getModifiers())) {
-                    throw new IllegalStateException("Predicate implementation '" + annotation.value() + "' must be static");
-                }
-
                 var handle = MethodHandles.publicLookup().unreflect(method);
-                constraint = new Constraint("Predicate method " + annotation.value(), o -> this.invokePredicate(handle, o));
+                if (!Modifier.isStatic(method.getModifiers())) {
+                    // Kotlin doesn't have static methods in class.
+                    constraint = new Constraint("Predicate method " + annotation.value(), o -> this.invokePredicate(handle, o, boundField.owner()));
+                } else {
+                    constraint = new Constraint("Predicate method " + annotation.value(), o -> this.invokePredicate(handle, o));
+                }
             }
 
             final var defaultValue = boundField.getValue();
@@ -330,6 +331,7 @@ public abstract class ConfigWrapper<C> {
     private void collectFieldValues(Option.Key parent, Object instance, Map<Option.Key, Option.BoundField<Object>> fields) throws IllegalAccessException {
         for (var field : instance.getClass().getDeclaredFields()) {
             if (Modifier.isTransient(field.getModifiers()) || Modifier.isStatic(field.getModifiers())) continue;
+            field.setAccessible(true); // Workaround kotlin private backing field issue
 
             if (field.isAnnotationPresent(Nest.class)) {
                 var fieldValue = field.get(instance);
@@ -347,6 +349,15 @@ public abstract class ConfigWrapper<C> {
     private boolean invokePredicate(MethodHandle predicate, Object value) {
         try {
             return (boolean) predicate.invoke(value);
+        } catch (Throwable e) {
+            throw new RuntimeException("Could not invoke predicate", e);
+        }
+    }
+
+    // Invoke for non-static function.
+    private boolean invokePredicate(MethodHandle predicate, Object value, Object thisRef) {
+        try {
+            return (boolean) predicate.invoke(thisRef, value);
         } catch (Throwable e) {
             throw new RuntimeException("Could not invoke predicate", e);
         }
