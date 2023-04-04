@@ -8,6 +8,8 @@ import io.wispforest.owo.mixin.ServerLoginNetworkHandlerAccessor;
 import io.wispforest.owo.network.serialization.PacketBufSerializer;
 import io.wispforest.owo.ops.TextOps;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
+import io.wispforest.owo.util.OwoFreezer;
+import io.wispforest.owo.util.ServicesFrozenException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientLoginConnectionEvents;
@@ -61,6 +63,9 @@ public final class OwoHandshake {
     public static void enable() {}
 
     public static void requireHandshake() {
+        if (OwoFreezer.isFrozen())
+            throw new ServicesFrozenException("The oωo handshake may only be made required during mod initialization");
+
         HANDSHAKE_REQUIRED = true;
     }
 
