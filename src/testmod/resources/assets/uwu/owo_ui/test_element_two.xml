@@ -1,0 +1,46 @@
+<owo-ui xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/wisp-forest/owo-lib/1.19.4/owo-ui.xsd">
+    <components>
+        <flow-layout direction="vertical">
+            <children>
+                <label>
+                    <text>bruh</text>
+                </label>
+            </children>
+
+            <padding>
+                <all>10</all>
+            </padding>
+
+            <surface>
+                <vanilla-translucent/>
+                <outline>#77000000</outline>
+            </surface>
+
+            <positioning type="relative">0,50</positioning>
+        </flow-layout>
+    </components>
+
+    <templates>
+        <hud-element>
+            <flow-layout direction="vertical">
+                <children>
+                    <label>
+                        <text>hudnite</text>
+                    </label>
+                </children>
+
+                <padding>
+                    <all>10</all>
+                </padding>
+
+                <surface>
+                    <blur size="2" quality="4"/>
+                    <outline>#7700B1FF</outline>
+                </surface>
+
+                <positioning type="relative">0,50</positioning>
+            </flow-layout>
+        </hud-element>
+    </templates>
+</owo-ui>

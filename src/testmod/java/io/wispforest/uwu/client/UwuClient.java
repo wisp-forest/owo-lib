@@ -11,6 +11,7 @@ import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.hud.Hud;
 import io.wispforest.owo.ui.layers.Layer;
 import io.wispforest.owo.ui.layers.Layers;
+import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.uwu.Uwu;
 import io.wispforest.uwu.network.UwuNetworkExample;
@@ -32,6 +33,8 @@ import net.minecraft.text.TranslatableTextContent;
 import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
 
+import java.nio.file.Path;
+import java.util.Map;
 import java.util.function.Supplier;
 
 public class UwuClient implements ClientModInitializer {
@@ -47,6 +50,9 @@ public class UwuClient implements ClientModInitializer {
         final var binding = new KeyBinding("key.uwu.hud_test", GLFW.GLFW_KEY_J, "misc");
         KeyBindingHelper.registerKeyBinding(binding);
 
+        final var bindingButCooler = new KeyBinding("key.uwu.hud_test_two", GLFW.GLFW_KEY_K, "misc");
+        KeyBindingHelper.registerKeyBinding(bindingButCooler);
+
         final var hudComponentId = new Identifier("uwu", "test_element");
         final Supplier<Component> hudComponent = () ->
                 Containers.verticalFlow(Sizing.content(), Sizing.content())
@@ -59,12 +65,25 @@ public class UwuClient implements ClientModInitializer {
                         .margins(Insets.of(5))
                         .positioning(Positioning.relative(100, 25));
 
+        final var coolerComponentId = new Identifier("uwu", "test_element_two");
+        final Supplier<Component> coolerComponent = () -> UIModel.load(Path.of("../src/testmod/resources/assets/uwu/owo_ui/test_element_two.xml")).expandTemplate(FlowLayout.class, "hud-element", Map.of());
+        Hud.add(coolerComponentId, coolerComponent);
+
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (binding.wasPressed()) {
                 if (Hud.hasComponent(hudComponentId)) {
                     Hud.remove(hudComponentId);
                 } else {
                     Hud.add(hudComponentId, hudComponent);
+                }
+            }
+
+            if (bindingButCooler.wasPressed()) {
+                Hud.remove(coolerComponentId);
+                Hud.add(coolerComponentId, coolerComponent);
+
+                //noinspection StatementWithEmptyBody
+                while (bindingButCooler.wasPressed()) {
                 }
             }
         });
