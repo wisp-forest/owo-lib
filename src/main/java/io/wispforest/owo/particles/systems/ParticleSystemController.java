@@ -70,6 +70,9 @@ public class ParticleSystemController {
         this.channelId = channelId;
         this.ownerClassName = ReflectionUtils.getCallingClassName(2);
 
+        OwoHandshake.enable();
+        OwoHandshake.requireHandshake();
+
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
             ClientPlayNetworking.registerGlobalReceiver(channelId, new Client()::handler);
         }
@@ -134,9 +137,6 @@ public class ParticleSystemController {
     }
 
     static {
-        OwoHandshake.enable();
-        OwoHandshake.requireHandshake();
-
         OwoFreezer.registerFreezeCallback(() -> {
             for (ParticleSystemController controller : REGISTERED_CONTROLLERS.values()) {
                 controller.verify();
