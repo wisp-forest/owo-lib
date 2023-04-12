@@ -112,6 +112,13 @@ public interface Surface {
                             UIParsing.parseUnsignedInt(child.getAttributeNode("texture-height")))
                     );
                 }
+                case "blur" -> {
+                    UIParsing.expectAttributes(child, "size", "quality");
+                    yield surface.and(blur(
+                            UIParsing.parseFloat(child.getAttributeNode("size")),
+                            UIParsing.parseFloat(child.getAttributeNode("quality"))
+                    ));
+                }
                 case "options-background" -> surface.and(OPTIONS_BACKGROUND);
                 case "vanilla-translucent" -> surface.and(VANILLA_TRANSLUCENT);
                 case "tooltip" -> surface.and(TOOLTIP);

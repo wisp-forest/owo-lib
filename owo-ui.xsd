@@ -250,6 +250,18 @@
                     </xs:simpleContent>
                 </xs:complexType>
             </xs:element>
+            <xs:element name="blur">
+                <xs:annotation>
+                    <xs:documentation>
+                        A simple, colorless surface that blurs everything
+                        underneath itself
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:attribute name="quality" type="xs:float"/>
+                    <xs:attribute name="size" type="xs:float"/>
+                </xs:complexType>
+            </xs:element>
             <xs:element name="options-background">
                 <xs:annotation>
                     <xs:documentation>
