@@ -1,6 +1,7 @@
 package io.wispforest.owo.ui.base;
 
 import io.wispforest.owo.Owo;
+import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.util.UIErrorToast;
@@ -93,6 +94,14 @@ public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen {
                 this.invalid = true;
             }
         }
+    }
+
+    /**
+     * A convenience shorthand for querying a component from the adapter's
+     * root component via {@link ParentComponent#childById(Class, String)}
+     */
+    protected <C extends Component> @Nullable C component(Class<C> expectedClass, String id) {
+        return this.uiAdapter.rootComponent.childById(expectedClass, id);
     }
 
     @Override

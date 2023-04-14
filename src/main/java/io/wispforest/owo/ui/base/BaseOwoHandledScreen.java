@@ -2,10 +2,7 @@ package io.wispforest.owo.ui.base;
 
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.mixin.ui.SlotAccessor;
-import io.wispforest.owo.ui.core.OwoUIAdapter;
-import io.wispforest.owo.ui.core.ParentComponent;
-import io.wispforest.owo.ui.core.PositionedRectangle;
-import io.wispforest.owo.ui.core.Sizing;
+import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.inject.GreedyInputComponent;
 import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.UIErrorToast;
@@ -147,6 +144,14 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
      */
     protected SlotComponent slotAsComponent(int index) {
         return new SlotComponent(index);
+    }
+
+    /**
+     * A convenience shorthand for querying a component from the adapter's
+     * root component via {@link ParentComponent#childById(Class, String)}
+     */
+    protected <C extends Component> @Nullable C component(Class<C> expectedClass, String id) {
+        return this.uiAdapter.rootComponent.childById(expectedClass, id);
     }
 
     @Override
