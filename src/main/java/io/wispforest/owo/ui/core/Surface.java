@@ -115,8 +115,8 @@ public interface Surface {
                 case "blur" -> {
                     UIParsing.expectAttributes(child, "size", "quality");
                     yield surface.and(blur(
-                            UIParsing.parseFloat(child.getAttributeNode("size")),
-                            UIParsing.parseFloat(child.getAttributeNode("quality"))
+                            UIParsing.parseFloat(child.getAttributeNode("quality")),
+                            UIParsing.parseFloat(child.getAttributeNode("size"))
                     ));
                 }
                 case "options-background" -> surface.and(OPTIONS_BACKGROUND);
