@@ -1,0 +1,10 @@
+<owo-ui xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../../../owo-ui.xsd">
+    <templates>
+        <template name="bruh-button">
+            <button>
+                <text>bruh</text>
+            </button>
+        </template>
+    </templates>
+</owo-ui>

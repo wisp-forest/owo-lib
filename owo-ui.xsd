@@ -4,7 +4,7 @@
     <xs:element name="owo-ui">
         <xs:complexType>
             <xs:sequence>
-                <xs:element name="components">
+                <xs:element name="components" minOccurs="0">
                     <xs:complexType>
                         <xs:sequence>
                             <xs:group ref="anyComponent"/>
@@ -14,7 +14,17 @@
                 <xs:element name="templates" minOccurs="0">
                     <xs:complexType>
                         <xs:sequence maxOccurs="unbounded">
-                            <xs:any processContents="lax"/>
+                            <xs:choice>
+                                <xs:element name="template">
+                                    <xs:complexType>
+                                        <xs:sequence>
+                                            <xs:group ref="anyComponent"/>
+                                        </xs:sequence>
+                                        <xs:attribute name="name" type="xs:Name" use="required"/>
+                                    </xs:complexType>
+                                </xs:element>
+                                <xs:any processContents="lax"/>
+                            </xs:choice>
                         </xs:sequence>
                     </xs:complexType>
                 </xs:element>
