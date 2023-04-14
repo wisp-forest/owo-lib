@@ -101,7 +101,7 @@ public abstract class ClickableWidgetMixin implements ComponentStub, net.minecra
 
     @Override
     public AnimatableProperty<Sizing> verticalSizing() {
-        return this.owo$getWrapper().horizontalSizing();
+        return this.owo$getWrapper().verticalSizing();
     }
 
     @Override
