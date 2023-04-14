@@ -166,11 +166,11 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
                     var slot = this.handler.slots.get(i);
                     if (!slot.isEnabled()) continue;
 
-                    Drawer.drawText(matrices, Text.literal(String.valueOf(i)),
+                    Drawer.drawText(matrices, Text.literal("H:" + i),
                             this.x + slot.x + 15, this.y + slot.y + 9, .5f, 0x0096FF,
                             Drawer.TextAnchor.BOTTOM_RIGHT
                     );
-                    Drawer.drawText(matrices, Text.literal("(" + slot.getIndex() + ")"),
+                    Drawer.drawText(matrices, Text.literal("I:" + slot.getIndex()),
                             this.x + slot.x + 15, this.y + slot.y + 15, .5f, 0x5800FF,
                             Drawer.TextAnchor.BOTTOM_RIGHT
                     );
