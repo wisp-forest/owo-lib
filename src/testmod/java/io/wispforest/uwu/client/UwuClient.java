@@ -3,6 +3,7 @@ package io.wispforest.uwu.client;
 import io.wispforest.owo.network.OwoNetChannel;
 import io.wispforest.owo.particles.ClientParticles;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
+import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.EntityComponent;
 import io.wispforest.owo.ui.container.Containers;
@@ -19,8 +20,10 @@ import io.wispforest.uwu.network.UwuOptionalNetExample;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.option.KeyBinding;
@@ -83,8 +86,7 @@ public class UwuClient implements ClientModInitializer {
                 Hud.add(coolerComponentId, coolerComponent);
 
                 //noinspection StatementWithEmptyBody
-                while (bindingButCooler.wasPressed()) {
-                }
+                while (bindingButCooler.wasPressed()) {}
             }
         });
 
@@ -134,6 +136,17 @@ public class UwuClient implements ClientModInitializer {
                             })
             );
         }, GameMenuScreen.class);
+
+        Layers.add(Containers::verticalFlow, instance -> {
+            ButtonComponent button;
+            instance.adapter.rootComponent.child(
+                    (button = Components.button(Text.literal(":)"), buttonComponent -> {
+                        MinecraftClient.getInstance().player.sendMessage(Text.literal("handled screen moment"));
+                    })).verticalSizing(Sizing.fixed(12))
+            );
+
+            instance.alignComponentToHandledScreenCoordinates(button, 125, 65);
+        }, InventoryScreen.class);
     }
 
     public record WeirdMessage(int e) {}
