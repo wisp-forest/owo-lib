@@ -1,9 +1,10 @@
-<owo-ui>
+<owo-ui xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/wisp-forest/owo-lib/1.19.4/owo-ui.xsd">
     <components>
         <flow-layout direction="vertical">
             <children>
                 <label>
-                    <text translate="true">text.owo.config.must_restart</text>#
+                    <text translate="true">text.owo.config.must_restart</text>
                     <shadow>true</shadow>
                 </label>
 

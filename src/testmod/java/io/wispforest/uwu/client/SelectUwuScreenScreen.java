@@ -9,6 +9,7 @@ import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.uwu.Uwu;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 public class SelectUwuScreenScreen extends BaseOwoScreen<FlowLayout> {
@@ -41,7 +42,7 @@ public class SelectUwuScreenScreen extends BaseOwoScreen<FlowLayout> {
         panel.child(Components.button(Text.literal("code config"), button -> this.client.setScreen(new TestConfigScreen())).margins(Insets.vertical(3)));
         panel.child(Components.button(Text.literal("xml config"), button -> this.client.setScreen(ConfigScreen.create(Uwu.CONFIG, null))).margins(Insets.vertical(3)));
         panel.child(Components.button(Text.literal("optimization test"), button -> this.client.setScreen(new TooManyComponentsScreen())).margins(Insets.vertical(3)));
-        panel.child(Components.button(Text.literal("focus cycle test"), button -> this.client.setScreen(new BaseUIModelScreen<>(FlowLayout.class, BaseUIModelScreen.DataSource.file("../src/testmod/resources/assets/uwu/owo_ui/focus_cycle_test.xml")) {
+        panel.child(Components.button(Text.literal("focus cycle test"), button -> this.client.setScreen(new BaseUIModelScreen<>(FlowLayout.class, new Identifier("uwu", "focus_cycle_test")) {
             @Override
             protected void build(FlowLayout rootComponent) {}
         })).margins(Insets.vertical(3)));
