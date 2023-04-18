@@ -16,12 +16,12 @@ public final class Containers {
         return new GridLayout(horizontalSizing, verticalSizing, rows, columns);
     }
 
-    public static VerticalFlowLayout verticalFlow(Sizing horizontalSizing, Sizing verticalSizing) {
-        return new VerticalFlowLayout(horizontalSizing, verticalSizing);
+    public static FlowLayout verticalFlow(Sizing horizontalSizing, Sizing verticalSizing) {
+        return new FlowLayout(horizontalSizing, verticalSizing, FlowLayout.Algorithm.VERTICAL);
     }
 
-    public static HorizontalFlowLayout horizontalFlow(Sizing horizontalSizing, Sizing verticalSizing) {
-        return new HorizontalFlowLayout(horizontalSizing, verticalSizing);
+    public static FlowLayout horizontalFlow(Sizing horizontalSizing, Sizing verticalSizing) {
+        return new FlowLayout(horizontalSizing, verticalSizing, FlowLayout.Algorithm.HORIZONTAL);
     }
 
     // ------

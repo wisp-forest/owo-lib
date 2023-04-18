@@ -30,19 +30,6 @@ public class FlowLayout extends BaseParentComponent {
         this.gap.observe(integer -> this.updateLayout());
     }
 
-    /**
-     * @deprecated Use {@link FlowLayout#FlowLayout(Sizing, Sizing, Algorithm)} instead
-     * and provide the proper layout algorithm
-     */
-    @Deprecated(forRemoval = true)
-    protected FlowLayout(Sizing horizontalSizing, Sizing verticalSizing) {
-        this(horizontalSizing, verticalSizing, container -> {
-            throw new IllegalStateException("Deprecated FlowLayout constructor used, no layout algorithm provided");
-        });
-
-        Owo.debugWarn(Owo.LOGGER, "Deprecated FlowLayout constructor invoked without providing a layout algorithm, this will crash");
-    }
-
     @Override
     protected int determineHorizontalContentSize(Sizing sizing) {
         return this.contentSize.width() + this.padding.get().horizontal();

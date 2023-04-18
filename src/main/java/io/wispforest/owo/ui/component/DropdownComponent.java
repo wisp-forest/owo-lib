@@ -1,7 +1,6 @@
 package io.wispforest.owo.ui.component;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
@@ -10,7 +9,6 @@ import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.UISounds;
-import io.wispforest.owo.util.ReflectionUtils;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
@@ -150,18 +148,6 @@ public class DropdownComponent extends FlowLayout {
         return super.removeChild(child);
     }
 
-    @Deprecated(forRemoval = true)
-    public DropdownComponent requiresHover(boolean requiresHover) {
-        Owo.debugWarn(Owo.LOGGER, "Dropdown property 'closeWhenNotHovered' was modified via deprecated method 'requiresHover' by {}", ReflectionUtils.getCallingClassName(2));
-        return this.closeWhenNotHovered(requiresHover);
-    }
-
-    @Deprecated(forRemoval = true)
-    public boolean requiresHover() {
-        Owo.debugWarn(Owo.LOGGER, "Dropdown property 'closeWhenNotHovered' was queried via deprecated method 'requiresHover' by {}", ReflectionUtils.getCallingClassName(2));
-        return this.closeWhenNotHovered();
-    }
-
     public DropdownComponent closeWhenNotHovered(boolean closeWhenNotHovered) {
         this.closeWhenNotHovered = closeWhenNotHovered;
         return this;
@@ -175,8 +161,6 @@ public class DropdownComponent extends FlowLayout {
     public void parseProperties(UIModel model, Element element, Map<String, Element> children) {
         super.parseProperties(model, element, children);
         UIParsing.apply(children, "entries", Function.identity(), this::parseAndApplyEntries);
-
-        UIParsing.apply(children, "requires-hover", UIParsing::parseBool, this::requiresHover);
         UIParsing.apply(children, "close-when-not-hovered", UIParsing::parseBool, this::closeWhenNotHovered);
     }
 
