@@ -1,0 +1,14 @@
+{
+  "texture": "owo:textures/gui/buttons.png",
+  "texture_width": 64,
+  "texture_height": 192,
+  "repeat": false,
+  "corner_patch_size": {
+    "width": 3,
+    "height": 3
+  },
+  "center_patch_size": {
+    "width": 58,
+    "height": 58
+  }
+}

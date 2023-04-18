@@ -1,0 +1,10 @@
+{
+  "texture": "owo:textures/gui/panel_inset.png",
+  "texture_width": 16,
+  "texture_height": 16,
+  "repeat": false,
+  "patch_size": {
+    "width": 5,
+    "height": 5
+  }
+}

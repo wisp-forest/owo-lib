@@ -5,7 +5,7 @@ import io.wispforest.owo.client.OwoClient;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.Drawer;
-import io.wispforest.owo.ui.util.OwoNinePatchRenderers;
+import io.wispforest.owo.ui.util.NinePatchTexture;
 import net.minecraft.client.gui.tooltip.TooltipBackgroundRenderer;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.Tessellator;
@@ -26,7 +26,9 @@ public interface Surface {
         Drawer.drawPanel(matrices, component.x(), component.y(), component.width(), component.height(), true);
     };
 
-    Surface PANEL_INSET = OwoNinePatchRenderers.PANEL_INSET::draw;
+    Surface PANEL_INSET = (matrices, component) -> {
+        NinePatchTexture.draw(Drawer.PANEL_INSET_NINE_PATCH_TEXTURE, matrices, component);
+    };
 
     Surface VANILLA_TRANSLUCENT = (matrices, component) -> {
         Drawer.drawGradientRect(matrices,

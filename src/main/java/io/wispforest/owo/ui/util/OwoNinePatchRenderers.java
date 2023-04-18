@@ -3,6 +3,12 @@ package io.wispforest.owo.ui.util;
 import io.wispforest.owo.ui.core.Size;
 import net.minecraft.util.Identifier;
 
+/**
+ * @deprecated Use the texture identifiers placed directly in the relevant classes,
+ * namely {@link io.wispforest.owo.ui.container.ScrollContainer}, {@link Drawer}
+ * and {@link io.wispforest.owo.ui.component.ButtonComponent}
+ */
+@Deprecated(forRemoval = true)
 public final class OwoNinePatchRenderers {
 
     private OwoNinePatchRenderers() {}
