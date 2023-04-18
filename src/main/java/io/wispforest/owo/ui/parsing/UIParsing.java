@@ -304,6 +304,8 @@ public class UIParsing {
         registerFactory("discrete-slider", DiscreteSliderComponent::parse);
         registerFactory("dropdown", element -> Components.dropdown(Sizing.content()));
         registerFactory("color-picker", element -> new ColorPickerComponent());
+        registerFactory("slim-slider", SlimSliderComponent::parse);
+        registerFactory("small-checkbox", element -> new SmallCheckboxComponent());
     }
 
 }

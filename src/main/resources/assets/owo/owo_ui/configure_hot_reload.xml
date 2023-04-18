@@ -71,7 +71,8 @@
             <button id="{{id}}">
                 <text translate="true">{{message}}</text>
                 <sizing>
-                    <horizontal method="fixed">75</horizontal>
+                    <horizontal method="fixed">70</horizontal>
+                    <vertical method="fixed">15</vertical>
                 </sizing>
 
                 <renderer>

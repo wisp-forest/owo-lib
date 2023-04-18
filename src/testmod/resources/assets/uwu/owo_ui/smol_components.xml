@@ -1,0 +1,188 @@
+<owo-ui xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../../../owo-ui.xsd">
+    <components>
+        <flow-layout direction="horizontal">
+            <children>
+                <flow-layout direction="vertical">
+                    <children>
+                        <small-checkbox/>
+
+                        <small-checkbox>
+                            <label>bruh</label>
+                            <checked>true</checked>
+                        </small-checkbox>
+
+                        <small-checkbox>
+                            <label>shadownite</label>
+                            <label-shadow>true</label-shadow>
+                        </small-checkbox>
+
+                        <slim-slider direction="horizontal" id="precise-slider">
+                            <sizing>
+                                <horizontal method="fixed">100</horizontal>
+                            </sizing>
+                        </slim-slider>
+
+                        <slim-slider direction="horizontal" id="tiny-steppy-man">
+                            <sizing>
+                                <horizontal method="fixed">100</horizontal>
+                            </sizing>
+
+                            <min>1.5</min>
+                            <max>3</max>
+                            <step-size>0.1</step-size>
+                            <value>2.6</value>
+                        </slim-slider>
+
+                        <flow-layout direction="horizontal">
+                            <children>
+                                <slim-slider direction="vertical" id="big-steppy-man">
+                                    <sizing>
+                                        <vertical method="fixed">100</vertical>
+                                    </sizing>
+
+                                    <min>20</min>
+                                    <max>80</max>
+                                    <step-size>10</step-size>
+                                </slim-slider>
+
+                                <flow-layout direction="horizontal">
+                                    <children>
+                                        <label>
+                                            <text>This is a very epic inset moment, we can really *feel* the social interactions energy</text>
+                                            <max-width>80</max-width>
+                                        </label>
+                                    </children>
+
+                                    <padding>
+                                        <all>4</all>
+                                    </padding>
+
+                                    <surface>
+                                        <panel-inset/>
+                                    </surface>
+                                </flow-layout>
+                            </children>
+
+                            <gap>10</gap>
+                        </flow-layout>
+                    </children>
+
+                    <padding>
+                        <all>5</all>
+                    </padding>
+
+                    <gap>3</gap>
+
+                    <surface>
+                        <panel/>
+                    </surface>
+                </flow-layout>
+
+                <flow-layout direction="vertical">
+                    <children>
+                        <template name="inset-panel">
+                            <border-size>4</border-size>
+                        </template>
+
+                        <template name="inset-panel">
+                            <border-size>6</border-size>
+                        </template>
+
+                        <template name="inset-panel">
+                            <border-size>8</border-size>
+                        </template>
+                    </children>
+
+                    <gap>10</gap>
+                </flow-layout>
+
+                <flow-layout direction="horizontal" id="inset-container">
+                    <children>
+                        <flow-layout direction="horizontal">
+                            <children>
+                                <slim-slider direction="horizontal" id="inset-slider">
+                                    <min>3</min>
+                                    <max>20</max>
+                                    <step-size>1</step-size>
+
+                                    <sizing>
+                                        <horizontal method="fill">85</horizontal>
+                                    </sizing>
+                                </slim-slider>
+                            </children>
+
+                            <horizontal-alignment>center</horizontal-alignment>
+                            <vertical-alignment>center</vertical-alignment>
+
+                            <sizing>
+                                <horizontal method="fill">100</horizontal>
+                                <vertical method="fill">100</vertical>
+                            </sizing>
+
+                            <surface>
+                                <panel-inset/>
+                            </surface>
+                        </flow-layout>
+                    </children>
+
+                    <padding>
+                        <all>3</all>
+                    </padding>
+
+                    <sizing>
+                        <horizontal method="fill">20</horizontal>
+                        <vertical method="fixed">50</vertical>
+                    </sizing>
+
+                    <surface>
+                        <panel/>
+                    </surface>
+                </flow-layout>
+            </children>
+
+            <gap>15</gap>
+
+            <surface>
+                <vanilla-translucent/>
+            </surface>
+
+            <vertical-alignment>center</vertical-alignment>
+            <horizontal-alignment>center</horizontal-alignment>
+        </flow-layout>
+    </components>
+
+    <templates>
+        <template name="inset-panel">
+            <flow-layout direction="horizontal">
+                <children>
+                    <flow-layout direction="horizontal">
+                        <children/>
+
+                        <sizing>
+                            <horizontal method="fill">100</horizontal>
+                            <vertical method="fill">100</vertical>
+                        </sizing>
+
+                        <surface>
+                            <panel-inset/>
+                        </surface>
+                    </flow-layout>
+                </children>
+
+                <padding>
+                    <all>{{border-size}}</all>
+                </padding>
+
+                <sizing>
+                    <horizontal method="fill">20</horizontal>
+                    <vertical method="fixed">50</vertical>
+                </sizing>
+
+                <surface>
+                    <panel/>
+                </surface>
+            </flow-layout>
+        </template>
+    </templates>
+</owo-ui>

@@ -32,20 +32,22 @@ public class SelectUwuScreenScreen extends BaseOwoScreen<FlowLayout> {
         );
 
         var panel = Containers.verticalFlow(Sizing.content(), Sizing.content()).<FlowLayout>configure(layout -> {
-            layout.padding(Insets.of(5))
+            layout.gap(6)
+                    .padding(Insets.of(5))
                     .surface(Surface.PANEL)
                     .horizontalAlignment(HorizontalAlignment.CENTER);
         });
 
-        panel.child(Components.button(Text.literal("code demo"), button -> this.client.setScreen(new ComponentTestScreen())).margins(Insets.vertical(3)));
-        panel.child(Components.button(Text.literal("xml demo"), button -> this.client.setScreen(new TestParseScreen())).margins(Insets.vertical(3)));
-        panel.child(Components.button(Text.literal("code config"), button -> this.client.setScreen(new TestConfigScreen())).margins(Insets.vertical(3)));
-        panel.child(Components.button(Text.literal("xml config"), button -> this.client.setScreen(ConfigScreen.create(Uwu.CONFIG, null))).margins(Insets.vertical(3)));
-        panel.child(Components.button(Text.literal("optimization test"), button -> this.client.setScreen(new TooManyComponentsScreen())).margins(Insets.vertical(3)));
+        panel.child(Components.button(Text.literal("code demo"), button -> this.client.setScreen(new ComponentTestScreen())));
+        panel.child(Components.button(Text.literal("xml demo"), button -> this.client.setScreen(new TestParseScreen())));
+        panel.child(Components.button(Text.literal("code config"), button -> this.client.setScreen(new TestConfigScreen())));
+        panel.child(Components.button(Text.literal("xml config"), button -> this.client.setScreen(ConfigScreen.create(Uwu.CONFIG, null))));
+        panel.child(Components.button(Text.literal("optimization test"), button -> this.client.setScreen(new TooManyComponentsScreen())));
         panel.child(Components.button(Text.literal("focus cycle test"), button -> this.client.setScreen(new BaseUIModelScreen<>(FlowLayout.class, new Identifier("uwu", "focus_cycle_test")) {
             @Override
             protected void build(FlowLayout rootComponent) {}
-        })).margins(Insets.vertical(3)));
+        })));
+        panel.child(Components.button(Text.literal("smolnite"), button -> this.client.setScreen(new SmolComponentTestScreen())));
 
         this.uiAdapter.rootComponent.child(panel);
     }

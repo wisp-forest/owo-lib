@@ -53,6 +53,8 @@
             <xs:element name="scroll" type="owo-ui-scroll-container"/>
             <xs:element name="dropdown" type="owo-ui-dropdown-component"/>
             <xs:element name="color-picker" type="owo-color-picker-component"/>
+            <xs:element name="small-checkbox" type="owo-small-checkbox-component"/>
+            <xs:element name="slim-slider" type="owo-slim-slider-component"/>
             <xs:element name="template">
                 <xs:complexType>
                     <xs:sequence minOccurs="0" maxOccurs="unbounded">
@@ -553,6 +555,34 @@
                     <xs:element type="xs:boolean" name="show-alpha" minOccurs="0"/>
                     <xs:element type="owo-ui-color" name="selected-color" minOccurs="0"/>
                 </xs:choice>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="owo-small-checkbox-component">
+        <xs:complexContent>
+            <xs:extension base="componentType">
+                <xs:choice maxOccurs="unbounded">
+                    <xs:group ref="componentProps"/>
+                    <xs:element type="owo-ui-text" name="label" minOccurs="0"/>
+                    <xs:element type="xs:boolean" name="label-shadow" minOccurs="0"/>
+                    <xs:element type="xs:boolean" name="checked" minOccurs="0"/>
+                </xs:choice>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="owo-slim-slider-component">
+        <xs:complexContent>
+            <xs:extension base="componentType">
+                <xs:choice maxOccurs="unbounded">
+                    <xs:group ref="componentProps"/>
+                    <xs:element type="xs:double" name="step-size" minOccurs="0"/>
+                    <xs:element type="xs:double" name="min" minOccurs="0"/>
+                    <xs:element type="xs:double" name="max" minOccurs="0"/>
+                    <xs:element type="xs:double" name="value" minOccurs="0"/>
+                </xs:choice>
+                <xs:attribute name="direction" type="owo-ui-axis-direction" use="required"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
