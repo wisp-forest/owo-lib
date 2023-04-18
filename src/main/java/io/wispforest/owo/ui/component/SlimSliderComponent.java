@@ -1,14 +1,14 @@
 package io.wispforest.owo.ui.component;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.CursorStyle;
-import io.wispforest.owo.ui.core.Size;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.Drawer;
-import io.wispforest.owo.ui.util.NinePatchRenderer;
+import io.wispforest.owo.ui.util.NinePatchTexture;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.Observable;
@@ -30,7 +30,8 @@ public class SlimSliderComponent extends BaseComponent {
 
     public static final Function<Double, Text> VALUE_TOOLTIP_SUPPLIER = value -> Text.literal(String.valueOf(value));
 
-    protected static final NinePatchRenderer TRACK_RENDERER = new NinePatchRenderer(new Identifier("owo", "textures/gui/slim_slider.png"), 0, 0, Size.of(1, 1), Size.of(14, 1), Size.of(16, 16), false);
+    protected static final Identifier TEXTURE = new Identifier("owo", "textures/gui/slim_slider.png");
+    protected static final Identifier TRACK_TEXTURE = new Identifier("owo", "slim_slider_track");
 
     protected final EventStream<OnChanged> changedEvents = OnChanged.newStream();
     protected final EventStream<OnSlideEnd> slideEndEvents = OnSlideEnd.newStream();
@@ -73,10 +74,14 @@ public class SlimSliderComponent extends BaseComponent {
     @Override
     public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
         if (this.axis == Axis.HORIZONTAL) {
-            TRACK_RENDERER.draw(matrices, this.x + 1, this.y + 3, this.width - 2, 3);
+            NinePatchTexture.draw(TRACK_TEXTURE, matrices, this.x + 1, this.y + 3, this.width - 2, 3);
+
+            RenderSystem.setShaderTexture(0, TEXTURE);
             Drawer.drawTexture(matrices, (int) (this.x + (this.width - 4) * this.value.get()), this.y + 1, 4, 7, 0, 3, 4, 7, 16, 16);
         } else {
-            TRACK_RENDERER.draw(matrices, this.x + 3, this.y + 1, 3, this.height - 2);
+            NinePatchTexture.draw(TRACK_TEXTURE, matrices, this.x + 3, this.y + 1, 3, this.height - 2);
+
+            RenderSystem.setShaderTexture(0, TEXTURE);
             Drawer.drawTexture(matrices, this.x + 1, (int) (this.y + (this.height - 4) * this.value.get()), 7, 4, 4, 3, 7, 4, 16, 16);
         }
     }
