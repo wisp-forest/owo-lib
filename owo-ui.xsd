@@ -244,6 +244,14 @@
                     <xs:attribute name="dark" type="xs:boolean"/>
                 </xs:complexType>
             </xs:element>
+            <xs:element name="panel-inset">
+                <xs:annotation>
+                    <xs:documentation>
+                        An inset into a panel, used to create an area
+                        enclosed by a standard light panel
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
             <xs:element name="tiled">
                 <xs:annotation>
                     <xs:documentation>

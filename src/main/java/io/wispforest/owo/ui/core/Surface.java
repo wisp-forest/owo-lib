@@ -5,6 +5,7 @@ import io.wispforest.owo.client.OwoClient;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.Drawer;
+import io.wispforest.owo.ui.util.OwoNinePatchRenderers;
 import net.minecraft.client.gui.tooltip.TooltipBackgroundRenderer;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.Tessellator;
@@ -24,6 +25,8 @@ public interface Surface {
     Surface DARK_PANEL = (matrices, component) -> {
         Drawer.drawPanel(matrices, component.x(), component.y(), component.width(), component.height(), true);
     };
+
+    Surface PANEL_INSET = OwoNinePatchRenderers.PANEL_INSET::draw;
 
     Surface VANILLA_TRANSLUCENT = (matrices, component) -> {
         Drawer.drawGradientRect(matrices,
@@ -121,6 +124,7 @@ public interface Surface {
                 }
                 case "options-background" -> surface.and(OPTIONS_BACKGROUND);
                 case "vanilla-translucent" -> surface.and(VANILLA_TRANSLUCENT);
+                case "panel-inset" -> surface.and(PANEL_INSET);
                 case "tooltip" -> surface.and(TOOLTIP);
                 case "outline" -> surface.and(outline(Color.parseAndPack(child)));
                 case "flat" -> surface.and(flat(Color.parseAndPack(child)));

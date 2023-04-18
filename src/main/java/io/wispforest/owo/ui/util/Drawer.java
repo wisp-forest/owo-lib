@@ -39,6 +39,7 @@ public class Drawer extends DrawableHelper {
 
     public static final Identifier PANEL_TEXTURE = new Identifier("owo", "textures/gui/panel.png");
     public static final Identifier DARK_PANEL_TEXTURE = new Identifier("owo", "textures/gui/dark_panel.png");
+    public static final Identifier PANEL_INSET_TEXTURE = new Identifier("owo", "textures/gui/panel_inset.png");
 
     private Drawer() {}
 

@@ -33,6 +33,7 @@ public final class OwoNinePatchRenderers {
 
     public static final NinePatchRenderer LIGHT_PANEL = new NinePatchRenderer(Drawer.PANEL_TEXTURE, Size.square(5), Size.square(16), false);
     public static final NinePatchRenderer DARK_PANEL = new NinePatchRenderer(Drawer.DARK_PANEL_TEXTURE, Size.square(5), Size.square(16), false);
+    public static final NinePatchRenderer PANEL_INSET = new NinePatchRenderer(Drawer.PANEL_INSET_TEXTURE, Size.square(5), Size.square(16), false);
 
     // Button Headquarters
 
