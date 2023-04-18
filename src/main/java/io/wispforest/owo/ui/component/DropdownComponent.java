@@ -38,7 +38,7 @@ public class DropdownComponent extends FlowLayout {
         this.entries = Containers.verticalFlow(horizontalSizing, Sizing.content());
         this.entries.padding(Insets.of(1));
         this.entries.allowOverflow(true);
-        this.entries.surface(Surface.flat(0xA7000000).and(Surface.outline(0xA7FFFFFF)));
+        this.entries.surface(Surface.flat(0xC7000000).and(Surface.blur(3, 5)).and(Surface.outline(0xFF121212)));
 
         this.child(this.entries);
     }
@@ -105,8 +105,10 @@ public class DropdownComponent extends FlowLayout {
 
         var entries = this.entries.children();
         for (int i = 0; i < entries.size(); i++) {
-            if (!(entries.get(i) instanceof ResizeableComponent sizeable)) continue;
-            sizeable.setWidth(this.entries.width() - this.entries.padding().get().horizontal());
+            var entry = entries.get(i);
+            if (!(entry instanceof ResizeableComponent sizeable)) continue;
+
+            sizeable.setWidth(this.entries.width() - this.entries.padding().get().horizontal() - entry.margins().get().horizontal());
         }
     }
 
@@ -239,7 +241,7 @@ public class DropdownComponent extends FlowLayout {
                     this.y - margins.top(),
                     this.x + this.width + margins.right(),
                     this.y + this.height + margins.bottom(),
-                    0xA7FFFFFF
+                    0xFF121212
             );
         }
 
