@@ -12,7 +12,6 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
@@ -44,9 +43,6 @@ public class OwoClient implements ClientModInitializer {
 
     public static final GlProgram HSV_PROGRAM = new GlProgram(new Identifier("owo", "spectrum"), VertexFormats.POSITION_COLOR);
     public static final BlurProgram BLUR_PROGRAM = new BlurProgram();
-
-    @ApiStatus.Internal
-    public static final boolean SATIN_LOADED = FabricLoader.getInstance().isModLoaded("satin");
 
     @Override
     public void onInitializeClient() {

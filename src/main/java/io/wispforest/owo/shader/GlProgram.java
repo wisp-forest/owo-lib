@@ -46,7 +46,7 @@ public class GlProgram {
         REGISTERED_PROGRAMS.add(new Pair<>(
                 resourceFactory -> {
                     try {
-                        return new ShaderProgram(resourceFactory, id.toString(), vertexFormat);
+                        return new OwoShaderProgram(resourceFactory, id.toString(), vertexFormat);
                     } catch (IOException e) {
                         throw new RuntimeException("Failed to initialized owo shader program", e);
                     }
@@ -86,5 +86,11 @@ public class GlProgram {
     @ApiStatus.Internal
     public static void forEachProgram(Consumer<Pair<Function<ResourceFactory, ShaderProgram>, Consumer<ShaderProgram>>> loader) {
         REGISTERED_PROGRAMS.forEach(loader);
+    }
+
+    public static class OwoShaderProgram extends ShaderProgram {
+        private OwoShaderProgram(ResourceFactory factory, String name, VertexFormat format) throws IOException {
+            super(factory, name, format);
+        }
     }
 }
