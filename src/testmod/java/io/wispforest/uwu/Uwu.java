@@ -3,6 +3,9 @@ package io.wispforest.uwu;
 import blue.endless.jankson.JsonPrimitive;
 import com.google.common.collect.ImmutableList;
 import com.mojang.authlib.GameProfile;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import io.wispforest.owo.config.ConfigSynchronizer;
+import io.wispforest.owo.config.Option;
 import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
@@ -202,6 +205,19 @@ public class Uwu implements ModInitializer {
 
                                                 return 0;
                                             }))));
+
+            dispatcher.register(literal("get_option")
+                    .then(argument("config", StringArgumentType.string())
+                            .then(argument("option", StringArgumentType.string()).executes(context -> {
+                                var value = ConfigSynchronizer.getClientOptions(
+                                        context.getSource().getPlayer(),
+                                        StringArgumentType.getString(context, "config")
+                                ).get(new Option.Key(StringArgumentType.getString(context, "option")));
+
+                                context.getSource().sendFeedback(Text.literal(String.valueOf(value)), false);
+
+                                return 0;
+                            }))));
 
         });
 
