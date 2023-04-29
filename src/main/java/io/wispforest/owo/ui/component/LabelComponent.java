@@ -10,6 +10,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.OrderedText;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import org.w3c.dom.Element;
 
@@ -178,12 +179,16 @@ public class LabelComponent extends BaseComponent {
         super.drawTooltip(matrices, mouseX, mouseY, partialTicks, delta);
 
         if (!this.isInBoundingBox(mouseX, mouseY)) return;
-        Drawer.utilityScreen().renderTextHoverEffect(matrices, this.text.getStyle(), mouseX, mouseY);
+        Drawer.utilityScreen().renderTextHoverEffect(matrices, this.styleAt(mouseX - this.x, mouseY - this.y), mouseX, mouseY);
     }
 
     @Override
     public boolean onMouseDown(double mouseX, double mouseY, int button) {
-        return Drawer.utilityScreen().handleTextClick(this.text.getStyle()) | super.onMouseDown(mouseX, mouseY, button);
+        return Drawer.utilityScreen().handleTextClick(this.styleAt((int) mouseX, (int) mouseY)) | super.onMouseDown(mouseX, mouseY, button);
+    }
+
+    private Style styleAt(int mouseX, int mouseY) {
+        return this.textRenderer.getTextHandler().getStyleAt(this.wrappedText.get(Math.min(mouseY / 11, this.wrappedText.size() - 1)), mouseX);
     }
 
     @Override

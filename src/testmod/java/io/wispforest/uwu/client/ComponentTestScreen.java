@@ -132,7 +132,9 @@ public class ComponentTestScreen extends Screen {
         );
 
         final var buttonPanel = Containers.horizontalFlow(Sizing.content(), Sizing.content())
-                .child(Components.label(Text.of("A horizontal Flow Layout\nthat's a tooltip?")).margins(Insets.of(5)))
+                .child(Components.label(Text.literal("A horizontal Flow").append(Text.literal("Layout")
+                        .styled(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackContent(Items.SCULK_SHRIEKER.getDefaultStack())))))
+                        .append(Text.literal("\nthat's a tooltip?"))).margins(Insets.of(5)))
                 .child(Components.button(Text.of("⇄"), button -> this.clearAndInit()).sizing(Sizing.fixed(20)))
                 .child(Components.button(Text.of("X"), button -> this.close()).sizing(Sizing.fixed(20)))
                 .positioning(Positioning.relative(100, 0))
