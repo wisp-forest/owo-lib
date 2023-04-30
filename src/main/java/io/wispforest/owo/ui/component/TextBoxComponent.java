@@ -1,6 +1,6 @@
 package io.wispforest.owo.ui.component;
 
-import io.wispforest.owo.mixin.ui.TextFieldWidgetAccessor;
+import io.wispforest.owo.mixin.ui.access.TextFieldWidgetAccessor;
 import io.wispforest.owo.ui.core.CursorStyle;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;

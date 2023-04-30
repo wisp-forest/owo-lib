@@ -1,5 +1,6 @@
 package io.wispforest.owo.mixin.ui;
 
+import io.wispforest.owo.mixin.ui.access.TextBoxComponentAccessor;
 import io.wispforest.owo.ui.inject.GreedyInputComponent;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;

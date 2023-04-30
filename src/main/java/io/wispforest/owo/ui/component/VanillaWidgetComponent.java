@@ -1,15 +1,14 @@
 package io.wispforest.owo.ui.component;
 
-import io.wispforest.owo.mixin.ui.ClickableWidgetAccessor;
-import io.wispforest.owo.mixin.ui.TextFieldWidgetAccessor;
+import io.wispforest.owo.mixin.ui.access.ClickableWidgetAccessor;
+import io.wispforest.owo.mixin.ui.access.TextFieldWidgetAccessor;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.*;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.CheckboxWidget;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.gui.widget.*;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.math.MathHelper;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 
@@ -17,14 +16,34 @@ public class VanillaWidgetComponent extends BaseComponent {
 
     private final ClickableWidget widget;
 
+    private float time = 0f;
+    private @Nullable Runnable tickCallback = null;
+
     protected VanillaWidgetComponent(ClickableWidget widget) {
         this.widget = widget;
 
         this.horizontalSizing.set(Sizing.fixed(this.widget.getWidth()));
         this.verticalSizing.set(Sizing.fixed(this.widget.getHeight()));
 
-        if (widget instanceof TextFieldWidget) {
+        if (widget instanceof TextFieldWidget textField) {
             this.margins(Insets.none());
+            this.tickCallback = textField::tick;
+        }
+
+        if (widget instanceof EditBoxWidget editBox) {
+            this.tickCallback = editBox::tick;
+        }
+    }
+
+    @Override
+    public void update(float delta, int mouseX, int mouseY) {
+        super.update(delta, mouseX, mouseY);
+        if (this.tickCallback == null) return;
+
+        this.time += delta;
+        while (this.time >= 1f) {
+            this.time -= 1f;
+            this.tickCallback.run();
         }
     }
 

@@ -1,4 +1,4 @@
-package io.wispforest.owo.mixin.ui;
+package io.wispforest.owo.mixin.ui.access;
 
 import io.wispforest.owo.ui.component.TextBoxComponent;
 import io.wispforest.owo.util.Observable;
