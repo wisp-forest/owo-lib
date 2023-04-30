@@ -63,6 +63,8 @@ public class VanillaWidgetComponent extends BaseComponent {
             } else {
                 return 9;
             }
+        } else if (this.widget instanceof TextAreaComponent textArea && textArea.maxLines() > 0) {
+            return MathHelper.clamp(textArea.getContentsHeight() / 9 + 1, 2, textArea.maxLines()) * 9 + (textArea.displayCharCount() ? 9 + 12 : 9);
         } else {
             return super.determineVerticalContentSize(sizing);
         }

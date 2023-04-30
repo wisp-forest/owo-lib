@@ -8,11 +8,9 @@ import io.wispforest.owo.ui.container.RenderEffectWrapper;
 import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.core.*;
 import net.minecraft.block.Blocks;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.Tooltip;
-import net.minecraft.client.gui.widget.EditBoxWidget;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.client.util.math.MatrixStack;
@@ -105,13 +103,10 @@ public class ComponentTestScreen extends Screen {
                 .verticalAlignment(VerticalAlignment.CENTER)
                 .padding(Insets.of(5));
 
-        final var editBox = new EditBoxWidget(MinecraftClient.getInstance().textRenderer,
-                0, 0, 75, 75, Text.literal("bruh"), Text.literal("b r u h")
-        );
-        editBox.sizing(Sizing.fixed(75));
-        editBox.setText("bruh");
-
-        innerLayout.child(editBox);
+        innerLayout.child(Components.textArea(Sizing.fixed(75), Sizing.content()).maxLines(5).displayCharCount(true));
+        innerLayout.child(Components.textArea(Sizing.fixed(75), Sizing.fixed(75)).<TextAreaComponent>configure(textArea -> {
+            textArea.displayCharCount(true).setMaxLength(100);
+        }));
 
         rootComponent.child(Containers.horizontalScroll(Sizing.fill(20), Sizing.content(), innerLayout)
                 .scrollbarThiccness(6)

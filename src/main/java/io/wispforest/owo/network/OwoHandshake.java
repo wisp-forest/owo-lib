@@ -124,7 +124,6 @@ public final class OwoHandshake {
     }
 
     private static void syncServer(MinecraftServer server, ServerLoginNetworkHandler handler, boolean responded, PacketByteBuf buf, ServerLoginNetworking.LoginSynchronizer loginSynchronizer, PacketSender packetSender) {
-        Owo.LOGGER.info("[Handshake] Receiving client channels");
         if (!responded) {
             if (!HANDSHAKE_REQUIRED) return;
 
@@ -132,6 +131,8 @@ public final class OwoHandshake {
             Owo.LOGGER.info("[Handshake] Handshake failed, client did not respond to channel query");
             return;
         }
+
+        Owo.LOGGER.info("[Handshake] Receiving client channels");
 
         final var clientChannels = RESPONSE_SERIALIZER.deserializer().apply(buf);
         final var clientParticleControllers = RESPONSE_SERIALIZER.deserializer().apply(buf);
