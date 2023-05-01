@@ -91,6 +91,18 @@ public class TextAreaComponent extends EditBoxWidget {
     }
 
     @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        boolean result = super.keyPressed(keyCode, scanCode, modifiers);
+
+        if (keyCode == GLFW.GLFW_KEY_TAB) {
+            this.editBox.replaceSelection("    ");
+            return true;
+        } else {
+            return result;
+        }
+    }
+
+    @Override
     public void inflate(Size space) {
         super.inflate(space);
 
