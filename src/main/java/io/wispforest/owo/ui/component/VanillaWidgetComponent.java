@@ -66,7 +66,7 @@ public class VanillaWidgetComponent extends BaseComponent {
         } else if (this.widget instanceof TextAreaComponent textArea && textArea.maxLines() > 0) {
             return MathHelper.clamp(textArea.getContentsHeight() / 9 + 1, 2, textArea.maxLines()) * 9 + (textArea.displayCharCount() ? 9 + 12 : 9);
         } else {
-            return super.determineVerticalContentSize(sizing);
+            throw new UnsupportedOperationException(this.widget.getClass().getSimpleName() + " does not support Sizing.content() on the vertical axis");
         }
     }
 
@@ -77,7 +77,7 @@ public class VanillaWidgetComponent extends BaseComponent {
         } else if (this.widget instanceof CheckboxWidget checkbox) {
             return MinecraftClient.getInstance().textRenderer.getWidth(checkbox.getMessage()) + 24;
         } else {
-            return super.determineHorizontalContentSize(sizing);
+            throw new UnsupportedOperationException(this.widget.getClass().getSimpleName() + " does not support Sizing.content() on the horizontal axis");
         }
     }
 
