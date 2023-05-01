@@ -6,6 +6,8 @@ import io.wispforest.owo.mixin.ui.access.EditBoxWidgetAccessor;
 import io.wispforest.owo.ui.core.CursorStyle;
 import io.wispforest.owo.ui.core.Size;
 import io.wispforest.owo.ui.core.Sizing;
+import io.wispforest.owo.ui.parsing.UIModel;
+import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
@@ -15,7 +17,10 @@ import net.minecraft.client.gui.EditBox;
 import net.minecraft.client.gui.widget.EditBoxWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
+import org.lwjgl.glfw.GLFW;
+import org.w3c.dom.Element;
 
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class TextAreaComponent extends EditBoxWidget {
@@ -143,6 +148,16 @@ public class TextAreaComponent extends EditBoxWidget {
     @Override
     public int heightOffset() {
         return this.displayCharCount.get() ? -12 : 0;
+    }
+
+    @Override
+    public void parseProperties(UIModel model, Element element, Map<String, Element> children) {
+        super.parseProperties(model, element, children);
+
+        UIParsing.apply(children, "display-char-count", UIParsing::parseBool, this::displayCharCount);
+        UIParsing.apply(children, "max-length", UIParsing::parseUnsignedInt, this::setMaxLength);
+        UIParsing.apply(children, "max-lines", UIParsing::parseUnsignedInt, this::maxLines);
+        UIParsing.apply(children, "text", $ -> $.getTextContent().strip(), this::text);
     }
 
     public interface OnChanged {

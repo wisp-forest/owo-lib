@@ -139,6 +139,16 @@
                         <panel/>
                     </surface>
                 </flow-layout>
+
+                <text-area>
+                    <text>bruh</text>
+                    <max-lines>10</max-lines>
+                    <max-length>100</max-length>
+                    <display-char-count>true</display-char-count>
+                    <sizing>
+                        <horizontal method="fixed">100</horizontal>
+                    </sizing>
+                </text-area>
             </children>
 
             <gap>15</gap>
