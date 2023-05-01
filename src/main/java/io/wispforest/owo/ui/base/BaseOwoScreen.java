@@ -4,6 +4,7 @@ import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.core.ParentComponent;
+import io.wispforest.owo.ui.inject.GreedyInputComponent;
 import io.wispforest.owo.ui.util.UIErrorToast;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
@@ -120,7 +121,9 @@ public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen {
             return true;
         }
 
-        return this.uiAdapter.keyPressed(keyCode, scanCode, modifiers);
+        return (modifiers & GLFW.GLFW_MOD_CONTROL) == 0 && this.uiAdapter.rootComponent.focusHandler().focused() instanceof GreedyInputComponent inputComponent
+                ? inputComponent.onKeyPress(keyCode, scanCode, modifiers)
+                : super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
