@@ -192,7 +192,7 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
             return true;
         }
 
-        return this.uiAdapter.rootComponent.focusHandler().focused() instanceof GreedyInputComponent inputComponent
+        return (modifiers & GLFW.GLFW_MOD_CONTROL) == 0 && this.uiAdapter.rootComponent.focusHandler().focused() instanceof GreedyInputComponent inputComponent
                 ? inputComponent.onKeyPress(keyCode, scanCode, modifiers)
                 : super.keyPressed(keyCode, scanCode, modifiers);
     }

@@ -51,6 +51,16 @@ public final class Components {
         return textBox;
     }
 
+    public static TextAreaComponent textArea(Sizing horizontalSizing, Sizing verticalSizing) {
+        return new TextAreaComponent(horizontalSizing, verticalSizing);
+    }
+
+    public static TextAreaComponent textArea(Sizing horizontalSizing, Sizing verticalSizing, String text) {
+        var textArea = new TextAreaComponent(horizontalSizing, verticalSizing);
+        textArea.setText(text);
+        return textArea;
+    }
+
     // ------------------
     // Default Components
     // ------------------

@@ -52,9 +52,10 @@
             <xs:element name="flow-layout" type="owo-ui-flow-layout"/>
             <xs:element name="scroll" type="owo-ui-scroll-container"/>
             <xs:element name="dropdown" type="owo-ui-dropdown-component"/>
-            <xs:element name="color-picker" type="owo-color-picker-component"/>
-            <xs:element name="small-checkbox" type="owo-small-checkbox-component"/>
-            <xs:element name="slim-slider" type="owo-slim-slider-component"/>
+            <xs:element name="color-picker" type="owo-ui-color-picker-component"/>
+            <xs:element name="small-checkbox" type="owo-ui-small-checkbox-component"/>
+            <xs:element name="slim-slider" type="owo-ui-slim-slider-component"/>
+            <xs:element name="text-area" type="owo-ui-text-area-component"/>
             <xs:element name="template">
                 <xs:complexType>
                     <xs:sequence minOccurs="0" maxOccurs="unbounded">
@@ -545,7 +546,21 @@
         </xs:complexContent>
     </xs:complexType>
 
-    <xs:complexType name="owo-color-picker-component">
+    <xs:complexType name="owo-ui-text-area-component">
+        <xs:complexContent>
+            <xs:extension base="componentType">
+                <xs:choice maxOccurs="unbounded">
+                    <xs:group ref="vanillaWidgetProps"/>
+                    <xs:element type="xs:string" name="text" minOccurs="0"/>
+                    <xs:element type="xs:unsignedInt" name="max-length" minOccurs="0"/>
+                    <xs:element type="xs:unsignedInt" name="max-lines" minOccurs="0"/>
+                    <xs:element type="xs:boolean" name="display-char-count" minOccurs="0"/>
+                </xs:choice>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="owo-ui-color-picker-component">
         <xs:complexContent>
             <xs:extension base="componentType">
                 <xs:choice maxOccurs="unbounded">
@@ -559,7 +574,7 @@
         </xs:complexContent>
     </xs:complexType>
 
-    <xs:complexType name="owo-small-checkbox-component">
+    <xs:complexType name="owo-ui-small-checkbox-component">
         <xs:complexContent>
             <xs:extension base="componentType">
                 <xs:choice maxOccurs="unbounded">
@@ -572,7 +587,7 @@
         </xs:complexContent>
     </xs:complexType>
 
-    <xs:complexType name="owo-slim-slider-component">
+    <xs:complexType name="owo-ui-slim-slider-component">
         <xs:complexContent>
             <xs:extension base="componentType">
                 <xs:choice maxOccurs="unbounded">

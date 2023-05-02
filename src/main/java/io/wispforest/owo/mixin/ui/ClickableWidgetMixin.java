@@ -317,6 +317,26 @@ public abstract class ClickableWidgetMixin implements ComponentStub, net.minecra
         return this.owo$wrapper;
     }
 
+    @Override
+    public int xOffset() {
+        return 0;
+    }
+
+    @Override
+    public int yOffset() {
+        return 0;
+    }
+
+    @Override
+    public int widthOffset() {
+        return 0;
+    }
+
+    @Override
+    public int heightOffset() {
+        return 0;
+    }
+
     @Inject(method = "setWidth", at = @At("HEAD"), cancellable = true)
     private void applyWidthToWrapper(int width, CallbackInfo ci) {
         var wrapper = this.owo$wrapper;

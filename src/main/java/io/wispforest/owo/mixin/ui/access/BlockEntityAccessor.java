@@ -1,4 +1,4 @@
-package io.wispforest.owo.mixin.ui;
+package io.wispforest.owo.mixin.ui.access;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;

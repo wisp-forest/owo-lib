@@ -1,8 +1,8 @@
 package io.wispforest.owo.ui.component;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import io.wispforest.owo.mixin.ui.ButtonWidgetAccessor;
-import io.wispforest.owo.mixin.ui.ClickableWidgetAccessor;
+import io.wispforest.owo.mixin.ui.access.ButtonWidgetAccessor;
+import io.wispforest.owo.mixin.ui.access.ClickableWidgetAccessor;
 import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.CursorStyle;
 import io.wispforest.owo.ui.core.Sizing;

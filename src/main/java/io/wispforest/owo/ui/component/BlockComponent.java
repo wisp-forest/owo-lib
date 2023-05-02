@@ -1,7 +1,7 @@
 package io.wispforest.owo.ui.component;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import io.wispforest.owo.mixin.ui.BlockEntityAccessor;
+import io.wispforest.owo.mixin.ui.access.BlockEntityAccessor;
 import io.wispforest.owo.ui.base.BaseComponent;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
