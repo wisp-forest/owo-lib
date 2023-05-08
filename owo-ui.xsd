@@ -50,6 +50,7 @@
             <xs:element name="collapsible" type="owo-ui-collapsible-container"/>
             <xs:element name="draggable" type="owo-ui-draggable-container"/>
             <xs:element name="flow-layout" type="owo-ui-flow-layout"/>
+            <xs:element name="grid-layout" type="owo-ui-grid-layout"/>
             <xs:element name="scroll" type="owo-ui-scroll-container"/>
             <xs:element name="dropdown" type="owo-ui-dropdown-component"/>
             <xs:element name="color-picker" type="owo-ui-color-picker-component"/>
@@ -648,8 +649,9 @@
             <xs:extension base="componentType">
                 <xs:choice maxOccurs="unbounded">
                     <xs:group ref="componentProps"/>
-                    <xs:element type="minecraft-identifier" name="item" minOccurs="0"/>
+                    <xs:element type="minecraft-identifier" name="stack" minOccurs="0"/>
                     <xs:element type="xs:boolean" name="show-overlay" minOccurs="0"/>
+                    <xs:element type="xs:boolean" name="set-tooltip-from-stack" minOccurs="0"/>
                 </xs:choice>
             </xs:extension>
         </xs:complexContent>

@@ -1,5 +1,6 @@
 package io.wispforest.owo.ui.component;
 
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
@@ -37,6 +38,7 @@ public class ItemComponent extends BaseComponent {
     protected final ItemRenderer itemRenderer;
     protected ItemStack stack;
     protected boolean showOverlay = false;
+    protected boolean setTooltipFromStack = false;
 
     protected ItemComponent(ItemStack stack) {
         this.entityBuffers = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
@@ -79,14 +81,39 @@ public class ItemComponent extends BaseComponent {
         // Clean up
         matrices.pop();
 
-        if (this.showOverlay) this.itemRenderer.renderGuiItemOverlay(matrices, MinecraftClient.getInstance().textRenderer, this.stack, this.x, this.y);
+        if (this.showOverlay) {
+            this.itemRenderer.renderGuiItemOverlay(matrices, MinecraftClient.getInstance().textRenderer, this.stack, this.x, this.y);
+        }
         if (notSideLit) {
             DiffuseLighting.enableGuiDepthLighting();
         }
     }
 
+    protected void updateTooltipForStack() {
+        if (!this.setTooltipFromStack) return;
+
+        if (!this.stack.isEmpty()) {
+            this.tooltip(tooltipFromItem(this.stack, MinecraftClient.getInstance().player, null));
+        } else {
+            this.tooltip((List<TooltipComponent>) null);
+        }
+    }
+
+    public ItemComponent setTooltipFromStack(boolean setTooltipFromStack) {
+        this.setTooltipFromStack = setTooltipFromStack;
+        this.updateTooltipForStack();
+
+        return this;
+    }
+
+    public boolean setTooltipFromStack() {
+        return setTooltipFromStack;
+    }
+
     public ItemComponent stack(ItemStack stack) {
         this.stack = stack;
+        this.updateTooltipForStack();
+
         return this;
     }
 
@@ -138,7 +165,16 @@ public class ItemComponent extends BaseComponent {
     public void parseProperties(UIModel model, Element element, Map<String, Element> children) {
         super.parseProperties(model, element, children);
         UIParsing.apply(children, "show-overlay", UIParsing::parseBool, this::showOverlay);
+        UIParsing.apply(children, "set-tooltip-from-stack", UIParsing::parseBool, this::setTooltipFromStack);
+
         UIParsing.apply(children, "item", UIParsing::parseIdentifier, itemId -> {
+            Owo.debugWarn(Owo.LOGGER, "Deprecated <item> property populated on item component - migrate to <stack> instead");
+
+            var item = Registries.ITEM.getOrEmpty(itemId).orElseThrow(() -> new UIModelParsingException("Unknown item " + itemId));
+            this.stack(item.getDefaultStack());
+        });
+
+        UIParsing.apply(children, "stack", UIParsing::parseIdentifier, itemId -> {
             var item = Registries.ITEM.getOrEmpty(itemId).orElseThrow(() -> new UIModelParsingException("Unknown item " + itemId));
             this.stack(item.getDefaultStack());
         });
