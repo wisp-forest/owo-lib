@@ -4,6 +4,7 @@ import io.wispforest.owo.ui.base.BaseUIModelScreen;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.util.CommandOpenedScreen;
 import io.wispforest.owo.ui.util.UISounds;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.gui.screen.Screen;
@@ -17,7 +18,7 @@ import org.lwjgl.util.tinyfd.TinyFileDialogs;
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 
-public class ConfigureHotReloadScreen extends BaseUIModelScreen<FlowLayout> {
+public class ConfigureHotReloadScreen extends BaseUIModelScreen<FlowLayout> implements CommandOpenedScreen {
 
     private final @Nullable Screen parent;
 

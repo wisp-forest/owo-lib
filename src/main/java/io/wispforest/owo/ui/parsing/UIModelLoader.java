@@ -19,8 +19,10 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class UIModelLoader implements SynchronousResourceReloader, IdentifiableResourceReloadListener {
 
@@ -87,6 +89,10 @@ public class UIModelLoader implements SynchronousResourceReloader, IdentifiableR
 
     public static @Nullable Path getHotReloadPath(Identifier modelId) {
         return HOT_RELOAD_LOCATIONS.get(modelId);
+    }
+
+    public static Set<Identifier> allLoadedModels() {
+        return Collections.unmodifiableSet(LOADED_MODELS.keySet());
     }
 
     @Override
