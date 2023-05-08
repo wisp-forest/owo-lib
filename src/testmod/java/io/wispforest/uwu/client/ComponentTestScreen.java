@@ -8,6 +8,7 @@ import io.wispforest.owo.ui.container.RenderEffectWrapper;
 import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.core.*;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.Tooltip;
@@ -116,19 +117,20 @@ public class ComponentTestScreen extends Screen {
         );
 
         rootComponent.child(Containers.verticalFlow(Sizing.content(), Sizing.content())
-                .child(Components.label(Text.literal("A vertical Flow Layout, as well as a really long text to demonstrate wrapping")
+                .child(Components.label(Text.literal("A profound vertical Flow Layout, as well as a really long text to demonstrate wrapping").styled(style -> style.withFont(MinecraftClient.UNICODE_FONT_ID))
                                 .styled(style -> {
                                     return style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, "yes"))
                                             .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackContent(Items.SCULK_SHRIEKER.getDefaultStack())));
                                 }))
                         .shadow(true)
+                        .lineHeight(7)
                         .maxWidth(100)
                         .margins(Insets.horizontal(15)))
         );
 
         final var buttonPanel = Containers.horizontalFlow(Sizing.content(), Sizing.content())
                 .child(Components.label(Text.literal("A horizontal Flow").append(Text.literal("Layout")
-                        .styled(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackContent(Items.SCULK_SHRIEKER.getDefaultStack())))))
+                                .styled(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackContent(Items.SCULK_SHRIEKER.getDefaultStack())))))
                         .append(Text.literal("\nthat's a tooltip?"))).margins(Insets.of(5)))
                 .child(Components.button(Text.of("⇄"), button -> this.clearAndInit()).sizing(Sizing.fixed(20)))
                 .child(Components.button(Text.of("X"), button -> this.close()).sizing(Sizing.fixed(20)))
@@ -294,8 +296,8 @@ public class ComponentTestScreen extends Screen {
 
         rootComponent.child(Components.item(new ItemStack(Items.EMERALD, 16))
                 .showOverlay(true)
+                .setTooltipFromStack(true)
                 .positioning(Positioning.absolute(120, 30))
-                .tooltip(ItemComponent.tooltipFromItem(bundle, this.client.player, null))
         );
 
         final var buttonGrid = Containers.grid(Sizing.content(), Sizing.fixed(85), 3, 5);

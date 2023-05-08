@@ -5,6 +5,7 @@ import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.Drawer;
+import io.wispforest.owo.util.Observable;
 import io.wispforest.owo.util.pond.OwoTextRendererExtension;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -29,6 +30,7 @@ public class LabelComponent extends BaseComponent {
     protected HorizontalAlignment horizontalTextAlignment = HorizontalAlignment.LEFT;
 
     protected final AnimatableProperty<Color> color = AnimatableProperty.of(Color.WHITE);
+    protected final Observable<Integer> lineHeight = Observable.of(this.textRenderer.fontHeight);
     protected boolean shadow;
     protected int maxWidth;
 
@@ -38,6 +40,8 @@ public class LabelComponent extends BaseComponent {
 
         this.shadow = false;
         this.maxWidth = Integer.MAX_VALUE;
+
+        this.lineHeight.observe($ -> this.notifyParentIfMounted());
     }
 
     public LabelComponent text(Text text) {
@@ -96,6 +100,15 @@ public class LabelComponent extends BaseComponent {
         return this.horizontalTextAlignment;
     }
 
+    public LabelComponent lineHeight(int lineHeight) {
+        this.lineHeight.set(lineHeight);
+        return this;
+    }
+
+    public int lineHeight() {
+        return this.lineHeight.get();
+    }
+
     @Override
     protected int determineHorizontalContentSize(Sizing sizing) {
         int widestText = 0;
@@ -115,7 +128,7 @@ public class LabelComponent extends BaseComponent {
     @Override
     protected int determineVerticalContentSize(Sizing sizing) {
         this.wrapLines();
-        return (this.wrappedText.size() * (this.textRenderer.fontHeight + 2)) - 2;
+        return (this.wrappedText.size() * (this.lineHeight() + 2)) - 2;
     }
 
     @Override
@@ -137,6 +150,9 @@ public class LabelComponent extends BaseComponent {
     @Override
     public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
         try {
+            matrices.push();
+            matrices.translate(0, 1 / MinecraftClient.getInstance().getWindow().getScaleFactor(), 0);
+
             int x = this.x;
             int y = this.y;
 
@@ -148,8 +164,8 @@ public class LabelComponent extends BaseComponent {
             }
 
             switch (this.verticalTextAlignment) {
-                case CENTER -> y += (this.height - ((this.wrappedText.size() * (this.textRenderer.fontHeight + 2)) - 2)) / 2;
-                case BOTTOM -> y += this.height - ((this.wrappedText.size() * (this.textRenderer.fontHeight + 2)) - 2);
+                case CENTER -> y += (this.height - ((this.wrappedText.size() * (this.lineHeight() + 2)) - 2)) / 2;
+                case BOTTOM -> y += this.height - ((this.wrappedText.size() * (this.lineHeight() + 2)) - 2);
             }
 
             ((OwoTextRendererExtension) this.textRenderer).owo$beginCache();
@@ -163,12 +179,17 @@ public class LabelComponent extends BaseComponent {
                     case RIGHT -> renderX += this.width - this.textRenderer.getWidth(renderText);
                 }
 
+                int renderY = y + i * (this.lineHeight() + 2);
+                renderY += this.lineHeight() - this.textRenderer.fontHeight;
+
                 if (this.shadow) {
-                    this.textRenderer.drawWithShadow(matrices, renderText, renderX, y + i * 11, this.color.get().argb());
+                    this.textRenderer.drawWithShadow(matrices, renderText, renderX, renderY, this.color.get().argb());
                 } else {
-                    this.textRenderer.draw(matrices, renderText, renderX, y + i * 11, this.color.get().argb());
+                    this.textRenderer.draw(matrices, renderText, renderX, renderY, this.color.get().argb());
                 }
             }
+
+            matrices.pop();
         } finally {
             ((OwoTextRendererExtension) this.textRenderer).owo$submitCache();
         }
@@ -188,7 +209,7 @@ public class LabelComponent extends BaseComponent {
     }
 
     private Style styleAt(int mouseX, int mouseY) {
-        return this.textRenderer.getTextHandler().getStyleAt(this.wrappedText.get(Math.min(mouseY / 11, this.wrappedText.size() - 1)), mouseX);
+        return this.textRenderer.getTextHandler().getStyleAt(this.wrappedText.get(Math.min(mouseY / (this.lineHeight() + 2), this.wrappedText.size() - 1)), mouseX);
     }
 
     @Override
@@ -198,6 +219,7 @@ public class LabelComponent extends BaseComponent {
         UIParsing.apply(children, "max-width", UIParsing::parseUnsignedInt, this::maxWidth);
         UIParsing.apply(children, "color", Color::parse, this::color);
         UIParsing.apply(children, "shadow", UIParsing::parseBool, this::shadow);
+        UIParsing.apply(children, "line-height", UIParsing::parseUnsignedInt, this::lineHeight);
 
         UIParsing.apply(children, "vertical-text-alignment", VerticalAlignment::parse, this::verticalTextAlignment);
         UIParsing.apply(children, "horizontal-text-alignment", HorizontalAlignment::parse, this::horizontalTextAlignment);
