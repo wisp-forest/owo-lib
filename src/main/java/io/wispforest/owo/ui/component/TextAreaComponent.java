@@ -15,6 +15,7 @@ import io.wispforest.owo.util.Observable;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.EditBox;
 import net.minecraft.client.gui.widget.EditBoxWidget;
+import net.minecraft.client.input.CursorMovement;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
@@ -111,11 +112,17 @@ public class TextAreaComponent extends EditBoxWidget {
     public void inflate(Size space) {
         super.inflate(space);
 
+        int cursor = this.editBox.getCursor();
+        int selection = ((EditBoxAccessor) this.editBox).owo$getSelectionEnd();
+
         ((EditBoxAccessor) this.editBox).owo$setWidth(this.width() - this.getPaddingDoubled() - 9);
         this.editBox.setText(this.getText());
 
         super.inflate(space);
         this.editBox.setText(this.getText());
+
+        this.editBox.moveCursor(CursorMovement.ABSOLUTE, cursor);
+        ((EditBoxAccessor) this.editBox).owo$setSelectionEnd(selection);
     }
 
     public EventSource<OnChanged> onChanged() {
