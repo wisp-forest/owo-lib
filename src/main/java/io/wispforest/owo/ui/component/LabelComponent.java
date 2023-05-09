@@ -18,6 +18,7 @@ import org.w3c.dom.Element;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 public class LabelComponent extends BaseComponent {
 
@@ -33,6 +34,8 @@ public class LabelComponent extends BaseComponent {
     protected final Observable<Integer> lineHeight = Observable.of(this.textRenderer.fontHeight);
     protected boolean shadow;
     protected int maxWidth;
+
+    protected Function<Style, Boolean> textClickHandler = Drawer.utilityScreen()::handleTextClick;
 
     protected LabelComponent(Text text) {
         this.text = text;
@@ -107,6 +110,15 @@ public class LabelComponent extends BaseComponent {
 
     public int lineHeight() {
         return this.lineHeight.get();
+    }
+
+    public LabelComponent textClickHandler(Function<Style, Boolean> textClickHandler) {
+        this.textClickHandler = textClickHandler;
+        return this;
+    }
+
+    public Function<Style, Boolean> textClickHandler() {
+        return textClickHandler;
     }
 
     @Override
@@ -205,10 +217,10 @@ public class LabelComponent extends BaseComponent {
 
     @Override
     public boolean onMouseDown(double mouseX, double mouseY, int button) {
-        return Drawer.utilityScreen().handleTextClick(this.styleAt((int) mouseX, (int) mouseY)) | super.onMouseDown(mouseX, mouseY, button);
+        return this.textClickHandler.apply(this.styleAt((int) mouseX, (int) mouseY)) | super.onMouseDown(mouseX, mouseY, button);
     }
 
-    private Style styleAt(int mouseX, int mouseY) {
+    protected Style styleAt(int mouseX, int mouseY) {
         return this.textRenderer.getTextHandler().getStyleAt(this.wrappedText.get(Math.min(mouseY / (this.lineHeight() + 2), this.wrappedText.size() - 1)), mouseX);
     }
 

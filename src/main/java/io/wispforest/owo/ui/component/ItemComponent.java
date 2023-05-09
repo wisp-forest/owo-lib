@@ -66,7 +66,7 @@ public class ItemComponent extends BaseComponent {
         matrices.push();
 
         // Translate to the root of the component
-        matrices.translate(x, y, 100);
+        matrices.translate(this.x, this.y, 100);
 
         // Scale according to component size and translate to the center
         matrices.scale(this.width / 16f, this.height / 16f, 1);
