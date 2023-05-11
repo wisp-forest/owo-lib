@@ -3,6 +3,9 @@ package io.wispforest.uwu;
 import blue.endless.jankson.JsonPrimitive;
 import com.google.common.collect.ImmutableList;
 import com.mojang.authlib.GameProfile;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import io.wispforest.owo.config.ConfigSynchronizer;
+import io.wispforest.owo.config.Option;
 import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
@@ -43,6 +46,7 @@ import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.registry.tag.TagKey;
+import net.minecraft.resource.featuretoggle.FeatureFlags;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
@@ -67,7 +71,7 @@ public class Uwu implements ModInitializer {
     public static final Identifier OWO_ICON_TEXTURE = new Identifier("uwu", "textures/gui/icon.png");
     public static final Identifier ANIMATED_BUTTON_TEXTURE = new Identifier("uwu", "textures/gui/animated_icon_test.png");
 
-    public static final ScreenHandlerType<EpicScreenHandler> EPIC_SCREEN_HANDLER_TYPE = new ScreenHandlerType<>(EpicScreenHandler::new);
+    public static final ScreenHandlerType<EpicScreenHandler> EPIC_SCREEN_HANDLER_TYPE = new ScreenHandlerType<>(EpicScreenHandler::new, FeatureFlags.VANILLA_FEATURES);
 
     public static final OwoItemGroup FOUR_TAB_GROUP = OwoItemGroup.builder(new Identifier("uwu", "four_tab_group"), () -> Icon.of(Items.AXOLOTL_BUCKET))
             .disableDynamicTitle()
@@ -90,7 +94,7 @@ public class Uwu implements ModInitializer {
                 group.addTab(Icon.of(Items.EMERALD), "tab_2", null, false);
                 group.addTab(Icon.of(Items.AMETHYST_SHARD), "tab_3", null, false);
                 group.addTab(Icon.of(Items.GOLD_INGOT), "tab_4", null, false);
-                group.addCustomTab(Icon.of(Items.IRON_INGOT), "tab_5", (enabledFeatures, entries, hasPermissions) -> entries.add(UwuItems.SCREEN_SHARD), false);
+                group.addCustomTab(Icon.of(Items.IRON_INGOT), "tab_5", (context, entries) -> entries.add(UwuItems.SCREEN_SHARD), false);
                 group.addTab(Icon.of(Items.QUARTZ), "tab_6", null, false);
 
                 group.addButton(new ItemGroupButton(group, Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16), "owo", () -> {
@@ -106,7 +110,7 @@ public class Uwu implements ModInitializer {
 
     public static final ItemGroup VANILLA_GROUP = FabricItemGroup.builder(new Identifier("uwu", "vanilla_group"))
             .icon(Items.ACACIA_BOAT::getDefaultStack)
-            .entries((enabledFeatures, entries, operatorEnabled) -> entries.add(Items.MANGROVE_CHEST_BOAT))
+            .entries((context, entries) -> entries.add(Items.MANGROVE_CHEST_BOAT))
             .build();
 
     public static final OwoNetChannel CHANNEL = OwoNetChannel.create(new Identifier("uwu", "uwu"));
@@ -201,6 +205,19 @@ public class Uwu implements ModInitializer {
 
                                                 return 0;
                                             }))));
+
+            dispatcher.register(literal("get_option")
+                    .then(argument("config", StringArgumentType.string())
+                            .then(argument("option", StringArgumentType.string()).executes(context -> {
+                                var value = ConfigSynchronizer.getClientOptions(
+                                        context.getSource().getPlayer(),
+                                        StringArgumentType.getString(context, "config")
+                                ).get(new Option.Key(StringArgumentType.getString(context, "option")));
+
+                                context.getSource().sendFeedback(Text.literal(String.valueOf(value)), false);
+
+                                return 0;
+                            }))));
 
         });
 

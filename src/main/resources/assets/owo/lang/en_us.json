@@ -4,6 +4,19 @@
     { "text": " > ", "color": "gray" },
     { "index": 1, "color": "dark_gray" }
   ],
+  "text.owo.configure_hot_reload.title": "Configure Hot Reload",
+  "text.owo.configure_hot_reload.choose_file": "Choose file",
+  "text.owo.configure_hot_reload.choose_ui_model_source": "Choose UI Model source",
+  "text.owo.configure_hot_reload.save": "Save",
+  "text.owo.configure_hot_reload.model": [
+    {"text": "Model: ", "color": "yellow"},
+    {"index": 0, "color": "gray"}
+  ],
+  "text.owo.configure_hot_reload.reload_from.unset": "Unset",
+  "text.owo.configure_hot_reload.reload_from": [
+    {"text": "Reload from: ", "color": "yellow"},
+    {"index": 0, "color": "gray"}
+  ],
   "text.owo.config.search": "Search...",
   "text.owo.config.search.matches": "%d of %d",
   "text.owo.config.search.no_matches": "No matches",
@@ -13,64 +26,29 @@
   "text.owo.config.button.range.edit_as_text": "Edit as text",
   "text.owo.config.button.range.edit_with_slider": "Edit with slider",
   "text.owo.config.applies_after_restart": [
-    {
-      "text": "⏻ ",
-      "color": "#FAEA48"
-    },
-    {
-      "text": "This option applies after a restart",
-      "color": "gray"
-    }
+    {"text": "⏻ ", "color": "#FAEA48"},
+    {"text": "This option applies after a restart", "color": "gray"}
   ],
   "text.owo.config.managed_by_server": [
-    {
-      "text": "⚑ ",
-      "color": "#EB1D36"
-    },
-    {
-      "text": "This option is being managed by the server\n   Disconnect to edit it",
-      "color": "gray"
-    }
+    {"text": "⚑ ", "color": "#EB1D36"},
+    {"text": "This option is being managed by the server\n   Disconnect to edit it", "color": "gray"}
   ],
   "text.owo.config.button.reload": "Reload",
   "text.owo.config.button.done": "Done",
-  "text.owo.config.sections": [
-    {
-      "text": "Sections",
-      "underlined": true
-    }
-  ],
+  "text.owo.config.sections": {"text": "Sections", "underlined": true},
   "text.owo.config.list.add_entry": "Add entry",
   "text.owo.config.boolean_toggle.enabled": [
     "",
-    {
-      "text": "[",
-      "color": "gray"
-    },
-    {
-      "text": "✔",
-      "color": "#28FFBF"
-    },
-    {
-      "text": "]",
-      "color": "gray"
-    },
+    {"text": "[", "color": "gray"},
+    {"text": "✔", "color": "#28FFBF"},
+    {"text": "]", "color": "gray"},
     " Enabled"
   ],
   "text.owo.config.boolean_toggle.disabled": [
     "",
-    {
-      "text": "[",
-      "color": "gray"
-    },
-    {
-      "text": "❌",
-      "color": "#EB1D36"
-    },
-    {
-      "text": "]",
-      "color": "gray"
-    },
+    {"text": "[", "color": "gray"},
+    {"text": "❌", "color": "#EB1D36"},
+    {"text": "]", "color": "gray"},
     " Disabled"
   ]
 }

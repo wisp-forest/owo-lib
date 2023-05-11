@@ -9,8 +9,8 @@ import java.lang.reflect.Field;
  * A special version of {@link FieldProcessingSubject} that contains fields which should
  * be registered into a {@link Registry} using the field names in lowercase as ID
  * <p>
- * Use {@link FieldRegistrationHandler#register(Class, String, boolean)} to automatically register all fields
- * of this class into the specified registry
+ * Use {@link #register(Class, String, boolean)} to automatically register all fields
+ * of a given implementation into its specified registry
  *
  * @param <T> The type of objects to register, same as the Registry's type parameter
  */
@@ -29,7 +29,17 @@ public interface AutoRegistryContainer<T> extends FieldProcessingSubject<T> {
      * @param identifier The identifier the field was assigned, possibly overridden by an {@link AssignedName}
      *                   annotation and always fully lowercase
      */
-    default void postProcessField(String namespace, T value, String identifier, Field field) {
+    default void postProcessField(String namespace, T value, String identifier, Field field) {}
 
+    /**
+     * Convenience-alias for {@link FieldRegistrationHandler#register(Class, String, boolean)}
+     */
+    static <T> void register(Class<? extends AutoRegistryContainer<T>> container, String namespace, boolean recurse) {
+        FieldRegistrationHandler.register(container, namespace, recurse);
+    }
+
+    @SuppressWarnings({"unchecked"})
+    static <T> Class<T> conform(Class<?> input) {
+        return (Class<T>) input;
     }
 }

@@ -54,8 +54,6 @@ public class Owo implements ModInitializer {
         InsertingTextContent.init();
         ScreenInternals.init();
 
-        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new UIModelLoader());
-
         ServerLifecycleEvents.SERVER_STARTING.register(server -> SERVER = server);
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> SERVER = null);
 

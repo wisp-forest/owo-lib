@@ -257,4 +257,20 @@ public interface ComponentStub extends Component {
     default VanillaWidgetComponent widgetWrapper() {
         throw new IllegalStateException("Interface stub method called");
     }
+
+    default int xOffset() {
+        throw new IllegalStateException("Interface stub method called");
+    }
+
+    default int yOffset() {
+        throw new IllegalStateException("Interface stub method called");
+    }
+
+    default int widthOffset() {
+        throw new IllegalStateException("Interface stub method called");
+    }
+
+    default int heightOffset() {
+        throw new IllegalStateException("Interface stub method called");
+    }
 }

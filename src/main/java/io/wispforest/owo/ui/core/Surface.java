@@ -5,6 +5,7 @@ import io.wispforest.owo.client.OwoClient;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.Drawer;
+import io.wispforest.owo.ui.util.NinePatchTexture;
 import net.minecraft.client.gui.tooltip.TooltipBackgroundRenderer;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.Tessellator;
@@ -23,6 +24,10 @@ public interface Surface {
 
     Surface DARK_PANEL = (matrices, component) -> {
         Drawer.drawPanel(matrices, component.x(), component.y(), component.width(), component.height(), true);
+    };
+
+    Surface PANEL_INSET = (matrices, component) -> {
+        NinePatchTexture.draw(Drawer.PANEL_INSET_NINE_PATCH_TEXTURE, matrices, component);
     };
 
     Surface VANILLA_TRANSLUCENT = (matrices, component) -> {
@@ -63,13 +68,9 @@ public interface Surface {
             buffer.vertex(matrix, component.x() + component.width(), component.y() + component.height(), 0).next();
             buffer.vertex(matrix, component.x() + component.width(), component.y(), 0).next();
 
-            RenderSystem.disableTexture();
-
             OwoClient.BLUR_PROGRAM.setParameters(16, quality, size);
             OwoClient.BLUR_PROGRAM.use();
             Tessellator.getInstance().draw();
-
-            RenderSystem.enableTexture();
         };
     }
 
@@ -116,8 +117,16 @@ public interface Surface {
                             UIParsing.parseUnsignedInt(child.getAttributeNode("texture-height")))
                     );
                 }
+                case "blur" -> {
+                    UIParsing.expectAttributes(child, "size", "quality");
+                    yield surface.and(blur(
+                            UIParsing.parseFloat(child.getAttributeNode("quality")),
+                            UIParsing.parseFloat(child.getAttributeNode("size"))
+                    ));
+                }
                 case "options-background" -> surface.and(OPTIONS_BACKGROUND);
                 case "vanilla-translucent" -> surface.and(VANILLA_TRANSLUCENT);
+                case "panel-inset" -> surface.and(PANEL_INSET);
                 case "tooltip" -> surface.and(TOOLTIP);
                 case "outline" -> surface.and(outline(Color.parseAndPack(child)));
                 case "flat" -> surface.and(flat(Color.parseAndPack(child)));

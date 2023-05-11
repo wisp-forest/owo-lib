@@ -1,4 +1,4 @@
-package io.wispforest.owo.mixin.ui;
+package io.wispforest.owo.mixin.ui.access;
 
 import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
 import io.wispforest.owo.ui.core.OwoUIAdapter;

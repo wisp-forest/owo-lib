@@ -1,6 +1,6 @@
 package io.wispforest.owo.ui.component;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
@@ -15,13 +15,14 @@ import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.item.ItemRenderer;
-import net.minecraft.client.render.model.json.ModelTransformation;
+import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 import org.w3c.dom.Element;
 
 import java.util.ArrayList;
@@ -31,10 +32,13 @@ import java.util.Objects;
 
 public class ItemComponent extends BaseComponent {
 
+    protected static final Matrix4f ITEM_SCALING = new Matrix4f().scaling(16, -16, 16);
+
     protected final VertexConsumerProvider.Immediate entityBuffers;
     protected final ItemRenderer itemRenderer;
     protected ItemStack stack;
     protected boolean showOverlay = false;
+    protected boolean setTooltipFromStack = false;
 
     protected ItemComponent(ItemStack stack) {
         this.entityBuffers = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
@@ -59,35 +63,57 @@ public class ItemComponent extends BaseComponent {
             DiffuseLighting.disableGuiDepthLighting();
         }
 
-        var modelView = RenderSystem.getModelViewStack();
-        modelView.push();
+        matrices.push();
 
         // Translate to the root of the component
-        modelView.translate(x, y, 100);
+        matrices.translate(this.x, this.y, 100);
 
         // Scale according to component size and translate to the center
-        modelView.scale(this.width / 16f, this.height / 16f, 1);
-        modelView.translate(8.0, 8.0, 0.0);
+        matrices.scale(this.width / 16f, this.height / 16f, 1);
+        matrices.translate(8.0, 8.0, 0.0);
 
         // Vanilla scaling and y inversion
-        modelView.scale(16, -16, 16);
-        RenderSystem.applyModelViewMatrix();
+        matrices.multiplyPositionMatrix(ITEM_SCALING);
 
-        this.itemRenderer.renderItem(this.stack, ModelTransformation.Mode.GUI, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, new MatrixStack(), entityBuffers, 0);
+        this.itemRenderer.renderItem(this.stack, ModelTransformationMode.GUI, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, matrices, entityBuffers, null, 0);
         this.entityBuffers.draw();
 
         // Clean up
-        modelView.pop();
-        RenderSystem.applyModelViewMatrix();
+        matrices.pop();
 
-        if (this.showOverlay) this.itemRenderer.renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, this.stack, this.x, this.y);
+        if (this.showOverlay) {
+            this.itemRenderer.renderGuiItemOverlay(matrices, MinecraftClient.getInstance().textRenderer, this.stack, this.x, this.y);
+        }
         if (notSideLit) {
             DiffuseLighting.enableGuiDepthLighting();
         }
     }
 
+    protected void updateTooltipForStack() {
+        if (!this.setTooltipFromStack) return;
+
+        if (!this.stack.isEmpty()) {
+            this.tooltip(tooltipFromItem(this.stack, MinecraftClient.getInstance().player, null));
+        } else {
+            this.tooltip((List<TooltipComponent>) null);
+        }
+    }
+
+    public ItemComponent setTooltipFromStack(boolean setTooltipFromStack) {
+        this.setTooltipFromStack = setTooltipFromStack;
+        this.updateTooltipForStack();
+
+        return this;
+    }
+
+    public boolean setTooltipFromStack() {
+        return setTooltipFromStack;
+    }
+
     public ItemComponent stack(ItemStack stack) {
         this.stack = stack;
+        this.updateTooltipForStack();
+
         return this;
     }
 
@@ -139,7 +165,16 @@ public class ItemComponent extends BaseComponent {
     public void parseProperties(UIModel model, Element element, Map<String, Element> children) {
         super.parseProperties(model, element, children);
         UIParsing.apply(children, "show-overlay", UIParsing::parseBool, this::showOverlay);
+        UIParsing.apply(children, "set-tooltip-from-stack", UIParsing::parseBool, this::setTooltipFromStack);
+
         UIParsing.apply(children, "item", UIParsing::parseIdentifier, itemId -> {
+            Owo.debugWarn(Owo.LOGGER, "Deprecated <item> property populated on item component - migrate to <stack> instead");
+
+            var item = Registries.ITEM.getOrEmpty(itemId).orElseThrow(() -> new UIModelParsingException("Unknown item " + itemId));
+            this.stack(item.getDefaultStack());
+        });
+
+        UIParsing.apply(children, "stack", UIParsing::parseIdentifier, itemId -> {
             var item = Registries.ITEM.getOrEmpty(itemId).orElseThrow(() -> new UIModelParsingException("Unknown item " + itemId));
             this.stack(item.getDefaultStack());
         });

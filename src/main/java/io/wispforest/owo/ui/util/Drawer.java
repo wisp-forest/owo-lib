@@ -37,8 +37,13 @@ public class Drawer extends DrawableHelper {
     private static final Drawer INSTANCE = new Drawer();
     private final DebugDrawer debug = new DebugDrawer();
 
-    public static final Identifier PANEL_TEXTURE = new Identifier("owo", "textures/gui/panel.png");
-    public static final Identifier DARK_PANEL_TEXTURE = new Identifier("owo", "textures/gui/dark_panel.png");
+    @Deprecated public static final Identifier PANEL_TEXTURE = new Identifier("owo", "textures/gui/panel.png");
+    @Deprecated public static final Identifier DARK_PANEL_TEXTURE = new Identifier("owo", "textures/gui/dark_panel.png");
+    @Deprecated public static final Identifier PANEL_INSET_TEXTURE = new Identifier("owo", "textures/gui/panel_inset.png");
+
+    public static final Identifier PANEL_NINE_PATCH_TEXTURE = new Identifier("owo", "panel/default");
+    public static final Identifier DARK_PANEL_NINE_PATCH_TEXTURE = new Identifier("owo", "panel/dark");
+    public static final Identifier PANEL_INSET_NINE_PATCH_TEXTURE = new Identifier("owo", "panel/inset");
 
     private Drawer() {}
 
@@ -83,7 +88,6 @@ public class Drawer extends DrawableHelper {
         buffer.vertex(matrix, x, y + height, 0).color(bottomLeftColor).next();
         buffer.vertex(matrix, x + width, y + height, 0).color(bottomRightColor).next();
 
-        RenderSystem.disableTexture();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
 
@@ -91,7 +95,6 @@ public class Drawer extends DrawableHelper {
         Tessellator.getInstance().draw();
 
         RenderSystem.disableBlend();
-        RenderSystem.enableTexture();
     }
 
     /**
@@ -106,7 +109,7 @@ public class Drawer extends DrawableHelper {
      * @param dark     Whether to use the dark version of the panel texture
      */
     public static void drawPanel(MatrixStack matrices, int x, int y, int width, int height, boolean dark) {
-        (dark ? OwoNinePatchRenderers.DARK_PANEL : OwoNinePatchRenderers.LIGHT_PANEL).draw(matrices, x, y, width, height);
+        NinePatchTexture.draw(dark ? DARK_PANEL_NINE_PATCH_TEXTURE : PANEL_NINE_PATCH_TEXTURE, matrices, x, y, width, height);
     }
 
     public static void drawSpectrum(MatrixStack matrices, int x, int y, int width, int height, boolean vertical) {
@@ -119,12 +122,8 @@ public class Drawer extends DrawableHelper {
         buffer.vertex(matrix, x + width, y + height, 0).color(0f, 1f, 1f, 1f).next();
         buffer.vertex(matrix, x + width, y, 0).color(vertical ? 1f : 0f, 1f, 1f, 1f).next();
 
-        RenderSystem.disableTexture();
-
         OwoClient.HSV_PROGRAM.use();
         Tessellator.getInstance().draw();
-
-        RenderSystem.enableTexture();
     }
 
     public static void drawText(MatrixStack matrices, Text text, float x, float y, float scale, int color) {

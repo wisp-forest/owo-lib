@@ -1,0 +1,84 @@
+<owo-ui xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/wisp-forest/owo-lib/1.19.4/owo-ui.xsd">
+    <components>
+        <flow-layout direction="vertical">
+            <children>
+                <flow-layout direction="vertical">
+                    <children>
+                        <label>
+                            <text translate="true">text.owo.configure_hot_reload.title</text>
+                            <shadow>true</shadow>
+                        </label>
+
+                        <flow-layout direction="vertical">
+                            <children>
+                                <label id="ui-model-label"/>
+                                <label id="file-name-label">
+                                    <max-width>250</max-width>
+                                </label>
+                            </children>
+                        </flow-layout>
+
+                        <flow-layout direction="horizontal">
+                            <children>
+                                <template name="button">
+                                    <id>choose-button</id>
+                                    <message>text.owo.configure_hot_reload.choose_file</message>
+                                </template>
+
+                                <template name="button">
+                                    <id>save-button</id>
+                                    <message>text.owo.configure_hot_reload.save</message>
+                                </template>
+                            </children>
+
+                            <gap>10</gap>
+                        </flow-layout>
+
+                        <label id="close-label">
+                            <text>❌</text>
+                            <positioning type="relative">100,0</positioning>
+                            <cursor-style>hand</cursor-style>
+                        </label>
+                    </children>
+
+                    <horizontal-alignment>center</horizontal-alignment>
+
+                    <padding>
+                        <all>5</all>
+                    </padding>
+
+                    <gap>5</gap>
+
+                    <surface>
+                        <flat>#77000000</flat>
+                        <outline>#FF121212</outline>
+                    </surface>
+                </flow-layout>
+            </children>
+
+            <surface>
+                <vanilla-translucent/>
+            </surface>
+
+            <vertical-alignment>center</vertical-alignment>
+            <horizontal-alignment>center</horizontal-alignment>
+        </flow-layout>
+    </components>
+
+    <templates>
+        <template name="button">
+            <button id="{{id}}">
+                <text translate="true">{{message}}</text>
+                <sizing>
+                    <horizontal method="fixed">70</horizontal>
+                    <vertical method="fixed">15</vertical>
+                </sizing>
+
+                <renderer>
+                    <flat color="#77000000" hovered-color="#AA000000" disabled-color="black"/>
+                </renderer>
+            </button>
+        </template>
+    </templates>
+</owo-ui>

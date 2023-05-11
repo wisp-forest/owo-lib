@@ -8,12 +8,15 @@ import io.wispforest.owo.itemgroup.json.OwoItemGroupLoader;
 import io.wispforest.owo.moddata.ModDataLoader;
 import io.wispforest.owo.shader.BlurProgram;
 import io.wispforest.owo.shader.GlProgram;
+import io.wispforest.owo.ui.parsing.UIModelLoader;
+import io.wispforest.owo.ui.util.NinePatchTexture;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.client.render.VertexFormats;
+import net.minecraft.resource.ResourceType;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.ApiStatus;
@@ -45,12 +48,12 @@ public class OwoClient implements ClientModInitializer {
     public static final GlProgram HSV_PROGRAM = new GlProgram(new Identifier("owo", "spectrum"), VertexFormats.POSITION_COLOR);
     public static final BlurProgram BLUR_PROGRAM = new BlurProgram();
 
-    @ApiStatus.Internal
-    public static final boolean SATIN_LOADED = FabricLoader.getInstance().isModLoaded("satin");
-
     @Override
     public void onInitializeClient() {
         ModDataLoader.load(OwoItemGroupLoader.INSTANCE);
+
+        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new UIModelLoader());
+        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new NinePatchTexture.MetadataLoader());
 
         final var renderdocPath = System.getProperty("owo.renderdocPath");
         if (renderdocPath != null) {

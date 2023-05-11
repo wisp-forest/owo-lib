@@ -4,7 +4,6 @@ import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.OwoItemSettings;
 import net.minecraft.item.ItemGroup;
-import net.minecraft.resource.featuretoggle.FeatureSet;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
@@ -30,6 +29,6 @@ public record ItemGroupTab(
 
     @FunctionalInterface
     public interface ContentSupplier {
-        void addItems(FeatureSet enabledFeatures, ItemGroup.Entries entries, boolean hasPermissions);
+        void addItems(ItemGroup.DisplayContext context, ItemGroup.Entries entries);
     }
 }

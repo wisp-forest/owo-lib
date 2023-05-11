@@ -56,14 +56,6 @@ public class OptionComponents {
         return new OptionComponentFactory.Result<>(optionComponent, valueBox);
     }
 
-    /**
-     * @deprecated Use {@link #createRangeControls} instead
-     */
-    @Deprecated(forRemoval = true)
-    public static OptionComponentFactory.Result<FlowLayout, OptionValueProvider> createSlider(UIModel model, Option<? extends Number> option, boolean withDecimals) {
-        return createRangeControls(model, option, withDecimals ? 2 : 0);
-    }
-
     public static OptionComponentFactory.Result<FlowLayout, OptionValueProvider> createRangeControls(UIModel model, Option<? extends Number> option, int decimalPlaces) {
         boolean withDecimals = decimalPlaces > 0;
 

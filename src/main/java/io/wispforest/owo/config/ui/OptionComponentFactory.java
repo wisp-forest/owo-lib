@@ -1,11 +1,9 @@
 package io.wispforest.owo.config.ui;
 
-import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.config.annotation.RangeConstraint;
 import io.wispforest.owo.config.annotation.WithAlpha;
 import io.wispforest.owo.config.ui.component.ListOptionContainer;
-import io.wispforest.owo.config.ui.component.OptionComponent;
 import io.wispforest.owo.config.ui.component.OptionValueProvider;
 import io.wispforest.owo.ui.component.BoxComponent;
 import io.wispforest.owo.ui.component.ButtonComponent;
@@ -139,14 +137,5 @@ public interface OptionComponentFactory<T> {
      */
     Result<?, ?> make(UIModel model, Option<T> option);
 
-    record Result<B extends Component, P extends OptionValueProvider>(B baseComponent, P optionProvider) {
-
-        @Deprecated(forRemoval = true)
-        @SuppressWarnings({"removal", "unchecked"})
-        public Result(B baseComponent, OptionComponent component) {
-            this(baseComponent, (P) component);
-            Owo.debugWarn(Owo.LOGGER, "Deprecated OptionComponentFactory.Result constructor invoked - update your mod");
-        }
-
-    }
+    record Result<B extends Component, P extends OptionValueProvider>(B baseComponent, P optionProvider) {}
 }

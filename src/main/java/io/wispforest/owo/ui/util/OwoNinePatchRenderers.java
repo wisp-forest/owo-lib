@@ -3,6 +3,12 @@ package io.wispforest.owo.ui.util;
 import io.wispforest.owo.ui.core.Size;
 import net.minecraft.util.Identifier;
 
+/**
+ * @deprecated Use the texture identifiers placed directly in the relevant classes,
+ * namely {@link io.wispforest.owo.ui.container.ScrollContainer}, {@link Drawer}
+ * and {@link io.wispforest.owo.ui.component.ButtonComponent}
+ */
+@Deprecated(forRemoval = true)
 public final class OwoNinePatchRenderers {
 
     private OwoNinePatchRenderers() {}
@@ -33,6 +39,7 @@ public final class OwoNinePatchRenderers {
 
     public static final NinePatchRenderer LIGHT_PANEL = new NinePatchRenderer(Drawer.PANEL_TEXTURE, Size.square(5), Size.square(16), false);
     public static final NinePatchRenderer DARK_PANEL = new NinePatchRenderer(Drawer.DARK_PANEL_TEXTURE, Size.square(5), Size.square(16), false);
+    public static final NinePatchRenderer PANEL_INSET = new NinePatchRenderer(Drawer.PANEL_INSET_TEXTURE, Size.square(5), Size.square(16), false);
 
     // Button Headquarters
 

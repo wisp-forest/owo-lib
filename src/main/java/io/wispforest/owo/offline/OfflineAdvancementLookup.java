@@ -99,7 +99,7 @@ public final class OfflineAdvancementLookup {
                 dynamic = dynamic.set("DataVersion", dynamic.createInt(1343));
             }
 
-            dynamic = Schemas.getFixer().update(DataFixTypes.ADVANCEMENTS.getTypeReference(), dynamic, dynamic.get("DataVersion").asInt(0), SharedConstants.getGameVersion().getSaveVersion().getId());
+            dynamic = DataFixTypes.ADVANCEMENTS.update(Schemas.getFixer(), dynamic, dynamic.get("DataVersion").asInt(0));
             dynamic = dynamic.remove("DataVersion");
 
             Map<Identifier, AdvancementProgress> parsedMap = GSON.getAdapter(JSON_TYPE).fromJsonTree(dynamic.getValue());

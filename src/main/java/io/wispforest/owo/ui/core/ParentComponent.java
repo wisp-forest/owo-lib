@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public interface ParentComponent extends Component {
 
@@ -261,14 +262,37 @@ public interface ParentComponent extends Component {
      * into the given list
      *
      * @param into The list into which to collect the hierarchy
+     * @deprecated Use {@link #collectDescendants(ArrayList)} instead, it has
+     * a much clearer name
      */
+    @Deprecated(forRemoval = true)
     default void collectChildren(ArrayList<Component> into) {
-        into.add(this);
+        this.forEachDescendant(into::add);
+    }
+
+    /**
+     * Collect the entire component hierarchy below the given component
+     * into the given list
+     *
+     * @param into The list into which to collect the hierarchy
+     */
+    default void collectDescendants(ArrayList<Component> into) {
+        this.forEachDescendant(into::add);
+    }
+
+    /**
+     * Run the given callback function for every
+     * descendant of this component
+     *
+     * @param action The action to execute for each descendant
+     */
+    default void forEachDescendant(Consumer<Component> action) {
+        action.accept(this);
         for (var child : this.children()) {
             if (child instanceof ParentComponent parent) {
-                parent.collectChildren(into);
+                parent.forEachDescendant(action);
             } else {
-                into.add(child);
+                action.accept(child);
             }
         }
     }

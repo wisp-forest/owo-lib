@@ -12,7 +12,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.Tooltip;
-import net.minecraft.client.gui.widget.EditBoxWidget;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.client.util.math.MatrixStack;
@@ -105,13 +104,10 @@ public class ComponentTestScreen extends Screen {
                 .verticalAlignment(VerticalAlignment.CENTER)
                 .padding(Insets.of(5));
 
-        final var editBox = new EditBoxWidget(MinecraftClient.getInstance().textRenderer,
-                0, 0, 75, 75, Text.literal("bruh"), Text.literal("b r u h")
-        );
-        editBox.sizing(Sizing.fixed(75));
-        editBox.setText("bruh");
-
-        innerLayout.child(editBox);
+        innerLayout.child(Components.textArea(Sizing.fixed(75), Sizing.content()).maxLines(5).displayCharCount(true));
+        innerLayout.child(Components.textArea(Sizing.fixed(75), Sizing.fixed(75)).<TextAreaComponent>configure(textArea -> {
+            textArea.displayCharCount(true).setMaxLength(100);
+        }));
 
         rootComponent.child(Containers.horizontalScroll(Sizing.fill(20), Sizing.content(), innerLayout)
                 .scrollbarThiccness(6)
@@ -121,18 +117,21 @@ public class ComponentTestScreen extends Screen {
         );
 
         rootComponent.child(Containers.verticalFlow(Sizing.content(), Sizing.content())
-                .child(Components.label(Text.literal("A vertical Flow Layout, as well as a really long text to demonstrate wrapping")
+                .child(Components.label(Text.literal("A profound vertical Flow Layout, as well as a really long text to demonstrate wrapping").styled(style -> style.withFont(MinecraftClient.UNICODE_FONT_ID))
                                 .styled(style -> {
                                     return style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, "yes"))
                                             .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackContent(Items.SCULK_SHRIEKER.getDefaultStack())));
                                 }))
                         .shadow(true)
+                        .lineHeight(7)
                         .maxWidth(100)
                         .margins(Insets.horizontal(15)))
         );
 
         final var buttonPanel = Containers.horizontalFlow(Sizing.content(), Sizing.content())
-                .child(Components.label(Text.of("A horizontal Flow Layout\nthat's a tooltip?")).margins(Insets.of(5)))
+                .child(Components.label(Text.literal("A horizontal Flow").append(Text.literal("Layout")
+                                .styled(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackContent(Items.SCULK_SHRIEKER.getDefaultStack())))))
+                        .append(Text.literal("\nthat's a tooltip?"))).margins(Insets.of(5)))
                 .child(Components.button(Text.of("⇄"), button -> this.clearAndInit()).sizing(Sizing.fixed(20)))
                 .child(Components.button(Text.of("X"), button -> this.close()).sizing(Sizing.fixed(20)))
                 .positioning(Positioning.relative(100, 0))
@@ -149,6 +148,7 @@ public class ComponentTestScreen extends Screen {
         var weeAnimation = buttonPanel.positioning().animate(1000, Easing.CUBIC, Positioning.relative(0, 100));
         rootComponent.child(Containers.verticalFlow(Sizing.content(), Sizing.content())
                 .child(growingTextBox)
+                .child(new SmallCheckboxComponent())
                 .child(Components.textBox(Sizing.fixed(60)))
                 .child(Components.button(Text.of("weeeee"), button -> {
                     weeAnimation.loop(!weeAnimation.looping());
@@ -296,8 +296,8 @@ public class ComponentTestScreen extends Screen {
 
         rootComponent.child(Components.item(new ItemStack(Items.EMERALD, 16))
                 .showOverlay(true)
+                .setTooltipFromStack(true)
                 .positioning(Positioning.absolute(120, 30))
-                .tooltip(ItemComponent.tooltipFromItem(bundle, this.client.player, null))
         );
 
         final var buttonGrid = Containers.grid(Sizing.content(), Sizing.fixed(85), 3, 5);

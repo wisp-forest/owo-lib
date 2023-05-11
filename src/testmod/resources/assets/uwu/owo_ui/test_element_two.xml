@@ -1,0 +1,27 @@
+<owo-ui xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../../../owo-ui.xsd">
+    <templates>
+        <template name="hud-element">
+            <flow-layout direction="vertical">
+                <children>
+                    <label>
+                        <text>hud momente</text>
+                    </label>
+
+                    <template name="bruh-button@uwu:test_element_one"/>
+                </children>
+
+                <padding>
+                    <all>10</all>
+                </padding>
+
+                <surface>
+                    <blur size="10" quality="3"/>
+                    <outline>#77AA00FF</outline>
+                </surface>
+
+                <positioning type="relative">0,50</positioning>
+            </flow-layout>
+        </template>
+    </templates>
+</owo-ui>

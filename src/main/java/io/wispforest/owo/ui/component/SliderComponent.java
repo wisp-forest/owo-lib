@@ -11,7 +11,6 @@ import net.minecraft.util.math.MathHelper;
 import org.w3c.dom.Element;
 
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class SliderComponent extends SliderWidget {
@@ -43,15 +42,6 @@ public class SliderComponent extends SliderWidget {
 
     public double value() {
         return this.value;
-    }
-
-    /**
-     * @deprecated Use {@code onChanged().subscribe(...)} instead
-     */
-    @Deprecated(forRemoval = true)
-    public SliderComponent onChanged(Consumer<Double> listener) {
-        this.changedEvents.source().subscribe(listener::accept);
-        return this;
     }
 
     public SliderComponent message(Function<String, Text> messageProvider) {

@@ -1,6 +1,6 @@
 package io.wispforest.owo.ui.component;
 
-import io.wispforest.owo.mixin.ui.TextFieldWidgetAccessor;
+import io.wispforest.owo.mixin.ui.access.TextFieldWidgetAccessor;
 import io.wispforest.owo.ui.core.CursorStyle;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
@@ -12,6 +12,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
+import org.lwjgl.glfw.GLFW;
 import org.w3c.dom.Element;
 
 import java.util.Map;
@@ -48,6 +49,18 @@ public class TextBoxComponent extends TextFieldWidget {
     }
 
     @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        boolean result = super.keyPressed(keyCode, scanCode, modifiers);
+
+        if (keyCode == GLFW.GLFW_KEY_TAB) {
+            this.write("    ");
+            return true;
+        } else {
+            return result;
+        }
+    }
+
+    @Override
     public void setDrawsBackground(boolean drawsBackground) {
         super.setDrawsBackground(drawsBackground);
         this.showsBackground.set(drawsBackground);
@@ -66,9 +79,9 @@ public class TextBoxComponent extends TextFieldWidget {
     @Override
     public void parseProperties(UIModel spec, Element element, Map<String, Element> children) {
         super.parseProperties(spec, element, children);
-        UIParsing.apply(children, "text", e -> e.getTextContent().strip(), this::text);
         UIParsing.apply(children, "show-background", UIParsing::parseBool, this::setDrawsBackground);
         UIParsing.apply(children, "max-length", UIParsing::parseUnsignedInt, this::setMaxLength);
+        UIParsing.apply(children, "text", e -> e.getTextContent().strip(), this::text);
     }
 
     protected CursorStyle owo$preferredCursorStyle() {

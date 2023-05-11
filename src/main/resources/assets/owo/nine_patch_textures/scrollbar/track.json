@@ -1,0 +1,15 @@
+{
+  "texture": "owo:textures/gui/scrollbar.png",
+  "texture_width": 64,
+  "texture_height": 32,
+  "u": 26,
+  "repeat": false,
+  "corner_patch_size": {
+    "width": 1,
+    "height": 1
+  },
+  "center_patch_size": {
+    "width": 4,
+    "height": 30
+  }
+}
