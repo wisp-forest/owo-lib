@@ -48,7 +48,7 @@
     "modmenu": {
       "links": {
         "modmenu.discord": "https://discord.gg/xrwHKktV2d",
-        "owo.wiki": "https://docs.wispforest.io/owo/features/"
+        "modmenu.wiki": "https://docs.wispforest.io/owo/features/"
       },
       "badges": [
         "library"
