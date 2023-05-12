@@ -328,6 +328,14 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
                         this.y + padding.top() + componentMargins.top() + Math.round((positioning.y / 100f) * (this.height() - child.fullSize().height() - padding.vertical()))
                 );
             }
+            case ACROSS -> {
+                child.inflate(space);
+                child.mount(
+                        this,
+                        this.x + padding.left() + componentMargins.left() + Math.round((positioning.x / 100f) * (this.width() - padding.horizontal())),
+                        this.y + padding.top() + componentMargins.top() + Math.round((positioning.y / 100f) * (this.height() - padding.vertical()))
+                );
+            }
         }
     }
 

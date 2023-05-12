@@ -25,7 +25,7 @@ public class MountingHelper {
         var lateChildren = new ArrayList<Component>();
 
         for (var child : children) {
-            if (child.positioning().get().type != Positioning.Type.RELATIVE) {
+            if (!child.positioning().get().isRelative()) {
                 sink.accept(child, childSpace, layoutFunc);
             } else {
                 lateChildren.add(child);
