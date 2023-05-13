@@ -3,7 +3,7 @@
   "texture_width": 64,
   "texture_height": 192,
   "v": 64,
-  "repeat": false,
+  "repeat": true,
   "corner_patch_size": {
     "width": 3,
     "height": 3
