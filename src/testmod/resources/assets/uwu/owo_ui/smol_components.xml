@@ -132,7 +132,7 @@
 <!--                            <horizontal-alignment>center</horizontal-alignment>-->
 <!--                        </flow-layout>-->
 
-                        <flow-layout direction="rtl-text-flow">
+                        <flow-layout direction="ltr-text-flow">
                             <children>
                                 <label>
                                     <text>1</text>

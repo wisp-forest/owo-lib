@@ -1,6 +1,5 @@
 package io.wispforest.owo.ui.container;
 
-import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.base.BaseParentComponent;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
@@ -167,7 +166,7 @@ public class FlowLayout extends BaseParentComponent {
 
         return switch (element.getAttribute("direction")) {
             case "horizontal" -> Containers.horizontalFlow(Sizing.content(), Sizing.content());
-            case "rtl-text-flow" -> Containers.rtlTextFlow(Sizing.content(), Sizing.content());
+            case "ltr-text-flow" -> Containers.ltrTextFlow(Sizing.content(), Sizing.content());
             default -> Containers.verticalFlow(Sizing.content(), Sizing.content());
         };
     }
@@ -272,9 +271,9 @@ public class FlowLayout extends BaseParentComponent {
             mountState.mountLate();
         };
 
-        Algorithm RTL_TEXT = container -> {
+        Algorithm LTR_TEXT = container -> {
             if (container.horizontalSizing.get().isContent()) {
-                throw new IllegalStateException("An RTL-text-flow layout must use content-independent horizontal sizing");
+                throw new IllegalStateException("An LTR-text-flow layout must use content-independent horizontal sizing");
             }
 
             var layoutWidth = new MutableInt(0);

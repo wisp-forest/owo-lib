@@ -24,8 +24,8 @@ public final class Containers {
         return new FlowLayout(horizontalSizing, verticalSizing, FlowLayout.Algorithm.HORIZONTAL);
     }
 
-    public static FlowLayout rtlTextFlow(Sizing horizontalSizing, Sizing verticalSizing) {
-        return new FlowLayout(horizontalSizing, verticalSizing, FlowLayout.Algorithm.RTL_TEXT);
+    public static FlowLayout ltrTextFlow(Sizing horizontalSizing, Sizing verticalSizing) {
+        return new FlowLayout(horizontalSizing, verticalSizing, FlowLayout.Algorithm.LTR_TEXT);
     }
 
     // ------
