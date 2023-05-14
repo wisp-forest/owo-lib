@@ -454,7 +454,8 @@
                 <xs:choice maxOccurs="unbounded">
                     <xs:group ref="componentProps"/>
                     <xs:element type="owo-ui-text" name="text" minOccurs="0"/>
-                    <xs:element type="xs:integer" name="max-width" minOccurs="0"/>
+                    <xs:element type="xs:unsignedInt" name="max-width" minOccurs="0"/>
+                    <xs:element type="xs:unsignedInt" name="line-height" minOccurs="0"/>
                     <xs:element type="owo-ui-color" name="color" minOccurs="0"/>
                     <xs:element type="xs:boolean" name="shadow" minOccurs="0"/>
                     <xs:element type="owo-ui-vertical-alignment" name="vertical-text-alignment" minOccurs="0"/>
@@ -719,7 +720,15 @@
                         <xs:group ref="parentComponentProps" maxOccurs="unbounded"/>
                     </xs:choice>
                 </xs:sequence>
-                <xs:attribute name="direction" type="owo-ui-axis-direction" use="required"/>
+                <xs:attribute name="direction" use="required">
+                    <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                            <xs:enumeration value="vertical"/>
+                            <xs:enumeration value="horizontal"/>
+                            <xs:enumeration value="ltr-text-flow"/>
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:attribute>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
