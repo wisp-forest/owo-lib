@@ -73,7 +73,11 @@ public class ItemComponent extends BaseComponent {
         matrices.translate(8.0, 8.0, 0.0);
 
         // Vanilla scaling and y inversion
-        matrices.multiplyPositionMatrix(ITEM_SCALING);
+        if (notSideLit) {
+            matrices.scale(16, -16, 16);
+        } else {
+            matrices.multiplyPositionMatrix(ITEM_SCALING);
+        }
 
         this.itemRenderer.renderItem(this.stack, ModelTransformationMode.GUI, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, matrices, entityBuffers, null, 0);
         this.entityBuffers.draw();
