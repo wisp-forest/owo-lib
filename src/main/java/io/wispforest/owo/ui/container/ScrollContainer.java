@@ -12,6 +12,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Range;
 import org.lwjgl.glfw.GLFW;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -266,11 +267,23 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
     }
 
     /**
-     * Scroll to the given component, trying to align it
-     * to the top of this container
+     * Scroll to the given component
      */
     public ScrollContainer<C> scrollTo(Component component) {
-        this.scrollOffset = MathHelper.clamp(this.scrollOffset - (this.y - component.y() + component.margins().get().top()), 0, this.maxScroll);
+        if (this.direction == ScrollDirection.VERTICAL) {
+            this.scrollOffset = MathHelper.clamp(this.scrollOffset - (this.y - component.y() + component.margins().get().top()), 0, this.maxScroll);
+        } else {
+            this.scrollOffset = MathHelper.clamp(this.scrollOffset - (this.x - component.x() + component.margins().get().right()), 0, this.maxScroll);
+        }
+        return this;
+    }
+
+    /**
+     * Scroll to the specified point along the entire
+     * length of this container's content
+     */
+    public ScrollContainer<C> scrollTo(@Range(from = 0, to = 1) double progress) {
+        this.scrollOffset = this.maxScroll * progress;
         return this;
     }
 
