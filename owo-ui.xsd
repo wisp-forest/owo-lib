@@ -45,6 +45,7 @@
             <xs:element name="discrete-slider" type="owo-ui-discrete-slider-component"/>
             <xs:element name="checkbox" type="owo-ui-checkbox-component"/>
             <xs:element name="item" type="owo-ui-item-component"/>
+            <xs:element name="block" type="owo-ui-block-component"/>
             <xs:element name="sprite" type="owo-ui-sprite-component"/>
             <xs:element name="texture" type="owo-ui-texture-component"/>
             <xs:element name="collapsible" type="owo-ui-collapsible-container"/>
@@ -641,7 +642,7 @@
                     <xs:element type="xs:boolean" name="mouse-rotation" minOccurs="0"/>
                     <xs:element type="xs:boolean" name="scale-to-fit" minOccurs="0"/>
                 </xs:choice>
-                <xs:attribute name="type" type="minecraft-identifier" use="required"/>
+                <xs:attribute name="type" type="xs:string" use="required"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
@@ -651,10 +652,19 @@
             <xs:extension base="componentType">
                 <xs:choice maxOccurs="unbounded">
                     <xs:group ref="componentProps"/>
-                    <xs:element type="minecraft-identifier" name="stack" minOccurs="0"/>
+                    <xs:element type="xs:string" name="stack" minOccurs="0"/>
                     <xs:element type="xs:boolean" name="show-overlay" minOccurs="0"/>
                     <xs:element type="xs:boolean" name="set-tooltip-from-stack" minOccurs="0"/>
                 </xs:choice>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="owo-ui-block-component">
+        <xs:complexContent>
+            <xs:extension base="componentType">
+                <xs:group ref="componentProps"/>
+                <xs:attribute name="state" use="required"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>

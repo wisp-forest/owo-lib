@@ -3,6 +3,7 @@ package io.wispforest.owo.ui.component;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
@@ -23,6 +24,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.registry.Registries;
@@ -224,7 +226,16 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
         var entityId = UIParsing.parseIdentifier(element.getAttributeNode("type"));
         var entityType = Registries.ENTITY_TYPE.getOrEmpty(entityId).orElseThrow(() -> new UIModelParsingException("Unknown entity type " + entityId));
 
-        return new EntityComponent<>(Sizing.content(), entityType, null);
+        NbtCompound nbt = null;
+        if (element.hasAttribute("nbt")) {
+            try {
+                nbt = StringNbtReader.parse(element.getAttribute("nbt"));
+            } catch (CommandSyntaxException cse) {
+                throw new UIModelParsingException("Invalid NBT compound", cse);
+            }
+        }
+
+        return new EntityComponent<>(Sizing.content(), entityType, nbt);
     }
 
     public static class RenderablePlayerEntity extends ClientPlayerEntity {

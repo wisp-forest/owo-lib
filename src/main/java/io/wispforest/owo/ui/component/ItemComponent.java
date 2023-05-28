@@ -1,5 +1,7 @@
 package io.wispforest.owo.ui.component;
 
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.Sizing;
@@ -17,6 +19,7 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.command.argument.ItemStringReader;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
@@ -178,9 +181,17 @@ public class ItemComponent extends BaseComponent {
             this.stack(item.getDefaultStack());
         });
 
-        UIParsing.apply(children, "stack", UIParsing::parseIdentifier, itemId -> {
-            var item = Registries.ITEM.getOrEmpty(itemId).orElseThrow(() -> new UIModelParsingException("Unknown item " + itemId));
-            this.stack(item.getDefaultStack());
+        UIParsing.apply(children, "stack", $ -> $.getTextContent().strip(), stackString -> {
+            try {
+                var result = ItemStringReader.item(Registries.ITEM.getReadOnlyWrapper(), new StringReader(stackString));
+
+                var stack = new ItemStack(result.item());
+                stack.setNbt(result.nbt());
+
+                this.stack(stack);
+            } catch (CommandSyntaxException cse) {
+                throw new UIModelParsingException("Invalid item stack", cse);
+            }
         });
     }
 }
