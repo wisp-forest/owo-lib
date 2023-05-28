@@ -135,6 +135,11 @@ public abstract class ClickableWidgetMixin implements ComponentStub, net.minecra
     }
 
     @Override
+    public boolean shouldDrawTooltip(double mouseX, double mouseY) {
+        return this.owo$getWrapper().shouldDrawTooltip(mouseX, mouseY);
+    }
+
+    @Override
     public void update(float delta, int mouseX, int mouseY) {
         this.owo$getWrapper().update(delta, mouseX, mouseY);
         this.cursorStyle(this.active ? this.owo$preferredCursorStyle() : CursorStyle.POINTER);
