@@ -51,6 +51,7 @@
             <xs:element name="draggable" type="owo-ui-draggable-container"/>
             <xs:element name="flow-layout" type="owo-ui-flow-layout"/>
             <xs:element name="grid-layout" type="owo-ui-grid-layout"/>
+            <xs:element name="stack-layout" type="owo-ui-stack-layout"/>
             <xs:element name="scroll" type="owo-ui-scroll-container"/>
             <xs:element name="dropdown" type="owo-ui-dropdown-component"/>
             <xs:element name="color-picker" type="owo-ui-color-picker-component"/>
@@ -280,8 +281,8 @@
                     </xs:documentation>
                 </xs:annotation>
                 <xs:complexType>
-                    <xs:attribute name="quality" type="xs:float"/>
-                    <xs:attribute name="size" type="xs:float"/>
+                    <xs:attribute name="quality" type="xs:float" use="required"/>
+                    <xs:attribute name="size" type="xs:float" use="required"/>
                 </xs:complexType>
             </xs:element>
             <xs:element name="options-background">
@@ -742,6 +743,17 @@
                 </xs:sequence>
                 <xs:attribute name="rows" type="xs:unsignedInt" use="required"/>
                 <xs:attribute name="columns" type="xs:unsignedInt" use="required"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="owo-ui-stack-layout">
+        <xs:complexContent>
+            <xs:extension base="componentType">
+                <xs:sequence>
+                    <xs:element type="componentList" name="children"/>
+                    <xs:group ref="parentComponentProps" maxOccurs="unbounded"/>
+                </xs:sequence>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>

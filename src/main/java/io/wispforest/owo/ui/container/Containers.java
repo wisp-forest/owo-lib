@@ -28,6 +28,10 @@ public final class Containers {
         return new FlowLayout(horizontalSizing, verticalSizing, FlowLayout.Algorithm.LTR_TEXT);
     }
 
+    public static StackLayout stack(Sizing horizontalSizing, Sizing verticalSizing) {
+        return new StackLayout(horizontalSizing, verticalSizing);
+    }
+
     // ------
     // Scroll
     // ------

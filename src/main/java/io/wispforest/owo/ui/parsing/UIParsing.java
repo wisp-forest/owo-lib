@@ -280,6 +280,7 @@ public class UIParsing {
         // Layout
         registerFactory("flow-layout", FlowLayout::parse);
         registerFactory("grid-layout", GridLayout::parse);
+        registerFactory("stack-layout", element -> Containers.stack(Sizing.content(), Sizing.content()));
 
         // Container
         registerFactory("scroll", ScrollContainer::parse);

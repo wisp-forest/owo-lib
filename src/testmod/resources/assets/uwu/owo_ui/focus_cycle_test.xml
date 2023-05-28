@@ -1,5 +1,5 @@
 <owo-ui xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/wisp-forest/owo-lib/1.19.3/owo-ui.xsd">
+        xsi:noNamespaceSchemaLocation="../../../../../../owo-ui.xsd">
     <components>
         <flow-layout direction="vertical">
             <children>
@@ -25,7 +25,36 @@
                         </button>
                     </children>
                 </grid-layout>
+
+                <stack-layout>
+                    <children>
+                        <button>
+                            <sizing>
+                                <horizontal method="fixed">100</horizontal>
+                                <vertical method="fixed">20</vertical>
+                            </sizing>
+                        </button>
+
+                        <button>
+                            <sizing>
+                                <horizontal method="fixed">20</horizontal>
+                                <vertical method="fixed">100</vertical>
+                            </sizing>
+                        </button>
+                    </children>
+
+                    <horizontal-alignment>center</horizontal-alignment>
+                    <vertical-alignment>center</vertical-alignment>
+                </stack-layout>
+
             </children>
+
+            <horizontal-alignment>center</horizontal-alignment>
+            <vertical-alignment>center</vertical-alignment>
+
+            <surface>
+                <blur quality="3" size="5"/>
+            </surface>
         </flow-layout>
     </components>
 </owo-ui>

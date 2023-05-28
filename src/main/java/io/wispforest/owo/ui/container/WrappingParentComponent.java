@@ -23,7 +23,7 @@ public abstract class WrappingParentComponent<C extends Component> extends BaseP
     protected WrappingParentComponent(Sizing horizontalSizing, Sizing verticalSizing, C child) {
         super(horizontalSizing, verticalSizing);
         this.child = child;
-        this.childView = Collections.singletonList(this.child);
+        this.childView = List.of(this.child);
     }
 
     @Override
@@ -62,7 +62,7 @@ public abstract class WrappingParentComponent<C extends Component> extends BaseP
         }
 
         this.child = newChild;
-        this.childView = Collections.singletonList(this.child);
+        this.childView = List.of(this.child);
 
         this.updateLayout();
         return this;
