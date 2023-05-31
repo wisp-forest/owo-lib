@@ -25,8 +25,8 @@ public class CcaDataCommand {
         final var player = context.getSource().getPlayer();
         final var nbt = player.writeNbt(new NbtCompound()).getCompound("cardinal_components");
 
-        context.getSource().sendFeedback(TextOps.concat(Owo.PREFIX, TextOps.withFormatting("CCA Data:", Formatting.GRAY)), false);
-        context.getSource().sendFeedback(NbtHelper.toPrettyPrintedText(nbt), false);
+        context.getSource().sendFeedback(() -> TextOps.concat(Owo.PREFIX, TextOps.withFormatting("CCA Data:", Formatting.GRAY)), false);
+        context.getSource().sendFeedback(() -> NbtHelper.toPrettyPrintedText(nbt), false);
 
         return 0;
     }
@@ -37,8 +37,8 @@ public class CcaDataCommand {
         final var nbt = path.get(player.writeNbt(new NbtCompound())
                 .getCompound("cardinal_components")).iterator().next();
 
-        context.getSource().sendFeedback(TextOps.concat(Owo.PREFIX, TextOps.withFormatting("CCA Data:", Formatting.GRAY)), false);
-        context.getSource().sendFeedback(NbtHelper.toPrettyPrintedText(nbt), false);
+        context.getSource().sendFeedback(() -> TextOps.concat(Owo.PREFIX, TextOps.withFormatting("CCA Data:", Formatting.GRAY)), false);
+        context.getSource().sendFeedback(() -> NbtHelper.toPrettyPrintedText(nbt), false);
 
         return 0;
     }

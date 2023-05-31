@@ -5,15 +5,16 @@ import io.wispforest.owo.mixin.ui.access.ButtonWidgetAccessor;
 import io.wispforest.owo.mixin.ui.access.ClickableWidgetAccessor;
 import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.CursorStyle;
+import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
-import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.NinePatchTexture;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.w3c.dom.Element;
@@ -37,21 +38,21 @@ public class ButtonComponent extends ButtonWidget {
     }
 
     @Override
-    public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        this.renderer.draw(matrices, this, delta);
+    public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
+        this.renderer.draw((OwoUIDrawContext) context, this, delta);
 
         var textRenderer = MinecraftClient.getInstance().textRenderer;
         int color = this.active ? 0xffffff : 0xa0a0a0;
 
         if (this.textShadow) {
-            Drawer.drawCenteredTextWithShadow(matrices, textRenderer, this.getMessage(), this.getX() + this.width / 2, this.getY() + (this.height - 8) / 2, color);
+            context.drawCenteredTextWithShadow(textRenderer, this.getMessage(), this.getX() + this.width / 2, this.getY() + (this.height - 8) / 2, color);
         } else {
-            textRenderer.draw(matrices, this.getMessage(), this.getX() + this.width / 2f - textRenderer.getWidth(this.getMessage()) / 2f, this.getY() + (this.height - 8) / 2f, color);
+            context.drawText(textRenderer, this.getMessage(), (int) (this.getX() + this.width / 2f - textRenderer.getWidth(this.getMessage()) / 2f), (int) (this.getY() + (this.height - 8) / 2f), color, false);
         }
 
         var tooltip = ((ClickableWidgetAccessor) this).owo$getTooltip();
         if (this.hovered && tooltip != null)
-            Drawer.utilityScreen().renderOrderedTooltip(matrices, tooltip.getLines(MinecraftClient.getInstance()), mouseX, mouseY);
+            context.drawTooltip(textRenderer, tooltip.getLines(MinecraftClient.getInstance()), HoveredTooltipPositioner.INSTANCE, mouseX, mouseY);
     }
 
     public ButtonComponent onPress(Consumer<ButtonComponent> onPress) {
@@ -110,23 +111,23 @@ public class ButtonComponent extends ButtonWidget {
         };
 
         static Renderer flat(int color, int hoveredColor, int disabledColor) {
-            return (matrices, button, delta) -> {
+            return (context, button, delta) -> {
                 RenderSystem.enableDepthTest();
 
                 if (button.active) {
                     if (button.hovered) {
-                        Drawer.fill(matrices, button.getX(), button.getY(), button.getX() + button.width, button.getY() + button.height, hoveredColor);
+                        context.fill(button.getX(), button.getY(), button.getX() + button.width, button.getY() + button.height, hoveredColor);
                     } else {
-                        Drawer.fill(matrices, button.getX(), button.getY(), button.getX() + button.width, button.getY() + button.height, color);
+                        context.fill(button.getX(), button.getY(), button.getX() + button.width, button.getY() + button.height, color);
                     }
                 } else {
-                    Drawer.fill(matrices, button.getX(), button.getY(), button.getX() + button.width, button.getY() + button.height, disabledColor);
+                    context.fill(button.getX(), button.getY(), button.getX() + button.width, button.getY() + button.height, disabledColor);
                 }
             };
         }
 
         static Renderer texture(Identifier texture, int u, int v, int textureWidth, int textureHeight) {
-            return (matrices, button, delta) -> {
+            return (context, button, delta) -> {
                 int renderV = v;
                 if (!button.active) {
                     renderV += button.height * 2;
@@ -135,12 +136,11 @@ public class ButtonComponent extends ButtonWidget {
                 }
 
                 RenderSystem.enableDepthTest();
-                RenderSystem.setShaderTexture(0, texture);
-                Drawer.drawTexture(matrices, button.getX(), button.getY(), u, renderV, button.width, button.height, textureWidth, textureHeight);
+                context.drawTexture(texture, button.getX(), button.getY(), u, renderV, button.width, button.height, textureWidth, textureHeight);
             };
         }
 
-        void draw(MatrixStack matrices, ButtonComponent button, float delta);
+        void draw(OwoUIDrawContext context, ButtonComponent button, float delta);
 
         static Renderer parse(Element element) {
             var children = UIParsing.<Element>allChildrenOfType(element, Node.ELEMENT_NODE);

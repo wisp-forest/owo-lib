@@ -3,12 +3,11 @@ package io.wispforest.owo.ui.component;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.AnimatableProperty;
+import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.PositionedRectangle;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
-import io.wispforest.owo.ui.util.Drawer;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import org.w3c.dom.Element;
 
@@ -53,8 +52,7 @@ public class TextureComponent extends BaseComponent {
     }
 
     @Override
-    public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
-        RenderSystem.setShaderTexture(0, this.texture);
+    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
         RenderSystem.enableDepthTest();
 
         if (this.blend) {
@@ -62,6 +60,7 @@ public class TextureComponent extends BaseComponent {
             RenderSystem.defaultBlendFunc();
         }
 
+        var matrices = context.getMatrices();
         matrices.push();
         matrices.translate(x, y, 0);
         matrices.scale(this.width / (float) this.regionWidth, this.height / (float) this.regionHeight, 0);
@@ -71,7 +70,7 @@ public class TextureComponent extends BaseComponent {
         int bottomEdge = Math.min(visibleArea.y() + visibleArea.height(), regionHeight);
         int rightEdge = Math.min(visibleArea.x() + visibleArea.width(), regionWidth);
 
-        Drawer.drawTexture(matrices,
+        context.drawTexture(this.texture,
                 visibleArea.x(),
                 visibleArea.y(),
                 rightEdge - visibleArea.x(),

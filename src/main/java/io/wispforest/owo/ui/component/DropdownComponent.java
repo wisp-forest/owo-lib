@@ -1,17 +1,14 @@
 package io.wispforest.owo.ui.component;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
-import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.UISounds;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -87,8 +84,8 @@ public class DropdownComponent extends FlowLayout {
     }
 
     @Override
-    public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
-        super.draw(matrices, mouseX, mouseY, partialTicks, delta);
+    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+        super.draw(context, mouseX, mouseY, partialTicks, delta);
         if (this.closeWhenNotHovered && !this.isInBoundingBox(mouseX, mouseY)) {
             this.queue(() -> {
                 this.closeWhenNotHovered(false);
@@ -176,7 +173,8 @@ public class DropdownComponent extends FlowLayout {
                     UIParsing.expectChildren(entry, children, "text");
 
                     var text = UIParsing.parseText(children.get("text"));
-                    this.button(text, dropdownComponent -> {});
+                    this.button(text, dropdownComponent -> {
+                    });
                 }
                 case "checkbox" -> {
                     var children = UIParsing.childElements(entry);
@@ -185,7 +183,8 @@ public class DropdownComponent extends FlowLayout {
                     var text = UIParsing.parseText(children.get("text"));
                     var checked = UIParsing.parseBool(children.get("checked"));
 
-                    this.checkbox(text, checked, aBoolean -> {});
+                    this.checkbox(text, checked, aBoolean -> {
+                    });
                 }
                 case "nested" -> {
                     var text = entry.getAttribute("translate").equals("true")
@@ -197,9 +196,8 @@ public class DropdownComponent extends FlowLayout {
         }
     }
 
-    protected static void drawIconFromTexture(MatrixStack matrices, ParentComponent dropdown, int y, int u, int v) {
-        RenderSystem.setShaderTexture(0, ICONS_TEXTURE);
-        Drawer.drawTexture(matrices,
+    protected static void drawIconFromTexture(OwoUIDrawContext context, ParentComponent dropdown, int y, int u, int v) {
+        context.drawTexture(ICONS_TEXTURE,
                 dropdown.x() + dropdown.width() - dropdown.padding().get().right() - 10, y,
                 u, v,
                 9, 9,
@@ -218,9 +216,9 @@ public class DropdownComponent extends FlowLayout {
         }
 
         @Override
-        public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+        public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
             var margins = this.margins.get();
-            Drawer.fill(matrices,
+            context.fill(
                     this.x - margins.left(),
                     this.y - margins.top(),
                     this.x + this.width + margins.right(),
@@ -254,9 +252,9 @@ public class DropdownComponent extends FlowLayout {
         }
 
         @Override
-        public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
-            super.draw(matrices, mouseX, mouseY, partialTicks, delta);
-            drawIconFromTexture(matrices, this.parent, this.y, 0, 16);
+        public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+            super.draw(context, mouseX, mouseY, partialTicks, delta);
+            drawIconFromTexture(context, this.parent, this.y, 0, 16);
 
             this.child.closeWhenNotHovered(!PositionedRectangle.of(this.x, this.y, this.parent.width(), this.height).isInBoundingBox(mouseX, mouseY));
         }
@@ -296,10 +294,10 @@ public class DropdownComponent extends FlowLayout {
         }
 
         @Override
-        public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+        public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
             if (this.isInBoundingBox(mouseX, mouseY)) {
                 var margins = this.margins.get();
-                Drawer.fill(matrices,
+                context.fill(
                         this.x - margins.left(),
                         this.y - margins.top(),
                         this.x + this.width + margins.right(),
@@ -308,7 +306,7 @@ public class DropdownComponent extends FlowLayout {
                 );
             }
 
-            super.draw(matrices, mouseX, mouseY, partialTicks, delta);
+            super.draw(context, mouseX, mouseY, partialTicks, delta);
         }
 
         protected void playInteractionSound() {
@@ -321,7 +319,8 @@ public class DropdownComponent extends FlowLayout {
         protected boolean state;
 
         public Checkbox(DropdownComponent parentDropdown, Text text, boolean state, Consumer<Boolean> onClick) {
-            super(parentDropdown, text, dropdownComponent -> {});
+            super(parentDropdown, text, dropdownComponent -> {
+            });
 
             this.state = state;
             this.onClick = dropdownComponent -> {
@@ -331,9 +330,9 @@ public class DropdownComponent extends FlowLayout {
         }
 
         @Override
-        public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
-            super.draw(matrices, mouseX, mouseY, partialTicks, delta);
-            drawIconFromTexture(matrices, this.parent, this.y, this.state ? 16 : 0, 0);
+        public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+            super.draw(context, mouseX, mouseY, partialTicks, delta);
+            drawIconFromTexture(context, this.parent, this.y, this.state ? 16 : 0, 0);
         }
 
         @Override

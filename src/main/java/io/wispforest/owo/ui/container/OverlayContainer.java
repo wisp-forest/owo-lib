@@ -1,7 +1,6 @@
 package io.wispforest.owo.ui.container;
 
 import io.wispforest.owo.ui.core.*;
-import net.minecraft.client.util.math.MatrixStack;
 import org.lwjgl.glfw.GLFW;
 
 public class OverlayContainer<C extends Component> extends WrappingParentComponent<C> {
@@ -16,13 +15,13 @@ public class OverlayContainer<C extends Component> extends WrappingParentCompone
     }
 
     @Override
-    public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
-        super.draw(matrices, mouseX, mouseY, partialTicks, delta);
-        this.drawChildren(matrices, mouseX, mouseY, partialTicks, delta, this.childView);
+    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+        super.draw(context, mouseX, mouseY, partialTicks, delta);
+        this.drawChildren(context, mouseX, mouseY, partialTicks, delta, this.childView);
     }
 
     @Override
-    public void drawFocusHighlight(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {}
+    public void drawFocusHighlight(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {}
 
     @Override
     public void mount(ParentComponent parent, int x, int y) {

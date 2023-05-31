@@ -11,7 +11,8 @@ import net.minecraft.util.Hand;
  */
 public final class ItemOps {
 
-    private ItemOps() {}
+    private ItemOps() {
+    }
 
     /**
      * Checks if stack one can stack onto stack two
@@ -21,7 +22,7 @@ public final class ItemOps {
      * @return {@code true} if addition can stack onto base
      */
     public static boolean canStack(ItemStack base, ItemStack addition) {
-        return base.isEmpty() || (canIncreaseBy(base, addition.getCount()) && ItemStack.areItemsEqual(base, addition) && ItemStack.areNbtEqual(base, addition));
+        return base.isEmpty() || (canIncreaseBy(base, addition.getCount()) && ItemStack.canCombine(base, addition));
     }
 
     /**

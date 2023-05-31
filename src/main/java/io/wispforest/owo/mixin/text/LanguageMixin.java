@@ -19,7 +19,7 @@ public class LanguageMixin {
 
     @Unique private static boolean skipNext;
 
-    @Redirect(method = "load", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/JsonHelper;asString(Lcom/google/gson/JsonElement;Ljava/lang/String;)Ljava/lang/String;"))
+    @Redirect(method = "load(Ljava/io/InputStream;Ljava/util/function/BiConsumer;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/JsonHelper;asString(Lcom/google/gson/JsonElement;Ljava/lang/String;)Ljava/lang/String;"))
     private static String skipIfObjectOrArray(JsonElement el, String str, InputStream inputStream, BiConsumer<String, String> entryConsumer) {
         if (!el.isJsonPrimitive() && LanguageAccess.textConsumer != null) {
             skipNext = true;
@@ -37,7 +37,7 @@ public class LanguageMixin {
         }
     }
 
-    @Redirect(method = "load", at = @At(value = "INVOKE", target = "Ljava/util/function/BiConsumer;accept(Ljava/lang/Object;Ljava/lang/Object;)V"))
+    @Redirect(method = "load(Ljava/io/InputStream;Ljava/util/function/BiConsumer;)V", at = @At(value = "INVOKE", target = "Ljava/util/function/BiConsumer;accept(Ljava/lang/Object;Ljava/lang/Object;)V"))
     private static void doSkip(BiConsumer<Object, Object> biConsumer, Object t, Object u) {
         if (!skipNext)
             biConsumer.accept(t, u);

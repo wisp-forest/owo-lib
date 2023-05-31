@@ -6,7 +6,6 @@ import io.wispforest.owo.ui.event.*;
 import io.wispforest.owo.ui.util.FocusHandler;
 import io.wispforest.owo.util.EventSource;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -20,7 +19,7 @@ import java.util.function.Consumer;
 public interface ComponentStub extends Component {
 
     @Override
-    default void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+    default void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
         throw new IllegalStateException("Interface stub method called");
     }
 

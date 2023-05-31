@@ -165,7 +165,7 @@ public class DumpdataCommand {
     }
 
     private static void feedback(ServerCommandSource source, Text message) {
-        source.sendFeedback(message, false);
+        source.sendFeedback(() -> message, false);
     }
 
     private static String formatPath(NbtPathArgumentType.NbtPath path) {

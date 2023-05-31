@@ -2,12 +2,12 @@ package io.wispforest.owo.ui.container;
 
 import io.wispforest.owo.ui.base.BaseParentComponent;
 import io.wispforest.owo.ui.core.Component;
+import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.Size;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.MountingHelper;
-import net.minecraft.client.util.math.MatrixStack;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -68,9 +68,9 @@ public class StackLayout extends BaseParentComponent {
     }
 
     @Override
-    public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
-        super.draw(matrices, mouseX, mouseY, partialTicks, delta);
-        this.drawChildren(matrices, mouseX, mouseY, partialTicks, delta, this.children);
+    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+        super.draw(context, mouseX, mouseY, partialTicks, delta);
+        this.drawChildren(context, mouseX, mouseY, partialTicks, delta, this.children);
     }
 
     /**

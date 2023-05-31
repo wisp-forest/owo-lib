@@ -5,10 +5,7 @@ import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.Delta;
-import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.NinePatchTexture;
-import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
@@ -100,8 +97,8 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
     }
 
     @Override
-    public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
-        super.draw(matrices, mouseX, mouseY, partialTicks, delta);
+    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+        super.draw(context, mouseX, mouseY, partialTicks, delta);
 
         // Update child
         int effectiveScrollOffset = this.scrollStep > 0
@@ -121,15 +118,15 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
         }
 
         // Draw, adding the fractional part of the offset via matrix translation
-        matrices.push();
+        context.getMatrices().push();
 
         double visualOffset = -(this.currentScrollPosition % 1d);
         if (visualOffset > 9999999e-7 || visualOffset < .1e-6) visualOffset = 0;
 
-        matrices.translate(this.direction.choose(visualOffset, 0), this.direction.choose(0, visualOffset), 0);
-        this.drawChildren(matrices, mouseX, mouseY, partialTicks, delta, this.childView);
+        context.getMatrices().translate(this.direction.choose(visualOffset, 0), this.direction.choose(0, visualOffset), 0);
+        this.drawChildren(context, mouseX, mouseY, partialTicks, delta, this.childView);
 
-        matrices.pop();
+        context.getMatrices().pop();
 
         // -----
 
@@ -156,7 +153,7 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
                 : 0;
 
         if (this.direction == ScrollDirection.VERTICAL) {
-            this.scrollbar.draw(matrices,
+            this.scrollbar.draw(context,
                     this.scrollbarOffset,
                     (int) (this.y + scrollbarPosition + padding.top()),
                     this.scrollbarThiccness,
@@ -167,7 +164,7 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
                     this.maxScroll > 0
             );
         } else {
-            this.scrollbar.draw(matrices,
+            this.scrollbar.draw(context,
                     (int) (this.x + scrollbarPosition + padding.left()),
                     this.scrollbarOffset,
                     (int) (this.lastScrollbarLength),
@@ -379,13 +376,13 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
         static Scrollbar flat(Color color) {
             int scrollbarColor = color.argb();
 
-            return (matrices, x, y, width, height, trackX, trackY, trackWidth, trackHeight, lastInteractTime, direction, active) -> {
+            return (context, x, y, width, height, trackX, trackY, trackWidth, trackHeight, lastInteractTime, direction, active) -> {
                 if (!active) return;
 
                 final var progress = Easing.SINE.apply(MathHelper.clamp(lastInteractTime - System.currentTimeMillis(), 0, 750) / 750f);
                 int alpha = (int) (progress * (scrollbarColor >>> 24));
 
-                DrawableHelper.fill(matrices,
+                context.fill(
                         x, y, x + width, y + height,
                         alpha << 24 | (scrollbarColor & 0xFFFFFF)
                 );
@@ -396,14 +393,14 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
          * The vanilla scrollbar used by the creative inventory screen
          */
         static Scrollbar vanilla() {
-            return (matrices, x, y, width, height, trackX, trackY, trackWidth, trackHeight, lastInteractTime, direction, active) -> {
-                NinePatchTexture.draw(VANILLA_SCROLLBAR_TRACK_TEXTURE, matrices, trackX, trackY, trackWidth, trackHeight);
+            return (context, x, y, width, height, trackX, trackY, trackWidth, trackHeight, lastInteractTime, direction, active) -> {
+                NinePatchTexture.draw(VANILLA_SCROLLBAR_TRACK_TEXTURE, context, trackX, trackY, trackWidth, trackHeight);
 
                 var texture = direction == ScrollDirection.VERTICAL
                         ? active ? VERTICAL_VANILLA_SCROLLBAR_TEXTURE : DISABLED_VERTICAL_VANILLA_SCROLLBAR_TEXTURE
                         : active ? HORIZONTAL_VANILLA_SCROLLBAR_TEXTURE : DISABLED_HORIZONTAL_VANILLA_SCROLLBAR_TEXTURE;
 
-                NinePatchTexture.draw(texture, matrices, x + 1, y + 1, width - 2, height - 2);
+                NinePatchTexture.draw(texture, context, x + 1, y + 1, width - 2, height - 2);
             };
         }
 
@@ -412,13 +409,13 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
          * game options screens
          */
         static Scrollbar vanillaFlat() {
-            return (matrices, x, y, width, height, trackX, trackY, trackWidth, trackHeight, lastInteractTime, direction, active) -> {
-                Drawer.fill(matrices, trackX, trackY, trackX + trackWidth, trackY + trackHeight, Color.BLACK.argb());
-                NinePatchTexture.draw(FLAT_VANILLA_SCROLLBAR_TEXTURE, matrices, x, y, width, height);
+            return (context, x, y, width, height, trackX, trackY, trackWidth, trackHeight, lastInteractTime, direction, active) -> {
+                context.fill(trackX, trackY, trackX + trackWidth, trackY + trackHeight, Color.BLACK.argb());
+                NinePatchTexture.draw(FLAT_VANILLA_SCROLLBAR_TEXTURE, context, x, y, width, height);
             };
         }
 
-        void draw(MatrixStack matrixStack, int x, int y, int width, int height, int trackX, int trackY, int trackWidth, int trackHeight,
+        void draw(OwoUIDrawContext context, int x, int y, int width, int height, int trackX, int trackY, int trackWidth, int trackHeight,
                   long lastInteractTime, ScrollDirection direction, boolean active);
 
         static Scrollbar parse(Element element) {

@@ -1,5 +1,6 @@
 package io.wispforest.owo.ui.util;
 
+import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.Size;
 import net.minecraft.util.Identifier;
 
@@ -37,9 +38,9 @@ public final class OwoNinePatchRenderers {
 
     // Panel outpost
 
-    public static final NinePatchRenderer LIGHT_PANEL = new NinePatchRenderer(Drawer.PANEL_TEXTURE, Size.square(5), Size.square(16), false);
-    public static final NinePatchRenderer DARK_PANEL = new NinePatchRenderer(Drawer.DARK_PANEL_TEXTURE, Size.square(5), Size.square(16), false);
-    public static final NinePatchRenderer PANEL_INSET = new NinePatchRenderer(Drawer.PANEL_INSET_TEXTURE, Size.square(5), Size.square(16), false);
+    public static final NinePatchRenderer LIGHT_PANEL = new NinePatchRenderer(OwoUIDrawContext.PANEL_TEXTURE, Size.square(5), Size.square(16), false);
+    public static final NinePatchRenderer DARK_PANEL = new NinePatchRenderer(OwoUIDrawContext.DARK_PANEL_TEXTURE, Size.square(5), Size.square(16), false);
+    public static final NinePatchRenderer PANEL_INSET = new NinePatchRenderer(OwoUIDrawContext.PANEL_INSET_TEXTURE, Size.square(5), Size.square(16), false);
 
     // Button Headquarters
 

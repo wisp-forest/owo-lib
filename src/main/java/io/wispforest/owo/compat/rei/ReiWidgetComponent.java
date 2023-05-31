@@ -1,10 +1,10 @@
 package io.wispforest.owo.compat.rei;
 
 import io.wispforest.owo.ui.base.BaseComponent;
+import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.core.Sizing;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
-import net.minecraft.client.util.math.MatrixStack;
 
 public class ReiWidgetComponent extends BaseComponent {
 
@@ -33,12 +33,12 @@ public class ReiWidgetComponent extends BaseComponent {
     }
 
     @Override
-    public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
-        this.widget.render(matrices, mouseX, mouseY, partialTicks);
+    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+        this.widget.render(context, mouseX, mouseY, partialTicks);
     }
 
     @Override
-    public void drawFocusHighlight(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {}
+    public void drawFocusHighlight(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {}
 
     @Override
     protected int determineHorizontalContentSize(Sizing sizing) {

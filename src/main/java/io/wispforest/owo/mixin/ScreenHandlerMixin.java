@@ -102,7 +102,7 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
 
             ServerPlayNetworking.send(serverPlayer, ScreenInternals.LOCAL_PACKET, buf);
         } else {
-            if (!this.owo$player.world.isClient) {
+            if (!this.owo$player.getWorld().isClient) {
                 throw new NetworkException("Tried to send serverbound message on the client");
             }
 

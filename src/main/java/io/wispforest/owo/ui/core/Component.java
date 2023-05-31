@@ -3,12 +3,10 @@ package io.wispforest.owo.ui.core;
 import io.wispforest.owo.ui.event.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
-import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.FocusHandler;
 import io.wispforest.owo.util.EventSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -26,40 +24,40 @@ public interface Component extends PositionedRectangle {
     /**
      * Draw the current state of this component onto the screen
      *
-     * @param matrices     The transformation stack
+     * @param context      The transformation stack
      * @param mouseX       The mouse pointer's x-coordinate
      * @param mouseY       The mouse pointer's y-coordinate
      * @param partialTicks The fraction of the current tick that has passed
      * @param delta        The duration of the last frame, in partial ticks
      */
-    void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta);
+    void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta);
 
     /**
      * Draw the current tooltip of this component onto the screen
      *
-     * @param matrices     The transformation stack
+     * @param context      The transformation stack
      * @param mouseX       The mouse pointer's x-coordinate
      * @param mouseY       The mouse pointer's y-coordinate
      * @param partialTicks The fraction of the current tick that has passed
      * @param delta        The duration of the last frame, in partial ticks
      */
-    default void drawTooltip(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+    default void drawTooltip(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
         if (!this.shouldDrawTooltip(mouseX, mouseY)) return;
-        Drawer.drawTooltip(matrices, mouseX, mouseY, this.tooltip());
+        context.drawTooltip(MinecraftClient.getInstance().textRenderer, mouseX, mouseY, this.tooltip());
     }
 
     /**
      * Draw something which clearly indicates
      * that this component is currently focused
      *
-     * @param matrices     The transformation stack
+     * @param context      The transformation stack
      * @param mouseX       The mouse pointer's x-coordinate
      * @param mouseY       The mouse pointer's y-coordinate
      * @param partialTicks The fraction of the current tick that has passed
      * @param delta        The duration of the last frame, in partial ticks
      */
-    default void drawFocusHighlight(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
-        Drawer.drawRectOutline(matrices, this.x(), this.y(), this.width(), this.height(), 0xFFFFFFFF);
+    default void drawFocusHighlight(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+        context.drawRectOutline(this.x(), this.y(), this.width(), this.height(), 0xFFFFFFFF);
     }
 
     /**

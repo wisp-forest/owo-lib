@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
 import io.wispforest.owo.util.pond.OwoSlotExtension;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.screen.slot.Slot;
@@ -27,17 +28,17 @@ public class HandledScreenMixin {
 
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "render", at = @At("HEAD"))
-    private void captureOwoState(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+    private void captureOwoState(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         owo$inOwoScreen = (Object) this instanceof BaseOwoHandledScreen<?, ?>;
     }
 
     @Inject(method = "render", at = @At("TAIL"))
-    private void resetOwoState(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+    private void resetOwoState(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         owo$inOwoScreen = false;
     }
 
     @Inject(method = "drawSlot", at = @At("HEAD"))
-    private void injectSlotScissors(MatrixStack matrices, Slot slot, CallbackInfo ci) {
+    private void injectSlotScissors(DrawContext context, Slot slot, CallbackInfo ci) {
         if (!owo$inOwoScreen) return;
 
         var scissorArea = ((OwoSlotExtension) slot).owo$getScissorArea();
@@ -48,7 +49,7 @@ public class HandledScreenMixin {
     }
 
     @Inject(method = "drawSlot", at = @At("RETURN"))
-    private void clearSlotScissors(MatrixStack matrices, Slot slot, CallbackInfo ci) {
+    private void clearSlotScissors(DrawContext context, Slot slot, CallbackInfo ci) {
         if (!owo$inOwoScreen) return;
 
         var scissorArea = ((OwoSlotExtension) slot).owo$getScissorArea();
@@ -57,17 +58,17 @@ public class HandledScreenMixin {
         GlStateManager._disableScissorTest();
     }
 
-    @Inject(method = "drawSlotHighlight", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;disableDepthTest()V", shift = At.Shift.AFTER))
-    private static void enableSlotDepth(MatrixStack matrices, int x, int y, int z, CallbackInfo ci) {
+    @Inject(method = "drawSlotHighlight", at = @At(value = "HEAD"))
+    private static void enableSlotDepth(DrawContext context, int x, int y, int z, CallbackInfo ci) {
         if (!owo$inOwoScreen) return;
         RenderSystem.enableDepthTest();
-        matrices.translate(0, 0, 300);
+        context.getMatrices().translate(0, 0, 300);
     }
 
     @Inject(method = "drawSlotHighlight", at = @At("TAIL"))
-    private static void clearSlotDepth(MatrixStack matrices, int x, int y, int z, CallbackInfo ci) {
+    private static void clearSlotDepth(DrawContext context, int x, int y, int z, CallbackInfo ci) {
         if (!owo$inOwoScreen) return;
-        matrices.translate(0, 0, -300);
+        context.getMatrices().translate(0, 0, -300);
     }
 
     @SuppressWarnings("InvalidInjectorMethodSignature")

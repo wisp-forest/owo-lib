@@ -63,8 +63,8 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
     protected void parentUpdate(float delta, int mouseX, int mouseY) {}
 
     @Override
-    public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
-        this.surface.draw(matrices, this);
+    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+        this.surface.draw(context, this);
     }
 
     @Override
@@ -346,10 +346,10 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
      *
      * @param children The list of children to draw
      */
-    protected void drawChildren(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta, List<Component> children) {
+    protected void drawChildren(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta, List<Component> children) {
         if (!this.allowOverflow) {
             var padding = this.padding.get();
-            ScissorStack.push(this.x + padding.left(), this.y + padding.top(), this.width - padding.horizontal(), this.height - padding.vertical(), matrices);
+            ScissorStack.push(this.x + padding.left(), this.y + padding.top(), this.width - padding.horizontal(), this.height - padding.vertical(), context.getMatrices());
         }
 
         var focusHandler = this.focusHandler();
@@ -357,15 +357,15 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
         for (int i = 0; i < children.size(); i++) {
             final var child = children.get(i);
 
-            if (!ScissorStack.isVisible(child, matrices)) continue;
-            matrices.translate(0, 0, child.zIndex());
+            if (!ScissorStack.isVisible(child, context.getMatrices())) continue;
+            context.getMatrices().translate(0, 0, child.zIndex());
 
-            child.draw(matrices, mouseX, mouseY, partialTicks, delta);
+            child.draw(context, mouseX, mouseY, partialTicks, delta);
             if (focusHandler.lastFocusSource() == FocusSource.KEYBOARD_CYCLE && focusHandler.focused() == child) {
-                child.drawFocusHighlight(matrices, mouseX, mouseY, partialTicks, delta);
+                child.drawFocusHighlight(context, mouseX, mouseY, partialTicks, delta);
             }
 
-            matrices.translate(0, 0, -child.zIndex());
+            context.getMatrices().translate(0, 0, -child.zIndex());
         }
 
         if (!this.allowOverflow) {

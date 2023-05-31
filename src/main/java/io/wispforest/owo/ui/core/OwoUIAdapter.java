@@ -5,14 +5,13 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.renderdoc.RenderDoc;
 import io.wispforest.owo.ui.util.CursorAdapter;
-import io.wispforest.owo.ui.util.Drawer;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.util.math.MatrixStack;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.function.BiFunction;
@@ -158,7 +157,10 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
     }
 
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float partialTicks) {
+    public void render(DrawContext context, int mouseX, int mouseY, float partialTicks) {
+        if (!(context instanceof OwoUIDrawContext)) context = OwoUIDrawContext.of(context);
+        var owoContext = (OwoUIDrawContext) context;
+
         try {
             isRendering = true;
 
@@ -173,12 +175,12 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
             GlStateManager._enableScissorTest();
 
             GlStateManager._scissorBox(0, 0, window.getFramebufferWidth(), window.getFramebufferHeight());
-            this.rootComponent.draw(matrices, mouseX, mouseY, partialTicks, delta);
+            this.rootComponent.draw(owoContext, mouseX, mouseY, partialTicks, delta);
 
             GlStateManager._disableScissorTest();
             RenderSystem.disableDepthTest();
 
-            this.rootComponent.drawTooltip(matrices, mouseX, mouseY, partialTicks, delta);
+            this.rootComponent.drawTooltip(owoContext, mouseX, mouseY, partialTicks, delta);
 
             final var hovered = this.rootComponent.childAt(mouseX, mouseY);
             if (!disposed && hovered != null) {
@@ -186,9 +188,9 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
             }
 
             if (this.enableInspector) {
-                matrices.translate(0, 0, this.inspectorZOffset);
-                Drawer.debug().drawInspector(matrices, this.rootComponent, mouseX, mouseY, !this.globalInspector);
-                matrices.translate(0, 0, -this.inspectorZOffset);
+                context.getMatrices().translate(0, 0, this.inspectorZOffset);
+                owoContext.drawInspector(this.rootComponent, mouseX, mouseY, !this.globalInspector);
+                context.getMatrices().translate(0, 0, -this.inspectorZOffset);
             }
 
             if (this.captureFrame) RenderDoc.endFrameCapture();

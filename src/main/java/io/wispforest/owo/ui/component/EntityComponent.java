@@ -5,6 +5,7 @@ import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.wispforest.owo.ui.base.BaseComponent;
+import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
@@ -77,7 +78,8 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
     }
 
     @Override
-    public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+        var matrices = context.getMatrices();
         matrices.push();
 
         matrices.translate(x + this.width / 2f, y + this.height / 2f, 100);
@@ -251,7 +253,7 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
                             new ClientConnection(NetworkSide.CLIENTBOUND),
                             null,
                             profile,
-                            MinecraftClient.getInstance().getTelemetryManager().createWorldSession(false, Duration.ZERO)
+                            MinecraftClient.getInstance().getTelemetryManager().createWorldSession(false, Duration.ZERO, "tetris")
                     ),
                     null, null, false, false
             );

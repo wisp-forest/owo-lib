@@ -3,8 +3,8 @@ package io.wispforest.owo.itemgroup.gui;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
@@ -21,16 +21,15 @@ public class ItemGroupButtonWidget extends ButtonWidget {
     }
 
     @Override
-    public void renderButton(MatrixStack matrixStack, int mouseX, int mouseY, float delta) {
+    public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
         var client = MinecraftClient.getInstance();
 
-        RenderSystem.setShaderTexture(0, definition.texture());
-        drawTexture(matrixStack, this.getX(), this.getY(), 0, (shouldShowHighlight(hovered) ? 1 : 0) * height, this.width, this.height, 64, 64);
+        drawTexture(context, definition.texture(), this.getX(), this.getY(), 0, 0, height, this.width, this.height, 64, 64);
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
 
-        this.definition.icon().render(matrixStack, this.getX() + 4, this.getY() + 4, mouseX, mouseY, delta);
+        this.definition.icon().render(context, this.getX() + 4, this.getY() + 4, mouseX, mouseY, delta);
 
         RenderSystem.disableBlend();
     }

@@ -4,7 +4,6 @@ import io.wispforest.owo.ui.parsing.IncompatibleUIModelException;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.ScissorStack;
-import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
@@ -124,20 +123,20 @@ public interface ParentComponent extends Component {
     ParentComponent removeChild(Component child);
 
     @Override
-    default void drawTooltip(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
-        Component.super.drawTooltip(matrices, mouseX, mouseY, partialTicks, delta);
+    default void drawTooltip(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+        Component.super.drawTooltip(context, mouseX, mouseY, partialTicks, delta);
 
         if (!this.allowOverflow()) {
             var padding = this.padding().get();
-            ScissorStack.push(this.x() + padding.left(), this.y() + padding.top(), this.width() - padding.horizontal(), this.height() - padding.vertical(), matrices);
+            ScissorStack.push(this.x() + padding.left(), this.y() + padding.top(), this.width() - padding.horizontal(), this.height() - padding.vertical(), context.getMatrices());
         }
 
         for (var child : this.children()) {
-            if (!ScissorStack.isVisible(mouseX, mouseY, matrices)) continue;
+            if (!ScissorStack.isVisible(mouseX, mouseY, context.getMatrices())) continue;
 
-            matrices.translate(0, 0, child.zIndex());
-            child.drawTooltip(matrices, mouseX, mouseY, partialTicks, delta);
-            matrices.translate(0, 0, -child.zIndex());
+            context.getMatrices().translate(0, 0, child.zIndex());
+            child.drawTooltip(context, mouseX, mouseY, partialTicks, delta);
+            context.getMatrices().translate(0, 0, -child.zIndex());
         }
 
         if (!this.allowOverflow()) {

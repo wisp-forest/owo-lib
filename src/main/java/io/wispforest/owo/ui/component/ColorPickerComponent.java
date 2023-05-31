@@ -3,16 +3,15 @@ package io.wispforest.owo.ui.component;
 import io.wispforest.owo.client.OwoClient;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.Color;
+import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
-import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.Observable;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormats;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.MathHelper;
 import org.w3c.dom.Element;
 
@@ -37,12 +36,12 @@ public class ColorPickerComponent extends BaseComponent {
     }
 
     @Override
-    public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
 
         // Color area
 
         var buffer = Tessellator.getInstance().getBuffer();
-        var matrix = matrices.peek().getPositionMatrix();
+        var matrix = context.getMatrices().peek().getPositionMatrix();
 
         buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
         buffer.vertex(matrix, this.renderX(), this.renderY(), 0)
@@ -57,8 +56,7 @@ public class ColorPickerComponent extends BaseComponent {
         OwoClient.HSV_PROGRAM.use();
         Tessellator.getInstance().draw();
 
-        Drawer.drawRectOutline(
-                matrices,
+        context.drawRectOutline(
                 (int) (this.renderX() + (this.saturation * this.colorAreaWidth()) - 1),
                 (int) (this.renderY() + ((1 - this.value) * (this.renderHeight() - 1)) - 1),
                 3, 3,
@@ -67,9 +65,8 @@ public class ColorPickerComponent extends BaseComponent {
 
         // Hue selector
 
-        Drawer.drawSpectrum(matrices, this.renderX() + this.hueSelectorX(), this.renderY(), this.selectorWidth, this.renderHeight(), true);
-        Drawer.drawRectOutline(
-                matrices,
+        context.drawSpectrum(this.renderX() + this.hueSelectorX(), this.renderY(), this.selectorWidth, this.renderHeight(), true);
+        context.drawRectOutline(
                 this.renderX() + this.hueSelectorX() - 1,
                 this.renderY() + (int) ((this.renderHeight() - 1) * (1 - this.hue) - 1),
                 this.selectorWidth + 2, 3,
@@ -80,9 +77,8 @@ public class ColorPickerComponent extends BaseComponent {
 
         if (this.showAlpha) {
             var color = 0xFF << 24 | this.selectedColor.get().rgb();
-            Drawer.drawGradientRect(matrices, this.renderX() + this.alphaSelectorX(), this.renderY(), this.selectorWidth, this.renderHeight(), color, color, 0, 0);
-            Drawer.drawRectOutline(
-                    matrices,
+            context.drawGradientRect(this.renderX() + this.alphaSelectorX(), this.renderY(), this.selectorWidth, this.renderHeight(), color, color, 0, 0);
+            context.drawRectOutline(
                     this.renderX() + this.alphaSelectorX() - 1,
                     this.renderY() + (int) ((this.renderHeight() - 1) * (1 - this.alpha) - 1),
                     this.selectorWidth + 2, 3,

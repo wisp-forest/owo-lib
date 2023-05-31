@@ -24,7 +24,7 @@ public class ItemMixin implements OwoItemExtensions {
     private int owo$tab = 0;
 
     @Unique
-    private BiConsumer<Item, ItemGroup.Entries> owo$stackGenerator = OwoItemGroup.DEFAULT_STACK_GENERATOR;
+    private BiConsumer<Item, ItemGroup.Entries> owo$stackGenerator;
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void grabTab(Item.Settings settings, CallbackInfo ci) {
@@ -42,7 +42,7 @@ public class ItemMixin implements OwoItemExtensions {
 
     @Override
     public BiConsumer<Item, ItemGroup.Entries> owo$stackGenerator() {
-        return owo$stackGenerator;
+        return this.owo$stackGenerator != null ? this.owo$stackGenerator : OwoItemGroup.DEFAULT_STACK_GENERATOR;
     }
 
     @Override
