@@ -24,10 +24,15 @@ public interface ItemGroupAccessor {
     @Accessor("searchTabStacks")
     void owo$setSearchTabStacks(Set<ItemStack> searchTabStacks);
 
-    @Accessor("searchProviderReloader")
-    Consumer<List<ItemStack>> owo$getSearchProviderReloader();
-
     @Mutable
     @Accessor("displayName")
     void owo$setDisplayName(Text displayName);
+
+    @Mutable
+    @Accessor("column")
+    void owo$setColumn(int column);
+
+    @Mutable
+    @Accessor("row")
+    void owo$setRow(ItemGroup.Row row);
 }

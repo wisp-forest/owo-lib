@@ -59,7 +59,6 @@ public class ItemComponent extends BaseComponent {
         return 16;
     }
 
-    // TODO use context methods
     @Override
     public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
         final boolean notSideLit = !this.itemRenderer.getModel(this.stack, null, null, 0).isSideLit();

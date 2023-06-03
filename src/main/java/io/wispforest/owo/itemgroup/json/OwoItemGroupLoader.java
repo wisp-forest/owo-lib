@@ -116,13 +116,13 @@ public class OwoItemGroupLoader implements ModDataConsumer {
 
             if (JsonHelper.getBoolean(json, "extend", false)) wrapper.markExtension();
         } else {
-            var wrapper = new WrapperGroup(targetGroup, tabs, buttons);
+            var wrapper = new WrapperGroup(targetGroup, targetGroupId, tabs, buttons);
             wrapper.initialize();
             if (JsonHelper.getBoolean(json, "extend", false)) wrapper.markExtension();
 
             Registries.ITEM.stream()
                     .filter(item -> ((OwoItemExtensions) item).owo$group() == targetGroup)
-                    .forEach(item -> ((OwoItemExtensions) item).owo$setGroup(targetGroup));
+                    .forEach(item -> ((OwoItemExtensions) item).owo$setGroup(wrapper));
         }
     }
 

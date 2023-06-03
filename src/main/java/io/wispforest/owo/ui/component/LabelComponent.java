@@ -5,7 +5,6 @@ import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.util.Observable;
-import io.wispforest.owo.util.pond.OwoTextRendererExtension;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.text.OrderedText;
@@ -159,48 +158,47 @@ public class LabelComponent extends BaseComponent {
 
     @Override
     public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
-        try {
-            var matrices = context.getMatrices();
+        var matrices = context.getMatrices();
 
-            matrices.push();
-            matrices.translate(0, 1 / MinecraftClient.getInstance().getWindow().getScaleFactor(), 0);
+        matrices.push();
+        matrices.translate(0, 1 / MinecraftClient.getInstance().getWindow().getScaleFactor(), 0);
 
-            int x = this.x;
-            int y = this.y;
+        int x = this.x;
+        int y = this.y;
 
-            if (this.horizontalSizing.get().isContent()) {
-                x += this.horizontalSizing.get().value;
-            }
-            if (this.verticalSizing.get().isContent()) {
-                y += this.verticalSizing.get().value;
-            }
+        if (this.horizontalSizing.get().isContent()) {
+            x += this.horizontalSizing.get().value;
+        }
+        if (this.verticalSizing.get().isContent()) {
+            y += this.verticalSizing.get().value;
+        }
 
-            switch (this.verticalTextAlignment) {
-                case CENTER -> y += (this.height - ((this.wrappedText.size() * (this.lineHeight() + 2)) - 2)) / 2;
-                case BOTTOM -> y += this.height - ((this.wrappedText.size() * (this.lineHeight() + 2)) - 2);
-            }
+        switch (this.verticalTextAlignment) {
+            case CENTER -> y += (this.height - ((this.wrappedText.size() * (this.lineHeight() + 2)) - 2)) / 2;
+            case BOTTOM -> y += this.height - ((this.wrappedText.size() * (this.lineHeight() + 2)) - 2);
+        }
 
-            ((OwoTextRendererExtension) this.textRenderer).owo$beginCache();
+        final int lambdaX = x;
+        final int lambdaY = y;
 
+        context.draw(() -> {
             for (int i = 0; i < this.wrappedText.size(); i++) {
                 var renderText = this.wrappedText.get(i);
-                int renderX = x;
+                int renderX = lambdaX;
 
                 switch (this.horizontalTextAlignment) {
                     case CENTER -> renderX += (this.width - this.textRenderer.getWidth(renderText)) / 2;
                     case RIGHT -> renderX += this.width - this.textRenderer.getWidth(renderText);
                 }
 
-                int renderY = y + i * (this.lineHeight() + 2);
+                int renderY = lambdaY + i * (this.lineHeight() + 2);
                 renderY += this.lineHeight() - this.textRenderer.fontHeight;
 
                 context.drawText(this.textRenderer, renderText, renderX, renderY, this.color.get().argb(), this.shadow);
             }
+        });
 
-            matrices.pop();
-        } finally {
-            ((OwoTextRendererExtension) this.textRenderer).owo$submitCache();
-        }
+        matrices.pop();
     }
 
     @Override

@@ -12,6 +12,10 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.gl.SimpleFramebuffer;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.render.BufferRenderer;
+import net.minecraft.client.render.GameRenderer;
+import net.minecraft.client.render.VertexFormat;
+import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.RotationAxis;
 import org.jetbrains.annotations.ApiStatus;
@@ -74,16 +78,18 @@ public class RenderEffectWrapper<C extends Component> extends WrappingParentComp
                 iter.next().effect.setup(this, context, partialTicks, delta);
             }
 
-            // TODO reimplement using framebuffer draw() method
-//            RenderSystem.setShaderTexture(0, framebuffer.getColorAttachment());
-//            context.drawTexture(
-//                    context,
-//                    0, 0,
-//                    window.getScaledWidth(), window.getScaledHeight(),
-//                    0, framebuffer.textureHeight,
-//                    framebuffer.textureWidth, -framebuffer.textureHeight,
-//                    framebuffer.textureWidth, framebuffer.textureHeight
-//            );
+            var buffer = RenderSystem.renderThreadTesselator().getBuffer();
+            var matrix = context.getMatrices().peek().getPositionMatrix();
+
+            buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
+            buffer.vertex(matrix, 0, window.getScaledHeight(), 0).texture(0, 0).color(1f, 1f, 1f, 1f).next();
+            buffer.vertex(matrix, window.getScaledWidth(), window.getScaledHeight(), 0).texture(1, 0).color(1f, 1f, 1f, 1f).next();
+            buffer.vertex(matrix, window.getScaledWidth(), 0, 0).texture(1, 1).color(1f, 1f, 1f, 1f).next();
+            buffer.vertex(matrix, 0, 0, 0).texture(0, 1).color(1f, 1f, 1f, 1f).next();
+
+            RenderSystem.setShaderTexture(0, framebuffer.getColorAttachment());
+            RenderSystem.setShader(GameRenderer::getPositionTexColorProgram);
+            BufferRenderer.drawWithGlobalProgram(buffer.end());
 
             while (iter.hasPrevious()) {
                 iter.previous().effect.cleanup(this, context, partialTicks, delta);

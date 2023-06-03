@@ -5,6 +5,7 @@ import io.wispforest.owo.ui.util.FocusHandler;
 import io.wispforest.owo.ui.util.ScissorStack;
 import io.wispforest.owo.util.Observable;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -358,7 +359,7 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
             final var child = children.get(i);
 
             if (!ScissorStack.isVisible(child, context.getMatrices())) continue;
-            context.getMatrices().translate(0, 0, child.zIndex());
+            context.getMatrices().translate(0, 0, child.zIndex() + 1);
 
             child.draw(context, mouseX, mouseY, partialTicks, delta);
             if (focusHandler.lastFocusSource() == FocusSource.KEYBOARD_CYCLE && focusHandler.focused() == child) {
