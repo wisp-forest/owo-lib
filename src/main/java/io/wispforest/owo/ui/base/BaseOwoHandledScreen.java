@@ -135,7 +135,7 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
     }
 
     /**
-     * Wrap the slot and the given index in this screen's
+     * Wrap the slot at the given index in this screen's
      * handler into a component, so it can be managed by the UI system
      *
      * @param index The index the slot occupies in the handler's slot list
