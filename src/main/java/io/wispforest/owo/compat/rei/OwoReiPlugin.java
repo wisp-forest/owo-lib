@@ -1,5 +1,6 @@
 package io.wispforest.owo.compat.rei;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.mixin.itemgroup.CreativeInventoryScreenAccessor;
 import io.wispforest.owo.mixin.ui.access.BaseOwoHandledScreenAccessor;
@@ -9,15 +10,26 @@ import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.core.Surface;
 import io.wispforest.owo.util.pond.OwoCreativeInventoryScreenExtensions;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
+import me.shedaniel.rei.api.client.registry.screen.OverlayDecider;
+import me.shedaniel.rei.api.client.registry.screen.OverlayRendererProvider;
+import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
+import net.minecraft.util.math.RotationAxis;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class OwoReiPlugin implements REIClientPlugin {
+
+    @SuppressWarnings("UnstableApiUsage")
+    private static @Nullable OverlayRendererProvider.Sink renderSink = null;
 
     @Override
     public void registerExclusionZones(ExclusionZones zones) {
@@ -50,7 +62,7 @@ public class OwoReiPlugin implements REIClientPlugin {
 
             var rootComponent = adapter.rootComponent;
             var children = new ArrayList<Component>();
-            rootComponent.collectChildren(children);
+            rootComponent.collectDescendants(children);
             children.remove(rootComponent);
 
             var rectangles = new ArrayList<Rectangle>();
@@ -61,6 +73,80 @@ public class OwoReiPlugin implements REIClientPlugin {
                 rectangles.add(new Rectangle(component.x(), component.y(), size.width(), size.height()));
             });
             return rectangles;
+        });
+    }
+
+    @Override
+    public void registerScreens(ScreenRegistry registry) {
+        registry.registerDecider(new OverlayDecider() {
+            @Override
+            public <R extends Screen> boolean isHandingScreen(Class<R> screen) {
+                return BaseOwoHandledScreen.class.isAssignableFrom(screen);
+            }
+
+            @Override
+            @SuppressWarnings("UnstableApiUsage")
+            public OverlayRendererProvider getRendererProvider() {
+                return new OverlayRendererProvider() {
+                    @Override
+                    public void onApplied(Sink sink) {
+                        renderSink = sink;
+                    }
+
+                    @Override
+                    public void onRemoved() {
+                        renderSink = null;
+                    }
+                };
+            }
+        });
+    }
+
+    static {
+        ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
+            if (!(screen instanceof BaseOwoHandledScreen<?, ?>)) return;
+
+            ScreenEvents.afterRender(screen).register(($, matrices, mouseX, mouseY, tickDelta) -> {
+                if (renderSink == null) return;
+
+                if (REIRuntime.getInstance().getSearchTextField().getText().equals("froge")) {
+                    var modelView = RenderSystem.getModelViewStack();
+
+                    final var time = System.currentTimeMillis();
+                    float scale = .75f + (float) (Math.sin(time / 500d) * .5f);
+                    modelView.translate($.width / 2f - scale / 2f * $.width, $.height / 2f - scale / 2f * $.height, 0);
+                    modelView.scale(scale, scale, 1f);
+                    modelView.translate((float) (Math.sin(time / 1000d) * .75f) * $.width, (float) (Math.sin(time / 500d) * .75f) * $.height, 0);
+
+                    modelView.translate($.width / 2f, $.height / 2f, 0);
+                    modelView.multiply(RotationAxis.POSITIVE_Z.rotationDegrees((float) (time / 25d % 360d)));
+                    modelView.translate($.width / -2f, $.height / -2f, 0);
+
+                    modelView.push();
+                    for (int i = 0; i < 20; i++) {
+                        modelView.push();
+                        modelView.translate($.width / 2f, $.height / 2f, 0);
+                        modelView.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(i * 18));
+                        modelView.translate($.width / -2f, $.height / -2f, 0);
+
+                        RenderSystem.applyModelViewMatrix();
+                        renderSink.render(matrices, mouseX, mouseY, tickDelta);
+                        renderSink.lateRender(matrices, mouseX, mouseY, tickDelta);
+                        modelView.pop();
+                    }
+
+                    RenderSystem.applyModelViewMatrix();
+                    modelView.pop();
+                } else {
+                    matrices.push();
+                    matrices.translate(0, 0, 500);
+
+                    renderSink.render(matrices, mouseX, mouseY, tickDelta);
+                    renderSink.lateRender(matrices, mouseX, mouseY, tickDelta);
+
+                    matrices.pop();
+                }
+            });
         });
     }
 }
