@@ -62,7 +62,7 @@ public class EpicHandledScreen extends BaseOwoHandledScreen<FlowLayout, EpicScre
         ).child(
                 Containers.verticalScroll(Sizing.content(), Sizing.fill(50), Containers.verticalFlow(Sizing.content(), Sizing.content())
                         .child(this.slotAsComponent(0).tooltip(Text.of("bruh")))
-                        .child(Components.box(Sizing.fixed(50), Sizing.fixed(35)).startColor(Color.RED).endColor(Color.BLUE).fill(true))
+                        .child(Components.box(Sizing.fixed(50), Sizing.fixed(35)).startColor(Color.RED).endColor(Color.BLUE).fill(true).tooltip(Text.literal("very very long tooltip")))
                         .child(this.slotAsComponent(1))
                         .child(Components.box(Sizing.fixed(50), Sizing.fixed(35)).startColor(Color.BLUE).endColor(Color.RED).fill(true))
                         .child(this.slotAsComponent(2))
