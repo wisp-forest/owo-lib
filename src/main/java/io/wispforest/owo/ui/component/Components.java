@@ -138,6 +138,14 @@ public final class Components {
         return new DropdownComponent(horizontalSizing);
     }
 
+    public static SlimSliderComponent slimSlider(SlimSliderComponent.Axis axis) {
+        return new SlimSliderComponent(axis);
+    }
+
+    public static SmallCheckboxComponent smallCheckbox(Text label) {
+        return new SmallCheckboxComponent(label);
+    }
+
     // -------
     // Utility
     // -------
