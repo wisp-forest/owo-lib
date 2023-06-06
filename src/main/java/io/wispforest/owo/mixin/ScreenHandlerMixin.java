@@ -117,13 +117,11 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
 
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public void owo$handlePacket(PacketByteBuf buf, boolean clientbound, Executor executor) {
+    public void owo$handlePacket(PacketByteBuf buf, boolean clientbound) {
         int id = buf.readVarInt();
-
         ScreenhandlerMessageData messageData = (clientbound ? this.owo$clientboundMessages : this.owo$serverboundMessages).get(id);
 
-        var message = messageData.serializer().deserializer().apply(buf);
-        executor.execute(() -> messageData.handler().accept(message));
+        messageData.handler().accept(messageData.serializer().deserializer().apply(buf));
     }
 
     @Override
