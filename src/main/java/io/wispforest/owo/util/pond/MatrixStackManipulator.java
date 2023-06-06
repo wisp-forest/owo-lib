@@ -1,76 +1,70 @@
 package io.wispforest.owo.util.pond;
 
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.util.math.MatrixStack;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
-public interface MatrixStackManipulator<C extends DrawContext> {
+/**
+ * Helper Interface implemented on top of the DrawContext through a Mixin allowing for easier matrix stack manipulation
+ */
+public interface MatrixStackManipulator<C extends MatrixStackManipulator<?>> {
+
+    static <C extends MatrixStackManipulator<?>> C of(DrawContext c){
+        return (C) c;
+    }
+
+    //----
 
     default C translate(double x, double y, double z) {
-        C context = getContext();
+        getMatrices().translate(x, y, z);
 
-        context.getMatrices().translate(x, y, z);
-
-        return context;
+        return (C) this;
     }
 
     default C translate(float x, float y, float z) {
-        C context = getContext();
+        getMatrices().translate(x, y, z);
 
-        context.getMatrices().translate(x, y, z);
-
-        return context;
+        return (C) this;
     }
 
     default C scale(float x, float y, float z) {
-        C context = getContext();
+        getMatrices().scale(x, y, z);
 
-        context.getMatrices().scale(x, y, z);
-
-        return context;
+        return (C) this;
     }
 
     default C multiply(Quaternionf quaternion) {
-        C context = getContext();
+        getMatrices().multiply(quaternion);
 
-        context.getMatrices().multiply(quaternion);
-
-        return context;
+        return (C) this;
     }
 
     default C multiply(Quaternionf quaternion, float originX, float originY, float originZ) {
-        C context = getContext();
+        getMatrices().multiply(quaternion, originX, originY, originZ);
 
-        context.getMatrices().multiply(quaternion, originX, originY, originZ);
-
-        return context;
+        return (C) this;
     }
 
     default C push() {
-        C context = getContext();
+        getMatrices().push();
 
-        context.getMatrices().push();
-
-        return context;
+        return (C) this;
     }
 
     default C pop() {
-        C context = getContext();
+        getMatrices().pop();
 
-        context.getMatrices().pop();
-
-        return context;
+        return (C) this;
     }
 
     default C multiplyPositionMatrix(Matrix4f matrix) {
-        C context = getContext();
+        getMatrices().multiplyPositionMatrix(matrix);
 
-        context.getMatrices().multiplyPositionMatrix(matrix);
-
-        return context;
+        return (C) this;
     }
 
-    default C getContext(){
+    default MatrixStack getMatrices(){
         throw new IllegalStateException("getContext() method hasn't been override leading to exception!");
     }
 }

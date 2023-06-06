@@ -372,9 +372,4 @@ public class OwoUIDrawContext extends DrawContext implements MatrixStackManipula
             });
         }
     }
-
-    @Override
-    public OwoUIDrawContext getContext() {
-        return this;
-    }
 }
