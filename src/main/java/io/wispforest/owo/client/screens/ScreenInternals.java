@@ -18,14 +18,18 @@ public class ScreenInternals {
 
     public static void init() {
         ServerPlayNetworking.registerGlobalReceiver(LOCAL_PACKET, (server, player, handler, buf, responseSender) -> {
-            var screenHandler = player.currentScreenHandler;
+            buf.retain();
+            server.execute(() -> {
+                var screenHandler = player.currentScreenHandler;
 
-            if (screenHandler == null) {
-                Owo.LOGGER.error("Received local packet for null ScreenHandler");
-                return;
-            }
+                if (screenHandler == null) {
+                    Owo.LOGGER.error("Received local packet for null ScreenHandler");
+                    return;
+                }
 
-            ((OwoScreenHandlerExtension) screenHandler).owo$handlePacket(buf, false, server);
+                ((OwoScreenHandlerExtension) screenHandler).owo$handlePacket(buf, false);
+                buf.release();
+            });
         });
     }
 
@@ -40,14 +44,18 @@ public class ScreenInternals {
             ClientPlayNetworking.registerGlobalReceiver(LOCAL_PACKET, (client, handler, buf, responseSender) -> {
                 if (client.player == null) return;
 
-                var screenHandler = client.player.currentScreenHandler;
+                buf.retain();
+                client.execute(() -> {
+                    var screenHandler = client.player.currentScreenHandler;
 
-                if (screenHandler == null) {
-                    Owo.LOGGER.error("Received local packet for null ScreenHandler");
-                    return;
-                }
+                    if (screenHandler == null) {
+                        Owo.LOGGER.error("Received local packet for null ScreenHandler");
+                        return;
+                    }
 
-                ((OwoScreenHandlerExtension) screenHandler).owo$handlePacket(buf, true, client);
+                    ((OwoScreenHandlerExtension) screenHandler).owo$handlePacket(buf, true);
+                    buf.release();
+                });
             });
 
             ClientPlayNetworking.registerGlobalReceiver(SYNC_PROPERTIES, (client, handler, buf, responseSender) -> {
