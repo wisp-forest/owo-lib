@@ -37,6 +37,7 @@
   "client": [
     "ClientLoginNetworkHandlerAccessor",
     "MinecraftClientMixin",
+    "DrawContextMixin",
     "itemgroup.AbstractInventoryScreenMixin",
     "itemgroup.CreativeInventoryScreenAccessor",
     "itemgroup.CreativeInventoryScreenMixin",

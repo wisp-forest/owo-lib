@@ -6,6 +6,7 @@ import io.wispforest.owo.client.OwoClient;
 import io.wispforest.owo.mixin.ui.DrawContextInvoker;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
 import io.wispforest.owo.ui.util.NinePatchTexture;
+import io.wispforest.owo.util.pond.MatrixStackManipulator;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
@@ -23,7 +24,7 @@ import org.joml.Vector2d;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OwoUIDrawContext extends DrawContext {
+public class OwoUIDrawContext extends DrawContext implements MatrixStackManipulator<OwoUIDrawContext> {
 
     @Deprecated
     public static final Identifier PANEL_TEXTURE = new Identifier("owo", "textures/gui/panel.png");
@@ -372,4 +373,8 @@ public class OwoUIDrawContext extends DrawContext {
         }
     }
 
+    @Override
+    public OwoUIDrawContext getContext() {
+        return this;
+    }
 }

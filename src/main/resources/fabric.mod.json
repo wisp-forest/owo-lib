@@ -64,6 +64,9 @@
       ],
       "net/minecraft/class_1703": [
         "io/wispforest/owo/client/screens/OwoScreenHandler"
+      ],
+      "net/minecraft/class_332": [
+        "io/wispforest/owo/util/pond/MatrixStackManipulator"
       ]
     }
   }
