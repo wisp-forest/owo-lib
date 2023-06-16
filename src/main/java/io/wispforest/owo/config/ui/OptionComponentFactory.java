@@ -77,7 +77,9 @@ public interface OptionComponentFactory<T> {
         });
 
         result.baseComponent.childById(FlowLayout.class, "controls-flow").<FlowLayout>configure(controls -> {
-            Supplier<Color> valueGetter = () -> (Color) result.optionProvider.parsedValue();
+            Supplier<Color> valueGetter = () -> result.optionProvider.isValid()
+                    ? (Color) result.optionProvider.parsedValue()
+                    : Color.BLACK;
 
             var box = Components.box(Sizing.fixed(15), Sizing.fixed(15)).color(valueGetter.get()).fill(true);
             box.margins(Insets.right(5)).cursorStyle(CursorStyle.HAND);
@@ -106,7 +108,7 @@ public interface OptionComponentFactory<T> {
                                 flowLayout.parent().remove();
                             });
                         })
-                ));
+                ).zIndex(100));
 
                 return true;
             });
