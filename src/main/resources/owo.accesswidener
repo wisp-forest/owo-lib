@@ -5,3 +5,5 @@ accessible method net/minecraft/client/gui/screen/Screen addDrawableChild (Lnet/
 extendable method net/minecraft/item/ItemGroup <init> (Lnet/minecraft/item/ItemGroup$Row;ILnet/minecraft/item/ItemGroup$Type;Lnet/minecraft/text/Text;Ljava/util/function/Supplier;Lnet/minecraft/item/ItemGroup$EntryCollector;)V
 transitive-accessible class net/minecraft/item/ItemGroup$Entries
 transitive-accessible class net/minecraft/item/ItemGroup$EntriesImpl
+
+transitive-accessible class net/minecraft/client/gui/DrawContext$ScissorStack

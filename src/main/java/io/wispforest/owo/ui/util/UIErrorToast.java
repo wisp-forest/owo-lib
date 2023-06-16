@@ -59,7 +59,6 @@ public class UIErrorToast implements Toast {
     @Override
     public Visibility draw(DrawContext context, ToastManager manager, long startTime) {
         var owoContext = OwoUIDrawContext.of(context);
-        owoContext.getMatrices().multiplyPositionMatrix(context.getMatrices().peek().getPositionMatrix());
 
         owoContext.fill(0, 0, this.getWidth(), this.getHeight(), 0x77000000);
         owoContext.drawRectOutline(0, 0, this.getWidth(), this.getHeight(), 0xA7FF0000);
