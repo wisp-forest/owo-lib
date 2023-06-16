@@ -294,7 +294,7 @@ public class FlowLayout extends BaseParentComponent {
                 int y = container.y + padding.top() + child.margins().get().top() + rowOffset.intValue();
 
                 final var childSize = child.fullSize();
-                if (x + childSize.width() > childSpace.width()) {
+                if (rowWidth.intValue() + childSize.width() > childSpace.width()) {
                     x -= rowWidth.intValue();
                     y = y - rowOffset.intValue() + layoutHeight.intValue();
 
