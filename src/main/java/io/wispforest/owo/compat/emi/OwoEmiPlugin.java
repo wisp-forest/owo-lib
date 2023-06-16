@@ -44,7 +44,7 @@ public class OwoEmiPlugin implements EmiPlugin {
 
             var rootComponent = adapter.rootComponent;
             var children = new ArrayList<Component>();
-            rootComponent.collectChildren(children);
+            rootComponent.collectDescendants(children);
             children.remove(rootComponent);
 
             children.forEach(component -> {
