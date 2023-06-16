@@ -6,10 +6,10 @@ import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
 import io.wispforest.owo.mixin.itemgroup.ItemGroupAccessor;
 import io.wispforest.owo.util.pond.OwoItemExtensions;
 import net.fabricmc.api.EnvType;
-import net.fabricmc.fabric.impl.itemgroup.ItemGroupHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.item.*;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.resource.featuretoggle.FeatureSet;
 import net.minecraft.text.Text;
@@ -69,7 +69,9 @@ public abstract class OwoItemGroup extends ItemGroup {
         this.displaySingleTab = displaySingleTab;
 
         ((ItemGroupAccessor) this).owo$setEntryCollector((context, entries) -> {
-            if (!this.initialized) throw new IllegalStateException("oωo item group not initialized, was 'initialize()' called?");
+            if (!this.initialized) {
+                throw new IllegalStateException("oωo item group not initialized, was 'initialize()' called?");
+            }
             this.getSelectedTab().contentSupplier().addItems(context, entries);
             this.collectItemsFromRegistry(entries, true);
         });
@@ -148,7 +150,7 @@ public abstract class OwoItemGroup extends ItemGroup {
      * @param icon            The icon to use
      * @param name            The name of the tab, used for the translation key
      * @param contentSupplier The function used for filling this tab
-     * @param texture    The texture to use for drawing the button
+     * @param texture         The texture to use for drawing the button
      * @see Icon#of(ItemConvertible)
      */
     public void addCustomTab(Icon icon, String name, ItemGroupTab.ContentSupplier contentSupplier, Identifier texture, boolean primary) {
@@ -243,9 +245,8 @@ public abstract class OwoItemGroup extends ItemGroup {
         return true;
     }
 
-    @Override
-    public Identifier getId() {
-        return this.id;
+    public Identifier id() {
+        return Registries.ITEM_GROUP.getId(this);
     }
 
     public static class Builder {
@@ -297,7 +298,7 @@ public abstract class OwoItemGroup extends ItemGroup {
 
         public OwoItemGroup build() {
             final var group = new OwoItemGroup(id, initializer, iconSupplier, tabStackHeight, buttonStackHeight, customTexture, useDynamicTitle, displaySingleTab) {};
-            ItemGroupHelper.appendItemGroup(group);
+            Registry.register(Registries.ITEM_GROUP, this.id, group);
             return group;
         }
     }
@@ -331,9 +332,10 @@ public abstract class OwoItemGroup extends ItemGroup {
         Text tooltip();
 
         static Text tooltipFor(ItemGroup group, String component, String componentName) {
-            var groupId = group.getId().getNamespace().equals("minecraft")
-                    ? group.getId().getPath()
-                    : group.getId().getNamespace() + "." + group.getId().getPath();
+            var registryId = Registries.ITEM_GROUP.getId(group);
+            var groupId = registryId.getNamespace().equals("minecraft")
+                    ? registryId.getPath()
+                    : registryId.getNamespace() + "." + registryId.getPath();
 
             return Text.translatable("itemGroup." + groupId + "." + component + "." + componentName);
         }

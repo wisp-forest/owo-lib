@@ -280,6 +280,7 @@ public class UIParsing {
         // Layout
         registerFactory("flow-layout", FlowLayout::parse);
         registerFactory("grid-layout", GridLayout::parse);
+        registerFactory("stack-layout", element -> Containers.stack(Sizing.content(), Sizing.content()));
 
         // Container
         registerFactory("scroll", ScrollContainer::parse);
@@ -293,6 +294,7 @@ public class UIParsing {
         // Game Objects
         registerFactory("entity", EntityComponent::parse);
         registerFactory("item", element -> Components.item(ItemStack.EMPTY));
+        registerFactory("block", BlockComponent::parse);
 
         // Widgets
         registerFactory("label", element -> Components.label(Text.empty()));

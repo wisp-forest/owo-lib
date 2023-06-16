@@ -11,7 +11,6 @@ import io.wispforest.owo.ui.util.FocusHandler;
 import io.wispforest.owo.util.EventSource;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -130,8 +129,13 @@ public abstract class ClickableWidgetMixin implements ComponentStub, net.minecra
     }
 
     @Override
-    public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
-        this.owo$getWrapper().draw(matrices, mouseX, mouseY, partialTicks, delta);
+    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+        this.owo$getWrapper().draw(context, mouseX, mouseY, partialTicks, delta);
+    }
+
+    @Override
+    public boolean shouldDrawTooltip(double mouseX, double mouseY) {
+        return this.owo$getWrapper().shouldDrawTooltip(mouseX, mouseY);
     }
 
     @Override

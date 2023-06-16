@@ -4,13 +4,12 @@ import io.wispforest.owo.Owo;
 import io.wispforest.owo.mixin.ui.SlotAccessor;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.inject.GreedyInputComponent;
-import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.UIErrorToast;
 import io.wispforest.owo.util.pond.OwoSlotExtension;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
@@ -136,7 +135,7 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
     }
 
     /**
-     * Wrap the slot and the given index in this screen's
+     * Wrap the slot at the given index in this screen's
      * handler into a component, so it can be managed by the UI system
      *
      * @param index The index the slot occupies in the handler's slot list
@@ -155,31 +154,32 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
     }
 
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(DrawContext vanillaContext, int mouseX, int mouseY, float delta) {
+        var context = OwoUIDrawContext.of(vanillaContext);
         if (!this.invalid) {
-            super.render(matrices, mouseX, mouseY, delta);
+            super.render(context, mouseX, mouseY, delta);
 
             if (this.uiAdapter.enableInspector) {
-                matrices.translate(0, 0, 500);
+                context.getMatrices().translate(0, 0, 500);
 
                 for (int i = 0; i < this.handler.slots.size(); i++) {
                     var slot = this.handler.slots.get(i);
                     if (!slot.isEnabled()) continue;
 
-                    Drawer.drawText(matrices, Text.literal("H:" + i),
+                    context.drawText(Text.literal("H:" + i),
                             this.x + slot.x + 15, this.y + slot.y + 9, .5f, 0x0096FF,
-                            Drawer.TextAnchor.BOTTOM_RIGHT
+                            OwoUIDrawContext.TextAnchor.BOTTOM_RIGHT
                     );
-                    Drawer.drawText(matrices, Text.literal("I:" + slot.getIndex()),
+                    context.drawText(Text.literal("I:" + slot.getIndex()),
                             this.x + slot.x + 15, this.y + slot.y + 15, .5f, 0x5800FF,
-                            Drawer.TextAnchor.BOTTOM_RIGHT
+                            OwoUIDrawContext.TextAnchor.BOTTOM_RIGHT
                     );
                 }
 
-                matrices.translate(0, 0, -500);
+                context.getMatrices().translate(0, 0, -500);
             }
 
-            this.drawMouseoverTooltip(matrices, mouseX, mouseY);
+            this.drawMouseoverTooltip(context, mouseX, mouseY);
         } else {
             this.close();
         }
@@ -215,7 +215,7 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
     }
 
     @Override
-    protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {}
+    protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {}
 
     public class SlotComponent extends BaseComponent {
 
@@ -227,7 +227,7 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
         }
 
         @Override
-        public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+        public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
             this.didDraw = true;
 
             int[] scissor = new int[4];
@@ -248,9 +248,9 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
         }
 
         @Override
-        public void drawTooltip(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+        public void drawTooltip(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
             if (!this.slot.hasStack()) {
-                super.drawTooltip(matrices, mouseX, mouseY, partialTicks, delta);
+                super.drawTooltip(context, mouseX, mouseY, partialTicks, delta);
             }
         }
 

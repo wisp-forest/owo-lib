@@ -8,11 +8,11 @@ import io.wispforest.owo.ui.core.Size;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
-import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.Observable;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.EditBox;
 import net.minecraft.client.gui.widget.EditBoxWidget;
 import net.minecraft.client.input.CursorMovement;
@@ -62,15 +62,17 @@ public class TextAreaComponent extends EditBoxWidget {
     }
 
     @Override
-    protected void renderOverlay(MatrixStack matrices) {
+    protected void renderOverlay(DrawContext context) {
         this.height -= 1;
+
+        var matrices = context.getMatrices();
         matrices.push();
         matrices.translate(-9, 1, 0);
 
         int previousMaxLength = this.editBox.getMaxLength();
         this.editBox.setMaxLength(Integer.MAX_VALUE);
 
-        super.renderOverlay(matrices);
+        super.renderOverlay(context);
 
         this.editBox.setMaxLength(previousMaxLength);
 
@@ -83,7 +85,7 @@ public class TextAreaComponent extends EditBoxWidget {
                     : Text.literal(String.valueOf(this.editBox.getText().length()));
 
             var textRenderer = MinecraftClient.getInstance().textRenderer;
-            Drawer.drawTextWithShadow(matrices, textRenderer, text, this.getX() + this.width - textRenderer.getWidth(text), this.getY() + this.height + 3, 0xa0a0a0);
+            context.drawTextWithShadow(textRenderer, text, this.getX() + this.width - textRenderer.getWidth(text), this.getY() + this.height + 3, 0xa0a0a0);
         }
     }
 

@@ -1,11 +1,8 @@
 package io.wispforest.owo.itemgroup;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.client.texture.AnimatedTextureDrawable;
 import io.wispforest.owo.client.texture.SpriteSheetMetadata;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
@@ -18,7 +15,7 @@ import org.jetbrains.annotations.ApiStatus;
  */
 public interface Icon {
 
-    void render(MatrixStack matrixStack, int x, int y, int mouseX, int mouseY, float delta);
+    void render(DrawContext context, int x, int y, int mouseX, int mouseY, float delta);
 
     static Icon of(ItemStack stack) {
         return new ItemIcon(stack);
@@ -58,8 +55,8 @@ public interface Icon {
         }
 
         @Override
-        public void render(MatrixStack matrixStack, int x, int y, int mouseX, int mouseY, float delta) {
-            MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(matrixStack, stack, x, y);
+        public void render(DrawContext context, int x, int y, int mouseX, int mouseY, float delta) {
+            context.drawItemWithoutEntity(stack, x, y);
         }
     }
 
@@ -82,9 +79,8 @@ public interface Icon {
         }
 
         @Override
-        public void render(MatrixStack matrixStack, int x, int y, int mouseX, int mouseY, float delta) {
-            RenderSystem.setShaderTexture(0, texture);
-            DrawableHelper.drawTexture(matrixStack, x, y, u, v, 16, 16, textureWidth, textureHeight);
+        public void render(DrawContext context, int x, int y, int mouseX, int mouseY, float delta) {
+            context.drawTexture(texture, x, y, u, v, 16, 16, textureWidth, textureHeight);
         }
     }
 
@@ -100,8 +96,8 @@ public interface Icon {
         }
 
         @Override
-        public void render(MatrixStack matrixStack, int x, int y, int mouseX, int mouseY, float delta) {
-            widget.render(x, y, matrixStack, mouseX, mouseY, delta);
+        public void render(DrawContext context, int x, int y, int mouseX, int mouseY, float delta) {
+            widget.render(x, y, context, mouseX, mouseY, delta);
         }
     }
 

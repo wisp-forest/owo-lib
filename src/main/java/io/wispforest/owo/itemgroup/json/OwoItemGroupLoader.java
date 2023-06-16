@@ -8,6 +8,7 @@ import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
 import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
 import io.wispforest.owo.moddata.ModDataConsumer;
 import io.wispforest.owo.util.pond.OwoItemExtensions;
+import net.fabricmc.fabric.api.event.registry.RegistryEntryAddedCallback;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemGroups;
 import net.minecraft.registry.Registries;
@@ -38,8 +39,10 @@ public class OwoItemGroupLoader implements ModDataConsumer {
     private OwoItemGroupLoader() {}
 
     public static void onGroupCreated(ItemGroup group) {
-        if (!BUFFERED_GROUPS.containsKey(group.getId())) return;
-        INSTANCE.acceptParsedFile(group.getId(), BUFFERED_GROUPS.remove(group.getId()));
+        var groupId = Registries.ITEM_GROUP.getId(group);
+
+        if (!BUFFERED_GROUPS.containsKey(groupId)) return;
+        INSTANCE.acceptParsedFile(groupId, BUFFERED_GROUPS.remove(groupId));
     }
 
     @Override
@@ -48,7 +51,7 @@ public class OwoItemGroupLoader implements ModDataConsumer {
 
         ItemGroup searchGroup = null;
         for (ItemGroup group : ItemGroups.getGroups()) {
-            if (group.getId().equals(targetGroupId)) {
+            if (Registries.ITEM_GROUP.getId(group).equals(targetGroupId)) {
                 searchGroup = group;
                 break;
             }
@@ -113,19 +116,25 @@ public class OwoItemGroupLoader implements ModDataConsumer {
 
             if (JsonHelper.getBoolean(json, "extend", false)) wrapper.markExtension();
         } else {
-            var wrapper = new WrapperGroup(targetGroup, tabs, buttons);
+            var wrapper = new WrapperGroup(targetGroup, targetGroupId, tabs, buttons);
             wrapper.initialize();
             if (JsonHelper.getBoolean(json, "extend", false)) wrapper.markExtension();
 
             Registries.ITEM.stream()
                     .filter(item -> ((OwoItemExtensions) item).owo$group() == targetGroup)
-                    .forEach(item -> ((OwoItemExtensions) item).owo$setGroup(targetGroup));
+                    .forEach(item -> ((OwoItemExtensions) item).owo$setGroup(wrapper));
         }
     }
 
     @Override
     public String getDataSubdirectory() {
         return "item_group_tabs";
+    }
+
+    static {
+        RegistryEntryAddedCallback.event(Registries.ITEM_GROUP).register((rawId, id, group) -> {
+            OwoItemGroupLoader.onGroupCreated(group);
+        });
     }
 
 }

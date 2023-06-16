@@ -69,7 +69,8 @@ public class HealCommand {
             living.heal(amount);
             healed = living.getHealth() - healed;
 
-            context.getSource().sendFeedback(TextOps.concat(Owo.PREFIX, TextOps.withColor("healed §" + healed + " §hp",
+            float thankYouMojang = healed;
+            context.getSource().sendFeedback(() -> TextOps.concat(Owo.PREFIX, TextOps.withColor("healed §" + thankYouMojang + " §hp",
                     TextOps.color(Formatting.GRAY), OwoDebugCommands.GENERAL_PURPLE, TextOps.color(Formatting.GRAY))), false);
         } else {
             context.getSource().sendError(TextOps.concat(Owo.PREFIX, Text.of("Cannot heal non living entity")));

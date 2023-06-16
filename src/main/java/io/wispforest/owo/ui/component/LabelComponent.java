@@ -4,12 +4,9 @@ import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
-import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.util.Observable;
-import io.wispforest.owo.util.pond.OwoTextRendererExtension;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -35,7 +32,7 @@ public class LabelComponent extends BaseComponent {
     protected boolean shadow;
     protected int maxWidth;
 
-    protected Function<Style, Boolean> textClickHandler = Drawer.utilityScreen()::handleTextClick;
+    protected Function<Style, Boolean> textClickHandler = OwoUIDrawContext.utilityScreen()::handleTextClick;
 
     protected LabelComponent(Text text) {
         this.text = text;
@@ -160,59 +157,56 @@ public class LabelComponent extends BaseComponent {
     }
 
     @Override
-    public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
-        try {
-            matrices.push();
-            matrices.translate(0, 1 / MinecraftClient.getInstance().getWindow().getScaleFactor(), 0);
+    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+        var matrices = context.getMatrices();
 
-            int x = this.x;
-            int y = this.y;
+        matrices.push();
+        matrices.translate(0, 1 / MinecraftClient.getInstance().getWindow().getScaleFactor(), 0);
 
-            if (this.horizontalSizing.get().isContent()) {
-                x += this.horizontalSizing.get().value;
-            }
-            if (this.verticalSizing.get().isContent()) {
-                y += this.verticalSizing.get().value;
-            }
+        int x = this.x;
+        int y = this.y;
 
-            switch (this.verticalTextAlignment) {
-                case CENTER -> y += (this.height - ((this.wrappedText.size() * (this.lineHeight() + 2)) - 2)) / 2;
-                case BOTTOM -> y += this.height - ((this.wrappedText.size() * (this.lineHeight() + 2)) - 2);
-            }
+        if (this.horizontalSizing.get().isContent()) {
+            x += this.horizontalSizing.get().value;
+        }
+        if (this.verticalSizing.get().isContent()) {
+            y += this.verticalSizing.get().value;
+        }
 
-            ((OwoTextRendererExtension) this.textRenderer).owo$beginCache();
+        switch (this.verticalTextAlignment) {
+            case CENTER -> y += (this.height - ((this.wrappedText.size() * (this.lineHeight() + 2)) - 2)) / 2;
+            case BOTTOM -> y += this.height - ((this.wrappedText.size() * (this.lineHeight() + 2)) - 2);
+        }
 
+        final int lambdaX = x;
+        final int lambdaY = y;
+
+        context.draw(() -> {
             for (int i = 0; i < this.wrappedText.size(); i++) {
                 var renderText = this.wrappedText.get(i);
-                int renderX = x;
+                int renderX = lambdaX;
 
                 switch (this.horizontalTextAlignment) {
                     case CENTER -> renderX += (this.width - this.textRenderer.getWidth(renderText)) / 2;
                     case RIGHT -> renderX += this.width - this.textRenderer.getWidth(renderText);
                 }
 
-                int renderY = y + i * (this.lineHeight() + 2);
+                int renderY = lambdaY + i * (this.lineHeight() + 2);
                 renderY += this.lineHeight() - this.textRenderer.fontHeight;
 
-                if (this.shadow) {
-                    this.textRenderer.drawWithShadow(matrices, renderText, renderX, renderY, this.color.get().argb());
-                } else {
-                    this.textRenderer.draw(matrices, renderText, renderX, renderY, this.color.get().argb());
-                }
+                context.drawText(this.textRenderer, renderText, renderX, renderY, this.color.get().argb(), this.shadow);
             }
+        });
 
-            matrices.pop();
-        } finally {
-            ((OwoTextRendererExtension) this.textRenderer).owo$submitCache();
-        }
+        matrices.pop();
     }
 
     @Override
-    public void drawTooltip(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
-        super.drawTooltip(matrices, mouseX, mouseY, partialTicks, delta);
+    public void drawTooltip(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+        super.drawTooltip(context, mouseX, mouseY, partialTicks, delta);
 
         if (!this.isInBoundingBox(mouseX, mouseY)) return;
-        Drawer.utilityScreen().renderTextHoverEffect(matrices, this.styleAt(mouseX - this.x, mouseY - this.y), mouseX, mouseY);
+        context.drawHoverEvent(this.textRenderer, this.styleAt(mouseX - this.x, mouseY - this.y), mouseX, mouseY);
     }
 
     @Override

@@ -6,7 +6,6 @@ import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.*;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 
@@ -139,8 +138,13 @@ public class VanillaWidgetComponent extends BaseComponent {
     }
 
     @Override
-    public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
-        this.widget.render(matrices, mouseX, mouseY, 0);
+    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+        this.widget.render(context, mouseX, mouseY, 0);
+    }
+
+    @Override
+    public boolean shouldDrawTooltip(double mouseX, double mouseY) {
+        return this.widget.visible && this.widget.active && super.shouldDrawTooltip(mouseX, mouseY);
     }
 
     @Override

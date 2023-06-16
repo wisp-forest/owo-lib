@@ -6,11 +6,11 @@ import io.wispforest.owo.itemgroup.gui.ItemGroupButtonWidget;
 import io.wispforest.owo.ui.core.CursorStyle;
 import io.wispforest.owo.ui.util.CursorAdapter;
 import io.wispforest.owo.util.pond.OwoCreativeInventoryScreenExtensions;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemGroup;
@@ -67,7 +67,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
     // Background
     // ----------
 
-    @ModifyArg(method = "drawBackground", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderTexture(ILnet/minecraft/util/Identifier;)V", ordinal = 1))
+    @ModifyArg(method = "drawBackground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawTexture(Lnet/minecraft/util/Identifier;IIIIII)V", ordinal = 0))
     private Identifier injectCustomGroupTexture(Identifier original) {
         if (!(selectedTab instanceof OwoItemGroup owoGroup) || owoGroup.getCustomTexture() == null) return original;
         return owoGroup.getCustomTexture();
@@ -77,27 +77,27 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
     // Scrollbar slider
     // ----------------
 
-    @ModifyArg(method = "drawBackground", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderTexture(ILnet/minecraft/util/Identifier;)V", ordinal = 2))
+    @ModifyArg(method = "drawBackground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawTexture(Lnet/minecraft/util/Identifier;IIIIII)V", ordinal = 1))
     private Identifier injectCustomScrollbarTexture(Identifier original) {
         if (!(selectedTab instanceof OwoItemGroup owoGroup) || owoGroup.getCustomTexture() == null) return original;
         this.owo$owoGroup = owoGroup;
         return owoGroup.getCustomTexture();
     }
 
-    @ModifyArg(method = "drawBackground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/CreativeInventoryScreen;drawTexture(Lnet/minecraft/client/util/math/MatrixStack;IIIIII)V", ordinal = 1), index = 3)
+    @ModifyArg(method = "drawBackground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawTexture(Lnet/minecraft/util/Identifier;IIIIII)V", ordinal = 1), index = 3)
     private int injectCustomScrollbarTextureU(int original) {
         if (owo$owoGroup == null) return original;
         return original - 232;
     }
 
-    @ModifyArg(method = "drawBackground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/CreativeInventoryScreen;drawTexture(Lnet/minecraft/client/util/math/MatrixStack;IIIIII)V", ordinal = 1), index = 4)
+    @ModifyArg(method = "drawBackground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawTexture(Lnet/minecraft/util/Identifier;IIIIII)V", ordinal = 1), index = 4)
     private int injectCustomScrollbarTextureV(int original) {
         if (owo$owoGroup == null) return original;
         return 136;
     }
 
     @Inject(method = "drawBackground", at = @At("RETURN"))
-    private void releaseGroupInstance(MatrixStack matrices, float delta, int mouseX, int mouseY, CallbackInfo ci) {
+    private void releaseGroupInstance(DrawContext context, float delta, int mouseX, int mouseY, CallbackInfo ci) {
         this.owo$owoGroup = null;
     }
 
@@ -105,31 +105,36 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
     // Group headers
     // -------------
 
-    @Inject(method = "renderTabIcon", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemGroup;getIcon()Lnet/minecraft/item/ItemStack;"))
-    private void injectCustomTabTexture(MatrixStack matrices, ItemGroup group, CallbackInfo ci) {
-        if (!(group instanceof OwoItemGroup owoGroup) || owoGroup.getCustomTexture() == null) return;
+    @Inject(method = "renderTabIcon", at = @At("HEAD"))
+    private void captureTabGroup(DrawContext context, ItemGroup group, CallbackInfo ci) {
+        if (!(group instanceof OwoItemGroup owoGroup)) return;
         this.owo$owoGroup = owoGroup;
-        RenderSystem.setShaderTexture(0, owoGroup.getCustomTexture());
     }
 
-    @ModifyArg(method = "renderTabIcon", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/CreativeInventoryScreen;drawTexture(Lnet/minecraft/client/util/math/MatrixStack;IIIIII)V"), index = 3)
+    @ModifyArg(method = "renderTabIcon", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawTexture(Lnet/minecraft/util/Identifier;IIIIII)V"))
+    private Identifier injectCustomTabTexture(Identifier texture) {
+        if (this.owo$owoGroup == null || this.owo$owoGroup.getCustomTexture() == null) return texture;
+        return owo$owoGroup.getCustomTexture();
+    }
+
+    @ModifyArg(method = "renderTabIcon", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawTexture(Lnet/minecraft/util/Identifier;IIIIII)V"), index = 3)
     private int injectCustomTabTextureLocation(int original) {
-        if (this.owo$owoGroup == null) return original;
-        return this.owo$owoGroup.getColumn() == 0 ? 195 : 223;
+        if (this.owo$owoGroup == null || this.owo$owoGroup.getCustomTexture() == null) return original;
+        return this.owo$owoGroup.getColumn() == 0 ? 195 : 221;
     }
 
     @Inject(method = "renderTabIcon", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemGroup;getIcon()Lnet/minecraft/item/ItemStack;"), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void renderOwoIcon(MatrixStack matrices, ItemGroup group, CallbackInfo ci, boolean bl, boolean bl2, int i, int j, int k, int l, int m) {
+    private void renderOwoIcon(DrawContext context, ItemGroup group, CallbackInfo ci, boolean bl, boolean bl2, int i, int j, int k, int l, int m) {
         if (!(group instanceof OwoItemGroup owoGroup)) return;
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        owoGroup.icon().render(matrices, l, m, 0, 0, 0);
+        owoGroup.icon().render(context, l, m, 0, 0, 0);
         RenderSystem.disableBlend();
     }
 
     @Inject(method = "renderTabIcon", at = @At("RETURN"))
-    private void restoreTabTexture(MatrixStack matrices, ItemGroup group, CallbackInfo ci) {
+    private void restoreTabTexture(DrawContext context, ItemGroup group, CallbackInfo ci) {
         if (this.owo$owoGroup == null) return;
         this.owo$owoGroup = null;
         RenderSystem.setShaderTexture(0, TEXTURE);
@@ -139,7 +144,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
     // oωo tab title
     // -------------
 
-    @ModifyArg(method = "drawForeground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/font/TextRenderer;draw(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/text/Text;FFI)I"))
+    @ModifyArg(method = "drawForeground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawText(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/text/Text;IIIZ)I"))
     private Text injectTabNameAsTitle(Text original) {
         if (!(selectedTab instanceof OwoItemGroup owoGroup) || !owoGroup.hasDynamicTitle()) return original;
         if (owoGroup.getSelectedTab().primary()) {
@@ -203,13 +208,13 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
         }
     }
 
-    @Inject(at = @At("TAIL"), method = "render(Lnet/minecraft/client/util/math/MatrixStack;IIF)V")
-    private void render(MatrixStack matrixStack, int mouseX, int mouseY, float delta, CallbackInfo cbi) {
+    @Inject(at = @At("TAIL"), method = "render")
+    private void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo cbi) {
         boolean anyButtonHovered = false;
 
         for (var button : owo$buttons) {
             if (button.trulyHovered()) {
-                renderTooltip(matrixStack, button.getMessage(), mouseX, mouseY);
+                context.drawTooltip(this.textRenderer, button.getMessage(), mouseX, mouseY);
                 anyButtonHovered = true;
             }
         }
@@ -240,7 +245,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
     @Unique
     private ButtonWidget.PressAction owo$createSelectAction(Screen targetScreen, OwoItemGroup group, int targetTabIndex) {
         return button -> {
-            group.setSelectedTab(targetTabIndex, new ItemGroup.DisplayContext(this.owo$enabledFeatures, this.shouldShowOperatorTab(this.handler.player()), this.handler.player().world.getRegistryManager()));
+            group.setSelectedTab(targetTabIndex, new ItemGroup.DisplayContext(this.owo$enabledFeatures, this.shouldShowOperatorTab(this.handler.player()), this.handler.player().getWorld().getRegistryManager()));
             this.clearAndInit();
             ((ItemGroupButtonWidget) button).isSelected = true;
         };

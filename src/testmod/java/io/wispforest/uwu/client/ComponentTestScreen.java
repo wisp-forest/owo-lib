@@ -9,6 +9,7 @@ import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.core.*;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.Tooltip;
@@ -368,8 +369,8 @@ public class ComponentTestScreen extends Screen {
     }
 
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        super.render(matrices, mouseX, mouseY, delta);
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        super.render(context, mouseX, mouseY, delta);
         this.fadeSlot.update(RenderEffectWrapper.RenderEffect.color(new Color(
                 1f, 1f, 1f,
                 (float) (Math.sin(System.currentTimeMillis() / 1000d) * .5 + .5)
@@ -388,7 +389,7 @@ public class ComponentTestScreen extends Screen {
                 writer.write("digraph D {\n");
 
                 final var tree = new ArrayList<Component>();
-                this.uiAdapter.rootComponent.collectChildren(tree);
+                this.uiAdapter.rootComponent.collectDescendants(tree);
 
                 for (var component : tree) {
                     writer.write("  \"" + format(component.parent()) + "\" -> \"" + format(component) + "\"\n");

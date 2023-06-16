@@ -120,6 +120,7 @@ public class OwoNetChannel {
         this.ownerClassName = ownerClassName;
         this.required = required;
 
+        OwoHandshake.enable();
         if (required) {
             OwoHandshake.requireHandshake();
         }
@@ -484,8 +485,6 @@ public class OwoNetChannel {
     }
 
     static {
-        OwoHandshake.enable();
-
         OwoFreezer.registerFreezeCallback(() -> {
             for (OwoNetChannel channel : OwoNetChannel.REGISTERED_CHANNELS.values()) {
                 channel.verify();

@@ -29,6 +29,10 @@ public class Positioning implements Animatable<Positioning> {
         return new Positioning(this.x, y, this.type);
     }
 
+    public boolean isRelative() {
+        return this.type == Type.RELATIVE || this.type == Type.ACROSS;
+    }
+
     @Override
     public Positioning interpolate(Positioning next, float delta) {
         if (next.type != this.type) {
@@ -72,6 +76,17 @@ public class Positioning implements Animatable<Positioning> {
     }
 
     /**
+     * Position the component the specified percentage
+     * across the parent, <i>not including the component's own size</i>
+     *
+     * @param xPercent The offset on the x-axis
+     * @param yPercent The offset on the y-axis
+     */
+    public static Positioning across(int xPercent, int yPercent) {
+        return new Positioning(xPercent, yPercent, Type.ACROSS);
+    }
+
+    /**
      * Position the component using whatever layout
      * method the parent component wants to apply
      */
@@ -80,7 +95,7 @@ public class Positioning implements Animatable<Positioning> {
     }
 
     public enum Type {
-        RELATIVE, ABSOLUTE, LAYOUT
+        RELATIVE, ACROSS, ABSOLUTE, LAYOUT
     }
 
     public static Positioning parse(Element positioningElement) {

@@ -1,13 +1,11 @@
 package io.wispforest.owo.ui.container;
 
-import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.base.BaseParentComponent;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.MountingHelper;
 import io.wispforest.owo.util.Observable;
-import net.minecraft.client.util.math.MatrixStack;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -142,9 +140,9 @@ public class FlowLayout extends BaseParentComponent {
     }
 
     @Override
-    public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
-        super.draw(matrices, mouseX, mouseY, partialTicks, delta);
-        this.drawChildren(matrices, mouseX, mouseY, partialTicks, delta, this.children);
+    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+        super.draw(context, mouseX, mouseY, partialTicks, delta);
+        this.drawChildren(context, mouseX, mouseY, partialTicks, delta, this.children);
     }
 
     @Override
@@ -165,9 +163,11 @@ public class FlowLayout extends BaseParentComponent {
     public static FlowLayout parse(Element element) {
         UIParsing.expectAttributes(element, "direction");
 
-        return element.getAttribute("direction").equals("vertical")
-                ? Containers.verticalFlow(Sizing.content(), Sizing.content())
-                : Containers.horizontalFlow(Sizing.content(), Sizing.content());
+        return switch (element.getAttribute("direction")) {
+            case "horizontal" -> Containers.horizontalFlow(Sizing.content(), Sizing.content());
+            case "ltr-text-flow" -> Containers.ltrTextFlow(Sizing.content(), Sizing.content());
+            default -> Containers.verticalFlow(Sizing.content(), Sizing.content());
+        };
     }
 
     @FunctionalInterface
@@ -263,6 +263,73 @@ public class FlowLayout extends BaseParentComponent {
                         component.updateY(component.y() + (container.height - padding.vertical() - layoutHeight.intValue()) / 2);
                     } else {
                         component.updateY(component.y() + (container.height - padding.vertical() - layoutHeight.intValue()));
+                    }
+                }
+            }
+
+            mountState.mountLate();
+        };
+
+        Algorithm LTR_TEXT = container -> {
+            if (container.horizontalSizing.get().isContent()) {
+                throw new IllegalStateException("An LTR-text-flow layout must use content-independent horizontal sizing");
+            }
+
+            var layoutWidth = new MutableInt(0);
+            var layoutHeight = new MutableInt(0);
+
+            var rowWidth = new MutableInt(0);
+            var rowOffset = new MutableInt(0);
+
+            final var layout = new ArrayList<Component>();
+            final var padding = container.padding.get();
+            final var childSpace = container.calculateChildSpace(container.space);
+
+            container.children.forEach(child -> child.inflate(childSpace));
+
+            var mountState = MountingHelper.mountEarly(container::mountChild, container.children, childSpace, child -> {
+                layout.add(child);
+
+                int x = container.x + padding.left() + child.margins().get().left() + rowWidth.intValue();
+                int y = container.y + padding.top() + child.margins().get().top() + rowOffset.intValue();
+
+                final var childSize = child.fullSize();
+                if (rowWidth.intValue() + childSize.width() > childSpace.width()) {
+                    x -= rowWidth.intValue();
+                    y = y - rowOffset.intValue() + layoutHeight.intValue();
+
+                    rowOffset.setValue(layoutHeight);
+                    rowWidth.setValue(0);
+                }
+
+                child.mount(container, x, y);
+
+                rowWidth.add(childSize.width() + container.gap());
+                if (rowOffset.intValue() + childSize.height() > layoutHeight.intValue()) {
+                    layoutHeight.setValue(rowOffset.intValue() + childSize.height());
+                }
+                if (rowWidth.intValue() > layoutWidth.intValue()) {
+                    layoutWidth.setValue(rowWidth.intValue());
+                }
+            });
+
+            layoutWidth.subtract(container.gap());
+
+            container.contentSize = Size.of(layoutWidth.intValue(), layoutHeight.intValue());
+            container.applySizing();
+
+            if (container.verticalAlignment() != VerticalAlignment.TOP) {
+                for (var component : layout) {
+                    component.updateY(component.y() + container.verticalAlignment().align(layoutHeight.intValue(), container.height - padding.vertical()));
+                }
+            }
+
+            if (container.horizontalAlignment() != HorizontalAlignment.LEFT) {
+                for (var component : layout) {
+                    if (container.horizontalAlignment() == HorizontalAlignment.CENTER) {
+                        component.updateX(component.x() + (container.width - padding.horizontal() - layoutWidth.intValue()) / 2);
+                    } else {
+                        component.updateX(component.x() + (container.width - padding.horizontal() - layoutWidth.intValue()));
                     }
                 }
             }

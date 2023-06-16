@@ -42,6 +42,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.ItemTags;
@@ -108,10 +109,11 @@ public class Uwu implements ModInitializer {
             .initializer(group -> group.addTab(Icon.of(Items.SPONGE), "tab_1", null, true))
             .build();
 
-    public static final ItemGroup VANILLA_GROUP = FabricItemGroup.builder(new Identifier("uwu", "vanilla_group"))
+    public static final ItemGroup VANILLA_GROUP = Registry.register(Registries.ITEM_GROUP, new Identifier("uwu", "vanilla_group"), FabricItemGroup.builder()
+            .displayName(Text.literal("who did this"))
             .icon(Items.ACACIA_BOAT::getDefaultStack)
             .entries((context, entries) -> entries.add(Items.MANGROVE_CHEST_BOAT))
-            .build();
+            .build());
 
     public static final OwoNetChannel CHANNEL = OwoNetChannel.create(new Identifier("uwu", "uwu"));
 
@@ -178,7 +180,7 @@ public class Uwu implements ModInitializer {
                                     .executes(context -> {
                                         GameProfile profile = GameProfileArgumentType.getProfileArgument(context, "player").iterator().next();
                                         NbtCompound tag = OfflineDataLookup.get(profile.getId());
-                                        context.getSource().sendFeedback(NbtHelper.toPrettyPrintedText(tag), false);
+                                        context.getSource().sendFeedback(() -> NbtHelper.toPrettyPrintedText(tag), false);
                                         return 0;
                                     })));
 
@@ -189,7 +191,7 @@ public class Uwu implements ModInitializer {
                                             .executes(context -> {
                                                 GameProfile profile = GameProfileArgumentType.getProfileArgument(context, "player").iterator().next();
                                                 Map<Identifier, AdvancementProgress> map = OfflineAdvancementLookup.get(profile.getId());
-                                                context.getSource().sendFeedback(Text.literal(map.toString()), false);
+                                                context.getSource().sendFeedback(() -> Text.literal(map.toString()), false);
                                                 System.out.println(map);
                                                 return 0;
                                             })))
@@ -214,7 +216,7 @@ public class Uwu implements ModInitializer {
                                         StringArgumentType.getString(context, "config")
                                 ).get(new Option.Key(StringArgumentType.getString(context, "option")));
 
-                                context.getSource().sendFeedback(Text.literal(String.valueOf(value)), false);
+                                context.getSource().sendFeedback(() -> Text.literal(String.valueOf(value)), false);
 
                                 return 0;
                             }))));

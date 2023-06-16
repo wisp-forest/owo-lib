@@ -92,9 +92,164 @@
                         <template name="inset-panel">
                             <border-size>8</border-size>
                         </template>
+
+                        <flow-layout direction="horizontal">
+                            <children>
+                                <box>
+                                    <color>white</color>
+                                    <fill>true</fill>
+
+                                    <positioning type="absolute">0,0</positioning>
+
+                                    <sizing>
+                                        <horizontal method="fixed">128</horizontal>
+                                        <vertical method="fixed">64</vertical>
+                                    </sizing>
+                                </box>
+
+                                <flow-layout direction="vertical">
+                                    <children>
+                                        <item>
+                                            <stack>minecraft:diamond</stack>
+                                            <sizing>
+                                                <horizontal method="fixed">8</horizontal>
+                                                <vertical method="fixed">8</vertical>
+                                            </sizing>
+                                        </item>
+
+                                        <item>
+                                            <stack>minecraft:diamond</stack>
+                                        </item>
+
+                                        <item>
+                                            <stack>minecraft:diamond</stack>
+                                            <sizing>
+                                                <horizontal method="fixed">32</horizontal>
+                                                <vertical method="fixed">32</vertical>
+                                            </sizing>
+                                        </item>
+                                    </children>
+
+                                    <horizontal-alignment>center</horizontal-alignment>
+                                </flow-layout>
+
+                                <flow-layout direction="vertical">
+                                    <children>
+                                        <item>
+                                            <stack>minecraft:stone</stack>
+                                            <sizing>
+                                                <horizontal method="fixed">8</horizontal>
+                                                <vertical method="fixed">8</vertical>
+                                            </sizing>
+                                        </item>
+
+                                        <item>
+                                            <stack>minecraft:stone</stack>
+                                        </item>
+
+                                        <item>
+                                            <stack>minecraft:stone</stack>
+                                            <sizing>
+                                                <horizontal method="fixed">32</horizontal>
+                                                <vertical method="fixed">32</vertical>
+                                            </sizing>
+                                        </item>
+                                    </children>
+
+                                    <horizontal-alignment>center</horizontal-alignment>
+                                </flow-layout>
+                            </children>
+
+                            <gap>5</gap>
+                            <horizontal-alignment>center</horizontal-alignment>
+                        </flow-layout>
+
+<!--                        <flow-layout direction="ltr-text-flow">-->
+<!--                            <children>-->
+<!--                                <label>-->
+<!--                                    <text>1</text>-->
+<!--                                </label>-->
+<!--                                <item>-->
+<!--                                    <stack>minecraft:iron_ingot</stack>-->
+<!--                                </item>-->
+<!--                                <label>-->
+<!--                                    <text>22</text>-->
+<!--                                </label>-->
+<!--                                <item>-->
+<!--                                    <stack>minecraft:iron_ingot</stack>-->
+<!--                                </item>-->
+<!--                                <label>-->
+<!--                                    <text>333</text>-->
+<!--                                </label>-->
+<!--                                <item>-->
+<!--                                    <stack>minecraft:iron_ingot</stack>-->
+<!--                                </item>-->
+<!--                                <label>-->
+<!--                                    <text>4444</text>-->
+<!--                                </label>-->
+<!--                                <item>-->
+<!--                                    <stack>minecraft:iron_ingot</stack>-->
+<!--                                </item>-->
+<!--                                <label>-->
+<!--                                    <text>55555</text>-->
+<!--                                </label>-->
+<!--                                <item>-->
+<!--                                    <stack>minecraft:iron_ingot</stack>-->
+<!--                                </item>-->
+<!--                                <label>-->
+<!--                                    <text>666666</text>-->
+<!--                                </label>-->
+<!--                                <item>-->
+<!--                                    <stack>minecraft:iron_ingot</stack>-->
+<!--                                </item>-->
+<!--                                <label>-->
+<!--                                    <text>77777777</text>-->
+<!--                                </label>-->
+<!--                                <item>-->
+<!--                                    <stack>minecraft:iron_ingot</stack>-->
+<!--                                </item>-->
+<!--                                <label>-->
+<!--                                    <text>88888888</text>-->
+<!--                                </label>-->
+<!--                                <item>-->
+<!--                                    <stack>minecraft:iron_ingot</stack>-->
+<!--                                </item>-->
+<!--                                <label>-->
+<!--                                    <text>999999999</text>-->
+<!--                                </label>-->
+<!--                                <item>-->
+<!--                                    <stack>minecraft:iron_ingot</stack>-->
+<!--                                </item>-->
+<!--                                <label>-->
+<!--                                    <text>101010101010101010</text>-->
+<!--                                </label>-->
+<!--                                <item>-->
+<!--                                    <stack>minecraft:iron_ingot</stack>-->
+<!--                                </item>-->
+<!--                                <label>-->
+<!--                                    <text>yes</text>-->
+<!--                                </label>-->
+<!--                                <item>-->
+<!--                                    <stack>minecraft:iron_ingot</stack>-->
+<!--                                </item>-->
+
+<!--                            </children>-->
+
+<!--                            <vertical-alignment>center</vertical-alignment>-->
+
+<!--                            <sizing>-->
+<!--                                <horizontal method="fixed">100</horizontal>-->
+<!--                                <vertical method="fixed">200</vertical>-->
+<!--                            </sizing>-->
+
+<!--                            <margins>-->
+<!--                                <bottom>150</bottom>-->
+<!--                            </margins>-->
+<!--                        </flow-layout>-->
                     </children>
 
                     <gap>10</gap>
+                    <horizontal-alignment>center</horizontal-alignment>
                 </flow-layout>
 
                 <flow-layout direction="horizontal" id="inset-container">

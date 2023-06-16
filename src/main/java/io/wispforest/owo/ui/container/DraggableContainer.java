@@ -1,12 +1,8 @@
 package io.wispforest.owo.ui.container;
 
-import io.wispforest.owo.ui.core.Component;
-import io.wispforest.owo.ui.core.Insets;
-import io.wispforest.owo.ui.core.ParentComponent;
-import io.wispforest.owo.ui.core.Sizing;
+import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
-import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 
@@ -26,18 +22,18 @@ public class DraggableContainer<C extends Component> extends WrappingParentCompo
     }
 
     @Override
-    public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
-        if (this.alwaysOnTop) matrices.translate(0, 0, 500);
-        super.draw(matrices, mouseX, mouseY, partialTicks, delta);
-        this.drawChildren(matrices, mouseX, mouseY, partialTicks, delta, this.childView);
-        if (this.alwaysOnTop) matrices.translate(0, 0, -500);
+    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+        if (this.alwaysOnTop) context.getMatrices().translate(0, 0, 500);
+        super.draw(context, mouseX, mouseY, partialTicks, delta);
+        this.drawChildren(context, mouseX, mouseY, partialTicks, delta, this.childView);
+        if (this.alwaysOnTop) context.getMatrices().translate(0, 0, -500);
     }
 
     @Override
-    public void drawTooltip(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
-        if (this.alwaysOnTop) matrices.translate(0, 0, 500);
-        super.drawTooltip(matrices, mouseX, mouseY, partialTicks, delta);
-        if (this.alwaysOnTop) matrices.translate(0, 0, -500);
+    public void drawTooltip(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+        if (this.alwaysOnTop) context.getMatrices().translate(0, 0, 500);
+        super.drawTooltip(context, mouseX, mouseY, partialTicks, delta);
+        if (this.alwaysOnTop) context.getMatrices().translate(0, 0, -500);
     }
 
     @Override

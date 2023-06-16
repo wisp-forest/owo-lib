@@ -1,19 +1,17 @@
 package io.wispforest.owo.ui.component;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.CursorStyle;
+import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
-import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.Observable;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
@@ -44,19 +42,14 @@ public class SmallCheckboxComponent extends BaseComponent {
     }
 
     @Override
-    public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
         if (this.label.get() != null) {
-            if (this.labelShadow) {
-                MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, this.label.get(), this.x + 13 + 2, this.y + 3, Color.WHITE.argb());
-            } else {
-                MinecraftClient.getInstance().textRenderer.draw(matrices, this.label.get(), this.x + 13 + 2, this.y + 3, Color.WHITE.argb());
-            }
+            context.drawText(MinecraftClient.getInstance().textRenderer, this.label.get(), this.x + 13 + 2, this.y + 3, Color.WHITE.argb(), this.labelShadow);
         }
 
-        RenderSystem.setShaderTexture(0, TEXTURE);
-        Drawer.drawTexture(matrices, this.x, this.y, 13, 13, 0, 0, 13, 13, 32, 16);
+        context.drawTexture(TEXTURE, this.x, this.y, 13, 13, 0, 0, 13, 13, 32, 16);
         if (this.checked) {
-            Drawer.drawTexture(matrices, this.x, this.y, 13, 13, 16, 0, 13, 13, 32, 16);
+            context.drawTexture(TEXTURE, this.x, this.y, 13, 13, 16, 0, 13, 13, 32, 16);
         }
     }
 

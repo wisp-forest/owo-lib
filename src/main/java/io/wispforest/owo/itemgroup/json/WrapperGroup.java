@@ -1,18 +1,20 @@
 package io.wispforest.owo.itemgroup.json;
 
+import com.mojang.serialization.Lifecycle;
 import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
 import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
 import io.wispforest.owo.mixin.itemgroup.ItemGroupAccessor;
-import net.fabricmc.fabric.impl.itemgroup.FabricItemGroup;
-import net.fabricmc.fabric.mixin.itemgroup.ItemGroupsAccessor;
+import io.wispforest.owo.mixin.ui.SimpleRegistryAccessor;
 import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemGroups;
+import net.minecraft.registry.MutableRegistry;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -26,27 +28,24 @@ public class WrapperGroup extends OwoItemGroup {
     private final ItemGroup parent;
     private boolean extension = false;
 
-    public WrapperGroup(ItemGroup parent, List<ItemGroupTab> tabs, List<ItemGroupButton> buttons) {
-        super(parent.getId(), owoItemGroup -> {}, () -> Icon.of(parent.getIcon()), 4, 4, null, true, false);
+    @SuppressWarnings("unchecked")
+    public WrapperGroup(ItemGroup parent, Identifier parentId, List<ItemGroupTab> tabs, List<ItemGroupButton> buttons) {
+        super(parentId, owoItemGroup -> {}, () -> Icon.of(parent.getIcon()), 4, 4, null, true, false);
 
-        var groups = new ArrayList<>(ItemGroups.getGroups());
-        groups.set(groups.indexOf(parent), this);
-        ItemGroupsAccessor.setGroups(groups);
-        ((FabricItemGroup) this).setPage(((FabricItemGroup) parent).getPage());
+        int parentRawId = Registries.ITEM_GROUP.getRawId(parent);
 
-        ((ItemGroupAccessor)this).owo$setDisplayName(parent.getDisplayName());
-        ((net.fabricmc.fabric.mixin.itemgroup.ItemGroupAccessor)this).setColumn(parent.getColumn());
-        ((net.fabricmc.fabric.mixin.itemgroup.ItemGroupAccessor)this).setRow(parent.getRow());
+        ((SimpleRegistryAccessor<ItemGroup>) Registries.ITEM_GROUP).owo$getValueToEntry().remove(parent);
+        ((SimpleRegistryAccessor<ItemGroup>) Registries.ITEM_GROUP).owo$getEntryToLifecycle().remove(parent);
+        ((MutableRegistry<ItemGroup>) Registries.ITEM_GROUP).set(parentRawId, RegistryKey.of(RegistryKeys.ITEM_GROUP, parentId), this, Lifecycle.stable());
+
+        ((ItemGroupAccessor) this).owo$setDisplayName(parent.getDisplayName());
+        ((ItemGroupAccessor) this).owo$setColumn(parent.getColumn());
+        ((ItemGroupAccessor) this).owo$setRow(parent.getRow());
 
         this.parent = parent;
 
         this.tabs.addAll(tabs);
         this.buttons.addAll(buttons);
-    }
-
-    @Override
-    public Identifier getId() {
-        return this.parent.getId();
     }
 
     public void addTabs(Collection<ItemGroupTab> tabs) {

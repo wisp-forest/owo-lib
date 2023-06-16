@@ -5,11 +5,9 @@ import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.Delta;
-import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.RotationAxis;
@@ -23,7 +21,7 @@ import java.util.List;
 
 public class CollapsibleContainer extends FlowLayout {
 
-    public static final Surface SURFACE = (matrices, component) -> Drawer.fill(matrices,
+    public static final Surface SURFACE = (context, component) -> context.fill(
             component.x() + 5,
             component.y(),
             component.x() + 6,
@@ -203,13 +201,15 @@ public class CollapsibleContainer extends FlowLayout {
         }
 
         @Override
-        public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+        public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+            var matrices = context.getMatrices();
+
             matrices.push();
             matrices.translate(this.x + this.width / 2f - 1, this.y + this.height / 2f - 1, 0);
             matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(this.rotation));
             matrices.translate(-(this.x + this.width / 2f - 1), -(this.y + this.height / 2f - 1), 0);
 
-            super.draw(matrices, mouseX, mouseY, partialTicks, delta);
+            super.draw(context, mouseX, mouseY, partialTicks, delta);
             matrices.pop();
         }
     }

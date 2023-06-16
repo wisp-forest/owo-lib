@@ -3,11 +3,10 @@ package io.wispforest.owo.ui.component;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.AnimatableProperty;
 import io.wispforest.owo.ui.core.Color;
+import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
-import io.wispforest.owo.ui.util.Drawer;
-import net.minecraft.client.util.math.MatrixStack;
 import org.w3c.dom.Element;
 
 import java.util.Map;
@@ -36,23 +35,23 @@ public class BoxComponent extends BaseComponent {
     }
 
     @Override
-    public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
         final int startColor = this.startColor.get().argb();
         final int endColor = this.endColor.get().argb();
 
         if (this.fill) {
             switch (this.direction) {
-                case TOP_TO_BOTTOM -> Drawer.drawGradientRect(matrices, this.x, this.y, this.width, this.height,
+                case TOP_TO_BOTTOM -> context.drawGradientRect(this.x, this.y, this.width, this.height,
                         startColor, startColor, endColor, endColor);
-                case RIGHT_TO_LEFT -> Drawer.drawGradientRect(matrices, this.x, this.y, this.width, this.height,
+                case RIGHT_TO_LEFT -> context.drawGradientRect(this.x, this.y, this.width, this.height,
                         endColor, startColor, startColor, endColor);
-                case BOTTOM_TO_TOP -> Drawer.drawGradientRect(matrices, this.x, this.y, this.width, this.height,
+                case BOTTOM_TO_TOP -> context.drawGradientRect(this.x, this.y, this.width, this.height,
                         endColor, endColor, startColor, startColor);
-                case LEFT_TO_RIGHT -> Drawer.drawGradientRect(matrices, this.x, this.y, this.width, this.height,
+                case LEFT_TO_RIGHT -> context.drawGradientRect(this.x, this.y, this.width, this.height,
                         startColor, endColor, endColor, startColor);
             }
         } else {
-            Drawer.drawRectOutline(matrices, this.x, this.y, this.width, this.height, startColor);
+            context.drawRectOutline(this.x, this.y, this.width, this.height, startColor);
         }
     }
 

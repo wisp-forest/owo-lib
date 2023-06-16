@@ -1,11 +1,12 @@
 package io.wispforest.owo.ui.util;
 
 import io.wispforest.owo.ops.TextOps;
+import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.toast.Toast;
 import net.minecraft.client.toast.ToastManager;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -56,15 +57,18 @@ public class UIErrorToast implements Toast {
     }
 
     @Override
-    public Visibility draw(MatrixStack matrices, ToastManager manager, long startTime) {
-        Drawer.fill(matrices, 0, 0, this.getWidth(), this.getHeight(), 0x77000000);
-        Drawer.drawRectOutline(matrices, 0, 0, this.getWidth(), this.getHeight(), 0xA7FF0000);
+    public Visibility draw(DrawContext context, ToastManager manager, long startTime) {
+        var owoContext = OwoUIDrawContext.of(context);
+        owoContext.getMatrices().multiplyPositionMatrix(context.getMatrices().peek().getPositionMatrix());
+
+        owoContext.fill(0, 0, this.getWidth(), this.getHeight(), 0x77000000);
+        owoContext.drawRectOutline(0, 0, this.getWidth(), this.getHeight(), 0xA7FF0000);
 
         int xOffset = this.getWidth() / 2 - this.textRenderer.getWidth(this.errorMessage.get(0)) / 2;
-        this.textRenderer.drawWithShadow(matrices, this.errorMessage.get(0), 4 + xOffset, 4, 0xFFFFFF);
+        owoContext.drawTextWithShadow(this.textRenderer, this.errorMessage.get(0), 4 + xOffset, 4, 0xFFFFFF);
 
         for (int i = 1; i < this.errorMessage.size(); i++) {
-            this.textRenderer.draw(matrices, this.errorMessage.get(i), 4, 4 + i * 11, 0xFFFFFF);
+            owoContext.drawText(this.textRenderer, this.errorMessage.get(i), 4, 4 + i * 11, 0xFFFFFF, false);
         }
 
         return startTime > 10000 ? Visibility.HIDE : Visibility.SHOW;

@@ -1,7 +1,10 @@
 package io.wispforest.owo.ui.component;
 
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.base.BaseComponent;
+import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
@@ -16,7 +19,7 @@ import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.command.argument.ItemStringReader;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
@@ -57,12 +60,13 @@ public class ItemComponent extends BaseComponent {
     }
 
     @Override
-    public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
         final boolean notSideLit = !this.itemRenderer.getModel(this.stack, null, null, 0).isSideLit();
         if (notSideLit) {
             DiffuseLighting.disableGuiDepthLighting();
         }
 
+        var matrices = context.getMatrices();
         matrices.push();
 
         // Translate to the root of the component
@@ -73,7 +77,11 @@ public class ItemComponent extends BaseComponent {
         matrices.translate(8.0, 8.0, 0.0);
 
         // Vanilla scaling and y inversion
-        matrices.multiplyPositionMatrix(ITEM_SCALING);
+        if (notSideLit) {
+            matrices.scale(16, -16, 16);
+        } else {
+            matrices.multiplyPositionMatrix(ITEM_SCALING);
+        }
 
         this.itemRenderer.renderItem(this.stack, ModelTransformationMode.GUI, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, matrices, entityBuffers, null, 0);
         this.entityBuffers.draw();
@@ -82,7 +90,7 @@ public class ItemComponent extends BaseComponent {
         matrices.pop();
 
         if (this.showOverlay) {
-            this.itemRenderer.renderGuiItemOverlay(matrices, MinecraftClient.getInstance().textRenderer, this.stack, this.x, this.y);
+            context.drawItemInSlot(MinecraftClient.getInstance().textRenderer, this.stack, this.x, this.y);
         }
         if (notSideLit) {
             DiffuseLighting.enableGuiDepthLighting();
@@ -174,9 +182,17 @@ public class ItemComponent extends BaseComponent {
             this.stack(item.getDefaultStack());
         });
 
-        UIParsing.apply(children, "stack", UIParsing::parseIdentifier, itemId -> {
-            var item = Registries.ITEM.getOrEmpty(itemId).orElseThrow(() -> new UIModelParsingException("Unknown item " + itemId));
-            this.stack(item.getDefaultStack());
+        UIParsing.apply(children, "stack", $ -> $.getTextContent().strip(), stackString -> {
+            try {
+                var result = ItemStringReader.item(Registries.ITEM.getReadOnlyWrapper(), new StringReader(stackString));
+
+                var stack = new ItemStack(result.item());
+                stack.setNbt(result.nbt());
+
+                this.stack(stack);
+            } catch (CommandSyntaxException cse) {
+                throw new UIModelParsingException("Invalid item stack", cse);
+            }
         });
     }
 }

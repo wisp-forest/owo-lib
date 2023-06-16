@@ -3,10 +3,10 @@ package io.wispforest.owo.config.ui.component;
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.config.ui.ConfigScreen;
 import io.wispforest.owo.ui.base.BaseComponent;
+import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.core.Positioning;
 import io.wispforest.owo.ui.core.Sizing;
-import net.minecraft.client.util.math.MatrixStack;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -33,7 +33,7 @@ public class SearchAnchorComponent extends BaseComponent {
     }
 
     @Override
-    public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {}
+    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {}
 
     public ParentComponent anchorFrame() {
         return this.anchorFrame;

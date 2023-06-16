@@ -17,14 +17,12 @@ import io.wispforest.owo.ui.component.TextBoxComponent;
 import io.wispforest.owo.ui.container.*;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIParsing;
-import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.owo.util.NumberReflection;
 import io.wispforest.owo.util.ReflectionUtils;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.resource.language.I18n;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -488,19 +486,19 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
         }
 
         @Override
-        public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+        public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
             final var mainColor = startColor.interpolate(endColor, (float) Math.sin(age / 25 * Math.PI)).argb();
 
             int segmentWidth = (int) (this.width * .3f);
             int baseX = (int) ((this.x - segmentWidth) + (Easing.CUBIC.apply(this.age / 25)) * (this.width + segmentWidth * 2));
 
-            Drawer.drawGradientRect(matrices,
+            context.drawGradientRect(
                     baseX - segmentWidth, this.y,
                     segmentWidth, this.height,
                     0, mainColor,
                     mainColor, 0
             );
-            Drawer.drawGradientRect(matrices,
+            context.drawGradientRect(
                     baseX, this.y,
                     segmentWidth, this.height,
                     mainColor, 0,

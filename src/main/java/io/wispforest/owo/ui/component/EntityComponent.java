@@ -3,7 +3,9 @@ package io.wispforest.owo.ui.component;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.wispforest.owo.ui.base.BaseComponent;
+import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
@@ -23,6 +25,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.registry.Registries;
@@ -75,7 +78,8 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
     }
 
     @Override
-    public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+        var matrices = context.getMatrices();
         matrices.push();
 
         matrices.translate(x + this.width / 2f, y + this.height / 2f, 100);
@@ -224,7 +228,16 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
         var entityId = UIParsing.parseIdentifier(element.getAttributeNode("type"));
         var entityType = Registries.ENTITY_TYPE.getOrEmpty(entityId).orElseThrow(() -> new UIModelParsingException("Unknown entity type " + entityId));
 
-        return new EntityComponent<>(Sizing.content(), entityType, null);
+        NbtCompound nbt = null;
+        if (element.hasAttribute("nbt")) {
+            try {
+                nbt = StringNbtReader.parse(element.getAttribute("nbt"));
+            } catch (CommandSyntaxException cse) {
+                throw new UIModelParsingException("Invalid NBT compound", cse);
+            }
+        }
+
+        return new EntityComponent<>(Sizing.content(), entityType, nbt);
     }
 
     public static class RenderablePlayerEntity extends ClientPlayerEntity {
@@ -240,7 +253,7 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
                             new ClientConnection(NetworkSide.CLIENTBOUND),
                             null,
                             profile,
-                            MinecraftClient.getInstance().getTelemetryManager().createWorldSession(false, Duration.ZERO)
+                            MinecraftClient.getInstance().getTelemetryManager().createWorldSession(false, Duration.ZERO, "tetris")
                     ),
                     null, null, false, false
             );

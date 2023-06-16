@@ -1,12 +1,11 @@
 package io.wispforest.owo.client.texture;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
-
-import static net.minecraft.client.gui.DrawableHelper.drawTexture;
 
 /**
  * A drawable that can draw an animated texture, very similar to how
@@ -70,15 +69,15 @@ public class AnimatedTextureDrawable implements Drawable {
      * Renders this drawable at the given position. The position
      * of this drawable is mutated non-temporarily
      */
-    public void render(int x, int y, MatrixStack matrixStack, int mouseX, int mouseY, float delta) {
+    public void render(int x, int y, DrawContext context, int mouseX, int mouseY, float delta) {
         this.x = x;
         this.y = y;
-        this.render(matrixStack, mouseX, mouseY, delta);
+        this.render(context, mouseX, mouseY, delta);
     }
 
     @SuppressWarnings("IntegerDivisionInFloatingPointContext")
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         if (startTime == -1L) startTime = Util.getMeasuringTimeMs();
 
         long currentTime = Util.getMeasuringTimeMs();
@@ -89,12 +88,10 @@ public class AnimatedTextureDrawable implements Drawable {
             frame = 0;
         }
 
-        RenderSystem.setShaderTexture(0, texture);
-
         RenderSystem.enableBlend();
         RenderSystem.enableDepthTest();
 
-        drawTexture(matrices, x, y, (frame / rows) * metadata.frameWidth(), (frame % rows) * metadata.frameHeight(), width, height, metadata.width(), metadata.height());
+        context.drawTexture(this.texture, x, y, (frame / rows) * metadata.frameWidth(), (frame % rows) * metadata.frameHeight(), width, height, metadata.width(), metadata.height());
 
         RenderSystem.disableDepthTest();
         RenderSystem.disableBlend();
