@@ -6,7 +6,6 @@ import io.wispforest.owo.client.OwoClient;
 import io.wispforest.owo.mixin.ui.DrawContextInvoker;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
 import io.wispforest.owo.ui.util.NinePatchTexture;
-import io.wispforest.owo.util.pond.MatrixStackManipulator;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
@@ -14,17 +13,14 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.render.*;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class OwoUIDrawContext extends DrawContext implements MatrixStackManipulator<OwoUIDrawContext> {
+public class OwoUIDrawContext extends DrawContext {
 
     @Deprecated
     public static final Identifier PANEL_TEXTURE = new Identifier("owo", "textures/gui/panel.png");
