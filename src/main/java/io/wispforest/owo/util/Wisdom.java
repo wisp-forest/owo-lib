@@ -48,7 +48,8 @@ public final class Wisdom {
             "My Seethenhagen factory makes 331 pounds of licorice per hour",
             "chyz: now i just need to painstakingly move jerry (the little tiny lil fella tiny guy man button) to correct spot when recipe book is opened",
             "chyz: bro, can you stop breathing",
-            "Noaaan: It's surprising how much knowledge is lost by the simple fact that people don't know it"
+            "Noaaan: It's surprising how much knowledge is lost by the simple fact that people don't know it",
+            "Blodhgarm: Did you know it took four switcheroos to implement the Matrices in the correct folder"
     );
 
     public static void spread() {
