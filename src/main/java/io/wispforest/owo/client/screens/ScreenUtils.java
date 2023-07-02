@@ -36,9 +36,13 @@ public class ScreenUtils {
         final var clickedStack = clickedSlot.getStack();
 
         if (clickedSlotIndex < upperInventorySize) {
-            if (!insertIntoSlotRange(handler, clickedStack, upperInventorySize, slots.size())) return ItemStack.EMPTY;
+            if (!insertIntoSlotRange(handler, clickedStack, upperInventorySize, slots.size(), true)) {
+                return ItemStack.EMPTY;
+            }
         } else {
-            if (!insertIntoSlotRange(handler, clickedStack, 0, upperInventorySize)) return ItemStack.EMPTY;
+            if (!insertIntoSlotRange(handler, clickedStack, 0, upperInventorySize)) {
+                return ItemStack.EMPTY;
+            }
         }
 
         if (clickedStack.isEmpty()) {
@@ -51,6 +55,15 @@ public class ScreenUtils {
     }
 
     /**
+     * Shorthand of {@link #insertIntoSlotRange(ScreenHandler, ItemStack, int, int, boolean)} with
+     * {@code false} for {@code fromLast}
+     */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    public static boolean insertIntoSlotRange(ScreenHandler handler, ItemStack addition, int beginIndex, int endIndex) {
+        return insertIntoSlotRange(handler, addition, beginIndex, endIndex, false);
+    }
+
+    /**
      * Tries to insert the {@code addition} stack into all slots in the given range
      *
      * @param handler    The ScreenHandler to operate on
@@ -58,11 +71,13 @@ public class ScreenUtils {
      * @param endIndex   The index of the last slot to check
      * @param addition   The ItemStack to try and insert, this gets mutated
      *                   if insertion (partly) succeeds
+     * @param fromLast   If {@code true}, iterate the range of slots in
+     *                   opposite order
      * @return {@code true} if state was modified
      */
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    public static boolean insertIntoSlotRange(ScreenHandler handler, ItemStack addition, int beginIndex, int endIndex) {
-        return ((ScreenHandlerInvoker) handler).owo$insertItem(addition, beginIndex, endIndex, false);
+    public static boolean insertIntoSlotRange(ScreenHandler handler, ItemStack addition, int beginIndex, int endIndex, boolean fromLast) {
+        return ((ScreenHandlerInvoker) handler).owo$insertItem(addition, beginIndex, endIndex, fromLast);
     }
 
 }
