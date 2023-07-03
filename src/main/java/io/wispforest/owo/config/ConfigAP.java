@@ -89,7 +89,7 @@ public class ConfigAP extends AbstractProcessor {
             }
             """;
 
-    private final Set<TypeElement> nestTypes = new HashSet<>();
+    private final Set<TypeElement> nestTypes = new LinkedHashSet<>();
     private Map<TypeMirror, TypeMirror> primitivesToWrappers;
 
     @Override
