@@ -62,7 +62,7 @@ public final class ItemOps {
      * @return {@code false} if the stack is empty after the operation
      */
     public static boolean emptyAwareDecrement(ItemStack stack) {
-        return emptyAwareDecrement(stack, 1)
+        return emptyAwareDecrement(stack, 1);
     }
 
     /**
