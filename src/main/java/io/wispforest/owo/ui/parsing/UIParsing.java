@@ -300,6 +300,7 @@ public class UIParsing {
         registerFactory("button", element -> Components.button(Text.empty(), (ButtonComponent button) -> {}));
         registerFactory("checkbox", element -> Components.checkbox(Text.empty()));
         registerFactory("text-box", element -> Components.textBox(Sizing.content()));
+        registerFactory("text-area", element -> Components.textArea(Sizing.content(), Sizing.content()));
         registerFactory("slider", element -> Components.slider(Sizing.content()));
         registerFactory("discrete-slider", DiscreteSliderComponent::parse);
         registerFactory("dropdown", element -> Components.dropdown(Sizing.content()));

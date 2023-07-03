@@ -2,7 +2,7 @@ package io.wispforest.owo.compat.rei;
 
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.mixin.itemgroup.CreativeInventoryScreenAccessor;
-import io.wispforest.owo.mixin.ui.BaseOwoHandledScreenAccessor;
+import io.wispforest.owo.mixin.ui.access.BaseOwoHandledScreenAccessor;
 import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.ParentComponent;

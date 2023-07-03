@@ -1,15 +1,14 @@
 package io.wispforest.owo.ui.component;
 
-import io.wispforest.owo.mixin.ui.ClickableWidgetAccessor;
-import io.wispforest.owo.mixin.ui.TextFieldWidgetAccessor;
+import io.wispforest.owo.mixin.ui.access.ClickableWidgetAccessor;
+import io.wispforest.owo.mixin.ui.access.TextFieldWidgetAccessor;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.*;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.CheckboxWidget;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.gui.widget.*;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.math.MathHelper;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 
@@ -17,14 +16,34 @@ public class VanillaWidgetComponent extends BaseComponent {
 
     private final ClickableWidget widget;
 
+    private float time = 0f;
+    private @Nullable Runnable tickCallback = null;
+
     protected VanillaWidgetComponent(ClickableWidget widget) {
         this.widget = widget;
 
         this.horizontalSizing.set(Sizing.fixed(this.widget.getWidth()));
         this.verticalSizing.set(Sizing.fixed(this.widget.getHeight()));
 
-        if (widget instanceof TextFieldWidget) {
+        if (widget instanceof TextFieldWidget textField) {
             this.margins(Insets.none());
+            this.tickCallback = textField::tick;
+        }
+
+        if (widget instanceof EditBoxWidget editBox) {
+            this.tickCallback = editBox::tick;
+        }
+    }
+
+    @Override
+    public void update(float delta, int mouseX, int mouseY) {
+        super.update(delta, mouseX, mouseY);
+        if (this.tickCallback == null) return;
+
+        this.time += delta;
+        while (this.time >= 1f) {
+            this.time -= 1f;
+            this.tickCallback.run();
         }
     }
 
@@ -44,8 +63,10 @@ public class VanillaWidgetComponent extends BaseComponent {
             } else {
                 return 9;
             }
+        } else if (this.widget instanceof TextAreaComponent textArea && textArea.maxLines() > 0) {
+            return MathHelper.clamp(textArea.getContentsHeight() / 9 + 1, 2, textArea.maxLines()) * 9 + (textArea.displayCharCount() ? 9 + 12 : 9);
         } else {
-            return super.determineVerticalContentSize(sizing);
+            throw new UnsupportedOperationException(this.widget.getClass().getSimpleName() + " does not support Sizing.content() on the vertical axis");
         }
     }
 
@@ -56,7 +77,7 @@ public class VanillaWidgetComponent extends BaseComponent {
         } else if (this.widget instanceof CheckboxWidget checkbox) {
             return MinecraftClient.getInstance().textRenderer.getWidth(checkbox.getMessage()) + 24;
         } else {
-            return super.determineHorizontalContentSize(sizing);
+            throw new UnsupportedOperationException(this.widget.getClass().getSimpleName() + " does not support Sizing.content() on the horizontal axis");
         }
     }
 
@@ -90,11 +111,11 @@ public class VanillaWidgetComponent extends BaseComponent {
     private void applyToWidget() {
         var accessor = (ClickableWidgetAccessor) this.widget;
 
-        accessor.owo$setX(this.x);
-        accessor.owo$setY(this.y);
+        accessor.owo$setX(this.x + this.widget.xOffset());
+        accessor.owo$setY(this.y + this.widget.yOffset());
 
-        accessor.owo$setWidth(this.width);
-        accessor.owo$setHeight(this.height);
+        accessor.owo$setWidth(this.width + this.widget.widthOffset());
+        accessor.owo$setHeight(this.height + this.widget.heightOffset());
     }
 
     @Override
