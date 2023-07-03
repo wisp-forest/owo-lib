@@ -6,7 +6,6 @@ import dev.emi.emi.api.widget.Bounds;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.mixin.itemgroup.CreativeInventoryScreenAccessor;
 import io.wispforest.owo.mixin.ui.access.BaseOwoHandledScreenAccessor;
-import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.core.Surface;
@@ -36,10 +35,10 @@ public class OwoEmiPlugin implements EmiPlugin {
             }
         });
 
-        registry.addExclusionArea(BaseOwoHandledScreen.class, (screen, consumer) -> {
-            if (screen.children().isEmpty()) return;
+        registry.addGenericExclusionArea((screen, consumer) -> {
+            if (screen.children().isEmpty() || !(screen instanceof BaseOwoHandledScreenAccessor accessor)) return;
 
-            var adapter = ((BaseOwoHandledScreenAccessor) screen).owo$getUIAdapter();
+            var adapter = accessor.owo$getUIAdapter();
             if (adapter == null) return;
 
             var rootComponent = adapter.rootComponent;
