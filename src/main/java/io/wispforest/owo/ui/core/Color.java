@@ -30,6 +30,14 @@ public record Color(float red, float green, float blue, float alpha) implements 
         this(red, green, blue, 1f);
     }
 
+    public Color(int red, int green, int blue, int alpha) {
+        this(red / 255f, green / 255f, blue / 255f, alpha / 255f);
+    }
+
+    public Color(int red, int green, int blue) {
+        this(red / 255f, green / 255f, blue / 255f, 1f);
+    }
+
     public static Color ofArgb(int argb) {
         return new Color(
                 ((argb >> 16) & 0xFF) / 255f,
