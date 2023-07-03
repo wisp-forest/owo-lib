@@ -54,6 +54,16 @@ public final class ItemOps {
         copy.setCount(1);
         return copy;
     }
+    
+    /**
+     * Decrements the stack
+     *
+     * @param stack The stack to decrement
+     * @return {@code false} if the stack is empty after the operation
+     */
+    public static boolean emptyAwareDecrement(ItemStack stack) {
+        return emptyAwareDecrement(stack, 1)
+    }
 
     /**
      * Decrements the stack
@@ -68,17 +78,6 @@ public final class ItemOps {
     }
 
     /**
-     * Decrements the stack
-     *
-     * @param stack The stack to decrement
-     * @return {@code false} if the stack is empty after the operation
-     */
-    public static boolean emptyAwareDecrement(ItemStack stack) {
-        stack.decrement(1);
-        return !stack.isEmpty();
-    }
-
-    /**
      * Decrements the stack in the players hand and replaces it with {@link ItemStack#EMPTY}
      * if the result would be an empty stack
      *
@@ -87,11 +86,7 @@ public final class ItemOps {
      * @return {@code false} if the stack is empty after the operation
      */
     public static boolean decrementPlayerHandItem(PlayerEntity player, Hand hand) {
-        var stack = player.getStackInHand(hand);
-        if (!player.isCreative()) {
-            if (!emptyAwareDecrement(stack)) player.setStackInHand(hand, ItemStack.EMPTY);
-        }
-        return !stack.isEmpty();
+        return decrementPlayerHandItem(player, hand, 1);
     }
 
     /**
