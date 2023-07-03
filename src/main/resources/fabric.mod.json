@@ -23,6 +23,9 @@
     "rei_client": [
       "io.wispforest.owo.compat.rei.OwoReiPlugin"
     ],
+    "emi": [
+      "io.wispforest.owo.compat.emi.OwoEmiPlugin"
+    ],
     "modmenu": [
       "io.wispforest.owo.compat.modmenu.OwoModMenuPlugin"
     ]
