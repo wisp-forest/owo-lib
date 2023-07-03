@@ -1,7 +1,10 @@
 package io.wispforest.owo.ui.util;
 
+import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.systems.RenderSystem;
+import io.wispforest.owo.client.OwoClient;
 import io.wispforest.owo.mixin.ui.ScreenInvoker;
+import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.ui.core.ParentComponent;
@@ -9,16 +12,16 @@ import io.wispforest.owo.ui.event.WindowResizeCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.render.GameRenderer;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
+import org.joml.Vector2d;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,8 +37,13 @@ public class Drawer extends DrawableHelper {
     private static final Drawer INSTANCE = new Drawer();
     private final DebugDrawer debug = new DebugDrawer();
 
-    public static final Identifier PANEL_TEXTURE = new Identifier("owo", "textures/gui/panel.png");
-    public static final Identifier DARK_PANEL_TEXTURE = new Identifier("owo", "textures/gui/dark_panel.png");
+    @Deprecated public static final Identifier PANEL_TEXTURE = new Identifier("owo", "textures/gui/panel.png");
+    @Deprecated public static final Identifier DARK_PANEL_TEXTURE = new Identifier("owo", "textures/gui/dark_panel.png");
+    @Deprecated public static final Identifier PANEL_INSET_TEXTURE = new Identifier("owo", "textures/gui/panel_inset.png");
+
+    public static final Identifier PANEL_NINE_PATCH_TEXTURE = new Identifier("owo", "panel/default");
+    public static final Identifier DARK_PANEL_NINE_PATCH_TEXTURE = new Identifier("owo", "panel/dark");
+    public static final Identifier PANEL_INSET_NINE_PATCH_TEXTURE = new Identifier("owo", "panel/inset");
 
     private Drawer() {}
 
@@ -80,7 +88,6 @@ public class Drawer extends DrawableHelper {
         buffer.vertex(matrix, x, y + height, 0).color(bottomLeftColor).next();
         buffer.vertex(matrix, x + width, y + height, 0).color(bottomRightColor).next();
 
-        RenderSystem.disableTexture();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
 
@@ -88,7 +95,6 @@ public class Drawer extends DrawableHelper {
         Tessellator.getInstance().draw();
 
         RenderSystem.disableBlend();
-        RenderSystem.enableTexture();
     }
 
     /**
@@ -103,11 +109,108 @@ public class Drawer extends DrawableHelper {
      * @param dark     Whether to use the dark version of the panel texture
      */
     public static void drawPanel(MatrixStack matrices, int x, int y, int width, int height, boolean dark) {
-        (dark ? OwoNinePatchRenderers.DARK_PANEL : OwoNinePatchRenderers.LIGHT_PANEL).draw(matrices, x, y, width, height);
+        NinePatchTexture.draw(dark ? DARK_PANEL_NINE_PATCH_TEXTURE : PANEL_NINE_PATCH_TEXTURE, matrices, x, y, width, height);
+    }
+
+    public static void drawSpectrum(MatrixStack matrices, int x, int y, int width, int height, boolean vertical) {
+        var buffer = Tessellator.getInstance().getBuffer();
+        var matrix = matrices.peek().getPositionMatrix();
+
+        buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
+        buffer.vertex(matrix, x, y, 0).color(1f, 1f, 1f, 1f).next();
+        buffer.vertex(matrix, x, y + height, 0).color(vertical ? 0f : 1f, 1f, 1f, 1f).next();
+        buffer.vertex(matrix, x + width, y + height, 0).color(0f, 1f, 1f, 1f).next();
+        buffer.vertex(matrix, x + width, y, 0).color(vertical ? 1f : 0f, 1f, 1f, 1f).next();
+
+        OwoClient.HSV_PROGRAM.use();
+        Tessellator.getInstance().draw();
     }
 
     public static void drawText(MatrixStack matrices, Text text, float x, float y, float scale, int color) {
         drawText(matrices, text, x, y, scale, color, TextAnchor.TOP_LEFT);
+    }
+
+    public static void drawLine(MatrixStack matrices, int x1, int y1, int x2, int y2, double thiccness, Color color) {
+        var offset = new Vector2d(x2 - x1, y2 - y1).perpendicular().normalize().mul(thiccness * .5d);
+
+        var buffer = Tessellator.getInstance().getBuffer();
+        var matrix = matrices.peek().getPositionMatrix();
+        int vColor = color.argb();
+
+        buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
+
+        buffer.vertex(matrix, (float) (x1 + offset.x), (float) (y1 + offset.y), 0).color(vColor).next();
+        buffer.vertex(matrix, (float) (x1 - offset.x), (float) (y1 - offset.y), 0).color(vColor).next();
+        buffer.vertex(matrix, (float) (x2 - offset.x), (float) (y2 - offset.y), 0).color(vColor).next();
+        buffer.vertex(matrix, (float) (x2 + offset.x), (float) (y2 + offset.y), 0).color(vColor).next();
+
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+
+        Tessellator.getInstance().draw();
+    }
+
+    public static void drawCircle(MatrixStack matrices, int centerX, int centerY, int segments, double radius, Color color) {
+        drawCircle(matrices, centerX, centerY, 0, 360, segments, radius, color);
+    }
+
+    public static void drawCircle(MatrixStack matrices, int centerX, int centerY, double angleFrom, double angleTo, int segments, double radius, Color color) {
+        Preconditions.checkArgument(angleFrom < angleTo, "angleFrom must be less than angleTo");
+
+        var buffer = Tessellator.getInstance().getBuffer();
+        var matrix = matrices.peek().getPositionMatrix();
+
+        double angleStep = Math.toRadians(angleTo - angleFrom) / segments;
+        int vColor = color.argb();
+
+        buffer.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
+        buffer.vertex(matrix, centerX, centerY, 0).color(vColor).next();
+
+        for (int i = segments; i >= 0; i--) {
+            double theta = Math.toRadians(angleFrom) + i * angleStep;
+            buffer.vertex(matrix, (float) (centerX - Math.cos(theta) * radius), (float) (centerY - Math.sin(theta) * radius), 0)
+                    .color(vColor).next();
+        }
+
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+
+        Tessellator.getInstance().draw();
+    }
+
+    public static void drawRing(MatrixStack matrices, int centerX, int centerY, int segments, double innerRadius, double outerRadius, Color innerColor, Color outerColor) {
+        drawRing(matrices, centerX, centerY, 0d, 360d, segments, innerRadius, outerRadius, innerColor, outerColor);
+    }
+
+    public static void drawRing(MatrixStack matrices, int centerX, int centerY, double angleFrom, double angleTo, int segments, double innerRadius, double outerRadius, Color innerColor, Color outerColor) {
+        Preconditions.checkArgument(angleFrom < angleTo, "angleFrom must be less than angleTo");
+        Preconditions.checkArgument(innerRadius < outerRadius, "innerRadius must be less than outerRadius");
+
+        var buffer = Tessellator.getInstance().getBuffer();
+        var matrix = matrices.peek().getPositionMatrix();
+
+        double angleStep = Math.toRadians(angleTo - angleFrom) / segments;
+        int inColor = innerColor.argb();
+        int outColor = outerColor.argb();
+
+        buffer.begin(VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR);
+
+        for (int i = 0; i <= segments; i++) {
+            double theta = Math.toRadians(angleFrom) + i * angleStep;
+
+            buffer.vertex(matrix, (float) (centerX - Math.cos(theta) * outerRadius), (float) (centerY - Math.sin(theta) * outerRadius), 0)
+                    .color(outColor).next();
+            buffer.vertex(matrix, (float) (centerX - Math.cos(theta) * innerRadius), (float) (centerY - Math.sin(theta) * innerRadius), 0)
+                    .color(inColor).next();
+        }
+
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+
+        Tessellator.getInstance().draw();
     }
 
     public static void drawText(MatrixStack matrices, Text text, float x, float y, float scale, int color, TextAnchor anchorPoint) {
@@ -130,7 +233,15 @@ public class Drawer extends DrawableHelper {
     }
 
     public static void drawTooltip(MatrixStack matrices, int x, int y, List<TooltipComponent> tooltip) {
-        ((ScreenInvoker) utilityScreen()).owo$renderTooltipFromComponents(matrices, tooltip, x, y);
+        ((ScreenInvoker) utilityScreen()).owo$renderTooltipFromComponents(matrices, tooltip, x, y, HoveredTooltipPositioner.INSTANCE);
+    }
+
+    public static void fillGradient(Matrix4f matrix, BufferBuilder builder, int startX, int startY, int endX, int endY, int z, int colorStart, int colorEnd) {
+        DrawableHelper.fillGradient(matrix, builder, startX, startY, endX, endY, z, colorStart, colorEnd);
+    }
+
+    protected static void fillGradient(MatrixStack matrices, int startX, int startY, int endX, int endY, int colorStart, int colorEnd, int z) {
+        DrawableHelper.fillGradient(matrices, startX, startY, endX, endY, colorStart, colorEnd, z);
     }
 
     public static UtilityScreen utilityScreen() {

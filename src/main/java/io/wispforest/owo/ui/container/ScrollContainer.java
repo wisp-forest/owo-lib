@@ -4,22 +4,30 @@ import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
+import io.wispforest.owo.ui.util.Delta;
 import io.wispforest.owo.ui.util.Drawer;
-import io.wispforest.owo.ui.util.OwoNinePatchRenderers;
+import io.wispforest.owo.ui.util.NinePatchTexture;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 public class ScrollContainer<C extends Component> extends WrappingParentComponent<C> {
+
+    public static final Identifier VERTICAL_VANILLA_SCROLLBAR_TEXTURE = new Identifier("owo", "scrollbar/vanilla_vertical");
+    public static final Identifier DISABLED_VERTICAL_VANILLA_SCROLLBAR_TEXTURE = new Identifier("owo", "scrollbar/vanilla_vertical_disabled");
+    public static final Identifier HORIZONTAL_VANILLA_SCROLLBAR_TEXTURE = new Identifier("owo", "scrollbar/vanilla_horizontal_disabled");
+    public static final Identifier DISABLED_HORIZONTAL_VANILLA_SCROLLBAR_TEXTURE = new Identifier("owo", "scrollbar/vanilla_horizontal_disabled");
+    public static final Identifier VANILLA_SCROLLBAR_TRACK_TEXTURE = new Identifier("owo", "scrollbar/track");
+    public static final Identifier FLAT_VANILLA_SCROLLBAR_TEXTURE = new Identifier("owo", "scrollbar/vanilla_flat");
 
     protected double scrollOffset = 0;
     protected double currentScrollPosition = 0;
@@ -85,12 +93,16 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
     }
 
     @Override
+    protected void parentUpdate(float delta, int mouseX, int mouseY) {
+        super.parentUpdate(delta, mouseX, mouseY);
+        this.currentScrollPosition += Delta.compute(this.currentScrollPosition, this.scrollOffset, delta * .5);
+    }
+
+    @Override
     public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
         super.draw(matrices, mouseX, mouseY, partialTicks, delta);
 
-        // Update scroll position and update child
-        this.currentScrollPosition += (this.scrollOffset - this.currentScrollPosition) * .5 * delta;
-
+        // Update child
         int effectiveScrollOffset = this.scrollStep > 0
                 ? ((int) this.scrollOffset / this.scrollStep) * this.scrollStep
                 : (int) this.currentScrollPosition;
@@ -114,7 +126,7 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
         if (visualOffset > 9999999e-7 || visualOffset < .1e-6) visualOffset = 0;
 
         matrices.translate(this.direction.choose(visualOffset, 0), this.direction.choose(0, visualOffset), 0);
-        this.drawChildren(matrices, mouseX, mouseY, partialTicks, delta, Collections.singletonList(this.child));
+        this.drawChildren(matrices, mouseX, mouseY, partialTicks, delta, this.childView);
 
         matrices.pop();
 
@@ -174,7 +186,8 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
 
     @Override
     public boolean onMouseScroll(double mouseX, double mouseY, double amount) {
-        if (this.child.onMouseScroll(this.x + mouseX - this.child.x(), this.y + mouseY - this.child.y(), amount)) return true;
+        if (this.child.onMouseScroll(this.x + mouseX - this.child.x(), this.y + mouseY - this.child.y(), amount))
+            return true;
 
         if (this.scrollStep < 1) {
             this.scrollBy(-amount * 15, false, true);
@@ -197,12 +210,13 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
 
     @Override
     public boolean onMouseDrag(double mouseX, double mouseY, double deltaX, double deltaY, int button) {
-        if (!this.scrollbaring && !this.isInScrollbar(this.x + mouseX, this.y + mouseY)) return super.onMouseDrag(mouseX, mouseY, deltaX, deltaY, button);
+        if (!this.scrollbaring && !this.isInScrollbar(this.x + mouseX, this.y + mouseY))
+            return super.onMouseDrag(mouseX, mouseY, deltaX, deltaY, button);
 
         double delta = this.direction.choose(deltaX, deltaY);
         double selfSize = this.direction.sizeGetter.apply(this) - this.direction.insetGetter.apply(this.padding.get());
         double scalar = (this.maxScroll) / (selfSize - this.lastScrollbarLength);
-        if (Double.isNaN(scalar)) scalar = 0;
+        if (!Double.isFinite(scalar)) scalar = 0;
 
         this.scrollBy(delta * scalar, true, false);
         this.scrollbaring = true;
@@ -370,13 +384,13 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
          */
         static Scrollbar vanilla() {
             return (matrices, x, y, width, height, trackX, trackY, trackWidth, trackHeight, lastInteractTime, direction, active) -> {
-                OwoNinePatchRenderers.VANILLA_SCROLLBAR_TRACK.draw(matrices, trackX, trackY, trackWidth, trackHeight);
+                NinePatchTexture.draw(VANILLA_SCROLLBAR_TRACK_TEXTURE, matrices, trackX, trackY, trackWidth, trackHeight);
 
-                var renderer = direction == ScrollDirection.VERTICAL
-                        ? active ? OwoNinePatchRenderers.VERTICAL_VANILLA_SCROLLBAR : OwoNinePatchRenderers.DISABLED_VERTICAL_VANILLA_SCROLLBAR
-                        : active ? OwoNinePatchRenderers.HORIZONTAL_VANILLA_SCROLLBAR : OwoNinePatchRenderers.DISABLED_HORIZONTAL_VANILLA_SCROLLBAR;
+                var texture = direction == ScrollDirection.VERTICAL
+                        ? active ? VERTICAL_VANILLA_SCROLLBAR_TEXTURE : DISABLED_VERTICAL_VANILLA_SCROLLBAR_TEXTURE
+                        : active ? HORIZONTAL_VANILLA_SCROLLBAR_TEXTURE : DISABLED_HORIZONTAL_VANILLA_SCROLLBAR_TEXTURE;
 
-                renderer.draw(matrices, x + 1, y + 1, width - 2, height - 2);
+                NinePatchTexture.draw(texture, matrices, x + 1, y + 1, width - 2, height - 2);
             };
         }
 
@@ -387,7 +401,7 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
         static Scrollbar vanillaFlat() {
             return (matrices, x, y, width, height, trackX, trackY, trackWidth, trackHeight, lastInteractTime, direction, active) -> {
                 Drawer.fill(matrices, trackX, trackY, trackX + trackWidth, trackY + trackHeight, Color.BLACK.argb());
-                OwoNinePatchRenderers.FLAT_VANILLA_SCROLLBAR.draw(matrices, x, y, width, height);
+                NinePatchTexture.draw(FLAT_VANILLA_SCROLLBAR_TEXTURE, matrices, x, y, width, height);
             };
         }
 
@@ -396,14 +410,16 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
 
         static Scrollbar parse(Element element) {
             var children = UIParsing.<Element>allChildrenOfType(element, Node.ELEMENT_NODE);
-            if (children.size() > 1) throw new UIModelParsingException("'scrollbar' declaration may only contain a single child");
+            if (children.size() > 1)
+                throw new UIModelParsingException("'scrollbar' declaration may only contain a single child");
 
             var scrollbarElement = children.get(0);
             return switch (scrollbarElement.getNodeName()) {
                 case "vanilla" -> vanilla();
                 case "vanilla-flat" -> vanillaFlat();
                 case "flat" -> flat(Color.parse(scrollbarElement));
-                default -> throw new UIModelParsingException("Unknown scrollbar type '" + scrollbarElement.getNodeName() + "'");
+                default ->
+                        throw new UIModelParsingException("Unknown scrollbar type '" + scrollbarElement.getNodeName() + "'");
             };
         }
     }

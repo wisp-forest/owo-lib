@@ -1,9 +1,16 @@
 package io.wispforest.owo.ui.core;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import io.wispforest.owo.client.OwoClient;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.Drawer;
+import io.wispforest.owo.ui.util.NinePatchTexture;
+import net.minecraft.client.gui.tooltip.TooltipBackgroundRenderer;
+import net.minecraft.client.render.GameRenderer;
+import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexFormat;
+import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import org.w3c.dom.Element;
@@ -19,6 +26,10 @@ public interface Surface {
         Drawer.drawPanel(matrices, component.x(), component.y(), component.width(), component.height(), true);
     };
 
+    Surface PANEL_INSET = (matrices, component) -> {
+        NinePatchTexture.draw(Drawer.PANEL_INSET_NINE_PATCH_TEXTURE, matrices, component);
+    };
+
     Surface VANILLA_TRANSLUCENT = (matrices, component) -> {
         Drawer.drawGradientRect(matrices,
                 component.x(), component.y(), component.width(), component.height(),
@@ -32,6 +43,36 @@ public interface Surface {
         Drawer.drawTexture(matrices, component.x(), component.y(), 0, 0, component.width(), component.height(), 32, 32);
         RenderSystem.setShaderColor(1, 1, 1, 1);
     };
+
+    Surface TOOLTIP = (matrices, component) -> {
+        var buffer = Tessellator.getInstance().getBuffer();
+        buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
+
+        TooltipBackgroundRenderer.render(Drawer::fillGradient, matrices.peek().getPositionMatrix(), buffer, component.x() + 4, component.y() + 4, component.width() - 8, component.height() - 8, 0);
+
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+
+        Tessellator.getInstance().draw();
+    };
+
+    static Surface blur(float quality, float size) {
+        return (matrices, component) -> {
+            var buffer = Tessellator.getInstance().getBuffer();
+            var matrix = matrices.peek().getPositionMatrix();
+
+            buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION);
+            buffer.vertex(matrix, component.x(), component.y(), 0).next();
+            buffer.vertex(matrix, component.x(), component.y() + component.height(), 0).next();
+            buffer.vertex(matrix, component.x() + component.width(), component.y() + component.height(), 0).next();
+            buffer.vertex(matrix, component.x() + component.width(), component.y(), 0).next();
+
+            OwoClient.BLUR_PROGRAM.setParameters(16, quality, size);
+            OwoClient.BLUR_PROGRAM.use();
+            Tessellator.getInstance().draw();
+        };
+    }
 
     Surface BLANK = (matrices, component) -> {};
 
@@ -76,8 +117,17 @@ public interface Surface {
                             UIParsing.parseUnsignedInt(child.getAttributeNode("texture-height")))
                     );
                 }
+                case "blur" -> {
+                    UIParsing.expectAttributes(child, "size", "quality");
+                    yield surface.and(blur(
+                            UIParsing.parseFloat(child.getAttributeNode("quality")),
+                            UIParsing.parseFloat(child.getAttributeNode("size"))
+                    ));
+                }
                 case "options-background" -> surface.and(OPTIONS_BACKGROUND);
                 case "vanilla-translucent" -> surface.and(VANILLA_TRANSLUCENT);
+                case "panel-inset" -> surface.and(PANEL_INSET);
+                case "tooltip" -> surface.and(TOOLTIP);
                 case "outline" -> surface.and(outline(Color.parseAndPack(child)));
                 case "flat" -> surface.and(flat(Color.parseAndPack(child)));
                 default -> throw new UIModelParsingException("Unknown surface type '" + child.getNodeName() + "'");

@@ -9,7 +9,7 @@ import net.minecraft.util.Hand;
 /**
  * A collection of common checks and operations done on {@link ItemStack}
  */
-public class ItemOps {
+public final class ItemOps {
 
     private ItemOps() {}
 

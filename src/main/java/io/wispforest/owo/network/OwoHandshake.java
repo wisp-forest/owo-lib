@@ -3,9 +3,13 @@ package io.wispforest.owo.network;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import io.wispforest.owo.Owo;
+import io.wispforest.owo.mixin.ClientLoginNetworkHandlerAccessor;
+import io.wispforest.owo.mixin.ServerLoginNetworkHandlerAccessor;
 import io.wispforest.owo.network.serialization.PacketBufSerializer;
 import io.wispforest.owo.ops.TextOps;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
+import io.wispforest.owo.util.OwoFreezer;
+import io.wispforest.owo.util.ServicesFrozenException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientLoginConnectionEvents;
@@ -36,7 +40,7 @@ import java.util.function.Consumer;
 import java.util.function.ToIntFunction;
 
 @ApiStatus.Internal
-public class OwoHandshake {
+public final class OwoHandshake {
 
     @SuppressWarnings("unchecked")
     private static final PacketBufSerializer<Map<Identifier, Integer>> RESPONSE_SERIALIZER =
@@ -50,6 +54,8 @@ public class OwoHandshake {
     private static boolean HANDSHAKE_REQUIRED = false;
     private static boolean QUERY_RECEIVED = false;
 
+    private OwoHandshake() {}
+
     // ------------
     // Registration
     // ------------
@@ -57,6 +63,9 @@ public class OwoHandshake {
     public static void enable() {}
 
     public static void requireHandshake() {
+        if (OwoFreezer.isFrozen())
+            throw new ServicesFrozenException("The oωo handshake may only be made required during mod initialization");
+
         HANDSHAKE_REQUIRED = true;
     }
 
@@ -103,7 +112,7 @@ public class OwoHandshake {
 
         if (buf.readableBytes() > 0) {
             final var serverOptionalChannels = RESPONSE_SERIALIZER.deserializer().apply(buf);
-            ((OwoClientConnectionExtension) clientLoginNetworkHandler.getConnection()).owo$setChannelSet(filterOptionalServices(serverOptionalChannels, OwoNetChannel.REGISTERED_CHANNELS, OwoHandshake::hashChannel));
+            ((OwoClientConnectionExtension) ((ClientLoginNetworkHandlerAccessor) clientLoginNetworkHandler).owo$getConnection()).owo$setChannelSet(filterOptionalServices(serverOptionalChannels, OwoNetChannel.REGISTERED_CHANNELS, OwoHandshake::hashChannel));
         }
 
         var response = PacketByteBufs.create();
@@ -115,7 +124,6 @@ public class OwoHandshake {
     }
 
     private static void syncServer(MinecraftServer server, ServerLoginNetworkHandler handler, boolean responded, PacketByteBuf buf, ServerLoginNetworking.LoginSynchronizer loginSynchronizer, PacketSender packetSender) {
-        Owo.LOGGER.info("[Handshake] Receiving client channels");
         if (!responded) {
             if (!HANDSHAKE_REQUIRED) return;
 
@@ -123,6 +131,8 @@ public class OwoHandshake {
             Owo.LOGGER.info("[Handshake] Handshake failed, client did not respond to channel query");
             return;
         }
+
+        Owo.LOGGER.info("[Handshake] Receiving client channels");
 
         final var clientChannels = RESPONSE_SERIALIZER.deserializer().apply(buf);
         final var clientParticleControllers = RESPONSE_SERIALIZER.deserializer().apply(buf);
@@ -138,7 +148,7 @@ public class OwoHandshake {
 
         if (buf.readableBytes() > 0) {
             final var clientOptionalChannels = RESPONSE_SERIALIZER.deserializer().apply(buf);
-            ((OwoClientConnectionExtension) handler.getConnection()).owo$setChannelSet(filterOptionalServices(clientOptionalChannels, OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel));
+            ((OwoClientConnectionExtension) ((ServerLoginNetworkHandlerAccessor) handler).owo$getConnection()).owo$setChannelSet(filterOptionalServices(clientOptionalChannels, OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel));
         }
 
         Owo.LOGGER.info("[Handshake] Handshake completed successfully");

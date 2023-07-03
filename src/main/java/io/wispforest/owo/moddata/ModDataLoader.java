@@ -19,11 +19,13 @@ import java.util.Map;
  * when {@link #load(ModDataConsumer)} is called. This should ideally be done
  * one and in a {@link net.fabricmc.api.ModInitializer}
  */
-public class ModDataLoader {
+public final class ModDataLoader {
 
     private static final Gson GSON = new Gson();
 
     private static final Path DATA_PATH = FabricLoader.getInstance().getGameDir().resolve("moddata");
+
+    private ModDataLoader() {}
 
     /**
      * Loads the data the {@code consumer} requests

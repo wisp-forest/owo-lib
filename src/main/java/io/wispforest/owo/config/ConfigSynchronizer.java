@@ -2,6 +2,7 @@ package io.wispforest.owo.config;
 
 import com.google.common.collect.HashMultimap;
 import io.wispforest.owo.Owo;
+import io.wispforest.owo.mixin.ServerPlayNetworkHandlerAccessor;
 import io.wispforest.owo.ops.TextOps;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -15,6 +16,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.network.ClientConnection;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
@@ -28,11 +30,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.function.BiConsumer;
 
 public class ConfigSynchronizer {
 
     public static final Identifier CONFIG_SYNC_CHANNEL = new Identifier("owo", "config_sync");
+
+    private static final Map<ClientConnection, Map<String, Map<Option.Key, Object>>> CLIENT_OPTION_STORAGE = new WeakHashMap<>();
 
     private static final Map<String, ConfigWrapper<?>> KNOWN_CONFIGS = new HashMap<>();
     private static final MutableText PREFIX = TextOps.concat(Owo.PREFIX, Text.of("§cunrecoverable config mismatch\n\n"));
@@ -47,14 +52,24 @@ public class ConfigSynchronizer {
      *
      * @param player     The player for which to retrieve the client values
      * @param configName The name of the config for which to retrieve values
-     * @return The player's client's values of the given config values,
+     * @return The player's client's values of the given config options,
      * or {@code null} if no config with the given name was synced
      */
     public static @Nullable Map<Option.Key, ?> getClientOptions(ServerPlayerEntity player, String configName) {
-        var storage = ((ServerPlayerEntityExtension) player).owo$optionStorage();
+        var storage = CLIENT_OPTION_STORAGE.get(((ServerPlayNetworkHandlerAccessor) player.networkHandler).owo$getConnection());
         if (storage == null) return null;
 
         return storage.get(configName);
+    }
+
+    /**
+     * Safer, more clear version of {@link #getClientOptions(ServerPlayerEntity, String)} to
+     * be used when the actual config wrapper is available
+     *
+     * @see #getClientOptions(ServerPlayerEntity, String)
+     */
+    public static @Nullable Map<Option.Key, ?> getClientOptions(ServerPlayerEntity player, ConfigWrapper<?> config) {
+        return getClientOptions(player, config.name());
     }
 
     private static void write(PacketByteBuf packet, Option.SyncMode targetMode) {
@@ -173,10 +188,10 @@ public class ConfigSynchronizer {
 
     private static void applyServer(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, PacketByteBuf buf, PacketSender sender) {
         Owo.LOGGER.info("Receiving client config");
-        var storage = ((ServerPlayerEntityExtension) player).owo$optionStorage();
+        var connection = ((ServerPlayNetworkHandlerAccessor) player.networkHandler).owo$getConnection();
 
         read(buf, (option, optionBuf) -> {
-            var config = storage.computeIfAbsent(option.configName(), s -> new HashMap<>());
+            var config = CLIENT_OPTION_STORAGE.computeIfAbsent(connection, $ -> new HashMap<>()).computeIfAbsent(option.configName(), s -> new HashMap<>());
             config.put(option.key(), option.serializer().deserializer().apply(optionBuf));
         });
     }
@@ -202,9 +217,5 @@ public class ConfigSynchronizer {
         }
 
         ServerPlayNetworking.registerGlobalReceiver(CONFIG_SYNC_CHANNEL, ConfigSynchronizer::applyServer);
-    }
-
-    public interface ServerPlayerEntityExtension {
-        Map<String, Map<Option.Key, Object>> owo$optionStorage();
     }
 }

@@ -10,7 +10,9 @@ import net.minecraft.util.Identifier;
  * {@link FieldProcessingSubject}
  */
 @SuppressWarnings("unchecked")
-public class FieldRegistrationHandler {
+public final class FieldRegistrationHandler {
+
+    private FieldRegistrationHandler() {}
 
     /**
      * Applies the given processor to all applicable fields of the targeted class

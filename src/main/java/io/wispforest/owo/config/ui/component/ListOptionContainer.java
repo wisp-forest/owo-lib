@@ -25,7 +25,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @ApiStatus.Internal
-public class ListOptionContainer<T> extends CollapsibleContainer implements OptionComponent {
+public class ListOptionContainer<T> extends CollapsibleContainer implements OptionValueProvider {
 
     protected final Option<List<T>> backingOption;
     protected final List<T> backingList;
@@ -131,7 +131,7 @@ public class ListOptionContainer<T> extends CollapsibleContainer implements Opti
             box.verticalSizing(Sizing.fixed(8));
 
             if (!this.backingOption.detached()) {
-                box.setChangedListener(s -> {
+                box.onChanged().subscribe(s -> {
                     if (!box.isValid()) return;
 
                     this.backingList.set(optionIndex, (T) box.parsedValue());

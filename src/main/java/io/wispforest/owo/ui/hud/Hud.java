@@ -7,8 +7,8 @@ import io.wispforest.owo.ui.event.WindowResizeCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -87,6 +87,17 @@ public class Hud {
         HudRenderCallback.EVENT.register((matrixStack, tickDelta) -> {
             if (suppress) return;
 
+            if (!pendingRemovals.isEmpty() && adapter != null) {
+                pendingRemovals.forEach(identifier -> {
+                    var component = activeComponents.get(identifier);
+                    if (component == null) return;
+
+                    adapter.rootComponent.removeChild(component);
+                    activeComponents.remove(identifier);
+                });
+                pendingRemovals.clear();
+            }
+
             if (!pendingComponents.isEmpty()) {
                 if (adapter == null) initializeAdapter();
 
@@ -100,18 +111,6 @@ public class Hud {
             }
 
             if (adapter == null) return;
-
-            if (!pendingRemovals.isEmpty()) {
-                pendingRemovals.forEach(identifier -> {
-                    var component = activeComponents.get(identifier);
-                    if (component == null) return;
-
-                    adapter.rootComponent.removeChild(component);
-                    activeComponents.remove(identifier);
-                });
-                pendingRemovals.clear();
-            }
-
             adapter.render(matrixStack, -69, -69, tickDelta);
         });
     }

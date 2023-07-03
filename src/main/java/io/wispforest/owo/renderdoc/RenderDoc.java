@@ -20,7 +20,9 @@ import java.util.Map;
 
 @ApiStatus.Experimental
 @SuppressWarnings({"unused", "UnusedReturnValue"})
-public class RenderDoc {
+public final class RenderDoc {
+
+    private RenderDoc() {}
 
     private static final RenderdocLibrary.RenderdocApi renderdoc;
 

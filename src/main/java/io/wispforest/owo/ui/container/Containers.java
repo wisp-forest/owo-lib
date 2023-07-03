@@ -4,7 +4,9 @@ import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.Sizing;
 import net.minecraft.text.Text;
 
-public class Containers {
+public final class Containers {
+
+    private Containers() {}
 
     // ------
     // Layout
@@ -14,12 +16,12 @@ public class Containers {
         return new GridLayout(horizontalSizing, verticalSizing, rows, columns);
     }
 
-    public static VerticalFlowLayout verticalFlow(Sizing horizontalSizing, Sizing verticalSizing) {
-        return new VerticalFlowLayout(horizontalSizing, verticalSizing);
+    public static FlowLayout verticalFlow(Sizing horizontalSizing, Sizing verticalSizing) {
+        return new FlowLayout(horizontalSizing, verticalSizing, FlowLayout.Algorithm.VERTICAL);
     }
 
-    public static HorizontalFlowLayout horizontalFlow(Sizing horizontalSizing, Sizing verticalSizing) {
-        return new HorizontalFlowLayout(horizontalSizing, verticalSizing);
+    public static FlowLayout horizontalFlow(Sizing horizontalSizing, Sizing verticalSizing) {
+        return new FlowLayout(horizontalSizing, verticalSizing, FlowLayout.Algorithm.HORIZONTAL);
     }
 
     // ------
@@ -44,6 +46,14 @@ public class Containers {
 
     public static CollapsibleContainer collapsible(Sizing horizontalSizing, Sizing verticalSizing, Text title, boolean expanded) {
         return new CollapsibleContainer(horizontalSizing, verticalSizing, title, expanded);
+    }
+
+    public static <C extends Component> OverlayContainer<C> overlay(C child) {
+        return new OverlayContainer<>(child);
+    }
+
+    public static <C extends Component> RenderEffectWrapper<C> renderEffect(C child) {
+        return new RenderEffectWrapper<>(child);
     }
 
 }

@@ -1,4 +1,4 @@
-package io.wispforest.owo.mixin.ui;
+package io.wispforest.owo.mixin.ui.access;
 
 import net.minecraft.client.gui.widget.CheckboxWidget;
 import org.spongepowered.asm.mixin.Mixin;

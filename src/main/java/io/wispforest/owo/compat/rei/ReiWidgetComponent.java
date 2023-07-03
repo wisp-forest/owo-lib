@@ -16,6 +16,14 @@ public class ReiWidgetComponent extends BaseComponent {
         var bounds = widget.getBounds();
         this.horizontalSizing.set(Sizing.fixed(bounds.getWidth()));
         this.verticalSizing.set(Sizing.fixed(bounds.getHeight()));
+
+        this.mouseEnter().subscribe(() -> {
+            this.focusHandler().focus(this, FocusSource.KEYBOARD_CYCLE);
+        });
+
+        this.mouseLeave().subscribe(() -> {
+            this.focusHandler().focus(null, null);
+        });
     }
 
     @Override
@@ -28,6 +36,9 @@ public class ReiWidgetComponent extends BaseComponent {
     public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
         this.widget.render(matrices, mouseX, mouseY, partialTicks);
     }
+
+    @Override
+    public void drawFocusHighlight(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {}
 
     @Override
     protected int determineHorizontalContentSize(Sizing sizing) {

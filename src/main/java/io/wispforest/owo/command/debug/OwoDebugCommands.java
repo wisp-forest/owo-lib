@@ -15,13 +15,11 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.IdentifierArgumentType;
-import net.minecraft.command.argument.serialize.ConstantArgumentSerializer;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -30,7 +28,6 @@ import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
@@ -56,8 +53,6 @@ public class OwoDebugCommands {
     public static final int VALUE_BLUE = 0x94DAFF;
 
     public static void register() {
-        ArgumentTypeRegistry.registerArgumentType(new Identifier("owo", "damage_source"), DamageSourceArgumentType.class, ConstantArgumentSerializer.of(DamageSourceArgumentType::damageSource));
-
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
 
             dispatcher.register(literal("logger").then(argument("level", LEVEL_ARGUMENT_TYPE).executes(context -> {
@@ -137,7 +132,6 @@ public class OwoDebugCommands {
 
             MakeLootContainerCommand.register(dispatcher, registryAccess);
             DumpdataCommand.register(dispatcher);
-            DamageCommand.register(dispatcher);
             HealCommand.register(dispatcher);
 
             if (FabricLoader.getInstance().isModLoaded("cardinal-components-base")) {

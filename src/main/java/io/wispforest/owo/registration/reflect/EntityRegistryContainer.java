@@ -12,8 +12,7 @@ public interface EntityRegistryContainer extends AutoRegistryContainer<EntityTyp
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     default Class<EntityType<?>> getTargetFieldType() {
-        return (Class<EntityType<?>>) (Object) EntityType.class;
+        return AutoRegistryContainer.conform(EntityType.class);
     }
 }

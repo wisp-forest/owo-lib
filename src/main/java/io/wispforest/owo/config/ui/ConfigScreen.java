@@ -13,6 +13,7 @@ import io.wispforest.owo.ui.base.BaseUIModelScreen;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
+import io.wispforest.owo.ui.component.TextBoxComponent;
 import io.wispforest.owo.ui.container.*;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIParsing;
@@ -22,7 +23,6 @@ import io.wispforest.owo.util.NumberReflection;
 import io.wispforest.owo.util.ReflectionUtils;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.OrderedText;
@@ -62,14 +62,14 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
     private static final Map<Predicate<Option<?>>, OptionComponentFactory<?>> DEFAULT_FACTORIES = new HashMap<>();
     /**
      * A set of extra option factories - add to this if you want to override
-     * some of the default factories or add extra ones for specific config options
+     * some default factories or add extra ones for specific config options
      * the standard ones don't support
      */
     protected final Map<Predicate<Option<?>>, OptionComponentFactory<?>> extraFactories = new HashMap<>();
 
     protected final Screen parent;
     protected final ConfigWrapper<?> config;
-    @SuppressWarnings("rawtypes") protected final Map<Option, OptionComponent> options = new HashMap<>();
+    @SuppressWarnings("rawtypes") protected final Map<Option, OptionValueProvider> options = new HashMap<>();
 
     protected String lastSearchFieldText = "";
     protected @Nullable SearchMatches currentMatches = null;
@@ -156,22 +156,22 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
             // TODO check if any options changed and warn
         });
 
-        var optionPanel = rootComponent.childById(VerticalFlowLayout.class, "option-panel");
+        var optionPanel = rootComponent.childById(FlowLayout.class, "option-panel");
         var sections = new LinkedHashMap<Component, Text>();
 
-        var containers = new HashMap<Option.Key, VerticalFlowLayout>();
+        var containers = new HashMap<Option.Key, FlowLayout>();
         containers.put(Option.Key.ROOT, optionPanel);
 
-        rootComponent.childById(TextFieldWidget.class, "search-field").<TextFieldWidget>configure(searchField -> {
+        rootComponent.childById(TextBoxComponent.class, "search-field").<TextBoxComponent>configure(searchField -> {
             var matchIndicator = rootComponent.childById(LabelComponent.class, "search-match-indicator");
             var optionScroll = rootComponent.childById(ScrollContainer.class, "option-panel-scroll");
 
             var searchHint = I18n.translate("text.owo.config.search");
             searchField.setSuggestion(searchHint);
-            searchField.setChangedListener(s -> {
+            searchField.onChanged().subscribe(s -> {
                 searchField.setSuggestion(s.isEmpty() ? searchHint : "");
                 if (!s.equals(this.lastSearchFieldText)) {
-                    searchField.setEditableColor(TextFieldWidget.DEFAULT_EDITABLE_COLOR);
+                    searchField.setEditableColor(TextBoxComponent.DEFAULT_EDITABLE_COLOR);
                     matchIndicator.text(Text.empty());
                 }
             });
@@ -183,7 +183,11 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                 if (query.isBlank()) return false;
 
                 if (this.currentMatches != null && this.currentMatches.query.equals(query)) {
-                    this.currentMatchIndex = (this.currentMatchIndex + 1) % this.currentMatches.matches.size();
+                    if (this.currentMatches.matches().isEmpty()) {
+                        this.currentMatchIndex = -1;
+                    } else {
+                        this.currentMatchIndex = (this.currentMatchIndex + 1) % this.currentMatches.matches.size();
+                    }
                 } else {
                     var splitQuery = query.split(" ");
 
@@ -204,17 +208,26 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                     var selectedMatch = this.currentMatches.matches.get(this.currentMatchIndex);
                     var anchorFrame = selectedMatch.anchorFrame();
 
-                    if (anchorFrame instanceof FlowLayout flow) {
-                        flow.child(0, selectedMatch.configure(new SearchHighlighterComponent()));
-                    }
-
+                    // we specifically build the path backwards, so we can then iterate
+                    // it root -> key, otherwise we could potentially be manipulating
+                    // unmounted components which is absolutely not desirable
+                    var pathToRoot = new ArrayDeque<Option.Key>();
                     var key = selectedMatch.key();
                     while (!key.isRoot()) {
-                        if (containers.get(key) instanceof CollapsibleContainer collapsible && !collapsible.expanded()) {
+                        pathToRoot.push(key);
+                        key = key.parent();
+                    }
+
+                    while (!pathToRoot.isEmpty()) {
+                        if (containers.get(pathToRoot.pop()) instanceof CollapsibleContainer collapsible && !collapsible.expanded()) {
                             collapsible.toggleExpansion();
                         }
+                    }
 
-                        key = key.parent();
+                    // in the same vein, the component is mounted after the layout is fully
+                    // restored, as we would otherwise be mounting onto a partially-built subtree
+                    if (anchorFrame instanceof FlowLayout flow) {
+                        flow.child(0, selectedMatch.configure(new SearchHighlighterComponent()));
                     }
 
                     if (anchorFrame.y() < optionScroll.y() || anchorFrame.y() + anchorFrame.height() > optionScroll.y() + optionScroll.height()) {
@@ -239,7 +252,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
             }
 
             var result = factory.make(this.model, option);
-            this.options.put(option, result.optionContainer());
+            this.options.put(option, result.optionProvider());
 
             var expanded = !parentKey.isRoot() && this.config.fieldForKey(parentKey).isAnnotationPresent(Expanded.class);
             var container = containers.getOrDefault(
@@ -342,8 +355,8 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                 if (buttonPanel.horizontalSizing().animation() == null) {
                     int percentage = Math.min(Math.round(((widestText.intValue() + 25f) / panelContainer.width()) * 100), 50);
 
-                    buttonPanel.horizontalSizing().animate(650, Easing.CUBIC, Sizing.fill(percentage));
-                    panelContainer.horizontalSizing().animate(650, Easing.CUBIC, Sizing.fill(100 - percentage));
+                    buttonPanel.horizontalSizing().animate(350, Easing.CUBIC, Sizing.fill(percentage));
+                    panelContainer.horizontalSizing().animate(350, Easing.CUBIC, Sizing.fill(100 - percentage));
                 }
 
                 buttonPanel.horizontalSizing().animation().reverse();
@@ -450,6 +463,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
         DEFAULT_FACTORIES.put(option -> option.clazz() == String.class, OptionComponentFactory.STRING);
         DEFAULT_FACTORIES.put(option -> option.clazz() == Boolean.class || option.clazz() == boolean.class, OptionComponentFactory.BOOLEAN);
         DEFAULT_FACTORIES.put(option -> option.clazz() == Identifier.class, OptionComponentFactory.IDENTIFIER);
+        DEFAULT_FACTORIES.put(option -> option.clazz() == Color.class, OptionComponentFactory.COLOR);
         DEFAULT_FACTORIES.put(option -> isStringOrNumberList(option.backingField().field()), OptionComponentFactory.LIST);
         DEFAULT_FACTORIES.put(option -> option.clazz().isEnum(), OptionComponentFactory.ENUM);
 

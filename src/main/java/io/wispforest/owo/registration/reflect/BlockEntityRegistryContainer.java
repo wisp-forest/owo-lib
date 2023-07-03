@@ -12,8 +12,7 @@ public interface BlockEntityRegistryContainer extends AutoRegistryContainer<Bloc
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     default Class<BlockEntityType<?>> getTargetFieldType() {
-        return (Class<BlockEntityType<?>>) (Object) BlockEntityType.class;
+        return AutoRegistryContainer.conform(BlockEntityType.class);
     }
 }

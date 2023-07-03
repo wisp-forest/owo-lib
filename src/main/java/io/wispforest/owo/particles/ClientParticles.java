@@ -17,7 +17,7 @@ import net.minecraft.world.World;
  * and more complex multi-particle operations
  */
 @Environment(EnvType.CLIENT)
-public class ClientParticles {
+public final class ClientParticles {
 
     private static int particleCount = 1;
     private static boolean persist = false;
@@ -26,6 +26,8 @@ public class ClientParticles {
     private static boolean randomizeVelocity = false;
     private static double randomVelocityScalar = 0;
     private static Direction.Axis randomizationAxis = null;
+
+    private ClientParticles() {}
 
     /**
      * Marks the values set by {@link ClientParticles#setParticleCount(int)} and {@link ClientParticles#setVelocity(Vec3d)} to be persistent

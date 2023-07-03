@@ -1,6 +1,6 @@
 //file:noinspection GradlePackageVersionRange
 plugins {
-    id 'fabric-loom' version '0.12-SNAPSHOT'
+    id 'fabric-loom' version '1.1-SNAPSHOT'
     id 'maven-publish'
     id 'io.github.juuxel.loom-quiltflower' version '1.7.3'
 }
@@ -17,10 +17,6 @@ allprojects {
 
     tasks.withType(JavaCompile) {
         options.compilerArgs << "-Xlint:unchecked"
-    }
-
-    loom {
-        shareCaches()
     }
 
     dependencies {
@@ -128,16 +124,13 @@ loom {
 }
 
 dependencies {
-//    modLocalRuntime("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}")
+    modLocalRuntime("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}")
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}")
-//    modLocalRuntime "dev.architectury:architectury-fabric:6.2.43"
 
     modCompileOnly("com.terraformersmc:modmenu:${project.modmenu_version}")
     modLocalRuntime("com.terraformersmc:modmenu:${project.modmenu_version}")
 
-    modLocalRuntime "maven.modrinth:lazydfu:0.1.2"
-
-    implementation include("blue.endless:jankson:${project.jankson_version}")
+    api(include("blue.endless:jankson:${project.jankson_version}"))
 
     modCompileOnly "fr.catcore:server-translations-api:${project.stapi_version}"
 

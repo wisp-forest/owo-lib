@@ -14,7 +14,7 @@ import java.util.function.Consumer;
 
 /**
  * Stub-version of component which adds implementations for all methods
- * which unconditionally throw - used for interface-injecting onto
+ * that unconditionally throw - used for interface-injecting onto
  * vanilla widgets
  */
 public interface ComponentStub extends Component {
@@ -255,6 +255,22 @@ public interface ComponentStub extends Component {
     }
 
     default VanillaWidgetComponent widgetWrapper() {
+        throw new IllegalStateException("Interface stub method called");
+    }
+
+    default int xOffset() {
+        throw new IllegalStateException("Interface stub method called");
+    }
+
+    default int yOffset() {
+        throw new IllegalStateException("Interface stub method called");
+    }
+
+    default int widthOffset() {
+        throw new IllegalStateException("Interface stub method called");
+    }
+
+    default int heightOffset() {
         throw new IllegalStateException("Interface stub method called");
     }
 }

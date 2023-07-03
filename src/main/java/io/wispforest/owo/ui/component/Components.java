@@ -29,7 +29,9 @@ import java.util.function.Supplier;
 /**
  * Utility methods for creating UI components
  */
-public class Components {
+public final class Components {
+
+    private Components() {}
 
     // -----------------------
     // Wrapped Vanilla Widgets
@@ -47,6 +49,16 @@ public class Components {
         var textBox = new TextBoxComponent(horizontalSizing);
         textBox.text(text);
         return textBox;
+    }
+
+    public static TextAreaComponent textArea(Sizing horizontalSizing, Sizing verticalSizing) {
+        return new TextAreaComponent(horizontalSizing, verticalSizing);
+    }
+
+    public static TextAreaComponent textArea(Sizing horizontalSizing, Sizing verticalSizing, String text) {
+        var textArea = new TextAreaComponent(horizontalSizing, verticalSizing);
+        textArea.setText(text);
+        return textArea;
     }
 
     // ------------------

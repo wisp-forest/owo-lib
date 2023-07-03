@@ -3,6 +3,7 @@ package io.wispforest.owo.ops;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.s2c.play.EntityStatusEffectS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -12,23 +13,38 @@ import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A collection of common operations done on {@link World}
  */
-public class WorldOps {
+public final class WorldOps {
+
+    private WorldOps() {}
 
     /**
-     * Breaks the specified block with the given item
+     * Break the specified block with the given item
      *
      * @param world     The world the block is in
      * @param pos       The position of the block to break
      * @param breakItem The item to break the block with
      */
     public static void breakBlockWithItem(World world, BlockPos pos, ItemStack breakItem) {
+        breakBlockWithItem(world, pos, breakItem, null);
+    }
+
+    /**
+     * Break the specified block with the given item
+     *
+     * @param world          The world the block is in
+     * @param pos            The position of the block to break
+     * @param breakItem      The item to break the block with
+     * @param breakingEntity The entity which is breaking the block
+     */
+    public static void breakBlockWithItem(World world, BlockPos pos, ItemStack breakItem, @Nullable Entity breakingEntity) {
         BlockEntity breakEntity = world.getBlockState(pos).getBlock() instanceof BlockEntityProvider ? world.getBlockEntity(pos) : null;
-        Block.dropStacks(world.getBlockState(pos), world, pos, breakEntity, null, breakItem);
-        world.breakBlock(pos, false, null);
+        Block.dropStacks(world.getBlockState(pos), world, pos, breakEntity, breakingEntity, breakItem);
+        world.breakBlock(pos, false, breakingEntity);
     }
 
     /**
@@ -41,7 +57,7 @@ public class WorldOps {
      * @param category The category for the sound
      */
     public static void playSound(World world, Vec3d pos, SoundEvent sound, SoundCategory category) {
-        playSound(world, new BlockPos(pos), sound, category, 1, 1);
+        playSound(world, BlockPos.ofFloored(pos), sound, category, 1, 1);
     }
 
     public static void playSound(World world, BlockPos pos, SoundEvent sound, SoundCategory category) {
@@ -60,7 +76,7 @@ public class WorldOps {
      * @param pitch    The pitch, or speed, to play the sound at
      */
     public static void playSound(World world, Vec3d pos, SoundEvent sound, SoundCategory category, float volume, float pitch) {
-        world.playSound(null, new BlockPos(pos), sound, category, volume, pitch);
+        world.playSound(null, BlockPos.ofFloored(pos), sound, category, volume, pitch);
     }
 
     public static void playSound(World world, BlockPos pos, SoundEvent sound, SoundCategory category, float volume, float pitch) {

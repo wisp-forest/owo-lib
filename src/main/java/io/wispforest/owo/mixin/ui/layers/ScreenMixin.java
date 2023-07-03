@@ -1,5 +1,6 @@
 package io.wispforest.owo.mixin.ui.layers;
 
+import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.layers.Layer;
 import io.wispforest.owo.ui.layers.Layers;
 import io.wispforest.owo.util.pond.OwoScreenExtension;
@@ -8,9 +9,7 @@ import net.minecraft.client.gui.screen.Screen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Mixin(value = Screen.class, priority = 1100)
 public abstract class ScreenMixin extends AbstractParentElement implements OwoScreenExtension {
@@ -18,8 +17,10 @@ public abstract class ScreenMixin extends AbstractParentElement implements OwoSc
     @Shadow public int width;
     @Shadow public int height;
 
-    private final List<Layer<?, ?>.Instance> owo$layers = new ArrayList<>();
-    private final List<Layer<?, ?>.Instance> owo$layersView = Collections.unmodifiableList(this.owo$layers);
+    private final List<Layer<?, ?>.Instance> owo$instances = new ArrayList<>();
+    private final List<Layer<?, ?>.Instance> owo$instancesView = Collections.unmodifiableList(this.owo$instances);
+    private final Map<Layer<?, ?>, Layer<?, ?>.Instance> owo$layersToInstances = new HashMap<>();
+
     private boolean owo$layersInitialized = false;
 
     @SuppressWarnings("ConstantConditions")
@@ -31,13 +32,14 @@ public abstract class ScreenMixin extends AbstractParentElement implements OwoSc
     @Override
     public void owo$updateLayers() {
         if (this.owo$layersInitialized) {
-            for (var instance : this.owo$layers) {
+            for (var instance : this.owo$instances) {
                 instance.resize(this.width, this.height);
             }
         } else {
             for (var layer : Layers.getLayers((Class<Screen>) this.owo$this().getClass())) {
                 var instance = layer.instantiate(this.owo$this());
-                this.owo$layers.add(instance);
+                this.owo$instances.add(instance);
+                this.owo$layersToInstances.put(layer, instance);
 
                 instance.adapter.inflateAndMount();
             }
@@ -45,16 +47,17 @@ public abstract class ScreenMixin extends AbstractParentElement implements OwoSc
             this.owo$layersInitialized = true;
         }
 
-        this.owo$layers.forEach(Layer.Instance::dispatchLayoutUpdates);
+        this.owo$instances.forEach(Layer.Instance::dispatchLayoutUpdates);
     }
 
     @Override
-    public List<Layer<?, ?>.Instance> owo$getLayers() {
-        return this.owo$layers;
+    @SuppressWarnings("unchecked")
+    public <S extends Screen, R extends ParentComponent> Layer<S, R>.Instance owo$getInstance(Layer<S, R> layer) {
+        return (Layer<S, R>.Instance) this.owo$layersToInstances.get(layer);
     }
 
     @Override
-    public List<Layer<?, ?>.Instance> owo$getLayersView() {
-        return this.owo$layersView;
+    public List<Layer<?, ?>.Instance> owo$getInstancesView() {
+        return this.owo$instancesView;
     }
 }

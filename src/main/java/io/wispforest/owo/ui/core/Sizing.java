@@ -66,6 +66,10 @@ public class Sizing implements Animatable<Sizing> {
         return new Sizing(percent, Method.FILL);
     }
 
+    public static Sizing fill() {
+        return Sizing.fill(100);
+    }
+
     public boolean isContent() {
         return this.method == Method.CONTENT;
     }
@@ -81,7 +85,7 @@ public class Sizing implements Animatable<Sizing> {
     }
 
     public enum Method {
-        FIXED, CONTENT, FILL;
+        FIXED, CONTENT, FILL
     }
 
     public static Sizing parse(Element sizingElement) {

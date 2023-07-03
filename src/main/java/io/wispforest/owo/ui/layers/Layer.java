@@ -1,10 +1,13 @@
 package io.wispforest.owo.ui.layers;
 
-import io.wispforest.owo.mixin.ui.layers.WrapperWidgetInvoker;
+import io.wispforest.owo.mixin.ui.layers.HandledScreenAccessor;
 import io.wispforest.owo.ui.core.*;
+import io.wispforest.owo.util.pond.OwoScreenExtension;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.gui.widget.LayoutWidget;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,6 +29,10 @@ public class Layer<S extends Screen, R extends ParentComponent> {
 
     public Instance instantiate(S screen) {
         return new Instance(screen);
+    }
+
+    public Instance getInstance(S screen) {
+        return ((OwoScreenExtension) screen).owo$getInstance(this);
     }
 
     public class Instance {
@@ -124,6 +131,30 @@ public class Layer<S extends Screen, R extends ParentComponent> {
             });
         }
 
+        /**
+         * Align the given component relative to the handled screen coordinates
+         * as used by vanilla for positioning slots
+         * <p>
+         * For obvious reasons, this method may only be invoked on layers which are
+         * pushed onto instances of {@link HandledScreen}
+         *
+         * @param component The component to position
+         * @param x         The X coordinate of the component, relative to the handled screen's origin
+         * @param y         The Y coordinate of the component, relative to the handled screen's origin
+         */
+        public void alignComponentToHandledScreenCoordinates(Component component, int x, int y) {
+            if (!(this.screen instanceof HandledScreen<?> handledScreen)) {
+                throw new IllegalStateException("Handled screen coordinates only exist on screens which extend HandledScreen<?>");
+            }
+
+            this.layoutUpdaters.add(() -> {
+                component.positioning(Positioning.absolute(
+                        ((HandledScreenAccessor) handledScreen).owo$getRootX() + x,
+                        ((HandledScreenAccessor) handledScreen).owo$getRootY() + y
+                ));
+            });
+        }
+
         @ApiStatus.Internal
         public void dispatchLayoutUpdates() {
             this.layoutUpdaters.forEach(Runnable::run);
@@ -131,10 +162,8 @@ public class Layer<S extends Screen, R extends ParentComponent> {
 
         private static void collectChildren(Element element, List<ClickableWidget> children) {
             if (element instanceof ClickableWidget widget) children.add(widget);
-            if (element instanceof WrapperWidgetInvoker wrapper) {
-                for (var widget : wrapper.owo$wrappedWidgets()) {
-                    collectChildren(widget, children);
-                }
+            if (element instanceof LayoutWidget layout) {
+                layout.forEachChild(child -> collectChildren(child, children));
             }
         }
 

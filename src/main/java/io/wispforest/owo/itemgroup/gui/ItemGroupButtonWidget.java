@@ -26,7 +26,6 @@ public class ItemGroupButtonWidget extends ButtonWidget {
 
         RenderSystem.setShaderTexture(0, definition.texture());
         drawTexture(matrixStack, this.getX(), this.getY(), 0, (shouldShowHighlight(hovered) ? 1 : 0) * height, this.width, this.height, 64, 64);
-        this.renderBackground(matrixStack, client, mouseX, mouseY);
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();

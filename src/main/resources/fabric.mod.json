@@ -6,8 +6,8 @@
   "description": "yes its bad i know thanks",
   "authors": [
     "glisco",
-    "Noaaan",
-    "BasiqueEvangelist"
+    "BasiqueEvangelist",
+    "Noaaan"
   ],
   "contact": {},
   "license": "MIT",
@@ -37,7 +37,7 @@
   "accessWidener": "owo.accesswidener",
   "depends": {
     "fabricloader": "*",
-    "fabric": "*",
+    "fabric": ">=0.76",
     "minecraft": ">=1.19"
   },
   "custom": {

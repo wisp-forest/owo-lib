@@ -1,0 +1,31 @@
+<owo-ui xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/wisp-forest/owo-lib/1.19.3/owo-ui.xsd">
+    <components>
+        <flow-layout direction="vertical">
+            <children>
+                <grid-layout rows="2" columns="3">
+                    <children>
+                        <button row="0" column="0">
+                            <text>1</text>
+                        </button>
+                        <button row="0" column="1">
+                            <text>2</text>
+                        </button>
+                        <button row="0" column="2">
+                            <text>3</text>
+                        </button>
+                        <button row="1" column="0">
+                            <text>4</text>
+                        </button>
+                        <button row="1" column="1">
+                            <text>5</text>
+                        </button>
+                        <button row="1" column="2">
+                            <text>6</text>
+                        </button>
+                    </children>
+                </grid-layout>
+            </children>
+        </flow-layout>
+    </components>
+</owo-ui>

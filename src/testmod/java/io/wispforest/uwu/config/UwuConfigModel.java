@@ -3,6 +3,7 @@ package io.wispforest.uwu.config;
 import blue.endless.jankson.Comment;
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.config.annotation.*;
+import io.wispforest.owo.ui.core.Color;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +28,7 @@ public class UwuConfigModel {
     @PredicateConstraint("predicateFunction")
     public List<String> someOption = new ArrayList<>(List.of("1", "2", "3", "4", "5"));
 
+    @RangeConstraint(min = 0, max = 10, decimalPlaces = 1)
     public float floting = 6.9f;
 
     public String thisIsAStringValue = "\\bruh?";
@@ -36,6 +38,11 @@ public class UwuConfigModel {
 
     @RestartRequired
     public WowValues broTheresAnEnum = WowValues.FIRST;
+
+    public Color anEpicColor = Color.BLUE;
+
+    @WithAlpha
+    public Color anEpicColorWithAlpha = Color.GREEN;
 
     @ExcludeFromScreen
     public String noSeeingThis = "yep, never";

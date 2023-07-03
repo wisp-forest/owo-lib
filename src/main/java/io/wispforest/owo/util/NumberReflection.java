@@ -8,7 +8,9 @@ import org.jetbrains.annotations.ApiStatus;
  * number primitives and their wrappers
  */
 @ApiStatus.Experimental
-public class NumberReflection {
+public final class NumberReflection {
+
+    private NumberReflection() {}
 
     /**
      * Determines whether the given class represents a number type

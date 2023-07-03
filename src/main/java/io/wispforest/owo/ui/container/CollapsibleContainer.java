@@ -4,6 +4,7 @@ import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIParsing;
+import io.wispforest.owo.ui.util.Delta;
 import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.owo.util.EventSource;
@@ -20,7 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public class CollapsibleContainer extends VerticalFlowLayout {
+public class CollapsibleContainer extends FlowLayout {
 
     public static final Surface SURFACE = (matrices, component) -> Drawer.fill(matrices,
             component.x() + 5,
@@ -32,8 +33,8 @@ public class CollapsibleContainer extends VerticalFlowLayout {
 
     protected final EventStream<OnToggled> toggledEvents = OnToggled.newStream();
 
-    protected List<Component> collapsibleChildren = new ArrayList<>();
-    protected List<Component> collapsibleChildrenView = Collections.unmodifiableList(this.collapsibleChildren);
+    protected final List<Component> collapsibleChildren = new ArrayList<>();
+    protected final List<Component> collapsibleChildrenView = Collections.unmodifiableList(this.collapsibleChildren);
     protected boolean expanded;
 
     protected final SpinnyBoiComponent spinnyBoi;
@@ -41,7 +42,7 @@ public class CollapsibleContainer extends VerticalFlowLayout {
     protected final FlowLayout contentLayout;
 
     protected CollapsibleContainer(Sizing horizontalSizing, Sizing verticalSizing, Text title, boolean expanded) {
-        super(horizontalSizing, verticalSizing);
+        super(horizontalSizing, verticalSizing, Algorithm.VERTICAL);
 
         // Title
 
@@ -198,7 +199,7 @@ public class CollapsibleContainer extends VerticalFlowLayout {
         @Override
         public void update(float delta, int mouseX, int mouseY) {
             super.update(delta, mouseX, mouseY);
-            this.rotation += (this.targetRotation - this.rotation) * delta * .65;
+            this.rotation += Delta.compute(this.rotation, this.targetRotation, delta * .65);
         }
 
         @Override

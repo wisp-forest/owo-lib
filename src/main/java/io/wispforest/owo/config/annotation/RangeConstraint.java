@@ -15,4 +15,10 @@ public @interface RangeConstraint {
     double min();
 
     double max();
+
+    /**
+     * @return How many decimals places to show in the config
+     * screen, if this is a floating point option
+     */
+    int decimalPlaces() default 2;
 }

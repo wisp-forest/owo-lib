@@ -1,27 +1,33 @@
 package io.wispforest.owo.ui.container;
 
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.base.BaseParentComponent;
-import io.wispforest.owo.ui.core.Component;
-import io.wispforest.owo.ui.core.Size;
-import io.wispforest.owo.ui.core.Sizing;
+import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
+import io.wispforest.owo.ui.util.MountingHelper;
+import io.wispforest.owo.util.Observable;
 import net.minecraft.client.util.math.MatrixStack;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import java.util.*;
 
-public abstract class FlowLayout extends BaseParentComponent {
+public class FlowLayout extends BaseParentComponent {
 
     protected final List<Component> children = new ArrayList<>();
     protected final List<Component> childrenView = Collections.unmodifiableList(this.children);
+    protected final Algorithm algorithm;
 
     protected Size contentSize = Size.zero();
-    protected int gap = 0;
+    protected Observable<Integer> gap = Observable.of(0);
 
-    protected FlowLayout(Sizing horizontalSizing, Sizing verticalSizing) {
+    protected FlowLayout(Sizing horizontalSizing, Sizing verticalSizing, Algorithm algorithm) {
         super(horizontalSizing, verticalSizing);
+        this.algorithm = algorithm;
+
+        this.gap.observe(integer -> this.updateLayout());
     }
 
     @Override
@@ -32,6 +38,11 @@ public abstract class FlowLayout extends BaseParentComponent {
     @Override
     protected int determineVerticalContentSize(Sizing sizing) {
         return this.contentSize.height() + this.padding.get().vertical();
+    }
+
+    @Override
+    public void layout(Size space) {
+        this.algorithm.layout(this);
     }
 
     /**
@@ -118,7 +129,7 @@ public abstract class FlowLayout extends BaseParentComponent {
      * should insert between all child components
      */
     public FlowLayout gap(int gap) {
-        this.gap = gap;
+        this.gap.set(gap);
         return this;
     }
 
@@ -127,7 +138,7 @@ public abstract class FlowLayout extends BaseParentComponent {
      * inserts between all child components
      */
     public int gap() {
-        return this.gap;
+        return this.gap.get();
     }
 
     @Override
@@ -139,6 +150,8 @@ public abstract class FlowLayout extends BaseParentComponent {
     @Override
     public void parseProperties(UIModel model, Element element, Map<String, Element> children) {
         super.parseProperties(model, element, children);
+
+        UIParsing.apply(children, "gap", UIParsing::parseSignedInt, this::gap);
 
         final var components = UIParsing
                 .get(children, "children", e -> UIParsing.<Element>allChildrenOfType(e, Node.ELEMENT_NODE))
@@ -155,5 +168,106 @@ public abstract class FlowLayout extends BaseParentComponent {
         return element.getAttribute("direction").equals("vertical")
                 ? Containers.verticalFlow(Sizing.content(), Sizing.content())
                 : Containers.horizontalFlow(Sizing.content(), Sizing.content());
+    }
+
+    @FunctionalInterface
+    public interface Algorithm {
+        void layout(FlowLayout container);
+
+        Algorithm HORIZONTAL = container -> {
+            var layoutWidth = new MutableInt(0);
+            var layoutHeight = new MutableInt(0);
+
+            final var layout = new ArrayList<Component>();
+            final var padding = container.padding.get();
+            final var childSpace = container.calculateChildSpace(container.space);
+
+            container.children.forEach(child -> child.inflate(childSpace));
+
+            var mountState = MountingHelper.mountEarly(container::mountChild, container.children, childSpace, child -> {
+                layout.add(child);
+
+                child.mount(container,
+                        container.x + padding.left() + child.margins().get().left() + layoutWidth.intValue(),
+                        container.y + padding.top() + child.margins().get().top());
+
+                final var childSize = child.fullSize();
+                layoutWidth.add(childSize.width() + container.gap());
+                if (childSize.height() > layoutHeight.intValue()) {
+                    layoutHeight.setValue(childSize.height());
+                }
+            });
+
+            layoutWidth.subtract(container.gap());
+
+            container.contentSize = Size.of(layoutWidth.intValue(), layoutHeight.intValue());
+            container.applySizing();
+
+            if (container.verticalAlignment() != VerticalAlignment.TOP) {
+                for (var component : layout) {
+                    component.updateY(component.y() + container.verticalAlignment().align(component.fullSize().height(), container.height - padding.vertical()));
+                }
+            }
+
+            if (container.horizontalAlignment() != HorizontalAlignment.LEFT) {
+                for (var component : layout) {
+                    if (container.horizontalAlignment() == HorizontalAlignment.CENTER) {
+                        component.updateX(component.x() + (container.width - padding.horizontal() - layoutWidth.intValue()) / 2);
+                    } else {
+                        component.updateX(component.x() + (container.width - padding.horizontal() - layoutWidth.intValue()));
+                    }
+                }
+            }
+
+            mountState.mountLate();
+        };
+
+        Algorithm VERTICAL = container -> {
+            var layoutHeight = new MutableInt(0);
+            var layoutWidth = new MutableInt(0);
+
+            final var layout = new ArrayList<Component>();
+            final var padding = container.padding.get();
+            final var childSpace = container.calculateChildSpace(container.space);
+
+            container.children.forEach(child -> child.inflate(childSpace));
+
+            var mountState = MountingHelper.mountEarly(container::mountChild, container.children, childSpace, child -> {
+                layout.add(child);
+
+                child.mount(container,
+                        container.x + padding.left() + child.margins().get().left(),
+                        container.y + padding.top() + child.margins().get().top() + layoutHeight.intValue());
+
+                final var childSize = child.fullSize();
+                layoutHeight.add(childSize.height() + container.gap());
+                if (childSize.width() > layoutWidth.intValue()) {
+                    layoutWidth.setValue(childSize.width());
+                }
+            });
+
+            layoutHeight.subtract(container.gap());
+
+            container.contentSize = Size.of(layoutWidth.intValue(), layoutHeight.intValue());
+            container.applySizing();
+
+            if (container.horizontalAlignment() != HorizontalAlignment.LEFT) {
+                for (var component : layout) {
+                    component.updateX(component.x() + container.horizontalAlignment().align(component.fullSize().width(), container.width - padding.horizontal()));
+                }
+            }
+
+            if (container.verticalAlignment() != VerticalAlignment.TOP) {
+                for (var component : layout) {
+                    if (container.verticalAlignment() == VerticalAlignment.CENTER) {
+                        component.updateY(component.y() + (container.height - padding.vertical() - layoutHeight.intValue()) / 2);
+                    } else {
+                        component.updateY(component.y() + (container.height - padding.vertical() - layoutHeight.intValue()));
+                    }
+                }
+            }
+
+            mountState.mountLate();
+        };
     }
 }

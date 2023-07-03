@@ -2,9 +2,9 @@ package io.wispforest.owo.compat.rei;
 
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.mixin.itemgroup.CreativeInventoryScreenAccessor;
+import io.wispforest.owo.mixin.ui.access.BaseOwoHandledScreenAccessor;
 import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
 import io.wispforest.owo.ui.core.Component;
-import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.core.Surface;
 import io.wispforest.owo.util.pond.OwoCreativeInventoryScreenExtensions;
@@ -43,7 +43,11 @@ public class OwoReiPlugin implements REIClientPlugin {
         });
 
         zones.register(BaseOwoHandledScreen.class, screen -> {
-            if (screen.children().isEmpty() || !(screen.children().get(0) instanceof OwoUIAdapter<?> adapter)) return List.of();
+            if (screen.children().isEmpty()) return List.of();
+
+            var adapter = ((BaseOwoHandledScreenAccessor) screen).owo$getUIAdapter();
+            if (adapter == null) return List.of();
+
             var rootComponent = adapter.rootComponent;
             var children = new ArrayList<Component>();
             rootComponent.collectChildren(children);

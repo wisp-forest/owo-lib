@@ -15,11 +15,10 @@ import java.util.function.Function;
 /**
  * A simple utility for inserting values into Tags at runtime
  */
-public class TagInjector {
+public final class TagInjector {
 
     @ApiStatus.Internal
     public static final HashMap<TagLocation, Set<TagEntry>> ADDITIONS = new HashMap<>();
-
 
     private static final Map<TagLocation, Set<TagEntry>> ADDITIONS_VIEW = new ForwardingMap<>() {
         @Override
@@ -29,24 +28,25 @@ public class TagInjector {
 
         @Override
         public Set<TagEntry> get(@Nullable Object key) {
-            return Collections.unmodifiableSet(delegate().get(key));
+            return Collections.unmodifiableSet(this.delegate().get(key));
         }
     };
 
+    private TagInjector() {}
+
     /**
-     * Retrieves an unmodifiable map of all planned tag injections.
-     *
-     * @return An immutable view of the planned tag injections.
+     * @return A view of all planned tag injections
      */
     public static Map<TagLocation, Set<TagEntry>> getInjections() {
         return ADDITIONS_VIEW;
     }
 
     /**
-     * Injects the given Identifiers into the given Tag.
-     * If the Identifiers don't correspond to an entry in the
-     * given Registry, you <i>will</i> break the Tag.
-     * If the Tag does not exist, it will be created.
+     * Inject the given identifiers into the given tag
+     * <p>
+     * If any of the identifiers don't correspond to an entry in the
+     * given registry, you <i>will</i> break the tag.
+     * If the tag does not exist, it will be created.
      *
      * @param registry   The registry for which the injected tags should apply
      * @param tag        The tag to insert into, this could contain all kinds of values
@@ -65,7 +65,7 @@ public class TagInjector {
     // -------
 
     /**
-     * Injects the given values into the given tag, obtaining
+     * Inject the given values into the given tag, obtaining
      * their identifiers from the given registry
      *
      * @param registry The registry the target tag is for
@@ -85,7 +85,7 @@ public class TagInjector {
     // -------
 
     /**
-     * Injects the given identifiers into the given tag
+     * Inject the given identifiers into the given tag
      *
      * @param registry The registry the target tag is for
      * @param tag      The identifier of the tag to inject into
@@ -102,7 +102,7 @@ public class TagInjector {
     // -------
 
     /**
-     * Injects the given tags into the given tag,
+     * Inject the given tags into the given tag,
      * effectively nesting them. This is equivalent to
      * prefixing an entry in the tag JSON's {@code values} array
      * with a {@code #}

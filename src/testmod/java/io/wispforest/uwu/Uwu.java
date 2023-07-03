@@ -1,7 +1,11 @@
 package io.wispforest.uwu;
 
+import blue.endless.jankson.JsonPrimitive;
 import com.google.common.collect.ImmutableList;
 import com.mojang.authlib.GameProfile;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import io.wispforest.owo.config.ConfigSynchronizer;
+import io.wispforest.owo.config.Option;
 import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
@@ -13,16 +17,7 @@ import io.wispforest.owo.particles.systems.ParticleSystem;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
 import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
 import io.wispforest.owo.text.CustomTextRegistry;
-import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.component.EntityComponent;
-import io.wispforest.owo.ui.container.Containers;
-import io.wispforest.owo.ui.container.FlowLayout;
-import io.wispforest.owo.ui.core.Insets;
-import io.wispforest.owo.ui.core.Sizing;
-import io.wispforest.owo.ui.core.VerticalAlignment;
-import io.wispforest.owo.ui.layers.Layer;
-import io.wispforest.owo.ui.layers.Layers;
-import io.wispforest.owo.ui.util.UISounds;
+import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.util.RegistryAccess;
 import io.wispforest.owo.util.TagInjector;
 import io.wispforest.uwu.config.BruhConfig;
@@ -38,12 +33,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.GameMenuScreen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.command.argument.GameProfileArgumentType;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.passive.AllayEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -56,10 +46,10 @@ import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.registry.tag.TagKey;
+import net.minecraft.resource.featuretoggle.FeatureFlags;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableTextContent;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -81,7 +71,7 @@ public class Uwu implements ModInitializer {
     public static final Identifier OWO_ICON_TEXTURE = new Identifier("uwu", "textures/gui/icon.png");
     public static final Identifier ANIMATED_BUTTON_TEXTURE = new Identifier("uwu", "textures/gui/animated_icon_test.png");
 
-    public static final ScreenHandlerType<EpicScreenHandler> EPIC_SCREEN_HANDLER_TYPE = new ScreenHandlerType<>(EpicScreenHandler::new);
+    public static final ScreenHandlerType<EpicScreenHandler> EPIC_SCREEN_HANDLER_TYPE = new ScreenHandlerType<>(EpicScreenHandler::new, FeatureFlags.VANILLA_FEATURES);
 
     public static final OwoItemGroup FOUR_TAB_GROUP = OwoItemGroup.builder(new Identifier("uwu", "four_tab_group"), () -> Icon.of(Items.AXOLOTL_BUCKET))
             .disableDynamicTitle()
@@ -104,7 +94,7 @@ public class Uwu implements ModInitializer {
                 group.addTab(Icon.of(Items.EMERALD), "tab_2", null, false);
                 group.addTab(Icon.of(Items.AMETHYST_SHARD), "tab_3", null, false);
                 group.addTab(Icon.of(Items.GOLD_INGOT), "tab_4", null, false);
-                group.addTab(Icon.of(Items.IRON_INGOT), "tab_5", null, false);
+                group.addCustomTab(Icon.of(Items.IRON_INGOT), "tab_5", (context, entries) -> entries.add(UwuItems.SCREEN_SHARD), false);
                 group.addTab(Icon.of(Items.QUARTZ), "tab_6", null, false);
 
                 group.addButton(new ItemGroupButton(group, Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16), "owo", () -> {
@@ -120,7 +110,7 @@ public class Uwu implements ModInitializer {
 
     public static final ItemGroup VANILLA_GROUP = FabricItemGroup.builder(new Identifier("uwu", "vanilla_group"))
             .icon(Items.ACACIA_BOAT::getDefaultStack)
-            .entries((enabledFeatures, entries, operatorEnabled) -> entries.add(Items.MANGROVE_CHEST_BOAT))
+            .entries((context, entries) -> entries.add(Items.MANGROVE_CHEST_BOAT))
             .build();
 
     public static final OwoNetChannel CHANNEL = OwoNetChannel.create(new Identifier("uwu", "uwu"));
@@ -146,7 +136,9 @@ public class Uwu implements ModInitializer {
     });
 
     public static final UwuConfig CONFIG = UwuConfig.createAndLoad();
-    public static final BruhConfig BRUHHHHH = BruhConfig.createAndLoad();
+    public static final BruhConfig BRUHHHHH = BruhConfig.createAndLoad(builder -> {
+        builder.registerSerializer(Color.class, (color, marshaller) -> new JsonPrimitive("bruv"));
+    });
 
     @Override
     public void onInitialize() {
@@ -178,31 +170,6 @@ public class Uwu implements ModInitializer {
 
         System.out.println(RegistryAccess.getEntry(Registries.ITEM, Items.ACACIA_BOAT));
         System.out.println(RegistryAccess.getEntry(Registries.ITEM, new Identifier("acacia_planks")));
-
-        Layers.add(Containers::verticalFlow, instance -> {
-            instance.adapter.rootComponent.child(
-                    Containers.horizontalFlow(Sizing.content(), Sizing.content())
-                            .child(Components.entity(Sizing.fixed(20), EntityType.ALLAY, null).<EntityComponent<AllayEntity>>configure(component -> {
-                                component.allowMouseRotation(true)
-                                        .scale(.75f);
-
-                                component.mouseDown().subscribe((mouseX, mouseY, button) -> {
-                                    UISounds.playInteractionSound();
-                                    return true;
-                                });
-                            })).child(Components.textBox(Sizing.fixed(100), "allay text").<TextFieldWidget>configure(textBox -> {
-                                textBox.verticalSizing(Sizing.fixed(9));
-                                textBox.setDrawsBackground(false);
-                            })).<FlowLayout>configure(layout -> {
-                                layout.gap(5).margins(Insets.left(4)).verticalAlignment(VerticalAlignment.CENTER);
-
-                                instance.alignComponentToWidget(widget -> {
-                                    if (!(widget instanceof ButtonWidget button)) return false;
-                                    return button.getMessage().getContent() instanceof TranslatableTextContent translatable && translatable.getKey().equals("menu.reportBugs");
-                                }, Layer.Instance.AnchorSide.RIGHT, 0, layout);
-                            })
-            );
-        }, GameMenuScreen.class);
 
         CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> {
             dispatcher.register(
@@ -238,6 +205,19 @@ public class Uwu implements ModInitializer {
 
                                                 return 0;
                                             }))));
+
+            dispatcher.register(literal("get_option")
+                    .then(argument("config", StringArgumentType.string())
+                            .then(argument("option", StringArgumentType.string()).executes(context -> {
+                                var value = ConfigSynchronizer.getClientOptions(
+                                        context.getSource().getPlayer(),
+                                        StringArgumentType.getString(context, "config")
+                                ).get(new Option.Key(StringArgumentType.getString(context, "option")));
+
+                                context.getSource().sendFeedback(Text.literal(String.valueOf(value)), false);
+
+                                return 0;
+                            }))));
 
         });
 

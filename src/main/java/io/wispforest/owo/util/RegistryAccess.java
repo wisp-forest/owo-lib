@@ -6,7 +6,7 @@ import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.SimpleRegistry;
 import org.jetbrains.annotations.Nullable;
 
-public class RegistryAccess {
+public final class RegistryAccess {
 
     private RegistryAccess() {}
 

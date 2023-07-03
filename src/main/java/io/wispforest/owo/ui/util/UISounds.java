@@ -8,9 +8,11 @@ import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 
-public class UISounds {
+public final class UISounds {
 
-    public static final SoundEvent UI_INTERACTION = new SoundEvent(new Identifier("owo", "ui.owo.interaction"));
+    public static final SoundEvent UI_INTERACTION = SoundEvent.of(new Identifier("owo", "ui.owo.interaction"));
+
+    private UISounds() {}
 
     @Environment(EnvType.CLIENT)
     public static void playButtonSound() {

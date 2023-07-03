@@ -10,7 +10,9 @@ import java.util.Set;
  * This is especially useful for ores that are supposed to glow, as with the normal
  * ore feature they won't do that since lighting is never calculated for them
  */
-public class Maldenhagen {
+public final class Maldenhagen {
+
+    private Maldenhagen() {}
 
     private static final Set<Block> COPIUM_INJECTED = new HashSet<>();
 

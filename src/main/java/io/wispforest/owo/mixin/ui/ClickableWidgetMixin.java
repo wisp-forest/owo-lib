@@ -27,10 +27,7 @@ import java.util.function.Consumer;
 
 @SuppressWarnings("ConstantConditions")
 @Mixin(ClickableWidget.class)
-public abstract class ClickableWidgetMixin implements ComponentStub {
-
-    @Shadow
-    protected abstract void setFocused(boolean focused);
+public abstract class ClickableWidgetMixin implements ComponentStub, net.minecraft.client.gui.Element {
 
     @Shadow public boolean active;
 
@@ -104,7 +101,7 @@ public abstract class ClickableWidgetMixin implements ComponentStub {
 
     @Override
     public AnimatableProperty<Sizing> verticalSizing() {
-        return this.owo$getWrapper().horizontalSizing();
+        return this.owo$getWrapper().verticalSizing();
     }
 
     @Override
@@ -318,6 +315,26 @@ public abstract class ClickableWidgetMixin implements ComponentStub {
     @Override
     public @Nullable VanillaWidgetComponent widgetWrapper() {
         return this.owo$wrapper;
+    }
+
+    @Override
+    public int xOffset() {
+        return 0;
+    }
+
+    @Override
+    public int yOffset() {
+        return 0;
+    }
+
+    @Override
+    public int widthOffset() {
+        return 0;
+    }
+
+    @Override
+    public int heightOffset() {
+        return 0;
     }
 
     @Inject(method = "setWidth", at = @At("HEAD"), cancellable = true)

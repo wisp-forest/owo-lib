@@ -11,6 +11,7 @@ import blue.endless.jankson.magic.TypeMagic;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.annotation.*;
 import io.wispforest.owo.config.ui.ConfigScreen;
+import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.util.NumberReflection;
 import io.wispforest.owo.util.Observable;
 import io.wispforest.owo.util.ReflectionUtils;
@@ -50,17 +51,26 @@ public abstract class ConfigWrapper<C> {
     protected final C instance;
 
     protected boolean loading = false;
-    protected final Jankson jankson = Jankson.builder()
-            .registerSerializer(Identifier.class, (identifier, marshaller) -> new JsonPrimitive(identifier.toString()))
-            .registerDeserializer(JsonPrimitive.class, Identifier.class, (jsonPrimitive, m) -> Identifier.tryParse(jsonPrimitive.asString()))
-            .build();
+    protected final Jankson jankson;
 
     @SuppressWarnings("rawtypes") protected final Map<Option.Key, Option> options = new LinkedHashMap<>();
     @SuppressWarnings("rawtypes") protected final Map<Option.Key, Option> optionsView = Collections.unmodifiableMap(options);
 
     protected ConfigWrapper(Class<C> clazz) {
+        this(clazz, builder -> {});
+    }
+
+    protected ConfigWrapper(Class<C> clazz, Consumer<Jankson.Builder> janksonBuilder) {
         ReflectionUtils.requireZeroArgsConstructor(clazz, s -> "Config model class " + s + " must provide a zero-args constructor");
         this.instance = ReflectionUtils.tryInstantiateWithNoArgs(clazz);
+
+        var builder = Jankson.builder()
+                .registerSerializer(Identifier.class, (identifier, marshaller) -> new JsonPrimitive(identifier.toString()))
+                .registerDeserializer(JsonPrimitive.class, Identifier.class, (primitive, m) -> Identifier.tryParse(primitive.asString()))
+                .registerSerializer(Color.class, (color, marshaller) -> new JsonPrimitive(color.asHexString(true)))
+                .registerDeserializer(JsonPrimitive.class, Color.class, (primitive, m) -> Color.ofArgb(Integer.parseUnsignedInt(primitive.asString().substring(1), 16)));
+        janksonBuilder.accept(builder);
+        this.jankson = builder.build();
 
         var configAnnotation = clazz.getAnnotation(Config.class);
         this.name = configAnnotation.name();

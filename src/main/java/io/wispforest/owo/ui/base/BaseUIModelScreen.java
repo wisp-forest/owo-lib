@@ -3,12 +3,14 @@ package io.wispforest.owo.ui.base;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.core.ParentComponent;
+import io.wispforest.owo.ui.parsing.ConfigureHotReloadScreen;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelLoader;
 import io.wispforest.owo.ui.util.UIErrorToast;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
 import java.nio.file.Path;
 
@@ -33,6 +35,8 @@ public abstract class BaseUIModelScreen<R extends ParentComponent> extends BaseO
     protected final UIModel model;
     protected final Class<R> rootComponentClass;
 
+    protected final @Nullable Identifier modelId;
+
     protected BaseUIModelScreen(Class<R> rootComponentClass, DataSource source) {
         var providedModel = source.get();
         if (providedModel == null) {
@@ -42,11 +46,29 @@ public abstract class BaseUIModelScreen<R extends ParentComponent> extends BaseO
 
         this.rootComponentClass = rootComponentClass;
         this.model = providedModel;
+
+        this.modelId = source instanceof DataSource.AssetDataSource assetSource
+                ? assetSource.assetPath()
+                : null;
+    }
+
+    protected BaseUIModelScreen(Class<R> rootComponentClass, Identifier modelId) {
+        this(rootComponentClass, DataSource.asset(modelId));
     }
 
     @Override
     protected @NotNull OwoUIAdapter<R> createAdapter() {
-        return this.model.createAdapter(rootComponentClass, this);
+        return this.model.createAdapter(this.rootComponentClass, this);
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (Owo.DEBUG && this.modelId != null && keyCode == GLFW.GLFW_KEY_F5 && (modifiers & GLFW.GLFW_MOD_CONTROL) != 0) {
+            this.client.setScreen(new ConfigureHotReloadScreen(this.modelId, this));
+            return true;
+        }
+
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     /**
@@ -73,7 +95,11 @@ public abstract class BaseUIModelScreen<R extends ParentComponent> extends BaseO
          * because only files inside the jar can be shipped
          *
          * @param filePath The path of the XML file to load
+         * @deprecated Using the file data source directly is strongly discouraged
+         * as it primarily causes issues when accidentally used in production. Instead, use
+         * the asset source and configure the hot reload location for your model
          */
+        @Deprecated
         static DataSource file(String filePath) {
             return new DataSource() {
                 @Override
@@ -102,18 +128,19 @@ public abstract class BaseUIModelScreen<R extends ParentComponent> extends BaseO
          *                  a UI model, relative to {@code assets/<namespace>/owo_ui}
          */
         static DataSource asset(Identifier assetPath) {
-            return new DataSource() {
-                @Override
-                public @Nullable UIModel get() {
-                    return UIModelLoader.getPreloaded(assetPath);
-                }
-
-                @Override
-                public void reportError() {
-                    UIErrorToast.report("No UI model with id " + assetPath + " was found");
-                }
-            };
+            return new AssetDataSource(assetPath);
         }
 
+        record AssetDataSource(Identifier assetPath) implements DataSource {
+            @Override
+            public @Nullable UIModel get() {
+                return UIModelLoader.get(assetPath);
+            }
+
+            @Override
+            public void reportError() {
+                UIErrorToast.report("No UI model with id " + assetPath + " was found");
+            }
+        }
     }
 }

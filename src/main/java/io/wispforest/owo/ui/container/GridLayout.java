@@ -127,7 +127,7 @@ public class GridLayout extends BaseParentComponent {
                 previousChild.dismount(DismountReason.REMOVED);
             }
 
-            this.nonNullChildren.add(0, child);
+            this.nonNullChildren.add(child);
             this.updateLayout();
         }
 

@@ -37,7 +37,7 @@ public abstract class OwoItemGroup extends ItemGroup {
 
     public static final BiConsumer<Item, Entries> DEFAULT_STACK_GENERATOR = (item, stacks) -> stacks.add(item.getDefaultStack());
 
-    protected static final ItemGroupTab PLACEHOLDER_TAB = new ItemGroupTab(Icon.of(Items.AIR), Text.empty(), (b, r, u) -> {}, ItemGroupTab.DEFAULT_TEXTURE, false);
+    protected static final ItemGroupTab PLACEHOLDER_TAB = new ItemGroupTab(Icon.of(Items.AIR), Text.empty(), (br, uh) -> {}, ItemGroupTab.DEFAULT_TEXTURE, false);
 
     public final List<ItemGroupTab> tabs = new ArrayList<>();
     public final List<ItemGroupButton> buttons = new ArrayList<>();
@@ -58,7 +58,7 @@ public abstract class OwoItemGroup extends ItemGroup {
     private final boolean displaySingleTab;
 
     protected OwoItemGroup(Identifier id, Consumer<OwoItemGroup> initializer, Supplier<Icon> iconSupplier, int tabStackHeight, int buttonStackHeight, @Nullable Identifier customTexture, boolean useDynamicTitle, boolean displaySingleTab) {
-        super(null, -1, Type.CATEGORY, Text.translatable("itemGroup.%s.%s".formatted(id.getNamespace(), id.getPath())), () -> ItemStack.EMPTY, (enabledFeatures, entries, operatorEnabled) -> {});
+        super(null, -1, Type.CATEGORY, Text.translatable("itemGroup.%s.%s".formatted(id.getNamespace(), id.getPath())), () -> ItemStack.EMPTY, (displayContext, entries) -> {});
         this.id = id;
         this.initializer = initializer;
         this.iconSupplier = iconSupplier;
@@ -68,13 +68,10 @@ public abstract class OwoItemGroup extends ItemGroup {
         this.useDynamicTitle = useDynamicTitle;
         this.displaySingleTab = displaySingleTab;
 
-        ((ItemGroupAccessor) this).owo$setEntryCollector((enabledFeatures, entries, operatorEnabled) -> {
+        ((ItemGroupAccessor) this).owo$setEntryCollector((context, entries) -> {
             if (!this.initialized) throw new IllegalStateException("oωo item group not initialized, was 'initialize()' called?");
-            this.getSelectedTab().contentSupplier().addItems(enabledFeatures, entries, operatorEnabled);
-
-            Registries.ITEM.stream()
-                    .filter(item -> ((OwoItemExtensions) item).owo$group() == this && ((OwoItemExtensions) item).owo$tab() == this.selectedTab)
-                    .forEach(item -> ((OwoItemExtensions) item).owo$stackGenerator().accept(item, entries));
+            this.getSelectedTab().contentSupplier().addItems(context, entries);
+            this.collectItemsFromRegistry(entries, true);
         });
     }
 
@@ -126,8 +123,8 @@ public abstract class OwoItemGroup extends ItemGroup {
                 icon,
                 ButtonDefinition.tooltipFor(this, "tab", name),
                 contentTag == null
-                        ? (features, entries, hasPermissions) -> {}
-                        : (features, entries, hasPermissions) -> Registries.ITEM.stream().filter(item -> item.getRegistryEntry().isIn(contentTag)).forEach(entries::add),
+                        ? (context, entries) -> {}
+                        : (context, entries) -> Registries.ITEM.stream().filter(item -> item.getRegistryEntry().isIn(contentTag)).forEach(entries::add),
                 texture,
                 primary
         ));
@@ -145,11 +142,58 @@ public abstract class OwoItemGroup extends ItemGroup {
         addTab(icon, name, contentTag, ItemGroupTab.DEFAULT_TEXTURE, primary);
     }
 
+    /**
+     * Adds a new tab to this group, using the default button texture
+     *
+     * @param icon            The icon to use
+     * @param name            The name of the tab, used for the translation key
+     * @param contentSupplier The function used for filling this tab
+     * @param texture    The texture to use for drawing the button
+     * @see Icon#of(ItemConvertible)
+     */
+    public void addCustomTab(Icon icon, String name, ItemGroupTab.ContentSupplier contentSupplier, Identifier texture, boolean primary) {
+        this.tabs.add(new ItemGroupTab(
+                icon,
+                ButtonDefinition.tooltipFor(this, "tab", name),
+                contentSupplier, texture, primary
+        ));
+    }
+
+    /**
+     * Adds a new tab to this group
+     *
+     * @param icon            The icon to use
+     * @param name            The name of the tab, used for the translation key
+     * @param contentSupplier The function used for filling this tab
+     * @see Icon#of(ItemConvertible)
+     */
+    public void addCustomTab(Icon icon, String name, ItemGroupTab.ContentSupplier contentSupplier, boolean primary) {
+        this.addCustomTab(icon, name, contentSupplier, ItemGroupTab.DEFAULT_TEXTURE, primary);
+    }
+
+    @Override
+    public void updateEntries(DisplayContext context) {
+        super.updateEntries(context);
+
+        var searchEntries = new SearchOnlyEntries(this, context.enabledFeatures());
+
+        this.collectItemsFromRegistry(searchEntries, false);
+        this.tabs.forEach(tab -> tab.contentSupplier().addItems(context, searchEntries));
+
+        ((ItemGroupAccessor) this).owo$setSearchTabStacks(searchEntries.searchTabStacks);
+    }
+
+    protected void collectItemsFromRegistry(Entries entries, boolean matchTab) {
+        Registries.ITEM.stream()
+                .filter(item -> ((OwoItemExtensions) item).owo$group() == this && (!matchTab || ((OwoItemExtensions) item).owo$tab() == this.selectedTab))
+                .forEach(item -> ((OwoItemExtensions) item).owo$stackGenerator().accept(item, entries));
+    }
+
     // Getters and setters
 
-    public void setSelectedTab(int selectedTab, FeatureSet enabledFeatures, boolean operatorEnabled) {
+    public void setSelectedTab(int selectedTab, DisplayContext context) {
         this.selectedTab = selectedTab;
-        this.updateEntries(enabledFeatures, operatorEnabled);
+        this.updateEntries(context);
     }
 
     public ItemGroupTab getSelectedTab() {
@@ -258,6 +302,19 @@ public abstract class OwoItemGroup extends ItemGroup {
         }
     }
 
+    protected static class SearchOnlyEntries extends EntriesImpl {
+
+        public SearchOnlyEntries(ItemGroup group, FeatureSet enabledFeatures) {
+            super(group, enabledFeatures);
+        }
+
+        @Override
+        public void add(ItemStack stack, StackVisibility visibility) {
+            if (visibility == StackVisibility.PARENT_TAB_ONLY) return;
+            super.add(stack, StackVisibility.SEARCH_TAB_ONLY);
+        }
+    }
+
     // Utility
 
     /**
@@ -272,6 +329,7 @@ public abstract class OwoItemGroup extends ItemGroup {
         Identifier texture();
 
         Text tooltip();
+
         static Text tooltipFor(ItemGroup group, String component, String componentName) {
             var groupId = group.getId().getNamespace().equals("minecraft")
                     ? group.getId().getPath()

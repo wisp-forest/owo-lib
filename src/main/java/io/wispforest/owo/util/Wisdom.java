@@ -7,7 +7,9 @@ import net.minecraft.util.math.random.Random;
 
 import java.util.List;
 
-public class Wisdom {
+public final class Wisdom {
+
+    private Wisdom() {}
 
     private static final Random CRYSTAL_BALL = Random.create();
     public static final List<String> ALL_THE_WISDOM = ImmutableList.of(
@@ -44,7 +46,9 @@ public class Wisdom {
             "I bet DeetHunter will never see this one!",
             "I think that's not the only reason Spectrum isn't compatible with Quilt",
             "My Seethenhagen factory makes 331 pounds of licorice per hour",
-            "chyz: now i just need to painstakingly move jerry (the little tiny lil fella tiny guy man button) to correct spot when recipe book is opened"
+            "chyz: now i just need to painstakingly move jerry (the little tiny lil fella tiny guy man button) to correct spot when recipe book is opened",
+            "chyz: bro, can you stop breathing",
+            "Noaaan: It's surprising how much knowledge is lost by the simple fact that people don't know it"
     );
 
     public static void spread() {

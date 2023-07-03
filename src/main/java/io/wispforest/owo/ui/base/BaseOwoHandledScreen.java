@@ -2,10 +2,7 @@ package io.wispforest.owo.ui.base;
 
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.mixin.ui.SlotAccessor;
-import io.wispforest.owo.ui.core.OwoUIAdapter;
-import io.wispforest.owo.ui.core.ParentComponent;
-import io.wispforest.owo.ui.core.PositionedRectangle;
-import io.wispforest.owo.ui.core.Sizing;
+import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.inject.GreedyInputComponent;
 import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.UIErrorToast;
@@ -149,6 +146,14 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
         return new SlotComponent(index);
     }
 
+    /**
+     * A convenience shorthand for querying a component from the adapter's
+     * root component via {@link ParentComponent#childById(Class, String)}
+     */
+    protected <C extends Component> @Nullable C component(Class<C> expectedClass, String id) {
+        return this.uiAdapter.rootComponent.childById(expectedClass, id);
+    }
+
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (!this.invalid) {
@@ -161,11 +166,11 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
                     var slot = this.handler.slots.get(i);
                     if (!slot.isEnabled()) continue;
 
-                    Drawer.drawText(matrices, Text.literal(String.valueOf(i)),
+                    Drawer.drawText(matrices, Text.literal("H:" + i),
                             this.x + slot.x + 15, this.y + slot.y + 9, .5f, 0x0096FF,
                             Drawer.TextAnchor.BOTTOM_RIGHT
                     );
-                    Drawer.drawText(matrices, Text.literal("(" + slot.getIndex() + ")"),
+                    Drawer.drawText(matrices, Text.literal("I:" + slot.getIndex()),
                             this.x + slot.x + 15, this.y + slot.y + 15, .5f, 0x5800FF,
                             Drawer.TextAnchor.BOTTOM_RIGHT
                     );
@@ -187,7 +192,7 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
             return true;
         }
 
-        return this.uiAdapter.rootComponent.focusHandler().focused() instanceof GreedyInputComponent inputComponent
+        return (modifiers & GLFW.GLFW_MOD_CONTROL) == 0 && this.uiAdapter.rootComponent.focusHandler().focused() instanceof GreedyInputComponent inputComponent
                 ? inputComponent.onKeyPress(keyCode, scanCode, modifiers)
                 : super.keyPressed(keyCode, scanCode, modifiers);
     }

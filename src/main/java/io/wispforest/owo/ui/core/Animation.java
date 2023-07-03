@@ -1,5 +1,7 @@
 package io.wispforest.owo.ui.core;
 
+import io.wispforest.owo.util.EventSource;
+import io.wispforest.owo.util.EventStream;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.Arrays;
@@ -20,6 +22,9 @@ public class Animation<A extends Animatable<A>> {
     private final A from;
     private final A to;
 
+    private final EventStream<Finished> finishedEvents = Finished.newStream();
+    private boolean eventInvoked = true;
+
     public Animation(int duration, Consumer<A> setter, Easing easing, A from, A to) {
         this.duration = duration;
         this.setter = setter;
@@ -34,7 +39,12 @@ public class Animation<A extends Animatable<A>> {
 
     public void update(float delta) {
         if (this.delta == this.direction.targetDelta) {
-            if (this.looping) this.direction = this.direction.reversed();
+            if (!this.eventInvoked) {
+                this.finishedEvents.sink().onFinished(this.direction, this.looping);
+                this.eventInvoked = true;
+            }
+
+            if (this.looping) this.reverse();
             else return;
         }
 
@@ -44,18 +54,24 @@ public class Animation<A extends Animatable<A>> {
     }
 
     public Animation<A> forwards() {
-        this.direction = Direction.FORWARDS;
+        this.setDirection(Direction.FORWARDS);
         return this;
     }
 
     public Animation<A> backwards() {
-        this.direction = Direction.BACKWARDS;
+        this.setDirection(Direction.BACKWARDS);
         return this;
     }
 
     public Animation<A> reverse() {
-        this.direction = this.direction.reversed();
+        this.setDirection(this.direction.reversed());
         return this;
+    }
+
+    private void setDirection(Direction direction) {
+        if (this.direction == direction) return;
+        this.direction = direction;
+        this.eventInvoked = false;
     }
 
     public Animation<A> loop(boolean loop) {
@@ -69,6 +85,10 @@ public class Animation<A extends Animatable<A>> {
 
     public Direction direction() {
         return this.direction;
+    }
+
+    public EventSource<Finished> finished() {
+        return this.finishedEvents.source();
     }
 
     public enum Direction {
@@ -88,6 +108,18 @@ public class Animation<A extends Animatable<A>> {
                 case FORWARDS -> BACKWARDS;
                 case BACKWARDS -> FORWARDS;
             };
+        }
+    }
+
+    public interface Finished {
+        void onFinished(Direction direction, boolean looping);
+
+        static EventStream<Finished> newStream() {
+            return new EventStream<>(subscribers -> (direction, looping) -> {
+                for (var subscriber : subscribers) {
+                    subscriber.onFinished(direction, looping);
+                }
+            });
         }
     }
 

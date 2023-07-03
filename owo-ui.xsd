@@ -4,7 +4,7 @@
     <xs:element name="owo-ui">
         <xs:complexType>
             <xs:sequence>
-                <xs:element name="components">
+                <xs:element name="components" minOccurs="0">
                     <xs:complexType>
                         <xs:sequence>
                             <xs:group ref="anyComponent"/>
@@ -14,7 +14,17 @@
                 <xs:element name="templates" minOccurs="0">
                     <xs:complexType>
                         <xs:sequence maxOccurs="unbounded">
-                            <xs:any processContents="lax"/>
+                            <xs:choice>
+                                <xs:element name="template">
+                                    <xs:complexType>
+                                        <xs:sequence>
+                                            <xs:group ref="anyComponent"/>
+                                        </xs:sequence>
+                                        <xs:attribute name="name" type="xs:Name" use="required"/>
+                                    </xs:complexType>
+                                </xs:element>
+                                <xs:any processContents="lax"/>
+                            </xs:choice>
                         </xs:sequence>
                     </xs:complexType>
                 </xs:element>
@@ -41,6 +51,11 @@
             <xs:element name="draggable" type="owo-ui-draggable-container"/>
             <xs:element name="flow-layout" type="owo-ui-flow-layout"/>
             <xs:element name="scroll" type="owo-ui-scroll-container"/>
+            <xs:element name="dropdown" type="owo-ui-dropdown-component"/>
+            <xs:element name="color-picker" type="owo-ui-color-picker-component"/>
+            <xs:element name="small-checkbox" type="owo-ui-small-checkbox-component"/>
+            <xs:element name="slim-slider" type="owo-ui-slim-slider-component"/>
+            <xs:element name="text-area" type="owo-ui-text-area-component"/>
             <xs:element name="template">
                 <xs:complexType>
                     <xs:sequence minOccurs="0" maxOccurs="unbounded">
@@ -232,6 +247,14 @@
                     <xs:attribute name="dark" type="xs:boolean"/>
                 </xs:complexType>
             </xs:element>
+            <xs:element name="panel-inset">
+                <xs:annotation>
+                    <xs:documentation>
+                        An inset into a panel, used to create an area
+                        enclosed by a standard light panel
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
             <xs:element name="tiled">
                 <xs:annotation>
                     <xs:documentation>
@@ -248,6 +271,18 @@
                     </xs:simpleContent>
                 </xs:complexType>
             </xs:element>
+            <xs:element name="blur">
+                <xs:annotation>
+                    <xs:documentation>
+                        A simple, colorless surface that blurs everything
+                        underneath itself
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:attribute name="quality" type="xs:float"/>
+                    <xs:attribute name="size" type="xs:float"/>
+                </xs:complexType>
+            </xs:element>
             <xs:element name="options-background">
                 <xs:annotation>
                     <xs:documentation>
@@ -261,6 +296,14 @@
                     <xs:documentation>
                         The standard dark translucent background
                         most Vanilla UIs use
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="tooltip">
+                <xs:annotation>
+                    <xs:documentation>
+                        The same renderer used by vanilla item
+                        and UI element tooltips
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
@@ -286,6 +329,38 @@
             <xs:element type="owo-ui-color" name="flat"/>
             <xs:element name="vanilla"/>
             <xs:element name="vanilla-flat"/>
+        </xs:choice>
+    </xs:complexType>
+
+    <xs:complexType name="owo-ui-dropdown-entries">
+        <xs:choice maxOccurs="unbounded">
+            <xs:element name="divider"/>
+            <xs:element type="owo-ui-text" name="text"/>
+            <xs:element name="button">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element type="owo-ui-text" name="text"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="checkbox">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element type="owo-ui-text" name="text"/>
+                        <xs:element type="xs:boolean" name="checked"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="nested">
+                <xs:complexType>
+                    <xs:complexContent>
+                        <xs:extension base="owo-ui-dropdown-entries">
+                            <xs:attribute type="xs:string" name="name"/>
+                            <xs:attribute type="xs:boolean" name="translate"/>
+                        </xs:extension>
+                    </xs:complexContent>
+                </xs:complexType>
+            </xs:element>
         </xs:choice>
     </xs:complexType>
 
@@ -471,6 +546,62 @@
         </xs:complexContent>
     </xs:complexType>
 
+    <xs:complexType name="owo-ui-text-area-component">
+        <xs:complexContent>
+            <xs:extension base="componentType">
+                <xs:choice maxOccurs="unbounded">
+                    <xs:group ref="vanillaWidgetProps"/>
+                    <xs:element type="xs:string" name="text" minOccurs="0"/>
+                    <xs:element type="xs:unsignedInt" name="max-length" minOccurs="0"/>
+                    <xs:element type="xs:unsignedInt" name="max-lines" minOccurs="0"/>
+                    <xs:element type="xs:boolean" name="display-char-count" minOccurs="0"/>
+                </xs:choice>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="owo-ui-color-picker-component">
+        <xs:complexContent>
+            <xs:extension base="componentType">
+                <xs:choice maxOccurs="unbounded">
+                    <xs:group ref="componentProps"/>
+                    <xs:element type="xs:unsignedInt" name="selector-width" minOccurs="0"/>
+                    <xs:element type="xs:unsignedInt" name="selector-padding" minOccurs="0"/>
+                    <xs:element type="xs:boolean" name="show-alpha" minOccurs="0"/>
+                    <xs:element type="owo-ui-color" name="selected-color" minOccurs="0"/>
+                </xs:choice>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="owo-ui-small-checkbox-component">
+        <xs:complexContent>
+            <xs:extension base="componentType">
+                <xs:choice maxOccurs="unbounded">
+                    <xs:group ref="componentProps"/>
+                    <xs:element type="owo-ui-text" name="label" minOccurs="0"/>
+                    <xs:element type="xs:boolean" name="label-shadow" minOccurs="0"/>
+                    <xs:element type="xs:boolean" name="checked" minOccurs="0"/>
+                </xs:choice>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="owo-ui-slim-slider-component">
+        <xs:complexContent>
+            <xs:extension base="componentType">
+                <xs:choice maxOccurs="unbounded">
+                    <xs:group ref="componentProps"/>
+                    <xs:element type="xs:double" name="step-size" minOccurs="0"/>
+                    <xs:element type="xs:double" name="min" minOccurs="0"/>
+                    <xs:element type="xs:double" name="max" minOccurs="0"/>
+                    <xs:element type="xs:double" name="value" minOccurs="0"/>
+                </xs:choice>
+                <xs:attribute name="direction" type="owo-ui-axis-direction" use="required"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
     <xs:complexType name="owo-ui-slider-component">
         <xs:complexContent>
             <xs:extension base="componentType">
@@ -562,12 +693,29 @@
         </xs:complexContent>
     </xs:complexType>
 
+    <xs:complexType name="owo-ui-dropdown-component">
+        <xs:complexContent>
+            <xs:extension base="componentType">
+                <xs:sequence>
+                    <xs:choice maxOccurs="unbounded">
+                        <xs:group ref="parentComponentProps"/>
+                        <xs:element type="xs:boolean" name="close-when-not-hovered" minOccurs="0"/>
+                        <xs:element type="owo-ui-dropdown-entries" name="entries" minOccurs="0"/>
+                    </xs:choice>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
     <xs:complexType name="owo-ui-flow-layout">
         <xs:complexContent>
             <xs:extension base="componentType">
                 <xs:sequence>
                     <xs:element type="componentList" name="children"/>
-                    <xs:group ref="parentComponentProps" maxOccurs="unbounded"/>
+                    <xs:choice maxOccurs="unbounded">
+                        <xs:element type="xs:integer" name="gap" minOccurs="0"/>
+                        <xs:group ref="parentComponentProps" maxOccurs="unbounded"/>
+                    </xs:choice>
                 </xs:sequence>
                 <xs:attribute name="direction" type="owo-ui-axis-direction" use="required"/>
             </xs:extension>

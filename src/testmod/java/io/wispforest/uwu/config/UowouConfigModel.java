@@ -2,9 +2,9 @@ package io.wispforest.uwu.config;
 
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.config.annotation.*;
+import io.wispforest.owo.ui.core.Color;
 import net.minecraft.util.Identifier;
 
-import java.util.HashSet;
 import java.util.Set;
 
 @Modmenu(modId = "fabric")
@@ -21,6 +21,7 @@ public class UowouConfigModel {
     @Sync(Option.SyncMode.NONE)
     public Set<String> setPlease = Set.of("that's a value");
 
+    public Color bruhve = Color.BLACK;
 }
 
 

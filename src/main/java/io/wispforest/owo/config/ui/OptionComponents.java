@@ -6,18 +6,26 @@ import io.wispforest.owo.config.ui.component.*;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.core.Positioning;
 import io.wispforest.owo.ui.parsing.UIModel;
+import net.minecraft.text.Text;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 @SuppressWarnings("ConstantConditions")
 public class OptionComponents {
 
-    public static OptionComponentFactory.Result createTextBox(UIModel model, Option<?> option, Consumer<ConfigTextBox> processor) {
+    public static OptionComponentFactory.Result<FlowLayout, ConfigTextBox> createTextBox(UIModel model, Option<?> option, Consumer<ConfigTextBox> processor) {
+        return createTextBox(model, option, Object::toString, processor);
+    }
+
+    public static <T> OptionComponentFactory.Result<FlowLayout, ConfigTextBox> createTextBox(UIModel model, Option<T> option, Function<T, String> toStringFunction, Consumer<ConfigTextBox> processor) {
         var optionComponent = model.expandTemplate(FlowLayout.class,
                 "text-box-config-option",
-                packParameters(option.translationKey(), option.value().toString())
+                packParameters(option.translationKey(), toStringFunction.apply(option.value()))
         );
 
         var valueBox = optionComponent.childById(ConfigTextBox.class, "value-box");
@@ -27,13 +35,13 @@ public class OptionComponents {
             resetButton.active = false;
             valueBox.setEditable(false);
         } else {
-            resetButton.active = !valueBox.getText().equals(option.defaultValue().toString());
+            resetButton.active = !valueBox.getText().equals(toStringFunction.apply(option.defaultValue()));
             resetButton.onPress(button -> {
-                valueBox.setText(option.defaultValue().toString());
+                valueBox.setText(toStringFunction.apply(option.defaultValue()));
                 button.active = false;
             });
 
-            valueBox.onChanged().subscribe(s -> resetButton.active = !s.equals(option.defaultValue().toString()));
+            valueBox.onChanged().subscribe(s -> resetButton.active = !s.equals(toStringFunction.apply(option.defaultValue())));
         }
 
         processor.accept(valueBox);
@@ -45,10 +53,16 @@ public class OptionComponents {
                 valueBox::getText
         ));
 
-        return new OptionComponentFactory.Result(optionComponent, valueBox);
+        return new OptionComponentFactory.Result<>(optionComponent, valueBox);
     }
 
-    public static OptionComponentFactory.Result createSlider(UIModel model, Option<? extends Number> option, boolean withDecimals) {
+    public static OptionComponentFactory.Result<FlowLayout, OptionValueProvider> createRangeControls(UIModel model, Option<? extends Number> option, int decimalPlaces) {
+        boolean withDecimals = decimalPlaces > 0;
+
+        // ------------
+        // Slider setup
+        // ------------
+
         var value = option.value();
         var optionComponent = model.expandTemplate(FlowLayout.class,
                 "range-config-option",
@@ -58,38 +72,97 @@ public class OptionComponents {
         var constraint = option.backingField().field().getAnnotation(RangeConstraint.class);
         double min = constraint.min(), max = constraint.max();
 
-        var valueSlider = optionComponent.childById(ConfigSlider.class, "value-slider");
-        valueSlider.min(min).max(max).decimalPlaces(withDecimals ? 2 : 0).snap(!withDecimals).setFromDiscreteValue(value.doubleValue());
-        valueSlider.valueType(option.clazz());
+        var sliderInput = optionComponent.childById(ConfigSlider.class, "value-slider");
+        sliderInput.min(min).max(max).decimalPlaces(decimalPlaces).snap(!withDecimals).setFromDiscreteValue(value.doubleValue());
+        sliderInput.valueType(option.clazz());
 
         var resetButton = optionComponent.childById(ButtonComponent.class, "reset-button");
 
         if (option.detached()) {
             resetButton.active = false;
-            valueSlider.active = false;
+            sliderInput.active = false;
         } else {
             resetButton.active = (withDecimals ? value.doubleValue() : Math.round(value.doubleValue())) != option.defaultValue().doubleValue();
             resetButton.onPress(button -> {
-                valueSlider.setFromDiscreteValue(option.defaultValue().doubleValue());
+                sliderInput.setFromDiscreteValue(option.defaultValue().doubleValue());
                 button.active = false;
             });
 
-            valueSlider.onChanged().subscribe(newValue -> {
+            sliderInput.onChanged().subscribe(newValue -> {
                 resetButton.active = (withDecimals ? newValue : Math.round(newValue)) != option.defaultValue().doubleValue();
             });
         }
+
+        // ------------------------------------
+        // Component handles and text box setup
+        // ------------------------------------
+
+        var sliderControls = optionComponent.childById(FlowLayout.class, "slider-controls");
+        var textControls = createTextBox(model, option, configTextBox -> {
+            configTextBox.configureForNumber(option.clazz());
+
+            var predicate = configTextBox.applyPredicate();
+            configTextBox.applyPredicate(predicate.and(s -> {
+                final var parsed = Double.parseDouble(s);
+                return parsed >= min && parsed <= max;
+            }));
+        }).baseComponent().childById(FlowLayout.class, "controls-flow").positioning(Positioning.layout());
+        var textInput = textControls.childById(ConfigTextBox.class, "value-box");
+
+        // ------------
+        // Toggle setup
+        // ------------
+
+        var controlsLayout = optionComponent.childById(FlowLayout.class, "controls-flow");
+        var toggleButton = optionComponent.childById(ButtonComponent.class, "toggle-button");
+
+        var textMode = new MutableBoolean(false);
+        toggleButton.onPress(button -> {
+            textMode.setValue(textMode.isFalse());
+
+            if (textMode.isTrue()) {
+                sliderControls.remove();
+                textInput.text(sliderInput.decimalPlaces() == 0 ? String.valueOf((int) sliderInput.discreteValue()) : String.valueOf(sliderInput.discreteValue()));
+
+                controlsLayout.child(textControls);
+            } else {
+                textControls.remove();
+                sliderInput.setFromDiscreteValue(((Number) textInput.parsedValue()).doubleValue());
+
+                controlsLayout.child(sliderControls);
+            }
+
+            button.tooltip(textMode.isTrue()
+                    ? Text.translatable("text.owo.config.button.range.edit_with_slider")
+                    : Text.translatable("text.owo.config.button.range.edit_as_text")
+            );
+        });
 
         optionComponent.child(new SearchAnchorComponent(
                 optionComponent,
                 option.key(),
                 () -> optionComponent.childById(LabelComponent.class, "option-name").text().getString(),
-                () -> valueSlider.getMessage().getString()
+                () -> textMode.isTrue() ? textInput.getText() : sliderInput.getMessage().getString()
         ));
 
-        return new OptionComponentFactory.Result(optionComponent, valueSlider);
+        return new OptionComponentFactory.Result<>(optionComponent, new OptionValueProvider() {
+            @Override
+            public boolean isValid() {
+                return textMode.isTrue()
+                        ? textInput.isValid()
+                        : sliderInput.isValid();
+            }
+
+            @Override
+            public Object parsedValue() {
+                return textMode.isTrue()
+                        ? textInput.parsedValue()
+                        : sliderInput.parsedValue();
+            }
+        });
     }
 
-    public static OptionComponentFactory.Result createToggleButton(UIModel model, Option<Boolean> option) {
+    public static OptionComponentFactory.Result<FlowLayout, ConfigToggleButton> createToggleButton(UIModel model, Option<Boolean> option) {
         var optionComponent = model.expandTemplate(FlowLayout.class,
                 "boolean-toggle-config-option",
                 packParameters(option.translationKey(), option.value().toString())
@@ -120,10 +193,10 @@ public class OptionComponents {
                 () -> toggleButton.getMessage().getString()
         ));
 
-        return new OptionComponentFactory.Result(optionComponent, toggleButton);
+        return new OptionComponentFactory.Result<>(optionComponent, toggleButton);
     }
 
-    public static OptionComponentFactory.Result createEnumButton(UIModel model, Option<? extends Enum<?>> option) {
+    public static OptionComponentFactory.Result<FlowLayout, ConfigEnumButton> createEnumButton(UIModel model, Option<? extends Enum<?>> option) {
         var optionComponent = model.expandTemplate(FlowLayout.class,
                 "enum-config-option",
                 packParameters(option.translationKey(), option.value().toString())
@@ -154,7 +227,7 @@ public class OptionComponents {
                 () -> enumButton.getMessage().getString()
         ));
 
-        return new OptionComponentFactory.Result(optionComponent, enumButton);
+        return new OptionComponentFactory.Result<>(optionComponent, enumButton);
     }
 
     public static Map<String, String> packParameters(String name, String value) {
@@ -163,5 +236,4 @@ public class OptionComponents {
                 "config-option-value", value
         );
     }
-
 }

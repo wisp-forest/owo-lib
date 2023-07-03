@@ -1,6 +1,6 @@
-package io.wispforest.owo.mixin.ui;
+package io.wispforest.owo.mixin.ui.access;
 
-import net.minecraft.client.gui.screen.Tooltip;
+import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;

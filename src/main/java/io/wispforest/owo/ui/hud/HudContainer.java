@@ -1,6 +1,6 @@
 package io.wispforest.owo.ui.hud;
 
-import io.wispforest.owo.ui.container.VerticalFlowLayout;
+import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.Positioning;
 import io.wispforest.owo.ui.core.Size;
@@ -10,13 +10,13 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Consumer;
 
 /**
- * Very simple extension of {@link VerticalFlowLayout} that
+ * Very simple extension of {@link io.wispforest.owo.ui.container.FlowLayout} that
  * does not allow children to be layout-positioned, used by {@link Hud}
  */
-public class HudContainer extends VerticalFlowLayout {
+public class HudContainer extends FlowLayout {
 
     protected HudContainer(Sizing horizontalSizing, Sizing verticalSizing) {
-        super(horizontalSizing, verticalSizing);
+        super(horizontalSizing, verticalSizing, Algorithm.VERTICAL);
     }
 
     @Override

@@ -120,8 +120,10 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
      * <p>
      * After this method has executed, this adapter can safely be garbage-collected
      */
+    // TODO properly dispose root component
     public void dispose() {
         this.cursorAdapter.dispose();
+        this.disposed = true;
     }
 
     /**
@@ -199,6 +201,14 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
     @Override
     public boolean isMouseOver(double mouseX, double mouseY) {
         return this.rootComponent.isInBoundingBox(mouseX, mouseY);
+    }
+
+    @Override
+    public void setFocused(boolean focused) {}
+
+    @Override
+    public boolean isFocused() {
+        return true;
     }
 
     @Override
