@@ -31,11 +31,11 @@ public record Color(float red, float green, float blue, float alpha) implements 
     }
 
     public Color(int red, int green, int blue, int alpha) {
-        this(red/255f, green/255f, blue/255f, alpha/255f);
+        this(red / 255f, green / 255f, blue / 255f, alpha / 255f);
     }
 
     public Color(int red, int green, int blue) {
-        this(red/255f, green/255f, blue/255f, 1f);
+        this(red / 255f, green / 255f, blue / 255f, 1f);
     }
 
     public static Color ofArgb(int argb) {
