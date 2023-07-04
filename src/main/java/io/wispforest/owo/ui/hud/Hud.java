@@ -84,7 +84,7 @@ public class Hud {
             adapter.moveAndResize(0, 0, window.getScaledWidth(), window.getScaledHeight());
         });
 
-        HudRenderCallback.EVENT.register((matrixStack, tickDelta) -> {
+        HudRenderCallback.EVENT.register((context, tickDelta) -> {
             if (suppress) return;
 
             if (!pendingRemovals.isEmpty() && adapter != null) {
@@ -111,7 +111,7 @@ public class Hud {
             }
 
             if (adapter == null) return;
-            adapter.render(matrixStack, -69, -69, tickDelta);
+            adapter.render(context, -69, -69, tickDelta);
         });
     }
 

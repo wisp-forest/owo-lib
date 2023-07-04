@@ -366,7 +366,7 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
                 child.drawFocusHighlight(context, mouseX, mouseY, partialTicks, delta);
             }
 
-            context.getMatrices().translate(0, 0, -child.zIndex());
+            context.getMatrices().translate(0, 0, -child.zIndex() - 1);
         }
 
         if (!this.allowOverflow) {
