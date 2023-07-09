@@ -111,7 +111,10 @@ public class Hud {
             }
 
             if (adapter == null) return;
+
+            context.push().translate(0, 0, 100);
             adapter.render(context, -69, -69, tickDelta);
+            context.pop();
         });
     }
 
