@@ -16,7 +16,7 @@ import java.util.Properties;
 import java.util.Scanner;
 
 @Mixin(EulaReader.class)
-public class EulaReaderMixin {
+public abstract class EulaReaderMixin {
 
     @Shadow
     @Final
@@ -26,8 +26,12 @@ public class EulaReaderMixin {
     @Final
     private Path eulaFile;
 
+    @Shadow public abstract boolean isEulaAgreedTo();
+
     @Inject(method = "checkEulaAgreement", at = @At(value = "TAIL"), cancellable = true)
     private void overrideEulaAgreement(CallbackInfoReturnable<Boolean> cir) {
+        if (this.isEulaAgreedTo()) return;
+
         var scanner = new Scanner(System.in);
         LOGGER.info("By answering 'true' to this prompt you are indicating your agreement to Minecraft's EULA (https://account.mojang.com/documents/minecraft_eula)\nEULA:");
 
