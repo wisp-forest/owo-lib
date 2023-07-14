@@ -6,17 +6,17 @@
     { "text": " > ", "color": "gray" },
     { "index": 1, "color": "dark_gray" }
   ],
-  "text.owo.configure_hot_reload.title": "Configure Hot Reload",
+  "text.owo.configure_hot_reload.title": "Кайнар яңадан йөкләү",
   "text.owo.configure_hot_reload.choose_file": "Файлны сайлау",
   "text.owo.configure_hot_reload.choose_ui_model_source": "Интерфейс моделен сайлау",
   "text.owo.configure_hot_reload.save": "Саклау",
   "text.owo.configure_hot_reload.model": [
-    {"text": "Model: ", "color": "yellow"},
+    {"text": "Модель: ", "color": "yellow"},
     {"index": 0, "color": "gray"}
   ],
-  "text.owo.configure_hot_reload.reload_from.unset": "Unset",
+  "text.owo.configure_hot_reload.reload_from.unset": "Сайланмаган",
   "text.owo.configure_hot_reload.reload_from": [
-    {"text": "Reload from: ", "color": "yellow"},
+    {"text": "Яңадан йөкләү урыны: ", "color": "yellow"},
     {"index": 0, "color": "gray"}
   ],
   "text.owo.config.search": "Эзләү...",
