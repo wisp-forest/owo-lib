@@ -14,7 +14,7 @@ public final class Wisdom {
     private static final Random CRYSTAL_BALL = Random.create();
     public static final List<String> ALL_THE_WISDOM = ImmutableList.of(
             "assume less - mald more",
-            ":ctft: 117896 and counting",
+            ":ctft: literally infinite and counting",
             "Unobtainium is usually found underground",
             "Did you know that Air is made of 78 percent nitrogen and 21 percent oxygen?",
             "We don't have to worry about people re-inventing Venezuela glisco, that's their problem for integrating the Bourgeoisie into their pack",
