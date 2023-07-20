@@ -6,19 +6,21 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
-import org.jetbrains.annotations.ApiStatus;
 
 /**
  * An icon used for rendering on buttons in {@link OwoItemGroup}s
  * <p>
- * Default implementations provided for textures and itemstacks
+ * Default implementations provided for textures and item stacks
  */
+@FunctionalInterface
 public interface Icon {
 
     void render(DrawContext context, int x, int y, int mouseX, int mouseY, float delta);
 
     static Icon of(ItemStack stack) {
-        return new ItemIcon(stack);
+        return (context, x, y, mouseX, mouseY, delta) -> {
+            context.drawItemWithoutEntity(stack, x, y);
+        };
     }
 
     static Icon of(ItemConvertible item) {
@@ -26,7 +28,9 @@ public interface Icon {
     }
 
     static Icon of(Identifier texture, int u, int v, int textureWidth, int textureHeight) {
-        return new TextureIcon(texture, u, v, textureWidth, textureHeight);
+        return (context, x, y, mouseX, mouseY, delta) -> {
+            context.drawTexture(texture, x, y, u, v, 16, 16, textureWidth, textureHeight);
+        };
     }
 
     /**
@@ -39,66 +43,9 @@ public interface Icon {
      * @return The created icon instance
      */
     static Icon of(Identifier texture, int textureSize, int frameDelay, boolean loop) {
-        return new AnimatedTextureIcon(texture, new SpriteSheetMetadata(textureSize, 16), frameDelay, loop);
-    }
-
-    /**
-     * Renders an {@link ItemStack}
-     */
-    @ApiStatus.Internal
-    class ItemIcon implements Icon {
-
-        private final ItemStack stack;
-
-        private ItemIcon(ItemStack stack) {
-            this.stack = stack;
-        }
-
-        @Override
-        public void render(DrawContext context, int x, int y, int mouseX, int mouseY, float delta) {
-            context.drawItemWithoutEntity(stack, x, y);
-        }
-    }
-
-    /**
-     * Renders a 16x16 region of the given texture, starting at (u, v)
-     */
-    @ApiStatus.Internal
-    class TextureIcon implements Icon {
-
-        private final Identifier texture;
-        private final int u, v;
-        private final int textureWidth, textureHeight;
-
-        public TextureIcon(Identifier texture, int u, int v, int textureWidth, int textureHeight) {
-            this.texture = texture;
-            this.u = u;
-            this.v = v;
-            this.textureWidth = textureWidth;
-            this.textureHeight = textureHeight;
-        }
-
-        @Override
-        public void render(DrawContext context, int x, int y, int mouseX, int mouseY, float delta) {
-            context.drawTexture(texture, x, y, u, v, 16, 16, textureWidth, textureHeight);
-        }
-    }
-
-    /**
-     * Similar to TextureIcon but allows 16x16 frame animated textures.
-     */
-    @ApiStatus.Internal
-    class AnimatedTextureIcon implements Icon {
-        private final AnimatedTextureDrawable widget;
-
-        public AnimatedTextureIcon(Identifier texture, SpriteSheetMetadata spriteSheetMetadata, int frameDelay, boolean loop) {
-            this.widget = new AnimatedTextureDrawable(0, 0, 16, 16, texture, spriteSheetMetadata, frameDelay, loop);
-        }
-
-        @Override
-        public void render(DrawContext context, int x, int y, int mouseX, int mouseY, float delta) {
+        var widget = new AnimatedTextureDrawable(0, 0, 16, 16, texture, new SpriteSheetMetadata(textureSize, 16), frameDelay, loop);
+        return (context, x, y, mouseX, mouseY, delta) -> {
             widget.render(x, y, context, mouseX, mouseY, delta);
-        }
+        };
     }
-
 }

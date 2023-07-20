@@ -75,16 +75,16 @@ public final class ItemGroupButton implements OwoItemGroup.ButtonDefinition {
 
     @Override
     public Icon icon() {
-        return icon;
+        return this.icon;
     }
 
     @Override
     public Text tooltip() {
-        return tooltip;
+        return this.tooltip;
     }
 
     public Runnable action() {
-        return action;
+        return this.action;
     }
 
 }

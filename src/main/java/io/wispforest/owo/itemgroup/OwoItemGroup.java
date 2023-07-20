@@ -5,6 +5,9 @@ import io.wispforest.owo.itemgroup.gui.ItemGroupButtonWidget;
 import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
 import io.wispforest.owo.mixin.itemgroup.ItemGroupAccessor;
 import io.wispforest.owo.util.pond.OwoItemExtensions;
+import it.unimi.dsi.fastutil.ints.IntArraySet;
+import it.unimi.dsi.fastutil.ints.IntSet;
+import it.unimi.dsi.fastutil.ints.IntSets;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.item.*;
@@ -23,15 +26,15 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * A custom implementation of {@link ItemGroup} that supports multiple sub-tabs
- * within itself, as well as arbitrary buttons with defaults provided for links
- * like GitHub, Modrinth, etc.
+ * Extensions for  {@link ItemGroup} which support multiple sub-tabs
+ * within, as well as arbitrary buttons with defaults provided for links
+ * to places like GitHub, Modrinth, etc.
  * <p>
- * By default, Items are added via tags, however you can also use {@link OwoItemSettings}
- * and set the tab for a given item via {@link OwoItemSettings#tab(int)}
+ * Tabs can be populated by using {@link OwoItemSettings} and setting the
+ * {@link OwoItemSettings#tab(int)}. Furthermore, tags can be used for easily populating
+ * tabs from data
  * <p>
- * Credits to Lemonszz for originally writing this for Biome Makeover.
- * Adapted from Azagwens implementation
+ * This concept originated in Biome Makeover, where it was written by Lemonszz
  */
 public abstract class OwoItemGroup extends ItemGroup {
 
@@ -42,13 +45,13 @@ public abstract class OwoItemGroup extends ItemGroup {
     public final List<ItemGroupTab> tabs = new ArrayList<>();
     public final List<ItemGroupButton> buttons = new ArrayList<>();
 
-    private final Identifier id;
     private final Consumer<OwoItemGroup> initializer;
 
     private final Supplier<Icon> iconSupplier;
     private Icon icon;
 
-    private int selectedTab = 0;
+    private final IntSet activeTabs = new IntArraySet();
+    private final IntSet activeTabsView = IntSets.unmodifiable(this.activeTabs);
     private boolean initialized = false;
 
     private final int tabStackHeight;
@@ -56,10 +59,10 @@ public abstract class OwoItemGroup extends ItemGroup {
     private final Identifier customTexture;
     private final boolean useDynamicTitle;
     private final boolean displaySingleTab;
+    private final boolean allowMultiSelect;
 
-    protected OwoItemGroup(Identifier id, Consumer<OwoItemGroup> initializer, Supplier<Icon> iconSupplier, int tabStackHeight, int buttonStackHeight, @Nullable Identifier customTexture, boolean useDynamicTitle, boolean displaySingleTab) {
+    protected OwoItemGroup(Identifier id, Consumer<OwoItemGroup> initializer, Supplier<Icon> iconSupplier, int tabStackHeight, int buttonStackHeight, @Nullable Identifier customTexture, boolean useDynamicTitle, boolean displaySingleTab, boolean allowMultiSelect) {
         super(null, -1, Type.CATEGORY, Text.translatable("itemGroup.%s.%s".formatted(id.getNamespace(), id.getPath())), () -> ItemStack.EMPTY, (displayContext, entries) -> {});
-        this.id = id;
         this.initializer = initializer;
         this.iconSupplier = iconSupplier;
         this.tabStackHeight = tabStackHeight;
@@ -67,13 +70,17 @@ public abstract class OwoItemGroup extends ItemGroup {
         this.customTexture = customTexture;
         this.useDynamicTitle = useDynamicTitle;
         this.displaySingleTab = displaySingleTab;
+        this.allowMultiSelect = allowMultiSelect;
 
         ((ItemGroupAccessor) this).owo$setEntryCollector((context, entries) -> {
             if (!this.initialized) {
                 throw new IllegalStateException("oωo item group not initialized, was 'initialize()' called?");
             }
-            this.getSelectedTab().contentSupplier().addItems(context, entries);
-            this.collectItemsFromRegistry(entries, true);
+
+            this.activeTabs.forEach(tabIdx -> {
+                this.tabs.get(tabIdx).contentSupplier().addItems(context, entries);
+                this.collectItemsFromRegistry(entries, tabIdx);
+            });
         });
     }
 
@@ -94,6 +101,15 @@ public abstract class OwoItemGroup extends ItemGroup {
 
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) this.initializer.accept(this);
         if (tabs.size() == 0) this.tabs.add(PLACEHOLDER_TAB);
+
+        if (this.allowMultiSelect) {
+            for (int tabIdx = 0; tabIdx < this.tabs.size(); tabIdx++) {
+                if (!this.tabs.get(tabIdx).primary()) continue;
+                this.activeTabs.add(tabIdx);
+            }
+        } else {
+            this.activeTabs.add(0);
+        }
 
         this.initialized = true;
     }
@@ -179,31 +195,117 @@ public abstract class OwoItemGroup extends ItemGroup {
 
         var searchEntries = new SearchOnlyEntries(this, context.enabledFeatures());
 
-        this.collectItemsFromRegistry(searchEntries, false);
+        this.collectItemsFromRegistry(searchEntries, -1);
         this.tabs.forEach(tab -> tab.contentSupplier().addItems(context, searchEntries));
 
         ((ItemGroupAccessor) this).owo$setSearchTabStacks(searchEntries.searchTabStacks);
     }
 
-    protected void collectItemsFromRegistry(Entries entries, boolean matchTab) {
+    protected void collectItemsFromRegistry(Entries entries, int tab) {
         Registries.ITEM.stream()
-                .filter(item -> ((OwoItemExtensions) item).owo$group() == this && (!matchTab || ((OwoItemExtensions) item).owo$tab() == this.selectedTab))
+                .filter(item -> ((OwoItemExtensions) item).owo$group() == this && (tab < 0 || tab == ((OwoItemExtensions) item).owo$tab()))
                 .forEach(item -> ((OwoItemExtensions) item).owo$stackGenerator().accept(item, entries));
     }
 
     // Getters and setters
 
+    /**
+     * @deprecated Use {@link #selectSingleTab(int, DisplayContext)} instead
+     */
+    @Deprecated(forRemoval = true)
     public void setSelectedTab(int selectedTab, DisplayContext context) {
-        this.selectedTab = selectedTab;
+        this.selectSingleTab(selectedTab, context);
+    }
+
+    /**
+     * @deprecated On an item group which allows multiple selection, this
+     * returns the first selected tab only. Instead, call {@link #selectedTabs()}
+     */
+    @Deprecated(forRemoval = true)
+    public ItemGroupTab getSelectedTab() {
+        return this.tabs.get(this.getSelectedTabIndex());
+    }
+
+    /**
+     * @deprecated On an item group which allows multiple selection, this
+     * returns the index of the first selected tab only. Instead, call {@link #selectedTabs()}
+     */
+    @Deprecated(forRemoval = true)
+    public int getSelectedTabIndex() {
+        return this.activeTabs.iterator().nextInt();
+    }
+
+    /**
+     * Select only {@code tab}, deselecting all other tabs,
+     * using {@code context} for re-population
+     */
+    public void selectSingleTab(int tab, DisplayContext context) {
+        this.activeTabs.clear();
+        this.activeTabs.add(tab);
+
         this.updateEntries(context);
     }
 
-    public ItemGroupTab getSelectedTab() {
-        return tabs.get(selectedTab);
+    /**
+     * Select {@code tab} in addition to other currently selected
+     * tabs, using {@code context} for re-population.
+     * <p>
+     * If this group does not allow multiple selection, behaves
+     * like {@link #selectSingleTab(int, DisplayContext)}
+     */
+    public void selectTab(int tab, DisplayContext context) {
+        if (!this.allowMultiSelect) {
+            this.activeTabs.clear();
+        }
+
+        this.activeTabs.add(tab);
+        this.updateEntries(context);
     }
 
-    public int getSelectedTabIndex() {
-        return selectedTab;
+    /**
+     * Deselect {@code tab} if it is currently selected, using {@code context} for
+     * re-population. If this results in no tabs being selected, all tabs are
+     * automatically selected instead
+     */
+    public void deselectTab(int tab, DisplayContext context) {
+        if (!this.allowMultiSelect) return;
+
+        this.activeTabs.remove(tab);
+        if (this.activeTabs.isEmpty()) {
+            for (int tabIdx = 0; tabIdx < this.tabs.size(); tabIdx++) {
+                this.activeTabs.add(tabIdx);
+            }
+        }
+
+        this.updateEntries(context);
+    }
+
+    /**
+     * Shorthand for {@link #selectTab(int, DisplayContext)} or
+     * {@link #deselectTab(int, DisplayContext)}, depending on the tabs
+     * current state
+     */
+    public void toggleTab(int tab, DisplayContext context) {
+        if (this.isTabSelected(tab)) {
+            this.deselectTab(tab, context);
+        } else {
+            this.selectTab(tab, context);
+        }
+    }
+
+    /**
+     * @return A set containing the indices of all currently
+     * selected tabs
+     */
+    public IntSet selectedTabs() {
+        return this.activeTabsView;
+    }
+
+    /**
+     * @return {@code true} if {@code tab} is currently selected
+     */
+    public boolean isTabSelected(int tab) {
+        return this.activeTabs.contains(tab);
     }
 
     public Identifier getCustomTexture() {
@@ -260,6 +362,7 @@ public abstract class OwoItemGroup extends ItemGroup {
         private @Nullable Identifier customTexture = null;
         private boolean useDynamicTitle = true;
         private boolean displaySingleTab = false;
+        private boolean allowMultiSelect = true;
 
         private Builder(Identifier id, Supplier<Icon> iconSupplier) {
             this.id = id;
@@ -296,8 +399,13 @@ public abstract class OwoItemGroup extends ItemGroup {
             return this;
         }
 
+        public Builder withoutMultipleSelection() {
+            this.allowMultiSelect = false;
+            return this;
+        }
+
         public OwoItemGroup build() {
-            final var group = new OwoItemGroup(id, initializer, iconSupplier, tabStackHeight, buttonStackHeight, customTexture, useDynamicTitle, displaySingleTab) {};
+            final var group = new OwoItemGroup(id, initializer, iconSupplier, tabStackHeight, buttonStackHeight, customTexture, useDynamicTitle, displaySingleTab, allowMultiSelect) {};
             Registry.register(Registries.ITEM_GROUP, this.id, group);
             return group;
         }

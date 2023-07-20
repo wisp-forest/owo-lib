@@ -4,6 +4,7 @@
     { "text": " > ", "color": "gray" },
     { "index": 1, "color": "dark_gray" }
   ],
+  "text.owo.itemGroup.select_hint": {"text": "Shift-click to select multiple", "color": "gray"},
   "text.owo.configure_hot_reload.title": "Configure Hot Reload",
   "text.owo.configure_hot_reload.choose_file": "Choose file",
   "text.owo.configure_hot_reload.choose_ui_model_source": "Choose UI Model source",

@@ -30,7 +30,7 @@ public class WrapperGroup extends OwoItemGroup {
 
     @SuppressWarnings("unchecked")
     public WrapperGroup(ItemGroup parent, Identifier parentId, List<ItemGroupTab> tabs, List<ItemGroupButton> buttons) {
-        super(parentId, owoItemGroup -> {}, () -> Icon.of(parent.getIcon()), 4, 4, null, true, false);
+        super(parentId, owoItemGroup -> {}, () -> Icon.of(parent.getIcon()), 4, 4, null, true, false, false);
 
         int parentRawId = Registries.ITEM_GROUP.getRawId(parent);
 
