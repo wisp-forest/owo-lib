@@ -6,6 +6,7 @@
     { "text": " > ", "color": "gray" },
     { "index": 1, "color": "dark_gray" }
   ],
+  "text.owo.itemGroup.select_hint": {"text": "Берничә сайлау өчен Shift төймәсенә басыгыз", "color": "gray"},
   "text.owo.configure_hot_reload.title": "Кайнар яңадан йөкләү",
   "text.owo.configure_hot_reload.choose_file": "Файлны сайлау",
   "text.owo.configure_hot_reload.choose_ui_model_source": "Интерфейс моделен сайлау",
