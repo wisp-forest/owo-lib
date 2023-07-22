@@ -2,6 +2,8 @@ package io.wispforest.owo.itemgroup;
 
 import io.wispforest.owo.client.texture.AnimatedTextureDrawable;
 import io.wispforest.owo.client.texture.SpriteSheetMetadata;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
@@ -15,11 +17,15 @@ import net.minecraft.util.Identifier;
 @FunctionalInterface
 public interface Icon {
 
+    @Environment(EnvType.CLIENT)
     void render(DrawContext context, int x, int y, int mouseX, int mouseY, float delta);
 
     static Icon of(ItemStack stack) {
-        return (context, x, y, mouseX, mouseY, delta) -> {
-            context.drawItemWithoutEntity(stack, x, y);
+        return new Icon() {
+            @Override
+            public void render(DrawContext context, int x, int y, int mouseX, int mouseY, float delta) {
+                context.drawItemWithoutEntity(stack, x, y);
+            }
         };
     }
 
@@ -28,8 +34,11 @@ public interface Icon {
     }
 
     static Icon of(Identifier texture, int u, int v, int textureWidth, int textureHeight) {
-        return (context, x, y, mouseX, mouseY, delta) -> {
-            context.drawTexture(texture, x, y, u, v, 16, 16, textureWidth, textureHeight);
+        return new Icon() {
+            @Override
+            public void render(DrawContext context, int x, int y, int mouseX, int mouseY, float delta) {
+                context.drawTexture(texture, x, y, u, v, 16, 16, textureWidth, textureHeight);
+            }
         };
     }
 
@@ -44,8 +53,11 @@ public interface Icon {
      */
     static Icon of(Identifier texture, int textureSize, int frameDelay, boolean loop) {
         var widget = new AnimatedTextureDrawable(0, 0, 16, 16, texture, new SpriteSheetMetadata(textureSize, 16), frameDelay, loop);
-        return (context, x, y, mouseX, mouseY, delta) -> {
-            widget.render(x, y, context, mouseX, mouseY, delta);
+        return new Icon() {
+            @Override
+            public void render(DrawContext context, int x, int y, int mouseX, int mouseY, float delta) {
+                widget.render(x, y, context, mouseX, mouseY, delta);
+            }
         };
     }
 }

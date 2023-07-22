@@ -28,11 +28,7 @@ public class ItemGroupButtonWidget extends ButtonWidget {
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        if (!(this.isSelected() || this.isSelected)) RenderSystem.setShaderColor(.75f, .75f, .75f, 1f);
-
         this.definition.icon().render(context, this.getX() + 4, this.getY() + 4, mouseX, mouseY, delta);
-
-        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
         RenderSystem.disableBlend();
     }
 

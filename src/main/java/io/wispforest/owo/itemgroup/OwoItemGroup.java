@@ -5,9 +5,7 @@ import io.wispforest.owo.itemgroup.gui.ItemGroupButtonWidget;
 import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
 import io.wispforest.owo.mixin.itemgroup.ItemGroupAccessor;
 import io.wispforest.owo.util.pond.OwoItemExtensions;
-import it.unimi.dsi.fastutil.ints.IntArraySet;
-import it.unimi.dsi.fastutil.ints.IntSet;
-import it.unimi.dsi.fastutil.ints.IntSets;
+import it.unimi.dsi.fastutil.ints.*;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.item.*;
@@ -50,7 +48,7 @@ public abstract class OwoItemGroup extends ItemGroup {
     private final Supplier<Icon> iconSupplier;
     private Icon icon;
 
-    private final IntSet activeTabs = new IntArraySet();
+    private final IntSet activeTabs = new IntAVLTreeSet(IntComparators.NATURAL_COMPARATOR);
     private final IntSet activeTabsView = IntSets.unmodifiable(this.activeTabs);
     private boolean initialized = false;
 
