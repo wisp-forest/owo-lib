@@ -149,6 +149,8 @@ public class UwuClient implements ClientModInitializer {
 
             instance.alignComponentToHandledScreenCoordinates(button, 125, 65);
         }, InventoryScreen.class);
+
+        UwuTestWindow.init();
     }
 
     public record WeirdMessage(int e) {}
