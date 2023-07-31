@@ -52,8 +52,12 @@ public final class Wisdom {
             "Blodhgarm: Did you know it took four switcheroos to implement the Matrices in the correct folder"
     );
 
+    public static String enlighten() {
+        return Util.getRandom(ALL_THE_WISDOM, CRYSTAL_BALL);
+    }
+
     public static void spread() {
-        Owo.LOGGER.info(Util.getRandom(ALL_THE_WISDOM, CRYSTAL_BALL));
+        Owo.LOGGER.info(enlighten());
     }
 
 }

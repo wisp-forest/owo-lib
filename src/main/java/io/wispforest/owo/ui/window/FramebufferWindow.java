@@ -18,10 +18,10 @@ import java.util.List;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class FramebufferWindow implements AutoCloseable {
-    private final int width;
-    private final int height;
+    private int width;
+    private int height;
     private final long handle;
-    private final Framebuffer framebuffer;
+    private Framebuffer framebuffer;
     private int localFramebuffer = 0;
     protected final MinecraftClient client = MinecraftClient.getInstance();
 
@@ -30,6 +30,8 @@ public class FramebufferWindow implements AutoCloseable {
     private final EventStream<WindowClosed> windowClosedEvents = WindowClosed.newStream();
     private final EventStream<WindowResized> windowResizedEvents = WindowResized.newStream();
     private final EventStream<WindowMouseMoved> mouseMovedEvents = WindowMouseMoved.newStream();
+    private final EventStream<WindowMouseButton> mouseButtonEvents = WindowMouseButton.newStream();
+    private final EventStream<WindowMouseScrolled> mouseScrolledEvents = WindowMouseScrolled.newStream();
 
     public FramebufferWindow(int width, int height, String name, long parentContext) {
         this.width = width;
@@ -69,8 +71,12 @@ public class FramebufferWindow implements AutoCloseable {
             mouseMovedEvents.sink().onMouseMoved(xpos, ypos);
         })));
         glfwSetMouseButtonCallback(handle, stowAndReturn(GLFWMouseButtonCallback.create((window, button, action, mods) -> {
-//            onMouseButton.invoker().onMouseButton(button, action, mods);
+            mouseButtonEvents.sink().onMouseButton(button, action == GLFW_RELEASE);
         })));
+        glfwSetScrollCallback(handle, stowAndReturn(GLFWScrollCallback.create((window, xoffset, yoffset) -> {
+            mouseScrolledEvents.sink().onMouseScrolled(xoffset, yoffset);
+        })));
+
 //        disposeList.add(glfwSetScrollCallback(handle, (window, xoffset, yoffset) -> {
 //            onMouseScroll.invoker().onMouseScroll(xoffset, yoffset);
 //        }));
@@ -102,6 +108,10 @@ public class FramebufferWindow implements AutoCloseable {
         return framebuffer;
     }
 
+    public long handle() {
+        return handle;
+    }
+
     public EventSource<WindowClosed> windowClosed() {
         return windowClosedEvents.source();
     }
@@ -112,6 +122,14 @@ public class FramebufferWindow implements AutoCloseable {
 
     public EventSource<WindowMouseMoved> mouseMoved() {
         return mouseMovedEvents.source();
+    }
+
+    public EventSource<WindowMouseButton> mouseButton() {
+        return mouseButtonEvents.source();
+    }
+
+    public EventSource<WindowMouseScrolled> mouseScrolled() {
+        return mouseScrolledEvents.source();
     }
 
     public void present() {
@@ -130,23 +148,33 @@ public class FramebufferWindow implements AutoCloseable {
     }
 
     private void initLocalFramebuffer() {
-        if (localFramebuffer != 0) {
-            GL32.glDeleteFramebuffers(localFramebuffer);
+        try (var ignored = OwoGlfwUtil.setContext(this.handle)) {
+            if (localFramebuffer != 0) {
+                GL32.glDeleteFramebuffers(localFramebuffer);
+            }
+
+            this.localFramebuffer = GL32.glGenFramebuffers();
+            GL32.glBindFramebuffer(GL32.GL_FRAMEBUFFER, this.localFramebuffer);
+            GL32.glFramebufferTexture2D(GL32.GL_FRAMEBUFFER, GL32.GL_COLOR_ATTACHMENT0, GL32.GL_TEXTURE_2D, this.framebuffer.getColorAttachment(), 0);
+
+            int status = GL32.glCheckFramebufferStatus(GL32.GL_FRAMEBUFFER);
+            if (status != GL32.GL_FRAMEBUFFER_COMPLETE)
+                throw new IllegalStateException("Failed to create local framebuffer!");
         }
-
-        this.localFramebuffer = GL32.glGenFramebuffers();
-        GL32.glBindFramebuffer(GL32.GL_FRAMEBUFFER, this.localFramebuffer);
-        GL32.glFramebufferTexture2D(GL32.GL_FRAMEBUFFER, GL32.GL_COLOR_ATTACHMENT0, GL32.GL_TEXTURE_2D, this.framebuffer.getColorAttachment(), 0);
-
-        int status = GL32.glCheckFramebufferStatus(GL32.GL_FRAMEBUFFER);
-        if (status != GL32.GL_FRAMEBUFFER_COMPLETE)
-            throw new IllegalStateException("Failed to create local framebuffer!");
     }
 
     protected void sizeChanged(long handle, int width, int height) {
         if (framebuffer.viewportWidth == width && framebuffer.viewportHeight == height) return;
 
-        framebuffer.resize(width, height, MinecraftClient.IS_SYSTEM_MAC);
+        this.width = width;
+        this.height = height;
+
+        try (var ignored = OwoGlfwUtil.setContext(client.getWindow().getHandle())) {
+            framebuffer.delete();
+
+            this.framebuffer = new SimpleFramebuffer(width, height, true, MinecraftClient.IS_SYSTEM_MAC);
+        }
+
         initLocalFramebuffer();
 
         windowResizedEvents.sink().onWindowResized(width, height);
@@ -158,8 +186,14 @@ public class FramebufferWindow implements AutoCloseable {
 
     @Override
     public void close() {
+        try (var ignored = OwoGlfwUtil.setContext(this.handle)) {
+            GL32.glDeleteFramebuffers(this.localFramebuffer);
+        }
+
+        this.framebuffer.delete();
+        glfwDestroyWindow(this.handle);
+
         this.disposeList.forEach(NativeResource::free);
         this.disposeList.clear();
-        glfwDestroyWindow(this.handle);
     }
 }

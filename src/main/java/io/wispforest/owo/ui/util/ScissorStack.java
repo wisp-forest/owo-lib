@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.PositionedRectangle;
+import io.wispforest.owo.ui.window.CurrentWindowContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.Nullable;
@@ -27,7 +28,7 @@ public final class ScissorStack {
 
         push(
                 (int) (x / scale),
-                (int) (window.getScaledHeight() - (y / scale) - height / scale),
+                (int) (CurrentWindowContext.scaledHeight() - (y / scale) - height / scale),
                 (int) (width / scale),
                 (int) (height / scale),
                 null
@@ -54,24 +55,22 @@ public final class ScissorStack {
 
         STACK.pop();
         applyState();
+
     }
 
     private static void applyState() {
         if (STACK.isEmpty()) {
-            var window = MinecraftClient.getInstance().getWindow();
-            GL11.glScissor(0, 0, window.getFramebufferWidth(), window.getFramebufferHeight());
+            GL11.glScissor(0, 0, CurrentWindowContext.framebufferWidth(), CurrentWindowContext.framebufferHeight());
             return;
         }
-
         if (!GL11.glIsEnabled(GL11.GL_SCISSOR_TEST)) return;
 
         var newFrame = STACK.peek();
-        var window = MinecraftClient.getInstance().getWindow();
-        var scale = window.getScaleFactor();
+        var scale = CurrentWindowContext.scaleFactor();
 
         GL11.glScissor(
                 (int) (newFrame.x() * scale),
-                (int) (window.getFramebufferHeight() - (newFrame.y() * scale) - newFrame.height() * scale),
+                (int) (CurrentWindowContext.framebufferHeight() - (newFrame.y() * scale) - newFrame.height() * scale),
                 (int) (newFrame.width() * scale),
                 (int) (newFrame.height() * scale)
         );
