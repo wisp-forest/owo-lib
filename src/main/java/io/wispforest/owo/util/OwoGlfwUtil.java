@@ -12,7 +12,10 @@ public final class OwoGlfwUtil {
 
     public static ContextRestorer setContext(long handle) {
         long old = GLFW.glfwGetCurrentContext();
+        if (old == handle) return new ContextRestorer(-1);
+
         GLFW.glfwMakeContextCurrent(handle);
+
         return new ContextRestorer(old);
     }
 
@@ -31,6 +34,8 @@ public final class OwoGlfwUtil {
 
         @Override
         public void close() {
+            if (oldContext == -1) return;
+
             GLFW.glfwMakeContextCurrent(oldContext);
         }
     }

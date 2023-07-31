@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.PositionedRectangle;
+import io.wispforest.owo.ui.window.CurrentWindowContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.MathHelper;
@@ -28,7 +29,7 @@ public final class ScissorStack {
 
         push(
                 (int) (x / scale),
-                (int) (window.getScaledHeight() - (y / scale) - height / scale),
+                (int) (CurrentWindowContext.scaledHeight() - (y / scale) - height / scale),
                 (int) (width / scale),
                 (int) (height / scale),
                 null
@@ -55,26 +56,24 @@ public final class ScissorStack {
 
         STACK.pop();
         applyState();
+
     }
 
     private static void applyState() {
         if (STACK.isEmpty()) {
-            var window = MinecraftClient.getInstance().getWindow();
-            GL11.glScissor(0, 0, window.getFramebufferWidth(), window.getFramebufferHeight());
+            GL11.glScissor(0, 0, CurrentWindowContext.framebufferWidth(), CurrentWindowContext.framebufferHeight());
             return;
         }
-
         if (!GL11.glIsEnabled(GL11.GL_SCISSOR_TEST)) return;
 
         var newFrame = STACK.peek();
-        var window = MinecraftClient.getInstance().getWindow();
-        var scale = window.getScaleFactor();
+        var scale = CurrentWindowContext.scaleFactor();
 
         GL11.glScissor(
-                (int) (newFrame.x() * scale),
-                (int) (window.getFramebufferHeight() - (newFrame.y() * scale) - newFrame.height() * scale),
-                MathHelper.clamp((int) (newFrame.width() * scale), 0, window.getFramebufferWidth()),
-                MathHelper.clamp((int) (newFrame.height() * scale), 0, window.getFramebufferHeight())
+            (int) (newFrame.x() * scale),
+            (int) (CurrentWindowContext.framebufferHeight() - (newFrame.y() * scale) - newFrame.height() * scale),
+            MathHelper.clamp((int) (newFrame.width() * scale), 0, CurrentWindowContext.framebufferWidth()),
+            MathHelper.clamp((int) (newFrame.height() * scale), 0, CurrentWindowContext.framebufferHeight())
         );
     }
 

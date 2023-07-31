@@ -18,6 +18,7 @@ import io.wispforest.uwu.Uwu;
 import io.wispforest.uwu.network.UwuNetworkExample;
 import io.wispforest.uwu.network.UwuOptionalNetExample;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
@@ -149,8 +150,6 @@ public class UwuClient implements ClientModInitializer {
 
             instance.alignComponentToHandledScreenCoordinates(button, 125, 65);
         }, InventoryScreen.class);
-
-        UwuTestWindow.init();
     }
 
     public record WeirdMessage(int e) {}

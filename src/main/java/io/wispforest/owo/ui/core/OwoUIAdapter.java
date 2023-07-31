@@ -5,6 +5,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.renderdoc.RenderDoc;
 import io.wispforest.owo.ui.util.CursorAdapter;
+import io.wispforest.owo.ui.window.CurrentWindowContext;
+import io.wispforest.owo.ui.window.OwoWindow;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
@@ -56,6 +58,16 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
         this.rootComponent = rootComponent;
     }
 
+    protected OwoUIAdapter(int x, int y, int width, int height, R rootComponent, OwoWindow<?> window) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+
+        this.cursorAdapter = CursorAdapter.ofWindow(window.handle());
+        this.rootComponent = rootComponent;
+    }
+
     /**
      * Create a UI adapter for the given screen. This also sets it up
      * to be rendered and receive input events, without needing you to
@@ -91,6 +103,11 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
     public static <R extends ParentComponent> OwoUIAdapter<R> createWithoutScreen(int x, int y, int width, int height, BiFunction<Sizing, Sizing, R> rootComponentMaker) {
         var rootComponent = rootComponentMaker.apply(Sizing.fill(100), Sizing.fill(100));
         return new OwoUIAdapter<>(x, y, width, height, rootComponent);
+    }
+
+    public static <R extends ParentComponent> OwoUIAdapter<R> create(OwoWindow<?> window, BiFunction<Sizing, Sizing, R> rootComponentMaker) {
+        var rootComponent = rootComponentMaker.apply(Sizing.fill(100), Sizing.fill(100));
+        return new OwoUIAdapter<>(0, 0, window.scaledWidth(), window.scaledHeight(), rootComponent, window);
     }
 
     /**
@@ -167,14 +184,13 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
             if (this.captureFrame) RenderDoc.startFrameCapture();
 
             final var delta = MinecraftClient.getInstance().getLastFrameDuration();
-            final var window = MinecraftClient.getInstance().getWindow();
 
             this.rootComponent.update(delta, mouseX, mouseY);
 
             RenderSystem.enableDepthTest();
             GlStateManager._enableScissorTest();
 
-            GlStateManager._scissorBox(0, 0, window.getFramebufferWidth(), window.getFramebufferHeight());
+            GlStateManager._scissorBox(0, 0, CurrentWindowContext.framebufferWidth(), CurrentWindowContext.framebufferHeight());
             this.rootComponent.draw(owoContext, mouseX, mouseY, partialTicks, delta);
 
             GlStateManager._disableScissorTest();
