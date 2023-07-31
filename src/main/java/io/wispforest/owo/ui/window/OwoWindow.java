@@ -52,6 +52,12 @@ public abstract class OwoWindow<R extends ParentComponent> extends FramebufferWi
                     * client.options.getMouseWheelSensitivity().getValue();
             adapter.mouseScrolled(mouseX, mouseY, amount);
         });
+        keyPressed().subscribe((keyCode, scanCode, modifiers, released) -> {
+            if (released) return;
+
+            adapter.keyPressed(keyCode, scanCode, modifiers);
+        });
+        charTyped().subscribe(adapter::charTyped);
     }
 
     protected abstract OwoUIAdapter<R> createAdapter();
