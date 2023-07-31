@@ -2,7 +2,6 @@ package io.wispforest.owo.ui.window;
 
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
