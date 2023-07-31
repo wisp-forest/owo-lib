@@ -1,6 +1,7 @@
 package io.wispforest.owo.ui.window;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import io.wispforest.owo.ui.event.CharTyped;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.OwoGlfwUtil;
@@ -32,6 +33,8 @@ public class FramebufferWindow implements AutoCloseable {
     private final EventStream<WindowMouseMoved> mouseMovedEvents = WindowMouseMoved.newStream();
     private final EventStream<WindowMouseButton> mouseButtonEvents = WindowMouseButton.newStream();
     private final EventStream<WindowMouseScrolled> mouseScrolledEvents = WindowMouseScrolled.newStream();
+    private final EventStream<WindowKeyPressed> keyPressedEvents = WindowKeyPressed.newStream();
+    private final EventStream<CharTyped> charTypedEvents = CharTyped.newStream();
 
     public FramebufferWindow(int width, int height, String name, long parentContext) {
         this.width = width;
@@ -76,19 +79,12 @@ public class FramebufferWindow implements AutoCloseable {
         glfwSetScrollCallback(handle, stowAndReturn(GLFWScrollCallback.create((window, xoffset, yoffset) -> {
             mouseScrolledEvents.sink().onMouseScrolled(xoffset, yoffset);
         })));
-
-//        disposeList.add(glfwSetScrollCallback(handle, (window, xoffset, yoffset) -> {
-//            onMouseScroll.invoker().onMouseScroll(xoffset, yoffset);
-//        }));
-//        disposeList.add(glfwSetDropCallback(handle, (window, count, names) -> {
-//            Path[] paths = new Path[count];
-//
-//            for (int j = 0; j < count; ++j) {
-//                paths[j] = Paths.get(GLFWDropCallback.getName(names, j));
-//            }
-//
-//            onFilesDropped.invoker().onFilesDropped(paths);
-//        }));
+        glfwSetKeyCallback(handle, stowAndReturn(GLFWKeyCallback.create((window, key, scancode, action, mods) -> {
+            keyPressedEvents.sink().onKeyPressed(key, scancode, mods, action == GLFW_RELEASE);
+        })));
+        glfwSetCharModsCallback(handle, stowAndReturn(GLFWCharModsCallback.create((window, codepoint, mods) -> {
+            charTypedEvents.sink().onCharTyped((char) codepoint, mods);
+        })));
     }
 
     private <T extends NativeResource> T stowAndReturn(T resource) {
@@ -130,6 +126,14 @@ public class FramebufferWindow implements AutoCloseable {
 
     public EventSource<WindowMouseScrolled> mouseScrolled() {
         return mouseScrolledEvents.source();
+    }
+
+    public EventSource<WindowKeyPressed> keyPressed() {
+        return keyPressedEvents.source();
+    }
+
+    public EventSource<CharTyped> charTyped() {
+        return charTypedEvents.source();
     }
 
     public void present() {

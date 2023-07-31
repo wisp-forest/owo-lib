@@ -7,9 +7,9 @@ import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.window.OwoWindow;
-import io.wispforest.owo.util.Wisdom;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
 public class UwuTestWindow extends OwoWindow<FlowLayout> {
     public UwuTestWindow() {
@@ -28,10 +28,24 @@ public class UwuTestWindow extends OwoWindow<FlowLayout> {
         var inner = Containers.verticalFlow(Sizing.content(), Sizing.content());
         rootComponent.child(Containers.verticalScroll(Sizing.content(), Sizing.fill(100), inner));
 
+        inner.child(Components.label(Text.of("Are you an owl?")));
+
+        var textbox = Components.textBox(Sizing.fixed(60));
+        var statusLabel = Components.label(Text.empty());
+
+        textbox.onChanged().subscribe(value -> {
+            if (value.equalsIgnoreCase("yes")) {
+                statusLabel.text(Text.literal("Owl :)")
+                        .formatted(Formatting.GREEN));
+            } else {
+                statusLabel.text(Text.literal("Not an owl :(")
+                        .formatted(Formatting.RED));
+            }
+        });
+
         inner
-                .child(Components.button(Text.literal("Honestly quite shrimple"), unused -> {
-                    inner.child(Components.label(
-                            Text.literal(Wisdom.enlighten())));
-                }));
+                .child(textbox
+                        .margins(Insets.vertical(5)))
+                .child(statusLabel);
     }
 }
