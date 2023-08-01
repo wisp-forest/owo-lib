@@ -83,14 +83,16 @@ public class ItemComponent extends BaseComponent {
             matrices.multiplyPositionMatrix(ITEM_SCALING);
         }
 
-        this.itemRenderer.renderItem(this.stack, ModelTransformationMode.GUI, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, matrices, entityBuffers, null, 0);
+        var client = MinecraftClient.getInstance();
+
+        this.itemRenderer.renderItem(this.stack, ModelTransformationMode.GUI, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, matrices, entityBuffers, client.world, 0);
         this.entityBuffers.draw();
 
         // Clean up
         matrices.pop();
 
         if (this.showOverlay) {
-            context.drawItemInSlot(MinecraftClient.getInstance().textRenderer, this.stack, this.x, this.y);
+            context.drawItemInSlot(client.textRenderer, this.stack, this.x, this.y);
         }
         if (notSideLit) {
             DiffuseLighting.enableGuiDepthLighting();
