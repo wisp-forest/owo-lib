@@ -83,7 +83,7 @@ public class ItemComponent extends BaseComponent {
             matrices.multiplyPositionMatrix(ITEM_SCALING);
         }
 
-        MinecraftClient client = MinecraftClient.getInstance();
+        var client = MinecraftClient.getInstance();
 
         this.itemRenderer.renderItem(this.stack, ModelTransformationMode.GUI, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, matrices, entityBuffers, client.world, 0);
         this.entityBuffers.draw();
