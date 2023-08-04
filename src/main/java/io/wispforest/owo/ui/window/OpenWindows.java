@@ -1,22 +1,28 @@
 package io.wispforest.owo.ui.window;
 
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.UnmodifiableView;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public final class OpenWindows {
     private static final List<OwoWindow<?>> WINDOWS = new CopyOnWriteArrayList<>();
+    private static final List<OwoWindow<?>> WINDOWS_VIEW = Collections.unmodifiableList(WINDOWS);
 
     private OpenWindows() {
 
     }
 
-    @ApiStatus.Internal
-    public static WindowRegistration add(OwoWindow<?> window) {
+    static WindowRegistration add(OwoWindow<?> window) {
         WINDOWS.add(window);
 
         return new WindowRegistration(window);
+    }
+
+    public static @UnmodifiableView List<OwoWindow<?>> windows() {
+        return WINDOWS_VIEW;
     }
 
     @ApiStatus.Internal

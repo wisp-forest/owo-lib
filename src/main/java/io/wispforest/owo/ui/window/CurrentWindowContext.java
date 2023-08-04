@@ -9,7 +9,7 @@ public final class CurrentWindowContext {
 
     }
 
-    public static WindowResetter setCurrent(OwoWindow<?> window) {
+    static WindowResetter setCurrent(OwoWindow<?> window) {
         var old = CURRENT;
         CURRENT = window;
         return new WindowResetter(old);
