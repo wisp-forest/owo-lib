@@ -102,6 +102,8 @@ public abstract class OwoWindow<R extends ParentComponent> extends FramebufferWi
     }
 
     public void render() {
+        if (closed()) return;
+
         try (var ignored = CurrentWindowContext.setCurrent(this)) {
             framebuffer().beginWrite(true);
 
