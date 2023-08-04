@@ -25,9 +25,11 @@ public abstract class OwoWindow<R extends ParentComponent> extends FramebufferWi
         super(width, height, name, parentContext);
         recalculateScale();
 
-        this.adapter = createAdapter();
-        build(this.adapter.rootComponent);
-        this.adapter.inflateAndMount();
+        try (var ignored = CurrentWindowContext.setCurrent(this)) {
+            this.adapter = createAdapter();
+            build(this.adapter.rootComponent);
+            this.adapter.inflateAndMount();
+        }
 
         this.registration = OpenWindows.add(this);
 

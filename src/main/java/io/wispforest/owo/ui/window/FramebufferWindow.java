@@ -9,6 +9,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.gl.GlDebug;
 import net.minecraft.client.gl.SimpleFramebuffer;
+import net.minecraft.client.render.Tessellator;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL32;
 import org.lwjgl.system.NativeResource;
@@ -37,6 +38,10 @@ public class FramebufferWindow implements AutoCloseable {
     private final EventStream<CharTyped> charTypedEvents = CharTyped.newStream();
 
     public FramebufferWindow(int width, int height, String name, long parentContext) {
+        if (glfwGetCurrentContext() != MinecraftClient.getInstance().getWindow().getHandle()) {
+            throw new IllegalStateException("Window was created on alternate GL context");
+        }
+
         this.width = width;
         this.height = height;
 
@@ -55,6 +60,7 @@ public class FramebufferWindow implements AutoCloseable {
             }
 
             glfwMakeContextCurrent(handle);
+            glfwSwapInterval(0);
         }
 
         this.framebuffer = new SimpleFramebuffer(width, height, true, MinecraftClient.IS_SYSTEM_MAC);
@@ -137,6 +143,8 @@ public class FramebufferWindow implements AutoCloseable {
     }
 
     public void present() {
+        if (closed()) return;
+
         try (var ignored = OwoGlfwUtil.setContext(handle)) {
             // This code intentionally doesn't use Minecraft's RenderSystem
             // class, as it caches GL state that is invalid on this context.
@@ -147,7 +155,10 @@ public class FramebufferWindow implements AutoCloseable {
             GL32.glClear(GL32.GL_COLOR_BUFFER_BIT | GL32.GL_DEPTH_BUFFER_BIT);
             GL32.glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL32.GL_COLOR_BUFFER_BIT, GL32.GL_NEAREST);
 
-            RenderSystem.flipFrame(handle);
+            // Intentionally doesn't poll events so that all events are on the main window
+            RenderSystem.replayQueue();
+            Tessellator.getInstance().getBuffer().clear();
+            GLFW.glfwSwapBuffers(this.handle);
         }
     }
 
