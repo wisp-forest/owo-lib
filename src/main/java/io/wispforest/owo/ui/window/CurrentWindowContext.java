@@ -15,6 +15,10 @@ public final class CurrentWindowContext {
         return new WindowResetter(old);
     }
 
+    public static boolean isMain() {
+        return CURRENT == null;
+    }
+
     public static int framebufferWidth() {
         if (CURRENT != null) {
             return CURRENT.width();
@@ -52,6 +56,14 @@ public final class CurrentWindowContext {
             return CURRENT.scaleFactor();
         } else {
             return MinecraftClient.getInstance().getWindow().getScaleFactor();
+        }
+    }
+
+    public static long handle() {
+        if (CURRENT != null) {
+            return CURRENT.handle();
+        } else {
+            return MinecraftClient.getInstance().getWindow().getHandle();
         }
     }
 

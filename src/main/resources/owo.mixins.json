@@ -59,6 +59,7 @@
     "ui.HandledScreenMixin",
     "ui.MinecraftClientMixin",
     "ui.RenderSystemMixin",
+    "ui.ScreenMixin",
     "ui.SliderWidgetMixin",
     "ui.TextFieldWidgetMixin",
     "ui.access.BaseOwoHandledScreenAccessor",
