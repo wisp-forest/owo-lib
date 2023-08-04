@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
+import io.wispforest.owo.ui.window.CurrentWindowContext;
 import net.minecraft.client.gui.screen.Screen;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -27,5 +28,10 @@ public class ScreenMixin {
     private @Nullable Screen injectProperLinkSource(@Nullable Screen screen) {
         if ((Object) this != OwoUIDrawContext.utilityScreen()) return screen;
         return OwoUIDrawContext.utilityScreen().getAndClearLinkSource();
+    }
+
+    @ModifyArg(method = {"hasShiftDown", "hasControlDown", "hasAltDown"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/InputUtil;isKeyPressed(JI)Z"), index = 0)
+    private static long replaceOnOtherWindow(long handle) {
+        return CurrentWindowContext.isMain() ? handle : CurrentWindowContext.handle();
     }
 }

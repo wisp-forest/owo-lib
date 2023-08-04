@@ -33,31 +33,43 @@ public abstract class OwoWindow<R extends ParentComponent> extends FramebufferWi
 
         windowClosed().subscribe(this::close);
         windowResized().subscribe((newWidth, newHeight) -> {
-            recalculateScale();
-            adapter.moveAndResize(0, 0, scaledWidth(), scaledHeight());
+            try (var ignored = CurrentWindowContext.setCurrent(this)) {
+                recalculateScale();
+                adapter.moveAndResize(0, 0, scaledWidth(), scaledHeight());
+            }
         });
         mouseMoved().subscribe((x, y) -> {
             this.mouseX = (int) (x / scaleFactor);
             this.mouseY = (int) (y / scaleFactor);
         });
         mouseButton().subscribe((button, released) -> {
-            if (released) {
-                adapter.mouseReleased(mouseX, mouseY, button);
-            } else {
-                adapter.mouseClicked(mouseX, mouseY, button);
+            try (var ignored = CurrentWindowContext.setCurrent(this)) {
+                if (released) {
+                    adapter.mouseReleased(mouseX, mouseY, button);
+                } else {
+                    adapter.mouseClicked(mouseX, mouseY, button);
+                }
             }
         });
         mouseScrolled().subscribe((xOffset, yOffset) -> {
-            double amount = (client.options.getDiscreteMouseScroll().getValue() ? Math.signum(yOffset) : yOffset)
+            try (var ignored = CurrentWindowContext.setCurrent(this)) {
+                double amount = (client.options.getDiscreteMouseScroll().getValue() ? Math.signum(yOffset) : yOffset)
                     * client.options.getMouseWheelSensitivity().getValue();
-            adapter.mouseScrolled(mouseX, mouseY, amount);
+                adapter.mouseScrolled(mouseX, mouseY, amount);
+            }
         });
         keyPressed().subscribe((keyCode, scanCode, modifiers, released) -> {
             if (released) return;
 
-            adapter.keyPressed(keyCode, scanCode, modifiers);
+            try (var ignored = CurrentWindowContext.setCurrent(this)) {
+                adapter.keyPressed(keyCode, scanCode, modifiers);
+            }
         });
-        charTyped().subscribe(adapter::charTyped);
+        charTyped().subscribe((chr, modifiers) -> {
+            try (var ignored = CurrentWindowContext.setCurrent(this)) {
+                return adapter.charTyped(chr, modifiers);
+            }
+        });
     }
 
     protected abstract OwoUIAdapter<R> createAdapter();
@@ -105,6 +117,7 @@ public abstract class OwoWindow<R extends ParentComponent> extends FramebufferWi
                             1000.0F,
                             21000.0F
                     );
+            RenderSystem.backupProjectionMatrix();
             RenderSystem.setProjectionMatrix(matrix4f, VertexSorter.BY_Z);
             MatrixStack matrixStack = RenderSystem.getModelViewStack();
             matrixStack.push();
@@ -117,6 +130,9 @@ public abstract class OwoWindow<R extends ParentComponent> extends FramebufferWi
             adapter.render(new DrawContext(client, consumers), mouseX, mouseY, client.getTickDelta());
             consumers.draw();
 
+            RenderSystem.getModelViewStack().pop();
+            RenderSystem.applyModelViewMatrix();
+            RenderSystem.restoreProjectionMatrix();
             framebuffer().endWrite();
         }
 
