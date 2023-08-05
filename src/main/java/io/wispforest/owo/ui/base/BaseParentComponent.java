@@ -296,15 +296,27 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
     }
 
     /**
+     * @deprecated Use {@link #mountChild(Component, Consumer)} instead. This new
+     * overload no longer inflates the child prior to mounting, as that is
+     * rarely ever necessary and was simply causing unnecessary calculations
+     */
+    @Deprecated(forRemoval = true)
+    protected void mountChild(@Nullable Component child, Size space, Consumer<Component> layoutFunc) {
+        if (child == null) return;
+
+        child.inflate(space);
+        this.mountChild(child, layoutFunc);
+    }
+
+    /**
      * Mount a child using the given mounting function if its positioning
      * is equal to {@link Positioning#layout()}, or according to its
      * intrinsic positioning otherwise
      *
      * @param child      The child to mount
-     * @param space      The available space for the to expand into
      * @param layoutFunc The mounting function for components which follow the layout
      */
-    protected void mountChild(@Nullable Component child, Size space, Consumer<Component> layoutFunc) {
+    protected void mountChild(@Nullable Component child, Consumer<Component> layoutFunc) {
         if (child == null) return;
 
         final var positioning = child.positioning().get();
@@ -313,30 +325,21 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
 
         switch (positioning.type) {
             case LAYOUT -> layoutFunc.accept(child);
-            case ABSOLUTE -> {
-                child.inflate(space);
-                child.mount(
-                        this,
-                        this.x + positioning.x + componentMargins.left() + padding.left(),
-                        this.y + positioning.y + componentMargins.top() + padding.top()
-                );
-            }
-            case RELATIVE -> {
-                child.inflate(space);
-                child.mount(
-                        this,
-                        this.x + padding.left() + componentMargins.left() + Math.round((positioning.x / 100f) * (this.width() - child.fullSize().width() - padding.horizontal())),
-                        this.y + padding.top() + componentMargins.top() + Math.round((positioning.y / 100f) * (this.height() - child.fullSize().height() - padding.vertical()))
-                );
-            }
-            case ACROSS -> {
-                child.inflate(space);
-                child.mount(
-                        this,
-                        this.x + padding.left() + componentMargins.left() + Math.round((positioning.x / 100f) * (this.width() - padding.horizontal())),
-                        this.y + padding.top() + componentMargins.top() + Math.round((positioning.y / 100f) * (this.height() - padding.vertical()))
-                );
-            }
+            case ABSOLUTE -> child.mount(
+                    this,
+                    this.x + positioning.x + componentMargins.left() + padding.left(),
+                    this.y + positioning.y + componentMargins.top() + padding.top()
+            );
+            case RELATIVE -> child.mount(
+                    this,
+                    this.x + padding.left() + componentMargins.left() + Math.round((positioning.x / 100f) * (this.width() - child.fullSize().width() - padding.horizontal())),
+                    this.y + padding.top() + componentMargins.top() + Math.round((positioning.y / 100f) * (this.height() - child.fullSize().height() - padding.vertical()))
+            );
+            case ACROSS -> child.mount(
+                    this,
+                    this.x + padding.left() + componentMargins.left() + Math.round((positioning.x / 100f) * (this.width() - padding.horizontal())),
+                    this.y + padding.top() + componentMargins.top() + Math.round((positioning.y / 100f) * (this.height() - padding.vertical()))
+            );
         }
     }
 
@@ -347,7 +350,7 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
      *
      * @param children The list of children to draw
      */
-    protected void drawChildren(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta, List<Component> children) {
+    protected void drawChildren(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta, List<? extends Component> children) {
         if (!this.allowOverflow) {
             var padding = this.padding.get();
             ScissorStack.push(this.x + padding.left(), this.y + padding.top(), this.width - padding.horizontal(), this.height - padding.vertical(), context.getMatrices());

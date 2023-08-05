@@ -184,7 +184,7 @@ public class FlowLayout extends BaseParentComponent {
 
             container.children.forEach(child -> child.inflate(childSpace));
 
-            var mountState = MountingHelper.mountEarly(container::mountChild, container.children, childSpace, child -> {
+            var mountState = MountingHelper.mountEarly(container::mountChild, container.children, child -> {
                 layout.add(child);
 
                 child.mount(container,
@@ -232,7 +232,7 @@ public class FlowLayout extends BaseParentComponent {
 
             container.children.forEach(child -> child.inflate(childSpace));
 
-            var mountState = MountingHelper.mountEarly(container::mountChild, container.children, childSpace, child -> {
+            var mountState = MountingHelper.mountEarly(container::mountChild, container.children, child -> {
                 layout.add(child);
 
                 child.mount(container,
@@ -287,7 +287,7 @@ public class FlowLayout extends BaseParentComponent {
 
             container.children.forEach(child -> child.inflate(childSpace));
 
-            var mountState = MountingHelper.mountEarly(container::mountChild, container.children, childSpace, child -> {
+            var mountState = MountingHelper.mountEarly(container::mountChild, container.children, child -> {
                 layout.add(child);
 
                 int x = container.x + padding.left() + child.margins().get().left() + rowWidth.intValue();
