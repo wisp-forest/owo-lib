@@ -388,8 +388,8 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
         final var padding = this.padding.get();
 
         return Size.of(
-                this.horizontalSizing.get().isContent() ? thisSpace.width() - padding.horizontal() : this.width - padding.horizontal(),
-                this.verticalSizing.get().isContent() ? thisSpace.height() - padding.vertical() : this.height - padding.vertical()
+                MathHelper.lerp(this.horizontalSizing.get().contentFactor(), this.width - padding.horizontal(), thisSpace.width() - padding.horizontal()),
+                MathHelper.lerp(this.verticalSizing.get().contentFactor(), this.height - padding.vertical(), thisSpace.height() - padding.vertical())
         );
     }
 

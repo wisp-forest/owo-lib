@@ -1,6 +1,5 @@
 package io.wispforest.owo.ui.core;
 
-import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import net.minecraft.util.math.MathHelper;
 import org.w3c.dom.Element;
@@ -66,18 +65,33 @@ public class Sizing implements Animatable<Sizing> {
         return new Sizing(percent, Method.FILL);
     }
 
+    /**
+     * @return {@code true} if this sizing instance
+     * uses the {@linkplain Method#CONTENT CONTENT} method
+     */
     public boolean isContent() {
         return this.method == Method.CONTENT;
+    }
+
+    /**
+     * The content factor of a sizing instance describes where
+     * on the spectrum from content to fixed sizing it sits. Specifically, this is
+     * used to lerp the reference frame used for calculating {@code fill(...)} sizing
+     * on children between the available space in this component (content factor 0)
+     * and this component's own available space (content factor 1), both of which can be
+     * independently determined prior to layout calculations
+     */
+    public float contentFactor() {
+        return this.isContent() ? 1f : 0f;
     }
 
     @Override
     public Sizing interpolate(Sizing next, float delta) {
         if (next.method != this.method) {
-            Owo.LOGGER.warn("Cannot interpolate between sizing with method " + this.method + " and " + next.method);
-            return this;
+            return new MergedSizing(this, next, delta);
+        } else {
+            return new Sizing(MathHelper.lerp(delta, this.value, next.value), this.method);
         }
-
-        return new Sizing((int) MathHelper.lerp(delta, this.value, next.value), this.method);
     }
 
     public enum Method {
@@ -119,6 +133,65 @@ public class Sizing implements Animatable<Sizing> {
     @Override
     public int hashCode() {
         return Objects.hash(method, value);
+    }
+
+    private static class MergedSizing extends Sizing {
+
+        private final Sizing first, second;
+        private final float delta;
+
+        private MergedSizing(Sizing first, Sizing second, float delta) {
+            super(first.value, first.method);
+            this.first = first;
+            this.second = second;
+            this.delta = delta;
+        }
+
+        @Override
+        public int inflate(int space, Function<Sizing, Integer> contentSizeFunction) {
+            return MathHelper.lerp(
+                    this.delta,
+                    this.first.inflate(space, contentSizeFunction),
+                    this.second.inflate(space, contentSizeFunction)
+            );
+        }
+
+        @Override
+        public Sizing interpolate(Sizing next, float delta) {
+            return this.first.interpolate(next, delta);
+        }
+
+        @Override
+        public boolean isContent() {
+            return this.first.isContent() || this.second.isContent();
+        }
+
+        @Override
+        public float contentFactor() {
+            if (this.first.isContent() && this.second.isContent()) return super.contentFactor();
+
+            if (this.first.isContent()) {
+                return 1f - delta;
+            } else if (this.second.isContent()) {
+                return delta;
+            } else {
+                return 0f;
+            }
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            if (!super.equals(o)) return false;
+            MergedSizing that = (MergedSizing) o;
+            return Float.compare(delta, that.delta) == 0 && Objects.equals(first, that.first) && Objects.equals(second, that.second);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(super.hashCode(), first, second, delta);
+        }
     }
 
 }
