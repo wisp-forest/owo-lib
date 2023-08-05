@@ -8,6 +8,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.InvalidIdentifierException;
+import org.jetbrains.annotations.ApiStatus;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -24,20 +25,31 @@ public class UIParsing {
     private static final Map<String, Function<Element, Component>> COMPONENT_FACTORIES = new HashMap<>();
 
     /**
-     * Register a factory used to create components from XML elements.
-     * Most factories will only consider the tag name of the element,
-     * but more context can be extracted from the passed element
-     *
-     * @param componentTagName The tag name of elements for which the
-     *                         passed factory should be invoked
-     * @param factory          The factory to register
+     * @deprecated In order to more properly separate factories added by different
+     * mods, use {@link #registerFactory(Identifier, Function)}, which takes an
+     * identifier instead
      */
+    @ApiStatus.Internal
     public static void registerFactory(String componentTagName, Function<Element, Component> factory) {
         if (COMPONENT_FACTORIES.containsKey(componentTagName)) {
             throw new IllegalStateException("A component factory with name " + componentTagName + " is already registered");
         }
 
         COMPONENT_FACTORIES.put(componentTagName, factory);
+    }
+
+    /**
+     * Register a factory used to create components from XML elements.
+     * Most factories will only consider the tag name of the element,
+     * but more context can be extracted from the passed element
+     *
+     * @param componentId The identifier under which to register the component,
+     *                    which (separated by a period instead of a colon) is used
+     *                    as the tag name for which this factory gets invoked
+     * @param factory     The factory to register
+     */
+    public static void registerFactory(Identifier componentId, Function<Element, Component> factory) {
+        registerFactory(componentId.getNamespace() + "." + componentId.getPath(), factory);
     }
 
     /**
