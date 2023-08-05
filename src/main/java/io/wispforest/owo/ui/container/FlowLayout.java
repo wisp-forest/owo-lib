@@ -61,7 +61,7 @@ public class FlowLayout extends BaseParentComponent {
      *
      * @param children The children to add to this layout
      */
-    public FlowLayout children(Collection<Component> children) {
+    public FlowLayout children(Collection<? extends Component> children) {
         this.children.addAll(children);
         this.updateLayout();
         return this;
@@ -87,7 +87,7 @@ public class FlowLayout extends BaseParentComponent {
      * @param index    The index at which to begin inserting children
      * @param children The children to add to this layout
      */
-    public FlowLayout children(int index, Collection<Component> children) {
+    public FlowLayout children(int index, Collection<? extends Component> children) {
         this.children.addAll(index, children);
         this.updateLayout();
         return this;

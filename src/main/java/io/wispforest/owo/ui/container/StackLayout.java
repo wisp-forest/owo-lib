@@ -91,7 +91,7 @@ public class StackLayout extends BaseParentComponent {
      *
      * @param children The children to add to this layout
      */
-    public StackLayout children(Collection<Component> children) {
+    public StackLayout children(Collection<? extends Component> children) {
         this.children.addAll(children);
         this.updateLayout();
         return this;
@@ -117,7 +117,7 @@ public class StackLayout extends BaseParentComponent {
      * @param index    The index at which to begin inserting children
      * @param children The children to add to this layout
      */
-    public StackLayout children(int index, Collection<Component> children) {
+    public StackLayout children(int index, Collection<? extends Component> children) {
         this.children.addAll(index, children);
         this.updateLayout();
         return this;
