@@ -320,24 +320,7 @@
     <templates>
         <template name="inset-panel">
             <flow-layout direction="horizontal">
-                <children>
-                    <flow-layout direction="horizontal">
-                        <children/>
-
-                        <sizing>
-                            <horizontal method="fill">100</horizontal>
-                            <vertical method="fill">100</vertical>
-                        </sizing>
-
-                        <surface>
-                            <panel-inset/>
-                        </surface>
-                    </flow-layout>
-                </children>
-
-                <padding>
-                    <all>{{border-size}}</all>
-                </padding>
+                <children/>
 
                 <sizing>
                     <horizontal method="fill">20</horizontal>
@@ -345,7 +328,7 @@
                 </sizing>
 
                 <surface>
-                    <panel/>
+                    <panel-with-inset>{{border-size}}</panel-with-inset>
                 </surface>
             </flow-layout>
         </template>
