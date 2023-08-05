@@ -2,14 +2,15 @@ package io.wispforest.owo.ui.base;
 
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.core.Component;
+import io.wispforest.owo.ui.core.CursorStyle;
 import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.inject.GreedyInputComponent;
+import io.wispforest.owo.ui.util.DisposableScreen;
 import io.wispforest.owo.ui.util.UIErrorToast;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -31,7 +32,7 @@ import java.util.function.BiFunction;
  *
  * @param <R> The type of root component this screen uses
  */
-public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen {
+public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen implements DisposableScreen {
 
     /**
      * The UI adapter of this screen. This handles
@@ -140,6 +141,13 @@ public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen {
 
     @Override
     public void removed() {
+        if (this.uiAdapter != null) {
+            this.uiAdapter.cursorAdapter.applyStyle(CursorStyle.NONE);
+        }
+    }
+
+    @Override
+    public void dispose() {
         if (this.uiAdapter != null) this.uiAdapter.dispose();
     }
 }

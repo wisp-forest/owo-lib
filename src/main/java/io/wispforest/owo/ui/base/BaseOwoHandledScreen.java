@@ -4,6 +4,7 @@ import io.wispforest.owo.Owo;
 import io.wispforest.owo.mixin.ui.SlotAccessor;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.inject.GreedyInputComponent;
+import io.wispforest.owo.ui.util.DisposableScreen;
 import io.wispforest.owo.ui.util.UIErrorToast;
 import io.wispforest.owo.util.pond.OwoSlotExtension;
 import net.minecraft.client.gui.DrawContext;
@@ -21,7 +22,7 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.function.BiFunction;
 
-public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends ScreenHandler> extends HandledScreen<S> {
+public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends ScreenHandler> extends HandledScreen<S> implements DisposableScreen {
 
     /**
      * The UI adapter of this screen. This handles
@@ -210,8 +211,15 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
 
     @Override
     public void removed() {
-        if (this.uiAdapter != null) this.uiAdapter.dispose();
         super.removed();
+        if (this.uiAdapter != null) {
+            this.uiAdapter.cursorAdapter.applyStyle(CursorStyle.NONE);
+        }
+    }
+
+    @Override
+    public void dispose() {
+        if (this.uiAdapter != null) this.uiAdapter.dispose();
     }
 
     @Override
