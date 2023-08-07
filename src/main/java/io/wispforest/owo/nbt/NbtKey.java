@@ -1,16 +1,20 @@
 package io.wispforest.owo.nbt;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.*;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.util.TriConsumer;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.IntFunction;
+import java.util.function.Supplier;
 
 /**
  * A utility class for serializing data into {@link NbtCompound}
@@ -70,7 +74,7 @@ public class NbtKey<T> {
      */
     @Deprecated
     public boolean isIn(@NotNull NbtCompound nbt) {
-        return nbt.contains(this.key, this.type.nbtEquivalent);
+        return nbt.contains(this.key, this.type.nbtEquivalent.get());
     }
 
     /**
@@ -79,6 +83,7 @@ public class NbtKey<T> {
      *
      * @param <T> The type of elements in the list
      */
+    @Deprecated
     public static final class ListKey<T> extends NbtKey<NbtList> {
 
         private final Type<T> elementType;
@@ -90,7 +95,7 @@ public class NbtKey<T> {
 
         @Override
         public NbtList get(@NotNull NbtCompound nbt) {
-            return nbt.getList(this.key, this.elementType.nbtEquivalent);
+            return nbt.getList(this.key, this.elementType.nbtEquivalent.get());
         }
 
         @Override
@@ -109,26 +114,36 @@ public class NbtKey<T> {
      * used for creating {@link NbtKey} instances
      */
     public static final class Type<T> {
-        public static final Type<Byte> BYTE = new Type<>(NbtElement.BYTE_TYPE, NbtCompound::getByte, NbtCompound::putByte);
-        public static final Type<Short> SHORT = new Type<>(NbtElement.SHORT_TYPE, NbtCompound::getShort, NbtCompound::putShort);
-        public static final Type<Integer> INT = new Type<>(NbtElement.INT_TYPE, NbtCompound::getInt, NbtCompound::putInt);
-        public static final Type<Long> LONG = new Type<>(NbtElement.LONG_TYPE, NbtCompound::getLong, NbtCompound::putLong);
-        public static final Type<Float> FLOAT = new Type<>(NbtElement.FLOAT_TYPE, NbtCompound::getFloat, NbtCompound::putFloat);
-        public static final Type<Double> DOUBLE = new Type<>(NbtElement.DOUBLE_TYPE, NbtCompound::getDouble, NbtCompound::putDouble);
-        public static final Type<byte[]> BYTE_ARRAY = new Type<>(NbtElement.BYTE_ARRAY_TYPE, NbtCompound::getByteArray, NbtCompound::putByteArray);
-        public static final Type<String> STRING = new Type<>(NbtElement.STRING_TYPE, NbtCompound::getString, NbtCompound::putString);
-        public static final Type<NbtCompound> COMPOUND = new Type<>(NbtElement.COMPOUND_TYPE, NbtCompound::getCompound, NbtCompound::put);
-        public static final Type<int[]> INT_ARRAY = new Type<>(NbtElement.INT_ARRAY_TYPE, NbtCompound::getIntArray, NbtCompound::putIntArray);
-        public static final Type<long[]> LONG_ARRAY = new Type<>(NbtElement.LONG_ARRAY_TYPE, NbtCompound::getLongArray, NbtCompound::putLongArray);
-        public static final Type<ItemStack> ITEM_STACK = new Type<>(NbtElement.COMPOUND_TYPE, Type::readItemStack, Type::writeItemStack);
-        public static final Type<Identifier> IDENTIFIER = new Type<>(NbtElement.STRING_TYPE, Type::readIdentifier, Type::writeIdentifier);
-        public static final Type<Boolean> BOOLEAN = new Type<>(NbtElement.BYTE_TYPE, NbtCompound::getBoolean, NbtCompound::putBoolean);
+        public static final Type<Byte> BYTE = new Type<>(NbtElementHandler.BYTE);
+        public static final Type<Short> SHORT = new Type<>(NbtElementHandler.SHORT);
+        public static final Type<Integer> INT = new Type<>(NbtElementHandler.INT);
+        public static final Type<Long> LONG = new Type<>(NbtElementHandler.LONG);
+        public static final Type<Float> FLOAT = new Type<>(NbtElementHandler.FLOAT);
+        public static final Type<Double> DOUBLE = new Type<>(NbtElementHandler.DOUBLE);
+        public static final Type<byte[]> BYTE_ARRAY = new Type<>(NbtElementHandler.BYTE_ARRAY);
+        public static final Type<String> STRING = new Type<>(NbtElementHandler.STRING);
+        public static final Type<NbtCompound> COMPOUND = new Type<>(NbtElementHandler.COMPOUND);
+        public static final Type<int[]> INT_ARRAY = new Type<>(NbtElementHandler.INT_ARRAY);
+        public static final Type<long[]> LONG_ARRAY = new Type<>(NbtElementHandler.LONG_ARRAY);
+        public static final Type<ItemStack> ITEM_STACK = new Type<>(NbtElementHandler.ITEM_STACK);
+        public static final Type<Identifier> IDENTIFIER = new Type<>(NbtElementHandler.IDENTIFIER);
+        public static final Type<Boolean> BOOLEAN = new Type<>(NbtElementHandler.BOOLEAN);
 
-        private final byte nbtEquivalent;
+        @Nullable
+        private NbtElementHandler<T, ? extends NbtElement> handler = null;
+
+        private final Supplier<Byte> nbtEquivalent;
         private final BiFunction<NbtCompound, String, T> getter;
         private final TriConsumer<NbtCompound, String, T> setter;
 
-        private Type(byte nbtEquivalent, BiFunction<NbtCompound, String, T> getter, TriConsumer<NbtCompound, String, T> setter) {
+        private Type(@NotNull NbtElementHandler<T, ? extends NbtElement> handler) {
+            this(() -> handler.nbtEquivalent, (compound, s) -> handler.fromElement.apply(handler.getElement(compound, s)), (compound, s, t) -> handler.setElement(compound, s, handler.toElement.apply(t)));
+
+            this.handler = handler;
+        }
+
+        @Deprecated
+        private Type(Supplier<Byte> nbtEquivalent, BiFunction<NbtCompound, String, T> getter, TriConsumer<NbtCompound, String, T> setter) {
             this.nbtEquivalent = nbtEquivalent;
             this.getter = getter;
             this.setter = setter;
@@ -145,25 +160,37 @@ public class NbtKey<T> {
          * @return The new key
          */
         public <R> Type<R> then(Function<T, R> getter, Function<R, T> setter) {
-            return new Type<>(this.nbtEquivalent,
-                    (compound, s) -> getter.apply(this.getter.apply(compound, s)),
-                    (compound, s, r) -> this.setter.accept(compound, s, setter.apply(r)));
+            if(handler == null){
+                return new Type<>(this.nbtEquivalent,
+                        (compound, s) -> getter.apply(this.getter.apply(compound, s)),
+                        (compound, s, r) -> this.setter.accept(compound, s, setter.apply(r)));
+            }
+
+            return new Type<>(handler.then(getter, setter));
+        }
+
+        /**
+         * @deprecated Use {@link Type#of(byte, Function, Function, Supplier)} instead
+         */
+        @Deprecated
+        public static <T> Type<T> of(byte nbtType, BiFunction<NbtCompound, String, T> getter, TriConsumer<NbtCompound, String, T> setter) {
+            return new Type<>(() -> nbtType, getter, setter);
         }
 
         /**
          * Creates a new {@link Type} that supports reading and writing data of type {@code T}
-         * into {@link NbtCompound} instances. Use this if you want to store data that is
+         * into {@link NbtCompound} instances using {@link NbtElementHandler}. Use this if you want to store data that is
          * not supported by the default provided types
          *
          * @param nbtType The type of NBT element that is used to represent the data,
          *                see {@link NbtElement} for the relevant constants
-         * @param getter  The function used for writing objects to an {@code NbtCompound}
-         * @param setter  The function used for reading objects from an {@code NbtCompound}
+         * @param fromElement  The function used to convert from the type {@code T} to the required {@code NbtElement}
+         * @param toElement    The function used to convert from the {@code NbtElement} to the specified type {@code T}
          * @param <T>     The type of data the created key can serialize
          * @return The created Type instance
          */
-        public static <T> Type<T> of(byte nbtType, BiFunction<NbtCompound, String, T> getter, TriConsumer<NbtCompound, String, T> setter) {
-            return new Type<>(nbtType, getter, setter);
+        public static <T, E extends NbtElement> Type<T> of(byte nbtType, Function<E, T> fromElement, Function<T, E> toElement, Supplier<E> defaultValue) {
+            return new Type<>(NbtElementHandler.of(nbtType, fromElement, toElement, defaultValue));
         }
 
         /**
@@ -175,25 +202,82 @@ public class NbtKey<T> {
          * @return The created type
          */
         public static <T> Type<T> ofRegistry(Registry<T> registry) {
-            return new Type<>(NbtElement.STRING_TYPE,
-                    (compound, s) -> registry.get(new Identifier(compound.getString(s))),
-                    (compound, s, t) -> compound.putString(s, registry.getId(t).toString()));
+            return new Type<>(NbtElementHandler.IDENTIFIER.then(registry::get, registry::getId));
+        }
+    }
+
+    public static final class CollectionKey<T, C extends Collection<T>> extends NbtKey<NbtList> {
+        private final Type<T> elementType;
+
+        private final IntFunction<C> collectionBuilder;
+
+        public CollectionKey(String key, Type<T> elementType, IntFunction<C> collectionBuilder) {
+            super(key, null);
+
+            if(elementType.handler == null){
+                throw new IllegalArgumentException("A CollectionKey was attempted to be constructed with a NbtKey.Type that was not created with a NbtElementHandler which is required!");
+            }
+
+            this.elementType = elementType;
+            this.collectionBuilder = collectionBuilder;
         }
 
-        private static void writeItemStack(NbtCompound nbt, String key, ItemStack stack) {
-            nbt.put(key, stack.writeNbt(new NbtCompound()));
+        public <E extends NbtElement> C getCollection(@NotNull NbtCompound nbt) {
+            NbtList nbtList = get(nbt);
+
+            C collection = collectionBuilder.apply(nbtList.size());
+
+            for (NbtElement element : nbtList) collection.add(((Function<E, T>) elementType.handler.fromElement).apply((E) element));
+
+            return collection;
         }
 
-        private static ItemStack readItemStack(NbtCompound nbt, String key) {
-            return nbt.contains(key, NbtElement.COMPOUND_TYPE) ? ItemStack.fromNbt(nbt.getCompound(key)) : ItemStack.EMPTY;
+        public void putCollection(@NotNull NbtCompound nbt, C values) {
+            NbtList nbtList = new NbtList();
+
+            for(T value : values) nbtList.add(elementType.handler.toElement.apply(value));
+
+            put(nbt, nbtList);
         }
 
-        private static void writeIdentifier(NbtCompound nbt, String key, Identifier identifier) {
-            nbt.putString(key, identifier.toString());
+        public Iterator<T> iterator(NbtCompound nbt){
+            return new NbtListIterator<>(get(nbt), elementType.handler.fromElement);
         }
 
-        private static Identifier readIdentifier(NbtCompound nbt, String key) {
-            return nbt.contains(key, NbtElement.STRING_TYPE) ? new Identifier(nbt.getString(key)) : null;
+        @Override
+        public NbtList get(@NotNull NbtCompound nbt) {
+            return nbt.getList(this.key, this.elementType.nbtEquivalent.get());
+        }
+
+        @Override
+        public void put(@NotNull NbtCompound nbt, NbtList value) {
+            nbt.put(this.key, value);
+        }
+
+        @Override
+        public boolean isIn(@NotNull NbtCompound nbt) {
+            return nbt.contains(this.key, NbtElement.LIST_TYPE);
+        }
+
+        public static class NbtListIterator<T, E extends NbtElement> implements Iterator<T> {
+            private final Iterator<NbtElement> listIterator;
+            private final Function<E, T> getter;
+
+            public NbtListIterator(List<NbtElement> listIterator, Function<E, T> getter){
+                this.listIterator = listIterator.iterator();
+
+                this.getter = getter;
+            }
+
+            @Override
+            public boolean hasNext() {
+                return listIterator.hasNext();
+            }
+
+            @Override
+            public T next() {
+                return this.getter.apply((E) listIterator.next());
+            }
         }
     }
 

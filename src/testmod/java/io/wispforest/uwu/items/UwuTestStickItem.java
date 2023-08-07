@@ -23,10 +23,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 public class UwuTestStickItem extends Item {
-
-    private static final NbtKey<Text> TEXT_KEY = new NbtKey<>("Text", NbtKey.Type.of(NbtElement.STRING_TYPE,
-            (compound, s) -> Text.Serializer.fromJson(compound.getString(s)),
-            (compound, s, text) -> compound.putString(s, Text.Serializer.toJson(text))));
+    private static final NbtKey<Text> TEXT_KEY = new NbtKey<>("Text", NbtKey.Type.STRING.then(Text.Serializer::fromJson, Text.Serializer::toJson));
 
     public UwuTestStickItem() {
         super(new OwoItemSettings().group(Uwu.SIX_TAB_GROUP).tab(3).maxCount(1)
