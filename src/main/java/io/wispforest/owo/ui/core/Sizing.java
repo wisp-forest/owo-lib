@@ -56,6 +56,13 @@ public class Sizing implements Animatable<Sizing> {
     public static Sizing content(int padding) {
         return new Sizing(padding, Method.CONTENT);
     }
+    
+    /**
+     * Dynamically size the component to fill the available space
+     */
+    public static Sizing fill() {
+        return fill(100);
+    }
 
     /**
      * Dynamically size the component based on the available space
