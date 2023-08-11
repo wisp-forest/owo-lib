@@ -15,6 +15,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.Items;
+import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -33,8 +34,7 @@ import java.util.stream.Collectors;
 public class UwuTestStickItem extends Item {
     private static final NbtKey<Text> TEXT_KEY = new NbtKey<>("Text", NbtKey.Type.STRING.then(Text.Serializer::fromJson, Text.Serializer::toJson));
     private static final NbtKey<Set<Text>> TEXTS_KEY = new NbtKey<>("Texts", NbtKey.Type.collectionType(NbtKey.Type.STRING.then(Text.Serializer::fromJson, Text.Serializer::toJson), HashSet::new));
-
-    private static final NbtKey<Map<String, Integer>> MAP_NBT_KEY = new NbtKey<>("CursedMap", NbtKey.Type.mapType(NbtKey.Type.STRING, NbtKey.Type.INT, HashMap::new));
+    private static final NbtKey<Map<String, Integer>> CURSED_KEY = new NbtKey<>("CursedMap", NbtKey.Type.mapType(NbtKey.Type.STRING, NbtKey.Type.INT, HashMap::new));
 
     public UwuTestStickItem() {
         super(new OwoItemSettings().group(Uwu.SIX_TAB_GROUP).tab(3).maxCount(1)
@@ -80,6 +80,10 @@ public class UwuTestStickItem extends Item {
 
         final var stickStack = context.getStack();
 
+        //--
+
+        context.getPlayer().sendMessage(Text.of("----"), false);
+
         if (!stickStack.has(TEXT_KEY)) {
             stickStack.put(TEXT_KEY, Text.of(String.valueOf(context.getWorld().random.nextInt(1000000))));
         }
@@ -90,22 +94,58 @@ public class UwuTestStickItem extends Item {
 
         //--
 
+        context.getPlayer().sendMessage(Text.of(""), false);
+
         if (!stickStack.has(TEXTS_KEY)) {
             stickStack.put(TEXTS_KEY, Set.of(
-                    Text.of(String.valueOf(context.getWorld().random.nextInt(1000000))),
-                    Text.of(String.valueOf(context.getWorld().random.nextInt(1000000))),
-                    Text.of(String.valueOf(context.getWorld().random.nextInt(1000000))),
-                    Text.of(String.valueOf(context.getWorld().random.nextInt(1000000)))
+                    Text.of("[Num: " + context.getWorld().random.nextInt(1000000) + "]"),
+                    Text.of("[Num: " + context.getWorld().random.nextInt(1000000) + "]"),
+                    Text.of("[Num: " + context.getWorld().random.nextInt(1000000) + "]"),
+                    Text.of("[Num: " + context.getWorld().random.nextInt(1000000) + "]")
             ));
         }
 
         stickStack.mutate(TEXTS_KEY, texts -> {
             return texts.stream()
-                    .map(text -> MutableText.of(new BasedTextContent("basednite, ")).append(text))
+                    .map(text -> Text.literal("List Entry: ").append(text))
                     .collect(Collectors.toSet());
         });
 
-        context.getPlayer().sendMessage(stickStack.get(TEXTS_KEY).stream().reduce(Text.empty(), (mutableText, text) -> text.copy(), MutableText::append), false);
+        stickStack.get(TEXTS_KEY).forEach(text -> context.getPlayer().sendMessage(text, false));
+
+        //--
+
+        context.getPlayer().sendMessage(Text.of(""), false);
+
+        if (!stickStack.has(CURSED_KEY)) {
+            int randomNum = context.getWorld().random.nextInt(5);
+
+            Map<String, Integer> map = new HashMap<>();
+
+            for(int i = 0; i < randomNum; i++){
+                String path = Registries.ITEM.getId(Registries.ITEM.get(i)).getPath();
+
+                map.put(path, i);
+            }
+
+            stickStack.put(CURSED_KEY, map);
+        }
+
+        stickStack.mutate(CURSED_KEY, map -> {
+            Map<String, Integer> mutatedMap = new HashMap<>(map.size());
+
+            map.forEach((s, integer) -> mutatedMap.put(s + "-[ID: " + integer + "]", integer + 21));
+
+            return mutatedMap;
+        });
+
+        Set<Text> mapTexts = stickStack.get(CURSED_KEY).entrySet().stream()
+                .map(entry -> Text.of("Map Pair [Key: " + entry.getKey() + " Value: " + entry.getValue() + "]"))
+                .collect(Collectors.toSet());
+
+        mapTexts.forEach(text -> context.getPlayer().sendMessage(text, false));
+
+        context.getPlayer().sendMessage(Text.of("----"), false);
 
         //--
 
