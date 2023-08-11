@@ -1,18 +1,20 @@
 package io.wispforest.uwu.items;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.OwoItemSettings;
 import io.wispforest.owo.nbt.NbtKey;
 import io.wispforest.owo.ops.WorldOps;
 import io.wispforest.uwu.Uwu;
 import io.wispforest.uwu.text.BasedTextContent;
+import net.fabricmc.tinyremapper.extension.mixin.common.MapUtility;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -22,8 +24,17 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 public class UwuTestStickItem extends Item {
     private static final NbtKey<Text> TEXT_KEY = new NbtKey<>("Text", NbtKey.Type.STRING.then(Text.Serializer::fromJson, Text.Serializer::toJson));
+    private static final NbtKey<Set<Text>> TEXTS_KEY = new NbtKey<>("Texts", NbtKey.Type.collectionType(NbtKey.Type.STRING.then(Text.Serializer::fromJson, Text.Serializer::toJson), HashSet::new));
+
+    private static final NbtKey<Map<String, Integer>> MAP_NBT_KEY = new NbtKey<>("CursedMap", NbtKey.Type.mapType(NbtKey.Type.STRING, NbtKey.Type.INT, HashMap::new));
 
     public UwuTestStickItem() {
         super(new OwoItemSettings().group(Uwu.SIX_TAB_GROUP).tab(3).maxCount(1)
@@ -75,7 +86,28 @@ public class UwuTestStickItem extends Item {
 
         stickStack.mutate(TEXT_KEY, text -> MutableText.of(new BasedTextContent("basednite, ")).append(text));
 
-        context.getPlayer().sendMessage(TEXT_KEY.get(stickStack.getNbt()), false);
+        context.getPlayer().sendMessage(stickStack.get(TEXT_KEY), false);
+
+        //--
+
+        if (!stickStack.has(TEXTS_KEY)) {
+            stickStack.put(TEXTS_KEY, Set.of(
+                    Text.of(String.valueOf(context.getWorld().random.nextInt(1000000))),
+                    Text.of(String.valueOf(context.getWorld().random.nextInt(1000000))),
+                    Text.of(String.valueOf(context.getWorld().random.nextInt(1000000))),
+                    Text.of(String.valueOf(context.getWorld().random.nextInt(1000000)))
+            ));
+        }
+
+        stickStack.mutate(TEXTS_KEY, texts -> {
+            return texts.stream()
+                    .map(text -> MutableText.of(new BasedTextContent("basednite, ")).append(text))
+                    .collect(Collectors.toSet());
+        });
+
+        context.getPlayer().sendMessage(stickStack.get(TEXTS_KEY).stream().reduce(Text.empty(), (mutableText, text) -> text.copy(), MutableText::append), false);
+
+        //--
 
         Uwu.BREAK_BLOCK_PARTICLES.spawn(context.getWorld(), Vec3d.of(context.getBlockPos()), null);
 

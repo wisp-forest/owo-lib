@@ -6,9 +6,7 @@ import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
@@ -105,58 +103,6 @@ public class NbtKey<T> {
         }
     }
 
-    public static final class CollectionKey<T, C extends Collection<T>> extends ListKey<T> {
-
-        private final IntFunction<C> collectionBuilder;
-
-        public CollectionKey(String key, Type<T, ?> elementType, IntFunction<C> collectionBuilder) {
-            super(key, elementType);
-            this.collectionBuilder = collectionBuilder;
-        }
-
-        public <E extends NbtElement> C getCollection(@NotNull NbtCompound nbt) {
-            NbtList nbtList = get(nbt);
-
-            C collection = this.collectionBuilder.apply(nbtList.size());
-
-            for (NbtElement element : nbtList) collection.add(((Function<E, T>) this.elementType.fromElement).apply((E) element));
-
-            return collection;
-        }
-
-        public void putCollection(@NotNull NbtCompound nbt, Collection<T> values) {
-            NbtList nbtList = new NbtList();
-
-            for(T value : values) nbtList.add(this.elementType.toElement.apply(value));
-
-            put(nbt, nbtList);
-        }
-
-        public Iterator<T> iterator(NbtCompound nbt){
-            return new NbtListIterator<>(get(nbt), this.elementType);
-        }
-
-        public static class NbtListIterator<T, E extends NbtElement> implements Iterator<T> {
-            private final Iterator<NbtElement> listIterator;
-            private final Type<T, E> elementType;
-
-            public NbtListIterator(List<NbtElement> listIterator, Type<T, E> elementType){
-                this.listIterator = listIterator.iterator();
-                this.elementType = elementType;
-            }
-
-            @Override
-            public boolean hasNext() {
-                return this.listIterator.hasNext();
-            }
-
-            @Override
-            public T next() {
-                return this.elementType.fromElement.apply((E) listIterator.next());
-            }
-        }
-    }
-
     /**
      * A container type holding serialization functions,
      * used for creating {@link NbtKey} instances
@@ -176,6 +122,7 @@ public class NbtKey<T> {
         public static final Type<ItemStack, NbtCompound> ITEM_STACK = new Type<>(NbtElement.COMPOUND_TYPE, Type::readItemStack, Type::writeItemStack, NbtCompound::new);
         public static final Type<Identifier, NbtString> IDENTIFIER = new Type<>(NbtElement.STRING_TYPE, Type::readIdentifier, Type::writeIdentifier, () -> NbtString.of("")); // Type::readIdentifier, Type::writeIdentifier
         public static final Type<Boolean, NbtByte> BOOLEAN = new Type<>(NbtElement.BYTE_TYPE, nbtByte -> nbtByte.byteValue() != 0, NbtByte::of, () -> NbtByte.of(false));
+        public static final Type<NbtList, NbtList> LIST = new Type<>(NbtElement.LIST_TYPE, nbtList -> nbtList, nbtList -> nbtList, NbtList::new);
 
         private final byte nbtEquivalent;
 
@@ -234,6 +181,78 @@ public class NbtKey<T> {
          */
         public static <T, E extends NbtElement> Type<T, E> of(byte nbtType, Function<E, T> fromElement, Function<T, E> toElement, Supplier<E> defaultValue) {
             return new Type<>(nbtType, fromElement, toElement, defaultValue);
+        }
+
+        /**
+         * Create a new type that serializes a Map of elements of the given Key {@link Type} and Value {@link Type}
+         *
+         * @param keyType    The {@link Type} used to serialize between {@link NbtCompound} and {@link Map.Entry} Key
+         * @param valueType  The {@link Type} used to serialize between {@link NbtCompound} and {@link Map.Entry} Value
+         * @param mapBuilder The builder used to create new instances of a Map
+         * @param <K> The type of the key of the given map type
+         * @param <V> The type of the value of the given map type
+         * @param <M> The type of map the created Type can serialize
+         * @return The map based Type instance
+         */
+        public static <K, V, M extends Map<K, V>> Type<M, ?> mapType(Type<K, ?> keyType, Type<V, ?> valueType, IntFunction<M> mapBuilder){
+            Type<Set<Map.Entry<K,V>>, ?> setType = collectionType(
+                    Type.COMPOUND.then(
+                            compound -> Map.entry(keyType.getter(compound, "key"), valueType.getter(compound, "value")),
+                            (Map.Entry<K, V> entry) -> {
+                                NbtCompound compound = new NbtCompound();
+
+                                keyType.setter(compound, "key", entry.getKey());
+                                valueType.setter(compound, "value", entry.getValue());
+
+                                return compound;
+                            }),
+                    HashSet::new);
+
+            return setType.then(entries -> {
+                M returnMap = mapBuilder.apply(entries.size());
+
+                for (Map.Entry<K, V> entry : entries) returnMap.put(entry.getKey(), entry.getValue());
+
+                return returnMap;
+            }, Map::entrySet);
+        }
+
+        /**
+         * Creates a new type that serializes a List of elements of the given {@link Type}
+         *
+         * @param elementType The {@link Type} base used to serialize between {@link NbtList} elements
+         * @param <T>         The type of data the passed key can serialize
+         * @return The List based Type instance
+         */
+        public static <T> Type<List<T>, ?> listType(Type<T, ?> elementType){
+            return collectionType(elementType, ArrayList::new);
+        }
+
+        /**
+         *
+         * @param elementType       The {@link Type} base key used to serialize between {@link NbtList}
+         * @param collectionBuilder The builder used to create new instances of a collection
+         * @param <T>               The type of data the passed key can serialize
+         * @param <C>               The type of collection the created Type can serialize
+         * @return The Collection based type instance
+         */
+        public static <T, C extends Collection<T>, E extends NbtElement> Type<C, ?> collectionType(Type<T, ?> elementType, IntFunction<C> collectionBuilder){
+            return Type.LIST.then(
+                    nbtList -> {
+                        C collection = collectionBuilder.apply(nbtList.size());
+
+                        for (NbtElement element : nbtList) collection.add(((Function<E, T>) elementType.fromElement).apply((E) element));
+
+                        return collection;
+                    },
+                    values -> {
+                        NbtList nbtList = new NbtList();
+
+                        for(T value : values) nbtList.add(elementType.toElement.apply(value));
+
+                        return nbtList;
+                    }
+            );
         }
 
         /**
