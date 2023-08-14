@@ -326,6 +326,10 @@ public abstract class OwoItemGroup extends ItemGroup {
         return this.displaySingleTab;
     }
 
+    public boolean canSelectMultipleTabs() {
+        return this.allowMultiSelect;
+    }
+
     public List<ItemGroupButton> getButtons() {
         return buttons;
     }

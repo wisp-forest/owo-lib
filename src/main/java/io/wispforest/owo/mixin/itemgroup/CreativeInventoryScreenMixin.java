@@ -180,17 +180,19 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 
         for (var button : this.owo$buttons) {
             if (button.trulyHovered()) {
-                context.drawTooltip(this.textRenderer, List.of(button.getMessage(), Text.translatable("text.owo.itemGroup.select_hint")), mouseX, mouseY);
+                context.drawTooltip(
+                        this.textRenderer,
+                        button.isTab() && ((OwoItemGroup)selectedTab).canSelectMultipleTabs()
+                                ? List.of(button.getMessage(), Text.translatable("text.owo.itemGroup.select_hint"))
+                                : List.of(button.getMessage()),
+                        mouseX,
+                        mouseY
+                );
                 anyButtonHovered = true;
             }
         }
 
         this.owo$cursorAdapter.applyStyle(anyButtonHovered ? CursorStyle.HAND : CursorStyle.NONE);
-    }
-
-    @Inject(method = "init", at = @At("HEAD"))
-    private void createCursorAdapter(CallbackInfo ci) {
-//        this.owo$cursorAdapter = CursorAdapter.ofClientWindow();
     }
 
     @Inject(method = "removed", at = @At("HEAD"))
