@@ -49,7 +49,8 @@ public final class Wisdom {
             "chyz: now i just need to painstakingly move jerry (the little tiny lil fella tiny guy man button) to correct spot when recipe book is opened",
             "chyz: bro, can you stop breathing",
             "Noaaan: It's surprising how much knowledge is lost by the simple fact that people don't know it",
-            "Blodhgarm: Did you know it took four switcheroos to implement the Matrices in the correct folder"
+            "Blodhgarm: Did you know it took four switcheroos to implement MatrixStackTransformer in the correct package?",
+            "chyz: who would've thought that if you don't summon satan things go better. you can put that in wisdom if you like"
     );
 
     public static void spread() {

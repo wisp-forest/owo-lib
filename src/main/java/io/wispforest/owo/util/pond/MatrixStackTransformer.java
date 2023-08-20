@@ -6,7 +6,7 @@ import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
 /**
- * Helper Interface implemented on top of the {@link DrawContext} to allow for easier matrix stack transformations
+ * Helper interface implemented on top of the {@link DrawContext} to allow for easier matrix stack transformations
  */
 public interface MatrixStackTransformer {
 
