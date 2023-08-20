@@ -8,6 +8,9 @@ import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
 import io.wispforest.owo.ui.util.ScissorStack;
+import io.wispforest.owo.ui.window.context.CurrentWindowContext;
+import io.wispforest.owo.ui.window.context.WindowContext;
+import io.wispforest.owo.util.SupportsFeatures;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.gl.SimpleFramebuffer;
@@ -24,6 +27,7 @@ import org.lwjgl.opengl.GL30;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -41,7 +45,6 @@ import java.util.function.Consumer;
 @ApiStatus.Experimental
 public class RenderEffectWrapper<C extends Component> extends WrappingParentComponent<C> {
 
-    protected static final List<Framebuffer> FRAMEBUFFERS = new ArrayList<>();
     protected static int drawDepth = 0;
 
     protected final List<RenderEffectSlot> effects = new ArrayList<>();
@@ -58,13 +61,11 @@ public class RenderEffectWrapper<C extends Component> extends WrappingParentComp
         try {
             drawDepth++;
 
-            var window = MinecraftClient.getInstance().getWindow();
-            while (drawDepth > FRAMEBUFFERS.size()) {
-                FRAMEBUFFERS.add(new SimpleFramebuffer(window.getFramebufferWidth(), window.getFramebufferHeight(), true, MinecraftClient.IS_SYSTEM_MAC));
-            }
+            var window = CurrentWindowContext.current();
+            var feature = window.get(FramebuffersFeature.KEY);
 
             var previousFramebuffer = GlStateManager.getBoundFramebuffer();
-            var framebuffer = FRAMEBUFFERS.get(drawDepth - 1);
+            var framebuffer = feature.getFor(drawDepth);
             framebuffer.setClearColor(0, 0, 0, 0);
             ScissorStack.drawUnclipped(() -> framebuffer.clear(MinecraftClient.IS_SYSTEM_MAC));
             framebuffer.beginWrite(false);
@@ -82,9 +83,9 @@ public class RenderEffectWrapper<C extends Component> extends WrappingParentComp
             var matrix = context.getMatrices().peek().getPositionMatrix();
 
             buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
-            buffer.vertex(matrix, 0, window.getScaledHeight(), 0).texture(0, 0).color(1f, 1f, 1f, 1f).next();
-            buffer.vertex(matrix, window.getScaledWidth(), window.getScaledHeight(), 0).texture(1, 0).color(1f, 1f, 1f, 1f).next();
-            buffer.vertex(matrix, window.getScaledWidth(), 0, 0).texture(1, 1).color(1f, 1f, 1f, 1f).next();
+            buffer.vertex(matrix, 0, window.scaledHeight(), 0).texture(0, 0).color(1f, 1f, 1f, 1f).next();
+            buffer.vertex(matrix, window.scaledWidth(), window.scaledHeight(), 0).texture(1, 0).color(1f, 1f, 1f, 1f).next();
+            buffer.vertex(matrix, window.scaledWidth(), 0, 0).texture(1, 1).color(1f, 1f, 1f, 1f).next();
             buffer.vertex(matrix, 0, 0, 0).texture(0, 1).color(1f, 1f, 1f, 1f).next();
 
             RenderSystem.setShaderTexture(0, framebuffer.getColorAttachment());
@@ -122,12 +123,37 @@ public class RenderEffectWrapper<C extends Component> extends WrappingParentComp
         this.effects.clear();
     }
 
-    static {
-        WindowResizeCallback.EVENT.register((client, window) -> {
-            FRAMEBUFFERS.forEach(framebuffer -> {
-                framebuffer.resize(window.getFramebufferWidth(), window.getFramebufferHeight(), MinecraftClient.IS_SYSTEM_MAC);
+    private static final class FramebuffersFeature implements AutoCloseable {
+        public static SupportsFeatures.Key<WindowContext, FramebuffersFeature> KEY = new SupportsFeatures.Key<>(FramebuffersFeature::new);
+
+        private final WindowContext ctx;
+        private final List<Framebuffer> framebuffers;
+
+        public FramebuffersFeature(WindowContext ctx) {
+            this.framebuffers = new ArrayList<>();
+            this.ctx = ctx;
+
+            ctx.framebufferResized().subscribe((newWidth, newHeight) -> {
+                framebuffers.forEach(framebuffer -> {
+                    framebuffer.resize(newWidth, newHeight, MinecraftClient.IS_SYSTEM_MAC);
+                });
             });
-        });
+        }
+
+        public Framebuffer getFor(int drawDepth) {
+            while (drawDepth > framebuffers.size()) {
+                framebuffers.add(new SimpleFramebuffer(ctx.framebufferWidth(), ctx.framebufferHeight(), true, MinecraftClient.IS_SYSTEM_MAC));
+            }
+
+            return framebuffers.get(drawDepth - 1);
+        }
+
+        @Override
+        public void close() {
+            for (Framebuffer fb : framebuffers) {
+                fb.delete();
+            }
+        }
     }
 
     public class RenderEffectSlot {

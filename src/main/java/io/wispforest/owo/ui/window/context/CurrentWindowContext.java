@@ -1,7 +1,5 @@
 package io.wispforest.owo.ui.window.context;
 
-import net.minecraft.client.MinecraftClient;
-
 public final class CurrentWindowContext {
     private static WindowContext CURRENT = VanillaWindowContext.MAIN;
 
