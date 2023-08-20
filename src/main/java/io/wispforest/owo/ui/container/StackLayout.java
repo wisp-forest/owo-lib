@@ -60,8 +60,8 @@ public class StackLayout extends BaseParentComponent {
         var verticalAlignment = this.verticalAlignment();
 
         for (var child : layout) {
-            child.updateX(child.x() + horizontalAlignment.align(child.fullSize().width(), this.width - this.padding.get().horizontal()));
-            child.updateY(child.y() + verticalAlignment.align(child.fullSize().height(), this.height - this.padding.get().vertical()));
+            child.updateX(child.baseX() + horizontalAlignment.align(child.fullSize().width(), this.width - this.padding.get().horizontal()));
+            child.updateY(child.baseY() + verticalAlignment.align(child.fullSize().height(), this.height - this.padding.get().vertical()));
         }
 
         helper.mountLate();

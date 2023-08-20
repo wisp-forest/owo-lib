@@ -32,7 +32,7 @@ import java.util.function.Supplier;
  * {@link OwoItemSettings#tab(int)}. Furthermore, tags can be used for easily populating
  * tabs from data
  * <p>
- * This concept originated in Biome Makeover, where it was written by Lemonszz
+ * The roots of this implementation originated in Biome Makeover, where it was written by Lemonszz
  */
 public abstract class OwoItemGroup extends ItemGroup {
 
@@ -98,7 +98,7 @@ public abstract class OwoItemGroup extends ItemGroup {
         if (this.initialized) return;
 
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) this.initializer.accept(this);
-        if (tabs.size() == 0) this.tabs.add(PLACEHOLDER_TAB);
+        if (this.tabs.isEmpty()) this.tabs.add(PLACEHOLDER_TAB);
 
         if (this.allowMultiSelect) {
             for (int tabIdx = 0; tabIdx < this.tabs.size(); tabIdx++) {

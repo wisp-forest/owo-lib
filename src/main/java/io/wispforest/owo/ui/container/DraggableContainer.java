@@ -73,6 +73,16 @@ public class DraggableContainer<C extends Component> extends WrappingParentCompo
     }
 
     @Override
+    public int baseX() {
+        return this.baseX;
+    }
+
+    @Override
+    public int baseY() {
+        return this.baseY;
+    }
+
+    @Override
     public ParentComponent padding(Insets padding) {
         return super.padding(Insets.of(padding.top() + this.foreheadSize, padding.bottom(), padding.left(), padding.right()));
     }

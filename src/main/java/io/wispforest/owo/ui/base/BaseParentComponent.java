@@ -271,7 +271,7 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
         super.updateX(x);
 
         for (var child : this.children()) {
-            child.updateX(child.x() + offset);
+            child.updateX(child.baseX() + offset);
         }
     }
 
@@ -281,7 +281,7 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
         super.updateY(y);
 
         for (var child : this.children()) {
-            child.updateY(child.y() + offset);
+            child.updateY(child.baseY() + offset);
         }
     }
 
