@@ -5,7 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.renderdoc.RenderDoc;
 import io.wispforest.owo.ui.util.CursorAdapter;
-import io.wispforest.owo.ui.window.CurrentWindowContext;
+import io.wispforest.owo.ui.window.context.CurrentWindowContext;
 import io.wispforest.owo.ui.window.OwoWindow;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
@@ -190,7 +190,7 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
             RenderSystem.enableDepthTest();
             GlStateManager._enableScissorTest();
 
-            GlStateManager._scissorBox(0, 0, CurrentWindowContext.framebufferWidth(), CurrentWindowContext.framebufferHeight());
+            GlStateManager._scissorBox(0, 0, CurrentWindowContext.current().framebufferWidth(), CurrentWindowContext.current().framebufferHeight());
             this.rootComponent.draw(owoContext, mouseX, mouseY, partialTicks, delta);
 
             GlStateManager._disableScissorTest();

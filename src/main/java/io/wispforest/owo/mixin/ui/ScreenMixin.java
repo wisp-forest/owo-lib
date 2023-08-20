@@ -4,7 +4,9 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
-import io.wispforest.owo.ui.window.CurrentWindowContext;
+import io.wispforest.owo.ui.window.context.CurrentWindowContext;
+import io.wispforest.owo.ui.window.context.VanillaWindowContext;
+import io.wispforest.owo.ui.window.context.WindowContext;
 import net.minecraft.client.gui.screen.Screen;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,6 +34,8 @@ public class ScreenMixin {
 
     @ModifyArg(method = {"hasShiftDown", "hasControlDown", "hasAltDown"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/InputUtil;isKeyPressed(JI)Z"), index = 0)
     private static long replaceOnOtherWindow(long handle) {
-        return CurrentWindowContext.isMain() ? handle : CurrentWindowContext.handle();
+        WindowContext ctx = CurrentWindowContext.current();
+
+        return ctx != VanillaWindowContext.MAIN ? ctx.handle() : handle;
     }
 }
