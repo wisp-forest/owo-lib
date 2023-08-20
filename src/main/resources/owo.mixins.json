@@ -12,6 +12,7 @@
     "ScreenHandlerMixin",
     "ServerLoginNetworkHandlerAccessor",
     "ServerPlayerEntityMixin",
+    "ServerPlayerInteractionManagerMixin",
     "ServerPlayNetworkHandlerAccessor",
     "SimpleRegistryMixin",
     "TagGroupLoaderMixin",
@@ -36,8 +37,8 @@
   ],
   "client": [
     "ClientLoginNetworkHandlerAccessor",
-    "MinecraftClientMixin",
     "DrawContextMixin",
+    "MinecraftClientMixin",
     "itemgroup.AbstractInventoryScreenMixin",
     "itemgroup.CreativeInventoryScreenAccessor",
     "itemgroup.CreativeInventoryScreenMixin",

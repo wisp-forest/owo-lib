@@ -3,10 +3,13 @@ package io.wispforest.owo.itemgroup;
 import net.fabricmc.fabric.api.item.v1.CustomDamageHandler;
 import net.fabricmc.fabric.api.item.v1.EquipmentSlotProvider;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.FoodComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.util.Hand;
 import net.minecraft.util.Rarity;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiConsumer;
@@ -17,6 +20,7 @@ public class OwoItemSettings extends FabricItemSettings {
     private OwoItemGroup group = null;
     private int tab = 0;
     private BiConsumer<Item, ItemGroup.Entries> stackGenerator = OwoItemGroup.DEFAULT_STACK_GENERATOR;
+    private boolean trackUsageStat = false;
 
     public OwoItemSettings group(ItemGroupReference ref) {
         this.group = ref.group();
@@ -56,6 +60,20 @@ public class OwoItemSettings extends FabricItemSettings {
 
     public BiConsumer<Item, ItemGroup.Entries> stackGenerator() {
         return this.stackGenerator;
+    }
+
+    /**
+     * Automatically increment {@link net.minecraft.stat.Stats#USED}
+     * for this item every time {@link Item#use(World, PlayerEntity, Hand)}
+     * returns an accepted result
+     */
+    public OwoItemSettings trackUsageStat() {
+        this.trackUsageStat = true;
+        return this;
+    }
+
+    public boolean shouldTrackUsageStat() {
+        return this.trackUsageStat;
     }
 
     @Override

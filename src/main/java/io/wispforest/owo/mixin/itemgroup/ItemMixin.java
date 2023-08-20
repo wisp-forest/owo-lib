@@ -26,12 +26,16 @@ public class ItemMixin implements OwoItemExtensions {
     @Unique
     private BiConsumer<Item, ItemGroup.Entries> owo$stackGenerator;
 
+    @Unique
+    private boolean owo$trackUsageStat = false;
+
     @Inject(method = "<init>", at = @At("TAIL"))
     private void grabTab(Item.Settings settings, CallbackInfo ci) {
         if (settings instanceof OwoItemSettings owoSettings) {
             this.owo$tab = owoSettings.tab();
             this.owo$stackGenerator = owoSettings.stackGenerator();
             this.owo$group = owoSettings.group();
+            this.owo$trackUsageStat = owoSettings.shouldTrackUsageStat();
         }
     }
 
@@ -53,5 +57,10 @@ public class ItemMixin implements OwoItemExtensions {
     @Override
     public @Nullable ItemGroup owo$group() {
         return this.owo$group;
+    }
+
+    @Override
+    public boolean owo$shouldTrackUsageStat() {
+        return this.owo$trackUsageStat;
     }
 }
