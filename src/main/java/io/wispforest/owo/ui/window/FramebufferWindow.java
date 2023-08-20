@@ -2,6 +2,7 @@ package io.wispforest.owo.ui.window;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.event.CharTyped;
+import io.wispforest.owo.ui.window.context.WindowContext;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.OwoGlfwUtil;
@@ -19,7 +20,7 @@ import java.util.List;
 
 import static org.lwjgl.glfw.GLFW.*;
 
-public class FramebufferWindow implements AutoCloseable {
+public class FramebufferWindow implements AutoCloseable, WindowContext {
     private int width;
     private int height;
     private final long handle;
@@ -30,7 +31,7 @@ public class FramebufferWindow implements AutoCloseable {
     private final List<NativeResource> disposeList;
 
     private final EventStream<WindowClosed> windowClosedEvents = WindowClosed.newStream();
-    private final EventStream<WindowResized> windowResizedEvents = WindowResized.newStream();
+    private final EventStream<WindowFramebufferResized> framebufferResizedEvents = WindowFramebufferResized.newStream();
     private final EventStream<WindowMouseMoved> mouseMovedEvents = WindowMouseMoved.newStream();
     private final EventStream<WindowMouseButton> mouseButtonEvents = WindowMouseButton.newStream();
     private final EventStream<WindowMouseScrolled> mouseScrolledEvents = WindowMouseScrolled.newStream();
@@ -98,18 +99,36 @@ public class FramebufferWindow implements AutoCloseable {
         return resource;
     }
 
-    public int width() {
-        return width;
-    }
-
-    public int height() {
-        return height;
-    }
-
     public Framebuffer framebuffer() {
         return framebuffer;
     }
 
+    @Override
+    public int framebufferWidth() {
+        return width;
+    }
+
+    @Override
+    public int framebufferHeight() {
+        return height;
+    }
+
+    @Override
+    public int scaledWidth() {
+        return framebufferWidth();
+    }
+
+    @Override
+    public int scaledHeight() {
+        return framebufferHeight();
+    }
+
+    @Override
+    public double scaleFactor() {
+        return 1;
+    }
+
+    @Override
     public long handle() {
         return handle;
     }
@@ -118,8 +137,9 @@ public class FramebufferWindow implements AutoCloseable {
         return windowClosedEvents.source();
     }
 
-    public EventSource<WindowResized> windowResized() {
-        return windowResizedEvents.source();
+    @Override
+    public EventSource<WindowFramebufferResized> framebufferResized() {
+        return framebufferResizedEvents.source();
     }
 
     public EventSource<WindowMouseMoved> mouseMoved() {
@@ -192,7 +212,7 @@ public class FramebufferWindow implements AutoCloseable {
 
         initLocalFramebuffer();
 
-        windowResizedEvents.sink().onWindowResized(width, height);
+        framebufferResizedEvents.sink().onFramebufferResized(width, height);
     }
 
     public boolean closed() {

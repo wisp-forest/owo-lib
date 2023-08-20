@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.systems.VertexSorter;
 import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.core.ParentComponent;
+import io.wispforest.owo.ui.window.context.CurrentWindowContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.DiffuseLighting;
@@ -34,7 +35,7 @@ public abstract class OwoWindow<R extends ParentComponent> extends FramebufferWi
         this.registration = OpenWindows.add(this);
 
         windowClosed().subscribe(this::close);
-        windowResized().subscribe((newWidth, newHeight) -> {
+        framebufferResized().subscribe((newWidth, newHeight) -> {
             try (var ignored = CurrentWindowContext.setCurrent(this)) {
                 recalculateScale();
                 adapter.moveAndResize(0, 0, scaledWidth(), scaledHeight());
@@ -86,10 +87,10 @@ public abstract class OwoWindow<R extends ParentComponent> extends FramebufferWi
 
         while (
                 factor != guiScale
-                        && factor < this.width()
-                        && factor < this.height()
-                        && this.width() / (factor + 1) >= 320
-                        && this.height() / (factor + 1) >= 240
+                        && factor < this.framebufferWidth()
+                        && factor < this.framebufferHeight()
+                        && this.framebufferWidth() / (factor + 1) >= 320
+                        && this.framebufferHeight() / (factor + 1) >= 240
         ) {
             ++factor;
         }
@@ -99,8 +100,8 @@ public abstract class OwoWindow<R extends ParentComponent> extends FramebufferWi
         }
 
         this.scaleFactor = factor;
-        this.scaledWidth = (int) Math.ceil((double) this.width() / scaleFactor);
-        this.scaledHeight = (int) Math.ceil((double) this.height() / scaleFactor);
+        this.scaledWidth = (int) Math.ceil((double) this.framebufferWidth() / scaleFactor);
+        this.scaledHeight = (int) Math.ceil((double) this.framebufferHeight() / scaleFactor);
     }
 
     public void render() {
@@ -143,14 +144,17 @@ public abstract class OwoWindow<R extends ParentComponent> extends FramebufferWi
         present();
     }
 
-    public int scaleFactor() {
+    @Override
+    public double scaleFactor() {
         return scaleFactor;
     }
 
+    @Override
     public int scaledWidth() {
         return scaledWidth;
     }
 
+    @Override
     public int scaledHeight() {
         return scaledHeight;
     }
