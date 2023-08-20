@@ -1,8 +1,11 @@
 package io.wispforest.uwu.client;
 
 import io.wispforest.owo.ui.component.Components;
+import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.container.RenderEffectWrapper;
+import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.core.Sizing;
@@ -42,6 +45,12 @@ public class UwuTestWindow extends OwoWindow<FlowLayout> {
                         .formatted(Formatting.RED));
             }
         });
+
+        inner.child(Containers.renderEffect(Components.label(Text.literal("breh!")))
+            .<RenderEffectWrapper<LabelComponent>>configure(component -> {
+                component.effect(RenderEffectWrapper.RenderEffect.rotate(45));
+                component.effect(RenderEffectWrapper.RenderEffect.color(Color.BLUE));
+            }));
 
         inner
                 .child(textbox

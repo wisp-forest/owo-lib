@@ -4,10 +4,11 @@ import io.wispforest.owo.ui.event.WindowResizeCallback;
 import io.wispforest.owo.ui.window.WindowFramebufferResized;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
+import io.wispforest.owo.util.SupportsFeaturesImpl;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.Window;
 
-public class VanillaWindowContext implements WindowContext {
+public class VanillaWindowContext extends SupportsFeaturesImpl<WindowContext> implements WindowContext {
     public static final VanillaWindowContext MAIN = new VanillaWindowContext(MinecraftClient.getInstance().getWindow());
 
     private final Window window;

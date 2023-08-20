@@ -36,42 +36,32 @@ public abstract class OwoWindow<R extends ParentComponent> extends FramebufferWi
 
         windowClosed().subscribe(this::close);
         framebufferResized().subscribe((newWidth, newHeight) -> {
-            try (var ignored = CurrentWindowContext.setCurrent(this)) {
-                recalculateScale();
-                adapter.moveAndResize(0, 0, scaledWidth(), scaledHeight());
-            }
+            recalculateScale();
+            adapter.moveAndResize(0, 0, scaledWidth(), scaledHeight());
         });
         mouseMoved().subscribe((x, y) -> {
             this.mouseX = (int) (x / scaleFactor);
             this.mouseY = (int) (y / scaleFactor);
         });
         mouseButton().subscribe((button, released) -> {
-            try (var ignored = CurrentWindowContext.setCurrent(this)) {
-                if (released) {
-                    adapter.mouseReleased(mouseX, mouseY, button);
-                } else {
-                    adapter.mouseClicked(mouseX, mouseY, button);
-                }
+            if (released) {
+                adapter.mouseReleased(mouseX, mouseY, button);
+            } else {
+                adapter.mouseClicked(mouseX, mouseY, button);
             }
         });
         mouseScrolled().subscribe((xOffset, yOffset) -> {
-            try (var ignored = CurrentWindowContext.setCurrent(this)) {
-                double amount = (client.options.getDiscreteMouseScroll().getValue() ? Math.signum(yOffset) : yOffset)
-                    * client.options.getMouseWheelSensitivity().getValue();
-                adapter.mouseScrolled(mouseX, mouseY, amount);
-            }
+            double amount = (client.options.getDiscreteMouseScroll().getValue() ? Math.signum(yOffset) : yOffset)
+                * client.options.getMouseWheelSensitivity().getValue();
+            adapter.mouseScrolled(mouseX, mouseY, amount);
         });
         keyPressed().subscribe((keyCode, scanCode, modifiers, released) -> {
             if (released) return;
 
-            try (var ignored = CurrentWindowContext.setCurrent(this)) {
-                adapter.keyPressed(keyCode, scanCode, modifiers);
-            }
+            adapter.keyPressed(keyCode, scanCode, modifiers);
         });
         charTyped().subscribe((chr, modifiers) -> {
-            try (var ignored = CurrentWindowContext.setCurrent(this)) {
-                return adapter.charTyped(chr, modifiers);
-            }
+            return adapter.charTyped(chr, modifiers);
         });
     }
 

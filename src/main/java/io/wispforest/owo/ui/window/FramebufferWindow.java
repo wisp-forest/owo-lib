@@ -2,10 +2,12 @@ package io.wispforest.owo.ui.window;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.event.CharTyped;
+import io.wispforest.owo.ui.window.context.CurrentWindowContext;
 import io.wispforest.owo.ui.window.context.WindowContext;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.OwoGlfwUtil;
+import io.wispforest.owo.util.SupportsFeaturesImpl;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.gl.GlDebug;
@@ -20,7 +22,7 @@ import java.util.List;
 
 import static org.lwjgl.glfw.GLFW.*;
 
-public class FramebufferWindow implements AutoCloseable, WindowContext {
+public class FramebufferWindow extends SupportsFeaturesImpl<WindowContext> implements AutoCloseable, WindowContext {
     private int width;
     private int height;
     private final long handle;
@@ -74,23 +76,35 @@ public class FramebufferWindow implements AutoCloseable, WindowContext {
 
         this.disposeList = new ArrayList<>();
         glfwSetWindowCloseCallback(handle, stowAndReturn(GLFWWindowCloseCallback.create(window -> {
-            windowClosedEvents.sink().onWindowClosed();
+            try (var ignored = CurrentWindowContext.setCurrent(this)) {
+                windowClosedEvents.sink().onWindowClosed();
+            }
         })));
         glfwSetFramebufferSizeCallback(handle, stowAndReturn(GLFWFramebufferSizeCallback.create(this::sizeChanged)));
         glfwSetCursorPosCallback(handle, stowAndReturn(GLFWCursorPosCallback.create((window, xpos, ypos) -> {
-            mouseMovedEvents.sink().onMouseMoved(xpos, ypos);
+            try (var ignored = CurrentWindowContext.setCurrent(this)) {
+                mouseMovedEvents.sink().onMouseMoved(xpos, ypos);
+            }
         })));
         glfwSetMouseButtonCallback(handle, stowAndReturn(GLFWMouseButtonCallback.create((window, button, action, mods) -> {
-            mouseButtonEvents.sink().onMouseButton(button, action == GLFW_RELEASE);
+            try (var ignored = CurrentWindowContext.setCurrent(this)) {
+                mouseButtonEvents.sink().onMouseButton(button, action == GLFW_RELEASE);
+            }
         })));
         glfwSetScrollCallback(handle, stowAndReturn(GLFWScrollCallback.create((window, xoffset, yoffset) -> {
-            mouseScrolledEvents.sink().onMouseScrolled(xoffset, yoffset);
+            try (var ignored = CurrentWindowContext.setCurrent(this)) {
+                mouseScrolledEvents.sink().onMouseScrolled(xoffset, yoffset);
+            }
         })));
         glfwSetKeyCallback(handle, stowAndReturn(GLFWKeyCallback.create((window, key, scancode, action, mods) -> {
-            keyPressedEvents.sink().onKeyPressed(key, scancode, mods, action == GLFW_RELEASE);
+            try (var ignored = CurrentWindowContext.setCurrent(this)) {
+                keyPressedEvents.sink().onKeyPressed(key, scancode, mods, action == GLFW_RELEASE);
+            }
         })));
         glfwSetCharModsCallback(handle, stowAndReturn(GLFWCharModsCallback.create((window, codepoint, mods) -> {
-            charTypedEvents.sink().onCharTyped((char) codepoint, mods);
+            try (var ignored = CurrentWindowContext.setCurrent(this)) {
+                charTypedEvents.sink().onCharTyped((char) codepoint, mods);
+            }
         })));
     }
 
@@ -221,6 +235,8 @@ public class FramebufferWindow implements AutoCloseable, WindowContext {
 
     @Override
     public void close() {
+        super.close();
+
         try (var ignored = OwoGlfwUtil.setContext(this.handle)) {
             GL32.glDeleteFramebuffers(this.localFramebuffer);
         }

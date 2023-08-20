@@ -6,6 +6,9 @@ import io.wispforest.owo.client.OwoClient;
 import io.wispforest.owo.mixin.ui.DrawContextInvoker;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
 import io.wispforest.owo.ui.util.NinePatchTexture;
+import io.wispforest.owo.ui.window.context.CurrentWindowContext;
+import io.wispforest.owo.ui.window.context.WindowContext;
+import io.wispforest.owo.util.SupportsFeatures;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
@@ -344,32 +347,18 @@ public class OwoUIDrawContext extends DrawContext {
 
     public static class UtilityScreen extends Screen {
 
-        private static UtilityScreen INSTANCE;
+        private static SupportsFeatures.Key<WindowContext, UtilityScreen> KEY = new SupportsFeatures.Key<>(UtilityScreen::new);
 
-        private UtilityScreen() {
+        private UtilityScreen(WindowContext ctx) {
             super(Text.empty());
+
+            ctx.framebufferResized().subscribe((newWidth, newHeight) -> {
+                this.init(MinecraftClient.getInstance(), ctx.scaledWidth(), ctx.scaledHeight());
+            });
         }
 
         public static UtilityScreen get() {
-            if (INSTANCE == null) {
-                INSTANCE = new UtilityScreen();
-
-                final var client = MinecraftClient.getInstance();
-                INSTANCE.init(
-                        client,
-                        client.getWindow().getScaledWidth(),
-                        client.getWindow().getScaledHeight()
-                );
-            }
-
-            return INSTANCE;
-        }
-
-        static {
-            WindowResizeCallback.EVENT.register((client, window) -> {
-                if (INSTANCE == null) return;
-                INSTANCE.init(client, window.getScaledWidth(), window.getScaledHeight());
-            });
+            return CurrentWindowContext.current().get(KEY);
         }
     }
 }
