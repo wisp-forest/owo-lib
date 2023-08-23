@@ -59,4 +59,9 @@ public class VanillaWindowContext extends SupportsFeaturesImpl<WindowContext> im
     public long handle() {
         return window.getHandle();
     }
+
+    @Override
+    public String toString() {
+        return "VanillaWindowContext[" + (this == MAIN ? "MAIN" : window) + "]";
+    }
 }
