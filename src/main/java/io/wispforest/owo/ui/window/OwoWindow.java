@@ -4,6 +4,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.systems.VertexSorter;
 import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.core.ParentComponent;
+import io.wispforest.owo.ui.util.GlDebugUtils;
+import io.wispforest.owo.ui.util.OwoGlUtil;
 import io.wispforest.owo.ui.window.context.CurrentWindowContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
@@ -97,7 +99,8 @@ public abstract class OwoWindow<R extends ParentComponent> extends FramebufferWi
     public void render() {
         if (closed()) return;
 
-        try (var ignored = CurrentWindowContext.setCurrent(this)) {
+        try (var ignored = CurrentWindowContext.setCurrent(this);
+             var ignored1 = GlDebugUtils.pushGroup("Rendering " + this)) {
             framebuffer().beginWrite(true);
 
             RenderSystem.clearColor(0, 0, 0, 1);
@@ -112,22 +115,23 @@ public abstract class OwoWindow<R extends ParentComponent> extends FramebufferWi
                             1000.0F,
                             21000.0F
                     );
-            RenderSystem.backupProjectionMatrix();
-            RenderSystem.setProjectionMatrix(matrix4f, VertexSorter.BY_Z);
-            MatrixStack matrixStack = RenderSystem.getModelViewStack();
-            matrixStack.push();
-            matrixStack.loadIdentity();
-            matrixStack.translate(0.0F, 0.0F, -11000.0F);
-            RenderSystem.applyModelViewMatrix();
-            DiffuseLighting.enableGuiDepthLighting();
 
-            var consumers = client.getBufferBuilders().getEntityVertexConsumers();
-            adapter.render(new DrawContext(client, consumers), mouseX, mouseY, client.getTickDelta());
-            consumers.draw();
+            try (var ignored2 = OwoGlUtil.setProjectionMatrix(matrix4f, VertexSorter.BY_Z)) {
+                MatrixStack matrixStack = RenderSystem.getModelViewStack();
+                matrixStack.push();
+                matrixStack.loadIdentity();
+                matrixStack.translate(0.0F, 0.0F, -11000.0F);
+                RenderSystem.applyModelViewMatrix();
+                DiffuseLighting.enableGuiDepthLighting();
 
-            RenderSystem.getModelViewStack().pop();
-            RenderSystem.applyModelViewMatrix();
-            RenderSystem.restoreProjectionMatrix();
+                var consumers = client.getBufferBuilders().getEntityVertexConsumers();
+                adapter.render(new DrawContext(client, consumers), mouseX, mouseY, client.getTickDelta());
+                consumers.draw();
+
+                RenderSystem.getModelViewStack().pop();
+                RenderSystem.applyModelViewMatrix();
+            }
+
             framebuffer().endWrite();
         }
 

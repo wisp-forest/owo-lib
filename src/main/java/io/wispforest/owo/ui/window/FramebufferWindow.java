@@ -2,11 +2,12 @@ package io.wispforest.owo.ui.window;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.event.CharTyped;
+import io.wispforest.owo.ui.util.GlDebugUtils;
 import io.wispforest.owo.ui.window.context.CurrentWindowContext;
 import io.wispforest.owo.ui.window.context.WindowContext;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
-import io.wispforest.owo.util.OwoGlfwUtil;
+import io.wispforest.owo.ui.util.OwoGlUtil;
 import io.wispforest.owo.util.SupportsFeaturesImpl;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
@@ -48,7 +49,7 @@ public class FramebufferWindow extends SupportsFeaturesImpl<WindowContext> imple
         this.width = width;
         this.height = height;
 
-        try (var ignored = OwoGlfwUtil.setContext(0)) {
+        try (var ignored = OwoGlUtil.setContext(0)) {
             glfwDefaultWindowHints();
             glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
             glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_NATIVE_CONTEXT_API);
@@ -67,8 +68,9 @@ public class FramebufferWindow extends SupportsFeaturesImpl<WindowContext> imple
         }
 
         this.framebuffer = new SimpleFramebuffer(width, height, true, MinecraftClient.IS_SYSTEM_MAC);
+        GlDebugUtils.labelObject(GL32.GL_FRAMEBUFFER, this.framebuffer.fbo, "Main context framebuffer for " + this);
 
-        try (var ignored = OwoGlfwUtil.setContext(this.handle)) {
+        try (var ignored = OwoGlUtil.setContext(this.handle)) {
             GlDebug.enableDebug(client.options.glDebugVerbosity, true);
         }
 
@@ -179,7 +181,8 @@ public class FramebufferWindow extends SupportsFeaturesImpl<WindowContext> imple
     public void present() {
         if (closed()) return;
 
-        try (var ignored = OwoGlfwUtil.setContext(handle)) {
+        try (var ignored = OwoGlUtil.setContext(handle);
+             var ignored1 = GlDebugUtils.pushGroup("Presenting framebuffer of " + this)) {
             // This code intentionally doesn't use Minecraft's RenderSystem
             // class, as it caches GL state that is invalid on this context.
             GL32.glBindFramebuffer(GL32.GL_READ_FRAMEBUFFER, localFramebuffer);
@@ -197,13 +200,14 @@ public class FramebufferWindow extends SupportsFeaturesImpl<WindowContext> imple
     }
 
     private void initLocalFramebuffer() {
-        try (var ignored = OwoGlfwUtil.setContext(this.handle)) {
+        try (var ignored = OwoGlUtil.setContext(this.handle)) {
             if (localFramebuffer != 0) {
                 GL32.glDeleteFramebuffers(localFramebuffer);
             }
 
             this.localFramebuffer = GL32.glGenFramebuffers();
             GL32.glBindFramebuffer(GL32.GL_FRAMEBUFFER, this.localFramebuffer);
+            GlDebugUtils.labelObject(GL32.GL_FRAMEBUFFER, this.localFramebuffer, "Local context framebuffer for " + this);
             GL32.glFramebufferTexture2D(GL32.GL_FRAMEBUFFER, GL32.GL_COLOR_ATTACHMENT0, GL32.GL_TEXTURE_2D, this.framebuffer.getColorAttachment(), 0);
 
             int status = GL32.glCheckFramebufferStatus(GL32.GL_FRAMEBUFFER);
@@ -218,10 +222,11 @@ public class FramebufferWindow extends SupportsFeaturesImpl<WindowContext> imple
         this.width = width;
         this.height = height;
 
-        try (var ignored = OwoGlfwUtil.setContext(client.getWindow().getHandle())) {
+        try (var ignored = OwoGlUtil.setContext(client.getWindow().getHandle())) {
             framebuffer.delete();
 
             this.framebuffer = new SimpleFramebuffer(width, height, true, MinecraftClient.IS_SYSTEM_MAC);
+            GlDebugUtils.labelObject(GL32.GL_FRAMEBUFFER, this.framebuffer.fbo, "Main context framebuffer for " + this);
         }
 
         initLocalFramebuffer();
@@ -237,7 +242,7 @@ public class FramebufferWindow extends SupportsFeaturesImpl<WindowContext> imple
     public void close() {
         super.close();
 
-        try (var ignored = OwoGlfwUtil.setContext(this.handle)) {
+        try (var ignored = OwoGlUtil.setContext(this.handle)) {
             GL32.glDeleteFramebuffers(this.localFramebuffer);
         }
 
