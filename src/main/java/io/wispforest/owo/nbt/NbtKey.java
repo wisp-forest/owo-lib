@@ -7,9 +7,7 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.IntFunction;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 /**
  * A utility class for serializing data into {@link NbtCompound}
@@ -45,7 +43,7 @@ public class NbtKey<T> {
      */
     @Deprecated
     public T get(@NotNull NbtCompound nbt) {
-        return this.type.getter(nbt, this.key);
+        return this.type.get(nbt, this.key);
     }
 
     /**
@@ -53,7 +51,7 @@ public class NbtKey<T> {
      */
     @Deprecated
     public void put(@NotNull NbtCompound nbt, T value) {
-        this.type.setter(nbt, this.key, value);
+        this.type.set(nbt, this.key, value);
     }
 
     /**
@@ -120,7 +118,7 @@ public class NbtKey<T> {
         public static final Type<int[], NbtIntArray> INT_ARRAY = new Type<>(NbtElement.INT_ARRAY_TYPE, NbtIntArray::getIntArray, NbtIntArray::new, () -> new NbtIntArray(new int[0]));
         public static final Type<long[], NbtLongArray> LONG_ARRAY = new Type<>(NbtElement.LONG_ARRAY_TYPE, NbtLongArray::getLongArray, NbtLongArray::new, () -> new NbtLongArray(new long[0]));
         public static final Type<ItemStack, NbtCompound> ITEM_STACK = new Type<>(NbtElement.COMPOUND_TYPE, Type::readItemStack, Type::writeItemStack, NbtCompound::new);
-        public static final Type<Identifier, NbtString> IDENTIFIER = new Type<>(NbtElement.STRING_TYPE, Type::readIdentifier, Type::writeIdentifier, () -> NbtString.of("")); // Type::readIdentifier, Type::writeIdentifier
+        public static final Type<Identifier, NbtString> IDENTIFIER = new Type<>(NbtElement.STRING_TYPE, Type::readIdentifier, Type::writeIdentifier, () -> NbtString.of(""));
         public static final Type<Boolean, NbtByte> BOOLEAN = new Type<>(NbtElement.BYTE_TYPE, nbtByte -> nbtByte.byteValue() != 0, NbtByte::of, () -> NbtByte.of(false));
         public static final Type<NbtList, NbtList> LIST = new Type<>(NbtElement.LIST_TYPE, nbtList -> nbtList, nbtList -> nbtList, NbtList::new);
 
@@ -140,11 +138,11 @@ public class NbtKey<T> {
             this.defaultValue = defaultValue;
         }
 
-        public T getter(NbtCompound compound, String key){
+        public T get(NbtCompound compound, String key){
             return this.fromElement.apply((E) (compound.contains(key, this.nbtEquivalent) ? compound.get(key) : this.defaultValue.get()));
         }
 
-        public void setter(NbtCompound compound, String key, T value){
+        public void set(NbtCompound compound, String key, T value){
             compound.put(key, this.toElement.apply(value));
         }
 
@@ -184,47 +182,13 @@ public class NbtKey<T> {
         }
 
         /**
-         * Create a new type that serializes a Map of elements of the given Key {@link Type} and Value {@link Type}
-         *
-         * @param keyType    The {@link Type} used to serialize between {@link NbtCompound} and {@link Map.Entry} Key
-         * @param valueType  The {@link Type} used to serialize between {@link NbtCompound} and {@link Map.Entry} Value
-         * @param mapBuilder The builder used to create new instances of a Map
-         * @param <K> The type of the key of the given map type
-         * @param <V> The type of the value of the given map type
-         * @param <M> The type of map the created Type can serialize
-         * @return The map based Type instance
-         */
-        public static <K, V, M extends Map<K, V>> Type<M, ?> mapType(Type<K, ?> keyType, Type<V, ?> valueType, IntFunction<M> mapBuilder){
-            Type<Set<Map.Entry<K,V>>, ?> setType = collectionType(
-                    Type.COMPOUND.then(
-                            compound -> Map.entry(keyType.getter(compound, "key"), valueType.getter(compound, "value")),
-                            (Map.Entry<K, V> entry) -> {
-                                NbtCompound compound = new NbtCompound();
-
-                                keyType.setter(compound, "key", entry.getKey());
-                                valueType.setter(compound, "value", entry.getValue());
-
-                                return compound;
-                            }),
-                    HashSet::new);
-
-            return setType.then(entries -> {
-                M returnMap = mapBuilder.apply(entries.size());
-
-                for (Map.Entry<K, V> entry : entries) returnMap.put(entry.getKey(), entry.getValue());
-
-                return returnMap;
-            }, Map::entrySet);
-        }
-
-        /**
          * Creates a new type that serializes a List of elements of the given {@link Type}
          *
          * @param elementType The {@link Type} base used to serialize between {@link NbtList} elements
          * @param <T>         The type of data the passed key can serialize
          * @return The List based Type instance
          */
-        public static <T> Type<List<T>, ?> listType(Type<T, ?> elementType){
+        public static <T, E extends NbtElement> Type<List<T>, NbtList> listType(Type<T, E> elementType){
             return collectionType(elementType, ArrayList::new);
         }
 
@@ -236,19 +200,23 @@ public class NbtKey<T> {
          * @param <C>               The type of collection the created Type can serialize
          * @return The Collection based type instance
          */
-        public static <T, C extends Collection<T>, E extends NbtElement> Type<C, ?> collectionType(Type<T, ?> elementType, IntFunction<C> collectionBuilder){
+        public static <T, C extends Collection<T>, E extends NbtElement> Type<C, NbtList> collectionType(Type<T, E> elementType, IntFunction<C> collectionBuilder){
             return Type.LIST.then(
                     nbtList -> {
-                        C collection = collectionBuilder.apply(nbtList.size());
+                        if(nbtList.getType() != elementType.nbtEquivalent) return collectionBuilder.apply(0);
 
-                        for (NbtElement element : nbtList) collection.add(((Function<E, T>) elementType.fromElement).apply((E) element));
+                        var collection = collectionBuilder.apply(nbtList.size());
+                        for (NbtElement element : nbtList) {
+                            collection.add((elementType.fromElement).apply((E) element));
+                        }
 
                         return collection;
                     },
                     values -> {
-                        NbtList nbtList = new NbtList();
-
-                        for(T value : values) nbtList.add(elementType.toElement.apply(value));
+                        var nbtList = new NbtList();
+                        for(T value : values){
+                            nbtList.add(elementType.toElement.apply(value));
+                        }
 
                         return nbtList;
                     }

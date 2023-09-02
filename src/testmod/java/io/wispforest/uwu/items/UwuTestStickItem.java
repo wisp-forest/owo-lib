@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 public class UwuTestStickItem extends Item {
     private static final NbtKey<Text> TEXT_KEY = new NbtKey<>("Text", NbtKey.Type.STRING.then(Text.Serializer::fromJson, Text.Serializer::toJson));
     private static final NbtKey<Set<Text>> TEXTS_KEY = new NbtKey<>("Texts", NbtKey.Type.collectionType(NbtKey.Type.STRING.then(Text.Serializer::fromJson, Text.Serializer::toJson), HashSet::new));
-    private static final NbtKey<Map<String, Integer>> CURSED_KEY = new NbtKey<>("CursedMap", NbtKey.Type.mapType(NbtKey.Type.STRING, NbtKey.Type.INT, HashMap::new));
 
     public UwuTestStickItem() {
         super(new OwoItemSettings().group(Uwu.SIX_TAB_GROUP).tab(3).maxCount(1)
@@ -112,40 +111,6 @@ public class UwuTestStickItem extends Item {
         });
 
         stickStack.get(TEXTS_KEY).forEach(text -> context.getPlayer().sendMessage(text, false));
-
-        //--
-
-        context.getPlayer().sendMessage(Text.of(""), false);
-
-        if (!stickStack.has(CURSED_KEY)) {
-            int randomNum = context.getWorld().random.nextInt(5);
-
-            Map<String, Integer> map = new HashMap<>();
-
-            for(int i = 0; i < randomNum; i++){
-                String path = Registries.ITEM.getId(Registries.ITEM.get(i)).getPath();
-
-                map.put(path, i);
-            }
-
-            stickStack.put(CURSED_KEY, map);
-        }
-
-        stickStack.mutate(CURSED_KEY, map -> {
-            Map<String, Integer> mutatedMap = new HashMap<>(map.size());
-
-            map.forEach((s, integer) -> mutatedMap.put(s + "-[ID: " + integer + "]", integer + 21));
-
-            return mutatedMap;
-        });
-
-        Set<Text> mapTexts = stickStack.get(CURSED_KEY).entrySet().stream()
-                .map(entry -> Text.of("Map Pair [Key: " + entry.getKey() + " Value: " + entry.getValue() + "]"))
-                .collect(Collectors.toSet());
-
-        mapTexts.forEach(text -> context.getPlayer().sendMessage(text, false));
-
-        context.getPlayer().sendMessage(Text.of("----"), false);
 
         //--
 
