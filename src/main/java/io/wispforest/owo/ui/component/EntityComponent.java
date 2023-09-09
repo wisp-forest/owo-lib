@@ -20,6 +20,8 @@ import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.PlayerModelPart;
+import net.minecraft.client.util.DefaultSkinHelper;
+import net.minecraft.client.util.SkinTextures;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -242,50 +244,33 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
 
     public static class RenderablePlayerEntity extends ClientPlayerEntity {
 
-        protected Identifier skinTextureId = null;
-        protected String model = null;
+        protected SkinTextures skinTextures;
 
         protected RenderablePlayerEntity(GameProfile profile) {
             super(MinecraftClient.getInstance(),
                     MinecraftClient.getInstance().world,
                     new ClientPlayNetworkHandler(MinecraftClient.getInstance(),
-                            null,
                             new ClientConnection(NetworkSide.CLIENTBOUND),
-                            null,
-                            profile,
-                            MinecraftClient.getInstance().getTelemetryManager().createWorldSession(false, Duration.ZERO, "tetris")
+                            null
                     ),
                     null, null, false, false
             );
 
-            this.client.getSkinProvider().loadSkin(this.getGameProfile(), (type, identifier, texture) -> {
-                if (type != MinecraftProfileTexture.Type.SKIN) return;
+            this.skinTextures = DefaultSkinHelper.getTexture(profile);
 
-                this.skinTextureId = identifier;
-                this.model = texture.getMetadata("model");
-                if (this.model == null) this.model = "default";
-
-            }, true);
+            this.client.getSkinProvider().fetchSkinTextures(this.getGameProfile()).thenAccept(textures -> {
+                this.skinTextures = textures;
+            });
         }
 
         @Override
-        public boolean hasSkinTexture() {
-            return skinTextureId != null;
-        }
-
-        @Override
-        public Identifier getSkinTexture() {
-            return this.skinTextureId != null ? this.skinTextureId : super.getSkinTexture();
+        public SkinTextures method_52814() {
+            return skinTextures;
         }
 
         @Override
         public boolean isPartVisible(PlayerModelPart modelPart) {
             return true;
-        }
-
-        @Override
-        public String getModel() {
-            return this.model != null ? this.model : super.getModel();
         }
 
         @Nullable

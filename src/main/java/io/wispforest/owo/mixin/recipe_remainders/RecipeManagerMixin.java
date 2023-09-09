@@ -1,15 +1,19 @@
 package io.wispforest.owo.mixin.recipe_remainders;
 
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
+import com.mojang.serialization.JsonOps;
 import io.wispforest.owo.util.RecipeRemainderStorage;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Recipe;
+import net.minecraft.recipe.RecipeCodecs;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.recipe.ShapedRecipe;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
+import net.minecraft.util.Util;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -29,11 +33,11 @@ public abstract class RecipeManagerMixin {
             var item = JsonHelper.asItem(new JsonPrimitive(remainderEntry.getKey()), remainderEntry.getKey());
 
             if (remainderEntry.getValue().isJsonObject()) {
-                var remainderStack = ShapedRecipe.outputFromJson(remainderEntry.getValue().getAsJsonObject());
-                remainders.put(item, remainderStack);
+                var remainderStack = Util.getResult(RecipeCodecs.CRAFTING_RESULT.parse(JsonOps.INSTANCE, remainderEntry.getValue().getAsJsonObject()), JsonParseException::new);
+                remainders.put(item.value(), remainderStack);
             } else {
                 var remainderItem = JsonHelper.asItem(remainderEntry.getValue(), "item");
-                remainders.put(item, new ItemStack(remainderItem));
+                remainders.put(item.value(), new ItemStack(remainderItem));
             }
         }
 

@@ -224,8 +224,8 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        return this.rootComponent.onMouseScroll(mouseX, mouseY, amount);
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        return this.rootComponent.onMouseScroll(mouseX, mouseY, verticalAmount);
     }
 
     @Override

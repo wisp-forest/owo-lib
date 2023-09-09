@@ -16,19 +16,21 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 @Mixin(Recipe.class)
 public interface RecipeMixin<C extends Inventory> {
 
-    @Shadow
-    Identifier getId();
+    // TODO: make work
 
-    @Inject(method = "getRemainder", at = @At("RETURN"), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void addRecipeSpecificRemainders(C inventory, CallbackInfoReturnable<DefaultedList<ItemStack>> cir, DefaultedList<ItemStack> remainders) {
-        if (!RecipeRemainderStorage.has(this.getId())) return;
-
-        var owoRemainders = RecipeRemainderStorage.get(this.getId());
-        for (int i = 0; i < remainders.size(); ++i) {
-            var item = inventory.getStack(i).getItem();
-            if (!owoRemainders.containsKey(item)) continue;
-
-            remainders.set(i, owoRemainders.get(item).copy());
-        }
-    }
+//    @Shadow
+//    Identifier getId();
+//
+//    @Inject(method = "getRemainder", at = @At("RETURN"), locals = LocalCapture.CAPTURE_FAILHARD)
+//    private void addRecipeSpecificRemainders(C inventory, CallbackInfoReturnable<DefaultedList<ItemStack>> cir, DefaultedList<ItemStack> remainders) {
+//        if (!RecipeRemainderStorage.has(this.getId())) return;
+//
+//        var owoRemainders = RecipeRemainderStorage.get(this.getId());
+//        for (int i = 0; i < remainders.size(); ++i) {
+//            var item = inventory.getStack(i).getItem();
+//            if (!owoRemainders.containsKey(item)) continue;
+//
+//            remainders.set(i, owoRemainders.get(item).copy());
+//        }
+//    }
 }

@@ -4,19 +4,25 @@ import com.google.common.base.Charsets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
 import com.google.gson.internal.Streams;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.mixin.offline.AdvancementProgressAccessor;
+import net.minecraft.GameVersion;
 import net.minecraft.SharedConstants;
 import net.minecraft.advancement.Advancement;
+import net.minecraft.advancement.AdvancementEntry;
 import net.minecraft.advancement.AdvancementProgress;
+import net.minecraft.advancement.PlayerAdvancementTracker;
 import net.minecraft.datafixer.DataFixTypes;
 import net.minecraft.datafixer.Schemas;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Util;
 import net.minecraft.util.WorldSavePath;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,11 +41,15 @@ import java.util.function.Consumer;
  * @author BasiqueEvangelist
  */
 public final class OfflineAdvancementLookup {
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     private OfflineAdvancementLookup() {}
 
-    private static final Gson GSON = (new GsonBuilder()).registerTypeAdapter(AdvancementProgress.class, new AdvancementProgress.Serializer()).registerTypeAdapter(Identifier.class, new Identifier.Serializer()).setPrettyPrinting().create();
-    private static final TypeToken<Map<Identifier, AdvancementProgress>> JSON_TYPE = new TypeToken<>() {};
+    public static final Codec<Map<Identifier, AdvancementProgress>> CODEC = DataFixTypes.ADVANCEMENTS.createDataFixingCodec(
+        Codec.unboundedMap(Identifier.CODEC, AdvancementProgress.CODEC),
+        Schemas.getFixer(),
+        1343
+    );
 
     /**
      * Saves the given advancement state
@@ -54,12 +64,10 @@ public final class OfflineAdvancementLookup {
         try {
             Path advancementsPath = Owo.currentServer().getSavePath(WorldSavePath.ADVANCEMENTS);
             Path advancementPath = advancementsPath.resolve(player.toString() + ".json");
-            JsonElement savedElement = GSON.toJsonTree(map);
-            savedElement.getAsJsonObject().addProperty("DataVersion", SharedConstants.getGameVersion().getSaveVersion().getId());
+            JsonElement saved = Util.getResult(CODEC.encodeStart(JsonOps.INSTANCE, map), IllegalStateException::new);
 
-            try (OutputStream os = Files.newOutputStream(advancementPath);
-                 OutputStreamWriter osWriter = new OutputStreamWriter(os, Charsets.UTF_8.newEncoder())) {
-                GSON.toJson(savedElement, osWriter);
+            try (BufferedWriter bw = Files.newBufferedWriter(advancementPath)) {
+                GSON.toJson(saved, bw);
             }
 
         } catch (IOException e) {
@@ -88,27 +96,24 @@ public final class OfflineAdvancementLookup {
             if (!Files.exists(advancementFile))
                 return null;
 
-            Dynamic<JsonElement> dynamic;
+            Map<Identifier, AdvancementProgress> parsedMap;
+
             try (InputStream s = Files.newInputStream(advancementFile);
                  InputStreamReader streamReader = new InputStreamReader(s);
                  JsonReader reader = new JsonReader(streamReader)) {
                 reader.setLenient(false);
-                dynamic = new Dynamic<>(JsonOps.INSTANCE, Streams.parse(reader));
-            }
-            if (dynamic.get("DataVersion").asNumber().result().isEmpty()) {
-                dynamic = dynamic.set("DataVersion", dynamic.createInt(1343));
+                JsonElement jsonElement = Streams.parse(reader);
+                parsedMap = Util.getResult(CODEC.parse(JsonOps.INSTANCE, jsonElement), JsonParseException::new);
             }
 
-            dynamic = DataFixTypes.ADVANCEMENTS.update(Schemas.getFixer(), dynamic, dynamic.get("DataVersion").asInt(0));
-            dynamic = dynamic.remove("DataVersion");
-
-            Map<Identifier, AdvancementProgress> parsedMap = GSON.getAdapter(JSON_TYPE).fromJsonTree(dynamic.getValue());
             for (Map.Entry<Identifier, AdvancementProgress> entry : parsedMap.entrySet()) {
-                if (((AdvancementProgressAccessor) entry.getValue()).getRequirements().length == 0) {
-                    Advancement adv = Owo.currentServer().getAdvancementLoader().get(entry.getKey());
+                var requirements = ((AdvancementProgressAccessor) entry.getValue()).getRequirements();
+
+                if (requirements.getLength() == 0) {
+                    AdvancementEntry adv = Owo.currentServer().getAdvancementLoader().get(entry.getKey());
 
                     if (adv != null) {
-                        ((AdvancementProgressAccessor) entry.getValue()).setRequirements(adv.getRequirements());
+                        ((AdvancementProgressAccessor) entry.getValue()).setRequirements(adv.value().requirements());
                     }
                 }
             }

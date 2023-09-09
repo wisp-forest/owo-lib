@@ -124,7 +124,7 @@ public class ListOptionContainer<T> extends CollapsibleContainer implements Opti
 
             final var box = new ConfigTextBox();
             box.setText(this.backingList.get(i).toString());
-            box.setCursorToStart();
+            box.setCursorToStart(false);
             box.setDrawsBackground(false);
             box.margins(Insets.vertical(2));
             box.horizontalSizing(Sizing.fill(95));

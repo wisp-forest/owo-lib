@@ -71,38 +71,37 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
     // Scrollbar slider
     // ----------------
 
-    @ModifyArgs(method = "drawBackground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawTexture(Lnet/minecraft/util/Identifier;IIIIII)V", ordinal = 1))
+    @ModifyArgs(method = "drawBackground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Lnet/minecraft/util/Identifier;IIII)V"))
     private void injectCustomScrollbarTexture(Args args) {
         if (!(selectedTab instanceof OwoItemGroup owoGroup) || owoGroup.getCustomTexture() == null) return;
 
+        // TODO: make work.
         args.set(0, owoGroup.getCustomTexture());
-        args.set(3, args.<Integer>get(3) - 232);
-        args.set(4, 136);
     }
 
     // -------------
     // Group headers
     // -------------
 
-    @ModifyArg(method = "renderTabIcon", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawTexture(Lnet/minecraft/util/Identifier;IIIIII)V"))
+    @ModifyArg(method = "renderTabIcon", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Lnet/minecraft/util/Identifier;IIII)V"))
     private Identifier injectCustomTabTexture(Identifier texture) {
         if (!(selectedTab instanceof OwoItemGroup owoGroup) || owoGroup.getCustomTexture() == null) return texture;
         return owoGroup.getCustomTexture();
     }
 
-    @ModifyArg(method = "renderTabIcon", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawTexture(Lnet/minecraft/util/Identifier;IIIIII)V"), index = 3)
+    @ModifyArg(method = "renderTabIcon", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Lnet/minecraft/util/Identifier;IIII)V"), index = 3)
     private int injectCustomTabTextureLocation(int original) {
         if (!(selectedTab instanceof OwoItemGroup owoGroup) || owoGroup.getCustomTexture() == null) return original;
         return owoGroup.getColumn() == 0 ? 195 : 221;
     }
 
     @Inject(method = "renderTabIcon", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemGroup;getIcon()Lnet/minecraft/item/ItemStack;"), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void renderOwoIcon(DrawContext context, ItemGroup group, CallbackInfo ci, boolean bl, boolean bl2, int i, int j, int k, int l, int m) {
+    private void renderOwoIcon(DrawContext context, ItemGroup group, CallbackInfo ci, boolean bl, boolean bl2, int i, int j, int k) {
         if (!(group instanceof OwoItemGroup owoGroup)) return;
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        owoGroup.icon().render(context, l, m, 0, 0, 0);
+        owoGroup.icon().render(context, j, k, 0, 0, 0);
         RenderSystem.disableBlend();
     }
 
