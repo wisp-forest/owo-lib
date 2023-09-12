@@ -135,7 +135,7 @@ dependencies {
 
     api(include("blue.endless:jankson:${project.jankson_version}"))
 
-    modCompileOnly "fr.catcore:server-translations-api:${project.stapi_version}"
+    modCompileOnly "xyz.nucleoid:server-translations-api:${project.stapi_version}"
 
     testmodImplementation sourceSets.main.output
     testmodAnnotationProcessor sourceSets.main.output
