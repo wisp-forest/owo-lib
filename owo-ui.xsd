@@ -176,6 +176,15 @@
         </xs:simpleContent>
     </xs:complexType>
 
+    <xs:simpleType name="owo-ui-text-transform">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="none"/>
+            <xs:enumeration value="lowercase"/>
+            <xs:enumeration value="uppercase"/>
+            <xs:enumeration value="capitalize"/>
+        </xs:restriction>
+    </xs:simpleType>
+
     <xs:simpleType name="owo-ui-color">
         <xs:annotation>
             <xs:documentation>
@@ -553,6 +562,7 @@
                     <xs:element type="xs:string" name="text" minOccurs="0"/>
                     <xs:element type="xs:unsignedInt" name="max-length" minOccurs="0"/>
                     <xs:element type="xs:boolean" name="show-background" minOccurs="0"/>
+                    <xs:element type="owo-ui-text-transform" name="transform" minOccurs="0"/>
                 </xs:choice>
             </xs:extension>
         </xs:complexContent>
@@ -567,6 +577,7 @@
                     <xs:element type="xs:unsignedInt" name="max-length" minOccurs="0"/>
                     <xs:element type="xs:unsignedInt" name="max-lines" minOccurs="0"/>
                     <xs:element type="xs:boolean" name="display-char-count" minOccurs="0"/>
+                    <xs:element type="owo-ui-text-transform" name="transform" minOccurs="0"/>
                 </xs:choice>
             </xs:extension>
         </xs:complexContent>

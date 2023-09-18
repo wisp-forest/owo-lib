@@ -6,6 +6,7 @@ import io.wispforest.owo.mixin.ui.access.EditBoxWidgetAccessor;
 import io.wispforest.owo.ui.core.CursorStyle;
 import io.wispforest.owo.ui.core.Size;
 import io.wispforest.owo.ui.core.Sizing;
+import io.wispforest.owo.ui.core.TextTransform;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.util.EventSource;
@@ -32,6 +33,7 @@ public class TextAreaComponent extends EditBoxWidget {
 
     protected final Observable<Boolean> displayCharCount = Observable.of(false);
     protected final Observable<Integer> maxLines = Observable.of(-1);
+    protected TextTransform transform = TextTransform.NONE;
 
     protected TextAreaComponent(Sizing horizontalSizing, Sizing verticalSizing) {
         super(MinecraftClient.getInstance().textRenderer, 0, 0, 0, 0, Text.empty(), Text.empty());
@@ -47,6 +49,8 @@ public class TextAreaComponent extends EditBoxWidget {
             if (this.maxLines.get() < 0) return;
             this.widgetWrapper().notifyParentIfMounted();
         });
+
+        this.onChanged().subscribe(this::checkTransform);
     }
 
     @Override
@@ -154,6 +158,23 @@ public class TextAreaComponent extends EditBoxWidget {
         return this;
     }
 
+    public TextTransform transform() {
+        return transform;
+    }
+
+    public TextAreaComponent transform(TextTransform transform) {
+        this.transform = transform;
+        checkTransform(getText());
+        return this;
+    }
+
+    protected void checkTransform(String value) {
+        String transformed = transform.apply(value);
+        if (!transformed.equals(value)) {
+            setText(transformed);
+        }
+    }
+
     @Override
     public int heightOffset() {
         return this.displayCharCount.get() ? -12 : 0;
@@ -167,6 +188,7 @@ public class TextAreaComponent extends EditBoxWidget {
         UIParsing.apply(children, "max-length", UIParsing::parseUnsignedInt, this::setMaxLength);
         UIParsing.apply(children, "max-lines", UIParsing::parseUnsignedInt, this::maxLines);
         UIParsing.apply(children, "text", $ -> $.getTextContent().strip(), this::text);
+        UIParsing.apply(children, "transform", TextTransform::parse, this::transform);
     }
 
     public interface OnChanged {

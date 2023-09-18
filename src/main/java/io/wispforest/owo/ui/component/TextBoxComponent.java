@@ -1,9 +1,7 @@
 package io.wispforest.owo.ui.component;
 
 import io.wispforest.owo.mixin.ui.access.TextFieldWidgetAccessor;
-import io.wispforest.owo.ui.core.CursorStyle;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
-import io.wispforest.owo.ui.core.Sizing;
+import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.util.EventSource;
@@ -26,6 +24,7 @@ public class TextBoxComponent extends TextFieldWidget {
 
     protected final Observable<String> textValue = Observable.of("");
     protected final EventStream<OnChanged> changedEvents = OnChanged.newStream();
+    protected TextTransform transform = TextTransform.NONE;
 
     protected TextBoxComponent(Sizing horizontalSizing) {
         super(MinecraftClient.getInstance().textRenderer, 0, 0, 0, 0, Text.empty());
@@ -34,6 +33,8 @@ public class TextBoxComponent extends TextFieldWidget {
         this.sizing(horizontalSizing, Sizing.content());
 
         this.showsBackground.observe(a -> this.widgetWrapper().notifyParentIfMounted());
+
+        this.onChanged().subscribe(this::checkTransform);
     }
 
     /**
@@ -78,12 +79,30 @@ public class TextBoxComponent extends TextFieldWidget {
         return this;
     }
 
+    public TextTransform transform() {
+        return transform;
+    }
+
+    public TextBoxComponent transform(TextTransform transform) {
+        this.transform = transform;
+        checkTransform(getText());
+        return this;
+    }
+
+    protected void checkTransform(String value) {
+        String transformed = transform.apply(value);
+        if (!transformed.equals(value)) {
+            setText(transformed);
+        }
+    }
+
     @Override
     public void parseProperties(UIModel spec, Element element, Map<String, Element> children) {
         super.parseProperties(spec, element, children);
         UIParsing.apply(children, "show-background", UIParsing::parseBool, this::setDrawsBackground);
         UIParsing.apply(children, "max-length", UIParsing::parseUnsignedInt, this::setMaxLength);
         UIParsing.apply(children, "text", e -> e.getTextContent().strip(), this::text);
+        UIParsing.apply(children, "transform", TextTransform::parse, this::transform);
     }
 
     protected CursorStyle owo$preferredCursorStyle() {
