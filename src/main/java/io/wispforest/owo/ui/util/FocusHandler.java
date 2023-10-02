@@ -34,7 +34,7 @@ public class FocusHandler {
 
     public void cycle(boolean forwards) {
         var allChildren = new ArrayList<Component>();
-        this.root.collectChildren(allChildren);
+        this.root.collectDescendants(allChildren);
 
         allChildren.removeIf(component -> !component.canFocus(Component.FocusSource.KEYBOARD_CYCLE));
         if (allChildren.isEmpty()) return;
@@ -53,7 +53,7 @@ public class FocusHandler {
         if (this.focused == null) return;
 
         var allChildren = new ArrayList<Component>();
-        this.root.collectChildren(allChildren);
+        this.root.collectDescendants(allChildren);
 
         allChildren.removeIf(component -> !component.canFocus(Component.FocusSource.KEYBOARD_CYCLE));
         if (allChildren.isEmpty()) return;

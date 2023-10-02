@@ -6,6 +6,10 @@ import net.minecraft.screen.slot.Slot;
 
 import java.util.function.Consumer;
 
+/**
+ * Stateful slot generation utility for easily
+ * arranging the slot grid used in a {@link net.minecraft.screen.ScreenHandler}
+ */
 public final class SlotGenerator {
 
     private int anchorX, anchorY;
@@ -21,16 +25,38 @@ public final class SlotGenerator {
         this.slotConsumer = slotConsumer;
     }
 
+    /**
+     * Begin generating slots into {@code slotConsumer}, starting at
+     * ({@code anchorX}, {@code anchorY}). Usually, the {@code slotConsumer}
+     * will be the {@code addSlot} method of the screen handler for which
+     * slots are being generated
+     * <p>
+     * <pre>
+     * {@code
+     * SlotGenerator.begin(this::addSlot, 50, 10)
+     *     .grid(someInventory, 0, 3, 3) // add a 3x3 grid of slots 0-8 of 'someInventory'
+     *     .moveTo(10, 100)
+     *     .playerInventory(playerInventory); // add the player inventory and hotbar slots
+     * }
+     * </pre>
+     */
     public static SlotGenerator begin(Consumer<Slot> slotConsumer, int anchorX, int anchorY) {
         return new SlotGenerator(slotConsumer, anchorX, anchorY);
     }
 
+    /**
+     * Move the top-left anchor point of generated grids to ({@code anchorX}, {@code anchorY})
+     */
     public SlotGenerator moveTo(int anchorX, int anchorY) {
         this.anchorX = anchorX;
         this.anchorY = anchorY;
         return this;
     }
 
+    /**
+     * Shorthand for calling both {@link #horizontalSpacing} and
+     * {@link #verticalSpacing} with {@code spacing}
+     */
     public SlotGenerator spacing(int spacing) {
         this.horizontalSpacing = spacing;
         this.verticalSpacing = spacing;
@@ -52,11 +78,19 @@ public final class SlotGenerator {
         return this;
     }
 
+    /**
+     * Reset the slot factory of this generator
+     * to the default {@link Slot#Slot(Inventory, int, int, int)} constructor
+     */
     public SlotGenerator defaultSlotFactory() {
         this.slotFactory = Slot::new;
         return this;
     }
 
+    /**
+     * Set the slot factory of this generator, used for instantiating
+     * each generated slot, to {@code slotFactory}
+     */
     public SlotGenerator slotFactory(SlotFactory slotFactory) {
         this.slotFactory = slotFactory;
         return this;

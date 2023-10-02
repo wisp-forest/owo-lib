@@ -41,8 +41,8 @@ public class Positioning implements Animatable<Positioning> {
         }
 
         return new Positioning(
-                (int) MathHelper.lerp(delta, this.x, next.x),
-                (int) MathHelper.lerp(delta, this.y, next.y),
+                MathHelper.lerp(delta, this.x, next.x),
+                MathHelper.lerp(delta, this.y, next.y),
                 this.type
         );
     }

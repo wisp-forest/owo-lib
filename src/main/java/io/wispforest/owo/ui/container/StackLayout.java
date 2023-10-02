@@ -44,9 +44,9 @@ public class StackLayout extends BaseParentComponent {
         var layoutHeight = new MutableInt();
 
         var layout = new ArrayList<Component>();
-        var helper = MountingHelper.mountEarly(this::mountChild, this.childrenView, childSpace, child -> {
-            child.mount(this, this.x + child.margins().get().left(), this.y + child.margins().get().top());
+        var helper = MountingHelper.mountEarly(this::mountChild, this.childrenView, child -> {
             layout.add(child);
+            child.mount(this, this.x + this.padding.get().left() + child.margins().get().left(), this.y + this.padding.get().top() + child.margins().get().top());
 
             var fullChildSize = child.fullSize();
             layoutWidth.setValue(Math.max(layoutWidth.getValue(), fullChildSize.width()));
@@ -60,8 +60,8 @@ public class StackLayout extends BaseParentComponent {
         var verticalAlignment = this.verticalAlignment();
 
         for (var child : layout) {
-            child.updateX(child.x() + horizontalAlignment.align(child.fullSize().width(), this.width));
-            child.updateY(child.y() + verticalAlignment.align(child.fullSize().height(), this.height));
+            child.updateX(child.baseX() + horizontalAlignment.align(child.fullSize().width(), this.width - this.padding.get().horizontal()));
+            child.updateY(child.baseY() + verticalAlignment.align(child.fullSize().height(), this.height - this.padding.get().vertical()));
         }
 
         helper.mountLate();
@@ -91,7 +91,7 @@ public class StackLayout extends BaseParentComponent {
      *
      * @param children The children to add to this layout
      */
-    public StackLayout children(Collection<Component> children) {
+    public StackLayout children(Collection<? extends Component> children) {
         this.children.addAll(children);
         this.updateLayout();
         return this;
@@ -117,7 +117,7 @@ public class StackLayout extends BaseParentComponent {
      * @param index    The index at which to begin inserting children
      * @param children The children to add to this layout
      */
-    public StackLayout children(int index, Collection<Component> children) {
+    public StackLayout children(int index, Collection<? extends Component> children) {
         this.children.addAll(index, children);
         this.updateLayout();
         return this;

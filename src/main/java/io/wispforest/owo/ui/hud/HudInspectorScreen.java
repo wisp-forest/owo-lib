@@ -17,7 +17,6 @@ public class HudInspectorScreen extends Screen implements CommandOpenedScreen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        this.renderBackground(context);
         super.render(context, mouseX, mouseY, delta);
 
         if (Hud.adapter == null) return;

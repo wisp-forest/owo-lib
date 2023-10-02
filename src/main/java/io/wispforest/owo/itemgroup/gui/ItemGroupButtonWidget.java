@@ -32,6 +32,10 @@ public class ItemGroupButtonWidget extends ButtonWidget {
         RenderSystem.disableBlend();
     }
 
+    public boolean isTab() {
+        return this.definition instanceof ItemGroupTab;
+    }
+
     public boolean trulyHovered() {
         return this.hovered;
     }

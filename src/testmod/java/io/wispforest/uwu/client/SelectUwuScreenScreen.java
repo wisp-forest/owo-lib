@@ -48,6 +48,7 @@ public class SelectUwuScreenScreen extends BaseOwoScreen<FlowLayout> {
             protected void build(FlowLayout rootComponent) {}
         })));
         panel.child(Components.button(Text.literal("smolnite"), button -> this.client.setScreen(new SmolComponentTestScreen())));
+        panel.child(Components.button(Text.literal("sizenite"), button -> this.client.setScreen(new SizingTestScreen())));
 
         this.uiAdapter.rootComponent.child(panel);
     }

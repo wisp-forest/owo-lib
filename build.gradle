@@ -2,7 +2,7 @@
 plugins {
     id 'fabric-loom' version '1.2-SNAPSHOT'
     id 'maven-publish'
-    id 'io.github.juuxel.loom-quiltflower' version '1.10.0'
+    id 'io.github.juuxel.loom-vineflower' version '1.11.0'
 }
 
 allprojects {
@@ -128,14 +128,14 @@ dependencies {
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}")
 
     modCompileOnly("dev.emi:emi-fabric:${project.emi_version}")
-    modLocalRuntime("dev.emi:emi-fabric:${project.emi_version}")
+//    modLocalRuntime("dev.emi:emi-fabric:${project.emi_version}")
 
     modCompileOnly("com.terraformersmc:modmenu:${project.modmenu_version}")
     modLocalRuntime("com.terraformersmc:modmenu:${project.modmenu_version}")
 
     api(include("blue.endless:jankson:${project.jankson_version}"))
 
-    modCompileOnly "fr.catcore:server-translations-api:${project.stapi_version}"
+    modCompileOnly "xyz.nucleoid:server-translations-api:${project.stapi_version}"
 
     testmodImplementation sourceSets.main.output
     testmodAnnotationProcessor sourceSets.main.output

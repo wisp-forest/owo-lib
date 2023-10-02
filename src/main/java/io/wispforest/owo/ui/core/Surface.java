@@ -90,6 +90,19 @@ public interface Surface {
         };
     }
 
+    static Surface panelWithInset(int insetWidth) {
+        return Surface.PANEL.and((context, component) -> {
+            NinePatchTexture.draw(
+                    OwoUIDrawContext.PANEL_INSET_NINE_PATCH_TEXTURE,
+                    context,
+                    component.x() + insetWidth,
+                    component.y() + insetWidth,
+                    component.width() - insetWidth * 2,
+                    component.height() - insetWidth * 2
+            );
+        });
+    }
+
     void draw(OwoUIDrawContext context, ParentComponent component);
 
     default Surface and(Surface surface) {
@@ -123,6 +136,7 @@ public interface Surface {
                             UIParsing.parseFloat(child.getAttributeNode("size"))
                     ));
                 }
+                case "panel-with-inset" -> surface.and(panelWithInset(UIParsing.parseUnsignedInt(child)));
                 case "options-background" -> surface.and(OPTIONS_BACKGROUND);
                 case "vanilla-translucent" -> surface.and(VANILLA_TRANSLUCENT);
                 case "panel-inset" -> surface.and(PANEL_INSET);

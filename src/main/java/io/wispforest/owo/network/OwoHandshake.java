@@ -1,10 +1,8 @@
 package io.wispforest.owo.network;
 
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
 import io.wispforest.owo.Owo;
-import io.wispforest.owo.mixin.ClientLoginNetworkHandlerAccessor;
-import io.wispforest.owo.mixin.ServerLoginNetworkHandlerAccessor;
+import io.wispforest.owo.mixin.ClientCommonNetworkHandlerAccessor;
+import io.wispforest.owo.mixin.ServerCommonNetworkHandlerAccessor;
 import io.wispforest.owo.network.serialization.PacketBufSerializer;
 import io.wispforest.owo.ops.TextOps;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
@@ -12,19 +10,14 @@ import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.ServicesFrozenException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.networking.v1.ClientLoginConnectionEvents;
-import net.fabricmc.fabric.api.client.networking.v1.ClientLoginNetworking;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.client.networking.v1.*;
 import net.fabricmc.fabric.api.networking.v1.*;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientLoginNetworkHandler;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.client.network.ClientConfigurationNetworkHandler;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerLoginNetworkHandler;
+import net.minecraft.server.network.ServerConfigurationNetworkHandler;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -36,9 +29,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 import java.util.function.ToIntFunction;
 
+@SuppressWarnings("UnstableApiUsage")
 @ApiStatus.Internal
 public final class OwoHandshake {
 
@@ -60,7 +53,10 @@ public final class OwoHandshake {
     // Registration
     // ------------
 
-    public static void enable() {}
+    public static void enable() {
+        if (OwoFreezer.isFrozen())
+            throw new ServicesFrozenException("The oωo handshake may only be enabled during mod initialization");
+    }
 
     public static void requireHandshake() {
         if (OwoFreezer.isFrozen())
@@ -70,25 +66,23 @@ public final class OwoHandshake {
     }
 
     static {
-        ServerLoginConnectionEvents.QUERY_START.register(OwoHandshake::queryStart);
-        ServerLoginNetworking.registerGlobalReceiver(OwoHandshake.CHANNEL_ID, OwoHandshake::syncServer);
-
-        if (!ENABLED) {
-            ServerPlayNetworking.registerGlobalReceiver(OwoHandshake.OFF_CHANNEL_ID, (server, player, handler, buf, responseSender) -> {});
-        } else {
-            ServerLifecycleEvents.SERVER_STARTED.register(server -> QUERY_RECEIVED = true);
-        }
+        ServerConfigurationConnectionEvents.CONFIGURE.register(OwoHandshake::configureStart);
+        ServerConfigurationNetworking.registerGlobalReceiver(OwoHandshake.CHANNEL_ID, OwoHandshake::syncServer);
 
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            ClientLoginNetworking.registerGlobalReceiver(OwoHandshake.CHANNEL_ID, OwoHandshake::syncClient);
-            ClientPlayConnectionEvents.JOIN.register(OwoHandshake::handleJoinClient);
+            if (!ENABLED) {
+                ClientConfigurationNetworking.registerGlobalReceiver(OwoHandshake.OFF_CHANNEL_ID, (client, handler, buf, responseSender) -> {});
+            }
+
+            ClientConfigurationNetworking.registerGlobalReceiver(OwoHandshake.CHANNEL_ID, OwoHandshake::syncClient);
+            ClientConfigurationConnectionEvents.READY.register(OwoHandshake::handleReadyClient);
 
             ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> QUERY_RECEIVED = false);
-            ClientLoginConnectionEvents.DISCONNECT.register((handler, client) -> QUERY_RECEIVED = false);
+            ClientConfigurationConnectionEvents.DISCONNECT.register((handler, client) -> QUERY_RECEIVED = false);
         }
     }
 
-    public static boolean isValid() {
+    public static boolean isValidClient() {
         return ENABLED && QUERY_RECEIVED;
     }
 
@@ -96,23 +90,36 @@ public final class OwoHandshake {
     // Packets
     // -------
 
-    private static void queryStart(ServerLoginNetworkHandler serverLoginNetworkHandler, MinecraftServer server, PacketSender sender, ServerLoginNetworking.LoginSynchronizer loginSynchronizer) {
+    private static void configureStart(ServerConfigurationNetworkHandler handler, MinecraftServer server) {
         if (!ENABLED) return;
+
+        if (ServerConfigurationNetworking.canSend(handler, OFF_CHANNEL_ID)) {
+            Owo.LOGGER.info("[Handshake] Handshake disabled by client, skipping");
+            return;
+        }
+
+        if (!ServerConfigurationNetworking.canSend(handler, CHANNEL_ID)) {
+            if (!HANDSHAKE_REQUIRED) return;
+
+            handler.disconnect(TextOps.concat(PREFIX, Text.of("incompatible client")));
+            Owo.LOGGER.info("[Handshake] Handshake failed, client doesn't understand channel packet");
+            return;
+        }
 
         var request = PacketByteBufs.create();
         writeHashes(request, OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel);
-        sender.sendPacket(OwoHandshake.CHANNEL_ID, request);
-        Owo.LOGGER.info("[Handshake] Sending channel query");
+        ServerConfigurationNetworking.send(handler, OwoHandshake.CHANNEL_ID, request);
+        Owo.LOGGER.info("[Handshake] Sending channel packet");
     }
 
     @Environment(EnvType.CLIENT)
-    private static CompletableFuture<PacketByteBuf> syncClient(MinecraftClient client, ClientLoginNetworkHandler clientLoginNetworkHandler, PacketByteBuf buf, Consumer<GenericFutureListener<? extends Future<? super Void>>> genericFutureListenerConsumer) {
+    private static void syncClient(MinecraftClient client, ClientConfigurationNetworkHandler handler, PacketByteBuf buf, PacketSender sender) {
         Owo.LOGGER.info("[Handshake] Sending client channels");
         QUERY_RECEIVED = true;
 
         if (buf.readableBytes() > 0) {
             final var serverOptionalChannels = RESPONSE_SERIALIZER.deserializer().apply(buf);
-            ((OwoClientConnectionExtension) ((ClientLoginNetworkHandlerAccessor) clientLoginNetworkHandler).owo$getConnection()).owo$setChannelSet(filterOptionalServices(serverOptionalChannels, OwoNetChannel.REGISTERED_CHANNELS, OwoHandshake::hashChannel));
+            ((OwoClientConnectionExtension) ((ClientCommonNetworkHandlerAccessor) handler).getConnection()).owo$setChannelSet(filterOptionalServices(serverOptionalChannels, OwoNetChannel.REGISTERED_CHANNELS, OwoHandshake::hashChannel));
         }
 
         var response = PacketByteBufs.create();
@@ -120,18 +127,10 @@ public final class OwoHandshake {
         writeHashes(response, ParticleSystemController.REGISTERED_CONTROLLERS, OwoHandshake::hashController);
         writeHashes(response, OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel);
 
-        return CompletableFuture.completedFuture(response);
+        sender.sendPacket(CHANNEL_ID, response);
     }
 
-    private static void syncServer(MinecraftServer server, ServerLoginNetworkHandler handler, boolean responded, PacketByteBuf buf, ServerLoginNetworking.LoginSynchronizer loginSynchronizer, PacketSender packetSender) {
-        if (!responded) {
-            if (!HANDSHAKE_REQUIRED) return;
-
-            handler.disconnect(TextOps.concat(PREFIX, Text.of("incompatible client")));
-            Owo.LOGGER.info("[Handshake] Handshake failed, client did not respond to channel query");
-            return;
-        }
-
+    private static void syncServer(MinecraftServer server, ServerConfigurationNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
         Owo.LOGGER.info("[Handshake] Receiving client channels");
 
         final var clientChannels = RESPONSE_SERIALIZER.deserializer().apply(buf);
@@ -148,17 +147,20 @@ public final class OwoHandshake {
 
         if (buf.readableBytes() > 0) {
             final var clientOptionalChannels = RESPONSE_SERIALIZER.deserializer().apply(buf);
-            ((OwoClientConnectionExtension) ((ServerLoginNetworkHandlerAccessor) handler).owo$getConnection()).owo$setChannelSet(filterOptionalServices(clientOptionalChannels, OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel));
+            ((OwoClientConnectionExtension) ((ServerCommonNetworkHandlerAccessor) handler).owo$getConnection()).owo$setChannelSet(filterOptionalServices(clientOptionalChannels, OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel));
         }
 
         Owo.LOGGER.info("[Handshake] Handshake completed successfully");
     }
 
     @Environment(EnvType.CLIENT)
-    private static void handleJoinClient(ClientPlayNetworkHandler handler, PacketSender packetSender, MinecraftClient client) {
-        if (QUERY_RECEIVED || ClientPlayNetworking.canSend(OFF_CHANNEL_ID) || !HANDSHAKE_REQUIRED || !ENABLED) return;
+    private static void handleReadyClient(ClientConfigurationNetworkHandler handler, MinecraftClient client) {
+        if (ClientConfigurationNetworking.canSend(CHANNEL_ID) || !HANDSHAKE_REQUIRED || !ENABLED) return;
+
         client.execute(() -> {
-            handler.getConnection().disconnect(TextOps.concat(PREFIX, Text.of("incompatible server")));
+            ((ClientCommonNetworkHandlerAccessor) handler)
+                .getConnection()
+                .disconnect(TextOps.concat(PREFIX, Text.of("incompatible server")));
         });
     }
 

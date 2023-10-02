@@ -136,7 +136,7 @@ public class CollapsibleContainer extends FlowLayout {
     }
 
     @Override
-    public FlowLayout children(Collection<Component> children) {
+    public FlowLayout children(Collection<? extends Component> children) {
         this.collapsibleChildren.addAll(children);
         if (this.expanded) this.contentLayout.children(children);
         return this;
@@ -150,7 +150,7 @@ public class CollapsibleContainer extends FlowLayout {
     }
 
     @Override
-    public FlowLayout children(int index, Collection<Component> children) {
+    public FlowLayout children(int index, Collection<? extends Component> children) {
         this.collapsibleChildren.addAll(index, children);
         if (this.expanded) this.contentLayout.children(index, children);
         return this;

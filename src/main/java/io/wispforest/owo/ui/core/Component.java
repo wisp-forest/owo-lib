@@ -534,10 +534,30 @@ public interface Component extends PositionedRectangle {
     /**
      * @return The current x-coordinate of the top-left
      * corner of the bounding box of this component
+     * <p>
+     * As a general rule of thumb, this property should be used
+     * whenever the component's position is queried during rendering,
+     * input processing and s on. If however, the position is required
+     * in the context of a layout operation, {@link #baseX()} is almost
+     * always the correct choice instead
      */
     @Override
     @Contract(pure = true)
     int x();
+
+    /**
+     * @return The current x-coordinate of this component's
+     * <i>base point</i> - the point on which it bases
+     * layout calculations.
+     * <p>
+     * For the majority of components this will be identical
+     * to {@link #x()} as they don't have special logic. A notable
+     * exception is the {@link io.wispforest.owo.ui.container.DraggableContainer}
+     * which internally applies a separate offset from dragging
+     */
+    default int baseX() {
+        return this.x();
+    }
 
     /**
      * Set the x-coordinate of the top-left corner of the
@@ -558,10 +578,30 @@ public interface Component extends PositionedRectangle {
     /**
      * @return The current y-coordinate of the top-left
      * corner of the bounding box of this component
+     * <p>
+     * As a general rule of thumb, this property should be used
+     * whenever the component's position is queried during rendering,
+     * input processing and s on. If however, the position is required
+     * in the context of a layout operation, {@link #baseY()} is almost
+     * always the correct choice instead
      */
     @Override
     @Contract(pure = true)
     int y();
+
+    /**
+     * @return The current y-coordinate of this component's
+     * <i>base point</i> - the point on which it bases
+     * layout calculations.
+     * <p>
+     * For the majority of components this will be identical
+     * to {@link #y()} as they don't have special logic. A notable
+     * exception is the {@link io.wispforest.owo.ui.container.DraggableContainer}
+     * which internally applies a separate offset from dragging
+     */
+    default int baseY() {
+        return this.y();
+    }
 
     /**
      * Set the y-coordinate of the top-left corner of the

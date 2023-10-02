@@ -74,7 +74,7 @@ public class TextBoxComponent extends TextFieldWidget {
 
     public TextBoxComponent text(String text) {
         this.setText(text);
-        this.setCursorToStart();
+        this.setCursorToStart(false);
         return this;
     }
 

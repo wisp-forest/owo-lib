@@ -34,4 +34,9 @@ public interface OwoItemExtensions {
      */
     @Nullable ItemGroup owo$group();
 
+    /**
+     * @return {@code true} if this item should automatically
+     * have its usage stat incremented
+     */
+    boolean owo$shouldTrackUsageStat();
 }

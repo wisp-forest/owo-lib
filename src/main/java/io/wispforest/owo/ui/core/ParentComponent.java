@@ -206,7 +206,7 @@ public interface ParentComponent extends Component {
      * none was found
      */
     @SuppressWarnings("unchecked")
-    default <T extends Component> @Nullable T childById(@NotNull Class<T> expectedClass, @NotNull String id) {
+    default <T extends Component> T childById(@NotNull Class<T> expectedClass, @NotNull String id) {
         var iter = this.children().listIterator(this.children().size());
 
         while (iter.hasPrevious()) {

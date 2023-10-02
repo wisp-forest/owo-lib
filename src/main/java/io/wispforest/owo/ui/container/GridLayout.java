@@ -70,7 +70,7 @@ public class GridLayout extends BaseParentComponent {
                 int columnSize = columnSizes[column];
                 int rowSize = rowSizes[row];
 
-                this.mountChild(this.getChild(row, column), childSpace, child -> {
+                this.mountChild(this.getChild(row, column), child -> {
                     child.mount(
                             this,
                             layoutX.intValue() + child.margins().get().left() + this.horizontalAlignment().align(child.fullSize().width(), columnSize),
@@ -99,7 +99,7 @@ public class GridLayout extends BaseParentComponent {
     }
 
     protected void determineSizes(int[] sizes, boolean rows) {
-        if ((rows ? this.verticalSizing : this.horizontalSizing).get().method != Sizing.Method.CONTENT) {
+        if (!(rows ? this.verticalSizing : this.horizontalSizing).get().isContent()) {
             Arrays.fill(sizes, (rows ? this.height - this.padding().get().vertical() : this.width - this.padding().get().horizontal()) / (rows ? this.rows : this.columns));
         } else {
             for (int row = 0; row < this.rows; row++) {

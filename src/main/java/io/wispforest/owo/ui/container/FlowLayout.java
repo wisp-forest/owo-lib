@@ -61,7 +61,7 @@ public class FlowLayout extends BaseParentComponent {
      *
      * @param children The children to add to this layout
      */
-    public FlowLayout children(Collection<Component> children) {
+    public FlowLayout children(Collection<? extends Component> children) {
         this.children.addAll(children);
         this.updateLayout();
         return this;
@@ -87,7 +87,7 @@ public class FlowLayout extends BaseParentComponent {
      * @param index    The index at which to begin inserting children
      * @param children The children to add to this layout
      */
-    public FlowLayout children(int index, Collection<Component> children) {
+    public FlowLayout children(int index, Collection<? extends Component> children) {
         this.children.addAll(index, children);
         this.updateLayout();
         return this;
@@ -184,7 +184,7 @@ public class FlowLayout extends BaseParentComponent {
 
             container.children.forEach(child -> child.inflate(childSpace));
 
-            var mountState = MountingHelper.mountEarly(container::mountChild, container.children, childSpace, child -> {
+            var mountState = MountingHelper.mountEarly(container::mountChild, container.children, child -> {
                 layout.add(child);
 
                 child.mount(container,
@@ -205,16 +205,16 @@ public class FlowLayout extends BaseParentComponent {
 
             if (container.verticalAlignment() != VerticalAlignment.TOP) {
                 for (var component : layout) {
-                    component.updateY(component.y() + container.verticalAlignment().align(component.fullSize().height(), container.height - padding.vertical()));
+                    component.updateY(component.baseY() + container.verticalAlignment().align(component.fullSize().height(), container.height - padding.vertical()));
                 }
             }
 
             if (container.horizontalAlignment() != HorizontalAlignment.LEFT) {
                 for (var component : layout) {
                     if (container.horizontalAlignment() == HorizontalAlignment.CENTER) {
-                        component.updateX(component.x() + (container.width - padding.horizontal() - layoutWidth.intValue()) / 2);
+                        component.updateX(component.baseX() + (container.width - padding.horizontal() - layoutWidth.intValue()) / 2);
                     } else {
-                        component.updateX(component.x() + (container.width - padding.horizontal() - layoutWidth.intValue()));
+                        component.updateX(component.baseX() + (container.width - padding.horizontal() - layoutWidth.intValue()));
                     }
                 }
             }
@@ -232,7 +232,7 @@ public class FlowLayout extends BaseParentComponent {
 
             container.children.forEach(child -> child.inflate(childSpace));
 
-            var mountState = MountingHelper.mountEarly(container::mountChild, container.children, childSpace, child -> {
+            var mountState = MountingHelper.mountEarly(container::mountChild, container.children, child -> {
                 layout.add(child);
 
                 child.mount(container,
@@ -253,16 +253,16 @@ public class FlowLayout extends BaseParentComponent {
 
             if (container.horizontalAlignment() != HorizontalAlignment.LEFT) {
                 for (var component : layout) {
-                    component.updateX(component.x() + container.horizontalAlignment().align(component.fullSize().width(), container.width - padding.horizontal()));
+                    component.updateX(component.baseX() + container.horizontalAlignment().align(component.fullSize().width(), container.width - padding.horizontal()));
                 }
             }
 
             if (container.verticalAlignment() != VerticalAlignment.TOP) {
                 for (var component : layout) {
                     if (container.verticalAlignment() == VerticalAlignment.CENTER) {
-                        component.updateY(component.y() + (container.height - padding.vertical() - layoutHeight.intValue()) / 2);
+                        component.updateY(component.baseY() + (container.height - padding.vertical() - layoutHeight.intValue()) / 2);
                     } else {
-                        component.updateY(component.y() + (container.height - padding.vertical() - layoutHeight.intValue()));
+                        component.updateY(component.baseY() + (container.height - padding.vertical() - layoutHeight.intValue()));
                     }
                 }
             }
@@ -287,7 +287,7 @@ public class FlowLayout extends BaseParentComponent {
 
             container.children.forEach(child -> child.inflate(childSpace));
 
-            var mountState = MountingHelper.mountEarly(container::mountChild, container.children, childSpace, child -> {
+            var mountState = MountingHelper.mountEarly(container::mountChild, container.children, child -> {
                 layout.add(child);
 
                 int x = container.x + padding.left() + child.margins().get().left() + rowWidth.intValue();
@@ -320,16 +320,16 @@ public class FlowLayout extends BaseParentComponent {
 
             if (container.verticalAlignment() != VerticalAlignment.TOP) {
                 for (var component : layout) {
-                    component.updateY(component.y() + container.verticalAlignment().align(layoutHeight.intValue(), container.height - padding.vertical()));
+                    component.updateY(component.baseY() + container.verticalAlignment().align(layoutHeight.intValue(), container.height - padding.vertical()));
                 }
             }
 
             if (container.horizontalAlignment() != HorizontalAlignment.LEFT) {
                 for (var component : layout) {
                     if (container.horizontalAlignment() == HorizontalAlignment.CENTER) {
-                        component.updateX(component.x() + (container.width - padding.horizontal() - layoutWidth.intValue()) / 2);
+                        component.updateX(component.baseX() + (container.width - padding.horizontal() - layoutWidth.intValue()) / 2);
                     } else {
-                        component.updateX(component.x() + (container.width - padding.horizontal() - layoutWidth.intValue()));
+                        component.updateX(component.baseX() + (container.width - padding.horizontal() - layoutWidth.intValue()));
                     }
                 }
             }

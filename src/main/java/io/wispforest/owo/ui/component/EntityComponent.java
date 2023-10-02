@@ -1,7 +1,6 @@
 package io.wispforest.owo.ui.component;
 
 import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.wispforest.owo.ui.base.BaseComponent;
@@ -12,14 +11,16 @@ import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.util.pond.OwoEntityRenderDispatcherExtension;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.network.PlayerListEntry;
+import net.minecraft.client.network.*;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.PlayerModelPart;
+import net.minecraft.client.session.telemetry.TelemetrySender;
+import net.minecraft.client.session.telemetry.WorldSession;
+import net.minecraft.client.util.DefaultSkinHelper;
+import net.minecraft.client.util.SkinTextures;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -29,7 +30,6 @@ import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.RotationAxis;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
@@ -242,50 +242,37 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
 
     public static class RenderablePlayerEntity extends ClientPlayerEntity {
 
-        protected Identifier skinTextureId = null;
-        protected String model = null;
+        protected SkinTextures skinTextures;
 
         protected RenderablePlayerEntity(GameProfile profile) {
             super(MinecraftClient.getInstance(),
                     MinecraftClient.getInstance().world,
                     new ClientPlayNetworkHandler(MinecraftClient.getInstance(),
-                            null,
                             new ClientConnection(NetworkSide.CLIENTBOUND),
-                            null,
-                            profile,
-                            MinecraftClient.getInstance().getTelemetryManager().createWorldSession(false, Duration.ZERO, "tetris")
-                    ),
+                            new ClientConnectionState(
+                                    profile, new WorldSession(TelemetrySender.NOOP, false, Duration.ZERO, ""),
+                                    MinecraftClient.getInstance().world.getRegistryManager().toImmutable(),
+                                    MinecraftClient.getInstance().world.getEnabledFeatures(),
+                                    "Wisp Forest Enterprises", null, null
+                    )),
                     null, null, false, false
             );
 
-            this.client.getSkinProvider().loadSkin(this.getGameProfile(), (type, identifier, texture) -> {
-                if (type != MinecraftProfileTexture.Type.SKIN) return;
+            this.skinTextures = DefaultSkinHelper.getTexture(profile);
 
-                this.skinTextureId = identifier;
-                this.model = texture.getMetadata("model");
-                if (this.model == null) this.model = "default";
-
-            }, true);
+            this.client.getSkinProvider().fetchSkinTextures(this.getGameProfile()).thenAccept(textures -> {
+                this.skinTextures = textures;
+            });
         }
 
         @Override
-        public boolean hasSkinTexture() {
-            return skinTextureId != null;
-        }
-
-        @Override
-        public Identifier getSkinTexture() {
-            return this.skinTextureId != null ? this.skinTextureId : super.getSkinTexture();
+        public SkinTextures getSkinTextures() {
+            return skinTextures;
         }
 
         @Override
         public boolean isPartVisible(PlayerModelPart modelPart) {
             return true;
-        }
-
-        @Override
-        public String getModel() {
-            return this.model != null ? this.model : super.getModel();
         }
 
         @Nullable

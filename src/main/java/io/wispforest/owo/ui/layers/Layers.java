@@ -118,7 +118,7 @@ public final class Layers {
             ScreenMouseEvents.allowMouseScroll(screeen).register((screen, mouseX, mouseY, horizontalAmount, verticalAmount) -> {
                 boolean handled;
                 for (var instance : getInstances(screen)) {
-                    handled = instance.adapter.mouseScrolled(mouseX, mouseY, verticalAmount);
+                    handled = instance.adapter.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
                     if (handled) return false;
                 }
 

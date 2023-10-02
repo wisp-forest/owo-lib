@@ -86,7 +86,7 @@ public class ReiWidgetComponent extends BaseComponent {
 
     @Override
     public boolean onMouseScroll(double mouseX, double mouseY, double amount) {
-        return this.widget.mouseScrolled(this.x + mouseX, this.y + mouseY, amount)
+        return this.widget.mouseScrolled(this.x + mouseX, this.y + mouseY, 0, amount)
                 | super.onMouseScroll(mouseX, mouseY, amount);
     }
 

@@ -1,6 +1,7 @@
 package io.wispforest.owo.offline;
 
 import net.minecraft.advancement.Advancement;
+import net.minecraft.advancement.AdvancementEntry;
 import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.util.Identifier;
 
@@ -35,10 +36,10 @@ public class OfflineAdvancementState {
      * @param advancement The target advancement
      * @return The progress of the targeted advancement
      */
-    public AdvancementProgress getOrAddProgress(Advancement advancement) {
-        return advancementData.computeIfAbsent(advancement.getId(), id -> {
+    public AdvancementProgress getOrAddProgress(AdvancementEntry advancement) {
+        return advancementData.computeIfAbsent(advancement.id(), id -> {
             AdvancementProgress progress = new AdvancementProgress();
-            progress.init(advancement.getCriteria(), advancement.getRequirements());
+            progress.init(advancement.value().requirements());
             return progress;
         });
     }
@@ -49,7 +50,7 @@ public class OfflineAdvancementState {
      *
      * @param advancement The advancement to grant
      */
-    public void grant(Advancement advancement) {
+    public void grant(AdvancementEntry advancement) {
         AdvancementProgress progress = getOrAddProgress(advancement);
         for (String criterion : progress.getUnobtainedCriteria()) {
             progress.obtain(criterion);
@@ -62,7 +63,7 @@ public class OfflineAdvancementState {
      *
      * @param advancement The advancement to revoke
      */
-    public void revoke(Advancement advancement) {
+    public void revoke(AdvancementEntry advancement) {
         AdvancementProgress progress = getOrAddProgress(advancement);
         for (String criterion : progress.getObtainedCriteria()) {
             progress.reset(criterion);
