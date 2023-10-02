@@ -110,6 +110,8 @@ public abstract class OwoItemGroup extends ItemGroup {
                 if (!this.tabs.get(tabIdx).primary()) continue;
                 this.activeTabs.add(tabIdx);
             }
+
+            if (this.activeTabs.isEmpty()) this.activeTabs.add(0);
         } else {
             this.activeTabs.add(0);
         }
