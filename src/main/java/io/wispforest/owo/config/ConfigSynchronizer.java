@@ -2,7 +2,7 @@ package io.wispforest.owo.config;
 
 import com.google.common.collect.HashMultimap;
 import io.wispforest.owo.Owo;
-import io.wispforest.owo.mixin.ServerPlayNetworkHandlerAccessor;
+import io.wispforest.owo.mixin.ServerCommonNetworkHandlerAccessor;
 import io.wispforest.owo.ops.TextOps;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -56,7 +56,7 @@ public class ConfigSynchronizer {
      * or {@code null} if no config with the given name was synced
      */
     public static @Nullable Map<Option.Key, ?> getClientOptions(ServerPlayerEntity player, String configName) {
-        var storage = CLIENT_OPTION_STORAGE.get(((ServerPlayNetworkHandlerAccessor) player.networkHandler).owo$getConnection());
+        var storage = CLIENT_OPTION_STORAGE.get(((ServerCommonNetworkHandlerAccessor) player.networkHandler).owo$getConnection());
         if (storage == null) return null;
 
         return storage.get(configName);
@@ -188,7 +188,7 @@ public class ConfigSynchronizer {
 
     private static void applyServer(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, PacketByteBuf buf, PacketSender sender) {
         Owo.LOGGER.info("Receiving client config");
-        var connection = ((ServerPlayNetworkHandlerAccessor) player.networkHandler).owo$getConnection();
+        var connection = ((ServerCommonNetworkHandlerAccessor) player.networkHandler).owo$getConnection();
 
         read(buf, (option, optionBuf) -> {
             var config = CLIENT_OPTION_STORAGE.computeIfAbsent(connection, $ -> new HashMap<>()).computeIfAbsent(option.configName(), s -> new HashMap<>());

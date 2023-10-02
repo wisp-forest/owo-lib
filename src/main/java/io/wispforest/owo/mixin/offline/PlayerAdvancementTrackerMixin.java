@@ -18,9 +18,9 @@ public class PlayerAdvancementTrackerMixin {
     private ServerPlayerEntity owner;
 
     @SuppressWarnings("unchecked")
-    @ModifyArg(method = "save", at = @At(value = "INVOKE", target = "Lcom/google/gson/Gson;toJsonTree(Ljava/lang/Object;)Lcom/google/gson/JsonElement;", remap = false))
+    @ModifyArg(method = "save", at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/Codec;encodeStart(Lcom/mojang/serialization/DynamicOps;Ljava/lang/Object;)Lcom/mojang/serialization/DataResult;", remap = false), index = 1)
     private Object onAdvancementsSaved(Object map) {
-        DataSavedEvents.ADVANCEMENTS.invoker().onSaved(owner.getUuid(), (Map<Identifier, AdvancementProgress>) map);
+        DataSavedEvents.ADVANCEMENTS.invoker().onSaved(owner.getUuid(), ((ProgressMapAccessor) map).getMap());
         return map;
     }
 }

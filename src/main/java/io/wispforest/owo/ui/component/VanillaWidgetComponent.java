@@ -16,7 +16,6 @@ public class VanillaWidgetComponent extends BaseComponent {
     private final ClickableWidget widget;
 
     private float time = 0f;
-    private @Nullable Runnable tickCallback = null;
 
     protected VanillaWidgetComponent(ClickableWidget widget) {
         this.widget = widget;
@@ -24,25 +23,8 @@ public class VanillaWidgetComponent extends BaseComponent {
         this.horizontalSizing.set(Sizing.fixed(this.widget.getWidth()));
         this.verticalSizing.set(Sizing.fixed(this.widget.getHeight()));
 
-        if (widget instanceof TextFieldWidget textField) {
+        if (widget instanceof TextFieldWidget) {
             this.margins(Insets.none());
-            this.tickCallback = textField::tick;
-        }
-
-        if (widget instanceof EditBoxWidget editBox) {
-            this.tickCallback = editBox::tick;
-        }
-    }
-
-    @Override
-    public void update(float delta, int mouseX, int mouseY) {
-        super.update(delta, mouseX, mouseY);
-        if (this.tickCallback == null) return;
-
-        this.time += delta;
-        while (this.time >= 1f) {
-            this.time -= 1f;
-            this.tickCallback.run();
         }
     }
 
@@ -161,7 +143,7 @@ public class VanillaWidgetComponent extends BaseComponent {
 
     @Override
     public boolean onMouseScroll(double mouseX, double mouseY, double amount) {
-        return this.widget.mouseScrolled(this.x + mouseX, this.y + mouseY, amount)
+        return this.widget.mouseScrolled(this.x + mouseX, this.y + mouseY, 0, amount)
                 | super.onMouseScroll(mouseX, mouseY, amount);
     }
 

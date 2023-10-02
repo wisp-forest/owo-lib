@@ -89,7 +89,15 @@ public class Uwu implements ModInitializer {
 
     public static final OwoItemGroup SIX_TAB_GROUP = OwoItemGroup.builder(new Identifier("uwu", "six_tab_group"), () -> Icon.of(Items.POWDER_SNOW_BUCKET))
             .tabStackHeight(3)
-            .customTexture(GROUP_TEXTURE)
+            .backgroundTexture(GROUP_TEXTURE)
+            .scrollerTextures(new OwoItemGroup.ScrollerTextures(new Identifier("uwu", "scroller"), new Identifier("uwu", "scroller_disabled")))
+            .tabTextures(new OwoItemGroup.TabTextures(
+                    new Identifier("uwu", "top_selected"),
+                    new Identifier("uwu", "top_selected_first_column"),
+                    new Identifier("uwu", "top_unselected"),
+                    new Identifier("uwu", "bottom_selected"),
+                    new Identifier("uwu", "bottom_selected_first_column"),
+                    new Identifier("uwu", "bottom_unselected")))
             .initializer(group -> {
                 group.addTab(Icon.of(Items.DIAMOND), "tab_1", null, true);
                 group.addTab(Icon.of(Items.EMERALD), "tab_2", null, false);

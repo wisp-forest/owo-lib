@@ -113,6 +113,8 @@ public class UwuClient implements ClientModInitializer {
         });
 
         Layers.add(Containers::verticalFlow, instance -> {
+            if (MinecraftClient.getInstance().world == null) return;
+
             instance.adapter.rootComponent.child(
                     Containers.horizontalFlow(Sizing.content(), Sizing.content())
                             .child(Components.entity(Sizing.fixed(20), EntityType.ALLAY, null).<EntityComponent<AllayEntity>>configure(component -> {

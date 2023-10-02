@@ -1,6 +1,6 @@
 package io.wispforest.owo.network;
 
-import io.wispforest.owo.mixin.ServerPlayNetworkHandlerAccessor;
+import io.wispforest.owo.mixin.ServerCommonNetworkHandlerAccessor;
 import io.wispforest.owo.network.serialization.PacketBufSerializer;
 import io.wispforest.owo.network.serialization.RecordSerializer;
 import io.wispforest.owo.util.OwoFreezer;
@@ -220,8 +220,8 @@ public class OwoNetChannel {
     public boolean canSendToPlayer(ServerPlayNetworkHandler networkHandler) {
         if (required) return true;
 
-        return OwoHandshake.isValid() ?
-                getChannelSet(((ServerPlayNetworkHandlerAccessor) networkHandler).owo$getConnection()).contains(this.packetId)
+        return OwoHandshake.isValidClient() ?
+                getChannelSet(((ServerCommonNetworkHandlerAccessor) networkHandler).owo$getConnection()).contains(this.packetId)
                 : ServerPlayNetworking.canSend(networkHandler, this.packetId);
     }
 
@@ -229,7 +229,7 @@ public class OwoNetChannel {
     public boolean canSendToServer() {
         if (required) return true;
 
-        return OwoHandshake.isValid() ?
+        return OwoHandshake.isValidClient() ?
                 getChannelSet(MinecraftClient.getInstance().getNetworkHandler().getConnection()).contains(packetId)
                 : ClientPlayNetworking.canSend(this.packetId);
     }
