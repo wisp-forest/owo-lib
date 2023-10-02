@@ -52,20 +52,25 @@ public abstract class OwoItemGroup extends ItemGroup {
     private final IntSet activeTabsView = IntSets.unmodifiable(this.activeTabs);
     private boolean initialized = false;
 
+    private final @Nullable Identifier backgroundTexture;
+    private final @Nullable ScrollerTextures scrollerTextures;
+    private final @Nullable TabTextures tabTextures;
+
     private final int tabStackHeight;
     private final int buttonStackHeight;
-    private final Identifier customTexture;
     private final boolean useDynamicTitle;
     private final boolean displaySingleTab;
     private final boolean allowMultiSelect;
 
-    protected OwoItemGroup(Identifier id, Consumer<OwoItemGroup> initializer, Supplier<Icon> iconSupplier, int tabStackHeight, int buttonStackHeight, @Nullable Identifier customTexture, boolean useDynamicTitle, boolean displaySingleTab, boolean allowMultiSelect) {
+    protected OwoItemGroup(Identifier id, Consumer<OwoItemGroup> initializer, Supplier<Icon> iconSupplier, int tabStackHeight, int buttonStackHeight, @Nullable Identifier backgroundTexture, @Nullable ScrollerTextures scrollerTextures, @Nullable TabTextures tabTextures, boolean useDynamicTitle, boolean displaySingleTab, boolean allowMultiSelect) {
         super(null, -1, Type.CATEGORY, Text.translatable("itemGroup.%s.%s".formatted(id.getNamespace(), id.getPath())), () -> ItemStack.EMPTY, (displayContext, entries) -> {});
         this.initializer = initializer;
         this.iconSupplier = iconSupplier;
         this.tabStackHeight = tabStackHeight;
         this.buttonStackHeight = buttonStackHeight;
-        this.customTexture = customTexture;
+        this.backgroundTexture = backgroundTexture;
+        this.scrollerTextures = scrollerTextures;
+        this.tabTextures = tabTextures;
         this.useDynamicTitle = useDynamicTitle;
         this.displaySingleTab = displaySingleTab;
         this.allowMultiSelect = allowMultiSelect;
@@ -306,8 +311,16 @@ public abstract class OwoItemGroup extends ItemGroup {
         return this.activeTabs.contains(tab);
     }
 
-    public Identifier getCustomTexture() {
-        return customTexture;
+    public @Nullable Identifier getBackgroundTexture() {
+        return this.backgroundTexture;
+    }
+
+    public @Nullable ScrollerTextures getScrollerTextures() {
+        return this.scrollerTextures;
+    }
+
+    public @Nullable TabTextures getTabTextures() {
+        return this.tabTextures;
     }
 
     public int getTabStackHeight() {
@@ -361,7 +374,9 @@ public abstract class OwoItemGroup extends ItemGroup {
         private Consumer<OwoItemGroup> initializer = owoItemGroup -> {};
         private int tabStackHeight = 4;
         private int buttonStackHeight = 4;
-        private @Nullable Identifier customTexture = null;
+        private @Nullable Identifier backgroundTexture = null;
+        private @Nullable ScrollerTextures scrollerTextures = null;
+        private @Nullable TabTextures tabTextures = null;
         private boolean useDynamicTitle = true;
         private boolean displaySingleTab = false;
         private boolean allowMultiSelect = true;
@@ -386,8 +401,18 @@ public abstract class OwoItemGroup extends ItemGroup {
             return this;
         }
 
-        public Builder customTexture(@Nullable Identifier customTexture) {
-            this.customTexture = customTexture;
+        public Builder backgroundTexture(@Nullable Identifier backgroundTexture) {
+            this.backgroundTexture = backgroundTexture;
+            return this;
+        }
+
+        public Builder scrollerTextures(ScrollerTextures scrollerTextures) {
+            this.scrollerTextures = scrollerTextures;
+            return this;
+        }
+
+        public Builder tabTextures(TabTextures tabTextures) {
+            this.tabTextures = tabTextures;
             return this;
         }
 
@@ -407,7 +432,7 @@ public abstract class OwoItemGroup extends ItemGroup {
         }
 
         public OwoItemGroup build() {
-            final var group = new OwoItemGroup(id, initializer, iconSupplier, tabStackHeight, buttonStackHeight, customTexture, useDynamicTitle, displaySingleTab, allowMultiSelect) {};
+            final var group = new OwoItemGroup(id, initializer, iconSupplier, tabStackHeight, buttonStackHeight, backgroundTexture, scrollerTextures, tabTextures, useDynamicTitle, displaySingleTab, allowMultiSelect) {};
             Registry.register(Registries.ITEM_GROUP, this.id, group);
             return group;
         }
@@ -425,6 +450,9 @@ public abstract class OwoItemGroup extends ItemGroup {
             super.add(stack, StackVisibility.SEARCH_TAB_ONLY);
         }
     }
+
+    public record ScrollerTextures(Identifier enabled, Identifier disabled) {}
+    public record TabTextures(Identifier topSelected, Identifier topSelectedFirstColumn, Identifier topUnselected, Identifier bottomSelected, Identifier bottomSelectedFirstColumn, Identifier bottomUnselected) {}
 
     // Utility
 

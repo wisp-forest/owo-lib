@@ -24,7 +24,6 @@
     "offline.WorldSaveHandlerMixin",
     "recipe_remainders.CraftingResultSlotMixin",
     "recipe_remainders.RecipeManagerMixin",
-    "recipe_remainders.RecipeMixin",
     "text.LanguageMixin",
     "text.TextSerializerMixin",
     "text.TranslatableTextContentMixin",

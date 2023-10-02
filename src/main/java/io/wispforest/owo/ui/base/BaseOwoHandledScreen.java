@@ -155,6 +155,9 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
     }
 
     @Override
+    public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {}
+
+    @Override
     public void render(DrawContext vanillaContext, int mouseX, int mouseY, float delta) {
         var context = OwoUIDrawContext.of(vanillaContext);
         if (!this.invalid) {

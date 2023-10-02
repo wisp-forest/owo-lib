@@ -8,7 +8,10 @@ import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
 import io.wispforest.owo.mixin.itemgroup.ItemGroupAccessor;
 import io.wispforest.owo.mixin.ui.SimpleRegistryAccessor;
 import net.minecraft.item.ItemGroup;
-import net.minecraft.registry.*;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.SimpleRegistry;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -27,7 +30,7 @@ public class WrapperGroup extends OwoItemGroup {
 
     @SuppressWarnings("unchecked")
     public WrapperGroup(ItemGroup parent, Identifier parentId, List<ItemGroupTab> tabs, List<ItemGroupButton> buttons) {
-        super(parentId, owoItemGroup -> {}, () -> Icon.of(parent.getIcon()), 4, 4, null, true, false, false);
+        super(parentId, owoItemGroup -> {}, () -> Icon.of(parent.getIcon()), 4, 4, null, null, null, true, false, false);
 
         int parentRawId = Registries.ITEM_GROUP.getRawId(parent);
 
