@@ -52,6 +52,10 @@ public class UwuTestWindow extends OwoWindow<FlowLayout> {
                 component.effect(RenderEffectWrapper.RenderEffect.color(Color.BLUE));
             }));
 
+        for (int i = 0; i < 100; i++) {
+            inner.child(Components.label(Text.of("breh!")));
+        }
+
         inner
                 .child(textbox
                         .margins(Insets.vertical(5)))

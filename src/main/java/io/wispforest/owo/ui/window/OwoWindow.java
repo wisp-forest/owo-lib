@@ -53,9 +53,11 @@ public abstract class OwoWindow<R extends ParentComponent> extends FramebufferWi
             }
         });
         mouseScrolled().subscribe((xOffset, yOffset) -> {
-            double amount = (client.options.getDiscreteMouseScroll().getValue() ? Math.signum(yOffset) : yOffset)
+            double yAmount = (client.options.getDiscreteMouseScroll().getValue() ? Math.signum(yOffset) : yOffset)
                 * client.options.getMouseWheelSensitivity().getValue();
-            adapter.mouseScrolled(mouseX, mouseY, amount);
+            double xAmount = (client.options.getDiscreteMouseScroll().getValue() ? Math.signum(xOffset) : xOffset)
+                * client.options.getMouseWheelSensitivity().getValue();
+            adapter.mouseScrolled(mouseX, mouseY, xAmount, yAmount);
         });
         keyPressed().subscribe((keyCode, scanCode, modifiers, released) -> {
             if (released) return;
