@@ -119,3 +119,7 @@ run/
 
 # generated sources
 /src/*/generated/
+bin/
+
+# Eclipse
+.settings/
