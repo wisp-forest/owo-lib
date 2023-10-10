@@ -7,3 +7,5 @@ transitive-accessible class net/minecraft/item/ItemGroup$Entries
 transitive-accessible class net/minecraft/item/ItemGroup$EntriesImpl
 
 transitive-accessible class net/minecraft/client/gui/DrawContext$ScissorStack
+
+accessible method net/minecraft/nbt/NbtCompound toMap ()Ljava/util/Map;

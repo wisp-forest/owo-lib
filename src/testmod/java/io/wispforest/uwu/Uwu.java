@@ -16,6 +16,13 @@ import io.wispforest.owo.particles.ClientParticles;
 import io.wispforest.owo.particles.systems.ParticleSystem;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
 import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
+import io.wispforest.owo.serialization.Codeck;
+import io.wispforest.owo.serialization.impl.bytebuf.ByteBufDeserializer;
+import io.wispforest.owo.serialization.impl.bytebuf.ByteBufSerializer;
+import io.wispforest.owo.serialization.impl.json.JsonDeserializer;
+import io.wispforest.owo.serialization.impl.json.JsonSerializer;
+import io.wispforest.owo.serialization.impl.nbt.NbtDeserializer;
+import io.wispforest.owo.serialization.impl.nbt.NbtSerializer;
 import io.wispforest.owo.text.CustomTextRegistry;
 import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.util.RegistryAccess;
@@ -229,6 +236,159 @@ public class Uwu implements ModInitializer {
                                 return 0;
                             }))));
 
+            dispatcher.register(literal("kodeck_test")
+                    .executes(context -> {
+                        var rand = context.getSource().getWorld().random;
+                        var source = context.getSource();
+
+                        //--
+
+                        String testPhrase = "This is a test to see how kodeck dose.";
+
+                        source.sendMessage(Text.of("Input:  " + testPhrase));
+
+                        var nbtData = Codeck.STRING.encode(NbtSerializer::new, testPhrase);
+                        var fromNbtData = Codeck.STRING.decode(NbtDeserializer::new, nbtData);
+
+                        var jsonData = Codeck.STRING.encode(JsonSerializer::new, fromNbtData);
+                        var fromJsonData = Codeck.STRING.decode(JsonDeserializer::new, jsonData);
+
+                        source.sendMessage(Text.of("Output: " + fromJsonData));
+
+                        source.sendMessage(Text.empty());
+
+                        //--
+
+                        int randomNumber = rand.nextInt(20000);
+
+                        source.sendMessage(Text.of("Input:  " + randomNumber));
+
+                        var jsonNum = Codeck.INT.encode(JsonSerializer::new, randomNumber);
+
+                        source.sendMessage(Text.of("Output: " + Codeck.INT.decode(JsonDeserializer::new, jsonNum)));
+
+                        source.sendMessage(Text.empty());
+
+                        //--
+
+                        List<Integer> randomNumbers = new ArrayList<>();
+
+                        var maxCount = rand.nextInt(20);
+
+                        for(int i = 0; i < maxCount; i++){
+                            randomNumbers.add(rand.nextInt(20000));
+                        }
+
+                        source.sendMessage(Text.of("Input:  " + randomNumbers));
+
+                        Codeck<List<Integer>> INT_LIST_KODECK = Codeck.INT.list();
+
+                        var nbtListData = INT_LIST_KODECK.encode(NbtSerializer::new, randomNumbers);
+
+                        source.sendMessage(Text.of("Output: " + INT_LIST_KODECK.decode(NbtDeserializer::new, nbtListData)));
+
+                        source.sendMessage(Text.empty());
+
+                        //---
+                        {
+                            if (source.getPlayer() == null) return 0;
+
+                            ItemStack stack = source.getPlayer().getStackInHand(Hand.MAIN_HAND);
+
+                            source.sendMessage(Text.of(stack.toString()));
+                            source.sendMessage(Text.of(String.valueOf(stack.getOrCreateNbt())));
+
+                            source.sendMessage(Text.of("---"));
+
+                            JsonElement stackJsonData;
+
+                            try {
+                                stackJsonData = Codeck.ITEM_STACK.encode(JsonSerializer::new, stack);
+                            } catch (Exception exception){
+                                source.sendMessage(Text.of(exception.getMessage()));
+                                source.sendMessage(Text.of((Arrays.toString(exception.getStackTrace()))));
+
+                                return 0;
+                            }
+
+                            source.sendMessage(Text.of(stackJsonData.toString()));
+
+                            source.sendMessage(Text.of("---"));
+
+                            ItemStack stackFromJson;
+
+                            try {
+                                stackFromJson = Codeck.ITEM_STACK.decode(JsonDeserializer::new, stackJsonData);
+                            } catch (Exception exception){
+                                source.sendMessage(Text.of(exception.getMessage()));
+                                source.sendMessage(Text.of((Arrays.toString(exception.getStackTrace()))));
+
+                                return 0;
+                            }
+
+                            source.sendMessage(Text.of(stackFromJson.toString()));
+                            source.sendMessage(Text.of(String.valueOf(stackFromJson.getOrCreateNbt())));
+                        }
+
+//                        source.sendMessage(Text.empty());
+
+                        if (source.getPlayer() == null) return 0;
+
+                        //Vanilla
+                        iterations((buf) -> {
+                            ItemStack stack = source.getPlayer().getStackInHand(Hand.MAIN_HAND);
+
+                            //source.sendMessage(Text.of(stack.toString()));
+                            //source.sendMessage(Text.of(String.valueOf(stack.getOrCreateNbt())));
+
+                            //source.sendMessage(Text.of("---"));
+
+                            buf.writeItemStack(stack);
+
+                            //source.sendMessage(Text.of(String.valueOf(buf.writerIndex())));
+
+                            //source.sendMessage(Text.of("---"));
+
+                            var stackFromByte = buf.readItemStack();
+
+                            //source.sendMessage(Text.of(stackFromByte.toString()));
+                            //source.sendMessage(Text.of(String.valueOf(stackFromByte.getOrCreateNbt())));
+                        });
+
+                        //Kodeck
+                        try {
+                            iterations((buf) -> {
+                                ItemStack stack = source.getPlayer().getStackInHand(Hand.MAIN_HAND);
+
+                                //source.sendMessage(Text.of(stack.toString()));
+                                //source.sendMessage(Text.of(String.valueOf(stack.getOrCreateNbt())));
+
+                                //source.sendMessage(Text.of("---"));
+
+                                Codeck.ITEM_STACK.encode(new ByteBufSerializer(buf), stack);
+
+                                //source.sendMessage(Text.of(String.valueOf(stackByteData.writerIndex())));
+
+                                //source.sendMessage(Text.of("---"));
+
+                                ItemStack stackFromByte;
+
+                                stackFromByte = Codeck.ITEM_STACK.decode(ByteBufDeserializer::new, buf);
+
+                                //source.sendMessage(Text.of(stackFromByte.toString()))
+                                //source.sendMessage(Text.of(String.valueOf(stackFromByte.getOrCreateNbt())));
+                            });
+                        } catch (Exception exception){
+                            source.sendMessage(Text.of(exception.getMessage()));
+                            source.sendMessage(Text.of((Arrays.toString(exception.getStackTrace()))));
+
+                            return 0;
+                        }
+
+                        //--
+
+                        return 0;
+                    }));
         });
 
         CustomTextRegistry.register("based", BasedTextContent.Serializer.INSTANCE);
