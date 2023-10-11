@@ -2,8 +2,10 @@ package io.wispforest.uwu;
 
 import blue.endless.jankson.JsonPrimitive;
 import com.google.common.collect.ImmutableList;
+import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import io.netty.buffer.ByteBuf;
 import io.wispforest.owo.config.ConfigSynchronizer;
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.itemgroup.Icon;
@@ -36,6 +38,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.block.Blocks;
@@ -47,6 +50,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -58,14 +62,14 @@ import net.minecraft.resource.featuretoggle.FeatureFlags;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
+import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
@@ -335,7 +339,7 @@ public class Uwu implements ModInitializer {
                         if (source.getPlayer() == null) return 0;
 
                         //Vanilla
-                        iterations((buf) -> {
+                        iterations("Vanilla", (buf) -> {
                             ItemStack stack = source.getPlayer().getStackInHand(Hand.MAIN_HAND);
 
                             //source.sendMessage(Text.of(stack.toString()));
@@ -355,9 +359,9 @@ public class Uwu implements ModInitializer {
                             //source.sendMessage(Text.of(String.valueOf(stackFromByte.getOrCreateNbt())));
                         });
 
-                        //Kodeck
+                        //Codeck
                         try {
-                            iterations((buf) -> {
+                            iterations("Codeck", (buf) -> {
                                 ItemStack stack = source.getPlayer().getStackInHand(Hand.MAIN_HAND);
 
                                 //source.sendMessage(Text.of(stack.toString()));
@@ -365,7 +369,7 @@ public class Uwu implements ModInitializer {
 
                                 //source.sendMessage(Text.of("---"));
 
-                                Codeck.ITEM_STACK.encode(new ByteBufSerializer(buf), stack);
+                                Codeck.ITEM_STACK.encode(new ByteBufSerializer<>(buf), stack);
 
                                 //source.sendMessage(Text.of(String.valueOf(stackByteData.writerIndex())));
 
@@ -395,6 +399,35 @@ public class Uwu implements ModInitializer {
 
         UwuNetworkExample.init();
         UwuOptionalNetExample.init();
+    }
+
+    public static void iterations(String label, Consumer<PacketByteBuf> action){
+        int maxTrials = 3;
+        int maxIterations = 50;
+
+        List<Long> durations = new ArrayList<>();
+
+        System.out.println("-----");
+        System.out.println(label);
+
+        for (int trial = 0; trial < maxTrials; trial++) {
+            durations.clear();
+
+            for (int i = 0; i < maxIterations; i++) {
+                PacketByteBuf buf = PacketByteBufs.create();
+
+                long startTime = System.nanoTime();
+
+                action.accept(buf);
+
+                durations.add(System.nanoTime() - startTime);
+            }
+
+            System.out.println(String.format(maxIterations + " Trials took on average: %.2f", ((durations.stream().mapToLong(v -> v).sum()) / (double) durations.size()) / 1000000));
+        }
+
+        System.out.println("-----");
+
     }
 
     public record OtherTestMessage(BlockPos pos, String message) {}

@@ -65,7 +65,11 @@ public class ByteBufDeserializer implements Deserializer<ByteBuf> {
 
     @Override
     public byte[] readBytes() {
-        return buf.readBytes(buf.readInt()).array();
+        var array = new byte[buf.readInt()];
+
+        buf.readBytes(array);
+
+        return array;
     }
 
     @Override

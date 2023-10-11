@@ -11,7 +11,7 @@ public interface SelfDescribedSerializer<T> extends Serializer<T> {
         optional.ifPresentOrElse(v -> codeck.encode(this, v), this::empty);
     }
 
-    void readAny(Object object);
+    void writeAny(Object object);
 
     class FormatSerializeException extends RuntimeException {
         public FormatSerializeException(String message){

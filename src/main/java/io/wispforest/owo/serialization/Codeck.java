@@ -67,7 +67,7 @@ public interface Codeck<T> {
         @Override
         public <E> void encode(Serializer<E> serializer, JsonElement value) {
             if(serializer instanceof SelfDescribedSerializer<E> describedSerializer){
-                describedSerializer.readAny(new JsonDeserializer(value).any());
+                describedSerializer.writeAny(new JsonDeserializer(value).readAny());
 
                 return;
             }
@@ -86,7 +86,7 @@ public interface Codeck<T> {
             if(deserializer instanceof SelfDescribedDeserializer<E> selfDescribedDeserializer){
                 var jsonSerializerzer = new JsonSerializer();
 
-                jsonSerializerzer.readAny(selfDescribedDeserializer.any());
+                jsonSerializerzer.writeAny(selfDescribedDeserializer.readAny());
 
                 return jsonSerializerzer.result();
             }
@@ -105,7 +105,7 @@ public interface Codeck<T> {
         @Override
         public <E> void encode(Serializer<E> serializer, NbtElement value) {
             if(serializer instanceof SelfDescribedSerializer<E> describedSerializer){
-                describedSerializer.readAny(new NbtDeserializer(value).any());
+                describedSerializer.writeAny(new NbtDeserializer(value).readAny());
 
                 return;
             }
@@ -126,7 +126,7 @@ public interface Codeck<T> {
             if(deserializer instanceof SelfDescribedDeserializer<E> selfDescribedDeserializer){
                 var nbtSerializerzer = new NbtSerializer();
 
-                nbtSerializerzer.readAny(selfDescribedDeserializer.any());
+                nbtSerializerzer.writeAny(selfDescribedDeserializer.readAny());
 
                 return nbtSerializerzer.result();
             }

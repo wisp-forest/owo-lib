@@ -72,6 +72,7 @@ public class ByteBufSerializer<T extends ByteBuf> implements Serializer<T> {
 
     @Override
     public void writeBytes(byte[] bytes) {
+        this.buf.writeInt(bytes.length);
         this.buf.writeBytes(bytes);
     }
 

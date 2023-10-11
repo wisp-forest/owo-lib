@@ -1,8 +1,6 @@
 package io.wispforest.owo.serialization.impl.nbt;
 
 import io.wispforest.owo.serialization.*;
-import io.wispforest.owo.serialization.impl.json.JsonDeserializer;
-import io.wispforest.owo.serialization.impl.json.JsonSerializer;
 import net.minecraft.nbt.*;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,8 +35,46 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
     }
 
     @Override
-    public Object any() {
-        return null;
+    public Object readAny() {
+        var element = topElement();
+
+        return switch (element.getType()){
+            case NbtElement.END_TYPE -> null;
+            case NbtElement.BYTE_TYPE -> ((AbstractNbtNumber)element).byteValue();
+            case NbtElement.SHORT_TYPE -> ((AbstractNbtNumber)element).shortValue();
+            case NbtElement.INT_TYPE -> ((AbstractNbtNumber)element).intValue();
+            case NbtElement.LONG_TYPE -> ((AbstractNbtNumber)element).longValue();
+            case NbtElement.FLOAT_TYPE -> ((AbstractNbtNumber)element).floatValue();
+            case NbtElement.DOUBLE_TYPE -> ((AbstractNbtNumber)element).doubleValue();
+            case NbtElement.STRING_TYPE -> element.asString();
+            case NbtElement.BYTE_ARRAY_TYPE, NbtElement.INT_ARRAY_TYPE, NbtElement.LONG_ARRAY_TYPE, NbtElement.LIST_TYPE -> {
+                List<Object> objects = new ArrayList<>();
+
+                ((AbstractNbtList<NbtElement>)element).forEach(element1 -> {
+                    stack.push(() -> element1);
+
+                    objects.add(readAny());
+
+                    stack.pop();
+                });
+
+                yield objects;
+            }
+            case NbtElement.COMPOUND_TYPE -> {
+                Map<String, Object> maps = new LinkedHashMap<>();
+
+                ((NbtCompound)element).toMap().forEach((s, element1) -> {
+                    stack.push(() -> element1);
+
+                    maps.put(s, readAny());
+
+                    stack.pop();
+                });
+
+                yield maps;
+            }
+            default -> throw new IllegalStateException("Unknown Object type: " + element);
+        };
     }
 
     //--

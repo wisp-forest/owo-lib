@@ -28,7 +28,7 @@ public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> 
     }
 
     @Override
-    public Object any() {
+    public Object readAny() {
         var element = topElement();
 
         if (element instanceof JsonNull) return null;
@@ -62,7 +62,7 @@ public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> 
             array.forEach(element1 -> {
                 stack.push(() -> element1);
 
-                objects.add(any());
+                objects.add(readAny());
 
                 stack.pop();
             });
@@ -76,7 +76,7 @@ public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> 
             object.asMap().forEach((s, element1) -> {
                 stack.push(() -> element1);
 
-                maps.put(s, any());
+                maps.put(s, readAny());
 
                 stack.pop();
             });

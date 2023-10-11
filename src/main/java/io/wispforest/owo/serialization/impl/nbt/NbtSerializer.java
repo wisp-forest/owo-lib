@@ -29,10 +29,8 @@ public class NbtSerializer implements SelfDescribedSerializer<NbtElement> {
         consumeElement(NbtEnd.INSTANCE);
     }
 
-    //--
-
     @Override
-    public void readAny(Object object) {
+    public void writeAny(Object object) {
         NbtElement element = null;
 
         if (object == null) {
@@ -59,7 +57,7 @@ public class NbtSerializer implements SelfDescribedSerializer<NbtElement> {
             stack.push(array::add);
 
             try {
-                objects.forEach(this::readAny);
+                objects.forEach(this::writeAny);
             } catch (UnsupportedOperationException e) {
                 throw new FormatSerializeException("Unable to Serializer a List into Nbt Format due to differing entries types.", e);
             }
@@ -75,13 +73,13 @@ public class NbtSerializer implements SelfDescribedSerializer<NbtElement> {
             } else {
                 element = array;
             }
-        } else if (element instanceof Map map) {
+        } else if (object instanceof Map map) {
             NbtCompound compound = new NbtCompound();
 
             map.forEach((key, value) -> {
                 stack.push((element1) -> compound.put((String) key, element1));
 
-                readAny(value);
+                writeAny(value);
 
                 stack.pop();
             });
@@ -93,6 +91,8 @@ public class NbtSerializer implements SelfDescribedSerializer<NbtElement> {
 
         consumeElement(element);
     }
+
+    //--
 
     @Override
     public void writeBoolean(boolean value) {
