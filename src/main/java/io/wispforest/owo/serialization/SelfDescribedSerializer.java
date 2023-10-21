@@ -1,8 +1,16 @@
 package io.wispforest.owo.serialization;
 
+import io.wispforest.owo.serialization.impl.SerializationAttribute;
+
 import java.util.Optional;
+import java.util.Set;
 
 public interface SelfDescribedSerializer<T> extends Serializer<T> {
+
+    @Override
+    default Set<SerializationAttribute> attributes(){
+        return Set.of(SerializationAttribute.SELF_DESCRIBING);
+    }
 
     void empty();
 

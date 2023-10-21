@@ -1,8 +1,15 @@
 package io.wispforest.owo.serialization;
 
+import io.wispforest.owo.serialization.impl.SerializationAttribute;
+
 import java.util.Optional;
+import java.util.Set;
 
 public interface Serializer<T> {
+
+    Set<SerializationAttribute> attributes();
+
+    Serializer<T> addAttribute(SerializationAttribute ...attributes);
 
     <V> void writeOptional(Codeck<V> codeck, final Optional<V> optional);
 
@@ -23,6 +30,10 @@ public interface Serializer<T> {
     void writeString(final String value);
 
     void writeBytes(final byte[] bytes);
+
+    void writeVarInt(final int value);
+
+    void writeVarLong(final long value);
 
     <E> SequenceSerializer<E> sequence(Codeck<E> elementCodec, int length);
 

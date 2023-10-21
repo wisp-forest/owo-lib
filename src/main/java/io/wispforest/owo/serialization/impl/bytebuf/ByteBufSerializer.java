@@ -6,10 +6,14 @@ import io.wispforest.owo.serialization.SequenceSerializer;
 import io.wispforest.owo.serialization.Serializer;
 import io.wispforest.owo.serialization.StructSerializer;
 import io.wispforest.owo.serialization.Codeck;
+import io.wispforest.owo.serialization.impl.SerializationAttribute;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.encoding.VarInts;
+import net.minecraft.network.encoding.VarLongs;
 
 import java.util.Optional;
+import java.util.Set;
 
 public class ByteBufSerializer<T extends ByteBuf> implements Serializer<T> {
 
@@ -22,6 +26,20 @@ public class ByteBufSerializer<T extends ByteBuf> implements Serializer<T> {
     public static ByteBufSerializer<PacketByteBuf> packet(){
         return new ByteBufSerializer<>(PacketByteBufs.create());
     }
+
+    //--
+
+    @Override
+    public Set<SerializationAttribute> attributes() {
+        return Set.of(SerializationAttribute.BINARY);
+    }
+
+    @Override
+    public Serializer<T> addAttribute(SerializationAttribute ...attributes) {
+        return this;
+    }
+
+    //--
 
     @Override
     public <V> void writeOptional(Codeck<V> codeck, Optional<V> optional) {
@@ -72,8 +90,18 @@ public class ByteBufSerializer<T extends ByteBuf> implements Serializer<T> {
 
     @Override
     public void writeBytes(byte[] bytes) {
-        this.buf.writeInt(bytes.length);
+        writeVarInt(bytes.length);
         this.buf.writeBytes(bytes);
+    }
+
+    @Override
+    public void writeVarInt(int value) {
+        VarInts.write(buf, value);
+    }
+
+    @Override
+    public void writeVarLong(long value) {
+        VarLongs.write(buf, value);
     }
 
     @Override
@@ -83,7 +111,7 @@ public class ByteBufSerializer<T extends ByteBuf> implements Serializer<T> {
 
     @Override
     public <E> SequenceSerializer<E> sequence(Codeck<E> elementCodec, int length) {
-        this.buf.writeInt(length);
+        writeVarInt(length);
 
         return new ByteBufSequenceSerializer<>(elementCodec);
     }

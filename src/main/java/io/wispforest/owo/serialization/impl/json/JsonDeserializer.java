@@ -2,6 +2,7 @@ package io.wispforest.owo.serialization.impl.json;
 
 import com.google.gson.*;
 import io.wispforest.owo.serialization.*;
+import io.wispforest.owo.serialization.impl.SerializationAttribute;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
@@ -9,6 +10,8 @@ import java.util.*;
 import java.util.function.Supplier;
 
 public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> {
+
+    private final Set<SerializationAttribute> extraAttributes = new HashSet<>();
 
     protected final Deque<Supplier<JsonElement>> stack = new ArrayDeque<>();
 
@@ -18,6 +21,25 @@ public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> 
 
     private JsonElement topElement() {
         return stack.peek().get();
+    }
+
+    //--
+
+    @Override
+    public Set<SerializationAttribute> attributes() {
+        Set<SerializationAttribute> set = new HashSet<>();
+
+        set.addAll(SelfDescribedDeserializer.super.attributes());
+        set.addAll(extraAttributes);
+
+        return set;
+    }
+
+    @Override
+    public Deserializer<JsonElement> addAttribute(SerializationAttribute... attributes) {
+        extraAttributes.addAll(Arrays.asList(attributes));
+
+        return this;
     }
 
     //--
@@ -151,6 +173,16 @@ public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> 
     }
 
     @Override
+    public int readVarInt() {
+        return readInt();
+    }
+
+    @Override
+    public long readVarLong() {
+        return readLong();
+    }
+
+    @Override
     public <E> SequenceDeserializer<E> sequence(Codeck<E> elementCodec) {
         return new JsonSequenceDeserializer<>(((JsonArray) topElement()), elementCodec);
     }
@@ -185,9 +217,13 @@ public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> 
         public V next() {
             JsonDeserializer.this.stack.push(entries::next);
 
-            var entry = valueCodec.decode(JsonDeserializer.this);
+            V entry;
 
-            JsonDeserializer.this.stack.pop();
+            try {
+                entry = valueCodec.decode(JsonDeserializer.this);
+            } finally {
+                JsonDeserializer.this.stack.pop();
+            }
 
             return entry;
         }
@@ -215,11 +251,15 @@ public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> 
 
             JsonDeserializer.this.stack.push(entry::getValue);
 
-            var newEntry = Map.entry(entry.getKey(), valueCodec.decode(JsonDeserializer.this));
+            Map.Entry<String, V> value;
 
-            JsonDeserializer.this.stack.pop();
+            try {
+                value = Map.entry(entry.getKey(), valueCodec.decode(JsonDeserializer.this));
+            } finally {
+                JsonDeserializer.this.stack.pop();
+            }
 
-            return newEntry;
+            return value;
         }
     }
 
@@ -237,9 +277,13 @@ public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> 
 
             JsonDeserializer.this.stack.push(() -> map.get(field));
 
-            var value = codeck.decode(JsonDeserializer.this);
+            F value;
 
-            JsonDeserializer.this.stack.pop();
+            try {
+                value = codeck.decode(JsonDeserializer.this);
+            } finally {
+                JsonDeserializer.this.stack.pop();
+            }
 
             return value;
         }

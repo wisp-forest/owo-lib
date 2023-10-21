@@ -1,8 +1,15 @@
 package io.wispforest.owo.serialization;
 
+import io.wispforest.owo.serialization.impl.SerializationAttribute;
+
 import java.util.Optional;
+import java.util.Set;
 
 public interface Deserializer<T> {
+
+    Set<SerializationAttribute> attributes();
+
+    Deserializer<T> addAttribute(SerializationAttribute ...attributes);
 
     <V> Optional<V> readOptional(Codeck<V> codeck);
 
@@ -23,6 +30,10 @@ public interface Deserializer<T> {
     String readString();
 
     byte[] readBytes();
+
+    int readVarInt();
+
+    long readVarLong();
 
     <E> SequenceDeserializer<E> sequence(Codeck<E> elementCodec);
 

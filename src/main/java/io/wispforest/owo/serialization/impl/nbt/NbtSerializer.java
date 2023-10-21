@@ -1,28 +1,51 @@
 package io.wispforest.owo.serialization.impl.nbt;
 
 import io.wispforest.owo.serialization.*;
+import io.wispforest.owo.serialization.impl.SerializationAttribute;
 import net.minecraft.nbt.*;
+import net.minecraft.network.encoding.VarInts;
+import net.minecraft.network.encoding.VarLongs;
 import org.apache.commons.lang3.mutable.MutableObject;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class NbtSerializer implements SelfDescribedSerializer<NbtElement> {
 
-    protected Deque<Consumer<NbtElement>> stack = new ArrayDeque<>();
+    private final Set<SerializationAttribute> extraAttributes = new HashSet<>();
 
-    protected NbtElement result = null;
+    private final Deque<Consumer<NbtElement>> stack = new ArrayDeque<>();
+
+    private NbtElement result = null;
 
     public NbtSerializer() {
         stack.push(element -> result = element);
     }
 
-    public void consumeElement(NbtElement element) {
+    private void consumeElement(NbtElement element) {
         stack.peek().accept(element);
     }
+
+    //--
+
+    @Override
+    public Set<SerializationAttribute> attributes() {
+        Set<SerializationAttribute> set = new HashSet<>();
+
+        set.addAll(SelfDescribedSerializer.super.attributes());
+        set.addAll(extraAttributes);
+
+        return set;
+    }
+
+    @Override
+    public Serializer<NbtElement> addAttribute(SerializationAttribute... attributes) {
+        extraAttributes.addAll(Arrays.asList(attributes));
+
+        return this;
+    }
+
+    //--
 
     @Override
     public void empty() {
@@ -140,6 +163,29 @@ public class NbtSerializer implements SelfDescribedSerializer<NbtElement> {
     }
 
     @Override
+    public void writeVarInt(int value) {
+        var abstractNbtNumber = switch (VarInts.getSizeInBytes(value)){
+            case 0, 1 -> NbtByte.of((byte) value);
+            case 2 -> NbtShort.of((short) value);
+            default -> NbtInt.of(value);
+        };
+
+        consumeElement(abstractNbtNumber);
+    }
+
+    @Override
+    public void writeVarLong(long value) {
+        var abstractNbtNumber = switch (VarLongs.getSizeInBytes(value)){
+            case 0, 1 -> NbtByte.of((byte) value);
+            case 2 -> NbtShort.of((short) value);
+            case 3, 4 -> NbtInt.of((int) value);
+            default -> NbtLong.of(value);
+        };
+
+        consumeElement(abstractNbtNumber);
+    }
+
+    @Override
     public <E> SequenceSerializer<E> sequence(Codeck<E> elementCodec, int length) {
         return new NbtSequenceSerializer<>(elementCodec);
     }
@@ -187,8 +233,12 @@ public class NbtSerializer implements SelfDescribedSerializer<NbtElement> {
             MutableObject<NbtElement> encodedHolder = new MutableObject<>(null);
 
             NbtSerializer.this.stack.push(encodedHolder::setValue);
-            codec.encode(NbtSerializer.this, value);
-            NbtSerializer.this.stack.pop();
+
+            try {
+                codec.encode(NbtSerializer.this, value);
+            } finally {
+                NbtSerializer.this.stack.pop();
+            }
 
             if (encodedHolder.getValue() == null) throw new NbtSerializer.NbtEncodeException("No field was serialized");
             result.put(name, encodedHolder.getValue());
@@ -217,8 +267,12 @@ public class NbtSerializer implements SelfDescribedSerializer<NbtElement> {
             MutableObject<NbtElement> encodedHolder = new MutableObject<>(null);
 
             NbtSerializer.this.stack.push(encodedHolder::setValue);
-            valueCodec.encode(NbtSerializer.this, element);
-            NbtSerializer.this.stack.pop();
+
+            try {
+                valueCodec.encode(NbtSerializer.this, element);
+            } finally {
+                NbtSerializer.this.stack.pop();
+            }
 
             if (encodedHolder.getValue() == null) throw new NbtSerializer.NbtEncodeException("No value was serialized");
             result.add(encodedHolder.getValue());

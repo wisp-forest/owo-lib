@@ -58,7 +58,7 @@ public class ReflectionCodeckBuilder {
      * @param deserializer The deserialization method
      * @param <T>          The type of object to register a serializer for
      */
-    public static <E, T> void register(Class<T> clazz, BiConsumer<Serializer<E>, T> serializer, Function<Deserializer<E>, T> deserializer) {
+    public static <T> void register(Class<T> clazz, BiConsumer<Serializer, T> serializer, Function<Deserializer, T> deserializer) {
         register(clazz, Codeck.of(serializer, deserializer));
     }
 
@@ -68,7 +68,7 @@ public class ReflectionCodeckBuilder {
     }
 
     @SafeVarargs
-    private static <E, T> void register(BiConsumer<Serializer<E>, T> serializer, Function<Deserializer<E>, T> deserializer, Class<T>... classes) {
+    private static <T> void register(BiConsumer<Serializer, T> serializer, Function<Deserializer, T> deserializer, Class<T>... classes) {
         final var kodeck = Codeck.of(serializer, deserializer);
 
         for (var clazz : classes) register(clazz, kodeck);
@@ -395,7 +395,7 @@ public class ReflectionCodeckBuilder {
 
                     @Override
                     public BlockHitResult decode(StructDeserializer deserializer) {
-                        BlockPos blockPos = deserializer.field("blockPos",Codeck.BLOCK_POS);
+                        BlockPos blockPos = deserializer.field("blockPos", Codeck.BLOCK_POS);
                         Direction direction = deserializer.field("side", DIRECTION);
 
                         float f = deserializer.field("x", Codeck.FLOAT);

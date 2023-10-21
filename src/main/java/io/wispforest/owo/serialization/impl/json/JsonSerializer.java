@@ -1,17 +1,16 @@
 package io.wispforest.owo.serialization.impl.json;
 
 import com.google.gson.*;
-import io.wispforest.owo.serialization.MapSerializer;
-import io.wispforest.owo.serialization.SelfDescribedSerializer;
-import io.wispforest.owo.serialization.SequenceSerializer;
-import io.wispforest.owo.serialization.StructSerializer;
-import io.wispforest.owo.serialization.Codeck;
+import io.wispforest.owo.serialization.*;
+import io.wispforest.owo.serialization.impl.SerializationAttribute;
 import org.apache.commons.lang3.mutable.MutableObject;
 
 import java.util.*;
 import java.util.function.Consumer;
 
 public class JsonSerializer implements SelfDescribedSerializer<JsonElement> {
+
+    private final Set<SerializationAttribute> extraAttributes = new HashSet<>();
 
     protected Deque<Consumer<JsonElement>> stack = new ArrayDeque<>();
 
@@ -24,6 +23,27 @@ public class JsonSerializer implements SelfDescribedSerializer<JsonElement> {
     public void consumeElement(JsonElement element) {
         stack.peek().accept(element);
     }
+
+    //--
+
+    @Override
+    public Set<SerializationAttribute> attributes() {
+        Set<SerializationAttribute> set = new HashSet<>();
+
+        set.addAll(SelfDescribedSerializer.super.attributes());
+        set.addAll(extraAttributes);
+
+        return set;
+    }
+
+    @Override
+    public Serializer<JsonElement> addAttribute(SerializationAttribute... attributes) {
+        extraAttributes.addAll(Arrays.asList(attributes));
+
+        return this;
+    }
+
+    //--
 
     @Override
     public void empty() {
@@ -132,6 +152,16 @@ public class JsonSerializer implements SelfDescribedSerializer<JsonElement> {
     }
 
     @Override
+    public void writeVarInt(int value) {
+        writeInt(value);
+    }
+
+    @Override
+    public void writeVarLong(long value) {
+        writeLong(value);
+    }
+
+    @Override
     public <E> SequenceSerializer<E> sequence(Codeck<E> elementCodec, int length) {
         return new JsonSequenceSerializer<>(elementCodec);
     }
@@ -179,8 +209,12 @@ public class JsonSerializer implements SelfDescribedSerializer<JsonElement> {
             MutableObject<JsonElement> encodedHolder = new MutableObject<>(null);
 
             JsonSerializer.this.stack.push(encodedHolder::setValue);
-            codec.encode(JsonSerializer.this, value);
-            JsonSerializer.this.stack.pop();
+
+            try {
+                codec.encode(JsonSerializer.this, value);
+            } finally {
+                JsonSerializer.this.stack.pop();
+            }
 
             if (encodedHolder.getValue() == null) throw new JsonSerializer.JsonEncodeException("No field was serialized");
             result.add(name, encodedHolder.getValue());
@@ -209,8 +243,12 @@ public class JsonSerializer implements SelfDescribedSerializer<JsonElement> {
             MutableObject<JsonElement> encodedHolder = new MutableObject<>(null);
 
             JsonSerializer.this.stack.push(encodedHolder::setValue);
-            valueCodec.encode(JsonSerializer.this, element);
-            JsonSerializer.this.stack.pop();
+
+            try {
+                valueCodec.encode(JsonSerializer.this, element);
+            } finally {
+                JsonSerializer.this.stack.pop();
+            }
 
             if (encodedHolder.getValue() == null) throw new JsonSerializer.JsonEncodeException("No value was serialized");
             result.add(encodedHolder.getValue());

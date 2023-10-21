@@ -2,19 +2,40 @@ package io.wispforest.owo.serialization.impl.bytebuf;
 
 import io.netty.buffer.ByteBuf;
 import io.wispforest.owo.serialization.*;
+import io.wispforest.owo.serialization.impl.SerializationAttribute;
+import net.minecraft.network.encoding.VarInts;
+import net.minecraft.network.encoding.VarLongs;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public class ByteBufDeserializer implements Deserializer<ByteBuf> {
+
+    private final boolean useVarInt;
 
     private final ByteBuf buf;
 
     public ByteBufDeserializer(ByteBuf buf){
         this.buf = buf;
+        this.useVarInt = false;
     }
+
+    //--
+
+    @Override
+    public Set<SerializationAttribute> attributes() {
+        return Set.of(SerializationAttribute.BINARY);
+    }
+
+    @Override
+    public Deserializer<ByteBuf> addAttribute(SerializationAttribute ...attributes) {
+        return this;
+    }
+
+    //--
 
     @Override
     public <V> Optional<V> readOptional(Codeck<V> codeck) {
@@ -65,7 +86,7 @@ public class ByteBufDeserializer implements Deserializer<ByteBuf> {
 
     @Override
     public byte[] readBytes() {
-        var array = new byte[buf.readInt()];
+        var array = new byte[readVarInt()];
 
         buf.readBytes(array);
 
@@ -73,13 +94,23 @@ public class ByteBufDeserializer implements Deserializer<ByteBuf> {
     }
 
     @Override
+    public int readVarInt() {
+        return VarInts.read(buf);
+    }
+
+    @Override
+    public long readVarLong() {
+        return VarLongs.read(buf);
+    }
+
+    @Override
     public <E> SequenceDeserializer<E> sequence(Codeck<E> elementCodec) {
-        return new ByteBufSequenceDeserializer<E>().valueCodec(elementCodec, buf.readInt());
+        return new ByteBufSequenceDeserializer<E>().valueCodec(elementCodec, readVarInt());
     }
 
     @Override
     public <V> MapDeserializer<V> map(Codeck<V> valueCodec) {
-        return new ByteBufMapDeserializer<V>(valueCodec, buf.readInt());
+        return new ByteBufMapDeserializer<V>(valueCodec, readVarInt());
     }
 
     @Override

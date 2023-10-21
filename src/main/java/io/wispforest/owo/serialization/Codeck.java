@@ -5,6 +5,7 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.google.gson.*;
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.Codec;
 import io.wispforest.owo.serialization.impl.*;
 import io.wispforest.owo.serialization.impl.json.JsonDeserializer;
 import io.wispforest.owo.serialization.impl.json.JsonSerializer;
@@ -17,14 +18,20 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.Registry;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Uuids;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import org.apache.logging.log4j.util.TriConsumer;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -42,16 +49,6 @@ public interface Codeck<T> {
     Codeck<String> STRING = Codeck.of(Serializer::writeString, Deserializer::readString);
 
     Codeck<byte[]> BYTE_ARRAY = Codeck.of(Serializer::writeBytes, Deserializer::readBytes);
-//            BYTE.list()
-//            .then(list -> {
-//                byte[] bytes = new byte[list.size()];
-//                for (int i = 0; i < list.size(); i++) bytes[i] = list.get(i);
-//                return bytes;
-//            }, bytes -> {
-//                List<Byte> list = new ArrayList<>();
-//                for (byte Byte : bytes) list.add(Byte);
-//                return list;
-//            });
 
     Codeck<int[]> INT_ARRAY = INT.list()
             .then((list) -> list.stream().mapToInt(v -> v).toArray(), (ints) -> Arrays.stream(ints).boxed().toList());
@@ -150,66 +147,71 @@ public interface Codeck<T> {
 
     Codeck<Identifier> IDENTIFIER = Codeck.STRING.then(Identifier::new, Identifier::toString);
 
-    Codeck<ItemStack> ITEM_STACK = COMPOUND
-            .then(ItemStack::fromNbt, stack -> stack.writeNbt(new NbtCompound()));
+    Codeck<ItemStack> ITEM_STACK = COMPOUND.then(ItemStack::fromNbt, stack -> stack.writeNbt(new NbtCompound()));
 
-    Codeck<UUID> UUID = StructCodeckBuilder.of(
-            StructField.of("mostSig", Codeck.LONG, java.util.UUID::getMostSignificantBits),
-            StructField.of("leastSig", Codeck.LONG, java.util.UUID::getLeastSignificantBits),
-            UUID::new
-    );
+    Codeck<UUID> UUID = Codeck.ifAttr(Codeck.STRING.then(java.util.UUID::fromString, java.util.UUID::toString), SerializationAttribute.HUMAN_READABLE)
+            .orElse(Codeck.INT_ARRAY.then(Uuids::toUuid, Uuids::toIntArray));
 
-    Codeck<Date> DATE = Codeck.LONG.then(Date::new, Date::getTime);
+    Codeck<Date> DATE = Codeck.ifAttr(Codeck.STRING.then(s -> Date.from(Instant.parse(s)), date -> date.toInstant().toString()), SerializationAttribute.HUMAN_READABLE)
+            .orElse(Codeck.LONG.then(Date::new, Date::getTime));
 
     Codeck<PacketByteBuf> PACKET_BYTE_BUF = Codeck.BYTE_ARRAY
-            .then(
-                    bytes -> {
-                        var byteBuf = PacketByteBufs.create();
+            .then(bytes -> {
+                var byteBuf = PacketByteBufs.create();
 
-                        byteBuf.writeBytes(bytes);
+                byteBuf.writeBytes(bytes);
 
-                        return byteBuf;
-                    },
-                    byteBuf -> {
-                        var bytes = new byte[byteBuf.readerIndex()];
+                return byteBuf;
+            }, byteBuf -> {
+                var bytes = new byte[byteBuf.readerIndex()];
 
-                        byteBuf.readBytes(bytes);
+                byteBuf.readBytes(bytes);
 
-                        return bytes;
-                    }
-            );
+                return bytes;
+            });
 
-    Codeck<BlockPos> BLOCK_POS = Codeck.LONG.then(BlockPos::fromLong, BlockPos::asLong);
-    Codeck<ChunkPos> CHUNK_POS = Codeck.LONG.then(ChunkPos::new, ChunkPos::toLong);
+    Codeck<BlockPos> BLOCK_POS = Codeck
+            .ifAttr(
+                    StructCodeckBuilder.of(
+                            StructField.of("x", StructCodeck.INT, BlockPos::getX),
+                            StructField.of("y", StructCodeck.INT, BlockPos::getX),
+                            StructField.of("z", StructCodeck.INT, BlockPos::getX),
+                            BlockPos::new
+                    ),
+                    SerializationAttribute.HUMAN_READABLE
+            )
+            .orElse(Codeck.LONG.then(BlockPos::fromLong, BlockPos::asLong));
+
+    Codeck<ChunkPos> CHUNK_POS = Codeck
+            .ifAttr(
+                    StructCodeckBuilder.of(
+                            StructField.of("x", StructCodeck.INT, (ChunkPos pos) -> pos.x),
+                            StructField.of("z", StructCodeck.INT, (ChunkPos pos) -> pos.z),
+                            ChunkPos::new
+                    ),
+                    SerializationAttribute.HUMAN_READABLE)
+            .orElse(Codeck.LONG.then(ChunkPos::new, ChunkPos::toLong));
 
     Codeck<BitSet> BITSET = Codeck.LONG_ARRAY.then(BitSet::valueOf, BitSet::toLongArray);
 
-    Codeck<Text> TEXT = Codeck.STRING.then(Text.Serializer::fromJson, Text.Serializer::toJson);
-
+    Codeck<Text> TEXT = Codeck.JSON_ELEMENT.then(Text.Serializer::fromJson, Text.Serializer::toJsonTree);
+            //Codeck.STRING.then(Text.Serializer::fromJson, Text.Serializer::toJson);
 
     //--
 
     //Kinda mega cursed but...
-    static <e, T> Codeck<T> of(BiConsumer<Serializer<e>, T> encode, Function<Deserializer<e>, T> decode) {
-        return new Codeck<T>() {
+    static <T> Codeck<T> of(BiConsumer<Serializer, T> encode, Function<Deserializer, T> decode) {
+        return new Codeck<>() {
             @Override
             public <E> void encode(Serializer<E> serializer, T value) {
-                encode.accept((Serializer<e>) serializer, value);
+                encode.accept(serializer, value);
             }
 
             @Override
             public <E> T decode(Deserializer<E> deserializer) {
-                return decode.apply((Deserializer<e>) deserializer);
+                return decode.apply(deserializer);
             }
         };
-    }
-
-    default ListCodeck<T> list(){
-        return new ListCodeck<>(this);
-    }
-
-    default MapCodeck<String, T> map(){
-        return MapCodeck.of(this);
     }
 
     static <T> Codeck<T> ofRegistry(Registry<T> registry) {
@@ -251,6 +253,20 @@ public interface Codeck<T> {
 
             return map;
         }, kvMap -> List.copyOf(kvMap.entrySet()));
+    }
+
+    static <T> AttributeCodeckBuilder<T> ifAttr(Codeck<T> codeck, SerializationAttribute attribute){
+        return new AttributeCodeckBuilder<>(codeck, attribute);
+    }
+
+    //--
+
+    default ListCodeck<T> list(){
+        return new ListCodeck<>(this);
+    }
+
+    default MapCodeck<String, T> map(){
+        return MapCodeck.of(this);
     }
 
     default <R> Codeck<R> then(Function<T, R> getter, Function<R, T> setter) {

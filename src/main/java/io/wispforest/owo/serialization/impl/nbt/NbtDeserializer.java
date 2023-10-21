@@ -1,6 +1,7 @@
 package io.wispforest.owo.serialization.impl.nbt;
 
 import io.wispforest.owo.serialization.*;
+import io.wispforest.owo.serialization.impl.SerializationAttribute;
 import net.minecraft.nbt.*;
 import org.jetbrains.annotations.Nullable;
 
@@ -9,7 +10,9 @@ import java.util.function.Supplier;
 
 public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
 
-    protected final Deque<Supplier<NbtElement>> stack = new ArrayDeque<>();
+    private final Set<SerializationAttribute> extraAttributes = new HashSet<>();
+
+    private final Deque<Supplier<NbtElement>> stack = new ArrayDeque<>();
 
     private boolean unsafe = true;
 
@@ -25,6 +28,25 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
 
     private NbtElement topElement() {
         return stack.peek().get();
+    }
+
+    //--
+
+    @Override
+    public Set<SerializationAttribute> attributes() {
+        Set<SerializationAttribute> set = new HashSet<>();
+
+        set.addAll(SelfDescribedDeserializer.super.attributes());
+        set.addAll(extraAttributes);
+
+        return set;
+    }
+
+    @Override
+    public Deserializer<NbtElement> addAttribute(SerializationAttribute... attributes) {
+        extraAttributes.addAll(Arrays.asList(attributes));
+
+        return this;
     }
 
     //--
@@ -170,6 +192,24 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
     }
 
     @Override
+    public int readVarInt() {
+        if (topElement() instanceof AbstractNbtNumber nbtNumber) return nbtNumber.intValue();
+
+        if (unsafe) return 0;
+
+        throw new RuntimeException("[NbtFormat] input was not AbstractNbtNumber");
+    }
+
+    @Override
+    public long readVarLong() {
+        if (topElement() instanceof AbstractNbtNumber nbtNumber) return nbtNumber.longValue();
+
+        if (unsafe) return 0;
+
+        throw new RuntimeException("[NbtFormat] input was not AbstractNbtNumber");
+    }
+
+    @Override
     public <E> SequenceDeserializer<E> sequence(Codeck<E> elementCodec) {
         return new NbtSequenceDeserializer<>(((AbstractNbtList<NbtElement>) topElement()), elementCodec);
     }
@@ -232,9 +272,13 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
 
             NbtDeserializer.this.stack.push(entry::getValue);
 
-            var newEntry = Map.entry(entry.getKey(), valueCodec.decode(NbtDeserializer.this));
+            Map.Entry<String, V> newEntry;
 
-            NbtDeserializer.this.stack.pop();
+            try {
+                newEntry = Map.entry(entry.getKey(), valueCodec.decode(NbtDeserializer.this));
+            } finally {
+                NbtDeserializer.this.stack.pop();
+            }
 
             return newEntry;
         }
@@ -254,9 +298,13 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
 
             NbtDeserializer.this.stack.push(() -> map.get(field));
 
-            var value = codeck.decode(NbtDeserializer.this);
+            F value;
 
-            NbtDeserializer.this.stack.pop();
+            try {
+                value = codeck.decode(NbtDeserializer.this);
+            } finally {
+                NbtDeserializer.this.stack.pop();
+            }
 
             return value;
         }
