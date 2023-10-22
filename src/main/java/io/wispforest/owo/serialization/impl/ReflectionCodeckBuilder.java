@@ -286,7 +286,7 @@ public class ReflectionCodeckBuilder {
      * @return The created serializer
      */
     public static <E extends Enum<E>> Codeck<E> createEnumSerializer(Class<E> enumClass) {
-        return Codeck.INT.then(integer -> enumClass.getEnumConstants()[integer], Enum::ordinal);
+        return Codeck.VAR_INT.then(i -> enumClass.getEnumConstants()[i], Enum::ordinal);
     }
 
     @SuppressWarnings("unchecked")

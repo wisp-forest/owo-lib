@@ -3,24 +3,22 @@ package io.wispforest.owo.serialization.impl.bytebuf;
 import io.netty.buffer.ByteBuf;
 import io.wispforest.owo.serialization.*;
 import io.wispforest.owo.serialization.impl.SerializationAttribute;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.encoding.StringEncoding;
 import net.minecraft.network.encoding.VarInts;
 import net.minecraft.network.encoding.VarLongs;
 import org.jetbrains.annotations.Nullable;
 
-import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 public class ByteBufDeserializer implements Deserializer<ByteBuf> {
 
-    private final boolean useVarInt;
-
     private final ByteBuf buf;
 
     public ByteBufDeserializer(ByteBuf buf){
         this.buf = buf;
-        this.useVarInt = false;
     }
 
     //--
@@ -81,7 +79,7 @@ public class ByteBufDeserializer implements Deserializer<ByteBuf> {
 
     @Override
     public String readString() {
-        return buf.toString(Charset.defaultCharset());
+        return StringEncoding.decode(buf, PacketByteBuf.DEFAULT_MAX_STRING_LENGTH);
     }
 
     @Override

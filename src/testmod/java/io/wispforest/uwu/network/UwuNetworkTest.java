@@ -1,6 +1,13 @@
 package io.wispforest.uwu.network;
 
 import io.wispforest.owo.network.serialization.RecordSerializer;
+import io.wispforest.owo.serialization.Codeck;
+import io.wispforest.owo.serialization.impl.RecordCodeck;
+import io.wispforest.owo.serialization.impl.ReflectionCodeckBuilder;
+import io.wispforest.owo.serialization.impl.StructCodeckBuilder;
+import io.wispforest.owo.serialization.impl.StructField;
+import io.wispforest.owo.serialization.impl.bytebuf.ByteBufDeserializer;
+import io.wispforest.owo.serialization.impl.bytebuf.ByteBufSerializer;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 
 import java.util.Collection;
@@ -19,8 +26,41 @@ public class UwuNetworkTest {
 
         testEquals(serializer, sameSerializer);
 
-        var buffer = PacketByteBufs.create();
-        var read = serializer.write(buffer, test).read(buffer);
+        testSerialization(test, testRecord -> {
+            var buffer = PacketByteBufs.create();
+            return serializer.write(buffer, test).read(buffer);
+        });
+
+        //--
+
+        System.out.println();
+
+        var codeck = RecordCodeck.create(TestRecord.class);
+        var sameCodeck = RecordCodeck.create(TestRecord.class);
+
+        testEquals(codeck, sameCodeck);
+
+        testSerialization(test, testRecord -> {
+            return codeck.decode(ByteBufDeserializer::new, codeck.encode(ByteBufSerializer::packet, testRecord));
+        });
+
+        //--
+
+        System.out.println();
+
+        var builtCodeck = StructCodeckBuilder.of(
+                StructField.of("text", Codeck.STRING.list().then(s -> s, s -> (List<String>) s), TestRecord::text),
+                StructField.of("enumValue", ReflectionCodeckBuilder.createEnumSerializer(TestEnum.class), TestRecord::enumValue),
+                TestRecord::new
+        );
+
+        testSerialization(test, testRecord -> {
+            return builtCodeck.decode(ByteBufDeserializer::new, builtCodeck.encode(ByteBufSerializer::packet, testRecord));
+        });
+    }
+
+    public static void testSerialization(TestRecord test, Function<TestRecord, TestRecord> function){
+        var read = function.apply(test);
 
         testEquals(test, read);
     }

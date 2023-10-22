@@ -197,6 +197,10 @@ public interface Codeck<T> {
     Codeck<Text> TEXT = Codeck.JSON_ELEMENT.then(Text.Serializer::fromJson, Text.Serializer::toJsonTree);
             //Codeck.STRING.then(Text.Serializer::fromJson, Text.Serializer::toJson);
 
+    Codeck<Integer> VAR_INT = Codeck.of(Serializer::writeVarInt, Deserializer::readVarInt);
+
+    Codeck<Long> VAR_LONG = Codeck.of(Serializer::writeVarLong, Deserializer::readVarLong);
+
     //--
 
     //Kinda mega cursed but...
@@ -299,6 +303,28 @@ public interface Codeck<T> {
 
     default Codeck<@Nullable T> ofNullable(){
         return ofOptional().then(o -> o.orElse(null), Optional::ofNullable);
+    }
+
+    default Codeck<T> onError(TriConsumer<Serializer, T, Exception> encode, BiFunction<Deserializer, Exception, T> decode){
+        return new Codeck<>() {
+            @Override
+            public <E> void encode(Serializer<E> serializer, T value) {
+                try {
+                    Codeck.this.encode(serializer, value);
+                } catch (Exception e){
+                    encode.accept(serializer, value, e);
+                }
+            }
+
+            @Override
+            public <E> T decode(Deserializer<E> deserializer) {
+                try {
+                    return Codeck.this.decode(deserializer);
+                } catch (Exception e) {
+                    return decode.apply(deserializer, e);
+                }
+            }
+        };
     }
 
     //--

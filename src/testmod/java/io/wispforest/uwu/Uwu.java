@@ -342,21 +342,7 @@ public class Uwu implements ModInitializer {
                         iterations("Vanilla", (buf) -> {
                             ItemStack stack = source.getPlayer().getStackInHand(Hand.MAIN_HAND);
 
-                            //source.sendMessage(Text.of(stack.toString()));
-                            //source.sendMessage(Text.of(String.valueOf(stack.getOrCreateNbt())));
-
-                            //source.sendMessage(Text.of("---"));
-
-                            buf.writeItemStack(stack);
-
-                            //source.sendMessage(Text.of(String.valueOf(buf.writerIndex())));
-
-                            //source.sendMessage(Text.of("---"));
-
-                            var stackFromByte = buf.readItemStack();
-
-                            //source.sendMessage(Text.of(stackFromByte.toString()));
-                            //source.sendMessage(Text.of(String.valueOf(stackFromByte.getOrCreateNbt())));
+                            var stackFromByte = buf.writeItemStack(stack).readItemStack();
                         });
 
                         //Codeck
@@ -364,23 +350,9 @@ public class Uwu implements ModInitializer {
                             iterations("Codeck", (buf) -> {
                                 ItemStack stack = source.getPlayer().getStackInHand(Hand.MAIN_HAND);
 
-                                //source.sendMessage(Text.of(stack.toString()));
-                                //source.sendMessage(Text.of(String.valueOf(stack.getOrCreateNbt())));
-
-                                //source.sendMessage(Text.of("---"));
-
                                 Codeck.ITEM_STACK.encode(new ByteBufSerializer<>(buf), stack);
 
-                                //source.sendMessage(Text.of(String.valueOf(stackByteData.writerIndex())));
-
-                                //source.sendMessage(Text.of("---"));
-
-                                ItemStack stackFromByte;
-
-                                stackFromByte = Codeck.ITEM_STACK.decode(ByteBufDeserializer::new, buf);
-
-                                //source.sendMessage(Text.of(stackFromByte.toString()))
-                                //source.sendMessage(Text.of(String.valueOf(stackFromByte.getOrCreateNbt())));
+                                var stackFromByte = Codeck.ITEM_STACK.decode(ByteBufDeserializer::new, buf);
                             });
                         } catch (Exception exception){
                             source.sendMessage(Text.of(exception.getMessage()));

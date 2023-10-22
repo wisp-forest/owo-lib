@@ -9,6 +9,7 @@ import io.wispforest.owo.serialization.Codeck;
 import io.wispforest.owo.serialization.impl.SerializationAttribute;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.encoding.StringEncoding;
 import net.minecraft.network.encoding.VarInts;
 import net.minecraft.network.encoding.VarLongs;
 
@@ -85,7 +86,7 @@ public class ByteBufSerializer<T extends ByteBuf> implements Serializer<T> {
 
     @Override
     public void writeString(String value) {
-        this.buf.writeBytes(value.getBytes());
+        StringEncoding.encode(buf, value, PacketByteBuf.DEFAULT_MAX_STRING_LENGTH);
     }
 
     @Override
