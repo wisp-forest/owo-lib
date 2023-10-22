@@ -28,11 +28,6 @@ public class ByteBufDeserializer implements Deserializer<ByteBuf> {
         return Set.of(SerializationAttribute.BINARY);
     }
 
-    @Override
-    public Deserializer<ByteBuf> addAttribute(SerializationAttribute ...attributes) {
-        return this;
-    }
-
     //--
 
     @Override

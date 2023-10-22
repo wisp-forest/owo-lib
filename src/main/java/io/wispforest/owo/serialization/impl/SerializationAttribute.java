@@ -4,5 +4,5 @@ public enum SerializationAttribute {
     SELF_DESCRIBING(),
     BINARY(),
     HUMAN_READABLE(),
-    COMPRESSED();
+    COMPRESSED()
 }

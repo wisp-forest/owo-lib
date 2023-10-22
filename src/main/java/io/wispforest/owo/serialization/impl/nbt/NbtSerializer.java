@@ -12,14 +12,16 @@ import java.util.function.Consumer;
 
 public class NbtSerializer implements SelfDescribedSerializer<NbtElement> {
 
-    private final Set<SerializationAttribute> extraAttributes = new HashSet<>();
+    private final SerializationAttribute extraAttribute;
 
     private final Deque<Consumer<NbtElement>> stack = new ArrayDeque<>();
 
     private NbtElement result = null;
 
-    public NbtSerializer() {
+    public NbtSerializer(SerializationAttribute attribute) {
         stack.push(element -> result = element);
+
+        extraAttribute = attribute;
     }
 
     private void consumeElement(NbtElement element) {
@@ -28,21 +30,25 @@ public class NbtSerializer implements SelfDescribedSerializer<NbtElement> {
 
     //--
 
-    @Override
-    public Set<SerializationAttribute> attributes() {
-        Set<SerializationAttribute> set = new HashSet<>();
+    public static NbtSerializer of(){
+        return new NbtSerializer(SerializationAttribute.HUMAN_READABLE);
+    }
 
-        set.addAll(SelfDescribedSerializer.super.attributes());
-        set.addAll(extraAttributes);
+    public static NbtSerializer compressed(){
+        return new NbtSerializer(SerializationAttribute.COMPRESSED);
+    }
 
-        return set;
+    public static NbtSerializer binary(){
+        return new NbtSerializer(SerializationAttribute.BINARY);
     }
 
     @Override
-    public Serializer<NbtElement> addAttribute(SerializationAttribute... attributes) {
-        extraAttributes.addAll(Arrays.asList(attributes));
+    public Set<SerializationAttribute> attributes() {
+        Set<SerializationAttribute> set = SelfDescribedSerializer.super.attributes();
 
-        return this;
+        set.add(extraAttribute);
+
+        return set;
     }
 
     //--

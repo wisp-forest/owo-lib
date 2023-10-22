@@ -9,8 +9,6 @@ public interface Deserializer<T> {
 
     Set<SerializationAttribute> attributes();
 
-    Deserializer<T> addAttribute(SerializationAttribute ...attributes);
-
     <V> Optional<V> readOptional(Codeck<V> codeck);
 
     boolean readBoolean();

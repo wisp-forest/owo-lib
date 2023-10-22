@@ -64,7 +64,7 @@ public interface Codeck<T> {
         @Override
         public <E> void encode(Serializer<E> serializer, JsonElement value) {
             if(serializer instanceof SelfDescribedSerializer<E> describedSerializer){
-                describedSerializer.writeAny(new JsonDeserializer(value).readAny());
+                describedSerializer.writeAny(JsonDeserializer.of(value).readAny());
 
                 return;
             }
@@ -81,7 +81,7 @@ public interface Codeck<T> {
         @Override
         public <E> JsonElement decode(Deserializer<E> deserializer) {
             if(deserializer instanceof SelfDescribedDeserializer<E> selfDescribedDeserializer){
-                var jsonSerializerzer = new JsonSerializer();
+                var jsonSerializerzer = JsonSerializer.of();
 
                 jsonSerializerzer.writeAny(selfDescribedDeserializer.readAny());
 
@@ -102,7 +102,7 @@ public interface Codeck<T> {
         @Override
         public <E> void encode(Serializer<E> serializer, NbtElement value) {
             if(serializer instanceof SelfDescribedSerializer<E> describedSerializer){
-                describedSerializer.writeAny(new NbtDeserializer(value).readAny());
+                describedSerializer.writeAny(NbtDeserializer.of(value).readAny());
 
                 return;
             }
@@ -121,7 +121,7 @@ public interface Codeck<T> {
         @Override
         public <E> NbtElement decode(Deserializer<E> deserializer) {
             if(deserializer instanceof SelfDescribedDeserializer<E> selfDescribedDeserializer){
-                var nbtSerializerzer = new NbtSerializer();
+                var nbtSerializerzer = NbtSerializer.of();
 
                 nbtSerializerzer.writeAny(selfDescribedDeserializer.readAny());
 
@@ -163,7 +163,7 @@ public interface Codeck<T> {
 
                 return byteBuf;
             }, byteBuf -> {
-                var bytes = new byte[byteBuf.readerIndex()];
+                var bytes = new byte[byteBuf.readableBytes()];
 
                 byteBuf.readBytes(bytes);
 
@@ -179,6 +179,13 @@ public interface Codeck<T> {
                             BlockPos::new
                     ),
                     SerializationAttribute.HUMAN_READABLE
+            )
+            .orElseIf(
+                    Codeck.INT.list().then(
+                            ints -> new BlockPos(ints.get(0), ints.get(1), ints.get(2)),
+                            blockPos -> List.of(blockPos.getX(), blockPos.getY(), blockPos.getZ())
+                    ),
+                    SerializationAttribute.COMPRESSED
             )
             .orElse(Codeck.LONG.then(BlockPos::fromLong, BlockPos::asLong));
 

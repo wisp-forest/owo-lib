@@ -35,11 +35,6 @@ public class ByteBufSerializer<T extends ByteBuf> implements Serializer<T> {
         return Set.of(SerializationAttribute.BINARY);
     }
 
-    @Override
-    public Serializer<T> addAttribute(SerializationAttribute ...attributes) {
-        return this;
-    }
-
     //--
 
     @Override

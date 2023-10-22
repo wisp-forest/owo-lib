@@ -9,8 +9,6 @@ public interface Serializer<T> {
 
     Set<SerializationAttribute> attributes();
 
-    Serializer<T> addAttribute(SerializationAttribute ...attributes);
-
     <V> void writeOptional(Codeck<V> codeck, final Optional<V> optional);
 
     void writeBoolean(final boolean value);

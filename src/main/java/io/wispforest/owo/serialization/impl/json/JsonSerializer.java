@@ -10,14 +10,16 @@ import java.util.function.Consumer;
 
 public class JsonSerializer implements SelfDescribedSerializer<JsonElement> {
 
-    private final Set<SerializationAttribute> extraAttributes = new HashSet<>();
+    private final SerializationAttribute extraAttribute;
 
     protected Deque<Consumer<JsonElement>> stack = new ArrayDeque<>();
 
     protected JsonElement result = null;
 
-    public JsonSerializer() {
+    public JsonSerializer(boolean compressed) {
         stack.push(element -> result = element);
+
+        extraAttribute = compressed ? SerializationAttribute.COMPRESSED : SerializationAttribute.HUMAN_READABLE;
     }
 
     public void consumeElement(JsonElement element) {
@@ -26,21 +28,21 @@ public class JsonSerializer implements SelfDescribedSerializer<JsonElement> {
 
     //--
 
-    @Override
-    public Set<SerializationAttribute> attributes() {
-        Set<SerializationAttribute> set = new HashSet<>();
+    public static JsonSerializer of(){
+        return new JsonSerializer(false);
+    }
 
-        set.addAll(SelfDescribedSerializer.super.attributes());
-        set.addAll(extraAttributes);
-
-        return set;
+    public static JsonSerializer compressed(){
+        return new JsonSerializer(true);
     }
 
     @Override
-    public Serializer<JsonElement> addAttribute(SerializationAttribute... attributes) {
-        extraAttributes.addAll(Arrays.asList(attributes));
+    public Set<SerializationAttribute> attributes() {
+        Set<SerializationAttribute> set = SelfDescribedSerializer.super.attributes();
 
-        return this;
+        set.add(extraAttribute);
+
+        return set;
     }
 
     //--

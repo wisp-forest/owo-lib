@@ -11,12 +11,14 @@ import java.util.function.Supplier;
 
 public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> {
 
-    private final Set<SerializationAttribute> extraAttributes = new HashSet<>();
+    private final SerializationAttribute extraAttribute;
 
     protected final Deque<Supplier<JsonElement>> stack = new ArrayDeque<>();
 
-    public JsonDeserializer(JsonElement element) {
+    public JsonDeserializer(JsonElement element, boolean compressed) {
         stack.push(() -> element);
+
+        extraAttribute = compressed ? SerializationAttribute.COMPRESSED : SerializationAttribute.HUMAN_READABLE;
     }
 
     private JsonElement topElement() {
@@ -25,21 +27,21 @@ public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> 
 
     //--
 
-    @Override
-    public Set<SerializationAttribute> attributes() {
-        Set<SerializationAttribute> set = new HashSet<>();
+    public static JsonDeserializer of(JsonElement element){
+        return new JsonDeserializer(element, false);
+    }
 
-        set.addAll(SelfDescribedDeserializer.super.attributes());
-        set.addAll(extraAttributes);
-
-        return set;
+    public static JsonDeserializer compressed(JsonElement element){
+        return new JsonDeserializer(element, true);
     }
 
     @Override
-    public Deserializer<JsonElement> addAttribute(SerializationAttribute... attributes) {
-        extraAttributes.addAll(Arrays.asList(attributes));
+    public Set<SerializationAttribute> attributes() {
+        Set<SerializationAttribute> set = SelfDescribedDeserializer.super.attributes();
 
-        return this;
+        set.add(extraAttribute);
+
+        return set;
     }
 
     //--

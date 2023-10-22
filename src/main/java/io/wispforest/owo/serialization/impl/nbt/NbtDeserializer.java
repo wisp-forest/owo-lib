@@ -1,7 +1,9 @@
 package io.wispforest.owo.serialization.impl.nbt;
 
+import com.google.gson.JsonElement;
 import io.wispforest.owo.serialization.*;
 import io.wispforest.owo.serialization.impl.SerializationAttribute;
+import io.wispforest.owo.serialization.impl.json.JsonDeserializer;
 import net.minecraft.nbt.*;
 import org.jetbrains.annotations.Nullable;
 
@@ -10,14 +12,16 @@ import java.util.function.Supplier;
 
 public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
 
-    private final Set<SerializationAttribute> extraAttributes = new HashSet<>();
+    private final SerializationAttribute extraAttribute;
 
     private final Deque<Supplier<NbtElement>> stack = new ArrayDeque<>();
 
     private boolean unsafe = true;
 
-    public NbtDeserializer(NbtElement element) {
+    public NbtDeserializer(NbtElement element, SerializationAttribute attribute) {
         stack.push(() -> element);
+
+        extraAttribute = attribute;
     }
 
     public NbtDeserializer unsafe(boolean value) {
@@ -32,21 +36,25 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
 
     //--
 
-    @Override
-    public Set<SerializationAttribute> attributes() {
-        Set<SerializationAttribute> set = new HashSet<>();
+    public static NbtDeserializer of(NbtElement element){
+        return new NbtDeserializer(element, SerializationAttribute.HUMAN_READABLE);
+    }
 
-        set.addAll(SelfDescribedDeserializer.super.attributes());
-        set.addAll(extraAttributes);
+    public static NbtDeserializer compressed(NbtElement element){
+        return new NbtDeserializer(element, SerializationAttribute.COMPRESSED);
+    }
 
-        return set;
+    public static NbtDeserializer binary(NbtElement element){
+        return new NbtDeserializer(element, SerializationAttribute.BINARY);
     }
 
     @Override
-    public Deserializer<NbtElement> addAttribute(SerializationAttribute... attributes) {
-        extraAttributes.addAll(Arrays.asList(attributes));
+    public Set<SerializationAttribute> attributes() {
+        Set<SerializationAttribute> set = SelfDescribedDeserializer.super.attributes();
 
-        return this;
+        set.add(extraAttribute);
+
+        return set;
     }
 
     //--
