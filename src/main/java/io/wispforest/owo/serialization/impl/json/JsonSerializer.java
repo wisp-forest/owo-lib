@@ -8,7 +8,7 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class JsonSerializer implements SelfDescribedSerializer<JsonElement> {
+public class JsonSerializer implements Serializer<JsonElement> {
 
     private final SerializationAttribute extraAttribute;
 
@@ -38,8 +38,9 @@ public class JsonSerializer implements SelfDescribedSerializer<JsonElement> {
 
     @Override
     public Set<SerializationAttribute> attributes() {
-        Set<SerializationAttribute> set = SelfDescribedSerializer.super.attributes();
+        Set<SerializationAttribute> set = new HashSet<>();
 
+        set.add(SerializationAttribute.SELF_DESCRIBING);
         set.add(extraAttribute);
 
         return set;
@@ -48,60 +49,9 @@ public class JsonSerializer implements SelfDescribedSerializer<JsonElement> {
     //--
 
     @Override
-    public void empty() {
-        consumeElement(JsonNull.INSTANCE); //Add ability to change such to write or no write ability
+    public <V> void writeOptional(Codeck<V> codeck, Optional<V> optional) {
+        optional.ifPresentOrElse(v -> codeck.encode(this, v), () -> consumeElement(JsonNull.INSTANCE));
     }
-
-    @Override
-    public void writeAny(Object object) {
-        JsonElement element = null;
-
-        if (object == null) {
-            element = JsonNull.INSTANCE;
-        } else if(object instanceof String value){
-            element = new JsonPrimitive(value);
-        } else if(object instanceof Boolean value) {
-            element = new JsonPrimitive(value);
-        } else if(object instanceof Byte value) {
-            element = new JsonPrimitive(value);
-        } else if(object instanceof Short value) {
-            element = new JsonPrimitive(value);
-        } else if(object instanceof Integer value) {
-            element = new JsonPrimitive(value);
-        } else if(object instanceof Long value) {
-            element = new JsonPrimitive(value);
-        } else if(object instanceof Float value) {
-            element = new JsonPrimitive(value);
-        } else if(object instanceof Double value) {
-            element = new JsonPrimitive(value);
-        } else if (object instanceof List objects) {
-            JsonArray array = new JsonArray();
-
-            stack.push(array::add);
-            objects.forEach(this::writeAny);
-            stack.pop();
-
-            element = array;
-        } else if (object instanceof Map map) {
-            JsonObject jsonObject = new JsonObject();
-
-            map.forEach((key, value) -> {
-                stack.push((element1) -> jsonObject.add((String) key, element1));
-
-                writeAny(value);
-
-                stack.pop();
-            });
-
-            element = jsonObject;
-        } else {
-            throw new IllegalStateException("Unknown Object type: " + object);
-        }
-
-        consumeElement(element);
-    }
-
-    //--
 
     @Override
     public void writeBoolean(boolean value) {

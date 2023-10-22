@@ -1,16 +1,9 @@
 package io.wispforest.owo.serialization;
 
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
 import com.google.gson.*;
-import com.mojang.logging.LogUtils;
-import com.mojang.serialization.Codec;
 import io.wispforest.owo.serialization.impl.*;
-import io.wispforest.owo.serialization.impl.json.JsonDeserializer;
-import io.wispforest.owo.serialization.impl.json.JsonSerializer;
-import io.wispforest.owo.serialization.impl.nbt.NbtDeserializer;
-import io.wispforest.owo.serialization.impl.nbt.NbtSerializer;
+import io.wispforest.owo.serialization.impl.nbt.NbtCodeck;
+import io.wispforest.owo.serialization.impl.json.JsonCodeck;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
@@ -23,12 +16,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import org.apache.logging.log4j.util.TriConsumer;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
 
-import java.io.IOException;
-import java.text.DateFormat;
 import java.time.Instant;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -58,88 +47,8 @@ public interface Codeck<T> {
 
     //--
 
-    Codeck<JsonElement> JSON_ELEMENT = new Codeck<JsonElement>() {
-        private static final Logger LOGGER = LogUtils.getLogger();
-
-        @Override
-        public <E> void encode(Serializer<E> serializer, JsonElement value) {
-            if(serializer instanceof SelfDescribedSerializer<E> describedSerializer){
-                describedSerializer.writeAny(JsonDeserializer.of(value).readAny());
-
-                return;
-            }
-
-
-            try {
-                Codeck.STRING.encode(serializer, value.toString());
-            } catch (AssertionError e){
-                LOGGER.error("Unable to serialize the given NbtElement into the given format!");
-                throw new RuntimeException(e);
-            }
-        }
-
-        @Override
-        public <E> JsonElement decode(Deserializer<E> deserializer) {
-            if(deserializer instanceof SelfDescribedDeserializer<E> selfDescribedDeserializer){
-                var jsonSerializerzer = JsonSerializer.of();
-
-                jsonSerializerzer.writeAny(selfDescribedDeserializer.readAny());
-
-                return jsonSerializerzer.result();
-            }
-
-            try {
-                return new JsonStreamParser(Codeck.STRING.decode(deserializer)).next();
-            } catch (JsonParseException e){
-                LOGGER.error("Unable to deserialize the given format into the desired JsonElement!");
-                throw new RuntimeException(e);
-            }
-        }
-    };
-
-    Codeck<NbtElement> NBT_ELEMENT = new Codeck<NbtElement>() {
-        private static final Logger LOGGER = LogUtils.getLogger();
-        @Override
-        public <E> void encode(Serializer<E> serializer, NbtElement value) {
-            if(serializer instanceof SelfDescribedSerializer<E> describedSerializer){
-                describedSerializer.writeAny(NbtDeserializer.of(value).readAny());
-
-                return;
-            }
-
-            try {
-                ByteArrayDataOutput stream = ByteStreams.newDataOutput();
-                NbtIo.write(value, stream);
-
-                Codeck.BYTE_ARRAY.encode(serializer, stream.toByteArray());
-            } catch (IOException e){
-                LOGGER.error("Unable to serialize the given NbtElement into the given format!");
-                throw new RuntimeException(e);
-            }
-        }
-
-        @Override
-        public <E> NbtElement decode(Deserializer<E> deserializer) {
-            if(deserializer instanceof SelfDescribedDeserializer<E> selfDescribedDeserializer){
-                var nbtSerializerzer = NbtSerializer.of();
-
-                nbtSerializerzer.writeAny(selfDescribedDeserializer.readAny());
-
-                return nbtSerializerzer.result();
-            }
-
-            byte[] array = Codeck.BYTE_ARRAY.decode(deserializer);
-
-            try {
-                ByteArrayDataInput stream = ByteStreams.newDataInput(array);
-
-                return NbtIo.read(stream, NbtTagSizeTracker.ofUnlimitedBytes());
-            } catch (IOException e){
-                LOGGER.error("Unable to deserialize the given format into the desired NbtElement!");
-                throw new RuntimeException(e);
-            }
-        }
-    };
+    Codeck<JsonElement> JSON_ELEMENT = JsonCodeck.INSTANCE;
+    Codeck<NbtElement> NBT_ELEMENT = NbtCodeck.INSTANCE;
 
     Codeck<NbtCompound> COMPOUND = Codeck.NBT_ELEMENT.then(element -> ((NbtCompound) element), compound -> compound);
 

@@ -1,5 +1,6 @@
 package io.wispforest.owo.serialization.impl.nbt;
 
+import com.google.gson.JsonNull;
 import io.wispforest.owo.serialization.*;
 import io.wispforest.owo.serialization.impl.SerializationAttribute;
 import net.minecraft.nbt.*;
@@ -10,7 +11,7 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class NbtSerializer implements SelfDescribedSerializer<NbtElement> {
+public class NbtSerializer implements Serializer<NbtElement> {
 
     private final SerializationAttribute extraAttribute;
 
@@ -44,8 +45,9 @@ public class NbtSerializer implements SelfDescribedSerializer<NbtElement> {
 
     @Override
     public Set<SerializationAttribute> attributes() {
-        Set<SerializationAttribute> set = SelfDescribedSerializer.super.attributes();
+        Set<SerializationAttribute> set = new HashSet<>();
 
+        set.add(SerializationAttribute.SELF_DESCRIBING);
         set.add(extraAttribute);
 
         return set;
@@ -54,74 +56,9 @@ public class NbtSerializer implements SelfDescribedSerializer<NbtElement> {
     //--
 
     @Override
-    public void empty() {
-        consumeElement(NbtEnd.INSTANCE);
+    public <V> void writeOptional(Codeck<V> codeck, Optional<V> optional) {
+        optional.ifPresentOrElse(v -> codeck.encode(this, v), () -> consumeElement(NbtEnd.INSTANCE));
     }
-
-    @Override
-    public void writeAny(Object object) {
-        NbtElement element = null;
-
-        if (object == null) {
-            element = NbtEnd.INSTANCE;
-        } else if(object instanceof String value){
-            element = NbtString.of(value);
-        } else if(object instanceof Boolean value) {
-            element = NbtByte.of(value);
-        } else if(object instanceof Byte value) {
-            element = NbtByte.of(value);
-        } else if(object instanceof Short value) {
-            element = NbtShort.of(value);
-        } else if(object instanceof Integer value) {
-            element = NbtInt.of(value);
-        } else if(object instanceof Long value) {
-            element = NbtLong.of(value);
-        } else if(object instanceof Float value) {
-            element = NbtFloat.of(value);
-        } else if(object instanceof Double value) {
-            element = NbtDouble.of(value);
-        } else if (object instanceof List objects ) {
-            NbtList array = new NbtList();
-
-            stack.push(array::add);
-
-            try {
-                objects.forEach(this::writeAny);
-            } catch (UnsupportedOperationException e) {
-                throw new FormatSerializeException("Unable to Serializer a List into Nbt Format due to differing entries types.", e);
-            }
-
-            stack.pop();
-
-            if(array.getHeldType() == NbtElement.BYTE_TYPE){
-                element = new NbtByteArray((List<Byte>) objects);
-            } else if (array.getHeldType() == NbtElement.INT_TYPE){
-                element = new NbtIntArray((List<Integer>) objects);
-            } else if (array.getHeldType() == NbtElement.LONG_TYPE) {
-                element = new NbtLongArray((List<Long>) objects);
-            } else {
-                element = array;
-            }
-        } else if (object instanceof Map map) {
-            NbtCompound compound = new NbtCompound();
-
-            map.forEach((key, value) -> {
-                stack.push((element1) -> compound.put((String) key, element1));
-
-                writeAny(value);
-
-                stack.pop();
-            });
-
-            element = compound;
-        } else {
-            throw new IllegalStateException("Unknown Object type: " + element);
-        }
-
-        consumeElement(element);
-    }
-
-    //--
 
     @Override
     public void writeBoolean(boolean value) {

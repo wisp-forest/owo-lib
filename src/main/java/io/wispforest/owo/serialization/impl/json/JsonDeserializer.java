@@ -37,19 +37,15 @@ public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> 
 
     @Override
     public Set<SerializationAttribute> attributes() {
-        Set<SerializationAttribute> set = SelfDescribedDeserializer.super.attributes();
+        Set<SerializationAttribute> set = new HashSet<>();
 
+        set.add(SerializationAttribute.SELF_DESCRIBING);
         set.add(extraAttribute);
 
         return set;
     }
 
     //--
-
-    @Override
-    public JsonElement getEmpty() {
-        return JsonNull.INSTANCE;
-    }
 
     @Override
     public Object readAny() {

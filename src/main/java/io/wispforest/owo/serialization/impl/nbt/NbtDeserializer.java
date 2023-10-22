@@ -50,19 +50,15 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
 
     @Override
     public Set<SerializationAttribute> attributes() {
-        Set<SerializationAttribute> set = SelfDescribedDeserializer.super.attributes();
+        Set<SerializationAttribute> set = new HashSet<>();
 
+        set.add(SerializationAttribute.SELF_DESCRIBING);
         set.add(extraAttribute);
 
         return set;
     }
 
     //--
-
-    @Override
-    public NbtElement getEmpty() {
-        return NbtEnd.INSTANCE;
-    }
 
     @Override
     public Object readAny() {
@@ -113,7 +109,7 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
     public <V> Optional<V> readOptional(Codeck<V> codeck) {
         var element = topElement();
 
-        if(element == getEmpty()) return Optional.empty();
+        if(element == NbtEnd.INSTANCE) return Optional.empty();
 
         return Optional.of(codeck.decode(this));
     }
