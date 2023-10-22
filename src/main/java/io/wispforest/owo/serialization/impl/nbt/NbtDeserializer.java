@@ -18,7 +18,7 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
 
     private boolean unsafe = true;
 
-    public NbtDeserializer(NbtElement element, SerializationAttribute attribute) {
+    private NbtDeserializer(NbtElement element, SerializationAttribute attribute) {
         stack.push(() -> element);
 
         extraAttribute = attribute;

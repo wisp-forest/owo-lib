@@ -251,11 +251,11 @@ public class Uwu implements ModInitializer {
 
                         source.sendMessage(Text.of("Input:  " + testPhrase));
 
-                        var nbtData = Codeck.STRING.encode(NbtSerializer::new, testPhrase);
-                        var fromNbtData = Codeck.STRING.decode(NbtDeserializer::new, nbtData);
+                        var nbtData = Codeck.STRING.encode(NbtSerializer::of, testPhrase);
+                        var fromNbtData = Codeck.STRING.decode(NbtDeserializer::of, nbtData);
 
-                        var jsonData = Codeck.STRING.encode(JsonSerializer::new, fromNbtData);
-                        var fromJsonData = Codeck.STRING.decode(JsonDeserializer::new, jsonData);
+                        var jsonData = Codeck.STRING.encode(JsonSerializer::of, fromNbtData);
+                        var fromJsonData = Codeck.STRING.decode(JsonDeserializer::of, jsonData);
 
                         source.sendMessage(Text.of("Output: " + fromJsonData));
 
@@ -267,9 +267,9 @@ public class Uwu implements ModInitializer {
 
                         source.sendMessage(Text.of("Input:  " + randomNumber));
 
-                        var jsonNum = Codeck.INT.encode(JsonSerializer::new, randomNumber);
+                        var jsonNum = Codeck.INT.encode(JsonSerializer::of, randomNumber);
 
-                        source.sendMessage(Text.of("Output: " + Codeck.INT.decode(JsonDeserializer::new, jsonNum)));
+                        source.sendMessage(Text.of("Output: " + Codeck.INT.decode(JsonDeserializer::of, jsonNum)));
 
                         source.sendMessage(Text.empty());
 
@@ -287,9 +287,9 @@ public class Uwu implements ModInitializer {
 
                         Codeck<List<Integer>> INT_LIST_KODECK = Codeck.INT.list();
 
-                        var nbtListData = INT_LIST_KODECK.encode(NbtSerializer::new, randomNumbers);
+                        var nbtListData = INT_LIST_KODECK.encode(NbtSerializer::of, randomNumbers);
 
-                        source.sendMessage(Text.of("Output: " + INT_LIST_KODECK.decode(NbtDeserializer::new, nbtListData)));
+                        source.sendMessage(Text.of("Output: " + INT_LIST_KODECK.decode(NbtDeserializer::of, nbtListData)));
 
                         source.sendMessage(Text.empty());
 
@@ -307,7 +307,7 @@ public class Uwu implements ModInitializer {
                             JsonElement stackJsonData;
 
                             try {
-                                stackJsonData = Codeck.ITEM_STACK.encode(JsonSerializer::new, stack);
+                                stackJsonData = Codeck.ITEM_STACK.encode(JsonSerializer::of, stack);
                             } catch (Exception exception){
                                 source.sendMessage(Text.of(exception.getMessage()));
                                 source.sendMessage(Text.of((Arrays.toString(exception.getStackTrace()))));
@@ -322,7 +322,7 @@ public class Uwu implements ModInitializer {
                             ItemStack stackFromJson;
 
                             try {
-                                stackFromJson = Codeck.ITEM_STACK.decode(JsonDeserializer::new, stackJsonData);
+                                stackFromJson = Codeck.ITEM_STACK.decode(JsonDeserializer::of, stackJsonData);
                             } catch (Exception exception){
                                 source.sendMessage(Text.of(exception.getMessage()));
                                 source.sendMessage(Text.of((Arrays.toString(exception.getStackTrace()))));

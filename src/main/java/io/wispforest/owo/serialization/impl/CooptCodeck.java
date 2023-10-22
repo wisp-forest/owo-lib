@@ -26,8 +26,8 @@ public class CooptCodeck<T> implements Codeck<T>, Codec<T> {
     public static Map<DynamicOps<?>, Pair<Supplier<Serializer<Object>>, Function<Object, Deserializer<Object>>>> MAP = new HashMap<>();
 
     static {
-        register(JsonOps.INSTANCE, JsonSerializer::new, JsonDeserializer::new);
-        register(NbtOps.INSTANCE, NbtSerializer::new, NbtDeserializer::new);
+        register(JsonOps.INSTANCE, JsonSerializer::of, JsonDeserializer::of);
+        register(NbtOps.INSTANCE, NbtSerializer::of, NbtDeserializer::of);
     }
 
     private final Codeck<T> codeck;

@@ -16,7 +16,7 @@ public class JsonSerializer implements Serializer<JsonElement> {
 
     protected JsonElement result = null;
 
-    public JsonSerializer(boolean compressed) {
+    private JsonSerializer(boolean compressed) {
         stack.push(element -> result = element);
 
         extraAttribute = compressed ? SerializationAttribute.COMPRESSED : SerializationAttribute.HUMAN_READABLE;
