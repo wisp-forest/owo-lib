@@ -5,11 +5,12 @@ import io.wispforest.owo.serialization.Deserializer;
 import io.wispforest.owo.serialization.Serializer;
 
 import java.util.*;
+import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
 public class ListCodeck<V> implements Codeck<List<V>> {
 
-    private Supplier<List<V>> listConstructor = ArrayList::new;
+    private IntFunction<List<V>> listConstructor = ArrayList::new;
 
     private final Codeck<V> codeck;
 
@@ -17,7 +18,7 @@ public class ListCodeck<V> implements Codeck<List<V>> {
         this.codeck = codeck;
     }
 
-    public ListCodeck<V> mapConstructor(Supplier<List<V>> listConstructor){
+    public ListCodeck<V> listConstructor(IntFunction<List<V>> listConstructor){
         this.listConstructor = listConstructor;
 
         return this;
@@ -32,9 +33,11 @@ public class ListCodeck<V> implements Codeck<List<V>> {
 
     @Override
     public <E> List<V> decode(Deserializer<E> deserializer) {
-        final List<V> list = listConstructor.get();
+        var sequenceDeserializer = deserializer.sequence(codeck);
 
-        deserializer.sequence(codeck).forEachRemaining(list::add);
+        final List<V> list = listConstructor.apply(sequenceDeserializer.size());
+
+        sequenceDeserializer.forEachRemaining(list::add);
 
         return list;
     }

@@ -182,7 +182,7 @@ public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> 
 
     @Override
     public <E> SequenceDeserializer<E> sequence(Codeck<E> elementCodec) {
-        return new JsonSequenceDeserializer<>(((JsonArray) topElement()), elementCodec);
+        return new JsonSequenceDeserializer<>(((JsonArray) topElement()).asList(), elementCodec);
     }
 
     @Override
@@ -198,12 +198,20 @@ public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> 
     public class JsonSequenceDeserializer<V> implements SequenceDeserializer<V> {
 
         private final Iterator<JsonElement> entries;
+        private final int maxSize;
 
         private final Codeck<V> valueCodec;
 
-        public JsonSequenceDeserializer(JsonArray entries, Codeck<V> valueCodec) {
-            this.entries = entries.asList().iterator();
+        public JsonSequenceDeserializer(List<JsonElement> entries, Codeck<V> valueCodec) {
+            this.entries = entries.iterator();
+            this.maxSize = entries.size();
+
             this.valueCodec = valueCodec;
+        }
+
+        @Override
+        public int size() {
+            return maxSize;
         }
 
         @Override
@@ -230,12 +238,20 @@ public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> 
     public class JsonMapDeserializer<V> implements MapDeserializer<V> {
 
         private final Iterator<Map.Entry<String, JsonElement>> entries;
+        private final int maxSize;
 
         private final Codeck<V> valueCodec;
 
         public JsonMapDeserializer(Map<String, JsonElement> map, Codeck<V> valueCodec) {
             this.entries = map.entrySet().iterator();
+            this.maxSize = map.size();
+
             this.valueCodec = valueCodec;
+        }
+
+        @Override
+        public int size() {
+            return maxSize;
         }
 
         @Override

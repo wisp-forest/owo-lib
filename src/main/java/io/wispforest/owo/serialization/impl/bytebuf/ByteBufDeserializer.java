@@ -126,6 +126,11 @@ public class ByteBufDeserializer implements Deserializer<ByteBuf> {
         }
 
         @Override
+        public int size() {
+            return maxSize;
+        }
+
+        @Override
         public boolean hasNext() {
             return index < maxSize;
         }
@@ -153,6 +158,11 @@ public class ByteBufDeserializer implements Deserializer<ByteBuf> {
         public ByteBufMapDeserializer(Codeck<V> valueCodec, int maxSize) {
             this.valueCodec = valueCodec;
             this.maxSize = maxSize;
+        }
+
+        @Override
+        public int size() {
+            return maxSize;
         }
 
         @Override

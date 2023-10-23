@@ -7,11 +7,12 @@ import io.wispforest.owo.serialization.Serializer;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
 public class MapCodeck<K, V> implements Codeck<Map<K, V>> {
 
-    private Supplier<Map<K, V>> mapConstructor = LinkedHashMap::new;
+    private IntFunction<Map<K, V>> mapConstructor = LinkedHashMap::new;
 
     private final Codeck<V> codeck;
 
@@ -25,7 +26,7 @@ public class MapCodeck<K, V> implements Codeck<Map<K, V>> {
         this.toKey = toKey;
     }
 
-    public MapCodeck<K, V> mapConstructor(Supplier<Map<K, V>> mapConstructor){
+    public MapCodeck<K, V> mapConstructor(IntFunction<Map<K, V>> mapConstructor){
         this.mapConstructor = mapConstructor;
 
         return this;
@@ -48,9 +49,11 @@ public class MapCodeck<K, V> implements Codeck<Map<K, V>> {
 
     @Override
     public <E> Map<K, V> decode(Deserializer<E> deserializer) {
-        final Map<K, V> map = mapConstructor.get();
+        var mapDeserializer = deserializer.map(codeck);
 
-        deserializer.map(codeck).forEachRemaining(entry -> map.put(toKey.apply(entry.getKey()), entry.getValue()));
+        final Map<K, V> map = mapConstructor.apply(mapDeserializer.size());
+
+        mapDeserializer.forEachRemaining(entry -> map.put(toKey.apply(entry.getKey()), entry.getValue()));
 
         return map;
     }

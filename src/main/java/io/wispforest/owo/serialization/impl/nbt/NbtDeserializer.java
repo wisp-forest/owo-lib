@@ -231,11 +231,20 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
     public class NbtSequenceDeserializer<V> implements SequenceDeserializer<V> {
 
         private final Iterator<NbtElement> entries;
+        private final int maxSize;
+
         private final Codeck<V> valueCodec;
 
-        public NbtSequenceDeserializer(AbstractNbtList<NbtElement> entries, Codeck<V> valueCodec) {
+        public NbtSequenceDeserializer(List<NbtElement> entries, Codeck<V> valueCodec) {
             this.entries = entries.iterator();
+            this.maxSize = entries.size();
+
             this.valueCodec = valueCodec;
+        }
+
+        @Override
+        public int size() {
+            return maxSize;
         }
 
         @Override
@@ -258,11 +267,20 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
     public class NbtMapDeserializer<V> implements MapDeserializer<V> {
 
         private final Iterator<Map.Entry<String, NbtElement>> entries;
+        private final int maxSize;
+
         private final Codeck<V> valueCodec;
 
         public NbtMapDeserializer(Map<String, NbtElement> map, Codeck<V> valueCodec) {
             this.entries = map.entrySet().iterator();
+            this.maxSize = map.size();
+
             this.valueCodec = valueCodec;
+        }
+
+        @Override
+        public int size() {
+            return maxSize;
         }
 
         @Override
