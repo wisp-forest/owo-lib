@@ -1,9 +1,7 @@
 package io.wispforest.owo.serialization.impl.nbt;
 
-import com.google.gson.JsonElement;
 import io.wispforest.owo.serialization.*;
 import io.wispforest.owo.serialization.impl.SerializationAttribute;
-import io.wispforest.owo.serialization.impl.json.JsonDeserializer;
 import net.minecraft.nbt.*;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,7 +14,7 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
 
     private final Deque<Supplier<NbtElement>> stack = new ArrayDeque<>();
 
-    private boolean unsafe = true;
+    private boolean safeHandling = true;
 
     private NbtDeserializer(NbtElement element, SerializationAttribute attribute) {
         stack.push(() -> element);
@@ -24,8 +22,8 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
         extraAttribute = attribute;
     }
 
-    public NbtDeserializer unsafe(boolean value) {
-        this.unsafe = value;
+    public NbtDeserializer safeHandling(boolean value) {
+        this.safeHandling = value;
 
         return this;
     }
@@ -118,7 +116,7 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
     public boolean readBoolean() {
         if (topElement() instanceof NbtByte nbtNumber) return nbtNumber.byteValue() != 0;
 
-        if (unsafe) return false; // Default value: 0 != 0;
+        if (safeHandling) return false; // Default value: 0 != 0;
 
         throw new RuntimeException("[NbtFormat] input was not NbtByte for a Boolean get call");
     }
@@ -127,7 +125,7 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
     public byte readByte() {
         if (topElement() instanceof NbtByte nbtNumber) return nbtNumber.byteValue();
 
-        if (unsafe) return 0;
+        if (safeHandling) return 0;
 
         throw new RuntimeException("[NbtFormat] input was not NbtByte for a Byte get call");
     }
@@ -136,7 +134,7 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
     public short readShort() {
         if (topElement() instanceof NbtShort nbtNumber) return nbtNumber.shortValue();
 
-        if (unsafe) return 0;
+        if (safeHandling) return 0;
 
         throw new RuntimeException("[NbtFormat] input was not NbtShort");
     }
@@ -145,7 +143,7 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
     public int readInt() {
         if (topElement() instanceof NbtInt nbtNumber) return nbtNumber.intValue();
 
-        if (unsafe) return 0;
+        if (safeHandling) return 0;
 
         throw new RuntimeException("[NbtFormat] input was not NbtInt");
     }
@@ -154,7 +152,7 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
     public long readLong() {
         if (topElement() instanceof NbtLong nbtNumber) return nbtNumber.longValue();
 
-        if (unsafe) return 0L;
+        if (safeHandling) return 0L;
 
         throw new RuntimeException("[NbtFormat] input was not NbtLong");
     }
@@ -163,7 +161,7 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
     public float readFloat() {
         if (topElement() instanceof NbtFloat nbtNumber) return nbtNumber.floatValue();
 
-        if (unsafe) return 0F;
+        if (safeHandling) return 0F;
 
         throw new RuntimeException("[NbtFormat] input was not NbtFloat");
     }
@@ -172,7 +170,7 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
     public double readDouble() {
         if (topElement() instanceof NbtDouble nbtNumber) return nbtNumber.doubleValue();
 
-        if (unsafe) return 0D;
+        if (safeHandling) return 0D;
 
         throw new RuntimeException("[NbtFormat] input was not NbtDouble");
     }
@@ -181,7 +179,7 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
     public String readString() {
         if (topElement() instanceof NbtString nbtString) return nbtString.asString();
 
-        if (unsafe) return "";
+        if (safeHandling) return "";
 
         throw new RuntimeException("[NbtFormat] input was not NbtDouble");
     }
@@ -190,7 +188,7 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
     public byte[] readBytes() {
         if(topElement() instanceof NbtByteArray nbtBytesArray) return nbtBytesArray.getByteArray();
 
-        if (unsafe) return new byte[0];
+        if (safeHandling) return new byte[0];
 
         throw new RuntimeException("[NbtFormat] input was not NbtByteArray");
     }
@@ -199,7 +197,7 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
     public int readVarInt() {
         if (topElement() instanceof AbstractNbtNumber nbtNumber) return nbtNumber.intValue();
 
-        if (unsafe) return 0;
+        if (safeHandling) return 0;
 
         throw new RuntimeException("[NbtFormat] input was not AbstractNbtNumber");
     }
@@ -208,7 +206,7 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
     public long readVarLong() {
         if (topElement() instanceof AbstractNbtNumber nbtNumber) return nbtNumber.longValue();
 
-        if (unsafe) return 0;
+        if (safeHandling) return 0;
 
         throw new RuntimeException("[NbtFormat] input was not AbstractNbtNumber");
     }
