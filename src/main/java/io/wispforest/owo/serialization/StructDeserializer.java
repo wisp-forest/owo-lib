@@ -2,8 +2,6 @@ package io.wispforest.owo.serialization;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
-
 public interface StructDeserializer {
 
     /**
@@ -37,8 +35,4 @@ public interface StructDeserializer {
             super(message);
         }
     }
-
-
-
-
 }

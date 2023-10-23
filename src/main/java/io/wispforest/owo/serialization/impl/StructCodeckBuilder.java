@@ -5,6 +5,10 @@ import io.wispforest.owo.serialization.Codeck;
 import io.wispforest.owo.serialization.StructDeserializer;
 import io.wispforest.owo.serialization.StructSerializer;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -19,7 +23,7 @@ public class StructCodeckBuilder<T> {
 
             @Override
             public S decode(StructDeserializer struct) {
-                return constructor.apply(struct.field(f1.name, f1.codec, f1.defaultValue));
+                return constructor.apply(f1.deserialize(struct));
             }
         };
     }
@@ -34,8 +38,8 @@ public class StructCodeckBuilder<T> {
 
             @Override
             public S decode(StructDeserializer struct) {
-                return constructor.apply(struct.field(f1.name, f1.codec, f1.defaultValue),
-                        struct.field(f2.name, f2.codec, f2.defaultValue));
+                return constructor.apply(f1.deserialize(struct),
+                        f2.deserialize(struct));
             }
         };
     }
@@ -51,9 +55,9 @@ public class StructCodeckBuilder<T> {
 
             @Override
             public S decode(StructDeserializer struct) {
-                return constructor.apply(struct.field(f1.name, f1.codec, f1.defaultValue),
-                        struct.field(f2.name, f2.codec, f2.defaultValue),
-                        struct.field(f3.name, f3.codec, f3.defaultValue));
+                return constructor.apply(f1.deserialize(struct),
+                        f2.deserialize(struct),
+                        f3.deserialize(struct));
             }
         };
     }
@@ -70,10 +74,10 @@ public class StructCodeckBuilder<T> {
 
             @Override
             public S decode(StructDeserializer struct) {
-                return constructor.apply(struct.field(f1.name, f1.codec, f1.defaultValue),
-                        struct.field(f2.name, f2.codec, f2.defaultValue),
-                        struct.field(f3.name, f3.codec, f3.defaultValue),
-                        struct.field(f4.name, f4.codec, f4.defaultValue));
+                return constructor.apply(f1.deserialize(struct),
+                        f2.deserialize(struct),
+                        f3.deserialize(struct),
+                        f4.deserialize(struct));
             }
         };
     }
@@ -91,11 +95,11 @@ public class StructCodeckBuilder<T> {
 
             @Override
             public S decode(StructDeserializer struct) {
-                return constructor.apply(struct.field(f1.name, f1.codec, f1.defaultValue),
-                        struct.field(f2.name, f2.codec, f2.defaultValue),
-                        struct.field(f3.name, f3.codec, f3.defaultValue),
-                        struct.field(f4.name, f4.codec, f4.defaultValue),
-                        struct.field(f5.name, f5.codec, f5.defaultValue));
+                return constructor.apply(f1.deserialize(struct),
+                        f2.deserialize(struct),
+                        f3.deserialize(struct),
+                        f4.deserialize(struct),
+                        f5.deserialize(struct));
             }
         };
     }
@@ -114,12 +118,12 @@ public class StructCodeckBuilder<T> {
 
             @Override
             public S decode(StructDeserializer struct) {
-                return constructor.apply(struct.field(f1.name, f1.codec, f1.defaultValue),
-                        struct.field(f2.name, f2.codec, f2.defaultValue),
-                        struct.field(f3.name, f3.codec, f3.defaultValue),
-                        struct.field(f4.name, f4.codec, f4.defaultValue),
-                        struct.field(f5.name, f5.codec, f5.defaultValue),
-                        struct.field(f6.name, f6.codec, f6.defaultValue));
+                return constructor.apply(f1.deserialize(struct),
+                        f2.deserialize(struct),
+                        f3.deserialize(struct),
+                        f4.deserialize(struct),
+                        f5.deserialize(struct),
+                        f6.deserialize(struct));
             }
         };
     }
@@ -139,13 +143,13 @@ public class StructCodeckBuilder<T> {
 
             @Override
             public S decode(StructDeserializer struct) {
-                return constructor.apply(struct.field(f1.name, f1.codec, f1.defaultValue),
-                        struct.field(f2.name, f2.codec, f2.defaultValue),
-                        struct.field(f3.name, f3.codec, f3.defaultValue),
-                        struct.field(f4.name, f4.codec, f4.defaultValue),
-                        struct.field(f5.name, f5.codec, f5.defaultValue),
-                        struct.field(f6.name, f6.codec, f6.defaultValue),
-                        struct.field(f7.name, f7.codec, f7.defaultValue));
+                return constructor.apply(f1.deserialize(struct),
+                        f2.deserialize(struct),
+                        f3.deserialize(struct),
+                        f4.deserialize(struct),
+                        f5.deserialize(struct),
+                        f6.deserialize(struct),
+                        f7.deserialize(struct));
             }
         };
     }
@@ -166,14 +170,14 @@ public class StructCodeckBuilder<T> {
 
             @Override
             public S decode(StructDeserializer struct) {
-                return constructor.apply(struct.field(f1.name, f1.codec, f1.defaultValue),
-                        struct.field(f2.name, f2.codec, f2.defaultValue),
-                        struct.field(f3.name, f3.codec, f3.defaultValue),
-                        struct.field(f4.name, f4.codec, f4.defaultValue),
-                        struct.field(f5.name, f5.codec, f5.defaultValue),
-                        struct.field(f6.name, f6.codec, f6.defaultValue),
-                        struct.field(f7.name, f7.codec, f7.defaultValue),
-                        struct.field(f8.name, f8.codec, f8.defaultValue));
+                return constructor.apply(f1.deserialize(struct),
+                        f2.deserialize(struct),
+                        f3.deserialize(struct),
+                        f4.deserialize(struct),
+                        f5.deserialize(struct),
+                        f6.deserialize(struct),
+                        f7.deserialize(struct),
+                        f8.deserialize(struct));
             }
         };
     }
@@ -195,15 +199,15 @@ public class StructCodeckBuilder<T> {
 
             @Override
             public S decode(StructDeserializer struct) {
-                return constructor.apply(struct.field(f1.name, f1.codec, f1.defaultValue),
-                        struct.field(f2.name, f2.codec, f2.defaultValue),
-                        struct.field(f3.name, f3.codec, f3.defaultValue),
-                        struct.field(f4.name, f4.codec, f4.defaultValue),
-                        struct.field(f5.name, f5.codec, f5.defaultValue),
-                        struct.field(f6.name, f6.codec, f6.defaultValue),
-                        struct.field(f7.name, f7.codec, f7.defaultValue),
-                        struct.field(f8.name, f8.codec, f8.defaultValue),
-                        struct.field(f9.name, f9.codec, f9.defaultValue));
+                return constructor.apply(f1.deserialize(struct),
+                        f2.deserialize(struct),
+                        f3.deserialize(struct),
+                        f4.deserialize(struct),
+                        f5.deserialize(struct),
+                        f6.deserialize(struct),
+                        f7.deserialize(struct),
+                        f8.deserialize(struct),
+                        f9.deserialize(struct));
             }
         };
     }
@@ -226,16 +230,16 @@ public class StructCodeckBuilder<T> {
 
             @Override
             public S decode(StructDeserializer struct) {
-                return constructor.apply(struct.field(f1.name, f1.codec, f1.defaultValue),
-                        struct.field(f2.name, f2.codec, f2.defaultValue),
-                        struct.field(f3.name, f3.codec, f3.defaultValue),
-                        struct.field(f4.name, f4.codec, f4.defaultValue),
-                        struct.field(f5.name, f5.codec, f5.defaultValue),
-                        struct.field(f6.name, f6.codec, f6.defaultValue),
-                        struct.field(f7.name, f7.codec, f7.defaultValue),
-                        struct.field(f8.name, f8.codec, f8.defaultValue),
-                        struct.field(f9.name, f9.codec, f9.defaultValue),
-                        struct.field(f10.name, f10.codec, f10.defaultValue));
+                return constructor.apply(f1.deserialize(struct),
+                        f2.deserialize(struct),
+                        f3.deserialize(struct),
+                        f4.deserialize(struct),
+                        f5.deserialize(struct),
+                        f6.deserialize(struct),
+                        f7.deserialize(struct),
+                        f8.deserialize(struct),
+                        f9.deserialize(struct),
+                        f10.deserialize(struct));
             }
         };
     }
@@ -259,17 +263,17 @@ public class StructCodeckBuilder<T> {
 
             @Override
             public S decode(StructDeserializer struct) {
-                return constructor.apply(struct.field(f1.name, f1.codec, f1.defaultValue),
-                        struct.field(f2.name, f2.codec, f2.defaultValue),
-                        struct.field(f3.name, f3.codec, f3.defaultValue),
-                        struct.field(f4.name, f4.codec, f4.defaultValue),
-                        struct.field(f5.name, f5.codec, f5.defaultValue),
-                        struct.field(f6.name, f6.codec, f6.defaultValue),
-                        struct.field(f7.name, f7.codec, f7.defaultValue),
-                        struct.field(f8.name, f8.codec, f8.defaultValue),
-                        struct.field(f9.name, f9.codec, f9.defaultValue),
-                        struct.field(f10.name, f10.codec, f10.defaultValue),
-                        struct.field(f11.name, f11.codec, f11.defaultValue));
+                return constructor.apply(f1.deserialize(struct),
+                        f2.deserialize(struct),
+                        f3.deserialize(struct),
+                        f4.deserialize(struct),
+                        f5.deserialize(struct),
+                        f6.deserialize(struct),
+                        f7.deserialize(struct),
+                        f8.deserialize(struct),
+                        f9.deserialize(struct),
+                        f10.deserialize(struct),
+                        f11.deserialize(struct));
             }
         };
     }
@@ -294,18 +298,18 @@ public class StructCodeckBuilder<T> {
 
             @Override
             public S decode(StructDeserializer struct) {
-                return constructor.apply(struct.field(f1.name, f1.codec, f1.defaultValue),
-                        struct.field(f2.name, f2.codec, f2.defaultValue),
-                        struct.field(f3.name, f3.codec, f3.defaultValue),
-                        struct.field(f4.name, f4.codec, f4.defaultValue),
-                        struct.field(f5.name, f5.codec, f5.defaultValue),
-                        struct.field(f6.name, f6.codec, f6.defaultValue),
-                        struct.field(f7.name, f7.codec, f7.defaultValue),
-                        struct.field(f8.name, f8.codec, f8.defaultValue),
-                        struct.field(f9.name, f9.codec, f9.defaultValue),
-                        struct.field(f10.name, f10.codec, f10.defaultValue),
-                        struct.field(f11.name, f11.codec, f11.defaultValue),
-                        struct.field(f12.name, f12.codec, f12.defaultValue));
+                return constructor.apply(f1.deserialize(struct),
+                        f2.deserialize(struct),
+                        f3.deserialize(struct),
+                        f4.deserialize(struct),
+                        f5.deserialize(struct),
+                        f6.deserialize(struct),
+                        f7.deserialize(struct),
+                        f8.deserialize(struct),
+                        f9.deserialize(struct),
+                        f10.deserialize(struct),
+                        f11.deserialize(struct),
+                        f12.deserialize(struct));
             }
         };
     }
@@ -331,19 +335,19 @@ public class StructCodeckBuilder<T> {
 
             @Override
             public S decode(StructDeserializer struct) {
-                return constructor.apply(struct.field(f1.name, f1.codec, f1.defaultValue),
-                        struct.field(f2.name, f2.codec, f2.defaultValue),
-                        struct.field(f3.name, f3.codec, f3.defaultValue),
-                        struct.field(f4.name, f4.codec, f4.defaultValue),
-                        struct.field(f5.name, f5.codec, f5.defaultValue),
-                        struct.field(f6.name, f6.codec, f6.defaultValue),
-                        struct.field(f7.name, f7.codec, f7.defaultValue),
-                        struct.field(f8.name, f8.codec, f8.defaultValue),
-                        struct.field(f9.name, f9.codec, f9.defaultValue),
-                        struct.field(f10.name, f10.codec, f10.defaultValue),
-                        struct.field(f11.name, f11.codec, f11.defaultValue),
-                        struct.field(f12.name, f12.codec, f12.defaultValue),
-                        struct.field(f13.name, f13.codec, f13.defaultValue));
+                return constructor.apply(f1.deserialize(struct),
+                        f2.deserialize(struct),
+                        f3.deserialize(struct),
+                        f4.deserialize(struct),
+                        f5.deserialize(struct),
+                        f6.deserialize(struct),
+                        f7.deserialize(struct),
+                        f8.deserialize(struct),
+                        f9.deserialize(struct),
+                        f10.deserialize(struct),
+                        f11.deserialize(struct),
+                        f12.deserialize(struct),
+                        f13.deserialize(struct));
             }
         };
     }
@@ -370,20 +374,20 @@ public class StructCodeckBuilder<T> {
 
             @Override
             public S decode(StructDeserializer struct) {
-                return constructor.apply(struct.field(f1.name, f1.codec, f1.defaultValue),
-                        struct.field(f2.name, f2.codec, f2.defaultValue),
-                        struct.field(f3.name, f3.codec, f3.defaultValue),
-                        struct.field(f4.name, f4.codec, f4.defaultValue),
-                        struct.field(f5.name, f5.codec, f5.defaultValue),
-                        struct.field(f6.name, f6.codec, f6.defaultValue),
-                        struct.field(f7.name, f7.codec, f7.defaultValue),
-                        struct.field(f8.name, f8.codec, f8.defaultValue),
-                        struct.field(f9.name, f9.codec, f9.defaultValue),
-                        struct.field(f10.name, f10.codec, f10.defaultValue),
-                        struct.field(f11.name, f11.codec, f11.defaultValue),
-                        struct.field(f12.name, f12.codec, f12.defaultValue),
-                        struct.field(f13.name, f13.codec, f13.defaultValue),
-                        struct.field(f14.name, f14.codec, f14.defaultValue));
+                return constructor.apply(f1.deserialize(struct),
+                        f2.deserialize(struct),
+                        f3.deserialize(struct),
+                        f4.deserialize(struct),
+                        f5.deserialize(struct),
+                        f6.deserialize(struct),
+                        f7.deserialize(struct),
+                        f8.deserialize(struct),
+                        f9.deserialize(struct),
+                        f10.deserialize(struct),
+                        f11.deserialize(struct),
+                        f12.deserialize(struct),
+                        f13.deserialize(struct),
+                        f14.deserialize(struct));
             }
         };
     }
@@ -411,21 +415,21 @@ public class StructCodeckBuilder<T> {
 
             @Override
             public S decode(StructDeserializer struct) {
-                return constructor.apply(struct.field(f1.name, f1.codec, f1.defaultValue),
-                        struct.field(f2.name, f2.codec, f2.defaultValue),
-                        struct.field(f3.name, f3.codec, f3.defaultValue),
-                        struct.field(f4.name, f4.codec, f4.defaultValue),
-                        struct.field(f5.name, f5.codec, f5.defaultValue),
-                        struct.field(f6.name, f6.codec, f6.defaultValue),
-                        struct.field(f7.name, f7.codec, f7.defaultValue),
-                        struct.field(f8.name, f8.codec, f8.defaultValue),
-                        struct.field(f9.name, f9.codec, f9.defaultValue),
-                        struct.field(f10.name, f10.codec, f10.defaultValue),
-                        struct.field(f11.name, f11.codec, f11.defaultValue),
-                        struct.field(f12.name, f12.codec, f12.defaultValue),
-                        struct.field(f13.name, f13.codec, f13.defaultValue),
-                        struct.field(f14.name, f14.codec, f14.defaultValue),
-                        struct.field(f15.name, f15.codec, f15.defaultValue));
+                return constructor.apply(f1.deserialize(struct),
+                        f2.deserialize(struct),
+                        f3.deserialize(struct),
+                        f4.deserialize(struct),
+                        f5.deserialize(struct),
+                        f6.deserialize(struct),
+                        f7.deserialize(struct),
+                        f8.deserialize(struct),
+                        f9.deserialize(struct),
+                        f10.deserialize(struct),
+                        f11.deserialize(struct),
+                        f12.deserialize(struct),
+                        f13.deserialize(struct),
+                        f14.deserialize(struct),
+                        f15.deserialize(struct));
             }
         };
     }
@@ -454,118 +458,111 @@ public class StructCodeckBuilder<T> {
 
             @Override
             public S decode(StructDeserializer struct) {
-                return constructor.apply(struct.field(f1.name, f1.codec, f1.defaultValue),
-                        struct.field(f2.name, f2.codec, f2.defaultValue),
-                        struct.field(f3.name, f3.codec, f3.defaultValue),
-                        struct.field(f4.name, f4.codec, f4.defaultValue),
-                        struct.field(f5.name, f5.codec, f5.defaultValue),
-                        struct.field(f6.name, f6.codec, f6.defaultValue),
-                        struct.field(f7.name, f7.codec, f7.defaultValue),
-                        struct.field(f8.name, f8.codec, f8.defaultValue),
-                        struct.field(f9.name, f9.codec, f9.defaultValue),
-                        struct.field(f10.name, f10.codec, f10.defaultValue),
-                        struct.field(f11.name, f11.codec, f11.defaultValue),
-                        struct.field(f12.name, f12.codec, f12.defaultValue),
-                        struct.field(f13.name, f13.codec, f13.defaultValue),
-                        struct.field(f14.name, f14.codec, f14.defaultValue),
-                        struct.field(f15.name, f15.codec, f15.defaultValue),
-                        struct.field(f16.name, f16.codec, f16.defaultValue));
+                return constructor.apply(f1.deserialize(struct),
+                        f2.deserialize(struct),
+                        f3.deserialize(struct),
+                        f4.deserialize(struct),
+                        f5.deserialize(struct),
+                        f6.deserialize(struct),
+                        f7.deserialize(struct),
+                        f8.deserialize(struct),
+                        f9.deserialize(struct),
+                        f10.deserialize(struct),
+                        f11.deserialize(struct),
+                        f12.deserialize(struct),
+                        f13.deserialize(struct),
+                        f14.deserialize(struct),
+                        f15.deserialize(struct),
+                        f16.deserialize(struct));
             }
         };
     }
 
+    /*public static void main(String[] args){
+        String typesSpot = "{types}";
 
+        String constructorNum = "{cnum}";
 
+        //--
 
+        String typeSpot = "{type}";
+        String typeArgumentName = "{arg}";
 
-//    public static void main(String[] args){
-//        String typesSpot = "{types}";
-//
-//        //--
-//
-//        String typeSpot = "{type}";
-//        String typeArgumentName = "{arg}";
-//
-//        String numberSpot = "{num}";
-//
-//        String structFieldTemplate = "StructField<S, F{num}> f{num}";
-//
-//        String structFieldArgs = "{fieldArgs}";
-//
-//        //--
-//
-//        String structSerCallTemplate = ".field({arg}.name, {arg}.codec, {arg}.getter.apply(value))";
-//
-//        String structSerCallsSpot = "{serCalls}";
-//
-//        //--
-//
-//        String structDeserCallTemplate =
-//        """
-//                {arg}.handle(struct.field({arg}.name, {arg}.codec))
-//        """;
-//
-//        String structDeserCallsSpot = "{deserCalls}";
-//
-//        String method =
-//        """
-//        public static <S, {types}> Codeck<S> of({fieldArgs} Function<{types}, S> constructor){
-//            return new Codeck<S>() {
-//                @Override
-//                public <E> void encode(Serializer<E> serializer, S value) {
-//                    try(StructSerializer struct = serializer.struct()){
-//                        struct{serCalls};
-//                    }
-//                }
-//
-//                @Override
-//                public <E> S decode(Deserializer<E> deserializer) {
-//                    var struct = deserializer.struct();
-//
-//                    return constructor.apply({deserCalls});
-//                }
-//            };
-//        }
-//
-//        """;
-//
-//        Map<Integer, String> structTypes = new LinkedHashMap<>();
-//        Map<Integer, String> structArgs = new LinkedHashMap<>();
-//
-//        Map<Integer, String> structFields = new LinkedHashMap<>();
-//        Map<Integer, String> structSerCalls = new LinkedHashMap<>();
-//        Map<Integer, String> structDeserCalls = new LinkedHashMap<>();
-//
-//        String allMethods = "";
-//
-//        for (int i = 1; i < 17; i++) {
-//            structTypes.put(i, "F" + i);
-//            structArgs.put(i, "f" + i);
-//
-//            structFields.put(i, structFieldTemplate.replace(numberSpot, String.valueOf(i)));
-//            structSerCalls.put(i, structSerCallTemplate.replace(typeArgumentName, structArgs.get(i)));
-//            structDeserCalls.put(i, structDeserCallTemplate.replace(typeArgumentName, structArgs.get(i)));
-//
-//            String types = String.join(", ", structTypes.values());
-//
-//            String fieldArgs = String.join(", ", structFields.values());
-//
-//            String serCalls = String.join("\n", structSerCalls.values());
-//            String deserCalls = String.join(",\n", structDeserCalls.values());
-//
-//            String newMethod = method
-//                    .replace(typesSpot, types)
-//                    .replace(structFieldArgs, fieldArgs)
-//                    .replace(structSerCallsSpot, serCalls)
-//                    .replace(structDeserCallsSpot, deserCalls);
-//
-//            allMethods = allMethods.concat(newMethod);
-//        }
-//
-//        try(FileWriter myWriter = new FileWriter("test.txt")) {
-//            myWriter.write(allMethods);
-//        } catch (IOException e){
-//            throw new RuntimeException(e);
-//        }
-//    }
+        String numberSpot = "{num}";
+
+        String structFieldTemplate = "StructField<S, F{num}> f{num}";
+
+        String structFieldArgs = "{fieldArgs}";
+
+        //--
+
+        String structSerCallTemplate = ".field({arg}.name, {arg}.codec, {arg}.getter.apply(value))";
+
+        String structSerCallsSpot = "{serCalls}";
+
+        //--
+
+        //String structDeserCallTemplate = "struct.field({arg}.name, {arg}.codec, {arg}.defaultValue)";
+        String structDeserCallTemplate = "{arg}.deserialize(struct)";
+
+        String structDeserCallsSpot = "{deserCalls}";
+
+        String method =
+                """
+                public static <S, {types}> Codeck<S> of({fieldArgs}, Function{cnum}<{types}, S> constructor){
+                    return new StructCodeck<S>() {
+                        @Override
+                        public void encode(StructSerializer struct, S value) {
+                            struct{serCalls};
+                        }
+
+                        @Override
+                        public S decode(StructDeserializer struct) {
+                            return constructor.apply({deserCalls});
+                        }
+                    };
+                }
+
+                """;
+
+        Map<Integer, String> structTypes = new LinkedHashMap<>();
+        Map<Integer, String> structArgs = new LinkedHashMap<>();
+
+        Map<Integer, String> structFields = new LinkedHashMap<>();
+        Map<Integer, String> structSerCalls = new LinkedHashMap<>();
+        Map<Integer, String> structDeserCalls = new LinkedHashMap<>();
+
+        String allMethods = "";
+
+        for (int i = 1; i < 17; i++) {
+            structTypes.put(i, "F" + i);
+            structArgs.put(i, "f" + i);
+
+            structFields.put(i, structFieldTemplate.replace(numberSpot, String.valueOf(i)));
+            structSerCalls.put(i, structSerCallTemplate.replace(typeArgumentName, structArgs.get(i)));
+            structDeserCalls.put(i, structDeserCallTemplate.replace(typeArgumentName, structArgs.get(i)));
+
+            String types = String.join(", ", structTypes.values());
+
+            String fieldArgs = String.join(", ", structFields.values());
+
+            String serCalls = String.join("\n", structSerCalls.values());
+            String deserCalls = String.join(",\n", structDeserCalls.values());
+
+            String newMethod = method
+                    .replace(constructorNum, String.valueOf(i))
+                    .replace(typesSpot, types)
+                    .replace(structFieldArgs, fieldArgs)
+                    .replace(structSerCallsSpot, serCalls)
+                    .replace(structDeserCallsSpot, deserCalls);
+
+            allMethods = allMethods.concat(newMethod);
+        }
+
+        try(FileWriter myWriter = new FileWriter("test.txt")) {
+            myWriter.write(allMethods);
+        } catch (IOException e){
+            throw new RuntimeException(e);
+        }
+    }*/
 }
