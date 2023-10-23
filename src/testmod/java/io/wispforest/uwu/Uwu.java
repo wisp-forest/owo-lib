@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.logging.LogUtils;
 import io.netty.buffer.ByteBuf;
 import io.wispforest.owo.config.ConfigSynchronizer;
 import io.wispforest.owo.config.Option;
@@ -66,6 +67,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import org.slf4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -75,6 +77,8 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class Uwu implements ModInitializer {
+
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     public static final boolean WE_TESTEN_HANDSHAKE = false;
 
@@ -249,7 +253,7 @@ public class Uwu implements ModInitializer {
 
                         String testPhrase = "This is a test to see how kodeck dose.";
 
-                        source.sendMessage(Text.of("Input:  " + testPhrase));
+                        LOGGER.info("Input:  " + testPhrase);
 
                         var nbtData = Codeck.STRING.encode(NbtSerializer::of, testPhrase);
                         var fromNbtData = Codeck.STRING.decode(NbtDeserializer::of, nbtData);
@@ -257,21 +261,21 @@ public class Uwu implements ModInitializer {
                         var jsonData = Codeck.STRING.encode(JsonSerializer::of, fromNbtData);
                         var fromJsonData = Codeck.STRING.decode(JsonDeserializer::of, jsonData);
 
-                        source.sendMessage(Text.of("Output: " + fromJsonData));
+                        LOGGER.info("Output: " + fromJsonData);
 
-                        source.sendMessage(Text.empty());
+                        LOGGER.info("");
 
                         //--
 
                         int randomNumber = rand.nextInt(20000);
 
-                        source.sendMessage(Text.of("Input:  " + randomNumber));
+                        LOGGER.info("Input:  " + randomNumber);
 
                         var jsonNum = Codeck.INT.encode(JsonSerializer::of, randomNumber);
 
-                        source.sendMessage(Text.of("Output: " + Codeck.INT.decode(JsonDeserializer::of, jsonNum)));
+                        LOGGER.info("Output: " + Codeck.INT.decode(JsonDeserializer::of, jsonNum));
 
-                        source.sendMessage(Text.empty());
+                        LOGGER.info("");
 
                         //--
 
@@ -283,60 +287,102 @@ public class Uwu implements ModInitializer {
                             randomNumbers.add(rand.nextInt(20000));
                         }
 
-                        source.sendMessage(Text.of("Input:  " + randomNumbers));
+                        LOGGER.info("Input:  " + randomNumbers);
 
                         Codeck<List<Integer>> INT_LIST_KODECK = Codeck.INT.list();
 
                         var nbtListData = INT_LIST_KODECK.encode(NbtSerializer::of, randomNumbers);
 
-                        source.sendMessage(Text.of("Output: " + INT_LIST_KODECK.decode(NbtDeserializer::of, nbtListData)));
+                        LOGGER.info("Output: " + INT_LIST_KODECK.decode(NbtDeserializer::of, nbtListData));
 
-                        source.sendMessage(Text.empty());
+                        LOGGER.info("");
 
                         //---
-                        {
-                            if (source.getPlayer() == null) return 0;
-
-                            ItemStack stack = source.getPlayer().getStackInHand(Hand.MAIN_HAND);
-
-                            source.sendMessage(Text.of(stack.toString()));
-                            source.sendMessage(Text.of(String.valueOf(stack.getOrCreateNbt())));
-
-                            source.sendMessage(Text.of("---"));
-
-                            JsonElement stackJsonData;
-
-                            try {
-                                stackJsonData = Codeck.ITEM_STACK.encode(JsonSerializer::of, stack);
-                            } catch (Exception exception){
-                                source.sendMessage(Text.of(exception.getMessage()));
-                                source.sendMessage(Text.of((Arrays.toString(exception.getStackTrace()))));
-
-                                return 0;
-                            }
-
-                            source.sendMessage(Text.of(stackJsonData.toString()));
-
-                            source.sendMessage(Text.of("---"));
-
-                            ItemStack stackFromJson;
-
-                            try {
-                                stackFromJson = Codeck.ITEM_STACK.decode(JsonDeserializer::of, stackJsonData);
-                            } catch (Exception exception){
-                                source.sendMessage(Text.of(exception.getMessage()));
-                                source.sendMessage(Text.of((Arrays.toString(exception.getStackTrace()))));
-
-                                return 0;
-                            }
-
-                            source.sendMessage(Text.of(stackFromJson.toString()));
-                            source.sendMessage(Text.of(String.valueOf(stackFromJson.getOrCreateNbt())));
-                        }
-
-//                        source.sendMessage(Text.empty());
 
                         if (source.getPlayer() == null) return 0;
+
+                        ItemStack handStack = source.getPlayer().getStackInHand(Hand.MAIN_HAND);
+
+                        LOGGER.info(handStack.toString());
+                        LOGGER.info(handStack.getOrCreateNbt().asString().replace("\n", "\\n"));
+
+                        LOGGER.info("---");
+
+                        JsonElement stackJsonData;
+
+                        try {
+                            stackJsonData = Codeck.ITEM_STACK.encode(JsonSerializer::of, handStack);
+                        } catch (Exception exception){
+                            LOGGER.info(exception.getMessage());
+                            LOGGER.info((Arrays.toString(exception.getStackTrace())));
+
+                            return 0;
+                        }
+
+                        LOGGER.info(stackJsonData.toString());
+
+                        LOGGER.info("---");
+
+                        try {
+                            handStack = Codeck.ITEM_STACK.decode(JsonDeserializer::of, stackJsonData);
+                        } catch (Exception exception){
+                            LOGGER.info(exception.getMessage());
+                            LOGGER.info((Arrays.toString(exception.getStackTrace())));
+
+                            return 0;
+                        }
+
+                        LOGGER.info(handStack.toString());
+                        LOGGER.info(handStack.getOrCreateNbt().asString().replace("\n", "\\n"));
+
+                        LOGGER.info("");
+
+                        //--
+
+                        {
+                            LOGGER.info("--- Format Based Codeck Test");
+
+                            var nbtDataStack = handStack.getOrCreateNbt();
+
+                            LOGGER.info("  Input:  " + nbtDataStack.asString().replace("\n", "\\n"));
+
+                            var jsonDataStack = Codeck.NBT_ELEMENT.encode(JsonSerializer::of, nbtDataStack);
+
+                            LOGGER.info("  Json:  " + jsonDataStack);
+
+                            var convertedNbtDataStack = Codeck.NBT_ELEMENT.decode(JsonDeserializer::of, jsonDataStack);
+
+                            LOGGER.info("Output:  " + convertedNbtDataStack.asString().replace("\n", "\\n"));
+
+                            LOGGER.info("---");
+
+                            LOGGER.info("");
+                        }
+
+                        //--
+
+                        {
+                            LOGGER.info("--- Transpose Format Based Codeck Test");
+
+                            var nbtDataStack = handStack.getOrCreateNbt();
+
+                            LOGGER.info("  Input:  " + nbtDataStack.asString().replace("\n", "\\n"));
+
+                            var jsonDataStack = Codeck.NBT_ELEMENT.encode(JsonSerializer::of, nbtDataStack);
+
+                            LOGGER.info("  Json:  " + jsonDataStack);
+
+                            var convertedNbtDataStack = Codeck.JSON_ELEMENT.encode(NbtSerializer::of, jsonDataStack);
+
+                            LOGGER.info("Output:  " + convertedNbtDataStack.asString().replace("\n", "\\n"));
+
+                            LOGGER.info("---");
+
+                            LOGGER.info("");
+                        }
+
+                        //--
+
 
                         //Vanilla
                         iterations("Vanilla", (buf) -> {
@@ -355,8 +401,8 @@ public class Uwu implements ModInitializer {
                                 var stackFromByte = Codeck.ITEM_STACK.decode(ByteBufDeserializer::new, buf);
                             });
                         } catch (Exception exception){
-                            source.sendMessage(Text.of(exception.getMessage()));
-                            source.sendMessage(Text.of((Arrays.toString(exception.getStackTrace()))));
+                            LOGGER.info(exception.getMessage());
+                            LOGGER.info(Arrays.toString(exception.getStackTrace()));
 
                             return 0;
                         }
@@ -373,14 +419,14 @@ public class Uwu implements ModInitializer {
         UwuOptionalNetExample.init();
     }
 
-    public static void iterations(String label, Consumer<PacketByteBuf> action){
+    private static void iterations(String label, Consumer<PacketByteBuf> action){
         int maxTrials = 3;
         int maxIterations = 50;
 
         List<Long> durations = new ArrayList<>();
 
-        System.out.println("-----");
-        System.out.println(label);
+        LOGGER.info("-----");
+        LOGGER.info(label);
 
         for (int trial = 0; trial < maxTrials; trial++) {
             durations.clear();
@@ -395,10 +441,10 @@ public class Uwu implements ModInitializer {
                 durations.add(System.nanoTime() - startTime);
             }
 
-            System.out.println(String.format(maxIterations + " Trials took on average: %.2f", ((durations.stream().mapToLong(v -> v).sum()) / (double) durations.size()) / 1000000));
+            LOGGER.info(String.format(maxIterations + " Trials took on average: %.2f", ((durations.stream().mapToLong(v -> v).sum()) / (double) durations.size()) / 1000000));
         }
 
-        System.out.println("-----");
+        LOGGER.info("-----");
 
     }
 
