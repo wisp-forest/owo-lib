@@ -5,8 +5,8 @@ import io.wispforest.owo.mixin.ClientCommonNetworkHandlerAccessor;
 import io.wispforest.owo.mixin.ServerCommonNetworkHandlerAccessor;
 import io.wispforest.owo.ops.TextOps;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
-import io.wispforest.owo.serialization.Codeck;
-import io.wispforest.owo.serialization.impl.ReflectionCodeckBuilder;
+import io.wispforest.owo.serialization.Endec;
+import io.wispforest.owo.serialization.impl.ReflectionEndecBuilder;
 import io.wispforest.owo.serialization.impl.bytebuf.ByteBufDeserializer;
 import io.wispforest.owo.serialization.impl.bytebuf.ByteBufSerializer;
 import io.wispforest.owo.util.OwoFreezer;
@@ -31,7 +31,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.ToIntFunction;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -39,8 +38,8 @@ import java.util.function.ToIntFunction;
 public final class OwoHandshake {
 
     @SuppressWarnings("unchecked")
-    private static final Codeck<Map<Identifier, Integer>> RESPONSE_SERIALIZER =
-            (Codeck<Map<Identifier, Integer>>) (Object) ReflectionCodeckBuilder.createMapSerializer(Map.class, Identifier.class, Integer.class);
+    private static final Endec<Map<Identifier, Integer>> RESPONSE_SERIALIZER =
+            (Endec<Map<Identifier, Integer>>) (Object) ReflectionEndecBuilder.createMapSerializer(Map.class, Identifier.class, Integer.class);
 
     private static final MutableText PREFIX = TextOps.concat(Owo.PREFIX, Text.of("§chandshake failure\n"));
     public static final Identifier CHANNEL_ID = new Identifier("owo", "handshake");

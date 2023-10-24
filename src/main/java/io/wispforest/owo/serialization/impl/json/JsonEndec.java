@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public final class JsonCodeck implements Codeck<JsonElement> {
+public final class JsonEndec implements Endec<JsonElement> {
 
-    public static JsonCodeck INSTANCE = new JsonCodeck();
+    public static JsonEndec INSTANCE = new JsonEndec();
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -26,7 +26,7 @@ public final class JsonCodeck implements Codeck<JsonElement> {
         }
 
         try {
-            Codeck.STRING.encode(serializer, value.toString());
+            Endec.STRING.encode(serializer, value.toString());
         } catch (AssertionError e){
             LOGGER.error("Unable to serialize the given JsonElement into the given format!");
             throw new RuntimeException(e);
@@ -40,7 +40,7 @@ public final class JsonCodeck implements Codeck<JsonElement> {
         }
 
         try {
-            return new JsonStreamParser(Codeck.STRING.decode(deserializer)).next();
+            return new JsonStreamParser(Endec.STRING.decode(deserializer)).next();
         } catch (JsonParseException e){
             LOGGER.error("Unable to deserialize the given format into the desired JsonElement!");
             throw new RuntimeException(e);

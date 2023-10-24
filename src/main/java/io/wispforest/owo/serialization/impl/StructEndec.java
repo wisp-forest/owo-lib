@@ -3,9 +3,9 @@ package io.wispforest.owo.serialization.impl;
 import io.wispforest.owo.serialization.*;
 
 /**
- * Helper Interface for Structs that do not conform to the {@link StructCodeckBuilder} format
+ * Helper Interface for Structs that do not conform to the {@link StructEndecBuilder} format
  */
-public interface StructCodeck<T> extends Codeck<T> {
+public interface StructEndec<T> extends Endec<T> {
 
     @Override
     default <E> void encode(Serializer<E> serializer, T value) {

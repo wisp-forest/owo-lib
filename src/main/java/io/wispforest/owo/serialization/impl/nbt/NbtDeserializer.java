@@ -104,12 +104,12 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
     //--
 
     @Override
-    public <V> Optional<V> readOptional(Codeck<V> codeck) {
+    public <V> Optional<V> readOptional(Endec<V> endec) {
         var element = topElement();
 
         if(element == NbtEnd.INSTANCE) return Optional.empty();
 
-        return Optional.of(codeck.decode(this));
+        return Optional.of(endec.decode(this));
     }
 
     @Override
@@ -212,13 +212,13 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
     }
 
     @Override
-    public <E> SequenceDeserializer<E> sequence(Codeck<E> elementCodec) {
-        return new NbtSequenceDeserializer<>(((AbstractNbtList<NbtElement>) topElement()), elementCodec);
+    public <E> SequenceDeserializer<E> sequence(Endec<E> elementEndec) {
+        return new NbtSequenceDeserializer<>(((AbstractNbtList<NbtElement>) topElement()), elementEndec);
     }
 
     @Override
-    public <V> MapDeserializer<V> map(Codeck<V> valueCodec) {
-        return new NbtMapDeserializer<>(((NbtCompound) topElement()).toMap(), valueCodec);
+    public <V> MapDeserializer<V> map(Endec<V> valueEndec) {
+        return new NbtMapDeserializer<>(((NbtCompound) topElement()).toMap(), valueEndec);
     }
 
     @Override
@@ -231,13 +231,13 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
         private final Iterator<NbtElement> entries;
         private final int maxSize;
 
-        private final Codeck<V> valueCodec;
+        private final Endec<V> valueEndec;
 
-        public NbtSequenceDeserializer(List<NbtElement> entries, Codeck<V> valueCodec) {
+        public NbtSequenceDeserializer(List<NbtElement> entries, Endec<V> valueEndec) {
             this.entries = entries.iterator();
             this.maxSize = entries.size();
 
-            this.valueCodec = valueCodec;
+            this.valueEndec = valueEndec;
         }
 
         @Override
@@ -254,7 +254,7 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
         public V next() {
             NbtDeserializer.this.stack.push(entries::next);
 
-            var entry = valueCodec.decode(NbtDeserializer.this);
+            var entry = valueEndec.decode(NbtDeserializer.this);
 
             NbtDeserializer.this.stack.pop();
 
@@ -267,13 +267,13 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
         private final Iterator<Map.Entry<String, NbtElement>> entries;
         private final int maxSize;
 
-        private final Codeck<V> valueCodec;
+        private final Endec<V> valueEndec;
 
-        public NbtMapDeserializer(Map<String, NbtElement> map, Codeck<V> valueCodec) {
+        public NbtMapDeserializer(Map<String, NbtElement> map, Endec<V> valueEndec) {
             this.entries = map.entrySet().iterator();
             this.maxSize = map.size();
 
-            this.valueCodec = valueCodec;
+            this.valueEndec = valueEndec;
         }
 
         @Override
@@ -295,7 +295,7 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
             Map.Entry<String, V> newEntry;
 
             try {
-                newEntry = Map.entry(entry.getKey(), valueCodec.decode(NbtDeserializer.this));
+                newEntry = Map.entry(entry.getKey(), valueEndec.decode(NbtDeserializer.this));
             } finally {
                 NbtDeserializer.this.stack.pop();
             }
@@ -313,7 +313,7 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
         }
 
         @Override
-        public <F> F field(String field, Codeck<F> codeck, @Nullable F defaultValue) {
+        public <F> F field(String field, Endec<F> endec, @Nullable F defaultValue) {
             if(!map.containsKey(field)) return defaultValue;
 
             NbtDeserializer.this.stack.push(() -> map.get(field));
@@ -321,7 +321,7 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
             F value;
 
             try {
-                value = codeck.decode(NbtDeserializer.this);
+                value = endec.decode(NbtDeserializer.this);
             } finally {
                 NbtDeserializer.this.stack.pop();
             }

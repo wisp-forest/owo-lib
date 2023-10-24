@@ -9,7 +9,7 @@ public interface Deserializer<T> {
 
     Set<SerializationAttribute> attributes();
 
-    <V> Optional<V> readOptional(Codeck<V> codeck);
+    <V> Optional<V> readOptional(Endec<V> endec);
 
     boolean readBoolean();
 
@@ -33,9 +33,9 @@ public interface Deserializer<T> {
 
     long readVarLong();
 
-    <E> SequenceDeserializer<E> sequence(Codeck<E> elementCodec);
+    <E> SequenceDeserializer<E> sequence(Endec<E> elementEndec);
 
-    <V> MapDeserializer<V> map(Codeck<V> valueCodec);
+    <V> MapDeserializer<V> map(Endec<V> valueEndec);
 
     StructDeserializer struct();
 }

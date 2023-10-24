@@ -1,24 +1,23 @@
 package io.wispforest.owo.serialization.impl;
 
-import io.wispforest.owo.serialization.Codeck;
+import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.Deserializer;
 import io.wispforest.owo.serialization.Serializer;
 
 import java.util.*;
 import java.util.function.IntFunction;
-import java.util.function.Supplier;
 
-public class ListCodeck<V> implements Codeck<List<V>> {
+public class ListEndec<V> implements Endec<List<V>> {
 
     private IntFunction<List<V>> listConstructor = ArrayList::new;
 
-    private final Codeck<V> codeck;
+    private final Endec<V> endec;
 
-    public ListCodeck(Codeck<V> codeck){
-        this.codeck = codeck;
+    public ListEndec(Endec<V> endec){
+        this.endec = endec;
     }
 
-    public ListCodeck<V> listConstructor(IntFunction<List<V>> listConstructor){
+    public ListEndec<V> listConstructor(IntFunction<List<V>> listConstructor){
         this.listConstructor = listConstructor;
 
         return this;
@@ -26,14 +25,14 @@ public class ListCodeck<V> implements Codeck<List<V>> {
 
     @Override
     public <E> void encode(Serializer<E> serializer, List<V> value) {
-        try (var state = serializer.sequence(codeck, value.size())) {
+        try (var state = serializer.sequence(endec, value.size())) {
             value.forEach(state::element);
         }
     }
 
     @Override
     public <E> List<V> decode(Deserializer<E> deserializer) {
-        var sequenceDeserializer = deserializer.sequence(codeck);
+        var sequenceDeserializer = deserializer.sequence(endec);
 
         final List<V> list = listConstructor.apply(sequenceDeserializer.size());
 

@@ -1,6 +1,5 @@
 package io.wispforest.owo.serialization.impl.nbt;
 
-import com.google.gson.JsonNull;
 import io.wispforest.owo.serialization.*;
 import io.wispforest.owo.serialization.impl.SerializationAttribute;
 import net.minecraft.nbt.*;
@@ -56,8 +55,8 @@ public class NbtSerializer implements Serializer<NbtElement> {
     //--
 
     @Override
-    public <V> void writeOptional(Codeck<V> codeck, Optional<V> optional) {
-        optional.ifPresentOrElse(v -> codeck.encode(this, v), () -> consumeElement(NbtEnd.INSTANCE));
+    public <V> void writeOptional(Endec<V> endec, Optional<V> optional) {
+        optional.ifPresentOrElse(v -> endec.encode(this, v), () -> consumeElement(NbtEnd.INSTANCE));
     }
 
     @Override
@@ -129,13 +128,13 @@ public class NbtSerializer implements Serializer<NbtElement> {
     }
 
     @Override
-    public <E> SequenceSerializer<E> sequence(Codeck<E> elementCodec, int length) {
-        return new NbtSequenceSerializer<>(elementCodec);
+    public <E> SequenceSerializer<E> sequence(Endec<E> elementEndec, int length) {
+        return new NbtSequenceSerializer<>(elementEndec);
     }
 
     @Override
-    public <V> MapSerializer<V> map(Codeck<V> valueCodec, int length) {
-        return new NbtMapSerializer<V>().valueCodec(valueCodec);
+    public <V> MapSerializer<V> map(Endec<V> valueEndec, int length) {
+        return new NbtMapSerializer<V>().valueEndec(valueEndec);
     }
 
     @Override
@@ -158,27 +157,27 @@ public class NbtSerializer implements Serializer<NbtElement> {
 
         private final NbtCompound result = new NbtCompound();
 
-        private Codeck<V> valueCodec = null;
+        private Endec<V> valueEndec = null;
 
-        public NbtMapSerializer<V> valueCodec(Codeck<V> valueCodec) {
-            this.valueCodec = valueCodec;
+        public NbtMapSerializer<V> valueEndec(Endec<V> valueEndec) {
+            this.valueEndec = valueEndec;
 
             return this;
         }
 
         @Override
         public void entry(String key, V value) {
-            field(key, valueCodec, value);
+            field(key, valueEndec, value);
         }
 
         @Override
-        public <F> StructSerializer field(String name, Codeck<F> codec, F value) {
+        public <F> StructSerializer field(String name, Endec<F> endec, F value) {
             MutableObject<NbtElement> encodedHolder = new MutableObject<>(null);
 
             NbtSerializer.this.stack.push(encodedHolder::setValue);
 
             try {
-                codec.encode(NbtSerializer.this, value);
+                endec.encode(NbtSerializer.this, value);
             } finally {
                 NbtSerializer.this.stack.pop();
             }
@@ -199,10 +198,10 @@ public class NbtSerializer implements Serializer<NbtElement> {
 
         private final NbtList result = new NbtList();
 
-        private final Codeck<V> valueCodec;
+        private final Endec<V> valueEndec;
 
-        public NbtSequenceSerializer(Codeck<V> valueCodec) {
-            this.valueCodec = valueCodec;
+        public NbtSequenceSerializer(Endec<V> valueEndec) {
+            this.valueEndec = valueEndec;
         }
 
         @Override
@@ -212,7 +211,7 @@ public class NbtSerializer implements Serializer<NbtElement> {
             NbtSerializer.this.stack.push(encodedHolder::setValue);
 
             try {
-                valueCodec.encode(NbtSerializer.this, element);
+                valueEndec.encode(NbtSerializer.this, element);
             } finally {
                 NbtSerializer.this.stack.pop();
             }

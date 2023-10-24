@@ -5,7 +5,7 @@ import io.wispforest.owo.serialization.MapSerializer;
 import io.wispforest.owo.serialization.SequenceSerializer;
 import io.wispforest.owo.serialization.Serializer;
 import io.wispforest.owo.serialization.StructSerializer;
-import io.wispforest.owo.serialization.Codeck;
+import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.impl.SerializationAttribute;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.network.PacketByteBuf;
@@ -38,10 +38,10 @@ public class ByteBufSerializer<T extends ByteBuf> implements Serializer<T> {
     //--
 
     @Override
-    public <V> void writeOptional(Codeck<V> codeck, Optional<V> optional) {
+    public <V> void writeOptional(Endec<V> endec, Optional<V> optional) {
         buf.writeBoolean(optional.isPresent());
 
-        optional.ifPresent(v -> codeck.encode(this, v));
+        optional.ifPresent(v -> endec.encode(this, v));
     }
 
     @Override
@@ -101,15 +101,15 @@ public class ByteBufSerializer<T extends ByteBuf> implements Serializer<T> {
     }
 
     @Override
-    public <V> MapSerializer<V> map(Codeck<V> valueCodec, int length) {
-        return (MapSerializer<V>) sequence(valueCodec, length);
+    public <V> MapSerializer<V> map(Endec<V> valueEndec, int length) {
+        return (MapSerializer<V>) sequence(valueEndec, length);
     }
 
     @Override
-    public <E> SequenceSerializer<E> sequence(Codeck<E> elementCodec, int length) {
+    public <E> SequenceSerializer<E> sequence(Endec<E> elementEndec, int length) {
         writeVarInt(length);
 
-        return new ByteBufSequenceSerializer<>(elementCodec);
+        return new ByteBufSequenceSerializer<>(elementEndec);
     }
 
     @Override
@@ -124,26 +124,26 @@ public class ByteBufSerializer<T extends ByteBuf> implements Serializer<T> {
 
     public class ByteBufSequenceSerializer<V> implements SequenceSerializer<V>, StructSerializer, MapSerializer<V> {
 
-        private final Codeck<V> valueCodec;
+        private final Endec<V> valueEndec;
 
-        public ByteBufSequenceSerializer(Codeck<V> valueCodec) {
-            this.valueCodec = valueCodec;
+        public ByteBufSequenceSerializer(Endec<V> valueEndec) {
+            this.valueEndec = valueEndec;
         }
 
         @Override
         public void element(V element) {
-            field("", valueCodec, element);
+            field("", valueEndec, element);
         }
 
         @Override
         public void entry(String key, V value) {
             ByteBufSerializer.this.writeString(key);
-            field(key, valueCodec, value);
+            field(key, valueEndec, value);
         }
 
         @Override
-        public <F> StructSerializer field(String name, Codeck<F> codeck, F value) {
-            codeck.encode(ByteBufSerializer.this, value);
+        public <F> StructSerializer field(String name, Endec<F> endec, F value) {
+            endec.encode(ByteBufSerializer.this, value);
 
             return this;
         }

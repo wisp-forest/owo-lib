@@ -31,10 +31,10 @@ public class ByteBufDeserializer implements Deserializer<ByteBuf> {
     //--
 
     @Override
-    public <V> Optional<V> readOptional(Codeck<V> codeck) {
+    public <V> Optional<V> readOptional(Endec<V> endec) {
         var bl = buf.readBoolean();
 
-        return Optional.ofNullable(bl ? codeck.decode(this) : null);
+        return Optional.ofNullable(bl ? endec.decode(this) : null);
     }
 
     @Override
@@ -97,13 +97,13 @@ public class ByteBufDeserializer implements Deserializer<ByteBuf> {
     }
 
     @Override
-    public <E> SequenceDeserializer<E> sequence(Codeck<E> elementCodec) {
-        return new ByteBufSequenceDeserializer<E>().valueCodec(elementCodec, readVarInt());
+    public <E> SequenceDeserializer<E> sequence(Endec<E> elementEndec) {
+        return new ByteBufSequenceDeserializer<E>().valueEndec(elementEndec, readVarInt());
     }
 
     @Override
-    public <V> MapDeserializer<V> map(Codeck<V> valueCodec) {
-        return new ByteBufMapDeserializer<V>(valueCodec, readVarInt());
+    public <V> MapDeserializer<V> map(Endec<V> valueEndec) {
+        return new ByteBufMapDeserializer<V>(valueEndec, readVarInt());
     }
 
     @Override
@@ -114,12 +114,12 @@ public class ByteBufDeserializer implements Deserializer<ByteBuf> {
     public class ByteBufSequenceDeserializer<V> implements SequenceDeserializer<V>, StructDeserializer {
 
         private int maxSize;
-        private Codeck<V> valueCodec;
+        private Endec<V> valueEndec;
 
         private int index = 0;
 
-        public ByteBufSequenceDeserializer<V> valueCodec(Codeck<V> valueCodec, int maxSize) {
-            this.valueCodec = valueCodec;
+        public ByteBufSequenceDeserializer<V> valueEndec(Endec<V> valueEndec, int maxSize) {
+            this.valueEndec = valueEndec;
             this.maxSize = maxSize;
 
             return this;
@@ -139,24 +139,24 @@ public class ByteBufDeserializer implements Deserializer<ByteBuf> {
         public V next() {
             index++;
 
-            return field("", valueCodec);
+            return field("", valueEndec);
         }
 
         @Override
-        public <F> F field(@Nullable String field, Codeck<F> codecy, @Nullable F defaultValue) {
-            return codecy.decode(ByteBufDeserializer.this);
+        public <F> F field(@Nullable String field, Endec<F> endec, @Nullable F defaultValue) {
+            return endec.decode(ByteBufDeserializer.this);
         }
     }
 
     public class ByteBufMapDeserializer<V> implements MapDeserializer<V> {
 
         private final int maxSize;
-        private final Codeck<V> valueCodec;
+        private final Endec<V> valueEndec;
 
         private int index = 0;
 
-        public ByteBufMapDeserializer(Codeck<V> valueCodec, int maxSize) {
-            this.valueCodec = valueCodec;
+        public ByteBufMapDeserializer(Endec<V> valueEndec, int maxSize) {
+            this.valueEndec = valueEndec;
             this.maxSize = maxSize;
         }
 
@@ -176,7 +176,7 @@ public class ByteBufDeserializer implements Deserializer<ByteBuf> {
 
             return Map.entry(
                     ByteBufDeserializer.this.readString(),
-                    valueCodec.decode(ByteBufDeserializer.this)
+                    valueEndec.decode(ByteBufDeserializer.this)
             );
         }
     }

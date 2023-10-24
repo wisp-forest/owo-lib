@@ -49,8 +49,8 @@ public class JsonSerializer implements Serializer<JsonElement> {
     //--
 
     @Override
-    public <V> void writeOptional(Codeck<V> codeck, Optional<V> optional) {
-        optional.ifPresentOrElse(v -> codeck.encode(this, v), () -> consumeElement(JsonNull.INSTANCE));
+    public <V> void writeOptional(Endec<V> endec, Optional<V> optional) {
+        optional.ifPresentOrElse(v -> endec.encode(this, v), () -> consumeElement(JsonNull.INSTANCE));
     }
 
     @Override
@@ -114,13 +114,13 @@ public class JsonSerializer implements Serializer<JsonElement> {
     }
 
     @Override
-    public <E> SequenceSerializer<E> sequence(Codeck<E> elementCodec, int length) {
-        return new JsonSequenceSerializer<>(elementCodec);
+    public <E> SequenceSerializer<E> sequence(Endec<E> elementEndec, int length) {
+        return new JsonSequenceSerializer<>(elementEndec);
     }
 
     @Override
-    public <V> MapSerializer<V> map(Codeck<V> valueCodec, int length) {
-        return new JsonMapSerializer<V>().valueCodec(valueCodec);
+    public <V> MapSerializer<V> map(Endec<V> valueEndec, int length) {
+        return new JsonMapSerializer<V>().valueEndec(valueEndec);
     }
 
     @Override
@@ -143,27 +143,27 @@ public class JsonSerializer implements Serializer<JsonElement> {
 
         private final JsonObject result = new JsonObject();
 
-        private Codeck<V> valueCodec = null;
+        private Endec<V> valueEndec = null;
 
-        public JsonMapSerializer<V> valueCodec(Codeck<V> valueCodec) {
-            this.valueCodec = valueCodec;
+        public JsonMapSerializer<V> valueEndec(Endec<V> valueEndec) {
+            this.valueEndec = valueEndec;
 
             return this;
         }
 
         @Override
         public void entry(String key, V value) {
-            field(key, valueCodec, value);
+            field(key, valueEndec, value);
         }
 
         @Override
-        public <F> StructSerializer field(String name, Codeck<F> codec, F value) {
+        public <F> StructSerializer field(String name, Endec<F> endec, F value) {
             MutableObject<JsonElement> encodedHolder = new MutableObject<>(null);
 
             JsonSerializer.this.stack.push(encodedHolder::setValue);
 
             try {
-                codec.encode(JsonSerializer.this, value);
+                endec.encode(JsonSerializer.this, value);
             } finally {
                 JsonSerializer.this.stack.pop();
             }
@@ -182,12 +182,12 @@ public class JsonSerializer implements Serializer<JsonElement> {
 
     public class JsonSequenceSerializer<V> implements SequenceSerializer<V> {
 
-        private final Codeck<V> valueCodec;
+        private final Endec<V> valueEndec;
 
         private final JsonArray result = new JsonArray();
 
-        public JsonSequenceSerializer(Codeck<V> valueCodec) {
-            this.valueCodec = valueCodec;
+        public JsonSequenceSerializer(Endec<V> valueEndec) {
+            this.valueEndec = valueEndec;
         }
 
         @Override
@@ -197,7 +197,7 @@ public class JsonSerializer implements Serializer<JsonElement> {
             JsonSerializer.this.stack.push(encodedHolder::setValue);
 
             try {
-                valueCodec.encode(JsonSerializer.this, element);
+                valueEndec.encode(JsonSerializer.this, element);
             } finally {
                 JsonSerializer.this.stack.pop();
             }

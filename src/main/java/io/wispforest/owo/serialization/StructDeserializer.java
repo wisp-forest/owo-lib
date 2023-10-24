@@ -7,12 +7,12 @@ public interface StructDeserializer {
     /**
      * Method that used to get the value of a field based on order of serialization
      *
-     * @param codeck The codeck for the given field
+     * @param endec The endec for the given field
      * @return the field value
      * @param <F>
      */
-    default <F> F field(String name, Codeck<F> codeck){
-        var value = field(name, codeck, null);
+    default <F> F field(String name, Endec<F> endec){
+        var value = field(name, endec, null);
 
         if(value == null) throw new StructDeserializerException("Unable to deserialize a required field! [Name: " + name + "]");
 
@@ -24,11 +24,11 @@ public interface StructDeserializer {
      * or other method employed by a given Formats {@link Deserializer}
      *
      * @param name Name of the given Field
-     * @param codeck The codeck for the given field
+     * @param endec The endec for the given field
      * @return an optional of the given value if present
      * @param <F>
      */
-    <F> F field(String name, Codeck<F> codeck, @Nullable F defaultValue);
+    <F> F field(String name, Endec<F> endec, @Nullable F defaultValue);
 
     class StructDeserializerException extends RuntimeException {
         public StructDeserializerException(String message){

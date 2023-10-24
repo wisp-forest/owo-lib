@@ -5,7 +5,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
-import io.wispforest.owo.serialization.Codeck;
+import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.Deserializer;
 import io.wispforest.owo.serialization.Serializer;
 import io.wispforest.owo.serialization.impl.json.JsonDeserializer;
@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class CooptCodeck<T> implements Codeck<T>, Codec<T> {
+public class CooptEndec<T> implements Endec<T>, Codec<T> {
 
     public static Map<DynamicOps<?>, Pair<Supplier<Serializer<Object>>, Function<Object, Deserializer<Object>>>> MAP = new HashMap<>();
 
@@ -30,10 +30,10 @@ public class CooptCodeck<T> implements Codeck<T>, Codec<T> {
         register(NbtOps.INSTANCE, NbtSerializer::of, NbtDeserializer::of);
     }
 
-    private final Codeck<T> codeck;
+    private final Endec<T> endec;
 
-    public CooptCodeck(Codeck<T> codeck){
-        this.codeck = codeck;
+    public CooptEndec(Endec<T> endec){
+        this.endec = endec;
     }
 
     private static <V> void register(DynamicOps<?> ops, Supplier<Serializer<V>> supplier, Function<V, Deserializer<V>> function){
@@ -99,11 +99,11 @@ public class CooptCodeck<T> implements Codeck<T>, Codec<T> {
 
     @Override
     public <E> void encode(Serializer<E> serializer, T value) {
-        codeck.encode(serializer, value);
+        endec.encode(serializer, value);
     }
 
     @Override
     public <E> T decode(Deserializer<E> deserializer) {
-        return codeck.decode(deserializer);
+        return endec.decode(deserializer);
     }
 }

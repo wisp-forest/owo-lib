@@ -1,10 +1,10 @@
 package io.wispforest.uwu.network;
 
 import io.wispforest.owo.network.serialization.RecordSerializer;
-import io.wispforest.owo.serialization.Codeck;
-import io.wispforest.owo.serialization.impl.RecordCodeck;
-import io.wispforest.owo.serialization.impl.ReflectionCodeckBuilder;
-import io.wispforest.owo.serialization.impl.StructCodeckBuilder;
+import io.wispforest.owo.serialization.Endec;
+import io.wispforest.owo.serialization.impl.RecordEndec;
+import io.wispforest.owo.serialization.impl.ReflectionEndecBuilder;
+import io.wispforest.owo.serialization.impl.StructEndecBuilder;
 import io.wispforest.owo.serialization.impl.StructField;
 import io.wispforest.owo.serialization.impl.bytebuf.ByteBufDeserializer;
 import io.wispforest.owo.serialization.impl.bytebuf.ByteBufSerializer;
@@ -35,27 +35,27 @@ public class UwuNetworkTest {
 
         System.out.println();
 
-        var codeck = RecordCodeck.create(TestRecord.class);
-        var sameCodeck = RecordCodeck.create(TestRecord.class);
+        var endec = RecordEndec.create(TestRecord.class);
+        var sameendec = RecordEndec.create(TestRecord.class);
 
-        testEquals(codeck, sameCodeck);
+        testEquals(endec, sameendec);
 
         testSerialization(test, testRecord -> {
-            return codeck.decode(ByteBufDeserializer::new, codeck.encode(ByteBufSerializer::packet, testRecord));
+            return endec.decode(ByteBufDeserializer::new, endec.encode(ByteBufSerializer::packet, testRecord));
         });
 
         //--
 
         System.out.println();
 
-        var builtCodeck = StructCodeckBuilder.of(
-                StructField.of("text", Codeck.STRING.list().then(s -> s, s -> (List<String>) s), TestRecord::text),
-                StructField.of("enumValue", ReflectionCodeckBuilder.createEnumSerializer(TestEnum.class), TestRecord::enumValue),
+        var builtendec = StructEndecBuilder.of(
+                StructField.of("text", Endec.STRING.list().then(s -> s, s -> (List<String>) s), TestRecord::text),
+                StructField.of("enumValue", ReflectionEndecBuilder.createEnumSerializer(TestEnum.class), TestRecord::enumValue),
                 TestRecord::new
         );
 
         testSerialization(test, testRecord -> {
-            return builtCodeck.decode(ByteBufDeserializer::new, builtCodeck.encode(ByteBufSerializer::packet, testRecord));
+            return builtendec.decode(ByteBufDeserializer::new, builtendec.encode(ByteBufSerializer::packet, testRecord));
         });
     }
 

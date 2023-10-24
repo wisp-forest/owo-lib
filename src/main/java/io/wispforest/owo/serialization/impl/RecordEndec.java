@@ -13,15 +13,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-public class RecordCodeck<R extends Record> implements StructCodeck<R> {
-    private static final Map<Class<?>, RecordCodeck<?>> SERIALIZERS = new HashMap<>();
+public class RecordEndec<R extends Record> implements StructEndec<R> {
+    private static final Map<Class<?>, RecordEndec<?>> SERIALIZERS = new HashMap<>();
 
-    private final Map<String, RecordCodeck.RecordEntryHandler<R>> adapters;
+    private final Map<String, RecordEntryHandler<R>> adapters;
     private final Class<R> recordClass;
     private final Constructor<R> instanceCreator;
     private final int fieldCount;
 
-    private RecordCodeck(Class<R> recordClass, Constructor<R> instanceCreator, ImmutableMap<String, RecordCodeck.RecordEntryHandler<R>> adapters) {
+    private RecordEndec(Class<R> recordClass, Constructor<R> instanceCreator, ImmutableMap<String, RecordEntryHandler<R>> adapters) {
         this.recordClass = recordClass;
         this.instanceCreator = instanceCreator;
         this.adapters = adapters;
@@ -34,12 +34,12 @@ public class RecordCodeck<R extends Record> implements StructCodeck<R> {
      *
      * @param recordClass The type of record to (de-)serialize
      * @param <R>         The type of record to (de-)serialize
-     * @return The serializer for the given record type
+     * @return The endec serializer for the given record type
      */
-    public static <R extends Record> RecordCodeck<R> create(Class<R> recordClass) {
-        if (SERIALIZERS.containsKey(recordClass)) return (RecordCodeck<R>) SERIALIZERS.get(recordClass);
+    public static <R extends Record> RecordEndec<R> create(Class<R> recordClass) {
+        if (SERIALIZERS.containsKey(recordClass)) return (RecordEndec<R>) SERIALIZERS.get(recordClass);
 
-        final ImmutableMap.Builder<String, RecordCodeck.RecordEntryHandler<R>> handlerBuilder = new ImmutableMap.Builder<>();
+        final ImmutableMap.Builder<String, RecordEndec.RecordEntryHandler<R>> handlerBuilder = new ImmutableMap.Builder<>();
 
         final Class<?>[] canonicalConstructorArgs = new Class<?>[recordClass.getRecordComponents().length];
 
@@ -50,9 +50,9 @@ public class RecordCodeck<R extends Record> implements StructCodeck<R> {
                 var handle = lookup.unreflect(component.getAccessor());
 
                 handlerBuilder.put(component.getName(),
-                        new RecordCodeck.RecordEntryHandler<>(
+                        new RecordEndec.RecordEntryHandler<>(
                                 r -> getRecordEntry(r, handle),
-                                ReflectionCodeckBuilder.getGeneric(component.getGenericType())
+                                ReflectionEndecBuilder.getGeneric(component.getGenericType())
                         )
                 );
 
@@ -63,7 +63,7 @@ public class RecordCodeck<R extends Record> implements StructCodeck<R> {
         }
 
         try {
-            final var serializer = new RecordCodeck<>(recordClass, recordClass.getConstructor(canonicalConstructorArgs), handlerBuilder.build());
+            final var serializer = new RecordEndec<>(recordClass, recordClass.getConstructor(canonicalConstructorArgs), handlerBuilder.build());
             SERIALIZERS.put(recordClass, serializer);
             return serializer;
         } catch (NoSuchMethodException e) {
@@ -119,5 +119,5 @@ public class RecordCodeck<R extends Record> implements StructCodeck<R> {
         adapters.forEach((s, fHandler) -> struct.field(s, fHandler.kodeck, fHandler.rFunction.apply(instance)));
     }
 
-    private record RecordEntryHandler<R>(Function<R, ?> rFunction, Codeck kodeck) { }
+    private record RecordEntryHandler<R>(Function<R, ?> rFunction, Endec kodeck) { }
 }

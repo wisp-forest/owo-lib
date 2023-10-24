@@ -9,7 +9,7 @@ public interface Serializer<T> {
 
     Set<SerializationAttribute> attributes();
 
-    <V> void writeOptional(Codeck<V> codeck, final Optional<V> optional);
+    <V> void writeOptional(Endec<V> endec, final Optional<V> optional);
 
     void writeBoolean(final boolean value);
 
@@ -33,9 +33,9 @@ public interface Serializer<T> {
 
     void writeVarLong(final long value);
 
-    <E> SequenceSerializer<E> sequence(Codeck<E> elementCodec, int length);
+    <E> SequenceSerializer<E> sequence(Endec<E> elementEndec, int length);
 
-    <V> MapSerializer<V> map(Codeck<V> valueCodec, int length);
+    <V> MapSerializer<V> map(Endec<V> valueEndec, int length);
 
     StructSerializer struct();
 

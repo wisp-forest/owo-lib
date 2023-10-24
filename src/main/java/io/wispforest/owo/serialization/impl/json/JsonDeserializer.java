@@ -110,12 +110,12 @@ public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> 
     //--
 
     @Override
-    public <V> Optional<V> readOptional(Codeck<V> codeck) {
+    public <V> Optional<V> readOptional(Endec<V> endec) {
         var element = topElement();
 
         if (element.isJsonNull()) return Optional.empty();
 
-        return Optional.of(codeck.decode(this));
+        return Optional.of(endec.decode(this));
     }
 
     @Override
@@ -181,13 +181,13 @@ public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> 
     }
 
     @Override
-    public <E> SequenceDeserializer<E> sequence(Codeck<E> elementCodec) {
-        return new JsonSequenceDeserializer<>(((JsonArray) topElement()).asList(), elementCodec);
+    public <E> SequenceDeserializer<E> sequence(Endec<E> elementEndec) {
+        return new JsonSequenceDeserializer<>(((JsonArray) topElement()).asList(), elementEndec);
     }
 
     @Override
-    public <V> MapDeserializer<V> map(Codeck<V> valueCodec) {
-        return new JsonMapDeserializer<>(((JsonObject) topElement()).asMap(), valueCodec);
+    public <V> MapDeserializer<V> map(Endec<V> valueEndec) {
+        return new JsonMapDeserializer<>(((JsonObject) topElement()).asMap(), valueEndec);
     }
 
     @Override
@@ -200,13 +200,13 @@ public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> 
         private final Iterator<JsonElement> entries;
         private final int maxSize;
 
-        private final Codeck<V> valueCodec;
+        private final Endec<V> valueEndec;
 
-        public JsonSequenceDeserializer(List<JsonElement> entries, Codeck<V> valueCodec) {
+        public JsonSequenceDeserializer(List<JsonElement> entries, Endec<V> valueEndec) {
             this.entries = entries.iterator();
             this.maxSize = entries.size();
 
-            this.valueCodec = valueCodec;
+            this.valueEndec = valueEndec;
         }
 
         @Override
@@ -226,7 +226,7 @@ public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> 
             V entry;
 
             try {
-                entry = valueCodec.decode(JsonDeserializer.this);
+                entry = valueEndec.decode(JsonDeserializer.this);
             } finally {
                 JsonDeserializer.this.stack.pop();
             }
@@ -240,13 +240,13 @@ public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> 
         private final Iterator<Map.Entry<String, JsonElement>> entries;
         private final int maxSize;
 
-        private final Codeck<V> valueCodec;
+        private final Endec<V> valueEndec;
 
-        public JsonMapDeserializer(Map<String, JsonElement> map, Codeck<V> valueCodec) {
+        public JsonMapDeserializer(Map<String, JsonElement> map, Endec<V> valueEndec) {
             this.entries = map.entrySet().iterator();
             this.maxSize = map.size();
 
-            this.valueCodec = valueCodec;
+            this.valueEndec = valueEndec;
         }
 
         @Override
@@ -268,7 +268,7 @@ public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> 
             Map.Entry<String, V> value;
 
             try {
-                value = Map.entry(entry.getKey(), valueCodec.decode(JsonDeserializer.this));
+                value = Map.entry(entry.getKey(), valueEndec.decode(JsonDeserializer.this));
             } finally {
                 JsonDeserializer.this.stack.pop();
             }
@@ -286,7 +286,7 @@ public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> 
         }
 
         @Override
-        public <F> F field(String field, Codeck<F> codeck, @Nullable F defaultValue) {
+        public <F> F field(String field, Endec<F> endec, @Nullable F defaultValue) {
             if (!map.containsKey(field)) return defaultValue;
 
             JsonDeserializer.this.stack.push(() -> map.get(field));
@@ -294,7 +294,7 @@ public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> 
             F value;
 
             try {
-                value = codeck.decode(JsonDeserializer.this);
+                value = endec.decode(JsonDeserializer.this);
             } finally {
                 JsonDeserializer.this.stack.pop();
             }

@@ -33,10 +33,10 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class ReflectionCodeckBuilder {
+public class ReflectionEndecBuilder {
 
     private static final Map<Class<?>, Supplier<?>> COLLECTION_PROVIDERS = new HashMap<>();
-    private static final Map<Class<?>, Codeck<?>> SERIALIZERS = new HashMap<>();
+    private static final Map<Class<?>, Endec<?>> SERIALIZERS = new HashMap<>();
 
     /**
      * Enables (de-)serialization for the given class
@@ -45,7 +45,7 @@ public class ReflectionCodeckBuilder {
      * @param serializer The serializer
      * @param <T>        The type of object to register a serializer for
      */
-    public static <T> void register(Class<T> clazz, Codeck<T> serializer) {
+    public static <T> void register(Class<T> clazz, Endec<T> serializer) {
         if (SERIALIZERS.containsKey(clazz)) throw new IllegalStateException("Class '" + clazz.getName() + "' already has a serializer");
         SERIALIZERS.put(clazz, serializer);
     }
@@ -59,17 +59,17 @@ public class ReflectionCodeckBuilder {
      * @param <T>          The type of object to register a serializer for
      */
     public static <T> void register(Class<T> clazz, BiConsumer<Serializer, T> serializer, Function<Deserializer, T> deserializer) {
-        register(clazz, Codeck.of(serializer, deserializer));
+        register(clazz, Endec.of(serializer, deserializer));
     }
 
     @SafeVarargs
-    private static <T> void register(Codeck<T> kodeck, Class<T>... classes) {
+    private static <T> void register(Endec<T> kodeck, Class<T>... classes) {
         for (var clazz : classes) register(clazz, kodeck);
     }
 
     @SafeVarargs
     private static <T> void register(BiConsumer<Serializer, T> serializer, Function<Deserializer, T> deserializer, Class<T>... classes) {
-        final var kodeck = Codeck.of(serializer, deserializer);
+        final var kodeck = Endec.of(serializer, deserializer);
 
         for (var clazz : classes) register(clazz, kodeck);
     }
@@ -82,7 +82,7 @@ public class ReflectionCodeckBuilder {
      * @return The respective serializer instance
      */
     @SuppressWarnings("unchecked")
-    public static Codeck<?> getGeneric(Type type) {
+    public static Endec<?> getGeneric(Type type) {
         if (type instanceof Class<?> klass) return get(klass);
 
         var pType = (ParameterizedType) type;
@@ -90,15 +90,15 @@ public class ReflectionCodeckBuilder {
         var typeArgs = pType.getActualTypeArguments();
 
         if (Map.class.isAssignableFrom(raw)) {
-            return ReflectionCodeckBuilder.createMapSerializer(conform(raw, Map.class), (Class<?>) typeArgs[0], (Class<?>) typeArgs[1]);
+            return ReflectionEndecBuilder.createMapSerializer(conform(raw, Map.class), (Class<?>) typeArgs[0], (Class<?>) typeArgs[1]);
         }
 
         if (Collection.class.isAssignableFrom(raw)) {
-            return ReflectionCodeckBuilder.createCollectionSerializer(conform(raw, Collection.class), (Class<?>) typeArgs[0]);
+            return ReflectionEndecBuilder.createCollectionSerializer(conform(raw, Collection.class), (Class<?>) typeArgs[0]);
         }
 
         if (Optional.class.isAssignableFrom(raw)) {
-            return ReflectionCodeckBuilder.createOptionalSerializer((Class<?>) typeArgs[0]);
+            return ReflectionEndecBuilder.createOptionalSerializer((Class<?>) typeArgs[0]);
         }
 
         return get(raw);
@@ -111,8 +111,8 @@ public class ReflectionCodeckBuilder {
      * @param clazz The class to obtain a serializer for
      * @return The respective serializer instance
      */
-    public static <T> Codeck<T> get(Class<T> clazz) {
-        Codeck<T> serializer = getOrNull(clazz);
+    public static <T> Endec<T> get(Class<T> clazz) {
+        Endec<T> serializer = getOrNull(clazz);
 
         if (serializer == null) {
             throw new IllegalStateException("No serializer available for class '" + clazz.getName() + "'");
@@ -127,23 +127,23 @@ public class ReflectionCodeckBuilder {
      * @param clazz The class to obtain a serializer for
      * @return An empty optional if no serializer is registered
      */
-    public static <T> Optional<Codeck<T>> maybeGet(Class<T> clazz) {
+    public static <T> Optional<Endec<T>> maybeGet(Class<T> clazz) {
         return Optional.ofNullable(getOrNull(clazz));
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> @Nullable Codeck<T> getOrNull(Class<T> clazz) {
-        Codeck<T> serializer = (Codeck<T>) SERIALIZERS.get(clazz);
+    private static <T> @Nullable Endec<T> getOrNull(Class<T> clazz) {
+        Endec<T> serializer = (Endec<T>) SERIALIZERS.get(clazz);
 
         if (serializer == null) {
             if (Record.class.isAssignableFrom(clazz))
-                serializer = (Codeck<T>) ReflectionCodeckBuilder.createRecordSerializer(conform(clazz, Record.class));
+                serializer = (Endec<T>) ReflectionEndecBuilder.createRecordSerializer(conform(clazz, Record.class));
             else if (clazz.isEnum())
-                serializer = (Codeck<T>) ReflectionCodeckBuilder.createEnumSerializer(conform(clazz, Enum.class));
+                serializer = (Endec<T>) ReflectionEndecBuilder.createEnumSerializer(conform(clazz, Enum.class));
             else if (clazz.isArray())
-                serializer = (Codeck<T>) ReflectionCodeckBuilder.createArraySerializer(clazz.getComponentType());
+                serializer = (Endec<T>) ReflectionEndecBuilder.createArraySerializer(clazz.getComponentType());
             else if (clazz.isAnnotationPresent(SealedPolymorphic.class))
-                serializer = (Codeck<T>) ReflectionCodeckBuilder.createSealedSerializer(clazz);
+                serializer = (Endec<T>) ReflectionEndecBuilder.createSealedSerializer(clazz);
             else
                 return null;
 
@@ -192,15 +192,15 @@ public class ReflectionCodeckBuilder {
      * @param valueClass The type of the map's values
      * @return The created serializer
      */
-    public static <K, V, T extends Map<K, V>> Codeck<T> createMapSerializer(Class<T> clazz, Class<K> keyClass, Class<V> valueClass) {
+    public static <K, V, T extends Map<K, V>> Endec<T> createMapSerializer(Class<T> clazz, Class<K> keyClass, Class<V> valueClass) {
         createCollection(clazz);
 
-        var keyCodeck = get(keyClass);
-        var valueCodeck = get(valueClass);
+        var keyendec = get(keyClass);
+        var valueendec = get(valueClass);
 
-        return keyCodeck == Codeck.STRING
-                ? (Codeck<T>) valueCodeck.map()
-                : (Codeck<T>) Codeck.mapOf(keyCodeck, valueCodeck);
+        return keyendec == Endec.STRING
+                ? (Endec<T>) valueendec.map()
+                : (Endec<T>) Endec.mapOf(keyendec, valueendec);
     }
 
     /**
@@ -211,12 +211,12 @@ public class ReflectionCodeckBuilder {
      * @param elementClass The type of the collections elements
      * @return The created serializer
      */
-    public static <E, T extends Collection<E>> Codeck<T> createCollectionSerializer(Class<T> clazz, Class<E> elementClass) {
+    public static <E, T extends Collection<E>> Endec<T> createCollectionSerializer(Class<T> clazz, Class<E> elementClass) {
         createCollection(clazz);
 
-        var elementCodeck = get(elementClass);
+        var elementEndec = get(elementClass);
 
-        return elementCodeck.list()
+        return elementEndec.list()
                 .then(es -> {
                     T collection = createCollection(clazz);
 
@@ -233,10 +233,10 @@ public class ReflectionCodeckBuilder {
      * @param elementClass The type of the collections elements
      * @return The created serializer
      */
-    public static <E> Codeck<Optional<E>> createOptionalSerializer(Class<E> elementClass) {
-        var elementCodeck = get(elementClass);
+    public static <E> Endec<Optional<E>> createOptionalSerializer(Class<E> elementClass) {
+        var elementEndec = get(elementClass);
 
-        return elementCodeck.ofOptional();
+        return elementEndec.ofOptional();
     }
 
     /**
@@ -247,8 +247,8 @@ public class ReflectionCodeckBuilder {
      * @return The created serializer
      */
     @SuppressWarnings("unchecked")
-    public static Codeck<?> createArraySerializer(Class<?> elementClass) {
-        var elementSerializer = (Codeck<Object>) get(elementClass);
+    public static Endec<?> createArraySerializer(Class<?> elementClass) {
+        var elementSerializer = (Endec<Object>) get(elementClass);
 
         return elementSerializer.list().then(list -> {
             final int length = list.size();
@@ -274,8 +274,8 @@ public class ReflectionCodeckBuilder {
      * @param clazz The class to create a serializer for
      * @return The created serializer
      */
-    public static <R extends Record> Codeck<R> createRecordSerializer(Class<R> clazz) {
-        return RecordCodeck.create(clazz);
+    public static <R extends Record> Endec<R> createRecordSerializer(Class<R> clazz) {
+        return RecordEndec.create(clazz);
     }
 
     /**
@@ -285,17 +285,17 @@ public class ReflectionCodeckBuilder {
      * @param enumClass The type of enum to create a serializer for
      * @return The created serializer
      */
-    public static <E extends Enum<E>> Codeck<E> createEnumSerializer(Class<E> enumClass) {
-        return Codeck.VAR_INT.then(i -> enumClass.getEnumConstants()[i], Enum::ordinal);
+    public static <E extends Enum<E>> Endec<E> createEnumSerializer(Class<E> enumClass) {
+        return Endec.VAR_INT.then(i -> enumClass.getEnumConstants()[i], Enum::ordinal);
     }
 
     @SuppressWarnings("unchecked")
-    public static <T, K> Codeck<T> createDispatchedSerializer(Function<K, Codeck<? extends T>> keyToCodeck, Function<T, K> keyGetter, Codeck<K> keyCodeck) {
-        return Codeck.dispatchedOf(keyToCodeck, keyGetter, keyCodeck);
+    public static <T, K> Endec<T> createDispatchedSerializer(Function<K, Endec<? extends T>> keyToEndec, Function<T, K> keyGetter, Endec<K> keyEndec) {
+        return Endec.dispatchedOf(keyToEndec, keyGetter, keyEndec);
     }
 
     @SuppressWarnings("unchecked")
-    private static Codeck<?> createSealedSerializer(Class<?> commonClass) {
+    private static Endec<?> createSealedSerializer(Class<?> commonClass) {
         if (!commonClass.isSealed())
             throw new IllegalStateException("@SealedPolymorphic class should be sealed!");
 
@@ -319,7 +319,7 @@ public class ReflectionCodeckBuilder {
 
         sortedPermittedSubclasses.sort(Comparator.comparing(Class::getName));
 
-        Int2ObjectMap<Codeck<?>> serializerMap = new Int2ObjectOpenHashMap<>();
+        Int2ObjectMap<Endec<?>> serializerMap = new Int2ObjectOpenHashMap<>();
         Reference2IntMap<Class<?>> classesMap = new Reference2IntOpenHashMap<>();
 
         classesMap.defaultReturnValue(-1);
@@ -327,11 +327,11 @@ public class ReflectionCodeckBuilder {
         for (int i = 0; i < sortedPermittedSubclasses.size(); i++) {
             Class<?> klass = sortedPermittedSubclasses.get(i);
 
-            serializerMap.put(i, ReflectionCodeckBuilder.get(klass));
+            serializerMap.put(i, ReflectionEndecBuilder.get(klass));
             classesMap.put(klass, i);
         }
 
-        return Codeck.dispatchedOf(serializerMap::get, v -> classesMap.getInt(v.getClass()), Codeck.INT);
+        return Endec.dispatchedOf(serializerMap::get, v -> classesMap.getInt(v.getClass()), Endec.INT);
     }
 
     @SuppressWarnings("unchecked")
@@ -345,75 +345,75 @@ public class ReflectionCodeckBuilder {
         // Primitives
         // ----------
 
-        register(Codeck.BOOLEAN, Boolean.class, boolean.class);
-        register(Codeck.INT, Integer.class, int.class);
-        register(Codeck.LONG, Long.class, long.class);
-        register(Codeck.FLOAT, Float.class, float.class);
-        register(Codeck.DOUBLE, Double.class, double.class);
+        register(Endec.BOOLEAN, Boolean.class, boolean.class);
+        register(Endec.INT, Integer.class, int.class);
+        register(Endec.LONG, Long.class, long.class);
+        register(Endec.FLOAT, Float.class, float.class);
+        register(Endec.DOUBLE, Double.class, double.class);
 
-        register(Codeck.BYTE, Byte.class, byte.class);
-        register(Codeck.SHORT, Short.class, short.class);
-        register(Codeck.SHORT.then(aShort -> (char) aShort.shortValue(), character -> (short) character.charValue()), Character.class, char.class);
+        register(Endec.BYTE, Byte.class, byte.class);
+        register(Endec.SHORT, Short.class, short.class);
+        register(Endec.SHORT.then(aShort -> (char) aShort.shortValue(), character -> (short) character.charValue()), Character.class, char.class);
 
-        register(Void.class, Codeck.EMPTY);
+        register(Void.class, Endec.EMPTY);
 
         // ----
         // Misc
         // ----
 
-        register(String.class, Codeck.STRING);
-        register(UUID.class, Codeck.UUID);
-        register(Date.class, Codeck.DATE);
-        register(PacketByteBuf.class, Codeck.PACKET_BYTE_BUF);
+        register(String.class, Endec.STRING);
+        register(UUID.class, Endec.UUID);
+        register(Date.class, Endec.DATE);
+        register(PacketByteBuf.class, Endec.PACKET_BYTE_BUF);
 
         // --------
         // MC Types
         // --------
 
-        register(BlockPos.class, Codeck.BLOCK_POS);
-        register(ChunkPos.class, Codeck.CHUNK_POS);
-        register(ItemStack.class, Codeck.ITEM_STACK);
-        register(Identifier.class, Codeck.IDENTIFIER);
-        register(NbtCompound.class, Codeck.COMPOUND);
+        register(BlockPos.class, Endec.BLOCK_POS);
+        register(ChunkPos.class, Endec.CHUNK_POS);
+        register(ItemStack.class, Endec.ITEM_STACK);
+        register(Identifier.class, Endec.IDENTIFIER);
+        register(NbtCompound.class, Endec.COMPOUND);
         register(
                 BlockHitResult.class,
-                new StructCodeck<>(){
-                    final Codeck<Direction> DIRECTION = createEnumSerializer(Direction.class);
+                new StructEndec<>(){
+                    final Endec<Direction> DIRECTION = createEnumSerializer(Direction.class);
 
                     @Override
                     public void encode(StructSerializer serializer, BlockHitResult hitResult) {
                         BlockPos blockPos = hitResult.getBlockPos();
-                        serializer.field("blockPos", Codeck.BLOCK_POS, blockPos)
+                        serializer.field("blockPos", Endec.BLOCK_POS, blockPos)
                                 .field("side", DIRECTION, hitResult.getSide());
 
                         Vec3d vec3d = hitResult.getPos();
-                        serializer.field("x", Codeck.FLOAT, (float)(vec3d.x - (double)blockPos.getX()))
-                                .field("y", Codeck.FLOAT, (float)(vec3d.x - (double)blockPos.getX()))
-                                .field("z", Codeck.FLOAT, (float)(vec3d.x - (double)blockPos.getX()))
-                                .field("inside", Codeck.BOOLEAN, hitResult.isInsideBlock());
+                        serializer.field("x", Endec.FLOAT, (float)(vec3d.x - (double)blockPos.getX()))
+                                .field("y", Endec.FLOAT, (float)(vec3d.x - (double)blockPos.getX()))
+                                .field("z", Endec.FLOAT, (float)(vec3d.x - (double)blockPos.getX()))
+                                .field("inside", Endec.BOOLEAN, hitResult.isInsideBlock());
                     }
 
                     @Override
                     public BlockHitResult decode(StructDeserializer deserializer) {
-                        BlockPos blockPos = deserializer.field("blockPos", Codeck.BLOCK_POS);
+                        BlockPos blockPos = deserializer.field("blockPos", Endec.BLOCK_POS);
                         Direction direction = deserializer.field("side", DIRECTION);
 
-                        float f = deserializer.field("x", Codeck.FLOAT);
-                        float g = deserializer.field("y", Codeck.FLOAT);
-                        float h = deserializer.field("z", Codeck.FLOAT);
+                        float f = deserializer.field("x", Endec.FLOAT);
+                        float g = deserializer.field("y", Endec.FLOAT);
+                        float h = deserializer.field("z", Endec.FLOAT);
 
-                        boolean bl = deserializer.field("inside", Codeck.BOOLEAN);
+                        boolean bl = deserializer.field("inside", Endec.BOOLEAN);
                         return new BlockHitResult(
                                 new Vec3d((double)blockPos.getX() + (double)f, (double)blockPos.getY() + (double)g, (double)blockPos.getZ() + (double)h), direction, blockPos, bl
                         );
                     }
                 }
         );
-        register(BitSet.class, Codeck.BITSET);
-        register(Text.class, Codeck.TEXT);
+        register(BitSet.class, Endec.BITSET);
+        register(Text.class, Endec.TEXT);
 
         register(ParticleEffect.class,
-                Codeck.PACKET_BYTE_BUF.then(
+                Endec.PACKET_BYTE_BUF.then(
                         byteBuf -> {
                             //noinspection rawtypes
                             final ParticleType particleType = Registries.PARTICLE_TYPE.get(byteBuf.readInt());
@@ -431,13 +431,13 @@ public class ReflectionCodeckBuilder {
                 )
         );
 
-        register(Vec3d.class, Codeck.DOUBLE.list()
+        register(Vec3d.class, Endec.DOUBLE.list()
                 .then(
                         doubles -> new Vec3d(doubles.get(0), doubles.get(1), doubles.get(2)),
                         vec3d -> List.of(vec3d.getX(), vec3d.getY(), vec3d.getZ())
                 ));
 
-        register(Vector3f.class, Codeck.FLOAT.list()
+        register(Vector3f.class, Endec.FLOAT.list()
                 .then(
                         doubles -> new Vector3f(doubles.get(0), doubles.get(1), doubles.get(2)),
                         vec3d -> List.of(vec3d.x(), vec3d.y(), vec3d.z())

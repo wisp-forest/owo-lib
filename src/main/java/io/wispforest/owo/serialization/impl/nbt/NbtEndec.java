@@ -12,9 +12,9 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.util.*;
 
-public final class NbtCodeck implements Codeck<NbtElement> {
+public final class NbtEndec implements Endec<NbtElement> {
 
-    public static NbtCodeck INSTANCE = new NbtCodeck();
+    public static NbtEndec INSTANCE = new NbtEndec();
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -30,7 +30,7 @@ public final class NbtCodeck implements Codeck<NbtElement> {
             ByteArrayDataOutput stream = ByteStreams.newDataOutput();
             NbtIo.write(value, stream);
 
-            Codeck.BYTE_ARRAY.encode(serializer, stream.toByteArray());
+            Endec.BYTE_ARRAY.encode(serializer, stream.toByteArray());
         } catch (IOException e){
             LOGGER.error("Unable to serialize the given NbtElement into the given format!");
             throw new RuntimeException(e);
@@ -43,7 +43,7 @@ public final class NbtCodeck implements Codeck<NbtElement> {
             return toNbt(selfDescribedDeserializer.readAny());
         }
 
-        byte[] array = Codeck.BYTE_ARRAY.decode(deserializer);
+        byte[] array = Endec.BYTE_ARRAY.decode(deserializer);
 
         try {
             ByteArrayDataInput stream = ByteStreams.newDataInput(array);
