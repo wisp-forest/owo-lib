@@ -1,6 +1,7 @@
 package io.wispforest.owo.serialization;
 
 import com.google.gson.*;
+import com.mojang.serialization.Codec;
 import io.wispforest.owo.serialization.impl.*;
 import io.wispforest.owo.serialization.impl.nbt.NbtEndec;
 import io.wispforest.owo.serialization.impl.json.JsonEndec;
@@ -241,6 +242,10 @@ public interface Endec<T> {
                 }
             }
         };
+    }
+
+    default Codec<T> codec(){
+        return new CooptCodec<>(this);
     }
 
     //--

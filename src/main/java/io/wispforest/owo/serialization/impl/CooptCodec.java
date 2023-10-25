@@ -21,9 +21,9 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class CooptEndec<T> implements Endec<T>, Codec<T> {
+public class CooptCodec<T> implements Endec<T>, Codec<T> {
 
-    public static Map<DynamicOps<?>, Pair<Supplier<Serializer<Object>>, Function<Object, Deserializer<Object>>>> MAP = new HashMap<>();
+    private static final Map<DynamicOps<?>, Pair<Supplier<Serializer<Object>>, Function<Object, Deserializer<Object>>>> MAP = new HashMap<>();
 
     static {
         register(JsonOps.INSTANCE, JsonSerializer::of, JsonDeserializer::of);
@@ -32,7 +32,7 @@ public class CooptEndec<T> implements Endec<T>, Codec<T> {
 
     private final Endec<T> endec;
 
-    public CooptEndec(Endec<T> endec){
+    public CooptCodec(Endec<T> endec){
         this.endec = endec;
     }
 
