@@ -1,11 +1,13 @@
 package io.wispforest.owo.serialization.impl.nbt;
 
+import com.google.gson.JsonElement;
 import io.wispforest.owo.serialization.*;
 import io.wispforest.owo.serialization.impl.SerializationAttribute;
 import net.minecraft.nbt.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
@@ -212,6 +214,20 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
     }
 
     @Override
+    public <V> V tryRead(Function<Deserializer<NbtElement>, V> func) {
+        var stackCopy = new ArrayList<>(stack);
+
+        try {
+            return func.apply(this);
+        } catch (Exception e){
+            stack.clear();
+            stack.addAll(stackCopy);
+
+            throw e;
+        }
+    }
+
+    @Override
     public <E> SequenceDeserializer<E> sequence(Endec<E> elementEndec) {
         return new NbtSequenceDeserializer<>(((AbstractNbtList<NbtElement>) topElement()), elementEndec);
     }
@@ -292,13 +308,9 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
 
             NbtDeserializer.this.stack.push(entry::getValue);
 
-            Map.Entry<String, V> newEntry;
+            Map.Entry<String, V> newEntry = Map.entry(entry.getKey(), valueEndec.decode(NbtDeserializer.this));
 
-            try {
-                newEntry = Map.entry(entry.getKey(), valueEndec.decode(NbtDeserializer.this));
-            } finally {
-                NbtDeserializer.this.stack.pop();
-            }
+            NbtDeserializer.this.stack.pop();
 
             return newEntry;
         }
@@ -318,13 +330,9 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
 
             NbtDeserializer.this.stack.push(() -> map.get(field));
 
-            F value;
+            F value = endec.decode(NbtDeserializer.this);
 
-            try {
-                value = endec.decode(NbtDeserializer.this);
-            } finally {
-                NbtDeserializer.this.stack.pop();
-            }
+            NbtDeserializer.this.stack.pop();
 
             return value;
         }

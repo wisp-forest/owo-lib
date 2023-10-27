@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 public class ByteBufDeserializer implements Deserializer<ByteBuf> {
 
@@ -32,7 +33,7 @@ public class ByteBufDeserializer implements Deserializer<ByteBuf> {
 
     @Override
     public <V> Optional<V> readOptional(Endec<V> endec) {
-        var bl = buf.readBoolean();
+        var bl = readBoolean();
 
         return Optional.ofNullable(bl ? endec.decode(this) : null);
     }
@@ -94,6 +95,19 @@ public class ByteBufDeserializer implements Deserializer<ByteBuf> {
     @Override
     public long readVarLong() {
         return VarLongs.read(buf);
+    }
+
+    @Override
+    public <V> V tryRead(Function<Deserializer<ByteBuf>, V> func) {
+        var prevReader = buf.readerIndex();
+
+        try {
+            return func.apply(this);
+        } catch (Exception exception){
+            this.buf.readerIndex(prevReader);
+
+            throw exception;
+        }
     }
 
     @Override

@@ -1,9 +1,12 @@
 package io.wispforest.owo.serialization;
 
 import io.wispforest.owo.serialization.impl.SerializationAttribute;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public interface Deserializer<T> {
 
@@ -32,6 +35,8 @@ public interface Deserializer<T> {
     int readVarInt();
 
     long readVarLong();
+
+    <V> V tryRead(Function<Deserializer<T>, V> func);
 
     <E> SequenceDeserializer<E> sequence(Endec<E> elementEndec);
 

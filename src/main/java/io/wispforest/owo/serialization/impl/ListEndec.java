@@ -23,6 +23,11 @@ public class ListEndec<V> implements Endec<List<V>> {
         return this;
     }
 
+    public <L extends List<V>> Endec<L> conform(IntFunction<L> mapConstructor){
+        return this.listConstructor(mapConstructor::apply)
+                .then(map -> (L) map, map -> map);
+    }
+
     @Override
     public <E> void encode(Serializer<E> serializer, List<V> value) {
         try (var state = serializer.sequence(endec, value.size())) {

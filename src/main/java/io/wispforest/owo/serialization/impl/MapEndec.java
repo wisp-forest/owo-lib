@@ -39,6 +39,15 @@ public class MapEndec<K, V> implements Endec<Map<K, V>> {
         return new MapEndec<>(this.endec, fromFunc.andThen(this.fromKey), this.toKey.andThen(toFunc));
     }
 
+    public MapEndec<K, V> keyValidator(Function<K, K> validator) {
+        return new MapEndec<>(this.endec, this.fromKey, this.toKey.andThen(validator));
+    }
+
+    public <M extends Map<K, V>> Endec<M> conform(IntFunction<M> mapConstructor){
+        return this.mapConstructor(mapConstructor::apply)
+                .then(map -> (M) map, map -> map);
+    }
+
     @Override
     public <E> void encode(Serializer<E> serializer, Map<K, V> value) {
         try (var state = serializer.map(endec, value.size())) {

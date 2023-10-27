@@ -2,6 +2,7 @@ package io.wispforest.owo.serialization;
 
 import com.google.gson.*;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import io.wispforest.owo.serialization.impl.*;
 import io.wispforest.owo.serialization.impl.nbt.NbtEndec;
 import io.wispforest.owo.serialization.impl.json.JsonEndec;
@@ -10,8 +11,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.InvalidIdentifierException;
 import net.minecraft.util.Uuids;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -139,6 +143,31 @@ public interface Endec<T> {
         return Endec.IDENTIFIER.then(registry::get, registry::getId);
     }
 
+    static <T> Endec<TagKey<T>> unprefixedTagKey(RegistryKey<? extends Registry<T>> registry) {
+        return IDENTIFIER.then(id -> TagKey.of(registry, id), TagKey::id);
+    }
+
+    static <T> Endec<TagKey<T>> tagKey(RegistryKey<? extends Registry<T>> registry) {
+        return Endec.STRING
+                .validate(s -> {
+                    if(!s.startsWith("#")) throw new IllegalStateException("Not a tag id");
+
+                    var id = s.substring(1);
+
+                    try {
+                        if(!Identifier.isValid(id)) throw new IllegalStateException("Not a valid resource location: " + id);
+                    } catch (InvalidIdentifierException var2) {
+                        throw new IllegalStateException("Not a valid resource location: " + id + " " + var2.getMessage());
+                    }
+
+                    return s;
+                })
+                .then(
+                    s -> TagKey.of(registry, new Identifier(s.substring(1))),
+                    tag -> "#" + tag.id()
+                );
+    }
+
     static <T, K> Endec<T> dispatchedOf(Function<K, Endec<? extends T>> keyToEndec, Function<T, K> keyGetter, Endec<K> keyEndec) {
         return new StructEndec<T>() {
             @Override
@@ -204,6 +233,10 @@ public interface Endec<T> {
         };
     }
 
+    default <R> StructField<R, T> field(String name, Function<R, T> getter){
+        return StructField.of(name, this, getter);
+    }
+
     default Endec<Optional<T>> ofOptional(){
         return new Endec<>() {
             @Override
@@ -222,6 +255,20 @@ public interface Endec<T> {
         return ofOptional().then(o -> o.orElse(null), Optional::ofNullable);
     }
 
+    default Endec<T> validate(Function<T, T> validator){
+        return new Endec<T>() {
+            @Override
+            public <E> void encode(Serializer<E> serializer, T value) {
+                Endec.this.encode(serializer, value);
+            }
+
+            @Override
+            public <E> T decode(Deserializer<E> deserializer) {
+                return validator.apply(Endec.this.decode(deserializer));
+            }
+        };
+    }
+
     default Endec<T> onError(TriConsumer<Serializer, T, Exception> encode, BiFunction<Deserializer, Exception, T> decode){
         return new Endec<>() {
             @Override
@@ -236,7 +283,7 @@ public interface Endec<T> {
             @Override
             public <E> T decode(Deserializer<E> deserializer) {
                 try {
-                    return Endec.this.decode(deserializer);
+                    return deserializer.tryRead(Endec.this::decode);
                 } catch (Exception e) {
                     return decode.apply(deserializer, e);
                 }

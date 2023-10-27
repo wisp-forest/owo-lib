@@ -10,3 +10,23 @@ transitive-accessible class net/minecraft/client/gui/DrawContext$ScissorStack
 
 accessible field net/minecraft/util/dynamic/ForwardingDynamicOps delegate Lcom/mojang/serialization/DynamicOps;
 accessible method net/minecraft/nbt/NbtCompound toMap ()Ljava/util/Map;
+
+accessible class net/minecraft/recipe/Ingredient$Entry
+
+accessible method net/minecraft/recipe/Ingredient$StackEntry <init> (Lnet/minecraft/item/ItemStack;)V
+
+accessible class net/minecraft/recipe/Ingredient$StackEntry
+accessible field net/minecraft/recipe/Ingredient$StackEntry stack Lnet/minecraft/item/ItemStack;
+
+accessible method net/minecraft/recipe/Ingredient$TagEntry <init> (Lnet/minecraft/registry/tag/TagKey;)V
+
+accessible class net/minecraft/recipe/Ingredient$TagEntry
+accessible field net/minecraft/recipe/Ingredient$TagEntry tag Lnet/minecraft/registry/tag/TagKey;
+
+accessible method net/minecraft/recipe/Ingredient <init> ([Lnet/minecraft/recipe/Ingredient$Entry;)V
+
+accessible field net/minecraft/recipe/Ingredient entries [Lnet/minecraft/recipe/Ingredient$Entry;
+accessible method net/minecraft/recipe/Ingredient ofEntries (Ljava/util/stream/Stream;)Lnet/minecraft/recipe/Ingredient;
+
+accessible method net/minecraft/recipe/ShapedRecipe removePadding (Ljava/util/List;)[Ljava/lang/String;
+

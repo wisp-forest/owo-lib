@@ -33,6 +33,7 @@ import io.wispforest.uwu.config.BruhConfig;
 import io.wispforest.uwu.config.UwuConfig;
 import io.wispforest.uwu.items.UwuItems;
 import io.wispforest.uwu.network.*;
+import io.wispforest.uwu.recipe.UwuShapedRecipe;
 import io.wispforest.uwu.text.BasedTextContent;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
@@ -193,6 +194,8 @@ public class Uwu implements ModInitializer {
 
         System.out.println(RegistryAccess.getEntry(Registries.ITEM, Items.ACACIA_BOAT));
         System.out.println(RegistryAccess.getEntry(Registries.ITEM, new Identifier("acacia_planks")));
+
+        UwuShapedRecipe.init();
 
         CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> {
             dispatcher.register(
@@ -454,5 +457,4 @@ public class Uwu implements ModInitializer {
                               int[] arr1, String[] arr2, short[] arr3, long[] arr4, byte[] arr5,
                               Optional<String> optional1, Optional<String> optional2,
                               List<BlockPos> posses, SealedTestClass sealed1, SealedTestClass sealed2) {}
-
 }

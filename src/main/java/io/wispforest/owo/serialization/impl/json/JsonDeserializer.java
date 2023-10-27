@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> {
@@ -181,6 +182,20 @@ public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> 
     }
 
     @Override
+    public <V> V tryRead(Function<Deserializer<JsonElement>, V> func) {
+        var stackCopy = new ArrayList<>(stack);
+
+        try {
+            return func.apply(this);
+        } catch (Exception e){
+            stack.clear();
+            stack.addAll(stackCopy);
+
+            throw e;
+        }
+    }
+
+    @Override
     public <E> SequenceDeserializer<E> sequence(Endec<E> elementEndec) {
         return new JsonSequenceDeserializer<>(((JsonArray) topElement()).asList(), elementEndec);
     }
@@ -223,13 +238,9 @@ public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> 
         public V next() {
             JsonDeserializer.this.stack.push(entries::next);
 
-            V entry;
+            V entry = valueEndec.decode(JsonDeserializer.this);
 
-            try {
-                entry = valueEndec.decode(JsonDeserializer.this);
-            } finally {
-                JsonDeserializer.this.stack.pop();
-            }
+            JsonDeserializer.this.stack.pop();
 
             return entry;
         }
@@ -265,13 +276,9 @@ public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> 
 
             JsonDeserializer.this.stack.push(entry::getValue);
 
-            Map.Entry<String, V> value;
+            Map.Entry<String, V> value = Map.entry(entry.getKey(), valueEndec.decode(JsonDeserializer.this));
 
-            try {
-                value = Map.entry(entry.getKey(), valueEndec.decode(JsonDeserializer.this));
-            } finally {
-                JsonDeserializer.this.stack.pop();
-            }
+            JsonDeserializer.this.stack.pop();
 
             return value;
         }
@@ -291,13 +298,9 @@ public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> 
 
             JsonDeserializer.this.stack.push(() -> map.get(field));
 
-            F value;
+            F value = endec.decode(JsonDeserializer.this);
 
-            try {
-                value = endec.decode(JsonDeserializer.this);
-            } finally {
-                JsonDeserializer.this.stack.pop();
-            }
+            JsonDeserializer.this.stack.pop();
 
             return value;
         }
