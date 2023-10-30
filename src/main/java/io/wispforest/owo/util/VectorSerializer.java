@@ -7,6 +7,8 @@ import net.minecraft.util.math.Vec3i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
+import java.util.List;
+
 /**
  * Utility class for reading and storing {@link Vec3d} and
  * {@link Vector3f} from and into {@link net.minecraft.nbt.NbtCompound}
@@ -68,9 +70,7 @@ public final class VectorSerializer {
      */
     public static NbtCompound puti(NbtCompound nbt, String key, Vec3i vec3i) {
 
-        NbtIntArray vectorArray = new NbtIntArray(List.of(vec3i.getX(), vec3i.getY(), vec3i.getZ()));
-
-        nbt.put(key, vectorArray);
+        nbt.putIntArray(key, List.of(vec3i.getX(), vec3i.getY(), vec3i.getZ()));
 
         return nbt;
     }
