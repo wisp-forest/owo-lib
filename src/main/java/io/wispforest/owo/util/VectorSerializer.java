@@ -68,10 +68,7 @@ public final class VectorSerializer {
      */
     public static NbtCompound puti(NbtCompound nbt, String key, Vec3i vec3i) {
 
-        NbtList vectorArray = new NbtList();
-        vectorArray.add(NbtInt.of(vec3i.getX()));
-        vectorArray.add(NbtInt.of(vec3i.getY()));
-        vectorArray.add(NbtInt.of(vec3i.getZ()));
+        NbtIntArray vectorArray = new NbtIntArray(List.of(vec3i.getX(), vec3i.getY(), vec3i.getZ()));
 
         nbt.put(key, vectorArray);
 
@@ -124,10 +121,10 @@ public final class VectorSerializer {
      */
     public static Vec3i geti(NbtCompound nbt, String key) {
 
-        NbtList vectorArray = nbt.getList(key, NbtElement.INT_TYPE);
-        int x = vectorArray.getInt(0);
-        int y = vectorArray.getInt(1);
-        int z = vectorArray.getInt(2);
+        int[] vectorArray = nbt.getIntArray(key);
+        int x = vectorArray[0];
+        int y = vectorArray[1];
+        int z = vectorArray[2];
 
         return new Vec3i(x, y, z);
     }
