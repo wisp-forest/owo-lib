@@ -163,9 +163,9 @@ public final class VectorSerializer {
      * @param buffer The packet buffer to write into
      */
     public static void writei(PacketByteBuf buffer, Vec3i vec3i) {
-        buffer.writeFloat(vec3i.getX());
-        buffer.writeFloat(vec3i.getY());
-        buffer.writeFloat(vec3i.getZ());
+        buffer.writeInt(vec3i.getX());
+        buffer.writeInt(vec3i.getY());
+        buffer.writeInt(vec3i.getZ());
     }
 
     /**
@@ -194,7 +194,7 @@ public final class VectorSerializer {
      * @param buffer The buffer to read from
      * @return The deserialized vector
      */
-    public static Vector3f readi(PacketByteBuf buffer) {
-        return new Vector3f(buffer.readInt(), buffer.readInt(), buffer.readInt());
+    public static Vec3i readi(PacketByteBuf buffer) {
+        return new Vec3i(buffer.readInt(), buffer.readInt(), buffer.readInt());
     }
 }
