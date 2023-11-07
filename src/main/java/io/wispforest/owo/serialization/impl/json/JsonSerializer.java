@@ -3,6 +3,7 @@ package io.wispforest.owo.serialization.impl.json;
 import com.google.gson.*;
 import io.wispforest.owo.serialization.*;
 import io.wispforest.owo.serialization.impl.SerializationAttribute;
+import io.wispforest.owo.serialization.impl.nbt.NbtSerializer;
 import org.apache.commons.lang3.mutable.MutableObject;
 
 import java.util.*;
@@ -12,9 +13,17 @@ public class JsonSerializer implements Serializer<JsonElement> {
 
     private final SerializationAttribute extraAttribute;
 
+    protected JsonElement prefix = null;
+
     protected Deque<Consumer<JsonElement>> stack = new ArrayDeque<>();
 
     protected JsonElement result = null;
+
+    private JsonSerializer(boolean compressed, JsonElement prefix) {
+        this(compressed);
+
+        this.prefix = prefix;
+    }
 
     private JsonSerializer(boolean compressed) {
         stack.push(element -> result = element);
@@ -32,9 +41,19 @@ public class JsonSerializer implements Serializer<JsonElement> {
         return new JsonSerializer(false);
     }
 
+    public static JsonSerializer of(JsonElement prefix){
+        return new JsonSerializer(false, prefix);
+    }
+
     public static JsonSerializer compressed(){
         return new JsonSerializer(true);
     }
+
+    public static JsonSerializer compressed(JsonElement prefix){
+        return new JsonSerializer(true, prefix);
+    }
+
+    //--
 
     @Override
     public Set<SerializationAttribute> attributes() {
@@ -141,7 +160,22 @@ public class JsonSerializer implements Serializer<JsonElement> {
 
     public class JsonMapSerializer<V> implements MapSerializer<V>, StructSerializer {
 
-        private final JsonObject result = new JsonObject();
+        private final JsonObject result;
+
+        public JsonMapSerializer(){
+            var prefix = JsonSerializer.this.prefix;
+
+            if(prefix == null){
+                result = new JsonObject();
+
+                return;
+            }
+
+            if(!(prefix instanceof JsonObject)) throw new IllegalStateException("Prefix is not a valid JsonObject!");
+
+            result = (JsonObject) prefix;
+            JsonSerializer.this.prefix = null;
+        }
 
         private Endec<V> valueEndec = null;
 

@@ -2,7 +2,6 @@ package io.wispforest.owo.serialization;
 
 import com.google.gson.*;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
 import io.wispforest.owo.serialization.impl.*;
 import io.wispforest.owo.serialization.impl.nbt.NbtEndec;
 import io.wispforest.owo.serialization.impl.json.JsonEndec;
@@ -231,6 +230,10 @@ public interface Endec<T> {
                 return getter.apply(Endec.this.decode(deserializer));
             }
         };
+    }
+
+    default KeyedField<T> keyed(String name){
+        return KeyedField.of(name, this);
     }
 
     default <R> StructField<R, T> field(String name, Function<R, T> getter){

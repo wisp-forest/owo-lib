@@ -19,6 +19,7 @@ import io.wispforest.owo.particles.systems.ParticleSystem;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
 import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
 import io.wispforest.owo.serialization.Endec;
+import io.wispforest.owo.serialization.impl.StructEndecBuilder;
 import io.wispforest.owo.serialization.impl.bytebuf.ByteBufDeserializer;
 import io.wispforest.owo.serialization.impl.bytebuf.ByteBufSerializer;
 import io.wispforest.owo.serialization.impl.json.JsonDeserializer;
@@ -384,6 +385,43 @@ public class Uwu implements ModInitializer {
 
                         //--
 
+                        {
+                            var variable1Endec = Endec.STRING.keyed("variable1");
+                            var variable2Endec = Endec.INT.keyed("variable2");
+                            var variable3Endec = TestRecord.ENDEC.keyed("variable3Endec");
+
+                            var variable1 = "Weeeeeee";
+                            var variable2 = 1000;
+                            var variable3 = new TestRecord("Matt", 24, List.of("One", "Two", "Three", "Four"));
+
+                            LOGGER.info(variable1);
+                            LOGGER.info(String.valueOf(variable2));
+                            LOGGER.info(String.valueOf(variable3));
+
+                            NbtCompound compound = new NbtCompound();
+
+                            compound.put(variable1Endec, variable1);
+                            compound.put(variable2Endec, variable2);
+                            compound.put(variable3Endec, variable3);
+
+                            LOGGER.info("");
+                            LOGGER.info(compound.asString());
+
+                            LOGGER.info("");
+
+                            LOGGER.info(compound.get(variable1Endec));
+                            LOGGER.info(compound.get(variable2Endec).toString());
+                            LOGGER.info(compound.get(variable3Endec).toString());
+
+                            LOGGER.info("---");
+                            LOGGER.info("");
+                        }
+
+                        //--
+
+
+
+                        //--
 
                         //Vanilla
                         iterations("Vanilla", (buf) -> {
@@ -407,6 +445,10 @@ public class Uwu implements ModInitializer {
 
                             return 0;
                         }
+
+                        //--
+
+
 
                         //--
 
@@ -447,6 +489,15 @@ public class Uwu implements ModInitializer {
 
         LOGGER.info("-----");
 
+    }
+
+    public record TestRecord(String name, int count, List<String> names) {
+        public static final Endec<TestRecord> ENDEC = StructEndecBuilder.of(
+                Endec.STRING.field("name", TestRecord::name),
+                Endec.INT.field("count", TestRecord::count),
+                Endec.STRING.list().field("names", TestRecord::names),
+                TestRecord::new
+        );
     }
 
     public record OtherTestMessage(BlockPos pos, String message) {}

@@ -14,9 +14,17 @@ public class NbtSerializer implements Serializer<NbtElement> {
 
     private final SerializationAttribute extraAttribute;
 
+    protected NbtElement prefix = null;
+
     private final Deque<Consumer<NbtElement>> stack = new ArrayDeque<>();
 
     private NbtElement result = null;
+
+    public NbtSerializer(SerializationAttribute attribute, NbtElement prefix) {
+        this(attribute);
+
+        this.prefix = prefix;
+    }
 
     public NbtSerializer(SerializationAttribute attribute) {
         stack.push(element -> result = element);
@@ -34,13 +42,28 @@ public class NbtSerializer implements Serializer<NbtElement> {
         return new NbtSerializer(SerializationAttribute.HUMAN_READABLE);
     }
 
+    public static NbtSerializer of(NbtElement prefix){
+        return new NbtSerializer(SerializationAttribute.HUMAN_READABLE, prefix);
+    }
+
+
     public static NbtSerializer compressed(){
         return new NbtSerializer(SerializationAttribute.COMPRESSED);
+    }
+
+    public static NbtSerializer compressed(NbtElement prefix){
+        return new NbtSerializer(SerializationAttribute.COMPRESSED, prefix);
     }
 
     public static NbtSerializer binary(){
         return new NbtSerializer(SerializationAttribute.BINARY);
     }
+
+    public static NbtSerializer binary(NbtElement prefix){
+        return new NbtSerializer(SerializationAttribute.BINARY, prefix);
+    }
+
+    //--
 
     @Override
     public Set<SerializationAttribute> attributes() {
@@ -56,7 +79,11 @@ public class NbtSerializer implements Serializer<NbtElement> {
 
     @Override
     public <V> void writeOptional(Endec<V> endec, Optional<V> optional) {
-        optional.ifPresentOrElse(v -> endec.encode(this, v), () -> consumeElement(NbtEnd.INSTANCE));
+        try(var struct = struct()) {
+            struct.field("present", Endec.BOOLEAN, optional.isPresent());
+
+            optional.ifPresent(v -> struct.field("value", endec, v));
+        }
     }
 
     @Override
@@ -155,9 +182,24 @@ public class NbtSerializer implements Serializer<NbtElement> {
 
     public class NbtMapSerializer<V> implements MapSerializer<V>, StructSerializer {
 
-        private final NbtCompound result = new NbtCompound();
+        private final NbtCompound result;
 
         private Endec<V> valueEndec = null;
+
+        public NbtMapSerializer(){
+            var prefix = NbtSerializer.this.prefix;
+
+            if(prefix == null){
+                result = new NbtCompound();
+
+                return;
+            }
+
+            if(!(prefix instanceof NbtCompound)) throw new IllegalStateException("Prefix is not a valid NbtCompound!");
+
+            result = (NbtCompound) prefix;
+            NbtSerializer.this.prefix = null;
+        }
 
         public NbtMapSerializer<V> valueEndec(Endec<V> valueEndec) {
             this.valueEndec = valueEndec;

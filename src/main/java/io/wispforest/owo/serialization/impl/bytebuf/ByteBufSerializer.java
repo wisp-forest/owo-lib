@@ -39,7 +39,7 @@ public class ByteBufSerializer<T extends ByteBuf> implements Serializer<T> {
 
     @Override
     public <V> void writeOptional(Endec<V> endec, Optional<V> optional) {
-        buf.writeBoolean(optional.isPresent());
+        writeBoolean(optional.isPresent());
 
         optional.ifPresent(v -> endec.encode(this, v));
     }

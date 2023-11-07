@@ -107,11 +107,11 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
 
     @Override
     public <V> Optional<V> readOptional(Endec<V> endec) {
-        var element = topElement();
+        var struct = struct();
 
-        if(element == NbtEnd.INSTANCE) return Optional.empty();
+        var present = struct.field("present", Endec.BOOLEAN);
 
-        return Optional.of(endec.decode(this));
+        return Optional.ofNullable(present ? struct.field("value", endec) : null);
     }
 
     @Override

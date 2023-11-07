@@ -54,10 +54,12 @@
     },
     "loom:injected_interfaces": {
       "net/minecraft/class_1799": [
-        "io/wispforest/owo/nbt/NbtCarrier"
+        "io/wispforest/owo/nbt/NbtCarrier",
+        "io/wispforest/owo/serialization/impl/nbt/NbtMapCarrier"
       ],
       "net/minecraft/class_2487": [
-        "io/wispforest/owo/nbt/NbtCarrier"
+        "io/wispforest/owo/nbt/NbtCarrier",
+        "io/wispforest/owo/serialization/impl/nbt/NbtMapCarrier"
       ],
       "net/minecraft/class_339": [
         "io/wispforest/owo/ui/inject/ComponentStub"
