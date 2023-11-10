@@ -7,6 +7,7 @@ import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.util.GlDebugUtils;
 import io.wispforest.owo.ui.util.OwoGlUtil;
 import io.wispforest.owo.ui.window.context.CurrentWindowContext;
+import io.wispforest.owo.util.InfallibleCloseable;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.DiffuseLighting;
@@ -19,7 +20,7 @@ public abstract class OwoWindow<R extends ParentComponent> extends FramebufferWi
     private int scaledWidth;
     private int scaledHeight;
     private final OwoUIAdapter<R> adapter;
-    private final OpenWindows.WindowRegistration registration;
+    private final InfallibleCloseable registration;
 
     private int mouseX = -1;
     private int mouseY = -1;

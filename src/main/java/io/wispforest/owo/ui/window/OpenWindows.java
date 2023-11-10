@@ -1,5 +1,6 @@
 package io.wispforest.owo.ui.window;
 
+import io.wispforest.owo.util.InfallibleCloseable;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.UnmodifiableView;
 
@@ -15,10 +16,10 @@ public final class OpenWindows {
 
     }
 
-    static WindowRegistration add(OwoWindow<?> window) {
+    static InfallibleCloseable add(OwoWindow<?> window) {
         WINDOWS.add(window);
 
-        return new WindowRegistration(window);
+        return () -> WINDOWS.remove(window);
     }
 
     public static @UnmodifiableView List<OwoWindow<?>> windows() {
@@ -29,19 +30,6 @@ public final class OpenWindows {
     public static void renderAll() {
         for (OwoWindow<?> window : WINDOWS) {
             window.render();
-        }
-    }
-
-    public static class WindowRegistration implements AutoCloseable {
-        private final OwoWindow<?> window;
-
-        private WindowRegistration(OwoWindow<?> window) {
-            this.window = window;
-        }
-
-        @Override
-        public void close() {
-            WINDOWS.remove(window);
         }
     }
 }
