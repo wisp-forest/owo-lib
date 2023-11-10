@@ -1,5 +1,7 @@
 package io.wispforest.owo.ui.window.context;
 
+import io.wispforest.owo.util.InfallibleCloseable;
+
 public final class CurrentWindowContext {
     private static WindowContext CURRENT = VanillaWindowContext.MAIN;
 
@@ -7,26 +9,15 @@ public final class CurrentWindowContext {
 
     }
 
-    public static WindowResetter setCurrent(WindowContext window) {
+    public static InfallibleCloseable setCurrent(WindowContext window) {
         var old = CURRENT;
+
         CURRENT = window;
-        return new WindowResetter(old);
+
+        return () -> CURRENT = old;
     }
 
     public static WindowContext current() {
         return CURRENT;
-    }
-
-    public static class WindowResetter implements AutoCloseable {
-        private final WindowContext window;
-
-        private WindowResetter(WindowContext window) {
-            this.window = window;
-        }
-
-        @Override
-        public void close() {
-            CurrentWindowContext.CURRENT = window;
-        }
     }
 }

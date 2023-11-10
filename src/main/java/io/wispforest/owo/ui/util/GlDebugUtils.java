@@ -1,11 +1,11 @@
 package io.wispforest.owo.ui.util;
 
-
-import org.lwjgl.opengl.ARBDebugOutput;
+import io.wispforest.owo.util.InfallibleCloseable;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.KHRDebug;
 
 public final class GlDebugUtils {
+    public static final boolean DEBUG_GROUPS_ENABLED = Boolean.getBoolean("owo.glDebugGroups");
     public static final boolean GL_KHR_debug = GL.getCapabilities().GL_KHR_debug;
 
     private GlDebugUtils() {
@@ -18,24 +18,10 @@ public final class GlDebugUtils {
         }
     }
 
-    public static DebugGroup pushGroup(String name) {
-        if (GL_KHR_debug) {
-            KHRDebug.glPushDebugGroup(KHRDebug.GL_DEBUG_SOURCE_APPLICATION, 42, name);
-        }
+    public static InfallibleCloseable pushGroup(String name) {
+        if (!GL_KHR_debug || !DEBUG_GROUPS_ENABLED) return InfallibleCloseable.empty();
 
-        return new DebugGroup();
-    }
-
-    public static class DebugGroup implements AutoCloseable {
-        private DebugGroup() {
-
-        }
-
-        @Override
-        public void close() {
-            if (GL_KHR_debug) {
-                KHRDebug.glPopDebugGroup();
-            }
-        }
+        KHRDebug.glPushDebugGroup(KHRDebug.GL_DEBUG_SOURCE_APPLICATION, 42, name);
+        return KHRDebug::glPopDebugGroup;
     }
 }
