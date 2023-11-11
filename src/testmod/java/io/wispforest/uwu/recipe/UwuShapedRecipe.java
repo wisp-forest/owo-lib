@@ -96,21 +96,23 @@ public class UwuShapedRecipe extends ShapedRecipe {
 
     //--
 
-    private static final Endec<List<String>> PATTERN_ENDEC = Endec.STRING.list().validate(rows -> {
-        if (rows.size() > 3) throw new IllegalStateException("Invalid pattern: too many rows, 3 is maximum");
-        if (rows.isEmpty()) throw new IllegalStateException("Invalid pattern: empty pattern not allowed");
 
-        int i = rows.get(0).length();
-
-        for(String string : rows) {
-            if (string.length() > 3) throw new IllegalStateException("Invalid pattern: too many columns, 3 is maximum");
-            if (i != string.length()) throw new IllegalStateException("Invalid pattern: each row must be the same width");
-        }
-
-        return rows;
-    });
 
     private record RawShapedRecipe(String group, CraftingRecipeCategory category, Map<String, Ingredient> key, List<String> pattern, ItemStack result, boolean showNotification) {
+        private static final Endec<List<String>> PATTERN_ENDEC = Endec.STRING.list().validate(rows -> {
+            if (rows.size() > 3) throw new IllegalStateException("Invalid pattern: too many rows, 3 is maximum");
+            if (rows.isEmpty()) throw new IllegalStateException("Invalid pattern: empty pattern not allowed");
+
+            int i = rows.get(0).length();
+
+            for(String string : rows) {
+                if (string.length() > 3) throw new IllegalStateException("Invalid pattern: too many columns, 3 is maximum");
+                if (i != string.length()) throw new IllegalStateException("Invalid pattern: each row must be the same width");
+            }
+
+            return rows;
+        });
+
         public static final Endec<RawShapedRecipe> ENDEC = StructEndecBuilder.of(
                 StructField.defaulted("group", Endec.STRING, recipe -> recipe.group, ""),
                 StructField.defaulted("category", RecipeEndecs.CATEGORY_ENDEC, recipe -> recipe.category, CraftingRecipeCategory.MISC),
