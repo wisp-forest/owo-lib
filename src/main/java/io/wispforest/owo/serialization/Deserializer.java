@@ -1,6 +1,7 @@
 package io.wispforest.owo.serialization;
 
 import io.wispforest.owo.serialization.impl.SerializationAttribute;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Iterator;
@@ -12,41 +13,30 @@ public interface Deserializer<T> {
 
     Set<SerializationAttribute> attributes();
 
-    <V> Optional<V> readOptional(Endec<V> endec);
-
-    boolean readBoolean();
-
     byte readByte();
-
     short readShort();
-
     int readInt();
-
     long readLong();
-
     float readFloat();
-
     double readDouble();
 
-    String readString();
-
-    byte[] readBytes();
-
     int readVarInt();
-
     long readVarLong();
 
-    <V> V tryRead(Function<Deserializer<T>, V> func);
+    boolean readBoolean();
+    String readString();
+    byte[] readBytes();
+    <V> Optional<V> readOptional(Endec<V> endec);
 
     <E> Sequence<E> sequence(Endec<E> elementEndec);
-
     <V> Map<V> map(Endec<V> valueEndec);
-
     Struct struct();
+
+    <V> V tryRead(Function<Deserializer<T>, V> reader);
 
     interface Sequence<E> extends Iterator<E> {
 
-        int size();
+        int estimatedSize();
 
         @Override
         boolean hasNext();
@@ -57,7 +47,7 @@ public interface Deserializer<T> {
 
     interface Map<E> extends Iterator<java.util.Map.Entry<String, E>> {
 
-        int size();
+        int estimatedSize();
 
         @Override
         boolean hasNext();
@@ -68,35 +58,15 @@ public interface Deserializer<T> {
 
     interface Struct {
         /**
-         * Method that used to get the value of a field based on order of serialization
-         *
-         * @param endec The endec for the given field
-         * @return the field value
-         * @param <F>
+         * Decode the value of field {@code name} using {@code endec}. If no
+         * such field exists in the serialized data, an exception is thrown
          */
-        default <F> F field(String name, Endec<F> endec){
-            var value = field(name, endec, null);
-
-            if(value == null) throw new StructDeserializerException("Unable to deserialize a required field! [Name: " + name + "]");
-
-            return value;
-        }
+        <F> @NotNull F field(String name, Endec<F> endec);
 
         /**
-         * Method for checking if a field exists based on if the key exists
-         * or other method employed by a given Formats {@link Deserializer}
-         *
-         * @param name Name of the given Field
-         * @param endec The endec for the given field
-         * @return an optional of the given value if present
-         * @param <F>
+         * Decode the value of field {@code name} using {@code endec}. If no
+         * such field exists in the serialized data, {@code defaultValue} is returned
          */
-        <F> F field(String name, Endec<F> endec, @Nullable F defaultValue);
-        class StructDeserializerException extends RuntimeException {
-            public StructDeserializerException(String message){
-                super(message);
-            }
-        }
-
+        <F> @Nullable F field(String name, Endec<F> endec, @Nullable F defaultValue);
     }
 }

@@ -9,34 +9,23 @@ public interface Serializer<T> {
 
     Set<SerializationAttribute> attributes();
 
-    <V> void writeOptional(Endec<V> endec, final Optional<V> optional);
+    void writeByte(byte value);
+    void writeShort(short value);
+    void writeInt(int value);
+    void writeLong(long value);
+    void writeFloat(float value);
+    void writeDouble(double value);
 
-    void writeBoolean(final boolean value);
+    void writeVarInt(int value);
+    void writeVarLong(long value);
 
-    void writeByte(final byte value);
-
-    void writeShort(final short value);
-
-    void writeInt(final int value);
-
-    void writeLong(final long value);
-
-    void writeFloat(final float value);
-
-    void writeDouble(final double value);
-
-    void writeString(final String value);
-
-    void writeBytes(final byte[] bytes);
-
-    void writeVarInt(final int value);
-
-    void writeVarLong(final long value);
+    void writeBoolean(boolean value);
+    void writeString(String value);
+    void writeBytes(byte[] bytes);
+    <V> void writeOptional(Endec<V> endec, Optional<V> optional);
 
     <E> Sequence<E> sequence(Endec<E> elementEndec, int size);
-
     <V> Map<V> map(Endec<V> valueEndec, int size);
-
     Struct struct();
 
     T result();

@@ -7,135 +7,131 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 
-public abstract class DataOutputSerializer<D extends DataOutput> implements Serializer<D> {
+public class DataOutputSerializer<D extends DataOutput> implements Serializer<D> {
 
-    public abstract D get();
+    protected final D output;
+
+    public DataOutputSerializer(D output) {
+        this.output = output;
+    }
 
     @Override
     public Set<SerializationAttribute> attributes() {
         return null;
     }
 
+    protected void write(Writer writer) {
+        try {
+            writer.write();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public <V> void writeOptional(Endec<V> endec, Optional<V> optional) {
-        writeBoolean(optional.isPresent());
-
-        optional.ifPresent(v -> endec.encode(this, v));
+        this.writeBoolean(optional.isPresent());
+        optional.ifPresent(value -> endec.encode(this, value));
     }
 
     @Override
     public void writeBoolean(boolean value) {
-        try {
-            get().writeBoolean(value);
-        } catch (IOException e){
-            throw new RuntimeException(e);
-        }
+        this.write(() -> this.output.writeBoolean(value));
     }
 
     @Override
     public void writeByte(byte value) {
-        try {
-            get().writeByte(value);
-        } catch (IOException e){
-            throw new RuntimeException(e);
-        }
+        this.write(() -> this.output.writeByte(value));
     }
 
     @Override
     public void writeShort(short value) {
-        try {
-            get().writeShort(value);
-        } catch (IOException e){
-            throw new RuntimeException(e);
-        }
+        this.write(() -> this.output.writeShort(value));
     }
 
     @Override
     public void writeInt(int value) {
-        try {
-            get().writeInt(value);
-        } catch (IOException e){
-            throw new RuntimeException(e);
-        }
+        this.write(() -> this.output.writeInt(value));
     }
 
     @Override
     public void writeLong(long value) {
-        try {
-            get().writeLong(value);
-        } catch (IOException e){
-            throw new RuntimeException(e);
-        }
+        this.write(() -> this.output.writeLong(value));
     }
 
     @Override
     public void writeFloat(float value) {
-        try {
-            get().writeFloat(value);
-        } catch (IOException e){
-            throw new RuntimeException(e);
-        }
+        this.write(() -> this.output.writeFloat(value));
     }
 
     @Override
     public void writeDouble(double value) {
-        try {
-            get().writeDouble(value);
-        } catch (IOException e){
-            throw new RuntimeException(e);
-        }
+        this.write(() -> this.output.writeDouble(value));
     }
 
     @Override
     public void writeString(String value) {
-        try {
-            get().writeUTF(value);
-        } catch (IOException e){
-            throw new RuntimeException(e);
-        }
+        this.write(() -> this.output.writeUTF(value));
     }
 
     @Override
     public void writeBytes(byte[] bytes) {
-        writeVarInt(bytes.length);
+        this.write(() -> {
+            this.writeVarInt(bytes.length);
+            this.output.write(bytes);
+        });
+    }
+
+    @Override
+    public void writeVarInt(int value) {
         try {
-            get().write(bytes);
-        } catch (IOException e){
+            while((value & -128) != 0) {
+                this.output.writeByte(value & 127 | 128);
+                value >>>= 7;
+            }
+
+            this.output.writeByte(value);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public void writeVarInt(int value) {
-        writeInt(value);
-    }
-
-    @Override
     public void writeVarLong(long value) {
-        writeLong(value);
+        try {
+            while((value & -128L) != 0L) {
+                this.output.writeByte((int)(value & 127L) | 128);
+                value >>>= 7;
+            }
+
+            this.output.writeByte((int) value);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public D result() {
-        return get();
+        return this.output;
     }
 
     @Override
     public <V> Map<V> map(Endec<V> valueEndec, int size) {
-        return (Map<V>) sequence(valueEndec, size);
+        this.writeVarInt(size);
+        return new Sequence<>(valueEndec);
     }
 
     @Override
     public <E> Serializer.Sequence<E> sequence(Endec<E> elementEndec, int size) {
-        writeVarInt(size);
-
+        this.writeVarInt(size);
         return new Sequence<>(elementEndec);
     }
 
     @Override
     public Struct struct() {
-        return new Sequence(null);
+        return new Sequence<>(null);
     }
 
     protected class Sequence<V> implements Serializer.Sequence<V>, Serializer.Struct, Serializer.Map<V> {
@@ -148,23 +144,27 @@ public abstract class DataOutputSerializer<D extends DataOutput> implements Seri
 
         @Override
         public void element(V element) {
-            field("", valueEndec, element);
+            this.valueEndec.encode(DataOutputSerializer.this, element);
         }
 
         @Override
         public void entry(String key, V value) {
             DataOutputSerializer.this.writeString(key);
-            field(key, valueEndec, value);
+            this.valueEndec.encode(DataOutputSerializer.this, value);
         }
 
         @Override
         public <F> Struct field(String name, Endec<F> endec, F value) {
             endec.encode(DataOutputSerializer.this, value);
-
             return this;
         }
 
-        @Override public void end() {}
+        @Override
+        public void end() {}
     }
 
+    @FunctionalInterface
+    protected interface Writer {
+        void write() throws IOException;
+    }
 }

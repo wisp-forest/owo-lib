@@ -3,69 +3,144 @@ package io.wispforest.owo.serialization.impl.nbt;
 import io.wispforest.owo.serialization.*;
 import io.wispforest.owo.serialization.impl.SerializationAttribute;
 import net.minecraft.nbt.*;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
-public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
+public class NbtDeserializer extends HierarchicalDeserializer<NbtElement> implements SelfDescribedDeserializer<NbtElement> {
 
-    private final SerializationAttribute extraAttribute;
+    private static final Set<SerializationAttribute> ATTRIBUTES = EnumSet.of(
+            SerializationAttribute.SELF_DESCRIBING
+    );
 
-    private final Deque<Supplier<NbtElement>> stack = new ArrayDeque<>();
-
-    private boolean safeHandling = true;
-
-    private NbtDeserializer(NbtElement element, SerializationAttribute attribute) {
-        stack.push(() -> element);
-
-        extraAttribute = attribute;
+    private NbtDeserializer(NbtElement element) {
+        super(element);
     }
 
-    public NbtDeserializer safeHandling(boolean value) {
-        this.safeHandling = value;
-
-        return this;
+    private <N extends NbtElement> N getAs(NbtElement element, Class<N> clazz) {
+        if (clazz.isInstance(element)) {
+            return clazz.cast(element);
+        } else {
+            throw new IllegalStateException("Expected a " + clazz.getSimpleName() + ", found a " + element.getClass().getSimpleName());
+        }
     }
 
-    private NbtElement topElement() {
-        return stack.peek().get();
-    }
+    // ---
 
-    //--
-
-    public static NbtDeserializer of(NbtElement element){
-        return new NbtDeserializer(element, SerializationAttribute.HUMAN_READABLE);
+    public static NbtDeserializer of(NbtElement element) {
+        return new NbtDeserializer(element);
     }
 
     @Override
     public Set<SerializationAttribute> attributes() {
-        Set<SerializationAttribute> set = new HashSet<>();
-
-        set.add(SerializationAttribute.SELF_DESCRIBING);
-        set.add(extraAttribute);
-
-        return set;
+        return ATTRIBUTES;
     }
 
-    //--
+    // ---
+
+    @Override
+    public byte readByte() {
+        return this.getAs(this.getValue(), NbtByte.class).byteValue();
+    }
+
+    @Override
+    public short readShort() {
+        return this.getAs(this.getValue(), NbtShort.class).shortValue();
+    }
+
+    @Override
+    public int readInt() {
+        return this.getAs(this.getValue(), NbtInt.class).intValue();
+    }
+
+    @Override
+    public long readLong() {
+        return this.getAs(this.getValue(), NbtLong.class).longValue();
+    }
+
+    @Override
+    public float readFloat() {
+        return this.getAs(this.getValue(), NbtFloat.class).floatValue();
+    }
+
+    @Override
+    public double readDouble() {
+        return this.getAs(this.getValue(), NbtDouble.class).doubleValue();
+    }
+
+    // ---
+
+    @Override
+    public int readVarInt() {
+        return this.getAs(this.getValue(), AbstractNbtNumber.class).intValue();
+    }
+
+    @Override
+    public long readVarLong() {
+        return this.getAs(this.getValue(), AbstractNbtNumber.class).longValue();
+    }
+
+    // ---
+
+    @Override
+    public boolean readBoolean() {
+        return this.getAs(this.getValue(), NbtByte.class).byteValue() != 0;
+    }
+
+    @Override
+    public String readString() {
+        return this.getAs(this.getValue(), NbtString.class).asString();
+    }
+
+    @Override
+    public byte[] readBytes() {
+        return this.getAs(this.getValue(), NbtByteArray.class).getByteArray();
+    }
+
+    @Override
+    public <V> Optional<V> readOptional(Endec<V> endec) {
+        var struct = this.struct();
+        return struct.field("present", Endec.BOOLEAN)
+                ? Optional.of(struct.field("value", endec))
+                : Optional.empty();
+    }
+
+    // ---
+
+    @Override
+    public <E> Deserializer.Sequence<E> sequence(Endec<E> elementEndec) {
+        //noinspection unchecked
+        return new Sequence<>(elementEndec, this.getAs(this.getValue(), AbstractNbtList.class));
+    }
+
+    @Override
+    public <V> Deserializer.Map<V> map(Endec<V> valueEndec) {
+        return new Map<>(valueEndec, this.getAs(this.getValue(), NbtCompound.class));
+    }
+
+    @Override
+    public Deserializer.Struct struct() {
+        return new Struct(this.getAs(this.getValue(), NbtCompound.class));
+    }
+
+    // ---
 
     @Override
     public <S> void readAny(Serializer<S> visitor) {
-        this.decodeValue(visitor, this.topElement());
+        this.decodeValue(visitor, this.getValue());
     }
 
-    private <S> void decodeValue(Serializer<S> visitor, NbtElement value)  {
+    private <S> void decodeValue(Serializer<S> visitor, NbtElement value) {
         switch (value.getType()) {
-            case NbtElement.BYTE_TYPE -> visitor.writeByte(((NbtByte)value).byteValue());
-            case NbtElement.SHORT_TYPE -> visitor.writeShort(((NbtShort)value).shortValue());
-            case NbtElement.INT_TYPE -> visitor.writeInt(((NbtInt)value).intValue());
-            case NbtElement.LONG_TYPE -> visitor.writeLong(((NbtLong)value).longValue());
-            case NbtElement.FLOAT_TYPE -> visitor.writeFloat(((NbtFloat)value).floatValue());
-            case NbtElement.DOUBLE_TYPE -> visitor.writeDouble(((NbtDouble)value).doubleValue());
+            case NbtElement.BYTE_TYPE -> visitor.writeByte(((NbtByte) value).byteValue());
+            case NbtElement.SHORT_TYPE -> visitor.writeShort(((NbtShort) value).shortValue());
+            case NbtElement.INT_TYPE -> visitor.writeInt(((NbtInt) value).intValue());
+            case NbtElement.LONG_TYPE -> visitor.writeLong(((NbtLong) value).longValue());
+            case NbtElement.FLOAT_TYPE -> visitor.writeFloat(((NbtFloat) value).floatValue());
+            case NbtElement.DOUBLE_TYPE -> visitor.writeDouble(((NbtDouble) value).doubleValue());
             case NbtElement.STRING_TYPE -> visitor.writeString(value.asString());
-            case NbtElement.BYTE_ARRAY_TYPE -> visitor.writeBytes(((NbtByteArray)value).getByteArray());
+            case NbtElement.BYTE_ARRAY_TYPE -> visitor.writeBytes(((NbtByteArray) value).getByteArray());
             case NbtElement.INT_ARRAY_TYPE, NbtElement.LONG_ARRAY_TYPE, NbtElement.LIST_TYPE -> {
                 var list = (AbstractNbtList<?>) value;
                 try (var sequence = visitor.sequence(Endec.<NbtElement>of(this::decodeValue, deserializer -> null), list.size())) {
@@ -80,242 +155,104 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
                     }
                 }
             }
-            default -> throw new IllegalArgumentException("Non-standard, unrecognized NbtElement implementation cannot be decoded");
+            default ->
+                    throw new IllegalArgumentException("Non-standard, unrecognized NbtElement implementation cannot be decoded");
         }
     }
 
-    //--
-
-    @Override
-    public <V> Optional<V> readOptional(Endec<V> endec) {
-        var struct = struct();
-
-        var present = struct.field("present", Endec.BOOLEAN);
-
-        return Optional.ofNullable(present ? struct.field("value", endec) : null);
-    }
-
-    @Override
-    public boolean readBoolean() {
-        if (topElement() instanceof NbtByte nbtNumber) return nbtNumber.byteValue() != 0;
-
-        if (safeHandling) return false; // Default value: 0 != 0;
-
-        throw new RuntimeException("[NbtFormat] input was not NbtByte for a Boolean get call");
-    }
-
-    @Override
-    public byte readByte() {
-        if (topElement() instanceof NbtByte nbtNumber) return nbtNumber.byteValue();
-
-        if (safeHandling) return 0;
-
-        throw new RuntimeException("[NbtFormat] input was not NbtByte for a Byte get call");
-    }
-
-    @Override
-    public short readShort() {
-        if (topElement() instanceof NbtShort nbtNumber) return nbtNumber.shortValue();
-
-        if (safeHandling) return 0;
-
-        throw new RuntimeException("[NbtFormat] input was not NbtShort");
-    }
-
-    @Override
-    public int readInt() {
-        if (topElement() instanceof NbtInt nbtNumber) return nbtNumber.intValue();
-
-        if (safeHandling) return 0;
-
-        throw new RuntimeException("[NbtFormat] input was not NbtInt");
-    }
-
-    @Override
-    public long readLong() {
-        if (topElement() instanceof NbtLong nbtNumber) return nbtNumber.longValue();
-
-        if (safeHandling) return 0L;
-
-        throw new RuntimeException("[NbtFormat] input was not NbtLong");
-    }
-
-    @Override
-    public float readFloat() {
-        if (topElement() instanceof NbtFloat nbtNumber) return nbtNumber.floatValue();
-
-        if (safeHandling) return 0F;
-
-        throw new RuntimeException("[NbtFormat] input was not NbtFloat");
-    }
-
-    @Override
-    public double readDouble() {
-        if (topElement() instanceof NbtDouble nbtNumber) return nbtNumber.doubleValue();
-
-        if (safeHandling) return 0D;
-
-        throw new RuntimeException("[NbtFormat] input was not NbtDouble");
-    }
-
-    @Override
-    public String readString() {
-        if (topElement() instanceof NbtString nbtString) return nbtString.asString();
-
-        if (safeHandling) return "";
-
-        throw new RuntimeException("[NbtFormat] input was not NbtDouble");
-    }
-
-    @Override
-    public byte[] readBytes() {
-        if(topElement() instanceof NbtByteArray nbtBytesArray) return nbtBytesArray.getByteArray();
-
-        if (safeHandling) return new byte[0];
-
-        throw new RuntimeException("[NbtFormat] input was not NbtByteArray");
-    }
-
-    @Override
-    public int readVarInt() {
-        if (topElement() instanceof AbstractNbtNumber nbtNumber) return nbtNumber.intValue();
-
-        if (safeHandling) return 0;
-
-        throw new RuntimeException("[NbtFormat] input was not AbstractNbtNumber");
-    }
-
-    @Override
-    public long readVarLong() {
-        if (topElement() instanceof AbstractNbtNumber nbtNumber) return nbtNumber.longValue();
-
-        if (safeHandling) return 0;
-
-        throw new RuntimeException("[NbtFormat] input was not AbstractNbtNumber");
-    }
-
-    @Override
-    public <V> V tryRead(Function<Deserializer<NbtElement>, V> func) {
-        var stackCopy = new ArrayList<>(stack);
-
-        try {
-            return func.apply(this);
-        } catch (Exception e){
-            stack.clear();
-            stack.addAll(stackCopy);
-
-            throw e;
-        }
-    }
-
-    @Override
-    public <E> Deserializer.Sequence<E> sequence(Endec<E> elementEndec) {
-        return new Sequence<>(((AbstractNbtList<NbtElement>) topElement()), elementEndec);
-    }
-
-    @Override
-    public <V> Deserializer.Map<V> map(Endec<V> valueEndec) {
-        return new Map<>(((NbtCompound) topElement()).toMap(), valueEndec);
-    }
-
-    @Override
-    public Struct struct() {
-        return new NbtStruct(((NbtCompound) topElement()).toMap());
-    }
+    // ---
 
     private class Sequence<V> implements Deserializer.Sequence<V> {
 
-        private final Iterator<NbtElement> entries;
-        private final int maxSize;
-
         private final Endec<V> valueEndec;
+        private final Iterator<NbtElement> elements;
+        private final int size;
 
-        private Sequence(List<NbtElement> entries, Endec<V> valueEndec) {
-            this.entries = entries.iterator();
-            this.maxSize = entries.size();
-
+        private Sequence(Endec<V> valueEndec, List<NbtElement> elements) {
             this.valueEndec = valueEndec;
+
+            this.elements = elements.iterator();
+            this.size = elements.size();
         }
 
         @Override
-        public int size() {
-            return maxSize;
+        public int estimatedSize() {
+            return this.size;
         }
 
         @Override
         public boolean hasNext() {
-            return entries.hasNext();
+            return this.elements.hasNext();
         }
 
         @Override
         public V next() {
-            NbtDeserializer.this.stack.push(entries::next);
-
-            var entry = valueEndec.decode(NbtDeserializer.this);
-
-            NbtDeserializer.this.stack.pop();
-
-            return entry;
+            return NbtDeserializer.this.frame(
+                    this.elements::next,
+                    () -> this.valueEndec.decode(NbtDeserializer.this)
+            );
         }
     }
 
     private class Map<V> implements Deserializer.Map<V> {
 
-        private final Iterator<java.util.Map.Entry<String, NbtElement>> entries;
-        private final int maxSize;
-
         private final Endec<V> valueEndec;
+        private final Iterator<java.util.Map.Entry<String, NbtElement>> entries;
+        private final int size;
 
-        private Map(java.util.Map<String, NbtElement> map, Endec<V> valueEndec) {
-            this.entries = map.entrySet().iterator();
-            this.maxSize = map.size();
-
+        private Map(Endec<V> valueEndec, NbtCompound compound) {
             this.valueEndec = valueEndec;
+
+            this.entries = compound.toMap().entrySet().iterator();
+            this.size = compound.getSize();
         }
 
         @Override
-        public int size() {
-            return maxSize;
+        public int estimatedSize() {
+            return this.size;
         }
 
         @Override
         public boolean hasNext() {
-            return entries.hasNext();
+            return this.entries.hasNext();
         }
 
         @Override
         public java.util.Map.Entry<String, V> next() {
-            var entry = entries.next();
-
-            NbtDeserializer.this.stack.push(entry::getValue);
-
-            java.util.Map.Entry<String, V> newEntry = java.util.Map.entry(entry.getKey(), valueEndec.decode(NbtDeserializer.this));
-
-            NbtDeserializer.this.stack.pop();
-
-            return newEntry;
+            var entry = this.entries.next();
+            return NbtDeserializer.this.frame(
+                    entry::getValue,
+                    () -> java.util.Map.entry(entry.getKey(), this.valueEndec.decode(NbtDeserializer.this))
+            );
         }
     }
 
-    public class NbtStruct implements Struct {
+    public class Struct implements Deserializer.Struct {
 
-        private final java.util.Map<String, NbtElement> map;
+        private final NbtCompound compound;
 
-        public NbtStruct(java.util.Map<String, NbtElement> map) {
-            this.map = map;
+        public Struct(NbtCompound compound) {
+            this.compound = compound;
         }
 
         @Override
-        public <F> F field(String field, Endec<F> endec, @Nullable F defaultValue) {
-            if(!map.containsKey(field)) return defaultValue;
+        public <F> @NotNull F field(String name, Endec<F> endec) {
+            if (!this.compound.contains(name)) {
+                throw new IllegalStateException("Field " + name + " was missing from serialized data, but no default value was provided");
+            }
+            return NbtDeserializer.this.frame(
+                    () -> this.compound.get(name),
+                    () -> endec.decode(NbtDeserializer.this)
+            );
+        }
 
-            NbtDeserializer.this.stack.push(() -> map.get(field));
-
-            F value = endec.decode(NbtDeserializer.this);
-
-            NbtDeserializer.this.stack.pop();
-
-            return value;
+        @Override
+        public <F> @Nullable F field(String name, Endec<F> endec, @Nullable F defaultValue) {
+            if (!this.compound.contains(name)) return defaultValue;
+            return NbtDeserializer.this.frame(
+                    () -> this.compound.get(name),
+                    () -> endec.decode(NbtDeserializer.this)
+            );
         }
     }
 }

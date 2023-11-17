@@ -1,36 +1,34 @@
 package io.wispforest.owo.serialization.impl.json;
 
-import com.google.gson.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import io.wispforest.owo.serialization.*;
 import io.wispforest.owo.serialization.impl.SerializationAttribute;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.EnumSet;
+import java.util.Iterator;
+import java.util.Optional;
+import java.util.Set;
 
-public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> {
+public class JsonDeserializer extends HierarchicalDeserializer<JsonElement> implements SelfDescribedDeserializer<JsonElement> {
 
-    private static final Set<SerializationAttribute> ATTRIBUTES = EnumSet.allOf(SerializationAttribute.class);
+    private static final Set<SerializationAttribute> ATTRIBUTES = EnumSet.of(
+            SerializationAttribute.SELF_DESCRIBING,
+            SerializationAttribute.HUMAN_READABLE
+    );
 
-    protected final Deque<Supplier<JsonElement>> stack = new ArrayDeque<>();
-
-    public JsonDeserializer(JsonElement element, boolean compressed) {
-        stack.push(() -> element);
+    public JsonDeserializer(JsonElement serialized) {
+        super(serialized);
     }
 
-    private JsonElement topElement() {
-        return stack.peek().get();
-    }
+    // ---
 
-    //--
-
-    public static JsonDeserializer of(JsonElement element) {
-        return new JsonDeserializer(element, false);
-    }
-
-    public static JsonDeserializer compressed(JsonElement element) {
-        return new JsonDeserializer(element, true);
+    public static JsonDeserializer of(JsonElement serialized) {
+        return new JsonDeserializer(serialized);
     }
 
     @Override
@@ -38,11 +36,104 @@ public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> 
         return ATTRIBUTES;
     }
 
-    //--
+    // ---
+
+    @Override
+    public byte readByte() {
+        return this.getValue().getAsByte();
+    }
+
+    @Override
+    public short readShort() {
+        return this.getValue().getAsShort();
+    }
+
+    @Override
+    public int readInt() {
+        return this.getValue().getAsInt();
+    }
+
+    @Override
+    public long readLong() {
+        return this.getValue().getAsLong();
+    }
+
+    @Override
+    public float readFloat() {
+        return this.getValue().getAsFloat();
+    }
+
+    @Override
+    public double readDouble() {
+        return this.getValue().getAsDouble();
+    }
+
+    // ---
+
+    @Override
+    public int readVarInt() {
+        return this.readInt();
+    }
+
+    @Override
+    public long readVarLong() {
+        return this.readLong();
+    }
+
+    // ---
+
+    @Override
+    public boolean readBoolean() {
+        return this.getValue().getAsBoolean();
+    }
+
+    @Override
+    public String readString() {
+        return this.getValue().getAsString();
+    }
+
+    @Override
+    public byte[] readBytes() {
+        var array = this.getValue().getAsJsonArray().asList();
+
+        var result = new byte[array.size()];
+        for (int i = 0; i < array.size(); i++) {
+            result[i] = array.get(i).getAsByte();
+        }
+
+        return result;
+    }
+
+    @Override
+    public <V> Optional<V> readOptional(Endec<V> endec) {
+        var value = this.getValue();
+        return !value.isJsonNull()
+                ? Optional.of(endec.decode(this))
+                : Optional.empty();
+    }
+
+    // ---
+
+    @Override
+    public <E> Deserializer.Sequence<E> sequence(Endec<E> elementEndec) {
+        return new Sequence<>(elementEndec, (JsonArray) this.getValue());
+    }
+
+    @Override
+    public <V> Deserializer.Map<V> map(Endec<V> valueEndec) {
+        return new Map<>(valueEndec, ((JsonObject) this.getValue()));
+    }
+
+    @Override
+    public Deserializer.Struct struct() {
+        return new Struct((JsonObject) this.getValue());
+    }
+
+    // ---
 
     @Override
     public <S> void readAny(Serializer<S> visitor) {
-        this.decodeValue(visitor, this.topElement());
+        this.decodeValue(visitor, this.getValue());
     }
 
     private <S> void decodeValue(Serializer<S> visitor, JsonElement element) {
@@ -91,201 +182,99 @@ public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> 
         }
     }
 
-    //--
-
-    @Override
-    public <V> Optional<V> readOptional(Endec<V> endec) {
-        var element = topElement();
-
-        if (element.isJsonNull()) return Optional.empty();
-
-        return Optional.of(endec.decode(this));
-    }
-
-    @Override
-    public boolean readBoolean() {
-        return topElement().getAsBoolean();
-    }
-
-    @Override
-    public byte readByte() {
-        return topElement().getAsByte();
-    }
-
-    @Override
-    public short readShort() {
-        return topElement().getAsShort();
-    }
-
-    @Override
-    public int readInt() {
-        return topElement().getAsInt();
-    }
-
-    @Override
-    public long readLong() {
-        return topElement().getAsLong();
-    }
-
-    @Override
-    public float readFloat() {
-        return topElement().getAsFloat();
-    }
-
-    @Override
-    public double readDouble() {
-        return topElement().getAsDouble();
-    }
-
-    @Override
-    public String readString() {
-        return topElement().getAsString();
-    }
-
-    @Override
-    public byte[] readBytes() {
-        var jsonArray = topElement().getAsJsonArray().asList();
-
-        byte[] array = new byte[topElement().getAsJsonArray().size()];
-
-        for (int i = 0; i < jsonArray.size(); i++) array[i] = jsonArray.get(i).getAsByte();
-
-        return array;
-        //return Base64.getDecoder().decode(topElement().getAsString());
-    }
-
-    @Override
-    public int readVarInt() {
-        return readInt();
-    }
-
-    @Override
-    public long readVarLong() {
-        return readLong();
-    }
-
-    @Override
-    public <V> V tryRead(Function<Deserializer<JsonElement>, V> func) {
-        var stackCopy = new ArrayList<>(stack);
-
-        try {
-            return func.apply(this);
-        } catch (Exception e) {
-            stack.clear();
-            stack.addAll(stackCopy);
-
-            throw e;
-        }
-    }
-
-    @Override
-    public <E> Deserializer.Sequence<E> sequence(Endec<E> elementEndec) {
-        return new Sequence<>(((JsonArray) topElement()).asList(), elementEndec);
-    }
-
-    @Override
-    public <V> Deserializer.Map<V> map(Endec<V> valueEndec) {
-        return new Map<>(((JsonObject) topElement()).asMap(), valueEndec);
-    }
-
-    @Override
-    public Deserializer.Struct struct() {
-        return new Struct(((JsonObject) topElement()).asMap());
-    }
+    // ---
 
     private class Sequence<V> implements Deserializer.Sequence<V> {
 
-        private final Iterator<JsonElement> entries;
-        private final int maxSize;
-
         private final Endec<V> valueEndec;
+        private final Iterator<JsonElement> elements;
+        private final int size;
 
-        private Sequence(List<JsonElement> entries, Endec<V> valueEndec) {
-            this.entries = entries.iterator();
-            this.maxSize = entries.size();
-
+        private Sequence(Endec<V> valueEndec, JsonArray elements) {
             this.valueEndec = valueEndec;
+
+            this.elements = elements.iterator();
+            this.size = elements.size();
         }
 
         @Override
-        public int size() {
-            return maxSize;
+        public int estimatedSize() {
+            return this.size;
         }
 
         @Override
         public boolean hasNext() {
-            return entries.hasNext();
+            return this.elements.hasNext();
         }
 
         @Override
         public V next() {
-            JsonDeserializer.this.stack.push(entries::next);
-
-            V entry = valueEndec.decode(JsonDeserializer.this);
-
-            JsonDeserializer.this.stack.pop();
-
-            return entry;
+            return JsonDeserializer.this.frame(
+                    elements::next,
+                    () -> this.valueEndec.decode(JsonDeserializer.this)
+            );
         }
     }
 
     private class Map<V> implements Deserializer.Map<V> {
 
-        private final Iterator<java.util.Map.Entry<String, JsonElement>> entries;
-        private final int maxSize;
-
         private final Endec<V> valueEndec;
+        private final Iterator<java.util.Map.Entry<String, JsonElement>> entries;
+        private final int size;
 
-        private Map(java.util.Map<String, JsonElement> map, Endec<V> valueEndec) {
-            this.entries = map.entrySet().iterator();
-            this.maxSize = map.size();
-
+        private Map(Endec<V> valueEndec, JsonObject entries) {
             this.valueEndec = valueEndec;
+
+            this.entries = entries.entrySet().iterator();
+            this.size = entries.size();
         }
 
         @Override
-        public int size() {
-            return maxSize;
+        public int estimatedSize() {
+            return this.size;
         }
 
         @Override
         public boolean hasNext() {
-            return entries.hasNext();
+            return this.entries.hasNext();
         }
 
         @Override
         public java.util.Map.Entry<String, V> next() {
             var entry = entries.next();
-
-            JsonDeserializer.this.stack.push(entry::getValue);
-
-            java.util.Map.Entry<String, V> value = java.util.Map.entry(entry.getKey(), valueEndec.decode(JsonDeserializer.this));
-
-            JsonDeserializer.this.stack.pop();
-
-            return value;
+            return JsonDeserializer.this.frame(
+                    entry::getValue,
+                    () -> java.util.Map.entry(entry.getKey(), this.valueEndec.decode(JsonDeserializer.this))
+            );
         }
     }
 
     private class Struct implements Deserializer.Struct {
 
-        private final java.util.Map<String, JsonElement> map;
+        private final JsonObject object;
 
-        private Struct(java.util.Map<String, JsonElement> map) {
-            this.map = map;
+        private Struct(JsonObject object) {
+            this.object = object;
         }
 
         @Override
-        public <F> F field(String field, Endec<F> endec, @Nullable F defaultValue) {
-            if (!map.containsKey(field)) return defaultValue;
+        public <F> @NotNull F field(String name, Endec<F> endec) {
+            if (!this.object.has(name)) {
+                throw new IllegalStateException("Field " + name + " was missing from serialized data, but no default value was provided");
+            }
+            return JsonDeserializer.this.frame(
+                    () -> this.object.get(name),
+                    () -> endec.decode(JsonDeserializer.this)
+            );
+        }
 
-            JsonDeserializer.this.stack.push(() -> map.get(field));
-
-            F value = endec.decode(JsonDeserializer.this);
-
-            JsonDeserializer.this.stack.pop();
-
-            return value;
+        @Override
+        public <F> @Nullable F field(String name, Endec<F> endec, @Nullable F defaultValue) {
+            if (!this.object.has(name)) return defaultValue;
+            return JsonDeserializer.this.frame(
+                    () -> this.object.get(name),
+                    () -> endec.decode(JsonDeserializer.this)
+            );
         }
     }
 }

@@ -1,7 +1,9 @@
 package io.wispforest.owo.serialization.impl.json;
 
 import com.google.gson.*;
-import io.wispforest.owo.serialization.*;
+import io.wispforest.owo.serialization.Endec;
+import io.wispforest.owo.serialization.HierarchicalSerializer;
+import io.wispforest.owo.serialization.Serializer;
 import io.wispforest.owo.serialization.impl.SerializationAttribute;
 
 import java.util.EnumSet;
@@ -11,7 +13,7 @@ import java.util.Set;
 public class JsonSerializer extends HierarchicalSerializer<JsonElement> {
 
     private static final Set<SerializationAttribute> ATTRIBUTES = EnumSet.allOf(SerializationAttribute.class);
-    protected JsonElement prefix;
+    private JsonElement prefix;
 
     private JsonSerializer(JsonElement prefix) {
         super(null);
@@ -28,27 +30,14 @@ public class JsonSerializer extends HierarchicalSerializer<JsonElement> {
         return new JsonSerializer(prefix);
     }
 
-    //--
+    // ---
 
     @Override
     public Set<SerializationAttribute> attributes() {
         return ATTRIBUTES;
     }
 
-    //--
-
-    @Override
-    public <V> void writeOptional(Endec<V> endec, Optional<V> optional) {
-        optional.ifPresentOrElse(
-                value -> endec.encode(this, value),
-                () -> this.consume(JsonNull.INSTANCE)
-        );
-    }
-
-    @Override
-    public void writeBoolean(boolean value) {
-        this.consume(new JsonPrimitive(value));
-    }
+    // ---
 
     @Override
     public void writeByte(byte value) {
@@ -80,20 +69,7 @@ public class JsonSerializer extends HierarchicalSerializer<JsonElement> {
         this.consume(new JsonPrimitive(value));
     }
 
-    @Override
-    public void writeString(String value) {
-        this.consume(new JsonPrimitive(value));
-    }
-
-    @Override
-    public void writeBytes(byte[] bytes) {
-        JsonArray array = new JsonArray();
-
-        for (byte aByte : bytes) array.add(aByte);
-
-        this.consume(array);
-        //consumeElement(new JsonPrimitive(Base64.encodeBase64String(bytes)));
-    }
+    // ---
 
     @Override
     public void writeVarInt(int value) {
@@ -104,6 +80,38 @@ public class JsonSerializer extends HierarchicalSerializer<JsonElement> {
     public void writeVarLong(long value) {
         this.writeLong(value);
     }
+
+    // ---
+
+    @Override
+    public void writeBoolean(boolean value) {
+        this.consume(new JsonPrimitive(value));
+    }
+
+    @Override
+    public void writeString(String value) {
+        this.consume(new JsonPrimitive(value));
+    }
+
+    @Override
+    public void writeBytes(byte[] bytes) {
+        var result = new JsonArray(bytes.length);
+        for (int i = 0; i < bytes.length; i++) {
+            result.add(bytes[i]);
+        }
+
+        this.consume(result);
+    }
+
+    @Override
+    public <V> void writeOptional(Endec<V> endec, Optional<V> optional) {
+        optional.ifPresentOrElse(
+                value -> endec.encode(this, value),
+                () -> this.consume(JsonNull.INSTANCE)
+        );
+    }
+
+    // ---
 
     @Override
     public <E> Serializer.Sequence<E> sequence(Endec<E> elementEndec, int size) {
@@ -120,10 +128,7 @@ public class JsonSerializer extends HierarchicalSerializer<JsonElement> {
         return new Map<>(null);
     }
 
-    @Override
-    public JsonElement result() {
-        return this.result;
-    }
+    // ---
 
     private class Map<V> implements Serializer.Map<V>, Struct {
 
@@ -136,6 +141,7 @@ public class JsonSerializer extends HierarchicalSerializer<JsonElement> {
             if (JsonSerializer.this.prefix != null) {
                 if (JsonSerializer.this.prefix instanceof JsonObject prefixObject) {
                     this.result = prefixObject;
+                    JsonSerializer.this.prefix = null;
                 } else {
                     throw new IllegalStateException("Incompatible prefix of type " + JsonSerializer.this.prefix.getClass().getSimpleName() + " used for JSON map/struct");
                 }
@@ -179,6 +185,7 @@ public class JsonSerializer extends HierarchicalSerializer<JsonElement> {
             if (JsonSerializer.this.prefix != null) {
                 if (JsonSerializer.this.prefix instanceof JsonArray prefixArray) {
                     this.result = prefixArray;
+                    JsonSerializer.this.prefix = null;
                 } else {
                     throw new IllegalStateException("Incompatible prefix of type " + JsonSerializer.this.prefix.getClass().getSimpleName() + " used for JSON sequence");
                 }
@@ -200,6 +207,4 @@ public class JsonSerializer extends HierarchicalSerializer<JsonElement> {
             JsonSerializer.this.consume(result);
         }
     }
-
-
 }

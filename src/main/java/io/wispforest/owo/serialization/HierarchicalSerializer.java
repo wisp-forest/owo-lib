@@ -26,6 +26,11 @@ public abstract class HierarchicalSerializer<T> implements Serializer<T> {
         this.sinks.pop();
     }
 
+    @Override
+    public T result() {
+        return this.result;
+    }
+
     @FunctionalInterface
     protected interface FrameAction<T> {
         void accept(EncodedValue<T> encoded);

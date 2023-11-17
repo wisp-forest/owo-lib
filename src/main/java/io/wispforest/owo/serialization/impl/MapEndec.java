@@ -59,7 +59,7 @@ public class MapEndec<K, V> implements Endec<Map<K, V>> {
     public <E> Map<K, V> decode(Deserializer<E> deserializer) {
         var mapDeserializer = deserializer.map(endec);
 
-        final Map<K, V> map = mapConstructor.apply(mapDeserializer.size());
+        final Map<K, V> map = mapConstructor.apply(mapDeserializer.estimatedSize());
 
         mapDeserializer.forEachRemaining(entry -> map.put(toKey.apply(entry.getKey()), entry.getValue()));
 

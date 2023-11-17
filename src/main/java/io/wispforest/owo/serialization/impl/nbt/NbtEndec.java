@@ -31,7 +31,7 @@ public final class NbtEndec implements Endec<NbtElement> {
 
             serializer.writeBytes(output.toByteArray());
         } catch (IOException e) {
-            throw new RuntimeException("Failed to parsed binary NBT in NbtEndec", e);
+            throw new RuntimeException("Failed to parse binary NBT in NbtEndec", e);
         }
     }
 

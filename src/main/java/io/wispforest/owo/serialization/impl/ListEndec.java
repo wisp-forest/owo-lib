@@ -39,7 +39,7 @@ public class ListEndec<V> implements Endec<List<V>> {
     public <E> List<V> decode(Deserializer<E> deserializer) {
         var sequenceDeserializer = deserializer.sequence(endec);
 
-        final List<V> list = listConstructor.apply(sequenceDeserializer.size());
+        final List<V> list = listConstructor.apply(sequenceDeserializer.estimatedSize());
 
         sequenceDeserializer.forEachRemaining(list::add);
 

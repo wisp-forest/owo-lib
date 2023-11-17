@@ -1,7 +1,9 @@
 package io.wispforest.owo.serialization.impl.data;
 
-import io.wispforest.owo.serialization.*;
+import io.wispforest.owo.serialization.Deserializer;
+import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.impl.SerializationAttribute;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.DataInput;
@@ -10,9 +12,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
-public abstract class DataInputDeserializer<D extends DataInput> implements Deserializer<D> {
+public class DataInputDeserializer<D extends DataInput> implements Deserializer<D> {
 
-    public abstract D get();
+    protected final D input;
+
+    public DataInputDeserializer(D input) {
+        this.input = input;
+    }
 
     @Override
     public Set<SerializationAttribute> attributes() {
@@ -21,16 +27,16 @@ public abstract class DataInputDeserializer<D extends DataInput> implements Dese
 
     @Override
     public <V> Optional<V> readOptional(Endec<V> endec) {
-        var bl = readBoolean();
-
-        return Optional.ofNullable(bl ? endec.decode(this) : null);
+        return this.readBoolean()
+                ? Optional.of(endec.decode(this))
+                : Optional.empty();
     }
 
     @Override
     public boolean readBoolean() {
         try {
-            return get().readBoolean();
-        } catch (IOException e){
+            return this.input.readBoolean();
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -38,8 +44,8 @@ public abstract class DataInputDeserializer<D extends DataInput> implements Dese
     @Override
     public byte readByte() {
         try {
-            return get().readByte();
-        } catch (IOException e){
+            return this.input.readByte();
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -47,8 +53,8 @@ public abstract class DataInputDeserializer<D extends DataInput> implements Dese
     @Override
     public short readShort() {
         try {
-            return get().readShort();
-        } catch (IOException e){
+            return this.input.readShort();
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -56,8 +62,8 @@ public abstract class DataInputDeserializer<D extends DataInput> implements Dese
     @Override
     public int readInt() {
         try {
-            return get().readInt();
-        } catch (IOException e){
+            return this.input.readInt();
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -65,8 +71,8 @@ public abstract class DataInputDeserializer<D extends DataInput> implements Dese
     @Override
     public long readLong() {
         try {
-            return get().readLong();
-        } catch (IOException e){
+            return this.input.readLong();
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -74,8 +80,8 @@ public abstract class DataInputDeserializer<D extends DataInput> implements Dese
     @Override
     public float readFloat() {
         try {
-            return get().readFloat();
-        } catch (IOException e){
+            return this.input.readFloat();
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -83,8 +89,8 @@ public abstract class DataInputDeserializer<D extends DataInput> implements Dese
     @Override
     public double readDouble() {
         try {
-            return get().readDouble();
-        } catch (IOException e){
+            return this.input.readDouble();
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -92,84 +98,118 @@ public abstract class DataInputDeserializer<D extends DataInput> implements Dese
     @Override
     public String readString() {
         try {
-            return get().readUTF();
-        } catch (IOException e){
+            return this.input.readUTF();
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
     public byte[] readBytes() {
-        var array = new byte[readVarInt()];
+        var result = new byte[this.readVarInt()];
 
         try {
-        get().readFully(array);
-        } catch (IOException e){
+            this.input.readFully(result);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        return array;
+        return result;
     }
 
     @Override
     public int readVarInt() {
-        return readInt();
+        try {
+            int result = 0;
+            int bytes = 0;
+
+            byte current;
+            do {
+                current = this.input.readByte();
+                result |= (current & 127) << bytes++ * 7;
+                if (bytes > 5) {
+                    throw new RuntimeException("VarInt too big");
+                }
+            } while((current & 128) == 128);
+
+            return result;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public long readVarLong() {
-        return readLong();
+        try {
+            long result = 0L;
+            int bytes = 0;
+
+            byte current;
+            do {
+                current = this.input.readByte();
+                result |= (long)(current & 127) << bytes++ * 7;
+                if (bytes > 10) {
+                    throw new RuntimeException("VarLong too big");
+                }
+            } while((current & 128) == 128);
+
+            return result;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
-    public <V> V tryRead(Function<Deserializer<D>, V> func) {
-        return func.apply(this);
+    public <V> V tryRead(Function<Deserializer<D>, V> reader) {
+        throw new UnsupportedOperationException("As DataInput cannot be rewound, tryRead(...) cannot be supported");
     }
 
     @Override
     public <E> Deserializer.Sequence<E> sequence(Endec<E> elementEndec) {
-        return new Sequence<E>().valueEndec(elementEndec, readVarInt());
+        return new Sequence<>(elementEndec, this.readVarInt());
     }
 
     @Override
     public <V> Deserializer.Map<V> map(Endec<V> valueEndec) {
-        return new Map<>(valueEndec, readVarInt());
+        return new Map<>(valueEndec, this.readVarInt());
     }
 
     @Override
     public Struct struct() {
-        return new Sequence<>();
+        return new Sequence<>(null, 0);
     }
 
     private class Sequence<V> implements Deserializer.Sequence<V>, Struct {
 
-        private int maxSize;
-        private Endec<V> valueEndec;
+        private final Endec<V> valueEndec;
+        private final int size;
 
         private int index = 0;
 
-        private Sequence<V> valueEndec(Endec<V> valueEndec, int maxSize) {
+        private Sequence(Endec<V> valueEndec, int size) {
             this.valueEndec = valueEndec;
-            this.maxSize = maxSize;
-
-            return this;
+            this.size = size;
         }
 
         @Override
-        public int size() {
-            return maxSize;
+        public int estimatedSize() {
+            return this.size;
         }
 
         @Override
         public boolean hasNext() {
-            return index < maxSize;
+            return this.index < this.size;
         }
 
         @Override
         public V next() {
-            index++;
+            this.index++;
+            return this.valueEndec.decode(DataInputDeserializer.this);
+        }
 
-            return field("", valueEndec);
+        @Override
+        public <F> @NotNull F field(String name, Endec<F> endec) {
+            return endec.decode(DataInputDeserializer.this);
         }
 
         @Override
@@ -180,33 +220,32 @@ public abstract class DataInputDeserializer<D extends DataInput> implements Dese
 
     private class Map<V> implements Deserializer.Map<V> {
 
-        private final int maxSize;
         private final Endec<V> valueEndec;
+        private final int size;
 
         private int index = 0;
 
-        private Map(Endec<V> valueEndec, int maxSize) {
+        private Map(Endec<V> valueEndec, int size) {
             this.valueEndec = valueEndec;
-            this.maxSize = maxSize;
+            this.size = size;
         }
 
         @Override
-        public int size() {
-            return maxSize;
+        public int estimatedSize() {
+            return this.size;
         }
 
         @Override
         public boolean hasNext() {
-            return index < maxSize;
+            return this.index < this.size;
         }
 
         @Override
         public java.util.Map.Entry<String, V> next() {
-            index++;
-
+            this.index++;
             return java.util.Map.entry(
                     DataInputDeserializer.this.readString(),
-                    valueEndec.decode(DataInputDeserializer.this)
+                    this.valueEndec.decode(DataInputDeserializer.this)
             );
         }
     }

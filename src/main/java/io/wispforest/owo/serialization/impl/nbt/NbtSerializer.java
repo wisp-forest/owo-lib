@@ -18,7 +18,7 @@ public class NbtSerializer extends HierarchicalSerializer<NbtElement> {
         this.prefix = prefix;
     }
 
-    //--
+    // ---
 
     public static NbtSerializer of() {
         return new NbtSerializer(null);
@@ -28,27 +28,14 @@ public class NbtSerializer extends HierarchicalSerializer<NbtElement> {
         return new NbtSerializer(prefix);
     }
 
-    //--
+    // ---
 
     @Override
     public Set<SerializationAttribute> attributes() {
         return ATTRIBUTES;
     }
 
-    //--
-
-    @Override
-    public <V> void writeOptional(Endec<V> endec, Optional<V> optional) {
-        try(var struct = this.struct()) {
-            struct.field("present", Endec.BOOLEAN, optional.isPresent());
-            optional.ifPresent(value -> struct.field("value", endec, value));
-        }
-    }
-
-    @Override
-    public void writeBoolean(boolean value) {
-        this.consume(NbtByte.of(value));
-    }
+    // ---
 
     @Override
     public void writeByte(byte value) {
@@ -80,15 +67,7 @@ public class NbtSerializer extends HierarchicalSerializer<NbtElement> {
         this.consume(NbtDouble.of(value));
     }
 
-    @Override
-    public void writeString(String value) {
-        this.consume(NbtString.of(value));
-    }
-
-    @Override
-    public void writeBytes(byte[] bytes) {
-        this.consume(new NbtByteArray(bytes));
-    }
+    // ---
 
     @Override
     public void writeVarInt(int value) {
@@ -109,6 +88,33 @@ public class NbtSerializer extends HierarchicalSerializer<NbtElement> {
         });
     }
 
+    // ---
+
+    @Override
+    public void writeBoolean(boolean value) {
+        this.consume(NbtByte.of(value));
+    }
+
+    @Override
+    public void writeString(String value) {
+        this.consume(NbtString.of(value));
+    }
+
+    @Override
+    public void writeBytes(byte[] bytes) {
+        this.consume(new NbtByteArray(bytes));
+    }
+
+    @Override
+    public <V> void writeOptional(Endec<V> endec, Optional<V> optional) {
+        try(var struct = this.struct()) {
+            struct.field("present", Endec.BOOLEAN, optional.isPresent());
+            optional.ifPresent(value -> struct.field("value", endec, value));
+        }
+    }
+
+    // ---
+
     @Override
     public <E> Serializer.Sequence<E> sequence(Endec<E> elementEndec, int size) {
         return new Sequence<>(elementEndec);
@@ -124,10 +130,7 @@ public class NbtSerializer extends HierarchicalSerializer<NbtElement> {
         return new Map<>(null);
     }
 
-    @Override
-    public NbtElement result() {
-        return this.result;
-    }
+    // ---
 
     private class Map<V> implements Serializer.Map<V>, Struct {
 
