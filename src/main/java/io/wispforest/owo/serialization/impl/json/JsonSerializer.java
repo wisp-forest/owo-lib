@@ -106,18 +106,18 @@ public class JsonSerializer extends HierarchicalSerializer<JsonElement> {
     }
 
     @Override
-    public <E> SequenceSerializer<E> sequence(Endec<E> elementEndec, int size) {
-        return new JsonSequenceSerializer<>(elementEndec, size);
+    public <E> Serializer.Sequence<E> sequence(Endec<E> elementEndec, int size) {
+        return new Sequence<>(elementEndec, size);
     }
 
     @Override
-    public <V> MapSerializer<V> map(Endec<V> valueEndec, int size) {
-        return new JsonMapSerializer<>(valueEndec);
+    public <V> Serializer.Map<V> map(Endec<V> valueEndec, int size) {
+        return new Map<>(valueEndec);
     }
 
     @Override
-    public StructSerializer struct() {
-        return new JsonMapSerializer<>(null);
+    public Struct struct() {
+        return new Map<>(null);
     }
 
     @Override
@@ -125,12 +125,12 @@ public class JsonSerializer extends HierarchicalSerializer<JsonElement> {
         return this.result;
     }
 
-    public class JsonMapSerializer<V> implements MapSerializer<V>, StructSerializer {
+    private class Map<V> implements Serializer.Map<V>, Struct {
 
         private final Endec<V> valueEndec;
         private final JsonObject result;
 
-        public JsonMapSerializer(Endec<V> valueEndec) {
+        private Map(Endec<V> valueEndec) {
             this.valueEndec = valueEndec;
 
             if (JsonSerializer.this.prefix != null) {
@@ -153,7 +153,7 @@ public class JsonSerializer extends HierarchicalSerializer<JsonElement> {
         }
 
         @Override
-        public <F> StructSerializer field(String name, Endec<F> endec, F value) {
+        public <F> Struct field(String name, Endec<F> endec, F value) {
             JsonSerializer.this.frame(encoded -> {
                 endec.encode(JsonSerializer.this, value);
                 this.result.add(name, encoded.require("struct field"));
@@ -168,12 +168,12 @@ public class JsonSerializer extends HierarchicalSerializer<JsonElement> {
         }
     }
 
-    public class JsonSequenceSerializer<V> implements SequenceSerializer<V> {
+    private class Sequence<V> implements Serializer.Sequence<V> {
 
         private final Endec<V> valueEndec;
         private final JsonArray result;
 
-        public JsonSequenceSerializer(Endec<V> valueEndec, int size) {
+        private Sequence(Endec<V> valueEndec, int size) {
             this.valueEndec = valueEndec;
 
             if (JsonSerializer.this.prefix != null) {

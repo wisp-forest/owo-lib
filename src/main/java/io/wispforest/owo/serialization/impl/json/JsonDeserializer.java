@@ -5,7 +5,6 @@ import io.wispforest.owo.serialization.*;
 import io.wispforest.owo.serialization.impl.SerializationAttribute;
 import org.jetbrains.annotations.Nullable;
 
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -180,28 +179,28 @@ public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> 
     }
 
     @Override
-    public <E> SequenceDeserializer<E> sequence(Endec<E> elementEndec) {
-        return new JsonSequenceDeserializer<>(((JsonArray) topElement()).asList(), elementEndec);
+    public <E> Deserializer.Sequence<E> sequence(Endec<E> elementEndec) {
+        return new Sequence<>(((JsonArray) topElement()).asList(), elementEndec);
     }
 
     @Override
-    public <V> MapDeserializer<V> map(Endec<V> valueEndec) {
-        return new JsonMapDeserializer<>(((JsonObject) topElement()).asMap(), valueEndec);
+    public <V> Deserializer.Map<V> map(Endec<V> valueEndec) {
+        return new Map<>(((JsonObject) topElement()).asMap(), valueEndec);
     }
 
     @Override
-    public StructDeserializer struct() {
-        return new JsonStructDeserializer(((JsonObject) topElement()).asMap());
+    public Deserializer.Struct struct() {
+        return new Struct(((JsonObject) topElement()).asMap());
     }
 
-    public class JsonSequenceDeserializer<V> implements SequenceDeserializer<V> {
+    private class Sequence<V> implements Deserializer.Sequence<V> {
 
         private final Iterator<JsonElement> entries;
         private final int maxSize;
 
         private final Endec<V> valueEndec;
 
-        public JsonSequenceDeserializer(List<JsonElement> entries, Endec<V> valueEndec) {
+        private Sequence(List<JsonElement> entries, Endec<V> valueEndec) {
             this.entries = entries.iterator();
             this.maxSize = entries.size();
 
@@ -230,14 +229,14 @@ public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> 
         }
     }
 
-    public class JsonMapDeserializer<V> implements MapDeserializer<V> {
+    private class Map<V> implements Deserializer.Map<V> {
 
-        private final Iterator<Map.Entry<String, JsonElement>> entries;
+        private final Iterator<java.util.Map.Entry<String, JsonElement>> entries;
         private final int maxSize;
 
         private final Endec<V> valueEndec;
 
-        public JsonMapDeserializer(Map<String, JsonElement> map, Endec<V> valueEndec) {
+        private Map(java.util.Map<String, JsonElement> map, Endec<V> valueEndec) {
             this.entries = map.entrySet().iterator();
             this.maxSize = map.size();
 
@@ -255,12 +254,12 @@ public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> 
         }
 
         @Override
-        public Map.Entry<String, V> next() {
+        public java.util.Map.Entry<String, V> next() {
             var entry = entries.next();
 
             JsonDeserializer.this.stack.push(entry::getValue);
 
-            Map.Entry<String, V> value = Map.entry(entry.getKey(), valueEndec.decode(JsonDeserializer.this));
+            java.util.Map.Entry<String, V> value = java.util.Map.entry(entry.getKey(), valueEndec.decode(JsonDeserializer.this));
 
             JsonDeserializer.this.stack.pop();
 
@@ -268,11 +267,11 @@ public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> 
         }
     }
 
-    public class JsonStructDeserializer implements StructDeserializer {
+    private class Struct implements Deserializer.Struct {
 
-        private final Map<String, JsonElement> map;
+        private final java.util.Map<String, JsonElement> map;
 
-        public JsonStructDeserializer(Map<String, JsonElement> map) {
+        private Struct(java.util.Map<String, JsonElement> map) {
             this.map = map;
         }
 

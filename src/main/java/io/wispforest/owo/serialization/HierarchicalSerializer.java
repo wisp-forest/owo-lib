@@ -1,7 +1,5 @@
 package io.wispforest.owo.serialization;
 
-import org.apache.commons.lang3.mutable.MutableObject;
-
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.function.Consumer;

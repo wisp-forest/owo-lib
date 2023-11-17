@@ -1,15 +1,12 @@
 package io.wispforest.owo.serialization.impl.nbtio;
 
 import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.MapSerializer;
-import io.wispforest.owo.serialization.SequenceSerializer;
-import io.wispforest.owo.serialization.StructSerializer;
+import io.wispforest.owo.serialization.Serializer;
 import io.wispforest.owo.serialization.impl.data.DataOutputSerializer;
 import net.minecraft.nbt.*;
 
 import java.io.DataOutput;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public class BinaryNbtSerializer extends DataOutputSerializer<DataOutput> {
@@ -69,33 +66,33 @@ public class BinaryNbtSerializer extends DataOutputSerializer<DataOutput> {
     }
 
     @Override
-    public <V> MapSerializer<V> map(Endec<V> valueEndec, int size) {
-        return new BinaryNbtMapSerializer<>(valueEndec);
+    public <V> Serializer.Map<V> map(Endec<V> valueEndec, int size) {
+        return new Map<>(valueEndec);
     }
 
     @Override
-    public <E> SequenceSerializer<E> sequence(Endec<E> elementEndec, int size) {
+    public <E> Serializer.Sequence<E> sequence(Endec<E> elementEndec, int size) {
         if(size == 0){
             writeByte((byte) 0);
             writeVarInt(0);
         }
 
-        return new BinaryNbtSequenceSerializer<>(elementEndec, size);
+        return new Sequence<>(elementEndec, size);
     }
 
     @Override
-    public StructSerializer struct() {
-        return new BinaryNbtMapSerializer<>(null);
+    public Struct struct() {
+        return new Map<>(null);
     }
 
-    public class BinaryNbtSequenceSerializer<V> implements SequenceSerializer<V>{
+    private class Sequence<V> implements Serializer.Sequence<V> {
 
         public boolean writtenTypeData = false;
         private final int size;
 
         private final Endec<V> valueEndec;
 
-        public BinaryNbtSequenceSerializer(Endec<V> valueEndec, int size) {
+        private Sequence(Endec<V> valueEndec, int size) {
             this.valueEndec = valueEndec;
             this.size = size;
         }
@@ -117,11 +114,11 @@ public class BinaryNbtSerializer extends DataOutputSerializer<DataOutput> {
         @Override public void end() {}
     }
 
-    public class BinaryNbtMapSerializer<V> implements StructSerializer, MapSerializer<V> {
+    private class Map<V> implements Struct, Serializer.Map<V> {
 
         private final Endec<V> valueEndec;
 
-        public BinaryNbtMapSerializer(Endec<V> valueEndec) {
+        private Map(Endec<V> valueEndec) {
             this.valueEndec = valueEndec;
         }
 
@@ -131,7 +128,7 @@ public class BinaryNbtSerializer extends DataOutputSerializer<DataOutput> {
         }
 
         @Override
-        public <F> StructSerializer field(String name, Endec<F> endec, F value) {
+        public <F> Struct field(String name, Endec<F> endec, F value) {
             writeByte(getType(value));
             BinaryNbtSerializer.this.writeString(name);
             endec.encode(BinaryNbtSerializer.this, value);
@@ -166,7 +163,7 @@ public class BinaryNbtSerializer extends DataOutputSerializer<DataOutput> {
             return NbtElement.DOUBLE_TYPE;
         } else if (object instanceof List) {
             return NbtElement.LIST_TYPE;
-        } else if (object instanceof Map) {
+        } else if (object instanceof java.util.Map) {
             return NbtElement.COMPOUND_TYPE;
         }
 

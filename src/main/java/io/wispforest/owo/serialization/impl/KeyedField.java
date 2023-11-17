@@ -1,8 +1,8 @@
 package io.wispforest.owo.serialization.impl;
 
+import io.wispforest.owo.serialization.Deserializer;
 import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.StructDeserializer;
-import io.wispforest.owo.serialization.StructSerializer;
+import io.wispforest.owo.serialization.Serializer;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 
@@ -51,11 +51,11 @@ public class KeyedField<F> {
 
     //--
 
-    public void serializeField(StructSerializer serializer, F value){
+    public void serializeField(Serializer.Struct serializer, F value){
         serializer.field(name, endec, value);
     }
 
-    public F deserializeField(StructDeserializer deserializer){
+    public F deserializeField(Deserializer.Struct deserializer){
         return (defaultValue == null)
                 ? deserializer.field(name, endec)
                 : deserializer.field(name, endec, defaultValue.getValue());

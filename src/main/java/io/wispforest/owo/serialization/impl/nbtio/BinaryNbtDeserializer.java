@@ -125,43 +125,42 @@ public class BinaryNbtDeserializer extends DataInputDeserializer<DataInput> impl
     }
 
     @Override
-    public <E> SequenceDeserializer<E> sequence(Endec<E> elementEndec) {
+    public <E> Deserializer.Sequence<E> sequence(Endec<E> elementEndec) {
         var currentType = typeStack.peek();
 
         if(!(currentType == NbtElement.INT_ARRAY_TYPE || currentType == NbtElement.LONG_ARRAY_TYPE)){
             readByte();
         }
 
-        return new BinaryNbtSequenceDeserializer<>(elementEndec, readVarInt());
+        return new Sequence<>(elementEndec, readVarInt());
     }
 
     @Override
-    public <V> MapDeserializer<V> map(Endec<V> valueEndec) {
+    public <V> Deserializer.Map<V> map(Endec<V> valueEndec) {
         var type = readByte();
 
         if(type != NbtElement.END_TYPE) typeStack.push(type);
 
-        return new BinaryNbtMapDeserializer<>(valueEndec, type != NbtElement.END_TYPE);
+        return new Map<>(valueEndec, type != NbtElement.END_TYPE);
     }
 
     @Override
-    public StructDeserializer struct() {
+    public Struct struct() {
         var type = readByte();
 
         if(type != NbtElement.END_TYPE) typeStack.push(type);
 
-        return new BinaryNbtMapDeserializer<>(null, type != NbtElement.END_TYPE);
+        return new Map<>(null, type != NbtElement.END_TYPE);
     }
 
-
-    public class BinaryNbtSequenceDeserializer<V> implements SequenceDeserializer<V> {
+    private class Sequence<V> implements Deserializer.Sequence<V> {
 
         private final int maxSize;
         private final Endec<V> valueEndec;
 
         private int index = 0;
 
-        public BinaryNbtSequenceDeserializer(Endec<V> valueEndec, int maxSize) {
+        private Sequence(Endec<V> valueEndec, int maxSize) {
             this.valueEndec = valueEndec;
             this.maxSize = maxSize;
         }
@@ -184,13 +183,13 @@ public class BinaryNbtDeserializer extends DataInputDeserializer<DataInput> impl
         }
     }
 
-    public class BinaryNbtMapDeserializer<V> implements MapDeserializer<V>, StructDeserializer {
+    private class Map<V> implements Deserializer.Map<V>, Deserializer.Struct {
 
         private boolean hasEnded;
 
         private final Endec<V> valueEndec;
 
-        public BinaryNbtMapDeserializer(Endec<V> valueEndec, boolean hasEnded) {
+        private Map(Endec<V> valueEndec, boolean hasEnded) {
             this.valueEndec = valueEndec;
             this.hasEnded = hasEnded;
         }
@@ -206,8 +205,8 @@ public class BinaryNbtDeserializer extends DataInputDeserializer<DataInput> impl
         }
 
         @Override
-        public Map.Entry<String, V> next() {
-            var value = Map.entry(
+        public java.util.Map.Entry<String, V> next() {
+            var value = java.util.Map.entry(
                     BinaryNbtDeserializer.this.readString(),
                     valueEndec.decode(BinaryNbtDeserializer.this)
             );

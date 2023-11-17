@@ -1,7 +1,7 @@
 package io.wispforest.owo.serialization.impl;
 
 import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.StructSerializer;
+import io.wispforest.owo.serialization.Serializer;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,7 +37,7 @@ public class StructField<S, F> extends KeyedField<F> {
 
     //--
 
-    public void serializeFieldInst(StructSerializer serializer, S instance){
+    public void serializeFieldInst(Serializer.Struct serializer, S instance){
         super.serializeField(serializer, getter.apply(instance));
     }
 }

@@ -209,28 +209,28 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
     }
 
     @Override
-    public <E> SequenceDeserializer<E> sequence(Endec<E> elementEndec) {
-        return new NbtSequenceDeserializer<>(((AbstractNbtList<NbtElement>) topElement()), elementEndec);
+    public <E> Deserializer.Sequence<E> sequence(Endec<E> elementEndec) {
+        return new Sequence<>(((AbstractNbtList<NbtElement>) topElement()), elementEndec);
     }
 
     @Override
-    public <V> MapDeserializer<V> map(Endec<V> valueEndec) {
-        return new NbtMapDeserializer<>(((NbtCompound) topElement()).toMap(), valueEndec);
+    public <V> Deserializer.Map<V> map(Endec<V> valueEndec) {
+        return new Map<>(((NbtCompound) topElement()).toMap(), valueEndec);
     }
 
     @Override
-    public StructDeserializer struct() {
-        return new NbtStructDeserializer(((NbtCompound) topElement()).toMap());
+    public Struct struct() {
+        return new NbtStruct(((NbtCompound) topElement()).toMap());
     }
 
-    public class NbtSequenceDeserializer<V> implements SequenceDeserializer<V> {
+    private class Sequence<V> implements Deserializer.Sequence<V> {
 
         private final Iterator<NbtElement> entries;
         private final int maxSize;
 
         private final Endec<V> valueEndec;
 
-        public NbtSequenceDeserializer(List<NbtElement> entries, Endec<V> valueEndec) {
+        private Sequence(List<NbtElement> entries, Endec<V> valueEndec) {
             this.entries = entries.iterator();
             this.maxSize = entries.size();
 
@@ -259,14 +259,14 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
         }
     }
 
-    public class NbtMapDeserializer<V> implements MapDeserializer<V> {
+    private class Map<V> implements Deserializer.Map<V> {
 
-        private final Iterator<Map.Entry<String, NbtElement>> entries;
+        private final Iterator<java.util.Map.Entry<String, NbtElement>> entries;
         private final int maxSize;
 
         private final Endec<V> valueEndec;
 
-        public NbtMapDeserializer(Map<String, NbtElement> map, Endec<V> valueEndec) {
+        private Map(java.util.Map<String, NbtElement> map, Endec<V> valueEndec) {
             this.entries = map.entrySet().iterator();
             this.maxSize = map.size();
 
@@ -284,12 +284,12 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
         }
 
         @Override
-        public Map.Entry<String, V> next() {
+        public java.util.Map.Entry<String, V> next() {
             var entry = entries.next();
 
             NbtDeserializer.this.stack.push(entry::getValue);
 
-            Map.Entry<String, V> newEntry = Map.entry(entry.getKey(), valueEndec.decode(NbtDeserializer.this));
+            java.util.Map.Entry<String, V> newEntry = java.util.Map.entry(entry.getKey(), valueEndec.decode(NbtDeserializer.this));
 
             NbtDeserializer.this.stack.pop();
 
@@ -297,11 +297,11 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
         }
     }
 
-    public class NbtStructDeserializer implements StructDeserializer {
+    public class NbtStruct implements Struct {
 
-        private final Map<String, NbtElement> map;
+        private final java.util.Map<String, NbtElement> map;
 
-        public NbtStructDeserializer(Map<String, NbtElement> map) {
+        public NbtStruct(java.util.Map<String, NbtElement> map) {
             this.map = map;
         }
 

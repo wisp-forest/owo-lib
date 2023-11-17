@@ -5,10 +5,8 @@ import io.wispforest.owo.serialization.impl.SerializationAttribute;
 import net.minecraft.nbt.*;
 import net.minecraft.network.encoding.VarInts;
 import net.minecraft.network.encoding.VarLongs;
-import org.apache.commons.lang3.mutable.MutableObject;
 
 import java.util.*;
-import java.util.function.Consumer;
 
 public class NbtSerializer extends HierarchicalSerializer<NbtElement> {
 
@@ -112,18 +110,18 @@ public class NbtSerializer extends HierarchicalSerializer<NbtElement> {
     }
 
     @Override
-    public <E> SequenceSerializer<E> sequence(Endec<E> elementEndec, int size) {
-        return new NbtSequenceSerializer<>(elementEndec);
+    public <E> Serializer.Sequence<E> sequence(Endec<E> elementEndec, int size) {
+        return new Sequence<>(elementEndec);
     }
 
     @Override
-    public <V> MapSerializer<V> map(Endec<V> valueEndec, int size) {
-        return new NbtMapSerializer<>(valueEndec);
+    public <V> Serializer.Map<V> map(Endec<V> valueEndec, int size) {
+        return new Map<>(valueEndec);
     }
 
     @Override
-    public StructSerializer struct() {
-        return new NbtMapSerializer<>(null);
+    public Struct struct() {
+        return new Map<>(null);
     }
 
     @Override
@@ -131,12 +129,12 @@ public class NbtSerializer extends HierarchicalSerializer<NbtElement> {
         return this.result;
     }
 
-    public class NbtMapSerializer<V> implements MapSerializer<V>, StructSerializer {
+    private class Map<V> implements Serializer.Map<V>, Struct {
 
         private final Endec<V> valueEndec;
         private final NbtCompound result;
 
-        public NbtMapSerializer(Endec<V> valueEndec) {
+        private Map(Endec<V> valueEndec) {
             this.valueEndec = valueEndec;
 
             if (NbtSerializer.this.prefix != null) {
@@ -159,7 +157,7 @@ public class NbtSerializer extends HierarchicalSerializer<NbtElement> {
         }
 
         @Override
-        public <F> StructSerializer field(String name, Endec<F> endec, F value) {
+        public <F> Struct field(String name, Endec<F> endec, F value) {
             NbtSerializer.this.frame(encoded -> {
                 endec.encode(NbtSerializer.this, value);
                 this.result.put(name, encoded.require("struct field"));
@@ -174,12 +172,12 @@ public class NbtSerializer extends HierarchicalSerializer<NbtElement> {
         }
     }
 
-    private class NbtSequenceSerializer<V> implements SequenceSerializer<V> {
+    private class Sequence<V> implements Serializer.Sequence<V> {
 
         private final Endec<V> valueEndec;
         private final NbtList result;
 
-        private NbtSequenceSerializer(Endec<V> valueEndec) {
+        private Sequence(Endec<V> valueEndec) {
             this.valueEndec = valueEndec;
 
             if (NbtSerializer.this.prefix != null) {

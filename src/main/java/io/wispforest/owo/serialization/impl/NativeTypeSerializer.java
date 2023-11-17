@@ -79,17 +79,17 @@ public class NativeTypeSerializer extends HierarchicalSerializer<Object> {
     }
 
     @Override
-    public <E> SequenceSerializer<E> sequence(Endec<E> elementEndec, int size) {
+    public <E> Serializer.Sequence<E> sequence(Endec<E> elementEndec, int size) {
         return new Sequence<>(elementEndec);
     }
 
     @Override
-    public <V> MapSerializer<V> map(Endec<V> valueEndec, int size) {
+    public <V> Serializer.Map<V> map(Endec<V> valueEndec, int size) {
         return new Map<>(valueEndec);
     }
 
     @Override
-    public StructSerializer struct() {
+    public Serializer.Struct struct() {
         return new Struct();
     }
 
@@ -98,7 +98,7 @@ public class NativeTypeSerializer extends HierarchicalSerializer<Object> {
         return this.result;
     }
 
-    private class Sequence<V> implements SequenceSerializer<V> {
+    private class Sequence<V> implements Serializer.Sequence<V> {
 
         private final Endec<V> elementEndec;
         private final List<Object> result;
@@ -122,7 +122,7 @@ public class NativeTypeSerializer extends HierarchicalSerializer<Object> {
         }
     }
 
-    private class Map<V> implements MapSerializer<V> {
+    private class Map<V> implements Serializer.Map<V> {
 
         private final Endec<V> valueEndec;
         private final java.util.Map<String, Object> result;
@@ -146,7 +146,7 @@ public class NativeTypeSerializer extends HierarchicalSerializer<Object> {
         }
     }
 
-    private class Struct implements StructSerializer {
+    private class Struct implements Serializer.Struct {
 
         private final java.util.Map<String, Object> result;
 
@@ -155,7 +155,7 @@ public class NativeTypeSerializer extends HierarchicalSerializer<Object> {
         }
 
         @Override
-        public <F> StructSerializer field(String name, Endec<F> endec, F value) {
+        public <F> Serializer.Struct field(String name, Endec<F> endec, F value) {
             NativeTypeSerializer.this.frame(encoded -> {
                 endec.encode(NativeTypeSerializer.this, value);
                 this.result.put(name, encoded.require("struct field"));

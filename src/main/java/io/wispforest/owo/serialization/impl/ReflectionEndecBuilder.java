@@ -383,7 +383,7 @@ public class ReflectionEndecBuilder {
                     final Endec<Direction> DIRECTION = createEnumSerializer(Direction.class);
 
                     @Override
-                    public void encode(StructSerializer serializer, BlockHitResult hitResult) {
+                    public void encode(Serializer.Struct serializer, BlockHitResult hitResult) {
                         BlockPos blockPos = hitResult.getBlockPos();
                         serializer.field("blockPos", Endec.BLOCK_POS, blockPos)
                                 .field("side", DIRECTION, hitResult.getSide());
@@ -396,7 +396,7 @@ public class ReflectionEndecBuilder {
                     }
 
                     @Override
-                    public BlockHitResult decode(StructDeserializer deserializer) {
+                    public BlockHitResult decode(Deserializer.Struct deserializer) {
                         BlockPos blockPos = deserializer.field("blockPos", Endec.BLOCK_POS);
                         Direction direction = deserializer.field("side", DIRECTION);
 

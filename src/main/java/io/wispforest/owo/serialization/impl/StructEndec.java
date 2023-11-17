@@ -9,7 +9,7 @@ public interface StructEndec<T> extends Endec<T> {
 
     @Override
     default <E> void encode(Serializer<E> serializer, T value) {
-        try(StructSerializer struct = serializer.struct()){
+        try(Serializer.Struct struct = serializer.struct()){
             encode(struct, value);
         }
     }
@@ -19,8 +19,8 @@ public interface StructEndec<T> extends Endec<T> {
         return decode(deserializer.struct());
     }
 
-    void encode(StructSerializer serializer, T value);
+    void encode(Serializer.Struct serializer, T value);
 
-    T decode(StructDeserializer deserializer);
+    T decode(Deserializer.Struct deserializer);
 
 }

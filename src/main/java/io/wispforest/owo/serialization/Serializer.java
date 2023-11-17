@@ -33,11 +33,23 @@ public interface Serializer<T> {
 
     void writeVarLong(final long value);
 
-    <E> SequenceSerializer<E> sequence(Endec<E> elementEndec, int size);
+    <E> Sequence<E> sequence(Endec<E> elementEndec, int size);
 
-    <V> MapSerializer<V> map(Endec<V> valueEndec, int size);
+    <V> Map<V> map(Endec<V> valueEndec, int size);
 
-    StructSerializer struct();
+    Struct struct();
 
     T result();
+
+    interface Sequence<E> extends Endable {
+        void element(E element);
+    }
+
+    interface Map<V> extends Endable {
+        void entry(String key, V value);
+    }
+
+    interface Struct extends Endable {
+        <F> Struct field(String name, Endec<F> endec, F value);
+    }
 }

@@ -9,7 +9,6 @@ import net.minecraft.network.encoding.VarInts;
 import net.minecraft.network.encoding.VarLongs;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -111,28 +110,28 @@ public class ByteBufDeserializer implements Deserializer<ByteBuf> {
     }
 
     @Override
-    public <E> SequenceDeserializer<E> sequence(Endec<E> elementEndec) {
-        return new ByteBufSequenceDeserializer<E>().valueEndec(elementEndec, readVarInt());
+    public <E> Deserializer.Sequence<E> sequence(Endec<E> elementEndec) {
+        return new Sequence<E>().valueEndec(elementEndec, readVarInt());
     }
 
     @Override
-    public <V> MapDeserializer<V> map(Endec<V> valueEndec) {
-        return new ByteBufMapDeserializer<V>(valueEndec, readVarInt());
+    public <V> Deserializer.Map<V> map(Endec<V> valueEndec) {
+        return new Map<V>(valueEndec, readVarInt());
     }
 
     @Override
-    public StructDeserializer struct() {
-        return new ByteBufSequenceDeserializer<>();
+    public Struct struct() {
+        return new Sequence<>();
     }
 
-    public class ByteBufSequenceDeserializer<V> implements SequenceDeserializer<V>, StructDeserializer {
+    private class Sequence<V> implements Deserializer.Sequence<V>, Struct {
 
         private int maxSize;
         private Endec<V> valueEndec;
 
         private int index = 0;
 
-        public ByteBufSequenceDeserializer<V> valueEndec(Endec<V> valueEndec, int maxSize) {
+        private Sequence<V> valueEndec(Endec<V> valueEndec, int maxSize) {
             this.valueEndec = valueEndec;
             this.maxSize = maxSize;
 
@@ -162,14 +161,14 @@ public class ByteBufDeserializer implements Deserializer<ByteBuf> {
         }
     }
 
-    public class ByteBufMapDeserializer<V> implements MapDeserializer<V> {
+    private class Map<V> implements Deserializer.Map<V> {
 
         private final int maxSize;
         private final Endec<V> valueEndec;
 
         private int index = 0;
 
-        public ByteBufMapDeserializer(Endec<V> valueEndec, int maxSize) {
+        private Map(Endec<V> valueEndec, int maxSize) {
             this.valueEndec = valueEndec;
             this.maxSize = maxSize;
         }
@@ -185,10 +184,10 @@ public class ByteBufDeserializer implements Deserializer<ByteBuf> {
         }
 
         @Override
-        public Map.Entry<String, V> next() {
+        public java.util.Map.Entry<String, V> next() {
             index++;
 
-            return Map.entry(
+            return java.util.Map.entry(
                     ByteBufDeserializer.this.readString(),
                     valueEndec.decode(ByteBufDeserializer.this)
             );

@@ -2,13 +2,10 @@ package io.wispforest.owo.serialization.impl.data;
 
 import io.wispforest.owo.serialization.*;
 import io.wispforest.owo.serialization.impl.SerializationAttribute;
-import io.wispforest.owo.serialization.impl.bytebuf.ByteBufDeserializer;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.DataInput;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -130,28 +127,28 @@ public abstract class DataInputDeserializer<D extends DataInput> implements Dese
     }
 
     @Override
-    public <E> SequenceDeserializer<E> sequence(Endec<E> elementEndec) {
-        return new DataInputSequenceDeserializer<E>().valueEndec(elementEndec, readVarInt());
+    public <E> Deserializer.Sequence<E> sequence(Endec<E> elementEndec) {
+        return new Sequence<E>().valueEndec(elementEndec, readVarInt());
     }
 
     @Override
-    public <V> MapDeserializer<V> map(Endec<V> valueEndec) {
-        return new DataInputMapDeserializer<>(valueEndec, readVarInt());
+    public <V> Deserializer.Map<V> map(Endec<V> valueEndec) {
+        return new Map<>(valueEndec, readVarInt());
     }
 
     @Override
-    public StructDeserializer struct() {
-        return new DataInputSequenceDeserializer<>();
+    public Struct struct() {
+        return new Sequence<>();
     }
 
-    public class DataInputSequenceDeserializer<V> implements SequenceDeserializer<V>, StructDeserializer {
+    private class Sequence<V> implements Deserializer.Sequence<V>, Struct {
 
         private int maxSize;
         private Endec<V> valueEndec;
 
         private int index = 0;
 
-        public DataInputSequenceDeserializer<V> valueEndec(Endec<V> valueEndec, int maxSize) {
+        private Sequence<V> valueEndec(Endec<V> valueEndec, int maxSize) {
             this.valueEndec = valueEndec;
             this.maxSize = maxSize;
 
@@ -181,14 +178,14 @@ public abstract class DataInputDeserializer<D extends DataInput> implements Dese
         }
     }
 
-    public class DataInputMapDeserializer<V> implements MapDeserializer<V> {
+    private class Map<V> implements Deserializer.Map<V> {
 
         private final int maxSize;
         private final Endec<V> valueEndec;
 
         private int index = 0;
 
-        public DataInputMapDeserializer(Endec<V> valueEndec, int maxSize) {
+        private Map(Endec<V> valueEndec, int maxSize) {
             this.valueEndec = valueEndec;
             this.maxSize = maxSize;
         }
@@ -204,10 +201,10 @@ public abstract class DataInputDeserializer<D extends DataInput> implements Dese
         }
 
         @Override
-        public Map.Entry<String, V> next() {
+        public java.util.Map.Entry<String, V> next() {
             index++;
 
-            return Map.entry(
+            return java.util.Map.entry(
                     DataInputDeserializer.this.readString(),
                     valueEndec.decode(DataInputDeserializer.this)
             );

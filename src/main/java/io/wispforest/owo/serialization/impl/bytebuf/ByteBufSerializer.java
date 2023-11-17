@@ -1,10 +1,7 @@
 package io.wispforest.owo.serialization.impl.bytebuf;
 
 import io.netty.buffer.ByteBuf;
-import io.wispforest.owo.serialization.MapSerializer;
-import io.wispforest.owo.serialization.SequenceSerializer;
 import io.wispforest.owo.serialization.Serializer;
-import io.wispforest.owo.serialization.StructSerializer;
 import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.impl.SerializationAttribute;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
@@ -101,20 +98,20 @@ public class ByteBufSerializer<T extends ByteBuf> implements Serializer<T> {
     }
 
     @Override
-    public <V> MapSerializer<V> map(Endec<V> valueEndec, int size) {
-        return (MapSerializer<V>) sequence(valueEndec, size);
+    public <V> Map<V> map(Endec<V> valueEndec, int size) {
+        return (Map<V>) sequence(valueEndec, size);
     }
 
     @Override
-    public <E> SequenceSerializer<E> sequence(Endec<E> elementEndec, int size) {
+    public <E> Serializer.Sequence<E> sequence(Endec<E> elementEndec, int size) {
         writeVarInt(size);
 
-        return new ByteBufSequenceSerializer<>(elementEndec);
+        return new Sequence<>(elementEndec);
     }
 
     @Override
-    public StructSerializer struct() {
-        return new ByteBufSequenceSerializer(null);
+    public Struct struct() {
+        return new Sequence(null);
     }
 
     @Override
@@ -122,11 +119,11 @@ public class ByteBufSerializer<T extends ByteBuf> implements Serializer<T> {
         return (T) buf;
     }
 
-    public class ByteBufSequenceSerializer<V> implements SequenceSerializer<V>, StructSerializer, MapSerializer<V> {
+    private class Sequence<V> implements Serializer.Sequence<V>, Struct, Map<V> {
 
         private final Endec<V> valueEndec;
 
-        public ByteBufSequenceSerializer(Endec<V> valueEndec) {
+        private Sequence(Endec<V> valueEndec) {
             this.valueEndec = valueEndec;
         }
 
@@ -142,7 +139,7 @@ public class ByteBufSerializer<T extends ByteBuf> implements Serializer<T> {
         }
 
         @Override
-        public <F> StructSerializer field(String name, Endec<F> endec, F value) {
+        public <F> Struct field(String name, Endec<F> endec, F value) {
             endec.encode(ByteBufSerializer.this, value);
 
             return this;

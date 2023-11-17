@@ -122,27 +122,27 @@ public abstract class DataOutputSerializer<D extends DataOutput> implements Seri
     }
 
     @Override
-    public <V> MapSerializer<V> map(Endec<V> valueEndec, int size) {
-        return (MapSerializer<V>) sequence(valueEndec, size);
+    public <V> Map<V> map(Endec<V> valueEndec, int size) {
+        return (Map<V>) sequence(valueEndec, size);
     }
 
     @Override
-    public <E> SequenceSerializer<E> sequence(Endec<E> elementEndec, int size) {
+    public <E> Serializer.Sequence<E> sequence(Endec<E> elementEndec, int size) {
         writeVarInt(size);
 
-        return new DataOutputSequenceSerializer<>(elementEndec);
+        return new Sequence<>(elementEndec);
     }
 
     @Override
-    public StructSerializer struct() {
-        return new DataOutputSequenceSerializer(null);
+    public Struct struct() {
+        return new Sequence(null);
     }
 
-    public class DataOutputSequenceSerializer<V> implements SequenceSerializer<V>, StructSerializer, MapSerializer<V> {
+    protected class Sequence<V> implements Serializer.Sequence<V>, Serializer.Struct, Serializer.Map<V> {
 
-        private final Endec<V> valueEndec;
+        protected final Endec<V> valueEndec;
 
-        public DataOutputSequenceSerializer(Endec<V> valueEndec) {
+        protected Sequence(Endec<V> valueEndec) {
             this.valueEndec = valueEndec;
         }
 
@@ -158,7 +158,7 @@ public abstract class DataOutputSerializer<D extends DataOutput> implements Seri
         }
 
         @Override
-        public <F> StructSerializer field(String name, Endec<F> endec, F value) {
+        public <F> Struct field(String name, Endec<F> endec, F value) {
             endec.encode(DataOutputSerializer.this, value);
 
             return this;

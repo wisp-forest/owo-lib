@@ -90,7 +90,7 @@ public class RecordEndec<R extends Record> implements StructEndec<R> {
      * @return The deserialized record
      */
     @Override
-    public R decode(StructDeserializer struct) {
+    public R decode(Deserializer.Struct struct) {
         Object[] messageContents = new Object[fieldCount];
 
         var index = new MutableInt();
@@ -115,7 +115,7 @@ public class RecordEndec<R extends Record> implements StructEndec<R> {
      * @param instance The record instance to serialize
      */
     @Override
-    public void encode(StructSerializer struct, R instance) {
+    public void encode(Serializer.Struct struct, R instance) {
         adapters.forEach((s, fHandler) -> struct.field(s, fHandler.kodeck, fHandler.rFunction.apply(instance)));
     }
 

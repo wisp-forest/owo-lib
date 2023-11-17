@@ -172,7 +172,7 @@ public interface Endec<T> {
     static <T, K> Endec<T> dispatchedOf(Function<K, Endec<? extends T>> keyToEndec, Function<T, K> keyGetter, Endec<K> keyEndec) {
         return new StructEndec<T>() {
             @Override
-            public void encode(StructSerializer struct, T value) {
+            public void encode(Serializer.Struct struct, T value) {
                 var key = keyGetter.apply(value);
 
                 struct.field("key", keyEndec, key)
@@ -180,7 +180,7 @@ public interface Endec<T> {
             }
 
             @Override
-            public T decode(StructDeserializer struct) {
+            public T decode(Deserializer.Struct struct) {
                 return struct.field("key", keyToEndec.apply(struct.field("value", keyEndec)));
             }
         };
