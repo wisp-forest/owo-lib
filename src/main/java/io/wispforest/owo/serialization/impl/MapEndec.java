@@ -45,7 +45,7 @@ public class MapEndec<K, V> implements Endec<Map<K, V>> {
 
     public <M extends Map<K, V>> Endec<M> conform(IntFunction<M> mapConstructor){
         return this.mapConstructor(mapConstructor::apply)
-                .then(map -> (M) map, map -> map);
+                .xmap(map -> (M) map, map -> map);
     }
 
     @Override

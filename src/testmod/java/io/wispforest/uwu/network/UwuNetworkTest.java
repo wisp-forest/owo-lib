@@ -49,7 +49,7 @@ public class UwuNetworkTest {
         System.out.println();
 
         var builtendec = StructEndecBuilder.of(
-                StructField.of("text", Endec.STRING.list().then(s -> s, s -> (List<String>) s), TestRecord::text),
+                StructField.of("text", Endec.STRING.list().xmap(s -> s, s -> (List<String>) s), TestRecord::text),
                 StructField.of("enumValue", ReflectionEndecBuilder.createEnumSerializer(TestEnum.class), TestRecord::enumValue),
                 TestRecord::new
         );

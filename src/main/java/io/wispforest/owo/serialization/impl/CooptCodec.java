@@ -21,8 +21,9 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class CooptCodec<T> implements Endec<T>, Codec<T> {
+public class CooptCodec<T> implements Codec<T> {
 
+    // truly one of the types of all time
     private static final Map<DynamicOps<?>, Pair<Supplier<Serializer<Object>>, Function<Object, Deserializer<Object>>>> MAP = new HashMap<>();
 
     static {
@@ -58,7 +59,7 @@ public class CooptCodec<T> implements Endec<T>, Codec<T> {
 
         if(deserializer != null) {
             try {
-                value = decode(deserializer);
+                value = this.endec.decode(deserializer);
 
                 error = false;
             } catch (Exception e) {
@@ -82,7 +83,7 @@ public class CooptCodec<T> implements Endec<T>, Codec<T> {
 
         if(serializer != null) {
             try {
-                encode(serializer, input);
+                this.endec.encode(serializer, input);
 
                 value = serializer.result();
 
@@ -95,15 +96,5 @@ public class CooptCodec<T> implements Endec<T>, Codec<T> {
         return error
                 ? DataResult.error(exception != null ? exception::getMessage : () -> "The corresponding Format for the given DynamicOps could not be located!")
                 : DataResult.success(value);
-    }
-
-    @Override
-    public <E> void encode(Serializer<E> serializer, T value) {
-        endec.encode(serializer, value);
-    }
-
-    @Override
-    public <E> T decode(Deserializer<E> deserializer) {
-        return endec.decode(deserializer);
     }
 }

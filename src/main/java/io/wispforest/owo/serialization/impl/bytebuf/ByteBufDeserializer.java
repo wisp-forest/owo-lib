@@ -26,7 +26,7 @@ public class ByteBufDeserializer implements Deserializer<ByteBuf> {
 
     @Override
     public Set<SerializationAttribute> attributes() {
-        return Set.of(SerializationAttribute.BINARY);
+        return Set.of();
     }
 
     //--

@@ -2,7 +2,6 @@ package io.wispforest.uwu.recipe;
 
 import com.google.common.collect.Sets;
 import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.endecs.ExtraEndecs;
 import io.wispforest.owo.serialization.endecs.IngredientEndec;
 import io.wispforest.owo.serialization.endecs.RecipeEndecs;
 import io.wispforest.owo.serialization.impl.AttributeEndecBuilder;
@@ -47,7 +46,7 @@ public class UwuShapedRecipe extends ShapedRecipe {
 
     //--
 
-    private static final Endec<UwuShapedRecipe> FROM_RAW_RECIPE = RawShapedRecipe.ENDEC.then(recipe -> {
+    private static final Endec<UwuShapedRecipe> FROM_RAW_RECIPE = RawShapedRecipe.ENDEC.xmap(recipe -> {
         String[] strings = ShapedRecipe.removePadding(recipe.pattern);
         int i = strings[0].length();
         int j = strings.length;

@@ -3,113 +3,86 @@ package io.wispforest.owo.serialization.impl.json;
 import com.google.gson.*;
 import io.wispforest.owo.serialization.*;
 import io.wispforest.owo.serialization.impl.SerializationAttribute;
-import io.wispforest.owo.serialization.impl.nbt.NbtSerializer;
-import org.apache.commons.lang3.mutable.MutableObject;
 
-import java.util.*;
-import java.util.function.Consumer;
+import java.util.EnumSet;
+import java.util.Optional;
+import java.util.Set;
 
-public class JsonSerializer implements Serializer<JsonElement> {
+public class JsonSerializer extends HierarchicalSerializer<JsonElement> {
 
-    private final SerializationAttribute extraAttribute;
+    private static final Set<SerializationAttribute> ATTRIBUTES = EnumSet.allOf(SerializationAttribute.class);
+    protected JsonElement prefix;
 
-    protected JsonElement prefix = null;
-
-    protected Deque<Consumer<JsonElement>> stack = new ArrayDeque<>();
-
-    protected JsonElement result = null;
-
-    private JsonSerializer(boolean compressed, JsonElement prefix) {
-        this(compressed);
-
+    private JsonSerializer(JsonElement prefix) {
+        super(null);
         this.prefix = prefix;
-    }
-
-    private JsonSerializer(boolean compressed) {
-        stack.push(element -> result = element);
-
-        extraAttribute = compressed ? SerializationAttribute.COMPRESSED : SerializationAttribute.HUMAN_READABLE;
-    }
-
-    public void consumeElement(JsonElement element) {
-        stack.peek().accept(element);
     }
 
     //--
 
-    public static JsonSerializer of(){
-        return new JsonSerializer(false);
+    public static JsonSerializer of() {
+        return new JsonSerializer(null);
     }
 
-    public static JsonSerializer of(JsonElement prefix){
-        return new JsonSerializer(false, prefix);
-    }
-
-    public static JsonSerializer compressed(){
-        return new JsonSerializer(true);
-    }
-
-    public static JsonSerializer compressed(JsonElement prefix){
-        return new JsonSerializer(true, prefix);
+    public static JsonSerializer of(JsonElement prefix) {
+        return new JsonSerializer(prefix);
     }
 
     //--
 
     @Override
     public Set<SerializationAttribute> attributes() {
-        Set<SerializationAttribute> set = new HashSet<>();
-
-        set.add(SerializationAttribute.SELF_DESCRIBING);
-        set.add(extraAttribute);
-
-        return set;
+        return ATTRIBUTES;
     }
 
     //--
 
     @Override
     public <V> void writeOptional(Endec<V> endec, Optional<V> optional) {
-        optional.ifPresentOrElse(v -> endec.encode(this, v), () -> consumeElement(JsonNull.INSTANCE));
+        optional.ifPresentOrElse(
+                value -> endec.encode(this, value),
+                () -> this.consume(JsonNull.INSTANCE)
+        );
     }
 
     @Override
     public void writeBoolean(boolean value) {
-        consumeElement(new JsonPrimitive(value));
+        this.consume(new JsonPrimitive(value));
     }
 
     @Override
     public void writeByte(byte value) {
-        consumeElement(new JsonPrimitive(value));
+        this.consume(new JsonPrimitive(value));
     }
 
     @Override
     public void writeShort(short value) {
-        consumeElement(new JsonPrimitive(value));
+        this.consume(new JsonPrimitive(value));
     }
 
     @Override
     public void writeInt(int value) {
-        consumeElement(new JsonPrimitive(value));
+        this.consume(new JsonPrimitive(value));
     }
 
     @Override
     public void writeLong(long value) {
-        consumeElement(new JsonPrimitive(value));
+        this.consume(new JsonPrimitive(value));
     }
 
     @Override
     public void writeFloat(float value) {
-        consumeElement(new JsonPrimitive(value));
+        this.consume(new JsonPrimitive(value));
     }
 
     @Override
     public void writeDouble(double value) {
-        consumeElement(new JsonPrimitive(value));
+        this.consume(new JsonPrimitive(value));
     }
 
     @Override
     public void writeString(String value) {
-        consumeElement(new JsonPrimitive(value));
+        this.consume(new JsonPrimitive(value));
     }
 
     @Override
@@ -118,131 +91,113 @@ public class JsonSerializer implements Serializer<JsonElement> {
 
         for (byte aByte : bytes) array.add(aByte);
 
-        consumeElement(array);
+        this.consume(array);
         //consumeElement(new JsonPrimitive(Base64.encodeBase64String(bytes)));
     }
 
     @Override
     public void writeVarInt(int value) {
-        writeInt(value);
+        this.writeInt(value);
     }
 
     @Override
     public void writeVarLong(long value) {
-        writeLong(value);
+        this.writeLong(value);
     }
 
     @Override
-    public <E> SequenceSerializer<E> sequence(Endec<E> elementEndec, int length) {
-        return new JsonSequenceSerializer<>(elementEndec);
+    public <E> SequenceSerializer<E> sequence(Endec<E> elementEndec, int size) {
+        return new JsonSequenceSerializer<>(elementEndec, size);
     }
 
     @Override
-    public <V> MapSerializer<V> map(Endec<V> valueEndec, int length) {
-        return new JsonMapSerializer<V>().valueEndec(valueEndec);
+    public <V> MapSerializer<V> map(Endec<V> valueEndec, int size) {
+        return new JsonMapSerializer<>(valueEndec);
     }
 
     @Override
     public StructSerializer struct() {
-        return new JsonMapSerializer<>();
+        return new JsonMapSerializer<>(null);
     }
 
     @Override
     public JsonElement result() {
-        return result;
-    }
-
-    public static class JsonEncodeException extends RuntimeException {
-        public JsonEncodeException(String message) {
-            super(message);
-        }
+        return this.result;
     }
 
     public class JsonMapSerializer<V> implements MapSerializer<V>, StructSerializer {
 
+        private final Endec<V> valueEndec;
         private final JsonObject result;
 
-        public JsonMapSerializer(){
-            var prefix = JsonSerializer.this.prefix;
-
-            if(prefix == null){
-                result = new JsonObject();
-
-                return;
-            }
-
-            if(!(prefix instanceof JsonObject)) throw new IllegalStateException("Prefix is not a valid JsonObject!");
-
-            result = (JsonObject) prefix;
-            JsonSerializer.this.prefix = null;
-        }
-
-        private Endec<V> valueEndec = null;
-
-        public JsonMapSerializer<V> valueEndec(Endec<V> valueEndec) {
+        public JsonMapSerializer(Endec<V> valueEndec) {
             this.valueEndec = valueEndec;
 
-            return this;
+            if (JsonSerializer.this.prefix != null) {
+                if (JsonSerializer.this.prefix instanceof JsonObject prefixObject) {
+                    this.result = prefixObject;
+                } else {
+                    throw new IllegalStateException("Incompatible prefix of type " + JsonSerializer.this.prefix.getClass().getSimpleName() + " used for JSON map/struct");
+                }
+            } else {
+                this.result = new JsonObject();
+            }
         }
 
         @Override
         public void entry(String key, V value) {
-            field(key, valueEndec, value);
+            JsonSerializer.this.frame(encoded -> {
+                this.valueEndec.encode(JsonSerializer.this, value);
+                this.result.add(key, encoded.require("map value"));
+            });
         }
 
         @Override
         public <F> StructSerializer field(String name, Endec<F> endec, F value) {
-            MutableObject<JsonElement> encodedHolder = new MutableObject<>(null);
-
-            JsonSerializer.this.stack.push(encodedHolder::setValue);
-
-            try {
+            JsonSerializer.this.frame(encoded -> {
                 endec.encode(JsonSerializer.this, value);
-            } finally {
-                JsonSerializer.this.stack.pop();
-            }
-
-            if (encodedHolder.getValue() == null) throw new JsonSerializer.JsonEncodeException("No field was serialized");
-            result.add(name, encodedHolder.getValue());
+                this.result.add(name, encoded.require("struct field"));
+            });
 
             return this;
         }
 
         @Override
         public void end() {
-            JsonSerializer.this.consumeElement(result);
+            JsonSerializer.this.consume(result);
         }
     }
 
     public class JsonSequenceSerializer<V> implements SequenceSerializer<V> {
 
         private final Endec<V> valueEndec;
+        private final JsonArray result;
 
-        private final JsonArray result = new JsonArray();
-
-        public JsonSequenceSerializer(Endec<V> valueEndec) {
+        public JsonSequenceSerializer(Endec<V> valueEndec, int size) {
             this.valueEndec = valueEndec;
+
+            if (JsonSerializer.this.prefix != null) {
+                if (JsonSerializer.this.prefix instanceof JsonArray prefixArray) {
+                    this.result = prefixArray;
+                } else {
+                    throw new IllegalStateException("Incompatible prefix of type " + JsonSerializer.this.prefix.getClass().getSimpleName() + " used for JSON sequence");
+                }
+            } else {
+                this.result = new JsonArray(size);
+            }
         }
 
         @Override
         public void element(V element) {
-            MutableObject<JsonElement> encodedHolder = new MutableObject<>(null);
-
-            JsonSerializer.this.stack.push(encodedHolder::setValue);
-
-            try {
-                valueEndec.encode(JsonSerializer.this, element);
-            } finally {
-                JsonSerializer.this.stack.pop();
-            }
-
-            if (encodedHolder.getValue() == null) throw new JsonSerializer.JsonEncodeException("No value was serialized");
-            result.add(encodedHolder.getValue());
+            JsonSerializer.this.frame(encoded -> {
+                this.valueEndec.encode(JsonSerializer.this, element);
+                this.result.add(encoded.require("sequence element"));
+            });
         }
 
         @Override
         public void end() {
-            JsonSerializer.this.consumeElement(result);
+            JsonSerializer.this.consume(result);
         }
     }
 

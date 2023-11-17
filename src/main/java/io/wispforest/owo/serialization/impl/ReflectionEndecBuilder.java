@@ -58,6 +58,7 @@ public class ReflectionEndecBuilder {
      * @param deserializer The deserialization method
      * @param <T>          The type of object to register a serializer for
      */
+    @SuppressWarnings("rawtypes")
     public static <T> void register(Class<T> clazz, BiConsumer<Serializer, T> serializer, Function<Deserializer, T> deserializer) {
         register(clazz, Endec.of(serializer, deserializer));
     }
@@ -68,6 +69,7 @@ public class ReflectionEndecBuilder {
     }
 
     @SafeVarargs
+    @SuppressWarnings("rawtypes")
     private static <T> void register(BiConsumer<Serializer, T> serializer, Function<Deserializer, T> deserializer, Class<T>... classes) {
         final var kodeck = Endec.of(serializer, deserializer);
 
@@ -217,7 +219,7 @@ public class ReflectionEndecBuilder {
         var elementEndec = get(elementClass);
 
         return elementEndec.list()
-                .then(es -> {
+                .xmap(es -> {
                     T collection = createCollection(clazz);
 
                     collection.addAll(es);
@@ -250,7 +252,7 @@ public class ReflectionEndecBuilder {
     public static Endec<?> createArraySerializer(Class<?> elementClass) {
         var elementSerializer = (Endec<Object>) get(elementClass);
 
-        return elementSerializer.list().then(list -> {
+        return elementSerializer.list().xmap(list -> {
             final int length = list.size();
             Object array = Array.newInstance(elementClass, length);
             for (int i = 0; i < length; i++) {
@@ -286,7 +288,7 @@ public class ReflectionEndecBuilder {
      * @return The created serializer
      */
     public static <E extends Enum<E>> Endec<E> createEnumSerializer(Class<E> enumClass) {
-        return Endec.VAR_INT.then(i -> enumClass.getEnumConstants()[i], Enum::ordinal);
+        return Endec.VAR_INT.xmap(i -> enumClass.getEnumConstants()[i], Enum::ordinal);
     }
 
     @SuppressWarnings("unchecked")
@@ -353,7 +355,7 @@ public class ReflectionEndecBuilder {
 
         register(Endec.BYTE, Byte.class, byte.class);
         register(Endec.SHORT, Short.class, short.class);
-        register(Endec.SHORT.then(aShort -> (char) aShort.shortValue(), character -> (short) character.charValue()), Character.class, char.class);
+        register(Endec.SHORT.xmap(aShort -> (char) aShort.shortValue(), character -> (short) character.charValue()), Character.class, char.class);
 
         register(Void.class, Endec.EMPTY);
 
@@ -413,7 +415,7 @@ public class ReflectionEndecBuilder {
         register(Text.class, Endec.TEXT);
 
         register(ParticleEffect.class,
-                Endec.PACKET_BYTE_BUF.then(
+                Endec.PACKET_BYTE_BUF.xmap(
                         byteBuf -> {
                             //noinspection rawtypes
                             final ParticleType particleType = Registries.PARTICLE_TYPE.get(byteBuf.readInt());
@@ -432,13 +434,13 @@ public class ReflectionEndecBuilder {
         );
 
         register(Vec3d.class, Endec.DOUBLE.list()
-                .then(
+                .xmap(
                         doubles -> new Vec3d(doubles.get(0), doubles.get(1), doubles.get(2)),
                         vec3d -> List.of(vec3d.getX(), vec3d.getY(), vec3d.getZ())
                 ));
 
         register(Vector3f.class, Endec.FLOAT.list()
-                .then(
+                .xmap(
                         doubles -> new Vector3f(doubles.get(0), doubles.get(1), doubles.get(2)),
                         vec3d -> List.of(vec3d.x(), vec3d.y(), vec3d.z())
                 ));

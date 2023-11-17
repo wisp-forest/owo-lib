@@ -1,6 +1,5 @@
 package io.wispforest.owo.serialization.impl.nbt;
 
-import com.google.gson.JsonElement;
 import io.wispforest.owo.serialization.*;
 import io.wispforest.owo.serialization.impl.SerializationAttribute;
 import net.minecraft.nbt.*;
@@ -40,14 +39,6 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
         return new NbtDeserializer(element, SerializationAttribute.HUMAN_READABLE);
     }
 
-    public static NbtDeserializer compressed(NbtElement element){
-        return new NbtDeserializer(element, SerializationAttribute.COMPRESSED);
-    }
-
-    public static NbtDeserializer binary(NbtElement element){
-        return new NbtDeserializer(element, SerializationAttribute.BINARY);
-    }
-
     @Override
     public Set<SerializationAttribute> attributes() {
         Set<SerializationAttribute> set = new HashSet<>();
@@ -61,46 +52,36 @@ public class NbtDeserializer implements SelfDescribedDeserializer<NbtElement> {
     //--
 
     @Override
-    public Object readAny() {
-        var element = topElement();
+    public <S> void readAny(Serializer<S> visitor) {
+        this.decodeValue(visitor, this.topElement());
+    }
 
-        return switch (element.getType()){
-            case NbtElement.END_TYPE -> null;
-            case NbtElement.BYTE_TYPE -> ((AbstractNbtNumber)element).byteValue();
-            case NbtElement.SHORT_TYPE -> ((AbstractNbtNumber)element).shortValue();
-            case NbtElement.INT_TYPE -> ((AbstractNbtNumber)element).intValue();
-            case NbtElement.LONG_TYPE -> ((AbstractNbtNumber)element).longValue();
-            case NbtElement.FLOAT_TYPE -> ((AbstractNbtNumber)element).floatValue();
-            case NbtElement.DOUBLE_TYPE -> ((AbstractNbtNumber)element).doubleValue();
-            case NbtElement.STRING_TYPE -> element.asString();
-            case NbtElement.BYTE_ARRAY_TYPE, NbtElement.INT_ARRAY_TYPE, NbtElement.LONG_ARRAY_TYPE, NbtElement.LIST_TYPE -> {
-                List<Object> objects = new ArrayList<>();
-
-                ((AbstractNbtList<NbtElement>)element).forEach(element1 -> {
-                    stack.push(() -> element1);
-
-                    objects.add(readAny());
-
-                    stack.pop();
-                });
-
-                yield objects;
+    private <S> void decodeValue(Serializer<S> visitor, NbtElement value)  {
+        switch (value.getType()) {
+            case NbtElement.BYTE_TYPE -> visitor.writeByte(((NbtByte)value).byteValue());
+            case NbtElement.SHORT_TYPE -> visitor.writeShort(((NbtShort)value).shortValue());
+            case NbtElement.INT_TYPE -> visitor.writeInt(((NbtInt)value).intValue());
+            case NbtElement.LONG_TYPE -> visitor.writeLong(((NbtLong)value).longValue());
+            case NbtElement.FLOAT_TYPE -> visitor.writeFloat(((NbtFloat)value).floatValue());
+            case NbtElement.DOUBLE_TYPE -> visitor.writeDouble(((NbtDouble)value).doubleValue());
+            case NbtElement.STRING_TYPE -> visitor.writeString(value.asString());
+            case NbtElement.BYTE_ARRAY_TYPE -> visitor.writeBytes(((NbtByteArray)value).getByteArray());
+            case NbtElement.INT_ARRAY_TYPE, NbtElement.LONG_ARRAY_TYPE, NbtElement.LIST_TYPE -> {
+                var list = (AbstractNbtList<?>) value;
+                try (var sequence = visitor.sequence(Endec.<NbtElement>of(this::decodeValue, deserializer -> null), list.size())) {
+                    list.forEach(sequence::element);
+                }
             }
             case NbtElement.COMPOUND_TYPE -> {
-                Map<String, Object> maps = new LinkedHashMap<>();
-
-                ((NbtCompound)element).toMap().forEach((s, element1) -> {
-                    stack.push(() -> element1);
-
-                    maps.put(s, readAny());
-
-                    stack.pop();
-                });
-
-                yield maps;
+                var compound = (NbtCompound) value;
+                try (var map = visitor.map(Endec.<NbtElement>of(this::decodeValue, deserializer -> null), compound.getSize())) {
+                    for (var key : compound.getKeys()) {
+                        map.entry(key, compound.get(key));
+                    }
+                }
             }
-            default -> throw new IllegalStateException("Unknown Object type: " + element);
-        };
+            default -> throw new IllegalArgumentException("Non-standard, unrecognized NbtElement implementation cannot be decoded");
+        }
     }
 
     //--

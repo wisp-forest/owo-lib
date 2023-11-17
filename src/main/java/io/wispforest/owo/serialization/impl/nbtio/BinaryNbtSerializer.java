@@ -69,18 +69,18 @@ public class BinaryNbtSerializer extends DataOutputSerializer<DataOutput> {
     }
 
     @Override
-    public <V> MapSerializer<V> map(Endec<V> valueEndec, int length) {
+    public <V> MapSerializer<V> map(Endec<V> valueEndec, int size) {
         return new BinaryNbtMapSerializer<>(valueEndec);
     }
 
     @Override
-    public <E> SequenceSerializer<E> sequence(Endec<E> elementEndec, int length) {
-        if(length == 0){
+    public <E> SequenceSerializer<E> sequence(Endec<E> elementEndec, int size) {
+        if(size == 0){
             writeByte((byte) 0);
             writeVarInt(0);
         }
 
-        return new BinaryNbtSequenceSerializer<>(elementEndec, length);
+        return new BinaryNbtSequenceSerializer<>(elementEndec, size);
     }
 
     @Override

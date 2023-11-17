@@ -12,14 +12,12 @@ import java.util.function.Supplier;
 
 public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> {
 
-    private final SerializationAttribute extraAttribute;
+    private static final Set<SerializationAttribute> ATTRIBUTES = EnumSet.allOf(SerializationAttribute.class);
 
     protected final Deque<Supplier<JsonElement>> stack = new ArrayDeque<>();
 
     public JsonDeserializer(JsonElement element, boolean compressed) {
         stack.push(() -> element);
-
-        extraAttribute = compressed ? SerializationAttribute.COMPRESSED : SerializationAttribute.HUMAN_READABLE;
     }
 
     private JsonElement topElement() {
@@ -28,84 +26,70 @@ public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> 
 
     //--
 
-    public static JsonDeserializer of(JsonElement element){
+    public static JsonDeserializer of(JsonElement element) {
         return new JsonDeserializer(element, false);
     }
 
-    public static JsonDeserializer compressed(JsonElement element){
+    public static JsonDeserializer compressed(JsonElement element) {
         return new JsonDeserializer(element, true);
     }
 
     @Override
     public Set<SerializationAttribute> attributes() {
-        Set<SerializationAttribute> set = new HashSet<>();
-
-        set.add(SerializationAttribute.SELF_DESCRIBING);
-        set.add(extraAttribute);
-
-        return set;
+        return ATTRIBUTES;
     }
 
     //--
 
     @Override
-    public Object readAny() {
-        var element = topElement();
+    public <S> void readAny(Serializer<S> visitor) {
+        this.decodeValue(visitor, this.topElement());
+    }
 
-        if (element instanceof JsonNull) return null;
+    private <S> void decodeValue(Serializer<S> visitor, JsonElement element) {
+        if (element.isJsonNull()) {
+            visitor.writeOptional(Endec.JSON_ELEMENT, Optional.empty());
+        } else if (element instanceof JsonPrimitive primitive) {
+            if (primitive.isString()) {
+                visitor.writeString(primitive.getAsString());
+            } else if (primitive.isBoolean()) {
+                visitor.writeBoolean(primitive.getAsBoolean());
+            } else {
+                var value = primitive.getAsBigDecimal();
 
-        if (element instanceof JsonPrimitive primitive) {
-            if (primitive.isString()) return element.getAsString();
-            if (primitive.isBoolean()) return element.getAsBoolean();
+                try {
+                    var asLong = value.longValueExact();
 
-            BigDecimal value = primitive.getAsBigDecimal();
+                    if ((byte) asLong == asLong) {
+                        visitor.writeByte(element.getAsByte());
+                    } else if ((short) asLong == asLong) {
+                        visitor.writeShort(element.getAsShort());
+                    } else if ((int) asLong == asLong) {
+                        visitor.writeInt(element.getAsInt());
+                    } else {
+                        visitor.writeLong(asLong);
+                    }
+                } catch (ArithmeticException bruh /* quite cringe java moment, why use an exception for this */) {
+                    var asDouble = value.doubleValue();
 
-            try {
-                long l = value.longValueExact();
-
-                if ((byte) l == l) return element.getAsByte();
-                if ((short) l == l) return element.getAsShort();
-                if ((int) l == l) return element.getAsInt();
-
-                return element.getAsLong();
-            } catch (ArithmeticException var10) {
-                double d = value.doubleValue();
-
-                if ((float) d == d) return element.getAsFloat();
-
-                return d;
+                    if ((float) asDouble == asDouble) {
+                        visitor.writeFloat(element.getAsFloat());
+                    } else {
+                        visitor.writeDouble(asDouble);
+                    }
+                }
             }
+        } else if (element instanceof JsonArray array) {
+            try (var sequence = visitor.sequence(Endec.<JsonElement>of(this::decodeValue, deserializer -> null), array.size())) {
+                array.forEach(sequence::element);
+            }
+        } else if (element instanceof JsonObject object) {
+            try (var map = visitor.map(Endec.<JsonElement>of(this::decodeValue, deserializer -> null), object.size())) {
+                object.asMap().forEach(map::entry);
+            }
+        } else {
+            throw new IllegalArgumentException("Non-standard, unrecognized JsonElement implementation cannot be decoded");
         }
-
-        if (element instanceof JsonArray array) {
-            List<Object> objects = new ArrayList<>();
-
-            array.forEach(element1 -> {
-                stack.push(() -> element1);
-
-                objects.add(readAny());
-
-                stack.pop();
-            });
-
-            return objects;
-        }
-
-        if (element instanceof JsonObject object) {
-            Map<String, Object> maps = new LinkedHashMap<>();
-
-            object.asMap().forEach((s, element1) -> {
-                stack.push(() -> element1);
-
-                maps.put(s, readAny());
-
-                stack.pop();
-            });
-
-            return maps;
-        }
-
-        throw new IllegalStateException("Unknown JsonElement Object: " + element);
     }
 
     //--
@@ -187,7 +171,7 @@ public class JsonDeserializer implements SelfDescribedDeserializer<JsonElement> 
 
         try {
             return func.apply(this);
-        } catch (Exception e){
+        } catch (Exception e) {
             stack.clear();
             stack.addAll(stackCopy);
 

@@ -25,7 +25,7 @@ public class ListEndec<V> implements Endec<List<V>> {
 
     public <L extends List<V>> Endec<L> conform(IntFunction<L> mapConstructor){
         return this.listConstructor(mapConstructor::apply)
-                .then(map -> (L) map, map -> map);
+                .xmap(map -> (L) map, map -> map);
     }
 
     @Override

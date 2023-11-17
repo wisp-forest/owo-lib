@@ -19,7 +19,7 @@ public abstract class DataInputDeserializer<D extends DataInput> implements Dese
 
     @Override
     public Set<SerializationAttribute> attributes() {
-        return Set.of(SerializationAttribute.BINARY);
+        return Set.of();
     }
 
     @Override

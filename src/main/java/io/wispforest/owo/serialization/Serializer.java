@@ -33,9 +33,9 @@ public interface Serializer<T> {
 
     void writeVarLong(final long value);
 
-    <E> SequenceSerializer<E> sequence(Endec<E> elementEndec, int length);
+    <E> SequenceSerializer<E> sequence(Endec<E> elementEndec, int size);
 
-    <V> MapSerializer<V> map(Endec<V> valueEndec, int length);
+    <V> MapSerializer<V> map(Endec<V> valueEndec, int size);
 
     StructSerializer struct();
 

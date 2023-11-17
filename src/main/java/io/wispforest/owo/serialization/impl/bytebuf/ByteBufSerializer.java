@@ -32,7 +32,7 @@ public class ByteBufSerializer<T extends ByteBuf> implements Serializer<T> {
 
     @Override
     public Set<SerializationAttribute> attributes() {
-        return Set.of(SerializationAttribute.BINARY);
+        return Set.of();
     }
 
     //--
@@ -101,13 +101,13 @@ public class ByteBufSerializer<T extends ByteBuf> implements Serializer<T> {
     }
 
     @Override
-    public <V> MapSerializer<V> map(Endec<V> valueEndec, int length) {
-        return (MapSerializer<V>) sequence(valueEndec, length);
+    public <V> MapSerializer<V> map(Endec<V> valueEndec, int size) {
+        return (MapSerializer<V>) sequence(valueEndec, size);
     }
 
     @Override
-    public <E> SequenceSerializer<E> sequence(Endec<E> elementEndec, int length) {
-        writeVarInt(length);
+    public <E> SequenceSerializer<E> sequence(Endec<E> elementEndec, int size) {
+        writeVarInt(size);
 
         return new ByteBufSequenceSerializer<>(elementEndec);
     }

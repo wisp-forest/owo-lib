@@ -122,13 +122,13 @@ public abstract class DataOutputSerializer<D extends DataOutput> implements Seri
     }
 
     @Override
-    public <V> MapSerializer<V> map(Endec<V> valueEndec, int length) {
-        return (MapSerializer<V>) sequence(valueEndec, length);
+    public <V> MapSerializer<V> map(Endec<V> valueEndec, int size) {
+        return (MapSerializer<V>) sequence(valueEndec, size);
     }
 
     @Override
-    public <E> SequenceSerializer<E> sequence(Endec<E> elementEndec, int length) {
-        writeVarInt(length);
+    public <E> SequenceSerializer<E> sequence(Endec<E> elementEndec, int size) {
+        writeVarInt(size);
 
         return new DataOutputSequenceSerializer<>(elementEndec);
     }

@@ -10,262 +10,200 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class NbtSerializer implements Serializer<NbtElement> {
+public class NbtSerializer extends HierarchicalSerializer<NbtElement> {
 
-    private final SerializationAttribute extraAttribute;
+    private static final Set<SerializationAttribute> ATTRIBUTES = EnumSet.allOf(SerializationAttribute.class);
+    protected NbtElement prefix;
 
-    protected NbtElement prefix = null;
-
-    private final Deque<Consumer<NbtElement>> stack = new ArrayDeque<>();
-
-    private NbtElement result = null;
-
-    public NbtSerializer(SerializationAttribute attribute, NbtElement prefix) {
-        this(attribute);
-
+    public NbtSerializer(NbtElement prefix) {
+        super(NbtEnd.INSTANCE);
         this.prefix = prefix;
-    }
-
-    public NbtSerializer(SerializationAttribute attribute) {
-        stack.push(element -> result = element);
-
-        extraAttribute = attribute;
-    }
-
-    private void consumeElement(NbtElement element) {
-        stack.peek().accept(element);
     }
 
     //--
 
-    public static NbtSerializer of(){
-        return new NbtSerializer(SerializationAttribute.HUMAN_READABLE);
+    public static NbtSerializer of() {
+        return new NbtSerializer(null);
     }
 
-    public static NbtSerializer of(NbtElement prefix){
-        return new NbtSerializer(SerializationAttribute.HUMAN_READABLE, prefix);
-    }
-
-
-    public static NbtSerializer compressed(){
-        return new NbtSerializer(SerializationAttribute.COMPRESSED);
-    }
-
-    public static NbtSerializer compressed(NbtElement prefix){
-        return new NbtSerializer(SerializationAttribute.COMPRESSED, prefix);
-    }
-
-    public static NbtSerializer binary(){
-        return new NbtSerializer(SerializationAttribute.BINARY);
-    }
-
-    public static NbtSerializer binary(NbtElement prefix){
-        return new NbtSerializer(SerializationAttribute.BINARY, prefix);
+    public static NbtSerializer of(NbtElement prefix) {
+        return new NbtSerializer(prefix);
     }
 
     //--
 
     @Override
     public Set<SerializationAttribute> attributes() {
-        Set<SerializationAttribute> set = new HashSet<>();
-
-        set.add(SerializationAttribute.SELF_DESCRIBING);
-        set.add(extraAttribute);
-
-        return set;
+        return ATTRIBUTES;
     }
 
     //--
 
     @Override
     public <V> void writeOptional(Endec<V> endec, Optional<V> optional) {
-        try(var struct = struct()) {
+        try(var struct = this.struct()) {
             struct.field("present", Endec.BOOLEAN, optional.isPresent());
-
-            optional.ifPresent(v -> struct.field("value", endec, v));
+            optional.ifPresent(value -> struct.field("value", endec, value));
         }
     }
 
     @Override
     public void writeBoolean(boolean value) {
-        consumeElement(NbtByte.of(value));
+        this.consume(NbtByte.of(value));
     }
 
     @Override
     public void writeByte(byte value) {
-        consumeElement(NbtByte.of(value));
+        this.consume(NbtByte.of(value));
     }
 
     @Override
     public void writeShort(short value) {
-        consumeElement(NbtShort.of(value));
+        this.consume(NbtShort.of(value));
     }
 
     @Override
     public void writeInt(int value) {
-        consumeElement(NbtInt.of(value));
+        this.consume(NbtInt.of(value));
     }
 
     @Override
     public void writeLong(long value) {
-        consumeElement(NbtLong.of(value));
+        this.consume(NbtLong.of(value));
     }
 
     @Override
     public void writeFloat(float value) {
-        consumeElement(NbtFloat.of(value));
+        this.consume(NbtFloat.of(value));
     }
 
     @Override
     public void writeDouble(double value) {
-        consumeElement(NbtDouble.of(value));
+        this.consume(NbtDouble.of(value));
     }
 
     @Override
     public void writeString(String value) {
-        consumeElement(NbtString.of(value));
+        this.consume(NbtString.of(value));
     }
 
     @Override
     public void writeBytes(byte[] bytes) {
-        consumeElement(new NbtByteArray(bytes));
+        this.consume(new NbtByteArray(bytes));
     }
 
     @Override
     public void writeVarInt(int value) {
-        var abstractNbtNumber = switch (VarInts.getSizeInBytes(value)){
+        this.consume(switch (VarInts.getSizeInBytes(value)){
             case 0, 1 -> NbtByte.of((byte) value);
             case 2 -> NbtShort.of((short) value);
             default -> NbtInt.of(value);
-        };
-
-        consumeElement(abstractNbtNumber);
+        });
     }
 
     @Override
     public void writeVarLong(long value) {
-        var abstractNbtNumber = switch (VarLongs.getSizeInBytes(value)){
+        this.consume(switch (VarLongs.getSizeInBytes(value)){
             case 0, 1 -> NbtByte.of((byte) value);
             case 2 -> NbtShort.of((short) value);
             case 3, 4 -> NbtInt.of((int) value);
             default -> NbtLong.of(value);
-        };
-
-        consumeElement(abstractNbtNumber);
+        });
     }
 
     @Override
-    public <E> SequenceSerializer<E> sequence(Endec<E> elementEndec, int length) {
+    public <E> SequenceSerializer<E> sequence(Endec<E> elementEndec, int size) {
         return new NbtSequenceSerializer<>(elementEndec);
     }
 
     @Override
-    public <V> MapSerializer<V> map(Endec<V> valueEndec, int length) {
-        return new NbtMapSerializer<V>().valueEndec(valueEndec);
+    public <V> MapSerializer<V> map(Endec<V> valueEndec, int size) {
+        return new NbtMapSerializer<>(valueEndec);
     }
 
     @Override
     public StructSerializer struct() {
-        return new NbtMapSerializer<>();
+        return new NbtMapSerializer<>(null);
     }
 
     @Override
     public NbtElement result() {
-        return result;
-    }
-
-    public static class NbtEncodeException extends RuntimeException {
-        public NbtEncodeException(String message) {
-            super(message);
-        }
+        return this.result;
     }
 
     public class NbtMapSerializer<V> implements MapSerializer<V>, StructSerializer {
 
+        private final Endec<V> valueEndec;
         private final NbtCompound result;
 
-        private Endec<V> valueEndec = null;
-
-        public NbtMapSerializer(){
-            var prefix = NbtSerializer.this.prefix;
-
-            if(prefix == null){
-                result = new NbtCompound();
-
-                return;
-            }
-
-            if(!(prefix instanceof NbtCompound)) throw new IllegalStateException("Prefix is not a valid NbtCompound!");
-
-            result = (NbtCompound) prefix;
-            NbtSerializer.this.prefix = null;
-        }
-
-        public NbtMapSerializer<V> valueEndec(Endec<V> valueEndec) {
+        public NbtMapSerializer(Endec<V> valueEndec) {
             this.valueEndec = valueEndec;
 
-            return this;
+            if (NbtSerializer.this.prefix != null) {
+                if (NbtSerializer.this.prefix instanceof NbtCompound prefixMap) {
+                    this.result = prefixMap;
+                } else {
+                    throw new IllegalStateException("Incompatible prefix of type " + NbtSerializer.this.prefix.getClass().getSimpleName() + " provided for NBT map/struct");
+                }
+            } else {
+                this.result = new NbtCompound();
+            }
         }
 
         @Override
         public void entry(String key, V value) {
-            field(key, valueEndec, value);
+            NbtSerializer.this.frame(encoded -> {
+                this.valueEndec.encode(NbtSerializer.this, value);
+                this.result.put(key, encoded.require("map value"));
+            });
         }
 
         @Override
         public <F> StructSerializer field(String name, Endec<F> endec, F value) {
-            MutableObject<NbtElement> encodedHolder = new MutableObject<>(null);
-
-            NbtSerializer.this.stack.push(encodedHolder::setValue);
-
-            try {
+            NbtSerializer.this.frame(encoded -> {
                 endec.encode(NbtSerializer.this, value);
-            } finally {
-                NbtSerializer.this.stack.pop();
-            }
-
-            if (encodedHolder.getValue() == null) throw new NbtSerializer.NbtEncodeException("No field was serialized");
-            result.put(name, encodedHolder.getValue());
+                this.result.put(name, encoded.require("struct field"));
+            });
 
             return this;
         }
 
         @Override
         public void end() {
-            NbtSerializer.this.consumeElement(result);
+            NbtSerializer.this.consume(this.result);
         }
     }
 
-    public class NbtSequenceSerializer<V> implements SequenceSerializer<V> {
-
-        private final NbtList result = new NbtList();
+    private class NbtSequenceSerializer<V> implements SequenceSerializer<V> {
 
         private final Endec<V> valueEndec;
+        private final NbtList result;
 
-        public NbtSequenceSerializer(Endec<V> valueEndec) {
+        private NbtSequenceSerializer(Endec<V> valueEndec) {
             this.valueEndec = valueEndec;
+
+            if (NbtSerializer.this.prefix != null) {
+                if (NbtSerializer.this.prefix instanceof NbtList prefixList) {
+                    this.result = prefixList;
+                } else {
+                    throw new IllegalStateException("Incompatible prefix of type " + NbtSerializer.this.prefix.getClass().getSimpleName() + " provided for NBT sequence");
+                }
+            } else {
+                this.result = new NbtList();
+            }
         }
 
         @Override
         public void element(V element) {
-            MutableObject<NbtElement> encodedHolder = new MutableObject<>(null);
-
-            NbtSerializer.this.stack.push(encodedHolder::setValue);
-
-            try {
-                valueEndec.encode(NbtSerializer.this, element);
-            } finally {
-                NbtSerializer.this.stack.pop();
-            }
-
-            if (encodedHolder.getValue() == null) throw new NbtSerializer.NbtEncodeException("No value was serialized");
-            result.add(encodedHolder.getValue());
+            NbtSerializer.this.frame(encoded -> {
+                this.valueEndec.encode(NbtSerializer.this, element);
+                this.result.add(encoded.require("sequence element"));
+            });
         }
 
         @Override
         public void end() {
-            NbtSerializer.this.consumeElement(result);
+            NbtSerializer.this.consume(this.result);
         }
     }
-
 }

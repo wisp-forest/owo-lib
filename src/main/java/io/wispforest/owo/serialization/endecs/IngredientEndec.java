@@ -5,9 +5,7 @@ import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.impl.StructEndecBuilder;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.util.collection.DefaultedList;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class IngredientEndec {
@@ -23,7 +21,7 @@ public class IngredientEndec {
     );
 
     private static final Endec<Ingredient.Entry> INGREDIENT_ENTRY_ENDEC = new XorEndec<>(STACK_ENTRY_ENDEC, TAG_ENTRY_ENDEC)
-            .then(
+            .xmap(
                     either -> either.map(stackEntry -> stackEntry, tagEntry -> tagEntry),
                     entry -> {
                         if (entry instanceof Ingredient.TagEntry tagEntry) return Either.right(tagEntry);
@@ -51,10 +49,10 @@ public class IngredientEndec {
 
                     return entries;
                 })
-                .then(entries -> entries.toArray(new Ingredient.Entry[0]), List::of);
+                .xmap(entries -> entries.toArray(new Ingredient.Entry[0]), List::of);
 
         return new EitherEndec<>(endec, INGREDIENT_ENTRY_ENDEC)
-                .then(
+                .xmap(
                     either -> either.map(Ingredient::new, entry -> new Ingredient(new Ingredient.Entry[]{entry})),
                     ingredient -> {
                         if(ingredient.entries.length == 0 && !allowEmpty){

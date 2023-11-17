@@ -30,7 +30,7 @@ public class RecipeEndecs {
 
                 return item;
             })
-            .then(ItemStack::new, ItemStack::getItem);
+            .xmap(ItemStack::new, ItemStack::getItem);
 
     public static final Endec<CraftingRecipeCategory> CATEGORY_ENDEC = ReflectionEndecBuilder.createEnumSerializer(CraftingRecipeCategory.class);
 
