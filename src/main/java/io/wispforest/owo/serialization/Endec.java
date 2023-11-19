@@ -1,15 +1,22 @@
 package io.wispforest.owo.serialization;
 
 import com.google.gson.JsonElement;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
+import io.wispforest.owo.serialization.endecs.EdmEndec;
 import io.wispforest.owo.serialization.impl.*;
+import io.wispforest.owo.serialization.impl.edm.EdmDeserializer;
+import io.wispforest.owo.serialization.impl.edm.EdmElement;
+import io.wispforest.owo.serialization.impl.edm.EdmOps;
+import io.wispforest.owo.serialization.impl.edm.EdmSerializer;
 import io.wispforest.owo.serialization.impl.json.JsonEndec;
 import io.wispforest.owo.serialization.impl.nbt.NbtEndec;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
@@ -140,9 +147,9 @@ public interface Endec<T> {
     }
 
     static <T> Endec<T> ofCodec(Codec<T> codec) {
-        return of(
-                (serializer, value) -> NbtEndec.INSTANCE.encode(serializer, codec.encodeStart(NbtOps.INSTANCE, value).result().get()),
-                deserializer -> codec.parse(NbtOps.INSTANCE, NbtEndec.INSTANCE.decode(deserializer)).result().get()
+        return Endec.of(
+                (serializer, value) -> EdmEndec.INSTANCE.encode(serializer, codec.encodeStart(EdmOps.INSTANCE, value).result().get()),
+                deserializer -> codec.<EdmElement<?>>parse(EdmOps.INSTANCE, EdmEndec.INSTANCE.decode(deserializer)).result().get()
         );
     }
 
@@ -234,6 +241,28 @@ public interface Endec<T> {
         };
     }
 
+    default Codec<T> codec() {
+        return new Codec<>() {
+            @Override
+            public <T1> DataResult<Pair<T, T1>> decode(DynamicOps<T1> ops, T1 input) {
+                try {
+                    return DataResult.success(new Pair<>(Endec.this.decode(new EdmDeserializer(ops.convertTo(EdmOps.INSTANCE, input))), input));
+                } catch (Exception e) {
+                    return DataResult.error(e::getMessage);
+                }
+            }
+
+            @Override
+            public <T1> DataResult<T1> encode(T input, DynamicOps<T1> ops, T1 prefix) {
+                try {
+                    return DataResult.success(EdmOps.INSTANCE.convertTo(ops, Endec.this.encode(EdmSerializer::new, input)));
+                } catch (Exception e) {
+                    return DataResult.error(e::getMessage);
+                }
+            }
+        };
+    }
+
     default KeyedField<T> keyed(String name) {
         return KeyedField.of(name, this);
     }
@@ -294,10 +323,6 @@ public interface Endec<T> {
                 }
             }
         };
-    }
-
-    default Codec<T> codec() {
-        return new CooptCodec<>(this);
     }
 
     //--

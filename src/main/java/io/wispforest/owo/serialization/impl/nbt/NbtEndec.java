@@ -31,7 +31,7 @@ public final class NbtEndec implements Endec<NbtElement> {
 
             serializer.writeBytes(output.toByteArray());
         } catch (IOException e) {
-            throw new RuntimeException("Failed to parse binary NBT in NbtEndec", e);
+            throw new RuntimeException("Failed to encode binary NBT in NbtEndec", e);
         }
     }
 
@@ -47,7 +47,7 @@ public final class NbtEndec implements Endec<NbtElement> {
         try {
             return NbtIo.read(ByteStreams.newDataInput(deserializer.readBytes()), NbtTagSizeTracker.ofUnlimitedBytes());
         } catch (IOException e) {
-            throw new RuntimeException("Failed to encode binary NBT in NbtEndec", e);
+            throw new RuntimeException("Failed to parse binary NBT in NbtEndec", e);
         }
     }
 }

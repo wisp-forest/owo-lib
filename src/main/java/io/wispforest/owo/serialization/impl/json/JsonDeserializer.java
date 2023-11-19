@@ -210,7 +210,7 @@ public class JsonDeserializer extends HierarchicalDeserializer<JsonElement> impl
         @Override
         public V next() {
             return JsonDeserializer.this.frame(
-                    elements::next,
+                    this.elements::next,
                     () -> this.valueEndec.decode(JsonDeserializer.this)
             );
         }
