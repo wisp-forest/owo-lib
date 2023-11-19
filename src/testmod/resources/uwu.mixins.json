@@ -4,6 +4,7 @@
   "package": "io.wispforest.uwu.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
+    "ShapedRecipeInvoker"
   ],
   "client": [
     "TitleScreenMixin"

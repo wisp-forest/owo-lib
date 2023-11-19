@@ -2,14 +2,14 @@ package io.wispforest.uwu.recipe;
 
 import com.google.common.collect.Sets;
 import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.endecs.IngredientEndec;
-import io.wispforest.owo.serialization.endecs.RecipeEndecs;
 import io.wispforest.owo.serialization.impl.AttributeEndecBuilder;
 import io.wispforest.owo.serialization.impl.SerializationAttribute;
 import io.wispforest.owo.serialization.impl.StructEndecBuilder;
 import io.wispforest.owo.serialization.impl.StructField;
+import io.wispforest.uwu.mixin.ShapedRecipeInvoker;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Ingredient;
+import net.minecraft.recipe.RecipeCodecs;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.ShapedRecipe;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
@@ -47,7 +47,7 @@ public class UwuShapedRecipe extends ShapedRecipe {
     //--
 
     private static final Endec<UwuShapedRecipe> FROM_RAW_RECIPE = RawShapedRecipe.ENDEC.xmap(recipe -> {
-        String[] strings = ShapedRecipe.removePadding(recipe.pattern);
+        String[] strings = ShapedRecipeInvoker.owo$removePadding(recipe.pattern);
         int i = strings[0].length();
         int j = strings.length;
         DefaultedList<Ingredient> defaultedList = DefaultedList.ofSize(i * j, Ingredient.EMPTY);
@@ -76,16 +76,16 @@ public class UwuShapedRecipe extends ShapedRecipe {
         throw new NotImplementedException("Serializing ShapedRecipe is not implemented yet.");
     });
 
-    private static final Endec<DefaultedList<Ingredient>> INGREDIENTS = IngredientEndec.ALLOW_EMPTY_CODEC.list()
+    private static final Endec<DefaultedList<Ingredient>> INGREDIENTS = Endec.ofCodec(Ingredient.ALLOW_EMPTY_CODEC).list()
             .conform(size -> DefaultedList.ofSize(size, Ingredient.EMPTY));
 
     private static final Endec<UwuShapedRecipe> FROM_INSTANCE = StructEndecBuilder.of(
             Endec.STRING.field("group", ShapedRecipe::getGroup),
-            RecipeEndecs.CATEGORY_ENDEC.field("category", ShapedRecipe::getCategory),
+            Endec.ofCodec(CraftingRecipeCategory.CODEC).field("category", ShapedRecipe::getCategory),
             Endec.VAR_INT.field("width", ShapedRecipe::getWidth),
             Endec.VAR_INT.field("height", ShapedRecipe::getHeight),
             INGREDIENTS.field("ingredients", ShapedRecipe::getIngredients),
-            RecipeEndecs.CRAFTING_RESULT.field("result", recipe -> recipe.getResult(null)),
+            Endec.ofCodec(RecipeCodecs.CRAFTING_RESULT).field("result", recipe -> recipe.getResult(null)),
             Endec.BOOLEAN.field("show_notification", ShapedRecipe::showNotification),
             UwuShapedRecipe::new
     );
@@ -114,10 +114,10 @@ public class UwuShapedRecipe extends ShapedRecipe {
 
         public static final Endec<RawShapedRecipe> ENDEC = StructEndecBuilder.of(
                 StructField.defaulted("group", Endec.STRING, recipe -> recipe.group, ""),
-                StructField.defaulted("category", RecipeEndecs.CATEGORY_ENDEC, recipe -> recipe.category, CraftingRecipeCategory.MISC),
-                IngredientEndec.DISALLOW_EMPTY_CODEC.map().keyValidator(UwuShapedRecipe::keyEntryValidator).field("key", recipe -> recipe.key),
+                StructField.defaulted("category", Endec.ofCodec(CraftingRecipeCategory.CODEC), recipe -> recipe.category, CraftingRecipeCategory.MISC),
+                Endec.ofCodec(Ingredient.DISALLOW_EMPTY_CODEC).map().keyValidator(UwuShapedRecipe::keyEntryValidator).field("key", recipe -> recipe.key),
                 PATTERN_ENDEC.field("pattern", recipe -> recipe.pattern),
-                RecipeEndecs.CRAFTING_RESULT.field("result", recipe -> recipe.result),
+                Endec.ofCodec(RecipeCodecs.CRAFTING_RESULT).field("result", recipe -> recipe.result),
                 StructField.defaulted("show_notification", Endec.BOOLEAN, recipe -> recipe.showNotification, true),
                 RawShapedRecipe::new
         );

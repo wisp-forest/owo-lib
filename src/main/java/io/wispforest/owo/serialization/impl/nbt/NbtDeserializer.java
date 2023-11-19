@@ -197,13 +197,15 @@ public class NbtDeserializer extends HierarchicalDeserializer<NbtElement> implem
     private class Map<V> implements Deserializer.Map<V> {
 
         private final Endec<V> valueEndec;
-        private final Iterator<java.util.Map.Entry<String, NbtElement>> entries;
+        private final NbtCompound compound;
+        private final Iterator<String> keys;
         private final int size;
 
         private Map(Endec<V> valueEndec, NbtCompound compound) {
             this.valueEndec = valueEndec;
 
-            this.entries = compound.toMap().entrySet().iterator();
+            this.compound = compound;
+            this.keys = compound.getKeys().iterator();
             this.size = compound.getSize();
         }
 
@@ -214,15 +216,15 @@ public class NbtDeserializer extends HierarchicalDeserializer<NbtElement> implem
 
         @Override
         public boolean hasNext() {
-            return this.entries.hasNext();
+            return this.keys.hasNext();
         }
 
         @Override
         public java.util.Map.Entry<String, V> next() {
-            var entry = this.entries.next();
+            var key = this.keys.next();
             return NbtDeserializer.this.frame(
-                    entry::getValue,
-                    () -> java.util.Map.entry(entry.getKey(), this.valueEndec.decode(NbtDeserializer.this))
+                    () -> this.compound.get(key),
+                    () -> java.util.Map.entry(key, this.valueEndec.decode(NbtDeserializer.this))
             );
         }
     }
