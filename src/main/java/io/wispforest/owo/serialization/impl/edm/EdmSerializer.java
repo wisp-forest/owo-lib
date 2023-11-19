@@ -47,6 +47,8 @@ public class EdmSerializer extends HierarchicalSerializer<EdmElement<?>> {
         this.consume(EdmElement.wrapLong(value));
     }
 
+    // ---
+
     @Override
     public void writeFloat(float value) {
         this.consume(EdmElement.wrapFloat(value));

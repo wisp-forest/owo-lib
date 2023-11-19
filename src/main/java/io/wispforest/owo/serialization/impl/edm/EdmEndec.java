@@ -1,4 +1,4 @@
-package io.wispforest.owo.serialization.endecs;
+package io.wispforest.owo.serialization.impl.edm;
 
 import com.google.common.io.ByteStreams;
 import io.wispforest.owo.serialization.Deserializer;
@@ -6,10 +6,6 @@ import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.SelfDescribedDeserializer;
 import io.wispforest.owo.serialization.Serializer;
 import io.wispforest.owo.serialization.impl.SerializationAttribute;
-import io.wispforest.owo.serialization.impl.edm.EdmDeserializer;
-import io.wispforest.owo.serialization.impl.edm.EdmElement;
-import io.wispforest.owo.serialization.impl.edm.EdmIo;
-import io.wispforest.owo.serialization.impl.edm.EdmSerializer;
 
 import java.io.IOException;
 

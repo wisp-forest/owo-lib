@@ -5,7 +5,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
-import io.wispforest.owo.serialization.endecs.EdmEndec;
+import io.wispforest.owo.serialization.impl.edm.EdmEndec;
 import io.wispforest.owo.serialization.impl.*;
 import io.wispforest.owo.serialization.impl.edm.EdmDeserializer;
 import io.wispforest.owo.serialization.impl.edm.EdmElement;
