@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
 
 public class ReflectionEndecBuilder {
 
-    private static final Map<Class<?>, Supplier<?>> COLLECTION_PROVIDERS = new HashMap<>();
     private static final Map<Class<?>, Endec<?>> SERIALIZERS = new HashMap<>();
 
     /**
@@ -54,18 +53,17 @@ public class ReflectionEndecBuilder {
      * Enables (de-)serialization for the given class
      *
      * @param clazz        The object class to serialize
-     * @param serializer   The serialization method
-     * @param deserializer The deserialization method
+     * @param endec        The endec for the given type
      * @param <T>          The type of object to register a serializer for
      */
     @SuppressWarnings("rawtypes")
-    public static <T> void register(Class<T> clazz, BiConsumer<Serializer, T> serializer, Function<Deserializer, T> deserializer) {
-        register(clazz, Endec.of(serializer, deserializer));
+    public static <T> void register(Endec<T> endec, Class<T> clazz) {
+        register(clazz, endec);
     }
 
     @SafeVarargs
-    private static <T> void register(Endec<T> kodeck, Class<T>... classes) {
-        for (var clazz : classes) register(clazz, kodeck);
+    private static <T> void register(Endec<T> endec, Class<T>... classes) {
+        for (var clazz : classes) register(clazz, endec);
     }
 
     @SafeVarargs
@@ -92,15 +90,26 @@ public class ReflectionEndecBuilder {
         var typeArgs = pType.getActualTypeArguments();
 
         if (Map.class.isAssignableFrom(raw)) {
-            return ReflectionEndecBuilder.createMapSerializer(conform(raw, Map.class), (Class<?>) typeArgs[0], (Class<?>) typeArgs[1]);
+            return (typeArgs[0] instanceof ParameterizedType)
+                    ? Endec.mapOf(getGeneric(typeArgs[0]), getGeneric(typeArgs[1]))
+                    : getGeneric(typeArgs[1]).map();
         }
 
-        if (Collection.class.isAssignableFrom(raw)) {
-            return ReflectionEndecBuilder.createCollectionSerializer(conform(raw, Collection.class), (Class<?>) typeArgs[0]);
+        if (List.class.isAssignableFrom(raw)) {
+            return getGeneric(typeArgs[0]).list();
+        }
+
+        if (Set.class.isAssignableFrom(raw)) {
+            // WARNING: DON'T REPLACE WITH LAMBDA OR IT NO WORK ):
+            return getGeneric(typeArgs[0]).list()
+                    .<Set>xmap(
+                            list -> (Set<?>) new HashSet<>(list),
+                            set -> List.copyOf(set)
+                    );
         }
 
         if (Optional.class.isAssignableFrom(raw)) {
-            return ReflectionEndecBuilder.createOptionalSerializer((Class<?>) typeArgs[0]);
+            return getGeneric(typeArgs[0]).ofOptional();
         }
 
         return get(raw);
@@ -139,11 +148,11 @@ public class ReflectionEndecBuilder {
 
         if (serializer == null) {
             if (Record.class.isAssignableFrom(clazz))
-                serializer = (Endec<T>) ReflectionEndecBuilder.createRecordSerializer(conform(clazz, Record.class));
+                serializer = (Endec<T>) RecordEndec.create(conform(clazz, Record.class));
             else if (clazz.isEnum())
-                serializer = (Endec<T>) ReflectionEndecBuilder.createEnumSerializer(conform(clazz, Enum.class));
+                serializer = (Endec<T>) ReflectionEndecBuilder.createEnumEndec(conform(clazz, Enum.class));
             else if (clazz.isArray())
-                serializer = (Endec<T>) ReflectionEndecBuilder.createArraySerializer(clazz.getComponentType());
+                serializer = (Endec<T>) ReflectionEndecBuilder.createArrayEndec(clazz.getComponentType());
             else if (clazz.isAnnotationPresent(SealedPolymorphic.class))
                 serializer = (Endec<T>) ReflectionEndecBuilder.createSealedSerializer(clazz);
             else
@@ -157,91 +166,6 @@ public class ReflectionEndecBuilder {
     }
 
     /**
-     * Registers a supplier that creates empty collections for the
-     * map and collection serializers to use
-     *
-     * @param clazz    The container class to register a provider for
-     * @param provider A provider that creates some default type for the given
-     *                 class
-     */
-    public static <T> void registerCollectionProvider(Class<T> clazz, Supplier<T> provider) {
-        if (COLLECTION_PROVIDERS.containsKey(clazz)) throw new IllegalStateException("Collection class '" + clazz.getName() + "' already has a provider");
-        COLLECTION_PROVIDERS.put(clazz, provider);
-    }
-
-    /**
-     * Creates a new collection instance
-     * for the given container class
-     *
-     * @param clazz The container class
-     * @return The created collection
-     */
-    public static <T> T createCollection(Class<? extends T> clazz) {
-        if (!COLLECTION_PROVIDERS.containsKey(clazz)) {
-            throw new IllegalStateException("No collection provider registered for collection class " + clazz.getName());
-        }
-
-        //noinspection unchecked
-        return ((Supplier<T>) COLLECTION_PROVIDERS.get(clazz)).get();
-    }
-
-    /**
-     * Tries to create a serializer capable of
-     * serializing the given map type
-     *
-     * @param clazz      The map type
-     * @param keyClass   The type of the map's keys
-     * @param valueClass The type of the map's values
-     * @return The created serializer
-     */
-    public static <K, V, T extends Map<K, V>> Endec<T> createMapSerializer(Class<T> clazz, Class<K> keyClass, Class<V> valueClass) {
-        createCollection(clazz);
-
-        var keyendec = get(keyClass);
-        var valueendec = get(valueClass);
-
-        return keyendec == Endec.STRING
-                ? (Endec<T>) valueendec.map()
-                : (Endec<T>) Endec.mapOf(keyendec, valueendec);
-    }
-
-    /**
-     * Tries to create a serializer capable of
-     * serializing the given collection type
-     *
-     * @param clazz        The collection type
-     * @param elementClass The type of the collections elements
-     * @return The created serializer
-     */
-    public static <E, T extends Collection<E>> Endec<T> createCollectionSerializer(Class<T> clazz, Class<E> elementClass) {
-        createCollection(clazz);
-
-        var elementEndec = get(elementClass);
-
-        return elementEndec.list()
-                .xmap(es -> {
-                    T collection = createCollection(clazz);
-
-                    collection.addAll(es);
-
-                    return collection;
-                }, List::copyOf);
-    }
-
-    /**
-     * Tries to create a serializer capable of
-     * serializing optionals with the given element type
-     *
-     * @param elementClass The type of the collections elements
-     * @return The created serializer
-     */
-    public static <E> Endec<Optional<E>> createOptionalSerializer(Class<E> elementClass) {
-        var elementEndec = get(elementClass);
-
-        return elementEndec.ofOptional();
-    }
-
-    /**
      * Tries to create a serializer capable of
      * serializing arrays of the given element type
      *
@@ -249,7 +173,7 @@ public class ReflectionEndecBuilder {
      * @return The created serializer
      */
     @SuppressWarnings("unchecked")
-    public static Endec<?> createArraySerializer(Class<?> elementClass) {
+    public static Endec<?> createArrayEndec(Class<?> elementClass) {
         var elementSerializer = (Endec<Object>) get(elementClass);
 
         return elementSerializer.list().xmap(list -> {
@@ -270,30 +194,14 @@ public class ReflectionEndecBuilder {
     }
 
     /**
-     * Tries to create a serializer capable of
-     * serializing the given record class
-     *
-     * @param clazz The class to create a serializer for
-     * @return The created serializer
-     */
-    public static <R extends Record> Endec<R> createRecordSerializer(Class<R> clazz) {
-        return RecordEndec.create(clazz);
-    }
-
-    /**
      * Tries to create a serializer capable of serializing
      * the given enum type
      *
      * @param enumClass The type of enum to create a serializer for
      * @return The created serializer
      */
-    public static <E extends Enum<E>> Endec<E> createEnumSerializer(Class<E> enumClass) {
+    public static <E extends Enum<E>> Endec<E> createEnumEndec(Class<E> enumClass) {
         return Endec.VAR_INT.xmap(i -> enumClass.getEnumConstants()[i], Enum::ordinal);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T, K> Endec<T> createDispatchedSerializer(Function<K, Endec<? extends T>> keyToEndec, Function<T, K> keyGetter, Endec<K> keyEndec) {
-        return Endec.dispatchedOf(keyToEndec, keyGetter, keyEndec);
     }
 
     @SuppressWarnings("unchecked")
@@ -380,7 +288,7 @@ public class ReflectionEndecBuilder {
         register(
                 BlockHitResult.class,
                 new StructEndec<>(){
-                    final Endec<Direction> DIRECTION = createEnumSerializer(Direction.class);
+                    final Endec<Direction> DIRECTION = createEnumEndec(Direction.class);
 
                     @Override
                     public void encode(Serializer.Struct serializer, BlockHitResult hitResult) {
@@ -444,13 +352,5 @@ public class ReflectionEndecBuilder {
                         doubles -> new Vector3f(doubles.get(0), doubles.get(1), doubles.get(2)),
                         vec3d -> List.of(vec3d.x(), vec3d.y(), vec3d.z())
                 ));
-
-        // -----------
-        // Collections
-        // -----------
-
-        registerCollectionProvider(Collection.class, HashSet::new);
-        registerCollectionProvider(List.class, ArrayList::new);
-        registerCollectionProvider(Map.class, LinkedHashMap::new);
     }
 }

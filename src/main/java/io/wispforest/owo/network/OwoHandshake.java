@@ -38,8 +38,7 @@ import java.util.function.ToIntFunction;
 public final class OwoHandshake {
 
     @SuppressWarnings("unchecked")
-    private static final Endec<Map<Identifier, Integer>> RESPONSE_SERIALIZER =
-            (Endec<Map<Identifier, Integer>>) (Object) ReflectionEndecBuilder.createMapSerializer(Map.class, Identifier.class, Integer.class);
+    private static final Endec<Map<Identifier, Integer>> RESPONSE_SERIALIZER = Endec.mapOf(Endec.IDENTIFIER, Endec.INT);
 
     private static final MutableText PREFIX = TextOps.concat(Owo.PREFIX, Text.of("§chandshake failure\n"));
     public static final Identifier CHANNEL_ID = new Identifier("owo", "handshake");
