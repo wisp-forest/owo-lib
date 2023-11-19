@@ -260,7 +260,7 @@ public class JsonDeserializer extends HierarchicalDeserializer<JsonElement> impl
         @Override
         public <F> @NotNull F field(String name, Endec<F> endec) {
             if (!this.object.has(name)) {
-                throw new IllegalStateException("Field " + name + " was missing from serialized data, but no default value was provided");
+                throw new IllegalStateException("Field '" + name + "' was missing from serialized data, but no default value was provided");
             }
             return JsonDeserializer.this.frame(
                     () -> this.object.get(name),

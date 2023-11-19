@@ -228,7 +228,7 @@ public class EdmDeserializer extends HierarchicalDeserializer<EdmElement<?>> imp
         @Override
         public <F> @NotNull F field(String name, Endec<F> endec) {
             if (!this.map.containsKey(name)) {
-                throw new IllegalStateException("Field " + name + " was missing from serialized data, but no default value was provided");
+                throw new IllegalStateException("Field '" + name + "' was missing from serialized data, but no default value was provided");
             }
             return EdmDeserializer.this.frame(
                     () -> this.map.get(name),
