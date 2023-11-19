@@ -474,6 +474,57 @@ public class StructEndecBuilder<T> {
         };
     }
 
+    public static <S, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17> Endec<S> of(StructField<S, F1> f1, StructField<S, F2> f2, StructField<S, F3> f3, StructField<S, F4> f4, StructField<S, F5> f5, StructField<S, F6> f6, StructField<S, F7> f7, StructField<S, F8> f8, StructField<S, F9> f9, StructField<S, F10> f10, StructField<S, F11> f11, StructField<S, F12> f12, StructField<S, F13> f13, StructField<S, F14> f14, StructField<S, F15> f15, StructField<S, F16> f16, StructField<S, F17> f17, Function17<F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17, S> constructor){
+        return new StructEndec<S>() {
+            @Override
+            public void encode(Serializer.Struct struct, S value) {
+                f1.serializeFieldInst(struct, value);
+                f2.serializeFieldInst(struct, value);
+                f3.serializeFieldInst(struct, value);
+                f4.serializeFieldInst(struct, value);
+                f5.serializeFieldInst(struct, value);
+                f6.serializeFieldInst(struct, value);
+                f7.serializeFieldInst(struct, value);
+                f8.serializeFieldInst(struct, value);
+                f9.serializeFieldInst(struct, value);
+                f10.serializeFieldInst(struct, value);
+                f11.serializeFieldInst(struct, value);
+                f12.serializeFieldInst(struct, value);
+                f13.serializeFieldInst(struct, value);
+                f14.serializeFieldInst(struct, value);
+                f15.serializeFieldInst(struct, value);
+                f16.serializeFieldInst(struct, value);
+                f17.serializeFieldInst(struct, value);
+            }
+
+            @Override
+            public S decode(Deserializer.Struct struct) {
+                return constructor.apply(f1.deserializeField(struct),
+                        f2.deserializeField(struct),
+                        f3.deserializeField(struct),
+                        f4.deserializeField(struct),
+                        f5.deserializeField(struct),
+                        f6.deserializeField(struct),
+                        f7.deserializeField(struct),
+                        f8.deserializeField(struct),
+                        f9.deserializeField(struct),
+                        f10.deserializeField(struct),
+                        f11.deserializeField(struct),
+                        f12.deserializeField(struct),
+                        f13.deserializeField(struct),
+                        f14.deserializeField(struct),
+                        f15.deserializeField(struct),
+                        f16.deserializeField(struct),
+                        f17.deserializeField(struct));
+            }
+        };
+    }
+
+    // Here as a one up for using endec... really based though
+    public interface Function17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, R> {
+        R apply(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6, T7 t7, T8 t8, T9 t9, T10 t10, T11 t11, T12 t12, T13 t13, T14 t14, T15 t15, T16 t16, T17 t17);
+    }
+
     /*public static void main(String[] args){
         String typesSpot = "{types}";
 
