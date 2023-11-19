@@ -241,21 +241,21 @@ public interface Endec<T> {
         };
     }
 
-    default Codec<T> codec() {
+    default Codec<T> codec(SerializationAttribute... assumedAttributes) {
         return new Codec<>() {
             @Override
-            public <T1> DataResult<Pair<T, T1>> decode(DynamicOps<T1> ops, T1 input) {
+            public <D> DataResult<Pair<T, D>> decode(DynamicOps<D> ops, D input) {
                 try {
-                    return DataResult.success(new Pair<>(Endec.this.decode(new EdmDeserializer(ops.convertTo(EdmOps.INSTANCE, input))), input));
+                    return DataResult.success(new Pair<>(Endec.this.decode(new EdmDeserializer(ops.convertTo(EdmOps.INSTANCE, input), assumedAttributes)), input));
                 } catch (Exception e) {
                     return DataResult.error(e::getMessage);
                 }
             }
 
             @Override
-            public <T1> DataResult<T1> encode(T input, DynamicOps<T1> ops, T1 prefix) {
+            public <D> DataResult<D> encode(T input, DynamicOps<D> ops, D prefix) {
                 try {
-                    return DataResult.success(EdmOps.INSTANCE.convertTo(ops, Endec.this.encode(EdmSerializer::new, input)));
+                    return DataResult.success(EdmOps.INSTANCE.convertTo(ops, Endec.this.encode(() -> new EdmSerializer(assumedAttributes), input)));
                 } catch (Exception e) {
                     return DataResult.error(e::getMessage);
                 }

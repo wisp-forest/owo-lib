@@ -2,6 +2,7 @@ package io.wispforest.uwu.recipe;
 
 import com.mojang.serialization.Codec;
 import io.wispforest.owo.serialization.Endec;
+import io.wispforest.owo.serialization.impl.SerializationAttribute;
 import io.wispforest.owo.serialization.impl.bytebuf.ByteBufDeserializer;
 import io.wispforest.owo.serialization.impl.bytebuf.ByteBufSerializer;
 import net.minecraft.network.PacketByteBuf;
@@ -14,13 +15,8 @@ public class EndecRecipeSerializer<T extends Recipe<?>> implements RecipeSeriali
     public final Codec<T> codec;
 
     public EndecRecipeSerializer(Endec<T> endec){
-        this.codec = endec.codec();
+        this.codec = endec.codec(SerializationAttribute.HUMAN_READABLE);
         this.endec = endec;
-    }
-
-    public EndecRecipeSerializer(Endec<T> endecCodec, Endec<T> packetEndec){
-        this.codec = endecCodec.codec();
-        this.endec = packetEndec;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package io.wispforest.owo.serialization.impl.edm;
 
+import com.google.common.collect.ImmutableSet;
 import io.wispforest.owo.serialization.*;
 import io.wispforest.owo.serialization.impl.SerializationAttribute;
 import org.jetbrains.annotations.NotNull;
@@ -9,15 +10,19 @@ import java.util.*;
 
 public class EdmDeserializer extends HierarchicalDeserializer<EdmElement<?>> implements SelfDescribedDeserializer<EdmElement<?>> {
 
-    private static final Set<SerializationAttribute> ATTRIBUTES = EnumSet.of(SerializationAttribute.SELF_DESCRIBING);
+    private final Set<SerializationAttribute> attributes;
 
-    public EdmDeserializer(EdmElement<?> serialized) {
+    public EdmDeserializer(EdmElement<?> serialized, SerializationAttribute... extraAttributes) {
         super(serialized);
+        this.attributes = ImmutableSet.<SerializationAttribute>builder()
+                .add(SerializationAttribute.SELF_DESCRIBING)
+                .add(extraAttributes)
+                .build();
     }
 
     @Override
     public Set<SerializationAttribute> attributes() {
-        return ATTRIBUTES;
+        return this.attributes;
     }
 
     // ---
