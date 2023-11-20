@@ -135,6 +135,15 @@ public interface Endec<T> {
         ).listOf().xmap(entries -> Map.ofEntries(entries.toArray(Map.Entry[]::new)), kvMap -> List.copyOf(kvMap.entrySet()));
     }
 
+    static <E extends Enum<E>> Endec<E> forEnum(Class<E> enumClazz) {
+        return ifAttr(
+                SerializationAttribute.HUMAN_READABLE,
+                STRING.xmap(name -> Arrays.stream(enumClazz.getEnumConstants()).filter(e -> e.name().equals(name)).findFirst().get(), Enum::name)
+        ).orElse(
+                VAR_INT.xmap(ordinal -> enumClazz.getEnumConstants()[ordinal], Enum::ordinal)
+        );
+    }
+
     static <T> Endec<T> ofCodec(Codec<T> codec) {
         return of(
                 (serializer, value) -> EdmEndec.INSTANCE.encode(serializer, codec.encodeStart(EdmOps.INSTANCE, value).result().get()),
