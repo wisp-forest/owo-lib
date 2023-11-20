@@ -5,8 +5,8 @@ import io.wispforest.owo.mixin.ClientCommonNetworkHandlerAccessor;
 import io.wispforest.owo.mixin.ServerCommonNetworkHandlerAccessor;
 import io.wispforest.owo.ops.TextOps;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
+import io.wispforest.owo.serialization.BuiltInEndecs;
 import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.impl.ReflectionEndecBuilder;
 import io.wispforest.owo.serialization.impl.bytebuf.ByteBufDeserializer;
 import io.wispforest.owo.serialization.impl.bytebuf.ByteBufSerializer;
 import io.wispforest.owo.util.OwoFreezer;
@@ -38,7 +38,7 @@ import java.util.function.ToIntFunction;
 public final class OwoHandshake {
 
     @SuppressWarnings("unchecked")
-    private static final Endec<Map<Identifier, Integer>> RESPONSE_SERIALIZER = Endec.mapOf(Endec.IDENTIFIER, Endec.INT);
+    private static final Endec<Map<Identifier, Integer>> RESPONSE_SERIALIZER = Endec.map(BuiltInEndecs.IDENTIFIER, Endec.INT);
 
     private static final MutableText PREFIX = TextOps.concat(Owo.PREFIX, Text.of("§chandshake failure\n"));
     public static final Identifier CHANNEL_ID = new Identifier("owo", "handshake");

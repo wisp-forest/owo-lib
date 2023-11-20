@@ -46,7 +46,7 @@ public class KeyedField<F> {
     }
 
     public static <F> KeyedField<Optional<F>> optional(String name, Endec<F> endec){
-        return new KeyedField<>(name, endec.ofOptional(), new MutableObject<>(Optional.empty()));
+        return new KeyedField<>(name, endec.optionalOf(), new MutableObject<>(Optional.empty()));
     }
 
     //--

@@ -138,7 +138,7 @@ public class JsonDeserializer extends HierarchicalDeserializer<JsonElement> impl
 
     private <S> void decodeValue(Serializer<S> visitor, JsonElement element) {
         if (element.isJsonNull()) {
-            visitor.writeOptional(Endec.JSON_ELEMENT, Optional.empty());
+            visitor.writeOptional(JsonEndec.INSTANCE, Optional.empty());
         } else if (element instanceof JsonPrimitive primitive) {
             if (primitive.isString()) {
                 visitor.writeString(primitive.getAsString());

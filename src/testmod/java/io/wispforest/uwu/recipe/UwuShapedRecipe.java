@@ -76,7 +76,7 @@ public class UwuShapedRecipe extends ShapedRecipe {
         throw new NotImplementedException("Serializing ShapedRecipe is not implemented yet.");
     });
 
-    private static final Endec<DefaultedList<Ingredient>> INGREDIENTS = Endec.ofCodec(Ingredient.ALLOW_EMPTY_CODEC).list()
+    private static final Endec<DefaultedList<Ingredient>> INGREDIENTS = Endec.ofCodec(Ingredient.ALLOW_EMPTY_CODEC).listOf()
             .conform(size -> DefaultedList.ofSize(size, Ingredient.EMPTY));
 
     private static final Endec<UwuShapedRecipe> FROM_INSTANCE = StructEndecBuilder.of(
@@ -98,7 +98,7 @@ public class UwuShapedRecipe extends ShapedRecipe {
 
 
     private record RawShapedRecipe(String group, CraftingRecipeCategory category, Map<String, Ingredient> key, List<String> pattern, ItemStack result, boolean showNotification) {
-        private static final Endec<List<String>> PATTERN_ENDEC = Endec.STRING.list().validate(rows -> {
+        private static final Endec<List<String>> PATTERN_ENDEC = Endec.STRING.listOf().validate(rows -> {
             if (rows.size() > 3) throw new IllegalStateException("Invalid pattern: too many rows, 3 is maximum");
             if (rows.isEmpty()) throw new IllegalStateException("Invalid pattern: empty pattern not allowed");
 
@@ -108,14 +108,12 @@ public class UwuShapedRecipe extends ShapedRecipe {
                 if (string.length() > 3) throw new IllegalStateException("Invalid pattern: too many columns, 3 is maximum");
                 if (i != string.length()) throw new IllegalStateException("Invalid pattern: each row must be the same width");
             }
-
-            return rows;
         });
 
         public static final Endec<RawShapedRecipe> ENDEC = StructEndecBuilder.of(
                 StructField.defaulted("group", Endec.STRING, recipe -> recipe.group, ""),
                 StructField.defaulted("category", Endec.ofCodec(CraftingRecipeCategory.CODEC), recipe -> recipe.category, CraftingRecipeCategory.MISC),
-                Endec.ofCodec(Ingredient.DISALLOW_EMPTY_CODEC).map().keyValidator(UwuShapedRecipe::keyEntryValidator).field("key", recipe -> recipe.key),
+                Endec.ofCodec(Ingredient.DISALLOW_EMPTY_CODEC).mapOf().keyValidator(UwuShapedRecipe::keyEntryValidator).field("key", recipe -> recipe.key),
                 PATTERN_ENDEC.field("pattern", recipe -> recipe.pattern),
                 Endec.ofCodec(RecipeCodecs.CRAFTING_RESULT).field("result", recipe -> recipe.result),
                 StructField.defaulted("show_notification", Endec.BOOLEAN, recipe -> recipe.showNotification, true),

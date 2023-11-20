@@ -6,79 +6,70 @@ import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.Serializer;
 import io.wispforest.owo.serialization.impl.SerializationAttribute;
 
-import java.util.Objects;
-import java.util.Optional;
+public final class EitherEndec<L, R> implements Endec<Either<L, R>> {
 
-public record EitherEndec<F, S>(Endec<F> first, Endec<S> second) implements Endec<Either<F, S>> {
+    private final Endec<L> leftEndec;
+    private final Endec<R> rightEndec;
+
+    private final boolean exclusive;
+
+    public EitherEndec(Endec<L> leftEndec, Endec<R> rightEndec, boolean exclusive) {
+        this.leftEndec = leftEndec;
+        this.rightEndec = rightEndec;
+
+        this.exclusive = exclusive;
+    }
 
     @Override
-    public <E> void encode(Serializer<E> serializer, Either<F, S> either) {
-        boolean selfDescribing = serializer.attributes().contains(SerializationAttribute.SELF_DESCRIBING);
-
-        if(!selfDescribing){
+    public void encode(Serializer<?> serializer, Either<L, R> either) {
+        if (serializer.attributes().contains(SerializationAttribute.SELF_DESCRIBING)) {
+            either.ifLeft(left -> this.leftEndec.encode(serializer, left)).ifRight(right -> this.rightEndec.encode(serializer, right));
+        } else {
             either.ifLeft(left -> {
-                try(var struct = serializer.struct()) {
-                    struct.field("side", Endec.VAR_INT, 0)
-                            .field("value", first, left);
+                try (var struct = serializer.struct()) {
+                    struct.field("is_left", Endec.BOOLEAN, true).field("left", this.leftEndec, left);
                 }
             }).ifRight(right -> {
-                try(var struct = serializer.struct()) {
-                    struct.field("side", Endec.VAR_INT, 1)
-                            .field("value", second, right);
+                try (var struct = serializer.struct()) {
+                    struct.field("is_left", Endec.BOOLEAN, false).field("right", this.rightEndec, right);
                 }
             });
-
-            return;
         }
-
-        either.ifLeft(left -> first.encode(serializer, left))
-                .ifRight(right -> second.encode(serializer, right));
     }
 
     @Override
-    public <E> Either<F, S> decode(Deserializer<E> deserializer) {
+    public Either<L, R> decode(Deserializer<?> deserializer) {
         boolean selfDescribing = deserializer.attributes().contains(SerializationAttribute.SELF_DESCRIBING);
 
-        if(!selfDescribing){
+        if (selfDescribing) {
+            Either<L, R> leftResult = null;
+            try {
+                leftResult = Either.left(deserializer.tryRead(leftEndec::decode));
+            } catch (Exception ignore) {}
+
+            if (!this.exclusive && leftResult != null) return leftResult;
+
+            Either<L, R> rightResult = null;
+            try {
+                rightResult = Either.right(deserializer.tryRead(rightEndec::decode));
+            } catch (Exception ignore) {}
+
+            if (this.exclusive && leftResult != null && rightResult != null) {
+                throw new IllegalStateException("Both alternatives read successfully, can not pick the correct one; first: " + leftResult + " second: " + rightResult);
+            }
+
+            if (leftResult != null) return leftResult;
+            if (rightResult != null) return rightResult;
+
+            throw new IllegalStateException("Neither alternative read successfully");
+        } else {
             var struct = deserializer.struct();
-
-            return switch (struct.field("side", Endec.VAR_INT)){
-                case 0 -> Either.left(struct.field("value", first));
-                case 1 -> Either.right(struct.field("value", second));
-                default -> throw new IllegalStateException("Unknown Int value for given Either Endec");
-            };
+            if (struct.field("is_left", Endec.BOOLEAN)) {
+                return Either.left(struct.field("left", this.leftEndec));
+            } else {
+                return Either.right(struct.field("right", this.rightEndec));
+            }
         }
 
-        Optional<Either<F, S>> result1 = Optional.empty();
-
-        try {
-            result1 = Optional.of(Either.left(deserializer.tryRead(first::decode)));
-        } catch (Exception ignore) {}
-
-        Optional<Either<F, S>> result2 = Optional.empty();
-
-        try {
-            result2 = Optional.of(Either.right(deserializer.tryRead(second::decode)));
-        } catch (Exception ignore) {}
-
-        if (result1.isPresent()) return result1.get();
-        if (result2.isPresent()) return result2.get();
-
-        throw new IllegalStateException("Neither alternatives read successfully!");
-    }
-
-    public boolean equals(Object o) {
-        if (this == o) return true;
-
-        if (o != null && this.getClass() == o.getClass()) {
-            EitherEndec<?, ?> either = (EitherEndec) o;
-            return Objects.equals(this.first, either.first) && Objects.equals(this.second, either.second);
-        }
-
-        return false;
-    }
-
-    public String toString() {
-        return "EitherCodec[" + this.first + ", " + this.second + "]";
     }
 }

@@ -29,14 +29,14 @@ public class ListEndec<V> implements Endec<List<V>> {
     }
 
     @Override
-    public <E> void encode(Serializer<E> serializer, List<V> value) {
+    public void encode(Serializer<?> serializer, List<V> value) {
         try (var state = serializer.sequence(endec, value.size())) {
             value.forEach(state::element);
         }
     }
 
     @Override
-    public <E> List<V> decode(Deserializer<E> deserializer) {
+    public List<V> decode(Deserializer<?> deserializer) {
         var sequenceDeserializer = deserializer.sequence(endec);
 
         final List<V> list = listConstructor.apply(sequenceDeserializer.estimatedSize());

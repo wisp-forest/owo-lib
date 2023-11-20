@@ -2,13 +2,12 @@ package io.wispforest.uwu;
 
 import blue.endless.jankson.JsonPrimitive;
 import com.google.common.collect.ImmutableList;
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.logging.LogUtils;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufInputStream;
-import io.netty.buffer.ByteBufOutputStream;
 import io.wispforest.owo.config.ConfigSynchronizer;
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.itemgroup.Icon;
@@ -21,16 +20,17 @@ import io.wispforest.owo.particles.ClientParticles;
 import io.wispforest.owo.particles.systems.ParticleSystem;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
 import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
+import io.wispforest.owo.serialization.BuiltInEndecs;
 import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.impl.StructEndecBuilder;
 import io.wispforest.owo.serialization.impl.bytebuf.ByteBufDeserializer;
 import io.wispforest.owo.serialization.impl.bytebuf.ByteBufSerializer;
 import io.wispforest.owo.serialization.impl.json.JsonDeserializer;
+import io.wispforest.owo.serialization.impl.json.JsonEndec;
 import io.wispforest.owo.serialization.impl.json.JsonSerializer;
 import io.wispforest.owo.serialization.impl.nbt.NbtDeserializer;
+import io.wispforest.owo.serialization.impl.nbt.NbtEndec;
 import io.wispforest.owo.serialization.impl.nbt.NbtSerializer;
-import io.wispforest.owo.serialization.impl.nbtio.BinaryNbtDeserializer;
-import io.wispforest.owo.serialization.impl.nbtio.BinaryNbtSerializer;
 import io.wispforest.owo.text.CustomTextRegistry;
 import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.util.RegistryAccess;
@@ -57,7 +57,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
-import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.Registries;
@@ -76,7 +76,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import org.slf4j.Logger;
 
-import java.io.*;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -174,6 +173,26 @@ public class Uwu implements ModInitializer {
 
     @Override
     public void onInitialize() {
+
+        var stackEndec = Endec.ofCodec(ItemStack.CODEC);
+        var stackData = """
+                        {
+                            "id": "minecraft:shroomlight",
+                            "Count": 42,
+                            "tag": {
+                                "Enchantments": [{"id": "unbreaking", "lvl": 3}]
+                            }
+                        }
+                """;
+
+        var stacknite = stackEndec.decode(JsonDeserializer.of(new Gson().fromJson(stackData, JsonObject.class)));
+        System.out.println(stacknite);
+
+        var serializer = ByteBufSerializer.packet();
+        stackEndec.encode(serializer, stacknite);
+
+        System.out.println(stackEndec.decode(new ByteBufDeserializer(serializer.result())));
+        System.out.println(BuiltInEndecs.BLOCK_POS.codec().encodeStart(NbtOps.INSTANCE, new BlockPos(34, 35, 69)).result().get());
 
         FieldRegistrationHandler.register(UwuItems.class, "uwu", true);
 
@@ -298,7 +317,7 @@ public class Uwu implements ModInitializer {
 
                         LOGGER.info("Input:  " + randomNumbers);
 
-                        Endec<List<Integer>> INT_LIST_KODECK = Endec.INT.list();
+                        Endec<List<Integer>> INT_LIST_KODECK = Endec.INT.listOf();
 
                         var nbtListData = INT_LIST_KODECK.encode(NbtSerializer::of, randomNumbers);
 
@@ -320,7 +339,7 @@ public class Uwu implements ModInitializer {
                         JsonElement stackJsonData;
 
                         try {
-                            stackJsonData = Endec.ITEM_STACK.encode(JsonSerializer::of, handStack);
+                            stackJsonData = BuiltInEndecs.ITEM_STACK.encode(JsonSerializer::of, handStack);
                         } catch (Exception exception){
                             LOGGER.info(exception.getMessage());
                             LOGGER.info((Arrays.toString(exception.getStackTrace())));
@@ -333,7 +352,7 @@ public class Uwu implements ModInitializer {
                         LOGGER.info("---");
 
                         try {
-                            handStack = Endec.ITEM_STACK.decode(JsonDeserializer::of, stackJsonData);
+                            handStack = BuiltInEndecs.ITEM_STACK.decode(JsonDeserializer::of, stackJsonData);
                         } catch (Exception exception){
                             LOGGER.info(exception.getMessage());
                             LOGGER.info((Arrays.toString(exception.getStackTrace())));
@@ -355,11 +374,11 @@ public class Uwu implements ModInitializer {
 
                             LOGGER.info("  Input:  " + nbtDataStack.asString().replace("\n", "\\n"));
 
-                            var jsonDataStack = Endec.NBT_ELEMENT.encode(JsonSerializer::of, nbtDataStack);
+                            var jsonDataStack = NbtEndec.ELEMENT.encode(JsonSerializer::of, nbtDataStack);
 
                             LOGGER.info("  Json:  " + jsonDataStack);
 
-                            var convertedNbtDataStack = Endec.NBT_ELEMENT.decode(JsonDeserializer::of, jsonDataStack);
+                            var convertedNbtDataStack = NbtEndec.ELEMENT.decode(JsonDeserializer::of, jsonDataStack);
 
                             LOGGER.info("Output:  " + convertedNbtDataStack.asString().replace("\n", "\\n"));
 
@@ -377,11 +396,11 @@ public class Uwu implements ModInitializer {
 
                             LOGGER.info("  Input:  " + nbtDataStack.asString().replace("\n", "\\n"));
 
-                            var jsonDataStack = Endec.NBT_ELEMENT.encode(JsonSerializer::of, nbtDataStack);
+                            var jsonDataStack = NbtEndec.ELEMENT.encode(JsonSerializer::of, nbtDataStack);
 
                             LOGGER.info("  Json:  " + jsonDataStack);
 
-                            var convertedNbtDataStack = Endec.JSON_ELEMENT.encode(NbtSerializer::of, jsonDataStack);
+                            var convertedNbtDataStack = JsonEndec.INSTANCE.encode(NbtSerializer::of, jsonDataStack);
 
                             LOGGER.info("Output:  " + convertedNbtDataStack.asString().replace("\n", "\\n"));
 
@@ -442,9 +461,9 @@ public class Uwu implements ModInitializer {
                             iterations("Endec", (buf) -> {
                                 ItemStack stack = source.getPlayer().getStackInHand(Hand.MAIN_HAND);
 
-                                Endec.ITEM_STACK.encode(new ByteBufSerializer<>(buf), stack);
+                                BuiltInEndecs.ITEM_STACK.encode(new ByteBufSerializer<>(buf), stack);
 
-                                var stackFromByte = Endec.ITEM_STACK.decode(ByteBufDeserializer::new, buf);
+                                var stackFromByte = BuiltInEndecs.ITEM_STACK.decode(ByteBufDeserializer::new, buf);
                             });
                         } catch (Exception exception){
                             LOGGER.info(exception.getMessage());
@@ -452,116 +471,6 @@ public class Uwu implements ModInitializer {
 
                             return 0;
                         }
-
-                        //--
-
-                        {
-                            LOGGER.info("-- BinaryNbt Test --");
-
-                            var variable1 = new TestRecord("Matt", 24, List.of("One", "Two", "Three", "Four"));
-
-                            ByteBuf buf = PacketByteBufs.create();
-
-                            LOGGER.info("Initial: " + variable1);
-
-                            var serializer = BinaryNbtSerializer.file(new ByteBufOutputStream(buf));
-
-                            TestRecord.ENDEC.encode(serializer, variable1);
-
-                            serializer.result();
-
-                            var variable1_decoded = TestRecord.ENDEC.decode(BinaryNbtDeserializer::file, new ByteBufInputStream(buf));
-
-                            LOGGER.info("Decoded: " + variable1_decoded);
-
-                            LOGGER.info("");
-
-                            //--
-                        }
-
-                        //--
-
-                        {
-                            LOGGER.info("-- BinaryNbt File Test --");
-                            var variable1 = new TestRecord("Matt", 24, List.of("One", "Two", "Three", "Four"));
-
-                            var path = FabricLoader.getInstance().getGameDir();
-
-                            var file = path.resolve("test.nbt").toFile();
-
-                            if(!file.exists()){
-                                try {
-                                    file.createNewFile();
-                                } catch (IOException e) {
-                                    throw new RuntimeException(e);
-                                }
-                            }
-
-                            try(var outputStream = new DataOutputStream(new FileOutputStream(file))) {
-                                LOGGER.info("Initial: " + variable1);
-
-                                var serializer = BinaryNbtSerializer.file(outputStream);
-
-                                TestRecord.ENDEC.encode(serializer, variable1);
-
-                                serializer.result();
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
-
-                            try(var inputStream = new DataInputStream(new FileInputStream(file))) {
-                                var variable1_decoded = TestRecord.ENDEC.decode(BinaryNbtDeserializer::file, inputStream);
-
-                                LOGGER.info("Decoded: " + variable1_decoded);
-
-                                LOGGER.info("");
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
-                        }
-
-                        //--
-
-                        {
-                            LOGGER.info("-- BinaryNbt Interop Test --");
-                            var variable1 = new TestRecord("Matt", 24, List.of("One", "Two", "Three", "Four"));
-
-                            var path = FabricLoader.getInstance().getGameDir();
-
-                            var file = path.resolve("test_2.nbt").toFile();
-
-                            if(!file.exists()){
-                                try {
-                                    file.createNewFile();
-                                } catch (IOException e) {
-                                    throw new RuntimeException(e);
-                                }
-                            }
-
-                            try(var outputStream = new DataOutputStream(new FileOutputStream(file))) {
-                                LOGGER.info("Initial: " + variable1);
-
-                                var serializer = BinaryNbtSerializer.file(outputStream);
-
-                                TestRecord.ENDEC.encode(serializer, variable1);
-
-                                serializer.result();
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
-
-                            try {
-                                var variable1_decoded = TestRecord.ENDEC.decode(NbtDeserializer::of, NbtIo.read(file));
-
-                                LOGGER.info("Decoded: " + variable1_decoded);
-
-                                LOGGER.info("");
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
-                        }
-                        
-                        //--
 
                         return 0;
                     }));
@@ -606,7 +515,7 @@ public class Uwu implements ModInitializer {
         public static final Endec<TestRecord> ENDEC = StructEndecBuilder.of(
                 Endec.STRING.field("name", TestRecord::name),
                 Endec.INT.field("count", TestRecord::count),
-                Endec.STRING.list().field("names", TestRecord::names),
+                Endec.STRING.listOf().field("names", TestRecord::names),
                 TestRecord::new
         );
     }

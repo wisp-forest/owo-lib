@@ -2,6 +2,7 @@ package io.wispforest.owo.serialization.impl;
 
 import io.wispforest.owo.network.serialization.SealedPolymorphic;
 import io.wispforest.owo.serialization.*;
+import io.wispforest.owo.serialization.impl.nbt.NbtEndec;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
@@ -30,7 +31,6 @@ import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class ReflectionEndecBuilder {
@@ -68,7 +68,7 @@ public class ReflectionEndecBuilder {
 
     @SafeVarargs
     @SuppressWarnings("rawtypes")
-    private static <T> void register(BiConsumer<Serializer, T> serializer, Function<Deserializer, T> deserializer, Class<T>... classes) {
+    private static <T> void register(BiConsumer<Serializer<?>, T> serializer, Function<Deserializer<?>, T> deserializer, Class<T>... classes) {
         final var kodeck = Endec.of(serializer, deserializer);
 
         for (var clazz : classes) register(clazz, kodeck);
@@ -91,17 +91,17 @@ public class ReflectionEndecBuilder {
 
         if (Map.class.isAssignableFrom(raw)) {
             return (typeArgs[0] instanceof ParameterizedType)
-                    ? Endec.mapOf(getGeneric(typeArgs[0]), getGeneric(typeArgs[1]))
-                    : getGeneric(typeArgs[1]).map();
+                    ? Endec.map(getGeneric(typeArgs[0]), getGeneric(typeArgs[1]))
+                    : getGeneric(typeArgs[1]).mapOf();
         }
 
         if (List.class.isAssignableFrom(raw)) {
-            return getGeneric(typeArgs[0]).list();
+            return getGeneric(typeArgs[0]).listOf();
         }
 
         if (Set.class.isAssignableFrom(raw)) {
             // WARNING: DON'T REPLACE WITH LAMBDA OR IT NO WORK ):
-            return getGeneric(typeArgs[0]).list()
+            return getGeneric(typeArgs[0]).listOf()
                     .<Set>xmap(
                             list -> (Set<?>) new HashSet<>(list),
                             set -> List.copyOf(set)
@@ -109,7 +109,7 @@ public class ReflectionEndecBuilder {
         }
 
         if (Optional.class.isAssignableFrom(raw)) {
-            return getGeneric(typeArgs[0]).ofOptional();
+            return getGeneric(typeArgs[0]).optionalOf();
         }
 
         return get(raw);
@@ -176,7 +176,7 @@ public class ReflectionEndecBuilder {
     public static Endec<?> createArrayEndec(Class<?> elementClass) {
         var elementSerializer = (Endec<Object>) get(elementClass);
 
-        return elementSerializer.list().xmap(list -> {
+        return elementSerializer.listOf().xmap(list -> {
             final int length = list.size();
             Object array = Array.newInstance(elementClass, length);
             for (int i = 0; i < length; i++) {
@@ -241,7 +241,7 @@ public class ReflectionEndecBuilder {
             classesMap.put(klass, i);
         }
 
-        return Endec.dispatchedOf(serializerMap::get, v -> classesMap.getInt(v.getClass()), Endec.INT);
+        return Endec.dispatched(serializerMap::get, v -> classesMap.getInt(v.getClass()), Endec.INT);
     }
 
     @SuppressWarnings("unchecked")
@@ -265,65 +265,65 @@ public class ReflectionEndecBuilder {
         register(Endec.SHORT, Short.class, short.class);
         register(Endec.SHORT.xmap(aShort -> (char) aShort.shortValue(), character -> (short) character.charValue()), Character.class, char.class);
 
-        register(Void.class, Endec.EMPTY);
+        register(Void.class, Endec.VOID);
 
         // ----
         // Misc
         // ----
 
         register(String.class, Endec.STRING);
-        register(UUID.class, Endec.UUID);
-        register(Date.class, Endec.DATE);
-        register(PacketByteBuf.class, Endec.PACKET_BYTE_BUF);
+        register(UUID.class, BuiltInEndecs.UUID);
+        register(Date.class, BuiltInEndecs.DATE);
+        register(PacketByteBuf.class, BuiltInEndecs.PACKET_BYTE_BUF);
 
         // --------
         // MC Types
         // --------
 
-        register(BlockPos.class, Endec.BLOCK_POS);
-        register(ChunkPos.class, Endec.CHUNK_POS);
-        register(ItemStack.class, Endec.ITEM_STACK);
-        register(Identifier.class, Endec.IDENTIFIER);
-        register(NbtCompound.class, Endec.COMPOUND);
+        register(BlockPos.class, BuiltInEndecs.BLOCK_POS);
+        register(ChunkPos.class, BuiltInEndecs.CHUNK_POS);
+        register(ItemStack.class, BuiltInEndecs.ITEM_STACK);
+        register(Identifier.class, BuiltInEndecs.IDENTIFIER);
+        register(NbtCompound.class, NbtEndec.COMPOUND);
         register(
                 BlockHitResult.class,
                 new StructEndec<>(){
                     final Endec<Direction> DIRECTION = createEnumEndec(Direction.class);
 
                     @Override
-                    public void encode(Serializer.Struct serializer, BlockHitResult hitResult) {
+                    public void encodeStruct(Serializer.Struct struct, BlockHitResult hitResult) {
                         BlockPos blockPos = hitResult.getBlockPos();
-                        serializer.field("blockPos", Endec.BLOCK_POS, blockPos)
+                        struct.field("blockPos", BuiltInEndecs.BLOCK_POS, blockPos)
                                 .field("side", DIRECTION, hitResult.getSide());
 
                         Vec3d vec3d = hitResult.getPos();
-                        serializer.field("x", Endec.FLOAT, (float)(vec3d.x - (double)blockPos.getX()))
+                        struct.field("x", Endec.FLOAT, (float)(vec3d.x - (double)blockPos.getX()))
                                 .field("y", Endec.FLOAT, (float)(vec3d.x - (double)blockPos.getX()))
                                 .field("z", Endec.FLOAT, (float)(vec3d.x - (double)blockPos.getX()))
                                 .field("inside", Endec.BOOLEAN, hitResult.isInsideBlock());
                     }
 
                     @Override
-                    public BlockHitResult decode(Deserializer.Struct deserializer) {
-                        BlockPos blockPos = deserializer.field("blockPos", Endec.BLOCK_POS);
-                        Direction direction = deserializer.field("side", DIRECTION);
+                    public BlockHitResult decodeStruct(Deserializer.Struct struct) {
+                        BlockPos blockPos = struct.field("blockPos", BuiltInEndecs.BLOCK_POS);
+                        Direction direction = struct.field("side", DIRECTION);
 
-                        float f = deserializer.field("x", Endec.FLOAT);
-                        float g = deserializer.field("y", Endec.FLOAT);
-                        float h = deserializer.field("z", Endec.FLOAT);
+                        float f = struct.field("x", Endec.FLOAT);
+                        float g = struct.field("y", Endec.FLOAT);
+                        float h = struct.field("z", Endec.FLOAT);
 
-                        boolean bl = deserializer.field("inside", Endec.BOOLEAN);
+                        boolean bl = struct.field("inside", Endec.BOOLEAN);
                         return new BlockHitResult(
                                 new Vec3d((double)blockPos.getX() + (double)f, (double)blockPos.getY() + (double)g, (double)blockPos.getZ() + (double)h), direction, blockPos, bl
                         );
                     }
                 }
         );
-        register(BitSet.class, Endec.BITSET);
-        register(Text.class, Endec.TEXT);
+        register(BitSet.class, BuiltInEndecs.BITSET);
+        register(Text.class, BuiltInEndecs.TEXT);
 
         register(ParticleEffect.class,
-                Endec.PACKET_BYTE_BUF.xmap(
+                BuiltInEndecs.PACKET_BYTE_BUF.xmap(
                         byteBuf -> {
                             //noinspection rawtypes
                             final ParticleType particleType = Registries.PARTICLE_TYPE.get(byteBuf.readInt());
@@ -341,13 +341,13 @@ public class ReflectionEndecBuilder {
                 )
         );
 
-        register(Vec3d.class, Endec.DOUBLE.list()
+        register(Vec3d.class, Endec.DOUBLE.listOf()
                 .xmap(
                         doubles -> new Vec3d(doubles.get(0), doubles.get(1), doubles.get(2)),
                         vec3d -> List.of(vec3d.getX(), vec3d.getY(), vec3d.getZ())
                 ));
 
-        register(Vector3f.class, Endec.FLOAT.list()
+        register(Vector3f.class, Endec.FLOAT.listOf()
                 .xmap(
                         doubles -> new Vector3f(doubles.get(0), doubles.get(1), doubles.get(2)),
                         vec3d -> List.of(vec3d.x(), vec3d.y(), vec3d.z())

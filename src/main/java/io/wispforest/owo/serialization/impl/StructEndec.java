@@ -8,19 +8,19 @@ import io.wispforest.owo.serialization.*;
 public interface StructEndec<T> extends Endec<T> {
 
     @Override
-    default <E> void encode(Serializer<E> serializer, T value) {
+    default void encode(Serializer<?> serializer, T value) {
         try(Serializer.Struct struct = serializer.struct()){
-            encode(struct, value);
+            this.encodeStruct(struct, value);
         }
     }
 
     @Override
-    default <E> T decode(Deserializer<E> deserializer) {
-        return decode(deserializer.struct());
+    default T decode(Deserializer<?> deserializer) {
+        return this.decodeStruct(deserializer.struct());
     }
 
-    void encode(Serializer.Struct serializer, T value);
+    void encodeStruct(Serializer.Struct struct, T value);
 
-    T decode(Deserializer.Struct deserializer);
+    T decodeStruct(Deserializer.Struct struct);
 
 }

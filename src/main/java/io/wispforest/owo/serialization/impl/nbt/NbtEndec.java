@@ -6,6 +6,7 @@ import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.SelfDescribedDeserializer;
 import io.wispforest.owo.serialization.Serializer;
 import io.wispforest.owo.serialization.impl.SerializationAttribute;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtTagSizeTracker;
@@ -14,12 +15,13 @@ import java.io.IOException;
 
 public final class NbtEndec implements Endec<NbtElement> {
 
-    public static final NbtEndec INSTANCE = new NbtEndec();
+    public static final Endec<NbtElement> ELEMENT = new NbtEndec();
+    public static final Endec<NbtCompound> COMPOUND = new NbtEndec().xmap(NbtCompound.class::cast, compound -> compound);
 
     private NbtEndec() {}
 
     @Override
-    public <E> void encode(Serializer<E> serializer, NbtElement value) {
+    public void encode(Serializer<?> serializer, NbtElement value) {
         if (serializer.attributes().contains(SerializationAttribute.SELF_DESCRIBING)) {
             NbtDeserializer.of(value).readAny(serializer);
             return;
@@ -36,8 +38,8 @@ public final class NbtEndec implements Endec<NbtElement> {
     }
 
     @Override
-    public <E> NbtElement decode(Deserializer<E> deserializer) {
-        if (deserializer instanceof SelfDescribedDeserializer<E> selfDescribedDeserializer) {
+    public NbtElement decode(Deserializer<?> deserializer) {
+        if (deserializer instanceof SelfDescribedDeserializer<?> selfDescribedDeserializer) {
             var nbt = NbtSerializer.of();
             selfDescribedDeserializer.readAny(nbt);
 

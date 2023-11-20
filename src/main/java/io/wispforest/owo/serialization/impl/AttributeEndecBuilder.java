@@ -1,7 +1,7 @@
 package io.wispforest.owo.serialization.impl;
 
-import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.Deserializer;
+import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.Serializer;
 
 import java.util.LinkedHashMap;
@@ -11,25 +11,27 @@ public class AttributeEndecBuilder<T> {
 
     private final Map<SerializationAttribute, Endec<T>> branches = new LinkedHashMap<>();
 
-    public AttributeEndecBuilder(Endec<T> endec, SerializationAttribute attr){
-        this.branches.put(attr, endec);
+    public AttributeEndecBuilder(Endec<T> endec, SerializationAttribute attribute) {
+        this.branches.put(attribute, endec);
     }
 
-    public AttributeEndecBuilder<T> orElseIf(Endec<T> endec, SerializationAttribute attr){
-        if(this.branches.containsKey(attr)) throw new IllegalStateException("Already Registered endec with the given Attribute! [" + attr.name() + "]");
-        this.branches.put(attr, endec);
+    public AttributeEndecBuilder<T> orElseIf(Endec<T> endec, SerializationAttribute attribute) {
+        if (this.branches.containsKey(attribute)) {
+            throw new IllegalStateException("Cannot have more than one branch for attribute " + attribute.name());
+        }
 
+        this.branches.put(attribute, endec);
         return this;
     }
 
-    public Endec<T> orElse(Endec<T> endec){
+    public Endec<T> orElse(Endec<T> endec) {
         return new Endec<>() {
             @Override
-            public <E> void encode(Serializer<E> serializer, T value) {
+            public void encode(Serializer<?> serializer, T value) {
                 var branchEndec = endec;
 
-                for (var branch : branches.entrySet()) {
-                    if(serializer.attributes().contains(branch.getKey())) {
+                for (var branch : AttributeEndecBuilder.this.branches.entrySet()) {
+                    if (serializer.attributes().contains(branch.getKey())) {
                         branchEndec = branch.getValue();
                         break;
                     }
@@ -39,11 +41,11 @@ public class AttributeEndecBuilder<T> {
             }
 
             @Override
-            public <E> T decode(Deserializer<E> deserializer) {
+            public T decode(Deserializer<?> deserializer) {
                 var branchEndec = endec;
 
-                for (var branch : branches.entrySet()) {
-                    if(deserializer.attributes().contains(branch.getKey())) {
+                for (var branch : AttributeEndecBuilder.this.branches.entrySet()) {
+                    if (deserializer.attributes().contains(branch.getKey())) {
                         branchEndec = branch.getValue();
                         break;
                     }

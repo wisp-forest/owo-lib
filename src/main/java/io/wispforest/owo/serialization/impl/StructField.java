@@ -32,7 +32,7 @@ public class StructField<S, F> extends KeyedField<F> {
     }
 
     public static <S, F> StructField<S, Optional<F>> optional(String name, Endec<F> endec, Function<S, Optional<F>> getter){
-        return new StructField<>(name, endec.ofOptional(), getter, new MutableObject<>(Optional.empty()));
+        return new StructField<>(name, endec.optionalOf(), getter, new MutableObject<>(Optional.empty()));
     }
 
     //--

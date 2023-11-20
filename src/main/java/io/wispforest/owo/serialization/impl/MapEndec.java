@@ -49,14 +49,14 @@ public class MapEndec<K, V> implements Endec<Map<K, V>> {
     }
 
     @Override
-    public <E> void encode(Serializer<E> serializer, Map<K, V> value) {
+    public void encode(Serializer<?> serializer, Map<K, V> value) {
         try (var state = serializer.map(endec, value.size())) {
             value.forEach((k, v) -> state.entry(fromKey.apply(k), v));
         }
     }
 
     @Override
-    public <E> Map<K, V> decode(Deserializer<E> deserializer) {
+    public Map<K, V> decode(Deserializer<?> deserializer) {
         var mapDeserializer = deserializer.map(endec);
 
         final Map<K, V> map = mapConstructor.apply(mapDeserializer.estimatedSize());

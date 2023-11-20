@@ -23,7 +23,7 @@ public class UwuNetworkExample {
         REGISTRY.put("one", ReflectionEndecBuilder.get(DispatchedSubclassOne.class));
         REGISTRY.put("two", ReflectionEndecBuilder.get(DispatchedSubclassTwo.class));
 
-        ReflectionEndecBuilder.register(DispatchedInterface.class, Endec.dispatchedOf(REGISTRY::get, DispatchedInterface::getName, Endec.STRING));
+        ReflectionEndecBuilder.register(DispatchedInterface.class, Endec.dispatched(REGISTRY::get, DispatchedInterface::getName, Endec.STRING));
 
         CHANNEL.registerClientbound(StringPacket.class, (message, access) -> {
             access.player().sendMessage(Text.of(message.value()), false);

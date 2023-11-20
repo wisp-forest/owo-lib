@@ -15,7 +15,7 @@ public final class JsonEndec implements Endec<JsonElement> {
     private JsonEndec() {}
 
     @Override
-    public <E> void encode(Serializer<E> serializer, JsonElement value) {
+    public void encode(Serializer<?> serializer, JsonElement value) {
         if (serializer.attributes().contains(SerializationAttribute.SELF_DESCRIBING)) {
             JsonDeserializer.of(value).readAny(serializer);
             return;
@@ -25,8 +25,8 @@ public final class JsonEndec implements Endec<JsonElement> {
     }
 
     @Override
-    public <E> JsonElement decode(Deserializer<E> deserializer) {
-        if (deserializer instanceof SelfDescribedDeserializer<E> selfDescribedDeserializer) {
+    public JsonElement decode(Deserializer<?> deserializer) {
+        if (deserializer instanceof SelfDescribedDeserializer<?> selfDescribedDeserializer) {
             var json = JsonSerializer.of();
             selfDescribedDeserializer.readAny(json);
 
