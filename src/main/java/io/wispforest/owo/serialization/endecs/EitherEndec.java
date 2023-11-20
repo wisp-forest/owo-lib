@@ -44,14 +44,14 @@ public final class EitherEndec<L, R> implements Endec<Either<L, R>> {
         if (selfDescribing) {
             Either<L, R> leftResult = null;
             try {
-                leftResult = Either.left(deserializer.tryRead(leftEndec::decode));
+                leftResult = Either.left(deserializer.tryRead(this.leftEndec::decode));
             } catch (Exception ignore) {}
 
             if (!this.exclusive && leftResult != null) return leftResult;
 
             Either<L, R> rightResult = null;
             try {
-                rightResult = Either.right(deserializer.tryRead(rightEndec::decode));
+                rightResult = Either.right(deserializer.tryRead(this.rightEndec::decode));
             } catch (Exception ignore) {}
 
             if (this.exclusive && leftResult != null && rightResult != null) {

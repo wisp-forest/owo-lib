@@ -8,11 +8,11 @@ import org.jetbrains.annotations.NotNull;
 public interface NbtMapCarrier extends MapCarrier {
 
     default <T> T get(@NotNull KeyedField<T> key) {
-        return key.endec.decode(NbtDeserializer::of, getMap().get(key.name));
+        return key.endec.decodeFully(NbtDeserializer::of, getMap().get(key.name));
     }
 
     default <T> void put(@NotNull KeyedField<T> key, @NotNull T value) {
-        getMap().put(key.name, key.endec.encode(NbtSerializer::of, value));
+        getMap().put(key.name, key.endec.encodeFully(NbtSerializer::of, value));
     }
 
     @Override

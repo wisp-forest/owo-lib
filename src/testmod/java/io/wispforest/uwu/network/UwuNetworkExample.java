@@ -2,7 +2,9 @@ package io.wispforest.uwu.network;
 
 import io.wispforest.owo.network.OwoNetChannel;
 import io.wispforest.owo.serialization.Endec;
+import io.wispforest.owo.serialization.impl.RecordEndec;
 import io.wispforest.owo.serialization.impl.ReflectionEndecBuilder;
+import io.wispforest.owo.serialization.impl.StructEndec;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -16,14 +18,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class UwuNetworkExample {
-    public static final Map<String, Endec<? extends DispatchedInterface>> REGISTRY = new HashMap<>();
+    public static final Map<String, StructEndec<? extends DispatchedInterface>> REGISTRY = new HashMap<>();
     public static final OwoNetChannel CHANNEL = OwoNetChannel.create(new Identifier("uwu", "main"));
 
     public static void init() {
-        REGISTRY.put("one", ReflectionEndecBuilder.get(DispatchedSubclassOne.class));
-        REGISTRY.put("two", ReflectionEndecBuilder.get(DispatchedSubclassTwo.class));
+        REGISTRY.put("one", RecordEndec.create(DispatchedSubclassOne.class));
+        REGISTRY.put("two", RecordEndec.create(DispatchedSubclassTwo.class));
 
-        ReflectionEndecBuilder.register(DispatchedInterface.class, Endec.dispatched(REGISTRY::get, DispatchedInterface::getName, Endec.STRING));
+        ReflectionEndecBuilder.register(DispatchedInterface.class, Endec.dispatchedStruct(REGISTRY::get, DispatchedInterface::getName, Endec.STRING));
 
         CHANNEL.registerClientbound(StringPacket.class, (message, access) -> {
             access.player().sendMessage(Text.of(message.value()), false);

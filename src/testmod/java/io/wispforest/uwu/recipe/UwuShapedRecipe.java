@@ -36,7 +36,7 @@ public class UwuShapedRecipe extends ShapedRecipe {
         return RECIPE_SERIALIZER;
     }
 
-    public static void init(){
+    public static void init() {
         RECIPE_SERIALIZER = Registry.register(
                 Registries.RECIPE_SERIALIZER,
                 new Identifier("uwu:crafting_shaped"),
@@ -53,12 +53,12 @@ public class UwuShapedRecipe extends ShapedRecipe {
         DefaultedList<Ingredient> defaultedList = DefaultedList.ofSize(i * j, Ingredient.EMPTY);
         Set<String> set = Sets.newHashSet(recipe.key.keySet());
 
-        for(int k = 0; k < strings.length; ++k) {
+        for (int k = 0; k < strings.length; ++k) {
             String string = strings[k];
 
-            for(int l = 0; l < string.length(); ++l) {
+            for (int l = 0; l < string.length(); ++l) {
                 String string2 = string.substring(l, l + 1);
-                Ingredient ingredient = string2.equals(" ") ? Ingredient.EMPTY : (Ingredient)recipe.key.get(string2);
+                Ingredient ingredient = string2.equals(" ") ? Ingredient.EMPTY : (Ingredient) recipe.key.get(string2);
 
                 if (ingredient == null) {
                     throw new IllegalStateException("Pattern references symbol '" + string2 + "' but it's not defined in the key");
@@ -76,8 +76,9 @@ public class UwuShapedRecipe extends ShapedRecipe {
         throw new NotImplementedException("Serializing ShapedRecipe is not implemented yet.");
     });
 
-    private static final Endec<DefaultedList<Ingredient>> INGREDIENTS = Endec.ofCodec(Ingredient.ALLOW_EMPTY_CODEC).listOf()
-            .conform(size -> DefaultedList.ofSize(size, Ingredient.EMPTY));
+    private static final Endec<DefaultedList<Ingredient>> INGREDIENTS = Endec.ofCodec(Ingredient.ALLOW_EMPTY_CODEC)
+            .listOf()
+            .xmap(ingredients -> new DefaultedList<>(ingredients, null) {}, defaulted -> defaulted);
 
     private static final Endec<UwuShapedRecipe> FROM_INSTANCE = StructEndecBuilder.of(
             Endec.STRING.field("group", ShapedRecipe::getGroup),
@@ -96,38 +97,40 @@ public class UwuShapedRecipe extends ShapedRecipe {
     //--
 
 
-
-    private record RawShapedRecipe(String group, CraftingRecipeCategory category, Map<String, Ingredient> key, List<String> pattern, ItemStack result, boolean showNotification) {
+    private record RawShapedRecipe(String group, CraftingRecipeCategory category, Map<String, Ingredient> key,
+                                   List<String> pattern, ItemStack result, boolean showNotification) {
         private static final Endec<List<String>> PATTERN_ENDEC = Endec.STRING.listOf().validate(rows -> {
             if (rows.size() > 3) throw new IllegalStateException("Invalid pattern: too many rows, 3 is maximum");
             if (rows.isEmpty()) throw new IllegalStateException("Invalid pattern: empty pattern not allowed");
 
             int i = rows.get(0).length();
 
-            for(String string : rows) {
-                if (string.length() > 3) throw new IllegalStateException("Invalid pattern: too many columns, 3 is maximum");
-                if (i != string.length()) throw new IllegalStateException("Invalid pattern: each row must be the same width");
+            for (String string : rows) {
+                if (string.length() > 3) {
+                    throw new IllegalStateException("Invalid pattern: too many columns, 3 is maximum");
+                }
+                if (i != string.length()) {
+                    throw new IllegalStateException("Invalid pattern: each row must be the same width");
+                }
             }
         });
 
         public static final Endec<RawShapedRecipe> ENDEC = StructEndecBuilder.of(
                 StructField.defaulted("group", Endec.STRING, recipe -> recipe.group, ""),
                 StructField.defaulted("category", Endec.ofCodec(CraftingRecipeCategory.CODEC), recipe -> recipe.category, CraftingRecipeCategory.MISC),
-                Endec.ofCodec(Ingredient.DISALLOW_EMPTY_CODEC).mapOf().keyValidator(UwuShapedRecipe::keyEntryValidator).field("key", recipe -> recipe.key),
+                Endec.ofCodec(Ingredient.DISALLOW_EMPTY_CODEC).mapOf().validate(map -> {
+                    for (var key : map.keySet()) {
+                        if (key.length() != 1) {
+                            throw new IllegalStateException("Invalid key entry: '" + key + "' is an invalid symbol (must be 1 character only).");
+                        } else if (" ".equals(key)) {
+                            throw new IllegalStateException("Invalid key entry: ' ' is a reserved symbol.");
+                        }
+                    }
+                }).field("key", recipe -> recipe.key),
                 PATTERN_ENDEC.field("pattern", recipe -> recipe.pattern),
                 Endec.ofCodec(RecipeCodecs.CRAFTING_RESULT).field("result", recipe -> recipe.result),
                 StructField.defaulted("show_notification", Endec.BOOLEAN, recipe -> recipe.showNotification, true),
                 RawShapedRecipe::new
         );
-    }
-
-    private static String keyEntryValidator(String key){
-        if (key.length() != 1) {
-            throw new IllegalStateException("Invalid key entry: '" + key + "' is an invalid symbol (must be 1 character only).");
-        } else if(" ".equals(key)){
-            throw new IllegalStateException("Invalid key entry: ' ' is a reserved symbol.");
-        }
-
-        return key;
     }
 }

@@ -130,14 +130,14 @@ public class OwoNetChannel {
 
         ServerPlayNetworking.registerGlobalReceiver(packetId, (server, player, handler, buf, responseSender) -> {
             int handlerIndex = buf.readVarInt();
-            final Record message = serializersByIndex.get(handlerIndex).serializer.decode(ByteBufDeserializer::new, buf);
+            final Record message = serializersByIndex.get(handlerIndex).serializer.decodeFully(ByteBufDeserializer::new, buf);
             server.execute(() -> serverHandlers.get(handlerIndex).handle(message, new ServerAccess(player)));
         });
 
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
             ClientPlayNetworking.registerGlobalReceiver(packetId, (client, handler, buf, responseSender) -> {
                 int handlerIndex = buf.readVarInt();
-                final Record message = serializersByIndex.get(-handlerIndex).serializer.decode(ByteBufDeserializer::new, buf);
+                final Record message = serializersByIndex.get(-handlerIndex).serializer.decodeFully(ByteBufDeserializer::new, buf);
                 client.execute(() -> clientHandlers.get(handlerIndex).handle(message, new ClientAccess(handler)));
             });
         }
@@ -444,7 +444,7 @@ public class OwoNetChannel {
         }
 
         buffer.writeVarInt(serializer.handlerIndex(target));
-        return serializer.serializer.encode(() -> new ByteBufSerializer<>(buffer), message);
+        return serializer.serializer.encodeFully(() -> new ByteBufSerializer<>(buffer), message);
     }
 
     public class ClientHandle {

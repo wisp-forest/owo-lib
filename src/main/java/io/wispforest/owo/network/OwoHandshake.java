@@ -119,7 +119,7 @@ public final class OwoHandshake {
         QUERY_RECEIVED = true;
 
         if (buf.readableBytes() > 0) {
-            final var serverOptionalChannels = RESPONSE_SERIALIZER.decode(ByteBufDeserializer::new, buf);
+            final var serverOptionalChannels = RESPONSE_SERIALIZER.decodeFully(ByteBufDeserializer::new, buf);
             ((OwoClientConnectionExtension) ((ClientCommonNetworkHandlerAccessor) handler).getConnection()).owo$setChannelSet(filterOptionalServices(serverOptionalChannels, OwoNetChannel.REGISTERED_CHANNELS, OwoHandshake::hashChannel));
         }
 
@@ -134,8 +134,8 @@ public final class OwoHandshake {
     private static void syncServer(MinecraftServer server, ServerConfigurationNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
         Owo.LOGGER.info("[Handshake] Receiving client channels");
 
-        final var clientChannels = RESPONSE_SERIALIZER.decode(ByteBufDeserializer::new, buf);
-        final var clientParticleControllers = RESPONSE_SERIALIZER.decode(ByteBufDeserializer::new, buf);
+        final var clientChannels = RESPONSE_SERIALIZER.decodeFully(ByteBufDeserializer::new, buf);
+        final var clientParticleControllers = RESPONSE_SERIALIZER.decodeFully(ByteBufDeserializer::new, buf);
 
         StringBuilder disconnectMessage = new StringBuilder();
 
@@ -147,7 +147,7 @@ public final class OwoHandshake {
         }
 
         if (buf.readableBytes() > 0) {
-            final var clientOptionalChannels = RESPONSE_SERIALIZER.decode(ByteBufDeserializer::new, buf);
+            final var clientOptionalChannels = RESPONSE_SERIALIZER.decodeFully(ByteBufDeserializer::new, buf);
             ((OwoClientConnectionExtension) ((ServerCommonNetworkHandlerAccessor) handler).owo$getConnection()).owo$setChannelSet(filterOptionalServices(clientOptionalChannels, OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel));
         }
 
@@ -230,7 +230,7 @@ public final class OwoHandshake {
             hashes.put(entry.getKey(), hashFunction.applyAsInt(entry.getValue()));
         }
 
-        RESPONSE_SERIALIZER.encode(() -> new ByteBufSerializer<>(buffer), hashes);
+        RESPONSE_SERIALIZER.encodeFully(() -> new ByteBufSerializer<>(buffer), hashes);
     }
 
     private static Pair<Set<Identifier>, Set<Identifier>> findCollisions(Set<Identifier> first, Set<Identifier> second) {

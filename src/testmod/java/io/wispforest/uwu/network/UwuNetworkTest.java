@@ -41,7 +41,7 @@ public class UwuNetworkTest {
         testEquals(endec, sameendec);
 
         testSerialization(test, testRecord -> {
-            return endec.decode(ByteBufDeserializer::new, endec.encode(ByteBufSerializer::packet, testRecord));
+            return endec.decodeFully(ByteBufDeserializer::new, endec.encodeFully(ByteBufSerializer::packet, testRecord));
         });
 
         //--
@@ -55,7 +55,7 @@ public class UwuNetworkTest {
         );
 
         testSerialization(test, testRecord -> {
-            return builtendec.decode(ByteBufDeserializer::new, builtendec.encode(ByteBufSerializer::packet, testRecord));
+            return builtendec.decodeFully(ByteBufDeserializer::new, builtendec.encodeFully(ByteBufSerializer::packet, testRecord));
         });
     }
 

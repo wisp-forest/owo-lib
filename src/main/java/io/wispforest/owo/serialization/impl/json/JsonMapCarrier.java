@@ -8,11 +8,11 @@ import org.jetbrains.annotations.NotNull;
 public interface JsonMapCarrier extends MapCarrier {
 
     default <T> T get(@NotNull KeyedField<T> key) {
-        return key.endec.decode(JsonDeserializer::of, getMap().get(key.name));
+        return key.endec.decodeFully(JsonDeserializer::of, getMap().get(key.name));
     }
 
     default <T> void put(@NotNull KeyedField<T> key, @NotNull T value) {
-        getMap().add(key.name, key.endec.encode(JsonSerializer::of, value));
+        getMap().add(key.name, key.endec.encodeFully(JsonSerializer::of, value));
     }
 
     @Override

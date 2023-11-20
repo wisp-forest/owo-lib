@@ -283,11 +283,11 @@ public class Uwu implements ModInitializer {
 
                         LOGGER.info("Input:  " + testPhrase);
 
-                        var nbtData = Endec.STRING.encode(NbtSerializer::of, testPhrase);
-                        var fromNbtData = Endec.STRING.decode(NbtDeserializer::of, nbtData);
+                        var nbtData = Endec.STRING.encodeFully(NbtSerializer::of, testPhrase);
+                        var fromNbtData = Endec.STRING.decodeFully(NbtDeserializer::of, nbtData);
 
-                        var jsonData = Endec.STRING.encode(JsonSerializer::of, fromNbtData);
-                        var fromJsonData = Endec.STRING.decode(JsonDeserializer::of, jsonData);
+                        var jsonData = Endec.STRING.encodeFully(JsonSerializer::of, fromNbtData);
+                        var fromJsonData = Endec.STRING.decodeFully(JsonDeserializer::of, jsonData);
 
                         LOGGER.info("Output: " + fromJsonData);
 
@@ -299,9 +299,9 @@ public class Uwu implements ModInitializer {
 
                         LOGGER.info("Input:  " + randomNumber);
 
-                        var jsonNum = Endec.INT.encode(JsonSerializer::of, randomNumber);
+                        var jsonNum = Endec.INT.encodeFully(JsonSerializer::of, randomNumber);
 
-                        LOGGER.info("Output: " + Endec.INT.decode(JsonDeserializer::of, jsonNum));
+                        LOGGER.info("Output: " + Endec.INT.decodeFully(JsonDeserializer::of, jsonNum));
 
                         LOGGER.info("");
 
@@ -319,9 +319,9 @@ public class Uwu implements ModInitializer {
 
                         Endec<List<Integer>> INT_LIST_KODECK = Endec.INT.listOf();
 
-                        var nbtListData = INT_LIST_KODECK.encode(NbtSerializer::of, randomNumbers);
+                        var nbtListData = INT_LIST_KODECK.encodeFully(NbtSerializer::of, randomNumbers);
 
-                        LOGGER.info("Output: " + INT_LIST_KODECK.decode(NbtDeserializer::of, nbtListData));
+                        LOGGER.info("Output: " + INT_LIST_KODECK.decodeFully(NbtDeserializer::of, nbtListData));
 
                         LOGGER.info("");
 
@@ -339,7 +339,7 @@ public class Uwu implements ModInitializer {
                         JsonElement stackJsonData;
 
                         try {
-                            stackJsonData = BuiltInEndecs.ITEM_STACK.encode(JsonSerializer::of, handStack);
+                            stackJsonData = BuiltInEndecs.ITEM_STACK.encodeFully(JsonSerializer::of, handStack);
                         } catch (Exception exception){
                             LOGGER.info(exception.getMessage());
                             LOGGER.info((Arrays.toString(exception.getStackTrace())));
@@ -352,7 +352,7 @@ public class Uwu implements ModInitializer {
                         LOGGER.info("---");
 
                         try {
-                            handStack = BuiltInEndecs.ITEM_STACK.decode(JsonDeserializer::of, stackJsonData);
+                            handStack = BuiltInEndecs.ITEM_STACK.decodeFully(JsonDeserializer::of, stackJsonData);
                         } catch (Exception exception){
                             LOGGER.info(exception.getMessage());
                             LOGGER.info((Arrays.toString(exception.getStackTrace())));
@@ -374,11 +374,11 @@ public class Uwu implements ModInitializer {
 
                             LOGGER.info("  Input:  " + nbtDataStack.asString().replace("\n", "\\n"));
 
-                            var jsonDataStack = NbtEndec.ELEMENT.encode(JsonSerializer::of, nbtDataStack);
+                            var jsonDataStack = NbtEndec.ELEMENT.encodeFully(JsonSerializer::of, nbtDataStack);
 
                             LOGGER.info("  Json:  " + jsonDataStack);
 
-                            var convertedNbtDataStack = NbtEndec.ELEMENT.decode(JsonDeserializer::of, jsonDataStack);
+                            var convertedNbtDataStack = NbtEndec.ELEMENT.decodeFully(JsonDeserializer::of, jsonDataStack);
 
                             LOGGER.info("Output:  " + convertedNbtDataStack.asString().replace("\n", "\\n"));
 
@@ -396,11 +396,11 @@ public class Uwu implements ModInitializer {
 
                             LOGGER.info("  Input:  " + nbtDataStack.asString().replace("\n", "\\n"));
 
-                            var jsonDataStack = NbtEndec.ELEMENT.encode(JsonSerializer::of, nbtDataStack);
+                            var jsonDataStack = NbtEndec.ELEMENT.encodeFully(JsonSerializer::of, nbtDataStack);
 
                             LOGGER.info("  Json:  " + jsonDataStack);
 
-                            var convertedNbtDataStack = JsonEndec.INSTANCE.encode(NbtSerializer::of, jsonDataStack);
+                            var convertedNbtDataStack = JsonEndec.INSTANCE.encodeFully(NbtSerializer::of, jsonDataStack);
 
                             LOGGER.info("Output:  " + convertedNbtDataStack.asString().replace("\n", "\\n"));
 
@@ -463,7 +463,7 @@ public class Uwu implements ModInitializer {
 
                                 BuiltInEndecs.ITEM_STACK.encode(new ByteBufSerializer<>(buf), stack);
 
-                                var stackFromByte = BuiltInEndecs.ITEM_STACK.decode(ByteBufDeserializer::new, buf);
+                                var stackFromByte = BuiltInEndecs.ITEM_STACK.decodeFully(ByteBufDeserializer::new, buf);
                             });
                         } catch (Exception exception){
                             LOGGER.info(exception.getMessage());
