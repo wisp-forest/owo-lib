@@ -412,9 +412,9 @@ public class Uwu implements ModInitializer {
                         //--
 
                         {
-                            var variable1Endec = Endec.STRING.keyed("variable1");
-                            var variable2Endec = Endec.INT.keyed("variable2");
-                            var variable3Endec = TestRecord.ENDEC.keyed("variable3Endec");
+                            var variable1Endec = Endec.STRING.keyed("variable1", "");
+                            var variable2Endec = Endec.INT.keyed("variable2", 0);
+                            var variable3Endec = TestRecord.ENDEC.keyed("variable3Endec", null);
 
                             var variable1 = "Weeeeeee";
                             var variable2 = 1000;
@@ -513,9 +513,9 @@ public class Uwu implements ModInitializer {
 
     public record TestRecord(String name, int count, List<String> names) {
         public static final Endec<TestRecord> ENDEC = StructEndecBuilder.of(
-                Endec.STRING.field("name", TestRecord::name),
-                Endec.INT.field("count", TestRecord::count),
-                Endec.STRING.listOf().field("names", TestRecord::names),
+                Endec.STRING.fieldOf("name", TestRecord::name),
+                Endec.INT.fieldOf("count", TestRecord::count),
+                Endec.STRING.listOf().fieldOf("names", TestRecord::names),
                 TestRecord::new
         );
     }

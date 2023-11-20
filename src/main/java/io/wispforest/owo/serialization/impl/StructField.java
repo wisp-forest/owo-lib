@@ -1,43 +1,42 @@
 package io.wispforest.owo.serialization.impl;
 
+import io.wispforest.owo.serialization.Deserializer;
 import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.Serializer;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
 import java.util.function.Function;
 
-public class StructField<S, F> extends KeyedField<F> {
+public final class StructField<S, F> {
 
-    public final Function<S, F> getter;
+    private final String name;
+    private final Endec<F> endec;
+    private final Function<S, F> getter;
+    private final @Nullable MutableObject<F> defaultValue;
 
-    protected StructField(String name, Endec<F> endec, Function<S, F> getter, @Nullable MutableObject<F> defaultValue) {
-        super(name, endec, defaultValue);
-
+    private StructField(String name, Endec<F> endec, Function<S, F> getter, @Nullable MutableObject<F> defaultValue) {
+        this.name = name;
+        this.endec = endec;
         this.getter = getter;
+        this.defaultValue = defaultValue;
     }
 
-    @Override
-    public <T extends KeyedField<F>> T defaulted(@Nullable F defaultValue) {
-        return (T) new StructField<>(name, endec, getter, new MutableObject<>(defaultValue));
+    public StructField(String name, Endec<F> endec, Function<S, F> getter, @Nullable F defaultValue) {
+        this(name, endec, getter, new MutableObject<>(defaultValue));
     }
 
-    public static <S, F> StructField<S, F> of(String name, Endec<F> endec, Function<S, F> getter){
-        return new StructField<>(name, endec, getter, null);
+    public StructField(String name, Endec<F> endec, Function<S, F> getter) {
+        this(name, endec, getter, (MutableObject<F>) null);
     }
 
-    public static <S, F> StructField<S, F> defaulted(String name, Endec<F> endec, Function<S, F> getter, F defaultValue){
-        return new StructField<>(name, endec, getter, new MutableObject<>(defaultValue));
+    public void encodeField(Serializer.Struct struct, S instance) {
+        struct.field(this.name, this.endec, this.getter.apply(instance));
     }
 
-    public static <S, F> StructField<S, Optional<F>> optional(String name, Endec<F> endec, Function<S, Optional<F>> getter){
-        return new StructField<>(name, endec.optionalOf(), getter, new MutableObject<>(Optional.empty()));
-    }
-
-    //--
-
-    public void serializeFieldInst(Serializer.Struct serializer, S instance){
-        super.serializeField(serializer, getter.apply(instance));
+    public F decodeField(Deserializer.Struct struct) {
+        return this.defaultValue != null
+                ? struct.field(this.name, this.endec, this.defaultValue.getValue())
+                : struct.field(this.name, this.endec);
     }
 }

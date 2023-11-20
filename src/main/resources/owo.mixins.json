@@ -16,7 +16,6 @@
     "ServerPlayerInteractionManagerMixin",
     "SimpleRegistryMixin",
     "TagGroupLoaderMixin",
-    "gson.JsonObjectMixin",
     "itemgroup.ItemGroupAccessor",
     "itemgroup.ItemMixin",
     "offline.AdvancementProgressAccessor",

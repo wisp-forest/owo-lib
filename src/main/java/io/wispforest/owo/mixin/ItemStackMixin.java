@@ -2,8 +2,10 @@ package io.wispforest.owo.mixin;
 
 import io.wispforest.owo.nbt.NbtCarrier;
 import io.wispforest.owo.nbt.NbtKey;
-import io.wispforest.owo.serialization.impl.KeyedField;
-import io.wispforest.owo.serialization.impl.nbt.NbtMapCarrier;
+import io.wispforest.owo.serialization.MapCarrier;
+import io.wispforest.owo.serialization.impl.KeyedEndec;
+import io.wispforest.owo.serialization.impl.nbt.NbtDeserializer;
+import io.wispforest.owo.serialization.impl.nbt.NbtSerializer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import org.jetbrains.annotations.NotNull;
@@ -11,14 +13,17 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+@SuppressWarnings("AddedMixinMembersNamePattern")
 @Mixin(ItemStack.class)
-public abstract class ItemStackMixin implements NbtCarrier, NbtMapCarrier {
+public abstract class ItemStackMixin implements NbtCarrier, MapCarrier {
 
     @Shadow
     private @Nullable NbtCompound nbt;
 
     @Shadow
     public abstract NbtCompound getOrCreateNbt();
+
+    // --- NbtCarrier (deprecated) ---
 
     @Override
     public <T> T get(@NotNull NbtKey<T> key) {
@@ -41,21 +46,28 @@ public abstract class ItemStackMixin implements NbtCarrier, NbtMapCarrier {
         return this.nbt != null && key.isIn(this.nbt);
     }
 
-    //--
+    // --- MapCarrier ---
 
     @Override
-    public NbtCompound getMap() {
-        return getOrCreateNbt();
+    public <T> T get(@NotNull KeyedEndec<T> key) {
+        return this.has(key)
+                ? key.endec().decodeFully(NbtDeserializer::of, this.nbt.get(key.key()))
+                : key.defaultValue();
     }
 
     @Override
-    public <T> void delete(@NotNull KeyedField<T> key) {
+    public <T> void put(@NotNull KeyedEndec<T> key, @NotNull T value) {
+        this.getOrCreateNbt().put(key.key(), key.endec().encodeFully(NbtSerializer::of, value));
+    }
+
+    @Override
+    public <T> void delete(@NotNull KeyedEndec<T> key) {
         if (this.nbt == null) return;
-        NbtMapCarrier.super.delete(key);
+        this.nbt.remove(key.key());
     }
 
     @Override
-    public <T> boolean has(@NotNull KeyedField<T> key) {
-        return this.nbt != null && NbtMapCarrier.super.has(key);
+    public <T> boolean has(@NotNull KeyedEndec<T> key) {
+        return this.nbt != null && this.nbt.contains(key.key());
     }
 }

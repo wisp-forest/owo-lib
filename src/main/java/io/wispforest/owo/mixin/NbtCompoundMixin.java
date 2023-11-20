@@ -2,16 +2,31 @@ package io.wispforest.owo.mixin;
 
 import io.wispforest.owo.nbt.NbtCarrier;
 import io.wispforest.owo.nbt.NbtKey;
-import io.wispforest.owo.serialization.impl.nbt.NbtMapCarrier;
+import io.wispforest.owo.serialization.MapCarrier;
+import io.wispforest.owo.serialization.impl.KeyedEndec;
+import io.wispforest.owo.serialization.impl.nbt.NbtDeserializer;
+import io.wispforest.owo.serialization.impl.nbt.NbtSerializer;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+@SuppressWarnings("AddedMixinMembersNamePattern")
 @Mixin(NbtCompound.class)
-public abstract class NbtCompoundMixin implements NbtCarrier, NbtMapCarrier {
+public abstract class NbtCompoundMixin implements NbtCarrier, MapCarrier {
+
     @Shadow
-    public abstract boolean contains(String key, int type);
+    public abstract @Nullable NbtElement get(String key);
+    @Shadow
+    public abstract @Nullable NbtElement put(String key, NbtElement element);
+    @Shadow
+    public abstract void remove(String key);
+    @Shadow
+    public abstract boolean contains(String key);
+
+    // --- NbtCarrier (deprecated) ---
 
     @Override
     public <T> T get(@NotNull NbtKey<T> key) {
@@ -33,10 +48,27 @@ public abstract class NbtCompoundMixin implements NbtCarrier, NbtMapCarrier {
         return key.isIn((NbtCompound) (Object) this);
     }
 
-    //--
+    // --- MapCarrier ---
 
     @Override
-    public NbtCompound getMap() {
-        return (NbtCompound) (Object) this;
+    public <T> T get(@NotNull KeyedEndec<T> key) {
+        return this.has(key)
+                ? key.endec().decodeFully(NbtDeserializer::of, this.get(key.key()))
+                : key.defaultValue();
+    }
+
+    @Override
+    public <T> void put(@NotNull KeyedEndec<T> key, @NotNull T value) {
+        this.put(key.key(), key.endec().encodeFully(NbtSerializer::of, value));
+    }
+
+    @Override
+    public <T> void delete(@NotNull KeyedEndec<T> key) {
+        this.remove(key.key());
+    }
+
+    @Override
+    public <T> boolean has(@NotNull KeyedEndec<T> key) {
+        return this.contains(key.key());
     }
 }

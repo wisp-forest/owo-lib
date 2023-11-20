@@ -49,8 +49,8 @@ public class UwuNetworkTest {
         System.out.println();
 
         var builtendec = StructEndecBuilder.of(
-                StructField.of("text", Endec.STRING.listOf().xmap(s -> s, s -> (List<String>) s), TestRecord::text),
-                StructField.of("enumValue", ReflectionEndecBuilder.createEnumEndec(TestEnum.class), TestRecord::enumValue),
+                Endec.STRING.listOf().xmap(s -> s, s -> s).fieldOf("text", TestRecord::text),
+                ReflectionEndecBuilder.createEnumEndec(TestEnum.class).fieldOf("enumValue", TestRecord::enumValue),
                 TestRecord::new
         );
 
@@ -65,7 +65,7 @@ public class UwuNetworkTest {
         testEquals(test, read);
     }
 
-    public record TestRecord(Collection<String> text, TestEnum enumValue) {}
+    public record TestRecord(List<String> text, TestEnum enumValue) {}
 
     public enum TestEnum {ONE_VALUE, ANOTHER_VALUE}
 

@@ -1,6 +1,6 @@
 package io.wispforest.owo.serialization;
 
-import io.wispforest.owo.serialization.impl.KeyedField;
+import io.wispforest.owo.serialization.impl.KeyedEndec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -10,43 +10,39 @@ public interface MapCarrier {
 
     // Interface specification
 
-    default <T> T get(@NotNull KeyedField<T> key){
+    default <T> T get(@NotNull KeyedEndec<T> key){
         throw new IllegalStateException("Interface default method called");
     }
 
-    default <T> void put(@NotNull KeyedField<T> key, @NotNull T value){
+    default <T> void put(@NotNull KeyedEndec<T> key, @NotNull T value){
         throw new IllegalStateException("Interface default method called");
     }
 
-    default <T> void delete(@NotNull KeyedField<T> key){
+    default <T> void delete(@NotNull KeyedEndec<T> key){
         throw new IllegalStateException("Interface default method called");
     }
 
-    default <T> boolean has(@NotNull KeyedField<T> key){
+    default <T> boolean has(@NotNull KeyedEndec<T> key){
         throw new IllegalStateException("Interface default method called");
     }
 
     // Default implementations
 
-    default <T> T getOr(@NotNull KeyedField<T> key, @Nullable T defaultValue) {
-        return this.has(key) ? this.get(key) : defaultValue;
-    }
-
-    default <T> void putIfNotNull(@NotNull KeyedField<T> key, @Nullable T value) {
+    default <T> void putIfNotNull(@NotNull KeyedEndec<T> key, @Nullable T value) {
         if (value == null) return;
         this.put(key, value);
     }
 
-    default <T> void copy(@NotNull KeyedField<T> key, @NotNull MapCarrier other) {
+    default <T> void copy(@NotNull KeyedEndec<T> key, @NotNull MapCarrier other) {
         other.put(key, this.get(key));
     }
 
-    default <T> void copyIfPresent(@NotNull KeyedField<T> key, @NotNull MapCarrier other) {
+    default <T> void copyIfPresent(@NotNull KeyedEndec<T> key, @NotNull MapCarrier other) {
         if (!this.has(key)) return;
         this.copy(key, other);
     }
 
-    default <T> void mutate(@NotNull KeyedField<T> key, @NotNull Function<T, T> mutator) {
+    default <T> void mutate(@NotNull KeyedEndec<T> key, @NotNull Function<T, T> mutator) {
         this.put(key, mutator.apply(this.get(key)));
     }
 }

@@ -14,10 +14,7 @@ import io.wispforest.owo.serialization.impl.edm.EdmOps;
 import io.wispforest.owo.serialization.impl.edm.EdmSerializer;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.*;
 
 /**
@@ -131,9 +128,9 @@ public interface Endec<T> {
     }
 
     static <K, V> Endec<Map<K, V>> map(Endec<K> keyEndec, Endec<V> valueEndec) {
-        return StructEndecBuilder.<Map.Entry<K, V>, K, V>of(
-                StructField.of("k", keyEndec, Map.Entry::getKey),
-                StructField.of("v", valueEndec, Map.Entry::getValue),
+        return StructEndecBuilder.of(
+                keyEndec.fieldOf("k", Map.Entry::getKey),
+                valueEndec.fieldOf("v", Map.Entry::getValue),
                 Map::entry
         ).listOf().xmap(entries -> Map.ofEntries(entries.toArray(Map.Entry[]::new)), kvMap -> List.copyOf(kvMap.entrySet()));
     }
@@ -234,6 +231,10 @@ public interface Endec<T> {
         });
     }
 
+    default Endec<@Nullable T> nullableOf() {
+        return this.optionalOf().xmap(o -> o.orElse(null), Optional::ofNullable);
+    }
+
     // --- Conversion ---
 
     default Codec<T> codec(SerializationAttribute... assumedAttributes) {
@@ -258,15 +259,15 @@ public interface Endec<T> {
         };
     }
 
-    default KeyedField<T> keyed(String name) {
-        return KeyedField.of(name, this);
+    default KeyedEndec<T> keyed(String key, T defaultValue) {
+        return new KeyedEndec<>(key, this, defaultValue);
     }
 
-    default <S> StructField<S, T> field(String name, Function<S, T> getter) {
-        return StructField.of(name, this, getter);
+    default <S> StructField<S, T> fieldOf(String name, Function<S, T> getter) {
+        return new StructField<>(name, this, getter);
     }
 
-    default Endec<@Nullable T> nullableOf() {
-        return this.optionalOf().xmap(o -> o.orElse(null), Optional::ofNullable);
+    default <S> StructField<S, T> optionalFieldOf(String name, Function<S, T> getter, @Nullable T defaultValue) {
+        return new StructField<>(name, this, getter, defaultValue);
     }
 }

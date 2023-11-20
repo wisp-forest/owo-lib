@@ -14,12 +14,12 @@ public class StructEndecBuilder<T> {
         return new StructEndec<>() {
             @Override
             public void encodeStruct(Serializer.Struct struct, S value) {
-                f1.serializeFieldInst(struct, value);
+                f1.encodeField(struct, value);
             }
 
             @Override
             public S decodeStruct(Deserializer.Struct struct) {
-                return constructor.apply(f1.deserializeField(struct));
+                return constructor.apply(f1.decodeField(struct));
             }
         };
     }
@@ -28,14 +28,14 @@ public class StructEndecBuilder<T> {
         return new StructEndec<>() {
             @Override
             public void encodeStruct(Serializer.Struct struct, S value) {
-                f1.serializeFieldInst(struct, value);
-                f2.serializeFieldInst(struct, value);
+                f1.encodeField(struct, value);
+                f2.encodeField(struct, value);
             }
 
             @Override
             public S decodeStruct(Deserializer.Struct struct) {
-                return constructor.apply(f1.deserializeField(struct),
-                        f2.deserializeField(struct));
+                return constructor.apply(f1.decodeField(struct),
+                        f2.decodeField(struct));
             }
         };
     }
@@ -44,16 +44,16 @@ public class StructEndecBuilder<T> {
         return new StructEndec<>() {
             @Override
             public void encodeStruct(Serializer.Struct struct, S value) {
-                f1.serializeFieldInst(struct, value);
-                f2.serializeFieldInst(struct, value);
-                f3.serializeFieldInst(struct, value);
+                f1.encodeField(struct, value);
+                f2.encodeField(struct, value);
+                f3.encodeField(struct, value);
             }
 
             @Override
             public S decodeStruct(Deserializer.Struct struct) {
-                return constructor.apply(f1.deserializeField(struct),
-                        f2.deserializeField(struct),
-                        f3.deserializeField(struct));
+                return constructor.apply(f1.decodeField(struct),
+                        f2.decodeField(struct),
+                        f3.decodeField(struct));
             }
         };
     }
@@ -62,18 +62,18 @@ public class StructEndecBuilder<T> {
         return new StructEndec<>() {
             @Override
             public void encodeStruct(Serializer.Struct struct, S value) {
-                f1.serializeFieldInst(struct, value);
-                f2.serializeFieldInst(struct, value);
-                f3.serializeFieldInst(struct, value);
-                f4.serializeFieldInst(struct, value);
+                f1.encodeField(struct, value);
+                f2.encodeField(struct, value);
+                f3.encodeField(struct, value);
+                f4.encodeField(struct, value);
             }
 
             @Override
             public S decodeStruct(Deserializer.Struct struct) {
-                return constructor.apply(f1.deserializeField(struct),
-                        f2.deserializeField(struct),
-                        f3.deserializeField(struct),
-                        f4.deserializeField(struct));
+                return constructor.apply(f1.decodeField(struct),
+                        f2.decodeField(struct),
+                        f3.decodeField(struct),
+                        f4.decodeField(struct));
             }
         };
     }
@@ -82,20 +82,20 @@ public class StructEndecBuilder<T> {
         return new StructEndec<>() {
             @Override
             public void encodeStruct(Serializer.Struct struct, S value) {
-                f1.serializeFieldInst(struct, value);
-                f2.serializeFieldInst(struct, value);
-                f3.serializeFieldInst(struct, value);
-                f4.serializeFieldInst(struct, value);
-                f5.serializeFieldInst(struct, value);
+                f1.encodeField(struct, value);
+                f2.encodeField(struct, value);
+                f3.encodeField(struct, value);
+                f4.encodeField(struct, value);
+                f5.encodeField(struct, value);
             }
 
             @Override
             public S decodeStruct(Deserializer.Struct struct) {
-                return constructor.apply(f1.deserializeField(struct),
-                        f2.deserializeField(struct),
-                        f3.deserializeField(struct),
-                        f4.deserializeField(struct),
-                        f5.deserializeField(struct));
+                return constructor.apply(f1.decodeField(struct),
+                        f2.decodeField(struct),
+                        f3.decodeField(struct),
+                        f4.decodeField(struct),
+                        f5.decodeField(struct));
             }
         };
     }
@@ -104,22 +104,22 @@ public class StructEndecBuilder<T> {
         return new StructEndec<>() {
             @Override
             public void encodeStruct(Serializer.Struct struct, S value) {
-                f1.serializeFieldInst(struct, value);
-                f2.serializeFieldInst(struct, value);
-                f3.serializeFieldInst(struct, value);
-                f4.serializeFieldInst(struct, value);
-                f5.serializeFieldInst(struct, value);
-                f6.serializeFieldInst(struct, value);
+                f1.encodeField(struct, value);
+                f2.encodeField(struct, value);
+                f3.encodeField(struct, value);
+                f4.encodeField(struct, value);
+                f5.encodeField(struct, value);
+                f6.encodeField(struct, value);
             }
 
             @Override
             public S decodeStruct(Deserializer.Struct struct) {
-                return constructor.apply(f1.deserializeField(struct),
-                        f2.deserializeField(struct),
-                        f3.deserializeField(struct),
-                        f4.deserializeField(struct),
-                        f5.deserializeField(struct),
-                        f6.deserializeField(struct));
+                return constructor.apply(f1.decodeField(struct),
+                        f2.decodeField(struct),
+                        f3.decodeField(struct),
+                        f4.decodeField(struct),
+                        f5.decodeField(struct),
+                        f6.decodeField(struct));
             }
         };
     }
@@ -128,24 +128,24 @@ public class StructEndecBuilder<T> {
         return new StructEndec<>() {
             @Override
             public void encodeStruct(Serializer.Struct struct, S value) {
-                f1.serializeFieldInst(struct, value);
-                f2.serializeFieldInst(struct, value);
-                f3.serializeFieldInst(struct, value);
-                f4.serializeFieldInst(struct, value);
-                f5.serializeFieldInst(struct, value);
-                f6.serializeFieldInst(struct, value);
-                f7.serializeFieldInst(struct, value);
+                f1.encodeField(struct, value);
+                f2.encodeField(struct, value);
+                f3.encodeField(struct, value);
+                f4.encodeField(struct, value);
+                f5.encodeField(struct, value);
+                f6.encodeField(struct, value);
+                f7.encodeField(struct, value);
             }
 
             @Override
             public S decodeStruct(Deserializer.Struct struct) {
-                return constructor.apply(f1.deserializeField(struct),
-                        f2.deserializeField(struct),
-                        f3.deserializeField(struct),
-                        f4.deserializeField(struct),
-                        f5.deserializeField(struct),
-                        f6.deserializeField(struct),
-                        f7.deserializeField(struct));
+                return constructor.apply(f1.decodeField(struct),
+                        f2.decodeField(struct),
+                        f3.decodeField(struct),
+                        f4.decodeField(struct),
+                        f5.decodeField(struct),
+                        f6.decodeField(struct),
+                        f7.decodeField(struct));
             }
         };
     }
@@ -154,26 +154,26 @@ public class StructEndecBuilder<T> {
         return new StructEndec<>() {
             @Override
             public void encodeStruct(Serializer.Struct struct, S value) {
-                f1.serializeFieldInst(struct, value);
-                f2.serializeFieldInst(struct, value);
-                f3.serializeFieldInst(struct, value);
-                f4.serializeFieldInst(struct, value);
-                f5.serializeFieldInst(struct, value);
-                f6.serializeFieldInst(struct, value);
-                f7.serializeFieldInst(struct, value);
-                f8.serializeFieldInst(struct, value);
+                f1.encodeField(struct, value);
+                f2.encodeField(struct, value);
+                f3.encodeField(struct, value);
+                f4.encodeField(struct, value);
+                f5.encodeField(struct, value);
+                f6.encodeField(struct, value);
+                f7.encodeField(struct, value);
+                f8.encodeField(struct, value);
             }
 
             @Override
             public S decodeStruct(Deserializer.Struct struct) {
-                return constructor.apply(f1.deserializeField(struct),
-                        f2.deserializeField(struct),
-                        f3.deserializeField(struct),
-                        f4.deserializeField(struct),
-                        f5.deserializeField(struct),
-                        f6.deserializeField(struct),
-                        f7.deserializeField(struct),
-                        f8.deserializeField(struct));
+                return constructor.apply(f1.decodeField(struct),
+                        f2.decodeField(struct),
+                        f3.decodeField(struct),
+                        f4.decodeField(struct),
+                        f5.decodeField(struct),
+                        f6.decodeField(struct),
+                        f7.decodeField(struct),
+                        f8.decodeField(struct));
             }
         };
     }
@@ -182,28 +182,28 @@ public class StructEndecBuilder<T> {
         return new StructEndec<>() {
             @Override
             public void encodeStruct(Serializer.Struct struct, S value) {
-                f1.serializeFieldInst(struct, value);
-                f2.serializeFieldInst(struct, value);
-                f3.serializeFieldInst(struct, value);
-                f4.serializeFieldInst(struct, value);
-                f5.serializeFieldInst(struct, value);
-                f6.serializeFieldInst(struct, value);
-                f7.serializeFieldInst(struct, value);
-                f8.serializeFieldInst(struct, value);
-                f9.serializeFieldInst(struct, value);
+                f1.encodeField(struct, value);
+                f2.encodeField(struct, value);
+                f3.encodeField(struct, value);
+                f4.encodeField(struct, value);
+                f5.encodeField(struct, value);
+                f6.encodeField(struct, value);
+                f7.encodeField(struct, value);
+                f8.encodeField(struct, value);
+                f9.encodeField(struct, value);
             }
 
             @Override
             public S decodeStruct(Deserializer.Struct struct) {
-                return constructor.apply(f1.deserializeField(struct),
-                        f2.deserializeField(struct),
-                        f3.deserializeField(struct),
-                        f4.deserializeField(struct),
-                        f5.deserializeField(struct),
-                        f6.deserializeField(struct),
-                        f7.deserializeField(struct),
-                        f8.deserializeField(struct),
-                        f9.deserializeField(struct));
+                return constructor.apply(f1.decodeField(struct),
+                        f2.decodeField(struct),
+                        f3.decodeField(struct),
+                        f4.decodeField(struct),
+                        f5.decodeField(struct),
+                        f6.decodeField(struct),
+                        f7.decodeField(struct),
+                        f8.decodeField(struct),
+                        f9.decodeField(struct));
             }
         };
     }
@@ -212,30 +212,30 @@ public class StructEndecBuilder<T> {
         return new StructEndec<>() {
             @Override
             public void encodeStruct(Serializer.Struct struct, S value) {
-                f1.serializeFieldInst(struct, value);
-                f2.serializeFieldInst(struct, value);
-                f3.serializeFieldInst(struct, value);
-                f4.serializeFieldInst(struct, value);
-                f5.serializeFieldInst(struct, value);
-                f6.serializeFieldInst(struct, value);
-                f7.serializeFieldInst(struct, value);
-                f8.serializeFieldInst(struct, value);
-                f9.serializeFieldInst(struct, value);
-                f10.serializeFieldInst(struct, value);
+                f1.encodeField(struct, value);
+                f2.encodeField(struct, value);
+                f3.encodeField(struct, value);
+                f4.encodeField(struct, value);
+                f5.encodeField(struct, value);
+                f6.encodeField(struct, value);
+                f7.encodeField(struct, value);
+                f8.encodeField(struct, value);
+                f9.encodeField(struct, value);
+                f10.encodeField(struct, value);
             }
 
             @Override
             public S decodeStruct(Deserializer.Struct struct) {
-                return constructor.apply(f1.deserializeField(struct),
-                        f2.deserializeField(struct),
-                        f3.deserializeField(struct),
-                        f4.deserializeField(struct),
-                        f5.deserializeField(struct),
-                        f6.deserializeField(struct),
-                        f7.deserializeField(struct),
-                        f8.deserializeField(struct),
-                        f9.deserializeField(struct),
-                        f10.deserializeField(struct));
+                return constructor.apply(f1.decodeField(struct),
+                        f2.decodeField(struct),
+                        f3.decodeField(struct),
+                        f4.decodeField(struct),
+                        f5.decodeField(struct),
+                        f6.decodeField(struct),
+                        f7.decodeField(struct),
+                        f8.decodeField(struct),
+                        f9.decodeField(struct),
+                        f10.decodeField(struct));
             }
         };
     }
@@ -244,32 +244,32 @@ public class StructEndecBuilder<T> {
         return new StructEndec<>() {
             @Override
             public void encodeStruct(Serializer.Struct struct, S value) {
-                f1.serializeFieldInst(struct, value);
-                f2.serializeFieldInst(struct, value);
-                f3.serializeFieldInst(struct, value);
-                f4.serializeFieldInst(struct, value);
-                f5.serializeFieldInst(struct, value);
-                f6.serializeFieldInst(struct, value);
-                f7.serializeFieldInst(struct, value);
-                f8.serializeFieldInst(struct, value);
-                f9.serializeFieldInst(struct, value);
-                f10.serializeFieldInst(struct, value);
-                f11.serializeFieldInst(struct, value);
+                f1.encodeField(struct, value);
+                f2.encodeField(struct, value);
+                f3.encodeField(struct, value);
+                f4.encodeField(struct, value);
+                f5.encodeField(struct, value);
+                f6.encodeField(struct, value);
+                f7.encodeField(struct, value);
+                f8.encodeField(struct, value);
+                f9.encodeField(struct, value);
+                f10.encodeField(struct, value);
+                f11.encodeField(struct, value);
             }
 
             @Override
             public S decodeStruct(Deserializer.Struct struct) {
-                return constructor.apply(f1.deserializeField(struct),
-                        f2.deserializeField(struct),
-                        f3.deserializeField(struct),
-                        f4.deserializeField(struct),
-                        f5.deserializeField(struct),
-                        f6.deserializeField(struct),
-                        f7.deserializeField(struct),
-                        f8.deserializeField(struct),
-                        f9.deserializeField(struct),
-                        f10.deserializeField(struct),
-                        f11.deserializeField(struct));
+                return constructor.apply(f1.decodeField(struct),
+                        f2.decodeField(struct),
+                        f3.decodeField(struct),
+                        f4.decodeField(struct),
+                        f5.decodeField(struct),
+                        f6.decodeField(struct),
+                        f7.decodeField(struct),
+                        f8.decodeField(struct),
+                        f9.decodeField(struct),
+                        f10.decodeField(struct),
+                        f11.decodeField(struct));
             }
         };
     }
@@ -278,34 +278,34 @@ public class StructEndecBuilder<T> {
         return new StructEndec<>() {
             @Override
             public void encodeStruct(Serializer.Struct struct, S value) {
-                f1.serializeFieldInst(struct, value);
-                f2.serializeFieldInst(struct, value);
-                f3.serializeFieldInst(struct, value);
-                f4.serializeFieldInst(struct, value);
-                f5.serializeFieldInst(struct, value);
-                f6.serializeFieldInst(struct, value);
-                f7.serializeFieldInst(struct, value);
-                f8.serializeFieldInst(struct, value);
-                f9.serializeFieldInst(struct, value);
-                f10.serializeFieldInst(struct, value);
-                f11.serializeFieldInst(struct, value);
-                f12.serializeFieldInst(struct, value);
+                f1.encodeField(struct, value);
+                f2.encodeField(struct, value);
+                f3.encodeField(struct, value);
+                f4.encodeField(struct, value);
+                f5.encodeField(struct, value);
+                f6.encodeField(struct, value);
+                f7.encodeField(struct, value);
+                f8.encodeField(struct, value);
+                f9.encodeField(struct, value);
+                f10.encodeField(struct, value);
+                f11.encodeField(struct, value);
+                f12.encodeField(struct, value);
             }
 
             @Override
             public S decodeStruct(Deserializer.Struct struct) {
-                return constructor.apply(f1.deserializeField(struct),
-                        f2.deserializeField(struct),
-                        f3.deserializeField(struct),
-                        f4.deserializeField(struct),
-                        f5.deserializeField(struct),
-                        f6.deserializeField(struct),
-                        f7.deserializeField(struct),
-                        f8.deserializeField(struct),
-                        f9.deserializeField(struct),
-                        f10.deserializeField(struct),
-                        f11.deserializeField(struct),
-                        f12.deserializeField(struct));
+                return constructor.apply(f1.decodeField(struct),
+                        f2.decodeField(struct),
+                        f3.decodeField(struct),
+                        f4.decodeField(struct),
+                        f5.decodeField(struct),
+                        f6.decodeField(struct),
+                        f7.decodeField(struct),
+                        f8.decodeField(struct),
+                        f9.decodeField(struct),
+                        f10.decodeField(struct),
+                        f11.decodeField(struct),
+                        f12.decodeField(struct));
             }
         };
     }
@@ -314,36 +314,36 @@ public class StructEndecBuilder<T> {
         return new StructEndec<>() {
             @Override
             public void encodeStruct(Serializer.Struct struct, S value) {
-                f1.serializeFieldInst(struct, value);
-                f2.serializeFieldInst(struct, value);
-                f3.serializeFieldInst(struct, value);
-                f4.serializeFieldInst(struct, value);
-                f5.serializeFieldInst(struct, value);
-                f6.serializeFieldInst(struct, value);
-                f7.serializeFieldInst(struct, value);
-                f8.serializeFieldInst(struct, value);
-                f9.serializeFieldInst(struct, value);
-                f10.serializeFieldInst(struct, value);
-                f11.serializeFieldInst(struct, value);
-                f12.serializeFieldInst(struct, value);
-                f13.serializeFieldInst(struct, value);
+                f1.encodeField(struct, value);
+                f2.encodeField(struct, value);
+                f3.encodeField(struct, value);
+                f4.encodeField(struct, value);
+                f5.encodeField(struct, value);
+                f6.encodeField(struct, value);
+                f7.encodeField(struct, value);
+                f8.encodeField(struct, value);
+                f9.encodeField(struct, value);
+                f10.encodeField(struct, value);
+                f11.encodeField(struct, value);
+                f12.encodeField(struct, value);
+                f13.encodeField(struct, value);
             }
 
             @Override
             public S decodeStruct(Deserializer.Struct struct) {
-                return constructor.apply(f1.deserializeField(struct),
-                        f2.deserializeField(struct),
-                        f3.deserializeField(struct),
-                        f4.deserializeField(struct),
-                        f5.deserializeField(struct),
-                        f6.deserializeField(struct),
-                        f7.deserializeField(struct),
-                        f8.deserializeField(struct),
-                        f9.deserializeField(struct),
-                        f10.deserializeField(struct),
-                        f11.deserializeField(struct),
-                        f12.deserializeField(struct),
-                        f13.deserializeField(struct));
+                return constructor.apply(f1.decodeField(struct),
+                        f2.decodeField(struct),
+                        f3.decodeField(struct),
+                        f4.decodeField(struct),
+                        f5.decodeField(struct),
+                        f6.decodeField(struct),
+                        f7.decodeField(struct),
+                        f8.decodeField(struct),
+                        f9.decodeField(struct),
+                        f10.decodeField(struct),
+                        f11.decodeField(struct),
+                        f12.decodeField(struct),
+                        f13.decodeField(struct));
             }
         };
     }
@@ -352,38 +352,38 @@ public class StructEndecBuilder<T> {
         return new StructEndec<>() {
             @Override
             public void encodeStruct(Serializer.Struct struct, S value) {
-                f1.serializeFieldInst(struct, value);
-                f2.serializeFieldInst(struct, value);
-                f3.serializeFieldInst(struct, value);
-                f4.serializeFieldInst(struct, value);
-                f5.serializeFieldInst(struct, value);
-                f6.serializeFieldInst(struct, value);
-                f7.serializeFieldInst(struct, value);
-                f8.serializeFieldInst(struct, value);
-                f9.serializeFieldInst(struct, value);
-                f10.serializeFieldInst(struct, value);
-                f11.serializeFieldInst(struct, value);
-                f12.serializeFieldInst(struct, value);
-                f13.serializeFieldInst(struct, value);
-                f14.serializeFieldInst(struct, value);
+                f1.encodeField(struct, value);
+                f2.encodeField(struct, value);
+                f3.encodeField(struct, value);
+                f4.encodeField(struct, value);
+                f5.encodeField(struct, value);
+                f6.encodeField(struct, value);
+                f7.encodeField(struct, value);
+                f8.encodeField(struct, value);
+                f9.encodeField(struct, value);
+                f10.encodeField(struct, value);
+                f11.encodeField(struct, value);
+                f12.encodeField(struct, value);
+                f13.encodeField(struct, value);
+                f14.encodeField(struct, value);
             }
 
             @Override
             public S decodeStruct(Deserializer.Struct struct) {
-                return constructor.apply(f1.deserializeField(struct),
-                        f2.deserializeField(struct),
-                        f3.deserializeField(struct),
-                        f4.deserializeField(struct),
-                        f5.deserializeField(struct),
-                        f6.deserializeField(struct),
-                        f7.deserializeField(struct),
-                        f8.deserializeField(struct),
-                        f9.deserializeField(struct),
-                        f10.deserializeField(struct),
-                        f11.deserializeField(struct),
-                        f12.deserializeField(struct),
-                        f13.deserializeField(struct),
-                        f14.deserializeField(struct));
+                return constructor.apply(f1.decodeField(struct),
+                        f2.decodeField(struct),
+                        f3.decodeField(struct),
+                        f4.decodeField(struct),
+                        f5.decodeField(struct),
+                        f6.decodeField(struct),
+                        f7.decodeField(struct),
+                        f8.decodeField(struct),
+                        f9.decodeField(struct),
+                        f10.decodeField(struct),
+                        f11.decodeField(struct),
+                        f12.decodeField(struct),
+                        f13.decodeField(struct),
+                        f14.decodeField(struct));
             }
         };
     }
@@ -392,40 +392,40 @@ public class StructEndecBuilder<T> {
         return new StructEndec<>() {
             @Override
             public void encodeStruct(Serializer.Struct struct, S value) {
-                f1.serializeFieldInst(struct, value);
-                f2.serializeFieldInst(struct, value);
-                f3.serializeFieldInst(struct, value);
-                f4.serializeFieldInst(struct, value);
-                f5.serializeFieldInst(struct, value);
-                f6.serializeFieldInst(struct, value);
-                f7.serializeFieldInst(struct, value);
-                f8.serializeFieldInst(struct, value);
-                f9.serializeFieldInst(struct, value);
-                f10.serializeFieldInst(struct, value);
-                f11.serializeFieldInst(struct, value);
-                f12.serializeFieldInst(struct, value);
-                f13.serializeFieldInst(struct, value);
-                f14.serializeFieldInst(struct, value);
-                f15.serializeFieldInst(struct, value);
+                f1.encodeField(struct, value);
+                f2.encodeField(struct, value);
+                f3.encodeField(struct, value);
+                f4.encodeField(struct, value);
+                f5.encodeField(struct, value);
+                f6.encodeField(struct, value);
+                f7.encodeField(struct, value);
+                f8.encodeField(struct, value);
+                f9.encodeField(struct, value);
+                f10.encodeField(struct, value);
+                f11.encodeField(struct, value);
+                f12.encodeField(struct, value);
+                f13.encodeField(struct, value);
+                f14.encodeField(struct, value);
+                f15.encodeField(struct, value);
             }
 
             @Override
             public S decodeStruct(Deserializer.Struct struct) {
-                return constructor.apply(f1.deserializeField(struct),
-                        f2.deserializeField(struct),
-                        f3.deserializeField(struct),
-                        f4.deserializeField(struct),
-                        f5.deserializeField(struct),
-                        f6.deserializeField(struct),
-                        f7.deserializeField(struct),
-                        f8.deserializeField(struct),
-                        f9.deserializeField(struct),
-                        f10.deserializeField(struct),
-                        f11.deserializeField(struct),
-                        f12.deserializeField(struct),
-                        f13.deserializeField(struct),
-                        f14.deserializeField(struct),
-                        f15.deserializeField(struct));
+                return constructor.apply(f1.decodeField(struct),
+                        f2.decodeField(struct),
+                        f3.decodeField(struct),
+                        f4.decodeField(struct),
+                        f5.decodeField(struct),
+                        f6.decodeField(struct),
+                        f7.decodeField(struct),
+                        f8.decodeField(struct),
+                        f9.decodeField(struct),
+                        f10.decodeField(struct),
+                        f11.decodeField(struct),
+                        f12.decodeField(struct),
+                        f13.decodeField(struct),
+                        f14.decodeField(struct),
+                        f15.decodeField(struct));
             }
         };
     }
@@ -434,42 +434,42 @@ public class StructEndecBuilder<T> {
         return new StructEndec<>() {
             @Override
             public void encodeStruct(Serializer.Struct struct, S value) {
-                f1.serializeFieldInst(struct, value);
-                f2.serializeFieldInst(struct, value);
-                f3.serializeFieldInst(struct, value);
-                f4.serializeFieldInst(struct, value);
-                f5.serializeFieldInst(struct, value);
-                f6.serializeFieldInst(struct, value);
-                f7.serializeFieldInst(struct, value);
-                f8.serializeFieldInst(struct, value);
-                f9.serializeFieldInst(struct, value);
-                f10.serializeFieldInst(struct, value);
-                f11.serializeFieldInst(struct, value);
-                f12.serializeFieldInst(struct, value);
-                f13.serializeFieldInst(struct, value);
-                f14.serializeFieldInst(struct, value);
-                f15.serializeFieldInst(struct, value);
-                f16.serializeFieldInst(struct, value);
+                f1.encodeField(struct, value);
+                f2.encodeField(struct, value);
+                f3.encodeField(struct, value);
+                f4.encodeField(struct, value);
+                f5.encodeField(struct, value);
+                f6.encodeField(struct, value);
+                f7.encodeField(struct, value);
+                f8.encodeField(struct, value);
+                f9.encodeField(struct, value);
+                f10.encodeField(struct, value);
+                f11.encodeField(struct, value);
+                f12.encodeField(struct, value);
+                f13.encodeField(struct, value);
+                f14.encodeField(struct, value);
+                f15.encodeField(struct, value);
+                f16.encodeField(struct, value);
             }
 
             @Override
             public S decodeStruct(Deserializer.Struct struct) {
-                return constructor.apply(f1.deserializeField(struct),
-                        f2.deserializeField(struct),
-                        f3.deserializeField(struct),
-                        f4.deserializeField(struct),
-                        f5.deserializeField(struct),
-                        f6.deserializeField(struct),
-                        f7.deserializeField(struct),
-                        f8.deserializeField(struct),
-                        f9.deserializeField(struct),
-                        f10.deserializeField(struct),
-                        f11.deserializeField(struct),
-                        f12.deserializeField(struct),
-                        f13.deserializeField(struct),
-                        f14.deserializeField(struct),
-                        f15.deserializeField(struct),
-                        f16.deserializeField(struct));
+                return constructor.apply(f1.decodeField(struct),
+                        f2.decodeField(struct),
+                        f3.decodeField(struct),
+                        f4.decodeField(struct),
+                        f5.decodeField(struct),
+                        f6.decodeField(struct),
+                        f7.decodeField(struct),
+                        f8.decodeField(struct),
+                        f9.decodeField(struct),
+                        f10.decodeField(struct),
+                        f11.decodeField(struct),
+                        f12.decodeField(struct),
+                        f13.decodeField(struct),
+                        f14.decodeField(struct),
+                        f15.decodeField(struct),
+                        f16.decodeField(struct));
             }
         };
     }
@@ -478,44 +478,44 @@ public class StructEndecBuilder<T> {
         return new StructEndec<>() {
             @Override
             public void encodeStruct(Serializer.Struct struct, S value) {
-                f1.serializeFieldInst(struct, value);
-                f2.serializeFieldInst(struct, value);
-                f3.serializeFieldInst(struct, value);
-                f4.serializeFieldInst(struct, value);
-                f5.serializeFieldInst(struct, value);
-                f6.serializeFieldInst(struct, value);
-                f7.serializeFieldInst(struct, value);
-                f8.serializeFieldInst(struct, value);
-                f9.serializeFieldInst(struct, value);
-                f10.serializeFieldInst(struct, value);
-                f11.serializeFieldInst(struct, value);
-                f12.serializeFieldInst(struct, value);
-                f13.serializeFieldInst(struct, value);
-                f14.serializeFieldInst(struct, value);
-                f15.serializeFieldInst(struct, value);
-                f16.serializeFieldInst(struct, value);
-                f17.serializeFieldInst(struct, value);
+                f1.encodeField(struct, value);
+                f2.encodeField(struct, value);
+                f3.encodeField(struct, value);
+                f4.encodeField(struct, value);
+                f5.encodeField(struct, value);
+                f6.encodeField(struct, value);
+                f7.encodeField(struct, value);
+                f8.encodeField(struct, value);
+                f9.encodeField(struct, value);
+                f10.encodeField(struct, value);
+                f11.encodeField(struct, value);
+                f12.encodeField(struct, value);
+                f13.encodeField(struct, value);
+                f14.encodeField(struct, value);
+                f15.encodeField(struct, value);
+                f16.encodeField(struct, value);
+                f17.encodeField(struct, value);
             }
 
             @Override
             public S decodeStruct(Deserializer.Struct struct) {
-                return constructor.apply(f1.deserializeField(struct),
-                        f2.deserializeField(struct),
-                        f3.deserializeField(struct),
-                        f4.deserializeField(struct),
-                        f5.deserializeField(struct),
-                        f6.deserializeField(struct),
-                        f7.deserializeField(struct),
-                        f8.deserializeField(struct),
-                        f9.deserializeField(struct),
-                        f10.deserializeField(struct),
-                        f11.deserializeField(struct),
-                        f12.deserializeField(struct),
-                        f13.deserializeField(struct),
-                        f14.deserializeField(struct),
-                        f15.deserializeField(struct),
-                        f16.deserializeField(struct),
-                        f17.deserializeField(struct));
+                return constructor.apply(f1.decodeField(struct),
+                        f2.decodeField(struct),
+                        f3.decodeField(struct),
+                        f4.decodeField(struct),
+                        f5.decodeField(struct),
+                        f6.decodeField(struct),
+                        f7.decodeField(struct),
+                        f8.decodeField(struct),
+                        f9.decodeField(struct),
+                        f10.decodeField(struct),
+                        f11.decodeField(struct),
+                        f12.decodeField(struct),
+                        f13.decodeField(struct),
+                        f14.decodeField(struct),
+                        f15.decodeField(struct),
+                        f16.decodeField(struct),
+                        f17.decodeField(struct));
             }
         };
     }
