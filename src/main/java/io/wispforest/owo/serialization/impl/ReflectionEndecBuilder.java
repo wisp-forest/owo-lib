@@ -1,7 +1,10 @@
 package io.wispforest.owo.serialization.impl;
 
 import io.wispforest.owo.network.serialization.SealedPolymorphic;
-import io.wispforest.owo.serialization.*;
+import io.wispforest.owo.serialization.BuiltInEndecs;
+import io.wispforest.owo.serialization.Deserializer;
+import io.wispforest.owo.serialization.Endec;
+import io.wispforest.owo.serialization.Serializer;
 import io.wispforest.owo.serialization.impl.nbt.NbtEndec;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -17,10 +20,7 @@ import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.*;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
@@ -45,7 +45,9 @@ public class ReflectionEndecBuilder {
      * @param <T>        The type of object to register a serializer for
      */
     public static <T> void register(Class<T> clazz, Endec<T> serializer) {
-        if (SERIALIZERS.containsKey(clazz)) throw new IllegalStateException("Class '" + clazz.getName() + "' already has a serializer");
+        if (SERIALIZERS.containsKey(clazz)) {
+            throw new IllegalStateException("Class '" + clazz.getName() + "' already has a serializer");
+        }
         SERIALIZERS.put(clazz, serializer);
     }
 
@@ -147,16 +149,15 @@ public class ReflectionEndecBuilder {
         Endec<T> serializer = (Endec<T>) SERIALIZERS.get(clazz);
 
         if (serializer == null) {
-            if (Record.class.isAssignableFrom(clazz))
+            if (Record.class.isAssignableFrom(clazz)) {
                 serializer = (Endec<T>) RecordEndec.create(conform(clazz, Record.class));
-            else if (clazz.isEnum())
-                serializer = (Endec<T>) ReflectionEndecBuilder.createEnumEndec(conform(clazz, Enum.class));
-            else if (clazz.isArray())
+            } else if (clazz.isEnum()) {
+                serializer = (Endec<T>) Endec.forEnum(conform(clazz, Enum.class));
+            } else if (clazz.isArray()) {
                 serializer = (Endec<T>) ReflectionEndecBuilder.createArrayEndec(clazz.getComponentType());
-            else if (clazz.isAnnotationPresent(SealedPolymorphic.class))
+            } else if (clazz.isAnnotationPresent(SealedPolymorphic.class)) {
                 serializer = (Endec<T>) ReflectionEndecBuilder.createSealedSerializer(clazz);
-            else
-                return null;
+            } else {return null;}
 
             SERIALIZERS.put(clazz, serializer);
         }
@@ -193,21 +194,9 @@ public class ReflectionEndecBuilder {
         });
     }
 
-    /**
-     * Tries to create a serializer capable of serializing
-     * the given enum type
-     *
-     * @param enumClass The type of enum to create a serializer for
-     * @return The created serializer
-     */
-    public static <E extends Enum<E>> Endec<E> createEnumEndec(Class<E> enumClass) {
-        return Endec.VAR_INT.xmap(i -> enumClass.getEnumConstants()[i], Enum::ordinal);
-    }
-
     @SuppressWarnings("unchecked")
     private static Endec<?> createSealedSerializer(Class<?> commonClass) {
-        if (!commonClass.isSealed())
-            throw new IllegalStateException("@SealedPolymorphic class should be sealed!");
+        if (!commonClass.isSealed()) {throw new IllegalStateException("@SealedPolymorphic class should be sealed!");}
 
         List<Class<?>> sortedPermittedSubclasses = Arrays.stream(commonClass.getPermittedSubclasses()).collect(Collectors.toList());
 
@@ -216,15 +205,15 @@ public class ReflectionEndecBuilder {
 
             if (klass.isSealed()) {
                 for (Class<?> subclass : klass.getPermittedSubclasses()) {
-                    if (!sortedPermittedSubclasses.contains(subclass))
-                        sortedPermittedSubclasses.add(subclass);
+                    if (!sortedPermittedSubclasses.contains(subclass)) {sortedPermittedSubclasses.add(subclass);}
                 }
             }
         }
 
         for (Class<?> klass : sortedPermittedSubclasses) {
-            if (!klass.isSealed() && !Modifier.isFinal(klass.getModifiers()))
+            if (!klass.isSealed() && !Modifier.isFinal(klass.getModifiers())) {
                 throw new IllegalStateException("Subclasses of a @SealedPolymorphic class must be sealed themselves!");
+            }
         }
 
         sortedPermittedSubclasses.sort(Comparator.comparing(Class::getName));
@@ -287,8 +276,8 @@ public class ReflectionEndecBuilder {
         register(NbtCompound.class, NbtEndec.COMPOUND);
         register(
                 BlockHitResult.class,
-                new StructEndec<>(){
-                    final Endec<Direction> DIRECTION = createEnumEndec(Direction.class);
+                new StructEndec<>() {
+                    final Endec<Direction> DIRECTION = Endec.forEnum(Direction.class);
 
                     @Override
                     public void encodeStruct(Serializer.Struct struct, BlockHitResult hitResult) {
@@ -297,9 +286,9 @@ public class ReflectionEndecBuilder {
                                 .field("side", DIRECTION, hitResult.getSide());
 
                         Vec3d vec3d = hitResult.getPos();
-                        struct.field("x", Endec.FLOAT, (float)(vec3d.x - (double)blockPos.getX()))
-                                .field("y", Endec.FLOAT, (float)(vec3d.x - (double)blockPos.getX()))
-                                .field("z", Endec.FLOAT, (float)(vec3d.x - (double)blockPos.getX()))
+                        struct.field("x", Endec.FLOAT, (float) (vec3d.x - (double) blockPos.getX()))
+                                .field("y", Endec.FLOAT, (float) (vec3d.x - (double) blockPos.getX()))
+                                .field("z", Endec.FLOAT, (float) (vec3d.x - (double) blockPos.getX()))
                                 .field("inside", Endec.BOOLEAN, hitResult.isInsideBlock());
                     }
 
@@ -314,7 +303,7 @@ public class ReflectionEndecBuilder {
 
                         boolean bl = struct.field("inside", Endec.BOOLEAN);
                         return new BlockHitResult(
-                                new Vec3d((double)blockPos.getX() + (double)f, (double)blockPos.getY() + (double)g, (double)blockPos.getZ() + (double)h), direction, blockPos, bl
+                                new Vec3d((double) blockPos.getX() + (double) f, (double) blockPos.getY() + (double) g, (double) blockPos.getZ() + (double) h), direction, blockPos, bl
                         );
                     }
                 }
@@ -341,16 +330,8 @@ public class ReflectionEndecBuilder {
                 )
         );
 
-        register(Vec3d.class, Endec.DOUBLE.listOf()
-                .xmap(
-                        doubles -> new Vec3d(doubles.get(0), doubles.get(1), doubles.get(2)),
-                        vec3d -> List.of(vec3d.getX(), vec3d.getY(), vec3d.getZ())
-                ));
-
-        register(Vector3f.class, Endec.FLOAT.listOf()
-                .xmap(
-                        doubles -> new Vector3f(doubles.get(0), doubles.get(1), doubles.get(2)),
-                        vec3d -> List.of(vec3d.x(), vec3d.y(), vec3d.z())
-                ));
+        register(Vec3d.class, BuiltInEndecs.VEC3D);
+        register(Vector3f.class, BuiltInEndecs.VECTOR3F);
+        register(Vec3i.class, BuiltInEndecs.VEC3I);
     }
 }

@@ -50,7 +50,7 @@ public class UwuNetworkTest {
 
         var builtendec = StructEndecBuilder.of(
                 Endec.STRING.listOf().xmap(s -> s, s -> s).fieldOf("text", TestRecord::text),
-                ReflectionEndecBuilder.createEnumEndec(TestEnum.class).fieldOf("enumValue", TestRecord::enumValue),
+                Endec.forEnum(TestEnum.class).fieldOf("enumValue", TestRecord::enumValue),
                 TestRecord::new
         );
 

@@ -75,7 +75,7 @@ public interface Endec<T> {
     Endec<Float> FLOAT = Endec.of(Serializer::writeFloat, Deserializer::readFloat);
     Endec<Double> DOUBLE = Endec.of(Serializer::writeDouble, Deserializer::readDouble);
     Endec<String> STRING = Endec.of(Serializer::writeString, Deserializer::readString);
-    Endec<byte[]> BYTE_ARRAY = Endec.of(Serializer::writeBytes, Deserializer::readBytes);
+    Endec<byte[]> BYTES = Endec.of(Serializer::writeBytes, Deserializer::readBytes);
 
     // --- Serializer compound types ---
 
