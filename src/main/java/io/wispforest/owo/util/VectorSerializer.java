@@ -3,7 +3,11 @@ package io.wispforest.owo.util;
 import net.minecraft.nbt.*;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 import org.joml.Vector3f;
+import org.joml.Vector3i;
+
+import java.util.List;
 
 /**
  * Utility class for reading and storing {@link Vec3d} and
@@ -56,6 +60,22 @@ public final class VectorSerializer {
     }
 
     /**
+     * Stores the given vector  as an array at the
+     * given key in the given nbt compound
+     *
+     * @param vec3i The vector to serialize
+     * @param nbt   The nbt compound to serialize into
+     * @param key   The key to use
+     * @return {@code nbt}
+     */
+    public static NbtCompound puti(NbtCompound nbt, String key, Vec3i vec3i) {
+
+        nbt.putIntArray(key, List.of(vec3i.getX(), vec3i.getY(), vec3i.getZ()));
+
+        return nbt;
+    }
+
+    /**
      * Gets the vector stored at the given key in the
      * given nbt compound
      *
@@ -92,6 +112,24 @@ public final class VectorSerializer {
     }
 
     /**
+     * Gets the vector stored at the given key in the
+     * given nbt compound
+     *
+     * @param nbt The nbt compound to read from
+     * @param key The key the read from
+     * @return The deserialized vector
+     */
+    public static Vec3i geti(NbtCompound nbt, String key) {
+
+        int[] vectorArray = nbt.getIntArray(key);
+        int x = vectorArray[0];
+        int y = vectorArray[1];
+        int z = vectorArray[2];
+
+        return new Vec3i(x, y, z);
+    }
+
+    /**
      * Writes the given vector into the given packet buffer
      *
      * @param vec3d  The vector to write
@@ -116,6 +154,18 @@ public final class VectorSerializer {
     }
 
     /**
+     * Writes the given vector into the given packet buffer
+     *
+     * @param vec3i  The vector to write
+     * @param buffer The packet buffer to write into
+     */
+    public static void writei(PacketByteBuf buffer, Vec3i vec3i) {
+        buffer.writeInt(vec3i.getX());
+        buffer.writeInt(vec3i.getY());
+        buffer.writeInt(vec3i.getZ());
+    }
+
+    /**
      * Reads one vector from the given packet buffer
      *
      * @param buffer The buffer to read from
@@ -135,4 +185,13 @@ public final class VectorSerializer {
         return new Vector3f(buffer.readFloat(), buffer.readFloat(), buffer.readFloat());
     }
 
+    /**
+     * Reads one vector from the given packet buffer
+     *
+     * @param buffer The buffer to read from
+     * @return The deserialized vector
+     */
+    public static Vec3i readi(PacketByteBuf buffer) {
+        return new Vec3i(buffer.readInt(), buffer.readInt(), buffer.readInt());
+    }
 }

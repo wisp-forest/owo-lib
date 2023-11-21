@@ -13,8 +13,13 @@ import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.ServicesFrozenException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.networking.v1.*;
-import net.fabricmc.fabric.api.networking.v1.*;
+import net.fabricmc.fabric.api.client.networking.v1.ClientConfigurationConnectionEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientConfigurationNetworking;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.networking.v1.ServerConfigurationConnectionEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerConfigurationNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientConfigurationNetworkHandler;
@@ -44,7 +49,7 @@ public final class OwoHandshake {
     public static final Identifier CHANNEL_ID = new Identifier("owo", "handshake");
     public static final Identifier OFF_CHANNEL_ID = new Identifier("owo", "handshake_off");
 
-    private static final boolean ENABLED = !Boolean.getBoolean("owo.handshake.disable");
+    private static final boolean ENABLED = System.getProperty("owo.handshake.enabled") != null ? Boolean.getBoolean("owo.handshake.enabled") : Owo.DEBUG;
     private static boolean HANDSHAKE_REQUIRED = false;
     private static boolean QUERY_RECEIVED = false;
 
@@ -55,13 +60,15 @@ public final class OwoHandshake {
     // ------------
 
     public static void enable() {
-        if (OwoFreezer.isFrozen())
+        if (OwoFreezer.isFrozen()) {
             throw new ServicesFrozenException("The oωo handshake may only be enabled during mod initialization");
+        }
     }
 
     public static void requireHandshake() {
-        if (OwoFreezer.isFrozen())
+        if (OwoFreezer.isFrozen()) {
             throw new ServicesFrozenException("The oωo handshake may only be made required during mod initialization");
+        }
 
         HANDSHAKE_REQUIRED = true;
     }
@@ -160,8 +167,8 @@ public final class OwoHandshake {
 
         client.execute(() -> {
             ((ClientCommonNetworkHandlerAccessor) handler)
-                .getConnection()
-                .disconnect(TextOps.concat(PREFIX, Text.of("incompatible server")));
+                    .getConnection()
+                    .disconnect(TextOps.concat(PREFIX, Text.of("incompatible server")));
         });
     }
 
@@ -211,7 +218,9 @@ public final class OwoHandshake {
             int localHash = hashFunction.applyAsInt(actualServiceObject);
 
             if (localHash != entry.getValue()) {
-                if (!hasMismatchedHashes) disconnectMessage.append(serviceNamePlural).append(" with mismatched hashes:\n");
+                if (!hasMismatchedHashes) {
+                    disconnectMessage.append(serviceNamePlural).append(" with mismatched hashes:\n");
+                }
 
                 disconnectMessage.append("§7").append(entry.getKey()).append("§r\n");
 
