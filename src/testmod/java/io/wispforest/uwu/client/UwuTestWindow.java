@@ -13,10 +13,15 @@ import io.wispforest.owo.ui.window.OwoWindow;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
+
+import java.util.List;
 
 public class UwuTestWindow extends OwoWindow<FlowLayout> {
     public UwuTestWindow() {
         super(640, 480, "uωu test window!", MinecraftClient.getInstance().getWindow().getHandle());
+
+        setIconTextures(MinecraftClient.getInstance().getResourceManager(), List.of(new Identifier("owo", "icon.png")));
     }
 
     @Override
@@ -29,7 +34,7 @@ public class UwuTestWindow extends OwoWindow<FlowLayout> {
         rootComponent.padding(Insets.of(10));
 
         var inner = Containers.verticalFlow(Sizing.content(), Sizing.content());
-        rootComponent.child(Containers.verticalScroll(Sizing.content(), Sizing.fill(100), inner));
+        rootComponent.child(Containers.verticalScroll(Sizing.fill(100), Sizing.fill(100), inner));
 
         inner.child(Components.label(Text.of("Are you an owl?")));
 
@@ -45,12 +50,6 @@ public class UwuTestWindow extends OwoWindow<FlowLayout> {
                         .formatted(Formatting.RED));
             }
         });
-
-        inner.child(Containers.renderEffect(Components.label(Text.literal("breh!")))
-            .<RenderEffectWrapper<LabelComponent>>configure(component -> {
-                component.effect(RenderEffectWrapper.RenderEffect.rotate(45));
-                component.effect(RenderEffectWrapper.RenderEffect.color(Color.BLUE));
-            }));
 
         for (int i = 0; i < 100; i++) {
             inner.child(Components.label(Text.of("breh!")));

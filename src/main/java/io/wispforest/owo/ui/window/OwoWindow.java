@@ -65,9 +65,7 @@ public abstract class OwoWindow<R extends ParentComponent> extends FramebufferWi
 
             adapter.keyPressed(keyCode, scanCode, modifiers);
         });
-        charTyped().subscribe((chr, modifiers) -> {
-            return adapter.charTyped(chr, modifiers);
-        });
+        charTyped().subscribe(adapter::charTyped);
     }
 
     protected abstract OwoUIAdapter<R> createAdapter();
