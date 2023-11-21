@@ -14,10 +14,19 @@ import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.gl.GlDebug;
 import net.minecraft.client.gl.SimpleFramebuffer;
 import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.texture.NativeImage;
+import net.minecraft.resource.InputSupplier;
+import net.minecraft.resource.ResourceManager;
+import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL32;
+import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.system.NativeResource;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,9 +35,12 @@ import static org.lwjgl.glfw.GLFW.*;
 public class FramebufferWindow extends SupportsFeaturesImpl<WindowContext> implements AutoCloseable, WindowContext {
     private int width;
     private int height;
+
     private final long handle;
+
     private Framebuffer framebuffer;
     private int localFramebuffer = 0;
+
     protected final MinecraftClient client = MinecraftClient.getInstance();
 
     private final List<NativeResource> disposeList;
@@ -232,6 +244,61 @@ public class FramebufferWindow extends SupportsFeaturesImpl<WindowContext> imple
         initLocalFramebuffer();
 
         framebufferResizedEvents.sink().onFramebufferResized(width, height);
+    }
+
+    public static boolean supportsIcons() {
+        int platform = GLFW.glfwGetPlatform();
+        return platform == GLFW_PLATFORM_WIN32 || platform == GLFW_PLATFORM_X11;
+    }
+
+    public void setIconTextures(ResourceManager manager, List<Identifier> iconIds) {
+        if (!supportsIcons()) return;
+
+        List<NativeImage> iconImages = new ArrayList<>(iconIds.size());
+
+        try {
+            for (Identifier iconId : iconIds) {
+                var icon = manager.getResource(iconId).orElse(null);
+
+                if (icon == null) continue;
+
+                try {
+                    iconImages.add(NativeImage.read(icon.getInputStream()));
+                } catch (IOException e) {
+                    throw new RuntimeException("Couldn't open icon " + iconId, e);
+                }
+            }
+
+            setIcon(iconImages);
+        } finally {
+            iconImages.forEach(NativeImage::close);
+        }
+    }
+
+    public void setIcon(List<NativeImage> icons) {
+        if (!supportsIcons()) return;
+
+        List<ByteBuffer> freeList = new ArrayList<>(icons.size());
+        try (MemoryStack memoryStack = MemoryStack.stackPush()) {
+            GLFWImage.Buffer buffer = GLFWImage.malloc(icons.size(), memoryStack);
+
+            for (int i = 0; i < icons.size(); i++) {
+                NativeImage icon = icons.get(i);
+                ByteBuffer imgBuffer = MemoryUtil.memAlloc(icon.getWidth() * icon.getHeight() * 4);
+                freeList.add(imgBuffer);
+                imgBuffer.asIntBuffer().put(icon.copyPixelsRgba());
+
+                buffer
+                    .position(i)
+                    .width(icon.getWidth())
+                    .height(icon.getHeight())
+                    .pixels(imgBuffer);
+            }
+
+            GLFW.glfwSetWindowIcon(this.handle, buffer.position(0));
+        } finally {
+            freeList.forEach(MemoryUtil::memFree);
+        }
     }
 
     public boolean closed() {
