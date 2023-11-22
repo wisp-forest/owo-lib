@@ -3,14 +3,11 @@ package io.wispforest.uwu.network;
 import io.wispforest.owo.network.serialization.RecordSerializer;
 import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.impl.RecordEndec;
-import io.wispforest.owo.serialization.impl.ReflectionEndecBuilder;
 import io.wispforest.owo.serialization.impl.StructEndecBuilder;
-import io.wispforest.owo.serialization.impl.StructField;
 import io.wispforest.owo.serialization.impl.bytebuf.ByteBufDeserializer;
 import io.wispforest.owo.serialization.impl.bytebuf.ByteBufSerializer;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;

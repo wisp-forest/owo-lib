@@ -11,19 +11,19 @@ public interface MapCarrier {
     // Interface specification
 
     default <T> T get(@NotNull KeyedEndec<T> key){
-        throw new IllegalStateException("Interface default method called");
+        throw new UnsupportedOperationException("Interface default method called");
     }
 
     default <T> void put(@NotNull KeyedEndec<T> key, @NotNull T value){
-        throw new IllegalStateException("Interface default method called");
+        throw new UnsupportedOperationException("Interface default method called");
     }
 
     default <T> void delete(@NotNull KeyedEndec<T> key){
-        throw new IllegalStateException("Interface default method called");
+        throw new UnsupportedOperationException("Interface default method called");
     }
 
     default <T> boolean has(@NotNull KeyedEndec<T> key){
-        throw new IllegalStateException("Interface default method called");
+        throw new UnsupportedOperationException("Interface default method called");
     }
 
     // Default implementations

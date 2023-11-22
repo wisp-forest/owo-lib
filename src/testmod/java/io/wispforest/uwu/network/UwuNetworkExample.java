@@ -3,7 +3,7 @@ package io.wispforest.uwu.network;
 import io.wispforest.owo.network.OwoNetChannel;
 import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.impl.RecordEndec;
-import io.wispforest.owo.serialization.impl.ReflectionEndecBuilder;
+import io.wispforest.owo.serialization.impl.ReflectiveEndecBuilder;
 import io.wispforest.owo.serialization.impl.StructEndec;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -25,7 +25,7 @@ public class UwuNetworkExample {
         REGISTRY.put("one", RecordEndec.create(DispatchedSubclassOne.class));
         REGISTRY.put("two", RecordEndec.create(DispatchedSubclassTwo.class));
 
-        ReflectionEndecBuilder.register(DispatchedInterface.class, Endec.dispatchedStruct(REGISTRY::get, DispatchedInterface::getName, Endec.STRING));
+        ReflectiveEndecBuilder.register(Endec.dispatchedStruct(REGISTRY::get, DispatchedInterface::getName, Endec.STRING), DispatchedInterface.class);
 
         CHANNEL.registerClientbound(StringPacket.class, (message, access) -> {
             access.player().sendMessage(Text.of(message.value()), false);
