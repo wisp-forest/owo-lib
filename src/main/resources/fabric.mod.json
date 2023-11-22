@@ -61,6 +61,9 @@
         "io/wispforest/owo/nbt/NbtCarrier",
         "io/wispforest/owo/serialization/MapCarrier"
       ],
+      "net/minecraft/class_2540": [
+        "io/wispforest/owo/util/pond/OwoPacketByteBufExtension"
+      ],
       "net/minecraft/class_339": [
         "io/wispforest/owo/ui/inject/ComponentStub"
       ],

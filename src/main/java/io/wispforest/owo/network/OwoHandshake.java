@@ -7,8 +7,6 @@ import io.wispforest.owo.ops.TextOps;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
 import io.wispforest.owo.serialization.BuiltInEndecs;
 import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.impl.bytebuf.ByteBufDeserializer;
-import io.wispforest.owo.serialization.impl.bytebuf.ByteBufSerializer;
 import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.ServicesFrozenException;
 import net.fabricmc.api.EnvType;
@@ -42,8 +40,7 @@ import java.util.function.ToIntFunction;
 @ApiStatus.Internal
 public final class OwoHandshake {
 
-    @SuppressWarnings("unchecked")
-    private static final Endec<Map<Identifier, Integer>> RESPONSE_SERIALIZER = Endec.map(BuiltInEndecs.IDENTIFIER, Endec.INT);
+    private static final Endec<Map<Identifier, Integer>> CHANNEL_HASHES_ENDEC = Endec.map(BuiltInEndecs.IDENTIFIER, Endec.INT);
 
     private static final MutableText PREFIX = TextOps.concat(Owo.PREFIX, Text.of("§chandshake failure\n"));
     public static final Identifier CHANNEL_ID = new Identifier("owo", "handshake");
@@ -126,7 +123,7 @@ public final class OwoHandshake {
         QUERY_RECEIVED = true;
 
         if (buf.readableBytes() > 0) {
-            final var serverOptionalChannels = RESPONSE_SERIALIZER.decodeFully(ByteBufDeserializer::new, buf);
+            final var serverOptionalChannels = buf.read(CHANNEL_HASHES_ENDEC);
             ((OwoClientConnectionExtension) ((ClientCommonNetworkHandlerAccessor) handler).getConnection()).owo$setChannelSet(filterOptionalServices(serverOptionalChannels, OwoNetChannel.REGISTERED_CHANNELS, OwoHandshake::hashChannel));
         }
 
@@ -141,8 +138,8 @@ public final class OwoHandshake {
     private static void syncServer(MinecraftServer server, ServerConfigurationNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
         Owo.LOGGER.info("[Handshake] Receiving client channels");
 
-        final var clientChannels = RESPONSE_SERIALIZER.decodeFully(ByteBufDeserializer::new, buf);
-        final var clientParticleControllers = RESPONSE_SERIALIZER.decodeFully(ByteBufDeserializer::new, buf);
+        final var clientChannels = buf.read(CHANNEL_HASHES_ENDEC);
+        final var clientParticleControllers = buf.read(CHANNEL_HASHES_ENDEC);
 
         StringBuilder disconnectMessage = new StringBuilder();
 
@@ -154,7 +151,7 @@ public final class OwoHandshake {
         }
 
         if (buf.readableBytes() > 0) {
-            final var clientOptionalChannels = RESPONSE_SERIALIZER.decodeFully(ByteBufDeserializer::new, buf);
+            final var clientOptionalChannels = buf.read(CHANNEL_HASHES_ENDEC);
             ((OwoClientConnectionExtension) ((ServerCommonNetworkHandlerAccessor) handler).owo$getConnection()).owo$setChannelSet(filterOptionalServices(clientOptionalChannels, OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel));
         }
 
@@ -239,7 +236,7 @@ public final class OwoHandshake {
             hashes.put(entry.getKey(), hashFunction.applyAsInt(entry.getValue()));
         }
 
-        RESPONSE_SERIALIZER.encodeFully(() -> new ByteBufSerializer<>(buffer), hashes);
+        buffer.write(CHANNEL_HASHES_ENDEC, hashes);
     }
 
     private static Pair<Set<Identifier>, Set<Identifier>> findCollisions(Set<Identifier> first, Set<Identifier> second) {
