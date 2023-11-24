@@ -62,7 +62,7 @@
         "io/wispforest/owo/serialization/MapCarrier"
       ],
       "net/minecraft/class_2540": [
-        "io/wispforest/owo/util/pond/OwoPacketByteBufExtension"
+        "io/wispforest/owo/serialization/EndecBuffer"
       ],
       "net/minecraft/class_339": [
         "io/wispforest/owo/ui/inject/ComponentStub"
@@ -74,7 +74,7 @@
         "io/wispforest/owo/client/screens/OwoScreenHandler"
       ],
       "net/minecraft/class_332": [
-        "io/wispforest/owo/util/pond/MatrixStackTransformer"
+        "io/wispforest/owo/ui/util/MatrixStackTransformer"
       ]
     }
   }

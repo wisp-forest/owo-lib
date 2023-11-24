@@ -1,8 +1,6 @@
-package io.wispforest.owo.util.pond;
+package io.wispforest.owo.serialization;
 
-import io.wispforest.owo.serialization.Endec;
-
-public interface OwoPacketByteBufExtension {
+public interface EndecBuffer {
     default <T> void write(Endec<T> endec, T value) {
         throw new UnsupportedOperationException();
     }

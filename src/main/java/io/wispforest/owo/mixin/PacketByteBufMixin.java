@@ -3,13 +3,13 @@ package io.wispforest.owo.mixin;
 import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.impl.bytebuf.ByteBufDeserializer;
 import io.wispforest.owo.serialization.impl.bytebuf.ByteBufSerializer;
-import io.wispforest.owo.util.pond.OwoPacketByteBufExtension;
+import io.wispforest.owo.serialization.EndecBuffer;
 import net.minecraft.network.PacketByteBuf;
 import org.spongepowered.asm.mixin.Mixin;
 
 @SuppressWarnings({"DataFlowIssue", "AddedMixinMembersNamePattern"})
 @Mixin(PacketByteBuf.class)
-public class PacketByteBufMixin implements OwoPacketByteBufExtension {
+public class PacketByteBufMixin implements EndecBuffer {
     @Override
     public <T> void write(Endec<T> endec, T value) {
         endec.encodeFully(() -> new ByteBufSerializer<>((PacketByteBuf) (Object) this), value);
