@@ -118,7 +118,7 @@ public final class BuiltInEndecs {
 
     private static <C, V> Endec<V> vectorEndec(String name, Endec<C> componentEndec, Function3<C, C, C, V> constructor, Function<V, C> xGetter, Function<V, C> yGetter, Function<V, C> zGetter) {
         return componentEndec.listOf().validate(ints -> {
-            if (ints.size() == 3) {
+            if (ints.size() != 3) {
                 throw new IllegalStateException(name + " array must have three elements");
             }
         }).xmap(
