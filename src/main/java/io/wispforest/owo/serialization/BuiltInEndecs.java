@@ -101,15 +101,15 @@ public final class BuiltInEndecs {
 
     // --- Constructors for MC types ---
 
-    static <T> Endec<T> ofRegistry(Registry<T> registry) {
+    public static <T> Endec<T> ofRegistry(Registry<T> registry) {
         return IDENTIFIER.xmap(registry::get, registry::getId);
     }
 
-    static <T> Endec<TagKey<T>> unprefixedTagKey(RegistryKey<? extends Registry<T>> registry) {
+    public static <T> Endec<TagKey<T>> unprefixedTagKey(RegistryKey<? extends Registry<T>> registry) {
         return IDENTIFIER.xmap(id -> TagKey.of(registry, id), TagKey::id);
     }
 
-    static <T> Endec<TagKey<T>> prefixedTagKey(RegistryKey<? extends Registry<T>> registry) {
+    public static <T> Endec<TagKey<T>> prefixedTagKey(RegistryKey<? extends Registry<T>> registry) {
         return Endec.STRING.xmap(
                 s -> TagKey.of(registry, new Identifier(s.substring(1))),
                 tag -> "#" + tag.id()

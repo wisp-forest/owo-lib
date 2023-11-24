@@ -51,7 +51,7 @@ public abstract class NbtCompoundMixin implements NbtCarrier, MapCarrier {
     // --- MapCarrier ---
 
     @Override
-    public <T> T get(@NotNull KeyedEndec<T> key) {
+    public <T> T getWithErrors(@NotNull KeyedEndec<T> key) {
         return this.has(key)
                 ? key.endec().decodeFully(NbtDeserializer::of, this.get(key.key()))
                 : key.defaultValue();

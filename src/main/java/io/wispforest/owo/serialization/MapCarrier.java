@@ -10,23 +10,31 @@ public interface MapCarrier {
 
     // Interface specification
 
-    default <T> T get(@NotNull KeyedEndec<T> key){
+    default <T> T getWithErrors(@NotNull KeyedEndec<T> key) {
         throw new UnsupportedOperationException("Interface default method called");
     }
 
-    default <T> void put(@NotNull KeyedEndec<T> key, @NotNull T value){
+    default <T> void put(@NotNull KeyedEndec<T> key, @NotNull T value) {
         throw new UnsupportedOperationException("Interface default method called");
     }
 
-    default <T> void delete(@NotNull KeyedEndec<T> key){
+    default <T> void delete(@NotNull KeyedEndec<T> key) {
         throw new UnsupportedOperationException("Interface default method called");
     }
 
-    default <T> boolean has(@NotNull KeyedEndec<T> key){
+    default <T> boolean has(@NotNull KeyedEndec<T> key) {
         throw new UnsupportedOperationException("Interface default method called");
     }
 
     // Default implementations
+
+    default <T> T get(@NotNull KeyedEndec<T> key) {
+        try {
+            return this.getWithErrors(key);
+        } catch (Exception e) {
+            return key.defaultValue();
+        }
+    }
 
     default <T> void putIfNotNull(@NotNull KeyedEndec<T> key, @Nullable T value) {
         if (value == null) return;
