@@ -1,12 +1,16 @@
 package io.wispforest.owo.serialization.impl.nbt;
 
-import io.wispforest.owo.serialization.*;
+import io.wispforest.owo.serialization.Endec;
+import io.wispforest.owo.serialization.HierarchicalSerializer;
+import io.wispforest.owo.serialization.Serializer;
 import io.wispforest.owo.serialization.impl.SerializationAttribute;
 import net.minecraft.nbt.*;
 import net.minecraft.network.encoding.VarInts;
 import net.minecraft.network.encoding.VarLongs;
 
-import java.util.*;
+import java.util.EnumSet;
+import java.util.Optional;
+import java.util.Set;
 
 public class NbtSerializer extends HierarchicalSerializer<NbtElement> {
 
@@ -107,9 +111,13 @@ public class NbtSerializer extends HierarchicalSerializer<NbtElement> {
 
     @Override
     public <V> void writeOptional(Endec<V> endec, Optional<V> optional) {
-        try(var struct = this.struct()) {
-            struct.field("present", Endec.BOOLEAN, optional.isPresent());
-            optional.ifPresent(value -> struct.field("value", endec, value));
+        if (this.isWritingStructField()) {
+            optional.ifPresent(v -> endec.encode(this, v));
+        } else {
+            try(var struct = this.struct()) {
+                struct.field("present", Endec.BOOLEAN, optional.isPresent());
+                optional.ifPresent(value -> struct.field("value", endec, value));
+            }
         }
     }
 
@@ -156,15 +164,17 @@ public class NbtSerializer extends HierarchicalSerializer<NbtElement> {
             NbtSerializer.this.frame(encoded -> {
                 this.valueEndec.encode(NbtSerializer.this, value);
                 this.result.put(key, encoded.require("map value"));
-            });
+            }, false);
         }
 
         @Override
         public <F> Struct field(String name, Endec<F> endec, F value) {
             NbtSerializer.this.frame(encoded -> {
                 endec.encode(NbtSerializer.this, value);
-                this.result.put(name, encoded.require("struct field"));
-            });
+                if (encoded.wasEncoded()) {
+                    this.result.put(name, encoded.get());
+                }
+            }, true);
 
             return this;
         }
@@ -199,7 +209,7 @@ public class NbtSerializer extends HierarchicalSerializer<NbtElement> {
             NbtSerializer.this.frame(encoded -> {
                 this.valueEndec.encode(NbtSerializer.this, element);
                 this.result.add(encoded.require("sequence element"));
-            });
+            }, false);
         }
 
         @Override

@@ -93,7 +93,8 @@ public class EdmDeserializer extends HierarchicalDeserializer<EdmElement<?>> imp
         if (optional.isPresent()) {
             return this.frame(
                     optional::get,
-                    () -> Optional.of(endec.decode(this))
+                    () -> Optional.of(endec.decode(this)),
+                    false
             );
         } else {
             return Optional.empty();
@@ -179,7 +180,8 @@ public class EdmDeserializer extends HierarchicalDeserializer<EdmElement<?>> imp
         public V next() {
             return EdmDeserializer.this.frame(
                     this.elements::next,
-                    () -> this.valueEndec.decode(EdmDeserializer.this)
+                    () -> this.valueEndec.decode(EdmDeserializer.this),
+                    false
             );
         }
     }
@@ -212,7 +214,8 @@ public class EdmDeserializer extends HierarchicalDeserializer<EdmElement<?>> imp
             var entry = entries.next();
             return EdmDeserializer.this.frame(
                     entry::getValue,
-                    () -> java.util.Map.entry(entry.getKey(), this.valueEndec.decode(EdmDeserializer.this))
+                    () -> java.util.Map.entry(entry.getKey(), this.valueEndec.decode(EdmDeserializer.this)),
+                    false
             );
         }
     }
@@ -232,7 +235,8 @@ public class EdmDeserializer extends HierarchicalDeserializer<EdmElement<?>> imp
             }
             return EdmDeserializer.this.frame(
                     () -> this.map.get(name),
-                    () -> endec.decode(EdmDeserializer.this)
+                    () -> endec.decode(EdmDeserializer.this),
+                    true
             );
         }
 
@@ -241,7 +245,8 @@ public class EdmDeserializer extends HierarchicalDeserializer<EdmElement<?>> imp
             if (!this.map.containsKey(name)) return defaultValue;
             return EdmDeserializer.this.frame(
                     () -> this.map.get(name),
-                    () -> endec.decode(EdmDeserializer.this)
+                    () -> endec.decode(EdmDeserializer.this),
+                    true
             );
         }
     }

@@ -105,10 +105,14 @@ public class JsonSerializer extends HierarchicalSerializer<JsonElement> {
 
     @Override
     public <V> void writeOptional(Endec<V> endec, Optional<V> optional) {
-        optional.ifPresentOrElse(
-                value -> endec.encode(this, value),
-                () -> this.consume(JsonNull.INSTANCE)
-        );
+        if (this.isWritingStructField()) {
+            optional.ifPresent(value -> endec.encode(this, value));
+        } else {
+            optional.ifPresentOrElse(
+                    value -> endec.encode(this, value),
+                    () -> this.consume(JsonNull.INSTANCE)
+            );
+        }
     }
 
     // ---
@@ -155,7 +159,7 @@ public class JsonSerializer extends HierarchicalSerializer<JsonElement> {
             JsonSerializer.this.frame(encoded -> {
                 this.valueEndec.encode(JsonSerializer.this, value);
                 this.result.add(key, encoded.require("map value"));
-            });
+            }, false);
         }
 
         @Override
@@ -163,7 +167,7 @@ public class JsonSerializer extends HierarchicalSerializer<JsonElement> {
             JsonSerializer.this.frame(encoded -> {
                 endec.encode(JsonSerializer.this, value);
                 this.result.add(name, encoded.require("struct field"));
-            });
+            }, true);
 
             return this;
         }
@@ -199,7 +203,7 @@ public class JsonSerializer extends HierarchicalSerializer<JsonElement> {
             JsonSerializer.this.frame(encoded -> {
                 this.valueEndec.encode(JsonSerializer.this, element);
                 this.result.add(encoded.require("sequence element"));
-            });
+            }, false);
         }
 
         @Override

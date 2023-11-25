@@ -7,38 +7,44 @@ import java.util.function.Supplier;
 
 public abstract class HierarchicalDeserializer<T> implements Deserializer<T> {
 
-    protected final Deque<Supplier<T>> sources = new ArrayDeque<>();
+    protected final Deque<Frame<T>> frames = new ArrayDeque<>();
     protected final T serialized;
 
     protected HierarchicalDeserializer(T serialized) {
         this.serialized = serialized;
-        this.sources.push(() -> this.serialized);
+        this.frames.push(new Frame<>(() -> this.serialized, false));
     }
 
     protected T getValue() {
-        return this.sources.peek().get();
+        return this.frames.peek().source.get();
     }
 
-    protected <V> V frame(Supplier<T> nextValue, Supplier<V> action) {
+    protected boolean isReadingStructField() {
+        return this.frames.peek().isStructField;
+    }
+
+    protected <V> V frame(Supplier<T> nextValue, Supplier<V> action, boolean isStructField) {
         try {
-            this.sources.push(nextValue);
+            this.frames.push(new Frame<>(nextValue, isStructField));
             return action.get();
         } finally {
-            this.sources.pop();
+            this.frames.pop();
         }
     }
 
     @Override
     public <V> V tryRead(Function<Deserializer<T>, V> reader) {
-        var sourcesBackup = new ArrayDeque<>(this.sources);
+        var sourcesBackup = new ArrayDeque<>(this.frames);
 
         try {
             return reader.apply(this);
         } catch (Exception e) {
-            this.sources.clear();
-            this.sources.addAll(sourcesBackup);
+            this.frames.clear();
+            this.frames.addAll(sourcesBackup);
 
             throw e;
         }
     }
+
+    protected record Frame<T>(Supplier<T> source, boolean isStructField) {}
 }

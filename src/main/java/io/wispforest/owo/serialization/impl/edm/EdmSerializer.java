@@ -93,7 +93,7 @@ public class EdmSerializer extends HierarchicalSerializer<EdmElement<?>> {
         this.frame(encoded -> {
             optional.ifPresent(v -> endec.encode(this, v));
             this.consume(EdmElement.wrapOptional(Optional.ofNullable(encoded.get())));
-        });
+        }, false);
     }
 
     // ---
@@ -130,7 +130,7 @@ public class EdmSerializer extends HierarchicalSerializer<EdmElement<?>> {
             EdmSerializer.this.frame(encoded -> {
                 this.elementEndec.encode(EdmSerializer.this, element);
                 this.result.add(encoded.require("sequence element"));
-            });
+            }, false);
         }
 
         @Override
@@ -154,7 +154,7 @@ public class EdmSerializer extends HierarchicalSerializer<EdmElement<?>> {
             EdmSerializer.this.frame(encoded -> {
                 this.valueEndec.encode(EdmSerializer.this, value);
                 this.result.put(key, encoded.require("map value"));
-            });
+            }, false);
         }
 
         @Override
@@ -176,7 +176,7 @@ public class EdmSerializer extends HierarchicalSerializer<EdmElement<?>> {
             EdmSerializer.this.frame(encoded -> {
                 endec.encode(EdmSerializer.this, value);
                 this.result.put(name, encoded.require("struct field"));
-            });
+            }, true);
 
             return this;
         }

@@ -211,7 +211,8 @@ public class JsonDeserializer extends HierarchicalDeserializer<JsonElement> impl
         public V next() {
             return JsonDeserializer.this.frame(
                     this.elements::next,
-                    () -> this.valueEndec.decode(JsonDeserializer.this)
+                    () -> this.valueEndec.decode(JsonDeserializer.this),
+                    false
             );
         }
     }
@@ -244,7 +245,8 @@ public class JsonDeserializer extends HierarchicalDeserializer<JsonElement> impl
             var entry = entries.next();
             return JsonDeserializer.this.frame(
                     entry::getValue,
-                    () -> java.util.Map.entry(entry.getKey(), this.valueEndec.decode(JsonDeserializer.this))
+                    () -> java.util.Map.entry(entry.getKey(), this.valueEndec.decode(JsonDeserializer.this)),
+                    false
             );
         }
     }
@@ -264,7 +266,8 @@ public class JsonDeserializer extends HierarchicalDeserializer<JsonElement> impl
             }
             return JsonDeserializer.this.frame(
                     () -> this.object.get(name),
-                    () -> endec.decode(JsonDeserializer.this)
+                    () -> endec.decode(JsonDeserializer.this),
+                    true
             );
         }
 
@@ -273,7 +276,8 @@ public class JsonDeserializer extends HierarchicalDeserializer<JsonElement> impl
             if (!this.object.has(name)) return defaultValue;
             return JsonDeserializer.this.frame(
                     () -> this.object.get(name),
-                    () -> endec.decode(JsonDeserializer.this)
+                    () -> endec.decode(JsonDeserializer.this),
+                    true
             );
         }
     }

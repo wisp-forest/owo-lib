@@ -100,10 +100,14 @@ public class NbtDeserializer extends HierarchicalDeserializer<NbtElement> implem
 
     @Override
     public <V> Optional<V> readOptional(Endec<V> endec) {
-        var struct = this.struct();
-        return struct.field("present", Endec.BOOLEAN)
-                ? Optional.of(struct.field("value", endec))
-                : Optional.empty();
+        if (this.isReadingStructField()) {
+            return Optional.of(endec.decode(this));
+        } else {
+            var struct = this.struct();
+            return struct.field("present", Endec.BOOLEAN)
+                    ? Optional.of(struct.field("value", endec))
+                    : Optional.empty();
+        }
     }
 
     // ---
@@ -189,7 +193,8 @@ public class NbtDeserializer extends HierarchicalDeserializer<NbtElement> implem
         public V next() {
             return NbtDeserializer.this.frame(
                     this.elements::next,
-                    () -> this.valueEndec.decode(NbtDeserializer.this)
+                    () -> this.valueEndec.decode(NbtDeserializer.this),
+                    false
             );
         }
     }
@@ -224,7 +229,8 @@ public class NbtDeserializer extends HierarchicalDeserializer<NbtElement> implem
             var key = this.keys.next();
             return NbtDeserializer.this.frame(
                     () -> this.compound.get(key),
-                    () -> java.util.Map.entry(key, this.valueEndec.decode(NbtDeserializer.this))
+                    () -> java.util.Map.entry(key, this.valueEndec.decode(NbtDeserializer.this)),
+                    false
             );
         }
     }
@@ -242,9 +248,11 @@ public class NbtDeserializer extends HierarchicalDeserializer<NbtElement> implem
             if (!this.compound.contains(name)) {
                 throw new IllegalStateException("Field '" + name + "' was missing from serialized data, but no default value was provided");
             }
+
             return NbtDeserializer.this.frame(
                     () -> this.compound.get(name),
-                    () -> endec.decode(NbtDeserializer.this)
+                    () -> endec.decode(NbtDeserializer.this),
+                    true
             );
         }
 
@@ -253,7 +261,8 @@ public class NbtDeserializer extends HierarchicalDeserializer<NbtElement> implem
             if (!this.compound.contains(name)) return defaultValue;
             return NbtDeserializer.this.frame(
                     () -> this.compound.get(name),
-                    () -> endec.decode(NbtDeserializer.this)
+                    () -> endec.decode(NbtDeserializer.this),
+                    true
             );
         }
     }

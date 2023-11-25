@@ -6,24 +6,28 @@ import java.util.function.Consumer;
 
 public abstract class HierarchicalSerializer<T> implements Serializer<T> {
 
-    protected final Deque<Consumer<T>> sinks = new ArrayDeque<>();
+    protected final Deque<Frame<T>> frames = new ArrayDeque<>();
     protected T result;
 
     protected HierarchicalSerializer(T initialResult) {
         this.result = initialResult;
-        this.sinks.push(t -> this.result = t);
+        this.frames.push(new Frame<>(t -> this.result = t, false));
     }
 
     protected void consume(T value) {
-        this.sinks.peek().accept(value);
+        this.frames.peek().sink.accept(value);
     }
 
-    protected void frame(FrameAction<T> action) {
+    protected boolean isWritingStructField() {
+        return this.frames.peek().isStructField;
+    }
+
+    protected void frame(FrameAction<T> action, boolean isStructField) {
         var encoded = new EncodedValue<T>();
 
-        this.sinks.push(encoded::set);
+        this.frames.push(new Frame<>(encoded::set, isStructField));
         action.accept(encoded);
-        this.sinks.pop();
+        this.frames.pop();
     }
 
     @Override
@@ -36,6 +40,8 @@ public abstract class HierarchicalSerializer<T> implements Serializer<T> {
         void accept(EncodedValue<T> encoded);
     }
 
+    protected record Frame<T>(Consumer<T> sink, boolean isStructField) {}
+
     protected static class EncodedValue<T> {
         private T value = null;
         private boolean encoded = false;
@@ -47,6 +53,10 @@ public abstract class HierarchicalSerializer<T> implements Serializer<T> {
 
         public T get() {
             return this.value;
+        }
+
+        public boolean wasEncoded() {
+            return this.encoded;
         }
 
         public T require(String name) {

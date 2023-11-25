@@ -277,6 +277,6 @@ public interface Endec<T> {
     }
 
     default <S> StructField<S, T> optionalFieldOf(String name, Function<S, T> getter, @Nullable T defaultValue) {
-        return new StructField<>(name, this, getter, defaultValue);
+        return new StructField<>(name, this.optionalOf().xmap(optional -> optional.orElse(defaultValue), Optional::ofNullable), getter, defaultValue);
     }
 }
