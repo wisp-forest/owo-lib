@@ -4,6 +4,8 @@ import io.wispforest.owo.nbt.NbtCarrier;
 import io.wispforest.owo.nbt.NbtKey;
 import io.wispforest.owo.serialization.MapCarrier;
 import io.wispforest.owo.serialization.impl.KeyedEndec;
+import io.wispforest.owo.serialization.impl.forwarding.ForwardingDeserializer;
+import io.wispforest.owo.serialization.impl.forwarding.ForwardingSerializer;
 import io.wispforest.owo.serialization.impl.nbt.NbtDeserializer;
 import io.wispforest.owo.serialization.impl.nbt.NbtSerializer;
 import net.minecraft.item.ItemStack;
@@ -50,14 +52,15 @@ public abstract class ItemStackMixin implements NbtCarrier, MapCarrier {
 
     @Override
     public <T> T getWithErrors(@NotNull KeyedEndec<T> key) {
-        return this.has(key)
-                ? key.endec().decodeFully(NbtDeserializer::of, this.nbt.get(key.key()))
-                : key.defaultValue();
+        if(!this.has(key)) return key.defaultValue();
+        return key.endec()
+                .decodeFully(e -> ForwardingDeserializer.humanReadable(NbtDeserializer.of(e)), this.nbt.get(key.key()));
     }
 
     @Override
     public <T> void put(@NotNull KeyedEndec<T> key, @NotNull T value) {
-        this.getOrCreateNbt().put(key.key(), key.endec().encodeFully(NbtSerializer::of, value));
+        this.getOrCreateNbt()
+                .put(key.key(), key.endec().encodeFully(() -> ForwardingSerializer.humanReadable(NbtSerializer.of()), value));
     }
 
     @Override
