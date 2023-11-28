@@ -13,7 +13,7 @@ public class ForwardingSerializer<T> implements Serializer<T> {
     private final Set<SerializationAttribute> attributes;
     private final Serializer<T> innerSerializer;
 
-    private ForwardingSerializer(Serializer<T> wrappedSerializer, boolean humanReadable){
+    protected ForwardingSerializer(Serializer<T> wrappedSerializer, boolean humanReadable){
         this.innerSerializer = wrappedSerializer;
 
         var set = ImmutableSet.<SerializationAttribute>builder();

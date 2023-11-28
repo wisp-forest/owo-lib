@@ -16,7 +16,7 @@ public class ForwardingDeserializer<T> implements Deserializer<T> {
     private final Set<SerializationAttribute> attributes;
     private final Deserializer<T> wrappedSerializer;
 
-    private ForwardingDeserializer(Deserializer<T> wrappedSerializer, boolean humanReadable){
+    protected ForwardingDeserializer(Deserializer<T> wrappedSerializer, boolean humanReadable){
         this.wrappedSerializer = wrappedSerializer;
 
         var set = ImmutableSet.<SerializationAttribute>builder();
