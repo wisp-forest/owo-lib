@@ -19,14 +19,13 @@ public final class Wisdom {
             "Did you know that Air is made of 78 percent nitrogen and 21 percent oxygen?",
             "We don't have to worry about people re-inventing Venezuela glisco, that's their problem for integrating the Bourgeoisie into their pack",
             "fuck i need to update tags again",
-            "Hey - if you want to spice up your house, Jello has about 1833 colors; atleast one of them has to tickle your fancy",
             "Don't use Forge, use Froge!",
             "Noaaan: I'm talking to my inner demons. Which is all of you",
             "There is a 1% chance that instead of Frog, you get Froge!",
             "it seems to react to redstone",
             "remember to update ubuntu, before it is too late",
             "DerGeistdesMatze - i will take the l",
-            "idwtialsimmoedm - I didn't want to install a library so I made my own enchantment descriptions mod",
+            "I didn't want to install a library so I made my own enchantment descriptions mod",
             "Here at Wisp Forest© we employ Wisp Tech Support™ magic, which solves your problem when you ask",
             "chyz: How could you do this to me, Blod. I loved you like a guy I don't know in real life :(",
             "chyzman: No sound or Ender Dragon leakage. Although Ender Dragon sound leakage is still a thing",
@@ -50,7 +49,9 @@ public final class Wisdom {
             "chyz: bro, can you stop breathing",
             "Noaaan: It's surprising how much knowledge is lost by the simple fact that people don't know it",
             "Blodhgarm: Did you know it took four switcheroos to implement MatrixStackTransformer in the correct package?",
-            "chyz: who would've thought that if you don't summon satan things go better. you can put that in wisdom if you like"
+            "chyz: who would've thought that if you don't summon satan things go better. you can put that in wisdom if you like",
+            "Its called Unobtainium until you obtain it, thats the thing",
+            "i ate moss and i died"
     );
 
     public static void spread() {
