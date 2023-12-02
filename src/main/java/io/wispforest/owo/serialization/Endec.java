@@ -272,11 +272,19 @@ public interface Endec<T> {
         return new KeyedEndec<>(key, this, defaultValue);
     }
 
+    default KeyedEndec<T> keyed(String key, Supplier<T> defaultValueFactory) {
+        return new KeyedEndec<>(key, this, defaultValueFactory);
+    }
+
     default <S> StructField<S, T> fieldOf(String name, Function<S, T> getter) {
         return new StructField<>(name, this, getter);
     }
 
     default <S> StructField<S, T> optionalFieldOf(String name, Function<S, T> getter, @Nullable T defaultValue) {
         return new StructField<>(name, this.optionalOf().xmap(optional -> optional.orElse(defaultValue), Optional::ofNullable), getter, defaultValue);
+    }
+
+    default <S> StructField<S, T> optionalFieldOf(String name, Function<S, T> getter, Supplier<@Nullable T> defaultValue) {
+        return new StructField<>(name, this.optionalOf().xmap(optional -> optional.orElseGet(defaultValue), Optional::ofNullable), getter, defaultValue);
     }
 }

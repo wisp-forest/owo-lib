@@ -14,7 +14,10 @@ import java.util.Set;
 
 public class NbtSerializer extends HierarchicalSerializer<NbtElement> {
 
-    private static final Set<SerializationAttribute> ATTRIBUTES = EnumSet.allOf(SerializationAttribute.class);
+    private static final Set<SerializationAttribute> ATTRIBUTES = EnumSet.of(
+            SerializationAttribute.SELF_DESCRIBING
+    );
+
     protected NbtElement prefix;
 
     public NbtSerializer(NbtElement prefix) {
