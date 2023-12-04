@@ -38,7 +38,7 @@ public final class RenderDoc {
                 if (os == Util.OperatingSystem.WINDOWS) {
                     renderdocLibrary = Native.load("renderdoc", RenderdocLibrary.class);
                 } else {
-                    renderdocLibrary = Native.load("renderdoc", RenderdocLibrary.class, Map.of(Library.OPTION_OPEN_FLAGS, 0x4 | 0x2));
+                    renderdocLibrary = Native.load("renderdoc", RenderdocLibrary.class, Map.of(Library.OPTION_OPEN_FLAGS, 0x2 | 0x4));
                 }
 
                 int initResult = renderdocLibrary.RENDERDOC_GetAPI(10500, apiPointer);

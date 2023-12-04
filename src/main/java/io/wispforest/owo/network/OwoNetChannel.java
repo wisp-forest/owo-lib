@@ -1,7 +1,6 @@
 package io.wispforest.owo.network;
 
 import io.wispforest.owo.mixin.ServerCommonNetworkHandlerAccessor;
-import io.wispforest.owo.network.serialization.PacketBufSerializer;
 import io.wispforest.owo.serialization.impl.RecordEndec;
 import io.wispforest.owo.serialization.impl.StructEndec;
 import io.wispforest.owo.serialization.impl.bytebuf.ByteBufDeserializer;

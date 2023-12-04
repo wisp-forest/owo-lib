@@ -5,7 +5,7 @@ import io.wispforest.owo.client.screens.ScreenInternals;
 import io.wispforest.owo.client.screens.ScreenhandlerMessageData;
 import io.wispforest.owo.client.screens.SyncedProperty;
 import io.wispforest.owo.network.NetworkException;
-import io.wispforest.owo.network.serialization.PacketBufSerializer;
+import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.util.pond.OwoScreenHandlerExtension;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 @Mixin(ScreenHandler.class)
@@ -55,10 +54,10 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
     }
 
     @Override
-    public <R extends Record> void addServerboundMessage(Class<R> messageClass, Consumer<R> handler) {
+    public <R extends Record> void addServerboundMessage(Class<R> messageClass, Endec<R> endec, Consumer<R> handler) {
         int id = this.owo$serverboundMessages.size();
 
-        var messageData = new ScreenhandlerMessageData<>(id, false, PacketBufSerializer.get(messageClass), handler);
+        var messageData = new ScreenhandlerMessageData<>(id, false, endec, handler);
         this.owo$serverboundMessages.add(messageData);
 
         if (this.owo$messages.put(messageClass, messageData) != null) {
@@ -67,10 +66,10 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
     }
 
     @Override
-    public <R extends Record> void addClientboundMessage(Class<R> messageClass, Consumer<R> handler) {
+    public <R extends Record> void addClientboundMessage(Class<R> messageClass, Endec<R> endec, Consumer<R> handler) {
         int id = this.owo$clientboundMessages.size();
 
-        var messageData = new ScreenhandlerMessageData<>(id, true, PacketBufSerializer.get(messageClass), handler);
+        var messageData = new ScreenhandlerMessageData<>(id, true, endec, handler);
         this.owo$clientboundMessages.add(messageData);
 
         if (this.owo$messages.put(messageClass, messageData) != null) {
@@ -93,7 +92,7 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
 
         var buf = PacketByteBufs.create();
         buf.writeVarInt(messageData.id());
-        messageData.serializer().serializer().accept(buf, message);
+        buf.write(messageData.endec(), message);
 
         if (messageData.clientbound()) {
             if (!(this.owo$player instanceof ServerPlayerEntity serverPlayer)) {
@@ -121,12 +120,12 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
         int id = buf.readVarInt();
         ScreenhandlerMessageData messageData = (clientbound ? this.owo$clientboundMessages : this.owo$serverboundMessages).get(id);
 
-        messageData.handler().accept(messageData.serializer().deserializer().apply(buf));
+        messageData.handler().accept(buf.read(messageData.endec()));
     }
 
     @Override
-    public <T> SyncedProperty<T> createProperty(Class<T> klass, T initial) {
-        var prop = new SyncedProperty<>(this.owo$properties.size(), klass, initial);
+    public <T> SyncedProperty<T> createProperty(Class<T> clazz, Endec<T> endec, T initial) {
+        var prop = new SyncedProperty<>(this.owo$properties.size(), endec, initial);
         this.owo$properties.add(prop);
         return prop;
     }

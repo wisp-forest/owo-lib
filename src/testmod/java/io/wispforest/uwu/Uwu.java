@@ -414,7 +414,7 @@ public class Uwu implements ModInitializer {
                         {
                             var variable1Endec = Endec.STRING.keyed("variable1", "");
                             var variable2Endec = Endec.INT.keyed("variable2", 0);
-                            var variable3Endec = TestRecord.ENDEC.keyed("variable3Endec", null);
+                            var variable3Endec = TestRecord.ENDEC.keyed("variable3Endec", (TestRecord) null);
 
                             var variable1 = "Weeeeeee";
                             var variable2 = 1000;

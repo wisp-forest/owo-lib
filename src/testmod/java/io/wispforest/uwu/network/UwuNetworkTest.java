@@ -1,6 +1,5 @@
 package io.wispforest.uwu.network;
 
-import io.wispforest.owo.network.serialization.RecordSerializer;
 import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.impl.RecordEndec;
 import io.wispforest.owo.serialization.impl.StructEndecBuilder;
@@ -18,14 +17,15 @@ public class UwuNetworkTest {
 
     public static void main(String[] args) {
         var test = new TestRecord(new LinkedList<>(List.of("hahayes epic text")), TestEnum.ANOTHER_VALUE);
-        var serializer = RecordSerializer.create(TestRecord.class);
-        var sameSerializer = RecordSerializer.create(TestRecord.class);
+        var serializer = RecordEndec.create(TestRecord.class);
+        var sameSerializer = RecordEndec.create(TestRecord.class);
 
         testEquals(serializer, sameSerializer);
 
         testSerialization(test, testRecord -> {
             var buffer = PacketByteBufs.create();
-            return serializer.write(buffer, test).read(buffer);
+            buffer.write(serializer, test);
+            return buffer.read(serializer);
         });
 
         //--
