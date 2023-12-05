@@ -57,10 +57,10 @@
         "io/wispforest/owo/serialization/MapCarrier"
       ],
       "net/minecraft/class_2487": [
-        "io/wispforest/owo/serialization/MapCarrier"
+        "io/wispforest/owo/serialization/util/MapCarrier"
       ],
       "net/minecraft/class_2540": [
-        "io/wispforest/owo/serialization/EndecBuffer"
+        "io/wispforest/owo/serialization/util/EndecBuffer"
       ],
       "net/minecraft/class_339": [
         "io/wispforest/owo/ui/inject/ComponentStub"
