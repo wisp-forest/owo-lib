@@ -29,7 +29,7 @@ public final class NbtEndec implements Endec<NbtElement> {
 
         try {
             var output = ByteStreams.newDataOutput();
-            NbtIo.write(value, output);
+            NbtIo.writeForPacket(value, output);
 
             serializer.writeBytes(output.toByteArray());
         } catch (IOException e) {
