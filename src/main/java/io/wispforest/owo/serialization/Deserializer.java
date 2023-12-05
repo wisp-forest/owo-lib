@@ -1,7 +1,5 @@
 package io.wispforest.owo.serialization;
 
-import io.wispforest.owo.serialization.impl.SerializationAttribute;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Iterator;

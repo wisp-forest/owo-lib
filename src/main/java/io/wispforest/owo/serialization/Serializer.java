@@ -1,6 +1,6 @@
 package io.wispforest.owo.serialization;
 
-import io.wispforest.owo.serialization.impl.SerializationAttribute;
+import io.wispforest.owo.serialization.util.Endable;
 
 import java.util.Optional;
 import java.util.Set;

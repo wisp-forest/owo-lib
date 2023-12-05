@@ -6,12 +6,11 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
-import io.wispforest.owo.serialization.endecs.EitherEndec;
-import io.wispforest.owo.serialization.impl.*;
-import io.wispforest.owo.serialization.impl.edm.EdmDeserializer;
-import io.wispforest.owo.serialization.impl.edm.EdmEndec;
-import io.wispforest.owo.serialization.impl.edm.EdmOps;
-import io.wispforest.owo.serialization.impl.edm.EdmSerializer;
+import io.wispforest.owo.serialization.endec.*;
+import io.wispforest.owo.serialization.format.edm.EdmDeserializer;
+import io.wispforest.owo.serialization.format.edm.EdmEndec;
+import io.wispforest.owo.serialization.format.edm.EdmOps;
+import io.wispforest.owo.serialization.format.edm.EdmSerializer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;

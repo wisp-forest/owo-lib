@@ -4,7 +4,7 @@ import io.wispforest.owo.Owo;
 import io.wispforest.owo.network.NetworkException;
 import io.wispforest.owo.network.OwoHandshake;
 import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.impl.ReflectiveEndecBuilder;
+import io.wispforest.owo.serialization.endec.ReflectiveEndecBuilder;
 import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.ReflectionUtils;
 import io.wispforest.owo.util.VectorSerializer;
@@ -99,7 +99,7 @@ public class ParticleSystemController {
 
     /**
      * Shorthand for {{@link #register(Class, Endec, ParticleSystemExecutor)}} which creates the endec
-     * through {@link io.wispforest.owo.serialization.impl.ReflectiveEndecBuilder#get(Class)}
+     * through {@link ReflectiveEndecBuilder#get(Class)}
      */
     public <T> ParticleSystem<T> register(Class<T> dataClass, ParticleSystemExecutor<T> executor) {
         return this.register(dataClass, ReflectiveEndecBuilder.get(dataClass), executor);
@@ -126,7 +126,7 @@ public class ParticleSystemController {
 
     /**
      * Shorthand for {{@link #registerDeferred(Class, Endec)}} which creates the endec
-     * through {@link io.wispforest.owo.serialization.impl.ReflectiveEndecBuilder#get(Class)}
+     * through {@link ReflectiveEndecBuilder#get(Class)}
      */
     public <T> ParticleSystem<T> registerDeferred(Class<T> dataClass) {
         return this.registerDeferred(dataClass, ReflectiveEndecBuilder.get(dataClass));

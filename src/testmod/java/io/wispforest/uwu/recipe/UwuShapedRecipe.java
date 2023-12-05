@@ -2,9 +2,9 @@ package io.wispforest.uwu.recipe;
 
 import com.google.common.collect.Sets;
 import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.impl.AttributeEndecBuilder;
-import io.wispforest.owo.serialization.impl.SerializationAttribute;
-import io.wispforest.owo.serialization.impl.StructEndecBuilder;
+import io.wispforest.owo.serialization.endec.AttributeEndecBuilder;
+import io.wispforest.owo.serialization.SerializationAttribute;
+import io.wispforest.owo.serialization.endec.StructEndecBuilder;
 import io.wispforest.uwu.mixin.ShapedRecipeInvoker;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Ingredient;

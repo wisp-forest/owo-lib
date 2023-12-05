@@ -1,11 +1,11 @@
 package io.wispforest.owo.mixin;
 
-import io.wispforest.owo.serialization.MapCarrier;
-import io.wispforest.owo.serialization.impl.KeyedEndec;
-import io.wispforest.owo.serialization.impl.forwarding.ForwardingDeserializer;
-import io.wispforest.owo.serialization.impl.forwarding.ForwardingSerializer;
-import io.wispforest.owo.serialization.impl.nbt.NbtDeserializer;
-import io.wispforest.owo.serialization.impl.nbt.NbtSerializer;
+import io.wispforest.owo.serialization.util.MapCarrier;
+import io.wispforest.owo.serialization.endec.KeyedEndec;
+import io.wispforest.owo.serialization.format.forwarding.ForwardingDeserializer;
+import io.wispforest.owo.serialization.format.forwarding.ForwardingSerializer;
+import io.wispforest.owo.serialization.format.nbt.NbtDeserializer;
+import io.wispforest.owo.serialization.format.nbt.NbtSerializer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import org.jetbrains.annotations.NotNull;

@@ -2,9 +2,9 @@ package io.wispforest.uwu.recipe;
 
 import com.mojang.serialization.Codec;
 import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.impl.SerializationAttribute;
-import io.wispforest.owo.serialization.impl.bytebuf.ByteBufDeserializer;
-import io.wispforest.owo.serialization.impl.bytebuf.ByteBufSerializer;
+import io.wispforest.owo.serialization.SerializationAttribute;
+import io.wispforest.owo.serialization.format.bytebuf.ByteBufDeserializer;
+import io.wispforest.owo.serialization.format.bytebuf.ByteBufSerializer;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeSerializer;

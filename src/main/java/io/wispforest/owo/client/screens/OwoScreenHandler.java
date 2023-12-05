@@ -1,7 +1,7 @@
 package io.wispforest.owo.client.screens;
 
 import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.impl.ReflectiveEndecBuilder;
+import io.wispforest.owo.serialization.endec.ReflectiveEndecBuilder;
 import net.minecraft.entity.player.PlayerEntity;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,7 +25,7 @@ public interface OwoScreenHandler {
 
     /**
      * Shorthand for {@link #createProperty(Class, Endec, Object)} which creates the endec
-     * through {@link io.wispforest.owo.serialization.impl.ReflectiveEndecBuilder#get(Class)}
+     * through {@link ReflectiveEndecBuilder#get(Class)}
      */
     default <T> SyncedProperty<T> createProperty(Class<T> clazz, T initial) {
         return this.createProperty(clazz, ReflectiveEndecBuilder.get(clazz), initial);
@@ -49,7 +49,7 @@ public interface OwoScreenHandler {
 
     /**
      * Shorthand for {@link #addServerboundMessage(Class, Endec, Consumer)} which creates the endec
-     * through {@link io.wispforest.owo.serialization.impl.ReflectiveEndecBuilder#get(Class)}
+     * through {@link ReflectiveEndecBuilder#get(Class)}
      */
     default <R extends Record> void addServerboundMessage(Class<R> messageClass, Consumer<R> handler) {
         this.addServerboundMessage(messageClass, ReflectiveEndecBuilder.get(messageClass), handler);
@@ -73,7 +73,7 @@ public interface OwoScreenHandler {
 
     /**
      * Shorthand for {@link #addClientboundMessage(Class, Endec, Consumer)} which creates the endec
-     * through {@link io.wispforest.owo.serialization.impl.ReflectiveEndecBuilder#get(Class)}
+     * through {@link ReflectiveEndecBuilder#get(Class)}
      */
     default <R extends Record> void addClientboundMessage(Class<R> messageClass, Consumer<R> handler) {
         this.addClientboundMessage(messageClass, ReflectiveEndecBuilder.get(messageClass), handler);

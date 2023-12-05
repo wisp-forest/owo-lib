@@ -1,10 +1,10 @@
 package io.wispforest.owo.network;
 
 import io.wispforest.owo.mixin.ServerCommonNetworkHandlerAccessor;
-import io.wispforest.owo.serialization.impl.RecordEndec;
-import io.wispforest.owo.serialization.impl.StructEndec;
-import io.wispforest.owo.serialization.impl.bytebuf.ByteBufDeserializer;
-import io.wispforest.owo.serialization.impl.bytebuf.ByteBufSerializer;
+import io.wispforest.owo.serialization.endec.RecordEndec;
+import io.wispforest.owo.serialization.StructEndec;
+import io.wispforest.owo.serialization.format.bytebuf.ByteBufDeserializer;
+import io.wispforest.owo.serialization.format.bytebuf.ByteBufSerializer;
 import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.ReflectionUtils;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
