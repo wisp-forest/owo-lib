@@ -54,7 +54,7 @@
     },
     "loom:injected_interfaces": {
       "net/minecraft/class_1799": [
-        "io/wispforest/owo/serialization/MapCarrier"
+        "io/wispforest/owo/serialization/util/MapCarrier"
       ],
       "net/minecraft/class_2487": [
         "io/wispforest/owo/serialization/util/MapCarrier"
