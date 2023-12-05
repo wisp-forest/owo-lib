@@ -244,7 +244,7 @@ public class NbtDeserializer extends HierarchicalDeserializer<NbtElement> implem
         }
 
         @Override
-        public <F> @NotNull F field(String name, Endec<F> endec) {
+        public <F> @Nullable F field(String name, Endec<F> endec) {
             if (!this.compound.contains(name)) {
                 throw new IllegalStateException("Field '" + name + "' was missing from serialized data, but no default value was provided");
             }

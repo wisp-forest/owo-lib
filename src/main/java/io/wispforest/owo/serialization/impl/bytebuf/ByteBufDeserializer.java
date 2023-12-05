@@ -162,12 +162,12 @@ public class ByteBufDeserializer implements Deserializer<ByteBuf> {
         }
 
         @Override
-        public <F> @NotNull F field(String name, Endec<F> endec) {
+        public <F> @Nullable F field(String name, Endec<F> endec) {
             return this.field(name, endec, null);
         }
 
         @Override
-        public <F> @NotNull F field(String name, Endec<F> endec, @Nullable F defaultValue) {
+        public <F> @Nullable F field(String name, Endec<F> endec, @Nullable F defaultValue) {
             return endec.decode(ByteBufDeserializer.this);
         }
     }

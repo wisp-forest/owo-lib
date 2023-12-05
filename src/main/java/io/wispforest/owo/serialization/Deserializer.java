@@ -61,7 +61,7 @@ public interface Deserializer<T> {
          * Decode the value of field {@code name} using {@code endec}. If no
          * such field exists in the serialized data, an exception is thrown
          */
-        <F> @NotNull F field(String name, Endec<F> endec);
+        <F> @Nullable F field(String name, Endec<F> endec);
 
         /**
          * Decode the value of field {@code name} using {@code endec}. If no

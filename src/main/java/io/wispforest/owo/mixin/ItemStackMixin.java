@@ -1,7 +1,5 @@
 package io.wispforest.owo.mixin;
 
-import io.wispforest.owo.nbt.NbtCarrier;
-import io.wispforest.owo.nbt.NbtKey;
 import io.wispforest.owo.serialization.MapCarrier;
 import io.wispforest.owo.serialization.impl.KeyedEndec;
 import io.wispforest.owo.serialization.impl.forwarding.ForwardingDeserializer;
@@ -17,7 +15,7 @@ import org.spongepowered.asm.mixin.Shadow;
 
 @SuppressWarnings("AddedMixinMembersNamePattern")
 @Mixin(ItemStack.class)
-public abstract class ItemStackMixin implements NbtCarrier, MapCarrier {
+public abstract class ItemStackMixin implements MapCarrier {
 
     @Shadow
     private @Nullable NbtCompound nbt;
@@ -25,34 +23,9 @@ public abstract class ItemStackMixin implements NbtCarrier, MapCarrier {
     @Shadow
     public abstract NbtCompound getOrCreateNbt();
 
-    // --- NbtCarrier (deprecated) ---
-
-    @Override
-    public <T> T get(@NotNull NbtKey<T> key) {
-        return key.get(this.getOrCreateNbt());
-    }
-
-    @Override
-    public <T> void put(@NotNull NbtKey<T> key, @NotNull T value) {
-        key.put(this.getOrCreateNbt(), value);
-    }
-
-    @Override
-    public <T> void delete(@NotNull NbtKey<T> key) {
-        if (this.nbt == null) return;
-        key.delete(this.nbt);
-    }
-
-    @Override
-    public <T> boolean has(@NotNull NbtKey<T> key) {
-        return this.nbt != null && key.isIn(this.nbt);
-    }
-
-    // --- MapCarrier ---
-
     @Override
     public <T> T getWithErrors(@NotNull KeyedEndec<T> key) {
-        if(!this.has(key)) return key.defaultValue();
+        if (!this.has(key)) return key.defaultValue();
         return key.endec()
                 .decodeFully(e -> ForwardingDeserializer.humanReadable(NbtDeserializer.of(e)), this.nbt.get(key.key()));
     }

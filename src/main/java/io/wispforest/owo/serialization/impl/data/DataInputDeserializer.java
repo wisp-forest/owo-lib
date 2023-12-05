@@ -208,12 +208,12 @@ public class DataInputDeserializer<D extends DataInput> implements Deserializer<
         }
 
         @Override
-        public <F> @NotNull F field(String name, Endec<F> endec) {
+        public <F> @Nullable F field(String name, Endec<F> endec) {
             return endec.decode(DataInputDeserializer.this);
         }
 
         @Override
-        public <F> F field(@Nullable String field, Endec<F> endec, @Nullable F defaultValue) {
+        public <F> @Nullable F field(@Nullable String field, Endec<F> endec, @Nullable F defaultValue) {
             return endec.decode(DataInputDeserializer.this);
         }
     }

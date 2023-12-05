@@ -229,7 +229,7 @@ public class EdmDeserializer extends HierarchicalDeserializer<EdmElement<?>> imp
         }
 
         @Override
-        public <F> @NotNull F field(String name, Endec<F> endec) {
+        public <F> @Nullable F field(String name, Endec<F> endec) {
             if (!this.map.containsKey(name)) {
                 throw new IllegalStateException("Field '" + name + "' was missing from serialized data, but no default value was provided");
             }
