@@ -4,8 +4,6 @@ import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.Sizing;
 import net.minecraft.text.Text;
 
-import java.util.Map;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -65,21 +63,6 @@ public final class Containers {
     }
 
     public static <T, C extends Component> FlowLayout list(Iterable<T> data, Consumer<FlowLayout> layoutConfigurator, Function<T, C> componentMaker) {
-        return list(data, layoutConfigurator, componentMaker, true);
-    }
-
-    public static <K, V, C extends Component> FlowLayout list(Map<K, V> data, Consumer<FlowLayout> layoutConfigurator, BiFunction<K, V, C> componentMaker, boolean vertical) {
-        var layout = vertical ? Containers.verticalFlow(Sizing.content(), Sizing.content()) : Containers.horizontalFlow(Sizing.content(), Sizing.content());
-        layoutConfigurator.accept(layout);
-
-        for (Map.Entry<K, V> entry : data.entrySet()) {
-            layout.child(componentMaker.apply(entry.getKey(), entry.getValue()));
-        }
-
-        return layout;
-    }
-
-    public static <K, V, C extends Component> FlowLayout list(Map<K, V> data, Consumer<FlowLayout> layoutConfigurator, BiFunction<K, V, C> componentMaker) {
         return list(data, layoutConfigurator, componentMaker, true);
     }
 
