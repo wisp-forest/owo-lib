@@ -24,7 +24,7 @@ public class LanguageMixin {
         if (!el.isJsonPrimitive() && LanguageAccess.textConsumer != null) {
             skipNext = true;
 
-            MutableText text = Text.Serializer.fromJson(el);
+            MutableText text = Text.Serialization.fromJsonTree(el);
             LanguageAccess.textConsumer.accept(str, text);
 
             return "";

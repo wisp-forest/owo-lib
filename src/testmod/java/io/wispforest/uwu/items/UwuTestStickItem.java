@@ -55,6 +55,7 @@ public class UwuTestStickItem extends Item {
             Uwu.CHANNEL.clientHandle().send(Uwu.MESSAGE);
 
             Uwu.CUBE.spawn(world, user.getEyePos().add(user.getRotationVec(0).multiply(3)).subtract(.5, .5, .5), null);
+            user.sendMessage(Text.translatable("uwu.a", "bruh"));
 
             return TypedActionResult.success(user.getStackInHand(hand));
         }
