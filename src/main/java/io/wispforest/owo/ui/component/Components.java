@@ -150,6 +150,10 @@ public final class Components {
     // Utility
     // -------
 
+    /**
+     * @deprecated Use {@link Containers#list(Iterable, Consumer, Function, boolean)} instead
+     */
+    @Deprecated
     public static <T, C extends Component> FlowLayout list(List<T> data, Consumer<FlowLayout> layoutConfigurator, Function<T, C> componentMaker, boolean vertical) {
         var layout = vertical ? Containers.verticalFlow(Sizing.content(), Sizing.content()) : Containers.horizontalFlow(Sizing.content(), Sizing.content());
         layoutConfigurator.accept(layout);

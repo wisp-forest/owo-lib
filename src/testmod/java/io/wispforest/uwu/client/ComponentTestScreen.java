@@ -15,7 +15,6 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.SpriteIdentifier;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -333,7 +332,7 @@ public class ComponentTestScreen extends Screen {
                 Containers.horizontalScroll(
                                 Sizing.fixed(26 * 7 + 8),
                                 Sizing.content(),
-                                Components.list(
+                                Containers.list(
                                         data,
                                         flowLayout -> flowLayout.margins(Insets.bottom(10)),
                                         integer -> Components.button(Text.literal(integer.toString()), (ButtonComponent button) -> {}).margins(Insets.horizontal(3)).horizontalSizing(Sizing.fixed(20)),
