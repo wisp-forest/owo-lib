@@ -44,6 +44,7 @@ public interface Component extends PositionedRectangle {
     default void drawTooltip(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
         if (!this.shouldDrawTooltip(mouseX, mouseY)) return;
         context.drawTooltip(MinecraftClient.getInstance().textRenderer, mouseX, mouseY, this.tooltip());
+        context.draw();
     }
 
     /**

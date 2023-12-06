@@ -6,6 +6,7 @@ import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.PositionedRectangle;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
@@ -72,8 +73,8 @@ public final class ScissorStack {
         GL11.glScissor(
                 (int) (newFrame.x() * scale),
                 (int) (window.getFramebufferHeight() - (newFrame.y() * scale) - newFrame.height() * scale),
-                (int) (newFrame.width() * scale),
-                (int) (newFrame.height() * scale)
+                MathHelper.clamp((int) (newFrame.width() * scale), 0, window.getFramebufferWidth()),
+                MathHelper.clamp((int) (newFrame.height() * scale), 0, window.getFramebufferHeight())
         );
     }
 
