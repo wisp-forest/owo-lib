@@ -54,10 +54,13 @@
     },
     "loom:injected_interfaces": {
       "net/minecraft/class_1799": [
-        "io/wispforest/owo/nbt/NbtCarrier"
+        "io/wispforest/owo/serialization/util/MapCarrier"
       ],
       "net/minecraft/class_2487": [
-        "io/wispforest/owo/nbt/NbtCarrier"
+        "io/wispforest/owo/serialization/util/MapCarrier"
+      ],
+      "net/minecraft/class_2540": [
+        "io/wispforest/owo/serialization/util/EndecBuffer"
       ],
       "net/minecraft/class_339": [
         "io/wispforest/owo/ui/inject/ComponentStub"
@@ -69,7 +72,7 @@
         "io/wispforest/owo/client/screens/OwoScreenHandler"
       ],
       "net/minecraft/class_332": [
-        "io/wispforest/owo/util/pond/MatrixStackTransformer"
+        "io/wispforest/owo/ui/util/MatrixStackTransformer"
       ]
     }
   }

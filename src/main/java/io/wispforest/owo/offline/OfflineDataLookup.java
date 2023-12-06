@@ -4,13 +4,12 @@ import io.wispforest.owo.Owo;
 import net.minecraft.datafixer.DataFixTypes;
 import net.minecraft.datafixer.Schemas;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.NbtTagSizeTracker;
 import net.minecraft.util.Util;
 import net.minecraft.util.WorldSavePath;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -40,11 +39,11 @@ public final class OfflineDataLookup {
         DataSavedEvents.PLAYER_DATA.invoker().onSaved(player, nbt);
 
         try {
-            File savedPlayersPath = Owo.currentServer().getSavePath(WorldSavePath.PLAYERDATA).toFile();
-            File file = File.createTempFile(player.toString() + "-", ".dat", savedPlayersPath);
+            var savedPlayersPath = Owo.currentServer().getSavePath(WorldSavePath.PLAYERDATA);
+            var file = Files.createTempFile(savedPlayersPath, player.toString() + "-", ".dat");
             NbtIo.writeCompressed(nbt, file);
-            File newDataFile = new File(savedPlayersPath, player + ".dat");
-            File oldDataFile = new File(savedPlayersPath, player + ".dat_old");
+            var newDataFile = savedPlayersPath.resolve(player + ".dat");
+            var oldDataFile = savedPlayersPath.resolve(player + ".dat_old");
             Util.backupAndReplace(newDataFile, file, oldDataFile);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -62,7 +61,7 @@ public final class OfflineDataLookup {
         try {
             Path savedPlayersPath = Owo.currentServer().getSavePath(WorldSavePath.PLAYERDATA);
             Path savedDataPath = savedPlayersPath.resolve(player.toString() + ".dat");
-            NbtCompound rawNbt = NbtIo.readCompressed(savedDataPath.toFile());
+            NbtCompound rawNbt = NbtIo.readCompressed(savedDataPath, NbtTagSizeTracker.ofUnlimitedBytes());
             int dataVersion = rawNbt.contains("DataVersion", 3) ? rawNbt.getInt("DataVersion") : -1;
             return DataFixTypes.PLAYER.update(Schemas.getFixer(), rawNbt, dataVersion);
         } catch (IOException e) {

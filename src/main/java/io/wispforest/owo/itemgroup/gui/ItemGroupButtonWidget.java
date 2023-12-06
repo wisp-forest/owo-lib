@@ -22,7 +22,7 @@ public class ItemGroupButtonWidget extends ButtonWidget {
     }
 
     @Override
-    public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
         RenderSystem.enableDepthTest();
         context.drawTexture(this.definition.texture(), this.getX(), this.getY(), this.baseU, this.isSelected() || this.isSelected ? this.height : 0, this.width, this.height, 64, 64);
 

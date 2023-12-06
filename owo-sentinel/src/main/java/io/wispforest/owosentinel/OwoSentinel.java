@@ -39,7 +39,7 @@ public class OwoSentinel {
         if (FabricLoader.getInstance().isModLoaded("owo-impl")) return;
 
         try {
-            if (GraphicsEnvironment.isHeadless() || FORCE_HEADLESS || System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("mac")) {
+            if (System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("mac") || GraphicsEnvironment.isHeadless() || FORCE_HEADLESS) {
                 SentinelConsole.run();
             } else {
                 SentinelWindow.open();

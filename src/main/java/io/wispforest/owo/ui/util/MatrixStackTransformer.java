@@ -1,4 +1,4 @@
-package io.wispforest.owo.util.pond;
+package io.wispforest.owo.ui.util;
 
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.util.math.MatrixStack;

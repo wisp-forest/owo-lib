@@ -2,8 +2,9 @@ package io.wispforest.uwu.items;
 
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.OwoItemSettings;
-import io.wispforest.owo.nbt.NbtKey;
 import io.wispforest.owo.ops.WorldOps;
+import io.wispforest.owo.serialization.endec.BuiltInEndecs;
+import io.wispforest.owo.serialization.endec.KeyedEndec;
 import io.wispforest.uwu.Uwu;
 import io.wispforest.uwu.text.BasedTextContent;
 import net.minecraft.enchantment.Enchantments;
@@ -12,7 +13,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -24,9 +24,7 @@ import net.minecraft.world.World;
 
 public class UwuTestStickItem extends Item {
 
-    private static final NbtKey<Text> TEXT_KEY = new NbtKey<>("Text", NbtKey.Type.of(NbtElement.STRING_TYPE,
-            (compound, s) -> Text.Serializer.fromJson(compound.getString(s)),
-            (compound, s, text) -> compound.putString(s, Text.Serializer.toJson(text))));
+    private static final KeyedEndec<Text> TEXT_KEY = BuiltInEndecs.TEXT.keyed("Text", Text.empty());
 
     public UwuTestStickItem() {
         super(new OwoItemSettings().group(Uwu.SIX_TAB_GROUP).tab(3).maxCount(1)
@@ -57,6 +55,7 @@ public class UwuTestStickItem extends Item {
             Uwu.CHANNEL.clientHandle().send(Uwu.MESSAGE);
 
             Uwu.CUBE.spawn(world, user.getEyePos().add(user.getRotationVec(0).multiply(3)).subtract(.5, .5, .5), null);
+            user.sendMessage(Text.translatable("uwu.a", "bruh"));
 
             return TypedActionResult.success(user.getStackInHand(hand));
         }
@@ -79,7 +78,7 @@ public class UwuTestStickItem extends Item {
 
         stickStack.mutate(TEXT_KEY, text -> MutableText.of(new BasedTextContent("basednite, ")).append(text));
 
-        context.getPlayer().sendMessage(TEXT_KEY.get(stickStack.getNbt()), false);
+        context.getPlayer().sendMessage(stickStack.getNbt().get(TEXT_KEY), false);
 
         Uwu.BREAK_BLOCK_PARTICLES.spawn(context.getWorld(), Vec3d.of(context.getBlockPos()), null);
 

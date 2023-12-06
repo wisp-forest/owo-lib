@@ -6,6 +6,7 @@ import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.util.Observable;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.CheckboxWidget;
 import net.minecraft.text.Text;
 import org.w3c.dom.Element;
@@ -18,7 +19,7 @@ public class CheckboxComponent extends CheckboxWidget {
     protected final Observable<Boolean> listeners;
 
     protected CheckboxComponent(Text message) {
-        super(0, 0, 0, 0, message, false);
+        super(0, 0, message, MinecraftClient.getInstance().textRenderer, false, (checkbox, checked) -> {});
         this.listeners = Observable.of(this.isChecked());
         this.sizing(Sizing.content(), Sizing.fixed(20));
     }
