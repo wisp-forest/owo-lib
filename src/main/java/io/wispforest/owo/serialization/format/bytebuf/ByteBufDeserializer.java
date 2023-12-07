@@ -18,7 +18,7 @@ public class ByteBufDeserializer implements Deserializer<ByteBuf> {
 
     private final ByteBuf buffer;
 
-    public ByteBufDeserializer(ByteBuf buffer){
+    public ByteBufDeserializer(ByteBuf buffer) {
         this.buffer = buffer;
     }
 
@@ -108,7 +108,7 @@ public class ByteBufDeserializer implements Deserializer<ByteBuf> {
 
         try {
             return reader.apply(this);
-        } catch (Exception e){
+        } catch (Exception e) {
             this.buffer.readerIndex(prevReaderIdx);
             throw e;
         }

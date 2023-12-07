@@ -1,9 +1,9 @@
 package io.wispforest.owo.serialization.format.nbt;
 
 import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.util.HierarchicalSerializer;
-import io.wispforest.owo.serialization.Serializer;
 import io.wispforest.owo.serialization.SerializationAttribute;
+import io.wispforest.owo.serialization.Serializer;
+import io.wispforest.owo.serialization.util.HierarchicalSerializer;
 import net.minecraft.nbt.*;
 import net.minecraft.network.encoding.VarInts;
 import net.minecraft.network.encoding.VarLongs;
@@ -78,7 +78,7 @@ public class NbtSerializer extends HierarchicalSerializer<NbtElement> {
 
     @Override
     public void writeVarInt(int value) {
-        this.consume(switch (VarInts.getSizeInBytes(value)){
+        this.consume(switch (VarInts.getSizeInBytes(value)) {
             case 0, 1 -> NbtByte.of((byte) value);
             case 2 -> NbtShort.of((short) value);
             default -> NbtInt.of(value);
@@ -87,7 +87,7 @@ public class NbtSerializer extends HierarchicalSerializer<NbtElement> {
 
     @Override
     public void writeVarLong(long value) {
-        this.consume(switch (VarLongs.getSizeInBytes(value)){
+        this.consume(switch (VarLongs.getSizeInBytes(value)) {
             case 0, 1 -> NbtByte.of((byte) value);
             case 2 -> NbtShort.of((short) value);
             case 3, 4 -> NbtInt.of((int) value);
@@ -117,7 +117,7 @@ public class NbtSerializer extends HierarchicalSerializer<NbtElement> {
         if (this.isWritingStructField()) {
             optional.ifPresent(v -> endec.encode(this, v));
         } else {
-            try(var struct = this.struct()) {
+            try (var struct = this.struct()) {
                 struct.field("present", Endec.BOOLEAN, optional.isPresent());
                 optional.ifPresent(value -> struct.field("value", endec, value));
             }

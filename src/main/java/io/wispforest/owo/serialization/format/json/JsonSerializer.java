@@ -2,9 +2,9 @@ package io.wispforest.owo.serialization.format.json;
 
 import com.google.gson.*;
 import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.util.HierarchicalSerializer;
-import io.wispforest.owo.serialization.Serializer;
 import io.wispforest.owo.serialization.SerializationAttribute;
+import io.wispforest.owo.serialization.Serializer;
+import io.wispforest.owo.serialization.util.HierarchicalSerializer;
 
 import java.util.EnumSet;
 import java.util.Optional;

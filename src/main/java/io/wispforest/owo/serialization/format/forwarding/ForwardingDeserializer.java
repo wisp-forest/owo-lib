@@ -1,11 +1,7 @@
 package io.wispforest.owo.serialization.format.forwarding;
 
 import com.google.common.collect.ImmutableSet;
-import io.wispforest.owo.serialization.Deserializer;
-import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.SelfDescribedDeserializer;
-import io.wispforest.owo.serialization.Serializer;
-import io.wispforest.owo.serialization.SerializationAttribute;
+import io.wispforest.owo.serialization.*;
 
 import java.util.Optional;
 import java.util.Set;
@@ -16,37 +12,37 @@ public class ForwardingDeserializer<T> implements Deserializer<T> {
     private final Set<SerializationAttribute> attributes;
     private final Deserializer<T> wrappedSerializer;
 
-    protected ForwardingDeserializer(Deserializer<T> wrappedSerializer, boolean humanReadable){
+    protected ForwardingDeserializer(Deserializer<T> wrappedSerializer, boolean humanReadable) {
         this.wrappedSerializer = wrappedSerializer;
 
         var set = ImmutableSet.<SerializationAttribute>builder();
 
-        if(this.wrappedSerializer.attributes().contains(SerializationAttribute.SELF_DESCRIBING)){
+        if (this.wrappedSerializer.attributes().contains(SerializationAttribute.SELF_DESCRIBING)) {
             set.add(SerializationAttribute.SELF_DESCRIBING);
         }
 
-        if(humanReadable) {
+        if (humanReadable) {
             set.add(SerializationAttribute.HUMAN_READABLE);
         }
 
         this.attributes = set.build();
     }
 
-    public static <T> ForwardingDeserializer<T> of(Deserializer<T> deserializer){
+    public static <T> ForwardingDeserializer<T> of(Deserializer<T> deserializer) {
         return create(deserializer, false);
     }
 
-    public static <T> ForwardingDeserializer<T> humanReadable(Deserializer<T> deserializer){
+    public static <T> ForwardingDeserializer<T> humanReadable(Deserializer<T> deserializer) {
         return create(deserializer, true);
     }
 
-    private static <T> ForwardingDeserializer<T> create(Deserializer<T> deserializer, boolean humanReadable){
+    private static <T> ForwardingDeserializer<T> create(Deserializer<T> deserializer, boolean humanReadable) {
         return (deserializer instanceof SelfDescribedDeserializer<T> selfDescribedDeserializer)
                 ? new ForwardingSelfDescribedDeserializer<>(selfDescribedDeserializer, humanReadable)
                 : new ForwardingDeserializer<>(deserializer, humanReadable);
     }
 
-    public Deserializer<T> delegate(){
+    public Deserializer<T> delegate() {
         return this.wrappedSerializer;
     }
 

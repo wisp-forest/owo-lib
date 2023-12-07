@@ -2,8 +2,8 @@ package io.wispforest.owo.serialization.format.bytebuf;
 
 import io.netty.buffer.ByteBuf;
 import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.Serializer;
 import io.wispforest.owo.serialization.SerializationAttribute;
+import io.wispforest.owo.serialization.Serializer;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.encoding.StringEncoding;

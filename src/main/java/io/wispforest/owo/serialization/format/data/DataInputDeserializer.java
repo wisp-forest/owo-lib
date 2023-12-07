@@ -129,7 +129,7 @@ public class DataInputDeserializer<D extends DataInput> implements Deserializer<
                 if (bytes > 5) {
                     throw new RuntimeException("VarInt too big");
                 }
-            } while((current & 128) == 128);
+            } while ((current & 128) == 128);
 
             return result;
         } catch (IOException e) {
@@ -146,11 +146,11 @@ public class DataInputDeserializer<D extends DataInput> implements Deserializer<
             byte current;
             do {
                 current = this.input.readByte();
-                result |= (long)(current & 127) << bytes++ * 7;
+                result |= (long) (current & 127) << bytes++ * 7;
                 if (bytes > 10) {
                     throw new RuntimeException("VarLong too big");
                 }
-            } while((current & 128) == 128);
+            } while ((current & 128) == 128);
 
             return result;
         } catch (IOException e) {

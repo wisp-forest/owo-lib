@@ -2,8 +2,8 @@ package io.wispforest.owo.serialization.format.forwarding;
 
 import com.google.common.collect.ImmutableSet;
 import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.Serializer;
 import io.wispforest.owo.serialization.SerializationAttribute;
+import io.wispforest.owo.serialization.Serializer;
 
 import java.util.Optional;
 import java.util.Set;
@@ -13,29 +13,29 @@ public class ForwardingSerializer<T> implements Serializer<T> {
     private final Set<SerializationAttribute> attributes;
     private final Serializer<T> innerSerializer;
 
-    protected ForwardingSerializer(Serializer<T> wrappedSerializer, boolean humanReadable){
+    protected ForwardingSerializer(Serializer<T> wrappedSerializer, boolean humanReadable) {
         this.innerSerializer = wrappedSerializer;
 
         var set = ImmutableSet.<SerializationAttribute>builder();
 
-        if(this.innerSerializer.attributes().contains(SerializationAttribute.SELF_DESCRIBING)){
+        if (this.innerSerializer.attributes().contains(SerializationAttribute.SELF_DESCRIBING)) {
             set.add(SerializationAttribute.SELF_DESCRIBING);
         }
 
-        if(humanReadable) set.add(SerializationAttribute.HUMAN_READABLE);
+        if (humanReadable) set.add(SerializationAttribute.HUMAN_READABLE);
 
         this.attributes = set.build();
     }
 
-    public Serializer<T> delegate(){
+    public Serializer<T> delegate() {
         return this.innerSerializer;
     }
 
-    public static <T> ForwardingSerializer<T> of(Serializer<T> serializer){
+    public static <T> ForwardingSerializer<T> of(Serializer<T> serializer) {
         return new ForwardingSerializer<>(serializer, false);
     }
 
-    public static <T> ForwardingSerializer<T> humanReadable(Serializer<T> serializer){
+    public static <T> ForwardingSerializer<T> humanReadable(Serializer<T> serializer) {
         return new ForwardingSerializer<>(serializer, true);
     }
 

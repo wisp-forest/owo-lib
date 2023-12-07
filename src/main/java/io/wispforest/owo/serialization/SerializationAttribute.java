@@ -1,8 +1,5 @@
 package io.wispforest.owo.serialization;
 
-import io.wispforest.owo.serialization.SelfDescribedDeserializer;
-import io.wispforest.owo.serialization.Serializer;
-
 public enum SerializationAttribute {
     /**
      * This format is self-describing - that is, the deserializer supports

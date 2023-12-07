@@ -3,7 +3,6 @@ package io.wispforest.owo.serialization.endec;
 import com.mojang.datafixers.util.Function3;
 import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.SerializationAttribute;
-import io.wispforest.owo.serialization.format.json.JsonEndec;
 import io.wispforest.owo.serialization.format.nbt.NbtEndec;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.item.ItemStack;

@@ -4,11 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import io.wispforest.owo.serialization.Deserializer;
-import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.SelfDescribedDeserializer;
-import io.wispforest.owo.serialization.Serializer;
-import io.wispforest.owo.serialization.SerializationAttribute;
+import io.wispforest.owo.serialization.*;
 import io.wispforest.owo.serialization.util.HierarchicalDeserializer;
 import org.jetbrains.annotations.Nullable;
 

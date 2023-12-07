@@ -1,6 +1,5 @@
 package io.wispforest.owo.serialization;
 
-import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
@@ -84,7 +83,12 @@ public interface Endec<T> {
                 list.forEach(sequence::element);
             }
         }, deserializer -> {
-            return Lists.newArrayList(deserializer.sequence(this));
+            var sequenceState = deserializer.sequence(this);
+
+            var list = new ArrayList<T>(sequenceState.estimatedSize());
+            sequenceState.forEachRemaining(list::add);
+
+            return list;
         });
     }
 

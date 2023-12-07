@@ -2,9 +2,9 @@ package io.wispforest.owo.serialization.format.edm;
 
 import com.google.common.collect.ImmutableSet;
 import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.util.HierarchicalSerializer;
-import io.wispforest.owo.serialization.Serializer;
 import io.wispforest.owo.serialization.SerializationAttribute;
+import io.wispforest.owo.serialization.Serializer;
+import io.wispforest.owo.serialization.util.HierarchicalSerializer;
 
 import java.util.*;
 

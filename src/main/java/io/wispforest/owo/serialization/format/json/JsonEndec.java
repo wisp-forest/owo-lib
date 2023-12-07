@@ -2,11 +2,7 @@ package io.wispforest.owo.serialization.format.json;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonStreamParser;
-import io.wispforest.owo.serialization.Deserializer;
-import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.SelfDescribedDeserializer;
-import io.wispforest.owo.serialization.Serializer;
-import io.wispforest.owo.serialization.SerializationAttribute;
+import io.wispforest.owo.serialization.*;
 
 public final class JsonEndec implements Endec<JsonElement> {
 

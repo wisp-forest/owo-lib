@@ -3,8 +3,8 @@ package io.wispforest.owo.serialization.endec;
 import com.mojang.datafixers.util.Either;
 import io.wispforest.owo.serialization.Deserializer;
 import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.Serializer;
 import io.wispforest.owo.serialization.SerializationAttribute;
+import io.wispforest.owo.serialization.Serializer;
 
 public final class EitherEndec<L, R> implements Endec<Either<L, R>> {
 

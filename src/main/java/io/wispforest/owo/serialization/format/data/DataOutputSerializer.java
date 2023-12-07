@@ -1,8 +1,8 @@
 package io.wispforest.owo.serialization.format.data;
 
 import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.Serializer;
 import io.wispforest.owo.serialization.SerializationAttribute;
+import io.wispforest.owo.serialization.Serializer;
 
 import java.io.DataOutput;
 import java.io.IOException;
@@ -87,7 +87,7 @@ public class DataOutputSerializer<D extends DataOutput> implements Serializer<D>
     @Override
     public void writeVarInt(int value) {
         try {
-            while((value & -128) != 0) {
+            while ((value & -128) != 0) {
                 this.output.writeByte(value & 127 | 128);
                 value >>>= 7;
             }
@@ -101,8 +101,8 @@ public class DataOutputSerializer<D extends DataOutput> implements Serializer<D>
     @Override
     public void writeVarLong(long value) {
         try {
-            while((value & -128L) != 0L) {
-                this.output.writeByte((int)(value & 127L) | 128);
+            while ((value & -128L) != 0L) {
+                this.output.writeByte((int) (value & 127L) | 128);
                 value >>>= 7;
             }
 
