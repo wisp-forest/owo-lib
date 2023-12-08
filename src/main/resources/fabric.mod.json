@@ -5,7 +5,10 @@
   "name": "oωo",
   "description": "yes its bad i know thanks",
   "authors": [
-    "glisco",
+    "glisco"
+  ],
+  "contributors": [
+    "Blodhgarm",
     "BasiqueEvangelist",
     "Noaaan"
   ],
@@ -41,7 +44,7 @@
   "depends": {
     "fabricloader": "*",
     "fabric": ">=0.76",
-    "minecraft": ">=1.19"
+    "minecraft": ">=1.20.2"
   },
   "custom": {
     "modmenu": {
