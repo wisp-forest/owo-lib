@@ -1,5 +1,6 @@
 package io.wispforest.owo.mixin.ui;
 
+import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
@@ -22,9 +23,6 @@ public class HandledScreenMixin {
 
     @Unique
     private static boolean owo$inOwoScreen = false;
-
-    @Unique
-    private Slot owo$lastClickedSlot = null;
 
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "render", at = @At("HEAD"))
@@ -71,20 +69,8 @@ public class HandledScreenMixin {
         context.getMatrices().translate(0, 0, -300);
     }
 
-    @SuppressWarnings("InvalidInjectorMethodSignature")
-    @Inject(method = "mouseClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Util;getMeasuringTimeMs()J"), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void captureClickedSlot(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir, boolean bl, Slot slot) {
-        this.owo$lastClickedSlot = slot;
-    }
-
     @ModifyVariable(method = "mouseClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/option/SimpleOption;getValue()Ljava/lang/Object;", ordinal = 0), ordinal = 3)
-    private int doNoThrow(int slotId) {
-        if (!((Object) this instanceof BaseOwoHandledScreen<?, ?>) || this.owo$lastClickedSlot == null) return slotId;
-        return this.owo$lastClickedSlot.id;
-    }
-
-    @Inject(method = "mouseClicked", at = @At(value = "RETURN"))
-    private void captureClickedSlot(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
-        this.owo$lastClickedSlot = null;
+    private int doNoThrow(int slotId, @Local() Slot slot) {
+        return (((Object) this instanceof BaseOwoHandledScreen<?, ?>) && slot != null) ? slot.id : slotId;
     }
 }
