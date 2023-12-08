@@ -1,5 +1,6 @@
 package io.wispforest.owo.mixin.itemgroup;
 
+import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButtonWidget;
@@ -48,9 +49,6 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
     protected abstract boolean hasScrollbar();
 
     @Unique
-    private @Nullable OwoItemGroup contextGroup = null;
-
-    @Unique
     private final List<ItemGroupButtonWidget> owoButtons = new ArrayList<>();
 
     @Unique
@@ -89,23 +87,14 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
     // Group headers
     // -------------
 
-    @Inject(method = "renderTabIcon", at = @At("HEAD"))
-    private void captureContextGroup(DrawContext context, ItemGroup group, CallbackInfo ci) {
-        if (group instanceof OwoItemGroup owoGroup) {
-            this.contextGroup = owoGroup;
-        } else {
-            this.contextGroup = null;
-        }
-    }
-
     @ModifyArg(method = "renderTabIcon", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Lnet/minecraft/util/Identifier;IIII)V"))
-    private Identifier injectCustomTabTexture(Identifier texture) {
-        if (this.contextGroup == null || this.contextGroup.getTabTextures() == null) return texture;
+    private Identifier injectCustomTabTexture(Identifier texture, @Local(argsOnly = true) ItemGroup group) {
+        if(!(group instanceof OwoItemGroup contextGroup) || contextGroup.getTabTextures() == null) return texture;
 
-        var textures = this.contextGroup.getTabTextures();
-        return this.contextGroup.getRow() == ItemGroup.Row.TOP
-                ? selectedTab == this.contextGroup ? this.contextGroup.getColumn() == 0 ? textures.topSelectedFirstColumn() : textures.topSelected() : textures.topUnselected()
-                : selectedTab == this.contextGroup ? this.contextGroup.getColumn() == 0 ? textures.bottomSelectedFirstColumn() : textures.bottomSelected() : textures.bottomUnselected();
+        var textures = contextGroup.getTabTextures();
+        return contextGroup.getRow() == ItemGroup.Row.TOP
+                ? selectedTab == contextGroup ? contextGroup.getColumn() == 0 ? textures.topSelectedFirstColumn() : textures.topSelected() : textures.topUnselected()
+                : selectedTab == contextGroup ? contextGroup.getColumn() == 0 ? textures.bottomSelectedFirstColumn() : textures.bottomSelected() : textures.bottomUnselected();
     }
 
     @Inject(method = "renderTabIcon", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemGroup;getIcon()Lnet/minecraft/item/ItemStack;"), locals = LocalCapture.CAPTURE_FAILHARD)
