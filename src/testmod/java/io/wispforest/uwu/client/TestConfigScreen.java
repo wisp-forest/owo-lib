@@ -36,7 +36,7 @@ public class TestConfigScreen extends BaseOwoScreen<FlowLayout> {
         final var optionsScrollContainer = Containers.verticalScroll(
                 Sizing.fill(90),
                 Sizing.fill(85),
-                Components.list(
+                Containers.list(
                         options,
                         flowLayout -> {},
                         this::createOptionComponent,

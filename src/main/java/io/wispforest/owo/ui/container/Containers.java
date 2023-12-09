@@ -4,6 +4,9 @@ import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.Sizing;
 import net.minecraft.text.Text;
 
+import java.util.function.Consumer;
+import java.util.function.Function;
+
 public final class Containers {
 
     private Containers() {}
@@ -47,6 +50,21 @@ public final class Containers {
     // ----------------
     // Utility wrappers
     // ----------------
+
+    public static <T, C extends Component> FlowLayout list(Iterable<T> data, Consumer<FlowLayout> layoutConfigurator, Function<T, C> componentMaker, boolean vertical) {
+        var layout = vertical ? Containers.verticalFlow(Sizing.content(), Sizing.content()) : Containers.horizontalFlow(Sizing.content(), Sizing.content());
+        layoutConfigurator.accept(layout);
+
+        for (var value : data) {
+            layout.child(componentMaker.apply(value));
+        }
+
+        return layout;
+    }
+
+    public static <T, C extends Component> FlowLayout list(Iterable<T> data, Consumer<FlowLayout> layoutConfigurator, Function<T, C> componentMaker) {
+        return list(data, layoutConfigurator, componentMaker, true);
+    }
 
     public static <C extends Component> DraggableContainer<C> draggable(Sizing horizontalSizing, Sizing verticalSizing, C child) {
         return new DraggableContainer<>(horizontalSizing, verticalSizing, child);
