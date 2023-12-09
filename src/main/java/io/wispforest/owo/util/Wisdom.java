@@ -25,7 +25,7 @@ public final class Wisdom {
             "it seems to react to redstone",
             "remember to update ubuntu, before it is too late",
             "DerGeistdesMatze - i will take the l",
-            "I didn't want to install a library so I made my own enchantment descriptions mod",
+            "idwtialsimmoedm - I didn't want to install a library so I made my own enchantment descriptions mod",
             "Here at Wisp Forest© we employ Wisp Tech Support™ magic, which solves your problem when you ask",
             "chyz: How could you do this to me, Blod. I loved you like a guy I don't know in real life :(",
             "chyzman: No sound or Ender Dragon leakage. Although Ender Dragon sound leakage is still a thing",
