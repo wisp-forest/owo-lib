@@ -12,6 +12,7 @@ import net.minecraft.util.Util;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.system.linux.DynamicLinkLoader;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -38,7 +39,12 @@ public final class RenderDoc {
                 if (os == Util.OperatingSystem.WINDOWS) {
                     renderdocLibrary = Native.load("renderdoc", RenderdocLibrary.class);
                 } else {
-                    renderdocLibrary = Native.load("renderdoc", RenderdocLibrary.class, Map.of(Library.OPTION_OPEN_FLAGS, 0x2 | 0x4));
+                    int flags = DynamicLinkLoader.RTLD_NOW | DynamicLinkLoader.RTLD_NOLOAD;
+                    if (DynamicLinkLoader.dlopen("librenderdoc.so", flags) == 0) {
+                        throw new UnsatisfiedLinkError();
+                    }
+
+                    renderdocLibrary = Native.load("renderdoc", RenderdocLibrary.class, Map.of(Library.OPTION_OPEN_FLAGS, flags));
                 }
 
                 int initResult = renderdocLibrary.RENDERDOC_GetAPI(10500, apiPointer);
@@ -53,8 +59,7 @@ public final class RenderDoc {
                     apiInstance.GetAPIVersion.call(major, minor, patch);
                     Owo.LOGGER.info("Connected to RenderDoc API v" + major.getValue() + "." + minor.getValue() + "." + patch.getValue());
                 }
-            } catch (UnsatisfiedLinkError ignored) {
-            }
+            } catch (UnsatisfiedLinkError ignored) {}
         }
 
         renderdoc = apiInstance;
