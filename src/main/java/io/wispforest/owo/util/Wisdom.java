@@ -51,7 +51,10 @@ public final class Wisdom {
             "Blodhgarm: Did you know it took four switcheroos to implement MatrixStackTransformer in the correct package?",
             "chyz: who would've thought that if you don't summon satan things go better. you can put that in wisdom if you like",
             "Its called Unobtainium until you obtain it, thats the thing",
-            "i ate moss and i died"
+            "i ate moss and i died",
+            "Jello was 126 years old when we added this line",
+            "I saw ppl complain that minor updates between big updates will ruin it for modders but I thought modders were very good and they can do what we do in a week so they should be ok with updating their mods to new versions in a day, right? :titantroll:",
+            "that's a CanPickUpLoot baby zombie, the most annoying thing ever. he runs around like crazy and picks up all your shit"
     );
 
     public static void spread() {
