@@ -14,10 +14,6 @@ allprojects {
     version = "${project.mod_version}+${rootProject.minecraft_base_version}"
     group = rootProject.maven_group
 
-    tasks.withType(JavaCompile) {
-        options.compilerArgs << "-Xlint:unchecked"
-    }
-
     dependencies {
         minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
         mappings "net.fabricmc:yarn:${rootProject.yarn_mappings}:v2"
