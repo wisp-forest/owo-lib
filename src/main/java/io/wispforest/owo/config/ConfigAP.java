@@ -123,7 +123,9 @@ public class ConfigAP extends AbstractProcessor {
                 var wrapperName = annotated.getAnnotation(Config.class).wrapperName();
 
                 try {
-                    var file = this.processingEnv.getFiler().createSourceFile(wrapperName);
+                    String packageName = getPackageName(className);
+                    String fqWrapperName = packageName + "." + wrapperName;
+                    var file = this.processingEnv.getFiler().createSourceFile(fqWrapperName);
                     try (var writer = new PrintWriter(file.openWriter())) {
                         writer.println(makeWrapper(wrapperName, className, this.collectFields(Option.Key.ROOT, clazz, clazz.getAnnotation(Config.class).defaultHook())));
                     }
@@ -355,5 +357,13 @@ public class ConfigAP extends AbstractProcessor {
         public @NotNull String toString() {
             return this.builder.toString();
         }
+    }
+
+    private String getPackageName(String fqn) {
+        int lastDotIndex = fqn.lastIndexOf('.');
+        if (lastDotIndex == -1) {
+            return "";
+        }
+        return fqn.substring(0, lastDotIndex);
     }
 }
