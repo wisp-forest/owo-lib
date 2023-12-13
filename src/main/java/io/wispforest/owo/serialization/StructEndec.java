@@ -7,6 +7,10 @@ import io.wispforest.owo.serialization.endec.StructEndecBuilder;
  */
 public interface StructEndec<T> extends Endec<T> {
 
+    void encodeStruct(Serializer.Struct struct, T value);
+
+    T decodeStruct(Deserializer.Struct struct);
+
     @Override
     default void encode(Serializer<?> serializer, T value) {
         try (var struct = serializer.struct()) {
@@ -18,9 +22,4 @@ public interface StructEndec<T> extends Endec<T> {
     default T decode(Deserializer<?> deserializer) {
         return this.decodeStruct(deserializer.struct());
     }
-
-    void encodeStruct(Serializer.Struct struct, T value);
-
-    T decodeStruct(Deserializer.Struct struct);
-
 }

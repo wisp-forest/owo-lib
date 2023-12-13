@@ -5,7 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import io.wispforest.owo.serialization.*;
-import io.wispforest.owo.serialization.util.HierarchicalDeserializer;
+import io.wispforest.owo.serialization.util.RecursiveDeserializer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
@@ -13,7 +13,7 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 
-public class JsonDeserializer extends HierarchicalDeserializer<JsonElement> implements SelfDescribedDeserializer<JsonElement> {
+public class JsonDeserializer extends RecursiveDeserializer<JsonElement> implements SelfDescribedDeserializer<JsonElement> {
 
     private static final Set<SerializationAttribute> ATTRIBUTES = EnumSet.of(
             SerializationAttribute.SELF_DESCRIBING,
