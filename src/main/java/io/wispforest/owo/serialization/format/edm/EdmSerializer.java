@@ -4,11 +4,11 @@ import com.google.common.collect.ImmutableSet;
 import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.SerializationAttribute;
 import io.wispforest.owo.serialization.Serializer;
-import io.wispforest.owo.serialization.util.HierarchicalSerializer;
+import io.wispforest.owo.serialization.util.RecursiveSerializer;
 
 import java.util.*;
 
-public class EdmSerializer extends HierarchicalSerializer<EdmElement<?>> {
+public class EdmSerializer extends RecursiveSerializer<EdmElement<?>> {
 
     private final Set<SerializationAttribute> attributes;
 

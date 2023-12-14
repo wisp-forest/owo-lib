@@ -1,13 +1,13 @@
 package io.wispforest.owo.serialization.format.nbt;
 
 import io.wispforest.owo.serialization.*;
-import io.wispforest.owo.serialization.util.HierarchicalDeserializer;
+import io.wispforest.owo.serialization.util.RecursiveDeserializer;
 import net.minecraft.nbt.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class NbtDeserializer extends HierarchicalDeserializer<NbtElement> implements SelfDescribedDeserializer<NbtElement> {
+public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implements SelfDescribedDeserializer<NbtElement> {
 
     private static final Set<SerializationAttribute> ATTRIBUTES = EnumSet.of(
             SerializationAttribute.SELF_DESCRIBING

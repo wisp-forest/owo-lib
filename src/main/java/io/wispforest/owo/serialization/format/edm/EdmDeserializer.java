@@ -2,7 +2,7 @@ package io.wispforest.owo.serialization.format.edm;
 
 import com.google.common.collect.ImmutableSet;
 import io.wispforest.owo.serialization.*;
-import io.wispforest.owo.serialization.util.HierarchicalDeserializer;
+import io.wispforest.owo.serialization.util.RecursiveDeserializer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Iterator;
@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public class EdmDeserializer extends HierarchicalDeserializer<EdmElement<?>> implements SelfDescribedDeserializer<EdmElement<?>> {
+public class EdmDeserializer extends RecursiveDeserializer<EdmElement<?>> implements SelfDescribedDeserializer<EdmElement<?>> {
 
     private final Set<SerializationAttribute> attributes;
 

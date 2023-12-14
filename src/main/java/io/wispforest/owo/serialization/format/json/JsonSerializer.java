@@ -4,13 +4,13 @@ import com.google.gson.*;
 import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.SerializationAttribute;
 import io.wispforest.owo.serialization.Serializer;
-import io.wispforest.owo.serialization.util.HierarchicalSerializer;
+import io.wispforest.owo.serialization.util.RecursiveSerializer;
 
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
 
-public class JsonSerializer extends HierarchicalSerializer<JsonElement> {
+public class JsonSerializer extends RecursiveSerializer<JsonElement> {
 
     private static final Set<SerializationAttribute> ATTRIBUTES = EnumSet.allOf(SerializationAttribute.class);
     private JsonElement prefix;

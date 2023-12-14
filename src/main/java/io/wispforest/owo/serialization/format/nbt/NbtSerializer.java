@@ -3,7 +3,7 @@ package io.wispforest.owo.serialization.format.nbt;
 import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.SerializationAttribute;
 import io.wispforest.owo.serialization.Serializer;
-import io.wispforest.owo.serialization.util.HierarchicalSerializer;
+import io.wispforest.owo.serialization.util.RecursiveSerializer;
 import net.minecraft.nbt.*;
 import net.minecraft.network.encoding.VarInts;
 import net.minecraft.network.encoding.VarLongs;
@@ -12,7 +12,7 @@ import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
 
-public class NbtSerializer extends HierarchicalSerializer<NbtElement> {
+public class NbtSerializer extends RecursiveSerializer<NbtElement> {
 
     private static final Set<SerializationAttribute> ATTRIBUTES = EnumSet.of(
             SerializationAttribute.SELF_DESCRIBING

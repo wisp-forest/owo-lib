@@ -20,6 +20,10 @@ import java.util.stream.Stream;
  */
 public interface StructEndec<T> extends Endec<T> {
 
+    void encodeStruct(Serializer.Struct struct, T value);
+
+    T decodeStruct(Deserializer.Struct struct);
+
     @Override
     default void encode(Serializer<?> serializer, T value) {
         try (var struct = serializer.struct()) {
@@ -31,10 +35,6 @@ public interface StructEndec<T> extends Endec<T> {
     default T decode(Deserializer<?> deserializer) {
         return this.decodeStruct(deserializer.struct());
     }
-
-    void encodeStruct(Serializer.Struct struct, T value);
-
-    T decodeStruct(Deserializer.Struct struct);
 
     default MapCodec<T> mapCodec() {
         return new MapCodec<>() {
