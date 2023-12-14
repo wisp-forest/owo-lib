@@ -1,7 +1,6 @@
 package io.wispforest.owo.serialization;
 
 import com.mojang.serialization.*;
-import io.wispforest.owo.serialization.endec.StructEndecBuilder;
 import io.wispforest.owo.serialization.format.edm.EdmDeserializer;
 import io.wispforest.owo.serialization.format.edm.EdmElement;
 import io.wispforest.owo.serialization.format.edm.EdmOps;
@@ -10,10 +9,14 @@ import net.minecraft.util.Util;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
- * Helper Interface for Structs that do not conform to the {@link StructEndecBuilder} format
+ * Marker and template interface for all endecs which serialize structs
+ * <p>
+ * Every such endec should extend this interface to profit from the implementation of {@link #mapCodec()}
+ * and composability which allows {@link Endec#dispatchedStruct(Function, Function, Endec, String)} to work
  */
 public interface StructEndec<T> extends Endec<T> {
 
@@ -33,28 +36,29 @@ public interface StructEndec<T> extends Endec<T> {
 
     T decodeStruct(Deserializer.Struct struct);
 
-    default MapCodec<T> mapCodec(){
+    default MapCodec<T> mapCodec() {
         return new MapCodec<>() {
             @Override
             public <T1> Stream<T1> keys(DynamicOps<T1> ops) {
-                return Stream.of();
+                throw new UnsupportedOperationException("MapCodec generated from StructEndec cannot report keys");
             }
 
             @Override
             public <T1> DataResult<T> decode(DynamicOps<T1> ops, MapLike<T1> input) {
                 try {
-                    Map<String, EdmElement<?>> map = new HashMap<>();
-
+                    var map = new HashMap<String, EdmElement<?>>();
                     input.entries().forEach(pair -> {
-                        var key = Util.getResult(
-                                ops.getStringValue(pair.getFirst()),
-                                s -> new IllegalStateException("Unable to parse given key value: " + s));
-
-                        map.put(key, ops.convertTo(EdmOps.INSTANCE, pair.getSecond()));
+                        map.put(
+                                Util.getResult(
+                                        ops.getStringValue(pair.getFirst()),
+                                        s -> new IllegalStateException("Unable to parse key: " + s)
+                                ),
+                                ops.convertTo(EdmOps.INSTANCE, pair.getSecond())
+                        );
                     });
 
                     return DataResult.success(StructEndec.this.decode(new EdmDeserializer(EdmElement.wrapMap(map))));
-                } catch (Exception e){
+                } catch (Exception e) {
                     return DataResult.error(e::getMessage);
                 }
             }
@@ -62,14 +66,15 @@ public interface StructEndec<T> extends Endec<T> {
             @Override
             public <T1> RecordBuilder<T1> encode(T input, DynamicOps<T1> ops, RecordBuilder<T1> prefix) {
                 try {
-                    Map<String, EdmElement<?>> element = StructEndec.this.encodeFully(EdmSerializer::new, input).cast();
+                    var element = StructEndec.this.encodeFully(EdmSerializer::new, input).<Map<String, EdmElement<?>>>cast();
 
+                    var result = prefix;
                     for (var entry : element.entrySet()) {
-                        prefix = prefix.add(entry.getKey(), EdmOps.INSTANCE.convertTo(ops, entry.getValue()));
+                        result = result.add(entry.getKey(), EdmOps.INSTANCE.convertTo(ops, entry.getValue()));
                     }
 
-                    return prefix;
-                } catch (Exception e){
+                    return result;
+                } catch (Exception e) {
                     return prefix.withErrorsFrom(DataResult.error(e::getMessage, input));
                 }
             }
