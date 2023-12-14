@@ -1,21 +1,21 @@
 package io.wispforest.owo.client.screens;
 
-import io.wispforest.owo.network.serialization.PacketBufSerializer;
+import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.util.Observable;
 import net.minecraft.network.PacketByteBuf;
 import org.jetbrains.annotations.ApiStatus;
 
 public class SyncedProperty<T> extends Observable<T> {
     private final int index;
-    private final PacketBufSerializer<T> serializer;
+    private final Endec<T> endec;
     private boolean needsSync;
 
     @ApiStatus.Internal
-    public SyncedProperty(int index, Class<T> klass, T initial) {
+    public SyncedProperty(int index, Endec<T> endec, T initial) {
         super(initial);
 
         this.index = index;
-        this.serializer = PacketBufSerializer.get(klass);
+        this.endec = endec;
     }
 
     public int index() {
@@ -30,13 +30,12 @@ public class SyncedProperty<T> extends Observable<T> {
     @ApiStatus.Internal
     public void write(PacketByteBuf buf) {
         needsSync = false;
-
-        serializer.serializer().accept(buf, value);
+        buf.write(this.endec, value);
     }
 
     @ApiStatus.Internal
     public void read(PacketByteBuf buf) {
-        set(serializer.deserializer().apply(buf));
+        this.set(buf.read(this.endec));
     }
 
     @Override

@@ -3,15 +3,21 @@ package io.wispforest.owo.network;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.mixin.ClientCommonNetworkHandlerAccessor;
 import io.wispforest.owo.mixin.ServerCommonNetworkHandlerAccessor;
-import io.wispforest.owo.network.serialization.PacketBufSerializer;
 import io.wispforest.owo.ops.TextOps;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
+import io.wispforest.owo.serialization.endec.BuiltInEndecs;
+import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.ServicesFrozenException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.networking.v1.*;
-import net.fabricmc.fabric.api.networking.v1.*;
+import net.fabricmc.fabric.api.client.networking.v1.ClientConfigurationConnectionEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientConfigurationNetworking;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.networking.v1.ServerConfigurationConnectionEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerConfigurationNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientConfigurationNetworkHandler;
@@ -28,22 +34,19 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.ToIntFunction;
 
 @SuppressWarnings("UnstableApiUsage")
 @ApiStatus.Internal
 public final class OwoHandshake {
 
-    @SuppressWarnings("unchecked")
-    private static final PacketBufSerializer<Map<Identifier, Integer>> RESPONSE_SERIALIZER =
-            (PacketBufSerializer<Map<Identifier, Integer>>) (Object) PacketBufSerializer.createMapSerializer(Map.class, Identifier.class, Integer.class);
+    private static final Endec<Map<Identifier, Integer>> CHANNEL_HASHES_ENDEC = Endec.map(BuiltInEndecs.IDENTIFIER, Endec.INT);
 
     private static final MutableText PREFIX = TextOps.concat(Owo.PREFIX, Text.of("§chandshake failure\n"));
     public static final Identifier CHANNEL_ID = new Identifier("owo", "handshake");
     public static final Identifier OFF_CHANNEL_ID = new Identifier("owo", "handshake_off");
 
-    private static final boolean ENABLED = !Boolean.getBoolean("owo.handshake.disable");
+    private static final boolean ENABLED = System.getProperty("owo.handshake.enabled") != null ? Boolean.getBoolean("owo.handshake.enabled") : Owo.DEBUG;
     private static boolean HANDSHAKE_REQUIRED = false;
     private static boolean QUERY_RECEIVED = false;
 
@@ -54,13 +57,15 @@ public final class OwoHandshake {
     // ------------
 
     public static void enable() {
-        if (OwoFreezer.isFrozen())
+        if (OwoFreezer.isFrozen()) {
             throw new ServicesFrozenException("The oωo handshake may only be enabled during mod initialization");
+        }
     }
 
     public static void requireHandshake() {
-        if (OwoFreezer.isFrozen())
+        if (OwoFreezer.isFrozen()) {
             throw new ServicesFrozenException("The oωo handshake may only be made required during mod initialization");
+        }
 
         HANDSHAKE_REQUIRED = true;
     }
@@ -118,7 +123,7 @@ public final class OwoHandshake {
         QUERY_RECEIVED = true;
 
         if (buf.readableBytes() > 0) {
-            final var serverOptionalChannels = RESPONSE_SERIALIZER.deserializer().apply(buf);
+            final var serverOptionalChannels = buf.read(CHANNEL_HASHES_ENDEC);
             ((OwoClientConnectionExtension) ((ClientCommonNetworkHandlerAccessor) handler).getConnection()).owo$setChannelSet(filterOptionalServices(serverOptionalChannels, OwoNetChannel.REGISTERED_CHANNELS, OwoHandshake::hashChannel));
         }
 
@@ -133,8 +138,8 @@ public final class OwoHandshake {
     private static void syncServer(MinecraftServer server, ServerConfigurationNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
         Owo.LOGGER.info("[Handshake] Receiving client channels");
 
-        final var clientChannels = RESPONSE_SERIALIZER.deserializer().apply(buf);
-        final var clientParticleControllers = RESPONSE_SERIALIZER.deserializer().apply(buf);
+        final var clientChannels = buf.read(CHANNEL_HASHES_ENDEC);
+        final var clientParticleControllers = buf.read(CHANNEL_HASHES_ENDEC);
 
         StringBuilder disconnectMessage = new StringBuilder();
 
@@ -146,7 +151,7 @@ public final class OwoHandshake {
         }
 
         if (buf.readableBytes() > 0) {
-            final var clientOptionalChannels = RESPONSE_SERIALIZER.deserializer().apply(buf);
+            final var clientOptionalChannels = buf.read(CHANNEL_HASHES_ENDEC);
             ((OwoClientConnectionExtension) ((ServerCommonNetworkHandlerAccessor) handler).owo$getConnection()).owo$setChannelSet(filterOptionalServices(clientOptionalChannels, OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel));
         }
 
@@ -159,8 +164,8 @@ public final class OwoHandshake {
 
         client.execute(() -> {
             ((ClientCommonNetworkHandlerAccessor) handler)
-                .getConnection()
-                .disconnect(TextOps.concat(PREFIX, Text.of("incompatible server")));
+                    .getConnection()
+                    .disconnect(TextOps.concat(PREFIX, Text.of("incompatible server")));
         });
     }
 
@@ -210,7 +215,9 @@ public final class OwoHandshake {
             int localHash = hashFunction.applyAsInt(actualServiceObject);
 
             if (localHash != entry.getValue()) {
-                if (!hasMismatchedHashes) disconnectMessage.append(serviceNamePlural).append(" with mismatched hashes:\n");
+                if (!hasMismatchedHashes) {
+                    disconnectMessage.append(serviceNamePlural).append(" with mismatched hashes:\n");
+                }
 
                 disconnectMessage.append("§7").append(entry.getKey()).append("§r\n");
 
@@ -229,7 +236,7 @@ public final class OwoHandshake {
             hashes.put(entry.getKey(), hashFunction.applyAsInt(entry.getValue()));
         }
 
-        RESPONSE_SERIALIZER.serializer().accept(buffer, hashes);
+        buffer.write(CHANNEL_HASHES_ENDEC, hashes);
     }
 
     private static Pair<Set<Identifier>, Set<Identifier>> findCollisions(Set<Identifier> first, Set<Identifier> second) {
@@ -250,7 +257,7 @@ public final class OwoHandshake {
     private static int hashChannel(OwoNetChannel channel) {
         int serializersHash = 0;
         for (var entry : channel.serializersByIndex.int2ObjectEntrySet()) {
-            serializersHash += entry.getIntKey() * 31 + entry.getValue().serializer.getRecordClass().getName().hashCode();
+            serializersHash += entry.getIntKey() * 31 + entry.getValue().getRecordClass().getName().hashCode();
         }
         return 31 * channel.packetId.hashCode() + serializersHash;
     }

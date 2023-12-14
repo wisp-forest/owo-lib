@@ -261,19 +261,6 @@ public interface ParentComponent extends Component {
      * into the given list
      *
      * @param into The list into which to collect the hierarchy
-     * @deprecated Use {@link #collectDescendants(ArrayList)} instead, it has
-     * a much clearer name
-     */
-    @Deprecated(forRemoval = true)
-    default void collectChildren(ArrayList<Component> into) {
-        this.forEachDescendant(into::add);
-    }
-
-    /**
-     * Collect the entire component hierarchy below the given component
-     * into the given list
-     *
-     * @param into The list into which to collect the hierarchy
      */
     default void collectDescendants(ArrayList<Component> into) {
         this.forEachDescendant(into::add);

@@ -2,7 +2,8 @@ package io.wispforest.owo.config;
 
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.annotation.RestartRequired;
-import io.wispforest.owo.network.serialization.PacketBufSerializer;
+import io.wispforest.owo.serialization.Endec;
+import io.wispforest.owo.serialization.endec.ReflectiveEndecBuilder;
 import io.wispforest.owo.util.Observable;
 import net.minecraft.network.PacketByteBuf;
 import org.jetbrains.annotations.Nullable;
@@ -36,7 +37,7 @@ public final class Option<T> {
     private final Class<T> clazz;
 
     private final ConfigWrapper.@Nullable Constraint constraint;
-    private final @Nullable PacketBufSerializer<T> serializer;
+    private final @Nullable Endec<T> endec;
     private final SyncMode syncMode;
 
     /**
@@ -79,7 +80,7 @@ public final class Option<T> {
 
         this.constraint = constraint;
         this.syncMode = syncMode;
-        this.serializer = syncMode.isNone() ? null : (PacketBufSerializer<T>) PacketBufSerializer.getGeneric(this.backingField.field.getGenericType());
+        this.endec = syncMode.isNone() ? null : (Endec<T>) ReflectiveEndecBuilder.get(this.backingField.field.getGenericType());
     }
 
     /**
@@ -164,7 +165,7 @@ public final class Option<T> {
      * @param buf The packet buffer to write to
      */
     void write(PacketByteBuf buf) {
-        this.serializer.serializer().accept(buf, this.value());
+        buf.write(this.endec, this.value());
     }
 
     /**
@@ -176,7 +177,7 @@ public final class Option<T> {
      * the server's value otherwise
      */
     T read(PacketByteBuf buf) {
-        final var newValue = this.serializer.deserializer().apply(buf);
+        final var newValue = buf.read(this.endec);
 
         if (!Objects.equals(newValue, this.value()) && this.backingField.hasAnnotation(RestartRequired.class)) {
             return newValue;
@@ -191,8 +192,8 @@ public final class Option<T> {
     /**
      * @return The serializer for this option's value
      */
-    PacketBufSerializer<T> serializer() {
-        return this.serializer;
+    Endec<T> endec() {
+        return this.endec;
     }
 
     /**

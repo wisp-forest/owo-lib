@@ -1,17 +1,19 @@
 package io.wispforest.uwu.text;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSerializationContext;
-import io.wispforest.owo.text.CustomTextContent;
-import io.wispforest.owo.text.CustomTextContentSerializer;
+import io.wispforest.owo.serialization.Endec;
+import io.wispforest.owo.serialization.endec.StructEndecBuilder;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Style;
-import net.minecraft.util.JsonHelper;
+import net.minecraft.text.TextContent;
 
 import java.util.Optional;
 
-public class BasedTextContent implements CustomTextContent {
+public class BasedTextContent implements TextContent {
+
+    public static final Type<BasedTextContent> TYPE = new Type<>(
+            StructEndecBuilder.of(Endec.STRING.fieldOf("based", o -> o.basedText), BasedTextContent::new).mapCodec(),
+            "uwu:based");
+
     private final String basedText;
 
     public BasedTextContent(String basedText) {
@@ -29,22 +31,7 @@ public class BasedTextContent implements CustomTextContent {
     }
 
     @Override
-    public CustomTextContentSerializer<?> serializer() {
-        return Serializer.INSTANCE;
-    }
-
-    public static class Serializer implements CustomTextContentSerializer<BasedTextContent> {
-
-        public static final Serializer INSTANCE = new Serializer();
-
-        @Override
-        public BasedTextContent deserialize(JsonObject obj, JsonDeserializationContext ctx) {
-            return new BasedTextContent(JsonHelper.getString(obj, "based"));
-        }
-
-        @Override
-        public void serialize(BasedTextContent content, JsonObject obj, JsonSerializationContext ctx) {
-            obj.addProperty("based", content.basedText);
-        }
+    public Type<?> getType() {
+        return TYPE;
     }
 }

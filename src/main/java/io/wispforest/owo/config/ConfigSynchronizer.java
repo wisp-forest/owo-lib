@@ -192,7 +192,7 @@ public class ConfigSynchronizer {
 
         read(buf, (option, optionBuf) -> {
             var config = CLIENT_OPTION_STORAGE.computeIfAbsent(connection, $ -> new HashMap<>()).computeIfAbsent(option.configName(), s -> new HashMap<>());
-            config.put(option.key(), option.serializer().deserializer().apply(optionBuf));
+            config.put(option.key(), optionBuf.read(option.endec()));
         });
     }
 

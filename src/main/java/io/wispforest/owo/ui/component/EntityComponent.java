@@ -258,7 +258,7 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
                     null, null, false, false
             );
 
-            this.skinTextures = DefaultSkinHelper.getTexture(profile);
+            this.skinTextures = DefaultSkinHelper.getSkinTextures(profile);
 
             this.client.getSkinProvider().fetchSkinTextures(this.getGameProfile()).thenAccept(textures -> {
                 this.skinTextures = textures;

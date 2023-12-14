@@ -35,7 +35,7 @@ public abstract class RecipeManagerMixin {
             var item = JsonHelper.asItem(new JsonPrimitive(remainderEntry.getKey()), remainderEntry.getKey());
 
             if (remainderEntry.getValue().isJsonObject()) {
-                var remainderStack = Util.getResult(RecipeCodecs.CRAFTING_RESULT.parse(JsonOps.INSTANCE, remainderEntry.getValue().getAsJsonObject()), JsonParseException::new);
+                var remainderStack = Util.getResult(ItemStack.RECIPE_RESULT_CODEC.parse(JsonOps.INSTANCE, remainderEntry.getValue().getAsJsonObject()), JsonParseException::new);
                 remainders.put(item.value(), remainderStack);
             } else {
                 var remainderItem = JsonHelper.asItem(remainderEntry.getValue(), "item");

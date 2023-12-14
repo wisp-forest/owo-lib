@@ -1,10 +1,9 @@
 package io.wispforest.owo.particles.systems;
 
 import io.wispforest.owo.network.NetworkException;
-import io.wispforest.owo.network.serialization.PacketBufSerializer;
+import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.ServicesFrozenException;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -21,10 +20,6 @@ import org.jetbrains.annotations.Nullable;
  * <p>
  * In case your particle effect not required any additional data,
  * use {@link Void} as the data class and pass {@code null} to {@link #spawn(World, Vec3d, Object)}
- * <p>
- * The data is serialized with the {@link PacketBufSerializer} system,
- * so should your data class not be supported, register your own
- * serializer with {@link PacketBufSerializer#register(Class, PacketByteBuf.PacketWriter, PacketByteBuf.PacketReader)}
  *
  * @param <T> The data class
  */
@@ -34,18 +29,18 @@ public class ParticleSystem<T> {
 
     final Class<T> dataClass;
     final int index;
-    final PacketBufSerializer<T> adapter;
+    final Endec<T> endec;
     ParticleSystemExecutor<T> handler;
 
     private final boolean permitsContextlessExecution;
 
-    ParticleSystem(ParticleSystemController manager, Class<T> dataClass, int index, PacketBufSerializer<T> adapter, ParticleSystemExecutor<T> handler) {
+    ParticleSystem(ParticleSystemController manager, Class<T> dataClass, int index, Endec<T> endec, ParticleSystemExecutor<T> handler) {
         OwoFreezer.checkRegister("Particle systems");
 
         this.manager = manager;
         this.dataClass = dataClass;
         this.index = index;
-        this.adapter = adapter;
+        this.endec = endec;
         this.handler = handler;
 
         this.permitsContextlessExecution = dataClass == Void.class;

@@ -38,7 +38,7 @@ public class ButtonComponent extends ButtonWidget {
     }
 
     @Override
-    public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
         this.renderer.draw((OwoUIDrawContext) context, this, delta);
 
         var textRenderer = MinecraftClient.getInstance().textRenderer;

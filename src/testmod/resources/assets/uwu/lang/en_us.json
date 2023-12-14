@@ -3,13 +3,14 @@
     "",
     {
       "text": "Test",
-      "color": "blue"
+      "color": "green"
     },
     {
       "text": " Stick",
       "color": "red"
     }
   ],
+  "uwu.a": {"index": 0, "color": "#ae0000"},
   "item.uwu.screen_shard": [
     {
       "text": "Screen Shard",

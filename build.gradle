@@ -1,8 +1,7 @@
 //file:noinspection GradlePackageVersionRange
 plugins {
-    id 'fabric-loom' version '1.2-SNAPSHOT'
+    id 'fabric-loom' version '1.4-SNAPSHOT'
     id 'maven-publish'
-    id 'io.github.juuxel.loom-vineflower' version '1.11.0'
 }
 
 allprojects {
@@ -14,10 +13,6 @@ allprojects {
 
     version = "${project.mod_version}+${rootProject.minecraft_base_version}"
     group = rootProject.maven_group
-
-    tasks.withType(JavaCompile) {
-        options.compilerArgs << "-Xlint:unchecked"
-    }
 
     dependencies {
         minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
@@ -124,7 +119,7 @@ loom {
 }
 
 dependencies {
-    modLocalRuntime("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}")
+//    modLocalRuntime("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}")
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}")
 
     modCompileOnly("dev.emi:emi-fabric:${project.emi_version}")

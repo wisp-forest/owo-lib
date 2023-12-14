@@ -103,7 +103,7 @@ public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen im
      * A convenience shorthand for querying a component from the adapter's
      * root component via {@link ParentComponent#childById(Class, String)}
      */
-    protected <C extends Component> @Nullable C component(Class<C> expectedClass, String id) {
+    protected <C extends Component> C component(Class<C> expectedClass, String id) {
         return this.uiAdapter.rootComponent.childById(expectedClass, id);
     }
 

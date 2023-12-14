@@ -8,6 +8,7 @@ import io.wispforest.owo.ui.window.context.CurrentWindowContext;
 import io.wispforest.owo.ui.window.context.WindowContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
@@ -74,8 +75,8 @@ public final class ScissorStack {
         GL11.glScissor(
                 (int) (newFrame.x() * scale),
                 (int) (ctx.framebufferHeight() - (newFrame.y() * scale) - newFrame.height() * scale),
-                (int) (newFrame.width() * scale),
-                (int) (newFrame.height() * scale)
+                MathHelper.clamp((int) (newFrame.width() * scale), 0, ctx.framebufferWidth()),
+                MathHelper.clamp((int) (newFrame.height() * scale), 0, ctx.framebufferHeight())
         );
     }
 

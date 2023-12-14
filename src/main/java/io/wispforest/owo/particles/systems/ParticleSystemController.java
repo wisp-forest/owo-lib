@@ -3,7 +3,8 @@ package io.wispforest.owo.particles.systems;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.network.NetworkException;
 import io.wispforest.owo.network.OwoHandshake;
-import io.wispforest.owo.network.serialization.PacketBufSerializer;
+import io.wispforest.owo.serialization.Endec;
+import io.wispforest.owo.serialization.endec.ReflectiveEndecBuilder;
 import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.ReflectionUtils;
 import io.wispforest.owo.util.VectorSerializer;
@@ -33,7 +34,7 @@ import java.util.Map;
  * A controller object that manages and creates {@link ParticleSystem}s.
  * It is recommended to have one of these per mod.
  * <p>
- * To obtain a new particle system, call {@link #register(Class, ParticleSystemExecutor)}
+ * To obtain a new particle system, call {@link #register(Class, Endec, ParticleSystemExecutor)}
  * with the system's context data class and handler function. <b>It is important
  * that this is done on both client and server, otherwise joining the server
  * will fail in a handshake error</b>
@@ -89,11 +90,19 @@ public class ParticleSystemController {
      * @param <T>       The type of context data to use
      * @return The created particle system
      */
-    public <T> ParticleSystem<T> register(Class<T> dataClass, ParticleSystemExecutor<T> executor) {
+    public <T> ParticleSystem<T> register(Class<T> dataClass, Endec<T> endec, ParticleSystemExecutor<T> executor) {
         int index = maxIndex++;
-        var system = new ParticleSystem<>(this, dataClass, index, PacketBufSerializer.get(dataClass), executor);
+        var system = new ParticleSystem<>(this, dataClass, index, endec, executor);
         systemsByIndex.put(index, system);
         return system;
+    }
+
+    /**
+     * Shorthand for {{@link #register(Class, Endec, ParticleSystemExecutor)}} which creates the endec
+     * through {@link ReflectiveEndecBuilder#get(Class)}
+     */
+    public <T> ParticleSystem<T> register(Class<T> dataClass, ParticleSystemExecutor<T> executor) {
+        return this.register(dataClass, ReflectiveEndecBuilder.get(dataClass), executor);
     }
 
     /**
@@ -108,18 +117,26 @@ public class ParticleSystemController {
      * @return The created particle system
      * @see ParticleSystem#setHandler(ParticleSystemExecutor)
      */
-    public <T> ParticleSystem<T> registerDeferred(Class<T> dataClass) {
+    public <T> ParticleSystem<T> registerDeferred(Class<T> dataClass, Endec<T> endec) {
         int index = maxIndex++;
-        var system = new ParticleSystem<>(this, dataClass, index, PacketBufSerializer.get(dataClass), null);
+        var system = new ParticleSystem<>(this, dataClass, index, endec, null);
         systemsByIndex.put(index, system);
         return system;
+    }
+
+    /**
+     * Shorthand for {{@link #registerDeferred(Class, Endec)}} which creates the endec
+     * through {@link ReflectiveEndecBuilder#get(Class)}
+     */
+    public <T> ParticleSystem<T> registerDeferred(Class<T> dataClass) {
+        return this.registerDeferred(dataClass, ReflectiveEndecBuilder.get(dataClass));
     }
 
     <T> void sendPacket(ParticleSystem<T> particleSystem, ServerWorld world, Vec3d pos, T data) {
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeVarInt(particleSystem.index);
         VectorSerializer.write(buf, pos);
-        particleSystem.adapter.serializer().accept(buf, data);
+        buf.write(particleSystem.endec, data);
 
         for (var player : PlayerLookup.tracking(world, BlockPos.ofFloored(pos))) {
             ServerPlayNetworking.send(player, channelId, buf);
@@ -158,7 +175,7 @@ public class ParticleSystemController {
             }
 
             ParticleSystem<Object> system = (ParticleSystem<Object>) systemsByIndex.get(index);
-            var data = system.adapter.deserializer().apply(buf);
+            var data = buf.read(system.endec);
             client.execute(() -> system.handler.executeParticleSystem(client.world, pos, data));
         }
     }

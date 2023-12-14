@@ -296,19 +296,6 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
     }
 
     /**
-     * @deprecated Use {@link #mountChild(Component, Consumer)} instead. This new
-     * overload no longer inflates the child prior to mounting, as that is
-     * rarely ever necessary and was simply causing unnecessary calculations
-     */
-    @Deprecated(forRemoval = true)
-    protected void mountChild(@Nullable Component child, Size space, Consumer<Component> layoutFunc) {
-        if (child == null) return;
-
-        child.inflate(space);
-        this.mountChild(child, layoutFunc);
-    }
-
-    /**
      * Mount a child using the given mounting function if its positioning
      * is equal to {@link Positioning#layout()}, or according to its
      * intrinsic positioning otherwise

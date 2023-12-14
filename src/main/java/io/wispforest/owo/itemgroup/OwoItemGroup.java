@@ -215,32 +215,6 @@ public abstract class OwoItemGroup extends ItemGroup {
     // Getters and setters
 
     /**
-     * @deprecated Use {@link #selectSingleTab(int, DisplayContext)} instead
-     */
-    @Deprecated(forRemoval = true)
-    public void setSelectedTab(int selectedTab, DisplayContext context) {
-        this.selectSingleTab(selectedTab, context);
-    }
-
-    /**
-     * @deprecated On an item group which allows multiple selection, this
-     * returns the first selected tab only. Instead, call {@link #selectedTabs()}
-     */
-    @Deprecated(forRemoval = true)
-    public ItemGroupTab getSelectedTab() {
-        return this.tabs.get(this.getSelectedTabIndex());
-    }
-
-    /**
-     * @deprecated On an item group which allows multiple selection, this
-     * returns the index of the first selected tab only. Instead, call {@link #selectedTabs()}
-     */
-    @Deprecated(forRemoval = true)
-    public int getSelectedTabIndex() {
-        return this.activeTabs.iterator().nextInt();
-    }
-
-    /**
      * Select only {@code tab}, deselecting all other tabs,
      * using {@code context} for re-population
      */

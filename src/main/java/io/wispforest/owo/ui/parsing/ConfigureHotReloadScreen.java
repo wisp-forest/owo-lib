@@ -6,11 +6,9 @@ import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.util.CommandOpenedScreen;
 import io.wispforest.owo.ui.util.UISounds;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Language;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.util.tinyfd.TinyFileDialogs;
@@ -43,7 +41,7 @@ public class ConfigureHotReloadScreen extends BaseUIModelScreen<FlowLayout> impl
 
         rootComponent.childById(ButtonComponent.class, "choose-button").onPress(button -> {
             CompletableFuture.runAsync(() -> {
-                var newPath = TinyFileDialogs.tinyfd_openFileDialog(Language.getInstance().get("text.owo.configure_hot_reload.choose_ui_model_source"), FabricLoader.getInstance().getGameDir().toString(), null, null, false);
+                var newPath = TinyFileDialogs.tinyfd_openFileDialog("Choose UI Model source", null, null, null, false);
                 if (newPath != null) this.reloadLocation = Path.of(newPath);
             }, Util.getMainWorkerExecutor()).whenComplete((unused, throwable) -> {
                 this.updateFileNameLabel();

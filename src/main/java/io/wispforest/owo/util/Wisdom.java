@@ -19,7 +19,6 @@ public final class Wisdom {
             "Did you know that Air is made of 78 percent nitrogen and 21 percent oxygen?",
             "We don't have to worry about people re-inventing Venezuela glisco, that's their problem for integrating the Bourgeoisie into their pack",
             "fuck i need to update tags again",
-            "Hey - if you want to spice up your house, Jello has about 1833 colors; atleast one of them has to tickle your fancy",
             "Don't use Forge, use Froge!",
             "Noaaan: I'm talking to my inner demons. Which is all of you",
             "There is a 1% chance that instead of Frog, you get Froge!",
@@ -50,7 +49,12 @@ public final class Wisdom {
             "chyz: bro, can you stop breathing",
             "Noaaan: It's surprising how much knowledge is lost by the simple fact that people don't know it",
             "Blodhgarm: Did you know it took four switcheroos to implement MatrixStackTransformer in the correct package?",
-            "chyz: who would've thought that if you don't summon satan things go better. you can put that in wisdom if you like"
+            "chyz: who would've thought that if you don't summon satan things go better. you can put that in wisdom if you like",
+            "Its called Unobtainium until you obtain it, thats the thing",
+            "i ate moss and i died",
+            "Jello was 126 years old when we added this line",
+            "I saw ppl complain that minor updates between big updates will ruin it for modders but I thought modders were very good and they can do what we do in a week so they should be ok with updating their mods to new versions in a day, right? :titantroll:",
+            "that's a CanPickUpLoot baby zombie, the most annoying thing ever. he runs around like crazy and picks up all your shit"
     );
 
     public static String enlighten() {
