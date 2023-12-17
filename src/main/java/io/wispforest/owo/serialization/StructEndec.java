@@ -1,10 +1,7 @@
 package io.wispforest.owo.serialization;
 
 import com.mojang.serialization.*;
-import io.wispforest.owo.serialization.format.edm.EdmDeserializer;
-import io.wispforest.owo.serialization.format.edm.EdmElement;
-import io.wispforest.owo.serialization.format.edm.EdmOps;
-import io.wispforest.owo.serialization.format.edm.EdmSerializer;
+import io.wispforest.owo.serialization.format.edm.*;
 import net.minecraft.util.Util;
 
 import java.util.HashMap;
@@ -57,7 +54,7 @@ public interface StructEndec<T> extends Endec<T> {
                         );
                     });
 
-                    return DataResult.success(StructEndec.this.decode(new EdmDeserializer(EdmElement.wrapMap(map))));
+                    return DataResult.success(StructEndec.this.decode(new LenientEdmDeserializer(EdmElement.wrapMap(map))));
                 } catch (Exception e) {
                     return DataResult.error(e::getMessage);
                 }
