@@ -44,7 +44,7 @@ public class Copenhagen {
     private void malding(StructureWorldAccess world, Random random, OreFeatureConfig config, double startX, double endX, double startZ, double endZ,
                          double startY, double endY, int p_x, int p_y, int p_z, int p_horizontalSize, int p_verticalSize, CallbackInfoReturnable<Boolean> cir,
                          int i, BitSet bitSet, BlockPos.Mutable mutable, int j, double[] ds, ChunkSectionCache chunkSectionCache, int m, double d, double e,
-                         double g, double h, int n, int o, int p, int q, int r, int s, int t, double u, int v, double w, int aa, ChunkSection chunkSection,
+                         double g, double h, int n, int o, int p, int q, int r, int s, int t, double u, int v, double w, int aa, double x, int ab, ChunkSection chunkSection,
                          int ad, int ae, int af, BlockState blockState, Iterator<OreFeatureConfig.Target> var57, OreFeatureConfig.Target target) {
 
         if (!Maldenhagen.isOnCopium(target.state.getBlock())) return;

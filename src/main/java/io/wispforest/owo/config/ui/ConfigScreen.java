@@ -196,7 +196,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                             .toList());
                 }
 
-                if (this.currentMatches == null || this.currentMatches.matches.isEmpty()) {
+                if (this.currentMatches.matches.isEmpty()) {
                     matchIndicator.text(Text.translatable("text.owo.config.search.no_matches"));
                     searchField.setEditableColor(0xEB1D36);
                 } else {
