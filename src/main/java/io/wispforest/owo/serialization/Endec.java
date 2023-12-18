@@ -7,6 +7,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import io.wispforest.owo.serialization.endec.*;
 import io.wispforest.owo.serialization.format.edm.*;
+import net.minecraft.util.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -189,8 +190,8 @@ public interface Endec<T> {
      */
     static <T> Endec<T> ofCodec(Codec<T> codec) {
         return of(
-                (serializer, value) -> EdmEndec.INSTANCE.encode(serializer, codec.encodeStart(EdmOps.INSTANCE, value).result().get()),
-                deserializer -> codec.parse(EdmOps.INSTANCE, EdmEndec.INSTANCE.decode(deserializer)).result().get()
+                (serializer, value) -> EdmEndec.INSTANCE.encode(serializer, Util.getResult(codec.encodeStart(EdmOps.INSTANCE, value), IllegalStateException::new)),
+                deserializer -> Util.getResult(codec.parse(EdmOps.INSTANCE, EdmEndec.INSTANCE.decode(deserializer)), IllegalStateException::new)
         );
     }
 
