@@ -1,6 +1,9 @@
 package io.wispforest.owo.serialization.format.edm;
 
+import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.SerializationAttribute;
+
+import java.util.Optional;
 
 public class LenientEdmDeserializer extends EdmDeserializer {
 
@@ -51,5 +54,19 @@ public class LenientEdmDeserializer extends EdmDeserializer {
         }
 
         return super.readBoolean();
+    }
+
+
+    @Override
+    public <V> Optional<V> readOptional(Endec<V> endec) {
+        var edmElement = this.getValue();
+
+        if(edmElement == null){
+            return Optional.empty();
+        } else if(edmElement.value() instanceof Optional<?>){
+            return super.readOptional(endec);
+        } else {
+            return Optional.of(endec.decode(this));
+        }
     }
 }
