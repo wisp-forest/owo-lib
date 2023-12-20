@@ -6,10 +6,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import io.wispforest.owo.serialization.endec.*;
-import io.wispforest.owo.serialization.format.edm.EdmDeserializer;
-import io.wispforest.owo.serialization.format.edm.EdmEndec;
-import io.wispforest.owo.serialization.format.edm.EdmOps;
-import io.wispforest.owo.serialization.format.edm.EdmSerializer;
+import io.wispforest.owo.serialization.format.edm.*;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.Nullable;
 
@@ -411,7 +408,7 @@ public interface Endec<T> {
             @Override
             public <D> DataResult<Pair<T, D>> decode(DynamicOps<D> ops, D input) {
                 try {
-                    return DataResult.success(new Pair<>(Endec.this.decode(new EdmDeserializer(ops.convertTo(EdmOps.INSTANCE, input), assumedAttributes)), input));
+                    return DataResult.success(new Pair<>(Endec.this.decode(new LenientEdmDeserializer(ops.convertTo(EdmOps.INSTANCE, input), assumedAttributes)), input));
                 } catch (Exception e) {
                     return DataResult.error(e::getMessage);
                 }

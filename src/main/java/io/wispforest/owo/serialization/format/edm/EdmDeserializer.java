@@ -55,6 +55,7 @@ public class EdmDeserializer extends RecursiveDeserializer<EdmElement<?>> implem
     public float readFloat() {
         return this.getValue().cast();
     }
+
     @Override
     public double readDouble() {
         return this.getValue().cast();
@@ -64,12 +65,12 @@ public class EdmDeserializer extends RecursiveDeserializer<EdmElement<?>> implem
 
     @Override
     public int readVarInt() {
-        return this.getValue().cast();
+        return this.readInt();
     }
 
     @Override
     public long readVarLong() {
-        return this.getValue().cast();
+        return this.readLong();
     }
 
     // ---
