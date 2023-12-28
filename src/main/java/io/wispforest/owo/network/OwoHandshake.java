@@ -36,7 +36,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.ToIntFunction;
 
-@SuppressWarnings("UnstableApiUsage")
 @ApiStatus.Internal
 public final class OwoHandshake {
 

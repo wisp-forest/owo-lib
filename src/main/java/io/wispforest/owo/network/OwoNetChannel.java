@@ -1,6 +1,7 @@
 package io.wispforest.owo.network;
 
 import io.wispforest.owo.mixin.ServerCommonNetworkHandlerAccessor;
+import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.endec.RecordEndec;
 import io.wispforest.owo.serialization.StructEndec;
 import io.wispforest.owo.serialization.format.bytebuf.ByteBufDeserializer;
@@ -37,9 +38,10 @@ import java.util.stream.Collectors;
 /**
  * An efficient networking abstraction that uses {@code record}s to store
  * and define packet data. Serialization for most types is fully automatic
- * and no custom handling needs to be done, should one of your record
- * components be of an unsupported type use {@link PacketBufSerializer#register(Class, PacketByteBuf.PacketWriter, PacketByteBuf.PacketReader)}
- * to register a custom serializer.
+ * and no custom handling needs to be done.
+ *
+ * <p> Should one of your record components be of an unsupported type, either use {@link io.wispforest.owo.serialization.endec.ReflectiveEndecBuilder#register(Endec, Class)}
+ * to register an appropriate endec, or supply it directly using {@link #registerClientbound(Class, StructEndec, ChannelHandler)} and {@link #registerServerbound(Class, StructEndec, ChannelHandler)}
  *
  * <p> To define a packet class suited for use with this wrapper, simply create a
  * standard Java {@code record} class and put the desired data into the record header.
@@ -56,9 +58,6 @@ import java.util.stream.Collectors;
  *
  * <p> The registered packet handlers are executed synchronously on the target environment's
  * game thread instead of Netty's event loops - there is no need to call {@code .execute(...)}
- *
- * @see PacketBufSerializer#register(Class, PacketByteBuf.PacketWriter, PacketByteBuf.PacketReader)
- * @see PacketBufSerializer#registerCollectionProvider(Class, Supplier)
  */
 public class OwoNetChannel {
 
@@ -129,14 +128,14 @@ public class OwoNetChannel {
 
         ServerPlayNetworking.registerGlobalReceiver(packetId, (server, player, handler, buf, responseSender) -> {
             int handlerIndex = buf.readVarInt();
-            final Record message = serializersByIndex.get(handlerIndex).serializer.decodeFully(ByteBufDeserializer::new, buf);
+            final Record message = serializersByIndex.get(handlerIndex).endec.decodeFully(ByteBufDeserializer::new, buf);
             server.execute(() -> serverHandlers.get(handlerIndex).handle(message, new ServerAccess(player)));
         });
 
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
             ClientPlayNetworking.registerGlobalReceiver(packetId, (client, handler, buf, responseSender) -> {
                 int handlerIndex = buf.readVarInt();
-                final Record message = serializersByIndex.get(-handlerIndex).serializer.decodeFully(ByteBufDeserializer::new, buf);
+                final Record message = serializersByIndex.get(-handlerIndex).endec.decodeFully(ByteBufDeserializer::new, buf);
                 client.execute(() -> clientHandlers.get(handlerIndex).handle(message, new ClientAccess(handler)));
             });
         }
@@ -162,9 +161,7 @@ public class OwoNetChannel {
      * @see #serverHandle(PlayerEntity)
      * @see #serverHandle(MinecraftServer)
      * @see #serverHandle(ServerWorld, BlockPos)
-     * @see PacketBufSerializer#register(Class, PacketByteBuf.PacketWriter, PacketByteBuf.PacketReader)
      */
-    @SuppressWarnings("unchecked")
     public <R extends Record> void registerClientbound(Class<R> messageClass, ChannelHandler<R, ClientAccess> handler) {
         registerClientbound(messageClass, handler, () -> RecordEndec.create(messageClass));
     }
@@ -178,7 +175,6 @@ public class OwoNetChannel {
      * @see #serverHandle(PlayerEntity)
      * @see #serverHandle(MinecraftServer)
      * @see #serverHandle(ServerWorld, BlockPos)
-     * @see PacketBufSerializer#register(Class, PacketByteBuf.PacketWriter, PacketByteBuf.PacketReader)
      */
     public <R extends Record> void registerClientboundDeferred(Class<R> messageClass) {
         registerClientboundDeferred(messageClass, () -> RecordEndec.create(messageClass));
@@ -192,9 +188,7 @@ public class OwoNetChannel {
      * @param messageClass The type of packet data to send and serialize
      * @param handler      The handler that will receive the deserialized
      * @see #clientHandle()
-     * @see PacketBufSerializer#register(Class, PacketByteBuf.PacketWriter, PacketByteBuf.PacketReader)
      */
-    @SuppressWarnings("unchecked")
     public <R extends Record> void registerServerbound(Class<R> messageClass, ChannelHandler<R, ServerAccess> handler) {
         registerServerbound(messageClass, handler, () -> RecordEndec.create(messageClass));
     }
@@ -212,9 +206,7 @@ public class OwoNetChannel {
      * @see #serverHandle(PlayerEntity)
      * @see #serverHandle(MinecraftServer)
      * @see #serverHandle(ServerWorld, BlockPos)
-     * @see PacketBufSerializer#register(Class, PacketByteBuf.PacketWriter, PacketByteBuf.PacketReader)
      */
-    @SuppressWarnings("unchecked")
     public <R extends Record> void registerClientbound(Class<R> messageClass, StructEndec<R> endec, ChannelHandler<R, ClientAccess> handler) {
         registerClientbound(messageClass, handler, () -> endec);
     }
@@ -229,7 +221,6 @@ public class OwoNetChannel {
      * @see #serverHandle(PlayerEntity)
      * @see #serverHandle(MinecraftServer)
      * @see #serverHandle(ServerWorld, BlockPos)
-     * @see PacketBufSerializer#register(Class, PacketByteBuf.PacketWriter, PacketByteBuf.PacketReader)
      */
     public <R extends Record> void registerClientboundDeferred(Class<R> messageClass, StructEndec<R> endec) {
         registerClientboundDeferred(messageClass, () -> endec);
@@ -244,9 +235,7 @@ public class OwoNetChannel {
      * @param endec        The alternative Endec to Serialize the given Record
      * @param handler      The handler that will receive the deserialized
      * @see #clientHandle()
-     * @see PacketBufSerializer#register(Class, PacketByteBuf.PacketWriter, PacketByteBuf.PacketReader)
      */
-    @SuppressWarnings("unchecked")
     public <R extends Record> void registerServerbound(Class<R> messageClass, StructEndec<R> endec, ChannelHandler<R, ServerAccess> handler) {
         registerServerbound(messageClass, handler, () -> endec);
     }
@@ -443,7 +432,7 @@ public class OwoNetChannel {
         }
 
         buffer.writeVarInt(serializer.handlerIndex(target));
-        return serializer.serializer.encodeFully(() -> new ByteBufSerializer<>(buffer), message);
+        return serializer.endec.encodeFully(() -> new ByteBufSerializer<>(buffer), message);
     }
 
     public class ClientHandle {
@@ -548,7 +537,7 @@ public class OwoNetChannel {
 
     private void verify() {
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            if (deferredClientSerializers.size() > 0) {
+            if (!this.deferredClientSerializers.isEmpty()) {
                 throw new NetworkException("Some deferred client handlers for channel " + packetId + " haven't been registered: " + deferredClientSerializers.keySet().stream().map(Class::getName).collect(Collectors.joining(", ")));
             }
         }
@@ -566,16 +555,16 @@ public class OwoNetChannel {
         private int clientHandlerIndex = -1;
         private int serverHandlerIndex = -1;
 
-        final Class<R> rClass;
-        final StructEndec<R> serializer;
+        private final Class<R> recordClass;
+        private final StructEndec<R> endec;
 
-        private IndexedSerializer(Class<R> rClass, StructEndec<R> serializer) {
-            this.serializer = serializer;
-            this.rClass = rClass;
+        private IndexedSerializer(Class<R> recordClass, StructEndec<R> endec) {
+            this.endec = endec;
+            this.recordClass = recordClass;
         }
 
-        public static <R extends Record> IndexedSerializer<R> create(Class<R> rClass, StructEndec<R> serializer, int index, EnvType target) {
-            return new IndexedSerializer<>(rClass, serializer).setHandlerIndex(index, target);
+        public static <R extends Record> IndexedSerializer<R> create(Class<R> rClass, StructEndec<R> endec, int index, EnvType target) {
+            return new IndexedSerializer<>(rClass, endec).setHandlerIndex(index, target);
         }
 
         public IndexedSerializer<R> setHandlerIndex(int index, EnvType target) {
@@ -594,7 +583,7 @@ public class OwoNetChannel {
         }
 
         public Class<R> getRecordClass(){
-            return this.rClass;
+            return this.recordClass;
         }
     }
 }
