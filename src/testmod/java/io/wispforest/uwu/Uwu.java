@@ -190,7 +190,7 @@ public class Uwu implements ModInitializer {
         var serializer = ByteBufSerializer.packet();
         stackEndec.encode(serializer, stacknite);
 
-        System.out.println(stackEndec.decode(new ByteBufDeserializer(serializer.result())));
+        System.out.println(serializer.result().read(stackEndec));
         System.out.println(BuiltInEndecs.BLOCK_POS.codec().encodeStart(NbtOps.INSTANCE, new BlockPos(34, 35, 69)).result().get());
 
         FieldRegistrationHandler.register(UwuItems.class, "uwu", true);
@@ -459,10 +459,9 @@ public class Uwu implements ModInitializer {
                         try {
                             iterations("Endec", (buf) -> {
                                 ItemStack stack = source.getPlayer().getStackInHand(Hand.MAIN_HAND);
+                                buf.write(BuiltInEndecs.ITEM_STACK, stack);
 
-                                BuiltInEndecs.ITEM_STACK.encode(new ByteBufSerializer<>(buf), stack);
-
-                                var stackFromByte = BuiltInEndecs.ITEM_STACK.decodeFully(ByteBufDeserializer::new, buf);
+                                var stackFromByte = buf.read(BuiltInEndecs.ITEM_STACK);
                             });
                         } catch (Exception exception){
                             LOGGER.info(exception.getMessage());

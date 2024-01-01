@@ -1,5 +1,6 @@
 package io.wispforest.owo.mixin;
 
+import io.wispforest.owo.serialization.SerializationAttribute;
 import io.wispforest.owo.serialization.util.MapCarrier;
 import io.wispforest.owo.serialization.endec.KeyedEndec;
 import io.wispforest.owo.serialization.format.forwarding.ForwardingDeserializer;
@@ -29,13 +30,12 @@ public abstract class NbtCompoundMixin implements MapCarrier {
     @Override
     public <T> T getWithErrors(@NotNull KeyedEndec<T> key) {
         if (!this.has(key)) return key.defaultValue();
-        return key.endec()
-                .decodeFully(e -> ForwardingDeserializer.humanReadable(NbtDeserializer.of(e)), this.get(key.key()));
+        return key.endec().decodeFully(e -> NbtDeserializer.of(e).withAttributes(SerializationAttribute.HUMAN_READABLE), this.get(key.key()));
     }
 
     @Override
     public <T> void put(@NotNull KeyedEndec<T> key, @NotNull T value) {
-        this.put(key.key(), key.endec().encodeFully(() -> ForwardingSerializer.humanReadable(NbtSerializer.of()), value));
+        this.put(key.key(), key.endec().encodeFully(() -> NbtSerializer.of().withAttributes(SerializationAttribute.HUMAN_READABLE), value));
     }
 
     @Override

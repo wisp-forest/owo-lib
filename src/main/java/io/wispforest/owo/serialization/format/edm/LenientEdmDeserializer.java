@@ -7,8 +7,12 @@ import java.util.Optional;
 
 public class LenientEdmDeserializer extends EdmDeserializer {
 
-    public LenientEdmDeserializer(EdmElement<?> serialized, SerializationAttribute... extraAttributes) {
-        super(serialized, extraAttributes);
+    protected LenientEdmDeserializer(EdmElement<?> serialized) {
+        super(serialized);
+    }
+
+    public static LenientEdmDeserializer of(EdmElement<?> serialized) {
+        return new LenientEdmDeserializer(serialized);
     }
 
     // ---

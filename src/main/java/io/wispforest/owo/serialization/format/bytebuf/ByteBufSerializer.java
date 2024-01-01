@@ -17,12 +17,16 @@ public class ByteBufSerializer<B extends ByteBuf> implements Serializer<B> {
 
     private final B buffer;
 
-    public ByteBufSerializer(B buffer) {
+    protected ByteBufSerializer(B buffer) {
         this.buffer = buffer;
     }
 
+    public static <B extends ByteBuf> ByteBufSerializer<B> of(B buffer) {
+        return new ByteBufSerializer<>(buffer);
+    }
+
     public static ByteBufSerializer<PacketByteBuf> packet() {
-        return new ByteBufSerializer<>(PacketByteBufs.create());
+        return of(PacketByteBufs.create());
     }
 
     // ---

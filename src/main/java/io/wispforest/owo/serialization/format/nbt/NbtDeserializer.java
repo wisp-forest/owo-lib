@@ -13,8 +13,12 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
             SerializationAttribute.SELF_DESCRIBING
     );
 
-    private NbtDeserializer(NbtElement element) {
+    protected NbtDeserializer(NbtElement element) {
         super(element);
+    }
+
+    public static NbtDeserializer of(NbtElement element) {
+        return new NbtDeserializer(element);
     }
 
     private <N extends NbtElement> N getAs(NbtElement element, Class<N> clazz) {
@@ -26,10 +30,6 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
     }
 
     // ---
-
-    public static NbtDeserializer of(NbtElement element) {
-        return new NbtDeserializer(element);
-    }
 
     @Override
     public Set<SerializationAttribute> attributes() {

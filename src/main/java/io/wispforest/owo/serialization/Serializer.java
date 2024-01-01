@@ -1,11 +1,17 @@
 package io.wispforest.owo.serialization;
 
+import io.wispforest.owo.serialization.format.forwarding.ForwardingSerializer;
 import io.wispforest.owo.serialization.util.Endable;
 
 import java.util.Optional;
 import java.util.Set;
 
 public interface Serializer<T> {
+
+    default Serializer<T> withAttributes(SerializationAttribute... assumedAttributes) {
+        if (assumedAttributes.length == 0) return this;
+        return ForwardingSerializer.of(this, assumedAttributes);
+    }
 
     Set<SerializationAttribute> attributes();
 

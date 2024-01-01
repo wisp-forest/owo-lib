@@ -18,8 +18,12 @@ public class ByteBufDeserializer implements Deserializer<ByteBuf> {
 
     private final ByteBuf buffer;
 
-    public ByteBufDeserializer(ByteBuf buffer) {
+    protected ByteBufDeserializer(ByteBuf buffer) {
         this.buffer = buffer;
+    }
+
+    public static ByteBufDeserializer of(ByteBuf buffer) {
+        return new ByteBufDeserializer(buffer);
     }
 
     // ---

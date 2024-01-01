@@ -11,34 +11,26 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
-public class DataInputDeserializer<D extends DataInput> implements Deserializer<D> {
+public class DataInputDeserializer implements Deserializer<DataInput> {
 
-    protected final D input;
+    protected final DataInput input;
 
-    public DataInputDeserializer(D input) {
+    protected DataInputDeserializer(DataInput input) {
         this.input = input;
     }
+
+    public static DataInputDeserializer of(DataInput input) {
+        return new DataInputDeserializer(input);
+    }
+
+    // ---
 
     @Override
     public Set<SerializationAttribute> attributes() {
         return Set.of();
     }
 
-    @Override
-    public <V> Optional<V> readOptional(Endec<V> endec) {
-        return this.readBoolean()
-                ? Optional.of(endec.decode(this))
-                : Optional.empty();
-    }
-
-    @Override
-    public boolean readBoolean() {
-        try {
-            return this.input.readBoolean();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    // ---
 
     @Override
     public byte readByte() {
@@ -94,27 +86,7 @@ public class DataInputDeserializer<D extends DataInput> implements Deserializer<
         }
     }
 
-    @Override
-    public String readString() {
-        try {
-            return this.input.readUTF();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public byte[] readBytes() {
-        var result = new byte[this.readVarInt()];
-
-        try {
-            this.input.readFully(result);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return result;
-    }
+    // ---
 
     @Override
     public int readVarInt() {
@@ -158,10 +130,54 @@ public class DataInputDeserializer<D extends DataInput> implements Deserializer<
         }
     }
 
+    // ---
+
     @Override
-    public <V> V tryRead(Function<Deserializer<D>, V> reader) {
+    public boolean readBoolean() {
+        try {
+            return this.input.readBoolean();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public String readString() {
+        try {
+            return this.input.readUTF();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public byte[] readBytes() {
+        var result = new byte[this.readVarInt()];
+
+        try {
+            this.input.readFully(result);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return result;
+    }
+
+    @Override
+    public <V> Optional<V> readOptional(Endec<V> endec) {
+        return this.readBoolean()
+                ? Optional.of(endec.decode(this))
+                : Optional.empty();
+    }
+
+    // ---
+
+    @Override
+    public <V> V tryRead(Function<Deserializer<DataInput>, V> reader) {
         throw new UnsupportedOperationException("As DataInput cannot be rewound, tryRead(...) cannot be supported");
     }
+
+    // ---
 
     @Override
     public <E> Deserializer.Sequence<E> sequence(Endec<E> elementEndec) {
@@ -177,6 +193,8 @@ public class DataInputDeserializer<D extends DataInput> implements Deserializer<
     public Struct struct() {
         return new Sequence<>(null, 0);
     }
+
+    // ---
 
     private class Sequence<V> implements Deserializer.Sequence<V>, Struct {
 

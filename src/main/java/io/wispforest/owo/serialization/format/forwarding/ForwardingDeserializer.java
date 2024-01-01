@@ -10,40 +10,26 @@ import java.util.function.Function;
 public class ForwardingDeserializer<T> implements Deserializer<T> {
 
     private final Set<SerializationAttribute> attributes;
-    private final Deserializer<T> wrappedSerializer;
+    private final Deserializer<T> delegate;
 
-    protected ForwardingDeserializer(Deserializer<T> wrappedSerializer, boolean humanReadable) {
-        this.wrappedSerializer = wrappedSerializer;
-
-        var set = ImmutableSet.<SerializationAttribute>builder();
-
-        if (this.wrappedSerializer.attributes().contains(SerializationAttribute.SELF_DESCRIBING)) {
-            set.add(SerializationAttribute.SELF_DESCRIBING);
-        }
-
-        if (humanReadable) {
-            set.add(SerializationAttribute.HUMAN_READABLE);
-        }
-
-        this.attributes = set.build();
+    protected ForwardingDeserializer(Deserializer<T> delegate, Set<SerializationAttribute> attributes) {
+        this.delegate = delegate;
+        this.attributes = attributes;
     }
 
-    public static <T> ForwardingDeserializer<T> of(Deserializer<T> deserializer) {
-        return create(deserializer, false);
-    }
+    public static <T> ForwardingDeserializer<T> of(Deserializer<T> delegate, SerializationAttribute... assumedAttributes) {
+        var attributes = ImmutableSet.<SerializationAttribute>builder()
+                .addAll(delegate.attributes())
+                .add(assumedAttributes)
+                .build();
 
-    public static <T> ForwardingDeserializer<T> humanReadable(Deserializer<T> deserializer) {
-        return create(deserializer, true);
-    }
-
-    private static <T> ForwardingDeserializer<T> create(Deserializer<T> deserializer, boolean humanReadable) {
-        return (deserializer instanceof SelfDescribedDeserializer<T> selfDescribedDeserializer)
-                ? new ForwardingSelfDescribedDeserializer<>(selfDescribedDeserializer, humanReadable)
-                : new ForwardingDeserializer<>(deserializer, humanReadable);
+        return (delegate instanceof SelfDescribedDeserializer<T> selfDescribedDeserializer)
+                ? new ForwardingSelfDescribedDeserializer<>(selfDescribedDeserializer, attributes)
+                : new ForwardingDeserializer<>(delegate, attributes);
     }
 
     public Deserializer<T> delegate() {
-        return this.wrappedSerializer;
+        return this.delegate;
     }
 
     //--
@@ -55,87 +41,87 @@ public class ForwardingDeserializer<T> implements Deserializer<T> {
 
     @Override
     public byte readByte() {
-        return this.wrappedSerializer.readByte();
+        return this.delegate.readByte();
     }
 
     @Override
     public short readShort() {
-        return this.wrappedSerializer.readShort();
+        return this.delegate.readShort();
     }
 
     @Override
     public int readInt() {
-        return this.wrappedSerializer.readInt();
+        return this.delegate.readInt();
     }
 
     @Override
     public long readLong() {
-        return this.wrappedSerializer.readLong();
+        return this.delegate.readLong();
     }
 
     @Override
     public float readFloat() {
-        return this.wrappedSerializer.readFloat();
+        return this.delegate.readFloat();
     }
 
     @Override
     public double readDouble() {
-        return this.wrappedSerializer.readDouble();
+        return this.delegate.readDouble();
     }
 
     @Override
     public int readVarInt() {
-        return this.wrappedSerializer.readVarInt();
+        return this.delegate.readVarInt();
     }
 
     @Override
     public long readVarLong() {
-        return this.wrappedSerializer.readVarLong();
+        return this.delegate.readVarLong();
     }
 
     @Override
     public boolean readBoolean() {
-        return this.wrappedSerializer.readBoolean();
+        return this.delegate.readBoolean();
     }
 
     @Override
     public String readString() {
-        return this.wrappedSerializer.readString();
+        return this.delegate.readString();
     }
 
     @Override
     public byte[] readBytes() {
-        return this.wrappedSerializer.readBytes();
+        return this.delegate.readBytes();
     }
 
     @Override
     public <V> Optional<V> readOptional(Endec<V> endec) {
-        return this.wrappedSerializer.readOptional(endec);
+        return this.delegate.readOptional(endec);
     }
 
     @Override
     public <E> Sequence<E> sequence(Endec<E> elementEndec) {
-        return this.wrappedSerializer.sequence(elementEndec);
+        return this.delegate.sequence(elementEndec);
     }
 
     @Override
     public <V> Map<V> map(Endec<V> valueEndec) {
-        return this.wrappedSerializer.map(valueEndec);
+        return this.delegate.map(valueEndec);
     }
 
     @Override
     public Struct struct() {
-        return this.wrappedSerializer.struct();
+        return this.delegate.struct();
     }
 
     @Override
     public <V> V tryRead(Function<Deserializer<T>, V> reader) {
-        return this.wrappedSerializer.tryRead(reader);
+        return this.delegate.tryRead(reader);
     }
 
-    public static class ForwardingSelfDescribedDeserializer<T> extends ForwardingDeserializer<T> implements SelfDescribedDeserializer<T> {
-        private ForwardingSelfDescribedDeserializer(SelfDescribedDeserializer<T> wrappedSerializer, boolean humanReadable) {
-            super(wrappedSerializer, humanReadable);
+    private static class ForwardingSelfDescribedDeserializer<T> extends ForwardingDeserializer<T> implements SelfDescribedDeserializer<T> {
+        private ForwardingSelfDescribedDeserializer(Deserializer<T> delegate, Set<SerializationAttribute> attributes) {
+            super(delegate, attributes);
         }
 
         @Override

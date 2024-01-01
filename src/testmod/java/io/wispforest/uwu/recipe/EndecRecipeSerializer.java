@@ -26,11 +26,11 @@ public class EndecRecipeSerializer<T extends Recipe<?>> implements RecipeSeriali
 
     @Override
     public void write(PacketByteBuf buf, T recipe) {
-        this.endec.encode(new ByteBufSerializer<>(buf), recipe);
+        buf.write(this.endec, recipe);
     }
 
     @Override
     public T read(PacketByteBuf buf) {
-        return this.endec.decode(new ByteBufDeserializer(buf));
+        return buf.read(this.endec);
     }
 }

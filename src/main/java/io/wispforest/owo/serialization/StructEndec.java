@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 /**
  * Marker and template interface for all endecs which serialize structs
  * <p>
- * Every such endec should extend this interface to profit from the implementation of {@link #mapCodec()}
+ * Every such endec should extend this interface to profit from the implementation of {@link #mapCodec(SerializationAttribute...)}
  * and composability which allows {@link Endec#dispatchedStruct(Function, Function, Endec, String)} to work
  */
 public interface StructEndec<T> extends Endec<T> {
@@ -33,7 +33,7 @@ public interface StructEndec<T> extends Endec<T> {
         return this.decodeStruct(deserializer.struct());
     }
 
-    default MapCodec<T> mapCodec() {
+    default MapCodec<T> mapCodec(SerializationAttribute... assumedAttributes) {
         return new MapCodec<>() {
             @Override
             public <T1> Stream<T1> keys(DynamicOps<T1> ops) {
@@ -54,7 +54,7 @@ public interface StructEndec<T> extends Endec<T> {
                         );
                     });
 
-                    return DataResult.success(StructEndec.this.decode(new LenientEdmDeserializer(EdmElement.wrapMap(map))));
+                    return DataResult.success(StructEndec.this.decode(LenientEdmDeserializer.of(EdmElement.wrapMap(map)).withAttributes(assumedAttributes)));
                 } catch (Exception e) {
                     return DataResult.error(e::getMessage);
                 }
@@ -63,7 +63,7 @@ public interface StructEndec<T> extends Endec<T> {
             @Override
             public <T1> RecordBuilder<T1> encode(T input, DynamicOps<T1> ops, RecordBuilder<T1> prefix) {
                 try {
-                    var element = StructEndec.this.encodeFully(EdmSerializer::new, input).<Map<String, EdmElement<?>>>cast();
+                    var element = StructEndec.this.encodeFully(() -> EdmSerializer.of().withAttributes(assumedAttributes), input).<Map<String, EdmElement<?>>>cast();
 
                     var result = prefix;
                     for (var entry : element.entrySet()) {

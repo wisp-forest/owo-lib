@@ -20,15 +20,15 @@ public class JsonDeserializer extends RecursiveDeserializer<JsonElement> impleme
             SerializationAttribute.HUMAN_READABLE
     );
 
-    public JsonDeserializer(JsonElement serialized) {
+    protected JsonDeserializer(JsonElement serialized) {
         super(serialized);
     }
-
-    // ---
 
     public static JsonDeserializer of(JsonElement serialized) {
         return new JsonDeserializer(serialized);
     }
+
+    // ---
 
     @Override
     public Set<SerializationAttribute> attributes() {

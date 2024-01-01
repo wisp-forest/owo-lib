@@ -1,5 +1,6 @@
 package io.wispforest.owo.serialization;
 
+import io.wispforest.owo.serialization.format.forwarding.ForwardingDeserializer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Iterator;
@@ -8,6 +9,11 @@ import java.util.Set;
 import java.util.function.Function;
 
 public interface Deserializer<T> {
+
+    default Deserializer<T> withAttributes(SerializationAttribute... assumedAttributes) {
+        if (assumedAttributes.length == 0) return this;
+        return ForwardingDeserializer.of(this, assumedAttributes);
+    }
 
     Set<SerializationAttribute> attributes();
 

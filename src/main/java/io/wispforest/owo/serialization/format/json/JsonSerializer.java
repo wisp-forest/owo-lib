@@ -15,19 +15,17 @@ public class JsonSerializer extends RecursiveSerializer<JsonElement> {
     private static final Set<SerializationAttribute> ATTRIBUTES = EnumSet.allOf(SerializationAttribute.class);
     private JsonElement prefix;
 
-    private JsonSerializer(JsonElement prefix) {
+    protected JsonSerializer(JsonElement prefix) {
         super(null);
         this.prefix = prefix;
     }
 
-    //--
-
-    public static JsonSerializer of() {
-        return new JsonSerializer(null);
-    }
-
     public static JsonSerializer of(JsonElement prefix) {
         return new JsonSerializer(prefix);
+    }
+
+    public static JsonSerializer of() {
+        return of(null);
     }
 
     // ---

@@ -13,13 +13,12 @@ public class DataOutputSerializer<D extends DataOutput> implements Serializer<D>
 
     protected final D output;
 
-    public DataOutputSerializer(D output) {
+    protected DataOutputSerializer(D output) {
         this.output = output;
     }
 
-    @Override
-    public Set<SerializationAttribute> attributes() {
-        return null;
+    public static <D extends DataOutput> DataOutputSerializer<D> of(D output) {
+        return new DataOutputSerializer<>(output);
     }
 
     protected void write(Writer writer) {
@@ -30,16 +29,14 @@ public class DataOutputSerializer<D extends DataOutput> implements Serializer<D>
         }
     }
 
-    @Override
-    public <V> void writeOptional(Endec<V> endec, Optional<V> optional) {
-        this.writeBoolean(optional.isPresent());
-        optional.ifPresent(value -> endec.encode(this, value));
-    }
+    // ---
 
     @Override
-    public void writeBoolean(boolean value) {
-        this.write(() -> this.output.writeBoolean(value));
+    public Set<SerializationAttribute> attributes() {
+        return null;
     }
+
+    // ---
 
     @Override
     public void writeByte(byte value) {
@@ -71,18 +68,7 @@ public class DataOutputSerializer<D extends DataOutput> implements Serializer<D>
         this.write(() -> this.output.writeDouble(value));
     }
 
-    @Override
-    public void writeString(String value) {
-        this.write(() -> this.output.writeUTF(value));
-    }
-
-    @Override
-    public void writeBytes(byte[] bytes) {
-        this.write(() -> {
-            this.writeVarInt(bytes.length);
-            this.output.write(bytes);
-        });
-    }
+    // ---
 
     @Override
     public void writeVarInt(int value) {
@@ -112,10 +98,33 @@ public class DataOutputSerializer<D extends DataOutput> implements Serializer<D>
         }
     }
 
+    // ---
+
     @Override
-    public D result() {
-        return this.output;
+    public void writeBoolean(boolean value) {
+        this.write(() -> this.output.writeBoolean(value));
     }
+
+    @Override
+    public void writeString(String value) {
+        this.write(() -> this.output.writeUTF(value));
+    }
+
+    @Override
+    public void writeBytes(byte[] bytes) {
+        this.write(() -> {
+            this.writeVarInt(bytes.length);
+            this.output.write(bytes);
+        });
+    }
+
+    @Override
+    public <V> void writeOptional(Endec<V> endec, Optional<V> optional) {
+        this.writeBoolean(optional.isPresent());
+        optional.ifPresent(value -> endec.encode(this, value));
+    }
+
+    // ---
 
     @Override
     public <V> Map<V> map(Endec<V> valueEndec, int size) {
@@ -133,6 +142,15 @@ public class DataOutputSerializer<D extends DataOutput> implements Serializer<D>
     public Struct struct() {
         return new Sequence<>(null);
     }
+
+    // ---
+
+    @Override
+    public D result() {
+        return this.output;
+    }
+
+    // ---
 
     protected class Sequence<V> implements Serializer.Sequence<V>, Serializer.Struct, Serializer.Map<V> {
 

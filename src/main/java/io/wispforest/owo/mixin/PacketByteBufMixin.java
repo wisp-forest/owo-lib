@@ -12,11 +12,11 @@ import org.spongepowered.asm.mixin.Mixin;
 public class PacketByteBufMixin implements EndecBuffer {
     @Override
     public <T> void write(Endec<T> endec, T value) {
-        endec.encodeFully(() -> new ByteBufSerializer<>((PacketByteBuf) (Object) this), value);
+        endec.encodeFully(() -> ByteBufSerializer.of((PacketByteBuf) (Object) this), value);
     }
 
     @Override
     public <T> T read(Endec<T> endec) {
-        return endec.decodeFully(ByteBufDeserializer::new, (PacketByteBuf) (Object) this);
+        return endec.decodeFully(ByteBufDeserializer::of, (PacketByteBuf) (Object) this);
     }
 }

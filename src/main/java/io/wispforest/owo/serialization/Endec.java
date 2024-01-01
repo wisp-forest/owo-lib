@@ -158,6 +158,26 @@ public interface Endec<T> {
     }
 
     /**
+     * Create a new endec which serializes a map from keys encoded as strings using
+     * {@code keyToString} and decoded using {@code stringToKey} to values serialized
+     * using {@code valueEndec}
+     */
+    static <K, V> Endec<Map<K, V>> map(Function<K, String> keyToString, Function<String, K> stringToKey, Endec<V> valueEndec) {
+        return of((serializer, map) -> {
+            try (var mapState = serializer.map(valueEndec, map.size())) {
+                map.forEach((k, v) -> mapState.entry(keyToString.apply(k), v));
+            }
+        }, deserializer -> {
+            var mapState = deserializer.map(valueEndec);
+
+            var map = new HashMap<K, V>(mapState.estimatedSize());
+            mapState.forEachRemaining(entry -> map.put(stringToKey.apply(entry.getKey()), entry.getValue()));
+
+            return map;
+        });
+    }
+
+    /**
      * Create a new endec which serializes the enum constants of {@code enumClass}
      * <p>
      * In a human-readable format, the endec serializes to the {@linkplain Enum#name() constant's name},
@@ -225,14 +245,14 @@ public interface Endec<T> {
      * stored in a map:
      * <pre>{@code
      * public final class Harald implements Herbert {
-     *      public static final Endec<Harald> = StructEndecBuilder.of(...);
+     *      public static final StructEndec<Harald> = StructEndecBuilder.of(...);
      *
      *      private final int haraldOMeter;
      *      ...
      * }
      *
      * public final class Albrecht implements Herbert {
-     *     public static final Endec<Harald> = StructEndecBuilder.of(...);
+     *     public static final StructEndec<Harald> = StructEndecBuilder.of(...);
      *
      *     private final List<String> dadJokes;
      *      ...
@@ -249,7 +269,7 @@ public interface Endec<T> {
      * Endec.dispatchedStruct(HERBERT_REGISTRY::get, Herbert::id, BuiltInEndecs.IDENTIFIER, "type")
      * }</pre>
      *
-     * If now encode an instance of {@code Albrecht} to JSON using this endec, we'll get the following result:
+     * If we now encode an instance of {@code Albrecht} to JSON using this endec, we'll get the following result:
      * <pre>{@code
      * {
      *      "type": "herbert:albrecht",
@@ -408,7 +428,7 @@ public interface Endec<T> {
             @Override
             public <D> DataResult<Pair<T, D>> decode(DynamicOps<D> ops, D input) {
                 try {
-                    return DataResult.success(new Pair<>(Endec.this.decode(new LenientEdmDeserializer(ops.convertTo(EdmOps.INSTANCE, input), assumedAttributes)), input));
+                    return DataResult.success(new Pair<>(Endec.this.decode(LenientEdmDeserializer.of(ops.convertTo(EdmOps.INSTANCE, input)).withAttributes(assumedAttributes)), input));
                 } catch (Exception e) {
                     return DataResult.error(e::getMessage);
                 }
@@ -417,7 +437,7 @@ public interface Endec<T> {
             @Override
             public <D> DataResult<D> encode(T input, DynamicOps<D> ops, D prefix) {
                 try {
-                    return DataResult.success(EdmOps.INSTANCE.convertTo(ops, Endec.this.encodeFully(() -> new EdmSerializer(assumedAttributes), input)));
+                    return DataResult.success(EdmOps.INSTANCE.convertTo(ops, Endec.this.encodeFully(() -> EdmSerializer.of().withAttributes(assumedAttributes), input)));
                 } catch (Exception e) {
                     return DataResult.error(e::getMessage);
                 }

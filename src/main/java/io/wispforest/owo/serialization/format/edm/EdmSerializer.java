@@ -10,19 +10,23 @@ import java.util.*;
 
 public class EdmSerializer extends RecursiveSerializer<EdmElement<?>> {
 
-    private final Set<SerializationAttribute> attributes;
+    private static final Set<SerializationAttribute> ATTRIBUTES = EnumSet.of(
+            SerializationAttribute.SELF_DESCRIBING
+    );
 
-    public EdmSerializer(SerializationAttribute... extraAttributes) {
+    protected EdmSerializer() {
         super(null);
-        this.attributes = ImmutableSet.<SerializationAttribute>builder()
-                .add(SerializationAttribute.SELF_DESCRIBING)
-                .add(extraAttributes)
-                .build();
     }
+
+    public static EdmSerializer of() {
+        return new EdmSerializer();
+    }
+
+    // ---
 
     @Override
     public Set<SerializationAttribute> attributes() {
-        return this.attributes;
+        return ATTRIBUTES;
     }
 
     // ---

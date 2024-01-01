@@ -255,7 +255,7 @@ public final class OwoHandshake {
 
     private static int hashChannel(OwoNetChannel channel) {
         int serializersHash = 0;
-        for (var entry : channel.serializersByIndex.int2ObjectEntrySet()) {
+        for (var entry : channel.endecsByIndex.int2ObjectEntrySet()) {
             serializersHash += entry.getIntKey() * 31 + entry.getValue().getRecordClass().getName().hashCode();
         }
         return 31 * channel.packetId.hashCode() + serializersHash;

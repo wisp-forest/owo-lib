@@ -1,30 +1,28 @@
 package io.wispforest.owo.serialization.format.edm;
 
-import com.google.common.collect.ImmutableSet;
 import io.wispforest.owo.serialization.*;
 import io.wispforest.owo.serialization.util.RecursiveDeserializer;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class EdmDeserializer extends RecursiveDeserializer<EdmElement<?>> implements SelfDescribedDeserializer<EdmElement<?>> {
 
-    private final Set<SerializationAttribute> attributes;
+    private static final Set<SerializationAttribute> ATTRIBUTES = EnumSet.of(
+            SerializationAttribute.SELF_DESCRIBING
+    );
 
-    public EdmDeserializer(EdmElement<?> serialized, SerializationAttribute... extraAttributes) {
+    protected EdmDeserializer(EdmElement<?> serialized) {
         super(serialized);
-        this.attributes = ImmutableSet.<SerializationAttribute>builder()
-                .add(SerializationAttribute.SELF_DESCRIBING)
-                .add(extraAttributes)
-                .build();
+    }
+
+    public static EdmDeserializer of(EdmElement<?> serialized) {
+        return new EdmDeserializer(serialized);
     }
 
     @Override
     public Set<SerializationAttribute> attributes() {
-        return this.attributes;
+        return ATTRIBUTES;
     }
 
     // ---

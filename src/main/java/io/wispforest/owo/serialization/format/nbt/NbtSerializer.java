@@ -20,19 +20,17 @@ public class NbtSerializer extends RecursiveSerializer<NbtElement> {
 
     protected NbtElement prefix;
 
-    public NbtSerializer(NbtElement prefix) {
+    protected NbtSerializer(NbtElement prefix) {
         super(NbtEnd.INSTANCE);
         this.prefix = prefix;
     }
 
-    // ---
-
-    public static NbtSerializer of() {
-        return new NbtSerializer(null);
-    }
-
     public static NbtSerializer of(NbtElement prefix) {
         return new NbtSerializer(prefix);
+    }
+
+    public static NbtSerializer of() {
+        return of(null);
     }
 
     // ---
