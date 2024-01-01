@@ -5,12 +5,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public final class EdmElement<T> {
+public sealed class EdmElement<T> permits EdmMap {
 
     private final T value;
     private final Type type;
 
-    private EdmElement(T value, Type type) {
+    EdmElement(T value, Type type) {
         this.value = value;
         this.type = type;
     }
@@ -40,6 +40,14 @@ public final class EdmElement<T> {
         }
     }
 
+    public EdmMap asMap() {
+        if(this.type != Type.MAP) {
+            throw new IllegalStateException("Given Element is not a Map Type: " + this);
+        }
+
+        return new EdmMap(this.cast());
+    }
+
     @Override
     public String toString() {
         return "E(" + this.type.name() + ", " + this.value + ")";
@@ -48,10 +56,7 @@ public final class EdmElement<T> {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        EdmElement<?> that = (EdmElement<?>) o;
-
+        if (!(o instanceof EdmElement<?> that)) return false;
         if (!this.value.equals(that.value)) return false;
         return this.type == that.type;
     }
