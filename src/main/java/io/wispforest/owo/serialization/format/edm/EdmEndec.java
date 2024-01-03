@@ -9,6 +9,8 @@ public class EdmEndec implements Endec<EdmElement<?>> {
 
     public static final EdmEndec INSTANCE = new EdmEndec();
 
+    public static final Endec<EdmMap> MAP = INSTANCE.xmap(EdmElement::asMap, edmMap -> edmMap);
+    
     private EdmEndec() {}
 
     @Override
