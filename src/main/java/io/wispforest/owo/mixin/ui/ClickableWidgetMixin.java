@@ -9,6 +9,7 @@ import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.FocusHandler;
 import io.wispforest.owo.util.EventSource;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import org.jetbrains.annotations.Nullable;
@@ -30,6 +31,7 @@ public abstract class ClickableWidgetMixin implements ComponentStub, net.minecra
 
     @Shadow public boolean active;
 
+    @Shadow protected boolean hovered;
     @Unique
     protected VanillaWidgetComponent owo$wrapper = null;
 
@@ -362,5 +364,10 @@ public abstract class ClickableWidgetMixin implements ComponentStub, net.minecra
 
     protected CursorStyle owo$preferredCursorStyle() {
         return CursorStyle.POINTER;
+    }
+
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/ClickableWidget;renderWidget(Lnet/minecraft/client/gui/DrawContext;IIF)V"))
+    private void setHovered(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+        if (this.owo$wrapper != null) this.hovered = this.hovered && this.owo$wrapper.hovered();
     }
 }

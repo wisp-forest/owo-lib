@@ -141,13 +141,22 @@ public abstract class BaseComponent implements Component {
 
         boolean nowHovered = this.isInBoundingBox(mouseX, mouseY);
         if (this.hovered != nowHovered) {
-            this.hovered = nowHovered;
+            this.updateHoveredState(mouseX, mouseY, nowHovered);
+        }
+    }
 
-            if (nowHovered) {
-                this.mouseEnterEvents.sink().onMouseEnter();
-            } else {
-                this.mouseLeaveEvents.sink().onMouseLeave();
+    protected void updateHoveredState(int mouseX, int mouseY, boolean nowHovered) {
+        this.hovered = nowHovered;
+
+        if (nowHovered) {
+            if (this.root() == null || this.root().childAt(mouseX, mouseY) != this) {
+                this.hovered = false;
+                return;
             }
+
+            this.mouseEnterEvents.sink().onMouseEnter();
+        } else {
+            this.mouseLeaveEvents.sink().onMouseLeave();
         }
     }
 
