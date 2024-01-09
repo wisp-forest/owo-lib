@@ -13,6 +13,7 @@ import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.util.math.MathHelper;
+import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 
 import java.util.Map;
@@ -21,6 +22,8 @@ public class ColorPickerComponent extends BaseComponent {
 
     protected EventStream<OnChanged> changedEvents = OnChanged.newStream();
     protected Observable<Color> selectedColor = Observable.of(Color.BLACK);
+
+    protected @Nullable Section lastClicked = null;
 
     protected float hue = .5f;
     protected float saturation = 1f;
@@ -89,6 +92,12 @@ public class ColorPickerComponent extends BaseComponent {
 
     @Override
     public boolean onMouseDown(double mouseX, double mouseY, int button) {
+        this.lastClicked = this.showAlpha && mouseX >= this.alphaSelectorX()
+                ? Section.ALPHA_SELECTOR
+                : mouseX > this.hueSelectorX()
+                ? Section.HUE_SELECTOR
+                : Section.COLOR_AREA;
+
         this.updateFromMouse(mouseX, mouseY);
 
         super.onMouseDown(mouseX, mouseY, button);
@@ -112,11 +121,11 @@ public class ColorPickerComponent extends BaseComponent {
         mouseX = MathHelper.clamp(mouseX - 1, 0, this.renderWidth());
         mouseY = MathHelper.clamp(mouseY - 1, 0, this.renderHeight());
 
-        if (this.showAlpha && mouseX >= this.alphaSelectorX()) {
+        if (this.lastClicked == Section.ALPHA_SELECTOR) {
             this.alpha = 1f - (float) (mouseY / this.renderHeight());
-        } else if (mouseX >= this.hueSelectorX()) {
+        } else if (this.lastClicked == Section.HUE_SELECTOR) {
             this.hue = 1f - (float) (mouseY / this.renderHeight());
-        } else {
+        } else if (this.lastClicked == Section.COLOR_AREA) {
             this.saturation = Math.min(1f, (float) (mouseX / this.colorAreaWidth()));
             this.value = 1f - (float) (mouseY / this.renderHeight());
         }
@@ -222,6 +231,10 @@ public class ColorPickerComponent extends BaseComponent {
         UIParsing.apply(children, "selector-width", UIParsing::parseUnsignedInt, this::selectorWidth);
         UIParsing.apply(children, "selector-padding", UIParsing::parseUnsignedInt, this::selectorPadding);
         UIParsing.apply(children, "selected-color", Color::parse, this::selectedColor);
+    }
+
+    protected enum Section {
+        COLOR_AREA, HUE_SELECTOR, ALPHA_SELECTOR
     }
 
     public interface OnChanged {
