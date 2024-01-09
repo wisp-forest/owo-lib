@@ -7,15 +7,12 @@ import io.wispforest.owo.ui.core.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.*;
 import net.minecraft.util.math.MathHelper;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 
 public class VanillaWidgetComponent extends BaseComponent {
 
     private final ClickableWidget widget;
-
-    private float time = 0f;
 
     protected VanillaWidgetComponent(ClickableWidget widget) {
         this.widget = widget;
@@ -28,10 +25,30 @@ public class VanillaWidgetComponent extends BaseComponent {
         }
     }
 
+    public boolean hovered() {
+        return this.hovered;
+    }
+
     @Override
     public void mount(ParentComponent parent, int x, int y) {
         super.mount(parent, x, y);
         this.applyToWidget();
+    }
+
+    @Override
+    protected void updateHoveredState(int mouseX, int mouseY, boolean nowHovered) {
+        this.hovered = nowHovered;
+
+        if (nowHovered) {
+            if (this.root() == null || this.root().childAt(mouseX, mouseY) != this.widget) {
+                this.hovered = false;
+                return;
+            }
+
+            this.mouseEnterEvents.sink().onMouseEnter();
+        } else {
+            this.mouseLeaveEvents.sink().onMouseLeave();
+        }
     }
 
     @Override

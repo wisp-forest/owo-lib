@@ -11,7 +11,6 @@ import java.util.Map;
 public class DraggableContainer<C extends Component> extends WrappingParentComponent<C> {
 
     protected int foreheadSize = 10;
-    protected boolean alwaysOnTop = false;
 
     protected int baseX = 0, baseY = 0;
     protected double xOffset = 0, yOffset = 0;
@@ -23,17 +22,8 @@ public class DraggableContainer<C extends Component> extends WrappingParentCompo
 
     @Override
     public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
-        if (this.alwaysOnTop) context.getMatrices().translate(0, 0, 500);
         super.draw(context, mouseX, mouseY, partialTicks, delta);
         this.drawChildren(context, mouseX, mouseY, partialTicks, delta, this.childView);
-        if (this.alwaysOnTop) context.getMatrices().translate(0, 0, -500);
-    }
-
-    @Override
-    public void drawTooltip(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
-        if (this.alwaysOnTop) context.getMatrices().translate(0, 0, 500);
-        super.drawTooltip(context, mouseX, mouseY, partialTicks, delta);
-        if (this.alwaysOnTop) context.getMatrices().translate(0, 0, -500);
     }
 
     @Override
@@ -100,13 +90,18 @@ public class DraggableContainer<C extends Component> extends WrappingParentCompo
         return this.foreheadSize;
     }
 
+    /**
+     * @deprecated This method merely sets the z-index of this component
+     * to 500/0. Simply use {@link #zIndex(int)} with an appropriate value instead
+     */
+    @Deprecated(forRemoval = true)
     public DraggableContainer<C> alwaysOnTop(boolean alwaysOnTop) {
-        this.alwaysOnTop = alwaysOnTop;
+        this.zIndex(alwaysOnTop ? 500 : 0);
         return this;
     }
 
     public boolean alwaysOnTop() {
-        return this.alwaysOnTop;
+        return false;
     }
 
     @Override

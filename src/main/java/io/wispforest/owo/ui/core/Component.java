@@ -220,7 +220,7 @@ public interface Component extends PositionedRectangle {
      * @return {@code true} if the tooltip should be rendered
      */
     default boolean shouldDrawTooltip(double mouseX, double mouseY) {
-        return this.tooltip() != null && this.isInBoundingBox(mouseX, mouseY);
+        return this.tooltip() != null && !this.tooltip().isEmpty() && this.isInBoundingBox(mouseX, mouseY);
     }
 
     /**

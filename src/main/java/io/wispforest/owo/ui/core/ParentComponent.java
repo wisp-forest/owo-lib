@@ -3,7 +3,6 @@ package io.wispforest.owo.ui.core;
 import io.wispforest.owo.ui.parsing.IncompatibleUIModelException;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
-import io.wispforest.owo.ui.util.ScissorStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
@@ -13,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public interface ParentComponent extends Component {
 
@@ -124,23 +124,31 @@ public interface ParentComponent extends Component {
 
     @Override
     default void drawTooltip(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
-        Component.super.drawTooltip(context, mouseX, mouseY, partialTicks, delta);
-
-        if (!this.allowOverflow()) {
-            var padding = this.padding().get();
-            ScissorStack.push(this.x() + padding.left(), this.y() + padding.top(), this.width() - padding.horizontal(), this.height() - padding.vertical(), context.getMatrices());
+        if (this.hasParent()) {
+            Component.super.drawTooltip(context, mouseX, mouseY, partialTicks, delta);
+            return;
         }
 
-        for (var child : this.children()) {
-            if (!ScissorStack.isVisible(mouseX, mouseY, context.getMatrices())) continue;
+        var hoveredDescendants = new ArrayList<Component>();
+        this.forEachDescendantWhere(hoveredDescendants::add, component -> component.isInBoundingBox(mouseX, mouseY));
+        hoveredDescendants.remove(this);
 
-            context.getMatrices().translate(0, 0, child.zIndex());
-            child.drawTooltip(context, mouseX, mouseY, partialTicks, delta);
-            context.getMatrices().translate(0, 0, -child.zIndex());
-        }
+        for (int i = hoveredDescendants.size() - 1; i >= 0; i--) {
+            var current = hoveredDescendants.get(i);
+            if (i > 0 && current.parent() != hoveredDescendants.get(i - 1)) break;
+            if (!current.shouldDrawTooltip(mouseX, mouseY)) continue;
 
-        if (!this.allowOverflow()) {
-            ScissorStack.pop();
+            context.push();
+            for (; i >= 0; i--) {
+                if (i > 0 && hoveredDescendants.get(i).parent() != hoveredDescendants.get(i - 1)) break;
+                context.translate(0, 0, hoveredDescendants.get(i).zIndex());
+            }
+
+            current.drawTooltip(context, mouseX, mouseY, partialTicks, delta);
+            context.draw();
+            context.pop();
+
+            break;
         }
     }
 
@@ -277,6 +285,26 @@ public interface ParentComponent extends Component {
         for (var child : this.children()) {
             if (child instanceof ParentComponent parent) {
                 parent.forEachDescendant(action);
+            } else {
+                action.accept(child);
+            }
+        }
+    }
+
+    /**
+     * Run the given callback function on every
+     * descendant of this component for which {@code condition}
+     * is true
+     *
+     * @param action The action to execute for each descendant
+     */
+    default void forEachDescendantWhere(Consumer<Component> action, Predicate<Component> condition) {
+        action.accept(this);
+        for (var child : this.children()) {
+            if (!condition.test(child)) continue;
+
+            if (child instanceof ParentComponent parent) {
+                parent.forEachDescendantWhere(action, condition);
             } else {
                 action.accept(child);
             }

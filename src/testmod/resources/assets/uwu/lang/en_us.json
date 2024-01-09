@@ -45,6 +45,7 @@
   "text.config.uwu.option.nestingTime.nestingTimeIntensifies.wowSoNested": "Wow so nested",
   "text.config.uwu.option.someOption": "Hello, yes, this is the predicate constraint tutorial",
   "text.config.uwu.option.floting": "Floting",
+  "text.config.uwu.option.floting.tooltip": "messes with button?",
   "text.config.uwu.section.bottom": "Bottom Text",
   "text.config.uwu.section.nesting_yo?": "That's Nestnite",
   "text.config.uwu.option.thisIsAStringValue": "Clearly, this is a string value",
