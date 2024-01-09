@@ -30,6 +30,7 @@ import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.registry.Registries;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.RotationAxis;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
@@ -258,16 +259,20 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
                     null, null, false, false
             );
 
-            this.skinTextures = DefaultSkinHelper.getSkinTextures(profile);
+            this.skinTextures = DefaultSkinHelper.getSkinTextures(profile.getId());
+            Util.getMainWorkerExecutor().execute(() -> {
+                var completeProfile = MinecraftClient.getInstance().getSessionService().fetchProfile(profile.getId(), false).profile();
 
-            this.client.getSkinProvider().fetchSkinTextures(this.getGameProfile()).thenAccept(textures -> {
-                this.skinTextures = textures;
+                this.skinTextures = DefaultSkinHelper.getSkinTextures(completeProfile);
+                this.client.getSkinProvider().fetchSkinTextures(completeProfile).thenAccept(textures -> {
+                    this.skinTextures = textures;
+                });
             });
         }
 
         @Override
         public SkinTextures getSkinTextures() {
-            return skinTextures;
+            return this.skinTextures;
         }
 
         @Override
