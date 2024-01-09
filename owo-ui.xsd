@@ -59,6 +59,7 @@
             <xs:element name="small-checkbox" type="owo-ui-small-checkbox-component"/>
             <xs:element name="slim-slider" type="owo-ui-slim-slider-component"/>
             <xs:element name="text-area" type="owo-ui-text-area-component"/>
+            <xs:element name="spacer" type="owo-ui-spacer-component"/>
             <xs:element name="template">
                 <xs:complexType>
                     <xs:sequence minOccurs="0" maxOccurs="unbounded">
@@ -136,6 +137,7 @@
                             <xs:enumeration value="content"/>
                             <xs:enumeration value="fixed"/>
                             <xs:enumeration value="fill"/>
+                            <xs:enumeration value="expand"/>
                         </xs:restriction>
                     </xs:simpleType>
                 </xs:attribute>
@@ -471,6 +473,14 @@
                     <xs:element type="owo-ui-vertical-alignment" name="vertical-text-alignment" minOccurs="0"/>
                     <xs:element type="owo-ui-horizontal-alignment" name="horizontal-text-alignment" minOccurs="0"/>
                 </xs:choice>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="owo-ui-spacer-component">
+        <xs:complexContent>
+            <xs:extension base="componentType">
+                <xs:group ref="componentProps"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>

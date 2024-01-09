@@ -1,9 +1,11 @@
 package io.wispforest.uwu.client;
 
 import io.wispforest.owo.ui.base.BaseUIModelScreen;
+import io.wispforest.owo.ui.component.BoxComponent;
 import io.wispforest.owo.ui.component.SlimSliderComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Insets;
+import io.wispforest.owo.ui.core.Sizing;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
@@ -30,6 +32,13 @@ public class SmolComponentTestScreen extends BaseUIModelScreen<FlowLayout> {
             slider.tooltipSupplier(value -> Text.literal("Insets: " + value.intValue()));
             slider.onChanged().subscribe(value -> {
                 rootComponent.childById(FlowLayout.class, "inset-container").padding(Insets.of((int) value));
+            });
+        });
+
+        this.component(SlimSliderComponent.class, "expando-slider").<SlimSliderComponent>configure(slider -> {
+            slider.tooltipSupplier(SlimSliderComponent.VALUE_TOOLTIP_SUPPLIER);
+            slider.onChanged().subscribe(value -> {
+                this.component(BoxComponent.class, "expando-box").horizontalSizing(Sizing.fixed((int) value));
             });
         });
     }

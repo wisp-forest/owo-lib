@@ -320,13 +320,8 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
             panelScroll.margins(Insets.right(10));
 
             var buttonPanel = this.model.expandTemplate(FlowLayout.class, "section-buttons", Map.of());
-            var widestText = new MutableInt();
-
             sections.forEach((component, text) -> {
                 var hoveredText = text.copy().formatted(Formatting.YELLOW);
-                if (this.textRenderer.getWidth(text) > widestText.intValue()) {
-                    widestText.setValue(this.textRenderer.getWidth(text));
-                }
 
                 final var label = Components.label(text);
                 label.cursorStyle(CursorStyle.HAND).margins(Insets.of(2));
@@ -351,15 +346,10 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                 if (mouseX < panelContainer.width() - 10) return false;
 
                 if (buttonPanel.horizontalSizing().animation() == null) {
-                    int percentage = Math.min(Math.round(((widestText.intValue() + 25f) / panelContainer.width()) * 100), 50);
-
-                    buttonPanel.horizontalSizing().animate(350, Easing.CUBIC, Sizing.fill(percentage));
-                    panelContainer.horizontalSizing().animate(350, Easing.CUBIC, Sizing.fill(100 - percentage));
+                    buttonPanel.horizontalSizing().animate(350, Easing.CUBIC, Sizing.content());
                 }
 
                 buttonPanel.horizontalSizing().animation().reverse();
-                panelContainer.horizontalSizing().animation().reverse();
-
                 closeButton.text(Text.literal(closeButton.text().getString().equals(">") ? "<" : ">").formatted(Formatting.BOLD));
 
                 UISounds.playInteractionSound();

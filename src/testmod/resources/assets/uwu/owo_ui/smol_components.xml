@@ -252,47 +252,128 @@
                     <horizontal-alignment>center</horizontal-alignment>
                 </flow-layout>
 
-                <flow-layout direction="horizontal" id="inset-container">
+                <flow-layout direction="vertical">
                     <children>
-                        <flow-layout direction="horizontal">
+                        <flow-layout direction="horizontal" id="inset-container">
                             <children>
-                                <slim-slider direction="horizontal" id="inset-slider">
-                                    <min>3</min>
-                                    <max>20</max>
+                                <flow-layout direction="horizontal">
+                                    <children>
+                                        <slim-slider direction="horizontal" id="inset-slider">
+                                            <min>3</min>
+                                            <max>20</max>
+                                            <step-size>1</step-size>
+
+                                            <sizing>
+                                                <horizontal method="fill">85</horizontal>
+                                            </sizing>
+                                        </slim-slider>
+                                    </children>
+
+                                    <horizontal-alignment>center</horizontal-alignment>
+                                    <vertical-alignment>center</vertical-alignment>
+
+                                    <sizing>
+                                        <horizontal method="fill">100</horizontal>
+                                        <vertical method="fill">100</vertical>
+                                    </sizing>
+
+                                    <surface>
+                                        <panel-inset/>
+                                    </surface>
+                                </flow-layout>
+                            </children>
+
+                            <padding>
+                                <all>3</all>
+                            </padding>
+
+                            <sizing>
+                                <horizontal method="fill">20</horizontal>
+                                <vertical method="fixed">50</vertical>
+                            </sizing>
+
+                            <surface>
+                                <panel/>
+                            </surface>
+                        </flow-layout>
+
+                        <flow-layout direction="vertical">
+                            <children>
+                                <flow-layout direction="horizontal">
+                                    <children>
+                                        <box id="expando-box">
+                                            <color>aqua</color>
+                                            <fill>true</fill>
+
+                                            <sizing>
+                                                <horizontal method="fixed">20</horizontal>
+                                                <vertical method="fill">100</vertical>
+                                            </sizing>
+                                        </box>
+
+                                        <box>
+                                            <color>red</color>
+                                            <fill>true</fill>
+
+                                            <sizing>
+                                                <horizontal method="expand">50</horizontal>
+                                                <vertical method="fill">100</vertical>
+                                            </sizing>
+                                        </box>
+
+                                        <box>
+                                            <color>dark-purple</color>
+                                            <fill>true</fill>
+
+                                            <sizing>
+                                                <horizontal method="expand">50</horizontal>
+                                                <vertical method="fill">100</vertical>
+                                            </sizing>
+                                        </box>
+                                    </children>
+
+                                    <horizontal-alignment>center</horizontal-alignment>
+
+                                    <surface>
+                                        <vanilla-translucent/>
+                                    </surface>
+
+                                    <sizing>
+                                        <horizontal method="fixed">100</horizontal>
+                                        <vertical method="fixed">15</vertical>
+                                    </sizing>
+                                </flow-layout>
+
+                                <slim-slider direction="horizontal" id="expando-slider">
+                                    <min>5</min>
+                                    <value>20</value>
+                                    <max>60</max>
                                     <step-size>1</step-size>
 
                                     <sizing>
-                                        <horizontal method="fill">85</horizontal>
+                                        <horizontal method="fixed">80</horizontal>
                                     </sizing>
+
+                                    <margins>
+                                        <all>5</all>
+                                    </margins>
                                 </slim-slider>
                             </children>
 
                             <horizontal-alignment>center</horizontal-alignment>
-                            <vertical-alignment>center</vertical-alignment>
-
-                            <sizing>
-                                <horizontal method="fill">100</horizontal>
-                                <vertical method="fill">100</vertical>
-                            </sizing>
 
                             <surface>
-                                <panel-inset/>
+                                <panel-with-inset>4</panel-with-inset>
                             </surface>
+                            <padding>
+                                <all>5</all>
+                            </padding>
+
+                            <margins>
+                                <all>10</all>
+                            </margins>
                         </flow-layout>
                     </children>
-
-                    <padding>
-                        <all>3</all>
-                    </padding>
-
-                    <sizing>
-                        <horizontal method="fill">20</horizontal>
-                        <vertical method="fixed">50</vertical>
-                    </sizing>
-
-                    <surface>
-                        <panel/>
-                    </surface>
                 </flow-layout>
 
                 <text-area>

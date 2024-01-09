@@ -30,7 +30,7 @@ public class Sizing implements Animatable<Sizing> {
     public int inflate(int space, Function<Sizing, Integer> contentSizeFunction) {
         return switch (this.method) {
             case FIXED -> this.value;
-            case FILL -> Math.round((this.value / 100f) * space);
+            case FILL, EXPAND -> Math.round((this.value / 100f) * space);
             case CONTENT -> contentSizeFunction.apply(this) + this.value * 2;
         };
     }
@@ -73,11 +73,37 @@ public class Sizing implements Animatable<Sizing> {
     }
 
     /**
+     * Dynamically size the component based on the remaining space
+     * <i>after all other components have been laid out</i>
+     */
+    public static Sizing expand() {
+        return expand(100);
+    }
+
+    /**
+     * Dynamically size the component based on the remaining space
+     * <i>after all other components have been laid out</i>
+     *
+     * @param percent How many percent of the available space to take up
+     */
+    public static Sizing expand(int percent) {
+        return new Sizing(percent, Method.EXPAND);
+    }
+
+    /**
      * @return {@code true} if this sizing instance
      * uses the {@linkplain Method#CONTENT CONTENT} method
      */
     public boolean isContent() {
         return this.method == Method.CONTENT;
+    }
+
+    /**
+     * @return {@code true} if this sizing instance
+     * uses the {@linkplain Method#EXPAND EXPAND} method
+     */
+    public boolean isExpand() {
+        return this.method == Method.EXPAND;
     }
 
     /**
@@ -102,7 +128,7 @@ public class Sizing implements Animatable<Sizing> {
     }
 
     public enum Method {
-        FIXED, CONTENT, FILL
+        FIXED, CONTENT, FILL, EXPAND
     }
 
     public static Sizing parse(Element sizingElement) {
@@ -142,7 +168,7 @@ public class Sizing implements Animatable<Sizing> {
         return Objects.hash(method, value);
     }
 
-    private static class MergedSizing extends Sizing {
+    private static final class MergedSizing extends Sizing {
 
         private final Sizing first, second;
         private final float delta;

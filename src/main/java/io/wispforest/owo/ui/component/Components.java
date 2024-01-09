@@ -146,6 +146,10 @@ public final class Components {
         return new SmallCheckboxComponent(label);
     }
 
+    public static SpacerComponent spacer() {
+        return new SpacerComponent();
+    }
+
     // -------
     // Utility
     // -------
