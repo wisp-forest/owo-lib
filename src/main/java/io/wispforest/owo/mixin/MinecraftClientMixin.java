@@ -1,5 +1,6 @@
 package io.wispforest.owo.mixin;
 
+import io.wispforest.owo.ui.window.OpenWindows;
 import io.wispforest.owo.util.OwoFreezer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.RunArgs;
@@ -28,5 +29,9 @@ public class MinecraftClientMixin {
         OwoFreezer.freeze();
     }
 
+    @Inject(method = "render", at = @At(value = "INVOKE_STRING", args = "ldc=yield", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V"))
+    private void renderAllWindows(CallbackInfo ci) {
+        OpenWindows.renderAll();
+    }
 }
 

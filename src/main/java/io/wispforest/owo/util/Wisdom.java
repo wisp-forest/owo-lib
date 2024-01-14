@@ -57,8 +57,12 @@ public final class Wisdom {
             "that's a CanPickUpLoot baby zombie, the most annoying thing ever. he runs around like crazy and picks up all your shit"
     );
 
+    public static String enlighten() {
+        return Util.getRandom(ALL_THE_WISDOM, CRYSTAL_BALL);
+    }
+
     public static void spread() {
-        Owo.LOGGER.info(Util.getRandom(ALL_THE_WISDOM, CRYSTAL_BALL));
+        Owo.LOGGER.info(enlighten());
     }
 
 }
