@@ -61,6 +61,12 @@ public class OverlayContainer<C extends Component> extends WrappingParentCompone
     }
 
     @Override
+    public boolean onMouseScroll(double mouseX, double mouseY, double amount) {
+        super.onMouseScroll(mouseX, mouseY, amount);
+        return true;
+    }
+
+    @Override
     public boolean canFocus(FocusSource source) {
         return source == FocusSource.KEYBOARD_CYCLE;
     }
