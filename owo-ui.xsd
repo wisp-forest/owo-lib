@@ -661,6 +661,7 @@
                     <xs:element type="xs:boolean" name="scale-to-fit" minOccurs="0"/>
                 </xs:choice>
                 <xs:attribute name="type" type="xs:string" use="required"/>
+                <xs:attribute name="nbt" type="xs:string"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
