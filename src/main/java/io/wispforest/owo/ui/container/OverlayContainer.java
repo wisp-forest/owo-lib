@@ -1,11 +1,14 @@
 package io.wispforest.owo.ui.container;
 
 import io.wispforest.owo.ui.core.*;
+import io.wispforest.owo.util.EventSource;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 public class OverlayContainer<C extends Component> extends WrappingParentComponent<C> {
 
     protected boolean closeOnClick = true;
+    protected @Nullable EventSource<?>.Subscription exitSubscription = null;
 
     protected OverlayContainer(C child) {
         super(Sizing.fill(100), Sizing.fill(100), child);
@@ -26,12 +29,28 @@ public class OverlayContainer<C extends Component> extends WrappingParentCompone
     @Override
     public void mount(ParentComponent parent, int x, int y) {
         super.mount(parent, x, y);
-        this.parent.focusHandler().focus(this, FocusSource.KEYBOARD_CYCLE);
+        this.exitSubscription = this.root().keyPress().subscribe((keyCode, scanCode, modifiers) -> {
+            if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+                this.remove();
+                return true;
+            }
+
+            return false;
+        });
+    }
+
+    @Override
+    public void dismount(DismountReason reason) {
+        super.dismount(reason);
+
+        if (this.exitSubscription != null) {
+            this.exitSubscription.cancel();
+        }
     }
 
     @Override
     public boolean onMouseDown(double mouseX, double mouseY, int button) {
-        boolean handled = super.onMouseDown(mouseX, mouseY, button);
+        boolean handled = super.onMouseDown(mouseX, mouseY, button) || this.child.isInBoundingBox(mouseX, mouseY);
 
         if (!handled && this.closeOnClick) {
             this.remove();
@@ -39,19 +58,6 @@ public class OverlayContainer<C extends Component> extends WrappingParentCompone
         } else {
             return handled;
         }
-    }
-
-    @Override
-    public boolean onKeyPress(int keyCode, int scanCode, int modifiers) {
-        boolean handled = super.onKeyPress(keyCode, scanCode, modifiers);
-
-        // TODO properly receive this event in the first place
-        if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
-            this.remove();
-            return true;
-        }
-
-        return handled;
     }
 
     @Override
