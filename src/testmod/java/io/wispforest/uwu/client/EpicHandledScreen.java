@@ -16,6 +16,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
+import org.lwjgl.glfw.GLFW;
 
 public class EpicHandledScreen extends BaseOwoHandledScreen<FlowLayout, EpicScreenHandler> {
     private LabelComponent numberLabel;
@@ -85,6 +86,12 @@ public class EpicHandledScreen extends BaseOwoHandledScreen<FlowLayout, EpicScre
         if (Screen.hasAltDown() && this.focusedSlot != null) {
             return false;
         }
+
+        if (button == GLFW.GLFW_MOUSE_BUTTON_MIDDLE) {
+            this.uiAdapter.rootComponent.child(Containers.overlay(Components.label(Text.literal("a"))));
+            return true;
+        }
+
         return super.mouseClicked(mouseX, mouseY, button);
     }
 

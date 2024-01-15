@@ -121,9 +121,13 @@ public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen im
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if ((modifiers & GLFW.GLFW_MOD_CONTROL) == 0 && this.uiAdapter.rootComponent.focusHandler().focused() instanceof GreedyInputComponent inputComponent
-                ? inputComponent.onKeyPress(keyCode, scanCode, modifiers)
-                : super.keyPressed(keyCode, scanCode, modifiers)) {
+        if ((modifiers & GLFW.GLFW_MOD_CONTROL) == 0
+                && this.uiAdapter.rootComponent.focusHandler().focused() instanceof GreedyInputComponent inputComponent
+                && inputComponent.onKeyPress(keyCode, scanCode, modifiers)) {
+            return true;
+        }
+
+        if (super.keyPressed(keyCode, scanCode, modifiers)) {
             return true;
         }
 
