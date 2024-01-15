@@ -481,6 +481,7 @@
         <xs:complexContent>
             <xs:extension base="componentType">
                 <xs:group ref="componentProps"/>
+                <xs:attribute name="percent" type="xs:unsignedInt"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>

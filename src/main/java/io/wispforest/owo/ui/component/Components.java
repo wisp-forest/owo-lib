@@ -146,8 +146,12 @@ public final class Components {
         return new SmallCheckboxComponent(label);
     }
 
+    public static SpacerComponent spacer(int percent) {
+        return new SpacerComponent(percent);
+    }
+
     public static SpacerComponent spacer() {
-        return new SpacerComponent();
+        return spacer(100);
     }
 
     // -------

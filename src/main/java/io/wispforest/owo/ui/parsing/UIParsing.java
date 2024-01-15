@@ -321,7 +321,7 @@ public class UIParsing {
         registerFactory("color-picker", element -> new ColorPickerComponent());
         registerFactory("slim-slider", SlimSliderComponent::parse);
         registerFactory("small-checkbox", element -> new SmallCheckboxComponent());
-        registerFactory("spacer", element -> Components.spacer());
+        registerFactory("spacer", SpacerComponent::parse);
     }
 
 }
