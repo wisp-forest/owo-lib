@@ -41,8 +41,8 @@ public class EdmIo {
 
                 output.writeInt(list.size());
                 if (!list.isEmpty()) {
-                    output.writeByte(list.get(0).type().ordinal());
                     for (var element : list) {
+                        output.writeByte(element.type().ordinal());
                         encodeElementData(output, element);
                     }
                 }
@@ -88,10 +88,9 @@ public class EdmIo {
                 var length = input.readInt();
                 if (length != 0) {
                     var result = new ArrayList<EdmElement<?>>(length);
-                    var listType = input.readByte();
 
                     for (int i = 0; i < length; i++) {
-                        result.add(decodeElementData(input, listType));
+                        result.add(decodeElementData(input, input.readByte()));
                     }
 
                     yield EdmElement.wrapSequence(result);
