@@ -134,8 +134,16 @@ public interface ParentComponent extends Component {
         hoveredDescendants.remove(this);
 
         for (int i = hoveredDescendants.size() - 1; i >= 0; i--) {
+            ParentComponent nextParent = null;
+            for (int parentIdx = i - 1; parentIdx >= 0; parentIdx--) {
+                if (hoveredDescendants.get(parentIdx) instanceof ParentComponent parent) {
+                    nextParent = parent;
+                    break;
+                }
+            }
+
             var current = hoveredDescendants.get(i);
-            if (i > 0 && current.parent() != hoveredDescendants.get(i - 1)) break;
+            if (nextParent != null && current.parent() != nextParent) break;
             if (!current.shouldDrawTooltip(mouseX, mouseY)) continue;
 
             context.push();

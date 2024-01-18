@@ -204,9 +204,13 @@ public class LabelComponent extends BaseComponent {
     @Override
     public void drawTooltip(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
         super.drawTooltip(context, mouseX, mouseY, partialTicks, delta);
-
-        if (!this.isInBoundingBox(mouseX, mouseY)) return;
         context.drawHoverEvent(this.textRenderer, this.styleAt(mouseX - this.x, mouseY - this.y), mouseX, mouseY);
+    }
+
+    @Override
+    public boolean shouldDrawTooltip(double mouseX, double mouseY) {
+        var hoveredStyle = this.styleAt((int) (mouseX - this.x), (int) (mouseY - this.y));
+        return super.shouldDrawTooltip(mouseX, mouseY) || (hoveredStyle != null && hoveredStyle.getHoverEvent() != null && this.isInBoundingBox(mouseX, mouseY));
     }
 
     @Override
