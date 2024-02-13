@@ -1,10 +1,11 @@
 package io.wispforest.owo.serialization.endec;
 
-import io.wispforest.owo.network.serialization.SealedPolymorphic;
+
 import io.wispforest.owo.serialization.Deserializer;
 import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.Serializer;
 import io.wispforest.owo.serialization.StructEndec;
+import io.wispforest.owo.serialization.annotations.SealedPolymorphic;
 import io.wispforest.owo.serialization.format.nbt.NbtEndec;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
@@ -126,7 +127,7 @@ public class ReflectiveEndecBuilder {
                 serializer = (Endec<T>) Endec.forEnum((Class<? extends Enum>) clazz);
             } else if (clazz.isArray()) {
                 serializer = (Endec<T>) ReflectiveEndecBuilder.createArrayEndec(clazz.getComponentType());
-            } else if (clazz.isAnnotationPresent(SealedPolymorphic.class)) {
+            } else if (clazz.isAnnotationPresent(io.wispforest.owo.network.serialization.SealedPolymorphic.class) || clazz.isAnnotationPresent(SealedPolymorphic.class)) {
                 serializer = (Endec<T>) ReflectiveEndecBuilder.createSealedSerializer(clazz);
             } else {
                 return null;

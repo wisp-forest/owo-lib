@@ -5,7 +5,9 @@ import io.wispforest.owo.serialization.Deserializer;
 import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.Serializer;
 import io.wispforest.owo.serialization.StructEndec;
+import io.wispforest.owo.serialization.annotations.NullableField;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -44,9 +46,15 @@ public final class RecordEndec<R extends Record> implements StructEndec<R> {
                 var component = recordClass.getRecordComponents()[i];
                 var handle = lookup.unreflect(component.getAccessor());
 
+                var endec = (Endec<Object>) ReflectiveEndecBuilder.get(component.getGenericType());
+
+                var nullAnnotation = component.getAnnotation(NullableField.class);
+
+                if(nullAnnotation != null) endec = endec.nullableOf();
+
                 fields.add(new StructField<>(
                         component.getName(),
-                        (Endec<Object>) ReflectiveEndecBuilder.get(component.getGenericType()),
+                        endec,
                         instance -> getRecordEntry(instance, handle)
                 ));
 
