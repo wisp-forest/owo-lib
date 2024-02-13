@@ -15,10 +15,9 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TextCodecs;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Uuids;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.*;
 import org.joml.Vector3f;
 
 import java.time.Instant;
@@ -86,6 +85,17 @@ public final class BuiltInEndecs {
                     )
             )
             .orElse(Endec.LONG.xmap(ChunkPos::new, ChunkPos::toLong));
+
+    public static final Endec<BlockHitResult> BLOCK_HIT_RESULT = StructEndecBuilder.of(
+            VEC3D.fieldOf("pos", BlockHitResult::getPos),
+            Endec.forEnum(Direction.class).fieldOf("side", BlockHitResult::getSide),
+            BLOCK_POS.fieldOf("block_pos", BlockHitResult::getBlockPos),
+            Endec.BOOLEAN.fieldOf("inside_block", BlockHitResult::isInsideBlock),
+            Endec.BOOLEAN.fieldOf("missed", $ -> $.getType() == HitResult.Type.MISS),
+            (pos, side, blockPos, insideBlock, missed) -> !missed
+                    ? new BlockHitResult(pos, side, blockPos, insideBlock)
+                    : BlockHitResult.createMissed(pos, side, blockPos)
+    );
 
     public static final Endec<PacketByteBuf> PACKET_BYTE_BUF = Endec.BYTES
             .xmap(bytes -> {

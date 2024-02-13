@@ -236,40 +236,7 @@ public class ReflectiveEndecBuilder {
         register(BuiltInEndecs.ITEM_STACK, ItemStack.class);
         register(BuiltInEndecs.IDENTIFIER, Identifier.class);
         register(NbtEndec.COMPOUND, NbtCompound.class);
-        register(
-                new StructEndec<>() {
-                    final Endec<Direction> DIRECTION = Endec.forEnum(Direction.class);
-
-                    @Override
-                    public void encodeStruct(Serializer.Struct struct, BlockHitResult hitResult) {
-                        BlockPos blockPos = hitResult.getBlockPos();
-                        struct.field("blockPos", BuiltInEndecs.BLOCK_POS, blockPos)
-                                .field("side", DIRECTION, hitResult.getSide());
-
-                        Vec3d vec3d = hitResult.getPos();
-                        struct.field("x", Endec.FLOAT, (float) (vec3d.x - (double) blockPos.getX()))
-                                .field("y", Endec.FLOAT, (float) (vec3d.x - (double) blockPos.getX()))
-                                .field("z", Endec.FLOAT, (float) (vec3d.x - (double) blockPos.getX()))
-                                .field("inside", Endec.BOOLEAN, hitResult.isInsideBlock());
-                    }
-
-                    @Override
-                    public BlockHitResult decodeStruct(Deserializer.Struct struct) {
-                        BlockPos blockPos = struct.field("blockPos", BuiltInEndecs.BLOCK_POS);
-                        Direction direction = struct.field("side", DIRECTION);
-
-                        float f = struct.field("x", Endec.FLOAT);
-                        float g = struct.field("y", Endec.FLOAT);
-                        float h = struct.field("z", Endec.FLOAT);
-
-                        boolean bl = struct.field("inside", Endec.BOOLEAN);
-                        return new BlockHitResult(
-                                new Vec3d((double) blockPos.getX() + (double) f, (double) blockPos.getY() + (double) g, (double) blockPos.getZ() + (double) h), direction, blockPos, bl
-                        );
-                    }
-                },
-                BlockHitResult.class
-        );
+        register(BuiltInEndecs.BLOCK_HIT_RESULT, BlockHitResult.class);
         register(BuiltInEndecs.BITSET, BitSet.class);
         register(BuiltInEndecs.TEXT, Text.class);
 
