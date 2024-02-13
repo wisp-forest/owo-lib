@@ -29,6 +29,7 @@ public class LabelComponent extends BaseComponent {
 
     protected final AnimatableProperty<Color> color = AnimatableProperty.of(Color.WHITE);
     protected final Observable<Integer> lineHeight = Observable.of(this.textRenderer.fontHeight);
+    protected final Observable<Integer> lineSpacing = Observable.of(2);
     protected boolean shadow;
     protected int maxWidth;
 
@@ -41,7 +42,7 @@ public class LabelComponent extends BaseComponent {
         this.shadow = false;
         this.maxWidth = Integer.MAX_VALUE;
 
-        this.lineHeight.observe($ -> this.notifyParentIfMounted());
+        Observable.observeAll(this::notifyParentIfMounted, this.lineHeight, this.lineSpacing);
     }
 
     public LabelComponent text(Text text) {
@@ -109,6 +110,15 @@ public class LabelComponent extends BaseComponent {
         return this.lineHeight.get();
     }
 
+    public LabelComponent lineSpacing(int lineSpacing) {
+        this.lineSpacing.set(lineSpacing);
+        return this;
+    }
+
+    public int lineSpacing() {
+        return this.lineSpacing.get();
+    }
+
     public LabelComponent textClickHandler(Function<Style, Boolean> textClickHandler) {
         this.textClickHandler = textClickHandler;
         return this;
@@ -137,7 +147,7 @@ public class LabelComponent extends BaseComponent {
     @Override
     protected int determineVerticalContentSize(Sizing sizing) {
         this.wrapLines();
-        return (this.wrappedText.size() * (this.lineHeight() + 2)) - 2;
+        return this.textHeight();
     }
 
     @Override
@@ -148,6 +158,10 @@ public class LabelComponent extends BaseComponent {
 
     private void wrapLines() {
         this.wrappedText = this.textRenderer.wrapLines(this.text, this.horizontalSizing.get().isContent() ? this.maxWidth : this.width);
+    }
+
+    protected int textHeight() {
+        return (this.wrappedText.size() * (this.lineHeight() + this.lineSpacing())) - this.lineSpacing();
     }
 
     @Override
@@ -174,8 +188,8 @@ public class LabelComponent extends BaseComponent {
         }
 
         switch (this.verticalTextAlignment) {
-            case CENTER -> y += (this.height - ((this.wrappedText.size() * (this.lineHeight() + 2)) - 2)) / 2;
-            case BOTTOM -> y += this.height - ((this.wrappedText.size() * (this.lineHeight() + 2)) - 2);
+            case CENTER -> y += (this.height - (this.textHeight())) / 2;
+            case BOTTOM -> y += this.height - (this.textHeight());
         }
 
         final int lambdaX = x;
@@ -191,7 +205,7 @@ public class LabelComponent extends BaseComponent {
                     case RIGHT -> renderX += this.width - this.textRenderer.getWidth(renderText);
                 }
 
-                int renderY = lambdaY + i * (this.lineHeight() + 2);
+                int renderY = lambdaY + i * (this.lineHeight() + this.lineSpacing());
                 renderY += this.lineHeight() - this.textRenderer.fontHeight;
 
                 context.drawText(this.textRenderer, renderText, renderX, renderY, this.color.get().argb(), this.shadow);
@@ -219,7 +233,7 @@ public class LabelComponent extends BaseComponent {
     }
 
     protected Style styleAt(int mouseX, int mouseY) {
-        return this.textRenderer.getTextHandler().getStyleAt(this.wrappedText.get(Math.min(mouseY / (this.lineHeight() + 2), this.wrappedText.size() - 1)), mouseX);
+        return this.textRenderer.getTextHandler().getStyleAt(this.wrappedText.get(Math.min(mouseY / (this.lineHeight() + this.lineSpacing()), this.wrappedText.size() - 1)), mouseX);
     }
 
     @Override
@@ -230,6 +244,7 @@ public class LabelComponent extends BaseComponent {
         UIParsing.apply(children, "color", Color::parse, this::color);
         UIParsing.apply(children, "shadow", UIParsing::parseBool, this::shadow);
         UIParsing.apply(children, "line-height", UIParsing::parseUnsignedInt, this::lineHeight);
+        UIParsing.apply(children, "line-spacing", UIParsing::parseUnsignedInt, this::lineSpacing);
 
         UIParsing.apply(children, "vertical-text-alignment", VerticalAlignment::parse, this::verticalTextAlignment);
         UIParsing.apply(children, "horizontal-text-alignment", HorizontalAlignment::parse, this::horizontalTextAlignment);
