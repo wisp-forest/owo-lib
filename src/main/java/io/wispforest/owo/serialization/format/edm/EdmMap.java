@@ -14,6 +14,7 @@ public final class EdmMap extends EdmElement<Map<String, EdmElement<?>>> impleme
 
     @Override
     public <T> T getWithErrors(@NotNull KeyedEndec<T> key) {
+        if (!this.has(key)) return key.defaultValue();
         return key.endec().decodeFully(EdmDeserializer::of, this.value().get(key.key()));
     }
 

@@ -42,7 +42,7 @@ public sealed class EdmElement<T> permits EdmMap {
 
     public EdmMap asMap() {
         if(this.type != Type.MAP) {
-            throw new IllegalStateException("Given Element is not a Map Type: " + this);
+            throw new IllegalStateException("Cannot cast EDM element of type " + this.type + " to MAP");
         }
 
         return new EdmMap(this.cast());
