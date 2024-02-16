@@ -11,6 +11,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.SynchronousResourceReloader;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 import org.xml.sax.SAXException;
@@ -51,7 +52,7 @@ public class UIModelLoader implements SynchronousResourceReloader, IdentifiableR
             try (var stream = Files.newInputStream(HOT_RELOAD_LOCATIONS.get(id))) {
                 return UIModel.load(stream);
             } catch (ParserConfigurationException | IOException | SAXException e) {
-                MinecraftClient.getInstance().player.sendMessage(TextOps.concat(Owo.PREFIX, TextOps.withFormatting("hot ui model reload failed, check the log for details")));
+                MinecraftClient.getInstance().player.sendMessage(TextOps.concat(Owo.PREFIX, TextOps.withFormatting("hot ui model reload failed, check the log for details", Formatting.RED)));
                 Owo.LOGGER.error("Hot UI model reload failed", e);
             }
         }
