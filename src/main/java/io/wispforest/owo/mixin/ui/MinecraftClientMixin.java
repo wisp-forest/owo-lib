@@ -1,5 +1,6 @@
 package io.wispforest.owo.mixin.ui;
 
+import io.wispforest.owo.ui.event.ClientRenderCallback;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
 import io.wispforest.owo.ui.util.DisposableScreen;
 import net.minecraft.client.MinecraftClient;
@@ -38,6 +39,16 @@ public class MinecraftClientMixin {
         WindowResizeCallback.EVENT.invoker().onResized((MinecraftClient) (Object) this, this.window);
     }
 
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/Window;setPhase(Ljava/lang/String;)V", ordinal = 1))
+    private void beforeRender(boolean tick, CallbackInfo ci) {
+        ClientRenderCallback.BEFORE.invoker().onRender((MinecraftClient) (Object) this);
+    }
+
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/Window;swapBuffers()V", shift = At.Shift.AFTER))
+    private void afterRender(boolean tick, CallbackInfo ci) {
+        ClientRenderCallback.AFTER.invoker().onRender((MinecraftClient) (Object) this);
+    }
+
     @Inject(method = "setScreen", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;removed()V"))
     private void captureSetScreen(Screen screen, CallbackInfo ci) {
         if (screen != null && this.currentScreen instanceof DisposableScreen disposable) {
@@ -64,5 +75,4 @@ public class MinecraftClientMixin {
             this.screensToDispose.clear();
         }
     }
-
 }
