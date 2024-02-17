@@ -38,6 +38,19 @@ public class UwuNetworkExample {
         CHANNEL.registerServerbound(MaldingPacket.class, (message, access) -> {
             access.player().sendMessage(Text.of(message.toString()), false);
         });
+
+        CHANNEL.registerServerbound(NullablePacket.class, (message, access) -> {
+            if(message.name() == null && message.names() == null) {
+                access.player().sendMessage(Text.of("NULLABLITY FOR THE WIN"));
+            } else {
+                var text = Text.literal("");
+
+                text.append(Text.of(String.valueOf(message.name())));
+                text.append(Text.of(String.valueOf(message.names())));
+
+                access.player().sendMessage(text);
+            }
+        });
     }
 
     @Environment(EnvType.CLIENT)
@@ -52,6 +65,9 @@ public class UwuNetworkExample {
 
                     CHANNEL.clientHandle().send(new MaldingPacket(new DispatchedSubclassOne("base")));
                     CHANNEL.clientHandle().send(new MaldingPacket(new DispatchedSubclassTwo(20)));
+
+                    CHANNEL.clientHandle().send(new NullablePacket(null, null));
+                    CHANNEL.clientHandle().send(new NullablePacket("Weeee", null));
                 }
             });
         }
