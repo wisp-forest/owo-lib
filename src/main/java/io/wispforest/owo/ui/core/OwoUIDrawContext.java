@@ -13,8 +13,11 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.render.*;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
 
 import java.util.ArrayList;
@@ -346,6 +349,8 @@ public class OwoUIDrawContext extends DrawContext {
 
         private static UtilityScreen INSTANCE;
 
+        private Screen linkSourceScreen = null;
+
         private UtilityScreen() {
             super(Text.empty());
         }
@@ -363,6 +368,42 @@ public class OwoUIDrawContext extends DrawContext {
             }
 
             return INSTANCE;
+        }
+
+        /**
+         * Set the screen to which the game should return after the {@link net.minecraft.client.gui.screen.ConfirmLinkScreen}
+         * opened by {@link #handleTextClick(Style)} to {@code screen}
+         *
+         * @see #handleTextClick(Style)
+         */
+        public void setLinkSource(Screen screen) {
+            this.linkSourceScreen = screen;
+        }
+
+        /**
+         * Invoke {@link #setLinkSource(Screen)} with the current screen. Used by the default text click handler
+         * in {@link io.wispforest.owo.ui.component.LabelComponent}
+         */
+        public void captureLinkSource() {
+            this.setLinkSource(this.client.currentScreen);
+        }
+
+        @ApiStatus.Internal
+        public @Nullable Screen getAndClearLinkSource() {
+            var source = this.linkSourceScreen;
+            this.linkSourceScreen = null;
+
+            return source;
+        }
+
+        /**
+         * Since the vanilla implementation of this method always returns to the screen the method was invoked on
+         * (which, here, would be the utility screen which is not what we want), either {@link #captureLinkSource()}
+         * or {@link #setLinkSource(Screen)} must be called prior to invoking this method
+         */
+        @Override
+        public boolean handleTextClick(@Nullable Style style) {
+            return super.handleTextClick(style);
         }
 
         static {

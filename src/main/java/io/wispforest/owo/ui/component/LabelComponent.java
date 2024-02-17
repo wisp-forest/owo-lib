@@ -33,7 +33,10 @@ public class LabelComponent extends BaseComponent {
     protected boolean shadow;
     protected int maxWidth;
 
-    protected Function<Style, Boolean> textClickHandler = OwoUIDrawContext.utilityScreen()::handleTextClick;
+    protected Function<Style, Boolean> textClickHandler = style -> {
+        OwoUIDrawContext.utilityScreen().captureLinkSource();
+        return OwoUIDrawContext.utilityScreen().handleTextClick(style);
+    };
 
     protected LabelComponent(Text text) {
         this.text = text;

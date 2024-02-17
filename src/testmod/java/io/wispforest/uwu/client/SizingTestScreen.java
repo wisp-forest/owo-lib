@@ -6,13 +6,15 @@ import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.StackLayout;
 import io.wispforest.owo.ui.core.*;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 
 public class SizingTestScreen extends BaseOwoScreen<FlowLayout> {
     @Override
     protected @NotNull OwoUIAdapter<FlowLayout> createAdapter() {
-        return OwoUIAdapter.create(this, Containers::horizontalFlow);
+        return OwoUIAdapter.create(this, Containers::verticalFlow);
     }
 
     @Override
@@ -26,5 +28,7 @@ public class SizingTestScreen extends BaseOwoScreen<FlowLayout> {
                 animation.reverse();
             }).horizontalSizing(Sizing.fill(50)));
         }));
+
+        rootComponent.child(Components.label(Text.literal("bruh").setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://wispforest.io")))));
     }
 }
