@@ -6,7 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * @Deprecated : Use {@link io.wispforest.owo.serialization.annotations.SealedPolymorphic}
+ * @deprecated Moved to {@link io.wispforest.owo.serialization.annotations.SealedPolymorphic} for consistency. This
+ * annotation will keep working for the time being but eventually get removed
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

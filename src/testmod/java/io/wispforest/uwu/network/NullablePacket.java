@@ -1,8 +1,7 @@
 package io.wispforest.uwu.network;
 
-import io.wispforest.owo.serialization.annotations.NullableField;
+import io.wispforest.owo.serialization.annotations.NullableComponent;
 
 import java.util.List;
 
-public record NullablePacket(@NullableField String name, @NullableField List<String> names) {
-}
+public record NullablePacket(@NullableComponent String name, @NullableComponent List<String> names) {}

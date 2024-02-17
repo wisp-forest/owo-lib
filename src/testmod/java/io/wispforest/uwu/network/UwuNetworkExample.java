@@ -45,8 +45,8 @@ public class UwuNetworkExample {
             } else {
                 var text = Text.literal("");
 
-                text.append(Text.of((message.name() == null) ? "null" : message.name()));
-                text.append(Text.of((message.names() == null) ? "null" : message.names().toString()));
+                text.append(Text.of(String.valueOf(message.name())));
+                text.append(Text.of(String.valueOf(message.names())));
 
                 access.player().sendMessage(text);
             }
