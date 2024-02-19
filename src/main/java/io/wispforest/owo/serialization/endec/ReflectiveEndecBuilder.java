@@ -241,22 +241,23 @@ public class ReflectiveEndecBuilder {
         register(BuiltInEndecs.BITSET, BitSet.class);
         register(BuiltInEndecs.TEXT, Text.class);
 
-        register(BuiltInEndecs.PACKET_BYTE_BUF.xmap(
-                byteBuf -> {
-                    //noinspection rawtypes
-                    final ParticleType particleType = Registries.PARTICLE_TYPE.get(byteBuf.readInt());
-                    //noinspection unchecked, ConstantConditions
-
-                    return particleType.getParametersFactory().read(particleType, byteBuf);
-                },
-                particleEffect -> {
-                    PacketByteBuf buf = PacketByteBufs.create();
-                    buf.writeInt(Registries.PARTICLE_TYPE.getRawId(particleEffect.getType()));
-                    particleEffect.write(buf);
-
-                    return buf;
-                }
-        ), ParticleEffect.class);
+        // TODO: properly implement this after RegistryByteBuf support is done
+//        register(BuiltInEndecs.PACKET_BYTE_BUF.xmap(
+//                byteBuf -> {
+//                    //noinspection rawtypes
+//                    final ParticleType particleType = Registries.PARTICLE_TYPE.get(byteBuf.readInt());
+//                    //noinspection unchecked, ConstantConditions
+//
+//                    return particleType.getParametersFactory().read(particleType, byteBuf);
+//                },
+//                particleEffect -> {
+//                    PacketByteBuf buf = PacketByteBufs.create();
+//                    buf.writeInt(Registries.PARTICLE_TYPE.getRawId(particleEffect.getType()));
+//                    particleEffect.write(buf);
+//
+//                    return buf;
+//                }
+//        ), ParticleEffect.class);
 
         register(BuiltInEndecs.VEC3D, Vec3d.class);
         register(BuiltInEndecs.VECTOR3F, Vector3f.class);

@@ -1,6 +1,6 @@
 //file:noinspection GradlePackageVersionRange
 plugins {
-    id 'fabric-loom' version '1.4-SNAPSHOT'
+    id 'fabric-loom' version '1.5-SNAPSHOT'
     id 'maven-publish'
 }
 
@@ -119,7 +119,7 @@ loom {
 }
 
 dependencies {
-    modLocalRuntime("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}")
+//    modLocalRuntime("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}")
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin:${project.rei_version}")
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}")
 

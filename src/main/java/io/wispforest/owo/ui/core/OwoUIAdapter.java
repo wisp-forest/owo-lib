@@ -71,7 +71,7 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
 
         var adapter = new OwoUIAdapter<>(0, 0, screen.width, screen.height, rootComponent);
         screen.addDrawableChild(adapter);
-        screen.focusOn(adapter);
+        screen.setFocused(adapter);
 
         return adapter;
     }

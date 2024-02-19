@@ -144,7 +144,7 @@ public class DumpdataCommand {
         final var blockEntity = player.getWorld().getBlockEntity(pos);
         if (blockEntity != null) {
             feedback(source, TextOps.withFormatting("Block Entity NBT" + formatPath(path) + ": ", Formatting.GRAY)
-                    .append(NbtHelper.toPrettyPrintedText(getPath(blockEntity.createNbt(), path))));
+                    .append(NbtHelper.toPrettyPrintedText(getPath(blockEntity.createNbt(player.getRegistryManager()), path))));
         } else {
             feedback(source, TextOps.withFormatting("No block entity", Formatting.GRAY));
         }

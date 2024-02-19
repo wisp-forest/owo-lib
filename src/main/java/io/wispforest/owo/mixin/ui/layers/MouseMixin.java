@@ -14,7 +14,7 @@ public class MouseMixin {
 
     @Shadow private int activeButton;
 
-    @Inject(method = "method_1602", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "method_55795", at = @At("HEAD"), cancellable = true)
     private void captureScreenMouseDrag(Screen screen, double mouseX, double mouseY, double deltaX, double deltaY, CallbackInfo ci) {
         boolean handled = false;
         for (var instance : Layers.getInstances(screen)) {

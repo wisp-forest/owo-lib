@@ -23,6 +23,7 @@ import net.minecraft.command.argument.ItemStringReader;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
@@ -32,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 public class ItemComponent extends BaseComponent {
 
@@ -186,7 +188,8 @@ public class ItemComponent extends BaseComponent {
 
         UIParsing.apply(children, "stack", $ -> $.getTextContent().strip(), stackString -> {
             try {
-                var result = ItemStringReader.item(Registries.ITEM.getReadOnlyWrapper(), new StringReader(stackString));
+                var result = new ItemStringReader(RegistryWrapper.WrapperLookup.of(Stream.of(Registries.ITEM.getReadOnlyWrapper())))
+                    .consume(new StringReader(stackString));
 
                 var stack = new ItemStack(result.item());
                 stack.setNbt(result.nbt());

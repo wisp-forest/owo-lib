@@ -5,7 +5,7 @@ import net.minecraft.datafixer.DataFixTypes;
 import net.minecraft.datafixer.Schemas;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.NbtTagSizeTracker;
+import net.minecraft.nbt.NbtSizeTracker;
 import net.minecraft.util.Util;
 import net.minecraft.util.WorldSavePath;
 import org.jetbrains.annotations.Nullable;
@@ -61,7 +61,7 @@ public final class OfflineDataLookup {
         try {
             Path savedPlayersPath = Owo.currentServer().getSavePath(WorldSavePath.PLAYERDATA);
             Path savedDataPath = savedPlayersPath.resolve(player.toString() + ".dat");
-            NbtCompound rawNbt = NbtIo.readCompressed(savedDataPath, NbtTagSizeTracker.ofUnlimitedBytes());
+            NbtCompound rawNbt = NbtIo.readCompressed(savedDataPath, NbtSizeTracker.ofUnlimitedBytes());
             int dataVersion = rawNbt.contains("DataVersion", 3) ? rawNbt.getInt("DataVersion") : -1;
             return DataFixTypes.PLAYER.update(Schemas.getFixer(), rawNbt, dataVersion);
         } catch (IOException e) {

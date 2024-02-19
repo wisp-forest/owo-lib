@@ -8,6 +8,8 @@ import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.logging.LogUtils;
+import io.netty.buffer.Unpooled;
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.ConfigSynchronizer;
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.itemgroup.Icon;
@@ -58,6 +60,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -92,7 +95,11 @@ public class Uwu implements ModInitializer {
     public static final Identifier OWO_ICON_TEXTURE = new Identifier("uwu", "textures/gui/icon.png");
     public static final Identifier ANIMATED_BUTTON_TEXTURE = new Identifier("uwu", "textures/gui/animated_icon_test.png");
 
-    public static final ScreenHandlerType<EpicScreenHandler> EPIC_SCREEN_HANDLER_TYPE = new ScreenHandlerType<>(EpicScreenHandler::new, FeatureFlags.VANILLA_FEATURES);
+    public static final ScreenHandlerType<EpicScreenHandler> EPIC_SCREEN_HANDLER_TYPE = Registry.register(
+        Registries.SCREEN_HANDLER,
+        new Identifier("uwu", "epic_screen_handler"),
+        new ScreenHandlerType<>(EpicScreenHandler::new, FeatureFlags.VANILLA_FEATURES)
+    );
 
     public static final OwoItemGroup FOUR_TAB_GROUP = OwoItemGroup.builder(new Identifier("uwu", "four_tab_group"), () -> Icon.of(Items.AXOLOTL_BUCKET))
             .disableDynamicTitle()
@@ -452,7 +459,8 @@ public class Uwu implements ModInitializer {
                         iterations("Vanilla", (buf) -> {
                             ItemStack stack = source.getPlayer().getStackInHand(Hand.MAIN_HAND);
 
-                            var stackFromByte = buf.writeItemStack(stack).readItemStack();
+                            ItemStack.PACKET_CODEC.encode(buf, stack);
+                            var stackFromByte = ItemStack.PACKET_CODEC.decode(buf);
                         });
 
                         //Codeck
@@ -480,7 +488,7 @@ public class Uwu implements ModInitializer {
         UwuOptionalNetExample.init();
     }
 
-    private static void iterations(String label, Consumer<PacketByteBuf> action){
+    private static void iterations(String label, Consumer<RegistryByteBuf> action){
         int maxTrials = 3;
         int maxIterations = 50;
 
@@ -493,7 +501,7 @@ public class Uwu implements ModInitializer {
             durations.clear();
 
             for (int i = 0; i < maxIterations; i++) {
-                PacketByteBuf buf = PacketByteBufs.create();
+                RegistryByteBuf buf = new RegistryByteBuf(Unpooled.buffer(), Owo.currentServer().getRegistryManager());
 
                 long startTime = System.nanoTime();
 
