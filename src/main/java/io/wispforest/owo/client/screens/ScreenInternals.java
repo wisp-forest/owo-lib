@@ -1,36 +1,68 @@
 package io.wispforest.owo.client.screens;
 
 import io.wispforest.owo.Owo;
+import io.wispforest.owo.serialization.Endec;
+import io.wispforest.owo.serialization.endec.BuiltInEndecs;
+import io.wispforest.owo.serialization.endec.StructEndecBuilder;
 import io.wispforest.owo.util.pond.OwoScreenHandlerExtension;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
 public class ScreenInternals {
-    public static final Identifier LOCAL_PACKET = new Identifier("owo", "local_packet");
     public static final Identifier SYNC_PROPERTIES = new Identifier("owo", "sync_screen_handler_properties");
 
     public static void init() {
-        ServerPlayNetworking.registerGlobalReceiver(LOCAL_PACKET, (server, player, handler, buf, responseSender) -> {
-            buf.retain();
-            server.execute(() -> {
-                var screenHandler = player.currentScreenHandler;
+        PayloadTypeRegistry.playS2C().register(LocalPacket.ID, LocalPacket.ENDEC.packetCodec());
+        PayloadTypeRegistry.playC2S().register(LocalPacket.ID, LocalPacket.ENDEC.packetCodec());
+        PayloadTypeRegistry.playS2C().register(SyncPropertiesPacket.ID, SyncPropertiesPacket.ENDEC.packetCodec());
 
-                if (screenHandler == null) {
-                    Owo.LOGGER.error("Received local packet for null ScreenHandler");
-                    return;
-                }
+        ServerPlayNetworking.registerGlobalReceiver(LocalPacket.ID, (payload, context) -> {
+            var screenHandler = context.player().currentScreenHandler;
 
-                ((OwoScreenHandlerExtension) screenHandler).owo$handlePacket(buf, false);
-                buf.release();
-            });
+            if (screenHandler == null) {
+                Owo.LOGGER.error("Received local packet for null ScreenHandler");
+                return;
+            }
+
+            ((OwoScreenHandlerExtension) screenHandler).owo$handlePacket(payload, false);
         });
+    }
+
+    public record LocalPacket(int packetId, PacketByteBuf payload) implements CustomPayload {
+        public static final Id<LocalPacket> ID = new Id<>(new Identifier("owo", "local_packet"));
+        public static final Endec<LocalPacket> ENDEC = StructEndecBuilder.of(
+            Endec.VAR_INT.fieldOf("packetId", LocalPacket::packetId),
+            BuiltInEndecs.PACKET_BYTE_BUF.fieldOf("payload", LocalPacket::payload),
+            LocalPacket::new
+        );
+
+        @Override
+        public Id<? extends CustomPayload> getId() {
+            return ID;
+        }
+    }
+
+    public record SyncPropertiesPacket(PacketByteBuf payload) implements CustomPayload {
+        public static final Id<SyncPropertiesPacket> ID = new Id<>(SYNC_PROPERTIES);
+        public static final Endec<SyncPropertiesPacket> ENDEC = StructEndecBuilder.of(
+            BuiltInEndecs.PACKET_BYTE_BUF.fieldOf("payload", SyncPropertiesPacket::payload),
+            SyncPropertiesPacket::new
+        );
+
+        @Override
+        public Id<? extends CustomPayload> getId() {
+            return ID;
+        }
     }
 
     @Environment(EnvType.CLIENT)
@@ -41,38 +73,26 @@ public class ScreenInternals {
                     ((OwoScreenHandlerExtension) handled.getScreenHandler()).owo$attachToPlayer(client.player);
             });
 
-            ClientPlayNetworking.registerGlobalReceiver(LOCAL_PACKET, (client, handler, buf, responseSender) -> {
-                if (client.player == null) return;
+            ClientPlayNetworking.registerGlobalReceiver(LocalPacket.ID, (payload, context) -> {
+                var screenHandler = context.player().currentScreenHandler;
 
-                buf.retain();
-                client.execute(() -> {
-                    var screenHandler = client.player.currentScreenHandler;
+                if (screenHandler == null) {
+                    Owo.LOGGER.error("Received local packet for null ScreenHandler");
+                    return;
+                }
 
-                    if (screenHandler == null) {
-                        Owo.LOGGER.error("Received local packet for null ScreenHandler");
-                        return;
-                    }
-
-                    ((OwoScreenHandlerExtension) screenHandler).owo$handlePacket(buf, true);
-                    buf.release();
-                });
+                ((OwoScreenHandlerExtension) screenHandler).owo$handlePacket(payload, true);
             });
 
-            ClientPlayNetworking.registerGlobalReceiver(SYNC_PROPERTIES, (client, handler, buf, responseSender) -> {
-                buf.retain();
+            ClientPlayNetworking.registerGlobalReceiver(SyncPropertiesPacket.ID, (payload, context) -> {
+                var screenHandler = context.player().currentScreenHandler;
 
-                client.execute(() -> {
-                    if (client.player == null) return;
+                if (screenHandler == null) {
+                    Owo.LOGGER.error("Received sync properties packet for null ScreenHandler");
+                    return;
+                }
 
-                    if (client.player.currentScreenHandler == null) {
-                        Owo.LOGGER.error("Received sync properties packet for null ScreenHandler");
-                        return;
-                    }
-
-                    ((OwoScreenHandlerExtension) client.player.currentScreenHandler).owo$readPropertySync(buf);
-
-                    buf.release();
-                });
+                ((OwoScreenHandlerExtension) screenHandler).owo$readPropertySync(payload);
             });
         }
     }

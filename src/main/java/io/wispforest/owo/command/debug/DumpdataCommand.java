@@ -66,12 +66,13 @@ public class DumpdataCommand {
             feedback(source, TextOps.withFormatting("Not damageable", Formatting.GRAY));
         }
 
-        if (context.getSource().getPlayer().getMainHandStack().hasNbt()) {
-            feedback(source, TextOps.withFormatting("NBT" + formatPath(path) + ": ", Formatting.GRAY)
-                    .append(NbtHelper.toPrettyPrintedText(getPath(stack.getNbt(), path))));
-        } else {
-            feedback(source, TextOps.withFormatting("No NBT", Formatting.GRAY));
-        }
+        // TODO: figure out what to do with this.
+//        if (context.getSource().getPlayer().getMainHandStack().hasNbt()) {
+//            feedback(source, TextOps.withFormatting("NBT" + formatPath(path) + ": ", Formatting.GRAY)
+//                    .append(NbtHelper.toPrettyPrintedText(getPath(stack.getNbt(), path))));
+//        } else {
+//            feedback(source, TextOps.withFormatting("No NBT", Formatting.GRAY));
+//        }
 
         feedback(source, TextOps.withFormatting("-----------------------", Formatting.GRAY));
 
@@ -144,7 +145,7 @@ public class DumpdataCommand {
         final var blockEntity = player.getWorld().getBlockEntity(pos);
         if (blockEntity != null) {
             feedback(source, TextOps.withFormatting("Block Entity NBT" + formatPath(path) + ": ", Formatting.GRAY)
-                    .append(NbtHelper.toPrettyPrintedText(getPath(blockEntity.createNbt(), path))));
+                    .append(NbtHelper.toPrettyPrintedText(getPath(blockEntity.createNbt(player.getRegistryManager()), path))));
         } else {
             feedback(source, TextOps.withFormatting("No block entity", Formatting.GRAY));
         }

@@ -14,6 +14,4 @@ public interface SimpleRegistryAccessor<T> {
     @Accessor("valueToEntry")
     Map<T, RegistryEntry.Reference<T>> owo$getValueToEntry();
 
-    @Accessor("entryToLifecycle")
-    Map<T, Lifecycle> owo$getEntryToLifecycle();
 }

@@ -1,10 +1,11 @@
 package io.wispforest.owo.particles.systems;
 
-import io.wispforest.owo.Owo;
 import io.wispforest.owo.network.NetworkException;
 import io.wispforest.owo.network.OwoHandshake;
 import io.wispforest.owo.serialization.Endec;
+import io.wispforest.owo.serialization.endec.BuiltInEndecs;
 import io.wispforest.owo.serialization.endec.ReflectiveEndecBuilder;
+import io.wispforest.owo.serialization.endec.StructEndecBuilder;
 import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.ReflectionUtils;
 import io.wispforest.owo.util.VectorSerializer;
@@ -14,17 +15,17 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.HashMap;
@@ -48,6 +49,7 @@ public class ParticleSystemController {
     public final Int2ObjectMap<ParticleSystem<?>> systemsByIndex = new Int2ObjectOpenHashMap<>();
 
     public final Identifier channelId;
+    private final CustomPayload.Id<ParticleSystemPayload> payloadId;
     private int maxIndex = 0;
     private final String ownerClassName;
 
@@ -69,13 +71,31 @@ public class ParticleSystemController {
         }
 
         this.channelId = channelId;
+        this.payloadId = new CustomPayload.Id<>(channelId);
         this.ownerClassName = ReflectionUtils.getCallingClassName(2);
+
+        var instanceEndec = Endec.<ParticleSystemInstance<?>, Integer>dispatched(
+            index -> {
+                @SuppressWarnings("unchecked")
+                var system = (ParticleSystem<Object>) systemsByIndex.get(index);
+                return system.endec.xmap(x -> new ParticleSystemInstance<>(system, x), x -> x.data);
+            },
+            instance -> instance.system.index,
+            Endec.VAR_INT
+        );
+        var endec = StructEndecBuilder.of(
+            BuiltInEndecs.VEC3D.fieldOf("pos", ParticleSystemPayload::pos),
+            instanceEndec.fieldOf("instance", ParticleSystemPayload::instance),
+            (pos, instance) -> new ParticleSystemPayload(payloadId, pos, instance)
+        );
+
+        PayloadTypeRegistry.playS2C().register(payloadId, endec.packetCodec());
 
         OwoHandshake.enable();
         OwoHandshake.requireHandshake();
 
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            ClientPlayNetworking.registerGlobalReceiver(channelId, new Client()::handler);
+            ClientPlayNetworking.registerGlobalReceiver(payloadId, new Client()::handler);
         }
 
         REGISTERED_CONTROLLERS.put(channelId, this);
@@ -133,13 +153,10 @@ public class ParticleSystemController {
     }
 
     <T> void sendPacket(ParticleSystem<T> particleSystem, ServerWorld world, Vec3d pos, T data) {
-        PacketByteBuf buf = PacketByteBufs.create();
-        buf.writeVarInt(particleSystem.index);
-        VectorSerializer.write(buf, pos);
-        buf.write(particleSystem.endec, data);
+        ParticleSystemPayload payload = new ParticleSystemPayload(payloadId, pos, new ParticleSystemInstance<>(particleSystem, data));
 
         for (var player : PlayerLookup.tracking(world, BlockPos.ofFloored(pos))) {
-            ServerPlayNetworking.send(player, channelId, buf);
+            ServerPlayNetworking.send(player, payload);
         }
     }
 
@@ -161,22 +178,23 @@ public class ParticleSystemController {
         });
     }
 
+    private record ParticleSystemInstance<T>(ParticleSystem<T> system, T data) {
+        public void execute(World world, Vec3d pos) {
+            system.handler.executeParticleSystem(world, pos, data);
+        }
+    }
+
+    private record ParticleSystemPayload(CustomPayload.Id<ParticleSystemPayload> id, Vec3d pos, ParticleSystemInstance<?> instance) implements CustomPayload {
+        @Override
+        public Id<? extends CustomPayload> getId() {
+            return id;
+        }
+    }
+
     @Environment(EnvType.CLIENT)
-    private class Client {
-        @SuppressWarnings("unchecked")
-        private void handler(MinecraftClient client, ClientPlayNetworkHandler networkHandler, PacketByteBuf buf, PacketSender sender) {
-            int index = buf.readVarInt();
-
-            Vec3d pos = VectorSerializer.read(buf);
-
-            if (maxIndex <= index || index < 0) {
-                Owo.LOGGER.warn("Received unknown particle system index {} on channel {}", index, channelId);
-                return;
-            }
-
-            ParticleSystem<Object> system = (ParticleSystem<Object>) systemsByIndex.get(index);
-            var data = buf.read(system.endec);
-            client.execute(() -> system.handler.executeParticleSystem(client.world, pos, data));
+    private static class Client {
+        private void handler(ParticleSystemPayload payload, ClientPlayNetworking.Context context) {
+            payload.instance.execute(context.client().world, payload.pos);
         }
     }
 }

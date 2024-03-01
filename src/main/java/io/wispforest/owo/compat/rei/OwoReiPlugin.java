@@ -140,19 +140,19 @@ public class OwoReiPlugin implements REIClientPlugin {
 
             final var time = System.currentTimeMillis();
             float scale = .75f + (float) (Math.sin(time / 500d) * .5f);
-            modelView.push();
+            modelView.pushMatrix();
             modelView.translate(screen.width / 2f - scale / 2f * screen.width, screen.height / 2f - scale / 2f * screen.height, 0);
             modelView.scale(scale, scale, 1f);
             modelView.translate((float) (Math.sin(time / 1000d) * .75f) * screen.width, (float) (Math.sin(time / 500d) * .75f) * screen.height, 0);
 
             modelView.translate(screen.width / 2f, screen.height / 2f, 0);
-            modelView.multiply(RotationAxis.POSITIVE_Z.rotationDegrees((float) (time / 25d % 360d)));
+            modelView.rotate(RotationAxis.POSITIVE_Z.rotationDegrees((float) (time / 25d % 360d)));
             modelView.translate(screen.width / -2f, screen.height / -2f, 0);
 
             for (int i = 0; i < 20; i++) {
-                modelView.push();
+                modelView.pushMatrix();
                 modelView.translate(screen.width / 2f, screen.height / 2f, 0);
-                modelView.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(i * 18));
+                modelView.rotate(RotationAxis.POSITIVE_Z.rotationDegrees(i * 18));
                 modelView.translate(screen.width / -2f, screen.height / -2f, 0);
 
                 RenderSystem.applyModelViewMatrix();
@@ -160,10 +160,10 @@ public class OwoReiPlugin implements REIClientPlugin {
                 renderFunction.run();
                 GlStateManager._enableScissorTest();
                 ScissorStack.pop();
-                modelView.pop();
+                modelView.popMatrix();
             }
 
-            modelView.pop();
+            modelView.popMatrix();
             RenderSystem.applyModelViewMatrix();
         } else {
             ScissorStack.pushDirect(0, 0, Integer.MAX_VALUE, Integer.MAX_VALUE);

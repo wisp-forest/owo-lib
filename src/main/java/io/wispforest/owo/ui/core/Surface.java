@@ -39,9 +39,11 @@ public interface Surface {
     };
 
     Surface OPTIONS_BACKGROUND = (context, component) -> {
-        RenderSystem.setShaderColor(64 / 255f, 64 / 255f, 64 / 255f, 1);
-        context.drawTexture(Screen.OPTIONS_BACKGROUND_TEXTURE, component.x(), component.y(), 0, 0, component.width(), component.height(), 32, 32);
-        RenderSystem.setShaderColor(1, 1, 1, 1);
+        // TODO: replace this with the proper background.
+
+//        RenderSystem.setShaderColor(64 / 255f, 64 / 255f, 64 / 255f, 1);
+//        context.drawTexture(Screen.OPTIONS_BACKGROUND_TEXTURE, component.x(), component.y(), 0, 0, component.width(), component.height(), 32, 32);
+//        RenderSystem.setShaderColor(1, 1, 1, 1);
     };
 
     Surface TOOLTIP = (context, component) -> {

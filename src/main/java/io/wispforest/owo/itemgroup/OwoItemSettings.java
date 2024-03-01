@@ -2,7 +2,6 @@ package io.wispforest.owo.itemgroup;
 
 import net.fabricmc.fabric.api.item.v1.CustomDamageHandler;
 import net.fabricmc.fabric.api.item.v1.EquipmentSlotProvider;
-import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.FoodComponent;
 import net.minecraft.item.Item;
@@ -14,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiConsumer;
 
-public class OwoItemSettings extends FabricItemSettings {
+public class OwoItemSettings extends Item.Settings {
 
     @Nullable
     private OwoItemGroup group = null;
@@ -120,5 +119,4 @@ public class OwoItemSettings extends FabricItemSettings {
     public OwoItemSettings fireproof() {
         return (OwoItemSettings) super.fireproof();
     }
-
 }

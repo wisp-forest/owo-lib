@@ -16,6 +16,8 @@ import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.BundleContentsComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -292,9 +294,10 @@ public class ComponentTestScreen extends Screen {
         );
 
         var bundle = Items.BUNDLE.getDefaultStack();
-        var itemList = new NbtList();
-        itemList.add(new ItemStack(Items.EMERALD, 16).writeNbt(new NbtCompound()));
-        bundle.getOrCreateNbt().put("Items", itemList);
+        var itemList = new ArrayList<ItemStack>();
+        itemList.add(new ItemStack(Items.EMERALD, 16));
+
+        bundle.set(DataComponentTypes.BUNDLE_CONTENTS, new BundleContentsComponent(itemList));
 
         rootComponent.child(Components.item(new ItemStack(Items.EMERALD, 16))
                 .showOverlay(true)

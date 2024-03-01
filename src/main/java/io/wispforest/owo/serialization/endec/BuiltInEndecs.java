@@ -57,7 +57,7 @@ public final class BuiltInEndecs {
     // --- MC Types ---
 
     public static final Endec<Identifier> IDENTIFIER = Endec.STRING.xmap(Identifier::new, Identifier::toString);
-    public static final Endec<ItemStack> ITEM_STACK = NbtEndec.COMPOUND.xmap(ItemStack::fromNbt, stack -> stack.writeNbt(new NbtCompound()));
+    public static final Endec<ItemStack> ITEM_STACK = Endec.ofCodec(ItemStack.OPTIONAL_CODEC);
     public static final Endec<Text> TEXT = Endec.ofCodec(TextCodecs.CODEC);
 
     public static final Endec<Vec3i> VEC3I = vectorEndec("Vec3i", Endec.INT, Vec3i::new, Vec3i::getX, Vec3i::getY, Vec3i::getZ);

@@ -6,7 +6,12 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import io.wispforest.owo.serialization.endec.*;
+import io.wispforest.owo.serialization.format.bytebuf.ByteBufDeserializer;
+import io.wispforest.owo.serialization.format.bytebuf.ByteBufSerializer;
 import io.wispforest.owo.serialization.format.edm.*;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.Nullable;
 
@@ -213,6 +218,15 @@ public interface Endec<T> {
                 (serializer, value) -> EdmEndec.INSTANCE.encode(serializer, Util.getResult(codec.encodeStart(EdmOps.INSTANCE, value), IllegalStateException::new)),
                 deserializer -> Util.getResult(codec.parse(EdmOps.INSTANCE, EdmEndec.INSTANCE.decode(deserializer)), IllegalStateException::new)
         );
+    }
+
+    static <T> Endec<T> ofPacketCodec(PacketCodec<PacketByteBuf, T> codec) {
+        return BuiltInEndecs.PACKET_BYTE_BUF
+            .xmap(codec::decode, value -> {
+                var buf = PacketByteBufs.create();
+                codec.encode(buf, value);
+                return buf;
+            });
     }
 
     // ---
@@ -441,6 +455,21 @@ public interface Endec<T> {
                 } catch (Exception e) {
                     return DataResult.error(e::getMessage);
                 }
+            }
+        };
+    }
+
+
+    default PacketCodec<PacketByteBuf, T> packetCodec() {
+        return new PacketCodec<>() {
+            @Override
+            public T decode(PacketByteBuf buf) {
+                return Endec.this.decodeFully(ByteBufDeserializer::of, buf);
+            }
+
+            @Override
+            public void encode(PacketByteBuf buf, T value) {
+                Endec.this.encodeFully(() -> ByteBufSerializer.of(buf), value);
             }
         };
     }

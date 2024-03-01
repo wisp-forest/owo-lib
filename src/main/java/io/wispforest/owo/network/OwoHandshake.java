@@ -7,6 +7,7 @@ import io.wispforest.owo.ops.TextOps;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
 import io.wispforest.owo.serialization.endec.BuiltInEndecs;
 import io.wispforest.owo.serialization.Endec;
+import io.wispforest.owo.serialization.endec.StructEndecBuilder;
 import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.ServicesFrozenException;
 import net.fabricmc.api.EnvType;
@@ -14,14 +15,11 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientConfigurationConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientConfigurationNetworking;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
-import net.fabricmc.fabric.api.networking.v1.ServerConfigurationConnectionEvents;
-import net.fabricmc.fabric.api.networking.v1.ServerConfigurationNetworking;
+import net.fabricmc.fabric.api.networking.v1.*;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientConfigurationNetworkHandler;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerConfigurationNetworkHandler;
 import net.minecraft.text.MutableText;
@@ -70,15 +68,18 @@ public final class OwoHandshake {
     }
 
     static {
+        PayloadTypeRegistry.configurationS2C().register(HandshakeRequest.ID, HandshakeRequest.ENDEC.packetCodec());
+        PayloadTypeRegistry.configurationC2S().register(HandshakeResponse.ID, HandshakeResponse.ENDEC.packetCodec());
+
         ServerConfigurationConnectionEvents.CONFIGURE.register(OwoHandshake::configureStart);
-        ServerConfigurationNetworking.registerGlobalReceiver(OwoHandshake.CHANNEL_ID, OwoHandshake::syncServer);
+        ServerConfigurationNetworking.registerGlobalReceiver(HandshakeResponse.ID, OwoHandshake::syncServer);
 
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
             if (!ENABLED) {
-                ClientConfigurationNetworking.registerGlobalReceiver(OwoHandshake.OFF_CHANNEL_ID, (client, handler, buf, responseSender) -> {});
+                ClientConfigurationNetworking.registerGlobalReceiver(HandshakeOff.ID, (payload, context) -> {});
             }
 
-            ClientConfigurationNetworking.registerGlobalReceiver(OwoHandshake.CHANNEL_ID, OwoHandshake::syncClient);
+            ClientConfigurationNetworking.registerGlobalReceiver(HandshakeRequest.ID, OwoHandshake::syncClient);
             ClientConfigurationConnectionEvents.READY.register(OwoHandshake::handleReadyClient);
 
             ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> QUERY_RECEIVED = false);
@@ -110,49 +111,39 @@ public final class OwoHandshake {
             return;
         }
 
-        var request = PacketByteBufs.create();
-        writeHashes(request, OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel);
-        ServerConfigurationNetworking.send(handler, OwoHandshake.CHANNEL_ID, request);
+        var optionalChannels = formatHashes(OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel);
+        ServerConfigurationNetworking.send(handler, new HandshakeRequest(optionalChannels));
         Owo.LOGGER.info("[Handshake] Sending channel packet");
     }
 
     @Environment(EnvType.CLIENT)
-    private static void syncClient(MinecraftClient client, ClientConfigurationNetworkHandler handler, PacketByteBuf buf, PacketSender sender) {
+    private static void syncClient(HandshakeRequest request, ClientConfigurationNetworking.Context context) {
         Owo.LOGGER.info("[Handshake] Sending client channels");
         QUERY_RECEIVED = true;
 
-        if (buf.readableBytes() > 0) {
-            final var serverOptionalChannels = buf.read(CHANNEL_HASHES_ENDEC);
-            ((OwoClientConnectionExtension) ((ClientCommonNetworkHandlerAccessor) handler).getConnection()).owo$setChannelSet(filterOptionalServices(serverOptionalChannels, OwoNetChannel.REGISTERED_CHANNELS, OwoHandshake::hashChannel));
-        }
+        // TODO: get the actual network handler here.
+//        ((OwoClientConnectionExtension) ((ClientCommonNetworkHandlerAccessor) MinecraftClient.getInstance().getNetworkHandler()).getConnection()).owo$setChannelSet(filterOptionalServices(request.optionalChannels(), OwoNetChannel.REGISTERED_CHANNELS, OwoHandshake::hashChannel));
 
-        var response = PacketByteBufs.create();
-        writeHashes(response, OwoNetChannel.REQUIRED_CHANNELS, OwoHandshake::hashChannel);
-        writeHashes(response, ParticleSystemController.REGISTERED_CONTROLLERS, OwoHandshake::hashController);
-        writeHashes(response, OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel);
+        var requiredChannels = formatHashes(OwoNetChannel.REQUIRED_CHANNELS, OwoHandshake::hashChannel);
+        var requiredControllers = formatHashes(ParticleSystemController.REGISTERED_CONTROLLERS, OwoHandshake::hashController);
+        var optionalChannels = formatHashes(OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel);
 
-        sender.sendPacket(CHANNEL_ID, response);
+        context.responseSender().sendPacket(new HandshakeResponse(requiredChannels, requiredControllers, optionalChannels));
     }
 
-    private static void syncServer(MinecraftServer server, ServerConfigurationNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
+    private static void syncServer(HandshakeResponse response, ServerConfigurationNetworking.Context context) {
         Owo.LOGGER.info("[Handshake] Receiving client channels");
-
-        final var clientChannels = buf.read(CHANNEL_HASHES_ENDEC);
-        final var clientParticleControllers = buf.read(CHANNEL_HASHES_ENDEC);
 
         StringBuilder disconnectMessage = new StringBuilder();
 
-        boolean isAllGood = verifyReceivedHashes("channels", clientChannels, OwoNetChannel.REQUIRED_CHANNELS, OwoHandshake::hashChannel, disconnectMessage);
-        isAllGood &= verifyReceivedHashes("controllers", clientParticleControllers, ParticleSystemController.REGISTERED_CONTROLLERS, OwoHandshake::hashController, disconnectMessage);
+        boolean isAllGood = verifyReceivedHashes("channels", response.requiredChannels(), OwoNetChannel.REQUIRED_CHANNELS, OwoHandshake::hashChannel, disconnectMessage);
+        isAllGood &= verifyReceivedHashes("controllers", response.requiredControllers(), ParticleSystemController.REGISTERED_CONTROLLERS, OwoHandshake::hashController, disconnectMessage);
 
         if (!isAllGood) {
-            handler.disconnect(TextOps.concat(PREFIX, Text.of(disconnectMessage.toString())));
+            context.responseSender().disconnect(TextOps.concat(PREFIX, Text.of(disconnectMessage.toString())));
         }
 
-        if (buf.readableBytes() > 0) {
-            final var clientOptionalChannels = buf.read(CHANNEL_HASHES_ENDEC);
-            ((OwoClientConnectionExtension) ((ServerCommonNetworkHandlerAccessor) handler).owo$getConnection()).owo$setChannelSet(filterOptionalServices(clientOptionalChannels, OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel));
-        }
+        ((OwoClientConnectionExtension) ((ServerCommonNetworkHandlerAccessor) context.networkHandler()).owo$getConnection()).owo$setChannelSet(filterOptionalServices(response.optionalChannels(), OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel));
 
         Owo.LOGGER.info("[Handshake] Handshake completed successfully");
     }
@@ -228,14 +219,14 @@ public final class OwoHandshake {
         return isAllGood;
     }
 
-    private static <T> void writeHashes(PacketByteBuf buffer, Map<Identifier, T> values, ToIntFunction<T> hashFunction) {
+    private static <T> Map<Identifier, Integer> formatHashes(Map<Identifier, T> values, ToIntFunction<T> hashFunction) {
         Map<Identifier, Integer> hashes = new HashMap<>();
 
         for (var entry : values.entrySet()) {
             hashes.put(entry.getKey(), hashFunction.applyAsInt(entry.getValue()));
         }
 
-        buffer.write(CHANNEL_HASHES_ENDEC, hashes);
+        return hashes;
     }
 
     private static Pair<Set<Identifier>, Set<Identifier>> findCollisions(Set<Identifier> first, Set<Identifier> second) {
@@ -258,7 +249,7 @@ public final class OwoHandshake {
         for (var entry : channel.endecsByIndex.int2ObjectEntrySet()) {
             serializersHash += entry.getIntKey() * 31 + entry.getValue().getRecordClass().getName().hashCode();
         }
-        return 31 * channel.packetId.hashCode() + serializersHash;
+        return 31 * channel.packetId.id().hashCode() + serializersHash;
     }
 
     private static int hashController(ParticleSystemController controller) {
@@ -267,5 +258,44 @@ public final class OwoHandshake {
             serializersHash += entry.getIntKey();
         }
         return 31 * controller.channelId.hashCode() + serializersHash;
+    }
+
+    public record HandshakeRequest(Map<Identifier, Integer> optionalChannels) implements CustomPayload {
+        public static Endec<HandshakeRequest> ENDEC = StructEndecBuilder.of(
+            CHANNEL_HASHES_ENDEC.fieldOf("optionalChannels", HandshakeRequest::optionalChannels),
+            HandshakeRequest::new
+        );
+        public static Id<HandshakeRequest> ID = new Id<>(OwoHandshake.CHANNEL_ID);
+
+        @Override
+        public Id<? extends CustomPayload> getId() {
+            return ID;
+        }
+    }
+
+    public record HandshakeOff() implements CustomPayload {
+        public static Id<HandshakeOff> ID = new Id<>(OwoHandshake.OFF_CHANNEL_ID);
+
+        @Override
+        public Id<? extends CustomPayload> getId() {
+            return ID;
+        }
+    }
+
+    private record HandshakeResponse(Map<Identifier, Integer> requiredChannels,
+                                     Map<Identifier, Integer> requiredControllers,
+                                     Map<Identifier, Integer> optionalChannels) implements CustomPayload {
+        public static Endec<HandshakeResponse> ENDEC = StructEndecBuilder.of(
+            CHANNEL_HASHES_ENDEC.fieldOf("requiredChannels", HandshakeResponse::requiredChannels),
+            CHANNEL_HASHES_ENDEC.fieldOf("requiredControllers", HandshakeResponse::requiredControllers),
+            CHANNEL_HASHES_ENDEC.fieldOf("optionalChannels", HandshakeResponse::optionalChannels),
+            HandshakeResponse::new
+        );
+        public static Id<HandshakeResponse> ID = new Id<>(OwoHandshake.CHANNEL_ID);
+
+        @Override
+        public Id<? extends CustomPayload> getId() {
+            return ID;
+        }
     }
 }

@@ -5,7 +5,7 @@ import io.wispforest.owo.serialization.*;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.NbtTagSizeTracker;
+import net.minecraft.nbt.NbtSizeTracker;
 
 import java.io.IOException;
 
@@ -43,7 +43,7 @@ public final class NbtEndec implements Endec<NbtElement> {
         }
 
         try {
-            return NbtIo.read(ByteStreams.newDataInput(deserializer.readBytes()), NbtTagSizeTracker.ofUnlimitedBytes());
+            return NbtIo.read(ByteStreams.newDataInput(deserializer.readBytes()), NbtSizeTracker.ofUnlimitedBytes());
         } catch (IOException e) {
             throw new RuntimeException("Failed to parse binary NBT in NbtEndec", e);
         }

@@ -34,9 +34,9 @@ public class WrapperGroup extends OwoItemGroup {
 
         int parentRawId = Registries.ITEM_GROUP.getRawId(parent);
 
-        ((SimpleRegistryAccessor<ItemGroup>) Registries.ITEM_GROUP).owo$getValueToEntry().remove(parent);
-        ((SimpleRegistryAccessor<ItemGroup>) Registries.ITEM_GROUP).owo$getEntryToLifecycle().remove(parent);
-        ((SimpleRegistry<ItemGroup>) Registries.ITEM_GROUP).set(parentRawId, RegistryKey.of(RegistryKeys.ITEM_GROUP, parentId), this, Lifecycle.stable());
+        // TODO: set doesn't exist anymore. figure out what to do.
+//        ((SimpleRegistryAccessor<ItemGroup>) Registries.ITEM_GROUP).owo$getValueToEntry().remove(parent);
+//        ((SimpleRegistry<ItemGroup>) Registries.ITEM_GROUP).set(parentRawId, RegistryKey.of(RegistryKeys.ITEM_GROUP, parentId), this, Lifecycle.stable());
 
         ((ItemGroupAccessor) this).owo$setDisplayName(parent.getDisplayName());
         ((ItemGroupAccessor) this).owo$setColumn(parent.getColumn());
