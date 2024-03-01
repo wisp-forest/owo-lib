@@ -1,6 +1,8 @@
 package io.wispforest.owo.ops;
 
+import io.wispforest.owo.mixin.class_9320Accessor;
 import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
+import net.minecraft.class_9320;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.LootPool;
@@ -15,6 +17,7 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -67,7 +70,7 @@ public final class LootOps {
     public static void injectItemStack(ItemStack stack, float chance, Identifier... targetTables) {
         ADDITIONS.put(targetTables, () -> ItemEntry.builder(stack.getItem())
                 .conditionally(RandomChanceLootCondition.builder(chance))
-                .apply(SetNbtLootFunction.builder(stack.getOrCreateNbt().copy()))
+                .apply(() -> class_9320Accessor.createClass_9320(List.of(), stack.getComponentChanges()))
                 .apply(SetCountLootFunction.builder(ConstantLootNumberProvider.create(stack.getCount())))
                 .build());
     }

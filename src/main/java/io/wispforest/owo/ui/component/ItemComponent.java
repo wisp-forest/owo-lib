@@ -192,7 +192,7 @@ public class ItemComponent extends BaseComponent {
                     .consume(new StringReader(stackString));
 
                 var stack = new ItemStack(result.item());
-                stack.setNbt(result.nbt());
+                stack.copyComponentsFrom(result.components());
 
                 this.stack(stack);
             } catch (CommandSyntaxException cse) {

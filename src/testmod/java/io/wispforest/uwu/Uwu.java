@@ -338,7 +338,7 @@ public class Uwu implements ModInitializer {
                         ItemStack handStack = source.getPlayer().getStackInHand(Hand.MAIN_HAND);
 
                         LOGGER.info(handStack.toString());
-                        LOGGER.info(handStack.getOrCreateNbt().asString().replace("\n", "\\n"));
+                        LOGGER.info(handStack.getComponents().toString().replace("\n", "\\n"));
 
                         LOGGER.info("---");
 
@@ -367,7 +367,7 @@ public class Uwu implements ModInitializer {
                         }
 
                         LOGGER.info(handStack.toString());
-                        LOGGER.info(handStack.getOrCreateNbt().asString().replace("\n", "\\n"));
+                        LOGGER.info(handStack.getComponents().toString().replace("\n", "\\n"));
 
                         LOGGER.info("");
 
@@ -376,7 +376,7 @@ public class Uwu implements ModInitializer {
                         {
                             LOGGER.info("--- Format Based Endec Test");
 
-                            var nbtDataStack = handStack.getOrCreateNbt();
+                            var nbtDataStack = handStack.encode(access);
 
                             LOGGER.info("  Input:  " + nbtDataStack.asString().replace("\n", "\\n"));
 
@@ -398,7 +398,7 @@ public class Uwu implements ModInitializer {
                         {
                             LOGGER.info("--- Transpose Format Based Endec Test");
 
-                            var nbtDataStack = handStack.getOrCreateNbt();
+                            var nbtDataStack = handStack.encode(access);
 
                             LOGGER.info("  Input:  " + nbtDataStack.asString().replace("\n", "\\n"));
 

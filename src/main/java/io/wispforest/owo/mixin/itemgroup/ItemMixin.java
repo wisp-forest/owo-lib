@@ -31,12 +31,10 @@ public class ItemMixin implements OwoItemExtensions {
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void grabTab(Item.Settings settings, CallbackInfo ci) {
-        if (settings instanceof OwoItemSettings owoSettings) {
-            this.owo$tab = owoSettings.tab();
-            this.owo$stackGenerator = owoSettings.stackGenerator();
-            this.owo$group = owoSettings.group();
-            this.owo$trackUsageStat = owoSettings.shouldTrackUsageStat();
-        }
+        this.owo$tab = settings.tab();
+        this.owo$stackGenerator = settings.stackGenerator();
+        this.owo$group = settings.group();
+        this.owo$trackUsageStat = settings.shouldTrackUsageStat();
     }
 
     @Override

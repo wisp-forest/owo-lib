@@ -1,5 +1,6 @@
 package io.wispforest.owo.ops;
 
+import io.wispforest.owo.Owo;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -117,9 +118,8 @@ public final class ItemOps {
     public static void store(ItemStack stack, NbtCompound nbt, String key) {
         if (stack.isEmpty()) return;
 
-        var stackNbt = new NbtCompound();
-        stack.writeNbt(stackNbt);
-        nbt.put(key, stackNbt);
+        // TODO: use proper dynamic registry manager.
+        nbt.put(key, stack.encode(Owo.currentServer().getRegistryManager()));
     }
 
     /**
@@ -133,8 +133,9 @@ public final class ItemOps {
     public static ItemStack get(NbtCompound nbt, String key) {
         if (!nbt.contains(key, NbtElement.COMPOUND_TYPE)) return ItemStack.EMPTY;
 
+        // TODO: use proper dynamic registry manager.
         var stackNbt = nbt.getCompound(key);
-        return ItemStack.fromNbt(stackNbt);
+        return ItemStack.fromNbtOrEmpty(Owo.currentServer().getRegistryManager(), stackNbt);
     }
 
 }
