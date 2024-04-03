@@ -1,0 +1,86 @@
+<owo-ui xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../../../owo-ui.xsd">
+    <components>
+        <flow-layout direction="vertical">
+            <children>
+                <!-- expand + gap, bug -->
+                <flow-layout direction="horizontal">
+                    <children>
+                        <flow-layout direction="vertical">
+                            <children>
+                                <!-- ... -->
+                            </children>
+
+                            <sizing>
+                                <vertical method="fixed">20</vertical>
+                                <horizontal method="fixed">20</horizontal>
+                            </sizing>
+
+                            <surface>
+                                <panel/>
+                            </surface>
+                        </flow-layout>
+
+                        <flow-layout direction="vertical">
+                            <children>
+                                <!-- ... -->
+                            </children>
+
+                            <sizing>
+                                <vertical method="fixed">20</vertical>
+                                <horizontal method="expand">100</horizontal>
+                            </sizing>
+
+                            <surface>
+                                <panel/>
+                            </surface>
+                        </flow-layout>
+                    </children>
+
+                    <gap>10</gap>
+                </flow-layout>
+
+                <!-- margins -->
+                <flow-layout direction="horizontal">
+                    <children>
+                        <flow-layout direction="vertical">
+                            <children>
+                                <!-- ... -->
+                            </children>
+
+                            <sizing>
+                                <vertical method="fixed">20</vertical>
+                                <horizontal method="fixed">20</horizontal>
+                            </sizing>
+
+                            <surface>
+                                <panel/>
+                            </surface>
+
+                            <margins>
+                                <right>10</right>
+                            </margins>
+                        </flow-layout>
+
+                        <flow-layout direction="vertical">
+                            <children>
+                                <!-- ... -->
+                            </children>
+
+                            <sizing>
+                                <vertical method="fixed">20</vertical>
+                                <horizontal method="expand">100</horizontal>
+                            </sizing>
+
+                            <surface>
+                                <panel/>
+                            </surface>
+                        </flow-layout>
+                    </children>
+                </flow-layout>
+            </children>
+
+            <gap>5</gap>
+        </flow-layout>
+    </components>
+</owo-ui>

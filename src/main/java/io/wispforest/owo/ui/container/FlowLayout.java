@@ -182,7 +182,7 @@ public class FlowLayout extends BaseParentComponent {
             final var padding = container.padding.get();
             final var childSpace = container.calculateChildSpace(container.space);
 
-            MountingHelper.inflateWithExpand(container.children, childSpace, false);
+            MountingHelper.inflateWithExpand(container.children, childSpace, false, container.gap());
             var mountState = MountingHelper.mountEarly(container::mountChild, container.children, child -> {
                 layout.add(child);
 
@@ -229,7 +229,7 @@ public class FlowLayout extends BaseParentComponent {
             final var padding = container.padding.get();
             final var childSpace = container.calculateChildSpace(container.space);
 
-            MountingHelper.inflateWithExpand(container.children, childSpace, true);
+            MountingHelper.inflateWithExpand(container.children, childSpace, true, container.gap());
             var mountState = MountingHelper.mountEarly(container::mountChild, container.children, child -> {
                 layout.add(child);
 
