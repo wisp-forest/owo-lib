@@ -1,10 +1,11 @@
 package io.wispforest.owo.serialization.format.edm;
 
-import com.google.common.collect.ImmutableSet;
 import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.SerializationAttribute;
 import io.wispforest.owo.serialization.Serializer;
 import io.wispforest.owo.serialization.util.RecursiveSerializer;
+import org.apache.commons.lang3.mutable.MutableObject;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -94,10 +95,13 @@ public class EdmSerializer extends RecursiveSerializer<EdmElement<?>> {
 
     @Override
     public <V> void writeOptional(Endec<V> endec, Optional<V> optional) {
+        var result = new MutableObject<@Nullable EdmElement<?>>();
         this.frame(encoded -> {
             optional.ifPresent(v -> endec.encode(this, v));
-            this.consume(EdmElement.wrapOptional(Optional.ofNullable(encoded.get())));
+            result.setValue(encoded.get());
         }, false);
+
+        this.consume(EdmElement.wrapOptional(Optional.ofNullable(result.getValue())));
     }
 
     // ---
