@@ -1,6 +1,7 @@
 package io.wispforest.owo.serialization;
 
 import com.mojang.serialization.*;
+import io.wispforest.owo.serialization.endec.StructField;
 import io.wispforest.owo.serialization.format.edm.*;
 import net.minecraft.util.Util;
 
@@ -31,6 +32,24 @@ public interface StructEndec<T> extends Endec<T> {
     @Override
     default T decode(Deserializer<?> deserializer) {
         return this.decodeStruct(deserializer.struct());
+    }
+
+    default <S> StructField<S, T> flatFieldOf(Function<S, T> getter) {
+        return new StructField.Flat<>(this, getter);
+    }
+
+    @Override
+    default <R> StructEndec<R> xmap(Function<T, R> to, Function<R, T> from) {
+        return new StructEndec<>() {
+            @Override
+            public void encodeStruct(Serializer.Struct struct, R value) {
+                StructEndec.this.encodeStruct(struct, from.apply(value));
+            }
+            @Override
+            public R decodeStruct(Deserializer.Struct struct) {
+                return to.apply(StructEndec.this.decodeStruct(struct));
+            }
+        };
     }
 
     default MapCodec<T> mapCodec(SerializationAttribute... assumedAttributes) {

@@ -3,17 +3,18 @@ package io.wispforest.owo.serialization.endec;
 import io.wispforest.owo.serialization.Deserializer;
 import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.Serializer;
+import io.wispforest.owo.serialization.StructEndec;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public final class StructField<S, F> {
+public sealed class StructField<S, F> permits StructField.Flat {
 
-    private final String name;
-    private final Endec<F> endec;
-    private final Function<S, F> getter;
-    private final @Nullable Supplier<F> defaultValueFactory;
+    protected final String name;
+    protected final Endec<F> endec;
+    protected final Function<S, F> getter;
+    protected final @Nullable Supplier<F> defaultValueFactory;
 
     public StructField(String name, Endec<F> endec, Function<S, F> getter, @Nullable Supplier<F> defaultValueFactory) {
         this.name = name;
@@ -38,5 +39,26 @@ public final class StructField<S, F> {
         return this.defaultValueFactory != null
                 ? struct.field(this.name, this.endec, this.defaultValueFactory.get())
                 : struct.field(this.name, this.endec);
+    }
+
+    public static final class Flat<S, F> extends StructField<S, F> {
+
+        public Flat(StructEndec<F> endec, Function<S, F> getter) {
+            super("", endec, getter, (Supplier<F>) null);
+        }
+
+        private StructEndec<F> endec() {
+            return (StructEndec<F>) this.endec;
+        }
+
+        @Override
+        public void encodeField(Serializer.Struct struct, S instance) {
+            this.endec().encodeStruct(struct, this.getter.apply(instance));
+        }
+
+        @Override
+        public F decodeField(Deserializer.Struct struct) {
+            return this.endec().decodeStruct(struct);
+        }
     }
 }
