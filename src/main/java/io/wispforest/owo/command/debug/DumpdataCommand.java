@@ -8,6 +8,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.ops.TextOps;
 import net.minecraft.command.argument.NbtPathArgumentType;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -59,8 +60,8 @@ public class DumpdataCommand {
         informationHeader(source, "Item");
         sendIdentifier(source, stack.getItem(), Registries.ITEM);
 
-        if (stack.getItem().isDamageable()) {
-            feedback(source, TextOps.withColor("Durability: §" + stack.getItem().getMaxDamage(),
+        if (stack.get(DataComponentTypes.MAX_DAMAGE) != null) {
+            feedback(source, TextOps.withColor("Durability: §" + stack.get(DataComponentTypes.MAX_DAMAGE),
                     TextOps.color(Formatting.GRAY), KEY_BLUE));
         } else {
             feedback(source, TextOps.withFormatting("Not damageable", Formatting.GRAY));

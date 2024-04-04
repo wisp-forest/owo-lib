@@ -215,8 +215,8 @@ public interface Endec<T> {
      */
     static <T> Endec<T> ofCodec(Codec<T> codec) {
         return of(
-                (serializer, value) -> EdmEndec.INSTANCE.encode(serializer, Util.getResult(codec.encodeStart(EdmOps.INSTANCE, value), IllegalStateException::new)),
-                deserializer -> Util.getResult(codec.parse(EdmOps.INSTANCE, EdmEndec.INSTANCE.decode(deserializer)), IllegalStateException::new)
+                (serializer, value) -> EdmEndec.INSTANCE.encode(serializer, codec.encodeStart(EdmOps.INSTANCE, value).getOrThrow(IllegalStateException::new)),
+                deserializer -> codec.parse(EdmOps.INSTANCE, EdmEndec.INSTANCE.decode(deserializer)).getOrThrow(IllegalStateException::new)
         );
     }
 

@@ -21,7 +21,7 @@ public abstract class TextCodecsMixin {
         if (!types.getClass().getComponentType().isAssignableFrom(TextContent.Type.class)) return codec;
 
         //noinspection unchecked
-        var customTextTypeCodec = Codecs.idChecked(StringIdentifiable::asString, s -> (T) CustomTextRegistry.typesMap().get(s).type());
+        var customTextTypeCodec = Codec.stringResolver(StringIdentifiable::asString, s -> (T) CustomTextRegistry.typesMap().get(s).type());
 
         return new Codec<>() {
             @Override

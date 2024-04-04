@@ -46,10 +46,8 @@ public interface StructEndec<T> extends Endec<T> {
                     var map = new HashMap<String, EdmElement<?>>();
                     input.entries().forEach(pair -> {
                         map.put(
-                                Util.getResult(
-                                        ops.getStringValue(pair.getFirst()),
-                                        s -> new IllegalStateException("Unable to parse key: " + s)
-                                ),
+                                ops.getStringValue(pair.getFirst())
+                                        .getOrThrow(s -> new IllegalStateException("Unable to parse key: " + s)),
                                 ops.convertTo(EdmOps.INSTANCE, pair.getSecond())
                         );
                     });

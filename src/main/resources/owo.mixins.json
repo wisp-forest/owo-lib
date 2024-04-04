@@ -4,7 +4,7 @@
   "package": "io.wispforest.owo.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
-    "class_9320Accessor",
+      "SetComponentsLootFunctionAccessor",
     "ClientCommonNetworkHandlerAccessor",
     "ClientConnectionMixin",
     "Copenhagen",

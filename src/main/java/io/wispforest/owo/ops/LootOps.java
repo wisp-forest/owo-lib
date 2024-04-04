@@ -1,8 +1,7 @@
 package io.wispforest.owo.ops;
 
-import io.wispforest.owo.mixin.class_9320Accessor;
+import io.wispforest.owo.mixin.SetComponentsLootFunctionAccessor;
 import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
-import net.minecraft.class_9320;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.LootPool;
@@ -10,7 +9,6 @@ import net.minecraft.loot.condition.RandomChanceLootCondition;
 import net.minecraft.loot.entry.ItemEntry;
 import net.minecraft.loot.entry.LootPoolEntry;
 import net.minecraft.loot.function.SetCountLootFunction;
-import net.minecraft.loot.function.SetNbtLootFunction;
 import net.minecraft.loot.provider.number.ConstantLootNumberProvider;
 import net.minecraft.loot.provider.number.UniformLootNumberProvider;
 import net.minecraft.util.Identifier;
@@ -70,7 +68,7 @@ public final class LootOps {
     public static void injectItemStack(ItemStack stack, float chance, Identifier... targetTables) {
         ADDITIONS.put(targetTables, () -> ItemEntry.builder(stack.getItem())
                 .conditionally(RandomChanceLootCondition.builder(chance))
-                .apply(() -> class_9320Accessor.createClass_9320(List.of(), stack.getComponentChanges()))
+                .apply(() -> SetComponentsLootFunctionAccessor.createSetComponentsLootFunction(List.of(), stack.getComponentChanges()))
                 .apply(SetCountLootFunction.builder(ConstantLootNumberProvider.create(stack.getCount())))
                 .build());
     }
@@ -90,9 +88,9 @@ public final class LootOps {
 
     @ApiStatus.Internal
     public static void registerListener() {
-        LootTableEvents.MODIFY.register((resourceManager, manager, id, tableBuilder, source) -> {
+        LootTableEvents.MODIFY.register((key, tableBuilder, source) -> {
             ADDITIONS.forEach((identifiers, lootPoolEntrySupplier) -> {
-                if (anyMatch(id, identifiers)) tableBuilder.pool(LootPool.builder().with(lootPoolEntrySupplier.get()));
+                if (anyMatch(key.getValue(), identifiers)) tableBuilder.pool(LootPool.builder().with(lootPoolEntrySupplier.get()));
             });
         });
     }

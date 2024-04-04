@@ -3,7 +3,6 @@ package io.wispforest.owo.itemgroup;
 import net.fabricmc.fabric.api.item.v1.CustomDamageHandler;
 import net.fabricmc.fabric.api.item.v1.EquipmentSlotProvider;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.FoodComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.util.Hand;
@@ -86,18 +85,8 @@ public class OwoItemSettings extends Item.Settings {
     }
 
     @Override
-    public OwoItemSettings food(FoodComponent foodComponent) {
-        return (OwoItemSettings) super.food(foodComponent);
-    }
-
-    @Override
     public OwoItemSettings maxCount(int maxCount) {
         return (OwoItemSettings) super.maxCount(maxCount);
-    }
-
-    @Override
-    public OwoItemSettings maxDamageIfAbsent(int maxDamage) {
-        return (OwoItemSettings) super.maxDamageIfAbsent(maxDamage);
     }
 
     @Override

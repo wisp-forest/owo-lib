@@ -87,7 +87,7 @@ public class BlockComponent extends BaseComponent {
         nbtCopy.putInt("y", 0);
         nbtCopy.putInt("z", 0);
 
-        blockEntity.readNbt(nbtCopy, world.getRegistryManager());
+        blockEntity.read(nbtCopy, world.getRegistryManager());
     }
 
     public static BlockComponent parse(Element element) {

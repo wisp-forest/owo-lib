@@ -64,7 +64,7 @@ public final class OfflineAdvancementLookup {
         try {
             Path advancementsPath = Owo.currentServer().getSavePath(WorldSavePath.ADVANCEMENTS);
             Path advancementPath = advancementsPath.resolve(player.toString() + ".json");
-            JsonElement saved = Util.getResult(CODEC.encodeStart(JsonOps.INSTANCE, map), IllegalStateException::new);
+            JsonElement saved = CODEC.encodeStart(JsonOps.INSTANCE, map).getOrThrow(IllegalStateException::new);
 
             try (BufferedWriter bw = Files.newBufferedWriter(advancementPath)) {
                 GSON.toJson(saved, bw);
@@ -103,7 +103,7 @@ public final class OfflineAdvancementLookup {
                  JsonReader reader = new JsonReader(streamReader)) {
                 reader.setLenient(false);
                 JsonElement jsonElement = Streams.parse(reader);
-                parsedMap = Util.getResult(CODEC.parse(JsonOps.INSTANCE, jsonElement), JsonParseException::new);
+                parsedMap = CODEC.parse(JsonOps.INSTANCE, jsonElement).getOrThrow(JsonParseException::new);
             }
 
             for (Map.Entry<Identifier, AdvancementProgress> entry : parsedMap.entrySet()) {

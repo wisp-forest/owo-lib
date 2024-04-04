@@ -1,6 +1,7 @@
 package io.wispforest.owo.serialization.util;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.SerializationAttribute;
 import io.wispforest.owo.serialization.StructEndec;
@@ -14,12 +15,12 @@ public abstract class EndecRecipeSerializer<R extends Recipe<?>> implements Reci
 
     private final StructEndec<R> endec;
     private final PacketCodec<PacketByteBuf, R> packetCodec;
-    private final Codec<R> codec;
+    private final MapCodec<R> codec;
 
     protected EndecRecipeSerializer(StructEndec<R> endec, Endec<R> networkEndec) {
         this.endec = endec;
         this.packetCodec = networkEndec.packetCodec();
-        this.codec = this.endec.mapCodec(SerializationAttribute.HUMAN_READABLE).codec();
+        this.codec = this.endec.mapCodec(SerializationAttribute.HUMAN_READABLE);
     }
 
     protected EndecRecipeSerializer(StructEndec<R> endec) {
@@ -27,7 +28,7 @@ public abstract class EndecRecipeSerializer<R extends Recipe<?>> implements Reci
     }
 
     @Override
-    public Codec<R> codec() {
+    public MapCodec<R> codec() {
         return this.codec;
     }
 

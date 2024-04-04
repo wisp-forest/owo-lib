@@ -28,7 +28,7 @@ public class LanguageMixin {
         if (!el.isJsonPrimitive() && LanguageAccess.textConsumer != null) {
             skipNext = true;
 
-            MutableText text = (MutableText) Util.getResult(TextCodecs.CODEC.parse(JsonOps.INSTANCE, el), JsonParseException::new);
+            MutableText text = (MutableText) TextCodecs.CODEC.parse(JsonOps.INSTANCE, el).getOrThrow(JsonParseException::new);
             LanguageAccess.textConsumer.accept(str, text);
 
             return "";

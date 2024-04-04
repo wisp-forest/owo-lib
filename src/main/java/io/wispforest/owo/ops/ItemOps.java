@@ -23,7 +23,7 @@ public final class ItemOps {
      * @return {@code true} if addition can stack onto base
      */
     public static boolean canStack(ItemStack base, ItemStack addition) {
-        return base.isEmpty() || (canIncreaseBy(base, addition.getCount()) && ItemStack.areItemsAndNbtEqual(base, addition));
+        return base.isEmpty() || (canIncreaseBy(base, addition.getCount()) && ItemStack.areItemsAndComponentsEqual(base, addition));
     }
 
     /**
