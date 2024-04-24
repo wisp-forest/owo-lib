@@ -9,6 +9,7 @@
     "Copenhagen",
     "NbtCompoundMixin",
     "PacketByteBufMixin",
+    "RegistryOpsAccessor",
     "ScreenHandlerInvoker",
     "ScreenHandlerMixin",
     "ServerCommonNetworkHandlerAccessor",

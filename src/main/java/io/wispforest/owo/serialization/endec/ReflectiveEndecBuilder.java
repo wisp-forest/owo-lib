@@ -247,7 +247,7 @@ public class ReflectiveEndecBuilder {
                 (serializer, particleEffect) -> {
                     var buffer = new RegistryByteBuf(
                             PacketByteBufs.create(),
-                            serializer.requireAttributeValue(SerializationAttributes.REGISTRIES)
+                            serializer.requireAttributeValue(SerializationAttributes.REGISTRIES).registryManager()
                     );
 
                     buffer.writeInt(Registries.PARTICLE_TYPE.getRawId(particleEffect.getType()));
@@ -257,7 +257,7 @@ public class ReflectiveEndecBuilder {
                 }, deserializer -> {
                     var buffer = new RegistryByteBuf(
                             BuiltInEndecs.PACKET_BYTE_BUF.decode(deserializer),
-                            deserializer.requireAttributeValue(SerializationAttributes.REGISTRIES)
+                            deserializer.requireAttributeValue(SerializationAttributes.REGISTRIES).registryManager()
                     );
 
                     return Registries.PARTICLE_TYPE.get(buffer.readInt()).getPacketCodec().decode(buffer);

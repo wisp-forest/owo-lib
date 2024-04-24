@@ -3,7 +3,9 @@ package io.wispforest.owo.serialization;
 public sealed abstract class SerializationAttribute permits SerializationAttribute.Marker, SerializationAttribute.WithValue {
 
     public final String name;
-    protected SerializationAttribute(String name) {this.name = name;}
+    protected SerializationAttribute(String name) {
+        this.name = name;
+    }
 
     public static SerializationAttribute.Marker marker(String name) {
         return new Marker(name);

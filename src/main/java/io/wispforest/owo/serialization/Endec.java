@@ -6,14 +6,16 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import io.netty.buffer.ByteBuf;
+import io.wispforest.owo.mixin.RegistryOpsAccessor;
 import io.wispforest.owo.serialization.endec.*;
 import io.wispforest.owo.serialization.format.bytebuf.ByteBufDeserializer;
 import io.wispforest.owo.serialization.format.bytebuf.ByteBufSerializer;
 import io.wispforest.owo.serialization.format.edm.*;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.registry.RegistryOps;
+import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -219,7 +221,7 @@ public interface Endec<T> {
                 (serializer, value) -> {
                     DynamicOps<EdmElement<?>> ops = EdmOps.INSTANCE;
                     if (serializer.hasAttribute(SerializationAttributes.REGISTRIES)) {
-                        ops = serializer.getAttributeValue(SerializationAttributes.REGISTRIES).getOps(ops);
+                        ops = RegistryOps.of(ops, serializer.getAttributeValue(SerializationAttributes.REGISTRIES).infoGetter());
                     }
 
                     EdmEndec.INSTANCE.encode(serializer, codec.encodeStart(ops, value).getOrThrow(IllegalStateException::new));
@@ -227,7 +229,7 @@ public interface Endec<T> {
                 deserializer -> {
                     DynamicOps<EdmElement<?>> ops = EdmOps.INSTANCE;
                     if (deserializer.hasAttribute(SerializationAttributes.REGISTRIES)) {
-                        ops = deserializer.getAttributeValue(SerializationAttributes.REGISTRIES).getOps(ops);
+                        ops = RegistryOps.of(ops, deserializer.getAttributeValue(SerializationAttributes.REGISTRIES).infoGetter());
                     }
 
                     return codec.parse(ops, EdmEndec.INSTANCE.decode(deserializer)).getOrThrow(IllegalStateException::new);
@@ -448,7 +450,11 @@ public interface Endec<T> {
             @Override
             public <D> DataResult<Pair<T, D>> decode(DynamicOps<D> ops, D input) {
                 try {
-                    return DataResult.success(new Pair<>(Endec.this.decode(LenientEdmDeserializer.of(ops.convertTo(EdmOps.INSTANCE, input)).withAttributes(assumedAttributes)), input));
+                    var attributes = ops instanceof RegistryOps<D> registryOps
+                            ? ArrayUtils.add(assumedAttributes, RegistriesAttribute.infoGetterOnly(((RegistryOpsAccessor) registryOps).owo$infoGetter()))
+                            : assumedAttributes;
+
+                    return DataResult.success(new Pair<>(Endec.this.decode(LenientEdmDeserializer.of(ops.convertTo(EdmOps.INSTANCE, input)).withAttributes(attributes)), input));
                 } catch (Exception e) {
                     return DataResult.error(e::getMessage);
                 }
@@ -457,7 +463,11 @@ public interface Endec<T> {
             @Override
             public <D> DataResult<D> encode(T input, DynamicOps<D> ops, D prefix) {
                 try {
-                    return DataResult.success(EdmOps.INSTANCE.convertTo(ops, Endec.this.encodeFully(() -> EdmSerializer.of().withAttributes(assumedAttributes), input)));
+                    var attributes = ops instanceof RegistryOps<D> registryOps
+                            ? ArrayUtils.add(assumedAttributes, RegistriesAttribute.infoGetterOnly(((RegistryOpsAccessor) registryOps).owo$infoGetter()))
+                            : assumedAttributes;
+
+                    return DataResult.success(EdmOps.INSTANCE.convertTo(ops, Endec.this.encodeFully(() -> EdmSerializer.of().withAttributes(attributes), input)));
                 } catch (Exception e) {
                     return DataResult.error(e::getMessage);
                 }
@@ -472,7 +482,7 @@ public interface Endec<T> {
             public T decode(B buf) {
                 Deserializer<ByteBuf> deserializer = ByteBufDeserializer.of(buf);
                 if (buf instanceof RegistryByteBuf registryByteBuf) {
-                    deserializer = deserializer.withAttributes(SerializationAttributes.REGISTRIES.instance(registryByteBuf.getRegistryManager()));
+                    deserializer = deserializer.withAttributes(RegistriesAttribute.of(registryByteBuf.getRegistryManager()));
                 }
 
                 return Endec.this.decode(deserializer);
@@ -482,7 +492,7 @@ public interface Endec<T> {
             public void encode(B buf, T value) {
                 Serializer<ByteBuf> serializer = ByteBufSerializer.of(buf);
                 if (buf instanceof RegistryByteBuf registryByteBuf) {
-                    serializer = serializer.withAttributes(SerializationAttributes.REGISTRIES.instance(registryByteBuf.getRegistryManager()));
+                    serializer = serializer.withAttributes(RegistriesAttribute.of(registryByteBuf.getRegistryManager()));
                 }
 
                 Endec.this.encode(serializer, value);

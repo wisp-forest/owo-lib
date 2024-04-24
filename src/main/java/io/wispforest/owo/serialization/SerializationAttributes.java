@@ -1,7 +1,5 @@
 package io.wispforest.owo.serialization;
 
-import net.minecraft.registry.DynamicRegistryManager;
-
 public final class SerializationAttributes {
 
     /**
@@ -22,8 +20,7 @@ public final class SerializationAttributes {
      */
     public static final SerializationAttribute.Marker HUMAN_READABLE = SerializationAttribute.marker("human_readable");
 
-    public static final SerializationAttribute.WithValue<DynamicRegistryManager> REGISTRIES = SerializationAttribute.withValue("registries");
+    public static final SerializationAttribute.WithValue<RegistriesAttribute> REGISTRIES = SerializationAttribute.withValue("registries");
 
     private SerializationAttributes() {}
-
 }
