@@ -3,6 +3,7 @@ package io.wispforest.owo.serialization.format.json;
 import com.google.gson.*;
 import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.SerializationAttribute;
+import io.wispforest.owo.serialization.SerializationAttributes;
 import io.wispforest.owo.serialization.Serializer;
 import io.wispforest.owo.serialization.util.RecursiveSerializer;
 
@@ -12,7 +13,6 @@ import java.util.Set;
 
 public class JsonSerializer extends RecursiveSerializer<JsonElement> {
 
-    private static final Set<SerializationAttribute> ATTRIBUTES = EnumSet.allOf(SerializationAttribute.class);
     private JsonElement prefix;
 
     protected JsonSerializer(JsonElement prefix) {
@@ -31,8 +31,13 @@ public class JsonSerializer extends RecursiveSerializer<JsonElement> {
     // ---
 
     @Override
-    public Set<SerializationAttribute> attributes() {
-        return ATTRIBUTES;
+    public boolean hasAttribute(SerializationAttribute attribute) {
+        return attribute == SerializationAttributes.SELF_DESCRIBING || attribute == SerializationAttributes.HUMAN_READABLE;
+    }
+
+    @Override
+    public <A> A getAttributeValue(SerializationAttribute.WithValue<A> attribute) {
+        throw new IllegalArgumentException("JsonSerializer does not provide any attribute values");
     }
 
     // ---

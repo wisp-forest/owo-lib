@@ -2,6 +2,7 @@ package io.wispforest.owo.serialization.format.nbt;
 
 import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.SerializationAttribute;
+import io.wispforest.owo.serialization.SerializationAttributes;
 import io.wispforest.owo.serialization.Serializer;
 import io.wispforest.owo.serialization.util.RecursiveSerializer;
 import net.minecraft.nbt.*;
@@ -13,10 +14,6 @@ import java.util.Optional;
 import java.util.Set;
 
 public class NbtSerializer extends RecursiveSerializer<NbtElement> {
-
-    private static final Set<SerializationAttribute> ATTRIBUTES = EnumSet.of(
-            SerializationAttribute.SELF_DESCRIBING
-    );
 
     protected NbtElement prefix;
 
@@ -36,8 +33,13 @@ public class NbtSerializer extends RecursiveSerializer<NbtElement> {
     // ---
 
     @Override
-    public Set<SerializationAttribute> attributes() {
-        return ATTRIBUTES;
+    public boolean hasAttribute(SerializationAttribute attribute) {
+        return attribute == SerializationAttributes.SELF_DESCRIBING;
+    }
+
+    @Override
+    public <A> A getAttributeValue(SerializationAttribute.WithValue<A> attribute) {
+        throw new IllegalArgumentException("NbtSerializer does not provide any attribute values");
     }
 
     // ---

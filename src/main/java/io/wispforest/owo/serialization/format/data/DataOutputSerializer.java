@@ -7,7 +7,6 @@ import io.wispforest.owo.serialization.Serializer;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Optional;
-import java.util.Set;
 
 public class DataOutputSerializer<D extends DataOutput> implements Serializer<D> {
 
@@ -32,8 +31,13 @@ public class DataOutputSerializer<D extends DataOutput> implements Serializer<D>
     // ---
 
     @Override
-    public Set<SerializationAttribute> attributes() {
-        return null;
+    public boolean hasAttribute(SerializationAttribute attribute) {
+        return false;
+    }
+
+    @Override
+    public <A> A getAttributeValue(SerializationAttribute.WithValue<A> attribute) {
+        throw new IllegalArgumentException("DataOutputSerializer does not provide any attribute values");
     }
 
     // ---

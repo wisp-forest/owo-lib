@@ -12,7 +12,7 @@ public final class JsonEndec implements Endec<JsonElement> {
 
     @Override
     public void encode(Serializer<?> serializer, JsonElement value) {
-        if (serializer.attributes().contains(SerializationAttribute.SELF_DESCRIBING)) {
+        if (serializer.hasAttribute(SerializationAttributes.SELF_DESCRIBING)) {
             JsonDeserializer.of(value).readAny(serializer);
             return;
         }

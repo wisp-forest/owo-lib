@@ -4,7 +4,6 @@
   "package": "io.wispforest.owo.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
-      "SetComponentsLootFunctionAccessor",
     "ClientCommonNetworkHandlerAccessor",
     "ClientConnectionMixin",
     "Copenhagen",
@@ -15,6 +14,7 @@
     "ServerCommonNetworkHandlerAccessor",
     "ServerPlayerEntityMixin",
     "ServerPlayerInteractionManagerMixin",
+    "SetComponentsLootFunctionAccessor",
     "SimpleRegistryMixin",
     "TagGroupLoaderMixin",
     "itemgroup.ItemGroupAccessor",
@@ -37,6 +37,7 @@
     "ui.access.BlockEntityAccessor"
   ],
   "client": [
+    "ClientConfigurationNetworkHandlerMixin",
     "ClientLoginNetworkHandlerAccessor",
     "DrawContextMixin",
     "MinecraftClientMixin",

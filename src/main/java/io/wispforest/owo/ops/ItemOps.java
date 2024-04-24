@@ -5,6 +5,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.Hand;
 
 /**
@@ -115,11 +116,10 @@ public final class ItemOps {
      * @param nbt   The nbt compound to write to
      * @param key   The key to prefix the stack with
      */
-    public static void store(ItemStack stack, NbtCompound nbt, String key) {
+    public static void store(RegistryWrapper.WrapperLookup registries, ItemStack stack, NbtCompound nbt, String key) {
         if (stack.isEmpty()) return;
 
-        // TODO: use proper dynamic registry manager.
-        nbt.put(key, stack.encode(Owo.currentServer().getRegistryManager()));
+        nbt.put(key, stack.encode(registries));
     }
 
     /**
@@ -130,12 +130,11 @@ public final class ItemOps {
      * @param key The key to load from
      * @return The deserialized stack
      */
-    public static ItemStack get(NbtCompound nbt, String key) {
+    public static ItemStack get(RegistryWrapper.WrapperLookup registries, NbtCompound nbt, String key) {
         if (!nbt.contains(key, NbtElement.COMPOUND_TYPE)) return ItemStack.EMPTY;
 
-        // TODO: use proper dynamic registry manager.
         var stackNbt = nbt.getCompound(key);
-        return ItemStack.fromNbtOrEmpty(Owo.currentServer().getRegistryManager(), stackNbt);
+        return ItemStack.fromNbtOrEmpty(registries, stackNbt);
     }
 
 }

@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.wispforest.owo.serialization.Deserializer;
 import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.SerializationAttribute;
+import io.wispforest.owo.serialization.SerializationAttributes;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.encoding.StringEncoding;
 import net.minecraft.network.encoding.VarInts;
@@ -11,7 +12,6 @@ import net.minecraft.network.encoding.VarLongs;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 
 public class ByteBufDeserializer implements Deserializer<ByteBuf> {
@@ -29,8 +29,13 @@ public class ByteBufDeserializer implements Deserializer<ByteBuf> {
     // ---
 
     @Override
-    public Set<SerializationAttribute> attributes() {
-        return Set.of();
+    public boolean hasAttribute(SerializationAttribute attribute) {
+        return false;
+    }
+
+    @Override
+    public <A> A getAttributeValue(SerializationAttribute.WithValue<A> attribute) {
+        throw new IllegalArgumentException("ByteBufDeserializer does not provide any attribute values");
     }
 
     // ---

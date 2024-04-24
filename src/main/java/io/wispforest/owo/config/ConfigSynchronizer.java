@@ -12,15 +12,14 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.event.Event;
-import net.fabricmc.fabric.api.networking.v1.*;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -176,8 +175,8 @@ public class ConfigSynchronizer {
     private record ConfigSyncPacket(Map<String, ConfigEntry> configs) implements CustomPayload {
         public static final Id<ConfigSyncPacket> ID = new Id<>(CONFIG_SYNC_CHANNEL);
         public static final Endec<ConfigSyncPacket> ENDEC = StructEndecBuilder.of(
-            Endec.map(Function.identity(), Function.identity(), ConfigEntry.ENDEC).fieldOf("configs", ConfigSyncPacket::configs),
-            ConfigSyncPacket::new
+                ConfigEntry.ENDEC.mapOf().fieldOf("configs", ConfigSyncPacket::configs),
+                ConfigSyncPacket::new
         );
 
         @Override
@@ -188,8 +187,8 @@ public class ConfigSynchronizer {
 
     private record ConfigEntry(Map<String, PacketByteBuf> options) {
         public static final Endec<ConfigEntry> ENDEC = StructEndecBuilder.of(
-            Endec.map(Function.identity(), Function.identity(), BuiltInEndecs.PACKET_BYTE_BUF).fieldOf("options", ConfigEntry::options),
-            ConfigEntry::new
+                BuiltInEndecs.PACKET_BYTE_BUF.mapOf().fieldOf("options", ConfigEntry::options),
+                ConfigEntry::new
         );
     }
 

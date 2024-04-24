@@ -8,11 +8,13 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.ops.TextOps;
 import net.minecraft.command.argument.NbtPathArgumentType;
+import net.minecraft.component.ComponentChanges;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.server.command.ServerCommandSource;
@@ -67,13 +69,12 @@ public class DumpdataCommand {
             feedback(source, TextOps.withFormatting("Not damageable", Formatting.GRAY));
         }
 
-        // TODO: figure out what to do with this.
-//        if (context.getSource().getPlayer().getMainHandStack().hasNbt()) {
-//            feedback(source, TextOps.withFormatting("NBT" + formatPath(path) + ": ", Formatting.GRAY)
-//                    .append(NbtHelper.toPrettyPrintedText(getPath(stack.getNbt(), path))));
-//        } else {
-//            feedback(source, TextOps.withFormatting("No NBT", Formatting.GRAY));
-//        }
+        if (!stack.getComponentChanges().isEmpty()) {
+            feedback(source, TextOps.withFormatting("Component changes" + formatPath(path) + ": ", Formatting.GRAY)
+                    .append(NbtHelper.toPrettyPrintedText(getPath(ComponentChanges.CODEC.encodeStart(NbtOps.INSTANCE, stack.getComponentChanges()).getOrThrow(), path))));
+        } else {
+            feedback(source, TextOps.withFormatting("No component changes", Formatting.GRAY));
+        }
 
         feedback(source, TextOps.withFormatting("-----------------------", Formatting.GRAY));
 

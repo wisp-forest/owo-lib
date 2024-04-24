@@ -4,16 +4,24 @@ import io.wispforest.owo.serialization.format.forwarding.ForwardingSerializer;
 import io.wispforest.owo.serialization.util.Endable;
 
 import java.util.Optional;
-import java.util.Set;
 
 public interface Serializer<T> {
 
-    default Serializer<T> withAttributes(SerializationAttribute... assumedAttributes) {
-        if (assumedAttributes.length == 0) return this;
-        return ForwardingSerializer.of(this, assumedAttributes);
+    default Serializer<T> withAttributes(SerializationAttribute.Instance... additionalAttributes) {
+        if (additionalAttributes.length == 0) return this;
+        return ForwardingSerializer.of(this, additionalAttributes);
     }
 
-    Set<SerializationAttribute> attributes();
+    boolean hasAttribute(SerializationAttribute attribute);
+    <A> A getAttributeValue(SerializationAttribute.WithValue<A> attribute);
+
+    default <A> A requireAttributeValue(SerializationAttribute.WithValue<A> attribute) {
+        if (!this.hasAttribute(attribute)) {
+            throw new IllegalStateException("Serializer did not provide a value for attribute '" + attribute.name + "', which is required for encoding");
+        }
+
+        return this.getAttributeValue(attribute);
+    }
 
     void writeByte(byte value);
     void writeShort(short value);

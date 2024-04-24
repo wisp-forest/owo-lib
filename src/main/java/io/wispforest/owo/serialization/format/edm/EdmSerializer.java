@@ -1,18 +1,17 @@
 package io.wispforest.owo.serialization.format.edm;
 
-import com.google.common.collect.ImmutableSet;
 import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.SerializationAttribute;
+import io.wispforest.owo.serialization.SerializationAttributes;
 import io.wispforest.owo.serialization.Serializer;
 import io.wispforest.owo.serialization.util.RecursiveSerializer;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Optional;
 
 public class EdmSerializer extends RecursiveSerializer<EdmElement<?>> {
-
-    private static final Set<SerializationAttribute> ATTRIBUTES = EnumSet.of(
-            SerializationAttribute.SELF_DESCRIBING
-    );
 
     protected EdmSerializer() {
         super(null);
@@ -25,8 +24,13 @@ public class EdmSerializer extends RecursiveSerializer<EdmElement<?>> {
     // ---
 
     @Override
-    public Set<SerializationAttribute> attributes() {
-        return ATTRIBUTES;
+    public boolean hasAttribute(SerializationAttribute attribute) {
+        return attribute == SerializationAttributes.SELF_DESCRIBING;
+    }
+
+    @Override
+    public <A> A getAttributeValue(SerializationAttribute.WithValue<A> attribute) {
+        throw new IllegalArgumentException("EdmSerializer does not provide any attribute values");
     }
 
     // ---

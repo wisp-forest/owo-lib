@@ -18,7 +18,7 @@ public final class NbtEndec implements Endec<NbtElement> {
 
     @Override
     public void encode(Serializer<?> serializer, NbtElement value) {
-        if (serializer.attributes().contains(SerializationAttribute.SELF_DESCRIBING)) {
+        if (serializer.hasAttribute(SerializationAttributes.SELF_DESCRIBING)) {
             NbtDeserializer.of(value).readAny(serializer);
             return;
         }

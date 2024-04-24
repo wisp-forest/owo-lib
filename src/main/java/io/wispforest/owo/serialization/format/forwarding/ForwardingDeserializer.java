@@ -1,27 +1,26 @@
 package io.wispforest.owo.serialization.format.forwarding;
 
-import com.google.common.collect.ImmutableSet;
 import io.wispforest.owo.serialization.*;
 
+import java.util.HashMap;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 
 public class ForwardingDeserializer<T> implements Deserializer<T> {
 
-    private final Set<SerializationAttribute> attributes;
+    private final java.util.Map<SerializationAttribute, Object> additionalAttributes;
     private final Deserializer<T> delegate;
 
-    protected ForwardingDeserializer(Deserializer<T> delegate, Set<SerializationAttribute> attributes) {
+    protected ForwardingDeserializer(Deserializer<T> delegate, java.util.Map<SerializationAttribute, Object> additionalAttributes) {
         this.delegate = delegate;
-        this.attributes = attributes;
+        this.additionalAttributes = additionalAttributes;
     }
 
-    public static <T> ForwardingDeserializer<T> of(Deserializer<T> delegate, SerializationAttribute... assumedAttributes) {
-        var attributes = ImmutableSet.<SerializationAttribute>builder()
-                .addAll(delegate.attributes())
-                .add(assumedAttributes)
-                .build();
+    public static <T> ForwardingDeserializer<T> of(Deserializer<T> delegate, SerializationAttribute.Instance... additionalAttributes) {
+        var attributes = new HashMap<SerializationAttribute, Object>();
+        for (var instance : additionalAttributes) {
+            attributes.put(instance.attribute(), instance.value());
+        }
 
         return (delegate instanceof SelfDescribedDeserializer<T> selfDescribedDeserializer)
                 ? new ForwardingSelfDescribedDeserializer<>(selfDescribedDeserializer, attributes)
@@ -35,8 +34,16 @@ public class ForwardingDeserializer<T> implements Deserializer<T> {
     //--
 
     @Override
-    public Set<SerializationAttribute> attributes() {
-        return attributes;
+    public boolean hasAttribute(SerializationAttribute attribute) {
+        return this.additionalAttributes.containsKey(attribute) || this.delegate.hasAttribute(attribute);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <A> A getAttributeValue(SerializationAttribute.WithValue<A> attribute) {
+        return this.additionalAttributes.containsKey(attribute)
+                ? (A) this.additionalAttributes.get(attribute)
+                : this.delegate.getAttributeValue(attribute);
     }
 
     @Override
@@ -120,7 +127,7 @@ public class ForwardingDeserializer<T> implements Deserializer<T> {
     }
 
     private static class ForwardingSelfDescribedDeserializer<T> extends ForwardingDeserializer<T> implements SelfDescribedDeserializer<T> {
-        private ForwardingSelfDescribedDeserializer(Deserializer<T> delegate, Set<SerializationAttribute> attributes) {
+        private ForwardingSelfDescribedDeserializer(Deserializer<T> delegate, java.util.Map<SerializationAttribute, Object> attributes) {
             super(delegate, attributes);
         }
 

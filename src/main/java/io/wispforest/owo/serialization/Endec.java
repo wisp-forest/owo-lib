@@ -5,14 +5,15 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
+import io.netty.buffer.ByteBuf;
 import io.wispforest.owo.serialization.endec.*;
 import io.wispforest.owo.serialization.format.bytebuf.ByteBufDeserializer;
 import io.wispforest.owo.serialization.format.bytebuf.ByteBufSerializer;
 import io.wispforest.owo.serialization.format.edm.*;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.util.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -190,7 +191,7 @@ public interface Endec<T> {
      */
     static <E extends Enum<E>> Endec<E> forEnum(Class<E> enumClass) {
         return ifAttr(
-                SerializationAttribute.HUMAN_READABLE,
+                SerializationAttributes.HUMAN_READABLE,
                 STRING.xmap(name -> Arrays.stream(enumClass.getEnumConstants()).filter(e -> e.name().equals(name)).findFirst().get(), Enum::name)
         ).orElse(
                 VAR_INT.xmap(ordinal -> enumClass.getEnumConstants()[ordinal], Enum::ordinal)
@@ -215,18 +216,23 @@ public interface Endec<T> {
      */
     static <T> Endec<T> ofCodec(Codec<T> codec) {
         return of(
-                (serializer, value) -> EdmEndec.INSTANCE.encode(serializer, codec.encodeStart(EdmOps.INSTANCE, value).getOrThrow(IllegalStateException::new)),
-                deserializer -> codec.parse(EdmOps.INSTANCE, EdmEndec.INSTANCE.decode(deserializer)).getOrThrow(IllegalStateException::new)
-        );
-    }
+                (serializer, value) -> {
+                    DynamicOps<EdmElement<?>> ops = EdmOps.INSTANCE;
+                    if (serializer.hasAttribute(SerializationAttributes.REGISTRIES)) {
+                        ops = serializer.getAttributeValue(SerializationAttributes.REGISTRIES).getOps(ops);
+                    }
 
-    static <T> Endec<T> ofPacketCodec(PacketCodec<PacketByteBuf, T> codec) {
-        return BuiltInEndecs.PACKET_BYTE_BUF
-            .xmap(codec::decode, value -> {
-                var buf = PacketByteBufs.create();
-                codec.encode(buf, value);
-                return buf;
-            });
+                    EdmEndec.INSTANCE.encode(serializer, codec.encodeStart(ops, value).getOrThrow(IllegalStateException::new));
+                },
+                deserializer -> {
+                    DynamicOps<EdmElement<?>> ops = EdmOps.INSTANCE;
+                    if (deserializer.hasAttribute(SerializationAttributes.REGISTRIES)) {
+                        ops = deserializer.getAttributeValue(SerializationAttributes.REGISTRIES).getOps(ops);
+                    }
+
+                    return codec.parse(ops, EdmEndec.INSTANCE.decode(deserializer)).getOrThrow(IllegalStateException::new);
+                }
+        );
     }
 
     // ---
@@ -437,7 +443,7 @@ public interface Endec<T> {
      * The serialized representation of a codec created through this method is generally
      * identical to that of a codec manually created to describe the same data
      */
-    default Codec<T> codec(SerializationAttribute... assumedAttributes) {
+    default Codec<T> codec(SerializationAttribute.Instance... assumedAttributes) {
         return new Codec<>() {
             @Override
             public <D> DataResult<Pair<T, D>> decode(DynamicOps<D> ops, D input) {
@@ -460,16 +466,26 @@ public interface Endec<T> {
     }
 
 
-    default PacketCodec<PacketByteBuf, T> packetCodec() {
+    default <B extends PacketByteBuf> PacketCodec<B, T> packetCodec() {
         return new PacketCodec<>() {
             @Override
-            public T decode(PacketByteBuf buf) {
-                return Endec.this.decodeFully(ByteBufDeserializer::of, buf);
+            public T decode(B buf) {
+                Deserializer<ByteBuf> deserializer = ByteBufDeserializer.of(buf);
+                if (buf instanceof RegistryByteBuf registryByteBuf) {
+                    deserializer = deserializer.withAttributes(SerializationAttributes.REGISTRIES.instance(registryByteBuf.getRegistryManager()));
+                }
+
+                return Endec.this.decode(deserializer);
             }
 
             @Override
-            public void encode(PacketByteBuf buf, T value) {
-                Endec.this.encodeFully(() -> ByteBufSerializer.of(buf), value);
+            public void encode(B buf, T value) {
+                Serializer<ByteBuf> serializer = ByteBufSerializer.of(buf);
+                if (buf instanceof RegistryByteBuf registryByteBuf) {
+                    serializer = serializer.withAttributes(SerializationAttributes.REGISTRIES.instance(registryByteBuf.getRegistryManager()));
+                }
+
+                Endec.this.encode(serializer, value);
             }
         };
     }

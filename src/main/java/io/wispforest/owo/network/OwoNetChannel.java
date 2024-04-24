@@ -131,24 +131,24 @@ public class OwoNetChannel {
             msg -> this.endecsByClass.get(msg.getClass()).serverHandlerIndex,
             Endec.VAR_INT
         )
-            .xmap(x -> new MessagePayload(packetId, x), x -> x.message);
+            .xmap(x -> new MessagePayload(this.packetId, x), x -> x.message);
 
         Endec<MessagePayload> clientEndec = Endec.<Record, Integer>dispatched(
                 index -> this.endecsByIndex.get(-index).endec,
                 msg -> this.endecsByClass.get(msg.getClass()).clientHandlerIndex,
                 Endec.VAR_INT
             )
-            .xmap(x -> new MessagePayload(packetId, x), x -> x.message);
+            .xmap(x -> new MessagePayload(this.packetId, x), x -> x.message);
 
-        PayloadTypeRegistry.playC2S().register(packetId, serverEndec.packetCodec());
-        PayloadTypeRegistry.playS2C().register(packetId, clientEndec.packetCodec());
+        PayloadTypeRegistry.playC2S().register(this.packetId, serverEndec.packetCodec());
+        PayloadTypeRegistry.playS2C().register(this.packetId, clientEndec.packetCodec());
 
-        ServerPlayNetworking.registerGlobalReceiver(packetId, (payload, context) -> {
+        ServerPlayNetworking.registerGlobalReceiver(this.packetId, (payload, context) -> {
             serverHandlers.get(endecsByClass.get(payload.message().getClass()).serverHandlerIndex).handle(payload.message, new ServerAccess(context.player()));
         });
 
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            ClientPlayNetworking.registerGlobalReceiver(packetId, (payload, context) -> {
+            ClientPlayNetworking.registerGlobalReceiver(this.packetId, (payload, context) -> {
                 clientHandlers.get(endecsByClass.get(payload.message.getClass()).clientHandlerIndex).handle(payload.message, new ClientAccess(context.player().networkHandler));
             });
         }
@@ -289,7 +289,7 @@ public class OwoNetChannel {
         if (required) return true;
 
         return OwoHandshake.isValidClient() ?
-                getChannelSet(((ServerCommonNetworkHandlerAccessor) networkHandler).owo$getConnection()).contains(this.packetId)
+                getChannelSet(((ServerCommonNetworkHandlerAccessor) networkHandler).owo$getConnection()).contains(this.packetId.id())
                 : ServerPlayNetworking.canSend(networkHandler, this.packetId);
     }
 
@@ -298,7 +298,7 @@ public class OwoNetChannel {
         if (required) return true;
 
         return OwoHandshake.isValidClient() ?
-                getChannelSet(MinecraftClient.getInstance().getNetworkHandler().getConnection()).contains(packetId)
+                getChannelSet(MinecraftClient.getInstance().getNetworkHandler().getConnection()).contains(this.packetId.id())
                 : ClientPlayNetworking.canSend(this.packetId);
     }
 
@@ -547,7 +547,7 @@ public class OwoNetChannel {
     private void verify() {
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
             if (!this.deferredClientEndecs.isEmpty()) {
-                throw new NetworkException("Some deferred client handlers for channel " + packetId + " haven't been registered: " + deferredClientEndecs.keySet().stream().map(Class::getName).collect(Collectors.joining(", ")));
+                throw new NetworkException("Some deferred client handlers for channel " + this.packetId + " haven't been registered: " + deferredClientEndecs.keySet().stream().map(Class::getName).collect(Collectors.joining(", ")));
             }
         }
     }

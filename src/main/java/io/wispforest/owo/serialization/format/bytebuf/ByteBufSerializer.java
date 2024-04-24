@@ -3,6 +3,7 @@ package io.wispforest.owo.serialization.format.bytebuf;
 import io.netty.buffer.ByteBuf;
 import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.SerializationAttribute;
+import io.wispforest.owo.serialization.SerializationAttributes;
 import io.wispforest.owo.serialization.Serializer;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.network.PacketByteBuf;
@@ -32,8 +33,13 @@ public class ByteBufSerializer<B extends ByteBuf> implements Serializer<B> {
     // ---
 
     @Override
-    public Set<SerializationAttribute> attributes() {
-        return Set.of();
+    public boolean hasAttribute(SerializationAttribute attribute) {
+        return false;
+    }
+
+    @Override
+    public <A> A getAttributeValue(SerializationAttribute.WithValue<A> attribute) {
+        throw new IllegalArgumentException("ByteBufSerializer does not provide any attribute values");
     }
 
     // ---

@@ -3,6 +3,7 @@ package io.wispforest.owo.serialization.endec;
 import com.mojang.datafixers.util.Function3;
 import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.SerializationAttribute;
+import io.wispforest.owo.serialization.SerializationAttributes;
 import io.wispforest.owo.serialization.format.nbt.NbtEndec;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.item.ItemStack;
@@ -40,7 +41,7 @@ public final class BuiltInEndecs {
 
     public static final Endec<java.util.UUID> UUID = Endec
             .ifAttr(
-                    SerializationAttribute.HUMAN_READABLE,
+                    SerializationAttributes.HUMAN_READABLE,
                     Endec.STRING.xmap(java.util.UUID::fromString, java.util.UUID::toString)
             ).orElse(
                     INT_ARRAY.xmap(Uuids::toUuid, Uuids::toIntArray)
@@ -48,7 +49,7 @@ public final class BuiltInEndecs {
 
     public static final Endec<Date> DATE = Endec
             .ifAttr(
-                    SerializationAttribute.HUMAN_READABLE,
+                    SerializationAttributes.HUMAN_READABLE,
                     Endec.STRING.xmap(s -> Date.from(Instant.parse(s)), date -> date.toInstant().toString())
             ).orElse(
                     Endec.LONG.xmap(Date::new, Date::getTime)
@@ -66,7 +67,7 @@ public final class BuiltInEndecs {
 
     public static final Endec<BlockPos> BLOCK_POS = Endec
             .ifAttr(
-                    SerializationAttribute.HUMAN_READABLE,
+                    SerializationAttributes.HUMAN_READABLE,
                     vectorEndec("BlockPos", Endec.INT, BlockPos::new, BlockPos::getX, BlockPos::getY, BlockPos::getZ)
             ).orElse(
                     Endec.LONG.xmap(BlockPos::fromLong, BlockPos::asLong)
@@ -74,7 +75,7 @@ public final class BuiltInEndecs {
 
     public static final Endec<ChunkPos> CHUNK_POS = Endec
             .ifAttr(
-                    SerializationAttribute.HUMAN_READABLE,
+                    SerializationAttributes.HUMAN_READABLE,
                     Endec.INT.listOf().validate(ints -> {
                         if (ints.size() != 2) {
                             throw new IllegalStateException("ChunkPos array must have two elements");

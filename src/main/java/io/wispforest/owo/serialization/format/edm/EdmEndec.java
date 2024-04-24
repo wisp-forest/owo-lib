@@ -15,7 +15,7 @@ public class EdmEndec implements Endec<EdmElement<?>> {
 
     @Override
     public void encode(Serializer<?> serializer, EdmElement<?> value) {
-        if (serializer.attributes().contains(SerializationAttribute.SELF_DESCRIBING)) {
+        if (serializer.hasAttribute(SerializationAttributes.SELF_DESCRIBING)) {
             new EdmDeserializer(value).readAny(serializer);
             return;
         }

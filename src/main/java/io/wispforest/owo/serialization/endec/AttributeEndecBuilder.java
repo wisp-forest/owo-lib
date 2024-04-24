@@ -18,7 +18,7 @@ public class AttributeEndecBuilder<T> {
 
     public AttributeEndecBuilder<T> orElseIf(Endec<T> endec, SerializationAttribute attribute) {
         if (this.branches.containsKey(attribute)) {
-            throw new IllegalStateException("Cannot have more than one branch for attribute " + attribute.name());
+            throw new IllegalStateException("Cannot have more than one branch for attribute " + attribute.name);
         }
 
         this.branches.put(attribute, endec);
@@ -32,7 +32,7 @@ public class AttributeEndecBuilder<T> {
                 var branchEndec = endec;
 
                 for (var branch : AttributeEndecBuilder.this.branches.entrySet()) {
-                    if (serializer.attributes().contains(branch.getKey())) {
+                    if (serializer.hasAttribute(branch.getKey())) {
                         branchEndec = branch.getValue();
                         break;
                     }
@@ -46,7 +46,7 @@ public class AttributeEndecBuilder<T> {
                 var branchEndec = endec;
 
                 for (var branch : AttributeEndecBuilder.this.branches.entrySet()) {
-                    if (deserializer.attributes().contains(branch.getKey())) {
+                    if (deserializer.hasAttribute(branch.getKey())) {
                         branchEndec = branch.getValue();
                         break;
                     }

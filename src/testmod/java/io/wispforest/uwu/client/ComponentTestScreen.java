@@ -373,6 +373,9 @@ public class ComponentTestScreen extends Screen {
     }
 
     @Override
+    public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {}
+
+    @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
         this.fadeSlot.update(RenderEffectWrapper.RenderEffect.color(new Color(

@@ -33,7 +33,7 @@ public interface StructEndec<T> extends Endec<T> {
         return this.decodeStruct(deserializer.struct());
     }
 
-    default MapCodec<T> mapCodec(SerializationAttribute... assumedAttributes) {
+    default MapCodec<T> mapCodec(SerializationAttribute.Instance... assumedAttributes) {
         return new MapCodec<>() {
             @Override
             public <T1> Stream<T1> keys(DynamicOps<T1> ops) {

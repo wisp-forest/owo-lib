@@ -5,17 +5,25 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Iterator;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 
 public interface Deserializer<T> {
 
-    default Deserializer<T> withAttributes(SerializationAttribute... assumedAttributes) {
-        if (assumedAttributes.length == 0) return this;
-        return ForwardingDeserializer.of(this, assumedAttributes);
+    default Deserializer<T> withAttributes(SerializationAttribute.Instance... additionalAttributes) {
+        if (additionalAttributes.length == 0) return this;
+        return ForwardingDeserializer.of(this, additionalAttributes);
     }
 
-    Set<SerializationAttribute> attributes();
+    boolean hasAttribute(SerializationAttribute attribute);
+    <A> A getAttributeValue(SerializationAttribute.WithValue<A> attribute);
+
+    default <A> A requireAttributeValue(SerializationAttribute.WithValue<A> attribute) {
+        if (!this.hasAttribute(attribute)) {
+            throw new IllegalStateException("Deserializer did not provide a value for attribute '" + attribute.name + "', which is required for decoding");
+        }
+
+        return this.getAttributeValue(attribute);
+    }
 
     byte readByte();
     short readShort();

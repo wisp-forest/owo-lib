@@ -9,10 +9,6 @@ import java.util.*;
 
 public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implements SelfDescribedDeserializer<NbtElement> {
 
-    private static final Set<SerializationAttribute> ATTRIBUTES = EnumSet.of(
-            SerializationAttribute.SELF_DESCRIBING
-    );
-
     protected NbtDeserializer(NbtElement element) {
         super(element);
     }
@@ -32,8 +28,13 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
     // ---
 
     @Override
-    public Set<SerializationAttribute> attributes() {
-        return ATTRIBUTES;
+    public boolean hasAttribute(SerializationAttribute attribute) {
+        return attribute == SerializationAttributes.SELF_DESCRIBING;
+    }
+
+    @Override
+    public <A> A getAttributeValue(SerializationAttribute.WithValue<A> attribute) {
+        throw new IllegalArgumentException("NbtDeserializer does not provide any attribute values");
     }
 
     // ---

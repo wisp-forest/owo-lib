@@ -1,10 +1,8 @@
 package io.wispforest.owo.serialization.endec;
 
 
-import io.wispforest.owo.serialization.Deserializer;
 import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.Serializer;
-import io.wispforest.owo.serialization.StructEndec;
+import io.wispforest.owo.serialization.SerializationAttributes;
 import io.wispforest.owo.serialization.annotations.SealedPolymorphic;
 import io.wispforest.owo.serialization.format.nbt.NbtEndec;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -13,13 +11,17 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleType;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.*;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
@@ -241,23 +243,27 @@ public class ReflectiveEndecBuilder {
         register(BuiltInEndecs.BITSET, BitSet.class);
         register(BuiltInEndecs.TEXT, Text.class);
 
-        // TODO: properly implement this after RegistryByteBuf support is done
-//        register(BuiltInEndecs.PACKET_BYTE_BUF.xmap(
-//                byteBuf -> {
-//                    //noinspection rawtypes
-//                    final ParticleType particleType = Registries.PARTICLE_TYPE.get(byteBuf.readInt());
-//                    //noinspection unchecked, ConstantConditions
-//
-//                    return particleType.getParametersFactory().read(particleType, byteBuf);
-//                },
-//                particleEffect -> {
-//                    PacketByteBuf buf = PacketByteBufs.create();
-//                    buf.writeInt(Registries.PARTICLE_TYPE.getRawId(particleEffect.getType()));
-//                    particleEffect.write(buf);
-//
-//                    return buf;
-//                }
-//        ), ParticleEffect.class);
+        register(Endec.of(
+                (serializer, particleEffect) -> {
+                    var buffer = new RegistryByteBuf(
+                            PacketByteBufs.create(),
+                            serializer.requireAttributeValue(SerializationAttributes.REGISTRIES)
+                    );
+
+                    buffer.writeInt(Registries.PARTICLE_TYPE.getRawId(particleEffect.getType()));
+                    ((ParticleType) particleEffect.getType()).getPacketCodec().encode(buffer, particleEffect);
+
+                    BuiltInEndecs.PACKET_BYTE_BUF.encode(serializer, buffer);
+                }, deserializer -> {
+                    var buffer = new RegistryByteBuf(
+                            BuiltInEndecs.PACKET_BYTE_BUF.decode(deserializer),
+                            deserializer.requireAttributeValue(SerializationAttributes.REGISTRIES)
+                    );
+
+                    return Registries.PARTICLE_TYPE.get(buffer.readInt()).getPacketCodec().decode(buffer);
+                }),
+                ParticleEffect.class
+        );
 
         register(BuiltInEndecs.VEC3D, Vec3d.class);
         register(BuiltInEndecs.VECTOR3F, Vector3f.class);

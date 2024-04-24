@@ -26,8 +26,13 @@ public class DataInputDeserializer implements Deserializer<DataInput> {
     // ---
 
     @Override
-    public Set<SerializationAttribute> attributes() {
-        return Set.of();
+    public boolean hasAttribute(SerializationAttribute attribute) {
+        return false;
+    }
+
+    @Override
+    public <A> A getAttributeValue(SerializationAttribute.WithValue<A> attribute) {
+        throw new IllegalArgumentException("DataInputDeserializer does not provide any attribute values");
     }
 
     // ---

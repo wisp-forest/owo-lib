@@ -1,10 +1,7 @@
 package io.wispforest.owo.serialization.endec;
 
 import com.mojang.datafixers.util.Either;
-import io.wispforest.owo.serialization.Deserializer;
-import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.SerializationAttribute;
-import io.wispforest.owo.serialization.Serializer;
+import io.wispforest.owo.serialization.*;
 
 public final class EitherEndec<L, R> implements Endec<Either<L, R>> {
 
@@ -22,7 +19,7 @@ public final class EitherEndec<L, R> implements Endec<Either<L, R>> {
 
     @Override
     public void encode(Serializer<?> serializer, Either<L, R> either) {
-        if (serializer.attributes().contains(SerializationAttribute.SELF_DESCRIBING)) {
+        if (serializer.hasAttribute(SerializationAttributes.SELF_DESCRIBING)) {
             either.ifLeft(left -> this.leftEndec.encode(serializer, left)).ifRight(right -> this.rightEndec.encode(serializer, right));
         } else {
             either.ifLeft(left -> {
@@ -39,7 +36,7 @@ public final class EitherEndec<L, R> implements Endec<Either<L, R>> {
 
     @Override
     public Either<L, R> decode(Deserializer<?> deserializer) {
-        boolean selfDescribing = deserializer.attributes().contains(SerializationAttribute.SELF_DESCRIBING);
+        boolean selfDescribing = deserializer.hasAttribute(SerializationAttributes.SELF_DESCRIBING);
 
         if (selfDescribing) {
             Either<L, R> leftResult = null;

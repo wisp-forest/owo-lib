@@ -8,17 +8,10 @@ import io.wispforest.owo.serialization.*;
 import io.wispforest.owo.serialization.util.RecursiveDeserializer;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.Optional;
-import java.util.Set;
 
 public class JsonDeserializer extends RecursiveDeserializer<JsonElement> implements SelfDescribedDeserializer<JsonElement> {
-
-    private static final Set<SerializationAttribute> ATTRIBUTES = EnumSet.of(
-            SerializationAttribute.SELF_DESCRIBING,
-            SerializationAttribute.HUMAN_READABLE
-    );
 
     protected JsonDeserializer(JsonElement serialized) {
         super(serialized);
@@ -31,8 +24,13 @@ public class JsonDeserializer extends RecursiveDeserializer<JsonElement> impleme
     // ---
 
     @Override
-    public Set<SerializationAttribute> attributes() {
-        return ATTRIBUTES;
+    public boolean hasAttribute(SerializationAttribute attribute) {
+        return attribute == SerializationAttributes.SELF_DESCRIBING || attribute == SerializationAttributes.HUMAN_READABLE;
+    }
+
+    @Override
+    public <A> A getAttributeValue(SerializationAttribute.WithValue<A> attribute) {
+        throw new IllegalArgumentException("JsonDeserializer does not provide any attribute values");
     }
 
     // ---

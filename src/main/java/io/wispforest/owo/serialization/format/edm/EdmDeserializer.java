@@ -4,13 +4,11 @@ import io.wispforest.owo.serialization.*;
 import io.wispforest.owo.serialization.util.RecursiveDeserializer;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
 
 public class EdmDeserializer extends RecursiveDeserializer<EdmElement<?>> implements SelfDescribedDeserializer<EdmElement<?>> {
-
-    private static final Set<SerializationAttribute> ATTRIBUTES = EnumSet.of(
-            SerializationAttribute.SELF_DESCRIBING
-    );
 
     protected EdmDeserializer(EdmElement<?> serialized) {
         super(serialized);
@@ -21,8 +19,13 @@ public class EdmDeserializer extends RecursiveDeserializer<EdmElement<?>> implem
     }
 
     @Override
-    public Set<SerializationAttribute> attributes() {
-        return ATTRIBUTES;
+    public boolean hasAttribute(SerializationAttribute attribute) {
+        return attribute == SerializationAttributes.SELF_DESCRIBING;
+    }
+
+    @Override
+    public <A> A getAttributeValue(SerializationAttribute.WithValue<A> attribute) {
+        throw new IllegalArgumentException("EdmDeserializer does not provide any attribute values");
     }
 
     // ---
@@ -137,8 +140,7 @@ public class EdmDeserializer extends RecursiveDeserializer<EdmElement<?>> implem
             case BOOLEAN -> visitor.writeBoolean(value.cast());
             case STRING -> visitor.writeString(value.cast());
             case BYTES -> visitor.writeBytes(value.cast());
-            case OPTIONAL ->
-                    visitor.writeOptional(Endec.<EdmElement<?>>of(this::visit, deserializer -> null), value.cast());
+            case OPTIONAL -> visitor.writeOptional(Endec.<EdmElement<?>>of(this::visit, deserializer -> null), value.cast());
             case SEQUENCE -> {
                 try (var sequence = visitor.sequence(Endec.<EdmElement<?>>of(this::visit, deserializer -> null), value.<List<EdmElement<?>>>cast().size())) {
                     value.<List<EdmElement<?>>>cast().forEach(sequence::element);
