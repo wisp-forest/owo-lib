@@ -76,7 +76,7 @@ public interface Endec<T> {
 
     // --- Serializer Primitives ---
 
-    Endec<Void> VOID = Endec.of((serializer, unused) -> {}, deserializer -> null);
+    Endec<Void> VOID = Endec.of((ctx, serializer, unused) -> {}, (ctx, deserializer) -> null);
 
     Endec<Boolean> BOOLEAN = Endec.of((ctx, serializer, value) -> serializer.writeBoolean(ctx, value), (ctx, deserializer) -> deserializer.readBoolean(ctx));
     Endec<Byte> BYTE = Endec.of((ctx, serializer, value) -> serializer.writeByte(ctx, value), (ctx, deserializer) -> deserializer.readByte(ctx));
@@ -142,20 +142,6 @@ public interface Endec<T> {
     }
 
     // --- Constructors ---
-
-    static <T> Endec<T> of(BiConsumer<Serializer<?>, T> encode, Function<Deserializer<?>, T> decode) {
-        return new Endec<>() {
-            @Override
-            public void encode(SerializationContext ctx, Serializer<?> serializer, T value) {
-                encode.accept(serializer, value);
-            }
-
-            @Override
-            public T decode(SerializationContext ctx, Deserializer<?> deserializer) {
-                return decode.apply(deserializer);
-            }
-        };
-    }
 
     static <T> Endec<T> of(Encoder<T> encode, Decoder<T> decode) {
         return new Endec<>() {
