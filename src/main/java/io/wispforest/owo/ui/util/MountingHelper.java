@@ -19,7 +19,17 @@ public class MountingHelper {
         this.lateChildren = children;
     }
 
+    /**
+     * @deprecated This method does not account for a possible gap inserted
+     * between components by the layout algorithm and always assumes all components being
+     * placed right next to each other. Use {@link #inflateWithExpand(List, Size, boolean, int)} instead
+     */
+    @Deprecated(forRemoval = true)
     public static void inflateWithExpand(List<Component> children, Size childSpace, boolean vertical) {
+        inflateWithExpand(children, childSpace, vertical, 0);
+    }
+
+    public static void inflateWithExpand(List<Component> children, Size childSpace, boolean vertical, int gap) {
         var nonExpandChildren = new ArrayList<Component>();
 
         children.forEach(child -> {
@@ -32,7 +42,6 @@ public class MountingHelper {
             }
         });
 
-        //noinspection ExtractMethodRecommender
         Size remainingSpace;
         if (vertical) {
             int height = childSpace.height();
@@ -40,6 +49,7 @@ public class MountingHelper {
                 height -= nonExpandChild.fullSize().height();
             }
 
+            height -= gap * Math.max(children.size() - 1, 0);
             remainingSpace = Size.of(childSpace.width(), Math.max(0, height));
         } else {
             int width = childSpace.width();
@@ -47,6 +57,7 @@ public class MountingHelper {
                 width -= nonExpandChild.fullSize().width();
             }
 
+            width -= gap * Math.max(children.size() - 1, 0);
             remainingSpace = Size.of(Math.max(0, width), childSpace.height());
         }
 

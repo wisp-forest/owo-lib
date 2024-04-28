@@ -2,7 +2,7 @@ package io.wispforest.owo.serialization;
 
 import java.util.*;
 
-public class SerializationContext {
+public final class SerializationContext {
 
     private static final SerializationContext EMPTY = new SerializationContext(Map.of(), Set.of());
 

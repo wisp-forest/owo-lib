@@ -3,6 +3,7 @@ package io.wispforest.owo.serialization;
 import com.mojang.serialization.*;
 import io.wispforest.owo.mixin.ForwardingDynamicOpsAccessor;
 import io.wispforest.owo.mixin.RegistryOpsAccessor;
+import io.wispforest.owo.serialization.endec.StructField;
 import io.wispforest.owo.serialization.format.edm.*;
 import net.minecraft.registry.RegistryOps;
 import net.minecraft.util.dynamic.ForwardingDynamicOps;
@@ -34,6 +35,24 @@ public interface StructEndec<T> extends Endec<T> {
     @Override
     default T decode(SerializationContext ctx, Deserializer<?> deserializer) {
         return this.decodeStruct(ctx, deserializer.struct());
+    }
+
+    default <S> StructField<S, T> flatFieldOf(Function<S, T> getter) {
+        return new StructField.Flat<>(this, getter);
+    }
+
+    @Override
+    default <R> StructEndec<R> xmap(Function<T, R> to, Function<R, T> from) {
+        return new StructEndec<>() {
+            @Override
+            public void encodeStruct(SerializationContext ctx, Serializer.Struct struct, R value) {
+                StructEndec.this.encodeStruct(ctx, struct, from.apply(value));
+            }
+            @Override
+            public R decodeStruct(SerializationContext ctx, Deserializer.Struct struct) {
+                return to.apply(StructEndec.this.decodeStruct(ctx, struct));
+            }
+        };
     }
 
     default MapCodec<T> mapCodec(SerializationContext assumedContext) {

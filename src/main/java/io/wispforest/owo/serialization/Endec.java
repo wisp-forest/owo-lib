@@ -374,7 +374,7 @@ public interface Endec<T> {
      * whichever variant is represented. In the general for non-self-described formats, the
      * which variant is represented must also be stored
      */
-    private static <F, S> Endec<Either<F, S>> either(Endec<F> first, Endec<S> second) {
+    static <F, S> Endec<Either<F, S>> either(Endec<F> first, Endec<S> second) {
         return new EitherEndec<>(first, second, false);
     }
 
@@ -431,6 +431,14 @@ public interface Endec<T> {
                 return decodeOnError.apply(deserializer, e);
             }
         });
+    }
+
+    /**
+     * Create a new endec which serializes a set of elements
+     * serialized using this endec as an xmapped list
+     */
+    default Endec<Set<T>> setOf() {
+        return this.listOf().xmap(HashSet::new, ArrayList::new);
     }
 
     /**
