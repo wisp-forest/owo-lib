@@ -2,12 +2,9 @@ package io.wispforest.owo.serialization.endec;
 
 import com.mojang.datafixers.util.Function3;
 import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.SerializationAttribute;
 import io.wispforest.owo.serialization.SerializationAttributes;
-import io.wispforest.owo.serialization.format.nbt.NbtEndec;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
@@ -57,6 +54,19 @@ public final class BuiltInEndecs {
 
     // --- MC Types ---
 
+    public static final Endec<PacketByteBuf> PACKET_BYTE_BUF = Endec.BYTES
+            .xmap(bytes -> {
+                var buffer = PacketByteBufs.create();
+                buffer.writeBytes(bytes);
+
+                return buffer;
+            }, buffer -> {
+                var bytes = new byte[buffer.readableBytes()];
+                buffer.readBytes(bytes);
+
+                return bytes;
+            });
+
     public static final Endec<Identifier> IDENTIFIER = Endec.STRING.xmap(Identifier::new, Identifier::toString);
     public static final Endec<ItemStack> ITEM_STACK = Endec.ofCodec(ItemStack.OPTIONAL_CODEC);
     public static final Endec<Text> TEXT = Endec.ofCodec(TextCodecs.CODEC);
@@ -97,19 +107,6 @@ public final class BuiltInEndecs {
                     ? new BlockHitResult(pos, side, blockPos, insideBlock)
                     : BlockHitResult.createMissed(pos, side, blockPos)
     );
-
-    public static final Endec<PacketByteBuf> PACKET_BYTE_BUF = Endec.BYTES
-            .xmap(bytes -> {
-                var buffer = PacketByteBufs.create();
-                buffer.writeBytes(bytes);
-
-                return buffer;
-            }, buffer -> {
-                var bytes = new byte[buffer.readableBytes()];
-                buffer.readBytes(bytes);
-
-                return bytes;
-            });
 
     // --- Constructors for MC types ---
 

@@ -32,7 +32,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.function.BiConsumer;
-import java.util.function.Function;
 
 public class ConfigSynchronizer {
 

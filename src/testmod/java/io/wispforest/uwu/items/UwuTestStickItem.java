@@ -1,14 +1,22 @@
 package io.wispforest.uwu.items;
 
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.OwoItemSettings;
 import io.wispforest.owo.ops.WorldOps;
-import io.wispforest.owo.serialization.endec.BuiltInEndecs;
+import io.wispforest.owo.serialization.Endec;
+import io.wispforest.owo.serialization.RegistriesAttribute;
+import io.wispforest.owo.serialization.SerializationContext;
 import io.wispforest.owo.serialization.endec.KeyedEndec;
+import io.wispforest.owo.serialization.endec.StructEndecBuilder;
 import io.wispforest.uwu.Uwu;
 import io.wispforest.uwu.text.BasedTextContent;
 import net.minecraft.component.DataComponentType;
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -17,6 +25,7 @@ import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryOps;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -31,13 +40,29 @@ import net.minecraft.world.World;
 public class UwuTestStickItem extends Item {
 
     private static final DataComponentType<Text> TEXT_COMPONENT = Registry.register(
-        Registries.DATA_COMPONENT_TYPE,
-        new Identifier("uwu", "text"),
-        DataComponentType.<Text>builder()
-            .codec(TextCodecs.CODEC)
-            .packetCodec(TextCodecs.PACKET_CODEC)
-            .build()
+            Registries.DATA_COMPONENT_TYPE,
+            new Identifier("uwu", "text"),
+            DataComponentType.<Text>builder()
+                    .codec(TextCodecs.CODEC)
+                    .packetCodec(TextCodecs.PACKET_CODEC)
+                    .build()
     );
+
+    private static final Codec<String> THIS_CODEC_NEEDS_REGISTRIES = new Codec<>() {
+        @Override
+        public <T> DataResult<Pair<String, T>> decode(DynamicOps<T> ops, T input) {
+            if (!(ops instanceof RegistryOps<T>)) return DataResult.error(() -> "need the registries bro");
+            return DataResult.success(new Pair<>(ops.getStringValue(input).getOrThrow(), input));
+        }
+        @Override
+        public <T> DataResult<T> encode(String input, DynamicOps<T> ops, T prefix) {
+            if (!(ops instanceof RegistryOps<T>)) return DataResult.error(() -> "need the registries bro");
+            return DataResult.success(ops.createString(input));
+        }
+    };
+
+    private static final Endec<String> YEP_SAME_HERE = Endec.ofCodec(Endec.ofCodec(THIS_CODEC_NEEDS_REGISTRIES).codec());
+    private static final KeyedEndec<String> KYED = YEP_SAME_HERE.keyed("kyed", (String) null);
 
     public UwuTestStickItem() {
         super(new OwoItemSettings()
@@ -48,6 +73,10 @@ public class UwuTestStickItem extends Item {
                     stack.set(DataComponentTypes.CUSTOM_NAME, Text.literal("the stick of the test").styled(style -> style.withItalic(false)));
                     stacks.add(stack);
                 })));
+
+        Uwu.CHANNEL.registerServerbound(ThatPacket.class, StructEndecBuilder.of(YEP_SAME_HERE.fieldOf("mhmm", ThatPacket::mhmm), ThatPacket::new), (message, access) -> {
+            System.out.println("that's a packet received alright: " + message.mhmm);
+        });
     }
 
     @Override
@@ -77,7 +106,29 @@ public class UwuTestStickItem extends Item {
 
     @Override
     public ActionResult useOnBlock(ItemUsageContext context) {
-        if (!context.getPlayer().isSneaking()) return ActionResult.PASS;
+        if (!context.getPlayer().isSneaking()) {
+            if (context.getWorld().isClient) Uwu.CHANNEL.clientHandle().send(new ThatPacket("stringnite"));
+
+            try {
+                var stack = context.getStack();
+                context.getPlayer().sendMessage(Text.literal("current: " + stack.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT).getNbt().get(
+                        KYED,
+                        SerializationContext.attributes(RegistriesAttribute.of(context.getWorld().getRegistryManager()))
+                )));
+
+                stack.apply(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT, nbt -> nbt.apply(nbtCompound -> nbtCompound.put(
+                        KYED,
+                        String.valueOf(context.getWorld().random.nextInt(10000)),
+                        SerializationContext.attributes(RegistriesAttribute.of(context.getWorld().getRegistryManager()))
+                )));
+                context.getPlayer().sendMessage(Text.literal("modified"));
+            } catch (Exception bruh) {
+                context.getPlayer().sendMessage(Text.literal("bruh: " + bruh.getMessage()));
+            }
+
+            return ActionResult.SUCCESS;
+        }
+
         if (context.getWorld().isClient) return ActionResult.SUCCESS;
 
         final var breakStack = new ItemStack(Items.NETHERITE_PICKAXE);
@@ -98,4 +149,6 @@ public class UwuTestStickItem extends Item {
 
         return ActionResult.SUCCESS;
     }
+
+    private record ThatPacket(String mhmm) {}
 }

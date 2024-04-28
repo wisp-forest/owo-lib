@@ -4,13 +4,13 @@ public final class SerializationAttributes {
 
     /**
      * This format is self-describing - that is, the deserializer supports
-     * {@link SelfDescribedDeserializer#readAny(Serializer)} to decode its current element
+     * {@link SelfDescribedDeserializer#readAny(SerializationContext, Serializer)} to decode its current element
      * based purely on structure data stored in the input alone
      * <p>
      * Endecs should use this to make decisions like storing a hierarchical data
      * structure without writing identifying data
      */
-    public static final SerializationAttribute.Marker SELF_DESCRIBING = SerializationAttribute.marker("self_describing");
+//    public static final SerializationAttribute.Marker SELF_DESCRIBING = SerializationAttribute.marker("self_describing");
 
     /**
      * This format is intended to be human-readable (and potentially -editable)

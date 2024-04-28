@@ -1,9 +1,6 @@
 package io.wispforest.owo.serialization.format.edm;
 
-import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.SerializationAttribute;
-import io.wispforest.owo.serialization.SerializationAttributes;
-import io.wispforest.owo.serialization.Serializer;
+import io.wispforest.owo.serialization.*;
 import io.wispforest.owo.serialization.util.RecursiveSerializer;
 
 import java.util.ArrayList;
@@ -11,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
-public class EdmSerializer extends RecursiveSerializer<EdmElement<?>> {
+public class EdmSerializer extends RecursiveSerializer<EdmElement<?>> implements SelfDescribedSerializer<EdmElement<?>> {
 
     protected EdmSerializer() {
         super(null);
@@ -24,82 +21,70 @@ public class EdmSerializer extends RecursiveSerializer<EdmElement<?>> {
     // ---
 
     @Override
-    public boolean hasAttribute(SerializationAttribute attribute) {
-        return attribute == SerializationAttributes.SELF_DESCRIBING;
-    }
-
-    @Override
-    public <A> A getAttributeValue(SerializationAttribute.WithValue<A> attribute) {
-        throw new IllegalArgumentException("EdmSerializer does not provide any attribute values");
-    }
-
-    // ---
-
-    @Override
-    public void writeByte(byte value) {
+    public void writeByte(SerializationContext ctx, byte value) {
         this.consume(EdmElement.wrapByte(value));
     }
 
     @Override
-    public void writeShort(short value) {
+    public void writeShort(SerializationContext ctx, short value) {
         this.consume(EdmElement.wrapShort(value));
     }
 
     @Override
-    public void writeInt(int value) {
+    public void writeInt(SerializationContext ctx, int value) {
         this.consume(EdmElement.wrapInt(value));
     }
 
     @Override
-    public void writeLong(long value) {
+    public void writeLong(SerializationContext ctx, long value) {
         this.consume(EdmElement.wrapLong(value));
     }
 
     // ---
 
     @Override
-    public void writeFloat(float value) {
+    public void writeFloat(SerializationContext ctx, float value) {
         this.consume(EdmElement.wrapFloat(value));
     }
 
     @Override
-    public void writeDouble(double value) {
+    public void writeDouble(SerializationContext ctx, double value) {
         this.consume(EdmElement.wrapDouble(value));
     }
 
     // ---
 
     @Override
-    public void writeVarInt(int value) {
+    public void writeVarInt(SerializationContext ctx, int value) {
         this.consume(EdmElement.wrapInt(value));
     }
 
     @Override
-    public void writeVarLong(long value) {
+    public void writeVarLong(SerializationContext ctx, long value) {
         this.consume(EdmElement.wrapLong(value));
     }
 
     // ---
 
     @Override
-    public void writeBoolean(boolean value) {
+    public void writeBoolean(SerializationContext ctx, boolean value) {
         this.consume(EdmElement.wrapBoolean(value));
     }
 
     @Override
-    public void writeString(String value) {
+    public void writeString(SerializationContext ctx, String value) {
         this.consume(EdmElement.wrapString(value));
     }
 
     @Override
-    public void writeBytes(byte[] bytes) {
+    public void writeBytes(SerializationContext ctx, byte[] bytes) {
         this.consume(EdmElement.wrapBytes(bytes));
     }
 
     @Override
-    public <V> void writeOptional(Endec<V> endec, Optional<V> optional) {
+    public <V> void writeOptional(SerializationContext ctx, Endec<V> endec, Optional<V> optional) {
         this.frame(encoded -> {
-            optional.ifPresent(v -> endec.encode(this, v));
+            optional.ifPresent(v -> endec.encode(ctx, this, v));
             this.consume(EdmElement.wrapOptional(Optional.ofNullable(encoded.get())));
         }, false);
     }
@@ -107,13 +92,13 @@ public class EdmSerializer extends RecursiveSerializer<EdmElement<?>> {
     // ---
 
     @Override
-    public <E> Serializer.Sequence<E> sequence(Endec<E> elementEndec, int size) {
-        return new Sequence<>(elementEndec);
+    public <E> Serializer.Sequence<E> sequence(SerializationContext ctx, Endec<E> elementEndec, int size) {
+        return new Sequence<>(ctx, elementEndec);
     }
 
     @Override
-    public <V> Serializer.Map<V> map(Endec<V> valueEndec, int size) {
-        return new Map<>(valueEndec);
+    public <V> Serializer.Map<V> map(SerializationContext ctx, Endec<V> valueEndec, int size) {
+        return new Map<>(ctx, valueEndec);
     }
 
     @Override
@@ -125,10 +110,12 @@ public class EdmSerializer extends RecursiveSerializer<EdmElement<?>> {
 
     private class Sequence<V> implements Serializer.Sequence<V> {
 
+        private final SerializationContext ctx;
         private final Endec<V> elementEndec;
         private final List<EdmElement<?>> result;
 
-        private Sequence(Endec<V> elementEndec) {
+        private Sequence(SerializationContext ctx, Endec<V> elementEndec) {
+            this.ctx = ctx;
             this.elementEndec = elementEndec;
             this.result = new ArrayList<>();
         }
@@ -136,7 +123,7 @@ public class EdmSerializer extends RecursiveSerializer<EdmElement<?>> {
         @Override
         public void element(V element) {
             EdmSerializer.this.frame(encoded -> {
-                this.elementEndec.encode(EdmSerializer.this, element);
+                this.elementEndec.encode(this.ctx, EdmSerializer.this, element);
                 this.result.add(encoded.require("sequence element"));
             }, false);
         }
@@ -149,10 +136,12 @@ public class EdmSerializer extends RecursiveSerializer<EdmElement<?>> {
 
     private class Map<V> implements Serializer.Map<V> {
 
+        private final SerializationContext ctx;
         private final Endec<V> valueEndec;
         private final java.util.Map<String, EdmElement<?>> result;
 
-        private Map(Endec<V> valueEndec) {
+        private Map(SerializationContext ctx, Endec<V> valueEndec) {
+            this.ctx = ctx;
             this.valueEndec = valueEndec;
             this.result = new HashMap<>();
         }
@@ -160,7 +149,7 @@ public class EdmSerializer extends RecursiveSerializer<EdmElement<?>> {
         @Override
         public void entry(String key, V value) {
             EdmSerializer.this.frame(encoded -> {
-                this.valueEndec.encode(EdmSerializer.this, value);
+                this.valueEndec.encode(this.ctx, EdmSerializer.this, value);
                 this.result.put(key, encoded.require("map value"));
             }, false);
         }
@@ -180,9 +169,9 @@ public class EdmSerializer extends RecursiveSerializer<EdmElement<?>> {
         }
 
         @Override
-        public <F> Serializer.Struct field(String name, Endec<F> endec, F value) {
+        public <F> Serializer.Struct field(String name, SerializationContext ctx, Endec<F> endec, F value) {
             EdmSerializer.this.frame(encoded -> {
-                endec.encode(EdmSerializer.this, value);
+                endec.encode(ctx, EdmSerializer.this, value);
                 this.result.put(name, encoded.require("struct field"));
             }, true);
 

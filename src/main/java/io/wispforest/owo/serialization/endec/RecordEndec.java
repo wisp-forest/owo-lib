@@ -1,10 +1,7 @@
 package io.wispforest.owo.serialization.endec;
 
 import io.wispforest.owo.Owo;
-import io.wispforest.owo.serialization.Deserializer;
-import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.Serializer;
-import io.wispforest.owo.serialization.StructEndec;
+import io.wispforest.owo.serialization.*;
 import io.wispforest.owo.serialization.annotations.NullableComponent;
 import org.apache.commons.lang3.mutable.MutableInt;
 
@@ -79,13 +76,13 @@ public final class RecordEndec<R extends Record> implements StructEndec<R> {
     }
 
     @Override
-    public R decodeStruct(Deserializer.Struct struct) {
+    public R decodeStruct(SerializationContext ctx, Deserializer.Struct struct) {
         Object[] fieldValues = new Object[this.fields.size()];
 
         var index = new MutableInt();
 
         this.fields.forEach((field) -> {
-            fieldValues[index.getAndIncrement()] = field.decodeField(struct);
+            fieldValues[index.getAndIncrement()] = field.decodeField(ctx, struct);
         });
 
         try {
@@ -98,7 +95,7 @@ public final class RecordEndec<R extends Record> implements StructEndec<R> {
     }
 
     @Override
-    public void encodeStruct(Serializer.Struct struct, R instance) {
-        this.fields.forEach(field -> field.encodeField(struct, instance));
+    public void encodeStruct(SerializationContext ctx, Serializer.Struct struct, R instance) {
+        this.fields.forEach(field -> field.encodeField(ctx, struct, instance));
     }
 }

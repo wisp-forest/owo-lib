@@ -1,8 +1,11 @@
 package io.wispforest.owo.serialization;
 
 import com.mojang.serialization.*;
+import io.wispforest.owo.mixin.ForwardingDynamicOpsAccessor;
+import io.wispforest.owo.mixin.RegistryOpsAccessor;
 import io.wispforest.owo.serialization.format.edm.*;
-import net.minecraft.util.Util;
+import net.minecraft.registry.RegistryOps;
+import net.minecraft.util.dynamic.ForwardingDynamicOps;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,28 +15,28 @@ import java.util.stream.Stream;
 /**
  * Marker and template interface for all endecs which serialize structs
  * <p>
- * Every such endec should extend this interface to profit from the implementation of {@link #mapCodec(SerializationAttribute...)}
+ * Every such endec should extend this interface to profit from the implementation of {@link #mapCodec(SerializationContext)}
  * and composability which allows {@link Endec#dispatchedStruct(Function, Function, Endec, String)} to work
  */
 public interface StructEndec<T> extends Endec<T> {
 
-    void encodeStruct(Serializer.Struct struct, T value);
+    void encodeStruct(SerializationContext ctx, Serializer.Struct struct, T value);
 
-    T decodeStruct(Deserializer.Struct struct);
+    T decodeStruct(SerializationContext ctx, Deserializer.Struct struct);
 
     @Override
-    default void encode(Serializer<?> serializer, T value) {
+    default void encode(SerializationContext ctx, Serializer<?> serializer, T value) {
         try (var struct = serializer.struct()) {
-            this.encodeStruct(struct, value);
+            this.encodeStruct(ctx, struct, value);
         }
     }
 
     @Override
-    default T decode(Deserializer<?> deserializer) {
-        return this.decodeStruct(deserializer.struct());
+    default T decode(SerializationContext ctx, Deserializer<?> deserializer) {
+        return this.decodeStruct(ctx, deserializer.struct());
     }
 
-    default MapCodec<T> mapCodec(SerializationAttribute.Instance... assumedAttributes) {
+    default MapCodec<T> mapCodec(SerializationContext assumedContext) {
         return new MapCodec<>() {
             @Override
             public <T1> Stream<T1> keys(DynamicOps<T1> ops) {
@@ -48,11 +51,22 @@ public interface StructEndec<T> extends Endec<T> {
                         map.put(
                                 ops.getStringValue(pair.getFirst())
                                         .getOrThrow(s -> new IllegalStateException("Unable to parse key: " + s)),
-                                ops.convertTo(EdmOps.INSTANCE, pair.getSecond())
+                                ops.convertTo(EdmOps.withoutContext(), pair.getSecond())
                         );
                     });
 
-                    return DataResult.success(StructEndec.this.decode(LenientEdmDeserializer.of(EdmElement.wrapMap(map)).withAttributes(assumedAttributes)));
+                    var rootOps = ops;
+                    while (rootOps instanceof ForwardingDynamicOps<T1>) rootOps = ((ForwardingDynamicOpsAccessor<T1>) ops).owo$delegate();
+
+                    var context = rootOps instanceof EdmOps edmOps
+                            ? edmOps.capturedContext().and(assumedContext)
+                            : assumedContext;
+
+                    if (ops instanceof RegistryOps<T1> registryOps) {
+                        context = context.withAttributes(RegistriesAttribute.infoGetterOnly(((RegistryOpsAccessor) registryOps).owo$infoGetter()));
+                    }
+
+                    return DataResult.success(StructEndec.this.decode(context, LenientEdmDeserializer.of(EdmElement.wrapMap(map))));
                 } catch (Exception e) {
                     return DataResult.error(e::getMessage);
                 }
@@ -61,11 +75,22 @@ public interface StructEndec<T> extends Endec<T> {
             @Override
             public <T1> RecordBuilder<T1> encode(T input, DynamicOps<T1> ops, RecordBuilder<T1> prefix) {
                 try {
-                    var element = StructEndec.this.encodeFully(() -> EdmSerializer.of().withAttributes(assumedAttributes), input).<Map<String, EdmElement<?>>>cast();
+                    var rootOps = ops;
+                    while (rootOps instanceof ForwardingDynamicOps<T1>) rootOps = ((ForwardingDynamicOpsAccessor<T1>) ops).owo$delegate();
+
+                    var context = rootOps instanceof EdmOps edmOps
+                            ? edmOps.capturedContext().and(assumedContext)
+                            : assumedContext;
+
+                    if (ops instanceof RegistryOps<T1> registryOps) {
+                        context = context.withAttributes(RegistriesAttribute.infoGetterOnly(((RegistryOpsAccessor) registryOps).owo$infoGetter()));
+                    }
+
+                    var element = StructEndec.this.encodeFully(context, EdmSerializer::of, input).<Map<String, EdmElement<?>>>cast();
 
                     var result = prefix;
                     for (var entry : element.entrySet()) {
-                        result = result.add(entry.getKey(), EdmOps.INSTANCE.convertTo(ops, entry.getValue()));
+                        result = result.add(entry.getKey(), EdmOps.withoutContext().convertTo(ops, entry.getValue()));
                     }
 
                     return result;
@@ -74,5 +99,9 @@ public interface StructEndec<T> extends Endec<T> {
                 }
             }
         };
+    }
+
+    default MapCodec<T> mapCodec() {
+        return this.mapCodec(SerializationContext.empty());
     }
 }

@@ -1,5 +1,6 @@
 package io.wispforest.owo.serialization.format.edm;
 
+import io.wispforest.owo.serialization.SerializationContext;
 import io.wispforest.owo.serialization.endec.KeyedEndec;
 import io.wispforest.owo.serialization.util.MapCarrier;
 import org.jetbrains.annotations.NotNull;
@@ -13,14 +14,14 @@ public final class EdmMap extends EdmElement<Map<String, EdmElement<?>>> impleme
     }
 
     @Override
-    public <T> T getWithErrors(@NotNull KeyedEndec<T> key) {
+    public <T> T getWithErrors(@NotNull KeyedEndec<T> key, SerializationContext ctx) {
         if (!this.has(key)) return key.defaultValue();
-        return key.endec().decodeFully(EdmDeserializer::of, this.value().get(key.key()));
+        return key.endec().decodeFully(ctx, EdmDeserializer::of, this.value().get(key.key()));
     }
 
     @Override
-    public <T> void put(@NotNull KeyedEndec<T> key, @NotNull T value) {
-        this.value().put(key.key(), key.endec().encodeFully(EdmSerializer::of, value));
+    public <T> void put(@NotNull KeyedEndec<T> key, @NotNull T value, SerializationContext ctx) {
+        this.value().put(key.key(), key.endec().encodeFully(ctx, EdmSerializer::of, value));
     }
 
     @Override

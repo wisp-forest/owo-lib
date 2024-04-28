@@ -2,6 +2,7 @@ package io.wispforest.owo.serialization.endec;
 
 import io.wispforest.owo.serialization.Deserializer;
 import io.wispforest.owo.serialization.Endec;
+import io.wispforest.owo.serialization.SerializationContext;
 import io.wispforest.owo.serialization.Serializer;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,13 +31,13 @@ public final class StructField<S, F> {
         this(name, endec, getter, (Supplier<F>) null);
     }
 
-    public void encodeField(Serializer.Struct struct, S instance) {
-        struct.field(this.name, this.endec, this.getter.apply(instance));
+    public void encodeField(SerializationContext ctx, Serializer.Struct struct, S instance) {
+        struct.field(this.name, ctx, this.endec, this.getter.apply(instance));
     }
 
-    public F decodeField(Deserializer.Struct struct) {
+    public F decodeField(SerializationContext ctx, Deserializer.Struct struct) {
         return this.defaultValueFactory != null
-                ? struct.field(this.name, this.endec, this.defaultValueFactory.get())
-                : struct.field(this.name, this.endec);
+                ? struct.field(this.name, ctx, this.endec, this.defaultValueFactory.get())
+                : struct.field(this.name, ctx, this.endec);
     }
 }

@@ -18,37 +18,37 @@ public final class EitherEndec<L, R> implements Endec<Either<L, R>> {
     }
 
     @Override
-    public void encode(Serializer<?> serializer, Either<L, R> either) {
-        if (serializer.hasAttribute(SerializationAttributes.SELF_DESCRIBING)) {
-            either.ifLeft(left -> this.leftEndec.encode(serializer, left)).ifRight(right -> this.rightEndec.encode(serializer, right));
+    public void encode(SerializationContext ctx, Serializer<?> serializer, Either<L, R> either) {
+        if (serializer instanceof SelfDescribedSerializer<?>) {
+            either.ifLeft(left -> this.leftEndec.encode(ctx, serializer, left)).ifRight(right -> this.rightEndec.encode(ctx, serializer, right));
         } else {
             either.ifLeft(left -> {
                 try (var struct = serializer.struct()) {
-                    struct.field("is_left", Endec.BOOLEAN, true).field("left", this.leftEndec, left);
+                    struct.field("is_left", ctx, Endec.BOOLEAN, true).field("left", ctx, this.leftEndec, left);
                 }
             }).ifRight(right -> {
                 try (var struct = serializer.struct()) {
-                    struct.field("is_left", Endec.BOOLEAN, false).field("right", this.rightEndec, right);
+                    struct.field("is_left", ctx, Endec.BOOLEAN, false).field("right", ctx, this.rightEndec, right);
                 }
             });
         }
     }
 
     @Override
-    public Either<L, R> decode(Deserializer<?> deserializer) {
-        boolean selfDescribing = deserializer.hasAttribute(SerializationAttributes.SELF_DESCRIBING);
+    public Either<L, R> decode(SerializationContext ctx, Deserializer<?> deserializer) {
+        boolean selfDescribing = deserializer instanceof SelfDescribedDeserializer<?>;
 
         if (selfDescribing) {
             Either<L, R> leftResult = null;
             try {
-                leftResult = Either.left(deserializer.tryRead(this.leftEndec::decode));
+                leftResult = Either.left(deserializer.tryRead(deserializer1 -> this.leftEndec.decode(ctx, deserializer1)));
             } catch (Exception ignore) {}
 
             if (!this.exclusive && leftResult != null) return leftResult;
 
             Either<L, R> rightResult = null;
             try {
-                rightResult = Either.right(deserializer.tryRead(this.rightEndec::decode));
+                rightResult = Either.right(deserializer.tryRead(deserializer1 -> this.rightEndec.decode(ctx, deserializer1)));
             } catch (Exception ignore) {}
 
             if (this.exclusive && leftResult != null && rightResult != null) {
@@ -61,10 +61,10 @@ public final class EitherEndec<L, R> implements Endec<Either<L, R>> {
             throw new IllegalStateException("Neither alternative read successfully");
         } else {
             var struct = deserializer.struct();
-            if (struct.field("is_left", Endec.BOOLEAN)) {
-                return Either.left(struct.field("left", this.leftEndec));
+            if (struct.field("is_left", ctx, Endec.BOOLEAN)) {
+                return Either.left(struct.field("left", ctx, this.leftEndec));
             } else {
-                return Either.right(struct.field("right", this.rightEndec));
+                return Either.right(struct.field("right", ctx, this.rightEndec));
             }
         }
 

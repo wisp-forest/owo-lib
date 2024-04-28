@@ -1,19 +1,14 @@
 package io.wispforest.owo.serialization.format.nbt;
 
-import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.SerializationAttribute;
-import io.wispforest.owo.serialization.SerializationAttributes;
-import io.wispforest.owo.serialization.Serializer;
+import io.wispforest.owo.serialization.*;
 import io.wispforest.owo.serialization.util.RecursiveSerializer;
 import net.minecraft.nbt.*;
 import net.minecraft.network.encoding.VarInts;
 import net.minecraft.network.encoding.VarLongs;
 
-import java.util.EnumSet;
 import java.util.Optional;
-import java.util.Set;
 
-public class NbtSerializer extends RecursiveSerializer<NbtElement> {
+public class NbtSerializer extends RecursiveSerializer<NbtElement> implements SelfDescribedSerializer<NbtElement> {
 
     protected NbtElement prefix;
 
@@ -33,51 +28,39 @@ public class NbtSerializer extends RecursiveSerializer<NbtElement> {
     // ---
 
     @Override
-    public boolean hasAttribute(SerializationAttribute attribute) {
-        return attribute == SerializationAttributes.SELF_DESCRIBING;
-    }
-
-    @Override
-    public <A> A getAttributeValue(SerializationAttribute.WithValue<A> attribute) {
-        throw new IllegalArgumentException("NbtSerializer does not provide any attribute values");
-    }
-
-    // ---
-
-    @Override
-    public void writeByte(byte value) {
+    public void writeByte(SerializationContext ctx, byte value) {
         this.consume(NbtByte.of(value));
     }
 
     @Override
-    public void writeShort(short value) {
+    public void writeShort(SerializationContext ctx, short value) {
         this.consume(NbtShort.of(value));
     }
 
     @Override
-    public void writeInt(int value) {
+    public void writeInt(SerializationContext ctx, int value) {
         this.consume(NbtInt.of(value));
     }
 
     @Override
-    public void writeLong(long value) {
+    public void writeLong(SerializationContext ctx, long value) {
         this.consume(NbtLong.of(value));
     }
 
     @Override
-    public void writeFloat(float value) {
+    public void writeFloat(SerializationContext ctx, float value) {
         this.consume(NbtFloat.of(value));
     }
 
     @Override
-    public void writeDouble(double value) {
+    public void writeDouble(SerializationContext ctx, double value) {
         this.consume(NbtDouble.of(value));
     }
 
     // ---
 
     @Override
-    public void writeVarInt(int value) {
+    public void writeVarInt(SerializationContext ctx, int value) {
         this.consume(switch (VarInts.getSizeInBytes(value)) {
             case 0, 1 -> NbtByte.of((byte) value);
             case 2 -> NbtShort.of((short) value);
@@ -86,7 +69,7 @@ public class NbtSerializer extends RecursiveSerializer<NbtElement> {
     }
 
     @Override
-    public void writeVarLong(long value) {
+    public void writeVarLong(SerializationContext ctx, long value) {
         this.consume(switch (VarLongs.getSizeInBytes(value)) {
             case 0, 1 -> NbtByte.of((byte) value);
             case 2 -> NbtShort.of((short) value);
@@ -98,28 +81,28 @@ public class NbtSerializer extends RecursiveSerializer<NbtElement> {
     // ---
 
     @Override
-    public void writeBoolean(boolean value) {
+    public void writeBoolean(SerializationContext ctx, boolean value) {
         this.consume(NbtByte.of(value));
     }
 
     @Override
-    public void writeString(String value) {
+    public void writeString(SerializationContext ctx, String value) {
         this.consume(NbtString.of(value));
     }
 
     @Override
-    public void writeBytes(byte[] bytes) {
+    public void writeBytes(SerializationContext ctx, byte[] bytes) {
         this.consume(new NbtByteArray(bytes));
     }
 
     @Override
-    public <V> void writeOptional(Endec<V> endec, Optional<V> optional) {
+    public <V> void writeOptional(SerializationContext ctx, Endec<V> endec, Optional<V> optional) {
         if (this.isWritingStructField()) {
-            optional.ifPresent(v -> endec.encode(this, v));
+            optional.ifPresent(v -> endec.encode(ctx, this, v));
         } else {
             try (var struct = this.struct()) {
-                struct.field("present", Endec.BOOLEAN, optional.isPresent());
-                optional.ifPresent(value -> struct.field("value", endec, value));
+                struct.field("present", ctx, Endec.BOOLEAN, optional.isPresent());
+                optional.ifPresent(value -> struct.field("value", ctx, endec, value));
             }
         }
     }
@@ -127,28 +110,30 @@ public class NbtSerializer extends RecursiveSerializer<NbtElement> {
     // ---
 
     @Override
-    public <E> Serializer.Sequence<E> sequence(Endec<E> elementEndec, int size) {
-        return new Sequence<>(elementEndec);
+    public <E> Serializer.Sequence<E> sequence(SerializationContext ctx, Endec<E> elementEndec, int size) {
+        return new Sequence<>(ctx, elementEndec);
     }
 
     @Override
-    public <V> Serializer.Map<V> map(Endec<V> valueEndec, int size) {
-        return new Map<>(valueEndec);
+    public <V> Serializer.Map<V> map(SerializationContext ctx, Endec<V> valueEndec, int size) {
+        return new Map<>(ctx, valueEndec);
     }
 
     @Override
     public Struct struct() {
-        return new Map<>(null);
+        return new Map<>(null, null);
     }
 
     // ---
 
     private class Map<V> implements Serializer.Map<V>, Struct {
 
+        private final SerializationContext ctx;
         private final Endec<V> valueEndec;
         private final NbtCompound result;
 
-        private Map(Endec<V> valueEndec) {
+        private Map(SerializationContext ctx, Endec<V> valueEndec) {
+            this.ctx = ctx;
             this.valueEndec = valueEndec;
 
             if (NbtSerializer.this.prefix != null) {
@@ -165,15 +150,15 @@ public class NbtSerializer extends RecursiveSerializer<NbtElement> {
         @Override
         public void entry(String key, V value) {
             NbtSerializer.this.frame(encoded -> {
-                this.valueEndec.encode(NbtSerializer.this, value);
+                this.valueEndec.encode(this.ctx, NbtSerializer.this, value);
                 this.result.put(key, encoded.require("map value"));
             }, false);
         }
 
         @Override
-        public <F> Struct field(String name, Endec<F> endec, F value) {
+        public <F> Struct field(String name, SerializationContext ctx, Endec<F> endec, F value) {
             NbtSerializer.this.frame(encoded -> {
-                endec.encode(NbtSerializer.this, value);
+                endec.encode(ctx, NbtSerializer.this, value);
                 if (encoded.wasEncoded()) {
                     this.result.put(name, encoded.get());
                 }
@@ -190,10 +175,12 @@ public class NbtSerializer extends RecursiveSerializer<NbtElement> {
 
     private class Sequence<V> implements Serializer.Sequence<V> {
 
+        private final SerializationContext ctx;
         private final Endec<V> valueEndec;
         private final NbtList result;
 
-        private Sequence(Endec<V> valueEndec) {
+        private Sequence(SerializationContext ctx, Endec<V> valueEndec) {
+            this.ctx = ctx;
             this.valueEndec = valueEndec;
 
             if (NbtSerializer.this.prefix != null) {
@@ -210,7 +197,7 @@ public class NbtSerializer extends RecursiveSerializer<NbtElement> {
         @Override
         public void element(V element) {
             NbtSerializer.this.frame(encoded -> {
-                this.valueEndec.encode(NbtSerializer.this, element);
+                this.valueEndec.encode(this.ctx, NbtSerializer.this, element);
                 this.result.add(encoded.require("sequence element"));
             }, false);
         }

@@ -3,8 +3,7 @@ package io.wispforest.owo.serialization.format.bytebuf;
 import io.netty.buffer.ByteBuf;
 import io.wispforest.owo.serialization.Deserializer;
 import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.SerializationAttribute;
-import io.wispforest.owo.serialization.SerializationAttributes;
+import io.wispforest.owo.serialization.SerializationContext;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.encoding.StringEncoding;
 import net.minecraft.network.encoding.VarInts;
@@ -29,83 +28,71 @@ public class ByteBufDeserializer implements Deserializer<ByteBuf> {
     // ---
 
     @Override
-    public boolean hasAttribute(SerializationAttribute attribute) {
-        return false;
-    }
-
-    @Override
-    public <A> A getAttributeValue(SerializationAttribute.WithValue<A> attribute) {
-        throw new IllegalArgumentException("ByteBufDeserializer does not provide any attribute values");
-    }
-
-    // ---
-
-    @Override
-    public byte readByte() {
+    public byte readByte(SerializationContext ctx) {
         return this.buffer.readByte();
     }
 
     @Override
-    public short readShort() {
+    public short readShort(SerializationContext ctx) {
         return this.buffer.readShort();
     }
 
     @Override
-    public int readInt() {
+    public int readInt(SerializationContext ctx) {
         return this.buffer.readInt();
     }
 
     @Override
-    public long readLong() {
+    public long readLong(SerializationContext ctx) {
         return this.buffer.readLong();
     }
 
     @Override
-    public float readFloat() {
+    public float readFloat(SerializationContext ctx) {
         return this.buffer.readFloat();
     }
 
     @Override
-    public double readDouble() {
+    public double readDouble(SerializationContext ctx) {
         return this.buffer.readDouble();
     }
 
     // ---
 
     @Override
-    public int readVarInt() {
+    public int readVarInt(SerializationContext ctx) {
         return VarInts.read(this.buffer);
     }
 
     @Override
-    public long readVarLong() {
+    public long readVarLong(SerializationContext ctx) {
         return VarLongs.read(this.buffer);
     }
 
     // ---
 
     @Override
-    public boolean readBoolean() {
+    public boolean readBoolean(SerializationContext ctx) {
         return this.buffer.readBoolean();
     }
 
     @Override
-    public String readString() {
+    public String readString(SerializationContext ctx) {
         return StringEncoding.decode(this.buffer, PacketByteBuf.DEFAULT_MAX_STRING_LENGTH);
     }
 
     @Override
-    public byte[] readBytes() {
-        var array = new byte[this.readVarInt()];
+    public byte[] readBytes(SerializationContext ctx) {
+        var array = new byte[this.readVarInt(ctx)];
         this.buffer.readBytes(array);
 
         return array;
     }
 
     @Override
-    public <V> Optional<V> readOptional(Endec<V> endec) {
-        return this.readBoolean()
-                ? Optional.of(endec.decode(this))
+    public <V> Optional<V> readOptional(SerializationContext ctx, Endec<V> endec) {
+        return this.readBoolean(ctx)
+                ? Optional.of(endec.decode(ctx, this))
                 : Optional.empty();
     }
 
@@ -126,30 +113,32 @@ public class ByteBufDeserializer implements Deserializer<ByteBuf> {
     // ---
 
     @Override
-    public <E> Deserializer.Sequence<E> sequence(Endec<E> elementEndec) {
-        return new Sequence<>(elementEndec, this.readVarInt());
+    public <E> Deserializer.Sequence<E> sequence(SerializationContext ctx, Endec<E> elementEndec) {
+        return new Sequence<>(ctx, elementEndec, this.readVarInt(ctx));
     }
 
     @Override
-    public <V> Deserializer.Map<V> map(Endec<V> valueEndec) {
-        return new Map<>(valueEndec, this.readVarInt());
+    public <V> Deserializer.Map<V> map(SerializationContext ctx, Endec<V> valueEndec) {
+        return new Map<>(ctx, valueEndec, this.readVarInt(ctx));
     }
 
     @Override
     public Struct struct() {
-        return new Sequence<>(null, 0);
+        return new Sequence<>(null, null, 0);
     }
 
     // ---
 
     private class Sequence<V> implements Deserializer.Sequence<V>, Struct {
 
+        private final SerializationContext ctx;
         private final Endec<V> valueEndec;
         private final int size;
 
         private int index = 0;
 
-        private Sequence(Endec<V> valueEndec, int size) {
+        private Sequence(SerializationContext ctx, Endec<V> valueEndec, int size) {
+            this.ctx = ctx;
             this.valueEndec = valueEndec;
             this.size = size;
         }
@@ -167,28 +156,30 @@ public class ByteBufDeserializer implements Deserializer<ByteBuf> {
         @Override
         public V next() {
             this.index++;
-            return this.valueEndec.decode(ByteBufDeserializer.this);
+            return this.valueEndec.decode(this.ctx, ByteBufDeserializer.this);
         }
 
         @Override
-        public <F> @Nullable F field(String name, Endec<F> endec) {
-            return this.field(name, endec, null);
+        public <F> @Nullable F field(String name, SerializationContext ctx, Endec<F> endec) {
+            return this.field(name, ctx, endec, null);
         }
 
         @Override
-        public <F> @Nullable F field(String name, Endec<F> endec, @Nullable F defaultValue) {
-            return endec.decode(ByteBufDeserializer.this);
+        public <F> @Nullable F field(String name, SerializationContext ctx, Endec<F> endec, @Nullable F defaultValue) {
+            return endec.decode(ctx, ByteBufDeserializer.this);
         }
     }
 
     private class Map<V> implements Deserializer.Map<V> {
 
+        private final SerializationContext ctx;
         private final Endec<V> valueEndec;
         private final int size;
 
         private int index = 0;
 
-        private Map(Endec<V> valueEndec, int size) {
+        private Map(SerializationContext ctx, Endec<V> valueEndec, int size) {
+            this.ctx = ctx;
             this.valueEndec = valueEndec;
             this.size = size;
         }
@@ -207,8 +198,8 @@ public class ByteBufDeserializer implements Deserializer<ByteBuf> {
         public java.util.Map.Entry<String, V> next() {
             this.index++;
             return java.util.Map.entry(
-                    ByteBufDeserializer.this.readString(),
-                    this.valueEndec.decode(ByteBufDeserializer.this)
+                    ByteBufDeserializer.this.readString(this.ctx),
+                    this.valueEndec.decode(this.ctx, ByteBufDeserializer.this)
             );
         }
     }

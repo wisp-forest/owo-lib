@@ -1,11 +1,10 @@
 package io.wispforest.owo.serialization;
 
-import net.minecraft.registry.*;
+import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.RegistryOps;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Optional;
 
 public final class RegistriesAttribute implements SerializationAttribute.Instance {
 
@@ -19,12 +18,7 @@ public final class RegistriesAttribute implements SerializationAttribute.Instanc
 
     public static RegistriesAttribute of(DynamicRegistryManager registryManager) {
         return new RegistriesAttribute(
-                new RegistryOps.RegistryInfoGetter() {
-                    @Override
-                    public <T> Optional<RegistryOps.RegistryInfo<T>> getRegistryInfo(RegistryKey<? extends Registry<? extends T>> registryRef) {
-                        return registryManager.getOptionalWrapper(registryRef).map(RegistryOps.RegistryInfo::fromWrapper);
-                    }
-                },
+                new RegistryOps.CachedRegistryInfoGetter(registryManager),
                 registryManager
         );
     }

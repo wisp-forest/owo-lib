@@ -28,84 +28,72 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
     // ---
 
     @Override
-    public boolean hasAttribute(SerializationAttribute attribute) {
-        return attribute == SerializationAttributes.SELF_DESCRIBING;
-    }
-
-    @Override
-    public <A> A getAttributeValue(SerializationAttribute.WithValue<A> attribute) {
-        throw new IllegalArgumentException("NbtDeserializer does not provide any attribute values");
-    }
-
-    // ---
-
-    @Override
-    public byte readByte() {
+    public byte readByte(SerializationContext ctx) {
         return this.getAs(this.getValue(), NbtByte.class).byteValue();
     }
 
     @Override
-    public short readShort() {
+    public short readShort(SerializationContext ctx) {
         return this.getAs(this.getValue(), NbtShort.class).shortValue();
     }
 
     @Override
-    public int readInt() {
+    public int readInt(SerializationContext ctx) {
         return this.getAs(this.getValue(), NbtInt.class).intValue();
     }
 
     @Override
-    public long readLong() {
+    public long readLong(SerializationContext ctx) {
         return this.getAs(this.getValue(), NbtLong.class).longValue();
     }
 
     @Override
-    public float readFloat() {
+    public float readFloat(SerializationContext ctx) {
         return this.getAs(this.getValue(), NbtFloat.class).floatValue();
     }
 
     @Override
-    public double readDouble() {
+    public double readDouble(SerializationContext ctx) {
         return this.getAs(this.getValue(), NbtDouble.class).doubleValue();
     }
 
     // ---
 
     @Override
-    public int readVarInt() {
+    public int readVarInt(SerializationContext ctx) {
         return this.getAs(this.getValue(), AbstractNbtNumber.class).intValue();
     }
 
     @Override
-    public long readVarLong() {
+    public long readVarLong(SerializationContext ctx) {
         return this.getAs(this.getValue(), AbstractNbtNumber.class).longValue();
     }
 
     // ---
 
     @Override
-    public boolean readBoolean() {
+    public boolean readBoolean(SerializationContext ctx) {
         return this.getAs(this.getValue(), NbtByte.class).byteValue() != 0;
     }
 
     @Override
-    public String readString() {
+    public String readString(SerializationContext ctx) {
         return this.getAs(this.getValue(), NbtString.class).asString();
     }
 
     @Override
-    public byte[] readBytes() {
+    public byte[] readBytes(SerializationContext ctx) {
         return this.getAs(this.getValue(), NbtByteArray.class).getByteArray();
     }
 
     @Override
-    public <V> Optional<V> readOptional(Endec<V> endec) {
+    public <V> Optional<V> readOptional(SerializationContext ctx, Endec<V> endec) {
         if (this.isReadingStructField()) {
-            return Optional.of(endec.decode(this));
+            return Optional.of(endec.decode(ctx, this));
         } else {
             var struct = this.struct();
-            return struct.field("present", Endec.BOOLEAN)
-                    ? Optional.of(struct.field("value", endec))
+            return struct.field("present", ctx, Endec.BOOLEAN)
+                    ? Optional.of(struct.field("value", ctx, endec))
                     : Optional.empty();
         }
     }
@@ -113,14 +101,14 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
     // ---
 
     @Override
-    public <E> Deserializer.Sequence<E> sequence(Endec<E> elementEndec) {
+    public <E> Deserializer.Sequence<E> sequence(SerializationContext ctx, Endec<E> elementEndec) {
         //noinspection unchecked
-        return new Sequence<>(elementEndec, this.getAs(this.getValue(), AbstractNbtList.class));
+        return new Sequence<>(ctx, elementEndec, this.getAs(this.getValue(), AbstractNbtList.class));
     }
 
     @Override
-    public <V> Deserializer.Map<V> map(Endec<V> valueEndec) {
-        return new Map<>(valueEndec, this.getAs(this.getValue(), NbtCompound.class));
+    public <V> Deserializer.Map<V> map(SerializationContext ctx, Endec<V> valueEndec) {
+        return new Map<>(ctx, valueEndec, this.getAs(this.getValue(), NbtCompound.class));
     }
 
     @Override
@@ -131,29 +119,29 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
     // ---
 
     @Override
-    public <S> void readAny(Serializer<S> visitor) {
-        this.decodeValue(visitor, this.getValue());
+    public <S> void readAny(SerializationContext ctx, Serializer<S> visitor) {
+        this.decodeValue(ctx, visitor, this.getValue());
     }
 
-    private <S> void decodeValue(Serializer<S> visitor, NbtElement value) {
+    private <S> void decodeValue(SerializationContext ctx, Serializer<S> visitor, NbtElement value) {
         switch (value.getType()) {
-            case NbtElement.BYTE_TYPE -> visitor.writeByte(((NbtByte) value).byteValue());
-            case NbtElement.SHORT_TYPE -> visitor.writeShort(((NbtShort) value).shortValue());
-            case NbtElement.INT_TYPE -> visitor.writeInt(((NbtInt) value).intValue());
-            case NbtElement.LONG_TYPE -> visitor.writeLong(((NbtLong) value).longValue());
-            case NbtElement.FLOAT_TYPE -> visitor.writeFloat(((NbtFloat) value).floatValue());
-            case NbtElement.DOUBLE_TYPE -> visitor.writeDouble(((NbtDouble) value).doubleValue());
-            case NbtElement.STRING_TYPE -> visitor.writeString(value.asString());
-            case NbtElement.BYTE_ARRAY_TYPE -> visitor.writeBytes(((NbtByteArray) value).getByteArray());
+            case NbtElement.BYTE_TYPE -> visitor.writeByte(ctx, ((NbtByte) value).byteValue());
+            case NbtElement.SHORT_TYPE -> visitor.writeShort(ctx, ((NbtShort) value).shortValue());
+            case NbtElement.INT_TYPE -> visitor.writeInt(ctx, ((NbtInt) value).intValue());
+            case NbtElement.LONG_TYPE -> visitor.writeLong(ctx, ((NbtLong) value).longValue());
+            case NbtElement.FLOAT_TYPE -> visitor.writeFloat(ctx, ((NbtFloat) value).floatValue());
+            case NbtElement.DOUBLE_TYPE -> visitor.writeDouble(ctx, ((NbtDouble) value).doubleValue());
+            case NbtElement.STRING_TYPE -> visitor.writeString(ctx, value.asString());
+            case NbtElement.BYTE_ARRAY_TYPE -> visitor.writeBytes(ctx, ((NbtByteArray) value).getByteArray());
             case NbtElement.INT_ARRAY_TYPE, NbtElement.LONG_ARRAY_TYPE, NbtElement.LIST_TYPE -> {
                 var list = (AbstractNbtList<?>) value;
-                try (var sequence = visitor.sequence(Endec.<NbtElement>of(this::decodeValue, deserializer -> null), list.size())) {
+                try (var sequence = visitor.sequence(ctx, Endec.<NbtElement>of(this::decodeValue, (ctx1, deserializer) -> null), list.size())) {
                     list.forEach(sequence::element);
                 }
             }
             case NbtElement.COMPOUND_TYPE -> {
                 var compound = (NbtCompound) value;
-                try (var map = visitor.map(Endec.<NbtElement>of(this::decodeValue, deserializer -> null), compound.getSize())) {
+                try (var map = visitor.map(ctx, Endec.<NbtElement>of(this::decodeValue, (ctx1, deserializer) -> null), compound.getSize())) {
                     for (var key : compound.getKeys()) {
                         map.entry(key, compound.get(key));
                     }
@@ -168,11 +156,13 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
 
     private class Sequence<V> implements Deserializer.Sequence<V> {
 
+        private final SerializationContext ctx;
         private final Endec<V> valueEndec;
         private final Iterator<NbtElement> elements;
         private final int size;
 
-        private Sequence(Endec<V> valueEndec, List<NbtElement> elements) {
+        private Sequence(SerializationContext ctx, Endec<V> valueEndec, List<NbtElement> elements) {
+            this.ctx = ctx;
             this.valueEndec = valueEndec;
 
             this.elements = elements.iterator();
@@ -193,7 +183,7 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
         public V next() {
             return NbtDeserializer.this.frame(
                     this.elements::next,
-                    () -> this.valueEndec.decode(NbtDeserializer.this),
+                    () -> this.valueEndec.decode(this.ctx, NbtDeserializer.this),
                     false
             );
         }
@@ -201,12 +191,14 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
 
     private class Map<V> implements Deserializer.Map<V> {
 
+        private final SerializationContext ctx;
         private final Endec<V> valueEndec;
         private final NbtCompound compound;
         private final Iterator<String> keys;
         private final int size;
 
-        private Map(Endec<V> valueEndec, NbtCompound compound) {
+        private Map(SerializationContext ctx, Endec<V> valueEndec, NbtCompound compound) {
+            this.ctx = ctx;
             this.valueEndec = valueEndec;
 
             this.compound = compound;
@@ -229,7 +221,7 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
             var key = this.keys.next();
             return NbtDeserializer.this.frame(
                     () -> this.compound.get(key),
-                    () -> java.util.Map.entry(key, this.valueEndec.decode(NbtDeserializer.this)),
+                    () -> java.util.Map.entry(key, this.valueEndec.decode(this.ctx, NbtDeserializer.this)),
                     false
             );
         }
@@ -244,24 +236,24 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
         }
 
         @Override
-        public <F> @Nullable F field(String name, Endec<F> endec) {
+        public <F> @Nullable F field(String name, SerializationContext ctx, Endec<F> endec) {
             if (!this.compound.contains(name)) {
                 throw new IllegalStateException("Field '" + name + "' was missing from serialized data, but no default value was provided");
             }
 
             return NbtDeserializer.this.frame(
                     () -> this.compound.get(name),
-                    () -> endec.decode(NbtDeserializer.this),
+                    () -> endec.decode(ctx, NbtDeserializer.this),
                     true
             );
         }
 
         @Override
-        public <F> @Nullable F field(String name, Endec<F> endec, @Nullable F defaultValue) {
+        public <F> @Nullable F field(String name, SerializationContext ctx, Endec<F> endec, @Nullable F defaultValue) {
             if (!this.compound.contains(name)) return defaultValue;
             return NbtDeserializer.this.frame(
                     () -> this.compound.get(name),
-                    () -> endec.decode(NbtDeserializer.this),
+                    () -> endec.decode(ctx, NbtDeserializer.this),
                     true
             );
         }

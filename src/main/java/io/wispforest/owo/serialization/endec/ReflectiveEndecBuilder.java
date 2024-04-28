@@ -244,20 +244,20 @@ public class ReflectiveEndecBuilder {
         register(BuiltInEndecs.TEXT, Text.class);
 
         register(Endec.of(
-                (serializer, particleEffect) -> {
+                (ctx, serializer, particleEffect) -> {
                     var buffer = new RegistryByteBuf(
                             PacketByteBufs.create(),
-                            serializer.requireAttributeValue(SerializationAttributes.REGISTRIES).registryManager()
+                            ctx.requireAttributeValue(SerializationAttributes.REGISTRIES).registryManager()
                     );
 
                     buffer.writeInt(Registries.PARTICLE_TYPE.getRawId(particleEffect.getType()));
                     ((ParticleType) particleEffect.getType()).getPacketCodec().encode(buffer, particleEffect);
 
-                    BuiltInEndecs.PACKET_BYTE_BUF.encode(serializer, buffer);
-                }, deserializer -> {
+                    BuiltInEndecs.PACKET_BYTE_BUF.encode(ctx, serializer, buffer);
+                }, (ctx, deserializer) -> {
                     var buffer = new RegistryByteBuf(
-                            BuiltInEndecs.PACKET_BYTE_BUF.decode(deserializer),
-                            deserializer.requireAttributeValue(SerializationAttributes.REGISTRIES).registryManager()
+                            BuiltInEndecs.PACKET_BYTE_BUF.decode(ctx, deserializer),
+                            ctx.requireAttributeValue(SerializationAttributes.REGISTRIES).registryManager()
                     );
 
                     return Registries.PARTICLE_TYPE.get(buffer.readInt()).getPacketCodec().decode(buffer);

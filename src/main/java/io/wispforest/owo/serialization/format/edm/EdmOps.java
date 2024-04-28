@@ -4,18 +4,33 @@ import com.mojang.datafixers.DataFixUtils;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
+import io.wispforest.owo.serialization.SerializationContext;
 
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@SuppressWarnings("unchecked")
 public class EdmOps implements DynamicOps<EdmElement<?>> {
 
-    public static final EdmOps INSTANCE = new EdmOps();
+    private static final EdmOps NO_CONTEXT = new EdmOps(SerializationContext.empty());
 
-    private EdmOps() {}
+    private final SerializationContext capturedContext;
+    private EdmOps(SerializationContext capturedContext) {
+        this.capturedContext = capturedContext;
+    }
+
+    public static EdmOps withContext(SerializationContext context) {
+        return new EdmOps(context);
+    }
+
+    public static EdmOps withoutContext() {
+        return NO_CONTEXT;
+    }
+
+    public SerializationContext capturedContext() {
+        return this.capturedContext;
+    }
 
     // --- Serialization ---
 
@@ -185,10 +200,8 @@ public class EdmOps implements DynamicOps<EdmElement<?>> {
             case BOOLEAN -> outOps.createBoolean(input.cast());
             case STRING -> outOps.createString(input.cast());
             case BYTES -> outOps.createByteList(ByteBuffer.wrap(input.cast()));
-            case OPTIONAL ->
-                    input.<Optional<EdmElement<?>>>cast().map(element -> this.convertTo(outOps, element)).orElse(outOps.empty());
-            case SEQUENCE ->
-                    outOps.createList(input.<List<EdmElement<?>>>cast().stream().map(element -> this.convertTo(outOps, element)));
+            case OPTIONAL -> input.<Optional<EdmElement<?>>>cast().map(element -> this.convertTo(outOps, element)).orElse(outOps.empty());
+            case SEQUENCE -> outOps.createList(input.<List<EdmElement<?>>>cast().stream().map(element -> this.convertTo(outOps, element)));
             case MAP ->
                     outOps.createMap(input.<Map<String, EdmElement<?>>>cast().entrySet().stream().map(entry -> new Pair<>(outOps.createString(entry.getKey()), this.convertTo(outOps, entry.getValue()))));
         };

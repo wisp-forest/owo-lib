@@ -254,7 +254,7 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
                                     profile, new WorldSession(TelemetrySender.NOOP, false, Duration.ZERO, ""),
                                     MinecraftClient.getInstance().world.getRegistryManager().toImmutable(),
                                     MinecraftClient.getInstance().world.getEnabledFeatures(),
-                                    "Wisp Forest Enterprises", null, null, Map.of(), null
+                                    "Wisp Forest Enterprises", null, null, Map.of(), null, false
                     )),
                     null, null, false, false
             );
