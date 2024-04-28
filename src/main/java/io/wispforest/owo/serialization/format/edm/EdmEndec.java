@@ -8,15 +8,14 @@ import java.io.IOException;
 public class EdmEndec implements Endec<EdmElement<?>> {
 
     public static final EdmEndec INSTANCE = new EdmEndec();
-
     public static final Endec<EdmMap> MAP = INSTANCE.xmap(EdmElement::asMap, edmMap -> edmMap);
-    
+
     private EdmEndec() {}
 
     @Override
-    public void encode(Serializer<?> serializer, EdmElement<?> value) {
-        if (serializer.attributes().contains(SerializationAttribute.SELF_DESCRIBING)) {
-            new EdmDeserializer(value).readAny(serializer);
+    public void encode(SerializationContext ctx, Serializer<?> serializer, EdmElement<?> value) {
+        if (serializer instanceof SelfDescribedSerializer<?>) {
+            new EdmDeserializer(value).readAny(ctx, serializer);
             return;
         }
 
@@ -24,23 +23,23 @@ public class EdmEndec implements Endec<EdmElement<?>> {
             var output = ByteStreams.newDataOutput();
             EdmIo.encode(output, value);
 
-            serializer.writeBytes(output.toByteArray());
+            serializer.writeBytes(ctx, output.toByteArray());
         } catch (IOException e) {
             throw new RuntimeException("Failed to encode EDM element in EdmEndec", e);
         }
     }
 
     @Override
-    public EdmElement<?> decode(Deserializer<?> deserializer) {
+    public EdmElement<?> decode(SerializationContext ctx, Deserializer<?> deserializer) {
         if (deserializer instanceof SelfDescribedDeserializer<?> selfDescribedDeserializer) {
             var nativeSerializer = new EdmSerializer();
-            selfDescribedDeserializer.readAny(nativeSerializer);
+            selfDescribedDeserializer.readAny(ctx, nativeSerializer);
 
             return nativeSerializer.result();
         }
 
         try {
-            return EdmIo.decode(ByteStreams.newDataInput(deserializer.readBytes()));
+            return EdmIo.decode(ByteStreams.newDataInput(deserializer.readBytes(ctx)));
         } catch (IOException e) {
             throw new RuntimeException("Failed to parse EDM element in EdmEndec", e);
         }

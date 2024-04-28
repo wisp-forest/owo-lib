@@ -5,6 +5,7 @@ import io.wispforest.owo.client.OwoClient;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.NinePatchTexture;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.TooltipBackgroundRenderer;
@@ -39,9 +40,8 @@ public interface Surface {
     };
 
     Surface OPTIONS_BACKGROUND = (context, component) -> {
-        RenderSystem.setShaderColor(64 / 255f, 64 / 255f, 64 / 255f, 1);
-        context.drawTexture(Screen.OPTIONS_BACKGROUND_TEXTURE, component.x(), component.y(), 0, 0, component.width(), component.height(), 32, 32);
-        RenderSystem.setShaderColor(1, 1, 1, 1);
+        MinecraftClient.getInstance().gameRenderer.renderBlur(0);
+        MinecraftClient.getInstance().getFramebuffer().beginWrite(false);
     };
 
     Surface TOOLTIP = (context, component) -> {

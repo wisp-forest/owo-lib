@@ -74,8 +74,10 @@ public class BlockComponent extends BaseComponent {
     protected static void prepareBlockEntity(BlockState state, BlockEntity blockEntity, @Nullable NbtCompound nbt) {
         if (blockEntity == null) return;
 
+        var world = MinecraftClient.getInstance().world;
+
         ((BlockEntityAccessor) blockEntity).owo$setCachedState(state);
-        blockEntity.setWorld(MinecraftClient.getInstance().world);
+        blockEntity.setWorld(world);
 
         if (nbt == null) return;
 
@@ -85,7 +87,7 @@ public class BlockComponent extends BaseComponent {
         nbtCopy.putInt("y", 0);
         nbtCopy.putInt("z", 0);
 
-        blockEntity.readNbt(nbtCopy);
+        blockEntity.read(nbtCopy, world.getRegistryManager());
     }
 
     public static BlockComponent parse(Element element) {

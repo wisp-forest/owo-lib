@@ -1,37 +1,32 @@
 package io.wispforest.owo.serialization;
 
-import io.wispforest.owo.serialization.format.forwarding.ForwardingSerializer;
 import io.wispforest.owo.serialization.util.Endable;
 
 import java.util.Optional;
-import java.util.Set;
 
 public interface Serializer<T> {
 
-    default Serializer<T> withAttributes(SerializationAttribute... assumedAttributes) {
-        if (assumedAttributes.length == 0) return this;
-        return ForwardingSerializer.of(this, assumedAttributes);
+    default SerializationContext setupContext(SerializationContext ctx) {
+        return ctx;
     }
 
-    Set<SerializationAttribute> attributes();
+    void writeByte(SerializationContext ctx, byte value);
+    void writeShort(SerializationContext ctx, short value);
+    void writeInt(SerializationContext ctx, int value);
+    void writeLong(SerializationContext ctx, long value);
+    void writeFloat(SerializationContext ctx, float value);
+    void writeDouble(SerializationContext ctx, double value);
 
-    void writeByte(byte value);
-    void writeShort(short value);
-    void writeInt(int value);
-    void writeLong(long value);
-    void writeFloat(float value);
-    void writeDouble(double value);
+    void writeVarInt(SerializationContext ctx, int value);
+    void writeVarLong(SerializationContext ctx, long value);
 
-    void writeVarInt(int value);
-    void writeVarLong(long value);
+    void writeBoolean(SerializationContext ctx, boolean value);
+    void writeString(SerializationContext ctx, String value);
+    void writeBytes(SerializationContext ctx, byte[] bytes);
+    <V> void writeOptional(SerializationContext ctx, Endec<V> endec, Optional<V> optional);
 
-    void writeBoolean(boolean value);
-    void writeString(String value);
-    void writeBytes(byte[] bytes);
-    <V> void writeOptional(Endec<V> endec, Optional<V> optional);
-
-    <E> Sequence<E> sequence(Endec<E> elementEndec, int size);
-    <V> Map<V> map(Endec<V> valueEndec, int size);
+    <E> Sequence<E> sequence(SerializationContext ctx, Endec<E> elementEndec, int size);
+    <V> Map<V> map(SerializationContext ctx, Endec<V> valueEndec, int size);
     Struct struct();
 
     T result();
@@ -45,6 +40,6 @@ public interface Serializer<T> {
     }
 
     interface Struct extends Endable {
-        <F> Struct field(String name, Endec<F> endec, F value);
+        <F> Struct field(String name, SerializationContext ctx, Endec<F> endec, F value);
     }
 }

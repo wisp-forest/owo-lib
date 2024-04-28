@@ -1,39 +1,34 @@
 package io.wispforest.owo.serialization;
 
-import io.wispforest.owo.serialization.format.forwarding.ForwardingDeserializer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Iterator;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 
 public interface Deserializer<T> {
 
-    default Deserializer<T> withAttributes(SerializationAttribute... assumedAttributes) {
-        if (assumedAttributes.length == 0) return this;
-        return ForwardingDeserializer.of(this, assumedAttributes);
+    default SerializationContext setupContext(SerializationContext ctx) {
+        return ctx;
     }
 
-    Set<SerializationAttribute> attributes();
+    byte readByte(SerializationContext ctx);
+    short readShort(SerializationContext ctx);
+    int readInt(SerializationContext ctx);
+    long readLong(SerializationContext ctx);
+    float readFloat(SerializationContext ctx);
+    double readDouble(SerializationContext ctx);
 
-    byte readByte();
-    short readShort();
-    int readInt();
-    long readLong();
-    float readFloat();
-    double readDouble();
+    int readVarInt(SerializationContext ctx);
+    long readVarLong(SerializationContext ctx);
 
-    int readVarInt();
-    long readVarLong();
+    boolean readBoolean(SerializationContext ctx);
+    String readString(SerializationContext ctx);
+    byte[] readBytes(SerializationContext ctx);
+    <V> Optional<V> readOptional(SerializationContext ctx, Endec<V> endec);
 
-    boolean readBoolean();
-    String readString();
-    byte[] readBytes();
-    <V> Optional<V> readOptional(Endec<V> endec);
-
-    <E> Sequence<E> sequence(Endec<E> elementEndec);
-    <V> Map<V> map(Endec<V> valueEndec);
+    <E> Sequence<E> sequence(SerializationContext ctx, Endec<E> elementEndec);
+    <V> Map<V> map(SerializationContext ctx, Endec<V> valueEndec);
     Struct struct();
 
     <V> V tryRead(Function<Deserializer<T>, V> reader);
@@ -65,12 +60,12 @@ public interface Deserializer<T> {
          * Decode the value of field {@code name} using {@code endec}. If no
          * such field exists in the serialized data, an exception is thrown
          */
-        <F> @Nullable F field(String name, Endec<F> endec);
+        <F> @Nullable F field(String name, SerializationContext ctx, Endec<F> endec);
 
         /**
          * Decode the value of field {@code name} using {@code endec}. If no
          * such field exists in the serialized data, {@code defaultValue} is returned
          */
-        <F> @Nullable F field(String name, Endec<F> endec, @Nullable F defaultValue);
+        <F> @Nullable F field(String name, SerializationContext ctx, Endec<F> endec, @Nullable F defaultValue);
     }
 }

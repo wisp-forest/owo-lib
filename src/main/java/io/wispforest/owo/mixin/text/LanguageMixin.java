@@ -1,11 +1,15 @@
 package io.wispforest.owo.mixin.text;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.mojang.serialization.JsonOps;
 import io.wispforest.owo.text.LanguageAccess;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.text.TextCodecs;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.Language;
+import net.minecraft.util.Util;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -24,7 +28,7 @@ public class LanguageMixin {
         if (!el.isJsonPrimitive() && LanguageAccess.textConsumer != null) {
             skipNext = true;
 
-            MutableText text = Text.Serialization.fromJsonTree(el);
+            MutableText text = (MutableText) TextCodecs.CODEC.parse(JsonOps.INSTANCE, el).getOrThrow(JsonParseException::new);
             LanguageAccess.textConsumer.accept(str, text);
 
             return "";

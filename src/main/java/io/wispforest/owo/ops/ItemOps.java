@@ -1,9 +1,11 @@
 package io.wispforest.owo.ops;
 
+import io.wispforest.owo.Owo;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.Hand;
 
 /**
@@ -22,7 +24,7 @@ public final class ItemOps {
      * @return {@code true} if addition can stack onto base
      */
     public static boolean canStack(ItemStack base, ItemStack addition) {
-        return base.isEmpty() || (canIncreaseBy(base, addition.getCount()) && ItemStack.canCombine(base, addition));
+        return base.isEmpty() || (canIncreaseBy(base, addition.getCount()) && ItemStack.areItemsAndComponentsEqual(base, addition));
     }
 
     /**
@@ -114,12 +116,10 @@ public final class ItemOps {
      * @param nbt   The nbt compound to write to
      * @param key   The key to prefix the stack with
      */
-    public static void store(ItemStack stack, NbtCompound nbt, String key) {
+    public static void store(RegistryWrapper.WrapperLookup registries, ItemStack stack, NbtCompound nbt, String key) {
         if (stack.isEmpty()) return;
 
-        var stackNbt = new NbtCompound();
-        stack.writeNbt(stackNbt);
-        nbt.put(key, stackNbt);
+        nbt.put(key, stack.encode(registries));
     }
 
     /**
@@ -130,11 +130,11 @@ public final class ItemOps {
      * @param key The key to load from
      * @return The deserialized stack
      */
-    public static ItemStack get(NbtCompound nbt, String key) {
+    public static ItemStack get(RegistryWrapper.WrapperLookup registries, NbtCompound nbt, String key) {
         if (!nbt.contains(key, NbtElement.COMPOUND_TYPE)) return ItemStack.EMPTY;
 
         var stackNbt = nbt.getCompound(key);
-        return ItemStack.fromNbt(stackNbt);
+        return ItemStack.fromNbtOrEmpty(registries, stackNbt);
     }
 
 }

@@ -1,6 +1,6 @@
 //file:noinspection GradlePackageVersionRange
 plugins {
-    id 'fabric-loom' version '1.4-SNAPSHOT'
+    id 'fabric-loom' version '1.6-SNAPSHOT'
     id 'maven-publish'
 }
 
@@ -31,7 +31,7 @@ allprojects {
         }
     }
 
-    def targetJavaVersion = 17
+    def targetJavaVersion = 21
     tasks.withType(JavaCompile).configureEach {
         // ensure that the encoding is set to UTF-8, no matter what the system default is
         // this fixes some edge cases with special characters not displaying correctly
@@ -119,7 +119,7 @@ loom {
 }
 
 dependencies {
-    modLocalRuntime("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}")
+//    modLocalRuntime("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}")
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin:${project.rei_version}")
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}")
 
@@ -127,7 +127,7 @@ dependencies {
 //    modLocalRuntime("dev.emi:emi-fabric:${project.emi_version}")
 
     modCompileOnly("com.terraformersmc:modmenu:${project.modmenu_version}")
-    modLocalRuntime("com.terraformersmc:modmenu:${project.modmenu_version}")
+//    modLocalRuntime("com.terraformersmc:modmenu:${project.modmenu_version}")
 
     api(include("blue.endless:jankson:${project.jankson_version}"))
 

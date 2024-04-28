@@ -1,5 +1,6 @@
 package io.wispforest.owo.serialization.util;
 
+import io.wispforest.owo.serialization.SerializationContext;
 import io.wispforest.owo.serialization.endec.KeyedEndec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,15 +15,23 @@ public interface MapCarrier {
      * <p>
      * Any exceptions thrown during decoding are propagated to the caller
      */
-    default <T> T getWithErrors(@NotNull KeyedEndec<T> key) {
+    default <T> T getWithErrors(@NotNull KeyedEndec<T> key, SerializationContext ctx) {
         throw new UnsupportedOperationException("Interface default method called");
+    }
+
+    default <T> T getWithErrors(@NotNull KeyedEndec<T> key) {
+        return this.getWithErrors(key, SerializationContext.empty());
     }
 
     /**
      * Store {@code value} under {@code key} in this object's associated map
      */
-    default <T> void put(@NotNull KeyedEndec<T> key, @NotNull T value) {
+    default <T> void put(@NotNull KeyedEndec<T> key, @NotNull T value, SerializationContext ctx) {
         throw new UnsupportedOperationException("Interface default method called");
+    }
+
+    default <T> void put(@NotNull KeyedEndec<T> key, @NotNull T value) {
+        this.put(key, value, SerializationContext.empty());
     }
 
     /**
@@ -50,6 +59,19 @@ public interface MapCarrier {
     default <T> T get(@NotNull KeyedEndec<T> key) {
         try {
             return this.getWithErrors(key);
+        } catch (Exception e) {
+            return key.defaultValue();
+        }
+    }
+
+    /**
+     * Get the value stored under {@code key} in this object's associated map.
+     * If no such value exists <i>or</i> an exception is thrown during decoding,
+     * the default value of {@code key} is returned
+     */
+    default <T> T get(@NotNull KeyedEndec<T> key, SerializationContext ctx) {
+        try {
+            return this.getWithErrors(key, ctx);
         } catch (Exception e) {
             return key.defaultValue();
         }

@@ -1,23 +1,26 @@
 package io.wispforest.owo.serialization.util;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.SerializationAttribute;
+import io.wispforest.owo.serialization.SerializationAttributes;
+import io.wispforest.owo.serialization.SerializationContext;
 import io.wispforest.owo.serialization.StructEndec;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeSerializer;
 
 public abstract class EndecRecipeSerializer<R extends Recipe<?>> implements RecipeSerializer<R> {
 
     private final StructEndec<R> endec;
-    private final Endec<R> networkEndec;
-    private final Codec<R> codec;
+    private final PacketCodec<PacketByteBuf, R> packetCodec;
+    private final MapCodec<R> codec;
 
     protected EndecRecipeSerializer(StructEndec<R> endec, Endec<R> networkEndec) {
         this.endec = endec;
-        this.networkEndec = networkEndec;
-        this.codec = this.endec.mapCodec(SerializationAttribute.HUMAN_READABLE).codec();
+        this.packetCodec = networkEndec.packetCodec();
+        this.codec = this.endec.mapCodec(SerializationContext.attributes(SerializationAttributes.HUMAN_READABLE));
     }
 
     protected EndecRecipeSerializer(StructEndec<R> endec) {
@@ -25,17 +28,12 @@ public abstract class EndecRecipeSerializer<R extends Recipe<?>> implements Reci
     }
 
     @Override
-    public Codec<R> codec() {
+    public MapCodec<R> codec() {
         return this.codec;
     }
 
     @Override
-    public R read(PacketByteBuf buf) {
-        return buf.read(this.networkEndec);
-    }
-
-    @Override
-    public void write(PacketByteBuf buf, R recipe) {
-        buf.write(this.networkEndec, recipe);
+    public PacketCodec<RegistryByteBuf, R> packetCodec() {
+        return this.packetCodec.cast();
     }
 }

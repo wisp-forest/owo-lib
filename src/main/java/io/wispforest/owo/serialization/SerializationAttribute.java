@@ -1,21 +1,58 @@
 package io.wispforest.owo.serialization;
 
-public enum SerializationAttribute {
-    /**
-     * This format is self-describing - that is, the deserializer supports
-     * {@link SelfDescribedDeserializer#readAny(Serializer)} to decode its current element
-     * based purely on structure data stored in the input alone
-     * <p>
-     * Endecs should use this to make decisions like storing a hierarchical data
-     * structure without writing identifying data
-     */
-    SELF_DESCRIBING,
+public sealed abstract class SerializationAttribute permits SerializationAttribute.Marker, SerializationAttribute.WithValue {
 
-    /**
-     * This format is intended to be human-readable (and potentially -editable)
-     * <p>
-     * Endecs should use this to make decisions like representing a
-     * {@link net.minecraft.util.math.BlockPos} as an integer sequence instead of packing it into a long
-     */
-    HUMAN_READABLE
+    public final String name;
+    protected SerializationAttribute(String name) {
+        this.name = name;
+    }
+
+    public static SerializationAttribute.Marker marker(String name) {
+        return new Marker(name);
+    }
+
+    public static <T> SerializationAttribute.WithValue<T> withValue(String name) {
+        return new WithValue<>(name);
+    }
+
+    public static final class Marker extends SerializationAttribute implements Instance {
+        private Marker(String name) {
+            super(name);
+        }
+
+        @Override
+        public SerializationAttribute attribute() {
+            return this;
+        }
+
+        @Override
+        public Object value() {
+            return null;
+        }
+    }
+
+    public static final class WithValue<T> extends SerializationAttribute {
+        private WithValue(String name) {
+            super(name);
+        }
+
+        public Instance instance(T value) {
+            return new Instance() {
+                @Override
+                public SerializationAttribute attribute() {
+                    return WithValue.this;
+                }
+
+                @Override
+                public Object value() {
+                    return value;
+                }
+            };
+        }
+    }
+
+    public interface Instance {
+        SerializationAttribute attribute();
+        Object value();
+    }
 }

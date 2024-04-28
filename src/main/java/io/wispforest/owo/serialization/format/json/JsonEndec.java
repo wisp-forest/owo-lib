@@ -11,24 +11,24 @@ public final class JsonEndec implements Endec<JsonElement> {
     private JsonEndec() {}
 
     @Override
-    public void encode(Serializer<?> serializer, JsonElement value) {
-        if (serializer.attributes().contains(SerializationAttribute.SELF_DESCRIBING)) {
-            JsonDeserializer.of(value).readAny(serializer);
+    public void encode(SerializationContext ctx, Serializer<?> serializer, JsonElement value) {
+        if (serializer instanceof SelfDescribedSerializer<?>) {
+            JsonDeserializer.of(value).readAny(ctx, serializer);
             return;
         }
 
-        serializer.writeString(value.toString());
+        serializer.writeString(ctx, value.toString());
     }
 
     @Override
-    public JsonElement decode(Deserializer<?> deserializer) {
+    public JsonElement decode(SerializationContext ctx, Deserializer<?> deserializer) {
         if (deserializer instanceof SelfDescribedDeserializer<?> selfDescribedDeserializer) {
             var json = JsonSerializer.of();
-            selfDescribedDeserializer.readAny(json);
+            selfDescribedDeserializer.readAny(ctx, json);
 
             return json.result();
         }
 
-        return new JsonStreamParser(deserializer.readString()).next();
+        return new JsonStreamParser(deserializer.readString(ctx)).next();
     }
 }

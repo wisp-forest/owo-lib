@@ -1,12 +1,12 @@
 package io.wispforest.owo.util.pond;
 
+import io.wispforest.owo.client.screens.ScreenInternals;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.PacketByteBuf;
 
 public interface OwoScreenHandlerExtension {
     void owo$attachToPlayer(PlayerEntity player);
 
-    void owo$readPropertySync(PacketByteBuf buf);
+    void owo$readPropertySync(ScreenInternals.SyncPropertiesPacket packet);
 
-    void owo$handlePacket(PacketByteBuf buf, boolean clientbound);
+    void owo$handlePacket(ScreenInternals.LocalPacket packet, boolean clientbound);
 }

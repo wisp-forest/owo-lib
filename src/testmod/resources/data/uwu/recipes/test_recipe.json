@@ -11,7 +11,7 @@
   "owo:remainders": {
     "minecraft:sand": "minecraft:sand",
     "minecraft:stick": {
-      "item": "minecraft:stick",
+      "id": "minecraft:stick",
       "count": 64
     }
   },
@@ -21,6 +21,6 @@
     "XXX"
   ],
   "result": {
-    "item": "minecraft:bedrock"
+    "id": "minecraft:bedrock"
   }
 }
