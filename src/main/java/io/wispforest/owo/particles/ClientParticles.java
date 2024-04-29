@@ -250,9 +250,12 @@ public final class ClientParticles {
      */
     @SuppressWarnings("ConstantConditions")
     public static <T extends ParticleEffect> void spawnWithMaxAge(T particleType, Vec3d pos, int maxAge) {
-        Particle particle = MinecraftClient.getInstance().particleManager.addParticle(particleType, pos.x, pos.y, pos.z, velocity.x, velocity.y, velocity.z);
-        particle.setMaxAge(maxAge);
+        var particle = MinecraftClient.getInstance().particleManager.addParticle(particleType, pos.x, pos.y, pos.z, velocity.x, velocity.y, velocity.z);
+        if (particle == null) {
+            return;
+        }
 
+        particle.setMaxAge(maxAge);
         clearState();
     }
 
