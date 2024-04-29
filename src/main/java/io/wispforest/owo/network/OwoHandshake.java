@@ -21,6 +21,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerConfigurationNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientConfigurationNetworkHandler;
+import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerConfigurationNetworkHandler;
@@ -81,6 +82,7 @@ public final class OwoHandshake {
 
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
             if (!ENABLED) {
+                PayloadTypeRegistry.configurationS2C().register(HandshakeOff.ID, PacketCodec.unit(new HandshakeOff()));
                 ClientConfigurationNetworking.registerGlobalReceiver(HandshakeOff.ID, (payload, context) -> {});
             }
 
