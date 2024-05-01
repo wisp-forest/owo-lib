@@ -40,9 +40,6 @@ import java.util.function.ToIntFunction;
 @ApiStatus.Internal
 public final class OwoHandshake {
 
-    @Environment(EnvType.CLIENT)
-    public static Set<Identifier> clientChannelSet;
-
     private static final Endec<Map<Identifier, Integer>> CHANNEL_HASHES_ENDEC = Endec.map(BuiltInEndecs.IDENTIFIER, Endec.INT);
 
     private static final MutableText PREFIX = TextOps.concat(Owo.PREFIX, Text.of("§chandshake failure\n"));
@@ -91,12 +88,12 @@ public final class OwoHandshake {
 
             ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
                 QUERY_RECEIVED = false;
-                clientChannelSet = null;
+                QueuedChannelSet.channels = null;
             });
 
             ClientConfigurationConnectionEvents.DISCONNECT.register((handler, client) -> {
                 QUERY_RECEIVED = false;
-                clientChannelSet = null;
+                QueuedChannelSet.channels = null;
             });
         }
     }
@@ -135,7 +132,7 @@ public final class OwoHandshake {
         Owo.LOGGER.info("[Handshake] Sending client channels");
         QUERY_RECEIVED = true;
 
-        clientChannelSet = filterOptionalServices(request.optionalChannels(), OwoNetChannel.REGISTERED_CHANNELS, OwoHandshake::hashChannel);
+        QueuedChannelSet.channels = filterOptionalServices(request.optionalChannels(), OwoNetChannel.REGISTERED_CHANNELS, OwoHandshake::hashChannel);
 
         var requiredChannels = formatHashes(OwoNetChannel.REQUIRED_CHANNELS, OwoHandshake::hashChannel);
         var requiredControllers = formatHashes(ParticleSystemController.REGISTERED_CONTROLLERS, OwoHandshake::hashController);
