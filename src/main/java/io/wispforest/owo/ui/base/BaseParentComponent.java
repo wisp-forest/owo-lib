@@ -4,7 +4,6 @@ import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.FocusHandler;
 import io.wispforest.owo.ui.util.ScissorStack;
 import io.wispforest.owo.util.Observable;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -51,6 +50,23 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
         }
     }
 
+    @Override
+    protected void updateHoveredState(int mouseX, int mouseY, boolean nowHovered) {
+        this.hovered = nowHovered;
+
+        if (nowHovered) {
+            ParentComponent root = this.root();
+            if ((root != null && root.childAt(mouseX, mouseY) != this) || (root == null && this.childAt(mouseX, mouseY) != null)) {
+                this.hovered = false;
+                return;
+            }
+
+            this.mouseEnterEvents.sink().onMouseEnter();
+        } else {
+            this.mouseLeaveEvents.sink().onMouseLeave();
+        }
+    }
+
     /**
      * Update the state of this component before drawing
      * the next frame. This method is separated from
@@ -61,7 +77,8 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
      * @param mouseX The mouse pointer's x-coordinate
      * @param mouseY The mouse pointer's y-coordinate
      */
-    protected void parentUpdate(float delta, int mouseX, int mouseY) {}
+    protected void parentUpdate(float delta, int mouseX, int mouseY) {
+    }
 
     @Override
     public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
