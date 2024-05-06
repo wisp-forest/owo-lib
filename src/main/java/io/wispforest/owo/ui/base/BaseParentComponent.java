@@ -56,7 +56,7 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
 
         if (nowHovered) {
             ParentComponent root = this.root();
-            if ((root != null && root.childAt(mouseX, mouseY) != this) || (root == null && this.childAt(mouseX, mouseY) != null)) {
+            if ((root != null && root.childAt(mouseX, mouseY) != this) || (root == null && this.childAt(mouseX, mouseY) != this)) {
                 this.hovered = false;
                 return;
             }
