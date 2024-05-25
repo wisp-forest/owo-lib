@@ -175,7 +175,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
             });
 
             searchField.keyPress().subscribe((keyCode, scanCode, modifiers) -> {
-                if (keyCode != GLFW.GLFW_KEY_ENTER) return false;
+                if (keyCode != GLFW.GLFW_KEY_ENTER && keyCode != GLFW.GLFW_KEY_KP_ENTER) return false;
 
                 var query = searchField.getText().toLowerCase(Locale.ROOT);
                 if (query.isBlank()) return false;
