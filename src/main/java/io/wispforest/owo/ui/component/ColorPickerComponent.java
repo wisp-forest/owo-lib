@@ -3,6 +3,7 @@ package io.wispforest.owo.ui.component;
 import io.wispforest.owo.client.OwoClient;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.Color;
+import io.wispforest.owo.ui.core.CursorStyle;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
@@ -34,12 +35,20 @@ public class ColorPickerComponent extends BaseComponent {
     protected int selectorPadding = 10;
     protected boolean showAlpha = false;
 
+    // not exactly an ideal solution for location-sensitive cursor
+    // styles but the framework doesn't really let us do much
+    // better currently
+    //
+    // glisco, 20.05.2024
+    private int lastCursorX;
+
     public ColorPickerComponent() {
         this.selectedColor.observe(changedEvents.sink()::onChanged);
     }
 
     @Override
     public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+        this.lastCursorX = mouseX - this.x;
 
         // Color area
 
@@ -115,6 +124,15 @@ public class ColorPickerComponent extends BaseComponent {
     @Override
     public boolean canFocus(FocusSource source) {
         return true;
+    }
+
+    @Override
+    public CursorStyle cursorStyle() {
+        var inColorArea = this.lastCursorX >= 0 && this.lastCursorX <= this.colorAreaWidth();
+        var inHueSelector = this.lastCursorX >= this.hueSelectorX() && this.lastCursorX <= this.hueSelectorX() + this.selectorWidth;
+        var inAlphaSelector = this.showAlpha && this.lastCursorX >= this.alphaSelectorX() && this.lastCursorX <= this.alphaSelectorX() + this.selectorWidth;
+
+        return inColorArea || inHueSelector || inAlphaSelector ? CursorStyle.MOVE : super.cursorStyle();
     }
 
     protected void updateFromMouse(double mouseX, double mouseY) {
