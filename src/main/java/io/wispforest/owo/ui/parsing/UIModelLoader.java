@@ -13,6 +13,7 @@ import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.SynchronousResourceReloader;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.xml.sax.SAXException;
 
@@ -36,6 +37,8 @@ public class UIModelLoader implements SynchronousResourceReloader, IdentifiableR
 
     private static final Path HOT_RELOAD_LOCATIONS_PATH = FabricLoader.getInstance().getConfigDir().resolve("owo_ui_hot_reload_locations.json5");
     private static final Map<Identifier, Path> HOT_RELOAD_LOCATIONS = new HashMap<>();
+
+    private static boolean loadedOnce = false;
 
     /**
      * Get the most up-to-date version of the UI model specified
@@ -117,6 +120,13 @@ public class UIModelLoader implements SynchronousResourceReloader, IdentifiableR
                 Owo.LOGGER.error("Could not parse UI model {}", resourceId, e);
             }
         });
+
+        loadedOnce = true;
+    }
+
+    @ApiStatus.Internal
+    public static boolean hasCompletedInitialLoad() {
+        return loadedOnce;
     }
 
     static {
