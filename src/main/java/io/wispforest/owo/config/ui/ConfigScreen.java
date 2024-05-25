@@ -339,6 +339,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
             });
 
             var closeButton = Components.label(Text.literal("<").formatted(Formatting.BOLD));
+            closeButton.tooltip(Text.translatable("text.owo.config.sections_tooltip"));
             closeButton.positioning(Positioning.relative(100, 50)).cursorStyle(CursorStyle.HAND).margins(Insets.right(2));
 
             panelContainer.child(closeButton);

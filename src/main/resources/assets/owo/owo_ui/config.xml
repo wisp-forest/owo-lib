@@ -18,45 +18,69 @@
                     <vertical-alignment>center</vertical-alignment>
                 </flow-layout>
 
-                <flow-layout direction="horizontal" id="main-panel">
+                <stack-layout>
                     <children>
-                        <flow-layout direction="vertical" id="option-panel-container">
+                        <flow-layout direction="horizontal" id="main-panel">
                             <children>
-                                <scroll direction="vertical" id="option-panel-scroll">
-                                    <flow-layout direction="vertical" id="option-panel">
-                                        <children/>
-                                    </flow-layout>
+                                <flow-layout direction="vertical" id="option-panel-container">
+                                    <children>
+                                        <scroll direction="vertical" id="option-panel-scroll">
+                                            <flow-layout direction="vertical" id="option-panel">
+                                                <children/>
+                                                <padding>
+                                                    <right>3</right>
+                                                </padding>
+                                            </flow-layout>
 
-                                    <scrollbar-thiccness>3</scrollbar-thiccness>
+                                            <scrollbar-thiccness>3</scrollbar-thiccness>
+
+                                            <sizing>
+                                                <horizontal method="fill">100</horizontal>
+                                                <vertical method="fill">100</vertical>
+                                            </sizing>
+
+                                            <padding>
+                                                <all>1</all>
+                                            </padding>
+                                        </scroll>
+                                    </children>
 
                                     <sizing>
-                                        <horizontal method="fill">100</horizontal>
+                                        <horizontal method="expand">100</horizontal>
                                         <vertical method="fill">100</vertical>
                                     </sizing>
-
-                                    <padding>
-                                        <all>1</all>
-                                    </padding>
-                                </scroll>
+                                </flow-layout>
                             </children>
 
+                            <padding>
+                                <horizontal>50</horizontal>
+                            </padding>
+
                             <sizing>
-                                <horizontal method="expand">100</horizontal>
+                                <horizontal method="fill">100</horizontal>
                                 <vertical method="fill">100</vertical>
                             </sizing>
+
+                            <surface>
+                                <flat>#77000000</flat>
+                                <outline>#99121212</outline>
+                            </surface>
                         </flow-layout>
                     </children>
 
+                    <padding>
+                        <all>1</all>
+                    </padding>
+
                     <sizing>
-                        <horizontal method="fill">90</horizontal>
+                        <horizontal method="fill">101</horizontal>
                         <vertical method="expand">100</vertical>
                     </sizing>
 
                     <surface>
-                        <flat>#77000000</flat>
-                        <outline>#FF121212</outline>
+                        <outline>#33FFFFFF</outline>
                     </surface>
-                </flow-layout>
+                </stack-layout>
 
                 <flow-layout direction="horizontal">
                     <children>
@@ -131,8 +155,12 @@
                         <vertical>5</vertical>
                     </margins>
 
+                    <padding>
+                        <horizontal>50</horizontal>
+                    </padding>
+
                     <sizing>
-                        <horizontal method="fill">90</horizontal>
+                        <horizontal method="fill">100</horizontal>
                     </sizing>
                 </flow-layout>
             </children>
@@ -141,7 +169,7 @@
             <horizontal-alignment>center</horizontal-alignment>
 
             <surface>
-                <flat>#77000000</flat>
+                <options-background/>
             </surface>
 
             <sizing>
@@ -158,7 +186,7 @@
                     <box>
                         <sizing>
                             <vertical method="fixed">2</vertical>
-                            <horizontal method="fill">20</horizontal>
+                            <horizontal method="fill">35</horizontal>
                         </sizing>
 
                         <start-color>#FFFFFFFF</start-color>
@@ -176,7 +204,7 @@
                     <box>
                         <sizing>
                             <vertical method="fixed">2</vertical>
-                            <horizontal method="fill">20</horizontal>
+                            <horizontal method="fill">35</horizontal>
                         </sizing>
 
                         <start-color>#FFFFFFFF</start-color>
@@ -220,7 +248,7 @@
                 <horizontal-alignment>center</horizontal-alignment>
 
                 <padding>
-                    <horizontal>10</horizontal>
+                    <horizontal>2</horizontal>
                 </padding>
 
                 <sizing>
