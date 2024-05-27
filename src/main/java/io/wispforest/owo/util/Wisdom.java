@@ -27,7 +27,7 @@ public final class Wisdom {
             "DerGeistdesMatze - i will take the l",
             "idwtialsimmoedm - I didn't want to install a library so I made my own enchantment descriptions mod",
             "Here at Wisp Forest© we employ Wisp Tech Support™ magic, which solves your problem when you ask",
-            "chyz: How could you do this to me, Blod. I loved you like a guy I don't know in real life :(",
+            "chyz: How could you do this to me, Blod. I loved you like a guy I've met in real life :(",
             "chyzman: No sound or Ender Dragon leakage. Although Ender Dragon sound leakage is still a thing",
             "This custom packet isn't supported by Gadget - Add support via DrawPacketHandler.EVENT",
             "glisco: I like this approach, cause it's stateless. And stateless approaches are always good since state management is pain - BasiqueEvangelist: I like french bread",
