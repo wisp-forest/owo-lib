@@ -1,12 +1,13 @@
 package io.wispforest.owo.config;
 
 import com.google.common.collect.HashMultimap;
+import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.mixin.ServerCommonNetworkHandlerAccessor;
 import io.wispforest.owo.ops.TextOps;
-import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.endec.BuiltInEndecs;
-import io.wispforest.owo.serialization.endec.StructEndecBuilder;
+import io.wispforest.endec.Endec;
+import io.wispforest.owo.serialization.CodecUtils;
+import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
@@ -186,14 +187,16 @@ public class ConfigSynchronizer {
 
     private record ConfigEntry(Map<String, PacketByteBuf> options) {
         public static final Endec<ConfigEntry> ENDEC = StructEndecBuilder.of(
-                BuiltInEndecs.PACKET_BYTE_BUF.mapOf().fieldOf("options", ConfigEntry::options),
+                MinecraftEndecs.PACKET_BYTE_BUF.mapOf().fieldOf("options", ConfigEntry::options),
                 ConfigEntry::new
         );
     }
 
     static {
-        PayloadTypeRegistry.playS2C().register(ConfigSyncPacket.ID, ConfigSyncPacket.ENDEC.packetCodec());
-        PayloadTypeRegistry.playC2S().register(ConfigSyncPacket.ID, ConfigSyncPacket.ENDEC.packetCodec());
+        var packetCodec = CodecUtils.packetCodec(ConfigSyncPacket.ENDEC);
+
+        PayloadTypeRegistry.playS2C().register(ConfigSyncPacket.ID, packetCodec);
+        PayloadTypeRegistry.playC2S().register(ConfigSyncPacket.ID, packetCodec);
 
         var earlyPhase = new Identifier("owo", "early");
         ServerPlayConnectionEvents.JOIN.addPhaseOrdering(earlyPhase, Event.DEFAULT_PHASE);

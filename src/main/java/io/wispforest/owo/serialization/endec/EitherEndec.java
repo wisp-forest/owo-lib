@@ -1,7 +1,7 @@
 package io.wispforest.owo.serialization.endec;
 
 import com.mojang.datafixers.util.Either;
-import io.wispforest.owo.serialization.*;
+import io.wispforest.endec.*;
 
 public final class EitherEndec<L, R> implements Endec<Either<L, R>> {
 

@@ -1,8 +1,11 @@
 package io.wispforest.owo.serialization.endec;
 
 import com.mojang.datafixers.util.Function3;
-import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.SerializationAttributes;
+import io.wispforest.endec.Endec;
+import io.wispforest.endec.SerializationAttributes;
+import io.wispforest.endec.impl.ReflectiveEndecBuilder;
+import io.wispforest.endec.impl.StructEndecBuilder;
+import io.wispforest.owo.serialization.CodecUtils;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
@@ -12,45 +15,17 @@ import net.minecraft.registry.tag.TagKey;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextCodecs;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Uuids;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
 import org.joml.Vector3f;
 
-import java.time.Instant;
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.Date;
 import java.util.List;
 import java.util.function.Function;
 
-public final class BuiltInEndecs {
+public final class MinecraftEndecs {
 
-    private BuiltInEndecs() {}
-
-    // --- Java Types ---
-
-    public static final Endec<int[]> INT_ARRAY = Endec.INT.listOf().xmap((list) -> list.stream().mapToInt(v -> v).toArray(), (ints) -> Arrays.stream(ints).boxed().toList());
-    public static final Endec<long[]> LONG_ARRAY = Endec.LONG.listOf().xmap((list) -> list.stream().mapToLong(v -> v).toArray(), (longs) -> Arrays.stream(longs).boxed().toList());
-
-    public static final Endec<BitSet> BITSET = LONG_ARRAY.xmap(BitSet::valueOf, BitSet::toLongArray);
-
-    public static final Endec<java.util.UUID> UUID = Endec
-            .ifAttr(
-                    SerializationAttributes.HUMAN_READABLE,
-                    Endec.STRING.xmap(java.util.UUID::fromString, java.util.UUID::toString)
-            ).orElse(
-                    INT_ARRAY.xmap(Uuids::toUuid, Uuids::toIntArray)
-            );
-
-    public static final Endec<Date> DATE = Endec
-            .ifAttr(
-                    SerializationAttributes.HUMAN_READABLE,
-                    Endec.STRING.xmap(s -> Date.from(Instant.parse(s)), date -> date.toInstant().toString())
-            ).orElse(
-                    Endec.LONG.xmap(Date::new, Date::getTime)
-            );
+    private MinecraftEndecs() {}
 
     // --- MC Types ---
 
@@ -68,8 +43,8 @@ public final class BuiltInEndecs {
             });
 
     public static final Endec<Identifier> IDENTIFIER = Endec.STRING.xmap(Identifier::new, Identifier::toString);
-    public static final Endec<ItemStack> ITEM_STACK = Endec.ofCodec(ItemStack.OPTIONAL_CODEC);
-    public static final Endec<Text> TEXT = Endec.ofCodec(TextCodecs.CODEC);
+    public static final Endec<ItemStack> ITEM_STACK = CodecUtils.ofCodec(ItemStack.OPTIONAL_CODEC);
+    public static final Endec<Text> TEXT = CodecUtils.ofCodec(TextCodecs.CODEC);
 
     public static final Endec<Vec3i> VEC3I = vectorEndec("Vec3i", Endec.INT, Vec3i::new, Vec3i::getX, Vec3i::getY, Vec3i::getZ);
     public static final Endec<Vec3d> VEC3D = vectorEndec("Vec3d", Endec.DOUBLE, Vec3d::new, Vec3d::getX, Vec3d::getY, Vec3d::getZ);
@@ -109,6 +84,25 @@ public final class BuiltInEndecs {
     );
 
     // --- Constructors for MC types ---
+
+    public static ReflectiveEndecBuilder withExtra(ReflectiveEndecBuilder builder) {
+        builder.register(PACKET_BYTE_BUF, PacketByteBuf.class);
+
+        builder.register(IDENTIFIER, Identifier.class)
+                .register(ITEM_STACK, ItemStack.class)
+                .register(TEXT, Text.class);
+
+        builder.register(VEC3I, Vec3i.class)
+                .register(VEC3D, Vec3d.class)
+                .register(VECTOR3F, Vector3f.class);
+
+        builder.register(BLOCK_POS, BlockPos.class)
+                .register(CHUNK_POS, ChunkPos.class);
+
+        builder.register(BLOCK_HIT_RESULT, BlockHitResult.class);
+
+        return builder;
+    }
 
     public static <T> Endec<T> ofRegistry(Registry<T> registry) {
         return IDENTIFIER.xmap(registry::get, registry::getId);

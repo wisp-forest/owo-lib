@@ -1,10 +1,10 @@
 package io.wispforest.uwu.network;
 
-import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.endec.RecordEndec;
-import io.wispforest.owo.serialization.endec.StructEndecBuilder;
-import io.wispforest.owo.serialization.format.bytebuf.ByteBufDeserializer;
-import io.wispforest.owo.serialization.format.bytebuf.ByteBufSerializer;
+import io.wispforest.endec.Endec;
+import io.wispforest.endec.format.bytebuf.ByteBufDeserializer;
+import io.wispforest.endec.format.bytebuf.ByteBufSerializer;
+import io.wispforest.endec.impl.RecordEndec;
+import io.wispforest.endec.impl.StructEndecBuilder;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 
 import java.util.LinkedList;
@@ -38,7 +38,7 @@ public class UwuNetworkTest {
         testEquals(endec, sameendec);
 
         testSerialization(test, testRecord -> {
-            return endec.decodeFully(ByteBufDeserializer::of, endec.encodeFully(ByteBufSerializer::packet, testRecord));
+            return endec.decodeFully(ByteBufDeserializer::of, endec.encodeFully(() -> ByteBufSerializer.of(PacketByteBufs.create()), testRecord));
         });
 
         //--
@@ -52,7 +52,7 @@ public class UwuNetworkTest {
         );
 
         testSerialization(test, testRecord -> {
-            return builtendec.decodeFully(ByteBufDeserializer::of, builtendec.encodeFully(ByteBufSerializer::packet, testRecord));
+            return builtendec.decodeFully(ByteBufDeserializer::of, builtendec.encodeFully(() -> ByteBufSerializer.of(PacketByteBufs.create()), testRecord));
         });
     }
 

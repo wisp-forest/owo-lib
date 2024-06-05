@@ -1,7 +1,7 @@
 package io.wispforest.owo.particles.systems;
 
 import io.wispforest.owo.network.NetworkException;
-import io.wispforest.owo.serialization.Endec;
+import io.wispforest.endec.Endec;
 import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.ServicesFrozenException;
 import net.minecraft.server.world.ServerWorld;

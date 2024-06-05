@@ -1,9 +1,9 @@
 package io.wispforest.owo.config;
 
+import io.wispforest.endec.impl.ReflectiveEndecBuilder;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.annotation.RestartRequired;
-import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.endec.ReflectiveEndecBuilder;
+import io.wispforest.endec.Endec;
 import io.wispforest.owo.util.Observable;
 import net.minecraft.network.PacketByteBuf;
 import org.jetbrains.annotations.Nullable;
@@ -66,7 +66,8 @@ public final class Option<T> {
                   Observable<T> mirror,
                   BoundField<T> backingField,
                   @Nullable ConfigWrapper.Constraint constraint,
-                  SyncMode syncMode
+                  SyncMode syncMode,
+                  ReflectiveEndecBuilder builder
     ) {
         this.configName = configName;
         this.key = key;
@@ -80,7 +81,7 @@ public final class Option<T> {
 
         this.constraint = constraint;
         this.syncMode = syncMode;
-        this.endec = syncMode.isNone() ? null : (Endec<T>) ReflectiveEndecBuilder.get(this.backingField.field.getGenericType());
+        this.endec = syncMode.isNone() ? null : (Endec<T>) builder.get(this.backingField.field.getGenericType());
     }
 
     /**

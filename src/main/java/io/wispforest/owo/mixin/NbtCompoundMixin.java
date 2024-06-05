@@ -1,11 +1,11 @@
 package io.wispforest.owo.mixin;
 
-import io.wispforest.owo.serialization.SerializationAttributes;
-import io.wispforest.owo.serialization.SerializationContext;
-import io.wispforest.owo.serialization.endec.KeyedEndec;
+import io.wispforest.endec.SerializationAttributes;
+import io.wispforest.endec.SerializationContext;
+import io.wispforest.endec.impl.KeyedEndec;
+import io.wispforest.endec.util.MapCarrier;
 import io.wispforest.owo.serialization.format.nbt.NbtDeserializer;
 import io.wispforest.owo.serialization.format.nbt.NbtSerializer;
-import io.wispforest.owo.serialization.util.MapCarrier;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import org.jetbrains.annotations.NotNull;
@@ -27,13 +27,13 @@ public abstract class NbtCompoundMixin implements MapCarrier {
     public abstract boolean contains(String key);
 
     @Override
-    public <T> T getWithErrors(@NotNull KeyedEndec<T> key, SerializationContext ctx) {
+    public <T> T getWithErrors(SerializationContext ctx, @NotNull KeyedEndec<T> key) {
         if (!this.has(key)) return key.defaultValue();
         return key.endec().decodeFully(ctx.withAttributes(SerializationAttributes.HUMAN_READABLE), NbtDeserializer::of, this.get(key.key()));
     }
 
     @Override
-    public <T> void put(@NotNull KeyedEndec<T> key, @NotNull T value, SerializationContext ctx) {
+    public <T> void put(SerializationContext ctx, @NotNull KeyedEndec<T> key, @NotNull T value) {
         this.put(key.key(), key.endec().encodeFully(ctx.withAttributes(SerializationAttributes.HUMAN_READABLE), NbtSerializer::of, value));
     }
 

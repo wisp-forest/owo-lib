@@ -1,9 +1,10 @@
 package io.wispforest.owo.client.screens;
 
+import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.Owo;
-import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.endec.BuiltInEndecs;
-import io.wispforest.owo.serialization.endec.StructEndecBuilder;
+import io.wispforest.endec.Endec;
+import io.wispforest.owo.serialization.CodecUtils;
+import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.util.pond.OwoScreenHandlerExtension;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -22,9 +23,11 @@ public class ScreenInternals {
     public static final Identifier SYNC_PROPERTIES = new Identifier("owo", "sync_screen_handler_properties");
 
     public static void init() {
-        PayloadTypeRegistry.playS2C().register(LocalPacket.ID, LocalPacket.ENDEC.packetCodec());
-        PayloadTypeRegistry.playC2S().register(LocalPacket.ID, LocalPacket.ENDEC.packetCodec());
-        PayloadTypeRegistry.playS2C().register(SyncPropertiesPacket.ID, SyncPropertiesPacket.ENDEC.packetCodec());
+        var localPacketCodec = CodecUtils.packetCodec(LocalPacket.ENDEC);
+
+        PayloadTypeRegistry.playS2C().register(LocalPacket.ID, localPacketCodec);
+        PayloadTypeRegistry.playC2S().register(LocalPacket.ID, localPacketCodec);
+        PayloadTypeRegistry.playS2C().register(SyncPropertiesPacket.ID, CodecUtils.packetCodec(SyncPropertiesPacket.ENDEC));
 
         ServerPlayNetworking.registerGlobalReceiver(LocalPacket.ID, (payload, context) -> {
             var screenHandler = context.player().currentScreenHandler;
@@ -42,7 +45,7 @@ public class ScreenInternals {
         public static final Id<LocalPacket> ID = new Id<>(new Identifier("owo", "local_packet"));
         public static final Endec<LocalPacket> ENDEC = StructEndecBuilder.of(
             Endec.VAR_INT.fieldOf("packetId", LocalPacket::packetId),
-            BuiltInEndecs.PACKET_BYTE_BUF.fieldOf("payload", LocalPacket::payload),
+            MinecraftEndecs.PACKET_BYTE_BUF.fieldOf("payload", LocalPacket::payload),
             LocalPacket::new
         );
 
@@ -55,7 +58,7 @@ public class ScreenInternals {
     public record SyncPropertiesPacket(PacketByteBuf payload) implements CustomPayload {
         public static final Id<SyncPropertiesPacket> ID = new Id<>(SYNC_PROPERTIES);
         public static final Endec<SyncPropertiesPacket> ENDEC = StructEndecBuilder.of(
-            BuiltInEndecs.PACKET_BYTE_BUF.fieldOf("payload", SyncPropertiesPacket::payload),
+            MinecraftEndecs.PACKET_BYTE_BUF.fieldOf("payload", SyncPropertiesPacket::payload),
             SyncPropertiesPacket::new
         );
 

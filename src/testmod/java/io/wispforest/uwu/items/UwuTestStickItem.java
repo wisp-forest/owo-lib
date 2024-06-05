@@ -4,14 +4,15 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
+import io.wispforest.endec.impl.KeyedEndec;
+import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.OwoItemSettings;
 import io.wispforest.owo.ops.WorldOps;
-import io.wispforest.owo.serialization.Endec;
+import io.wispforest.endec.Endec;
+import io.wispforest.endec.SerializationContext;
+import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.RegistriesAttribute;
-import io.wispforest.owo.serialization.SerializationContext;
-import io.wispforest.owo.serialization.endec.KeyedEndec;
-import io.wispforest.owo.serialization.endec.StructEndecBuilder;
 import io.wispforest.uwu.Uwu;
 import io.wispforest.uwu.text.BasedTextContent;
 import net.minecraft.component.DataComponentType;
@@ -61,7 +62,7 @@ public class UwuTestStickItem extends Item {
         }
     };
 
-    private static final Endec<String> YEP_SAME_HERE = Endec.ofCodec(Endec.ofCodec(THIS_CODEC_NEEDS_REGISTRIES).codec());
+    private static final Endec<String> YEP_SAME_HERE = CodecUtils.ofCodec(CodecUtils.ofEndec(CodecUtils.ofCodec(THIS_CODEC_NEEDS_REGISTRIES)));
     private static final KeyedEndec<String> KYED = YEP_SAME_HERE.keyed("kyed", (String) null);
 
     public UwuTestStickItem() {
@@ -111,16 +112,18 @@ public class UwuTestStickItem extends Item {
 
             try {
                 var stack = context.getStack();
-                context.getPlayer().sendMessage(Text.literal("current: " + stack.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT).getNbt().get(
-                        KYED,
-                        SerializationContext.attributes(RegistriesAttribute.of(context.getWorld().getRegistryManager()))
-                )));
+                var data = stack.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT).getNbt()
+                        .get(SerializationContext.attributes(RegistriesAttribute.of(context.getWorld().getRegistryManager())), KYED);
 
-                stack.apply(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT, nbt -> nbt.apply(nbtCompound -> nbtCompound.put(
-                        KYED,
-                        String.valueOf(context.getWorld().random.nextInt(10000)),
-                        SerializationContext.attributes(RegistriesAttribute.of(context.getWorld().getRegistryManager()))
-                )));
+                context.getPlayer().sendMessage(Text.literal("current: " + data));
+
+                stack.apply(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT, nbt -> {
+                    return nbt.apply(nbtCompound -> nbtCompound.put(
+                            SerializationContext.attributes(RegistriesAttribute.of(context.getWorld().getRegistryManager())),
+                            KYED,
+                            String.valueOf(context.getWorld().random.nextInt(10000))
+                    ));
+                });
                 context.getPlayer().sendMessage(Text.literal("modified"));
             } catch (Exception bruh) {
                 context.getPlayer().sendMessage(Text.literal("bruh: " + bruh.getMessage()));

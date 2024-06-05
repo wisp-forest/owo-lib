@@ -1,10 +1,10 @@
 package io.wispforest.owo.mixin;
 
-import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.SerializationContext;
-import io.wispforest.owo.serialization.format.bytebuf.ByteBufDeserializer;
-import io.wispforest.owo.serialization.format.bytebuf.ByteBufSerializer;
-import io.wispforest.owo.serialization.util.EndecBuffer;
+import io.wispforest.endec.Endec;
+import io.wispforest.endec.SerializationContext;
+import io.wispforest.endec.format.bytebuf.ByteBufDeserializer;
+import io.wispforest.endec.format.bytebuf.ByteBufSerializer;
+import io.wispforest.endec.util.EndecBuffer;
 import net.minecraft.network.PacketByteBuf;
 import org.spongepowered.asm.mixin.Mixin;
 

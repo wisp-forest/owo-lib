@@ -4,7 +4,8 @@ import com.mojang.datafixers.DataFixUtils;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
-import io.wispforest.owo.serialization.SerializationContext;
+import io.wispforest.endec.SerializationContext;
+import io.wispforest.endec.format.edm.EdmElement;
 
 import java.nio.ByteBuffer;
 import java.util.*;

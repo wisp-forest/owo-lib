@@ -1,5 +1,6 @@
 package io.wispforest.owo.serialization;
 
+import io.wispforest.endec.SerializationAttribute;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.RegistryOps;
 import org.jetbrains.annotations.ApiStatus;
@@ -7,6 +8,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public final class RegistriesAttribute implements SerializationAttribute.Instance {
+
+    public static final SerializationAttribute.WithValue<RegistriesAttribute> REGISTRIES = SerializationAttribute.withValue("registries");
 
     private final RegistryOps.RegistryInfoGetter infoGetter;
     private final @Nullable DynamicRegistryManager registryManager;
@@ -46,7 +49,7 @@ public final class RegistriesAttribute implements SerializationAttribute.Instanc
 
     @Override
     public SerializationAttribute attribute() {
-        return SerializationAttributes.REGISTRIES;
+        return REGISTRIES;
     }
 
     @Override

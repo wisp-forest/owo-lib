@@ -1,6 +1,6 @@
 package io.wispforest.uwu.network;
 
-import io.wispforest.owo.serialization.annotations.NullableComponent;
+import io.wispforest.endec.annotations.NullableComponent;
 
 import java.util.List;
 

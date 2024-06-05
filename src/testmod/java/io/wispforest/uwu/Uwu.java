@@ -9,6 +9,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.logging.LogUtils;
 import io.netty.buffer.Unpooled;
+import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.ConfigSynchronizer;
 import io.wispforest.owo.config.Option;
@@ -22,14 +23,14 @@ import io.wispforest.owo.particles.ClientParticles;
 import io.wispforest.owo.particles.systems.ParticleSystem;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
 import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
-import io.wispforest.owo.serialization.SerializationContext;
-import io.wispforest.owo.serialization.endec.BuiltInEndecs;
-import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.endec.StructEndecBuilder;
-import io.wispforest.owo.serialization.format.bytebuf.ByteBufSerializer;
-import io.wispforest.owo.serialization.format.json.JsonDeserializer;
-import io.wispforest.owo.serialization.format.json.JsonEndec;
-import io.wispforest.owo.serialization.format.json.JsonSerializer;
+import io.wispforest.endec.SerializationContext;
+import io.wispforest.endec.Endec;
+import io.wispforest.endec.format.bytebuf.ByteBufSerializer;
+import io.wispforest.endec.format.json.JsonDeserializer;
+import io.wispforest.endec.format.json.JsonEndec;
+import io.wispforest.endec.format.json.JsonSerializer;
+import io.wispforest.owo.serialization.CodecUtils;
+import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.serialization.format.nbt.NbtDeserializer;
 import io.wispforest.owo.serialization.format.nbt.NbtEndec;
 import io.wispforest.owo.serialization.format.nbt.NbtSerializer;
@@ -46,6 +47,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.block.Blocks;
@@ -178,7 +180,7 @@ public class Uwu implements ModInitializer {
     @Override
     public void onInitialize() {
 
-        var stackEndec = Endec.ofCodec(ItemStack.CODEC);
+        var stackEndec = CodecUtils.ofCodec(ItemStack.CODEC);
         var stackData = """
                         {
                             "id": "minecraft:shroomlight",
@@ -192,11 +194,11 @@ public class Uwu implements ModInitializer {
         var stacknite = stackEndec.decode(SerializationContext.empty(), JsonDeserializer.of(new Gson().fromJson(stackData, JsonObject.class)));
         System.out.println(stacknite);
 
-        var serializer = ByteBufSerializer.packet();
+        var serializer = ByteBufSerializer.of(PacketByteBufs.create());
         stackEndec.encode(SerializationContext.empty(), serializer, stacknite);
 
         System.out.println(serializer.result().read(SerializationContext.empty(), stackEndec));
-        System.out.println(BuiltInEndecs.BLOCK_POS.codec().encodeStart(NbtOps.INSTANCE, new BlockPos(34, 35, 69)).result().get());
+        System.out.println(CodecUtils.ofEndec(MinecraftEndecs.BLOCK_POS).encodeStart(NbtOps.INSTANCE, new BlockPos(34, 35, 69)).result().get());
 
         FieldRegistrationHandler.register(UwuItems.class, "uwu", true);
 
@@ -343,7 +345,7 @@ public class Uwu implements ModInitializer {
                         JsonElement stackJsonData;
 
                         try {
-                            stackJsonData = BuiltInEndecs.ITEM_STACK.encodeFully(JsonSerializer::of, handStack);
+                            stackJsonData = MinecraftEndecs.ITEM_STACK.encodeFully(JsonSerializer::of, handStack);
                         } catch (Exception exception){
                             LOGGER.info(exception.getMessage());
                             LOGGER.info((Arrays.toString(exception.getStackTrace())));
@@ -356,7 +358,7 @@ public class Uwu implements ModInitializer {
                         LOGGER.info("---");
 
                         try {
-                            handStack = BuiltInEndecs.ITEM_STACK.decodeFully(JsonDeserializer::of, stackJsonData);
+                            handStack = MinecraftEndecs.ITEM_STACK.decodeFully(JsonDeserializer::of, stackJsonData);
                         } catch (Exception exception){
                             LOGGER.info(exception.getMessage());
                             LOGGER.info((Arrays.toString(exception.getStackTrace())));
@@ -465,9 +467,9 @@ public class Uwu implements ModInitializer {
                         try {
                             iterations("Endec", (buf) -> {
                                 ItemStack stack = source.getPlayer().getStackInHand(Hand.MAIN_HAND);
-                                buf.write(BuiltInEndecs.ITEM_STACK, stack);
+                                buf.write(MinecraftEndecs.ITEM_STACK, stack);
 
-                                var stackFromByte = buf.read(BuiltInEndecs.ITEM_STACK);
+                                var stackFromByte = buf.read(MinecraftEndecs.ITEM_STACK);
                             });
                         } catch (Exception exception){
                             LOGGER.info(exception.getMessage());

@@ -1,7 +1,7 @@
 package io.wispforest.owo.serialization.format.nbt;
 
 import com.google.common.io.ByteStreams;
-import io.wispforest.owo.serialization.*;
+import io.wispforest.endec.*;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtIo;
