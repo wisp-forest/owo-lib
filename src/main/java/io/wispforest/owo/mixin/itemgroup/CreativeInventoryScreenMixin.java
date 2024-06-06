@@ -11,6 +11,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemGroup;
@@ -58,7 +59,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
     private final CursorAdapter cursorAdapter = CursorAdapter.ofClientWindow();
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void captureFeatures(PlayerEntity player, FeatureSet enabledFeatures, boolean operatorTabEnabled, CallbackInfo ci) {
+    private void captureFeatures(ClientPlayerEntity player, FeatureSet enabledFeatures, boolean operatorTabEnabled, CallbackInfo ci) {
         this.enabledFeatures = enabledFeatures;
     }
 

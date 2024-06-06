@@ -56,7 +56,7 @@ public class UwuClient implements ClientModInitializer {
         final var bindingButCooler = new KeyBinding("key.uwu.hud_test_two", GLFW.GLFW_KEY_K, "misc");
         KeyBindingHelper.registerKeyBinding(bindingButCooler);
 
-        final var hudComponentId = new Identifier("uwu", "test_element");
+        final var hudComponentId = Identifier.of("uwu", "test_element");
         final Supplier<Component> hudComponent = () ->
                 Containers.verticalFlow(Sizing.content(), Sizing.content())
                         .child(Components.item(Items.DIAMOND.getDefaultStack()).margins(Insets.of(3)))
@@ -68,7 +68,7 @@ public class UwuClient implements ClientModInitializer {
                         .margins(Insets.of(5))
                         .positioning(Positioning.relative(100, 25));
 
-        final var coolerComponentId = new Identifier("uwu", "test_element_two");
+        final var coolerComponentId = Identifier.of("uwu", "test_element_two");
         final Supplier<Component> coolerComponent = () -> UIModel.load(Path.of("../src/testmod/resources/assets/uwu/owo_ui/test_element_two.xml")).expandTemplate(FlowLayout.class, "hud-element", Map.of());
         Hud.add(coolerComponentId, coolerComponent);
 
@@ -95,14 +95,14 @@ public class UwuClient implements ClientModInitializer {
         });
 
         if (Uwu.WE_TESTEN_HANDSHAKE) {
-            OwoNetChannel.create(new Identifier("uwu", "client_only_channel"));
+            OwoNetChannel.create(Identifier.of("uwu", "client_only_channel"));
 
             Uwu.CHANNEL.registerServerbound(WeirdMessage.class, (data, access) -> {
             });
             Uwu.CHANNEL.registerClientbound(WeirdMessage.class, (data, access) -> {
             });
 
-            new ParticleSystemController(new Identifier("uwu", "client_only_particles"));
+            new ParticleSystemController(Identifier.of("uwu", "client_only_particles"));
             Uwu.PARTICLE_CONTROLLER.register(WeirdMessage.class, (world, pos, data) -> {
             });
         }

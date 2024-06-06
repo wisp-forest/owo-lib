@@ -90,7 +90,7 @@ public abstract class ConfigWrapper<C> {
             var modmenuAnnotation = clazz.getAnnotation(Modmenu.class);
             ConfigScreen.registerProvider(
                     modmenuAnnotation.modId(),
-                    screen -> ConfigScreen.createWithCustomModel(new Identifier(modmenuAnnotation.uiModelId()), this, screen)
+                    screen -> ConfigScreen.createWithCustomModel(Identifier.of(modmenuAnnotation.uiModelId()), this, screen)
             );
         }
 

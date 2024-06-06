@@ -44,8 +44,8 @@ public final class OwoHandshake {
     private static final Endec<Map<Identifier, Integer>> CHANNEL_HASHES_ENDEC = Endec.map(MinecraftEndecs.IDENTIFIER, Endec.INT);
 
     private static final MutableText PREFIX = TextOps.concat(Owo.PREFIX, Text.of("§chandshake failure\n"));
-    public static final Identifier CHANNEL_ID = new Identifier("owo", "handshake");
-    public static final Identifier OFF_CHANNEL_ID = new Identifier("owo", "handshake_off");
+    public static final Identifier CHANNEL_ID = Identifier.of("owo", "handshake");
+    public static final Identifier OFF_CHANNEL_ID = Identifier.of("owo", "handshake_off");
 
     private static final boolean ENABLED = System.getProperty("owo.handshake.enabled") != null ? Boolean.getBoolean("owo.handshake.enabled") : Owo.DEBUG;
     private static boolean HANDSHAKE_REQUIRED = false;

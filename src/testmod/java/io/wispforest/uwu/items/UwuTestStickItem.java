@@ -13,9 +13,10 @@ import io.wispforest.endec.Endec;
 import io.wispforest.endec.SerializationContext;
 import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.RegistriesAttribute;
+import io.wispforest.owo.util.RegistryAccess;
 import io.wispforest.uwu.Uwu;
 import io.wispforest.uwu.text.BasedTextContent;
-import net.minecraft.component.DataComponentType;
+import net.minecraft.component.ComponentType;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
 import net.minecraft.enchantment.Enchantments;
@@ -26,6 +27,7 @@ import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryOps;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
@@ -40,10 +42,10 @@ import net.minecraft.world.World;
 
 public class UwuTestStickItem extends Item {
 
-    private static final DataComponentType<Text> TEXT_COMPONENT = Registry.register(
+    private static final ComponentType<Text> TEXT_COMPONENT = Registry.register(
             Registries.DATA_COMPONENT_TYPE,
-            new Identifier("uwu", "text"),
-            DataComponentType.<Text>builder()
+            Identifier.of("uwu", "text"),
+            ComponentType.<Text>builder()
                     .codec(TextCodecs.CODEC)
                     .packetCodec(TextCodecs.PACKET_CODEC)
                     .build()
@@ -135,7 +137,9 @@ public class UwuTestStickItem extends Item {
         if (context.getWorld().isClient) return ActionResult.SUCCESS;
 
         final var breakStack = new ItemStack(Items.NETHERITE_PICKAXE);
-        breakStack.addEnchantment(Enchantments.FORTUNE, 3);
+
+        final var fortune = context.getWorld().getRegistryManager().get(RegistryKeys.ENCHANTMENT).getEntry(Enchantments.FORTUNE).orElseThrow();
+        breakStack.addEnchantment(fortune, 3);
         WorldOps.breakBlockWithItem(context.getWorld(), context.getBlockPos(), breakStack);
 
         final var stickStack = context.getStack();

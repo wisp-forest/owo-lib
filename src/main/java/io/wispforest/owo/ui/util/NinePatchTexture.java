@@ -162,7 +162,7 @@ public class NinePatchTexture {
 
         @Override
         public Identifier getFabricId() {
-            return new Identifier("owo", "nine_patch_metadata");
+            return Identifier.of("owo", "nine_patch_metadata");
         }
 
         @Override
@@ -170,7 +170,7 @@ public class NinePatchTexture {
             prepared.forEach((resourceId, jsonElement) -> {
                 if (!(jsonElement instanceof JsonObject object)) return;
 
-                var texture = new Identifier(JsonHelper.getString(object, "texture"));
+                var texture = Identifier.of(JsonHelper.getString(object, "texture"));
                 var textureSize = Size.of(JsonHelper.getInt(object, "texture_width"), JsonHelper.getInt(object, "texture_height"));
 
                 int u = JsonHelper.getInt(object, "u", 0), v = JsonHelper.getInt(object, "v", 0);

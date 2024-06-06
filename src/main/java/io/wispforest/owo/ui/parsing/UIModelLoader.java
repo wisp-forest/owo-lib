@@ -101,7 +101,7 @@ public class UIModelLoader implements SynchronousResourceReloader, IdentifiableR
 
     @Override
     public Identifier getFabricId() {
-        return new Identifier("owo", "ui-model-loader");
+        return Identifier.of("owo", "ui-model-loader");
     }
 
     @Override
@@ -110,7 +110,7 @@ public class UIModelLoader implements SynchronousResourceReloader, IdentifiableR
 
         manager.findResources("owo_ui", identifier -> identifier.getPath().endsWith(".xml")).forEach((resourceId, resource) -> {
             try {
-                var modelId = new Identifier(
+                var modelId = Identifier.of(
                         resourceId.getNamespace(),
                         resourceId.getPath().substring(7, resourceId.getPath().length() - 4)
                 );
@@ -135,7 +135,7 @@ public class UIModelLoader implements SynchronousResourceReloader, IdentifiableR
                 var associations = JANKSON.load(stream);
                 associations.forEach((key, value) -> {
                     if (!(value instanceof JsonPrimitive primitive)) return;
-                    HOT_RELOAD_LOCATIONS.put(new Identifier(key), Path.of(primitive.asString()));
+                    HOT_RELOAD_LOCATIONS.put(Identifier.of(key), Path.of(primitive.asString()));
                 });
             } catch (IOException | SyntaxError ignored) {}
         }

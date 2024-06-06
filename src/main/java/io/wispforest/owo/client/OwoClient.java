@@ -45,7 +45,7 @@ public class OwoClient implements ClientModInitializer {
             Ignored 'owo.renderdocPath' property as this Minecraft instance is not running on Windows.
             ========================================""";
 
-    public static final GlProgram HSV_PROGRAM = new GlProgram(new Identifier("owo", "spectrum"), VertexFormats.POSITION_COLOR);
+    public static final GlProgram HSV_PROGRAM = new GlProgram(Identifier.of("owo", "spectrum"), VertexFormats.POSITION_COLOR);
     public static final BlurProgram BLUR_PROGRAM = new BlurProgram();
 
     @Override

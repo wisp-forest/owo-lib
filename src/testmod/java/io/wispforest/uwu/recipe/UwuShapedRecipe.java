@@ -16,7 +16,7 @@ package io.wispforest.uwu.recipe;
 //    public static void init() {
 //        RECIPE_SERIALIZER = Registry.register(
 //                Registries.RECIPE_SERIALIZER,
-//                new Identifier("uwu:crafting_shaped"),
+//                Identifier.of("uwu:crafting_shaped"),
 //                new EndecRecipeSerializer<>(ENDEC)
 //        );
 //    }

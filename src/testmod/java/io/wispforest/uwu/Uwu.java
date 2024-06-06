@@ -90,18 +90,18 @@ public class Uwu implements ModInitializer {
 
     public static final boolean WE_TESTEN_HANDSHAKE = false;
 
-    public static final TagKey<Item> TAB_2_CONTENT = TagKey.of(RegistryKeys.ITEM, new Identifier("uwu", "tab_2_content"));
-    public static final Identifier GROUP_TEXTURE = new Identifier("uwu", "textures/gui/group.png");
-    public static final Identifier OWO_ICON_TEXTURE = new Identifier("uwu", "textures/gui/icon.png");
-    public static final Identifier ANIMATED_BUTTON_TEXTURE = new Identifier("uwu", "textures/gui/animated_icon_test.png");
+    public static final TagKey<Item> TAB_2_CONTENT = TagKey.of(RegistryKeys.ITEM, Identifier.of("uwu", "tab_2_content"));
+    public static final Identifier GROUP_TEXTURE = Identifier.of("uwu", "textures/gui/group.png");
+    public static final Identifier OWO_ICON_TEXTURE = Identifier.of("uwu", "textures/gui/icon.png");
+    public static final Identifier ANIMATED_BUTTON_TEXTURE = Identifier.of("uwu", "textures/gui/animated_icon_test.png");
 
     public static final ScreenHandlerType<EpicScreenHandler> EPIC_SCREEN_HANDLER_TYPE = Registry.register(
         Registries.SCREEN_HANDLER,
-        new Identifier("uwu", "epic_screen_handler"),
+        Identifier.of("uwu", "epic_screen_handler"),
         new ScreenHandlerType<>(EpicScreenHandler::new, FeatureFlags.VANILLA_FEATURES)
     );
 
-    public static final OwoItemGroup FOUR_TAB_GROUP = OwoItemGroup.builder(new Identifier("uwu", "four_tab_group"), () -> Icon.of(Items.AXOLOTL_BUCKET))
+    public static final OwoItemGroup FOUR_TAB_GROUP = OwoItemGroup.builder(Identifier.of("uwu", "four_tab_group"), () -> Icon.of(Items.AXOLOTL_BUCKET))
             .disableDynamicTitle()
             .buttonStackHeight(1)
             .initializer(group -> {
@@ -114,17 +114,17 @@ public class Uwu implements ModInitializer {
             })
             .build();
 
-    public static final OwoItemGroup SIX_TAB_GROUP = OwoItemGroup.builder(new Identifier("uwu", "six_tab_group"), () -> Icon.of(Items.POWDER_SNOW_BUCKET))
+    public static final OwoItemGroup SIX_TAB_GROUP = OwoItemGroup.builder(Identifier.of("uwu", "six_tab_group"), () -> Icon.of(Items.POWDER_SNOW_BUCKET))
             .tabStackHeight(3)
             .backgroundTexture(GROUP_TEXTURE)
-            .scrollerTextures(new OwoItemGroup.ScrollerTextures(new Identifier("uwu", "scroller"), new Identifier("uwu", "scroller_disabled")))
+            .scrollerTextures(new OwoItemGroup.ScrollerTextures(Identifier.of("uwu", "scroller"), Identifier.of("uwu", "scroller_disabled")))
             .tabTextures(new OwoItemGroup.TabTextures(
-                    new Identifier("uwu", "top_selected"),
-                    new Identifier("uwu", "top_selected_first_column"),
-                    new Identifier("uwu", "top_unselected"),
-                    new Identifier("uwu", "bottom_selected"),
-                    new Identifier("uwu", "bottom_selected_first_column"),
-                    new Identifier("uwu", "bottom_unselected")))
+                    Identifier.of("uwu", "top_selected"),
+                    Identifier.of("uwu", "top_selected_first_column"),
+                    Identifier.of("uwu", "top_unselected"),
+                    Identifier.of("uwu", "bottom_selected"),
+                    Identifier.of("uwu", "bottom_selected_first_column"),
+                    Identifier.of("uwu", "bottom_unselected")))
             .initializer(group -> {
                 group.addTab(Icon.of(Items.DIAMOND), "tab_1", null, true);
                 group.addTab(Icon.of(Items.EMERALD), "tab_2", null, false);
@@ -139,26 +139,26 @@ public class Uwu implements ModInitializer {
             })
             .build();
 
-    public static final OwoItemGroup SINGLE_TAB_GROUP = OwoItemGroup.builder(new Identifier("uwu", "single_tab_group"), () -> Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16))
+    public static final OwoItemGroup SINGLE_TAB_GROUP = OwoItemGroup.builder(Identifier.of("uwu", "single_tab_group"), () -> Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16))
             .displaySingleTab()
             .initializer(group -> group.addTab(Icon.of(Items.SPONGE), "tab_1", null, true))
             .build();
 
-    public static final ItemGroup VANILLA_GROUP = Registry.register(Registries.ITEM_GROUP, new Identifier("uwu", "vanilla_group"), FabricItemGroup.builder()
+    public static final ItemGroup VANILLA_GROUP = Registry.register(Registries.ITEM_GROUP, Identifier.of("uwu", "vanilla_group"), FabricItemGroup.builder()
             .displayName(Text.literal("who did this"))
             .icon(Items.ACACIA_BOAT::getDefaultStack)
             .entries((context, entries) -> entries.add(Items.MANGROVE_CHEST_BOAT))
             .build());
 
-    public static final OwoNetChannel CHANNEL = OwoNetChannel.create(new Identifier("uwu", "uwu"));
+    public static final OwoNetChannel CHANNEL = OwoNetChannel.create(Identifier.of("uwu", "uwu"));
 
     public static final TestMessage MESSAGE = new TestMessage("hahayes", 69, Long.MAX_VALUE, ItemStack.EMPTY, Short.MAX_VALUE, Byte.MAX_VALUE, new BlockPos(69, 420, 489),
-            Float.NEGATIVE_INFINITY, Double.NaN, false, new Identifier("uowou", "hahayes"), Collections.emptyMap(),
+            Float.NEGATIVE_INFINITY, Double.NaN, false, Identifier.of("uowou", "hahayes"), Collections.emptyMap(),
             new int[]{10, 20}, new String[]{"trollface"}, new short[]{1, 2, 3}, new long[]{Long.MAX_VALUE, 1, 3}, new byte[]{1, 2, 3, 4},
             Optional.of("NullableString"), Optional.empty(),
             ImmutableList.of(new BlockPos(9786, 42, 9234)), new SealedSubclassOne("basede", 10), new SealedSubclassTwo(10, null));
 
-    public static final ParticleSystemController PARTICLE_CONTROLLER = new ParticleSystemController(new Identifier("uwu", "particles"));
+    public static final ParticleSystemController PARTICLE_CONTROLLER = new ParticleSystemController(Identifier.of("uwu", "particles"));
     public static final ParticleSystem<Void> CUBE = PARTICLE_CONTROLLER.registerDeferred(Void.class);
     public static final ParticleSystem<Void> BREAK_BLOCK_PARTICLES = PARTICLE_CONTROLLER.register(Void.class, (world, pos, data) -> {
         ClientParticles.persist();
@@ -221,12 +221,12 @@ public class Uwu implements ModInitializer {
         });
 
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER && WE_TESTEN_HANDSHAKE) {
-            OwoNetChannel.create(new Identifier("uwu", "server_only_channel"));
-            new ParticleSystemController(new Identifier("uwu", "server_only_particles"));
+            OwoNetChannel.create(Identifier.of("uwu", "server_only_channel"));
+            new ParticleSystemController(Identifier.of("uwu", "server_only_particles"));
         }
 
         System.out.println(RegistryAccess.getEntry(Registries.ITEM, Items.ACACIA_BOAT));
-        System.out.println(RegistryAccess.getEntry(Registries.ITEM, new Identifier("acacia_planks")));
+        System.out.println(RegistryAccess.getEntry(Registries.ITEM, Identifier.of("acacia_planks")));
 
 //        UwuShapedRecipe.init();
 
@@ -259,7 +259,7 @@ public class Uwu implements ModInitializer {
                                                 GameProfile profile = GameProfileArgumentType.getProfileArgument(context, "player").iterator().next();
 
                                                 OfflineAdvancementLookup.edit(profile.getId(), handle -> {
-                                                    handle.grant(server.getAdvancementLoader().get(new Identifier("story/iron_tools")));
+                                                    handle.grant(server.getAdvancementLoader().get(Identifier.of("story/iron_tools")));
                                                 });
 
                                                 return 0;

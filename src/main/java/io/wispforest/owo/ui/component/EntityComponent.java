@@ -16,7 +16,6 @@ import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
-import net.minecraft.client.render.entity.PlayerModelPart;
 import net.minecraft.client.session.telemetry.TelemetrySender;
 import net.minecraft.client.session.telemetry.WorldSession;
 import net.minecraft.client.util.DefaultSkinHelper;
@@ -25,11 +24,13 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerModelPart;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.registry.Registries;
+import net.minecraft.server.ServerLinks;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.RotationAxis;
 import org.jetbrains.annotations.Nullable;
@@ -254,7 +255,7 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
                                     profile, new WorldSession(TelemetrySender.NOOP, false, Duration.ZERO, ""),
                                     MinecraftClient.getInstance().world.getRegistryManager().toImmutable(),
                                     MinecraftClient.getInstance().world.getEnabledFeatures(),
-                                    "Wisp Forest Enterprises", null, null, Map.of(), null, false
+                                    "Wisp Forest Enterprises", null, null, Map.of(), null, false, Map.of(), ServerLinks.EMPTY
                     )),
                     null, null, false, false
             );

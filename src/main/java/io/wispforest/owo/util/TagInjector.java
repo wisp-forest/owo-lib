@@ -2,6 +2,8 @@ package io.wispforest.owo.util;
 
 import com.google.common.collect.ForwardingMap;
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.TagEntry;
 import net.minecraft.registry.tag.TagManagerLoader;
 import net.minecraft.util.Identifier;
@@ -54,7 +56,7 @@ public final class TagInjector {
      * @param values     The values to insert
      */
     public static void injectRaw(Registry<?> registry, Identifier tag, Function<Identifier, TagEntry> entryMaker, Collection<Identifier> values) {
-        ADDITIONS.computeIfAbsent(new TagLocation(TagManagerLoader.getPath(registry.getKey()), tag), identifier -> new HashSet<>())
+        ADDITIONS.computeIfAbsent(new TagLocation(RegistryKeys.getTagPath(registry.getKey()), tag),identifier -> new HashSet<>())
                 .addAll(values.stream().map(entryMaker).toList());
     }
 

@@ -116,7 +116,7 @@ public final class Components {
 
     public static SpriteComponent sprite(SpriteIdentifier spriteId) {
         return new SpriteComponent(
-                spriteId.getAtlasId().equals(new Identifier("textures/atlas/gui.png"))
+                spriteId.getAtlasId().equals(Identifier.of("textures/atlas/gui.png"))
                         ? MinecraftClient.getInstance().getGuiAtlasManager().getSprite(spriteId.getTextureId())
                         : spriteId.getSprite()
         );

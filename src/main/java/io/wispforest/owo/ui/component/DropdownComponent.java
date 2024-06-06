@@ -23,7 +23,7 @@ import java.util.function.Function;
 
 public class DropdownComponent extends FlowLayout {
 
-    protected static final Identifier ICONS_TEXTURE = new Identifier("owo", "textures/gui/dropdown_icons.png");
+    protected static final Identifier ICONS_TEXTURE = Identifier.of("owo", "textures/gui/dropdown_icons.png");
     protected final FlowLayout entries;
     protected boolean closeWhenNotHovered = false;
 

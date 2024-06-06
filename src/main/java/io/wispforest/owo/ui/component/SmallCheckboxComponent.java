@@ -22,7 +22,7 @@ import java.util.Map;
 
 public class SmallCheckboxComponent extends BaseComponent {
 
-    public static final Identifier TEXTURE = new Identifier("owo", "textures/gui/smol_checkbox.png");
+    public static final Identifier TEXTURE = Identifier.of("owo", "textures/gui/smol_checkbox.png");
 
     protected final EventStream<OnChanged> checkedEvents = OnChanged.newStream();
 

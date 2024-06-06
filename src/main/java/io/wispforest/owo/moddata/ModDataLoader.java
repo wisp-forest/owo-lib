@@ -67,7 +67,7 @@ public final class ModDataLoader {
                 try {
                     final InputStreamReader tabData = new InputStreamReader(Files.newInputStream(path));
 
-                    foundFiles.put(new Identifier(namespace, FilenameUtils.removeExtension(targetPath.relativize(path).toString())), GSON.fromJson(tabData, JsonObject.class));
+                    foundFiles.put(Identifier.of(namespace, FilenameUtils.removeExtension(targetPath.relativize(path).toString())), GSON.fromJson(tabData, JsonObject.class));
                 } catch (IOException e) {
                     Owo.LOGGER.warn("### Unable to open data file {} ++ Stacktrace below ###", path, e);
                     e.printStackTrace();

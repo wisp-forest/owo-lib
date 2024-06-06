@@ -29,7 +29,7 @@ public interface BlockRegistryContainer extends AutoRegistryContainer<Block> {
     @Override
     default void postProcessField(String namespace, Block value, String identifier, Field field) {
         if (field.isAnnotationPresent(NoBlockItem.class)) return;
-        Registry.register(Registries.ITEM, new Identifier(namespace, identifier), createBlockItem(value, identifier));
+        Registry.register(Registries.ITEM, Identifier.of(namespace, identifier), createBlockItem(value, identifier));
     }
 
     /**

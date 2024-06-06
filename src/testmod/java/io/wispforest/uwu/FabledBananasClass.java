@@ -48,12 +48,12 @@ public class FabledBananasClass {
         BlockPos decoded = MinecraftEndecs.BLOCK_POS.decodeFully(JsonDeserializer::of, result);
 
 
-        Endec<Map<Identifier, Integer>> endec = Endec.map(Identifier::toString, Identifier::new, Endec.INT);
-        System.out.println(endec.encodeFully(JsonSerializer::of, Map.of(new Identifier("a"), 6, new Identifier("b"), 9)).toString());
+        Endec<Map<Identifier, Integer>> endec = Endec.map(Identifier::toString, Identifier::of, Endec.INT);
+        System.out.println(endec.encodeFully(JsonSerializer::of, Map.of(Identifier.of("a"), 6, Identifier.of("b"), 9)).toString());
         System.out.println(endec.decodeFully(JsonDeserializer::of, new Gson().fromJson("{\"a:b\":24,\"c\":17}", JsonObject.class)));
 
         Endec<Map<BlockPos, Identifier>> mappy = Endec.map(MinecraftEndecs.BLOCK_POS, MinecraftEndecs.IDENTIFIER);
-        System.out.println(mappy.encodeFully(JsonSerializer::of, Map.of(BlockPos.ORIGIN, new Identifier("a"), new BlockPos(69, 420, 489), new Identifier("bruh:l"))).toString());
+        System.out.println(mappy.encodeFully(JsonSerializer::of, Map.of(BlockPos.ORIGIN, Identifier.of("a"), new BlockPos(69, 420, 489), Identifier.of("bruh:l"))).toString());
         System.out.println(mappy.decodeFully(JsonDeserializer::of, new Gson().fromJson("[{\"k\":[69,420,489],\"v\":\"bruh:l\"},{\"k\":[0,0,0],\"v\":\"minecraft:a\"}]", JsonArray.class)));
     }
 }

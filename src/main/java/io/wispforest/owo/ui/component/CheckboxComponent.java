@@ -19,7 +19,7 @@ public class CheckboxComponent extends CheckboxWidget {
     protected final Observable<Boolean> listeners;
 
     protected CheckboxComponent(Text message) {
-        super(0, 0, message, MinecraftClient.getInstance().textRenderer, false, (checkbox, checked) -> {});
+        super(0, 0, 0, message, MinecraftClient.getInstance().textRenderer, false, (checkbox, checked) -> {});
         this.listeners = Observable.of(this.isChecked());
         this.sizing(Sizing.content(), Sizing.fixed(20));
     }

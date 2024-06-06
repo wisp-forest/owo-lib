@@ -250,7 +250,7 @@ public class UIModel {
         Element template;
         var splitTemplateName = name.split("@");
         if (splitTemplateName.length == 2) {
-            var modelReference = UIModelLoader.get(new Identifier(splitTemplateName[1]));
+            var modelReference = UIModelLoader.get(Identifier.of(splitTemplateName[1]));
             if (modelReference == null) {
                 throw new UIModelParsingException("Unknown UI model " + splitTemplateName[1] + ", referenced by template " + splitTemplateName[0]);
             }

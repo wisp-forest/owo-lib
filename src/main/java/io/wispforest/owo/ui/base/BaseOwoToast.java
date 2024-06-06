@@ -36,7 +36,10 @@ public abstract class BaseOwoToast<R extends ParentComponent> implements Toast {
     @Override
     public Visibility draw(DrawContext context, ToastManager manager, long startTime) {
         var client = MinecraftClient.getInstance();
-        this.rootComponent.draw(OwoUIDrawContext.of(context), -1000, -1000, client.getTickDelta(), client.getLastFrameDuration());
+
+        var tickCounter = MinecraftClient.getInstance().getRenderTickCounter();
+
+        this.rootComponent.draw(OwoUIDrawContext.of(context), -1000, -1000, tickCounter.getTickDelta(false), tickCounter.getLastFrameDuration());
 
         return this.visibilityPredicate.test(this, startTime);
     }

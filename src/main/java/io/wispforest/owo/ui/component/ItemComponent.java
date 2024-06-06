@@ -12,7 +12,6 @@ import io.wispforest.owo.ui.parsing.UIParsing;
 import net.fabricmc.fabric.api.client.rendering.v1.TooltipComponentCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.item.TooltipType;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.OverlayTexture;
@@ -23,6 +22,7 @@ import net.minecraft.command.argument.ItemStringReader;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
@@ -195,7 +195,7 @@ public class ItemComponent extends BaseComponent {
                     .consume(new StringReader(stackString));
 
                 var stack = new ItemStack(result.item());
-                stack.applyComponentsFrom(result.components());
+                stack.applyChanges(result.components());
 
                 this.stack(stack);
             } catch (CommandSyntaxException cse) {

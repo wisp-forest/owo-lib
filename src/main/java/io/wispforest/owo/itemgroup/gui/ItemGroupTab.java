@@ -20,7 +20,7 @@ public record ItemGroupTab(
         boolean primary
 ) implements OwoItemGroup.ButtonDefinition {
 
-    public static final Identifier DEFAULT_TEXTURE = new Identifier("owo", "textures/gui/tabs.png");
+    public static final Identifier DEFAULT_TEXTURE = Identifier.of("owo", "textures/gui/tabs.png");
 
     @Override
     public Text tooltip() {

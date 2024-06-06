@@ -12,7 +12,7 @@ import net.minecraft.util.Identifier;
 public class SmolComponentTestScreen extends BaseUIModelScreen<FlowLayout> {
 
     protected SmolComponentTestScreen() {
-        super(FlowLayout.class, new Identifier("uwu", "smol_components"));
+        super(FlowLayout.class, Identifier.of("uwu", "smol_components"));
     }
 
     @Override

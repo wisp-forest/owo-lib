@@ -19,7 +19,7 @@ import java.util.Map;
 
 public class UwuNetworkExample {
     public static final Map<String, StructEndec<? extends DispatchedInterface>> REGISTRY = new HashMap<>();
-    public static final OwoNetChannel CHANNEL = OwoNetChannel.create(new Identifier("uwu", "main"));
+    public static final OwoNetChannel CHANNEL = OwoNetChannel.create(Identifier.of("uwu", "main"));
 
     public static void init() {
         CHANNEL.addEndecs(builder -> {

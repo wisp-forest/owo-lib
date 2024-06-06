@@ -42,7 +42,7 @@ public final class MinecraftEndecs {
                 return bytes;
             });
 
-    public static final Endec<Identifier> IDENTIFIER = Endec.STRING.xmap(Identifier::new, Identifier::toString);
+    public static final Endec<Identifier> IDENTIFIER = Endec.STRING.xmap(Identifier::of, Identifier::toString);
     public static final Endec<ItemStack> ITEM_STACK = CodecUtils.ofCodec(ItemStack.OPTIONAL_CODEC);
     public static final Endec<Text> TEXT = CodecUtils.ofCodec(TextCodecs.CODEC);
 
@@ -114,7 +114,7 @@ public final class MinecraftEndecs {
 
     public static <T> Endec<TagKey<T>> prefixedTagKey(RegistryKey<? extends Registry<T>> registry) {
         return Endec.STRING.xmap(
-                s -> TagKey.of(registry, new Identifier(s.substring(1))),
+                s -> TagKey.of(registry, Identifier.of(s.substring(1))),
                 tag -> "#" + tag.id()
         );
     }
