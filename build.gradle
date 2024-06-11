@@ -14,22 +14,12 @@ allprojects {
     version = "${project.mod_version}+${rootProject.minecraft_base_version}"
     group = rootProject.maven_group
 
-    repositories {
-        maven { url 'https://maven.wispforest.io' }
-        mavenLocal()
-    }
-
     dependencies {
         minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
         mappings "net.fabricmc:yarn:${rootProject.yarn_mappings}:v2"
         modImplementation "net.fabricmc:fabric-loader:${rootProject.loader_version}"
 
         modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-
-        include implementation("io.wispforest:endec:0.1.0-pre.8")
-        include implementation("io.wispforest.endec:netty:0.1.0-pre.2")
-        include implementation("io.wispforest.endec:gson:0.1.0-pre.2")
-        include implementation("io.wispforest.endec:jankson:0.1.0-pre.2")
     }
 
     processResources {
@@ -100,6 +90,7 @@ repositories {
         }
     }
     maven { url "https://maven.nucleoid.xyz/" }
+    maven { url 'https://maven.wispforest.io' }
     mavenLocal()
 }
 
@@ -140,9 +131,14 @@ dependencies {
     modCompileOnly("com.terraformersmc:modmenu:${project.modmenu_version}")
     modLocalRuntime("com.terraformersmc:modmenu:${project.modmenu_version}")
 
-    api(include("blue.endless:jankson:${project.jankson_version}"))
+    include api("io.wispforest:endec:0.1.0-pre.9")
+    include api("io.wispforest.endec:netty:0.1.0-pre.2")
+    include api("io.wispforest.endec:gson:0.1.0-pre.3")
+    include api("io.wispforest.endec:jankson:0.1.0-pre.3")
 
-    modCompileOnly "xyz.nucleoid:server-translations-api:${project.stapi_version}"
+    include api("blue.endless:jankson:${project.jankson_version}")
+
+    modCompileOnly("xyz.nucleoid:server-translations-api:${project.stapi_version}")
 
     testmodImplementation sourceSets.main.output
     testmodAnnotationProcessor sourceSets.main.output
