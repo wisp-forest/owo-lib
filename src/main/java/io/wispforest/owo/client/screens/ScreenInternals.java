@@ -12,7 +12,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
@@ -72,7 +72,7 @@ public class ScreenInternals {
     public static class Client {
         public static void init() {
             ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
-                if (screen instanceof HandledScreen<?> handled)
+                if (screen instanceof ScreenHandlerProvider<?> handled)
                     ((OwoScreenHandlerExtension) handled.getScreenHandler()).owo$attachToPlayer(client.player);
             });
 
