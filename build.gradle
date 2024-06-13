@@ -14,6 +14,11 @@ allprojects {
     version = "${project.mod_version}+${rootProject.minecraft_base_version}"
     group = rootProject.maven_group
 
+    repositories {
+        maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+        jcenter()
+    }
+
     dependencies {
         minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
         mappings "net.fabricmc:yarn:${rootProject.yarn_mappings}:v2"
@@ -41,6 +46,12 @@ allprojects {
         if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
             it.options.release = targetJavaVersion
         }
+
+        if (JavaVersion.current() != JavaVersion.VERSION_1_8 && sourceSets.main.allJava.files.any {it.name == "module-info.java"}) {
+            options.compilerArgs += ['-Xplugin:Manifold', '--module-path', it.classpath.asPath]
+        } else {
+            options.compilerArgs += ['-Xplugin:Manifold']
+        }
     }
 
     java {
@@ -58,6 +69,10 @@ allprojects {
     jar {
         from("LICENSE") {
             rename { "${it}_${project.archivesBaseName}" }
+        }
+
+        manifest {
+            attributes('Contains-Sources':'java,class')
         }
     }
 
@@ -138,6 +153,9 @@ dependencies {
 
     include api("blue.endless:jankson:${project.jankson_version}")
 
+    implementation testmodImplementation("systems.manifold:manifold-ext-rt:2024.1.17")
+    annotationProcessor testmodAnnotationProcessor("systems.manifold:manifold-ext:2024.1.17") // Add manifold to -processorpath for javac
+
     modCompileOnly("xyz.nucleoid:server-translations-api:${project.stapi_version}")
 
     testmodImplementation sourceSets.main.output
@@ -149,4 +167,10 @@ javadoc {
     options.tags = ["apiNote", "implNote", "implSpec"]
     options.addStringOption("Xdoclint:-missing", "-quiet")
     options.encoding = 'UTF-8'
+}
+
+jar {
+    manifest {
+        attributes('Contains-Sources':'java,class')
+    }
 }
