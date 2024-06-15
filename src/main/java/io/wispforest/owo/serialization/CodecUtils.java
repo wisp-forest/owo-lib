@@ -41,7 +41,7 @@ public class CodecUtils {
      * When encoding, the value is encoded using {@code codec} to an EDM element which is then
      * written into the serializer
      */
-    public static <T> Endec<T> ofCodec(Codec<T> codec) {
+    public static <T> Endec<T> toEndec(Codec<T> codec) {
         return Endec.of(
                 (ctx, serializer, value) -> {
                     DynamicOps<EdmElement<?>> ops = EdmOps.withContext(ctx);
@@ -70,15 +70,15 @@ public class CodecUtils {
      * whichever variant is represented. In the general for non-self-described formats, the
      * which variant is represented must also be stored
      */
-    public static <F, S> Endec<Either<F, S>> either(Endec<F> first, Endec<S> second) {
+    public static <F, S> Endec<Either<F, S>> eitherEndec(Endec<F> first, Endec<S> second) {
         return new EitherEndec<>(first, second, false);
     }
 
     /**
-     * Like {@link #either(Endec, Endec)}, but ensures when decoding from a self-described format
+     * Like {@link #eitherEndec(Endec, Endec)}, but ensures when decoding from a self-described format
      * that only {@code first} or {@code second}, but not both, succeed
      */
-    public static <F, S> Endec<Either<F, S>> xor(Endec<F> first, Endec<S> second) {
+    public static <F, S> Endec<Either<F, S>> xorEndec(Endec<F> first, Endec<S> second) {
         return new EitherEndec<>(first, second, true);
     }
 
@@ -89,19 +89,19 @@ public class CodecUtils {
      * that the serialized format posses the {@code assumedAttributes}
      * <p>
      * This method is implemented by converting between a given DynamicOps'
-     * datatype and EDM (see {@link #ofCodec(Codec)}) and then encoding/decoding
+     * datatype and EDM (see {@link #toEndec(Codec)}) and then encoding/decoding
      * from/to an EDM element using the {@link EdmSerializer} and {@link EdmDeserializer}
      * <p>
      * The serialized representation of a codec created through this method is generally
      * identical to that of a codec manually created to describe the same data
      */
-    public static <T> Codec<T> ofEndec(Endec<T> endec, SerializationContext assumedContext) {
+    public static <T> Codec<T> toCodec(Endec<T> endec, SerializationContext assumedContext) {
         return new Codec<>() {
             @Override
             public <D> DataResult<Pair<T, D>> decode(DynamicOps<D> ops, D input) {
                 try {
                     var rootOps = ops;
-                    while (rootOps instanceof ForwardingDynamicOps<D>) rootOps = ((ForwardingDynamicOpsAccessor<D>) ops).owo$delegate();
+                    while (rootOps instanceof ForwardingDynamicOps<D>) rootOps = ((ForwardingDynamicOpsAccessor<D>) rootOps).owo$delegate();
 
                     var context = rootOps instanceof EdmOps edmOps
                             ? edmOps.capturedContext().and(assumedContext)
@@ -122,7 +122,7 @@ public class CodecUtils {
             public <D> DataResult<D> encode(T input, DynamicOps<D> ops, D prefix) {
                 try {
                     var rootOps = ops;
-                    while (rootOps instanceof ForwardingDynamicOps<D>) rootOps = ((ForwardingDynamicOpsAccessor<D>) ops).owo$delegate();
+                    while (rootOps instanceof ForwardingDynamicOps<D>) rootOps = ((ForwardingDynamicOpsAccessor<D>) rootOps).owo$delegate();
 
                     var context = rootOps instanceof EdmOps edmOps
                             ? edmOps.capturedContext().and(assumedContext)
@@ -140,11 +140,11 @@ public class CodecUtils {
         };
     }
 
-    public static <T> Codec<T> ofEndec(Endec<T> endec) {
-        return ofEndec(endec, SerializationContext.empty());
+    public static <T> Codec<T> toCodec(Endec<T> endec) {
+        return toCodec(endec, SerializationContext.empty());
     }
 
-    public static <T> MapCodec<T> ofStruct(StructEndec<T> structEndec, SerializationContext assumedContext) {
+    public static <T> MapCodec<T> toMapCodec(StructEndec<T> structEndec, SerializationContext assumedContext) {
         return new MapCodec<>() {
             @Override
             public <T1> Stream<T1> keys(DynamicOps<T1> ops) {
@@ -209,8 +209,8 @@ public class CodecUtils {
         };
     }
 
-    public static <T> MapCodec<T> ofStruct(StructEndec<T> structEndec) {
-        return ofStruct(structEndec, SerializationContext.empty());
+    public static <T> MapCodec<T> toMapCodec(StructEndec<T> structEndec) {
+        return toMapCodec(structEndec, SerializationContext.empty());
     }
 
     // the fact that we lose context here is certainly far from ideal,
@@ -220,7 +220,7 @@ public class CodecUtils {
     // mostly impossible because the system turns into one opaque spaghetti mess
     //
     // glisco, 28.04.2024
-    public static <B extends PacketByteBuf, T> PacketCodec<B, T> packetCodec(Endec<T> endec) {
+    public static <B extends PacketByteBuf, T> PacketCodec<B, T> toPacketCodec(Endec<T> endec) {
         return new PacketCodec<>() {
             @Override
             public T decode(B buf) {

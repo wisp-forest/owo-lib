@@ -19,8 +19,8 @@ public abstract class EndecRecipeSerializer<R extends Recipe<?>> implements Reci
 
     protected EndecRecipeSerializer(StructEndec<R> endec, Endec<R> networkEndec) {
         this.endec = endec;
-        this.packetCodec = CodecUtils.packetCodec(networkEndec);
-        this.codec = CodecUtils.ofStruct(this.endec, SerializationContext.attributes(SerializationAttributes.HUMAN_READABLE));
+        this.packetCodec = CodecUtils.toPacketCodec(networkEndec);
+        this.codec = CodecUtils.toMapCodec(this.endec, SerializationContext.attributes(SerializationAttributes.HUMAN_READABLE));
     }
 
     protected EndecRecipeSerializer(StructEndec<R> endec) {

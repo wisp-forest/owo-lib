@@ -9,6 +9,9 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.logging.LogUtils;
 import io.netty.buffer.Unpooled;
+import io.wispforest.endec.format.json.GsonDeserializer;
+import io.wispforest.endec.format.json.GsonEndec;
+import io.wispforest.endec.format.json.GsonSerializer;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.ConfigSynchronizer;
@@ -26,9 +29,6 @@ import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
 import io.wispforest.endec.SerializationContext;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.format.bytebuf.ByteBufSerializer;
-import io.wispforest.endec.format.json.JsonDeserializer;
-import io.wispforest.endec.format.json.JsonEndec;
-import io.wispforest.endec.format.json.JsonSerializer;
 import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.serialization.format.nbt.NbtDeserializer;
@@ -180,7 +180,7 @@ public class Uwu implements ModInitializer {
     @Override
     public void onInitialize() {
 
-        var stackEndec = CodecUtils.ofCodec(ItemStack.CODEC);
+        var stackEndec = CodecUtils.toEndec(ItemStack.CODEC);
         var stackData = """
                         {
                             "id": "minecraft:shroomlight",
@@ -191,14 +191,14 @@ public class Uwu implements ModInitializer {
                         }
                 """;
 
-        var stacknite = stackEndec.decode(SerializationContext.empty(), JsonDeserializer.of(new Gson().fromJson(stackData, JsonObject.class)));
+        var stacknite = stackEndec.decode(SerializationContext.empty(), GsonDeserializer.of(new Gson().fromJson(stackData, JsonObject.class)));
         System.out.println(stacknite);
 
         var serializer = ByteBufSerializer.of(PacketByteBufs.create());
         stackEndec.encode(SerializationContext.empty(), serializer, stacknite);
 
         System.out.println(serializer.result().read(SerializationContext.empty(), stackEndec));
-        System.out.println(CodecUtils.ofEndec(MinecraftEndecs.BLOCK_POS).encodeStart(NbtOps.INSTANCE, new BlockPos(34, 35, 69)).result().get());
+        System.out.println(CodecUtils.toCodec(MinecraftEndecs.BLOCK_POS).encodeStart(NbtOps.INSTANCE, new BlockPos(34, 35, 69)).result().get());
 
         FieldRegistrationHandler.register(UwuItems.class, "uwu", true);
 
@@ -292,8 +292,8 @@ public class Uwu implements ModInitializer {
                         var nbtData = Endec.STRING.encodeFully(NbtSerializer::of, testPhrase);
                         var fromNbtData = Endec.STRING.decodeFully(NbtDeserializer::of, nbtData);
 
-                        var jsonData = Endec.STRING.encodeFully(JsonSerializer::of, fromNbtData);
-                        var fromJsonData = Endec.STRING.decodeFully(JsonDeserializer::of, jsonData);
+                        var jsonData = Endec.STRING.encodeFully(GsonSerializer::of, fromNbtData);
+                        var fromJsonData = Endec.STRING.decodeFully(GsonDeserializer::of, jsonData);
 
                         LOGGER.info("Output: " + fromJsonData);
 
@@ -305,9 +305,9 @@ public class Uwu implements ModInitializer {
 
                         LOGGER.info("Input:  " + randomNumber);
 
-                        var jsonNum = Endec.INT.encodeFully(JsonSerializer::of, randomNumber);
+                        var jsonNum = Endec.INT.encodeFully(GsonSerializer::of, randomNumber);
 
-                        LOGGER.info("Output: " + Endec.INT.decodeFully(JsonDeserializer::of, jsonNum));
+                        LOGGER.info("Output: " + Endec.INT.decodeFully(GsonDeserializer::of, jsonNum));
 
                         LOGGER.info("");
 
@@ -345,7 +345,7 @@ public class Uwu implements ModInitializer {
                         JsonElement stackJsonData;
 
                         try {
-                            stackJsonData = MinecraftEndecs.ITEM_STACK.encodeFully(JsonSerializer::of, handStack);
+                            stackJsonData = MinecraftEndecs.ITEM_STACK.encodeFully(GsonSerializer::of, handStack);
                         } catch (Exception exception){
                             LOGGER.info(exception.getMessage());
                             LOGGER.info((Arrays.toString(exception.getStackTrace())));
@@ -358,7 +358,7 @@ public class Uwu implements ModInitializer {
                         LOGGER.info("---");
 
                         try {
-                            handStack = MinecraftEndecs.ITEM_STACK.decodeFully(JsonDeserializer::of, stackJsonData);
+                            handStack = MinecraftEndecs.ITEM_STACK.decodeFully(GsonDeserializer::of, stackJsonData);
                         } catch (Exception exception){
                             LOGGER.info(exception.getMessage());
                             LOGGER.info((Arrays.toString(exception.getStackTrace())));
@@ -380,11 +380,11 @@ public class Uwu implements ModInitializer {
 
                             LOGGER.info("  Input:  " + nbtDataStack.asString().replace("\n", "\\n"));
 
-                            var jsonDataStack = NbtEndec.ELEMENT.encodeFully(JsonSerializer::of, nbtDataStack);
+                            var jsonDataStack = NbtEndec.ELEMENT.encodeFully(GsonSerializer::of, nbtDataStack);
 
                             LOGGER.info("  Json:  " + jsonDataStack);
 
-                            var convertedNbtDataStack = NbtEndec.ELEMENT.decodeFully(JsonDeserializer::of, jsonDataStack);
+                            var convertedNbtDataStack = NbtEndec.ELEMENT.decodeFully(GsonDeserializer::of, jsonDataStack);
 
                             LOGGER.info("Output:  " + convertedNbtDataStack.asString().replace("\n", "\\n"));
 
@@ -402,11 +402,11 @@ public class Uwu implements ModInitializer {
 
                             LOGGER.info("  Input:  " + nbtDataStack.asString().replace("\n", "\\n"));
 
-                            var jsonDataStack = NbtEndec.ELEMENT.encodeFully(JsonSerializer::of, nbtDataStack);
+                            var jsonDataStack = NbtEndec.ELEMENT.encodeFully(GsonSerializer::of, nbtDataStack);
 
                             LOGGER.info("  Json:  " + jsonDataStack);
 
-                            var convertedNbtDataStack = JsonEndec.INSTANCE.encodeFully(NbtSerializer::of, jsonDataStack);
+                            var convertedNbtDataStack = GsonEndec.INSTANCE.encodeFully(NbtSerializer::of, jsonDataStack);
 
                             LOGGER.info("Output:  " + convertedNbtDataStack.asString().replace("\n", "\\n"));
 

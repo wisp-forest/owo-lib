@@ -5,9 +5,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.wispforest.endec.Endec;
+import io.wispforest.endec.format.json.GsonDeserializer;
+import io.wispforest.endec.format.json.GsonSerializer;
 import io.wispforest.endec.impl.StructEndecBuilder;
-import io.wispforest.endec.format.json.JsonDeserializer;
-import io.wispforest.endec.format.json.JsonSerializer;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
@@ -42,18 +42,18 @@ public class FabledBananasClass {
 
     public static void main(String[] args) {
         var pos = new BlockPos(1, 2, 3);
-        JsonElement result = MinecraftEndecs.BLOCK_POS.encodeFully(JsonSerializer::of, pos);
+        JsonElement result = MinecraftEndecs.BLOCK_POS.encodeFully(GsonSerializer::of, pos);
 
         System.out.println(result);
-        BlockPos decoded = MinecraftEndecs.BLOCK_POS.decodeFully(JsonDeserializer::of, result);
+        BlockPos decoded = MinecraftEndecs.BLOCK_POS.decodeFully(GsonDeserializer::of, result);
 
 
         Endec<Map<Identifier, Integer>> endec = Endec.map(Identifier::toString, Identifier::of, Endec.INT);
-        System.out.println(endec.encodeFully(JsonSerializer::of, Map.of(Identifier.of("a"), 6, Identifier.of("b"), 9)).toString());
-        System.out.println(endec.decodeFully(JsonDeserializer::of, new Gson().fromJson("{\"a:b\":24,\"c\":17}", JsonObject.class)));
+        System.out.println(endec.encodeFully(GsonSerializer::of, Map.of(Identifier.of("a"), 6, Identifier.of("b"), 9)).toString());
+        System.out.println(endec.decodeFully(GsonDeserializer::of, new Gson().fromJson("{\"a:b\":24,\"c\":17}", JsonObject.class)));
 
         Endec<Map<BlockPos, Identifier>> mappy = Endec.map(MinecraftEndecs.BLOCK_POS, MinecraftEndecs.IDENTIFIER);
-        System.out.println(mappy.encodeFully(JsonSerializer::of, Map.of(BlockPos.ORIGIN, Identifier.of("a"), new BlockPos(69, 420, 489), Identifier.of("bruh:l"))).toString());
-        System.out.println(mappy.decodeFully(JsonDeserializer::of, new Gson().fromJson("[{\"k\":[69,420,489],\"v\":\"bruh:l\"},{\"k\":[0,0,0],\"v\":\"minecraft:a\"}]", JsonArray.class)));
+        System.out.println(mappy.encodeFully(GsonSerializer::of, Map.of(BlockPos.ORIGIN, Identifier.of("a"), new BlockPos(69, 420, 489), Identifier.of("bruh:l"))).toString());
+        System.out.println(mappy.decodeFully(GsonDeserializer::of, new Gson().fromJson("[{\"k\":[69,420,489],\"v\":\"bruh:l\"},{\"k\":[0,0,0],\"v\":\"minecraft:a\"}]", JsonArray.class)));
     }
 }

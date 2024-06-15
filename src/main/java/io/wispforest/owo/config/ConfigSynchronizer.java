@@ -193,7 +193,7 @@ public class ConfigSynchronizer {
     }
 
     static {
-        var packetCodec = CodecUtils.packetCodec(ConfigSyncPacket.ENDEC);
+        var packetCodec = CodecUtils.toPacketCodec(ConfigSyncPacket.ENDEC);
 
         PayloadTypeRegistry.playS2C().register(ConfigSyncPacket.ID, packetCodec);
         PayloadTypeRegistry.playC2S().register(ConfigSyncPacket.ID, packetCodec);

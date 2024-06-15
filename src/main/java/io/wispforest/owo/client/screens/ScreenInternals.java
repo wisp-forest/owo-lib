@@ -23,11 +23,11 @@ public class ScreenInternals {
     public static final Identifier SYNC_PROPERTIES = Identifier.of("owo", "sync_screen_handler_properties");
 
     public static void init() {
-        var localPacketCodec = CodecUtils.packetCodec(LocalPacket.ENDEC);
+        var localPacketCodec = CodecUtils.toPacketCodec(LocalPacket.ENDEC);
 
         PayloadTypeRegistry.playS2C().register(LocalPacket.ID, localPacketCodec);
         PayloadTypeRegistry.playC2S().register(LocalPacket.ID, localPacketCodec);
-        PayloadTypeRegistry.playS2C().register(SyncPropertiesPacket.ID, CodecUtils.packetCodec(SyncPropertiesPacket.ENDEC));
+        PayloadTypeRegistry.playS2C().register(SyncPropertiesPacket.ID, CodecUtils.toPacketCodec(SyncPropertiesPacket.ENDEC));
 
         ServerPlayNetworking.registerGlobalReceiver(LocalPacket.ID, (payload, context) -> {
             var screenHandler = context.player().currentScreenHandler;

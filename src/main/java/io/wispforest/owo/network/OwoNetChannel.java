@@ -1,6 +1,5 @@
 package io.wispforest.owo.network;
 
-import blue.endless.jankson.Jankson;
 import io.wispforest.endec.impl.RecordEndec;
 import io.wispforest.endec.impl.ReflectiveEndecBuilder;
 import io.wispforest.owo.mixin.ServerCommonNetworkHandlerAccessor;
@@ -118,7 +117,11 @@ public class OwoNetChannel {
     private OwoNetChannel(Identifier id, String ownerClassName, boolean required) {
         OwoFreezer.checkRegister("Network channels");
 
-        this.builder = MinecraftEndecs.withExtra(new ReflectiveEndecBuilder());
+        this.builder = new ReflectiveEndecBuilder(builder -> {
+            builder.register(Endec.VAR_INT, Integer.class, int.class);
+            builder.register(Endec.VAR_LONG, Long.class, long.class);
+            MinecraftEndecs.addDefaults(builder);
+        });
 
         if (REGISTERED_CHANNELS.containsKey(id)) {
             throw new IllegalStateException("Channel with id '" + id + "' was already registered from class '" + REGISTERED_CHANNELS.get(id).ownerClassName + "'");
@@ -149,8 +152,8 @@ public class OwoNetChannel {
             )
             .xmap(x -> new MessagePayload(this.packetId, x), x -> x.message);
 
-        PayloadTypeRegistry.playC2S().register(this.packetId, CodecUtils.packetCodec(serverEndec));
-        PayloadTypeRegistry.playS2C().register(this.packetId, CodecUtils.packetCodec(clientEndec));
+        PayloadTypeRegistry.playC2S().register(this.packetId, CodecUtils.toPacketCodec(serverEndec));
+        PayloadTypeRegistry.playS2C().register(this.packetId, CodecUtils.toPacketCodec(clientEndec));
 
         ServerPlayNetworking.registerGlobalReceiver(this.packetId, (payload, context) -> {
             serverHandlers.get(endecsByClass.get(payload.message().getClass()).serverHandlerIndex).handle(payload.message, new ServerAccess(context.player()));

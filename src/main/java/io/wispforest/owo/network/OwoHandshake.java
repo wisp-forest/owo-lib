@@ -72,8 +72,8 @@ public final class OwoHandshake {
     }
 
     static {
-        PayloadTypeRegistry.configurationS2C().register(HandshakeRequest.ID, CodecUtils.packetCodec(HandshakeRequest.ENDEC));
-        PayloadTypeRegistry.configurationC2S().register(HandshakeResponse.ID, CodecUtils.packetCodec(HandshakeResponse.ENDEC));
+        PayloadTypeRegistry.configurationS2C().register(HandshakeRequest.ID, CodecUtils.toPacketCodec(HandshakeRequest.ENDEC));
+        PayloadTypeRegistry.configurationC2S().register(HandshakeResponse.ID, CodecUtils.toPacketCodec(HandshakeResponse.ENDEC));
 
         ServerConfigurationConnectionEvents.CONFIGURE.register(OwoHandshake::configureStart);
         ServerConfigurationNetworking.registerGlobalReceiver(HandshakeResponse.ID, OwoHandshake::syncServer);

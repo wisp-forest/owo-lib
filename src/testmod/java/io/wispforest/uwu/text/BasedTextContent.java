@@ -12,7 +12,7 @@ import java.util.Optional;
 public class BasedTextContent implements TextContent {
 
     public static final Type<BasedTextContent> TYPE = new Type<>(
-            CodecUtils.ofStruct(StructEndecBuilder.of(Endec.STRING.fieldOf("based", o -> o.basedText), BasedTextContent::new)),
+            CodecUtils.toMapCodec(StructEndecBuilder.of(Endec.STRING.fieldOf("based", o -> o.basedText), BasedTextContent::new)),
             "uwu:based");
 
     private final String basedText;

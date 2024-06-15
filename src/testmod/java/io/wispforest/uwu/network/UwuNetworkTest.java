@@ -17,8 +17,8 @@ public class UwuNetworkTest {
 
     public static void main(String[] args) {
         var test = new TestRecord(new LinkedList<>(List.of("hahayes epic text")), TestEnum.ANOTHER_VALUE);
-        var serializer = RecordEndec.create(TestRecord.class);
-        var sameSerializer = RecordEndec.create(TestRecord.class);
+        var serializer = RecordEndec.createShared(TestRecord.class);
+        var sameSerializer = RecordEndec.createShared(TestRecord.class);
 
         testEquals(serializer, sameSerializer);
 
@@ -32,8 +32,8 @@ public class UwuNetworkTest {
 
         System.out.println();
 
-        var endec = RecordEndec.create(TestRecord.class);
-        var sameendec = RecordEndec.create(TestRecord.class);
+        var endec = RecordEndec.createShared(TestRecord.class);
+        var sameendec = RecordEndec.createShared(TestRecord.class);
 
         testEquals(endec, sameendec);
 

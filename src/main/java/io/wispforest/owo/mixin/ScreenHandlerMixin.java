@@ -51,7 +51,7 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void createReflectiveBuilder(ScreenHandlerType type, int syncId, CallbackInfo ci) {
-        this.builder = MinecraftEndecs.withExtra(new ReflectiveEndecBuilder());
+        this.builder = MinecraftEndecs.addDefaults(new ReflectiveEndecBuilder());
     }
 
     @Override

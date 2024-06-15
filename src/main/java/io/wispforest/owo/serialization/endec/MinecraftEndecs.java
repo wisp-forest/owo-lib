@@ -43,8 +43,8 @@ public final class MinecraftEndecs {
             });
 
     public static final Endec<Identifier> IDENTIFIER = Endec.STRING.xmap(Identifier::of, Identifier::toString);
-    public static final Endec<ItemStack> ITEM_STACK = CodecUtils.ofCodec(ItemStack.OPTIONAL_CODEC);
-    public static final Endec<Text> TEXT = CodecUtils.ofCodec(TextCodecs.CODEC);
+    public static final Endec<ItemStack> ITEM_STACK = CodecUtils.toEndec(ItemStack.OPTIONAL_CODEC);
+    public static final Endec<Text> TEXT = CodecUtils.toEndec(TextCodecs.CODEC);
 
     public static final Endec<Vec3i> VEC3I = vectorEndec("Vec3i", Endec.INT, Vec3i::new, Vec3i::getX, Vec3i::getY, Vec3i::getZ);
     public static final Endec<Vec3d> VEC3D = vectorEndec("Vec3d", Endec.DOUBLE, Vec3d::new, Vec3d::getX, Vec3d::getY, Vec3d::getZ);
@@ -85,7 +85,7 @@ public final class MinecraftEndecs {
 
     // --- Constructors for MC types ---
 
-    public static ReflectiveEndecBuilder withExtra(ReflectiveEndecBuilder builder) {
+    public static ReflectiveEndecBuilder addDefaults(ReflectiveEndecBuilder builder) {
         builder.register(PACKET_BYTE_BUF, PacketByteBuf.class);
 
         builder.register(IDENTIFIER, Identifier.class)

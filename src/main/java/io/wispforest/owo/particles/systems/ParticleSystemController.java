@@ -65,7 +65,7 @@ public class ParticleSystemController {
     public ParticleSystemController(Identifier channelId) {
         OwoFreezer.checkRegister("Particle system controllers");
 
-        this.builder = MinecraftEndecs.withExtra(new ReflectiveEndecBuilder());
+        this.builder = MinecraftEndecs.addDefaults(new ReflectiveEndecBuilder());
 
         if (REGISTERED_CONTROLLERS.containsKey(channelId)) {
             throw new IllegalStateException("Controller with id '" + channelId + "' was already registered from class '" +
@@ -91,7 +91,7 @@ public class ParticleSystemController {
             (pos, instance) -> new ParticleSystemPayload(payloadId, pos, instance)
         );
 
-        PayloadTypeRegistry.playS2C().register(payloadId, CodecUtils.packetCodec(endec));
+        PayloadTypeRegistry.playS2C().register(payloadId, CodecUtils.toPacketCodec(endec));
 
         OwoHandshake.enable();
         OwoHandshake.requireHandshake();

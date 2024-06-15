@@ -13,7 +13,6 @@ import io.wispforest.endec.Endec;
 import io.wispforest.endec.SerializationContext;
 import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.RegistriesAttribute;
-import io.wispforest.owo.util.RegistryAccess;
 import io.wispforest.uwu.Uwu;
 import io.wispforest.uwu.text.BasedTextContent;
 import net.minecraft.component.ComponentType;
@@ -64,7 +63,7 @@ public class UwuTestStickItem extends Item {
         }
     };
 
-    private static final Endec<String> YEP_SAME_HERE = CodecUtils.ofCodec(CodecUtils.ofEndec(CodecUtils.ofCodec(THIS_CODEC_NEEDS_REGISTRIES)));
+    private static final Endec<String> YEP_SAME_HERE = CodecUtils.toEndec(CodecUtils.toCodec(CodecUtils.toEndec(THIS_CODEC_NEEDS_REGISTRIES)));
     private static final KeyedEndec<String> KYED = YEP_SAME_HERE.keyed("kyed", (String) null);
 
     public UwuTestStickItem() {

@@ -13,7 +13,7 @@ import java.util.Optional;
 public record InsertingTextContent(int index) implements TextContent {
 
     public static final TextContent.Type<InsertingTextContent> TYPE = new Type<>(
-            CodecUtils.ofStruct(StructEndecBuilder.of(Endec.INT.fieldOf("index", InsertingTextContent::index), InsertingTextContent::new)),
+            CodecUtils.toMapCodec(StructEndecBuilder.of(Endec.INT.fieldOf("index", InsertingTextContent::index), InsertingTextContent::new)),
             "owo:insert"
     );
 

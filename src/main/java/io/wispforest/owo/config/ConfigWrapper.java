@@ -65,7 +65,7 @@ public abstract class ConfigWrapper<C> {
     }
 
     protected ConfigWrapper(Class<C> clazz, Consumer<Jankson.Builder> janksonBuilder) {
-        this.builder = MinecraftEndecs.withExtra(new ReflectiveEndecBuilder());
+        this.builder = MinecraftEndecs.addDefaults(new ReflectiveEndecBuilder());
 
         ReflectionUtils.requireZeroArgsConstructor(clazz, s -> "Config model class " + s + " must provide a zero-args constructor");
         this.instance = ReflectionUtils.tryInstantiateWithNoArgs(clazz);
