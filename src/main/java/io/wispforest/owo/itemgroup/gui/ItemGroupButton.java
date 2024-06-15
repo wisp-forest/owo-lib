@@ -15,7 +15,7 @@ import net.minecraft.util.Util;
  */
 public final class ItemGroupButton implements OwoItemGroup.ButtonDefinition {
 
-    public static final Identifier ICONS_TEXTURE = new Identifier("owo", "textures/gui/icons.png");
+    public static final Identifier ICONS_TEXTURE = Identifier.of("owo", "textures/gui/icons.png");
 
     private final Icon icon;
     private final Text tooltip;

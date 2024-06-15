@@ -10,7 +10,7 @@ import net.minecraft.util.Identifier;
 
 public final class UISounds {
 
-    public static final SoundEvent UI_INTERACTION = SoundEvent.of(new Identifier("owo", "ui.owo.interaction"));
+    public static final SoundEvent UI_INTERACTION = SoundEvent.of(Identifier.of("owo", "ui.owo.interaction"));
 
     private UISounds() {}
 

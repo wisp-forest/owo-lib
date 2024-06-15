@@ -1,10 +1,10 @@
-package io.wispforest.owo.serialization.util;
+package io.wispforest.owo.serialization;
 
 import com.mojang.serialization.MapCodec;
-import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.SerializationAttributes;
-import io.wispforest.owo.serialization.SerializationContext;
-import io.wispforest.owo.serialization.StructEndec;
+import io.wispforest.endec.Endec;
+import io.wispforest.endec.SerializationAttributes;
+import io.wispforest.endec.SerializationContext;
+import io.wispforest.endec.StructEndec;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
@@ -19,8 +19,8 @@ public abstract class EndecRecipeSerializer<R extends Recipe<?>> implements Reci
 
     protected EndecRecipeSerializer(StructEndec<R> endec, Endec<R> networkEndec) {
         this.endec = endec;
-        this.packetCodec = networkEndec.packetCodec();
-        this.codec = this.endec.mapCodec(SerializationContext.attributes(SerializationAttributes.HUMAN_READABLE));
+        this.packetCodec = CodecUtils.toPacketCodec(networkEndec);
+        this.codec = CodecUtils.toMapCodec(this.endec, SerializationContext.attributes(SerializationAttributes.HUMAN_READABLE));
     }
 
     protected EndecRecipeSerializer(StructEndec<R> endec) {

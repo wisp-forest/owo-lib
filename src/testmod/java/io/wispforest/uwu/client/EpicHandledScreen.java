@@ -40,7 +40,7 @@ public class EpicHandledScreen extends BaseOwoHandledScreen<FlowLayout, EpicScre
         selectBox.setTextPredicate(s -> s.matches("\\d*"));
 
         rootComponent.child(
-                Components.texture(new Identifier("textures/gui/container/shulker_box.png"), 0, 0, 176, 166)
+                Components.texture(Identifier.of("textures/gui/container/shulker_box.png"), 0, 0, 176, 166)
         ).child(
                 Containers.draggable(
                         Sizing.content(), Sizing.content(),

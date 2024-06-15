@@ -4,6 +4,7 @@
   "package": "io.wispforest.owo.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
+    "BufferBuilderAccessor",
     "ClientCommonNetworkHandlerAccessor",
     "ClientConnectionMixin",
     "Copenhagen",
@@ -53,7 +54,6 @@
     "text.TranslationStorageMixin",
     "tweaks.OperatingSystemMixin",
     "tweaks.TextFieldWidgetMixin",
-    "ui.BufferBuilderMixin",
     "ui.ChatScreenMixin",
     "ui.ClickableWidgetMixin",
     "ui.DrawContextInvoker",
@@ -66,6 +66,7 @@
     "ui.RenderSystemMixin",
     "ui.ScreenMixin",
     "ui.SliderWidgetMixin",
+    "ui.TessellatorMixin",
     "ui.TextFieldWidgetMixin",
     "ui.access.BaseOwoHandledScreenAccessor",
     "ui.access.ButtonWidgetAccessor",

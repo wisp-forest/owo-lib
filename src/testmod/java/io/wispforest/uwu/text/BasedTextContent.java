@@ -1,7 +1,8 @@
 package io.wispforest.uwu.text;
 
-import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.endec.StructEndecBuilder;
+import io.wispforest.endec.Endec;
+import io.wispforest.endec.impl.StructEndecBuilder;
+import io.wispforest.owo.serialization.CodecUtils;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Style;
 import net.minecraft.text.TextContent;
@@ -11,7 +12,7 @@ import java.util.Optional;
 public class BasedTextContent implements TextContent {
 
     public static final Type<BasedTextContent> TYPE = new Type<>(
-            StructEndecBuilder.of(Endec.STRING.fieldOf("based", o -> o.basedText), BasedTextContent::new).mapCodec(),
+            CodecUtils.toMapCodec(StructEndecBuilder.of(Endec.STRING.fieldOf("based", o -> o.basedText), BasedTextContent::new)),
             "uwu:based");
 
     private final String basedText;

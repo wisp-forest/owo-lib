@@ -4,7 +4,8 @@ import com.mojang.datafixers.DataFixUtils;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
-import io.wispforest.owo.serialization.SerializationContext;
+import io.wispforest.endec.SerializationContext;
+import io.wispforest.endec.format.edm.EdmElement;
 
 import java.nio.ByteBuffer;
 import java.util.*;
@@ -14,6 +15,7 @@ import java.util.stream.Stream;
 public class EdmOps implements DynamicOps<EdmElement<?>> {
 
     private static final EdmOps NO_CONTEXT = new EdmOps(SerializationContext.empty());
+    private static final EdmElement<?> EMPTY = EdmElement.wrapSequence(List.of());
 
     private final SerializationContext capturedContext;
     private EdmOps(SerializationContext capturedContext) {
@@ -36,7 +38,7 @@ public class EdmOps implements DynamicOps<EdmElement<?>> {
 
     @Override
     public EdmElement<?> empty() {
-        return null;
+        return EMPTY;
     }
 
     public EdmElement<?> createNumeric(Number number) {
@@ -92,7 +94,7 @@ public class EdmOps implements DynamicOps<EdmElement<?>> {
 
     @Override
     public DataResult<EdmElement<?>> mergeToList(EdmElement<?> list, EdmElement<?> value) {
-        if (list == null) {
+        if (list == EMPTY) {
             return DataResult.success(EdmElement.wrapSequence(List.of(value)));
         } else if (list.value() instanceof List<?> properList) {
             var newList = new ArrayList<EdmElement<?>>((Collection<? extends EdmElement<?>>) properList);
@@ -115,7 +117,7 @@ public class EdmOps implements DynamicOps<EdmElement<?>> {
             return DataResult.error(() -> "Key is not a string: " + key);
         }
 
-        if (map == null) {
+        if (map == EMPTY) {
             return DataResult.success(EdmElement.wrapMap(Map.of(key.cast(), value)));
         } else if (map.value() instanceof Map<?, ?> properMap) {
             var newMap = new HashMap<String, EdmElement<?>>((Map<String, ? extends EdmElement<?>>) properMap);
@@ -190,6 +192,7 @@ public class EdmOps implements DynamicOps<EdmElement<?>> {
 
     @Override
     public <U> U convertTo(DynamicOps<U> outOps, EdmElement<?> input) {
+        if (input == EMPTY) return outOps.empty();
         return switch (input.type()) {
             case BYTE -> outOps.createByte(input.cast());
             case SHORT -> outOps.createShort(input.cast());

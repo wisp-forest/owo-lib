@@ -8,9 +8,11 @@ import blue.endless.jankson.api.DeserializationException;
 import blue.endless.jankson.api.SyntaxError;
 import blue.endless.jankson.impl.POJODeserializer;
 import blue.endless.jankson.magic.TypeMagic;
+import io.wispforest.endec.impl.ReflectiveEndecBuilder;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.annotation.*;
 import io.wispforest.owo.config.ui.ConfigScreen;
+import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.util.NumberReflection;
 import io.wispforest.owo.util.Observable;
@@ -56,11 +58,15 @@ public abstract class ConfigWrapper<C> {
     @SuppressWarnings("rawtypes") protected final Map<Option.Key, Option> options = new LinkedHashMap<>();
     @SuppressWarnings("rawtypes") protected final Map<Option.Key, Option> optionsView = Collections.unmodifiableMap(options);
 
+    protected final ReflectiveEndecBuilder builder;
+
     protected ConfigWrapper(Class<C> clazz) {
         this(clazz, builder -> {});
     }
 
     protected ConfigWrapper(Class<C> clazz, Consumer<Jankson.Builder> janksonBuilder) {
+        this.builder = MinecraftEndecs.addDefaults(new ReflectiveEndecBuilder());
+
         ReflectionUtils.requireZeroArgsConstructor(clazz, s -> "Config model class " + s + " must provide a zero-args constructor");
         this.instance = ReflectionUtils.tryInstantiateWithNoArgs(clazz);
 
@@ -84,7 +90,7 @@ public abstract class ConfigWrapper<C> {
             var modmenuAnnotation = clazz.getAnnotation(Modmenu.class);
             ConfigScreen.registerProvider(
                     modmenuAnnotation.modId(),
-                    screen -> ConfigScreen.createWithCustomModel(new Identifier(modmenuAnnotation.uiModelId()), this, screen)
+                    screen -> ConfigScreen.createWithCustomModel(Identifier.of(modmenuAnnotation.uiModelId()), this, screen)
             );
         }
 
@@ -323,7 +329,7 @@ public abstract class ConfigWrapper<C> {
                 }
             }
 
-            this.options.put(key, new Option<>(this.name, key, defaultValue, observable, boundField, constraint, syncMode));
+            this.options.put(key, new Option<>(this.name, key, defaultValue, observable, boundField, constraint, syncMode, this.builder));
         }
     }
 

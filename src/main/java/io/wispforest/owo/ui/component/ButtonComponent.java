@@ -25,9 +25,9 @@ import java.util.function.Consumer;
 
 public class ButtonComponent extends ButtonWidget {
 
-    public static final Identifier ACTIVE_TEXTURE = new Identifier("owo", "button/active");
-    public static final Identifier HOVERED_TEXTURE = new Identifier("owo", "button/hovered");
-    public static final Identifier DISABLED_TEXTURE = new Identifier("owo", "button/disabled");
+    public static final Identifier ACTIVE_TEXTURE = Identifier.of("owo", "button/active");
+    public static final Identifier HOVERED_TEXTURE = Identifier.of("owo", "button/hovered");
+    public static final Identifier DISABLED_TEXTURE = Identifier.of("owo", "button/disabled");
 
     protected Renderer renderer = Renderer.VANILLA;
     protected boolean textShadow = true;

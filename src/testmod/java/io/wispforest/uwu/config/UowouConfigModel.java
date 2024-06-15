@@ -16,7 +16,7 @@ public class UowouConfigModel {
     public boolean thisIsNotSyncable = false;
 
     @Hook
-    public Identifier idPlease = new Identifier("uowou", "bruh");
+    public Identifier idPlease = Identifier.of("uowou", "bruh");
 
     @Sync(Option.SyncMode.NONE)
     public Set<String> setPlease = Set.of("that's a value");

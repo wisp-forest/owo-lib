@@ -66,7 +66,7 @@ public final class FieldRegistrationHandler {
         AutoRegistryContainer<T> container = ReflectionUtils.tryInstantiateWithNoArgs(clazz);
 
         ReflectionUtils.iterateAccessibleStaticFields(clazz, container.getTargetFieldType(), createProcessor((fieldValue, identifier, field) -> {
-            Registry.register(container.getRegistry(), new Identifier(namespace, identifier), fieldValue);
+            Registry.register(container.getRegistry(), Identifier.of(namespace, identifier), fieldValue);
             container.postProcessField(namespace, fieldValue, identifier, field);
         }, container));
 

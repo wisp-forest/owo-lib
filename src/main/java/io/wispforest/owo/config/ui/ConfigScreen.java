@@ -53,7 +53,7 @@ import java.util.function.Predicate;
  */
 public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
 
-    public static final Identifier DEFAULT_MODEL_ID = new Identifier("owo", "config");
+    public static final Identifier DEFAULT_MODEL_ID = Identifier.of("owo", "config");
 
     private static final Map<String, Function<Screen, ? extends ConfigScreen>> CONFIG_SCREEN_PROVIDERS = new HashMap<>();
 

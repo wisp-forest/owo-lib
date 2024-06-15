@@ -1,25 +1,23 @@
 package io.wispforest.owo.particles.systems;
 
+import io.wispforest.endec.impl.ReflectiveEndecBuilder;
+import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.network.NetworkException;
 import io.wispforest.owo.network.OwoHandshake;
-import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.endec.BuiltInEndecs;
-import io.wispforest.owo.serialization.endec.ReflectiveEndecBuilder;
-import io.wispforest.owo.serialization.endec.StructEndecBuilder;
+import io.wispforest.endec.Endec;
+import io.wispforest.owo.serialization.CodecUtils;
+import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.ReflectionUtils;
-import io.wispforest.owo.util.VectorSerializer;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
@@ -53,6 +51,8 @@ public class ParticleSystemController {
     private int maxIndex = 0;
     private final String ownerClassName;
 
+    private final ReflectiveEndecBuilder builder;
+
     /**
      * Creates a new controller with the given ID. Duplicate controller IDs
      * are not allowed - if there is a collision, the name of the
@@ -64,6 +64,8 @@ public class ParticleSystemController {
      */
     public ParticleSystemController(Identifier channelId) {
         OwoFreezer.checkRegister("Particle system controllers");
+
+        this.builder = MinecraftEndecs.addDefaults(new ReflectiveEndecBuilder());
 
         if (REGISTERED_CONTROLLERS.containsKey(channelId)) {
             throw new IllegalStateException("Controller with id '" + channelId + "' was already registered from class '" +
@@ -84,12 +86,12 @@ public class ParticleSystemController {
             Endec.VAR_INT
         );
         var endec = StructEndecBuilder.of(
-            BuiltInEndecs.VEC3D.fieldOf("pos", ParticleSystemPayload::pos),
+            MinecraftEndecs.VEC3D.fieldOf("pos", ParticleSystemPayload::pos),
             instanceEndec.fieldOf("instance", ParticleSystemPayload::instance),
             (pos, instance) -> new ParticleSystemPayload(payloadId, pos, instance)
         );
 
-        PayloadTypeRegistry.playS2C().register(payloadId, endec.packetCodec());
+        PayloadTypeRegistry.playS2C().register(payloadId, CodecUtils.toPacketCodec(endec));
 
         OwoHandshake.enable();
         OwoHandshake.requireHandshake();
@@ -99,6 +101,10 @@ public class ParticleSystemController {
         }
 
         REGISTERED_CONTROLLERS.put(channelId, this);
+    }
+
+    public ReflectiveEndecBuilder endecBuilder() {
+        return this.builder;
     }
 
     /**
@@ -122,7 +128,7 @@ public class ParticleSystemController {
      * through {@link ReflectiveEndecBuilder#get(Class)}
      */
     public <T> ParticleSystem<T> register(Class<T> dataClass, ParticleSystemExecutor<T> executor) {
-        return this.register(dataClass, ReflectiveEndecBuilder.get(dataClass), executor);
+        return this.register(dataClass, this.builder.get(dataClass), executor);
     }
 
     /**
@@ -149,7 +155,7 @@ public class ParticleSystemController {
      * through {@link ReflectiveEndecBuilder#get(Class)}
      */
     public <T> ParticleSystem<T> registerDeferred(Class<T> dataClass) {
-        return this.registerDeferred(dataClass, ReflectiveEndecBuilder.get(dataClass));
+        return this.registerDeferred(dataClass, this.builder.get(dataClass));
     }
 
     <T> void sendPacket(ParticleSystem<T> particleSystem, ServerWorld world, Vec3d pos, T data) {

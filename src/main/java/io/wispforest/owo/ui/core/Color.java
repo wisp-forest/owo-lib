@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Node;
@@ -64,8 +65,8 @@ public record Color(float red, float green, float blue, float alpha) implements 
     }
 
     public static Color ofDye(@NotNull DyeColor dyeColor) {
-        var components = dyeColor.getColorComponents();
-        return new Color(components[0], components[1], components[2]);
+        var color = dyeColor.getEntityColor();
+        return new Color(ColorHelper.Argb.getRed(color), ColorHelper.Argb.getGreen(color), ColorHelper.Argb.getBlue(color));
     }
 
     public int rgb() {

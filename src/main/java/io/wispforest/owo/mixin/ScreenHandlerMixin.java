@@ -1,11 +1,13 @@
 package io.wispforest.owo.mixin;
 
+import io.wispforest.endec.impl.ReflectiveEndecBuilder;
 import io.wispforest.owo.client.screens.OwoScreenHandler;
 import io.wispforest.owo.client.screens.ScreenInternals;
 import io.wispforest.owo.client.screens.ScreenhandlerMessageData;
 import io.wispforest.owo.client.screens.SyncedProperty;
 import io.wispforest.owo.network.NetworkException;
-import io.wispforest.owo.serialization.Endec;
+import io.wispforest.endec.Endec;
+import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.util.pond.OwoScreenHandlerExtension;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -15,6 +17,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
@@ -42,6 +45,19 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
     private final List<ScreenhandlerMessageData<?>> owo$serverboundMessages = new ArrayList<>();
 
     private PlayerEntity owo$player = null;
+
+    @Unique
+    private ReflectiveEndecBuilder builder;
+
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void createReflectiveBuilder(ScreenHandlerType type, int syncId, CallbackInfo ci) {
+        this.builder = MinecraftEndecs.addDefaults(new ReflectiveEndecBuilder());
+    }
+
+    @Override
+    public ReflectiveEndecBuilder endecBuilder() {
+        return builder;
+    }
 
     @Override
     public void owo$attachToPlayer(PlayerEntity player) {

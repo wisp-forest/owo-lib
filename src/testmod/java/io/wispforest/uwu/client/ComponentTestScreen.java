@@ -202,7 +202,7 @@ public class ComponentTestScreen extends Screen {
                 Containers.renderEffect(
                         Containers.verticalFlow(Sizing.content(), Sizing.content())
                                 .child(Containers.renderEffect(
-                                        Components.sprite(new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, new Identifier("block/stone"))).margins(Insets.of(5))
+                                        Components.sprite(new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, Identifier.of("block/stone"))).margins(Insets.of(5))
                                 ).<RenderEffectWrapper<?>>configure(wrapper -> {
                                     wrapper.effect(RenderEffectWrapper.RenderEffect.rotate(RotationAxis.POSITIVE_Z, -45));
                                     wrapper.effect(RenderEffectWrapper.RenderEffect.color(Color.ofHsv(.5f, 1f, 1f)));

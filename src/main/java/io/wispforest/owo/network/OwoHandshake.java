@@ -1,13 +1,14 @@
 package io.wispforest.owo.network;
 
+import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.mixin.ClientCommonNetworkHandlerAccessor;
 import io.wispforest.owo.mixin.ServerCommonNetworkHandlerAccessor;
 import io.wispforest.owo.ops.TextOps;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
-import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.endec.BuiltInEndecs;
-import io.wispforest.owo.serialization.endec.StructEndecBuilder;
+import io.wispforest.endec.Endec;
+import io.wispforest.owo.serialization.CodecUtils;
+import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.ServicesFrozenException;
 import net.fabricmc.api.EnvType;
@@ -40,11 +41,11 @@ import java.util.function.ToIntFunction;
 @ApiStatus.Internal
 public final class OwoHandshake {
 
-    private static final Endec<Map<Identifier, Integer>> CHANNEL_HASHES_ENDEC = Endec.map(BuiltInEndecs.IDENTIFIER, Endec.INT);
+    private static final Endec<Map<Identifier, Integer>> CHANNEL_HASHES_ENDEC = Endec.map(MinecraftEndecs.IDENTIFIER, Endec.INT);
 
     private static final MutableText PREFIX = TextOps.concat(Owo.PREFIX, Text.of("§chandshake failure\n"));
-    public static final Identifier CHANNEL_ID = new Identifier("owo", "handshake");
-    public static final Identifier OFF_CHANNEL_ID = new Identifier("owo", "handshake_off");
+    public static final Identifier CHANNEL_ID = Identifier.of("owo", "handshake");
+    public static final Identifier OFF_CHANNEL_ID = Identifier.of("owo", "handshake_off");
 
     private static final boolean ENABLED = System.getProperty("owo.handshake.enabled") != null ? Boolean.getBoolean("owo.handshake.enabled") : Owo.DEBUG;
     private static boolean HANDSHAKE_REQUIRED = false;
@@ -71,8 +72,8 @@ public final class OwoHandshake {
     }
 
     static {
-        PayloadTypeRegistry.configurationS2C().register(HandshakeRequest.ID, HandshakeRequest.ENDEC.packetCodec());
-        PayloadTypeRegistry.configurationC2S().register(HandshakeResponse.ID, HandshakeResponse.ENDEC.packetCodec());
+        PayloadTypeRegistry.configurationS2C().register(HandshakeRequest.ID, CodecUtils.toPacketCodec(HandshakeRequest.ENDEC));
+        PayloadTypeRegistry.configurationC2S().register(HandshakeResponse.ID, CodecUtils.toPacketCodec(HandshakeResponse.ENDEC));
 
         ServerConfigurationConnectionEvents.CONFIGURE.register(OwoHandshake::configureStart);
         ServerConfigurationNetworking.registerGlobalReceiver(HandshakeResponse.ID, OwoHandshake::syncServer);

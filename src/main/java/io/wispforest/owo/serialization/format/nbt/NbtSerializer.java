@@ -1,7 +1,7 @@
 package io.wispforest.owo.serialization.format.nbt;
 
-import io.wispforest.owo.serialization.*;
-import io.wispforest.owo.serialization.util.RecursiveSerializer;
+import io.wispforest.endec.*;
+import io.wispforest.endec.util.RecursiveSerializer;
 import net.minecraft.nbt.*;
 import net.minecraft.network.encoding.VarInts;
 import net.minecraft.network.encoding.VarLongs;

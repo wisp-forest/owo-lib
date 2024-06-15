@@ -1,7 +1,7 @@
 package io.wispforest.owo.serialization.format.nbt;
 
-import io.wispforest.owo.serialization.*;
-import io.wispforest.owo.serialization.util.RecursiveDeserializer;
+import io.wispforest.endec.*;
+import io.wispforest.endec.util.RecursiveDeserializer;
 import net.minecraft.nbt.*;
 import org.jetbrains.annotations.Nullable;
 

@@ -1,10 +1,10 @@
 package io.wispforest.uwu.network;
 
-import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.endec.RecordEndec;
-import io.wispforest.owo.serialization.endec.StructEndecBuilder;
-import io.wispforest.owo.serialization.format.bytebuf.ByteBufDeserializer;
-import io.wispforest.owo.serialization.format.bytebuf.ByteBufSerializer;
+import io.wispforest.endec.Endec;
+import io.wispforest.endec.format.bytebuf.ByteBufDeserializer;
+import io.wispforest.endec.format.bytebuf.ByteBufSerializer;
+import io.wispforest.endec.impl.RecordEndec;
+import io.wispforest.endec.impl.StructEndecBuilder;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 
 import java.util.LinkedList;
@@ -17,8 +17,8 @@ public class UwuNetworkTest {
 
     public static void main(String[] args) {
         var test = new TestRecord(new LinkedList<>(List.of("hahayes epic text")), TestEnum.ANOTHER_VALUE);
-        var serializer = RecordEndec.create(TestRecord.class);
-        var sameSerializer = RecordEndec.create(TestRecord.class);
+        var serializer = RecordEndec.createShared(TestRecord.class);
+        var sameSerializer = RecordEndec.createShared(TestRecord.class);
 
         testEquals(serializer, sameSerializer);
 
@@ -32,13 +32,13 @@ public class UwuNetworkTest {
 
         System.out.println();
 
-        var endec = RecordEndec.create(TestRecord.class);
-        var sameendec = RecordEndec.create(TestRecord.class);
+        var endec = RecordEndec.createShared(TestRecord.class);
+        var sameendec = RecordEndec.createShared(TestRecord.class);
 
         testEquals(endec, sameendec);
 
         testSerialization(test, testRecord -> {
-            return endec.decodeFully(ByteBufDeserializer::of, endec.encodeFully(ByteBufSerializer::packet, testRecord));
+            return endec.decodeFully(ByteBufDeserializer::of, endec.encodeFully(() -> ByteBufSerializer.of(PacketByteBufs.create()), testRecord));
         });
 
         //--
@@ -52,7 +52,7 @@ public class UwuNetworkTest {
         );
 
         testSerialization(test, testRecord -> {
-            return builtendec.decodeFully(ByteBufDeserializer::of, builtendec.encodeFully(ByteBufSerializer::packet, testRecord));
+            return builtendec.decodeFully(ByteBufDeserializer::of, builtendec.encodeFully(() -> ByteBufSerializer.of(PacketByteBufs.create()), testRecord));
         });
     }
 

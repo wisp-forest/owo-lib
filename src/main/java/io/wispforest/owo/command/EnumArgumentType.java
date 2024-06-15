@@ -50,7 +50,7 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<Enum<T>
      */
     public static <T extends Enum<T>> EnumArgumentType<T> create(Class<T> enumClass) {
         final var type = new EnumArgumentType<>(enumClass, "Invalid enum value '{}'");
-        ArgumentTypeRegistry.registerArgumentType(new Identifier("owo", "enum_" + enumClass.getName().toLowerCase(Locale.ROOT)), type.getClass(), ConstantArgumentSerializer.of(() -> type));
+        ArgumentTypeRegistry.registerArgumentType(Identifier.of("owo", "enum_" + enumClass.getName().toLowerCase(Locale.ROOT)), type.getClass(), ConstantArgumentSerializer.of(() -> type));
         return type;
     }
 
@@ -70,7 +70,7 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<Enum<T>
      */
     public static <T extends Enum<T>> EnumArgumentType<T> create(Class<T> enumClass, String noElementMessage) {
         final var type = new EnumArgumentType<>(enumClass, noElementMessage);
-        ArgumentTypeRegistry.registerArgumentType(new Identifier("owo", "enum_" + enumClass.getName().toLowerCase(Locale.ROOT)), type.getClass(), ConstantArgumentSerializer.of(() -> type));
+        ArgumentTypeRegistry.registerArgumentType(Identifier.of("owo", "enum_" + enumClass.getName().toLowerCase(Locale.ROOT)), type.getClass(), ConstantArgumentSerializer.of(() -> type));
         return type;
     }
 

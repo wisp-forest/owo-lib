@@ -28,8 +28,10 @@ public abstract class BaseOwoTooltipComponent<R extends ParentComponent> impleme
     public void drawItems(TextRenderer textRenderer, int x, int y, DrawContext context) {
         var client = MinecraftClient.getInstance();
 
+        var tickCounter = MinecraftClient.getInstance().getRenderTickCounter();
+
         this.rootComponent.moveTo(x, y);
-        this.rootComponent.draw(OwoUIDrawContext.of(context), -1000, -1000, client.getTickDelta(), client.getLastFrameDuration());
+        this.rootComponent.draw(OwoUIDrawContext.of(context), -1000, -1000, tickCounter.getTickDelta(false), tickCounter.getLastFrameDuration());
     }
 
     @Override
