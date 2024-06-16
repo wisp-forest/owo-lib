@@ -73,6 +73,9 @@
       ],
       "net/minecraft/class_332": [
         "io/wispforest/owo/ui/util/MatrixStackTransformer"
+      ],
+      "net/minecraft/class_9331\u0024class_9332": [
+        "io/wispforest/owo/serialization/OwoComponentTypeBuilder<TT;>"
       ]
     }
   }
