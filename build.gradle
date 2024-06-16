@@ -25,6 +25,9 @@ allprojects {
         modImplementation "net.fabricmc:fabric-loader:${rootProject.loader_version}"
 
         modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+        implementation ("systems.manifold:manifold-ext-rt:${project.manifold_ext_version}")
+        annotationProcessor ("systems.manifold:manifold-ext:${project.manifold_ext_version}") // Add manifold to -processorpath for javac
     }
 
     processResources {
@@ -38,19 +41,15 @@ allprojects {
 
     def targetJavaVersion = 21
     tasks.withType(JavaCompile).configureEach {
-        // ensure that the encoding is set to UTF-8, no matter what the system default is
-        // this fixes some edge cases with special characters not displaying correctly
-        // see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
-        // If Javadoc is generated, this must be specified in that task too.
         it.options.encoding = "UTF-8"
         if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
             it.options.release = targetJavaVersion
         }
 
+        it.options.compilerArgs += ['-Xplugin:Manifold'];
+
         if (JavaVersion.current() != JavaVersion.VERSION_1_8 && sourceSets.main.allJava.files.any {it.name == "module-info.java"}) {
-            options.compilerArgs += ['-Xplugin:Manifold', '--module-path', it.classpath.asPath]
-        } else {
-            options.compilerArgs += ['-Xplugin:Manifold']
+            it.options.compilerArgs += ['--module-path', it.classpath.asPath]
         }
     }
 
@@ -153,13 +152,13 @@ dependencies {
 
     include api("blue.endless:jankson:${project.jankson_version}")
 
-    implementation testmodImplementation("systems.manifold:manifold-ext-rt:2024.1.17")
-    annotationProcessor testmodAnnotationProcessor("systems.manifold:manifold-ext:2024.1.17") // Add manifold to -processorpath for javac
-
     modCompileOnly("xyz.nucleoid:server-translations-api:${project.stapi_version}")
 
     testmodImplementation sourceSets.main.output
     testmodAnnotationProcessor sourceSets.main.output
+
+    testmodImplementation("systems.manifold:manifold-ext-rt:${project.manifold_ext_version}")
+    testmodAnnotationProcessor("systems.manifold:manifold-ext:${project.manifold_ext_version}") // Add manifold to -processorpath for javac
 }
 
 javadoc {
