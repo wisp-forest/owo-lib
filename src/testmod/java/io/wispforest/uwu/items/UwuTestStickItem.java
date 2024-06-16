@@ -7,7 +7,6 @@ import com.mojang.serialization.DynamicOps;
 import io.wispforest.endec.impl.KeyedEndec;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
-import io.wispforest.owo.itemgroup.OwoItemSettings;
 import io.wispforest.owo.ops.WorldOps;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.SerializationContext;
@@ -67,7 +66,7 @@ public class UwuTestStickItem extends Item {
     private static final KeyedEndec<String> KYED = YEP_SAME_HERE.keyed("kyed", (String) null);
 
     public UwuTestStickItem() {
-        super(new OwoItemSettings()
+        super(new Item.Settings()
                 .group(Uwu.SIX_TAB_GROUP).tab(3).maxCount(1)
                 .trackUsageStat()
                 .stackGenerator(OwoItemGroup.DEFAULT_STACK_GENERATOR.andThen((item, stacks) -> {

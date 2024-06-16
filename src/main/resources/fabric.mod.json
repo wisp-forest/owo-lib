@@ -73,6 +73,9 @@
       ],
       "net/minecraft/class_332": [
         "io/wispforest/owo/ui/util/MatrixStackTransformer"
+      ],
+      "net/minecraft/class_1792\u0024class_1793": [
+        "io/wispforest/owo/itemgroup/OwoItemSettings"
       ]
     }
   }
