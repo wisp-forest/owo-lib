@@ -8,6 +8,8 @@
     "ClientCommonNetworkHandlerAccessor",
     "ClientConnectionMixin",
     "Copenhagen",
+    "DataResultMixin",
+    "DataResultMixin$DataResultErrorMixin",
     "ForwardingDynamicOpsAccessor",
     "NbtCompoundMixin",
     "PacketByteBufMixin",
