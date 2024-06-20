@@ -149,7 +149,7 @@ public abstract class BaseComponent implements Component {
         this.hovered = nowHovered;
 
         if (nowHovered) {
-            if (this.root() == null || this.root().childAt(mouseX, mouseY) != this) {
+            if (this.root() != null && this.root().childAt(mouseX, mouseY) != this) {
                 this.hovered = false;
                 return;
             }
