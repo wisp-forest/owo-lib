@@ -16,33 +16,34 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 @Mixin(value = DataResult.class, remap = false)
-public interface DataResultMixin<R> {
+public interface DataResultMixin {
 
-    @Inject(method = {
-            "error(Ljava/util/function/Supplier;)Lcom/mojang/serialization/DataResult;",
-            "error(Ljava/util/function/Supplier;Ljava/lang/Object;)Lcom/mojang/serialization/DataResult;",
-            "error(Ljava/util/function/Supplier;Lcom/mojang/serialization/Lifecycle;)Lcom/mojang/serialization/DataResult;",
-            "error(Ljava/util/function/Supplier;Ljava/lang/Object;Lcom/mojang/serialization/Lifecycle;)Lcom/mojang/serialization/DataResult;"
-    }, at = @At(value = "HEAD"), remap = false)
+    @Inject(
+            method = {
+                    "error(Ljava/util/function/Supplier;)Lcom/mojang/serialization/DataResult;",
+                    "error(Ljava/util/function/Supplier;Ljava/lang/Object;)Lcom/mojang/serialization/DataResult;",
+                    "error(Ljava/util/function/Supplier;Lcom/mojang/serialization/Lifecycle;)Lcom/mojang/serialization/DataResult;",
+                    "error(Ljava/util/function/Supplier;Ljava/lang/Object;Lcom/mojang/serialization/Lifecycle;)Lcom/mojang/serialization/DataResult;"
+            },
+            at = @At(value = "HEAD"),
+            remap = false
+    )
     private static <R> void wrapMessageWithStacktrace(CallbackInfoReturnable<Optional<DataResult.Error<R>>> cir, @Local(argsOnly = true) LocalRef<Supplier<String>> messageSupplier) {
-        if(!Owo.DEBUG) return;
+        if (!Owo.DEBUG) return;
 
         var ogSupplier = messageSupplier.get();
         var ogClass = ogSupplier.getClass();
-
-        if(ogSupplier instanceof StackTraceSupplier) return;
+        if (ogSupplier instanceof StackTraceSupplier) return;
 
         var stackTrace = Thread.currentThread().getStackTrace();
 
-        if(ogClass.isSynthetic()) {
+        if (ogClass.isSynthetic()) {
             try {
                 for (var field : ogClass.getDeclaredFields()) {
                     if (!Throwable.class.isAssignableFrom(field.getType())) continue;
 
                     field.setAccessible(true);
                     if (field.get(ogSupplier) instanceof Throwable e) stackTrace = e.getStackTrace().clone();
-                    field.setAccessible(false);
-
                     break;
                 }
             } catch (IllegalArgumentException | IllegalAccessException ignore) {}
@@ -50,10 +51,11 @@ public interface DataResultMixin<R> {
 
         messageSupplier.set(new StackTraceSupplier(stackTrace, ogSupplier));
     }
-    
+
     @Mixin(value = DataResult.Error.class, remap = false)
     abstract class DataResultErrorMixin<R> {
-        @Shadow(remap = false) public abstract Supplier<String> messageSupplier();
+        @Shadow(remap = false)
+        public abstract Supplier<String> messageSupplier();
 
         @Inject(method = {"getOrThrow", "getPartialOrThrow"}, at = @At(value = "HEAD"), remap = false)
         private <E extends Throwable> void addStackTraceToException(CallbackInfoReturnable<R> cir, @Local(argsOnly = true) LocalRef<Function<String, E>> exceptionSupplier) {
@@ -61,8 +63,9 @@ public interface DataResultMixin<R> {
 
             exceptionSupplier.set(s -> {
                 var exception = funcToWrap.apply(s);
-
-                if(this.messageSupplier() instanceof StackTraceSupplier stackTraceSupplier) exception.setStackTrace(stackTraceSupplier.stackTrace());
+                if (this.messageSupplier() instanceof StackTraceSupplier stackTraceSupplier) {
+                    exception.setStackTrace(stackTraceSupplier.stackTrace());
+                }
 
                 return exception;
             });
