@@ -5,7 +5,6 @@
   "compatibilityLevel": "JAVA_16",
   "mixins": [
     "BufferBuilderAccessor",
-    "ClientCommonNetworkHandlerAccessor",
     "ClientConnectionMixin",
     "ComponentTypeBuilderMixin",
     "Copenhagen",
@@ -45,6 +44,7 @@
   "client": [
     "ClientConfigurationNetworkHandlerMixin",
     "ClientLoginNetworkHandlerAccessor",
+    "ClientCommonNetworkHandlerAccessor",
     "DrawContextMixin",
     "MinecraftClientMixin",
     "itemgroup.AbstractInventoryScreenMixin",

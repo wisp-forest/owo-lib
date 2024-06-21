@@ -127,7 +127,7 @@ public class OwoNetChannel {
             throw new IllegalStateException("Channel with id '" + id + "' was already registered from class '" + REGISTERED_CHANNELS.get(id).ownerClassName + "'");
         }
 
-        deferredClientEndecs.defaultReturnValue(-1);
+        this.deferredClientEndecs.defaultReturnValue(-1);
 
         this.packetId = new CustomPayload.Id<>(id);
         this.ownerClassName = ownerClassName;
