@@ -3,6 +3,7 @@ package io.wispforest.owo.serialization;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.*;
+import io.netty.buffer.ByteBuf;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.SerializationContext;
 import io.wispforest.endec.StructEndec;
@@ -12,7 +13,9 @@ import io.wispforest.endec.format.edm.*;
 import io.wispforest.owo.mixin.ForwardingDynamicOpsAccessor;
 import io.wispforest.owo.mixin.RegistryOpsAccessor;
 import io.wispforest.owo.serialization.endec.EitherEndec;
+import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.serialization.format.edm.EdmOps;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
@@ -52,6 +55,40 @@ public class CodecUtils {
                     EdmEndec.INSTANCE.encode(ctx, serializer, codec.encodeStart(ops, value).getOrThrow(IllegalStateException::new));
                 },
                 (ctx, deserializer) -> {
+                    DynamicOps<EdmElement<?>> ops = EdmOps.withContext(ctx);
+                    if (ctx.hasAttribute(RegistriesAttribute.REGISTRIES)) {
+                        ops = RegistryOps.of(ops, ctx.getAttributeValue(RegistriesAttribute.REGISTRIES).infoGetter());
+                    }
+
+                    return codec.parse(ops, EdmEndec.INSTANCE.decode(ctx, deserializer)).getOrThrow(IllegalStateException::new);
+                }
+        );
+    }
+
+    public static <T> Endec<T> toEndec(Codec<T> codec, PacketCodec<ByteBuf, T> packetCodec) {
+        return Endec.of(
+                (ctx, serializer, value) -> {
+                    if (serializer instanceof ByteBufSerializer<?>) {
+                        var buffer = PacketByteBufs.create();
+                        packetCodec.encode(buffer, value);
+
+                        MinecraftEndecs.PACKET_BYTE_BUF.encode(ctx, serializer, buffer);
+                        return;
+                    }
+
+                    DynamicOps<EdmElement<?>> ops = EdmOps.withContext(ctx);
+                    if (ctx.hasAttribute(RegistriesAttribute.REGISTRIES)) {
+                        ops = RegistryOps.of(ops, ctx.getAttributeValue(RegistriesAttribute.REGISTRIES).infoGetter());
+                    }
+
+                    EdmEndec.INSTANCE.encode(ctx, serializer, codec.encodeStart(ops, value).getOrThrow(IllegalStateException::new));
+                },
+                (ctx, deserializer) -> {
+                    if (deserializer instanceof ByteBufSerializer<?>) {
+                        var buffer = MinecraftEndecs.PACKET_BYTE_BUF.decode(ctx, deserializer);
+                        return packetCodec.decode(buffer);
+                    }
+
                     DynamicOps<EdmElement<?>> ops = EdmOps.withContext(ctx);
                     if (ctx.hasAttribute(RegistriesAttribute.REGISTRIES)) {
                         ops = RegistryOps.of(ops, ctx.getAttributeValue(RegistriesAttribute.REGISTRIES).infoGetter());
