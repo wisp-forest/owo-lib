@@ -9,6 +9,8 @@
     "ClientConnectionMixin",
     "ComponentTypeBuilderMixin",
     "Copenhagen",
+    "DataResultMixin",
+    "DataResultMixin$DataResultErrorMixin",
     "ForwardingDynamicOpsAccessor",
     "NbtCompoundMixin",
     "PacketByteBufMixin",
