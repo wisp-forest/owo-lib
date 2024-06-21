@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-@Mixin(DataResult.class)
+@Mixin(value = DataResult.class, remap = false)
 public interface DataResultMixin<R> {
 
     @Inject(method = {
@@ -23,7 +23,7 @@ public interface DataResultMixin<R> {
             "error(Ljava/util/function/Supplier;Ljava/lang/Object;)Lcom/mojang/serialization/DataResult;",
             "error(Ljava/util/function/Supplier;Lcom/mojang/serialization/Lifecycle;)Lcom/mojang/serialization/DataResult;",
             "error(Ljava/util/function/Supplier;Ljava/lang/Object;Lcom/mojang/serialization/Lifecycle;)Lcom/mojang/serialization/DataResult;"
-    }, at = @At(value = "HEAD"))
+    }, at = @At(value = "HEAD"), remap = false)
     private static <R> void wrapMessageWithStacktrace(CallbackInfoReturnable<Optional<DataResult.Error<R>>> cir, @Local(argsOnly = true) LocalRef<Supplier<String>> messageSupplier) {
         if(!Owo.DEBUG) return;
 
@@ -51,11 +51,11 @@ public interface DataResultMixin<R> {
         messageSupplier.set(new StackTraceSupplier(stackTrace, ogSupplier));
     }
     
-    @Mixin(DataResult.Error.class)
+    @Mixin(value = DataResult.Error.class, remap = false)
     abstract class DataResultErrorMixin<R> {
-        @Shadow public abstract Supplier<String> messageSupplier();
+        @Shadow(remap = false) public abstract Supplier<String> messageSupplier();
 
-        @Inject(method = {"getOrThrow", "getPartialOrThrow"}, at = @At(value = "HEAD"))
+        @Inject(method = {"getOrThrow", "getPartialOrThrow"}, at = @At(value = "HEAD"), remap = false)
         private <E extends Throwable> void addStackTraceToException(CallbackInfoReturnable<R> cir, @Local(argsOnly = true) LocalRef<Function<String, E>> exceptionSupplier) {
             final var funcToWrap = exceptionSupplier.get();
 
