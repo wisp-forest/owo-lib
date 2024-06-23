@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_16",
   "mixins": [
     "BufferBuilderAccessor",
+    "CachedRegistryInfoGetterAccessor",
     "ClientConnectionMixin",
     "ComponentTypeBuilderMixin",
     "Copenhagen",
