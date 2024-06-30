@@ -1,7 +1,9 @@
 package io.wispforest.owo.ui.util;
 
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.ops.TextOps;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
+import io.wispforest.owo.ui.parsing.UIModelLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
@@ -49,11 +51,24 @@ public class UIErrorToast implements Toast {
     }
 
     public static void report(String message) {
+        logErrorsDuringInitialLoad();
         MinecraftClient.getInstance().getToastManager().add(new UIErrorToast(message));
     }
 
     public static void report(Throwable error) {
+        logErrorsDuringInitialLoad();
         MinecraftClient.getInstance().getToastManager().add(new UIErrorToast(error));
+    }
+
+    private static void logErrorsDuringInitialLoad() {
+        if (UIModelLoader.hasCompletedInitialLoad()) return;
+
+        var throwable = new Throwable();
+        Owo.LOGGER.error(
+                "An owo-ui error has occurred during the initial resource reload (on thread {}). This is likely a bug caused by *some* other mod initializing an owo-config screen significantly too early - please report it at https://github.com/wisp-forest/owo-lib/issues",
+                Thread.currentThread().getName(),
+                throwable
+        );
     }
 
     @Override

@@ -4,24 +4,41 @@ import com.mojang.datafixers.DataFixUtils;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
+import io.wispforest.endec.SerializationContext;
+import io.wispforest.endec.format.edm.EdmElement;
 
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@SuppressWarnings("unchecked")
 public class EdmOps implements DynamicOps<EdmElement<?>> {
 
-    public static final EdmOps INSTANCE = new EdmOps();
+    private static final EdmOps NO_CONTEXT = new EdmOps(SerializationContext.empty());
+    private static final EdmElement<?> EMPTY = EdmElement.wrapSequence(List.of());
 
-    private EdmOps() {}
+    private final SerializationContext capturedContext;
+    private EdmOps(SerializationContext capturedContext) {
+        this.capturedContext = capturedContext;
+    }
+
+    public static EdmOps withContext(SerializationContext context) {
+        return new EdmOps(context);
+    }
+
+    public static EdmOps withoutContext() {
+        return NO_CONTEXT;
+    }
+
+    public SerializationContext capturedContext() {
+        return this.capturedContext;
+    }
 
     // --- Serialization ---
 
     @Override
     public EdmElement<?> empty() {
-        return null;
+        return EMPTY;
     }
 
     public EdmElement<?> createNumeric(Number number) {
@@ -77,7 +94,7 @@ public class EdmOps implements DynamicOps<EdmElement<?>> {
 
     @Override
     public DataResult<EdmElement<?>> mergeToList(EdmElement<?> list, EdmElement<?> value) {
-        if (list == null) {
+        if (list == EMPTY) {
             return DataResult.success(EdmElement.wrapSequence(List.of(value)));
         } else if (list.value() instanceof List<?> properList) {
             var newList = new ArrayList<EdmElement<?>>((Collection<? extends EdmElement<?>>) properList);
@@ -100,7 +117,7 @@ public class EdmOps implements DynamicOps<EdmElement<?>> {
             return DataResult.error(() -> "Key is not a string: " + key);
         }
 
-        if (map == null) {
+        if (map == EMPTY) {
             return DataResult.success(EdmElement.wrapMap(Map.of(key.cast(), value)));
         } else if (map.value() instanceof Map<?, ?> properMap) {
             var newMap = new HashMap<String, EdmElement<?>>((Map<String, ? extends EdmElement<?>>) properMap);
@@ -175,6 +192,7 @@ public class EdmOps implements DynamicOps<EdmElement<?>> {
 
     @Override
     public <U> U convertTo(DynamicOps<U> outOps, EdmElement<?> input) {
+        if (input == EMPTY) return outOps.empty();
         return switch (input.type()) {
             case BYTE -> outOps.createByte(input.cast());
             case SHORT -> outOps.createShort(input.cast());
@@ -185,10 +203,8 @@ public class EdmOps implements DynamicOps<EdmElement<?>> {
             case BOOLEAN -> outOps.createBoolean(input.cast());
             case STRING -> outOps.createString(input.cast());
             case BYTES -> outOps.createByteList(ByteBuffer.wrap(input.cast()));
-            case OPTIONAL ->
-                    input.<Optional<EdmElement<?>>>cast().map(element -> this.convertTo(outOps, element)).orElse(outOps.empty());
-            case SEQUENCE ->
-                    outOps.createList(input.<List<EdmElement<?>>>cast().stream().map(element -> this.convertTo(outOps, element)));
+            case OPTIONAL -> input.<Optional<EdmElement<?>>>cast().map(element -> this.convertTo(outOps, element)).orElse(outOps.empty());
+            case SEQUENCE -> outOps.createList(input.<List<EdmElement<?>>>cast().stream().map(element -> this.convertTo(outOps, element)));
             case MAP ->
                     outOps.createMap(input.<Map<String, EdmElement<?>>>cast().entrySet().stream().map(entry -> new Pair<>(outOps.createString(entry.getKey()), this.convertTo(outOps, entry.getValue()))));
         };

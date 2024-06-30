@@ -15,7 +15,7 @@ public class RestartRequiredScreen extends BaseUIModelScreen<FlowLayout> {
     protected final Screen parent;
 
     public RestartRequiredScreen(Screen parent) {
-        super(FlowLayout.class, DataSource.asset(new Identifier("owo", "restart_required")));
+        super(FlowLayout.class, DataSource.asset(Identifier.of("owo", "restart_required")));
         this.parent = parent;
     }
 

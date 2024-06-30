@@ -5,13 +5,11 @@ import io.wispforest.owo.client.OwoClient;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.NinePatchTexture;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.TooltipBackgroundRenderer;
-import net.minecraft.client.render.GameRenderer;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import org.w3c.dom.Element;
@@ -39,38 +37,32 @@ public interface Surface {
     };
 
     Surface OPTIONS_BACKGROUND = (context, component) -> {
-        RenderSystem.setShaderColor(64 / 255f, 64 / 255f, 64 / 255f, 1);
-        context.drawTexture(Screen.OPTIONS_BACKGROUND_TEXTURE, component.x(), component.y(), 0, 0, component.width(), component.height(), 32, 32);
-        RenderSystem.setShaderColor(1, 1, 1, 1);
+        MinecraftClient.getInstance().gameRenderer.renderBlur(0);
+        MinecraftClient.getInstance().getFramebuffer().beginWrite(false);
     };
 
     Surface TOOLTIP = (context, component) -> {
-        var buffer = Tessellator.getInstance().getBuffer();
-        buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
+        context.draw(() -> {
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
 
-        TooltipBackgroundRenderer.render(context, component.x() + 4, component.y() + 4, component.width() - 8, component.height() - 8, 0);
-
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
-
-        Tessellator.getInstance().draw();
+            TooltipBackgroundRenderer.render(context, component.x() + 4, component.y() + 4, component.width() - 8, component.height() - 8, 0);
+        });
     };
 
     static Surface blur(float quality, float size) {
         return (context, component) -> {
-            var buffer = Tessellator.getInstance().getBuffer();
+            var buffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION);
             var matrix = context.getMatrices().peek().getPositionMatrix();
 
-            buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION);
-            buffer.vertex(matrix, component.x(), component.y(), 0).next();
-            buffer.vertex(matrix, component.x(), component.y() + component.height(), 0).next();
-            buffer.vertex(matrix, component.x() + component.width(), component.y() + component.height(), 0).next();
-            buffer.vertex(matrix, component.x() + component.width(), component.y(), 0).next();
+            buffer.vertex(matrix, component.x(), component.y(), 0);
+            buffer.vertex(matrix, component.x(), component.y() + component.height(), 0);
+            buffer.vertex(matrix, component.x() + component.width(), component.y() + component.height(), 0);
+            buffer.vertex(matrix, component.x() + component.width(), component.y(), 0);
 
             OwoClient.BLUR_PROGRAM.setParameters(16, quality, size);
             OwoClient.BLUR_PROGRAM.use();
-            Tessellator.getInstance().draw();
+            BufferRenderer.drawWithGlobalProgram(buffer.end());
         };
     }
 

@@ -29,8 +29,8 @@ public class SlimSliderComponent extends BaseComponent {
 
     public static final Function<Double, Text> VALUE_TOOLTIP_SUPPLIER = value -> Text.literal(String.valueOf(value));
 
-    protected static final Identifier TEXTURE = new Identifier("owo", "textures/gui/slim_slider.png");
-    protected static final Identifier TRACK_TEXTURE = new Identifier("owo", "slim_slider_track");
+    protected static final Identifier TEXTURE = Identifier.of("owo", "textures/gui/slim_slider.png");
+    protected static final Identifier TRACK_TEXTURE = Identifier.of("owo", "slim_slider_track");
 
     protected final EventStream<OnChanged> changedEvents = OnChanged.newStream();
     protected final EventStream<OnSlideEnd> slideEndEvents = OnSlideEnd.newStream();

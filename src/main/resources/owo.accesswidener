@@ -7,5 +7,6 @@ transitive-accessible class net/minecraft/item/ItemGroup$Entries
 transitive-accessible class net/minecraft/item/ItemGroup$EntriesImpl
 
 transitive-accessible class net/minecraft/client/gui/DrawContext$ScissorStack
-transitive-extendable method net/minecraft/client/gui/widget/CheckboxWidget <init> (IILnet/minecraft/text/Text;Lnet/minecraft/client/font/TextRenderer;ZLnet/minecraft/client/gui/widget/CheckboxWidget$Callback;)V
+transitive-extendable method net/minecraft/client/gui/widget/CheckboxWidget <init> (IIILnet/minecraft/text/Text;Lnet/minecraft/client/font/TextRenderer;ZLnet/minecraft/client/gui/widget/CheckboxWidget$Callback;)V
 
+accessible class net/minecraft/registry/RegistryOps$CachedRegistryInfoGetter

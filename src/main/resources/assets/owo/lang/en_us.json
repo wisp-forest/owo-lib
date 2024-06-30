@@ -35,6 +35,7 @@
   ],
   "text.owo.config.button.reload": "Reload",
   "text.owo.config.button.done": "Done",
+  "text.owo.config.sections_tooltip": "Sections",
   "text.owo.config.sections": {"text": "Sections", "underlined": true},
   "text.owo.config.list.add_entry": "Add entry",
   "text.owo.config.boolean_toggle.enabled": [

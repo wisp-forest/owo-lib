@@ -187,7 +187,7 @@ public class UIParsing {
      */
     public static Identifier parseIdentifier(Node node) {
         try {
-            return new Identifier(node.getTextContent().strip());
+            return Identifier.of(node.getTextContent().strip());
         } catch (InvalidIdentifierException exception) {
             throw new UIModelParsingException("Invalid identifier '" + node.getTextContent() + "'", exception);
         }

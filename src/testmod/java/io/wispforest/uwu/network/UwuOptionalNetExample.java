@@ -21,7 +21,7 @@ public class UwuOptionalNetExample {
 
     public static void init() {
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER || SERVER_CHANNEL_IN_CLIENT) {
-            var serverChannel = OwoNetChannel.createOptional(new Identifier("uwu", "optional_server"));
+            var serverChannel = OwoNetChannel.createOptional(Identifier.of("uwu", "optional_server"));
 
             serverChannel.registerClientbound(StringPacket.class, (message, access) -> {
                 access.player().sendMessage(Text.of(message.value()), false);
@@ -40,7 +40,7 @@ public class UwuOptionalNetExample {
             });
 
             if (CLIENT_CHANNEL_IN_SERVER) {
-                var clientChannel = OwoNetChannel.createOptional(new Identifier("uwu", "optional_client"));
+                var clientChannel = OwoNetChannel.createOptional(Identifier.of("uwu", "optional_client"));
 
                 clientChannel.registerServerbound(KeycodePacket.class, (message, access) -> {
                     System.out.println(message.key());
@@ -54,7 +54,7 @@ public class UwuOptionalNetExample {
         public static final KeyBinding NETWORK_TEST = new KeyBinding("key.uwu.network_opt_test", GLFW.GLFW_KEY_M, "misc");
 
         public static void init() {
-            var clientChannel = OwoNetChannel.createOptional(new Identifier("uwu", "optional_client"));
+            var clientChannel = OwoNetChannel.createOptional(Identifier.of("uwu", "optional_client"));
 
             clientChannel.registerServerbound(KeycodePacket.class, (message, access) -> {
                 System.out.println(message.key());

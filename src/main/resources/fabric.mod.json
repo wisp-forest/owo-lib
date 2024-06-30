@@ -43,8 +43,8 @@
   "accessWidener": "owo.accesswidener",
   "depends": {
     "fabricloader": ">=0.15.0",
-    "fabric": ">=0.76",
-    "minecraft": ">=1.20.2"
+    "fabric": ">=0.100",
+    "minecraft": ">=1.21"
   },
   "custom": {
     "modmenu": {
@@ -56,14 +56,11 @@
       ]
     },
     "loom:injected_interfaces": {
-      "net/minecraft/class_1799": [
-        "io/wispforest/owo/serialization/util/MapCarrier"
-      ],
       "net/minecraft/class_2487": [
-        "io/wispforest/owo/serialization/util/MapCarrier"
+        "io/wispforest/endec/util/MapCarrier"
       ],
       "net/minecraft/class_2540": [
-        "io/wispforest/owo/serialization/util/EndecBuffer"
+        "io/wispforest/endec/util/EndecBuffer"
       ],
       "net/minecraft/class_339": [
         "io/wispforest/owo/ui/inject/ComponentStub"
@@ -76,6 +73,9 @@
       ],
       "net/minecraft/class_332": [
         "io/wispforest/owo/ui/util/MatrixStackTransformer"
+      ],
+      "net/minecraft/class_9331\u0024class_9332": [
+        "io/wispforest/owo/serialization/OwoComponentTypeBuilder<TT;>"
       ]
     }
   }

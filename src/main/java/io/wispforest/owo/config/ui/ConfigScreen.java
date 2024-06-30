@@ -53,7 +53,7 @@ import java.util.function.Predicate;
  */
 public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
 
-    public static final Identifier DEFAULT_MODEL_ID = new Identifier("owo", "config");
+    public static final Identifier DEFAULT_MODEL_ID = Identifier.of("owo", "config");
 
     private static final Map<String, Function<Screen, ? extends ConfigScreen>> CONFIG_SCREEN_PROVIDERS = new HashMap<>();
 
@@ -175,7 +175,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
             });
 
             searchField.keyPress().subscribe((keyCode, scanCode, modifiers) -> {
-                if (keyCode != GLFW.GLFW_KEY_ENTER) return false;
+                if (keyCode != GLFW.GLFW_KEY_ENTER && keyCode != GLFW.GLFW_KEY_KP_ENTER) return false;
 
                 var query = searchField.getText().toLowerCase(Locale.ROOT);
                 if (query.isBlank()) return false;
@@ -339,6 +339,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
             });
 
             var closeButton = Components.label(Text.literal("<").formatted(Formatting.BOLD));
+            closeButton.tooltip(Text.translatable("text.owo.config.sections_tooltip"));
             closeButton.positioning(Positioning.relative(100, 50)).cursorStyle(CursorStyle.HAND).margins(Insets.right(2));
 
             panelContainer.child(closeButton);

@@ -1,6 +1,6 @@
 package io.wispforest.owo.client.screens;
 
-import io.wispforest.owo.serialization.Endec;
+import io.wispforest.endec.Endec;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.function.Consumer;

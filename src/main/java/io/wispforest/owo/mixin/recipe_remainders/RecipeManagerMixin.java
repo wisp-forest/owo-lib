@@ -9,6 +9,8 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.*;
+import net.minecraft.recipe.input.RecipeInput;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.Util;
@@ -27,7 +29,7 @@ import java.util.Optional;
 public abstract class RecipeManagerMixin {
 
     @Inject(method = "deserialize", at = @At(value = "RETURN"))
-    private static void deserializeRecipeSpecificRemainders(Identifier id, JsonObject json, CallbackInfoReturnable<Recipe<?>> cir) {
+    private static void deserializeRecipeSpecificRemainders(Identifier id, JsonObject json, RegistryWrapper.WrapperLookup registryLookup, CallbackInfoReturnable<Recipe<?>> cir) {
         if (!json.has("owo:remainders")) return;
 
         var remainders = new HashMap<Item, ItemStack>();
@@ -35,7 +37,7 @@ public abstract class RecipeManagerMixin {
             var item = JsonHelper.asItem(new JsonPrimitive(remainderEntry.getKey()), remainderEntry.getKey());
 
             if (remainderEntry.getValue().isJsonObject()) {
-                var remainderStack = Util.getResult(ItemStack.RECIPE_RESULT_CODEC.parse(JsonOps.INSTANCE, remainderEntry.getValue().getAsJsonObject()), JsonParseException::new);
+                var remainderStack = ItemStack.CODEC.parse(JsonOps.INSTANCE, remainderEntry.getValue().getAsJsonObject()).getOrThrow(JsonParseException::new);
                 remainders.put(item.value(), remainderStack);
             } else {
                 var remainderItem = JsonHelper.asItem(remainderEntry.getValue(), "item");
@@ -48,14 +50,14 @@ public abstract class RecipeManagerMixin {
     }
 
     @Inject(method = "getRemainingStacks", at = @At(value = "RETURN", ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
-    private <I extends Inventory, R extends Recipe<I>> void addRecipeSpecificRemainders(RecipeType<R> type, I inventory, World world, CallbackInfoReturnable<DefaultedList<ItemStack>> cir, Optional<RecipeEntry<R>> optional) {
+    private <I extends RecipeInput, R extends Recipe<I>> void addRecipeSpecificRemainders(RecipeType<R> type, I inventory, World world, CallbackInfoReturnable<DefaultedList<ItemStack>> cir, Optional<RecipeEntry<R>> optional) {
         if (optional.isEmpty() || !RecipeRemainderStorage.has(optional.get().id())) return;
 
         var remainders = cir.getReturnValue();
         var owoRemainders = RecipeRemainderStorage.get(optional.get().id());
 
         for (int i = 0; i < remainders.size(); ++i) {
-            var item = inventory.getStack(i).getItem();
+            var item = inventory.getStackInSlot(i).getItem();
             if (!owoRemainders.containsKey(item)) continue;
 
             remainders.set(i, owoRemainders.get(item).copy());

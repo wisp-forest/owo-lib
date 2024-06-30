@@ -83,7 +83,7 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
 
         var adapter = new OwoUIAdapter<>(0, 0, screen.width, screen.height, rootComponent);
         screen.addDrawableChild(adapter);
-        screen.focusOn(adapter);
+        screen.setFocused(adapter);
 
         return adapter;
     }
@@ -183,7 +183,8 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
 
             if (this.captureFrame) RenderDoc.startFrameCapture();
 
-            final var delta = MinecraftClient.getInstance().getLastFrameDuration();
+            final var delta = MinecraftClient.getInstance().getRenderTickCounter().getLastFrameDuration();
+            final var window = MinecraftClient.getInstance().getWindow();
 
             this.rootComponent.update(delta, mouseX, mouseY);
 

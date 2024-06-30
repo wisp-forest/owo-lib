@@ -13,6 +13,7 @@ import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.SynchronousResourceReloader;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.xml.sax.SAXException;
 
@@ -36,6 +37,8 @@ public class UIModelLoader implements SynchronousResourceReloader, IdentifiableR
 
     private static final Path HOT_RELOAD_LOCATIONS_PATH = FabricLoader.getInstance().getConfigDir().resolve("owo_ui_hot_reload_locations.json5");
     private static final Map<Identifier, Path> HOT_RELOAD_LOCATIONS = new HashMap<>();
+
+    private static boolean loadedOnce = false;
 
     /**
      * Get the most up-to-date version of the UI model specified
@@ -98,7 +101,7 @@ public class UIModelLoader implements SynchronousResourceReloader, IdentifiableR
 
     @Override
     public Identifier getFabricId() {
-        return new Identifier("owo", "ui-model-loader");
+        return Identifier.of("owo", "ui-model-loader");
     }
 
     @Override
@@ -107,7 +110,7 @@ public class UIModelLoader implements SynchronousResourceReloader, IdentifiableR
 
         manager.findResources("owo_ui", identifier -> identifier.getPath().endsWith(".xml")).forEach((resourceId, resource) -> {
             try {
-                var modelId = new Identifier(
+                var modelId = Identifier.of(
                         resourceId.getNamespace(),
                         resourceId.getPath().substring(7, resourceId.getPath().length() - 4)
                 );
@@ -117,6 +120,13 @@ public class UIModelLoader implements SynchronousResourceReloader, IdentifiableR
                 Owo.LOGGER.error("Could not parse UI model {}", resourceId, e);
             }
         });
+
+        loadedOnce = true;
+    }
+
+    @ApiStatus.Internal
+    public static boolean hasCompletedInitialLoad() {
+        return loadedOnce;
     }
 
     static {
@@ -125,7 +135,7 @@ public class UIModelLoader implements SynchronousResourceReloader, IdentifiableR
                 var associations = JANKSON.load(stream);
                 associations.forEach((key, value) -> {
                     if (!(value instanceof JsonPrimitive primitive)) return;
-                    HOT_RELOAD_LOCATIONS.put(new Identifier(key), Path.of(primitive.asString()));
+                    HOT_RELOAD_LOCATIONS.put(Identifier.of(key), Path.of(primitive.asString()));
                 });
             } catch (IOException | SyntaxError ignored) {}
         }

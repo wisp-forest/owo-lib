@@ -7,14 +7,14 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.util.concurrent.CompletableFuture;
 
 @Mixin(value = Util.OperatingSystem.class)
 public abstract class OperatingSystemMixin {
 
-    @Shadow
-    protected abstract String[] getURLOpenCommand(URL url);
+    @Shadow protected abstract String[] getURIOpenCommand(URI uri);
 
     /**
      * @author glisco
@@ -25,16 +25,16 @@ public abstract class OperatingSystemMixin {
      * at opening the user's desired application 100% of the time
      */
     @Overwrite()
-    public void open(URL url) {
+    public void open(URI uri) {
         CompletableFuture.runAsync(() -> {
             try {
-                final var command = getURLOpenCommand(url);
+                final var command = getURIOpenCommand(uri);
                 new ProcessBuilder(command)
                         .redirectError(ProcessBuilder.Redirect.DISCARD)
                         .redirectOutput(ProcessBuilder.Redirect.DISCARD)
                         .start();
             } catch (IOException e) {
-                LogUtils.getLogger().error("Couldn't open url '{}'", url, e);
+                LogUtils.getLogger().error("Couldn't open uri '{}'", uri, e);
             }
         }, Util.getMainWorkerExecutor());
     }

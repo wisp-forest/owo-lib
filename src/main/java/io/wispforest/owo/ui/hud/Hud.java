@@ -108,7 +108,7 @@ public class Hud {
             if (adapter == null || suppress) return;
 
             context.push().translate(0, 0, 100);
-            adapter.render(context, -69, -69, tickDelta);
+            adapter.render(context, -69, -69, tickDelta.getTickDelta(false));
             context.pop();
         });
     }

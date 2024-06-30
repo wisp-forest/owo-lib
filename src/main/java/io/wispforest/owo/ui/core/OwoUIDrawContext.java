@@ -9,6 +9,7 @@ import io.wispforest.owo.ui.util.NinePatchTexture;
 import io.wispforest.owo.ui.window.context.CurrentWindowContext;
 import io.wispforest.owo.ui.window.context.WindowContext;
 import io.wispforest.owo.util.SupportsFeatures;
+import io.wispforest.owo.util.pond.OwoTessellatorExtension;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
@@ -29,15 +30,15 @@ import java.util.List;
 public class OwoUIDrawContext extends DrawContext {
 
     @Deprecated
-    public static final Identifier PANEL_TEXTURE = new Identifier("owo", "textures/gui/panel.png");
+    public static final Identifier PANEL_TEXTURE = Identifier.of("owo", "textures/gui/panel.png");
     @Deprecated
-    public static final Identifier DARK_PANEL_TEXTURE = new Identifier("owo", "textures/gui/dark_panel.png");
+    public static final Identifier DARK_PANEL_TEXTURE = Identifier.of("owo", "textures/gui/dark_panel.png");
     @Deprecated
-    public static final Identifier PANEL_INSET_TEXTURE = new Identifier("owo", "textures/gui/panel_inset.png");
+    public static final Identifier PANEL_INSET_TEXTURE = Identifier.of("owo", "textures/gui/panel_inset.png");
 
-    public static final Identifier PANEL_NINE_PATCH_TEXTURE = new Identifier("owo", "panel/default");
-    public static final Identifier DARK_PANEL_NINE_PATCH_TEXTURE = new Identifier("owo", "panel/dark");
-    public static final Identifier PANEL_INSET_NINE_PATCH_TEXTURE = new Identifier("owo", "panel/inset");
+    public static final Identifier PANEL_NINE_PATCH_TEXTURE = Identifier.of("owo", "panel/default");
+    public static final Identifier DARK_PANEL_NINE_PATCH_TEXTURE = Identifier.of("owo", "panel/dark");
+    public static final Identifier PANEL_INSET_NINE_PATCH_TEXTURE = Identifier.of("owo", "panel/inset");
 
     private boolean recording = false;
 
@@ -67,7 +68,14 @@ public class OwoUIDrawContext extends DrawContext {
 
     public void submitQuads() {
         recording = false;
-        Tessellator.getInstance().draw();
+
+        var extension = ((OwoTessellatorExtension) Tessellator.getInstance());
+
+        var buffer = extension.owo$getStoredBuilder();
+
+        extension.owo$setStoredBuilder(null);
+
+        BufferRenderer.drawWithGlobalProgram(buffer.end());
     }
 
     /**
@@ -100,20 +108,19 @@ public class OwoUIDrawContext extends DrawContext {
      * @param bottomLeftColor  The color at the rectangle's bottom left corner
      */
     public void drawGradientRect(int x, int y, int width, int height, int topLeftColor, int topRightColor, int bottomRightColor, int bottomLeftColor) {
-        var buffer = Tessellator.getInstance().getBuffer();
+        var buffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
         var matrix = this.getMatrices().peek().getPositionMatrix();
 
-        buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
-        buffer.vertex(matrix, x + width, y, 0).color(topRightColor).next();
-        buffer.vertex(matrix, x, y, 0).color(topLeftColor).next();
-        buffer.vertex(matrix, x, y + height, 0).color(bottomLeftColor).next();
-        buffer.vertex(matrix, x + width, y + height, 0).color(bottomRightColor).next();
+        buffer.vertex(matrix, x + width, y, 0).color(topRightColor);
+        buffer.vertex(matrix, x, y, 0).color(topLeftColor);
+        buffer.vertex(matrix, x, y + height, 0).color(bottomLeftColor);
+        buffer.vertex(matrix, x + width, y + height, 0).color(bottomRightColor);
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
 
         RenderSystem.setShader(GameRenderer::getPositionColorProgram);
-        Tessellator.getInstance().draw();
+        BufferRenderer.drawWithGlobalProgram(buffer.end());
 
         RenderSystem.disableBlend();
     }
@@ -133,17 +140,16 @@ public class OwoUIDrawContext extends DrawContext {
     }
 
     public void drawSpectrum(int x, int y, int width, int height, boolean vertical) {
-        var buffer = Tessellator.getInstance().getBuffer();
+        var buffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
         var matrix = this.getMatrices().peek().getPositionMatrix();
 
-        buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
-        buffer.vertex(matrix, x, y, 0).color(1f, 1f, 1f, 1f).next();
-        buffer.vertex(matrix, x, y + height, 0).color(vertical ? 0f : 1f, 1f, 1f, 1f).next();
-        buffer.vertex(matrix, x + width, y + height, 0).color(0f, 1f, 1f, 1f).next();
-        buffer.vertex(matrix, x + width, y, 0).color(vertical ? 1f : 0f, 1f, 1f, 1f).next();
+        buffer.vertex(matrix, x, y, 0).color(1f, 1f, 1f, 1f);
+        buffer.vertex(matrix, x, y + height, 0).color(vertical ? 0f : 1f, 1f, 1f, 1f);
+        buffer.vertex(matrix, x + width, y + height, 0).color(0f, 1f, 1f, 1f);
+        buffer.vertex(matrix, x + width, y, 0).color(vertical ? 1f : 0f, 1f, 1f, 1f);
 
         OwoClient.HSV_PROGRAM.use();
-        Tessellator.getInstance().draw();
+        BufferRenderer.drawWithGlobalProgram(buffer.end());
     }
 
     public void drawText(Text text, float x, float y, float scale, int color) {
@@ -177,22 +183,20 @@ public class OwoUIDrawContext extends DrawContext {
     public void drawLine(int x1, int y1, int x2, int y2, double thiccness, Color color) {
         var offset = new Vector2d(x2 - x1, y2 - y1).perpendicular().normalize().mul(thiccness * .5d);
 
-        var buffer = Tessellator.getInstance().getBuffer();
+        var buffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
         var matrix = this.getMatrices().peek().getPositionMatrix();
         int vColor = color.argb();
 
-        buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
-
-        buffer.vertex(matrix, (float) (x1 + offset.x), (float) (y1 + offset.y), 0).color(vColor).next();
-        buffer.vertex(matrix, (float) (x1 - offset.x), (float) (y1 - offset.y), 0).color(vColor).next();
-        buffer.vertex(matrix, (float) (x2 - offset.x), (float) (y2 - offset.y), 0).color(vColor).next();
-        buffer.vertex(matrix, (float) (x2 + offset.x), (float) (y2 + offset.y), 0).color(vColor).next();
+        buffer.vertex(matrix, (float) (x1 + offset.x), (float) (y1 + offset.y), 0).color(vColor);
+        buffer.vertex(matrix, (float) (x1 - offset.x), (float) (y1 - offset.y), 0).color(vColor);
+        buffer.vertex(matrix, (float) (x2 - offset.x), (float) (y2 - offset.y), 0).color(vColor);
+        buffer.vertex(matrix, (float) (x2 + offset.x), (float) (y2 + offset.y), 0).color(vColor);
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShader(GameRenderer::getPositionColorProgram);
 
-        Tessellator.getInstance().draw();
+        BufferRenderer.drawWithGlobalProgram(buffer.end());
     }
 
     public void drawCircle(int centerX, int centerY, int segments, double radius, Color color) {
@@ -202,26 +206,25 @@ public class OwoUIDrawContext extends DrawContext {
     public void drawCircle(int centerX, int centerY, double angleFrom, double angleTo, int segments, double radius, Color color) {
         Preconditions.checkArgument(angleFrom < angleTo, "angleFrom must be less than angleTo");
 
-        var buffer = Tessellator.getInstance().getBuffer();
+        var buffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
         var matrix = this.getMatrices().peek().getPositionMatrix();
 
         double angleStep = Math.toRadians(angleTo - angleFrom) / segments;
         int vColor = color.argb();
 
-        buffer.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
-        buffer.vertex(matrix, centerX, centerY, 0).color(vColor).next();
+        buffer.vertex(matrix, centerX, centerY, 0).color(vColor);
 
         for (int i = segments; i >= 0; i--) {
             double theta = Math.toRadians(angleFrom) + i * angleStep;
             buffer.vertex(matrix, (float) (centerX - Math.cos(theta) * radius), (float) (centerY - Math.sin(theta) * radius), 0)
-                    .color(vColor).next();
+                    .color(vColor);
         }
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShader(GameRenderer::getPositionColorProgram);
 
-        Tessellator.getInstance().draw();
+        BufferRenderer.drawWithGlobalProgram(buffer.end());
     }
 
     public void drawRing(int centerX, int centerY, int segments, double innerRadius, double outerRadius, Color innerColor, Color outerColor) {
@@ -232,29 +235,27 @@ public class OwoUIDrawContext extends DrawContext {
         Preconditions.checkArgument(angleFrom < angleTo, "angleFrom must be less than angleTo");
         Preconditions.checkArgument(innerRadius < outerRadius, "innerRadius must be less than outerRadius");
 
-        var buffer = Tessellator.getInstance().getBuffer();
+        var buffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR);
         var matrix = this.getMatrices().peek().getPositionMatrix();
 
         double angleStep = Math.toRadians(angleTo - angleFrom) / segments;
         int inColor = innerColor.argb();
         int outColor = outerColor.argb();
 
-        buffer.begin(VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR);
-
         for (int i = 0; i <= segments; i++) {
             double theta = Math.toRadians(angleFrom) + i * angleStep;
 
             buffer.vertex(matrix, (float) (centerX - Math.cos(theta) * outerRadius), (float) (centerY - Math.sin(theta) * outerRadius), 0)
-                    .color(outColor).next();
+                    .color(outColor);
             buffer.vertex(matrix, (float) (centerX - Math.cos(theta) * innerRadius), (float) (centerY - Math.sin(theta) * innerRadius), 0)
-                    .color(inColor).next();
+                    .color(inColor);
         }
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShader(GameRenderer::getPositionColorProgram);
 
-        Tessellator.getInstance().draw();
+        BufferRenderer.drawWithGlobalProgram(buffer.end());
     }
 
     public void drawTooltip(TextRenderer textRenderer, int x, int y, List<TooltipComponent> components) {

@@ -15,6 +15,9 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.SpriteIdentifier;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.BundleContentsComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -200,7 +203,7 @@ public class ComponentTestScreen extends Screen {
                 Containers.renderEffect(
                         Containers.verticalFlow(Sizing.content(), Sizing.content())
                                 .child(Containers.renderEffect(
-                                        Components.sprite(new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, new Identifier("block/stone"))).margins(Insets.of(5))
+                                        Components.sprite(new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, Identifier.of("block/stone"))).margins(Insets.of(5))
                                 ).<RenderEffectWrapper<?>>configure(wrapper -> {
                                     wrapper.effect(RenderEffectWrapper.RenderEffect.rotate(RotationAxis.POSITIVE_Z, -45));
                                     wrapper.effect(RenderEffectWrapper.RenderEffect.color(Color.ofHsv(.5f, 1f, 1f)));
@@ -292,9 +295,10 @@ public class ComponentTestScreen extends Screen {
         );
 
         var bundle = Items.BUNDLE.getDefaultStack();
-        var itemList = new NbtList();
-        itemList.add(new ItemStack(Items.EMERALD, 16).writeNbt(new NbtCompound()));
-        bundle.getOrCreateNbt().put("Items", itemList);
+        var itemList = new ArrayList<ItemStack>();
+        itemList.add(new ItemStack(Items.EMERALD, 16));
+
+        bundle.set(DataComponentTypes.BUNDLE_CONTENTS, new BundleContentsComponent(itemList));
 
         rootComponent.child(Components.item(new ItemStack(Items.EMERALD, 16))
                 .showOverlay(true)
@@ -368,6 +372,9 @@ public class ComponentTestScreen extends Screen {
 
         uiAdapter.inflateAndMount();
     }
+
+    @Override
+    public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {}
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {

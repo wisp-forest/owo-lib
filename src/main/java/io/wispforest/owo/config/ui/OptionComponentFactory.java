@@ -59,7 +59,7 @@ public interface OptionComponentFactory<T> {
         return OptionComponents.createTextBox(model, option, configTextBox -> {
             configTextBox.inputPredicate(s -> s.matches("[a-z0-9_.:\\-]*"));
             configTextBox.applyPredicate(s -> Identifier.tryParse(s) != null);
-            configTextBox.valueParser(Identifier::new);
+            configTextBox.valueParser(Identifier::of);
         });
     };
 

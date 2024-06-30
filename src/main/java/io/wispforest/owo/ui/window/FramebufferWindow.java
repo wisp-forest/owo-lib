@@ -206,7 +206,7 @@ public class FramebufferWindow extends SupportsFeaturesImpl<WindowContext> imple
 
             // Intentionally doesn't poll events so that all events are on the main window
             RenderSystem.replayQueue();
-            Tessellator.getInstance().getBuffer().clear();
+            Tessellator.getInstance().clear();
             GLFW.glfwSwapBuffers(this.handle);
         }
     }

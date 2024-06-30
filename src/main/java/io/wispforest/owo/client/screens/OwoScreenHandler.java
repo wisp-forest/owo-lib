@@ -1,13 +1,17 @@
 package io.wispforest.owo.client.screens;
 
-import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.endec.ReflectiveEndecBuilder;
+import io.wispforest.endec.Endec;
+import io.wispforest.endec.impl.ReflectiveEndecBuilder;
 import net.minecraft.entity.player.PlayerEntity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
 public interface OwoScreenHandler {
+
+    default ReflectiveEndecBuilder endecBuilder() {
+        throw new UnsupportedOperationException("Implemented in ScreenHandlerMixin");
+    }
 
     /**
      * Create a new property on this screen handler. This property can be updated serverside
@@ -28,7 +32,7 @@ public interface OwoScreenHandler {
      * through {@link ReflectiveEndecBuilder#get(Class)}
      */
     default <T> SyncedProperty<T> createProperty(Class<T> clazz, T initial) {
-        return this.createProperty(clazz, ReflectiveEndecBuilder.get(clazz), initial);
+        return this.createProperty(clazz, this.endecBuilder().get(clazz), initial);
     }
 
     /**
@@ -52,7 +56,7 @@ public interface OwoScreenHandler {
      * through {@link ReflectiveEndecBuilder#get(Class)}
      */
     default <R extends Record> void addServerboundMessage(Class<R> messageClass, Consumer<R> handler) {
-        this.addServerboundMessage(messageClass, ReflectiveEndecBuilder.get(messageClass), handler);
+        this.addServerboundMessage(messageClass, this.endecBuilder().get(messageClass), handler);
     }
 
     /**
@@ -76,7 +80,7 @@ public interface OwoScreenHandler {
      * through {@link ReflectiveEndecBuilder#get(Class)}
      */
     default <R extends Record> void addClientboundMessage(Class<R> messageClass, Consumer<R> handler) {
-        this.addClientboundMessage(messageClass, ReflectiveEndecBuilder.get(messageClass), handler);
+        this.addClientboundMessage(messageClass, this.endecBuilder().get(messageClass), handler);
     }
 
     /**

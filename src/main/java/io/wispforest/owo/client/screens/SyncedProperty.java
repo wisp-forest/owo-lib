@@ -1,6 +1,6 @@
 package io.wispforest.owo.client.screens;
 
-import io.wispforest.owo.serialization.Endec;
+import io.wispforest.endec.Endec;
 import io.wispforest.owo.util.Observable;
 import net.minecraft.network.PacketByteBuf;
 import org.jetbrains.annotations.ApiStatus;

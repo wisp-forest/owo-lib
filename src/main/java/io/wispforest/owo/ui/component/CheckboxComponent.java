@@ -2,6 +2,7 @@ package io.wispforest.owo.ui.component;
 
 import io.wispforest.owo.mixin.ui.access.CheckboxWidgetAccessor;
 import io.wispforest.owo.ui.core.CursorStyle;
+import io.wispforest.owo.ui.core.Size;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
@@ -19,7 +20,7 @@ public class CheckboxComponent extends CheckboxWidget {
     protected final Observable<Boolean> listeners;
 
     protected CheckboxComponent(Text message) {
-        super(0, 0, message, MinecraftClient.getInstance().textRenderer, false, (checkbox, checked) -> {});
+        super(0, 0, 0, message, MinecraftClient.getInstance().textRenderer, false, (checkbox, checked) -> {});
         this.listeners = Observable.of(this.isChecked());
         this.sizing(Sizing.content(), Sizing.fixed(20));
     }
@@ -39,6 +40,12 @@ public class CheckboxComponent extends CheckboxWidget {
     public CheckboxComponent onChanged(Consumer<Boolean> listener) {
         this.listeners.observe(listener);
         return this;
+    }
+
+    @Override
+    public void inflate(Size space) {
+        super.inflate(space);
+        ((CheckboxWidgetAccessor) this).owo$getTextWidget().setMaxWidth(this.width);
     }
 
     @Override

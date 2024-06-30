@@ -21,7 +21,7 @@ public class UwuTestWindow extends OwoWindow<FlowLayout> {
     public UwuTestWindow() {
         super(640, 480, "uωu test window!", MinecraftClient.getInstance().getWindow().getHandle());
 
-        setIconTextures(MinecraftClient.getInstance().getResourceManager(), List.of(new Identifier("owo", "icon.png")));
+        setIconTextures(MinecraftClient.getInstance().getResourceManager(), List.of(Identifier.of("owo", "icon.png")));
     }
 
     @Override

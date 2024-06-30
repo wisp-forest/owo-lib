@@ -79,14 +79,13 @@ public class RenderEffectWrapper<C extends Component> extends WrappingParentComp
                 iter.next().effect.setup(this, context, partialTicks, delta);
             }
 
-            var buffer = RenderSystem.renderThreadTesselator().getBuffer();
+            var buffer = RenderSystem.renderThreadTesselator().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
             var matrix = context.getMatrices().peek().getPositionMatrix();
 
-            buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
-            buffer.vertex(matrix, 0, window.scaledHeight(), 0).texture(0, 0).color(1f, 1f, 1f, 1f).next();
-            buffer.vertex(matrix, window.scaledWidth(), window.scaledHeight(), 0).texture(1, 0).color(1f, 1f, 1f, 1f).next();
-            buffer.vertex(matrix, window.scaledWidth(), 0, 0).texture(1, 1).color(1f, 1f, 1f, 1f).next();
-            buffer.vertex(matrix, 0, 0, 0).texture(0, 1).color(1f, 1f, 1f, 1f).next();
+            buffer.vertex(matrix, 0, window.scaledHeight(), 0).texture(0, 0).color(1f, 1f, 1f, 1f);
+            buffer.vertex(matrix, window.scaledWidth(), window.scaledHeight(), 0).texture(1, 0).color(1f, 1f, 1f, 1f);
+            buffer.vertex(matrix, window.scaledWidth(), 0, 0).texture(1, 1).color(1f, 1f, 1f, 1f);
+            buffer.vertex(matrix, 0, 0, 0).texture(0, 1).color(1f, 1f, 1f, 1f);
 
             RenderSystem.setShaderTexture(0, framebuffer.getColorAttachment());
             RenderSystem.setShader(GameRenderer::getPositionTexColorProgram);

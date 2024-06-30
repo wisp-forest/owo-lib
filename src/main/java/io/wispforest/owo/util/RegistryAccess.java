@@ -1,6 +1,7 @@
 package io.wispforest.owo.util;
 
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.Identifier;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.SimpleRegistry;

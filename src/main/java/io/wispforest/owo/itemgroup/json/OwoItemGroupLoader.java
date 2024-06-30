@@ -47,7 +47,7 @@ public class OwoItemGroupLoader implements ModDataConsumer {
 
     @Override
     public void acceptParsedFile(Identifier id, JsonObject json) {
-        var targetGroupId = new Identifier(JsonHelper.getString(json, "target_group"));
+        var targetGroupId = Identifier.of(JsonHelper.getString(json, "target_group"));
 
         ItemGroup searchGroup = null;
         for (ItemGroup group : ItemGroups.getGroups()) {
@@ -71,10 +71,10 @@ public class OwoItemGroupLoader implements ModDataConsumer {
             if (!jsonElement.isJsonObject()) return;
             var tabObject = jsonElement.getAsJsonObject();
 
-            var texture = new Identifier(JsonHelper.getString(tabObject, "texture", ItemGroupTab.DEFAULT_TEXTURE.toString()));
+            var texture = Identifier.of(JsonHelper.getString(tabObject, "texture", ItemGroupTab.DEFAULT_TEXTURE.toString()));
 
-            var tag = TagKey.of(RegistryKeys.ITEM, new Identifier(JsonHelper.getString(tabObject, "tag")));
-            var icon = Registries.ITEM.get(new Identifier(JsonHelper.getString(tabObject, "icon")));
+            var tag = TagKey.of(RegistryKeys.ITEM, Identifier.of(JsonHelper.getString(tabObject, "tag")));
+            var icon = Registries.ITEM.get(Identifier.of(JsonHelper.getString(tabObject, "icon")));
             var name = JsonHelper.getString(tabObject, "name");
 
             tabs.add(new ItemGroupTab(
@@ -105,7 +105,7 @@ public class OwoItemGroupLoader implements ModDataConsumer {
             final var textureId = JsonHelper.getString(buttonObject, "texture", null);
             var texture = textureId == null
                     ? ItemGroupButton.ICONS_TEXTURE
-                    : new Identifier(textureId);
+                    : Identifier.of(textureId);
 
             buttons.add(ItemGroupButton.link(targetGroup, Icon.of(texture, u, v, textureWidth, textureHeight), name, link));
         });

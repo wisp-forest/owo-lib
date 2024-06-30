@@ -1,11 +1,13 @@
 package io.wispforest.owo.mixin;
 
+import io.wispforest.endec.impl.ReflectiveEndecBuilder;
 import io.wispforest.owo.client.screens.OwoScreenHandler;
 import io.wispforest.owo.client.screens.ScreenInternals;
 import io.wispforest.owo.client.screens.ScreenhandlerMessageData;
 import io.wispforest.owo.client.screens.SyncedProperty;
 import io.wispforest.owo.network.NetworkException;
-import io.wispforest.owo.serialization.Endec;
+import io.wispforest.endec.Endec;
+import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.util.pond.OwoScreenHandlerExtension;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -13,13 +15,14 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -42,6 +45,19 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
     private final List<ScreenhandlerMessageData<?>> owo$serverboundMessages = new ArrayList<>();
 
     private PlayerEntity owo$player = null;
+
+    @Unique
+    private ReflectiveEndecBuilder builder;
+
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void createReflectiveBuilder(ScreenHandlerType type, int syncId, CallbackInfo ci) {
+        this.builder = MinecraftEndecs.addDefaults(new ReflectiveEndecBuilder());
+    }
+
+    @Override
+    public ReflectiveEndecBuilder endecBuilder() {
+        return builder;
+    }
 
     @Override
     public void owo$attachToPlayer(PlayerEntity player) {
@@ -91,36 +107,37 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
         }
 
         var buf = PacketByteBufs.create();
-        buf.writeVarInt(messageData.id());
         buf.write(messageData.endec(), message);
+
+        var packet = new ScreenInternals.LocalPacket(messageData.id(), buf);
 
         if (messageData.clientbound()) {
             if (!(this.owo$player instanceof ServerPlayerEntity serverPlayer)) {
                 throw new NetworkException("Tried to send clientbound message on the server");
             }
 
-            ServerPlayNetworking.send(serverPlayer, ScreenInternals.LOCAL_PACKET, buf);
+            ServerPlayNetworking.send(serverPlayer, packet);
         } else {
             if (!this.owo$player.getWorld().isClient) {
                 throw new NetworkException("Tried to send serverbound message on the client");
             }
 
-            this.owo$sendToServer(ScreenInternals.LOCAL_PACKET, buf);
+            this.owo$sendToServer(packet);
         }
     }
 
+    @Unique
     @Environment(EnvType.CLIENT)
-    private void owo$sendToServer(Identifier channel, PacketByteBuf data) {
-        ClientPlayNetworking.send(channel, data);
+    private void owo$sendToServer(CustomPayload payload) {
+        ClientPlayNetworking.send(payload);
     }
 
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public void owo$handlePacket(PacketByteBuf buf, boolean clientbound) {
-        int id = buf.readVarInt();
-        ScreenhandlerMessageData messageData = (clientbound ? this.owo$clientboundMessages : this.owo$serverboundMessages).get(id);
+    public void owo$handlePacket(ScreenInternals.LocalPacket packet, boolean clientbound) {
+        ScreenhandlerMessageData messageData = (clientbound ? this.owo$clientboundMessages : this.owo$serverboundMessages).get(packet.packetId());
 
-        messageData.handler().accept(buf.read(messageData.endec()));
+        messageData.handler().accept(packet.payload().read(messageData.endec()));
     }
 
     @Override
@@ -131,12 +148,12 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
     }
 
     @Override
-    public void owo$readPropertySync(PacketByteBuf buf) {
-        int count = buf.readVarInt();
+    public void owo$readPropertySync(ScreenInternals.SyncPropertiesPacket packet) {
+        int count = packet.payload().readVarInt();
 
         for (int i = 0; i < count; i++) {
-            int idx = buf.readVarInt();
-            this.owo$properties.get(idx).read(buf);
+            int idx = packet.payload().readVarInt();
+            this.owo$properties.get(idx).read(packet.payload());
         }
     }
 
@@ -152,6 +169,7 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
         this.syncProperties();
     }
 
+    @Unique
     private void syncProperties() {
         if (this.owo$player == null) return;
         if (!(this.owo$player instanceof ServerPlayerEntity player)) return;
@@ -174,7 +192,7 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
             prop.write(buf);
         }
 
-        ServerPlayNetworking.send(player, ScreenInternals.SYNC_PROPERTIES, buf);
+        ServerPlayNetworking.send(player, new ScreenInternals.SyncPropertiesPacket(buf));
     }
 
 }

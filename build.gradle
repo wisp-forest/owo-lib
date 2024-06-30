@@ -1,6 +1,6 @@
 //file:noinspection GradlePackageVersionRange
 plugins {
-    id 'fabric-loom' version '1.4-SNAPSHOT'
+    id 'fabric-loom' version '1.6-SNAPSHOT'
     id 'maven-publish'
 }
 
@@ -31,7 +31,7 @@ allprojects {
         }
     }
 
-    def targetJavaVersion = 17
+    def targetJavaVersion = 21
     tasks.withType(JavaCompile).configureEach {
         // ensure that the encoding is set to UTF-8, no matter what the system default is
         // this fixes some edge cases with special characters not displaying correctly
@@ -89,7 +89,9 @@ repositories {
             includeGroup "maven.modrinth"
         }
     }
-    maven { url = "https://maven.nucleoid.xyz/" }
+    maven { url "https://maven.nucleoid.xyz/" }
+    maven { url 'https://maven.wispforest.io' }
+    mavenLocal()
 }
 
 sourceSets {
@@ -119,7 +121,7 @@ loom {
 }
 
 dependencies {
-    modLocalRuntime("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}")
+//    modLocalRuntime("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}")
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin:${project.rei_version}")
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}")
 
@@ -129,9 +131,14 @@ dependencies {
     modCompileOnly("com.terraformersmc:modmenu:${project.modmenu_version}")
     modLocalRuntime("com.terraformersmc:modmenu:${project.modmenu_version}")
 
-    api(include("blue.endless:jankson:${project.jankson_version}"))
+    include api("io.wispforest:endec:0.1.0")
+    include api("io.wispforest.endec:netty:0.1.0")
+    include api("io.wispforest.endec:gson:0.1.0")
+    include api("io.wispforest.endec:jankson:0.1.0")
 
-    modCompileOnly "xyz.nucleoid:server-translations-api:${project.stapi_version}"
+    include api("blue.endless:jankson:${project.jankson_version}")
+
+    modCompileOnly("xyz.nucleoid:server-translations-api:${project.stapi_version}")
 
     testmodImplementation sourceSets.main.output
     testmodAnnotationProcessor sourceSets.main.output

@@ -1,6 +1,6 @@
 package io.wispforest.owo.mixin.ui.access;
 
-import net.minecraft.client.gui.tooltip.Tooltip;
+import net.minecraft.client.gui.tooltip.TooltipState;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -21,5 +21,5 @@ public interface ClickableWidgetAccessor {
     void owo$setY(int y);
 
     @Accessor("tooltip")
-    Tooltip owo$getTooltip();
+    TooltipState owo$getTooltip();
 }

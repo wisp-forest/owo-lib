@@ -1,22 +1,29 @@
 package io.wispforest.owo.mixin.shader;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 import io.wispforest.owo.shader.GlProgram;
 import net.minecraft.client.gl.ShaderProgram;
+import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 @Mixin(ShaderProgram.class)
 public class ShaderProgramMixin {
 
-    @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Identifier;<init>(Ljava/lang/String;)V"), require = 0)
-    private String fixIdentifier(String id) {
-        if (!((Object) this instanceof GlProgram.OwoShaderProgram)) return id;
+    @WrapOperation(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Identifier;ofVanilla(Ljava/lang/String;)Lnet/minecraft/util/Identifier;"), require = 0)
+    private Identifier fixIdentifier(String path, Operation<Identifier> original, @Local(argsOnly = true) String name) {
+        if ((Object) this instanceof GlProgram.OwoShaderProgram) {
+            var pathParts = path.split(name);
+            if (pathParts.length == 2 && pathParts[0].startsWith("shaders/core/")) {
+                var programParts = name.split(":");
 
-        var splitName = id.split(":");
-        if (splitName.length != 2 || !splitName[0].startsWith("shaders/core/")) return id;
+                return Identifier.of(programParts[0], pathParts[0] + programParts[1] + pathParts[1]);
+            }
+        }
 
-        return splitName[0].replace("shaders/core/", "") + ":" + "shaders/core/" + splitName[1];
+        return original.call(path);
     }
 
 }

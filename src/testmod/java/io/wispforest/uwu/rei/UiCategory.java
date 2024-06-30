@@ -26,7 +26,7 @@ import java.util.List;
 
 public class UiCategory implements DisplayCategory<Display> {
 
-    public static CategoryIdentifier<UiDisplay> ID = CategoryIdentifier.of(new Identifier("owo", "ui"));
+    public static CategoryIdentifier<UiDisplay> ID = CategoryIdentifier.of(Identifier.of("owo", "ui"));
 
     @Override
     public List<Widget> setupDisplay(Display display, Rectangle bounds) {

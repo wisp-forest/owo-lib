@@ -1,7 +1,8 @@
 package io.wispforest.owo.text;
 
-import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.endec.StructEndecBuilder;
+import io.wispforest.endec.Endec;
+import io.wispforest.endec.impl.StructEndecBuilder;
+import io.wispforest.owo.serialization.CodecUtils;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -12,7 +13,7 @@ import java.util.Optional;
 public record InsertingTextContent(int index) implements TextContent {
 
     public static final TextContent.Type<InsertingTextContent> TYPE = new Type<>(
-            StructEndecBuilder.of(Endec.INT.fieldOf("index", InsertingTextContent::index), InsertingTextContent::new).mapCodec(),
+            CodecUtils.toMapCodec(StructEndecBuilder.of(Endec.INT.fieldOf("index", InsertingTextContent::index), InsertingTextContent::new)),
             "owo:insert"
     );
 

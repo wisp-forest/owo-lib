@@ -13,6 +13,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.util.math.MatrixStack;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fStack;
 import org.lwjgl.opengl.GL32;
 
 public abstract class OwoWindow<R extends ParentComponent> extends FramebufferWindow {
@@ -118,18 +119,18 @@ public abstract class OwoWindow<R extends ParentComponent> extends FramebufferWi
                     );
 
             try (var ignored2 = OwoGlUtil.setProjectionMatrix(matrix4f, VertexSorter.BY_Z)) {
-                MatrixStack matrixStack = RenderSystem.getModelViewStack();
-                matrixStack.push();
-                matrixStack.loadIdentity();
+                Matrix4fStack matrixStack = RenderSystem.getModelViewStack();
+                matrixStack.pushMatrix();
+                matrixStack.identity();
                 matrixStack.translate(0.0F, 0.0F, -11000.0F);
                 RenderSystem.applyModelViewMatrix();
                 DiffuseLighting.enableGuiDepthLighting();
 
                 var consumers = client.getBufferBuilders().getEntityVertexConsumers();
-                adapter.render(new DrawContext(client, consumers), mouseX, mouseY, client.getTickDelta());
+                adapter.render(new DrawContext(client, consumers), mouseX, mouseY, client.getRenderTickCounter().getTickDelta(false));
                 consumers.draw();
 
-                RenderSystem.getModelViewStack().pop();
+                RenderSystem.getModelViewStack().popMatrix();
                 RenderSystem.applyModelViewMatrix();
             }
 

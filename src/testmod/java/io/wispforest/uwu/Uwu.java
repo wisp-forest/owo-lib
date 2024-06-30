@@ -8,6 +8,12 @@ import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.logging.LogUtils;
+import io.netty.buffer.Unpooled;
+import io.wispforest.endec.format.json.GsonDeserializer;
+import io.wispforest.endec.format.json.GsonEndec;
+import io.wispforest.endec.format.json.GsonSerializer;
+import io.wispforest.endec.impl.StructEndecBuilder;
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.ConfigSynchronizer;
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.itemgroup.Icon;
@@ -20,14 +26,11 @@ import io.wispforest.owo.particles.ClientParticles;
 import io.wispforest.owo.particles.systems.ParticleSystem;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
 import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
-import io.wispforest.owo.serialization.endec.BuiltInEndecs;
-import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.endec.StructEndecBuilder;
-import io.wispforest.owo.serialization.format.bytebuf.ByteBufDeserializer;
-import io.wispforest.owo.serialization.format.bytebuf.ByteBufSerializer;
-import io.wispforest.owo.serialization.format.json.JsonDeserializer;
-import io.wispforest.owo.serialization.format.json.JsonEndec;
-import io.wispforest.owo.serialization.format.json.JsonSerializer;
+import io.wispforest.endec.SerializationContext;
+import io.wispforest.endec.Endec;
+import io.wispforest.endec.format.bytebuf.ByteBufSerializer;
+import io.wispforest.owo.serialization.CodecUtils;
+import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.serialization.format.nbt.NbtDeserializer;
 import io.wispforest.owo.serialization.format.nbt.NbtEndec;
 import io.wispforest.owo.serialization.format.nbt.NbtSerializer;
@@ -57,7 +60,7 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -87,14 +90,18 @@ public class Uwu implements ModInitializer {
 
     public static final boolean WE_TESTEN_HANDSHAKE = false;
 
-    public static final TagKey<Item> TAB_2_CONTENT = TagKey.of(RegistryKeys.ITEM, new Identifier("uwu", "tab_2_content"));
-    public static final Identifier GROUP_TEXTURE = new Identifier("uwu", "textures/gui/group.png");
-    public static final Identifier OWO_ICON_TEXTURE = new Identifier("uwu", "textures/gui/icon.png");
-    public static final Identifier ANIMATED_BUTTON_TEXTURE = new Identifier("uwu", "textures/gui/animated_icon_test.png");
+    public static final TagKey<Item> TAB_2_CONTENT = TagKey.of(RegistryKeys.ITEM, Identifier.of("uwu", "tab_2_content"));
+    public static final Identifier GROUP_TEXTURE = Identifier.of("uwu", "textures/gui/group.png");
+    public static final Identifier OWO_ICON_TEXTURE = Identifier.of("uwu", "textures/gui/icon.png");
+    public static final Identifier ANIMATED_BUTTON_TEXTURE = Identifier.of("uwu", "textures/gui/animated_icon_test.png");
 
-    public static final ScreenHandlerType<EpicScreenHandler> EPIC_SCREEN_HANDLER_TYPE = new ScreenHandlerType<>(EpicScreenHandler::new, FeatureFlags.VANILLA_FEATURES);
+    public static final ScreenHandlerType<EpicScreenHandler> EPIC_SCREEN_HANDLER_TYPE = Registry.register(
+        Registries.SCREEN_HANDLER,
+        Identifier.of("uwu", "epic_screen_handler"),
+        new ScreenHandlerType<>(EpicScreenHandler::new, FeatureFlags.VANILLA_FEATURES)
+    );
 
-    public static final OwoItemGroup FOUR_TAB_GROUP = OwoItemGroup.builder(new Identifier("uwu", "four_tab_group"), () -> Icon.of(Items.AXOLOTL_BUCKET))
+    public static final OwoItemGroup FOUR_TAB_GROUP = OwoItemGroup.builder(Identifier.of("uwu", "four_tab_group"), () -> Icon.of(Items.AXOLOTL_BUCKET))
             .disableDynamicTitle()
             .buttonStackHeight(1)
             .initializer(group -> {
@@ -107,17 +114,17 @@ public class Uwu implements ModInitializer {
             })
             .build();
 
-    public static final OwoItemGroup SIX_TAB_GROUP = OwoItemGroup.builder(new Identifier("uwu", "six_tab_group"), () -> Icon.of(Items.POWDER_SNOW_BUCKET))
+    public static final OwoItemGroup SIX_TAB_GROUP = OwoItemGroup.builder(Identifier.of("uwu", "six_tab_group"), () -> Icon.of(Items.POWDER_SNOW_BUCKET))
             .tabStackHeight(3)
             .backgroundTexture(GROUP_TEXTURE)
-            .scrollerTextures(new OwoItemGroup.ScrollerTextures(new Identifier("uwu", "scroller"), new Identifier("uwu", "scroller_disabled")))
+            .scrollerTextures(new OwoItemGroup.ScrollerTextures(Identifier.of("uwu", "scroller"), Identifier.of("uwu", "scroller_disabled")))
             .tabTextures(new OwoItemGroup.TabTextures(
-                    new Identifier("uwu", "top_selected"),
-                    new Identifier("uwu", "top_selected_first_column"),
-                    new Identifier("uwu", "top_unselected"),
-                    new Identifier("uwu", "bottom_selected"),
-                    new Identifier("uwu", "bottom_selected_first_column"),
-                    new Identifier("uwu", "bottom_unselected")))
+                    Identifier.of("uwu", "top_selected"),
+                    Identifier.of("uwu", "top_selected_first_column"),
+                    Identifier.of("uwu", "top_unselected"),
+                    Identifier.of("uwu", "bottom_selected"),
+                    Identifier.of("uwu", "bottom_selected_first_column"),
+                    Identifier.of("uwu", "bottom_unselected")))
             .initializer(group -> {
                 group.addTab(Icon.of(Items.DIAMOND), "tab_1", null, true);
                 group.addTab(Icon.of(Items.EMERALD), "tab_2", null, false);
@@ -132,26 +139,26 @@ public class Uwu implements ModInitializer {
             })
             .build();
 
-    public static final OwoItemGroup SINGLE_TAB_GROUP = OwoItemGroup.builder(new Identifier("uwu", "single_tab_group"), () -> Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16))
+    public static final OwoItemGroup SINGLE_TAB_GROUP = OwoItemGroup.builder(Identifier.of("uwu", "single_tab_group"), () -> Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16))
             .displaySingleTab()
             .initializer(group -> group.addTab(Icon.of(Items.SPONGE), "tab_1", null, true))
             .build();
 
-    public static final ItemGroup VANILLA_GROUP = Registry.register(Registries.ITEM_GROUP, new Identifier("uwu", "vanilla_group"), FabricItemGroup.builder()
+    public static final ItemGroup VANILLA_GROUP = Registry.register(Registries.ITEM_GROUP, Identifier.of("uwu", "vanilla_group"), FabricItemGroup.builder()
             .displayName(Text.literal("who did this"))
             .icon(Items.ACACIA_BOAT::getDefaultStack)
             .entries((context, entries) -> entries.add(Items.MANGROVE_CHEST_BOAT))
             .build());
 
-    public static final OwoNetChannel CHANNEL = OwoNetChannel.create(new Identifier("uwu", "uwu"));
+    public static final OwoNetChannel CHANNEL = OwoNetChannel.create(Identifier.of("uwu", "uwu"));
 
     public static final TestMessage MESSAGE = new TestMessage("hahayes", 69, Long.MAX_VALUE, ItemStack.EMPTY, Short.MAX_VALUE, Byte.MAX_VALUE, new BlockPos(69, 420, 489),
-            Float.NEGATIVE_INFINITY, Double.NaN, false, new Identifier("uowou", "hahayes"), Collections.emptyMap(),
+            Float.NEGATIVE_INFINITY, Double.NaN, false, Identifier.of("uowou", "hahayes"), Collections.emptyMap(),
             new int[]{10, 20}, new String[]{"trollface"}, new short[]{1, 2, 3}, new long[]{Long.MAX_VALUE, 1, 3}, new byte[]{1, 2, 3, 4},
             Optional.of("NullableString"), Optional.empty(),
             ImmutableList.of(new BlockPos(9786, 42, 9234)), new SealedSubclassOne("basede", 10), new SealedSubclassTwo(10, null));
 
-    public static final ParticleSystemController PARTICLE_CONTROLLER = new ParticleSystemController(new Identifier("uwu", "particles"));
+    public static final ParticleSystemController PARTICLE_CONTROLLER = new ParticleSystemController(Identifier.of("uwu", "particles"));
     public static final ParticleSystem<Void> CUBE = PARTICLE_CONTROLLER.registerDeferred(Void.class);
     public static final ParticleSystem<Void> BREAK_BLOCK_PARTICLES = PARTICLE_CONTROLLER.register(Void.class, (world, pos, data) -> {
         ClientParticles.persist();
@@ -173,7 +180,7 @@ public class Uwu implements ModInitializer {
     @Override
     public void onInitialize() {
 
-        var stackEndec = Endec.ofCodec(ItemStack.CODEC);
+        var stackEndec = CodecUtils.toEndec(ItemStack.CODEC);
         var stackData = """
                         {
                             "id": "minecraft:shroomlight",
@@ -184,14 +191,14 @@ public class Uwu implements ModInitializer {
                         }
                 """;
 
-        var stacknite = stackEndec.decode(JsonDeserializer.of(new Gson().fromJson(stackData, JsonObject.class)));
+        var stacknite = stackEndec.decode(SerializationContext.empty(), GsonDeserializer.of(new Gson().fromJson(stackData, JsonObject.class)));
         System.out.println(stacknite);
 
-        var serializer = ByteBufSerializer.packet();
-        stackEndec.encode(serializer, stacknite);
+        var serializer = ByteBufSerializer.of(PacketByteBufs.create());
+        stackEndec.encode(SerializationContext.empty(), serializer, stacknite);
 
-        System.out.println(serializer.result().read(stackEndec));
-        System.out.println(BuiltInEndecs.BLOCK_POS.codec().encodeStart(NbtOps.INSTANCE, new BlockPos(34, 35, 69)).result().get());
+        System.out.println(serializer.result().read(SerializationContext.empty(), stackEndec));
+        System.out.println(CodecUtils.toCodec(MinecraftEndecs.BLOCK_POS).encodeStart(NbtOps.INSTANCE, new BlockPos(34, 35, 69)).result().get());
 
         FieldRegistrationHandler.register(UwuItems.class, "uwu", true);
 
@@ -214,12 +221,12 @@ public class Uwu implements ModInitializer {
         });
 
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER && WE_TESTEN_HANDSHAKE) {
-            OwoNetChannel.create(new Identifier("uwu", "server_only_channel"));
-            new ParticleSystemController(new Identifier("uwu", "server_only_particles"));
+            OwoNetChannel.create(Identifier.of("uwu", "server_only_channel"));
+            new ParticleSystemController(Identifier.of("uwu", "server_only_particles"));
         }
 
         System.out.println(RegistryAccess.getEntry(Registries.ITEM, Items.ACACIA_BOAT));
-        System.out.println(RegistryAccess.getEntry(Registries.ITEM, new Identifier("acacia_planks")));
+        System.out.println(RegistryAccess.getEntry(Registries.ITEM, Identifier.of("acacia_planks")));
 
 //        UwuShapedRecipe.init();
 
@@ -252,7 +259,7 @@ public class Uwu implements ModInitializer {
                                                 GameProfile profile = GameProfileArgumentType.getProfileArgument(context, "player").iterator().next();
 
                                                 OfflineAdvancementLookup.edit(profile.getId(), handle -> {
-                                                    handle.grant(server.getAdvancementLoader().get(new Identifier("story/iron_tools")));
+                                                    handle.grant(server.getAdvancementLoader().get(Identifier.of("story/iron_tools")));
                                                 });
 
                                                 return 0;
@@ -285,8 +292,8 @@ public class Uwu implements ModInitializer {
                         var nbtData = Endec.STRING.encodeFully(NbtSerializer::of, testPhrase);
                         var fromNbtData = Endec.STRING.decodeFully(NbtDeserializer::of, nbtData);
 
-                        var jsonData = Endec.STRING.encodeFully(JsonSerializer::of, fromNbtData);
-                        var fromJsonData = Endec.STRING.decodeFully(JsonDeserializer::of, jsonData);
+                        var jsonData = Endec.STRING.encodeFully(GsonSerializer::of, fromNbtData);
+                        var fromJsonData = Endec.STRING.decodeFully(GsonDeserializer::of, jsonData);
 
                         LOGGER.info("Output: " + fromJsonData);
 
@@ -298,9 +305,9 @@ public class Uwu implements ModInitializer {
 
                         LOGGER.info("Input:  " + randomNumber);
 
-                        var jsonNum = Endec.INT.encodeFully(JsonSerializer::of, randomNumber);
+                        var jsonNum = Endec.INT.encodeFully(GsonSerializer::of, randomNumber);
 
-                        LOGGER.info("Output: " + Endec.INT.decodeFully(JsonDeserializer::of, jsonNum));
+                        LOGGER.info("Output: " + Endec.INT.decodeFully(GsonDeserializer::of, jsonNum));
 
                         LOGGER.info("");
 
@@ -331,14 +338,14 @@ public class Uwu implements ModInitializer {
                         ItemStack handStack = source.getPlayer().getStackInHand(Hand.MAIN_HAND);
 
                         LOGGER.info(handStack.toString());
-                        LOGGER.info(handStack.getOrCreateNbt().asString().replace("\n", "\\n"));
+                        LOGGER.info(handStack.getComponents().toString().replace("\n", "\\n"));
 
                         LOGGER.info("---");
 
                         JsonElement stackJsonData;
 
                         try {
-                            stackJsonData = BuiltInEndecs.ITEM_STACK.encodeFully(JsonSerializer::of, handStack);
+                            stackJsonData = MinecraftEndecs.ITEM_STACK.encodeFully(GsonSerializer::of, handStack);
                         } catch (Exception exception){
                             LOGGER.info(exception.getMessage());
                             LOGGER.info((Arrays.toString(exception.getStackTrace())));
@@ -351,7 +358,7 @@ public class Uwu implements ModInitializer {
                         LOGGER.info("---");
 
                         try {
-                            handStack = BuiltInEndecs.ITEM_STACK.decodeFully(JsonDeserializer::of, stackJsonData);
+                            handStack = MinecraftEndecs.ITEM_STACK.decodeFully(GsonDeserializer::of, stackJsonData);
                         } catch (Exception exception){
                             LOGGER.info(exception.getMessage());
                             LOGGER.info((Arrays.toString(exception.getStackTrace())));
@@ -360,7 +367,7 @@ public class Uwu implements ModInitializer {
                         }
 
                         LOGGER.info(handStack.toString());
-                        LOGGER.info(handStack.getOrCreateNbt().asString().replace("\n", "\\n"));
+                        LOGGER.info(handStack.getComponents().toString().replace("\n", "\\n"));
 
                         LOGGER.info("");
 
@@ -369,15 +376,15 @@ public class Uwu implements ModInitializer {
                         {
                             LOGGER.info("--- Format Based Endec Test");
 
-                            var nbtDataStack = handStack.getOrCreateNbt();
+                            var nbtDataStack = handStack.encode(access);
 
                             LOGGER.info("  Input:  " + nbtDataStack.asString().replace("\n", "\\n"));
 
-                            var jsonDataStack = NbtEndec.ELEMENT.encodeFully(JsonSerializer::of, nbtDataStack);
+                            var jsonDataStack = NbtEndec.ELEMENT.encodeFully(GsonSerializer::of, nbtDataStack);
 
                             LOGGER.info("  Json:  " + jsonDataStack);
 
-                            var convertedNbtDataStack = NbtEndec.ELEMENT.decodeFully(JsonDeserializer::of, jsonDataStack);
+                            var convertedNbtDataStack = NbtEndec.ELEMENT.decodeFully(GsonDeserializer::of, jsonDataStack);
 
                             LOGGER.info("Output:  " + convertedNbtDataStack.asString().replace("\n", "\\n"));
 
@@ -391,15 +398,15 @@ public class Uwu implements ModInitializer {
                         {
                             LOGGER.info("--- Transpose Format Based Endec Test");
 
-                            var nbtDataStack = handStack.getOrCreateNbt();
+                            var nbtDataStack = handStack.encode(access);
 
                             LOGGER.info("  Input:  " + nbtDataStack.asString().replace("\n", "\\n"));
 
-                            var jsonDataStack = NbtEndec.ELEMENT.encodeFully(JsonSerializer::of, nbtDataStack);
+                            var jsonDataStack = NbtEndec.ELEMENT.encodeFully(GsonSerializer::of, nbtDataStack);
 
                             LOGGER.info("  Json:  " + jsonDataStack);
 
-                            var convertedNbtDataStack = JsonEndec.INSTANCE.encodeFully(NbtSerializer::of, jsonDataStack);
+                            var convertedNbtDataStack = GsonEndec.INSTANCE.encodeFully(NbtSerializer::of, jsonDataStack);
 
                             LOGGER.info("Output:  " + convertedNbtDataStack.asString().replace("\n", "\\n"));
 
@@ -452,16 +459,17 @@ public class Uwu implements ModInitializer {
                         iterations("Vanilla", (buf) -> {
                             ItemStack stack = source.getPlayer().getStackInHand(Hand.MAIN_HAND);
 
-                            var stackFromByte = buf.writeItemStack(stack).readItemStack();
+                            ItemStack.PACKET_CODEC.encode(buf, stack);
+                            var stackFromByte = ItemStack.PACKET_CODEC.decode(buf);
                         });
 
                         //Codeck
                         try {
                             iterations("Endec", (buf) -> {
                                 ItemStack stack = source.getPlayer().getStackInHand(Hand.MAIN_HAND);
-                                buf.write(BuiltInEndecs.ITEM_STACK, stack);
+                                buf.write(MinecraftEndecs.ITEM_STACK, stack);
 
-                                var stackFromByte = buf.read(BuiltInEndecs.ITEM_STACK);
+                                var stackFromByte = buf.read(MinecraftEndecs.ITEM_STACK);
                             });
                         } catch (Exception exception){
                             LOGGER.info(exception.getMessage());
@@ -480,7 +488,7 @@ public class Uwu implements ModInitializer {
         UwuOptionalNetExample.init();
     }
 
-    private static void iterations(String label, Consumer<PacketByteBuf> action){
+    private static void iterations(String label, Consumer<RegistryByteBuf> action){
         int maxTrials = 3;
         int maxIterations = 50;
 
@@ -493,7 +501,7 @@ public class Uwu implements ModInitializer {
             durations.clear();
 
             for (int i = 0; i < maxIterations; i++) {
-                PacketByteBuf buf = PacketByteBufs.create();
+                RegistryByteBuf buf = new RegistryByteBuf(Unpooled.buffer(), Owo.currentServer().getRegistryManager());
 
                 long startTime = System.nanoTime();
 
