@@ -20,12 +20,12 @@ public class DownloadTask extends SwingWorker<Void, Void> {
 
     @Override
     protected Void doInBackground() {
-        try {
-            OwoSentinel.downloadAndInstall(logger);
-        } catch (Exception e) {
-            logger.accept("Download failed!");
-            OwoSentinel.LOGGER.error("Download failed", e);
-        }
+//        try {
+//            OwoSentinel.downloadAndInstall(logger);
+//        } catch (Exception e) {
+//            logger.accept("Download failed!");
+//            OwoSentinel.LOGGER.error("Download failed", e);
+//        }
         return null;
     }
 }

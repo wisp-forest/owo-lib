@@ -12,18 +12,18 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(ShaderProgram.class)
 public class ShaderProgramMixin {
 
-    @WrapOperation(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Identifier;ofVanilla(Ljava/lang/String;)Lnet/minecraft/util/Identifier;"), require = 0)
-    private Identifier fixIdentifier(String path, Operation<Identifier> original, @Local(argsOnly = true) String name) {
-        if ((Object) this instanceof GlProgram.OwoShaderProgram) {
-            var pathParts = path.split(name);
-            if (pathParts.length == 2 && pathParts[0].startsWith("shaders/core/")) {
-                var programParts = name.split(":");
-
-                return Identifier.of(programParts[0], pathParts[0] + programParts[1] + pathParts[1]);
-            }
-        }
-
-        return original.call(path);
-    }
+//    @WrapOperation(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Identifier;ofVanilla(Ljava/lang/String;)Lnet/minecraft/util/Identifier;"), require = 0)
+//    private Identifier fixIdentifier(String path, Operation<Identifier> original, @Local(argsOnly = true) String name) {
+//        if ((Object) this instanceof GlProgram.OwoShaderProgram) {
+//            var pathParts = path.split(name);
+//            if (pathParts.length == 2 && pathParts[0].startsWith("shaders/core/")) {
+//                var programParts = name.split(":");
+//
+//                return Identifier.of(programParts[0], pathParts[0] + programParts[1] + pathParts[1]);
+//            }
+//        }
+//
+//        return original.call(path);
+//    }
 
 }

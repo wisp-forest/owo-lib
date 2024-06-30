@@ -1,12 +1,16 @@
 //file:noinspection GradlePackageVersionRange
 plugins {
-    id 'fabric-loom' version '1.6-SNAPSHOT'
+    id "dev.architectury.loom" version "1.6-SNAPSHOT"
     id 'maven-publish'
+}
+
+base {
+    archivesName = project.archives_base_name
 }
 
 allprojects {
     apply plugin: "java"
-    apply plugin: "fabric-loom"
+    apply plugin: "dev.architectury.loom"
     apply plugin: "maven-publish"
 
     def ENV = System.getenv()
@@ -14,19 +18,27 @@ allprojects {
     version = "${project.mod_version}+${rootProject.minecraft_base_version}"
     group = rootProject.maven_group
 
+    repositories {
+        maven { url 'https://maven.neoforged.net/releases/' }
+    }
+
     dependencies {
         minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
-        mappings "net.fabricmc:yarn:${rootProject.yarn_mappings}:v2"
-        modImplementation "net.fabricmc:fabric-loader:${rootProject.loader_version}"
+        mappings loom.layered {
+            it.mappings("net.fabricmc:yarn:${rootProject.yarn_mappings}:v2")
+            it.mappings("dev.architectury:yarn-mappings-patch-neoforge:1.21+build.4")
+        }
+        //modImplementation "net.fabricmc:fabric-loader:${rootProject.loader_version}"
 
-        modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+        neoForge "net.neoforged:neoforge:${project.neoforge_version}"
+        //modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     }
 
     processResources {
         inputs.property "version", project.version
         filteringCharset "UTF-8"
 
-        filesMatching("fabric.mod.json") {
+        filesMatching("META-INF/neoforge.mods.toml") {
             expand "version": project.version
         }
     }
@@ -107,38 +119,66 @@ loom {
             client()
             ideConfigGenerated project.rootProject == project
             name = "Testmod Client"
+            mods {
+                create("uwu") {
+                    sourceSet sourceSets.testmod
+                }
+                create("owo"){
+                    sourceSet sourceSets.main
+                }
+            }
             source sourceSets.testmod
         }
         testmodServer {
             server()
             ideConfigGenerated project.rootProject == project
             name = "Testmod Server"
+            mods {
+                create("uwu") {
+                    sourceSet sourceSets.testmod
+                }
+                create("owo"){
+                    sourceSet sourceSets.main
+                }
+            }
             source sourceSets.testmod
         }
     }
 
     accessWidenerPath = file("src/main/resources/owo.accesswidener")
+
+    neoForge {
+//        convertAccessWideners = true
+//        extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
+    }
+}
+
+remapJar {
+    dependsOn(processResources)
+    atAccessWideners.add("owo.accesswidener")
 }
 
 dependencies {
 //    modLocalRuntime("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}")
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin:${project.rei_version}")
-    modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}")
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-neoforge:${project.rei_version}")
 
-    modCompileOnly("dev.emi:emi-fabric:${project.emi_version}")
+    modCompileOnly("dev.emi:emi-neoforge:${project.emi_version}")
 //    modLocalRuntime("dev.emi:emi-fabric:${project.emi_version}")
 
-    modCompileOnly("com.terraformersmc:modmenu:${project.modmenu_version}")
-    modLocalRuntime("com.terraformersmc:modmenu:${project.modmenu_version}")
+//    modCompileOnly("com.terraformersmc:modmenu:${project.modmenu_version}")
+//    modLocalRuntime("com.terraformersmc:modmenu:${project.modmenu_version}")
 
-    include api("io.wispforest:endec:0.1.0")
-    include api("io.wispforest.endec:netty:0.1.0")
-    include api("io.wispforest.endec:gson:0.1.0")
-    include api("io.wispforest.endec:jankson:0.1.0")
+    include api(forgeRuntimeLibrary("io.wispforest:endec:0.1.3"))
+    include api(forgeRuntimeLibrary("io.wispforest.endec:netty:0.1.2"))
+    include api(forgeRuntimeLibrary("io.wispforest.endec:gson:0.1.2"))
+    //include api(forgeRuntimeLibrary("io.wispforest.endec:jankson:0.1.2"))
 
-    include api("blue.endless:jankson:${project.jankson_version}")
+    include api(forgeRuntimeLibrary("blue.endless:jankson:${project.jankson_version}"))
 
     modCompileOnly("xyz.nucleoid:server-translations-api:${project.stapi_version}")
+
+    include modApi("org.sinytra.forgified-fabric-api:fabric-api-base:0.4.42+e0539096d1"){ exclude group: "fabric-api" }
 
     testmodImplementation sourceSets.main.output
     testmodAnnotationProcessor sourceSets.main.output

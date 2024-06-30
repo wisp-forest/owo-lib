@@ -1,5 +1,6 @@
 package io.wispforest.owo.ui.component;
 
+import io.wispforest.owo.extras.ScreenEvents;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
@@ -7,7 +8,6 @@ import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.UISounds;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -68,7 +68,7 @@ public class DropdownComponent extends FlowLayout {
         dropdown.positioning(Positioning.absolute(xLocation, yLocation));
 
         var dismounted = new MutableBoolean(false);
-        ScreenMouseEvents.beforeMouseClick(screen).register((screen_, mouseX_, mouseY_, button) -> {
+        ScreenEvents.beforeMouseClick(screen).register((screen_, mouseX_, mouseY_, button) -> {
             if (dismounted.isTrue() || dropdown.isInBoundingBox(mouseX_, mouseY_)) return;
 
             rootComponent.removeChild(dropdown);

@@ -6,13 +6,13 @@ import blue.endless.jankson.JsonPrimitive;
 import blue.endless.jankson.api.SyntaxError;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.ops.TextOps;
-import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.SynchronousResourceReloader;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.fml.loading.FMLPaths;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.xml.sax.SAXException;
@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class UIModelLoader implements SynchronousResourceReloader, IdentifiableResourceReloadListener {
+public class UIModelLoader implements SynchronousResourceReloader {
 
     private static final Map<Identifier, UIModel> LOADED_MODELS = new HashMap<>();
 
@@ -35,7 +35,7 @@ public class UIModelLoader implements SynchronousResourceReloader, IdentifiableR
             .registerSerializer(Identifier.class, (identifier, marshaller) -> new JsonPrimitive(identifier.toString()))
             .build();
 
-    private static final Path HOT_RELOAD_LOCATIONS_PATH = FabricLoader.getInstance().getConfigDir().resolve("owo_ui_hot_reload_locations.json5");
+    private static final Path HOT_RELOAD_LOCATIONS_PATH = FMLLoader.getGamePath().resolve(FMLPaths.CONFIGDIR.relative()).resolve("owo_ui_hot_reload_locations.json5");
     private static final Map<Identifier, Path> HOT_RELOAD_LOCATIONS = new HashMap<>();
 
     private static boolean loadedOnce = false;
@@ -97,11 +97,6 @@ public class UIModelLoader implements SynchronousResourceReloader, IdentifiableR
 
     public static Set<Identifier> allLoadedModels() {
         return Collections.unmodifiableSet(LOADED_MODELS.keySet());
-    }
-
-    @Override
-    public Identifier getFabricId() {
-        return Identifier.of("owo", "ui-model-loader");
     }
 
     @Override

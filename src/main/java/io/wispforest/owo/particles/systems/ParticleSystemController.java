@@ -5,25 +5,25 @@ import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.network.NetworkException;
 import io.wispforest.owo.network.OwoHandshake;
 import io.wispforest.endec.Endec;
+import io.wispforest.owo.extras.network.NetworkDirection;
+import io.wispforest.owo.extras.network.OwoInternalNetworking;
+import io.wispforest.owo.extras.network.PlayerLookup;
 import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.ReflectionUtils;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.network.NetworkPhase;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.HashMap;
@@ -63,7 +63,7 @@ public class ParticleSystemController {
      * @param channelId The packet ID to use
      */
     public ParticleSystemController(Identifier channelId) {
-        OwoFreezer.checkRegister("Particle system controllers");
+        //OwoFreezer.checkRegister("Particle system controllers");
 
         this.builder = MinecraftEndecs.addDefaults(new ReflectiveEndecBuilder());
 
@@ -91,13 +91,15 @@ public class ParticleSystemController {
             (pos, instance) -> new ParticleSystemPayload(payloadId, pos, instance)
         );
 
-        PayloadTypeRegistry.playS2C().register(payloadId, CodecUtils.toPacketCodec(endec));
+        OwoInternalNetworking.registerPayloadType(NetworkDirection.S2C, NetworkPhase.PLAY, payloadId, CodecUtils.toPacketCodec(endec));
 
         OwoHandshake.enable();
         OwoHandshake.requireHandshake();
 
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            ClientPlayNetworking.registerGlobalReceiver(payloadId, new Client()::handler);
+        if (FMLLoader.getDist() == Dist.CLIENT) {
+            OwoInternalNetworking.registerReceiver(NetworkDirection.S2C, NetworkPhase.PLAY, payloadId, (packet, context) -> {
+                packet.instance.execute(context.player().getWorld(), packet.pos);
+            });
         }
 
         REGISTERED_CONTROLLERS.put(channelId, this);
@@ -162,12 +164,12 @@ public class ParticleSystemController {
         ParticleSystemPayload payload = new ParticleSystemPayload(payloadId, pos, new ParticleSystemInstance<>(particleSystem, data));
 
         for (var player : PlayerLookup.tracking(world, BlockPos.ofFloored(pos))) {
-            ServerPlayNetworking.send(player, payload);
+            PacketDistributor.sendToPlayer(player, payload);
         }
     }
 
     private void verify() {
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+        if (FMLLoader.getDist() == Dist.CLIENT) {
             for (ParticleSystem<?> system : systemsByIndex.values()) {
                 if (system.handler == null) {
                     throw new NetworkException("Some particle systems of " + channelId + " don't have handlers registered");
@@ -194,13 +196,6 @@ public class ParticleSystemController {
         @Override
         public Id<? extends CustomPayload> getId() {
             return id;
-        }
-    }
-
-    @Environment(EnvType.CLIENT)
-    private static class Client {
-        private void handler(ParticleSystemPayload payload, ClientPlayNetworking.Context context) {
-            payload.instance.execute(context.client().world, payload.pos);
         }
     }
 }

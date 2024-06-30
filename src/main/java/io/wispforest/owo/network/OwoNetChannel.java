@@ -1,10 +1,14 @@
 package io.wispforest.owo.network;
 
+import io.netty.buffer.Unpooled;
 import io.wispforest.endec.impl.RecordEndec;
 import io.wispforest.endec.impl.ReflectiveEndecBuilder;
 import io.wispforest.owo.mixin.ServerCommonNetworkHandlerAccessor;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.StructEndec;
+import io.wispforest.owo.extras.network.NetworkDirection;
+import io.wispforest.owo.extras.network.OwoInternalNetworking;
+import io.wispforest.owo.extras.network.PlayerLookup;
 import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.util.OwoFreezer;
@@ -13,18 +17,13 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.fabricmc.loader.api.FabricLoader;
+import me.shedaniel.cloth.clothconfig.shadowed.org.yaml.snakeyaml.events.Event;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.ClientConnection;
+import net.minecraft.network.NetworkPhase;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.MinecraftServer;
@@ -33,6 +32,11 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.registration.NetworkRegistry;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -79,6 +83,8 @@ public class OwoNetChannel {
 
     private final Reference2IntMap<Class<?>> deferredClientEndecs = new Reference2IntOpenHashMap<>();
 
+    final Identifier channelId;
+
     final CustomPayload.Id<MessagePayload> packetId;
     private final String ownerClassName;
     final boolean required;
@@ -115,7 +121,7 @@ public class OwoNetChannel {
     }
 
     private OwoNetChannel(Identifier id, String ownerClassName, boolean required) {
-        OwoFreezer.checkRegister("Network channels");
+        //OwoFreezer.checkRegister("Network channels");
 
         this.builder = new ReflectiveEndecBuilder(builder -> {
             builder.register(Endec.VAR_INT, Integer.class, int.class);
@@ -138,6 +144,8 @@ public class OwoNetChannel {
             OwoHandshake.requireHandshake();
         }
 
+        this.channelId = id;
+
         Endec<MessagePayload> serverEndec = Endec.<Record, Integer>dispatched(
             index -> this.endecsByIndex.get(index).endec,
             msg -> this.endecsByClass.get(msg.getClass()).serverHandlerIndex,
@@ -152,16 +160,16 @@ public class OwoNetChannel {
             )
             .xmap(x -> new MessagePayload(this.packetId, x), x -> x.message);
 
-        PayloadTypeRegistry.playC2S().register(this.packetId, CodecUtils.toPacketCodec(serverEndec));
-        PayloadTypeRegistry.playS2C().register(this.packetId, CodecUtils.toPacketCodec(clientEndec));
+        OwoInternalNetworking.registerPayloadType(NetworkDirection.C2S, NetworkPhase.PLAY, this.packetId, CodecUtils.toPacketCodec(serverEndec));
+        OwoInternalNetworking.registerPayloadType(NetworkDirection.S2C, NetworkPhase.PLAY, this.packetId, CodecUtils.toPacketCodec(clientEndec));
 
-        ServerPlayNetworking.registerGlobalReceiver(this.packetId, (payload, context) -> {
-            serverHandlers.get(endecsByClass.get(payload.message().getClass()).serverHandlerIndex).handle(payload.message, new ServerAccess(context.player()));
+        OwoInternalNetworking.registerReceiver(NetworkDirection.C2S, NetworkPhase.PLAY, this.packetId, (payload, context) -> {
+            serverHandlers.get(endecsByClass.get(payload.message().getClass()).serverHandlerIndex).handle(payload.message, new ServerAccess((ServerPlayerEntity) context.player()));
         });
 
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            ClientPlayNetworking.registerGlobalReceiver(this.packetId, (payload, context) -> {
-                clientHandlers.get(endecsByClass.get(payload.message.getClass()).clientHandlerIndex).handle(payload.message, new ClientAccess(context.player().networkHandler));
+        if (FMLLoader.getDist() == Dist.CLIENT) {
+            OwoInternalNetworking.registerReceiver(NetworkDirection.S2C, NetworkPhase.PLAY, this.packetId, (payload, context) -> {
+                clientHandlers.get(endecsByClass.get(payload.message.getClass()).clientHandlerIndex).handle(payload.message, new ClientAccess(((ClientPlayerEntity) context.player()).networkHandler));
             });
         }
 
@@ -275,20 +283,20 @@ public class OwoNetChannel {
     private  <R extends Record> void registerClientbound(Class<R> messageClass, ChannelHandler<R, ClientAccess> handler, Supplier<StructEndec<R>> endec) {
         int deferredIndex = deferredClientEndecs.removeInt(messageClass);
         if (deferredIndex != -1) {
-            OwoFreezer.checkRegister("Network handlers");
+            //OwoFreezer.checkRegister("Network handlers");
 
             this.clientHandlers.set(deferredIndex, (ChannelHandler<Record, ClientAccess>) handler);
             return;
         }
 
         int index = this.clientHandlers.size();
-        this.createEndec(messageClass, index, EnvType.CLIENT, endec);
+        this.createEndec(messageClass, index, Dist.CLIENT, endec);
         this.clientHandlers.add((ChannelHandler<Record, ClientAccess>) handler);
     }
 
     private <R extends Record> void registerClientboundDeferred(Class<R> messageClass, Supplier<StructEndec<R>> endec) {
         int index = this.clientHandlers.size();
-        this.createEndec(messageClass, index, EnvType.CLIENT, endec);
+        this.createEndec(messageClass, index, Dist.CLIENT, endec);
         this.clientHandlers.add(null);
 
         this.deferredClientEndecs.put(messageClass, index);
@@ -297,7 +305,7 @@ public class OwoNetChannel {
     @SuppressWarnings("unchecked")
     private <R extends Record> void registerServerbound(Class<R> messageClass, ChannelHandler<R, ServerAccess> handler, Supplier<StructEndec<R>> endec) {
         int index = this.serverHandlers.size();
-        this.createEndec(messageClass, index, EnvType.SERVER, endec);
+        this.createEndec(messageClass, index, Dist.DEDICATED_SERVER, endec);
         this.serverHandlers.add((ChannelHandler<Record, ServerAccess>) handler);
     }
 
@@ -312,16 +320,16 @@ public class OwoNetChannel {
 
         return OwoHandshake.isValidClient() ?
                 getChannelSet(((ServerCommonNetworkHandlerAccessor) networkHandler).owo$getConnection()).contains(this.packetId.id())
-                : ServerPlayNetworking.canSend(networkHandler, this.packetId);
+                : NetworkRegistry.hasChannel(networkHandler, this.packetId.id());
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public boolean canSendToServer() {
         if (required) return true;
 
         return OwoHandshake.isValidClient() ?
                 getChannelSet(MinecraftClient.getInstance().getNetworkHandler().getConnection()).contains(this.packetId.id())
-                : ClientPlayNetworking.canSend(this.packetId);
+                : NetworkRegistry.hasChannel(MinecraftClient.getInstance().getNetworkHandler(), this.packetId.id());
     }
 
     private static Set<Identifier> getChannelSet(ClientConnection connection) {
@@ -335,8 +343,8 @@ public class OwoNetChannel {
      * @return The client handle of this channel
      */
     public ClientHandle clientHandle() {
-        if (FabricLoader.getInstance().getEnvironmentType() != EnvType.CLIENT)
-            throw new NetworkException("Cannot obtain client handle in environment type '" + FabricLoader.getInstance().getEnvironmentType() + "'");
+        if (FMLLoader.getDist() != Dist.CLIENT)
+            throw new NetworkException("Cannot obtain client handle in environment type '" + FMLLoader.getDist() + "'");
 
         if (this.clientHandle == null) this.clientHandle = new ClientHandle();
         return clientHandle;
@@ -429,25 +437,25 @@ public class OwoNetChannel {
         return serverHandle;
     }
 
-    private <R extends Record> void createEndec(Class<R> messageClass, int handlerIndex, EnvType target, Supplier<StructEndec<R>> supplier) {
-        OwoFreezer.checkRegister("Network handlers");
+    private <R extends Record> void createEndec(Class<R> messageClass, int handlerIndex, Dist target, Supplier<StructEndec<R>> supplier) {
+        //OwoFreezer.checkRegister("Network handlers");
 
         var endec = endecsByClass.get(messageClass);
         if (endec == null) {
             final var indexedEndec = IndexedEndec.create(messageClass, supplier.get(), handlerIndex, target);
             endecsByClass.put(messageClass, indexedEndec);
-            endecsByIndex.put(target == EnvType.CLIENT ? -handlerIndex : handlerIndex, indexedEndec);
+            endecsByIndex.put(target == Dist.CLIENT ? -handlerIndex : handlerIndex, indexedEndec);
         } else if (endec.handlerIndex(target) == -1) {
             endec.setHandlerIndex(handlerIndex, target);
-            endecsByIndex.put(target == EnvType.CLIENT ? -handlerIndex : handlerIndex, endec);
+            endecsByIndex.put(target == Dist.CLIENT ? -handlerIndex : handlerIndex, endec);
         } else {
             throw new IllegalStateException("Message class '" + messageClass.getName() + "' is already registered for target environment " + target);
         }
     }
 
     @SuppressWarnings("unchecked")
-    private <R extends Record> PacketByteBuf encode(R message, EnvType target) {
-        var buffer = PacketByteBufs.create();
+    private <R extends Record> PacketByteBuf encode(R message, Dist target) {
+        var buffer = new PacketByteBuf(Unpooled.buffer());
 
         final var messageClass = message.getClass();
 
@@ -475,7 +483,7 @@ public class OwoNetChannel {
          * @see #send(Record[])
          */
         public <R extends Record> void send(R message) {
-            ClientPlayNetworking.send(new MessagePayload(packetId, message));
+            PacketDistributor.sendToServer(new MessagePayload(packetId, message));
         }
 
         /**
@@ -502,7 +510,7 @@ public class OwoNetChannel {
          * @see #send(Record[])
          */
         public <R extends Record> void send(R message) {
-            this.targets.forEach(player -> ServerPlayNetworking.send(player, new MessagePayload(packetId, message)));
+            this.targets.forEach(player -> PacketDistributor.sendToPlayer(player, new MessagePayload(packetId, message)));
             this.targets = null;
         }
 
@@ -517,7 +525,7 @@ public class OwoNetChannel {
         public final <R extends Record> void send(R... messages) {
             this.targets.forEach(player -> {
                 for (R message : messages) {
-                    ServerPlayNetworking.send(player, new MessagePayload(packetId, message));
+                    PacketDistributor.sendToPlayer(player, new MessagePayload(packetId, message));
                 }
             });
             this.targets = null;
@@ -567,7 +575,7 @@ public class OwoNetChannel {
     }
 
     private void verify() {
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+        if (FMLLoader.getDist() == Dist.CLIENT) {
             if (!this.deferredClientEndecs.isEmpty()) {
                 throw new NetworkException("Some deferred client handlers for channel " + this.packetId + " haven't been registered: " + deferredClientEndecs.keySet().stream().map(Class::getName).collect(Collectors.joining(", ")));
             }
@@ -594,22 +602,22 @@ public class OwoNetChannel {
             this.recordClass = recordClass;
         }
 
-        public static <R extends Record> IndexedEndec<R> create(Class<R> rClass, StructEndec<R> endec, int index, EnvType target) {
+        public static <R extends Record> IndexedEndec<R> create(Class<R> rClass, StructEndec<R> endec, int index, Dist target) {
             return new IndexedEndec<>(rClass, endec).setHandlerIndex(index, target);
         }
 
-        public IndexedEndec<R> setHandlerIndex(int index, EnvType target) {
+        public IndexedEndec<R> setHandlerIndex(int index, Dist target) {
             switch (target) {
                 case CLIENT -> this.clientHandlerIndex = index;
-                case SERVER -> this.serverHandlerIndex = index;
+                case DEDICATED_SERVER -> this.serverHandlerIndex = index;
             }
             return this;
         }
 
-        public int handlerIndex(EnvType target) {
+        public int handlerIndex(Dist target) {
             return switch (target) {
                 case CLIENT -> clientHandlerIndex;
-                case SERVER -> serverHandlerIndex;
+                case DEDICATED_SERVER -> serverHandlerIndex;
             };
         }
 

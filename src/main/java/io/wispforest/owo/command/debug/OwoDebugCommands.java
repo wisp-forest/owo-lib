@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.logging.LogUtils;
+import dev.architectury.event.events.common.CommandRegistrationEvent;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.command.EnumArgumentType;
 import io.wispforest.owo.ops.TextOps;
@@ -13,13 +14,6 @@ import io.wispforest.owo.renderdoc.RenderdocScreen;
 import io.wispforest.owo.ui.hud.HudInspectorScreen;
 import io.wispforest.owo.ui.parsing.ConfigureHotReloadScreen;
 import io.wispforest.owo.ui.parsing.UIModelLoader;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.IdentifierArgumentType;
@@ -36,6 +30,11 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.poi.PointOfInterestStorage;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.event.Level;
 
@@ -45,11 +44,14 @@ import static net.minecraft.server.command.CommandManager.literal;
 @ApiStatus.Internal
 public class OwoDebugCommands {
 
-    private static final EnumArgumentType<Level> LEVEL_ARGUMENT_TYPE =
-            EnumArgumentType.create(Level.class, "'{}' is not a valid logging level");
+    private static EnumArgumentType<Level> LEVEL_ARGUMENT_TYPE;
 
     private static final SuggestionProvider<ServerCommandSource> POI_TYPES =
             (context, builder) -> CommandSource.suggestIdentifiers(Registries.POINT_OF_INTEREST_TYPE.getIds(), builder);
+
+    public static void initArgumentTypes() {
+        LEVEL_ARGUMENT_TYPE = EnumArgumentType.create(Level.class, "'{}' is not a valid logging level");
+    }
 
     private static final SimpleCommandExceptionType NO_POI_TYPE = new SimpleCommandExceptionType(Text.of("Invalid POI type"));
     public static final int GENERAL_PURPLE = 0xB983FF;
@@ -57,7 +59,9 @@ public class OwoDebugCommands {
     public static final int VALUE_BLUE = 0x94DAFF;
 
     public static void register() {
-        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+        NeoForge.EVENT_BUS.addListener((RegisterCommandsEvent event) -> {
+            var dispatcher = event.getDispatcher();
+            var registryAccess = event.getBuildContext();
 
             dispatcher.register(literal("logger").then(argument("level", LEVEL_ARGUMENT_TYPE).executes(context -> {
                 final var level = LEVEL_ARGUMENT_TYPE.get(context, "level");
@@ -138,30 +142,33 @@ public class OwoDebugCommands {
             DumpdataCommand.register(dispatcher);
             HealCommand.register(dispatcher);
 
-            if (FabricLoader.getInstance().isModLoaded("cardinal-components-base")) {
-                CcaDataCommand.register(dispatcher);
-            }
+//            if (FabricLoader.getInstance().isModLoaded("cardinal-components-base")) {
+//                CcaDataCommand.register(dispatcher);
+//            }
         });
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public static class Client {
 
-        private static final SuggestionProvider<FabricClientCommandSource> LOADED_UI_MODELS =
+        private static final SuggestionProvider<ServerCommandSource> LOADED_UI_MODELS =
                 (context, builder) -> CommandSource.suggestIdentifiers(UIModelLoader.allLoadedModels(), builder);
 
         private static final SimpleCommandExceptionType NO_SUCH_UI_MODEL = new SimpleCommandExceptionType(Text.literal("No such UI model is loaded"));
 
         public static void register() {
-            ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-                dispatcher.register(ClientCommandManager.literal("owo-hud-inspect")
+            NeoForge.EVENT_BUS.addListener((RegisterClientCommandsEvent event) -> {
+                var dispatcher = event.getDispatcher();
+                var registryAccess = event.getBuildContext();
+
+                dispatcher.register(literal("owo-hud-inspect")
                         .executes(context -> {
                             MinecraftClient.getInstance().setScreen(new HudInspectorScreen());
                             return 0;
                         }));
 
-                dispatcher.register(ClientCommandManager.literal("owo-ui-set-reload-path")
-                        .then(ClientCommandManager.argument("model-id", IdentifierArgumentType.identifier()).suggests(LOADED_UI_MODELS).executes(context -> {
+                dispatcher.register(literal("owo-ui-set-reload-path")
+                        .then(argument("model-id", IdentifierArgumentType.identifier()).suggests(LOADED_UI_MODELS).executes(context -> {
                             var modelId = context.getArgument("model-id", Identifier.class);
                             if (UIModelLoader.getPreloaded(modelId) == null) throw NO_SUCH_UI_MODEL.create();
 
@@ -170,12 +177,12 @@ public class OwoDebugCommands {
                         })));
 
                 if (RenderDoc.isAvailable()) {
-                    dispatcher.register(ClientCommandManager.literal("renderdoc").executes(context -> {
+                    dispatcher.register(literal("renderdoc").executes(context -> {
                         MinecraftClient.getInstance().setScreen(new RenderdocScreen());
                         return 1;
-                    }).then(ClientCommandManager.literal("comment")
-                            .then(ClientCommandManager.argument("capture_index", IntegerArgumentType.integer(0))
-                                    .then(ClientCommandManager.argument("comment", StringArgumentType.greedyString())
+                    }).then(literal("comment")
+                            .then(argument("capture_index", IntegerArgumentType.integer(0))
+                                    .then(argument("comment", StringArgumentType.greedyString())
                                             .executes(context -> {
                                                 var capture = RenderDoc.getCapture(IntegerArgumentType.getInteger(context, "capture_index"));
                                                 if (capture == null) {
@@ -184,7 +191,7 @@ public class OwoDebugCommands {
                                                 }
 
                                                 RenderDoc.setCaptureComments(capture, StringArgumentType.getString(context, "comment"));
-                                                context.getSource().sendFeedback(TextOps.concat(Owo.PREFIX, Text.of("comment updated")));
+                                                context.getSource().sendFeedback(() -> TextOps.concat(Owo.PREFIX, Text.of("comment updated")), false);
 
                                                 return 1;
                                             })))));

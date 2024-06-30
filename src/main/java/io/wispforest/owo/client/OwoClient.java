@@ -10,20 +10,25 @@ import io.wispforest.owo.shader.BlurProgram;
 import io.wispforest.owo.shader.GlProgram;
 import io.wispforest.owo.ui.parsing.UIModelLoader;
 import io.wispforest.owo.ui.util.NinePatchTexture;
-import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.client.render.VertexFormats;
-import net.minecraft.resource.ResourceType;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
+import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
-@Environment(EnvType.CLIENT)
-public class OwoClient implements ClientModInitializer {
+@OnlyIn(Dist.CLIENT)
+@Mod(value = "owo", dist = Dist.CLIENT)
+public class OwoClient {
 
     private static final String LINUX_RENDERDOC_WARNING = """
 
@@ -48,12 +53,21 @@ public class OwoClient implements ClientModInitializer {
     public static final GlProgram HSV_PROGRAM = new GlProgram(Identifier.of("owo", "spectrum"), VertexFormats.POSITION_COLOR);
     public static final BlurProgram BLUR_PROGRAM = new BlurProgram();
 
-    @Override
-    public void onInitializeClient() {
-        ModDataLoader.load(OwoItemGroupLoader.INSTANCE);
+    private final IEventBus eventBus;
 
-        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new UIModelLoader());
-        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new NinePatchTexture.MetadataLoader());
+    public OwoClient(IEventBus eventBus) {
+        this.eventBus = eventBus;
+
+        eventBus.addListener(this::onInitializeClient);
+
+        eventBus.addListener((RegisterClientReloadListenersEvent event) -> {
+            event.registerReloadListener(new UIModelLoader());
+            event.registerReloadListener(new NinePatchTexture.MetadataLoader());
+        });
+    }
+
+    public void onInitializeClient(FMLClientSetupEvent setupEvent) {
+        ModDataLoader.load(OwoItemGroupLoader.INSTANCE);
 
         final var renderdocPath = System.getProperty("owo.renderdocPath");
         if (renderdocPath != null) {
@@ -70,7 +84,9 @@ public class OwoClient implements ClientModInitializer {
 
         ScreenInternals.Client.init();
 
-        ClientCommandRegistrationCallback.EVENT.register(OwoConfigCommand::register);
+        NeoForge.EVENT_BUS.addListener((RegisterClientCommandsEvent event) -> {
+            OwoConfigCommand.register(event.getDispatcher(), event.getBuildContext());
+        });
 
         if (!Owo.DEBUG) return;
         OwoDebugCommands.Client.register();

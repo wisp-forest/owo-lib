@@ -1,7 +1,5 @@
 package io.wispforest.owo.itemgroup;
 
-import net.fabricmc.fabric.api.item.v1.CustomDamageHandler;
-import net.fabricmc.fabric.api.item.v1.EquipmentSlotProvider;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -72,16 +70,6 @@ public class OwoItemSettings extends Item.Settings {
 
     public boolean shouldTrackUsageStat() {
         return this.trackUsageStat;
-    }
-
-    @Override
-    public OwoItemSettings equipmentSlot(EquipmentSlotProvider equipmentSlotProvider) {
-        return (OwoItemSettings) super.equipmentSlot(equipmentSlotProvider);
-    }
-
-    @Override
-    public OwoItemSettings customDamage(CustomDamageHandler handler) {
-        return (OwoItemSettings) super.customDamage(handler);
     }
 
     @Override

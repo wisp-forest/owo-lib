@@ -35,7 +35,7 @@ public class ParticleSystem<T> {
     private final boolean permitsContextlessExecution;
 
     ParticleSystem(ParticleSystemController manager, Class<T> dataClass, int index, Endec<T> endec, ParticleSystemExecutor<T> handler) {
-        OwoFreezer.checkRegister("Particle systems");
+        //OwoFreezer.checkRegister("Particle systems");
 
         this.manager = manager;
         this.dataClass = dataClass;
@@ -53,7 +53,7 @@ public class ParticleSystem<T> {
      * @throws NetworkException if this particle system already has a handler
      */
     public void setHandler(ParticleSystemExecutor<T> handler) {
-        if (OwoFreezer.isFrozen()) throw new ServicesFrozenException("Particle systems can only be changed during mod init");
+//        if (OwoFreezer.isFrozen()) throw new ServicesFrozenException("Particle systems can only be changed during mod init");
         if (this.handler != null) throw new NetworkException("Particle system already has a handler");
 
         this.handler = handler;

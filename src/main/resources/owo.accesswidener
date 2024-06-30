@@ -2,7 +2,7 @@ accessWidener v2 named
 
 accessible method net/minecraft/client/gui/screen/Screen addDrawableChild (Lnet/minecraft/client/gui/Element;)Lnet/minecraft/client/gui/Element;
 
-extendable method net/minecraft/item/ItemGroup <init> (Lnet/minecraft/item/ItemGroup$Row;ILnet/minecraft/item/ItemGroup$Type;Lnet/minecraft/text/Text;Ljava/util/function/Supplier;Lnet/minecraft/item/ItemGroup$EntryCollector;)V
+extendable method net/minecraft/item/ItemGroup <init> (Lnet/minecraft/item/ItemGroup$Row;ILnet/minecraft/item/ItemGroup$Type;Lnet/minecraft/text/Text;Ljava/util/function/Supplier;Lnet/minecraft/item/ItemGroup$EntryCollector;Lnet/minecraft/util/Identifier;ZILnet/minecraft/util/Identifier;IILjava/util/List;Ljava/util/List;)V
 transitive-accessible class net/minecraft/item/ItemGroup$Entries
 transitive-accessible class net/minecraft/item/ItemGroup$EntriesImpl
 
@@ -10,3 +10,5 @@ transitive-accessible class net/minecraft/client/gui/DrawContext$ScissorStack
 transitive-extendable method net/minecraft/client/gui/widget/CheckboxWidget <init> (IIILnet/minecraft/text/Text;Lnet/minecraft/client/font/TextRenderer;ZLnet/minecraft/client/gui/widget/CheckboxWidget$Callback;)V
 
 accessible class net/minecraft/registry/RegistryOps$CachedRegistryInfoGetter
+
+accessible class net/minecraft/server/world/ServerChunkLoadingManager$EntityTracker

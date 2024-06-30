@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "io.wispforest.owo.mixin.extras",
+  "compatibilityLevel": "JAVA_16",
+  "mixins": [
+    "ServerChunkLoadingManagerAccessor",
+    "EntityTrackerAccessor",
+    "PlayerManagerMixin",
+    "ServerConfigurationNetworkHandlerMixin"
+  ],
+  "client": [
+    "client.ClientConfigurationNetworkHandlerMixin",
+    "client.ClientConnectionMixin",
+    "client.ScreenMixin"
+  ]
+}

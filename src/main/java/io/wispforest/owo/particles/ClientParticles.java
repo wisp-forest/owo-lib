@@ -1,8 +1,6 @@
 package io.wispforest.owo.particles;
 
 import io.wispforest.owo.util.VectorRandomUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.particle.ParticleEffect;
@@ -11,12 +9,14 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * A wrapper for vanilla's terrible particle system that allows for easier
  * and more complex multi-particle operations
  */
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public final class ClientParticles {
 
     private static int particleCount = 1;

@@ -7,14 +7,18 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
 import net.minecraft.command.CommandSource;
+import net.minecraft.command.argument.ArgumentTypes;
 import net.minecraft.command.argument.serialize.ConstantArgumentSerializer;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -49,9 +53,7 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<Enum<T>
      * @return A new argument type that can parse instances of {@code T}
      */
     public static <T extends Enum<T>> EnumArgumentType<T> create(Class<T> enumClass) {
-        final var type = new EnumArgumentType<>(enumClass, "Invalid enum value '{}'");
-        ArgumentTypeRegistry.registerArgumentType(Identifier.of("owo", "enum_" + enumClass.getName().toLowerCase(Locale.ROOT)), type.getClass(), ConstantArgumentSerializer.of(() -> type));
-        return type;
+        return create(enumClass, "Invalid enum value '{}'");
     }
 
     /**
@@ -70,7 +72,7 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<Enum<T>
      */
     public static <T extends Enum<T>> EnumArgumentType<T> create(Class<T> enumClass, String noElementMessage) {
         final var type = new EnumArgumentType<>(enumClass, noElementMessage);
-        ArgumentTypeRegistry.registerArgumentType(Identifier.of("owo", "enum_" + enumClass.getName().toLowerCase(Locale.ROOT)), type.getClass(), ConstantArgumentSerializer.of(() -> type));
+        ArgumentTypes.registerByClass((Class<EnumArgumentType<T>>) type.getClass(), Registry.register(Registries.COMMAND_ARGUMENT_TYPE, Identifier.of("owo", "enum_" + enumClass.getName().toLowerCase(Locale.ROOT)), ConstantArgumentSerializer.of(() -> type)));
         return type;
     }
 

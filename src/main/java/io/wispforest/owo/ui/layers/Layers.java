@@ -2,12 +2,10 @@ package io.wispforest.owo.ui.layers;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import io.wispforest.owo.extras.ScreenEvents;
 import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.util.pond.OwoScreenExtension;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.fabricmc.fabric.api.event.Event;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.Identifier;
@@ -96,7 +94,7 @@ public final class Layers {
                 }
             });
 
-            ScreenMouseEvents.allowMouseClick(screeen).register((screen, mouseX, mouseY, button) -> {
+            ScreenEvents.allowMouseClick(screeen).register((screen, mouseX, mouseY, button) -> {
                 boolean handled;
                 for (var instance : getInstances(screen)) {
                     handled = instance.adapter.mouseClicked(mouseX, mouseY, button);
@@ -106,7 +104,7 @@ public final class Layers {
                 return true;
             });
 
-            ScreenMouseEvents.allowMouseRelease(screeen).register((screen, mouseX, mouseY, button) -> {
+            ScreenEvents.allowMouseRelease(screeen).register((screen, mouseX, mouseY, button) -> {
                 boolean handled;
                 for (var instance : getInstances(screen)) {
                     handled = instance.adapter.mouseReleased(mouseX, mouseY, button);
@@ -116,7 +114,7 @@ public final class Layers {
                 return true;
             });
 
-            ScreenMouseEvents.allowMouseScroll(screeen).register((screen, mouseX, mouseY, horizontalAmount, verticalAmount) -> {
+            ScreenEvents.allowMouseScroll(screeen).register((screen, mouseX, mouseY, horizontalAmount, verticalAmount) -> {
                 boolean handled;
                 for (var instance : getInstances(screen)) {
                     handled = instance.adapter.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
@@ -126,7 +124,7 @@ public final class Layers {
                 return true;
             });
 
-            ScreenKeyboardEvents.allowKeyPress(screeen).register((screen, key, scancode, modifiers) -> {
+            ScreenEvents.allowKeyPress(screeen).register((screen, key, scancode, modifiers) -> {
                 boolean handled;
                 for (var instance : getInstances(screen)) {
                     handled = instance.adapter.keyPressed(key, scancode, modifiers);
@@ -136,7 +134,7 @@ public final class Layers {
                 return true;
             });
 
-            ScreenKeyboardEvents.allowKeyRelease(screeen).register((screen, key, scancode, modifiers) -> {
+            ScreenEvents.allowKeyRelease(screeen).register((screen, key, scancode, modifiers) -> {
                 boolean handled;
                 for (var instance : getInstances(screen)) {
                     handled = instance.adapter.keyReleased(key, scancode, modifiers);

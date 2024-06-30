@@ -1,5 +1,6 @@
 package io.wispforest.uwu.client;
 
+import dev.architectury.event.events.common.TickEvent;
 import io.wispforest.owo.network.OwoNetChannel;
 import io.wispforest.owo.particles.ClientParticles;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
@@ -17,9 +18,6 @@ import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.uwu.Uwu;
 import io.wispforest.uwu.network.UwuNetworkExample;
 import io.wispforest.uwu.network.UwuOptionalNetExample;
-import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
@@ -34,27 +32,47 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableTextContent;
 import net.minecraft.util.Identifier;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import org.lwjgl.glfw.GLFW;
 
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public class UwuClient implements ClientModInitializer {
+@Mod(value = "uwu", dist = Dist.CLIENT)
+public class UwuClient {
 
-    @Override
-    public void onInitializeClient() {
-        UwuNetworkExample.Client.init();
-        UwuOptionalNetExample.Client.init();
+    private final IEventBus eventBus;
 
+    public UwuClient(IEventBus eventBus) {
+        this.eventBus = eventBus;
+
+        eventBus.addListener(this::onInitializeClient);
+
+        UwuNetworkExample.Client.init(this.eventBus);
+        UwuOptionalNetExample.Client.init(this.eventBus);
+
+        eventBus.addListener((RegisterKeyMappingsEvent mappingsEvent) -> {
+            HUD_BINDING = new KeyBinding("key.uwu.hud_test", GLFW.GLFW_KEY_J, "misc");
+            mappingsEvent.register(HUD_BINDING);
+
+            BUT_COLOR_BINDING = new KeyBinding("key.uwu.hud_test_two", GLFW.GLFW_KEY_K, "misc");
+            mappingsEvent.register(BUT_COLOR_BINDING);
+        });
+    }
+
+    private static KeyBinding HUD_BINDING;
+    private static KeyBinding BUT_COLOR_BINDING;
+
+    public void onInitializeClient(FMLClientSetupEvent event) {
         HandledScreens.register(Uwu.EPIC_SCREEN_HANDLER_TYPE, EpicHandledScreen::new);
 //        HandledScreens.register(EPIC_SCREEN_HANDLER_TYPE, EpicHandledModelScreen::new);
-
-        final var binding = new KeyBinding("key.uwu.hud_test", GLFW.GLFW_KEY_J, "misc");
-        KeyBindingHelper.registerKeyBinding(binding);
-
-        final var bindingButCooler = new KeyBinding("key.uwu.hud_test_two", GLFW.GLFW_KEY_K, "misc");
-        KeyBindingHelper.registerKeyBinding(bindingButCooler);
 
         final var hudComponentId = Identifier.of("uwu", "test_element");
         final Supplier<Component> hudComponent = () ->
@@ -72,8 +90,8 @@ public class UwuClient implements ClientModInitializer {
         final Supplier<Component> coolerComponent = () -> UIModel.load(Path.of("../src/testmod/resources/assets/uwu/owo_ui/test_element_two.xml")).expandTemplate(FlowLayout.class, "hud-element", Map.of());
         Hud.add(coolerComponentId, coolerComponent);
 
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (binding.wasPressed()) {
+        NeoForge.EVENT_BUS.addListener((ClientTickEvent.Post clientEvent) -> {
+            while (HUD_BINDING.wasPressed()) {
                 if (Hud.hasComponent(hudComponentId)) {
                     Hud.remove(hudComponentId);
                 } else {
@@ -81,12 +99,12 @@ public class UwuClient implements ClientModInitializer {
                 }
             }
 
-            if (bindingButCooler.wasPressed()) {
+            if (BUT_COLOR_BINDING.wasPressed()) {
                 Hud.remove(coolerComponentId);
                 Hud.add(coolerComponentId, coolerComponent);
 
                 //noinspection StatementWithEmptyBody
-                while (bindingButCooler.wasPressed()) {}
+                while (BUT_COLOR_BINDING.wasPressed()) {}
             }
         });
 
@@ -97,10 +115,8 @@ public class UwuClient implements ClientModInitializer {
         if (Uwu.WE_TESTEN_HANDSHAKE) {
             OwoNetChannel.create(Identifier.of("uwu", "client_only_channel"));
 
-            Uwu.CHANNEL.registerServerbound(WeirdMessage.class, (data, access) -> {
-            });
-            Uwu.CHANNEL.registerClientbound(WeirdMessage.class, (data, access) -> {
-            });
+            Uwu.CHANNEL.registerServerbound(WeirdMessage.class, (data, access) -> {});
+            Uwu.CHANNEL.registerClientbound(WeirdMessage.class, (data, access) -> {});
 
             new ParticleSystemController(Identifier.of("uwu", "client_only_particles"));
             Uwu.PARTICLE_CONTROLLER.register(WeirdMessage.class, (world, pos, data) -> {

@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.*;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.SerializationContext;
 import io.wispforest.endec.StructEndec;
@@ -15,7 +16,6 @@ import io.wispforest.owo.mixin.RegistryOpsAccessor;
 import io.wispforest.owo.serialization.endec.EitherEndec;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.serialization.format.edm.EdmOps;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
@@ -69,7 +69,7 @@ public class CodecUtils {
         return Endec.of(
                 (ctx, serializer, value) -> {
                     if (serializer instanceof ByteBufSerializer<?>) {
-                        var buffer = PacketByteBufs.create();
+                        var buffer = new PacketByteBuf(Unpooled.buffer());
                         packetCodec.encode(buffer, value);
 
                         MinecraftEndecs.PACKET_BYTE_BUF.encode(ctx, serializer, buffer);
@@ -84,7 +84,7 @@ public class CodecUtils {
                     EdmEndec.INSTANCE.encode(ctx, serializer, codec.encodeStart(ops, value).getOrThrow(IllegalStateException::new));
                 },
                 (ctx, deserializer) -> {
-                    if (deserializer instanceof ByteBufSerializer<?>) {
+                    if (deserializer instanceof ByteBufDeserializer) {
                         var buffer = MinecraftEndecs.PACKET_BYTE_BUF.decode(ctx, deserializer);
                         return packetCodec.decode(buffer);
                     }
@@ -259,13 +259,15 @@ public class CodecUtils {
     // glisco, 28.04.2024
     public static <B extends PacketByteBuf, T> PacketCodec<B, T> toPacketCodec(Endec<T> endec) {
         return new PacketCodec<>() {
+            private final Endec<T> innerEndec = endec;
+
             @Override
             public T decode(B buf) {
                 var ctx = buf instanceof RegistryByteBuf registryByteBuf
                         ? SerializationContext.attributes(RegistriesAttribute.of(registryByteBuf.getRegistryManager()))
                         : SerializationContext.empty();
 
-                return endec.decode(ctx, ByteBufDeserializer.of(buf));
+                return innerEndec.decode(ctx, ByteBufDeserializer.of(buf));
             }
 
             @Override
@@ -274,7 +276,20 @@ public class CodecUtils {
                         ? SerializationContext.attributes(RegistriesAttribute.of(registryByteBuf.getRegistryManager()))
                         : SerializationContext.empty();
 
-                endec.encode(ctx, ByteBufSerializer.of(buf), value);
+                innerEndec.encode(ctx, ByteBufSerializer.of(buf), value);
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if(this.getClass().isInstance(obj)) {
+                    try {
+                        return innerEndec.equals(obj.getClass().getDeclaredField("innerEndec").get(obj));
+                    } catch (NoSuchFieldException | IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
+                return false;
             }
         };
     }

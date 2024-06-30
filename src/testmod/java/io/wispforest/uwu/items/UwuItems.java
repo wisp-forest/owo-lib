@@ -5,8 +5,8 @@ import io.wispforest.owo.registration.annotations.AssignedName;
 import io.wispforest.owo.registration.annotations.RegistryNamespace;
 import io.wispforest.owo.registration.reflect.ItemRegistryContainer;
 import io.wispforest.uwu.Uwu;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.item.Item;
+import net.neoforged.fml.loading.FMLLoader;
 
 import java.lang.reflect.Field;
 
@@ -23,7 +23,7 @@ public class UwuItems implements ItemRegistryContainer {
 
         @Override
         public boolean shouldProcessField(Item value, String identifier, Field field) {
-            return FabricLoader.getInstance().isModLoaded("owo");
+            return FMLLoader.getLoadingModList().getModFileById("owo") != null ;
         }
     }
 

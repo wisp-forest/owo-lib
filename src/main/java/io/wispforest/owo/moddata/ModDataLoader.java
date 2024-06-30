@@ -3,8 +3,8 @@ package io.wispforest.owo.moddata;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import io.wispforest.owo.Owo;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Identifier;
+import net.neoforged.fml.loading.FMLLoader;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.IOException;
@@ -23,7 +23,7 @@ public final class ModDataLoader {
 
     private static final Gson GSON = new Gson();
 
-    private static final Path DATA_PATH = FabricLoader.getInstance().getGameDir().resolve("moddata");
+    private static final Path DATA_PATH = FMLLoader.getGamePath().resolve("moddata");
 
     private ModDataLoader() {}
 
@@ -35,10 +35,10 @@ public final class ModDataLoader {
     public static void load(ModDataConsumer consumer) {
         Map<Identifier, JsonObject> foundFiles = new HashMap<>();
 
-        FabricLoader.getInstance().getAllMods().forEach(modContainer -> {
-            final var targetPath = modContainer.getRootPath().resolve(String.format("data/%s/%s", modContainer.getMetadata().getId(), consumer.getDataSubdirectory()));
+        FMLLoader.getLoadingModList().getMods().forEach(modInfo -> {
+            final var targetPath = modInfo.getOwningFile().getFile().getFilePath().resolve(String.format("data/%s/%s", modInfo.getModId(), consumer.getDataSubdirectory()));
 
-            tryLoadFilesFrom(foundFiles, modContainer.getMetadata().getId(), targetPath);
+            tryLoadFilesFrom(foundFiles, modInfo.getModId(), targetPath);
         });
 
         try {

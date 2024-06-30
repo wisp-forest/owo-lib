@@ -8,18 +8,28 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.neoforge.common.NeoForge;
 
-import java.util.List;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class ReiUIAdapter<T extends ParentComponent> extends Widget {
+
+    private static final Map<Screen, Set<OwoUIAdapter<?>>> activeAdapters = new HashMap<>();
+
+    static {
+        NeoForge.EVENT_BUS.addListener((ScreenEvent.Closing event) -> {
+            activeAdapters.getOrDefault(event.getScreen(), Set.of()).forEach(OwoUIAdapter::dispose);
+        });
+    }
 
     public static final Point LAYOUT = new Point(-69, -69);
 
@@ -30,7 +40,8 @@ public class ReiUIAdapter<T extends ParentComponent> extends Widget {
         this.adapter.inspectorZOffset = 900;
 
         if (MinecraftClient.getInstance().currentScreen != null) {
-            ScreenEvents.remove(MinecraftClient.getInstance().currentScreen).register(screen -> this.adapter.dispose());
+            activeAdapters.computeIfAbsent(MinecraftClient.getInstance().currentScreen, screen -> new HashSet<>())
+                            .add(this.adapter);
         }
     }
 
