@@ -4,14 +4,12 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.systems.VertexSorter;
 import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.core.ParentComponent;
-import io.wispforest.owo.ui.util.GlDebugUtils;
 import io.wispforest.owo.ui.util.OwoGlUtil;
 import io.wispforest.owo.ui.window.context.CurrentWindowContext;
 import io.wispforest.owo.util.InfallibleCloseable;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.DiffuseLighting;
-import net.minecraft.client.util.math.MatrixStack;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
 import org.lwjgl.opengl.GL32;
@@ -101,8 +99,7 @@ public abstract class OwoWindow<R extends ParentComponent> extends FramebufferWi
     public void render() {
         if (closed()) return;
 
-        try (var ignored = CurrentWindowContext.setCurrent(this);
-             var ignored1 = GlDebugUtils.pushGroup("Rendering " + this)) {
+        try (var ignored = CurrentWindowContext.setCurrent(this)) {
             framebuffer().beginWrite(true);
 
             RenderSystem.clearColor(0, 0, 0, 1);
