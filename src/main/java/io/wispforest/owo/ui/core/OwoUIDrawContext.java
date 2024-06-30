@@ -351,12 +351,14 @@ public class OwoUIDrawContext extends DrawContext {
 
     public static class UtilityScreen extends Screen {
 
-        private static SupportsFeatures.Key<WindowContext, UtilityScreen> KEY = new SupportsFeatures.Key<>(UtilityScreen::new);
+        private static final SupportsFeatures.Key<WindowContext, UtilityScreen> KEY = new SupportsFeatures.Key<>(UtilityScreen::new);
 
         private Screen linkSourceScreen = null;
 
         private UtilityScreen(WindowContext ctx) {
             super(Text.empty());
+
+            this.init(MinecraftClient.getInstance(), ctx.scaledWidth(), ctx.scaledHeight());
 
             ctx.framebufferResized().subscribe((newWidth, newHeight) -> {
                 this.init(MinecraftClient.getInstance(), ctx.scaledWidth(), ctx.scaledHeight());

@@ -123,7 +123,7 @@ public class RenderEffectWrapper<C extends Component> extends WrappingParentComp
     }
 
     private static final class FramebuffersFeature implements AutoCloseable {
-        public static SupportsFeatures.Key<WindowContext, FramebuffersFeature> KEY = new SupportsFeatures.Key<>(FramebuffersFeature::new);
+        private static final SupportsFeatures.Key<WindowContext, FramebuffersFeature> KEY = new SupportsFeatures.Key<>(FramebuffersFeature::new);
 
         private final WindowContext ctx;
         private final List<Framebuffer> framebuffers;
