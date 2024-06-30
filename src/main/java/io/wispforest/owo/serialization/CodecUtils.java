@@ -84,7 +84,7 @@ public class CodecUtils {
                     EdmEndec.INSTANCE.encode(ctx, serializer, codec.encodeStart(ops, value).getOrThrow(IllegalStateException::new));
                 },
                 (ctx, deserializer) -> {
-                    if (deserializer instanceof ByteBufSerializer<?>) {
+                    if (deserializer instanceof ByteBufDeserializer) {
                         var buffer = MinecraftEndecs.PACKET_BYTE_BUF.decode(ctx, deserializer);
                         return packetCodec.decode(buffer);
                     }
