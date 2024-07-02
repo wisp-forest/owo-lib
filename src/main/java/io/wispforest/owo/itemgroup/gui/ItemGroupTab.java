@@ -2,14 +2,14 @@ package io.wispforest.owo.itemgroup.gui;
 
 import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
-import io.wispforest.owo.itemgroup.OwoItemSettings;
+import io.wispforest.owo.itemgroup.OwoItemSettingsExtension;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 /**
  * Represents a tab inside an {@link OwoItemGroup} that contains all items in the
- * passed {@code contentTag}. If you want to use {@link OwoItemSettings#tab(int)} to
+ * passed {@code contentTag}. If you want to use {@link OwoItemSettingsExtension#tab(int)} to
  * define the contents, use {@code null} as the tag
  */
 public record ItemGroupTab(

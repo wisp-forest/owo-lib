@@ -28,9 +28,8 @@ import java.util.function.Supplier;
  * within, as well as arbitrary buttons with defaults provided for links
  * to places like GitHub, Modrinth, etc.
  * <p>
- * Tabs can be populated by using {@link OwoItemSettings} and setting the
- * {@link OwoItemSettings#tab(int)}. Furthermore, tags can be used for easily populating
- * tabs from data
+ * Tabs can be populated by setting the {@link OwoItemSettingsExtension#tab(int)}.
+ * Furthermore, tags can be used for easily populating tabs from data
  * <p>
  * The roots of this implementation originated in Biome Makeover, where it was written by Lemonszz
  */

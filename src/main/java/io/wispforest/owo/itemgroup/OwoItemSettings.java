@@ -1,48 +1,59 @@
 package io.wispforest.owo.itemgroup;
 
+import io.wispforest.owo.Owo;
+import net.fabricmc.fabric.api.item.v1.CustomDamageHandler;
+import net.fabricmc.fabric.api.item.v1.EquipmentSlotProvider;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Rarity;
 import net.minecraft.world.World;
 
 import java.util.function.BiConsumer;
 
-public interface OwoItemSettings {
+/**
+ * @deprecated Replaced with {@link OwoItemSettingsExtension}.
+ */
+@Deprecated(forRemoval = true)
+public class OwoItemSettings extends Item.Settings {
+    public OwoItemSettings() {
+        Owo.LOGGER.warn("Deprecated OwoItemSettings used, switch to OwoItemSettingsExtension");
+    }
 
-    default Item.Settings group(ItemGroupReference ref) {
-        throw new IllegalStateException("Implemented in mixin.");
+    public OwoItemSettings group(ItemGroupReference ref) {
+        return (OwoItemSettings) super.group(ref);
     }
 
     /**
      * @param group The item group this item should appear in
      */
-    default Item.Settings group(OwoItemGroup group) {
-        throw new IllegalStateException("Implemented in mixin.");
+    public OwoItemSettings group(OwoItemGroup group) {
+        return (OwoItemSettings) super.group(group);
     }
 
-    default OwoItemGroup group() {
-        throw new IllegalStateException("Implemented in mixin.");
+    public OwoItemGroup group() {
+        return super.group();
     }
 
-    default Item.Settings tab(int tab) {
-        throw new IllegalStateException("Implemented in mixin.");
+    public OwoItemSettings tab(int tab) {
+        return (OwoItemSettings) super.tab(tab);
     }
 
-    default int tab() {
-        throw new IllegalStateException("Implemented in mixin.");
+    public int tab() {
+        return super.tab();
     }
 
     /**
      * @param generator The function this item uses for creating stacks in the
      *                  {@link OwoItemGroup} it is in, by default this will be {@link OwoItemGroup#DEFAULT_STACK_GENERATOR}
      */
-    default Item.Settings stackGenerator(BiConsumer<Item, ItemGroup.Entries> generator) {
-        throw new IllegalStateException("Implemented in mixin.");
+    public OwoItemSettings stackGenerator(BiConsumer<Item, ItemGroup.Entries> generator) {
+        return (OwoItemSettings) super.stackGenerator(generator);
     }
 
-    default BiConsumer<Item, ItemGroup.Entries> stackGenerator() {
-        throw new IllegalStateException("Implemented in mixin.");
+    public BiConsumer<Item, ItemGroup.Entries> stackGenerator() {
+        return super.stackGenerator();
     }
 
     /**
@@ -50,11 +61,46 @@ public interface OwoItemSettings {
      * for this item every time {@link Item#use(World, PlayerEntity, Hand)}
      * returns an accepted result
      */
-    default Item.Settings trackUsageStat() {
-        throw new IllegalStateException("Implemented in mixin.");
+    public OwoItemSettings trackUsageStat() {
+        return (OwoItemSettings) super.trackUsageStat();
     }
 
-    default boolean shouldTrackUsageStat() {
-        throw new IllegalStateException("Implemented in mixin.");
+    public boolean shouldTrackUsageStat() {
+        return super.shouldTrackUsageStat();
+    }
+
+    @Override
+    public OwoItemSettings equipmentSlot(EquipmentSlotProvider equipmentSlotProvider) {
+        return (OwoItemSettings) super.equipmentSlot(equipmentSlotProvider);
+    }
+
+    @Override
+    public OwoItemSettings customDamage(CustomDamageHandler handler) {
+        return (OwoItemSettings) super.customDamage(handler);
+    }
+
+    @Override
+    public OwoItemSettings maxCount(int maxCount) {
+        return (OwoItemSettings) super.maxCount(maxCount);
+    }
+
+    @Override
+    public OwoItemSettings maxDamage(int maxDamage) {
+        return (OwoItemSettings) super.maxDamage(maxDamage);
+    }
+
+    @Override
+    public OwoItemSettings recipeRemainder(Item recipeRemainder) {
+        return (OwoItemSettings) super.recipeRemainder(recipeRemainder);
+    }
+
+    @Override
+    public OwoItemSettings rarity(Rarity rarity) {
+        return (OwoItemSettings) super.rarity(rarity);
+    }
+
+    @Override
+    public OwoItemSettings fireproof() {
+        return (OwoItemSettings) super.fireproof();
     }
 }

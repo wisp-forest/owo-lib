@@ -2,7 +2,7 @@ package io.wispforest.owo.mixin.itemgroup;
 
 import io.wispforest.owo.itemgroup.ItemGroupReference;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
-import io.wispforest.owo.itemgroup.OwoItemSettings;
+import io.wispforest.owo.itemgroup.OwoItemSettingsExtension;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import org.spongepowered.asm.mixin.Mixin;
@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import java.util.function.BiConsumer;
 
 @Mixin(Item.Settings.class)
-public class ItemSettingsMixin implements OwoItemSettings {
+public class ItemSettingsMixin implements OwoItemSettingsExtension {
     private OwoItemGroup owo$group = null;
     private int owo$tab = 0;
     // TODO: OwoItemGroup.DEFAULT_STACK_GENERATOR was inlined to not cause clinit issues. fix.
