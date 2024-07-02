@@ -17,10 +17,6 @@ import java.util.function.BiConsumer;
  */
 @Deprecated(forRemoval = true)
 public class OwoItemSettings extends Item.Settings {
-    public OwoItemSettings() {
-        Owo.LOGGER.warn("Deprecated OwoItemSettings used, switch to OwoItemSettingsExtension");
-    }
-
     public OwoItemSettings group(ItemGroupReference ref) {
         return (OwoItemSettings) super.group(ref);
     }
