@@ -7,8 +7,10 @@ import io.wispforest.endec.SerializationAttributes;
 import io.wispforest.endec.impl.ReflectiveEndecBuilder;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.serialization.CodecUtils;
+import io.wispforest.owo.serialization.RegistriesAttribute;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.tag.TagKey;
@@ -36,8 +38,32 @@ public final class MinecraftEndecs {
 
                 return buffer;
             }, buffer -> {
+                var ridx = buffer.readerIndex();
+
                 var bytes = new byte[buffer.readableBytes()];
                 buffer.readBytes(bytes);
+
+                buffer.readerIndex(ridx);
+
+                return bytes;
+            });
+
+    public static final Endec<RegistryByteBuf> REGISTRY_BYTE_BUF = Endec.BYTES
+            .xmapWithContext((ctx, bytes) -> {
+                // TODO: ADD CONNECTION TYPE FOR NEO!
+                var registry = ctx.requireAttributeValue(RegistriesAttribute.REGISTRIES);
+
+                var buffer = new RegistryByteBuf(Unpooled.buffer(), registry.registryManager());
+                buffer.writeBytes(bytes);
+
+                return buffer;
+            }, (ctx, buffer) -> {
+                var ridx = buffer.readerIndex();
+
+                var bytes = new byte[buffer.readableBytes()];
+                buffer.readBytes(bytes);
+
+                buffer.readerIndex(ridx);
 
                 return bytes;
             });

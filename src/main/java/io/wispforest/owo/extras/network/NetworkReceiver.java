@@ -14,7 +14,7 @@ import java.util.function.Consumer;
 public interface NetworkReceiver<T> {
     void onPacket(T packet, Context ctx);
 
-    record Context(@Nullable PlayerEntity player, PacketListener listener, Consumer<CustomPayload> responseSender){
+    record Context(@Nullable PlayerEntity player, PacketListener listener, Consumer<CustomPayload> responseSender, Consumer<Runnable> syncCallback){
         public void disconnect(Text text) {
             this.listener.onDisconnected(new DisconnectionInfo(text));
         }
@@ -27,6 +27,14 @@ public interface NetworkReceiver<T> {
             } else {
                 server.onPacket(packet, ctx);
             }
+        };
+    }
+
+    default NetworkReceiver<T> async() {
+        return (packet, ctx) -> {
+            ctx.syncCallback().accept(() -> {
+                this.onPacket(packet, ctx);
+            });
         };
     }
 

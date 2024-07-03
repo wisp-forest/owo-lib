@@ -25,11 +25,11 @@ public class ScreenInternals {
     public static final Identifier SYNC_PROPERTIES = Identifier.of("owo", "sync_screen_handler_properties");
 
     public static void init() {
-        var localPacketCodec = CodecUtils.toPacketCodec(LocalPacket.ENDEC);
+        var localPacketCodec = LocalPacket.ENDEC;
 
         OwoInternalNetworking.registerPayloadType(NetworkDirection.S2C, NetworkPhase.PLAY, LocalPacket.ID, localPacketCodec);
         OwoInternalNetworking.registerPayloadType(NetworkDirection.C2S, NetworkPhase.PLAY, LocalPacket.ID, localPacketCodec);
-        OwoInternalNetworking.registerPayloadType(NetworkDirection.S2C, NetworkPhase.PLAY, SyncPropertiesPacket.ID, CodecUtils.toPacketCodec(SyncPropertiesPacket.ENDEC));
+        OwoInternalNetworking.registerPayloadType(NetworkDirection.S2C, NetworkPhase.PLAY, SyncPropertiesPacket.ID, SyncPropertiesPacket.ENDEC);
 
         OwoInternalNetworking.registerReceiver(NetworkDirection.C2S, NetworkPhase.PLAY, LocalPacket.ID, (payload, context) -> {
             var screenHandler = context.player().currentScreenHandler;

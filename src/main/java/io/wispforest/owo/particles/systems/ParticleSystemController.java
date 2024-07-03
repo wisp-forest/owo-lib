@@ -63,7 +63,7 @@ public class ParticleSystemController {
      * @param channelId The packet ID to use
      */
     public ParticleSystemController(Identifier channelId) {
-        //OwoFreezer.checkRegister("Particle system controllers");
+        OwoFreezer.checkRegister("Particle system controllers");
 
         this.builder = MinecraftEndecs.addDefaults(new ReflectiveEndecBuilder());
 
@@ -91,7 +91,7 @@ public class ParticleSystemController {
             (pos, instance) -> new ParticleSystemPayload(payloadId, pos, instance)
         );
 
-        OwoInternalNetworking.registerPayloadType(NetworkDirection.S2C, NetworkPhase.PLAY, payloadId, CodecUtils.toPacketCodec(endec));
+        OwoInternalNetworking.registerPayloadType(NetworkDirection.S2C, NetworkPhase.PLAY, payloadId, endec);
 
         OwoHandshake.enable();
         OwoHandshake.requireHandshake();

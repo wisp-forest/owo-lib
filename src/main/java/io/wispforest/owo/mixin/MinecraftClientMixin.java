@@ -27,14 +27,5 @@ public class MinecraftClientMixin {
 //    private void afterQuiltHook(RunArgs args, CallbackInfo ci) {
 //        OwoFreezer.freeze();
 //    }
-
-    @SuppressWarnings({"MixinAnnotationTarget", "UnresolvedMixinReference"})
-    @Group(name = "clientFreezeHooks", min = 1, max = 1)
-    @Inject(method = "<init>", at = @At(value = "INVOKE", remap = false,
-            target = "Ljava/lang/Thread;currentThread()Ljava/lang/Thread;", shift = At.Shift.AFTER))
-    private void afterForgeHook(RunArgs args, CallbackInfo ci) {
-        OwoFreezer.freeze();
-    }
-
 }
 

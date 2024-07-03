@@ -26,13 +26,4 @@ public class MainMixin {
 //    private static void afterQuiltHook(CallbackInfo ci) {
 //        OwoFreezer.freeze();
 //    }
-
-    @SuppressWarnings({"MixinAnnotationTarget", "UnresolvedMixinReference"})
-    @Group(name = "serverFreezeHooks", min = 1, max = 1)
-    @Inject(method = "main", at = @At(value = "INVOKE", remap = false,
-            target = "Lnet/neoforged/neoforge/server/loading/ServerModLoader;load()V", shift = At.Shift.AFTER))
-    private static void afterForgeHook(CallbackInfo ci) {
-        OwoFreezer.freeze();
-    }
-
 }

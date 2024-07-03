@@ -1,7 +1,15 @@
 package io.wispforest.owo.extras.network;
 
 import com.mojang.logging.LogUtils;
+import io.wispforest.endec.Endec;
+import io.wispforest.endec.SerializationAttribute;
+import io.wispforest.endec.SerializationAttributes;
+import io.wispforest.endec.SerializationContext;
+import io.wispforest.endec.format.bytebuf.ByteBufDeserializer;
+import io.wispforest.endec.format.bytebuf.ByteBufSerializer;
 import io.wispforest.owo.Owo;
+import io.wispforest.owo.serialization.CodecUtils;
+import io.wispforest.owo.serialization.RegistriesAttribute;
 import net.minecraft.network.NetworkPhase;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.RegistryByteBuf;
@@ -25,7 +33,7 @@ public class OwoInternalNetworking {
 
     public static final OwoInternalNetworking INSTANCE = new OwoInternalNetworking();
 
-    private final Map<NetworkConfiguration, Map<CustomPayload.Id<?>, PacketCodec<? super PacketByteBuf, ?>>> payloadCodecs = new HashMap<>();
+    private final Map<NetworkConfiguration, Map<CustomPayload.Id<?>, Endec<?>>> payloadCodecs = new HashMap<>();
     private final Map<NetworkConfiguration, Map<CustomPayload.Id<?>, NetworkReceiver<?>>> receivers = new HashMap<>();
 
     @Nullable
@@ -41,22 +49,23 @@ public class OwoInternalNetworking {
             var payloadCodecs = this.payloadCodecs.getOrDefault(configuration, new HashMap<>());
 
             receivers.forEach((id, receiver) -> {
-                var codec = payloadCodecs.remove(id);
+                var endec = payloadCodecs.remove(id);
 
-                if(codec == null) {
+                if(endec == null) {
                     throw new IllegalStateException("Unable to get the required codec to serialize the given packet: [Id: " + id + "]");
                 }
 
-                registerForConfiguration(configuration, id, codec, receiver);
+                registerForConfiguration(configuration, id, toCodec(endec), receiver);
             });
         });
 
         this.payloadCodecs.forEach((configuration, packetCodecs) -> {
             var payloadCodecs = this.payloadCodecs.getOrDefault(configuration, Map.of());
 
-            payloadCodecs.forEach((id, codec) -> {
+            for (var id : payloadCodecs.keySet()) {
+                var codec = toCodec(payloadCodecs.remove(id));
                 registerForConfiguration(configuration, id, codec, (packet, context) -> {});
-            });
+            }
         });
     }
 
@@ -90,24 +99,24 @@ public class OwoInternalNetworking {
 
     private static <T extends CustomPayload> void register(TriConsumer<CustomPayload.Id<T>, PacketCodec<? super PacketByteBuf, T>, IPayloadHandler<T>> consumer, CustomPayload.Id<?> id, PacketCodec<? super PacketByteBuf, ?> codec, NetworkReceiver<?> receiver) {
         consumer.accept((CustomPayload.Id<T>) id, (PacketCodec<? super PacketByteBuf, T>) codec, (arg, ctx) -> {
-            ctx.enqueueWork(() -> ((NetworkReceiver<T>) receiver).onPacket(arg, new NetworkReceiver.Context(ctx.protocol() == NetworkPhase.PLAY ? ctx.player() : null, ctx.listener(), ctx::reply)));
+            ((NetworkReceiver<T>) receiver).onPacket(arg, new NetworkReceiver.Context(ctx.protocol() == NetworkPhase.PLAY ? ctx.player() : null, ctx.listener(), ctx::reply, ctx::enqueueWork));
         });
     }
 
     //public <T extends CustomPayload> PayloadRegistrar playToClient(CustomPayload.Id<T> type, PacketCodec<? super RegistryByteBuf, T> reader, IPayloadHandler<T> handler) {
 
-    public static <T extends CustomPayload> void registerPayloadType(NetworkDirection direction, NetworkPhase phase, CustomPayload.Id<T> type, PacketCodec<? super PacketByteBuf, T> reader) {
+    public static <T extends CustomPayload> void registerPayloadType(NetworkDirection direction, NetworkPhase phase, CustomPayload.Id<T> type, Endec<T> reader) {
         if(freezeNetworkRegistration) throw new IllegalStateException("NETWORK REGISTRATION FROZEN");
 
         if(direction != NetworkDirection.BI) {
             var oppositeDir = direction == NetworkDirection.C2S ? NetworkDirection.S2C : NetworkDirection.C2S;
 
-            var otherReader = (PacketCodec<? super PacketByteBuf, T>) INSTANCE.payloadCodecs.computeIfAbsent(new NetworkConfiguration(oppositeDir, phase), direction1 -> new HashMap<>())
+            var otherReader = (Endec<T>) INSTANCE.payloadCodecs.computeIfAbsent(new NetworkConfiguration(oppositeDir, phase), direction1 -> new HashMap<>())
                     .remove(type);
 
             if(otherReader != null) {
                 INSTANCE.payloadCodecs.computeIfAbsent(new NetworkConfiguration(NetworkDirection.BI, phase), direction1 -> new HashMap<>())
-                        .put(type, biDirectionalCodec(
+                        .put(type, biDirectionalEndec(type,
                                 (direction == NetworkDirection.C2S ? otherReader : reader),
                                 (direction == NetworkDirection.C2S ? reader : otherReader)
                         ));
@@ -127,32 +136,68 @@ public class OwoInternalNetworking {
         map.put(type, reader);
     }
 
-    private static <T> PacketCodec<? super PacketByteBuf, T> biDirectionalCodec(PacketCodec<? super PacketByteBuf, T> clientCodec, PacketCodec<? super PacketByteBuf, T> serverCodec) {
+    public static final SerializationAttribute.WithValue<ConnectionSideAttribute> CONNECTION_SIDE_ATTRIBUTE = SerializationAttribute.withValue("connection_side");
+
+    public record ConnectionSideAttribute(boolean isClient) {}
+
+    private static <T extends CustomPayload> Endec<T> biDirectionalEndec(CustomPayload.Id<T> type, Endec<T> clientEndec, Endec<T> serverEndec) {
+        return Endec.of((ctx, serializer, value) -> {
+            try {
+                if (ctx.requireAttributeValue(CONNECTION_SIDE_ATTRIBUTE).isClient()) {
+                    clientEndec.encode(ctx, serializer, value);
+                } else {
+                    serverEndec.encode(ctx, serializer, value);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("BI_DI ENCODING PACKET BROKEN! [Packet Id: " + type.id() + "]", e);
+            }
+        }, (ctx, serializer) -> {
+            try {
+                return (ctx.requireAttributeValue(CONNECTION_SIDE_ATTRIBUTE).isClient())
+                        ? clientEndec.decode(ctx, serializer)
+                        : serverEndec.decode(ctx, serializer);
+            } catch (Exception e) {
+                throw new RuntimeException("BI_DI DECODING PACKET BROKEN! [Packet Id: " + type.id() + "]", e);
+            }
+        });
+    }
+
+    private static <T> PacketCodec<? super PacketByteBuf, T> toCodec(Endec<T> endec) {
         return PacketCodec.of(
                 (value, buf) -> {
+                    var ctx = buf instanceof RegistryByteBuf registryByteBuf
+                            ? SerializationContext.attributes(RegistriesAttribute.of(registryByteBuf.getRegistryManager()))
+                            : SerializationContext.empty();
+
                     var server = Owo.currentServer();
 
-                    if(server != null && buf instanceof RegistryByteBuf registryByteBuf && registryByteBuf.getRegistryManager().equals(server.getRegistryManager())) {
-                        serverCodec.encode(buf, value);
+                    boolean isOnServer = server != null && buf instanceof RegistryByteBuf registryByteBuf && registryByteBuf.getRegistryManager().equals(server.getRegistryManager());
 
-                        return;
-                    }
+                    ctx = ctx.withAttributes(CONNECTION_SIDE_ATTRIBUTE.instance(new ConnectionSideAttribute(!isOnServer)));
 
-                    clientCodec.encode(buf, value);
+                    endec.encode(ctx, ByteBufSerializer.of(buf), value);
                 },
                 buf -> {
+                    var ctx = buf instanceof RegistryByteBuf registryByteBuf
+                            ? SerializationContext.attributes(RegistriesAttribute.of(registryByteBuf.getRegistryManager()))
+                            : SerializationContext.empty();
+
                     var server = Owo.currentServer();
 
-                    if(server != null && buf instanceof RegistryByteBuf registryByteBuf && registryByteBuf.getRegistryManager().equals(server.getRegistryManager())) {
-                        return serverCodec.decode(buf);
-                    }
+                    boolean isOnServer = server != null && buf instanceof RegistryByteBuf registryByteBuf && registryByteBuf.getRegistryManager().equals(server.getRegistryManager());
 
-                    return clientCodec.decode(buf);
+                    ctx = ctx.withAttributes(CONNECTION_SIDE_ATTRIBUTE.instance(new ConnectionSideAttribute(!isOnServer)));
+
+                    return endec.decode(ctx, ByteBufDeserializer.of(buf));
                 }
         );
     }
 
     public static <T extends CustomPayload> void registerReceiver(NetworkDirection direction, NetworkPhase phase, CustomPayload.Id<T> type, NetworkReceiver<T> receiver) {
+        registerReceiverAsync(direction, phase, type, receiver.async());
+    }
+
+    public static <T extends CustomPayload> void registerReceiverAsync(NetworkDirection direction, NetworkPhase phase, CustomPayload.Id<T> type, NetworkReceiver<T> receiver) {
         if(freezeNetworkRegistration) throw new IllegalStateException("NETWORK REGISTRATION FROZEN");
 
         if(direction != NetworkDirection.BI) {

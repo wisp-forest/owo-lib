@@ -83,8 +83,8 @@ public final class OwoHandshake {
     }
 
     public static void init(IEventBus eventBus) {
-        OwoInternalNetworking.registerPayloadType(NetworkDirection.S2C, NetworkPhase.CONFIGURATION, HandshakeRequest.ID, CodecUtils.toPacketCodec(HandshakeRequest.ENDEC));
-        OwoInternalNetworking.registerPayloadType(NetworkDirection.C2S, NetworkPhase.CONFIGURATION, HandshakeResponse.ID, CodecUtils.toPacketCodec(HandshakeResponse.ENDEC));
+        OwoInternalNetworking.registerPayloadType(NetworkDirection.S2C, NetworkPhase.CONFIGURATION, HandshakeRequest.ID, HandshakeRequest.ENDEC);
+        OwoInternalNetworking.registerPayloadType(NetworkDirection.C2S, NetworkPhase.CONFIGURATION, HandshakeResponse.ID, HandshakeResponse.ENDEC);
 
         eventBus.addListener((RegisterConfigurationTasksEvent event) -> {
             event.register(new ICustomConfigurationTask() {
@@ -104,7 +104,7 @@ public final class OwoHandshake {
 
         if (FMLLoader.getDist() == Dist.CLIENT) {
             if (!ENABLED) {
-                OwoInternalNetworking.registerPayloadType(NetworkDirection.S2C, NetworkPhase.CONFIGURATION, HandshakeOff.ID, PacketCodec.unit(new HandshakeOff()));
+                OwoInternalNetworking.registerPayloadType(NetworkDirection.S2C, NetworkPhase.CONFIGURATION, HandshakeOff.ID, Endec.VOID.xmap(unused -> new HandshakeOff(), o -> null));
                 OwoInternalNetworking.registerReceiver(NetworkDirection.C2S, NetworkPhase.CONFIGURATION, HandshakeOff.ID, (payload, context) -> {});
             }
 
@@ -286,7 +286,7 @@ public final class OwoHandshake {
         for (var entry : channel.endecsByIndex.int2ObjectEntrySet()) {
             serializersHash += entry.getIntKey() * 31 + entry.getValue().getRecordClass().getName().hashCode();
         }
-        return 31 * channel.packetId.id().hashCode() + serializersHash;
+        return 31 * channel.channelId.hashCode() + serializersHash;
     }
 
     private static int hashController(ParticleSystemController controller) {

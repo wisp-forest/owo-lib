@@ -102,7 +102,7 @@ repositories {
         }
     }
     maven { url "https://maven.nucleoid.xyz/" }
-    maven { url 'https://maven.wispforest.io' }
+    maven { url 'https://maven.wispforest.io/releases' }
     mavenLocal()
 }
 

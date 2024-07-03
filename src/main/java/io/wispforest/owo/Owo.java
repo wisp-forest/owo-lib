@@ -8,6 +8,7 @@ import io.wispforest.owo.network.OwoHandshake;
 import io.wispforest.owo.ops.LootOps;
 import io.wispforest.owo.text.CustomTextRegistry;
 import io.wispforest.owo.text.InsertingTextContent;
+import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.Wisdom;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.MinecraftServer;
@@ -17,6 +18,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
@@ -71,6 +73,7 @@ public class Owo {
         });
 
         eventBus.addListener(OwoInternalNetworking.INSTANCE::initializeNetworking);
+        eventBus.addListener((FMLLoadCompleteEvent event) -> OwoFreezer.freeze());
     }
 
     public void onInitialize(FMLCommonSetupEvent event) {

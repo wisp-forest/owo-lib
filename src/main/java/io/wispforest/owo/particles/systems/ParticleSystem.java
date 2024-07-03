@@ -35,7 +35,7 @@ public class ParticleSystem<T> {
     private final boolean permitsContextlessExecution;
 
     ParticleSystem(ParticleSystemController manager, Class<T> dataClass, int index, Endec<T> endec, ParticleSystemExecutor<T> handler) {
-        //OwoFreezer.checkRegister("Particle systems");
+        OwoFreezer.checkRegister("Particle systems");
 
         this.manager = manager;
         this.dataClass = dataClass;

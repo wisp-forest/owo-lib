@@ -203,7 +203,7 @@ public class ConfigSynchronizer {
     }
 
     static {
-        var packetCodec = CodecUtils.toPacketCodec(ConfigSyncPacket.ENDEC);
+        var packetCodec = ConfigSyncPacket.ENDEC;
 
         OwoInternalNetworking.registerPayloadType(NetworkDirection.BI, NetworkPhase.PLAY, ConfigSyncPacket.ID, packetCodec);
 
