@@ -6,6 +6,7 @@ import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.window.OwoWindow;
+import io.wispforest.owo.ui.window.WindowIcon;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -14,10 +15,12 @@ import net.minecraft.util.Identifier;
 import java.util.List;
 
 public class UwuTestWindow extends OwoWindow<FlowLayout> {
-    public UwuTestWindow() {
-        super(640, 480, "uωu test window!", MinecraftClient.getInstance().getWindow().getHandle());
-
-        setIconTextures(MinecraftClient.getInstance().getResourceManager(), List.of(Identifier.of("owo", "icon.png")));
+    public static void openWindow() {
+        new UwuTestWindow()
+            .size(640, 480)
+            .title("uωu test window!")
+            .icon(WindowIcon.fromResources(Identifier.of("owo", "icon.png")))
+            .open();
     }
 
     @Override
@@ -41,17 +44,20 @@ public class UwuTestWindow extends OwoWindow<FlowLayout> {
         textbox.onChanged().subscribe(value -> {
             if (value.equalsIgnoreCase("yes")) {
                 statusLabel.text(Text.literal("Owl :)")
-                        .formatted(Formatting.GREEN));
+                    .formatted(Formatting.GREEN));
+                this.title("uωu test window! [owl :)]");
             } else {
                 statusLabel.text(Text.literal("Not an owl :(")
-                        .formatted(Formatting.RED));
+                    .formatted(Formatting.RED));
+
+                this.title("uωu test window! [not owl :(]");
             }
         });
 
         inner
-                .child(textbox
-                        .margins(Insets.vertical(5)))
-                .child(statusLabel);
+            .child(textbox
+                .margins(Insets.vertical(5)))
+            .child(statusLabel);
 
         inner.child(Containers.horizontalFlow(Sizing.content(), Sizing.content())
             .child(Components.label(Text.literal("owl level: ")))

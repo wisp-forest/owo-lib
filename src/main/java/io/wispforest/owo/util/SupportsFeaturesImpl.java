@@ -3,7 +3,7 @@ package io.wispforest.owo.util;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class SupportsFeaturesImpl<S extends SupportsFeatures<S>> implements SupportsFeatures<S>, AutoCloseable {
+public abstract class SupportsFeaturesImpl<S extends SupportsFeatures<S>> implements SupportsFeatures<S> {
     private final Map<Key<S, ?>, Object> features = new HashMap<>();
 
     @SuppressWarnings("unchecked")
@@ -19,8 +19,7 @@ public abstract class SupportsFeaturesImpl<S extends SupportsFeatures<S>> implem
         return value;
     }
 
-    @Override
-    public void close() {
+    public void destroyFeatures() {
         for (var feature : features.values()) {
             try {
                 if (feature instanceof AutoCloseable closeable) {

@@ -16,10 +16,12 @@ public final class OpenWindows {
 
     }
 
-    static InfallibleCloseable add(OwoWindow<?> window) {
+    static void add(OwoWindow<?> window) {
         WINDOWS.add(window);
+    }
 
-        return () -> WINDOWS.remove(window);
+    static void remove(OwoWindow<?> window) {
+        WINDOWS.remove(window);
     }
 
     public static @UnmodifiableView List<OwoWindow<?>> windows() {
