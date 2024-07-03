@@ -53,7 +53,7 @@ public class ParticleSystem<T> {
      * @throws NetworkException if this particle system already has a handler
      */
     public void setHandler(ParticleSystemExecutor<T> handler) {
-//        if (OwoFreezer.isFrozen()) throw new ServicesFrozenException("Particle systems can only be changed during mod init");
+        if (OwoFreezer.isFrozen()) throw new ServicesFrozenException("Particle systems can only be changed during mod init");
         if (this.handler != null) throw new NetworkException("Particle system already has a handler");
 
         this.handler = handler;

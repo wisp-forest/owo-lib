@@ -15,6 +15,8 @@ import io.wispforest.owo.particles.systems.ParticleSystemController;
 import io.wispforest.endec.Endec;
 import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
+import io.wispforest.owo.util.OwoFreezer;
+import io.wispforest.owo.util.ServicesFrozenException;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientConfigurationNetworkHandler;
 import net.minecraft.network.NetworkPhase;
@@ -69,15 +71,15 @@ public final class OwoHandshake {
     // ------------
 
     public static void enable() {
-//        if (OwoFreezer.isFrozen()) {
-//            throw new ServicesFrozenException("The oωo handshake may only be enabled during mod initialization");
-//        }
+        if (OwoFreezer.isFrozen()) {
+            throw new ServicesFrozenException("The oωo handshake may only be enabled during mod initialization");
+        }
     }
 
     public static void requireHandshake() {
-//        if (OwoFreezer.isFrozen()) {
-//            throw new ServicesFrozenException("The oωo handshake may only be made required during mod initialization");
-//        }
+        if (OwoFreezer.isFrozen()) {
+            throw new ServicesFrozenException("The oωo handshake may only be made required during mod initialization");
+        }
 
         HANDSHAKE_REQUIRED = true;
     }
