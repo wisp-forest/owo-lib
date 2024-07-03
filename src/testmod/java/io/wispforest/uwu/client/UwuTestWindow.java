@@ -7,12 +7,10 @@ import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.window.OwoWindow;
 import io.wispforest.owo.ui.window.WindowIcon;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
-
-import java.util.List;
+import org.lwjgl.glfw.GLFW;
 
 public class UwuTestWindow extends OwoWindow<FlowLayout> {
     public static void openWindow() {
@@ -20,6 +18,7 @@ public class UwuTestWindow extends OwoWindow<FlowLayout> {
             .size(640, 480)
             .title("uωu test window!")
             .icon(WindowIcon.fromResources(Identifier.of("owo", "icon.png")))
+            .windowHint(GLFW.GLFW_TRANSPARENT_FRAMEBUFFER, 1)
             .open();
     }
 
@@ -30,7 +29,7 @@ public class UwuTestWindow extends OwoWindow<FlowLayout> {
 
     @Override
     protected void build(FlowLayout rootComponent) {
-        rootComponent.surface(Surface.DARK_PANEL);
+//        rootComponent.surface(Surface.DARK_PANEL);
         rootComponent.padding(Insets.of(10));
 
         var inner = Containers.verticalFlow(Sizing.content(), Sizing.content());

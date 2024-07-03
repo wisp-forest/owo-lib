@@ -9,7 +9,6 @@ import io.wispforest.owo.ui.window.context.CurrentWindowContext;
 import io.wispforest.owo.ui.window.context.WindowContext;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
-import io.wispforest.owo.util.InfallibleCloseable;
 import io.wispforest.owo.util.SupportsFeaturesImpl;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
@@ -19,6 +18,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.texture.NativeImage;
+import net.minecraft.util.Pair;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
 import org.lwjgl.glfw.*;
@@ -38,7 +38,8 @@ public abstract class OwoWindow<R extends ParentComponent> extends SupportsFeatu
     private String title = "owo-ui window";
     private int screenWidth = 854;
     private int screenHeight = 480;
-    private WindowIcon icon;
+    private WindowIcon icon = null;
+    private final List<Pair<Integer, Integer>> windowHints = new ArrayList<>();
 
     private int framebufferWidth;
     private int framebufferHeight;
@@ -97,6 +98,16 @@ public abstract class OwoWindow<R extends ParentComponent> extends SupportsFeatu
         return this;
     }
 
+    public OwoWindow<R> windowHint(int hint, int value) {
+        if (this.handle != 0) {
+            throw new IllegalStateException("Tried to add window hint after window was opened");
+        }
+
+        windowHints.add(new Pair<>(hint, value));
+
+        return this;
+    }
+
     public void open() {
         try (var ignored = OwoGlUtil.setContext(0)) {
             glfwDefaultWindowHints();
@@ -106,6 +117,11 @@ public abstract class OwoWindow<R extends ParentComponent> extends SupportsFeatu
             glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
             glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
             glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, 1);
+
+            for (var hint : windowHints) {
+                glfwWindowHint(hint.getLeft(), hint.getRight());
+            }
+
             this.handle = glfwCreateWindow(this.screenWidth, this.screenHeight, this.title, 0, MinecraftClient.getInstance().getWindow().getHandle());
 
             if (this.handle == 0) {
@@ -328,7 +344,7 @@ public abstract class OwoWindow<R extends ParentComponent> extends SupportsFeatu
 
             framebuffer().beginWrite(true);
 
-            RenderSystem.clearColor(0, 0, 0, 1);
+            RenderSystem.clearColor(0, 0, 0, 0);
             RenderSystem.clear(GL32.GL_COLOR_BUFFER_BIT | GL32.GL_DEPTH_BUFFER_BIT, MinecraftClient.IS_SYSTEM_MAC);
 
             Matrix4f matrix4f = new Matrix4f()
