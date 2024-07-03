@@ -1,14 +1,10 @@
 package io.wispforest.uwu.client;
 
 import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.component.LabelComponent;
+import io.wispforest.owo.ui.component.SlimSliderComponent;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
-import io.wispforest.owo.ui.container.RenderEffectWrapper;
-import io.wispforest.owo.ui.core.Color;
-import io.wispforest.owo.ui.core.Insets;
-import io.wispforest.owo.ui.core.OwoUIAdapter;
-import io.wispforest.owo.ui.core.Sizing;
+import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.window.OwoWindow;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
@@ -31,6 +27,7 @@ public class UwuTestWindow extends OwoWindow<FlowLayout> {
 
     @Override
     protected void build(FlowLayout rootComponent) {
+        rootComponent.surface(Surface.DARK_PANEL);
         rootComponent.padding(Insets.of(10));
 
         var inner = Containers.verticalFlow(Sizing.content(), Sizing.content());
@@ -51,13 +48,22 @@ public class UwuTestWindow extends OwoWindow<FlowLayout> {
             }
         });
 
-        for (int i = 0; i < 100; i++) {
-            inner.child(Components.label(Text.of("breh!")));
-        }
-
         inner
                 .child(textbox
                         .margins(Insets.vertical(5)))
                 .child(statusLabel);
+
+        inner.child(Containers.horizontalFlow(Sizing.content(), Sizing.content())
+            .child(Components.label(Text.literal("owl level: ")))
+            .child(Components.slider(Sizing.fixed(200))));
+
+        inner.child(Containers.horizontalFlow(Sizing.content(), Sizing.content())
+            .child(Components.label(Text.literal("owl level (slim): ")))
+            .child(Components.slimSlider(SlimSliderComponent.Axis.HORIZONTAL)
+                .horizontalSizing(Sizing.fixed(200))));
+
+        for (int i = 0; i < 100; i++) {
+            inner.child(Components.label(Text.of("breh!")));
+        }
     }
 }

@@ -23,6 +23,9 @@ public abstract class OwoWindow<R extends ParentComponent> extends FramebufferWi
 
     private int mouseX = -1;
     private int mouseY = -1;
+    private int deltaX = 0;
+    private int deltaY = 0;
+    private int activeButton = -1;
 
     public OwoWindow(int width, int height, String name, long parentContext) {
         super(width, height, name, parentContext);
@@ -42,13 +45,23 @@ public abstract class OwoWindow<R extends ParentComponent> extends FramebufferWi
             adapter.moveAndResize(0, 0, scaledWidth(), scaledHeight());
         });
         mouseMoved().subscribe((x, y) -> {
-            this.mouseX = (int) (x / scaleFactor);
-            this.mouseY = (int) (y / scaleFactor);
+            int newX = (int) (x / scaleFactor);
+            int newY = (int) (y / scaleFactor);
+
+            deltaX += newX - mouseX;
+            deltaY += newY - mouseY;
+
+            mouseY = newY;
+            mouseX = newX;
         });
         mouseButton().subscribe((button, released) -> {
             if (released) {
+                this.activeButton = -1;
+
                 adapter.mouseReleased(mouseX, mouseY, button);
             } else {
+                this.activeButton = button;
+
                 adapter.mouseClicked(mouseX, mouseY, button);
             }
         });
@@ -96,10 +109,23 @@ public abstract class OwoWindow<R extends ParentComponent> extends FramebufferWi
         this.scaledHeight = (int) Math.ceil((double) this.framebufferHeight() / scaleFactor);
     }
 
+    private void tickMouse() {
+        if (deltaX == 0 && this.deltaY == 0) return;
+
+        adapter.mouseMoved(mouseX, mouseY);
+
+        if (activeButton != -1) adapter.mouseDragged(mouseX, mouseY, activeButton, deltaX, deltaY);
+
+        deltaX = 0;
+        deltaY = 0;
+    }
+
     public void render() {
         if (closed()) return;
 
         try (var ignored = CurrentWindowContext.setCurrent(this)) {
+            tickMouse();
+
             framebuffer().beginWrite(true);
 
             RenderSystem.clearColor(0, 0, 0, 1);
