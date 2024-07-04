@@ -35,6 +35,7 @@ public class UwuTestWindow extends OwoWindow<FlowLayout> {
         var inner = Containers.verticalFlow(Sizing.content(), Sizing.content());
         rootComponent.child(Containers.verticalScroll(Sizing.fill(100), Sizing.fill(100), inner));
 
+        inner.child(new MoveButtonComponent(Text.literal("hehe move"), unused -> {}));
         inner.child(Components.label(Text.of("Are you an owl?")));
 
         var textbox = Components.textBox(Sizing.fixed(60));

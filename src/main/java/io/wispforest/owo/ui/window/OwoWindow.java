@@ -35,6 +35,8 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.glfwSetCharModsCallback;
 
 public abstract class OwoWindow<R extends ParentComponent> extends SupportsFeaturesImpl<WindowContext> implements WindowContext {
+    private static final boolean USE_GLOBAL_POS = glfwGetPlatform() != GLFW_PLATFORM_WAYLAND;
+
     private String title = "owo-ui window";
     private int screenWidth = 854;
     private int screenHeight = 480;
@@ -57,9 +59,14 @@ public abstract class OwoWindow<R extends ParentComponent> extends SupportsFeatu
 
     private int mouseX = -1;
     private int mouseY = -1;
+    private int globalMouseX = -1;
+    private int globalMouseY = -1;
     private int deltaX = 0;
     private int deltaY = 0;
     private int activeButton = -1;
+
+    private final int[] globalX = new int[1];
+    private final int[] globalY = new int[1];
 
     private final EventStream<WindowFramebufferResized> framebufferResizedEvents = WindowFramebufferResized.newStream();
 
@@ -186,11 +193,25 @@ public abstract class OwoWindow<R extends ParentComponent> extends SupportsFeatu
             int newX = (int) (xpos / scaleFactor);
             int newY = (int) (ypos / scaleFactor);
 
-            deltaX += newX - mouseX;
-            deltaY += newY - mouseY;
+            if (!USE_GLOBAL_POS) {
+                this.deltaX += newX - mouseX;
+                this.deltaY += newY - mouseY;
+            }
 
-            mouseY = newY;
-            mouseX = newX;
+            this.mouseY = newY;
+            this.mouseX = newX;
+
+            if (USE_GLOBAL_POS) {
+                glfwGetWindowPos(handle, this.globalX, this.globalY);
+                int newGlobalX = (int) ((this.globalX[0] + xpos) / scaleFactor);
+                int newGlobalY = (int) ((this.globalY[0] + ypos) / scaleFactor);
+
+                this.deltaX += newGlobalX - this.globalMouseX;
+                this.deltaY += newGlobalY - this.globalMouseY;
+
+                this.globalMouseX = newGlobalX;
+                this.globalMouseY = newGlobalY;
+            }
         })));
 
         glfwSetMouseButtonCallback(handle, stowAndReturn(GLFWMouseButtonCallback.create((window, button, action, mods) -> {
