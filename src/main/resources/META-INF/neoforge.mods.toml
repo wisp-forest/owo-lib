@@ -19,14 +19,14 @@ config = 'owo.mixins.json'
 [[mixins]]
 config = 'owo-forge.mixins.json'
 
-[[dependencies.accessories]]
+[[dependencies.owo]]
 modId = "neoforge"
 required = true
 versionRange = "[21,)"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.accessories]]
+[[dependencies.owo]]
 modId = "minecraft"
 required = true
 versionRange = "[1.21,)"
