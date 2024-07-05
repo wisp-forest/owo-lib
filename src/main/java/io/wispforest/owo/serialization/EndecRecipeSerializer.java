@@ -11,19 +11,17 @@ import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeSerializer;
 
-public abstract class EndecRecipeSerializer<R extends Recipe<?>> implements RecipeSerializer<R> {
+public class EndecRecipeSerializer<R extends Recipe<?>> implements RecipeSerializer<R> {
 
-    private final StructEndec<R> endec;
     private final PacketCodec<PacketByteBuf, R> packetCodec;
     private final MapCodec<R> codec;
 
-    protected EndecRecipeSerializer(StructEndec<R> endec, Endec<R> networkEndec) {
-        this.endec = endec;
+    public EndecRecipeSerializer(StructEndec<R> endec, Endec<R> networkEndec) {
         this.packetCodec = CodecUtils.toPacketCodec(networkEndec);
-        this.codec = CodecUtils.toMapCodec(this.endec, SerializationContext.attributes(SerializationAttributes.HUMAN_READABLE));
+        this.codec = CodecUtils.toMapCodec(endec, SerializationContext.attributes(SerializationAttributes.HUMAN_READABLE));
     }
 
-    protected EndecRecipeSerializer(StructEndec<R> endec) {
+    public EndecRecipeSerializer(StructEndec<R> endec) {
         this(endec, endec);
     }
 
