@@ -155,7 +155,7 @@ loom {
 
 remapJar {
     dependsOn(processResources)
-    atAccessWideners.add("owo.accesswidener")
+    atAccessWideners.add("owo_fun.accesswidener")
 }
 
 dependencies {
