@@ -143,7 +143,7 @@ public class Uwu {
                 );
             });
 
-            event.register(RegistryKeys.SCREEN_HANDLER, (helper) -> {
+            event.register(RegistryKeys.ITEM_GROUP, (helper) -> {
                 FOUR_TAB_GROUP = OwoItemGroup.builder(Identifier.of("uwu", "four_tab_group"), () -> Icon.of(Items.AXOLOTL_BUCKET))
                         .disableDynamicTitle()
                         .buttonStackHeight(1)
