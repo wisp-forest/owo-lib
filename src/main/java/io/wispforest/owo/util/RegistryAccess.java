@@ -1,7 +1,7 @@
 package io.wispforest.owo.util;
 
+import io.wispforest.owo.mixin.registry.SimpleRegistryAccessor;
 import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.Identifier;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.SimpleRegistry;
@@ -23,7 +23,7 @@ public final class RegistryAccess {
     @SuppressWarnings("unchecked")
     public static <T> RegistryEntry<T> getEntry(Registry<T> registry, Identifier id) {
         checkSimple(registry);
-        return ((AccessibleRegistry<T>) registry).getEntry(id);
+        return ((SimpleRegistryAccessor<T>) registry).owo$getIdToEntry().get(id);
     }
 
     /**
@@ -38,7 +38,7 @@ public final class RegistryAccess {
     @SuppressWarnings("unchecked")
     public static <T> RegistryEntry<T> getEntry(Registry<T> registry, T value) {
         checkSimple(registry);
-        return ((AccessibleRegistry<T>) registry).getEntry(value);
+        return ((SimpleRegistryAccessor<T>) registry).owo$getValueToEntry().get(value);
     }
 
     private static void checkSimple(Registry<?> registry) {
@@ -46,11 +46,4 @@ public final class RegistryAccess {
         throw new IllegalArgumentException("[RegistryAccess] Tried to operate on Registry of class '"
                 + registry.getClass() + "', but only 'SimpleRegistry' and descendants are supported");
     }
-
-    public interface AccessibleRegistry<T> {
-        @Nullable RegistryEntry<T> getEntry(Identifier id);
-
-        @Nullable RegistryEntry<T> getEntry(T value);
-    }
-
 }
