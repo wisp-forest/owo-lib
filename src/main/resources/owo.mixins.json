@@ -43,9 +43,9 @@
     "ui.access.BlockEntityAccessor"
   ],
   "client": [
+    "ClientCommonNetworkHandlerAccessor",
     "ClientConfigurationNetworkHandlerMixin",
     "ClientLoginNetworkHandlerAccessor",
-    "ClientCommonNetworkHandlerAccessor",
     "DrawContextMixin",
     "MinecraftClientMixin",
     "itemgroup.AbstractInventoryScreenMixin",
