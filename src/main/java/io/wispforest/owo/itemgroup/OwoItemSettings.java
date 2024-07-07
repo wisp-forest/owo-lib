@@ -9,17 +9,18 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 public class OwoItemSettings extends Item.Settings {
 
     @Nullable
-    private OwoItemGroup group = null;
+    private Supplier<OwoItemGroup> group = () -> null;
     private int tab = 0;
     private BiConsumer<Item, ItemGroup.Entries> stackGenerator = OwoItemGroup.DEFAULT_STACK_GENERATOR;
     private boolean trackUsageStat = false;
 
     public OwoItemSettings group(ItemGroupReference ref) {
-        this.group = ref.group();
+        this.group = ref.groupSup();
         this.tab = ref.tab();
         return this;
     }
@@ -27,12 +28,23 @@ public class OwoItemSettings extends Item.Settings {
     /**
      * @param group The item group this item should appear in
      */
+    @Deprecated
     public OwoItemSettings group(OwoItemGroup group) {
+        this.group = () -> group;
+        return this;
+    }
+
+    @Deprecated
+    public OwoItemGroup group() {
+        return this.group.get();
+    }
+
+    public OwoItemSettings group(Supplier<OwoItemGroup> group) {
         this.group = group;
         return this;
     }
 
-    public OwoItemGroup group() {
+    public Supplier<OwoItemGroup> groupSupplier() {
         return this.group;
     }
 
