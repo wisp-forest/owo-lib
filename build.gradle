@@ -153,10 +153,10 @@ loom {
     }
 }
 
-remapJar {
-    dependsOn(processResources)
-    atAccessWideners.add("owo_fun.accesswidener")
-}
+//remapJar {
+//    dependsOn(processResources)
+//    atAccessWideners.add("owo_fun.accesswidener")
+//}
 
 dependencies {
 //    modLocalRuntime("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}")

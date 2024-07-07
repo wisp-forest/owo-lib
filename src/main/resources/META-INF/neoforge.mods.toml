@@ -14,8 +14,12 @@ yes its bad i know thanks
 '''
 logoFile = "assets/owo/icon.png"
 
+[[accessTransformers]]
+file="META-INF/accesstransformer_owo.cfg"
+
 [[mixins]]
 config = 'owo.mixins.json'
+
 [[mixins]]
 config = 'owo-forge.mixins.json'
 
