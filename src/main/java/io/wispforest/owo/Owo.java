@@ -6,8 +6,6 @@ import io.wispforest.owo.compat.modmenu.OwoModMenuPlugin;
 import io.wispforest.owo.extras.network.OwoInternalNetworking;
 import io.wispforest.owo.network.OwoHandshake;
 import io.wispforest.owo.ops.LootOps;
-import io.wispforest.owo.text.CustomTextRegistry;
-import io.wispforest.owo.text.InsertingTextContent;
 import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.Wisdom;
 import net.minecraft.registry.RegistryKeys;
@@ -78,7 +76,6 @@ public class Owo {
 
     public void onInitialize(FMLCommonSetupEvent event) {
         LootOps.registerListener();
-        CustomTextRegistry.register(InsertingTextContent.TYPE, "index");
         ScreenInternals.init();
 
         OwoHandshake.init(this.eventBus);

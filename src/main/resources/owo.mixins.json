@@ -32,8 +32,6 @@
     "recipe_remainders.RecipeManagerMixin",
     "text.LanguageMixin",
     "text.TextCodecsMixin",
-    "text.TranslatableTextContentMixin",
-    "text.stapi.SystemDelegatedLanguageFixin",
     "tweaks.EulaReaderMixin",
     "tweaks.LevelInfoMixin",
     "ui.SimpleRegistryAccessor",
