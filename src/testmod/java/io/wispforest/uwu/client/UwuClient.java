@@ -38,6 +38,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import org.lwjgl.glfw.GLFW;
 
@@ -65,13 +66,16 @@ public class UwuClient {
             BUT_COLOR_BINDING = new KeyBinding("key.uwu.hud_test_two", GLFW.GLFW_KEY_K, "misc");
             mappingsEvent.register(BUT_COLOR_BINDING);
         });
+
+        eventBus.addListener(RegisterMenuScreensEvent.class, event -> {
+            event.register(Uwu.EPIC_SCREEN_HANDLER_TYPE, EpicHandledScreen::new);
+        });
     }
 
     private static KeyBinding HUD_BINDING;
     private static KeyBinding BUT_COLOR_BINDING;
 
     public void onInitializeClient(FMLClientSetupEvent event) {
-        HandledScreens.register(Uwu.EPIC_SCREEN_HANDLER_TYPE, EpicHandledScreen::new);
 //        HandledScreens.register(EPIC_SCREEN_HANDLER_TYPE, EpicHandledModelScreen::new);
 
         final var hudComponentId = Identifier.of("uwu", "test_element");

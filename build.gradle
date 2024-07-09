@@ -176,7 +176,7 @@ dependencies {
 
     include api(forgeRuntimeLibrary("blue.endless:jankson:${project.jankson_version}"))
 
-    modCompileOnly("xyz.nucleoid:server-translations-api:${project.stapi_version}")
+//    modCompileOnly("xyz.nucleoid:server-translations-api:${project.stapi_version}")
 
     include modApi("org.sinytra.forgified-fabric-api:fabric-api-base:0.4.42+e0539096d1"){ exclude group: "fabric-api" }
 
