@@ -142,8 +142,10 @@ public class EdmOps implements DynamicOps<EdmElement<?>> {
 
     @Override
     public DataResult<Boolean> getBooleanValue(EdmElement<?> input) {
-        if (input.value() instanceof Boolean b) {
-            return DataResult.success(b);
+        if (input.value() instanceof Boolean bl) {
+            return DataResult.success(bl);
+        } else if(input.value() instanceof Byte b) {
+            return DataResult.success(b == 1);
         } else {
             return DataResult.error(() -> "Not a boolean: " + input);
         }
