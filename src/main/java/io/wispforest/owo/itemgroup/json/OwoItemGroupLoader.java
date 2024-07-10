@@ -125,7 +125,7 @@ public class OwoItemGroupLoader implements ModDataConsumer {
 
             Registries.ITEM.stream()
                     .filter(item -> ((OwoItemExtensions) item).owo$group() == targetGroup)
-                    .forEach(item -> ((OwoItemExtensions) item).owo$setGroup(wrapper));
+                    .forEach(item -> ((OwoItemExtensions) item).owo$setGroup(() -> wrapper));
         }
     }
 
@@ -134,7 +134,7 @@ public class OwoItemGroupLoader implements ModDataConsumer {
         return "item_group_tabs";
     }
 
-    static {
+    public static void initItemGroupCallback(){
         Registries.ITEM_GROUP.addCallback((AddCallback<ItemGroup>) (registry, rawId, id, group) -> {
             OwoItemGroupLoader.onGroupCreated(group);
         });

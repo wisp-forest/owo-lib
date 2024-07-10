@@ -18,8 +18,7 @@ import java.util.function.Supplier;
 @Mixin(Item.class)
 public class ItemMixin implements OwoItemExtensions {
 
-    @Nullable
-    protected Supplier<? extends ItemGroup> owo$group = () -> null;
+    protected Supplier<@Nullable ? extends ItemGroup> owo$group = () -> null;
 
     @Unique
     private int owo$tab = 0;
@@ -51,8 +50,8 @@ public class ItemMixin implements OwoItemExtensions {
     }
 
     @Override
-    public void owo$setGroup(ItemGroup group) {
-        this.owo$group = () -> group;
+    public void owo$setGroup(Supplier<ItemGroup> group) {
+        this.owo$group = group;
     }
 
     @Override

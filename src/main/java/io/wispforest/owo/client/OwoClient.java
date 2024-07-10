@@ -64,11 +64,12 @@ public class OwoClient {
             event.registerReloadListener(new UIModelLoader());
             event.registerReloadListener(new NinePatchTexture.MetadataLoader());
         });
+
+        ModDataLoader.load(OwoItemGroupLoader.INSTANCE);
+        OwoItemGroupLoader.initItemGroupCallback();
     }
 
     public void onInitializeClient(FMLClientSetupEvent setupEvent) {
-        ModDataLoader.load(OwoItemGroupLoader.INSTANCE);
-
         final var renderdocPath = System.getProperty("owo.renderdocPath");
         if (renderdocPath != null) {
             if (Util.getOperatingSystem() == Util.OperatingSystem.WINDOWS) {

@@ -39,8 +39,8 @@ public class OwoItemSettings extends Item.Settings {
         return this.group.get();
     }
 
-    public OwoItemSettings group(Supplier<OwoItemGroup> group) {
-        this.group = group;
+    public OwoItemSettings group(Supplier<OwoItemGroup> groupSupplier) {
+        this.group = groupSupplier;
         return this;
     }
 
