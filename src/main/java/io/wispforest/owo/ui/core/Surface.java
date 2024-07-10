@@ -34,18 +34,8 @@ public interface Surface {
         );
     };
 
-    Surface OPTIONS_BACKGROUND = (context, component) -> {
-        var client = MinecraftClient.getInstance();
-        var delta = client.getRenderTickCounter().getLastDuration();
-
-        if (client.world == null) {
-            ScreenAccessor.owo$ROTATING_PANORAMA_RENDERER()
-                    .render(context, component.width(), component.height(), 1.0F, delta);
-        }
-
-        client.gameRenderer.renderBlur(delta);
-        client.getFramebuffer().beginWrite(false);
-    };
+    Surface OPTIONS_BACKGROUND = Surface.panorama(false)
+            .and(Surface.blur(5, 10));
 
     Surface TOOLTIP = (context, component) -> {
         context.draw(() -> {
@@ -69,6 +59,17 @@ public interface Surface {
             OwoClient.BLUR_PROGRAM.setParameters(16, quality, size);
             OwoClient.BLUR_PROGRAM.use();
             BufferRenderer.drawWithGlobalProgram(buffer.end());
+        };
+    }
+
+    static Surface panorama(boolean alwaysVisible) {
+        return (context, component) -> {
+            var delta = MinecraftClient.getInstance().getRenderTickCounter().getLastDuration();
+
+            if (alwaysVisible || MinecraftClient.getInstance().world == null) {
+                ScreenAccessor.owo$ROTATING_PANORAMA_RENDERER()
+                        .render(context, component.width(), component.height(), 1.0F, delta);
+            }
         };
     }
 
