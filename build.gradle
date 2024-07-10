@@ -1,6 +1,6 @@
 //file:noinspection GradlePackageVersionRange
 plugins {
-    id "dev.architectury.loom" version "1.6-SNAPSHOT"
+    id "dev.architectury.loom" version "1.7.407"
     id 'maven-publish'
 }
 
