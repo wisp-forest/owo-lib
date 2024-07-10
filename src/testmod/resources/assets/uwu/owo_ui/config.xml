@@ -1,4 +1,5 @@
-<owo-ui xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../../owo-ui.xsd">
+<owo-ui xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../../../owo-ui.xsd">
     <components>
         <flow-layout direction="vertical">
             <children>
@@ -7,65 +8,79 @@
                         <label id="title">
                             <text translate="true"/>
                             <shadow>true</shadow>
+
+                            <margins>
+                                <vertical>10</vertical>
+                            </margins>
                         </label>
                     </children>
 
                     <vertical-alignment>center</vertical-alignment>
-
-                    <sizing>
-                        <vertical method="fill">8</vertical>
-                    </sizing>
                 </flow-layout>
 
-                <flow-layout direction="horizontal" id="main-panel">
+                <stack-layout>
                     <children>
-                        <flow-layout direction="vertical" id="option-panel-container">
+                        <flow-layout direction="horizontal" id="main-panel">
                             <children>
-                                <scroll direction="vertical" id="option-panel-scroll">
-                                    <flow-layout direction="vertical" id="option-panel">
-                                        <children/>
+                                <flow-layout direction="vertical" id="option-panel-container">
+                                    <children>
+                                        <scroll direction="vertical" id="option-panel-scroll">
+                                            <flow-layout direction="vertical" id="option-panel">
+                                                <children/>
+                                                <padding>
+                                                    <right>3</right>
+                                                </padding>
+                                            </flow-layout>
 
-                                        <padding>
-                                            <right>8</right>
-                                        </padding>
-                                    </flow-layout>
+                                            <scrollbar-thiccness>3</scrollbar-thiccness>
+
+                                            <sizing>
+                                                <horizontal method="fill">100</horizontal>
+                                                <vertical method="fill">100</vertical>
+                                            </sizing>
+
+                                            <padding>
+                                                <all>1</all>
+                                            </padding>
+                                        </scroll>
+                                    </children>
 
                                     <sizing>
-                                        <horizontal method="fill">100</horizontal>
+                                        <horizontal method="expand">100</horizontal>
                                         <vertical method="fill">100</vertical>
                                     </sizing>
-
-                                    <padding>
-                                        <all>1</all>
-                                    </padding>
-
-                                    <scrollbar-thiccness>14</scrollbar-thiccness>
-                                    <fixed-scrollbar-length>17</fixed-scrollbar-length>
-                                    <scrollbar>
-                                        <vanilla/>
-                                    </scrollbar>
-                                </scroll>
+                                </flow-layout>
                             </children>
+
+                            <padding>
+                                <horizontal>50</horizontal>
+                            </padding>
 
                             <sizing>
                                 <horizontal method="fill">100</horizontal>
                                 <vertical method="fill">100</vertical>
                             </sizing>
+
+                            <surface>
+                                <flat>#77000000</flat>
+                                <outline>#99121212</outline>
+                            </surface>
                         </flow-layout>
                     </children>
 
+                    <padding>
+                        <all>1</all>
+                    </padding>
+
                     <sizing>
-                        <horizontal method="fill">90</horizontal>
-                        <vertical method="fill">82</vertical>
+                        <horizontal method="fill">101</horizontal>
+                        <vertical method="expand">100</vertical>
                     </sizing>
 
                     <surface>
-                        <flat>#77000000</flat>
-                        <outline>#FF121212</outline>
+                        <outline>#33FFFFFF</outline>
                     </surface>
-                </flow-layout>
-
-
+                </stack-layout>
 
                 <flow-layout direction="horizontal">
                     <children>
@@ -136,13 +151,16 @@
                     <horizontal-alignment>right</horizontal-alignment>
                     <vertical-alignment>center</vertical-alignment>
 
-                    <surface>
-                        <panel dark="true"/>
-                    </surface>
+                    <margins>
+                        <vertical>5</vertical>
+                    </margins>
+
+                    <padding>
+                        <horizontal>50</horizontal>
+                    </padding>
 
                     <sizing>
-                        <horizontal method="fill">90</horizontal>
-                        <vertical method="fill">10</vertical>
+                        <horizontal method="fill">100</horizontal>
                     </sizing>
                 </flow-layout>
             </children>
@@ -151,7 +169,7 @@
             <horizontal-alignment>center</horizontal-alignment>
 
             <surface>
-                <flat>#77000000</flat>
+                <options-background/>
             </surface>
 
             <sizing>
@@ -162,55 +180,13 @@
     </components>
 
     <templates>
-        <config-option>
-            <flow-layout direction="horizontal">
-                <children>
-                    <label>
-                        <text translate="true">{{config-option-name}}</text>
-                        <positioning type="relative">0,50</positioning>
-                        <shadow>true</shadow>
-                    </label>
-
-                    <flow-layout direction="horizontal">
-                        <children>
-                            <template-child id="value-container">
-                                <sizing>
-                                    <horizontal method="fixed">120</horizontal>
-                                </sizing>
-                            </template-child>
-
-                            <button id="reset-button">
-                                <text>resette</text>
-                                <margins>
-                                    <horizontal>5</horizontal>
-                                </margins>
-                            </button>
-                        </children>
-
-                        <positioning type="relative">100,50</positioning>
-                        <vertical-alignment>center</vertical-alignment>
-                    </flow-layout>
-                </children>
-
-                <sizing>
-                    <horizontal method="fill">100</horizontal>
-                    <vertical method="fixed">32</vertical>
-                </sizing>
-
-                <padding>
-                    <all>5</all>
-                </padding>
-
-            </flow-layout>
-        </config-option>
-
-        <section-header>
+        <template name="section-header">
             <flow-layout direction="horizontal">
                 <children>
                     <box>
                         <sizing>
                             <vertical method="fixed">2</vertical>
-                            <horizontal method="fill">20</horizontal>
+                            <horizontal method="fill">35</horizontal>
                         </sizing>
 
                         <start-color>#FFFFFFFF</start-color>
@@ -228,7 +204,7 @@
                     <box>
                         <sizing>
                             <vertical method="fixed">2</vertical>
-                            <horizontal method="fill">20</horizontal>
+                            <horizontal method="fill">35</horizontal>
                         </sizing>
 
                         <start-color>#FFFFFFFF</start-color>
@@ -252,9 +228,9 @@
                     <vertical method="fixed">20</vertical>
                 </sizing>
             </flow-layout>
-        </section-header>
+        </template>
 
-        <section-buttons>
+        <template name="section-buttons">
             <flow-layout direction="vertical">
                 <children>
                     <label>
@@ -271,14 +247,67 @@
                 <vertical-alignment>center</vertical-alignment>
                 <horizontal-alignment>center</horizontal-alignment>
 
+                <padding>
+                    <horizontal>2</horizontal>
+                </padding>
+
                 <sizing>
-                    <horizontal method="fill">0</horizontal>
+                    <horizontal method="fixed">0</horizontal>
                     <vertical method="fill">100</vertical>
                 </sizing>
             </flow-layout>
-        </section-buttons>
+        </template>
 
-        <text-box-config-option>
+        <template name="config-option-base">
+            <flow-layout direction="horizontal">
+                <children>
+                    <label id="option-name">
+                        <text translate="true">{{config-option-name}}</text>
+                        <positioning type="relative">0,50</positioning>
+                        <shadow>true</shadow>
+                    </label>
+
+                    <template-child id="controls">
+                        <positioning type="relative">100,50</positioning>
+                        <vertical-alignment>center</vertical-alignment>
+                    </template-child>
+                </children>
+
+                <sizing>
+                    <horizontal method="fill">100</horizontal>
+                    <vertical method="fixed">32</vertical>
+                </sizing>
+
+                <padding>
+                    <all>5</all>
+                </padding>
+            </flow-layout>
+        </template>
+
+        <template name="config-option">
+            <template name="config-option-base">
+                <child id="controls">
+                    <flow-layout direction="horizontal" id="controls-flow">
+                        <children>
+                            <template-child id="value-container">
+                                <sizing>
+                                    <horizontal method="fixed">120</horizontal>
+                                </sizing>
+                            </template-child>
+
+                            <button id="reset-button">
+                                <text>⇄</text>
+                                <margins>
+                                    <horizontal>5</horizontal>
+                                </margins>
+                            </button>
+                        </children>
+                    </flow-layout>
+                </child>
+            </template>
+        </template>
+
+        <template name="text-box-config-option">
             <template name="config-option">
                 <child id="value-container">
                     <config-text-box id="value-box">
@@ -286,36 +315,147 @@
                     </config-text-box>
                 </child>
             </template>
-        </text-box-config-option>
+        </template>
 
-        <boolean-toggle-config-option>
+        <template name="boolean-toggle-config-option">
             <template name="config-option">
                 <child id="value-container">
                     <config-toggle-button id="toggle-button"/>
                 </child>
             </template>
-        </boolean-toggle-config-option>
+        </template>
 
-        <enum-config-option>
+        <template name="enum-config-option">
             <template name="config-option">
                 <child id="value-container">
                     <config-enum-button id="enum-button"/>
                 </child>
             </template>
-        </enum-config-option>
+        </template>
 
-        <range-config-option>
-            <template name="config-option">
-                <child id="value-container">
-                    <config-slider id="value-slider">
-                        <margins>
-                            <all>1</all>
-                        </margins>
-                    </config-slider>
+        <template name="range-config-option">
+            <template name="config-option-base">
+                <child id="controls">
+                    <flow-layout direction="horizontal" id="controls-flow">
+                        <children>
+                            <button id="toggle-button">
+                                <text>✎</text>
+                                <tooltip-text translate="true">text.owo.config.button.range.edit_as_text</tooltip-text>
+
+                                <renderer>
+                                    <flat color="#00000000" hovered-color="#77000000" disabled-color="#00000000"/>
+                                </renderer>
+
+                                <sizing>
+                                    <vertical method="fixed">16</vertical>
+                                </sizing>
+                            </button>
+
+                            <flow-layout direction="horizontal" id="slider-controls">
+                                <children>
+                                    <config-slider id="value-slider">
+                                        <margins>
+                                            <all>1</all>
+                                        </margins>
+                                        <sizing>
+                                            <horizontal method="fixed">120</horizontal>
+                                        </sizing>
+                                    </config-slider>
+
+                                    <button id="reset-button">
+                                        <text>⇄</text>
+                                        <margins>
+                                            <horizontal>5</horizontal>
+                                        </margins>
+                                    </button>
+                                </children>
+
+                                <vertical-alignment>center</vertical-alignment>
+                            </flow-layout>
+                        </children>
+
+                        <gap>2</gap>
+                    </flow-layout>
                 </child>
             </template>
-        </range-config-option>
-    </templates>
+        </template>
 
+        <template name="color-picker-panel">
+            <flow-layout direction="vertical">
+                <children>
+                    <label>
+                        <text>Choose color</text>
+                        <shadow>true</shadow>
+                        <margins>
+                            <top>3</top>
+                        </margins>
+                    </label>
+
+                    <color-picker id="color-picker">
+                        <show-alpha>{{with-alpha}}</show-alpha>
+                        <selected-color>{{color}}</selected-color>
+                        <sizing>
+                            <horizontal method="fixed">160</horizontal>
+                            <vertical method="fixed">100</vertical>
+                        </sizing>
+                    </color-picker>
+
+                    <flow-layout direction="horizontal">
+                        <children>
+                            <box>
+                                <fill>true</fill>
+                                <color>{{color}}</color>
+                                <sizing>
+                                    <horizontal method="fixed">80</horizontal>
+                                    <vertical method="fixed">15</vertical>
+                                </sizing>
+                            </box>
+                            <box id="current-color">
+                                <fill>true</fill>
+                                <color>{{color}}</color>
+                                <sizing>
+                                    <horizontal method="fixed">80</horizontal>
+                                    <vertical method="fixed">15</vertical>
+                                </sizing>
+                            </box>
+                        </children>
+                    </flow-layout>
+
+                    <flow-layout direction="horizontal">
+                        <children>
+                            <button id="cancel-button">
+                                <text>❌</text>
+                                <sizing>
+                                    <horizontal method="fixed">50</horizontal>
+                                    <vertical method="fixed">14</vertical>
+                                </sizing>
+                            </button>
+
+                            <button id="confirm-button">
+                                <text>✔</text>
+                                <sizing>
+                                    <horizontal method="fixed">50</horizontal>
+                                    <vertical method="fixed">14</vertical>
+                                </sizing>
+                            </button>
+                        </children>
+
+                        <gap>10</gap>
+                    </flow-layout>
+                </children>
+
+                <horizontal-alignment>center</horizontal-alignment>
+
+                <gap>5</gap>
+                <padding>
+                    <all>5</all>
+                </padding>
+                <surface>
+                    <panel dark="true"/>
+                </surface>
+            </flow-layout>
+        </template>
+
+    </templates>
 </owo-ui>
 
