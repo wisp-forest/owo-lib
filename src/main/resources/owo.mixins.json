@@ -14,6 +14,7 @@
     "NbtCompoundMixin",
     "PacketByteBufMixin",
     "RegistryOpsAccessor",
+    "ScreenAccessor",
     "ScreenHandlerInvoker",
     "ScreenHandlerMixin",
     "ServerCommonNetworkHandlerAccessor",
@@ -42,9 +43,9 @@
     "ui.access.BlockEntityAccessor"
   ],
   "client": [
+    "ClientCommonNetworkHandlerAccessor",
     "ClientConfigurationNetworkHandlerMixin",
     "ClientLoginNetworkHandlerAccessor",
-    "ClientCommonNetworkHandlerAccessor",
     "DrawContextMixin",
     "MinecraftClientMixin",
     "itemgroup.AbstractInventoryScreenMixin",

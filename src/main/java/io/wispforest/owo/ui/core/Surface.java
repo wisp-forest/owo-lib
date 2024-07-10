@@ -2,15 +2,13 @@ package io.wispforest.owo.ui.core;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.client.OwoClient;
+import io.wispforest.owo.mixin.ScreenAccessor;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.NinePatchTexture;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.TooltipBackgroundRenderer;
 import net.minecraft.client.render.*;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -37,8 +35,16 @@ public interface Surface {
     };
 
     Surface OPTIONS_BACKGROUND = (context, component) -> {
-        MinecraftClient.getInstance().gameRenderer.renderBlur(0);
-        MinecraftClient.getInstance().getFramebuffer().beginWrite(false);
+        var client = MinecraftClient.getInstance();
+        var delta = client.getRenderTickCounter().getLastDuration();
+
+        if (client.world == null) {
+            ScreenAccessor.owo$ROTATING_PANORAMA_RENDERER()
+                    .render(context, component.width(), component.height(), 1.0F, delta);
+        }
+
+        client.gameRenderer.renderBlur(delta);
+        client.getFramebuffer().beginWrite(false);
     };
 
     Surface TOOLTIP = (context, component) -> {
