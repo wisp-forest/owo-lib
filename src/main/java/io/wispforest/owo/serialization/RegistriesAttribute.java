@@ -31,7 +31,7 @@ public final class RegistriesAttribute implements SerializationAttribute.Instanc
     public static RegistriesAttribute infoGetterOnly(RegistryOps.RegistryInfoGetter lookup) {
         DynamicRegistryManager registryManager = null;
 
-        if(lookup instanceof RegistryOps.CachedRegistryInfoGetter getter && ((CachedRegistryInfoGetterAccessor) getter).getRegistriesLookup() instanceof DynamicRegistryManager drm) {
+        if(lookup instanceof RegistryOps.CachedRegistryInfoGetter getter && ((CachedRegistryInfoGetterAccessor) (Object) getter).getRegistriesLookup() instanceof DynamicRegistryManager drm) {
             registryManager = drm;
         }
 
