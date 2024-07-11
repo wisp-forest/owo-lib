@@ -93,8 +93,7 @@ public class Sizing implements Animatable<Sizing> {
 
     /**
      * A collection of utility methods for generating random sizing instances
-     * <p>
-     * made by chyzman
+     * @author chyzman
      */
     public static class Random {
         private static final java.util.Random SIZING_RANDOM = new java.util.Random();
