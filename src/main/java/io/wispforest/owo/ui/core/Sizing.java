@@ -6,6 +6,7 @@ import org.w3c.dom.Element;
 
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Random;
 import java.util.function.Function;
 
 public class Sizing implements Animatable<Sizing> {
@@ -55,7 +56,7 @@ public class Sizing implements Animatable<Sizing> {
     public static Sizing content(int padding) {
         return new Sizing(padding, Method.CONTENT);
     }
-    
+
     /**
      * Dynamically size the component to fill the available space
      */
@@ -88,6 +89,76 @@ public class Sizing implements Animatable<Sizing> {
      */
     public static Sizing expand(int percent) {
         return new Sizing(percent, Method.EXPAND);
+    }
+
+    public static class Random {
+        private static final java.util.Random SIZING_RANDOM = new java.util.Random();
+
+        public static Sizing fill(int min, int max) {
+            return Sizing.fill(SIZING_RANDOM.nextInt(min, max));
+        }
+
+        public static Sizing fill(int max) {
+            return Sizing.fill(SIZING_RANDOM.nextInt(0, max));
+        }
+
+        public static Sizing fill() {
+            return Sizing.fill(SIZING_RANDOM.nextInt(0, 100));
+        }
+
+        public static Sizing expand(int min, int max) {
+            return Sizing.expand(SIZING_RANDOM.nextInt(min, max));
+        }
+
+        public static Sizing expand(int max) {
+            return Sizing.expand(SIZING_RANDOM.nextInt(0, max));
+        }
+
+        public static Sizing expand() {
+            return Sizing.expand(SIZING_RANDOM.nextInt(0, 100));
+        }
+
+        public static Sizing fixed(int min, int max) {
+            return Sizing.fixed(SIZING_RANDOM.nextInt(min, max));
+        }
+
+        public static Sizing fixed(int max) {
+            return Sizing.fixed(SIZING_RANDOM.nextInt(0, max));
+        }
+
+        public static Sizing fixed() {
+            return Sizing.fixed(SIZING_RANDOM.nextInt(0, 100));
+        }
+
+        public static Sizing content(int min, int max) {
+            return Sizing.content(SIZING_RANDOM.nextInt(min, max));
+        }
+
+        public static Sizing content(int max) {
+            return Sizing.content(SIZING_RANDOM.nextInt(0, max));
+        }
+
+        public static Sizing content() {
+            return Sizing.content(SIZING_RANDOM.nextInt(0, 100));
+        }
+
+        public static Sizing random(int min, int max) {
+            return switch (SIZING_RANDOM.nextInt(0, 4)) {
+                case 0 -> fill();
+                case 1 -> expand();
+                case 2 -> fixed();
+                case 3 -> content();
+                default -> throw new IllegalStateException("Unexpected value: " + SIZING_RANDOM.nextInt(0, 4));
+            };
+        }
+
+        public static Sizing random(int max) {
+            return random(0, 100);
+        }
+
+        public static Sizing random() {
+            return random(0, 100);
+        }
     }
 
     /**
