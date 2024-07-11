@@ -69,6 +69,15 @@ public record Color(float red, float green, float blue, float alpha) implements 
         return new Color(ColorHelper.Argb.getRed(color), ColorHelper.Argb.getGreen(color), ColorHelper.Argb.getBlue(color));
     }
 
+    /**
+     * Generates a random color
+     * @apiNote Don't tell glisco about this
+     * @author chyzman
+     */
+    public static Color random() {
+        return ofArgb((int) (Math.random() * 0xFFFFFF) | 0xFF000000);
+    }
+
     public int rgb() {
         return (int) (this.red * 255) << 16
                 | (int) (this.green * 255) << 8

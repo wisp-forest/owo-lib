@@ -93,99 +93,142 @@ public class Sizing implements Animatable<Sizing> {
 
     /**
      * A collection of utility methods for generating random sizing instances
+     *
      * @author chyzman
      */
     public static class Random {
         private static final java.util.Random SIZING_RANDOM = new java.util.Random();
 
         /**
-         * Generate a random sizing instance with a value between {@code min} and {@code max}
+         * Generate a random fill sizing instance with a value between {@code min} and {@code max}
          *
          * @param min The minimum value
          * @param max The maximum value
          * @return A random sizing instance
+         * @author chyzman
          */
         public static Sizing fill(int min, int max) {
             return Sizing.fill(SIZING_RANDOM.nextInt(min, max));
         }
 
         /**
-         * Generate a random sizing instance with a value between 0 and {@code max}
+         * Generate a random fill sizing instance with a value between 0 and {@code max}
          *
          * @param max The maximum value
          * @return A random sizing instance
+         * @author chyzman
          */
         public static Sizing fill(int max) {
             return Sizing.fill(SIZING_RANDOM.nextInt(0, max));
         }
 
         /**
-         * Generate a random sizing instance with a value between 0 and 100
+         * Generate a random fill sizing instance with a value between 0 and 100
          *
          * @return A random sizing instance
+         * @author chyzman
          */
         public static Sizing fill() {
             return Sizing.fill(SIZING_RANDOM.nextInt(0, 100));
         }
 
         /**
-         * Generate a random sizing instance with a value between {@code min} and {@code max}
+         * Generate a random expand sizing instance with a value between {@code min} and {@code max}
          *
          * @param min The minimum value
          * @param max The maximum value
          * @return A random sizing instance
+         * @author chyzman
          */
         public static Sizing expand(int min, int max) {
             return Sizing.expand(SIZING_RANDOM.nextInt(min, max));
         }
 
         /**
-         * Generate a random sizing instance with a value between 0 and {@code max}
+         * Generate a random expand sizing instance with a value between 0 and {@code max}
          *
          * @param max The maximum value
          * @return A random sizing instance
+         * @author chyzman
          */
         public static Sizing expand(int max) {
             return Sizing.expand(SIZING_RANDOM.nextInt(0, max));
         }
 
         /**
-         * Generate a random sizing instance with a value between 0 and 100
+         * Generate a random expand sizing instance with a value between 0 and 100
          *
          * @return A random sizing instance
+         * @author chyzman
          */
         public static Sizing expand() {
             return Sizing.expand(SIZING_RANDOM.nextInt(0, 100));
         }
 
         /**
-         * Generate a random sizing instance with a value between {@code min} and {@code max}
+         * Generate a random fixed sizing instance with a value between {@code min} and {@code max}
          *
          * @param min The minimum value
          * @param max The maximum value
          * @return A random sizing instance
+         * @author chyzman
          */
         public static Sizing fixed(int min, int max) {
             return Sizing.fixed(SIZING_RANDOM.nextInt(min, max));
         }
 
         /**
-         * Generate a random sizing instance with a value between 0 and {@code max}
+         * Generate a random fixed sizing instance with a value between 0 and {@code max}
          *
          * @param max The maximum value
          * @return A random sizing instance
+         * @author chyzman
          */
         public static Sizing fixed(int max) {
             return Sizing.fixed(SIZING_RANDOM.nextInt(0, max));
         }
 
         /**
-         * Generate a random sizing instance with a value between 0 and 100
+         * Generate a random fixed sizing instance with a value between 0 and 100
          *
          * @return A random sizing instance
+         * @author chyzman
          */
         public static Sizing fixed() {
             return Sizing.fixed(SIZING_RANDOM.nextInt(0, 100));
+        }
+
+        /**
+         * Generate a random content sizing instance with a padding value between {@code min} and {@code max}
+         *
+         * @param min The minimum value
+         * @param max The maximum value
+         * @return A random sizing instance
+         * @author chyzman
+         */
+        public static Sizing content(int min, int max) {
+            return Sizing.content(SIZING_RANDOM.nextInt(min, max));
+        }
+
+        /**
+         * Generate a random content sizing instance with a padding value between 0 and {@code max}
+         *
+         * @param max The maximum value
+         * @return A random sizing instance
+         * @author chyzman
+         */
+        public static Sizing content(int max) {
+            return Sizing.content(SIZING_RANDOM.nextInt(0, max));
+        }
+
+        /**
+         * Generate a random content sizing instance with a padding value between 0 and 100
+         *
+         * @return A random sizing instance
+         * @author chyzman
+         */
+        public static Sizing content() {
+            return Sizing.content(SIZING_RANDOM.nextInt(0, 100));
         }
 
         /**
@@ -194,36 +237,8 @@ public class Sizing implements Animatable<Sizing> {
          * @param min The minimum value
          * @param max The maximum value
          * @return A random sizing instance
-         */
-        public static Sizing content(int min, int max) {
-            return Sizing.content(SIZING_RANDOM.nextInt(min, max));
-        }
-
-        /**
-         * Generate a random sizing instance with a value between 0 and {@code max}
-         *
-         * @param max The maximum value
-         * @return A random sizing instance
-         */
-        public static Sizing content(int max) {
-            return Sizing.content(SIZING_RANDOM.nextInt(0, max));
-        }
-
-        /**
-         * Generate a random sizing instance with a value between 0 and 100
-         *
-         * @return A random sizing instance
-         */
-        public static Sizing content() {
-            return Sizing.content(SIZING_RANDOM.nextInt(0, 100));
-        }
-
-        /**
-         * Generate a random sizing instance
-         *
-         * @param min The minimum value
-         * @param max The maximum value
-         * @return A random sizing instance
+         * @apiNote Can crash if put on a component that isn't a container
+         * @author chyzman
          */
         public static Sizing random(int min, int max) {
             return switch (SIZING_RANDOM.nextInt(0, 4)) {
@@ -236,19 +251,23 @@ public class Sizing implements Animatable<Sizing> {
         }
 
         /**
-         * Generate a random sizing instance
+         * Generate a random sizing instance with a value between 0 and {@code max}
          *
          * @param max The maximum value
          * @return A random sizing instance
+         * @apiNote Can crash if put on a component that isn't a container
+         * @author chyzman
          */
         public static Sizing random(int max) {
             return random(0, max);
         }
 
         /**
-         * Generate a random sizing instance
+         * Generate a random sizing instance with a value between 0 and 100
          *
          * @return A random sizing instance
+         * @apiNote Can crash if put on a component that isn't a container
+         * @author chyzman
          */
         public static Sizing random() {
             return random(0, 100);
@@ -261,6 +280,7 @@ public class Sizing implements Animatable<Sizing> {
          * @param min The minimum value
          * @param max The maximum value
          * @return A random sizing instance
+         * @author chyzman
          */
         public static Sizing noContent(int min, int max) {
             return switch (SIZING_RANDOM.nextInt(0, 3)) {
@@ -277,6 +297,7 @@ public class Sizing implements Animatable<Sizing> {
          *
          * @param max The maximum value
          * @return A random sizing instance
+         * @author chyzman
          */
         public static Sizing noContent(int max) {
             return noContent(0, max);
@@ -286,6 +307,7 @@ public class Sizing implements Animatable<Sizing> {
          * Generate a random sizing instance that is not content-based
          *
          * @return A random sizing instance
+         * @author chyzman
          */
         public static Sizing noContent() {
             return noContent(0, 100);
