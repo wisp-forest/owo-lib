@@ -29,7 +29,6 @@
     "offline.WorldSaveHandlerMixin",
     "recipe_remainders.CraftingResultSlotMixin",
     "recipe_remainders.RecipeManagerMixin",
-    "registry.SimpleRegistryAccessor",
     "registry.SimpleRegistryMixin",
     "registry.ReferenceAccessor",
     "text.LanguageMixin",

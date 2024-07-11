@@ -38,6 +38,8 @@ public abstract class SimpleRegistryMixin<T> implements MutableRegistry<T>, OwoS
      * Copy of the {@link SimpleRegistry#add} function but uses {@link List#set} instead of {@link List#add} for {@link SimpleRegistry#rawIdToEntry}
      */
     public RegistryEntry.Reference<T> owo$set(int id, RegistryKey<T> arg, T object, RegistryEntryInfo arg2) {
+        this.valueToEntry.remove(object);
+
         OwoFreezer.checkRegister("Registry Set Calls"); //this.assertNotFrozen(arg);
 
         Objects.requireNonNull(arg);

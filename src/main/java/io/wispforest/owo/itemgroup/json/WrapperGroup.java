@@ -5,7 +5,6 @@ import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
 import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
 import io.wispforest.owo.mixin.itemgroup.ItemGroupAccessor;
-import io.wispforest.owo.mixin.registry.SimpleRegistryAccessor;
 import io.wispforest.owo.util.pond.OwoSimpleRegistryExtensions;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.registry.Registries;
@@ -34,7 +33,6 @@ public class WrapperGroup extends OwoItemGroup {
 
         int parentRawId = Registries.ITEM_GROUP.getRawId(parent);
 
-        ((SimpleRegistryAccessor<ItemGroup>) Registries.ITEM_GROUP).owo$getValueToEntry().remove(parent);
         ((OwoSimpleRegistryExtensions<ItemGroup>) Registries.ITEM_GROUP).owo$set(parentRawId, RegistryKey.of(RegistryKeys.ITEM_GROUP, parentId), this, RegistryEntryInfo.DEFAULT);
 
         ((ItemGroupAccessor) this).owo$setDisplayName(parent.getDisplayName());
