@@ -228,10 +228,10 @@ public class Sizing implements Animatable<Sizing> {
          */
         public static Sizing random(int min, int max) {
             return switch (SIZING_RANDOM.nextInt(0, 4)) {
-                case 0 -> fill();
-                case 1 -> expand();
-                case 2 -> fixed();
-                case 3 -> content();
+                case 0 -> fill(min, max);
+                case 1 -> expand(min, max);
+                case 2 -> fixed(min, max);
+                case 3 -> content(min, max);
                 default -> throw new IllegalStateException("Unexpected value: " + SIZING_RANDOM.nextInt(0, 4));
             };
         }
@@ -243,7 +243,7 @@ public class Sizing implements Animatable<Sizing> {
          * @return A random sizing instance
          */
         public static Sizing random(int max) {
-            return random(0, 100);
+            return random(0, max);
         }
 
         /**
@@ -253,6 +253,43 @@ public class Sizing implements Animatable<Sizing> {
          */
         public static Sizing random() {
             return random(0, 100);
+        }
+
+        /**
+         * Generate a random sizing instance with a value between {@code min} and {@code max}
+         * that is not content-based
+         *
+         * @param min The minimum value
+         * @param max The maximum value
+         * @return A random sizing instance
+         */
+        public static Sizing noContent(int min, int max) {
+            return switch (SIZING_RANDOM.nextInt(0, 3)) {
+                case 0 -> fill(min, max);
+                case 1 -> expand(min, max);
+                case 2 -> fixed(min, max);
+                default -> throw new IllegalStateException("Unexpected value: " + SIZING_RANDOM.nextInt(0, 3));
+            };
+        }
+
+        /**
+         * Generate a random sizing instance with a value between 0 and {@code max}
+         * that is not content-based
+         *
+         * @param max The maximum value
+         * @return A random sizing instance
+         */
+        public static Sizing noContent(int max) {
+            return noContent(0, max);
+        }
+
+        /**
+         * Generate a random sizing instance that is not content-based
+         *
+         * @return A random sizing instance
+         */
+        public static Sizing noContent() {
+            return noContent(0, 100);
         }
     }
 
