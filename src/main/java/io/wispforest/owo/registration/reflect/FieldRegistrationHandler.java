@@ -24,7 +24,7 @@ public final class FieldRegistrationHandler {
      */
     public static <T> void process(Class<? extends FieldProcessingSubject<T>> clazz, ReflectionUtils.FieldConsumer<T> processor, boolean recurseIntoInnerClasses) {
         var handler = ReflectionUtils.tryInstantiateWithNoArgs(clazz);
-        ReflectionUtils.iterateAccessibleStaticFields(clazz, handler.getTargetFieldType(), createProcessor(processor, handler));
+        ReflectionUtils.iterateAccessibleStaticFieldsAllowingSuppliers(clazz, handler.getTargetFieldType(), createProcessor(processor, handler));
 
         if (recurseIntoInnerClasses) {
             ReflectionUtils.forApplicableSubclasses(clazz, FieldProcessingSubject.class,
@@ -44,7 +44,7 @@ public final class FieldRegistrationHandler {
      */
     public static <T> void processSimple(Class<? extends SimpleFieldProcessingSubject<T>> clazz, boolean recurseIntoInnerClasses) {
         var handler = ReflectionUtils.tryInstantiateWithNoArgs(clazz);
-        ReflectionUtils.iterateAccessibleStaticFields(clazz, handler.getTargetFieldType(), createProcessor(handler::processField, handler));
+        ReflectionUtils.iterateAccessibleStaticFieldsAllowingSuppliers(clazz, handler.getTargetFieldType(), createProcessor(handler::processField, handler));
 
         if (recurseIntoInnerClasses) {
             ReflectionUtils.forApplicableSubclasses(clazz, SimpleFieldProcessingSubject.class,
@@ -65,8 +65,19 @@ public final class FieldRegistrationHandler {
     public static <T> void register(Class<? extends AutoRegistryContainer<T>> clazz, String namespace, boolean recurseIntoInnerClasses) {
         AutoRegistryContainer<T> container = ReflectionUtils.tryInstantiateWithNoArgs(clazz);
 
-        ReflectionUtils.iterateAccessibleStaticFields(clazz, container.getTargetFieldType(), createProcessor((fieldValue, identifier, field) -> {
-            Registry.register(container.getRegistry(), Identifier.of(namespace, identifier), fieldValue);
+        ReflectionUtils.iterateAccessibleStaticFieldsAllowingSuppliers(clazz, container.getTargetFieldType(), createProcessor((fieldValue, identifier, field) -> {
+            var reference = Registry.registerReference(container.getRegistry(), Identifier.of(namespace, identifier), fieldValue);
+
+            try {
+                var object = field.get(null);
+
+                if(object instanceof MemorizedRegistryEntry memorizedRegistryEntry) {
+                    memorizedRegistryEntry.setEntry(reference);
+                }
+            } catch (IllegalArgumentException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+
             container.postProcessField(namespace, fieldValue, identifier, field);
         }, container));
 

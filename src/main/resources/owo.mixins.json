@@ -39,7 +39,8 @@
     "ui.SimpleRegistryAccessor",
     "ui.SlotAccessor",
     "ui.SlotMixin",
-    "ui.access.BlockEntityAccessor"
+    "ui.access.BlockEntityAccessor",
+    "registry.RegistryEntryMixin"
   ],
   "client": [
     "ClientConfigurationNetworkHandlerMixin",
