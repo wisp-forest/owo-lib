@@ -99,7 +99,7 @@ public final class ReflectionUtils {
         }
     }
 
-    public static <C, F> void iterateAccessibleStaticFieldsAllowingSuppliers(Class<C> clazz, Class<F> targetFieldType, FieldConsumer<F> fieldConsumer) {
+    public static <C, F> void iterateAccessibleStaticFieldsAllowingMemorizedSuppliers(Class<C> clazz, Class<F> targetFieldType, FieldConsumer<F> fieldConsumer) {
         for (var field : clazz.getDeclaredFields()) {
             if (!Modifier.isStatic(field.getModifiers())) continue;
 

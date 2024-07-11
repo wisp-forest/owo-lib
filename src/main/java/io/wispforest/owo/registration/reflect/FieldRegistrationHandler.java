@@ -24,7 +24,7 @@ public final class FieldRegistrationHandler {
      */
     public static <T> void process(Class<? extends FieldProcessingSubject<T>> clazz, ReflectionUtils.FieldConsumer<T> processor, boolean recurseIntoInnerClasses) {
         var handler = ReflectionUtils.tryInstantiateWithNoArgs(clazz);
-        ReflectionUtils.iterateAccessibleStaticFieldsAllowingSuppliers(clazz, handler.getTargetFieldType(), createProcessor(processor, handler));
+        ReflectionUtils.iterateAccessibleStaticFieldsAllowingMemorizedSuppliers(clazz, handler.getTargetFieldType(), createProcessor(processor, handler));
 
         if (recurseIntoInnerClasses) {
             ReflectionUtils.forApplicableSubclasses(clazz, FieldProcessingSubject.class,
@@ -44,7 +44,7 @@ public final class FieldRegistrationHandler {
      */
     public static <T> void processSimple(Class<? extends SimpleFieldProcessingSubject<T>> clazz, boolean recurseIntoInnerClasses) {
         var handler = ReflectionUtils.tryInstantiateWithNoArgs(clazz);
-        ReflectionUtils.iterateAccessibleStaticFieldsAllowingSuppliers(clazz, handler.getTargetFieldType(), createProcessor(handler::processField, handler));
+        ReflectionUtils.iterateAccessibleStaticFieldsAllowingMemorizedSuppliers(clazz, handler.getTargetFieldType(), createProcessor(handler::processField, handler));
 
         if (recurseIntoInnerClasses) {
             ReflectionUtils.forApplicableSubclasses(clazz, SimpleFieldProcessingSubject.class,
@@ -65,7 +65,7 @@ public final class FieldRegistrationHandler {
     public static <T> void register(Class<? extends AutoRegistryContainer<T>> clazz, String namespace, boolean recurseIntoInnerClasses) {
         AutoRegistryContainer<T> container = ReflectionUtils.tryInstantiateWithNoArgs(clazz);
 
-        ReflectionUtils.iterateAccessibleStaticFieldsAllowingSuppliers(clazz, container.getTargetFieldType(), createProcessor((fieldValue, identifier, field) -> {
+        ReflectionUtils.iterateAccessibleStaticFieldsAllowingMemorizedSuppliers(clazz, container.getTargetFieldType(), createProcessor((fieldValue, identifier, field) -> {
             var reference = Registry.registerReference(container.getRegistry(), Identifier.of(namespace, identifier), fieldValue);
 
             try {
