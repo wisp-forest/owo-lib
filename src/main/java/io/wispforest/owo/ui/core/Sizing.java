@@ -388,7 +388,11 @@ public class Sizing implements Animatable<Sizing> {
 
         @Override
         public int inflate(int space, Function<Sizing, Integer> contentSizeFunction) {
-            return MathHelper.lerp(this.delta, this.first.inflate(space, contentSizeFunction), this.second.inflate(space, contentSizeFunction));
+            return MathHelper.lerp(
+                    this.delta,
+                    this.first.inflate(space, contentSizeFunction),
+                    this.second.inflate(space, contentSizeFunction)
+            );
         }
 
         @Override
