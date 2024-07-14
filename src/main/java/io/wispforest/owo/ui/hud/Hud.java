@@ -40,6 +40,7 @@ public class Hud {
      */
     public static void add(Identifier id, Supplier<Component> component) {
         pendingActions.add(flowLayout -> {
+            if (hasComponent(id)) return;
             var instance = component.get();
 
             flowLayout.child(instance);
