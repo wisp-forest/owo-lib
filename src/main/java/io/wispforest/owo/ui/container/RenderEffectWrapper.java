@@ -6,7 +6,6 @@ import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.Sizing;
-import io.wispforest.owo.ui.event.WindowResizeCallback;
 import io.wispforest.owo.ui.util.ScissorStack;
 import io.wispforest.owo.ui.window.context.CurrentWindowContext;
 import io.wispforest.owo.ui.window.context.WindowContext;
