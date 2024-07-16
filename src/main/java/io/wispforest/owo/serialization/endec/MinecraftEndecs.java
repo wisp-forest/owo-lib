@@ -36,8 +36,12 @@ public final class MinecraftEndecs {
 
                 return buffer;
             }, buffer -> {
+                var rinx = buffer.readerIndex();
+
                 var bytes = new byte[buffer.readableBytes()];
                 buffer.readBytes(bytes);
+
+                buffer.readerIndex(rinx);
 
                 return bytes;
             });
