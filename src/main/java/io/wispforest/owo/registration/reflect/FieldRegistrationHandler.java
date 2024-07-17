@@ -1,9 +1,14 @@
 package io.wispforest.owo.registration.reflect;
 
+import io.wispforest.owo.registration.annotations.IterationIgnored;
 import io.wispforest.owo.registration.annotations.RegistryNamespace;
 import io.wispforest.owo.util.ReflectionUtils;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
+
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.util.function.Supplier;
 
 /**
  * Main hub for all interactions with implementations of
@@ -24,7 +29,7 @@ public final class FieldRegistrationHandler {
      */
     public static <T> void process(Class<? extends FieldProcessingSubject<T>> clazz, ReflectionUtils.FieldConsumer<T> processor, boolean recurseIntoInnerClasses) {
         var handler = ReflectionUtils.tryInstantiateWithNoArgs(clazz);
-        ReflectionUtils.iterateAccessibleStaticFieldsAllowingMemorizedSuppliers(clazz, handler.getTargetFieldType(), createProcessor(processor, handler));
+        iterateAccessibleStaticFieldsAllowingMemorizedSuppliers(clazz, handler.getTargetFieldType(), createProcessor(processor, handler));
 
         if (recurseIntoInnerClasses) {
             ReflectionUtils.forApplicableSubclasses(clazz, FieldProcessingSubject.class,
@@ -44,7 +49,7 @@ public final class FieldRegistrationHandler {
      */
     public static <T> void processSimple(Class<? extends SimpleFieldProcessingSubject<T>> clazz, boolean recurseIntoInnerClasses) {
         var handler = ReflectionUtils.tryInstantiateWithNoArgs(clazz);
-        ReflectionUtils.iterateAccessibleStaticFieldsAllowingMemorizedSuppliers(clazz, handler.getTargetFieldType(), createProcessor(handler::processField, handler));
+        iterateAccessibleStaticFieldsAllowingMemorizedSuppliers(clazz, handler.getTargetFieldType(), createProcessor(handler::processField, handler));
 
         if (recurseIntoInnerClasses) {
             ReflectionUtils.forApplicableSubclasses(clazz, SimpleFieldProcessingSubject.class,
@@ -65,13 +70,13 @@ public final class FieldRegistrationHandler {
     public static <T> void register(Class<? extends AutoRegistryContainer<T>> clazz, String namespace, boolean recurseIntoInnerClasses) {
         AutoRegistryContainer<T> container = ReflectionUtils.tryInstantiateWithNoArgs(clazz);
 
-        ReflectionUtils.iterateAccessibleStaticFieldsAllowingMemorizedSuppliers(clazz, container.getTargetFieldType(), createProcessor((fieldValue, identifier, field) -> {
+        iterateAccessibleStaticFieldsAllowingMemorizedSuppliers(clazz, container.getTargetFieldType(), createProcessor((fieldValue, identifier, field) -> {
             var reference = Registry.registerReference(container.getRegistry(), Identifier.of(namespace, identifier), fieldValue);
 
             try {
                 var object = field.get(null);
 
-                if(object instanceof MemorizedRegistryEntry memorizedRegistryEntry) {
+                if(object instanceof MemoizedRegistryEntry memorizedRegistryEntry) {
                     memorizedRegistryEntry.setEntry(reference);
                 }
             } catch (IllegalArgumentException | IllegalAccessException e) {
@@ -97,6 +102,52 @@ public final class FieldRegistrationHandler {
             if (!handler.shouldProcessField(value, name, field)) return;
             delegate.accept(value, name, field);
         };
+    }
+
+    private static <C, F> void iterateAccessibleStaticFieldsAllowingMemorizedSuppliers(Class<C> clazz, Class<F> targetFieldType, ReflectionUtils.FieldConsumer<F> fieldConsumer) {
+        for (var field : clazz.getDeclaredFields()) {
+            if (!Modifier.isStatic(field.getModifiers())) continue;
+
+            Object fieldValue;
+            try {
+                fieldValue = field.get(null);
+            } catch (IllegalAccessException e) {
+                continue;
+            }
+
+            if(fieldValue == null) continue;
+
+            var valueType = fieldValue.getClass();
+
+            F finalValue = null;
+
+            if (!targetFieldType.isAssignableFrom(valueType)) {
+                boolean isValid = false;
+
+                if(Supplier.class.isAssignableFrom(field.getType()) && field.getGenericType() instanceof ParameterizedType parameterizedType) {
+                    var genericType = parameterizedType.getActualTypeArguments()[0];
+
+                    if (genericType instanceof Class<?> genericClass && targetFieldType.isAssignableFrom(genericClass)) {
+                        if(!(fieldValue instanceof MemoizedEntry<?>)) {
+                            throw new IllegalStateException("A given Supplier object must be of a memoized variant or problems may occur! [Field: " + field.getName() + "]");
+                        }
+
+                        finalValue = (F) ((Supplier) fieldValue).get();
+
+
+                        isValid = true;
+                    }
+                }
+
+                if(!isValid) continue;
+            } else {
+                finalValue = (F) fieldValue;
+            }
+
+            if (field.isAnnotationPresent(IterationIgnored.class)) continue;
+
+            fieldConsumer.accept(finalValue, ReflectionUtils.getFieldName(field), field);
+        }
     }
 
 }

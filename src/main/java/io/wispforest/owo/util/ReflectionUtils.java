@@ -2,7 +2,7 @@ package io.wispforest.owo.util;
 
 import io.wispforest.owo.registration.annotations.AssignedName;
 import io.wispforest.owo.registration.annotations.IterationIgnored;
-import io.wispforest.owo.registration.reflect.MemorizedEntry;
+import io.wispforest.owo.registration.reflect.MemoizedEntry;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -96,52 +96,6 @@ public final class ReflectionUtils {
             if (field.isAnnotationPresent(IterationIgnored.class)) continue;
 
             fieldConsumer.accept(value, getFieldName(field), field);
-        }
-    }
-
-    public static <C, F> void iterateAccessibleStaticFieldsAllowingMemorizedSuppliers(Class<C> clazz, Class<F> targetFieldType, FieldConsumer<F> fieldConsumer) {
-        for (var field : clazz.getDeclaredFields()) {
-            if (!Modifier.isStatic(field.getModifiers())) continue;
-
-            Object fieldValue;
-            try {
-                fieldValue = field.get(null);
-            } catch (IllegalAccessException e) {
-                continue;
-            }
-
-            if(fieldValue == null) continue;
-
-            var valueType = fieldValue.getClass();
-
-            F finalValue = null;
-
-            if (!targetFieldType.isAssignableFrom(valueType)) {
-                boolean isValid = false;
-
-                if(Supplier.class.isAssignableFrom(field.getType()) && field.getGenericType() instanceof ParameterizedType parameterizedType) {
-                    var genericType = parameterizedType.getActualTypeArguments()[0];
-
-                    if (genericType instanceof Class<?> genericClass && genericClass.isAssignableFrom(targetFieldType)) {
-                        if(!(fieldValue instanceof MemorizedEntry<?>)) {
-                            throw new IllegalStateException("A given Supplier object must be of a memoized variant or problems may occur! [Field: " + field.getName() + "]");
-                        }
-
-                        finalValue = (F) ((Supplier) fieldValue).get();
-
-
-                        isValid = true;
-                    }
-                }
-
-                if(!isValid) continue;
-            } else {
-                finalValue = (F) fieldValue;
-            }
-
-            if (field.isAnnotationPresent(IterationIgnored.class)) continue;
-
-            fieldConsumer.accept(finalValue, getFieldName(field), field);
         }
     }
 

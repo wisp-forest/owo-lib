@@ -4,15 +4,15 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 
-public interface BlockEntityRegistryContainer extends AutoRegistryContainer<BlockEntityType<?>> {
+public abstract class BlockEntityRegistryContainer extends AutoRegistryContainer<BlockEntityType<?>> {
 
     @Override
-    default Registry<BlockEntityType<?>> getRegistry() {
+    public final Registry<BlockEntityType<?>> getRegistry() {
         return Registries.BLOCK_ENTITY_TYPE;
     }
 
     @Override
-    default Class<BlockEntityType<?>> getTargetFieldType() {
+    public final Class<BlockEntityType<?>> getTargetFieldType() {
         return AutoRegistryContainer.conform(BlockEntityType.class);
     }
 }

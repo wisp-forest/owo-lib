@@ -2,8 +2,10 @@ package io.wispforest.owo.registration.reflect;
 
 import io.wispforest.owo.registration.annotations.AssignedName;
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.entry.RegistryEntry;
 
 import java.lang.reflect.Field;
+import java.util.function.Supplier;
 
 /**
  * A special version of {@link FieldProcessingSubject} that contains fields which should
@@ -14,12 +16,12 @@ import java.lang.reflect.Field;
  *
  * @param <T> The type of objects to register, same as the Registry's type parameter
  */
-public interface AutoRegistryContainer<T> extends FieldProcessingSubject<T> {
+public abstract class AutoRegistryContainer<T> implements FieldProcessingSubject<T> {
 
     /**
      * @return The registry the fields of this class should be registered into
      */
-    Registry<T> getRegistry();
+    public abstract Registry<T> getRegistry();
 
     /**
      * Called after the given field has been registered
@@ -29,7 +31,7 @@ public interface AutoRegistryContainer<T> extends FieldProcessingSubject<T> {
      * @param identifier The identifier the field was assigned, possibly overridden by an {@link AssignedName}
      *                   annotation and always fully lowercase
      */
-    default void postProcessField(String namespace, T value, String identifier, Field field) {}
+    public void postProcessField(String namespace, T value, String identifier, Field field) {}
 
     /**
      * Convenience-alias for {@link FieldRegistrationHandler#register(Class, String, boolean)}
@@ -41,5 +43,9 @@ public interface AutoRegistryContainer<T> extends FieldProcessingSubject<T> {
     @SuppressWarnings({"unchecked"})
     static <T> Class<T> conform(Class<?> input) {
         return (Class<T>) input;
+    }
+
+    public static <T> RegistryEntry<T> entry(Supplier<T> supplier) {
+        return MemoizedEntry.ofEntry(supplier);
     }
 }
