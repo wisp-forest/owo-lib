@@ -201,7 +201,7 @@ public class CodecUtils {
                     });
 
                     var rootOps = ops;
-                    while (rootOps instanceof ForwardingDynamicOps<T1>) rootOps = ((ForwardingDynamicOpsAccessor<T1>) ops).owo$delegate();
+                    while (rootOps instanceof ForwardingDynamicOps<T1>) rootOps = ((ForwardingDynamicOpsAccessor<T1>) rootOps).owo$delegate();
 
                     var context = rootOps instanceof EdmOps edmOps
                             ? edmOps.capturedContext().and(assumedContext)
@@ -221,7 +221,7 @@ public class CodecUtils {
             public <T1> RecordBuilder<T1> encode(T input, DynamicOps<T1> ops, RecordBuilder<T1> prefix) {
                 try {
                     var rootOps = ops;
-                    while (rootOps instanceof ForwardingDynamicOps<T1>) rootOps = ((ForwardingDynamicOpsAccessor<T1>) ops).owo$delegate();
+                    while (rootOps instanceof ForwardingDynamicOps<T1>) rootOps = ((ForwardingDynamicOpsAccessor<T1>) rootOps).owo$delegate();
 
                     var context = rootOps instanceof EdmOps edmOps
                             ? edmOps.capturedContext().and(assumedContext)
