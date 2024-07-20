@@ -2,7 +2,6 @@ package io.wispforest.owo.util;
 
 import io.wispforest.owo.registration.annotations.AssignedName;
 import io.wispforest.owo.registration.annotations.IterationIgnored;
-import io.wispforest.owo.registration.reflect.MemoizedEntry;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -10,7 +9,6 @@ import java.lang.reflect.*;
 import java.util.Locale;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 @ApiStatus.Experimental
 public final class ReflectionUtils {
@@ -84,6 +82,7 @@ public final class ReflectionUtils {
     public static <C, F> void iterateAccessibleStaticFields(Class<C> clazz, Class<F> targetFieldType, FieldConsumer<F> fieldConsumer) {
         for (var field : clazz.getDeclaredFields()) {
             if (!Modifier.isStatic(field.getModifiers())) continue;
+            if (field.isAnnotationPresent(IterationIgnored.class)) continue;
 
             F value;
             try {
@@ -93,7 +92,6 @@ public final class ReflectionUtils {
             }
 
             if (value == null || !targetFieldType.isAssignableFrom(value.getClass())) continue;
-            if (field.isAnnotationPresent(IterationIgnored.class)) continue;
 
             fieldConsumer.accept(value, getFieldName(field), field);
         }

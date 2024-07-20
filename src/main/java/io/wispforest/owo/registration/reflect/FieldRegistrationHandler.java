@@ -107,6 +107,7 @@ public final class FieldRegistrationHandler {
     private static <C, F> void iterateAccessibleStaticFieldsAllowingMemorizedSuppliers(Class<C> clazz, Class<F> targetFieldType, ReflectionUtils.FieldConsumer<F> fieldConsumer) {
         for (var field : clazz.getDeclaredFields()) {
             if (!Modifier.isStatic(field.getModifiers())) continue;
+            if (field.isAnnotationPresent(IterationIgnored.class)) continue;
 
             Object fieldValue;
             try {
@@ -143,8 +144,6 @@ public final class FieldRegistrationHandler {
             } else {
                 finalValue = (F) fieldValue;
             }
-
-            if (field.isAnnotationPresent(IterationIgnored.class)) continue;
 
             fieldConsumer.accept(finalValue, ReflectionUtils.getFieldName(field), field);
         }
