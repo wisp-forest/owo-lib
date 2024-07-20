@@ -65,8 +65,7 @@ public record Color(float red, float green, float blue, float alpha) implements 
     }
 
     public static Color ofDye(@NotNull DyeColor dyeColor) {
-        var color = dyeColor.getEntityColor();
-        return new Color(ColorHelper.Argb.getRed(color), ColorHelper.Argb.getGreen(color), ColorHelper.Argb.getBlue(color));
+        return ofArgb(dyeColor.getEntityColor());
     }
 
     /**
