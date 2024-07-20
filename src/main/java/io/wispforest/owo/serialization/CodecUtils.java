@@ -189,6 +189,36 @@ public class CodecUtils {
         return toMapCodec(structEndec, SerializationContext.empty());
     }
 
+    public static <T> StructEndec<T> ofMapCodec(MapCodec<T> mapCodec) {
+        return new StructEndec<T>() {
+            @Override
+            public void encodeStruct(SerializationContext ctx, Serializer<?> serializer, Serializer.Struct struct, T value) {
+                var ops = createEdmOps(ctx);
+
+                var edmMap = mapCodec.encode(value, ops, ops.mapBuilder()).build(ops.emptyMap())
+                        .getOrThrow(IllegalStateException::new)
+                        .asMap();
+
+                if(serializer instanceof SelfDescribedDeserializer<?>) {
+                    edmMap.value().forEach((s, element) -> struct.field(s, ctx, EdmEndec.INSTANCE, element));
+                } else {
+                    struct.field("element", ctx, EdmEndec.MAP, edmMap);
+                }
+            }
+
+            @Override
+            public T decodeStruct(SerializationContext ctx, Deserializer<?> deserializer, Deserializer.Struct struct) {
+                var edmMap = ((deserializer instanceof SelfDescribedDeserializer<?>)
+                        ? EdmEndec.MAP.decode(ctx, deserializer)
+                        : struct.field("element", ctx, EdmEndec.MAP));
+
+                var ops = createEdmOps(ctx);
+
+                return mapCodec.decode(ops, ops.getMap(edmMap).getOrThrow(IllegalStateException::new)).getOrThrow(IllegalStateException::new);
+            }
+        };
+    }
+
     // the fact that we lose context here is certainly far from ideal,
     // but for the most part *shouldn't* matter. after all, ideally nobody
     // should ever be nesting packet codecs into endecs - there's little
