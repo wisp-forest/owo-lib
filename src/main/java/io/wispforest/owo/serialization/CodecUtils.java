@@ -199,7 +199,7 @@ public class CodecUtils {
                         .getOrThrow(IllegalStateException::new)
                         .asMap();
 
-                if(serializer instanceof SelfDescribedDeserializer<?>) {
+                if(serializer instanceof SelfDescribedSerializer<?>) {
                     edmMap.value().forEach((s, element) -> struct.field(s, ctx, EdmEndec.INSTANCE, element));
                 } else {
                     struct.field("element", ctx, EdmEndec.MAP, edmMap);
