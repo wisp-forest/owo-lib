@@ -78,7 +78,7 @@
         "io/wispforest/owo/serialization/OwoComponentTypeBuilder<TT;>"
       ],
       "net/minecraft/class_6880": [
-        "java/util/function/Supplier<TT;>"
+        "java/util/function/OwoInjectedSupplier<TT;>"
       ]
     }
   }
