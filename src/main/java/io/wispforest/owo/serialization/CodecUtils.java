@@ -189,7 +189,7 @@ public class CodecUtils {
         return toMapCodec(structEndec, SerializationContext.empty());
     }
 
-    public static <T> StructEndec<T> ofMapCodec(MapCodec<T> mapCodec) {
+    public static <T> StructEndec<T> toStructEndec(MapCodec<T> mapCodec) {
         return new StructEndec<T>() {
             @Override
             public void encodeStruct(SerializationContext ctx, Serializer<?> serializer, Serializer.Struct struct, T value) {
