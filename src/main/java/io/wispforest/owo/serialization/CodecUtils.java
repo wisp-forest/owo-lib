@@ -4,9 +4,7 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.*;
 import io.netty.buffer.ByteBuf;
-import io.wispforest.endec.Endec;
-import io.wispforest.endec.SerializationContext;
-import io.wispforest.endec.StructEndec;
+import io.wispforest.endec.*;
 import io.wispforest.endec.format.bytebuf.ByteBufDeserializer;
 import io.wispforest.endec.format.bytebuf.ByteBufSerializer;
 import io.wispforest.endec.format.edm.*;
@@ -24,6 +22,7 @@ import net.minecraft.util.dynamic.ForwardingDynamicOps;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class CodecUtils {
@@ -47,18 +46,12 @@ public class CodecUtils {
     public static <T> Endec<T> toEndec(Codec<T> codec) {
         return Endec.of(
                 (ctx, serializer, value) -> {
-                    DynamicOps<EdmElement<?>> ops = EdmOps.withContext(ctx);
-                    if (ctx.hasAttribute(RegistriesAttribute.REGISTRIES)) {
-                        ops = RegistryOps.of(ops, ctx.getAttributeValue(RegistriesAttribute.REGISTRIES).infoGetter());
-                    }
+                    var ops = createEdmOps(ctx);
 
                     EdmEndec.INSTANCE.encode(ctx, serializer, codec.encodeStart(ops, value).getOrThrow(IllegalStateException::new));
                 },
                 (ctx, deserializer) -> {
-                    DynamicOps<EdmElement<?>> ops = EdmOps.withContext(ctx);
-                    if (ctx.hasAttribute(RegistriesAttribute.REGISTRIES)) {
-                        ops = RegistryOps.of(ops, ctx.getAttributeValue(RegistriesAttribute.REGISTRIES).infoGetter());
-                    }
+                    var ops = createEdmOps(ctx);
 
                     return codec.parse(ops, EdmEndec.INSTANCE.decode(ctx, deserializer)).getOrThrow(IllegalStateException::new);
                 }
@@ -76,10 +69,7 @@ public class CodecUtils {
                         return;
                     }
 
-                    DynamicOps<EdmElement<?>> ops = EdmOps.withContext(ctx);
-                    if (ctx.hasAttribute(RegistriesAttribute.REGISTRIES)) {
-                        ops = RegistryOps.of(ops, ctx.getAttributeValue(RegistriesAttribute.REGISTRIES).infoGetter());
-                    }
+                    var ops = createEdmOps(ctx);
 
                     EdmEndec.INSTANCE.encode(ctx, serializer, codec.encodeStart(ops, value).getOrThrow(IllegalStateException::new));
                 },
@@ -89,10 +79,7 @@ public class CodecUtils {
                         return packetCodec.decode(buffer);
                     }
 
-                    DynamicOps<EdmElement<?>> ops = EdmOps.withContext(ctx);
-                    if (ctx.hasAttribute(RegistriesAttribute.REGISTRIES)) {
-                        ops = RegistryOps.of(ops, ctx.getAttributeValue(RegistriesAttribute.REGISTRIES).infoGetter());
-                    }
+                    var ops = createEdmOps(ctx);
 
                     return codec.parse(ops, EdmEndec.INSTANCE.decode(ctx, deserializer)).getOrThrow(IllegalStateException::new);
                 }
@@ -136,43 +123,17 @@ public class CodecUtils {
         return new Codec<>() {
             @Override
             public <D> DataResult<Pair<T, D>> decode(DynamicOps<D> ops, D input) {
-                try {
-                    var rootOps = ops;
-                    while (rootOps instanceof ForwardingDynamicOps<D>) rootOps = ((ForwardingDynamicOpsAccessor<D>) rootOps).owo$delegate();
-
-                    var context = rootOps instanceof EdmOps edmOps
-                            ? edmOps.capturedContext().and(assumedContext)
-                            : assumedContext;
-
-                    if (ops instanceof RegistryOps<D> registryOps) {
-                        context = context.withAttributes(RegistriesAttribute.infoGetterOnly(((RegistryOpsAccessor) registryOps).owo$infoGetter()));
-                    }
-
-                    return DataResult.success(new Pair<>(endec.decode(context, LenientEdmDeserializer.of(ops.convertTo(EdmOps.withoutContext(), input))), input));
-                } catch (Exception e) {
-                    return DataResult.error(e::getMessage);
-                }
+                return captureThrows(() -> {
+                    return new Pair<>(endec.decode(createContext(ops, assumedContext), LenientEdmDeserializer.of(ops.convertTo(EdmOps.withoutContext(), input))), input);
+                });
             }
 
             @Override
             @SuppressWarnings("unchecked")
             public <D> DataResult<D> encode(T input, DynamicOps<D> ops, D prefix) {
-                try {
-                    var rootOps = ops;
-                    while (rootOps instanceof ForwardingDynamicOps<D>) rootOps = ((ForwardingDynamicOpsAccessor<D>) rootOps).owo$delegate();
-
-                    var context = rootOps instanceof EdmOps edmOps
-                            ? edmOps.capturedContext().and(assumedContext)
-                            : assumedContext;
-
-                    if (ops instanceof RegistryOps<D> registryOps) {
-                        context = context.withAttributes(RegistriesAttribute.infoGetterOnly(((RegistryOpsAccessor) registryOps).owo$infoGetter()));
-                    }
-
-                    return DataResult.success(EdmOps.withoutContext().convertTo(ops, endec.encodeFully(context, EdmSerializer::of, input)));
-                } catch (Exception e) {
-                    return DataResult.error(e::getMessage);
-                }
+                return captureThrows(() -> {
+                    return EdmOps.withoutContext().convertTo(ops, endec.encodeFully(createContext(ops, assumedContext), EdmSerializer::of, input));
+                });
             }
         };
     }
@@ -190,7 +151,7 @@ public class CodecUtils {
 
             @Override
             public <T1> DataResult<T> decode(DynamicOps<T1> ops, MapLike<T1> input) {
-                try {
+                return captureThrows(() -> {
                     var map = new HashMap<String, EdmElement<?>>();
                     input.entries().forEach(pair -> {
                         map.put(
@@ -200,36 +161,14 @@ public class CodecUtils {
                         );
                     });
 
-                    var rootOps = ops;
-                    while (rootOps instanceof ForwardingDynamicOps<T1>) rootOps = ((ForwardingDynamicOpsAccessor<T1>) ops).owo$delegate();
-
-                    var context = rootOps instanceof EdmOps edmOps
-                            ? edmOps.capturedContext().and(assumedContext)
-                            : assumedContext;
-
-                    if (ops instanceof RegistryOps<T1> registryOps) {
-                        context = context.withAttributes(RegistriesAttribute.infoGetterOnly(((RegistryOpsAccessor) registryOps).owo$infoGetter()));
-                    }
-
-                    return DataResult.success(structEndec.decode(context, LenientEdmDeserializer.of(EdmElement.wrapMap(map))));
-                } catch (Exception e) {
-                    return DataResult.error(e::getMessage);
-                }
+                    return structEndec.decode(createContext(ops, assumedContext), LenientEdmDeserializer.of(EdmElement.wrapMap(map)));
+                });
             }
 
             @Override
             public <T1> RecordBuilder<T1> encode(T input, DynamicOps<T1> ops, RecordBuilder<T1> prefix) {
                 try {
-                    var rootOps = ops;
-                    while (rootOps instanceof ForwardingDynamicOps<T1>) rootOps = ((ForwardingDynamicOpsAccessor<T1>) ops).owo$delegate();
-
-                    var context = rootOps instanceof EdmOps edmOps
-                            ? edmOps.capturedContext().and(assumedContext)
-                            : assumedContext;
-
-                    if (ops instanceof RegistryOps<T1> registryOps) {
-                        context = context.withAttributes(RegistriesAttribute.infoGetterOnly(((RegistryOpsAccessor) registryOps).owo$infoGetter()));
-                    }
+                    var context = createContext(ops, assumedContext);
 
                     var element = structEndec.encodeFully(context, EdmSerializer::of, input).<Map<String, EdmElement<?>>>cast();
 
@@ -277,5 +216,40 @@ public class CodecUtils {
                 endec.encode(ctx, ByteBufSerializer.of(buf), value);
             }
         };
+    }
+
+    //--
+
+    private static SerializationContext createContext(DynamicOps<?> ops, SerializationContext assumedContext) {
+        var rootOps = ops;
+        while (rootOps instanceof ForwardingDynamicOps<?>) rootOps = ((ForwardingDynamicOpsAccessor<?>) rootOps).owo$delegate();
+
+        var context = rootOps instanceof EdmOps edmOps
+                ? edmOps.capturedContext().and(assumedContext)
+                : assumedContext;
+
+        if (ops instanceof RegistryOps<?> registryOps) {
+            context = context.withAttributes(RegistriesAttribute.infoGetterOnly(((RegistryOpsAccessor) registryOps).owo$infoGetter()));
+        }
+
+        return context;
+    }
+
+    private static DynamicOps<EdmElement<?>> createEdmOps(SerializationContext ctx) {
+        DynamicOps<EdmElement<?>> ops = EdmOps.withContext(ctx);
+
+        if (ctx.hasAttribute(RegistriesAttribute.REGISTRIES)) {
+            ops = RegistryOps.of(ops, ctx.getAttributeValue(RegistriesAttribute.REGISTRIES).infoGetter());
+        }
+
+        return ops;
+    }
+
+    private static <T> DataResult<T> captureThrows(Supplier<T> action) {
+        try {
+            return DataResult.success(action.get());
+        } catch (Exception e) {
+            return DataResult.error(e::getMessage);
+        }
     }
 }
