@@ -7,17 +7,15 @@ import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.util.pond.OwoScreenHandlerExtension;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.client.event.ScreenEvent;
-import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
@@ -73,11 +71,9 @@ public class ScreenInternals {
     @OnlyIn(Dist.CLIENT)
     public static class Client {
         public static void init() {
-            NeoForge.EVENT_BUS.addListener((ScreenEvent.Init.Post event) -> {
-                var screen = event.getScreen();
-                var client = MinecraftClient.getInstance();
-
-                if (screen instanceof ScreenHandlerProvider<?> handled) ((OwoScreenHandlerExtension) handled.getScreenHandler()).owo$attachToPlayer(client.player);
+            ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
+                if (screen instanceof ScreenHandlerProvider<?> handled)
+                    ((OwoScreenHandlerExtension) handled.getScreenHandler()).owo$attachToPlayer(client.player);
             });
 
             ClientPlayNetworking.registerGlobalReceiver(LocalPacket.ID, (payload, context) -> {

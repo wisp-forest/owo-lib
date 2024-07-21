@@ -5,7 +5,6 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.logging.LogUtils;
-import dev.architectury.event.events.common.CommandRegistrationEvent;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.command.EnumArgumentType;
 import io.wispforest.owo.ops.TextOps;
@@ -18,6 +17,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.IdentifierArgumentType;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -32,9 +32,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.poi.PointOfInterestStorage;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.registries.RegisterEvent;
 import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.event.Level;
 
@@ -49,16 +51,18 @@ public class OwoDebugCommands {
     private static final SuggestionProvider<ServerCommandSource> POI_TYPES =
             (context, builder) -> CommandSource.suggestIdentifiers(Registries.POINT_OF_INTEREST_TYPE.getIds(), builder);
 
-    public static void initArgumentTypes() {
-        LEVEL_ARGUMENT_TYPE = EnumArgumentType.create(Level.class, "'{}' is not a valid logging level");
-    }
-
     private static final SimpleCommandExceptionType NO_POI_TYPE = new SimpleCommandExceptionType(Text.of("Invalid POI type"));
     public static final int GENERAL_PURPLE = 0xB983FF;
     public static final int KEY_BLUE = 0x94B3FD;
     public static final int VALUE_BLUE = 0x94DAFF;
 
-    public static void register() {
+    public static void register(IEventBus modBus) {
+        modBus.addListener(RegisterEvent.class, event -> {
+            event.register(RegistryKeys.COMMAND_ARGUMENT_TYPE, helper -> {
+                LEVEL_ARGUMENT_TYPE = EnumArgumentType.create(Level.class, "'{}' is not a valid logging level");
+            });
+        });
+
         NeoForge.EVENT_BUS.addListener((RegisterCommandsEvent event) -> {
             var dispatcher = event.getDispatcher();
             var registryAccess = event.getBuildContext();

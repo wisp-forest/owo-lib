@@ -16,10 +16,7 @@ import net.minecraft.util.Util;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 import net.neoforged.neoforge.common.NeoForge;
@@ -53,23 +50,15 @@ public class OwoClient {
     public static final GlProgram HSV_PROGRAM = new GlProgram(Identifier.of("owo", "spectrum"), VertexFormats.POSITION_COLOR);
     public static final BlurProgram BLUR_PROGRAM = new BlurProgram();
 
-    private final IEventBus eventBus;
+    public OwoClient(IEventBus modBus) {
+        ModDataLoader.load(OwoItemGroupLoader.INSTANCE);
+        OwoItemGroupLoader.initItemGroupCallback();
 
-    public OwoClient(IEventBus eventBus) {
-        this.eventBus = eventBus;
-
-        eventBus.addListener(this::onInitializeClient);
-
-        eventBus.addListener((RegisterClientReloadListenersEvent event) -> {
+        modBus.addListener((RegisterClientReloadListenersEvent event) -> {
             event.registerReloadListener(new UIModelLoader());
             event.registerReloadListener(new NinePatchTexture.MetadataLoader());
         });
 
-        ModDataLoader.load(OwoItemGroupLoader.INSTANCE);
-        OwoItemGroupLoader.initItemGroupCallback();
-    }
-
-    public void onInitializeClient(FMLClientSetupEvent setupEvent) {
         final var renderdocPath = System.getProperty("owo.renderdocPath");
         if (renderdocPath != null) {
             if (Util.getOperatingSystem() == Util.OperatingSystem.WINDOWS) {
