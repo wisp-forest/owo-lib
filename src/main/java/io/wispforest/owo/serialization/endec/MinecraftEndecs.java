@@ -1,16 +1,14 @@
 package io.wispforest.owo.serialization.endec;
 
 import com.mojang.datafixers.util.Function3;
-import io.netty.buffer.Unpooled;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.SerializationAttributes;
 import io.wispforest.endec.impl.ReflectiveEndecBuilder;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.serialization.CodecUtils;
-import io.wispforest.owo.serialization.RegistriesAttribute;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.tag.TagKey;
@@ -33,37 +31,17 @@ public final class MinecraftEndecs {
 
     public static final Endec<PacketByteBuf> PACKET_BYTE_BUF = Endec.BYTES
             .xmap(bytes -> {
-                var buffer = new PacketByteBuf(Unpooled.buffer());
+                var buffer = PacketByteBufs.create();
                 buffer.writeBytes(bytes);
 
                 return buffer;
             }, buffer -> {
-                var ridx = buffer.readerIndex();
+                var rinx = buffer.readerIndex();
 
                 var bytes = new byte[buffer.readableBytes()];
                 buffer.readBytes(bytes);
 
-                buffer.readerIndex(ridx);
-
-                return bytes;
-            });
-
-    public static final Endec<RegistryByteBuf> REGISTRY_BYTE_BUF = Endec.BYTES
-            .xmapWithContext((ctx, bytes) -> {
-                // TODO: ADD CONNECTION TYPE FOR NEO!
-                var registry = ctx.requireAttributeValue(RegistriesAttribute.REGISTRIES);
-
-                var buffer = new RegistryByteBuf(Unpooled.buffer(), registry.registryManager());
-                buffer.writeBytes(bytes);
-
-                return buffer;
-            }, (ctx, buffer) -> {
-                var ridx = buffer.readerIndex();
-
-                var bytes = new byte[buffer.readableBytes()];
-                buffer.readBytes(bytes);
-
-                buffer.readerIndex(ridx);
+                buffer.readerIndex(rinx);
 
                 return bytes;
             });
@@ -77,36 +55,36 @@ public final class MinecraftEndecs {
     public static final Endec<Vector3f> VECTOR3F = vectorEndec("Vector3f", Endec.FLOAT, Vector3f::new, Vector3f::x, Vector3f::y, Vector3f::z);
 
     public static final Endec<BlockPos> BLOCK_POS = Endec
-            .ifAttr(
-                    SerializationAttributes.HUMAN_READABLE,
-                    vectorEndec("BlockPos", Endec.INT, BlockPos::new, BlockPos::getX, BlockPos::getY, BlockPos::getZ)
-            ).orElse(
-                    Endec.LONG.xmap(BlockPos::fromLong, BlockPos::asLong)
-            );
+        .ifAttr(
+            SerializationAttributes.HUMAN_READABLE,
+            vectorEndec("BlockPos", Endec.INT, BlockPos::new, BlockPos::getX, BlockPos::getY, BlockPos::getZ)
+        ).orElse(
+            Endec.LONG.xmap(BlockPos::fromLong, BlockPos::asLong)
+        );
 
     public static final Endec<ChunkPos> CHUNK_POS = Endec
-            .ifAttr(
-                    SerializationAttributes.HUMAN_READABLE,
-                    Endec.INT.listOf().validate(ints -> {
-                        if (ints.size() != 2) {
-                            throw new IllegalStateException("ChunkPos array must have two elements");
-                        }
-                    }).xmap(
-                            ints -> new ChunkPos(ints.get(0), ints.get(1)),
-                            chunkPos -> List.of(chunkPos.x, chunkPos.z)
-                    )
+        .ifAttr(
+            SerializationAttributes.HUMAN_READABLE,
+            Endec.INT.listOf().validate(ints -> {
+                if (ints.size() != 2) {
+                    throw new IllegalStateException("ChunkPos array must have two elements");
+                }
+            }).xmap(
+                ints -> new ChunkPos(ints.get(0), ints.get(1)),
+                chunkPos -> List.of(chunkPos.x, chunkPos.z)
             )
-            .orElse(Endec.LONG.xmap(ChunkPos::new, ChunkPos::toLong));
+        )
+        .orElse(Endec.LONG.xmap(ChunkPos::new, ChunkPos::toLong));
 
     public static final Endec<BlockHitResult> BLOCK_HIT_RESULT = StructEndecBuilder.of(
-            VEC3D.fieldOf("pos", BlockHitResult::getPos),
-            Endec.forEnum(Direction.class).fieldOf("side", BlockHitResult::getSide),
-            BLOCK_POS.fieldOf("block_pos", BlockHitResult::getBlockPos),
-            Endec.BOOLEAN.fieldOf("inside_block", BlockHitResult::isInsideBlock),
-            Endec.BOOLEAN.fieldOf("missed", $ -> $.getType() == HitResult.Type.MISS),
-            (pos, side, blockPos, insideBlock, missed) -> !missed
-                    ? new BlockHitResult(pos, side, blockPos, insideBlock)
-                    : BlockHitResult.createMissed(pos, side, blockPos)
+        VEC3D.fieldOf("pos", BlockHitResult::getPos),
+        Endec.forEnum(Direction.class).fieldOf("side", BlockHitResult::getSide),
+        BLOCK_POS.fieldOf("block_pos", BlockHitResult::getBlockPos),
+        Endec.BOOLEAN.fieldOf("inside_block", BlockHitResult::isInsideBlock),
+        Endec.BOOLEAN.fieldOf("missed", $ -> $.getType() == HitResult.Type.MISS),
+        (pos, side, blockPos, insideBlock, missed) -> !missed
+            ? new BlockHitResult(pos, side, blockPos, insideBlock)
+            : BlockHitResult.createMissed(pos, side, blockPos)
     );
 
     // --- Constructors for MC types ---
