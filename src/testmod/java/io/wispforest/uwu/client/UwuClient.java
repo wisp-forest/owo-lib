@@ -1,6 +1,5 @@
 package io.wispforest.uwu.client;
 
-import dev.architectury.event.events.common.TickEvent;
 import io.wispforest.owo.network.OwoNetChannel;
 import io.wispforest.owo.particles.ClientParticles;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
@@ -35,7 +34,6 @@ import net.minecraft.util.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
@@ -49,34 +47,22 @@ import java.util.function.Supplier;
 @Mod(value = "uwu", dist = Dist.CLIENT)
 public class UwuClient {
 
-    private final IEventBus eventBus;
+    public UwuClient(IEventBus modBus) {
+        UwuNetworkExample.Client.init(modBus);
+        UwuOptionalNetExample.Client.init(modBus);
 
-    public UwuClient(IEventBus eventBus) {
-        this.eventBus = eventBus;
-
-        eventBus.addListener(this::onInitializeClient);
-
-        UwuNetworkExample.Client.init(this.eventBus);
-        UwuOptionalNetExample.Client.init(this.eventBus);
-
-        eventBus.addListener((RegisterKeyMappingsEvent mappingsEvent) -> {
-            HUD_BINDING = new KeyBinding("key.uwu.hud_test", GLFW.GLFW_KEY_J, "misc");
-            mappingsEvent.register(HUD_BINDING);
-
-            BUT_COLOR_BINDING = new KeyBinding("key.uwu.hud_test_two", GLFW.GLFW_KEY_K, "misc");
-            mappingsEvent.register(BUT_COLOR_BINDING);
-        });
-
-        eventBus.addListener(RegisterMenuScreensEvent.class, event -> {
+        modBus.addListener(RegisterMenuScreensEvent.class, event -> {
             event.register(Uwu.EPIC_SCREEN_HANDLER_TYPE, EpicHandledScreen::new);
+//            HandledScreens.register(EPIC_SCREEN_HANDLER_TYPE, EpicHandledModelScreen::new);
         });
-    }
 
-    private static KeyBinding HUD_BINDING;
-    private static KeyBinding BUT_COLOR_BINDING;
+        final var binding = new KeyBinding("key.uwu.hud_test", GLFW.GLFW_KEY_J, "misc");
+        final var bindingButCooler = new KeyBinding("key.uwu.hud_test_two", GLFW.GLFW_KEY_K, "misc");
 
-    public void onInitializeClient(FMLClientSetupEvent event) {
-//        HandledScreens.register(EPIC_SCREEN_HANDLER_TYPE, EpicHandledModelScreen::new);
+        modBus.addListener(RegisterKeyMappingsEvent.class, event -> {
+            event.register(binding);
+            event.register(bindingButCooler);
+        });
 
         final var hudComponentId = Identifier.of("uwu", "test_element");
         final Supplier<Component> hudComponent = () ->
@@ -94,8 +80,8 @@ public class UwuClient {
         final Supplier<Component> coolerComponent = () -> UIModel.load(Path.of("../src/testmod/resources/assets/uwu/owo_ui/test_element_two.xml")).expandTemplate(FlowLayout.class, "hud-element", Map.of());
         Hud.add(coolerComponentId, coolerComponent);
 
-        NeoForge.EVENT_BUS.addListener((ClientTickEvent.Post clientEvent) -> {
-            while (HUD_BINDING.wasPressed()) {
+        NeoForge.EVENT_BUS.addListener(ClientTickEvent.Post.class, event -> {
+            while (binding.wasPressed()) {
                 if (Hud.hasComponent(hudComponentId)) {
                     Hud.remove(hudComponentId);
                 } else {
@@ -103,12 +89,12 @@ public class UwuClient {
                 }
             }
 
-            if (BUT_COLOR_BINDING.wasPressed()) {
+            if (bindingButCooler.wasPressed()) {
                 Hud.remove(coolerComponentId);
                 Hud.add(coolerComponentId, coolerComponent);
 
                 //noinspection StatementWithEmptyBody
-                while (BUT_COLOR_BINDING.wasPressed()) {}
+                while (bindingButCooler.wasPressed()) {}
             }
         });
 
@@ -119,8 +105,10 @@ public class UwuClient {
         if (Uwu.WE_TESTEN_HANDSHAKE) {
             OwoNetChannel.create(Identifier.of("uwu", "client_only_channel"));
 
-            Uwu.CHANNEL.registerServerbound(WeirdMessage.class, (data, access) -> {});
-            Uwu.CHANNEL.registerClientbound(WeirdMessage.class, (data, access) -> {});
+            Uwu.CHANNEL.registerServerbound(WeirdMessage.class, (data, access) -> {
+            });
+            Uwu.CHANNEL.registerClientbound(WeirdMessage.class, (data, access) -> {
+            });
 
             new ParticleSystemController(Identifier.of("uwu", "client_only_particles"));
             Uwu.PARTICLE_CONTROLLER.register(WeirdMessage.class, (world, pos, data) -> {

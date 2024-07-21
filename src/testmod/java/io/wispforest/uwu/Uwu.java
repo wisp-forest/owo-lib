@@ -43,6 +43,7 @@ import io.wispforest.uwu.config.UwuConfig;
 import io.wispforest.uwu.items.UwuItems;
 import io.wispforest.uwu.network.*;
 import io.wispforest.uwu.text.BasedTextContent;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
@@ -54,12 +55,10 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.ItemTags;
@@ -75,10 +74,10 @@ import net.minecraft.util.math.Direction;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import org.slf4j.Logger;
 
@@ -110,7 +109,7 @@ public class Uwu {
 
     public static ItemGroup VANILLA_GROUP;
 
-    public static OwoNetChannel CHANNEL;
+    public static final OwoNetChannel CHANNEL = OwoNetChannel.create(Identifier.of("uwu", "uwu"));
 
     public static final TestMessage MESSAGE = new TestMessage("hahayes", 69, Long.MAX_VALUE, ItemStack.EMPTY, Short.MAX_VALUE, Byte.MAX_VALUE, new BlockPos(69, 420, 489),
             Float.NEGATIVE_INFINITY, Double.NaN, false, Identifier.of("uowou", "hahayes"), Collections.emptyMap(),
@@ -118,32 +117,30 @@ public class Uwu {
             Optional.of("NullableString"), Optional.empty(),
             ImmutableList.of(new BlockPos(9786, 42, 9234)), new SealedSubclassOne("basede", 10), new SealedSubclassTwo(10, null));
 
-    public static ParticleSystemController PARTICLE_CONTROLLER;
-    public static ParticleSystem<Void> CUBE;
-    public static ParticleSystem<Void> BREAK_BLOCK_PARTICLES;
+    public static final ParticleSystemController PARTICLE_CONTROLLER = new ParticleSystemController(Identifier.of("uwu", "particles"));
+    public static final ParticleSystem<Void> CUBE = PARTICLE_CONTROLLER.registerDeferred(Void.class);
+    public static final ParticleSystem<Void> BREAK_BLOCK_PARTICLES = PARTICLE_CONTROLLER.register(Void.class, (world, pos, data) -> {
+        ClientParticles.persist();
+
+        ClientParticles.setParticleCount(30);
+        ClientParticles.spawnLine(ParticleTypes.DRAGON_BREATH, world, pos.add(.5, .5, .5), pos.add(.5, 2.5, .5), .015f);
+
+        ClientParticles.randomizeVelocityOnAxis(.1, Direction.Axis.Z);
+        ClientParticles.spawn(ParticleTypes.CLOUD, world, pos.add(.5, 2.5, .5), 0);
+
+        ClientParticles.reset();
+    });
 
     public static final UwuConfig CONFIG = UwuConfig.createAndLoad();
     public static final BruhConfig BRUHHHHH = BruhConfig.createAndLoad(builder -> {
         builder.registerSerializer(Color.class, (color, marshaller) -> new JsonPrimitive("bruv"));
     });
 
-    private final IEventBus eventBus;
-
     public Uwu(IEventBus eventBus) {
-        this.eventBus = eventBus;
+        eventBus.addListener(RegisterEvent.class, event -> {
+            event.register(RegistryKeys.SCREEN_HANDLER, Identifier.of("uwu", "epic_screen_handler"), () -> EPIC_SCREEN_HANDLER_TYPE = new ScreenHandlerType<>(EpicScreenHandler::new, FeatureFlags.VANILLA_FEATURES));
 
-        CHANNEL = OwoNetChannel.create(Identifier.of("uwu", "uwu"));
-
-        eventBus.addListener((RegisterEvent event) -> {
-            event.register(RegistryKeys.SCREEN_HANDLER, (helper) -> {
-                EPIC_SCREEN_HANDLER_TYPE = Registry.register(
-                        Registries.SCREEN_HANDLER,
-                        Identifier.of("uwu", "epic_screen_handler"),
-                        new ScreenHandlerType<>(EpicScreenHandler::new, FeatureFlags.VANILLA_FEATURES)
-                );
-            });
-
-            event.register(RegistryKeys.ITEM_GROUP, (helper) -> {
+            event.register(RegistryKeys.ITEM_GROUP, helper -> {
                 FOUR_TAB_GROUP = OwoItemGroup.builder(Identifier.of("uwu", "four_tab_group"), () -> Icon.of(Items.AXOLOTL_BUCKET))
                         .disableDynamicTitle()
                         .buttonStackHeight(1)
@@ -198,15 +195,11 @@ public class Uwu {
                 SINGLE_TAB_GROUP.initialize();
             });
 
-            event.register(RegistryKeys.ITEM, (helper) -> {
+            event.register(RegistryKeys.ITEM, helper -> {
                 FieldRegistrationHandler.register(UwuItems.class, "uwu", true);
             });
         });
 
-        eventBus.addListener(this::onInitialize);
-    }
-
-    public void onInitialize(FMLCommonSetupEvent event) {
         var stackEndec = CodecUtils.toEndec(ItemStack.CODEC);
         var stackData = """
                         {
@@ -221,7 +214,7 @@ public class Uwu {
         var stacknite = stackEndec.decode(SerializationContext.empty(), GsonDeserializer.of(new Gson().fromJson(stackData, JsonObject.class)));
         System.out.println(stacknite);
 
-        var serializer = ByteBufSerializer.of(new PacketByteBuf(Unpooled.buffer()));
+        var serializer = ByteBufSerializer.of(PacketByteBufs.create());
         stackEndec.encode(SerializationContext.empty(), serializer, stacknite);
 
         System.out.println(serializer.result().read(SerializationContext.empty(), stackEndec));
@@ -505,21 +498,6 @@ public class Uwu {
 
                         return 0;
                     }));
-        });
-
-        PARTICLE_CONTROLLER = new ParticleSystemController(Identifier.of("uwu", "particles"));
-
-        CUBE = PARTICLE_CONTROLLER.registerDeferred(Void.class);
-        BREAK_BLOCK_PARTICLES = PARTICLE_CONTROLLER.register(Void.class, (world, pos, data) -> {
-            ClientParticles.persist();
-
-            ClientParticles.setParticleCount(30);
-            ClientParticles.spawnLine(ParticleTypes.DRAGON_BREATH, world, pos.add(.5, .5, .5), pos.add(.5, 2.5, .5), .015f);
-
-            ClientParticles.randomizeVelocityOnAxis(.1, Direction.Axis.Z);
-            ClientParticles.spawn(ParticleTypes.CLOUD, world, pos.add(.5, 2.5, .5), 0);
-
-            ClientParticles.reset();
         });
 
         CustomTextRegistry.register(BasedTextContent.TYPE, "based");
