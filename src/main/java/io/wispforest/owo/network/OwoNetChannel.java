@@ -1,10 +1,10 @@
 package io.wispforest.owo.network;
 
-import io.wispforest.endec.Endec;
-import io.wispforest.endec.StructEndec;
 import io.wispforest.endec.impl.RecordEndec;
 import io.wispforest.endec.impl.ReflectiveEndecBuilder;
 import io.wispforest.owo.mixin.ServerCommonNetworkHandlerAccessor;
+import io.wispforest.endec.Endec;
+import io.wispforest.endec.StructEndec;
 import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.util.OwoFreezer;
@@ -139,10 +139,10 @@ public class OwoNetChannel {
         }
 
         Endec<MessagePayload> serverEndec = Endec.<Record, Integer>dispatched(
-                index -> this.endecsByIndex.get(index).endec,
-                msg -> this.endecsByClass.get(msg.getClass()).serverHandlerIndex,
-                Endec.VAR_INT
-            )
+            index -> this.endecsByIndex.get(index).endec,
+            msg -> this.endecsByClass.get(msg.getClass()).serverHandlerIndex,
+            Endec.VAR_INT
+        )
             .xmap(x -> new MessagePayload(this.packetId, x), x -> x.message);
 
         Endec<MessagePayload> clientEndec = Endec.<Record, Integer>dispatched(
@@ -311,8 +311,8 @@ public class OwoNetChannel {
         if (required) return true;
 
         return OwoHandshake.isValidClient() ?
-            getChannelSet(((ServerCommonNetworkHandlerAccessor) networkHandler).owo$getConnection()).contains(this.packetId.id())
-            : ServerPlayNetworking.canSend(networkHandler, this.packetId);
+                getChannelSet(((ServerCommonNetworkHandlerAccessor) networkHandler).owo$getConnection()).contains(this.packetId.id())
+                : ServerPlayNetworking.canSend(networkHandler, this.packetId);
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -320,8 +320,8 @@ public class OwoNetChannel {
         if (required) return true;
 
         return OwoHandshake.isValidClient() ?
-            getChannelSet(MinecraftClient.getInstance().getNetworkHandler().getConnection()).contains(this.packetId.id())
-            : ClientPlayNetworking.canSend(this.packetId);
+                getChannelSet(MinecraftClient.getInstance().getNetworkHandler().getConnection()).contains(this.packetId.id())
+                : ClientPlayNetworking.canSend(this.packetId);
     }
 
     private static Set<Identifier> getChannelSet(ClientConnection connection) {
@@ -625,3 +625,4 @@ public class OwoNetChannel {
         }
     }
 }
+

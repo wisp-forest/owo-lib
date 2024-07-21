@@ -55,36 +55,36 @@ public final class MinecraftEndecs {
     public static final Endec<Vector3f> VECTOR3F = vectorEndec("Vector3f", Endec.FLOAT, Vector3f::new, Vector3f::x, Vector3f::y, Vector3f::z);
 
     public static final Endec<BlockPos> BLOCK_POS = Endec
-        .ifAttr(
-            SerializationAttributes.HUMAN_READABLE,
-            vectorEndec("BlockPos", Endec.INT, BlockPos::new, BlockPos::getX, BlockPos::getY, BlockPos::getZ)
-        ).orElse(
-            Endec.LONG.xmap(BlockPos::fromLong, BlockPos::asLong)
-        );
+            .ifAttr(
+                    SerializationAttributes.HUMAN_READABLE,
+                    vectorEndec("BlockPos", Endec.INT, BlockPos::new, BlockPos::getX, BlockPos::getY, BlockPos::getZ)
+            ).orElse(
+                    Endec.LONG.xmap(BlockPos::fromLong, BlockPos::asLong)
+            );
 
     public static final Endec<ChunkPos> CHUNK_POS = Endec
-        .ifAttr(
-            SerializationAttributes.HUMAN_READABLE,
-            Endec.INT.listOf().validate(ints -> {
-                if (ints.size() != 2) {
-                    throw new IllegalStateException("ChunkPos array must have two elements");
-                }
-            }).xmap(
-                ints -> new ChunkPos(ints.get(0), ints.get(1)),
-                chunkPos -> List.of(chunkPos.x, chunkPos.z)
+            .ifAttr(
+                    SerializationAttributes.HUMAN_READABLE,
+                    Endec.INT.listOf().validate(ints -> {
+                        if (ints.size() != 2) {
+                            throw new IllegalStateException("ChunkPos array must have two elements");
+                        }
+                    }).xmap(
+                            ints -> new ChunkPos(ints.get(0), ints.get(1)),
+                            chunkPos -> List.of(chunkPos.x, chunkPos.z)
+                    )
             )
-        )
-        .orElse(Endec.LONG.xmap(ChunkPos::new, ChunkPos::toLong));
+            .orElse(Endec.LONG.xmap(ChunkPos::new, ChunkPos::toLong));
 
     public static final Endec<BlockHitResult> BLOCK_HIT_RESULT = StructEndecBuilder.of(
-        VEC3D.fieldOf("pos", BlockHitResult::getPos),
-        Endec.forEnum(Direction.class).fieldOf("side", BlockHitResult::getSide),
-        BLOCK_POS.fieldOf("block_pos", BlockHitResult::getBlockPos),
-        Endec.BOOLEAN.fieldOf("inside_block", BlockHitResult::isInsideBlock),
-        Endec.BOOLEAN.fieldOf("missed", $ -> $.getType() == HitResult.Type.MISS),
-        (pos, side, blockPos, insideBlock, missed) -> !missed
-            ? new BlockHitResult(pos, side, blockPos, insideBlock)
-            : BlockHitResult.createMissed(pos, side, blockPos)
+            VEC3D.fieldOf("pos", BlockHitResult::getPos),
+            Endec.forEnum(Direction.class).fieldOf("side", BlockHitResult::getSide),
+            BLOCK_POS.fieldOf("block_pos", BlockHitResult::getBlockPos),
+            Endec.BOOLEAN.fieldOf("inside_block", BlockHitResult::isInsideBlock),
+            Endec.BOOLEAN.fieldOf("missed", $ -> $.getType() == HitResult.Type.MISS),
+            (pos, side, blockPos, insideBlock, missed) -> !missed
+                    ? new BlockHitResult(pos, side, blockPos, insideBlock)
+                    : BlockHitResult.createMissed(pos, side, blockPos)
     );
 
     // --- Constructors for MC types ---
