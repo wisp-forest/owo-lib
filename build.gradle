@@ -1,6 +1,6 @@
 //file:noinspection GradlePackageVersionRange
 plugins {
-    id "dev.architectury.loom" version "1.7.407"
+    id "dev.architectury.loom" version "1.7.410"
     id 'maven-publish'
 }
 
@@ -103,6 +103,7 @@ repositories {
     }
     maven { url "https://maven.nucleoid.xyz/" }
     maven { url 'https://maven.wispforest.io/releases' }
+    maven { url "https://maven.su5ed.dev/releases" }
     mavenLocal()
 }
 
@@ -178,7 +179,9 @@ dependencies {
 
 //    modCompileOnly("xyz.nucleoid:server-translations-api:${project.stapi_version}")
 
-    include modApi("org.sinytra.forgified-fabric-api:fabric-api-base:0.4.42+e0539096d1"){ exclude group: "fabric-api" }
+    include modApi("org.sinytra.forgified-fabric-api:fabric-api-base:0.4.42+d1308dedd1") { exclude group: "fabric-api" }
+    include modApi("org.sinytra.forgified-fabric-api:fabric-networking-api-v1:4.2.0+247fd407d1") { exclude group: "fabric-api" }
+    include modApi("org.sinytra.forgified-fabric-api:fabric-screen-api-v1:2.0.24+c055723bd1") { exclude group: "fabric-api" }
 
     testmodImplementation sourceSets.main.output
     testmodAnnotationProcessor sourceSets.main.output

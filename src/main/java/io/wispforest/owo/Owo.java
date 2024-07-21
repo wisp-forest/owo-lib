@@ -3,7 +3,6 @@ package io.wispforest.owo;
 import io.wispforest.owo.client.screens.ScreenInternals;
 import io.wispforest.owo.command.debug.OwoDebugCommands;
 import io.wispforest.owo.compat.modmenu.OwoModMenuPlugin;
-import io.wispforest.owo.extras.network.OwoInternalNetworking;
 import io.wispforest.owo.network.OwoHandshake;
 import io.wispforest.owo.ops.LootOps;
 import io.wispforest.owo.util.OwoFreezer;
@@ -70,15 +69,12 @@ public class Owo {
             });
         });
 
-        eventBus.addListener(OwoInternalNetworking.INSTANCE::initializeNetworking);
         eventBus.addListener((FMLLoadCompleteEvent event) -> OwoFreezer.freeze());
     }
 
     public void onInitialize(FMLCommonSetupEvent event) {
         LootOps.registerListener();
         ScreenInternals.init();
-
-        OwoHandshake.init(this.eventBus);
 
         OwoModMenuPlugin.getProvidedConfigScreenFactories().forEach((s, iConfigScreenFactory) -> {
             ModList.get().getModContainerById(s).ifPresent(modContainer -> modContainer.registerExtensionPoint(IConfigScreenFactory.class, iConfigScreenFactory));
