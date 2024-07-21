@@ -270,7 +270,7 @@ public class CodecUtils {
                 : assumedContext;
 
         if (ops instanceof RegistryOps<?> registryOps) {
-            context = context.withAttributes(RegistriesAttribute.infoGetterOnly(((RegistryOpsAccessor) registryOps).owo$infoGetter()));
+            context = context.withAttributes(RegistriesAttribute.tryFromCachedInfoGetter(((RegistryOpsAccessor) registryOps).owo$infoGetter()));
         }
 
         return context;

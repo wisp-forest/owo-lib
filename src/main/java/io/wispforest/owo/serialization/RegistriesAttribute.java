@@ -28,14 +28,24 @@ public final class RegistriesAttribute implements SerializationAttribute.Instanc
     }
 
     @ApiStatus.Internal
-    public static RegistriesAttribute infoGetterOnly(RegistryOps.RegistryInfoGetter lookup) {
+    public static RegistriesAttribute tryFromCachedInfoGetter(RegistryOps.RegistryInfoGetter lookup) {
+        return (lookup instanceof RegistryOps.CachedRegistryInfoGetter cachedGetter)
+                ? fromCachedInfoGetter(cachedGetter)
+                : fromInfoGetter(lookup);
+    }
+
+    public static RegistriesAttribute fromCachedInfoGetter(RegistryOps.CachedRegistryInfoGetter cachedGetter) {
         DynamicRegistryManager registryManager = null;
 
-        if(lookup instanceof RegistryOps.CachedRegistryInfoGetter getter && ((CachedRegistryInfoGetterAccessor) (Object) getter).owo$getRegistriesLookup() instanceof DynamicRegistryManager drm) {
+        if(((CachedRegistryInfoGetterAccessor) (Object) cachedGetter).owo$getRegistriesLookup() instanceof DynamicRegistryManager drm) {
             registryManager = drm;
         }
 
-        return new RegistriesAttribute(lookup, registryManager);
+        return new RegistriesAttribute(cachedGetter, registryManager);
+    }
+
+    public static RegistriesAttribute fromInfoGetter(RegistryOps.RegistryInfoGetter lookup) {
+        return new RegistriesAttribute(lookup, null);
     }
 
     public RegistryOps.RegistryInfoGetter infoGetter() {
