@@ -261,7 +261,7 @@ public class CodecUtils {
 
     //--
 
-    private static SerializationContext createContext(DynamicOps<?> ops, SerializationContext assumedContext) {
+    public static SerializationContext createContext(DynamicOps<?> ops, SerializationContext assumedContext) {
         var rootOps = ops;
         while (rootOps instanceof ForwardingDynamicOps<?>) rootOps = ((ForwardingDynamicOpsAccessor<?>) rootOps).owo$delegate();
 
@@ -276,7 +276,7 @@ public class CodecUtils {
         return context;
     }
 
-    private static DynamicOps<EdmElement<?>> createEdmOps(SerializationContext ctx) {
+    public static DynamicOps<EdmElement<?>> createEdmOps(SerializationContext ctx) {
         DynamicOps<EdmElement<?>> ops = EdmOps.withContext(ctx);
 
         if (ctx.hasAttribute(RegistriesAttribute.REGISTRIES)) {
