@@ -13,8 +13,7 @@ import java.util.function.BiConsumer;
 public class ItemSettingsMixin implements OwoItemSettingsExtension {
     private OwoItemGroup owo$group = null;
     private int owo$tab = 0;
-    // TODO: OwoItemGroup.DEFAULT_STACK_GENERATOR was inlined to not cause clinit issues. fix.
-    private BiConsumer<Item, ItemGroup.Entries> owo$stackGenerator = (item, stacks) -> stacks.add(item.getDefaultStack());
+    private BiConsumer<Item, ItemGroup.Entries> owo$stackGenerator = null;
     private boolean owo$trackUsageStat = false;
 
     @Override
