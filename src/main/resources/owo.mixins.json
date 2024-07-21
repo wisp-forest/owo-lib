@@ -23,6 +23,7 @@
     "SimpleRegistryMixin",
     "TagGroupLoaderMixin",
     "itemgroup.ItemGroupAccessor",
+    "itemgroup.ItemSettingsMixin",
     "itemgroup.ItemMixin",
     "offline.AdvancementProgressAccessor",
     "offline.PlayerAdvancementTrackerMixin",
