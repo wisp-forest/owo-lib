@@ -12,6 +12,7 @@ import io.wispforest.endec.Endec;
 import io.wispforest.endec.SerializationContext;
 import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.RegistriesAttribute;
+import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.uwu.Uwu;
 import io.wispforest.uwu.text.BasedTextContent;
 import net.minecraft.component.ComponentType;
@@ -44,8 +45,7 @@ public class UwuTestStickItem extends Item {
             Registries.DATA_COMPONENT_TYPE,
             Identifier.of("uwu", "text"),
             ComponentType.<Text>builder()
-                    .codec(TextCodecs.CODEC)
-                    .packetCodec(TextCodecs.PACKET_CODEC)
+                    .endec(MinecraftEndecs.TEXT)
                     .build()
     );
 
