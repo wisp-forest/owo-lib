@@ -60,7 +60,7 @@ public class ComponentTestScreen extends Screen {
                         .child(Components.button(Text.of("Dirt Background"), button -> rootComponent.surface(Surface.OPTIONS_BACKGROUND)).horizontalSizing(Sizing.fixed(95)))
                         .child(Components.checkbox(Text.of("bruh")).onChanged(aBoolean -> this.client.player.sendMessage(Text.of("bruh: " + aBoolean))).margins(Insets.top(5)))
                         .padding(Insets.of(10))
-                        .surface(Surface.flat(0x77000000))
+                        .surface(Surface.vanillaPanorama(true))
                         .positioning(Positioning.relative(1, 1))
         );
 

@@ -1,5 +1,6 @@
 package io.wispforest.owo.ui.core;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.client.OwoClient;
 import io.wispforest.owo.mixin.ScreenAccessor;
@@ -7,9 +8,12 @@ import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.NinePatchTexture;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.CubeMapRenderer;
+import net.minecraft.client.gui.RotatingCubeMapRenderer;
 import net.minecraft.client.gui.tooltip.TooltipBackgroundRenderer;
 import net.minecraft.client.render.*;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -34,7 +38,7 @@ public interface Surface {
         );
     };
 
-    Surface OPTIONS_BACKGROUND = Surface.panorama(false)
+    Surface OPTIONS_BACKGROUND = Surface.panorama(ScreenAccessor.owo$ROTATING_PANORAMA_RENDERER(), false)
             .and(Surface.blur(5, 10));
 
     Surface TOOLTIP = (context, component) -> {
@@ -62,14 +66,45 @@ public interface Surface {
         };
     }
 
-    static Surface panorama(boolean alwaysVisible) {
-        return (context, component) -> {
-            var delta = MinecraftClient.getInstance().getRenderTickCounter().getLastDuration();
+    static Surface vanillaPanorama(boolean alwaysVisible) {
+        return panorama(new RotatingCubeMapRenderer(ScreenAccessor.owo$PANORAMA_RENDERER()), alwaysVisible);
+    }
 
-            if (alwaysVisible || MinecraftClient.getInstance().world == null) {
-                ScreenAccessor.owo$ROTATING_PANORAMA_RENDERER()
-                        .render(context, component.width(), component.height(), 1.0F, delta);
-            }
+    static Surface panorama(RotatingCubeMapRenderer renderer, boolean alwaysVisible) {
+        return (context, component) -> {
+            if (!alwaysVisible && MinecraftClient.getInstance().world != null) return;
+
+            var client = MinecraftClient.getInstance();
+
+            int prevX = GlStateManager.Viewport.getX();
+            int prevY = GlStateManager.Viewport.getY();
+            int prevWidth = GlStateManager.Viewport.getWidth();
+            int prevHeight = GlStateManager.Viewport.getHeight();
+
+            var window = client.getWindow();
+            var scale = window.getScaleFactor();
+
+            var x = component.x();
+            var y = component.y();
+            var width = component.width();
+            var height = component.height();
+
+            RenderSystem.viewport(
+                    (int) (x * scale),
+                    (int) (window.getFramebufferHeight() - (y * scale) - height * scale),
+                    MathHelper.clamp((int) (width * scale), 0, window.getFramebufferWidth()),
+                    MathHelper.clamp((int) (height * scale), 0, window.getFramebufferHeight())
+            );
+
+            var delta = client.getRenderTickCounter().getLastDuration();
+
+            RenderSystem.disableDepthTest();
+
+            renderer.render(context, width, height, 1.0F, delta);
+
+            RenderSystem.enableDepthTest();
+
+            RenderSystem.viewport(prevX, prevY, prevWidth, prevHeight);
         };
     }
 
