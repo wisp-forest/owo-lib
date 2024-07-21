@@ -3,9 +3,10 @@ package io.wispforest.owo.util;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 import net.minecraft.registry.entry.RegistryEntry;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-@Deprecated
+@Deprecated(forRemoval = true)
 public final class RegistryAccess {
 
     private RegistryAccess() {}
