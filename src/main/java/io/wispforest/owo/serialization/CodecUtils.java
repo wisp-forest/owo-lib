@@ -13,12 +13,14 @@ import io.wispforest.owo.mixin.RegistryOpsAccessor;
 import io.wispforest.owo.serialization.endec.EitherEndec;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.serialization.format.edm.EdmOps;
+import io.wispforest.owo.util.Scary;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.registry.RegistryOps;
 import net.minecraft.util.dynamic.ForwardingDynamicOps;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -189,6 +191,15 @@ public class CodecUtils {
         return toMapCodec(structEndec, SerializationContext.empty());
     }
 
+    /*
+     * This method overall should be fine but do not expect such tot work always as it could be a problem as
+     * it bypasses certain features about Deserializer API that may be an issue but is low chance for general
+     * cases within Minecraft.
+     *
+     * blodhgarm: 21.07.2024
+     */
+    @Scary
+    @ApiStatus.Experimental
     public static <T> StructEndec<T> toStructEndec(MapCodec<T> mapCodec) {
         return new StructEndec<T>() {
             @Override
