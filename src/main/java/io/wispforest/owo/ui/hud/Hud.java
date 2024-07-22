@@ -6,7 +6,6 @@ import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.event.ClientRenderCallback;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
@@ -32,7 +31,9 @@ public class Hud {
      * The root container used by the HUD does not support layout
      * positioning - the component supplied by {@code component}
      * must be explicitly positioned via either {@link io.wispforest.owo.ui.core.Positioning#absolute(int, int)}
-     * or {@link io.wispforest.owo.ui.core.Positioning#relative(int, int)}
+     * or {@link io.wispforest.owo.ui.core.Positioning#relative(int, int)}<br>
+     * <br>
+     * If a component with the given {@code id} already exists, it will be replaced.
      *
      * @param id        An ID uniquely describing this HUD component
      * @param component A function creating the component
@@ -40,7 +41,7 @@ public class Hud {
      */
     public static void add(Identifier id, Supplier<Component> component) {
         pendingActions.add(flowLayout -> {
-            if (hasComponent(id)) return;
+            if (hasComponent(id)) removeComponent(id, flowLayout);
             var instance = component.get();
 
             flowLayout.child(instance);
@@ -54,13 +55,15 @@ public class Hud {
      * @param id The ID of the HUD component to remove
      */
     public static void remove(Identifier id) {
-        pendingActions.add(flowLayout -> {
-            var component = activeComponents.get(id);
-            if (component == null) return;
+        pendingActions.add(flowLayout -> removeComponent(id, flowLayout));
+    }
 
-            flowLayout.removeChild(component);
-            activeComponents.remove(id);
-        });
+    private static void removeComponent(Identifier id, FlowLayout flowLayout) {
+        var component = activeComponents.get(id);
+        if (component == null) return;
+
+        flowLayout.removeChild(component);
+        activeComponents.remove(id);
     }
 
     /**
