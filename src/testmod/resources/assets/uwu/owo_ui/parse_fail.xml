@@ -1,0 +1,23 @@
+<owo-ui xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../../../owo-ui.xsd">
+    <components>
+        <flow-layout direction="horizontal">
+            <children>
+                <button>
+                    <sizing>
+                        <horizontal method="fixed">100</horizontal>
+                        <vertical method="fixed">20</vertical>
+                    </sizing>
+                </button>
+            </children>
+
+            <horizontal-alignment>center</horizontal-alignment>
+            <vertical-alignment>center</vertical-alignment>
+
+            <surface>
+                <blur quality="3" size="5"/>
+            </surface>
+            <!-- invalid xml -->
+        </flow-layout
+    </components>
+</owo-ui>
