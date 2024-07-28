@@ -73,12 +73,12 @@ public class OverlayContainer<C extends Component> extends WrappingParentCompone
 
     @Override
     protected int childMountX() {
-        return this.padding.get().left() + (this.width - this.child.fullSize().width()) / 2;
+        return this.x + this.padding.get().left() + (this.width - this.child.fullSize().width()) / 2;
     }
 
     @Override
     protected int childMountY() {
-        return this.padding.get().top() + (this.height() - this.child.fullSize().height()) / 2;
+        return this.y + this.padding.get().top() + (this.height() - this.child.fullSize().height()) / 2;
     }
 
     /**
