@@ -132,7 +132,7 @@ public class LabelComponent extends BaseComponent {
     }
 
     @Override
-    protected int determineHorizontalContentSize(Sizing sizing) {
+    public int determineHorizontalContentSize(Sizing sizing) {
         int widestText = 0;
         for (var line : this.wrappedText) {
             int width = this.textRenderer.getWidth(line);
@@ -148,7 +148,7 @@ public class LabelComponent extends BaseComponent {
     }
 
     @Override
-    protected int determineVerticalContentSize(Sizing sizing) {
+    public int determineVerticalContentSize(Sizing sizing) {
         this.wrapLines();
         return this.textHeight();
     }

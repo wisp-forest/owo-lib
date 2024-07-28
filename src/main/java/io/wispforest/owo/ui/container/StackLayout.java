@@ -26,12 +26,12 @@ public class StackLayout extends BaseParentComponent {
     }
 
     @Override
-    protected int determineHorizontalContentSize(Sizing sizing) {
+    public int determineHorizontalContentSize(Sizing sizing) {
         return this.contentSize.width() + this.padding.get().horizontal();
     }
 
     @Override
-    protected int determineVerticalContentSize(Sizing sizing) {
+    public int determineVerticalContentSize(Sizing sizing) {
         return this.contentSize.height() + this.padding.get().vertical();
     }
 

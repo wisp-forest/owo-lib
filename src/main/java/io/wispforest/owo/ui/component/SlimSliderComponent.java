@@ -53,7 +53,7 @@ public class SlimSliderComponent extends BaseComponent {
     }
 
     @Override
-    protected int determineHorizontalContentSize(Sizing sizing) {
+    public int determineHorizontalContentSize(Sizing sizing) {
         if (this.axis == Axis.VERTICAL) {
             return 9;
         } else {
@@ -62,7 +62,7 @@ public class SlimSliderComponent extends BaseComponent {
     }
 
     @Override
-    protected int determineVerticalContentSize(Sizing sizing) {
+    public int determineVerticalContentSize(Sizing sizing) {
         if (this.axis == Axis.HORIZONTAL) {
             return 9;
         } else {

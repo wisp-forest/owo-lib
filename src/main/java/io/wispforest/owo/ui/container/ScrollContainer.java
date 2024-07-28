@@ -53,7 +53,7 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
     }
 
     @Override
-    protected int determineHorizontalContentSize(Sizing sizing) {
+    public int determineHorizontalContentSize(Sizing sizing) {
         if (this.direction == ScrollDirection.VERTICAL) {
             return super.determineHorizontalContentSize(sizing);
         } else {
@@ -62,7 +62,7 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
     }
 
     @Override
-    protected int determineVerticalContentSize(Sizing sizing) {
+    public int determineVerticalContentSize(Sizing sizing) {
         if (this.direction == ScrollDirection.HORIZONTAL) {
             return super.determineVerticalContentSize(sizing);
         } else {
