@@ -99,6 +99,32 @@ public class CodecUtils {
         );
     }
 
+    public static <T> Endec<T> toEndecWithRegistries(Codec<T> codec, PacketCodec<RegistryByteBuf, T> packetCodec) {
+        return Endec.of(
+                (ctx, serializer, value) -> {
+                    if (serializer instanceof ByteBufSerializer<?>) {
+                        var buffer = new RegistryByteBuf(PacketByteBufs.create(), ctx.requireAttributeValue(RegistriesAttribute.REGISTRIES).registryManager());
+                        packetCodec.encode(buffer, value);
+
+                        MinecraftEndecs.PACKET_BYTE_BUF.encode(ctx, serializer, buffer);
+                        return;
+                    }
+
+                    var ops = RegistryOps.of(EdmOps.withContext(ctx), ctx.requireAttributeValue(RegistriesAttribute.REGISTRIES).infoGetter());
+                    EdmEndec.INSTANCE.encode(ctx, serializer, codec.encodeStart(ops, value).getOrThrow(IllegalStateException::new));
+                },
+                (ctx, deserializer) -> {
+                    if (deserializer instanceof ByteBufDeserializer) {
+                        var buffer = MinecraftEndecs.PACKET_BYTE_BUF.decode(ctx, deserializer);
+                        return packetCodec.decode(new RegistryByteBuf(buffer, ctx.requireAttributeValue(RegistriesAttribute.REGISTRIES).registryManager()));
+                    }
+
+                    var ops = RegistryOps.of(EdmOps.withContext(ctx), ctx.requireAttributeValue(RegistriesAttribute.REGISTRIES).infoGetter());
+                    return codec.parse(ops, EdmEndec.INSTANCE.decode(ctx, deserializer)).getOrThrow(IllegalStateException::new);
+                }
+        );
+    }
+
     /**
      * Create an endec which serializes an instance of {@link Either}, using {@code first}
      * for the left and {@code second} for the right variant
