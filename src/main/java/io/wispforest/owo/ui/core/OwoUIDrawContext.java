@@ -178,6 +178,10 @@ public class OwoUIDrawContext extends DrawContext {
     }
 
     public void drawLine(int x1, int y1, int x2, int y2, double thiccness, Color color) {
+        drawLine((double) x1, y1, x2, y2, thiccness, color);
+    }
+
+    public void drawLine(double x1, double y1, double x2, double y2, double thiccness, Color color) {
         var offset = new Vector2d(x2 - x1, y2 - y1).perpendicular().normalize().mul(thiccness * .5d);
 
         var buffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
