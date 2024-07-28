@@ -65,7 +65,7 @@ public abstract class BaseComponent implements Component {
      * @deprecated Override {@link Component#calculateHorizontalContentSize(Sizing)}
      */
     protected int determineHorizontalContentSize(Sizing sizing) {
-        return this.calculateHorizontalContentSize(sizing);
+        return Component.super.calculateHorizontalContentSize(sizing);
     }
 
     /**
@@ -75,7 +75,17 @@ public abstract class BaseComponent implements Component {
      */
     @Deprecated
     protected int determineVerticalContentSize(Sizing sizing) {
-        return this.calculateVerticalContentSize(sizing);
+        return Component.super.calculateVerticalContentSize(sizing);
+    }
+
+    @Override
+    public int calculateHorizontalContentSize(Sizing sizing) {
+        return this.determineHorizontalContentSize(sizing);
+    }
+
+    @Override
+    public int calculateVerticalContentSize(Sizing sizing) {
+        return this.determineVerticalContentSize(sizing);
     }
 
     @Override
