@@ -23,12 +23,12 @@ public class SpriteComponent extends BaseComponent {
     }
 
     @Override
-    public int determineHorizontalContentSize(Sizing sizing) {
+    protected int determineHorizontalContentSize(Sizing sizing) {
         return this.sprite.getContents().getWidth();
     }
 
     @Override
-    public int determineVerticalContentSize(Sizing sizing) {
+    protected int determineVerticalContentSize(Sizing sizing) {
         return this.sprite.getContents().getHeight();
     }
 

@@ -270,12 +270,12 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
         }
 
         @Override
-        public int determineHorizontalContentSize(Sizing sizing) {
+        protected int determineHorizontalContentSize(Sizing sizing) {
             return 16;
         }
 
         @Override
-        public int determineVerticalContentSize(Sizing sizing) {
+        protected int determineVerticalContentSize(Sizing sizing) {
             return 16;
         }
 

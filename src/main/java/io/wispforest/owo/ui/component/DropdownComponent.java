@@ -260,7 +260,7 @@ public class DropdownComponent extends FlowLayout {
         }
 
         @Override
-        public int determineHorizontalContentSize(Sizing sizing) {
+        protected int determineHorizontalContentSize(Sizing sizing) {
             return super.determineHorizontalContentSize(sizing) + 17;
         }
     }
@@ -336,7 +336,7 @@ public class DropdownComponent extends FlowLayout {
         }
 
         @Override
-        public int determineHorizontalContentSize(Sizing sizing) {
+        protected int determineHorizontalContentSize(Sizing sizing) {
             return super.determineHorizontalContentSize(sizing) + 17;
         }
 

@@ -41,12 +41,12 @@ public class ReiWidgetComponent extends BaseComponent {
     public void drawFocusHighlight(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {}
 
     @Override
-    public int determineHorizontalContentSize(Sizing sizing) {
+    protected int determineHorizontalContentSize(Sizing sizing) {
         return this.widget.getBounds().getWidth();
     }
 
     @Override
-    public int determineVerticalContentSize(Sizing sizing) {
+    protected int determineVerticalContentSize(Sizing sizing) {
         return this.widget.getBounds().getHeight();
     }
 

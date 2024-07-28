@@ -150,7 +150,7 @@ public interface Component extends PositionedRectangle {
      * @return The horizontal size this component needs to fit its contents
      * @throws UnsupportedOperationException if this component doesn't support horizontal content sizing
      */
-    default int determineHorizontalContentSize(Sizing sizing) {
+    default int calculateHorizontalContentSize(Sizing sizing) {
         throw new UnsupportedOperationException(this.getClass().getSimpleName() + " does not support Sizing.content() on the horizontal axis");
     }
 
@@ -158,7 +158,7 @@ public interface Component extends PositionedRectangle {
      * @return The vertical size this component needs to fit its contents
      * @throws UnsupportedOperationException if this component doesn't support vertical content sizing
      */
-    default int determineVerticalContentSize(Sizing sizing) {
+    default int calculateVerticalContentSize(Sizing sizing) {
         throw new UnsupportedOperationException(this.getClass().getSimpleName() + " does not support Sizing.content() on the vertical axis");
     }
 

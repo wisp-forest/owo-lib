@@ -59,6 +59,25 @@ public abstract class BaseComponent implements Component {
         Observable.observeAll(this::notifyParentIfMounted, margins, positioning, horizontalSizing, verticalSizing);
     }
 
+    /**
+     * @return The horizontal size this component needs to fit its contents
+     * @throws UnsupportedOperationException if this component doesn't support horizontal content sizing
+     * @deprecated Override {@link Component#calculateHorizontalContentSize(Sizing)}
+     */
+    protected int determineHorizontalContentSize(Sizing sizing) {
+        return this.calculateHorizontalContentSize(sizing);
+    }
+
+    /**
+     * @return The vertical size this component needs to fit its contents
+     * @throws UnsupportedOperationException if this component doesn't support vertical content sizing
+     * @deprecated Override {@link Component#calculateVerticalContentSize(Sizing)}
+     */
+    @Deprecated
+    protected int determineVerticalContentSize(Sizing sizing) {
+        return this.calculateVerticalContentSize(sizing);
+    }
+
     @Override
     public void inflate(Size space) {
         this.space = space;
