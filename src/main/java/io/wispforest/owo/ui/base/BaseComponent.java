@@ -105,8 +105,8 @@ public abstract class BaseComponent implements Component {
 
         final var margins = this.margins.get();
 
-        this.width = horizontalSizing.inflate(this.space.width() - margins.horizontal(), this::determineHorizontalContentSize);
-        this.height = verticalSizing.inflate(this.space.height() - margins.vertical(), this::determineVerticalContentSize);
+        this.width = horizontalSizing.inflate(this.space.width() - margins.horizontal(), this::calculateHorizontalContentSize);
+        this.height = verticalSizing.inflate(this.space.height() - margins.vertical(), this::calculateVerticalContentSize);
     }
 
     protected void notifyParentIfMounted() {
