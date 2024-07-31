@@ -36,22 +36,26 @@ public final class ModDataLoader {
         Map<Identifier, JsonObject> foundFiles = new HashMap<>();
 
         FabricLoader.getInstance().getAllMods().forEach(modContainer -> {
-            final var targetPath = modContainer.getRootPath().resolve(String.format("data/%s/%s", modContainer.getMetadata().getId(), consumer.getDataSubdirectory()));
-
-            tryLoadFilesFrom(foundFiles, modContainer.getMetadata().getId(), targetPath);
+            for (var rootPath : modContainer.getRootPaths()) {
+                final var targetPath = rootPath.resolve(String.format("data/%s/%s", modContainer.getMetadata().getId(), consumer.getDataSubdirectory()));
+                tryLoadFilesFrom(foundFiles, modContainer.getMetadata().getId(), targetPath);
+            }
         });
 
         try {
             Files.createDirectories(DATA_PATH);
-            Files.list(DATA_PATH).forEach(nsPath -> {
-                if (!Files.isDirectory(nsPath)) return;
 
-                var namespace = nsPath.getFileName().toString();
-                var targetPath = nsPath.resolve(consumer.getDataSubdirectory());
-                if (!Files.exists(targetPath)) return;
+            try (var stream = Files.list(DATA_PATH)) {
+                stream.forEach(nsPath -> {
+                    if (!Files.isDirectory(nsPath)) return;
 
-                tryLoadFilesFrom(foundFiles, namespace, targetPath);
-            });
+                    var namespace = nsPath.getFileName().toString();
+                    var targetPath = nsPath.resolve(consumer.getDataSubdirectory());
+                    if (!Files.exists(targetPath)) return;
+
+                    tryLoadFilesFrom(foundFiles, namespace, targetPath);
+                });
+            }
         } catch (IOException e) {
             Owo.LOGGER.error("### Unable to traverse global data tree ++ Stacktrace below ###", e);
         }
@@ -62,17 +66,20 @@ public final class ModDataLoader {
     private static void tryLoadFilesFrom(Map<Identifier, JsonObject> foundFiles, String namespace, Path targetPath) {
         try {
             if (!Files.exists(targetPath)) return;
-            Files.walk(targetPath).forEach(path -> {
-                if (!path.toString().endsWith(".json")) return;
-                try {
-                    final InputStreamReader tabData = new InputStreamReader(Files.newInputStream(path));
 
-                    foundFiles.put(Identifier.of(namespace, FilenameUtils.removeExtension(targetPath.relativize(path).toString())), GSON.fromJson(tabData, JsonObject.class));
-                } catch (IOException e) {
-                    Owo.LOGGER.warn("### Unable to open data file {} ++ Stacktrace below ###", path, e);
-                    e.printStackTrace();
-                }
-            });
+            try (var stream = Files.walk(targetPath)) {
+                stream.forEach(path -> {
+                    if (!path.toString().endsWith(".json")) return;
+                    try {
+                        final InputStreamReader tabData = new InputStreamReader(Files.newInputStream(path));
+
+                        foundFiles.put(Identifier.of(namespace, FilenameUtils.removeExtension(targetPath.relativize(path).toString())), GSON.fromJson(tabData, JsonObject.class));
+                    } catch (IOException e) {
+                        Owo.LOGGER.warn("### Unable to open data file {} ++ Stacktrace below ###", path, e);
+                    }
+                });
+            }
+
         } catch (IOException e) {
             Owo.LOGGER.error("### Unable to traverse data tree {} ++ Stacktrace below ###", targetPath, e);
         }
