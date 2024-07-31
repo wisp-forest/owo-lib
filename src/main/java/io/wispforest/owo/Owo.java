@@ -2,13 +2,10 @@ package io.wispforest.owo;
 
 import io.wispforest.owo.client.screens.ScreenInternals;
 import io.wispforest.owo.command.debug.OwoDebugCommands;
-import io.wispforest.owo.compat.modmenu.OwoModMenuPlugin;
-import io.wispforest.owo.extras.network.OwoInternalNetworking;
-import io.wispforest.owo.network.OwoHandshake;
+import io.wispforest.owo.config.ui.ConfigScreen;
 import io.wispforest.owo.ops.LootOps;
 import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.Wisdom;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -19,10 +16,7 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.server.ServerStartingEvent;
-import net.neoforged.neoforge.event.server.ServerStoppingEvent;
-import net.neoforged.neoforge.registries.RegisterEvent;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
@@ -38,7 +32,6 @@ public class Owo {
      */
     public static final boolean DEBUG;
     public static final Logger LOGGER = LogManager.getLogger("owo");
-    private static MinecraftServer SERVER;
 
     public static final Text PREFIX = Text.empty().formatted(Formatting.GRAY)
             .append(withColor("o", 0x3955e5))
@@ -57,41 +50,24 @@ public class Owo {
         DEBUG = debug;
     }
 
-    private final IEventBus eventBus;
-
-    public Owo(IEventBus eventBus) {
-        this.eventBus = eventBus;
-
-        eventBus.addListener(this::onInitialize);
-
-        eventBus.addListener((RegisterEvent event) -> {
-            event.register(RegistryKeys.COMMAND_ARGUMENT_TYPE, (helper) -> {
-                OwoDebugCommands.initArgumentTypes();
-            });
-        });
-
-        eventBus.addListener(OwoInternalNetworking.INSTANCE::initializeNetworking);
-        eventBus.addListener((FMLLoadCompleteEvent event) -> OwoFreezer.freeze());
-    }
-
-    public void onInitialize(FMLCommonSetupEvent event) {
+    public Owo(IEventBus modBus) {
         LootOps.registerListener();
         ScreenInternals.init();
 
-        OwoHandshake.init(this.eventBus);
+        modBus.addListener((FMLLoadCompleteEvent event) -> OwoFreezer.freeze());
 
-        OwoModMenuPlugin.getProvidedConfigScreenFactories().forEach((s, iConfigScreenFactory) -> {
-            ModList.get().getModContainerById(s).ifPresent(modContainer -> modContainer.registerExtensionPoint(IConfigScreenFactory.class, iConfigScreenFactory));
+        modBus.addListener(FMLCommonSetupEvent.class, event -> {
+            ConfigScreen.forEachProvider((modId, screenFactory) -> {
+                ModList.get().getModContainerById(modId)
+                    .ifPresent(mod -> mod.registerExtensionPoint(IConfigScreenFactory.class, (modContainer, modsScreen) -> screenFactory.apply(modsScreen)));
+            });
         });
-
-        NeoForge.EVENT_BUS.addListener((ServerStartingEvent event1) -> SERVER = event1.getServer());
-        NeoForge.EVENT_BUS.addListener((ServerStoppingEvent event1) -> SERVER = null);
 
         Wisdom.spread();
 
         if (!DEBUG) return;
 
-        OwoDebugCommands.register();
+        OwoDebugCommands.register(modBus);
     }
 
     @ApiStatus.Internal
@@ -112,7 +88,7 @@ public class Owo {
      * a local singleplayer world and {@code null} otherwise
      */
     public static MinecraftServer currentServer() {
-        return SERVER;
+        return ServerLifecycleHooks.getCurrentServer();
     }
 
 }

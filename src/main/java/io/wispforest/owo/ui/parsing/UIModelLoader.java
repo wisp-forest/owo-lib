@@ -11,7 +11,6 @@ import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.SynchronousResourceReloader;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
-import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.fml.loading.FMLPaths;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -35,7 +34,7 @@ public class UIModelLoader implements SynchronousResourceReloader {
             .registerSerializer(Identifier.class, (identifier, marshaller) -> new JsonPrimitive(identifier.toString()))
             .build();
 
-    private static final Path HOT_RELOAD_LOCATIONS_PATH = FMLLoader.getGamePath().resolve(FMLPaths.CONFIGDIR.relative()).resolve("owo_ui_hot_reload_locations.json5");
+    private static final Path HOT_RELOAD_LOCATIONS_PATH = FMLPaths.CONFIGDIR.get().resolve("owo_ui_hot_reload_locations.json5");
     private static final Map<Identifier, Path> HOT_RELOAD_LOCATIONS = new HashMap<>();
 
     private static boolean loadedOnce = false;

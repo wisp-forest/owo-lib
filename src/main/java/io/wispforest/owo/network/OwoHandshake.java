@@ -2,14 +2,8 @@ package io.wispforest.owo.network;
 
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.Owo;
-import io.wispforest.owo.extras.ClientConfigurationConnectionEvents;
-import io.wispforest.owo.extras.ClientPlayConnectionEvents;
-import io.wispforest.owo.extras.ServerConfigurationConnectionEvents;
 import io.wispforest.owo.mixin.ClientCommonNetworkHandlerAccessor;
 import io.wispforest.owo.mixin.ServerCommonNetworkHandlerAccessor;
-import io.wispforest.owo.extras.network.NetworkDirection;
-import io.wispforest.owo.extras.network.NetworkReceiver;
-import io.wispforest.owo.extras.network.OwoInternalNetworking;
 import io.wispforest.owo.ops.TextOps;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
 import io.wispforest.endec.Endec;
@@ -17,33 +11,31 @@ import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.ServicesFrozenException;
+import net.fabricmc.fabric.api.client.networking.v1.ClientConfigurationConnectionEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientConfigurationNetworking;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerConfigurationConnectionEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerConfigurationNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientConfigurationNetworkHandler;
-import net.minecraft.network.NetworkPhase;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerConfigurationNetworkHandler;
-import net.minecraft.server.network.ServerPlayerConfigurationTask;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.loading.FMLLoader;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.network.configuration.ICustomConfigurationTask;
-import net.neoforged.neoforge.network.event.RegisterConfigurationTasksEvent;
-import net.neoforged.neoforge.network.registration.NetworkRegistry;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.function.ToIntFunction;
 
 @ApiStatus.Internal
@@ -52,12 +44,7 @@ public final class OwoHandshake {
     private static final Endec<Map<Identifier, Integer>> CHANNEL_HASHES_ENDEC = Endec.map(MinecraftEndecs.IDENTIFIER, Endec.INT);
 
     private static final MutableText PREFIX = TextOps.concat(Owo.PREFIX, Text.of("§chandshake failure\n"));
-
     public static final Identifier CHANNEL_ID = Identifier.of("owo", "handshake");
-
-    public static final Identifier CHANNEL_ID_RESPONSE = Identifier.of("owo", "handshake_response");
-    public static final Identifier CHANNEL_ID_REQUEST = Identifier.of("owo", "handshake_request");
-
     public static final Identifier OFF_CHANNEL_ID = Identifier.of("owo", "handshake_off");
 
     private static final boolean ENABLED = System.getProperty("owo.handshake.enabled") != null ? Boolean.getBoolean("owo.handshake.enabled") : Owo.DEBUG;
@@ -84,34 +71,21 @@ public final class OwoHandshake {
         HANDSHAKE_REQUIRED = true;
     }
 
-    public static void init(IEventBus eventBus) {
-        OwoInternalNetworking.registerPayloadType(NetworkDirection.S2C, NetworkPhase.CONFIGURATION, HandshakeRequest.ID, HandshakeRequest.ENDEC);
-        OwoInternalNetworking.registerPayloadType(NetworkDirection.C2S, NetworkPhase.CONFIGURATION, HandshakeResponse.ID, HandshakeResponse.ENDEC);
+    static {
+        PayloadTypeRegistry.configurationS2C().register(HandshakeRequest.ID, CodecUtils.toPacketCodec(HandshakeRequest.ENDEC));
+        PayloadTypeRegistry.configurationC2S().register(HandshakeResponse.ID, CodecUtils.toPacketCodec(HandshakeResponse.ENDEC));
 
-        eventBus.addListener((RegisterConfigurationTasksEvent event) -> {
-            event.register(new ICustomConfigurationTask() {
-                @Override
-                public void run(Consumer<CustomPayload> consumer) {
-                    OwoHandshake.configureStart((ServerConfigurationNetworkHandler) event.getListener(), Owo.currentServer());
-                }
-
-                @Override
-                public Key getKey() {
-                    return new Key(CHANNEL_ID);
-                }
-            });
-        });
-//        ServerConfigurationConnectionEvents.CONFIGURE.register(OwoHandshake::configureStart);
-        OwoInternalNetworking.registerReceiver(NetworkDirection.C2S, NetworkPhase.CONFIGURATION, HandshakeResponse.ID, OwoHandshake::syncServer);
+        ServerConfigurationConnectionEvents.CONFIGURE.register(OwoHandshake::configureStart);
+        ServerConfigurationNetworking.registerGlobalReceiver(HandshakeResponse.ID, OwoHandshake::syncServer);
 
         if (FMLLoader.getDist() == Dist.CLIENT) {
             if (!ENABLED) {
-                OwoInternalNetworking.registerPayloadType(NetworkDirection.S2C, NetworkPhase.CONFIGURATION, HandshakeOff.ID, Endec.VOID.xmap(unused -> new HandshakeOff(), o -> null));
-                OwoInternalNetworking.registerReceiver(NetworkDirection.C2S, NetworkPhase.CONFIGURATION, HandshakeOff.ID, (payload, context) -> {});
+                PayloadTypeRegistry.configurationS2C().register(HandshakeOff.ID, PacketCodec.unit(new HandshakeOff()));
+                ClientConfigurationNetworking.registerGlobalReceiver(HandshakeOff.ID, (payload, context) -> {});
             }
 
-            OwoInternalNetworking.registerReceiver(NetworkDirection.S2C, NetworkPhase.CONFIGURATION, HandshakeRequest.ID, OwoHandshake::syncClient);
-            ClientConfigurationConnectionEvents.COMPLETE.register(OwoHandshake::handleReadyClient);
+            ClientConfigurationNetworking.registerGlobalReceiver(HandshakeRequest.ID, OwoHandshake::syncClient);
+            ClientConfigurationConnectionEvents.READY.register(OwoHandshake::handleReadyClient);
 
             ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
                 QUERY_RECEIVED = false;
@@ -136,12 +110,12 @@ public final class OwoHandshake {
     private static void configureStart(ServerConfigurationNetworkHandler handler, MinecraftServer server) {
         if (!ENABLED) return;
 
-        if (NetworkRegistry.hasChannel(handler, OFF_CHANNEL_ID)) {
+        if (ServerConfigurationNetworking.canSend(handler, OFF_CHANNEL_ID)) {
             Owo.LOGGER.info("[Handshake] Handshake disabled by client, skipping");
             return;
         }
 
-        if (!NetworkRegistry.hasChannel(handler, CHANNEL_ID_REQUEST)) {
+        if (!ServerConfigurationNetworking.canSend(handler, CHANNEL_ID)) {
             if (!HANDSHAKE_REQUIRED) return;
 
             handler.disconnect(TextOps.concat(PREFIX, Text.of("incompatible client")));
@@ -150,12 +124,12 @@ public final class OwoHandshake {
         }
 
         var optionalChannels = formatHashes(OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel);
-        handler.send(new HandshakeRequest(optionalChannels));
+        ServerConfigurationNetworking.send(handler, new HandshakeRequest(optionalChannels));
         Owo.LOGGER.info("[Handshake] Sending channel packet");
     }
 
     @OnlyIn(Dist.CLIENT)
-    private static void syncClient(HandshakeRequest request, NetworkReceiver.Context context) {
+    private static void syncClient(HandshakeRequest request, ClientConfigurationNetworking.Context context) {
         Owo.LOGGER.info("[Handshake] Sending client channels");
         QUERY_RECEIVED = true;
 
@@ -165,10 +139,10 @@ public final class OwoHandshake {
         var requiredControllers = formatHashes(ParticleSystemController.REGISTERED_CONTROLLERS, OwoHandshake::hashController);
         var optionalChannels = formatHashes(OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel);
 
-        context.responseSender().accept(new HandshakeResponse(requiredChannels, requiredControllers, optionalChannels));
+        context.responseSender().sendPacket(new HandshakeResponse(requiredChannels, requiredControllers, optionalChannels));
     }
 
-    private static void syncServer(HandshakeResponse response, NetworkReceiver.Context context) {
+    private static void syncServer(HandshakeResponse response, ServerConfigurationNetworking.Context context) {
         Owo.LOGGER.info("[Handshake] Receiving client channels");
 
         StringBuilder disconnectMessage = new StringBuilder();
@@ -177,19 +151,17 @@ public final class OwoHandshake {
         isAllGood &= verifyReceivedHashes("controllers", response.requiredControllers(), ParticleSystemController.REGISTERED_CONTROLLERS, OwoHandshake::hashController, disconnectMessage);
 
         if (!isAllGood) {
-            context.disconnect(TextOps.concat(PREFIX, Text.of(disconnectMessage.toString())));
+            context.responseSender().disconnect(TextOps.concat(PREFIX, Text.of(disconnectMessage.toString())));
         }
 
-        ((OwoClientConnectionExtension) ((ServerCommonNetworkHandlerAccessor) context.listener()).owo$getConnection()).owo$setChannelSet(filterOptionalServices(response.optionalChannels(), OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel));
+        ((OwoClientConnectionExtension) ((ServerCommonNetworkHandlerAccessor) context.networkHandler()).owo$getConnection()).owo$setChannelSet(filterOptionalServices(response.optionalChannels(), OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel));
 
         Owo.LOGGER.info("[Handshake] Handshake completed successfully");
-
-        ((ServerConfigurationNetworkHandler) context.listener()).onTaskFinished(new ServerPlayerConfigurationTask.Key(CHANNEL_ID));
     }
 
     @OnlyIn(Dist.CLIENT)
     private static void handleReadyClient(ClientConfigurationNetworkHandler handler, MinecraftClient client) {
-        if (NetworkRegistry.hasChannel(handler, CHANNEL_ID_RESPONSE) || !HANDSHAKE_REQUIRED || !ENABLED) return;
+        if (ClientConfigurationNetworking.canSend(CHANNEL_ID) || !HANDSHAKE_REQUIRED || !ENABLED) return;
 
         client.execute(() -> {
             ((ClientCommonNetworkHandlerAccessor) handler)
@@ -288,7 +260,7 @@ public final class OwoHandshake {
         for (var entry : channel.endecsByIndex.int2ObjectEntrySet()) {
             serializersHash += entry.getIntKey() * 31 + entry.getValue().getRecordClass().getName().hashCode();
         }
-        return 31 * channel.channelId.hashCode() + serializersHash;
+        return 31 * channel.packetId.id().hashCode() + serializersHash;
     }
 
     private static int hashController(ParticleSystemController controller) {
@@ -301,7 +273,7 @@ public final class OwoHandshake {
 
     public record HandshakeRequest(Map<Identifier, Integer> optionalChannels) implements CustomPayload {
 
-        public static final Id<HandshakeRequest> ID = new Id<>(OwoHandshake.CHANNEL_ID_REQUEST);
+        public static final Id<HandshakeRequest> ID = new Id<>(OwoHandshake.CHANNEL_ID);
         public static final Endec<HandshakeRequest> ENDEC = StructEndecBuilder.of(
                 CHANNEL_HASHES_ENDEC.fieldOf("optionalChannels", HandshakeRequest::optionalChannels),
                 HandshakeRequest::new
@@ -327,7 +299,7 @@ public final class OwoHandshake {
                                      Map<Identifier, Integer> requiredControllers,
                                      Map<Identifier, Integer> optionalChannels) implements CustomPayload {
 
-        public static final Id<HandshakeResponse> ID = new Id<>(OwoHandshake.CHANNEL_ID_RESPONSE);
+        public static final Id<HandshakeResponse> ID = new Id<>(OwoHandshake.CHANNEL_ID);
         public static final Endec<HandshakeResponse> ENDEC = StructEndecBuilder.of(
                 CHANNEL_HASHES_ENDEC.fieldOf("requiredChannels", HandshakeResponse::requiredChannels),
                 CHANNEL_HASHES_ENDEC.fieldOf("requiredControllers", HandshakeResponse::requiredControllers),

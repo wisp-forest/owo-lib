@@ -2,7 +2,7 @@ package io.wispforest.owo.ui.util;
 
 import io.wispforest.owo.Owo;
 import net.minecraft.client.texture.Sprite;
-import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.fml.ModList;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -20,7 +20,7 @@ public class SpriteUtilInvoker {
     }
 
     private static MethodHandle getMarkSpriteActive() {
-        if (FMLLoader.getLoadingModList().getModFileById("sodium") != null) {
+        if (ModList.get().isLoaded("sodium")) {
             try {
                 Class<?> spriteUtil = Class.forName("me.jellysquid.mods.sodium.client.render.texture.SpriteUtil");
                 var m = spriteUtil.getMethod("markSpriteActive", Sprite.class);

@@ -63,7 +63,8 @@ public class ItemComponent extends BaseComponent {
 
     @Override
     public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
-        final boolean notSideLit = !this.itemRenderer.getModel(this.stack, null, null, 0).isSideLit();
+//        final boolean notSideLit = !this.itemRenderer.getModel(this.stack, null, null, 0).isSideLit();
+        final boolean notSideLit = true; // TODO: figure out why this fixes item rendering - basique
         if (notSideLit) {
             DiffuseLighting.disableGuiDepthLighting();
         }

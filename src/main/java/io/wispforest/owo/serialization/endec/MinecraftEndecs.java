@@ -1,16 +1,14 @@
 package io.wispforest.owo.serialization.endec;
 
 import com.mojang.datafixers.util.Function3;
-import io.netty.buffer.Unpooled;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.SerializationAttributes;
 import io.wispforest.endec.impl.ReflectiveEndecBuilder;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.serialization.CodecUtils;
-import io.wispforest.owo.serialization.RegistriesAttribute;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.tag.TagKey;
@@ -33,37 +31,17 @@ public final class MinecraftEndecs {
 
     public static final Endec<PacketByteBuf> PACKET_BYTE_BUF = Endec.BYTES
             .xmap(bytes -> {
-                var buffer = new PacketByteBuf(Unpooled.buffer());
+                var buffer = PacketByteBufs.create();
                 buffer.writeBytes(bytes);
 
                 return buffer;
             }, buffer -> {
-                var ridx = buffer.readerIndex();
+                var rinx = buffer.readerIndex();
 
                 var bytes = new byte[buffer.readableBytes()];
                 buffer.readBytes(bytes);
 
-                buffer.readerIndex(ridx);
-
-                return bytes;
-            });
-
-    public static final Endec<RegistryByteBuf> REGISTRY_BYTE_BUF = Endec.BYTES
-            .xmapWithContext((ctx, bytes) -> {
-                // TODO: ADD CONNECTION TYPE FOR NEO!
-                var registry = ctx.requireAttributeValue(RegistriesAttribute.REGISTRIES);
-
-                var buffer = new RegistryByteBuf(Unpooled.buffer(), registry.registryManager());
-                buffer.writeBytes(bytes);
-
-                return buffer;
-            }, (ctx, buffer) -> {
-                var ridx = buffer.readerIndex();
-
-                var bytes = new byte[buffer.readableBytes()];
-                buffer.readBytes(bytes);
-
-                buffer.readerIndex(ridx);
+                buffer.readerIndex(rinx);
 
                 return bytes;
             });
