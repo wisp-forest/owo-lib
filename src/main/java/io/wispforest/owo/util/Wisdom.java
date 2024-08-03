@@ -57,7 +57,8 @@ public final class Wisdom {
             "that's a CanPickUpLoot baby zombie, the most annoying thing ever. he runs around like crazy and picks up all your shit",
             "blod: I think I need to take a book out of your page",
             "blod: he her",
-            "BasiqueEvangelist: what if... iphones"
+            "BasiqueEvangelist: what if... iphones",
+            "Cheese Cheese Creeper, the newest release from MC Basic"
     );
 
     public static void spread() {
