@@ -1,9 +1,8 @@
 package io.wispforest.owo.util;
 
-import net.minecraft.block.Block;
-
 import java.util.HashSet;
 import java.util.Set;
+import net.minecraft.world.level.block.Block;
 
 /**
  * A simple utility class for making ore blocks update after they are generated.

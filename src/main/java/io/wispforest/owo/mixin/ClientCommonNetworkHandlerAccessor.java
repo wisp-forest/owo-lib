@@ -1,12 +1,12 @@
 package io.wispforest.owo.mixin;
 
-import net.minecraft.client.network.ClientCommonNetworkHandler;
-import net.minecraft.network.ClientConnection;
+import net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl;
+import net.minecraft.network.Connection;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(ClientCommonNetworkHandler.class)
+@Mixin(ClientCommonPacketListenerImpl.class)
 public interface ClientCommonNetworkHandlerAccessor {
     @Accessor
-    ClientConnection getConnection();
+    Connection getConnection();
 }

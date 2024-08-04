@@ -4,17 +4,17 @@ import io.wispforest.owo.ui.component.*;
 import io.wispforest.owo.ui.container.*;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.Sizing;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.InvalidIdentifierException;
 import org.jetbrains.annotations.ApiStatus;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
+import org.w3c.dom.NodeList;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import net.minecraft.network.chat.Text;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.InvalidIdentifierException;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * A utility class containing the component factory registry
@@ -49,7 +49,7 @@ public class UIParsing {
      * @param factory     The factory to register
      */
     public static void registerFactory(Identifier componentId, Function<Element, Component> factory) {
-        registerFactory(componentId.getNamespace() + "." + componentId.getPath(), factory);
+        registerFactory(componentId.namespace() + "." + componentId.path(), factory);
     }
 
     /**
@@ -187,7 +187,7 @@ public class UIParsing {
      */
     public static Identifier parseIdentifier(Node node) {
         try {
-            return Identifier.of(node.getTextContent().strip());
+            return Identifier.parse(node.getTextContent().strip());
         } catch (InvalidIdentifierException exception) {
             throw new UIModelParsingException("Invalid identifier '" + node.getTextContent() + "'", exception);
         }

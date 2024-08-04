@@ -4,12 +4,12 @@ import com.google.common.collect.ForwardingMap;
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
 import io.wispforest.owo.config.ui.ConfigScreen;
-import net.minecraft.util.Util;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
+import net.minecraft.Util;
 
 @ApiStatus.Internal
 public class OwoModMenuPlugin implements ModMenuApi {

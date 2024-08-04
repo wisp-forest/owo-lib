@@ -5,15 +5,15 @@ import io.wispforest.endec.Endec;
 import io.wispforest.endec.SerializationAttributes;
 import io.wispforest.endec.SerializationContext;
 import io.wispforest.endec.StructEndec;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeSerializer;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 
 public class EndecRecipeSerializer<R extends Recipe<?>> implements RecipeSerializer<R> {
 
-    private final PacketCodec<PacketByteBuf, R> packetCodec;
+    private final StreamCodec<FriendlyByteBuf, R> packetCodec;
     private final MapCodec<R> codec;
 
     public EndecRecipeSerializer(StructEndec<R> endec, Endec<R> networkEndec) {
@@ -31,7 +31,7 @@ public class EndecRecipeSerializer<R extends Recipe<?>> implements RecipeSeriali
     }
 
     @Override
-    public PacketCodec<RegistryByteBuf, R> packetCodec() {
+    public StreamCodec<RegistryFriendlyByteBuf, R> streamCodec() {
         return this.packetCodec.cast();
     }
 }

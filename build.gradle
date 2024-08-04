@@ -14,9 +14,21 @@ allprojects {
     version = "${project.mod_version}+${rootProject.minecraft_base_version}"
     group = rootProject.maven_group
 
+    repositories {
+        maven {
+            name = "Gegy"
+            url = uri("https://maven.gegy.dev/releases/")
+        }
+        maven { url "https://maven.parchmentmc.org" }
+    }
+
     dependencies {
         minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
-        mappings "net.fabricmc:yarn:${rootProject.yarn_mappings}:v2"
+        mappings loom.layered {
+            officialMojangMappings()
+            parchment("org.parchmentmc.data:parchment-${rootProject.minecraft_version}:${rootProject.parchment_version}@zip")
+            mappings("dev.lambdaurora:yalmm:${rootProject.yalmm_version}")
+        }
         modImplementation "net.fabricmc:fabric-loader:${rootProject.loader_version}"
 
         modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"

@@ -1,5 +1,6 @@
 package io.wispforest.uwu.client;
 
+import OwoUIAdapter;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.ButtonComponent;
@@ -7,10 +8,10 @@ import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.*;
-import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
-
+import java.util.List;
 import java.util.stream.IntStream;
+import net.minecraft.network.chat.Text;
 
 public class TestConfigScreen extends BaseOwoScreen<FlowLayout> {
 

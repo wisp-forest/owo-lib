@@ -5,9 +5,6 @@ import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.FocusHandler;
 import io.wispforest.owo.util.EventSource;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.text.Text;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -18,6 +15,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.network.chat.Text;
+import net.minecraft.util.FormattedCharSequence;
 
 public interface Component extends PositionedRectangle {
 
@@ -43,8 +44,8 @@ public interface Component extends PositionedRectangle {
      */
     default void drawTooltip(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
         if (!this.shouldDrawTooltip(mouseX, mouseY)) return;
-        context.drawTooltip(MinecraftClient.getInstance().textRenderer, mouseX, mouseY, this.tooltip());
-        context.draw();
+        context.drawTooltip(Minecraft.getInstance().font, mouseX, mouseY, this.tooltip());
+        context.flush();
     }
 
     /**
@@ -165,15 +166,15 @@ public interface Component extends PositionedRectangle {
      *
      * @param tooltip The tooltip to display
      */
-    Component tooltip(@Nullable List<TooltipComponent> tooltip);
+    Component tooltip(@Nullable List<ClientTooltipComponent> tooltip);
 
     /**
      * Set the tooltip of this component to the given
      * text, without any wrapping applied
      */
     default Component tooltip(@NotNull Collection<Text> tooltip) {
-        var components = new ArrayList<TooltipComponent>();
-        for (var line : tooltip) components.add(TooltipComponent.of(line.asOrderedText()));
+        var components = new ArrayList<ClientTooltipComponent>();
+        for (var line : tooltip) components.add(ClientTooltipComponent.create(line.getVisualOrderText()));
         this.tooltip(components);
         return this;
     }
@@ -183,9 +184,9 @@ public interface Component extends PositionedRectangle {
      * text, wrapping at newline characters
      */
     default Component tooltip(@NotNull Text tooltip) {
-        var components = new ArrayList<TooltipComponent>();
-        for (var line : MinecraftClient.getInstance().textRenderer.wrapLines(tooltip, Integer.MAX_VALUE)) {
-            components.add(TooltipComponent.of(line));
+        var components = new ArrayList<ClientTooltipComponent>();
+        for (var line : Minecraft.getInstance().font.wrapLines(tooltip, Integer.MAX_VALUE)) {
+            components.add(ClientTooltipComponent.create(line));
         }
         this.tooltip(components);
         return this;
@@ -196,7 +197,7 @@ public interface Component extends PositionedRectangle {
      * display while hovered
      */
     @Contract(pure = true)
-    @Nullable List<TooltipComponent> tooltip();
+    @Nullable List<ClientTooltipComponent> tooltip();
 
     /**
      * Set the Z-Index of this component. This is used

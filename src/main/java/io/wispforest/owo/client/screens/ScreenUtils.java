@@ -1,17 +1,19 @@
 package io.wispforest.owo.client.screens;
 
 import io.wispforest.owo.mixin.ScreenHandlerInvoker;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ScreenHandler;
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 
 /**
- * A collection of utilities to ease implementing a simple {@link net.minecraft.client.gui.screen.ingame.HandledScreen}
+ * A collection of utilities to ease implementing a simple {@link net.minecraft.client.gui.screens.inventory.AbstractContainerScreen}
  */
 public class ScreenUtils {
 
     /**
-     * Can be used as an implementation of {@link net.minecraft.screen.ScreenHandler#quickMove(PlayerEntity, int)}
+     * Can be used as an implementation of {@link net.minecraft.world.inventory.AbstractContainerMenu#quickMoveStack(Player, int)}
      * for simple screens with a lower (player) and upper (main) inventory
      *
      * <pre>
@@ -26,14 +28,14 @@ public class ScreenUtils {
      * @param handler            The target ScreenHandler
      * @param clickedSlotIndex   The slot index that was clicked
      * @param upperInventorySize The size of the upper (main) inventory
-     * @return The return value for {{@link net.minecraft.screen.ScreenHandler#quickMove(PlayerEntity, int)}}
+     * @return The return value for {{@link net.minecraft.world.inventory.AbstractContainerMenu#quickMoveStack(Player, int)}}
      */
-    public static ItemStack handleSlotTransfer(ScreenHandler handler, int clickedSlotIndex, int upperInventorySize) {
+    public static ItemStack handleSlotTransfer(AbstractContainerMenu handler, int clickedSlotIndex, int upperInventorySize) {
         final var slots = handler.slots;
         final var clickedSlot = slots.get(clickedSlotIndex);
-        if (!clickedSlot.hasStack()) return ItemStack.EMPTY;
+        if (!clickedSlot.hasItem()) return ItemStack.EMPTY;
 
-        final var clickedStack = clickedSlot.getStack();
+        final var clickedStack = clickedSlot.getItem();
 
         if (clickedSlotIndex < upperInventorySize) {
             if (!insertIntoSlotRange(handler, clickedStack, upperInventorySize, slots.size(), true)) {
@@ -46,20 +48,20 @@ public class ScreenUtils {
         }
 
         if (clickedStack.isEmpty()) {
-            clickedSlot.setStack(ItemStack.EMPTY);
+            clickedSlot.setByPlayer(ItemStack.EMPTY);
         } else {
-            clickedSlot.markDirty();
+            clickedSlot.setChanged();
         }
 
         return clickedStack;
     }
 
     /**
-     * Shorthand of {@link #insertIntoSlotRange(ScreenHandler, ItemStack, int, int, boolean)} with
+     * Shorthand of {@link #insertIntoSlotRange(AbstractContainerMenu, ItemStack, int, int, boolean)} with
      * {@code false} for {@code fromLast}
      */
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    public static boolean insertIntoSlotRange(ScreenHandler handler, ItemStack addition, int beginIndex, int endIndex) {
+    public static boolean insertIntoSlotRange(AbstractContainerMenu handler, ItemStack addition, int beginIndex, int endIndex) {
         return insertIntoSlotRange(handler, addition, beginIndex, endIndex, false);
     }
 
@@ -76,7 +78,7 @@ public class ScreenUtils {
      * @return {@code true} if state was modified
      */
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    public static boolean insertIntoSlotRange(ScreenHandler handler, ItemStack addition, int beginIndex, int endIndex, boolean fromLast) {
+    public static boolean insertIntoSlotRange(AbstractContainerMenu handler, ItemStack addition, int beginIndex, int endIndex, boolean fromLast) {
         return ((ScreenHandlerInvoker) handler).owo$insertItem(addition, beginIndex, endIndex, fromLast);
     }
 

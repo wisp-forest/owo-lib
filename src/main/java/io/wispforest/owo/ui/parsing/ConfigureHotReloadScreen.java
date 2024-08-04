@@ -6,15 +6,15 @@ import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.util.CommandOpenedScreen;
 import io.wispforest.owo.ui.util.UISounds;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Util;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.util.tinyfd.TinyFileDialogs;
 
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
+import net.minecraft.Util;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Text;
+import net.minecraft.resources.Identifier;
 
 public class ConfigureHotReloadScreen extends BaseUIModelScreen<FlowLayout> implements CommandOpenedScreen {
 
@@ -43,25 +43,25 @@ public class ConfigureHotReloadScreen extends BaseUIModelScreen<FlowLayout> impl
             CompletableFuture.runAsync(() -> {
                 var newPath = TinyFileDialogs.tinyfd_openFileDialog("Choose UI Model source", null, null, null, false);
                 if (newPath != null) this.reloadLocation = Path.of(newPath);
-            }, Util.getMainWorkerExecutor()).whenComplete((unused, throwable) -> {
+            }, Util.backgroundExecutor()).whenComplete((unused, throwable) -> {
                 this.updateFileNameLabel();
             });
         });
 
         rootComponent.childById(ButtonComponent.class, "save-button").onPress(button -> {
             UIModelLoader.setHotReloadPath(this.modelId, this.reloadLocation);
-            this.close();
+            this.onClose();
         });
 
         rootComponent.childById(LabelComponent.class, "close-label").mouseDown().subscribe((mouseX, mouseY, button) -> {
             UISounds.playInteractionSound();
-            this.close();
+            this.onClose();
             return true;
         });
     }
 
     @Override
-    public void close() {
+    public void onClose() {
         this.client.setScreen(this.parent);
     }
 

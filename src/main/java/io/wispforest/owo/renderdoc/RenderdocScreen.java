@@ -1,6 +1,7 @@
 package io.wispforest.owo.renderdoc;
 
 import io.wispforest.owo.ops.TextOps;
+import io.wispforest.owo.renderdoc.RenderDoc.Key;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.CheckboxComponent;
@@ -10,12 +11,12 @@ import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.CommandOpenedScreen;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
+import net.minecraft.TextFormatting;
+import net.minecraft.network.chat.Text;
 
 public class RenderdocScreen extends BaseOwoScreen<FlowLayout> implements CommandOpenedScreen {
 
@@ -41,34 +42,34 @@ public class RenderdocScreen extends BaseOwoScreen<FlowLayout> implements Comman
                                 .child(Components.label(Text.literal("RenderDoc Controls")).shadow(true).margins(Insets.top(5).withBottom(10)))
                                 .child(
                                         Containers.grid(Sizing.content(), Sizing.content(), 2, 2)
-                                                .child(overlayControl(Text.of("Enabled"), overlayState, RenderDoc.OverlayOption.ENABLED), 0, 0)
-                                                .child(overlayControl(Text.of("Capture List"), overlayState, RenderDoc.OverlayOption.CAPTURE_LIST), 0, 1)
-                                                .child(overlayControl(Text.of("Frame Rate"), overlayState, RenderDoc.OverlayOption.FRAME_RATE), 1, 0)
-                                                .child(overlayControl(Text.of("Frame Number"), overlayState, RenderDoc.OverlayOption.FRAME_NUMBER), 1, 1)
+                                                .child(overlayControl(Text.nullToEmpty("Enabled"), overlayState, RenderDoc.OverlayOption.ENABLED), 0, 0)
+                                                .child(overlayControl(Text.nullToEmpty("Capture List"), overlayState, RenderDoc.OverlayOption.CAPTURE_LIST), 0, 1)
+                                                .child(overlayControl(Text.nullToEmpty("Frame Rate"), overlayState, RenderDoc.OverlayOption.FRAME_RATE), 1, 0)
+                                                .child(overlayControl(Text.nullToEmpty("Frame Number"), overlayState, RenderDoc.OverlayOption.FRAME_NUMBER), 1, 1)
                                 )
                                 .child(
                                         Components.box(Sizing.fixed(175), Sizing.fixed(1))
-                                                .color(Color.ofFormatting(Formatting.DARK_GRAY))
+                                                .color(Color.ofFormatting(TextFormatting.DARK_GRAY))
                                                 .fill(true)
                                                 .margins(Insets.vertical(5))
                                 )
                                 .child(
                                         Containers.grid(Sizing.content(), Sizing.content(), 2, 2)
                                                 .child(Components.button(
-                                                        Text.of("Launch UI"),
+                                                        Text.nullToEmpty("Launch UI"),
                                                         (ButtonComponent button) -> RenderDoc.launchReplayUI(true)
                                                 ).horizontalSizing(Sizing.fixed(90)).margins(Insets.of(2)), 0, 0)
                                                 .child((this.captureKeyButton = Components.button(
-                                                        Text.of("Capture Hotkey"),
+                                                        Text.nullToEmpty("Capture Hotkey"),
                                                         (ButtonComponent button) -> {
                                                             button.active = false;
-                                                            button.setMessage(Text.of("Press..."));
+                                                            button.setMessage(Text.nullToEmpty("Press..."));
 
                                                             this.setCaptureKey = true;
                                                         }
                                                 )).horizontalSizing(Sizing.fixed(90)).margins(Insets.of(2)), 1, 0)
                                                 .child(Components.button(
-                                                        Text.of("Capture Frame"),
+                                                        Text.nullToEmpty("Capture Frame"),
                                                         (ButtonComponent button) -> RenderDoc.triggerCapture()
                                                 ).horizontalSizing(Sizing.fixed(90)).margins(Insets.of(2)), 0, 1)
                                                 .child(this.captureLabel = Components.label(
@@ -101,7 +102,7 @@ public class RenderdocScreen extends BaseOwoScreen<FlowLayout> implements Comman
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (this.setCaptureKey) {
             this.captureKeyButton.active = true;
-            this.captureKeyButton.setMessage(Text.of("Capture Hotkey"));
+            this.captureKeyButton.setMessage(Text.nullToEmpty("Capture Hotkey"));
 
             this.setCaptureKey = false;
 
@@ -117,7 +118,7 @@ public class RenderdocScreen extends BaseOwoScreen<FlowLayout> implements Comman
     }
 
     private Text createCapturesText() {
-        return TextOps.withColor("Captures: §" + RenderDoc.getNumCaptures(), TextOps.color(Formatting.WHITE), 0x00D7FF);
+        return TextOps.withColor("Captures: §" + RenderDoc.getNumCaptures(), TextOps.color(TextFormatting.WHITE), 0x00D7FF);
     }
 
     private static CheckboxComponent overlayControl(Text name, EnumSet<RenderDoc.OverlayOption> state, RenderDoc.OverlayOption option) {

@@ -1,10 +1,10 @@
 package io.wispforest.owo.text;
 
-import net.minecraft.text.TextContent;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.HashMap;
 import java.util.Map;
+import net.minecraft.network.chat.ComponentContents;
 
 public final class CustomTextRegistry {
 
@@ -12,7 +12,7 @@ public final class CustomTextRegistry {
 
     private CustomTextRegistry() {}
 
-    public static void register(TextContent.Type<?> type, String triggerField) {
+    public static void register(ComponentContents.Type<?> type, String triggerField) {
         TYPES.put(type.id(), new Entry<>(triggerField, type));
     }
 
@@ -21,5 +21,5 @@ public final class CustomTextRegistry {
         return TYPES;
     }
 
-    public record Entry<C extends TextContent>(String triggerField, TextContent.Type<C> type) {}
+    public record Entry<C extends ComponentContents>(String triggerField, ComponentContents.Type<C> type) {}
 }

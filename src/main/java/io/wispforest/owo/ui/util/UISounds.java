@@ -2,26 +2,26 @@ package io.wispforest.owo.ui.util;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.resources.Identifier;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 
 public final class UISounds {
 
-    public static final SoundEvent UI_INTERACTION = SoundEvent.of(Identifier.of("owo", "ui.owo.interaction"));
+    public static final SoundEvent UI_INTERACTION = SoundEvent.createVariableRangeEvent(Identifier.of("owo", "ui.owo.interaction"));
 
     private UISounds() {}
 
     @Environment(EnvType.CLIENT)
     public static void playButtonSound() {
-        MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1));
+        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1));
     }
 
     @Environment(EnvType.CLIENT)
     public static void playInteractionSound() {
-        MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(UI_INTERACTION, 1));
+        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(UI_INTERACTION, 1));
     }
 
 }

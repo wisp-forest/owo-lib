@@ -1,15 +1,16 @@
 package io.wispforest.owo.mixin.shader;
 
+import ;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import io.wispforest.owo.shader.GlProgram;
-import net.minecraft.client.gl.ShaderProgram;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(ShaderProgram.class)
+@Mixin(ShaderInstance.class)
 public class ShaderProgramMixin {
 
     @WrapOperation(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Identifier;ofVanilla(Ljava/lang/String;)Lnet/minecraft/util/Identifier;"), require = 0)

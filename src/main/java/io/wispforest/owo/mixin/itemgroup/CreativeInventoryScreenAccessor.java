@@ -1,15 +1,15 @@
 package io.wispforest.owo.mixin.itemgroup;
 
-import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
-import net.minecraft.item.ItemGroup;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.world.item.CreativeModeTab;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(CreativeInventoryScreen.class)
+@Mixin(CreativeModeInventoryScreen.class)
 public interface CreativeInventoryScreenAccessor {
 
     @Accessor("selectedTab")
-    static ItemGroup owo$getSelectedTab() {
+    static CreativeModeTab owo$getSelectedTab() {
         throw new IllegalStateException("Mixin stub must not be called");
     }
 

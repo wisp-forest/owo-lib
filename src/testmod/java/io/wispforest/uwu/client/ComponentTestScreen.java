@@ -1,5 +1,6 @@
 package io.wispforest.uwu.client;
 
+import OwoUIAdapter;
 import com.mojang.authlib.GameProfile;
 import io.wispforest.owo.ui.component.*;
 import io.wispforest.owo.ui.container.Containers;
@@ -7,35 +8,34 @@ import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.RenderEffectWrapper;
 import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.core.*;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.tooltip.Tooltip;
-import net.minecraft.client.texture.SpriteAtlasTexture;
-import net.minecraft.client.util.SpriteIdentifier;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.BundleContentsComponent;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.resources.model.Material;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.RotationAxis;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.Text;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.BundleContents;
+import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
@@ -55,10 +55,10 @@ public class ComponentTestScreen extends Screen {
 
         rootComponent.child(
                 Containers.verticalFlow(Sizing.content(), Sizing.content())
-                        .child(Components.button(Text.of("Dark Background"), button -> rootComponent.surface(Surface.flat(0x77000000))).horizontalSizing(Sizing.fixed(95)))
-                        .child(Components.button(Text.of("No Background"), button -> rootComponent.surface(Surface.BLANK)).margins(Insets.vertical(5)).horizontalSizing(Sizing.fixed(95)))
-                        .child(Components.button(Text.of("Dirt Background"), button -> rootComponent.surface(Surface.OPTIONS_BACKGROUND)).horizontalSizing(Sizing.fixed(95)))
-                        .child(Components.checkbox(Text.of("bruh")).onChanged(aBoolean -> this.client.player.sendMessage(Text.of("bruh: " + aBoolean))).margins(Insets.top(5)))
+                        .child(Components.button(Text.nullToEmpty("Dark Background"), button -> rootComponent.surface(Surface.flat(0x77000000))).horizontalSizing(Sizing.fixed(95)))
+                        .child(Components.button(Text.nullToEmpty("No Background"), button -> rootComponent.surface(Surface.BLANK)).margins(Insets.vertical(5)).horizontalSizing(Sizing.fixed(95)))
+                        .child(Components.button(Text.nullToEmpty("Dirt Background"), button -> rootComponent.surface(Surface.OPTIONS_BACKGROUND)).horizontalSizing(Sizing.fixed(95)))
+                        .child(Components.checkbox(Text.nullToEmpty("bruh")).onChanged(aBoolean -> this.client.player.sendMessage(Text.of("bruh: " + aBoolean))).margins(Insets.top(5)))
                         .padding(Insets.of(10))
                         .surface(Surface.vanillaPanorama(true))
                         .positioning(Positioning.relative(1, 1))
@@ -90,7 +90,7 @@ public class ComponentTestScreen extends Screen {
                         .scrollbarThiccness(12)
                         .id("scrollnite")
                 )
-                .child(Components.button(Text.of("+"), (ButtonComponent button) -> {
+                .child(Components.button(Text.nullToEmpty("+"), (ButtonComponent button) -> {
                             verticalAnimation.reverse();
 
                             button.setMessage(verticalAnimation.direction() == Animation.Direction.FORWARDS
@@ -120,10 +120,10 @@ public class ComponentTestScreen extends Screen {
         );
 
         rootComponent.child(Containers.verticalFlow(Sizing.content(), Sizing.content())
-                .child(Components.label(Text.literal("A profound vertical Flow Layout, as well as a leally long text to demonstrate wrapping").styled(style -> style.withFont(MinecraftClient.UNICODE_FONT_ID))
-                                .styled(style -> {
+                .child(Components.label(Text.literal("A profound vertical Flow Layout, as well as a leally long text to demonstrate wrapping").withStyle(style -> style.withFont(Minecraft.UNIFORM_FONT))
+                                .withStyle(style -> {
                                     return style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, "yes"))
-                                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackContent(Items.SCULK_SHRIEKER.getDefaultStack())));
+                                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackInfo(Items.SCULK_SHRIEKER.getDefaultInstance())));
                                 }))
                         .shadow(true)
                         .lineHeight(7)
@@ -134,10 +134,10 @@ public class ComponentTestScreen extends Screen {
 
         final var buttonPanel = Containers.horizontalFlow(Sizing.content(), Sizing.content())
                 .child(Components.label(Text.literal("AAAAAAAAAAAAAAAAAAA").append(Text.literal("Layout")
-                                .styled(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackContent(Items.SCULK_SHRIEKER.getDefaultStack())))))
+                                .withStyle(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackInfo(Items.SCULK_SHRIEKER.getDefaultInstance())))))
                         .append(Text.literal("\nAAAAAAAAAAAAAAA"))).margins(Insets.of(5)))
-                .child(Components.button(Text.of("⇄"), button -> this.clearAndInit()).sizing(Sizing.fixed(20)))
-                .child(Components.button(Text.of("X"), button -> this.close()).sizing(Sizing.fixed(20)))
+                .child(Components.button(Text.nullToEmpty("⇄"), button -> this.clearAndInit()).sizing(Sizing.fixed(20)))
+                .child(Components.button(Text.nullToEmpty("X"), button -> this.close()).sizing(Sizing.fixed(20)))
                 .positioning(Positioning.relative(100, 0))
                 .verticalAlignment(VerticalAlignment.CENTER)
                 .surface(Surface.TOOLTIP)
@@ -154,7 +154,7 @@ public class ComponentTestScreen extends Screen {
                 .child(growingTextBox)
                 .child(new SmallCheckboxComponent())
                 .child(Components.textBox(Sizing.fixed(60)))
-                .child(Components.button(Text.of("weeeee"), button -> {
+                .child(Components.button(Text.nullToEmpty("weeeee"), button -> {
                     weeAnimation.loop(!weeAnimation.looping());
                     rootComponent.<FlowLayout>configure(layout -> {
                         var padding = layout.padding().get();
@@ -180,19 +180,19 @@ public class ComponentTestScreen extends Screen {
         );
 
         var dropdown = Components.dropdown(Sizing.content())
-                .checkbox(Text.of("more checking"), true, aBoolean -> {})
-                .text(Text.of("hahayes"))
-                .button(Text.of("epic button"), dropdownComponent -> {})
+                .checkbox(Text.nullToEmpty("more checking"), true, aBoolean -> {})
+                .text(Text.nullToEmpty("hahayes"))
+                .button(Text.nullToEmpty("epic button"), dropdownComponent -> {})
                 .divider()
-                .text(Text.of("very good"))
-                .checkbox(Text.of("checking time"), false, aBoolean -> {})
-                .nested(Text.of("nested entry"), Sizing.content(), nested -> {
+                .text(Text.nullToEmpty("very good"))
+                .checkbox(Text.nullToEmpty("checking time"), false, aBoolean -> {})
+                .nested(Text.nullToEmpty("nested entry"), Sizing.content(), nested -> {
                     nested.text(Text.of("nest title"))
                             .divider()
                             .button(Text.of("nest button"), dropdownComponent -> {});
                 });
 
-        var dropdownButton = Components.button(Text.of("Dropdown"), button -> {
+        var dropdownButton = Components.button(Text.nullToEmpty("Dropdown"), button -> {
             if (dropdown.hasParent()) return;
             rootComponent.child(dropdown.positioning(Positioning.absolute(button.x(), button.y() + button.height())));
         }).margins(Insets.horizontal(8));
@@ -202,7 +202,7 @@ public class ComponentTestScreen extends Screen {
                 Containers.renderEffect(
                         Containers.verticalFlow(Sizing.content(), Sizing.content())
                                 .child(Containers.renderEffect(
-                                        Components.sprite(new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, Identifier.of("block/stone"))).margins(Insets.of(5))
+                                        Components.sprite(new Material(TextureAtlas.LOCATION_BLOCKS, Identifier.parse("block/stone"))).margins(Insets.of(5))
                                 ).<RenderEffectWrapper<?>>configure(wrapper -> {
                                     wrapper.effect(RenderEffectWrapper.RenderEffect.rotate(RotationAxis.POSITIVE_Z, -45));
                                     wrapper.effect(RenderEffectWrapper.RenderEffect.color(Color.ofHsv(.5f, 1f, 1f)));
@@ -265,7 +265,7 @@ public class ComponentTestScreen extends Screen {
 //                        Drawer.drawSpectrum(matrices, this.x, this.y, this.width, (int) (this.height * (Math.sin(time) * .5 + .5)), true);
 //                    }
 //                }.positioning(Positioning.relative(50, 50)).sizing(Sizing.fixed(350))
-                Components.button(Text.of("overlay"), button -> {
+                Components.button(Text.nullToEmpty("overlay"), button -> {
                     rootComponent.child(Containers.overlay(
                             Containers.verticalFlow(Sizing.content(), Sizing.content())
                                     .child(new ColorPickerComponent()
@@ -290,14 +290,14 @@ public class ComponentTestScreen extends Screen {
         );
 
         rootComponent.child(
-                Components.block(Blocks.FURNACE.getDefaultState(), (NbtCompound) null).sizing(Sizing.fixed(100))
+                Components.block(Blocks.FURNACE.defaultState(), (NbtCompound) null).sizing(Sizing.fixed(100))
         );
 
-        var bundle = Items.BUNDLE.getDefaultStack();
+        var bundle = Items.BUNDLE.getDefaultInstance();
         var itemList = new ArrayList<ItemStack>();
         itemList.add(new ItemStack(Items.EMERALD, 16));
 
-        bundle.set(DataComponentTypes.BUNDLE_CONTENTS, new BundleContentsComponent(itemList));
+        bundle.set(DataComponents.BUNDLE_CONTENTS, new BundleContents(itemList));
 
         rootComponent.child(Components.item(new ItemStack(Items.EMERALD, 16))
                 .showOverlay(true)
@@ -309,7 +309,7 @@ public class ComponentTestScreen extends Screen {
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 5; column++) {
                 buttonGrid.child(
-                        Components.button(Text.of("" + (row * 5 + column)), button -> {
+                        Components.button(Text.nullToEmpty("" + (row * 5 + column)), button -> {
                             if (button.getMessage().getString().equals("11")) {
                                 buttonGrid.child(Components.button(Text.of("long boiii"), b -> buttonGrid.child(button, 2, 1)).margins(Insets.of(3)), 2, 1);
                             } else if (button.getMessage().getString().equals("8")) {
@@ -373,10 +373,10 @@ public class ComponentTestScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {}
+    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {}
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
         this.fadeSlot.update(RenderEffectWrapper.RenderEffect.color(new Color(
                 1f, 1f, 1f,
@@ -387,7 +387,7 @@ public class ComponentTestScreen extends Screen {
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
-            this.close();
+            this.onClose();
             return true;
         }
 
@@ -419,13 +419,13 @@ public class ComponentTestScreen extends Screen {
     }
 
     @Override
-    public boolean shouldPause() {
+    public boolean isPauseScreen() {
         return false;
     }
 
     @Nullable
     @Override
-    public Element getFocused() {
+    public GuiEventListener getFocused() {
         return this.uiAdapter;
     }
 

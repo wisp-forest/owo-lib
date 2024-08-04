@@ -12,6 +12,7 @@ import io.netty.buffer.Unpooled;
 import io.wispforest.endec.format.gson.GsonDeserializer;
 import io.wispforest.endec.format.gson.GsonEndec;
 import io.wispforest.endec.format.gson.GsonSerializer;
+import io.wispforest.endec.impl.KeyedEndec;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.ConfigSynchronizer;
@@ -50,40 +51,42 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.advancement.AdvancementProgress;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.command.argument.GameProfileArgumentType;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.advancements.AdvancementProgress;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.GameProfileArgument;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.resource.featuretoggle.FeatureFlags;
-import net.minecraft.screen.ScreenHandlerType;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Text;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.text.Text;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
 import org.slf4j.Logger;
 
 import java.util.*;
 import java.util.function.Consumer;
 
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
+
+import I;
 
 public class Uwu implements ModInitializer {
 
@@ -91,15 +94,15 @@ public class Uwu implements ModInitializer {
 
     public static final boolean WE_TESTEN_HANDSHAKE = false;
 
-    public static final TagKey<Item> TAB_2_CONTENT = TagKey.of(RegistryKeys.ITEM, Identifier.of("uwu", "tab_2_content"));
+    public static final TagKey<Item> TAB_2_CONTENT = TagKey.of(Registries.ITEM, Identifier.of("uwu", "tab_2_content"));
     public static final Identifier GROUP_TEXTURE = Identifier.of("uwu", "textures/gui/group.png");
     public static final Identifier OWO_ICON_TEXTURE = Identifier.of("uwu", "textures/gui/icon.png");
     public static final Identifier ANIMATED_BUTTON_TEXTURE = Identifier.of("uwu", "textures/gui/animated_icon_test.png");
 
-    public static final ScreenHandlerType<EpicScreenHandler> EPIC_SCREEN_HANDLER_TYPE = Registry.register(
-        Registries.SCREEN_HANDLER,
+    public static final MenuType<EpicScreenHandler> EPIC_SCREEN_HANDLER_TYPE = Registry.register(
+        BuiltInRegistries.MENU,
         Identifier.of("uwu", "epic_screen_handler"),
-        new ScreenHandlerType<>(EpicScreenHandler::new, FeatureFlags.VANILLA_FEATURES)
+        new MenuType<>(EpicScreenHandler::new, FeatureFlags.VANILLA_SET)
     );
 
     public static final OwoItemGroup FOUR_TAB_GROUP = OwoItemGroup.builder(Identifier.of("uwu", "four_tab_group"), () -> Icon.of(Items.AXOLOTL_BUCKET))
@@ -145,10 +148,10 @@ public class Uwu implements ModInitializer {
             .initializer(group -> group.addTab(Icon.of(Items.SPONGE), "tab_1", null, true))
             .build();
 
-    public static final ItemGroup VANILLA_GROUP = Registry.register(Registries.ITEM_GROUP, Identifier.of("uwu", "vanilla_group"), FabricItemGroup.builder()
-            .displayName(Text.literal("who did this"))
-            .icon(Items.ACACIA_BOAT::getDefaultStack)
-            .entries((context, entries) -> entries.add(Items.MANGROVE_CHEST_BOAT))
+    public static final CreativeModeTab VANILLA_GROUP = Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, Identifier.of("uwu", "vanilla_group"), FabricItemGroup.builder()
+            .title(Text.literal("who did this"))
+            .icon(Items.ACACIA_BOAT::getDefaultInstance)
+            .displayItems((context, entries) -> entries.accept(Items.MANGROVE_CHEST_BOAT))
             .build());
 
     public static final OwoNetChannel CHANNEL = OwoNetChannel.create(Identifier.of("uwu", "uwu"));
@@ -203,8 +206,8 @@ public class Uwu implements ModInitializer {
 
         FieldRegistrationHandler.register(UwuItems.class, "uwu", true);
 
-        TagInjector.inject(Registries.BLOCK, BlockTags.BASE_STONE_OVERWORLD.id(), Blocks.GLASS);
-        TagInjector.injectTagReference(Registries.ITEM, ItemTags.COALS.id(), ItemTags.FOX_FOOD.id());
+        TagInjector.inject(BuiltInRegistries.BLOCK, BlockTags.BASE_STONE_OVERWORLD.id(), Blocks.GLASS);
+        TagInjector.injectTagReference(BuiltInRegistries.ITEM, ItemTags.COALS.id(), ItemTags.FOX_FOOD.id());
 
         FOUR_TAB_GROUP.initialize();
         SIX_TAB_GROUP.initialize();
@@ -226,38 +229,38 @@ public class Uwu implements ModInitializer {
             new ParticleSystemController(Identifier.of("uwu", "server_only_particles"));
         }
 
-        System.out.println(RegistryAccess.getEntry(Registries.ITEM, Items.ACACIA_BOAT));
-        System.out.println(RegistryAccess.getEntry(Registries.ITEM, Identifier.of("acacia_planks")));
+        System.out.println(RegistryAccess.getEntry(BuiltInRegistries.ITEM, Items.ACACIA_BOAT));
+        System.out.println(RegistryAccess.getEntry(BuiltInRegistries.ITEM, Identifier.parse("acacia_planks")));
 
 //        UwuShapedRecipe.init();
 
         CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> {
             dispatcher.register(
                     literal("show_nbt")
-                            .then(argument("player", GameProfileArgumentType.gameProfile())
+                            .then(argument("player", GameProfileArgument.gameProfile())
                                     .executes(context -> {
-                                        GameProfile profile = GameProfileArgumentType.getProfileArgument(context, "player").iterator().next();
+                                        GameProfile profile = GameProfileArgument.getGameProfiles(context, "player").iterator().next();
                                         NbtCompound tag = OfflineDataLookup.get(profile.getId());
-                                        context.getSource().sendFeedback(() -> NbtHelper.toPrettyPrintedText(tag), false);
+                                        context.getSource().sendSuccess(() -> NbtUtils.toPrettyComponent(tag), false);
                                         return 0;
                                     })));
 
             dispatcher.register(
                     literal("test_advancement_cache")
                             .then(literal("read")
-                                    .then(argument("player", GameProfileArgumentType.gameProfile())
+                                    .then(argument("player", GameProfileArgument.gameProfile())
                                             .executes(context -> {
-                                                GameProfile profile = GameProfileArgumentType.getProfileArgument(context, "player").iterator().next();
+                                                GameProfile profile = GameProfileArgument.getGameProfiles(context, "player").iterator().next();
                                                 Map<Identifier, AdvancementProgress> map = OfflineAdvancementLookup.get(profile.getId());
-                                                context.getSource().sendFeedback(() -> Text.literal(map.toString()), false);
+                                                context.getSource().sendSuccess(() -> Text.literal(map.toString()), false);
                                                 System.out.println(map);
                                                 return 0;
                                             })))
                             .then(literal("write")
-                                    .then(argument("player", GameProfileArgumentType.gameProfile())
+                                    .then(argument("player", GameProfileArgument.gameProfile())
                                             .executes(context -> {
                                                 MinecraftServer server = context.getSource().getServer();
-                                                GameProfile profile = GameProfileArgumentType.getProfileArgument(context, "player").iterator().next();
+                                                GameProfile profile = GameProfileArgument.getGameProfiles(context, "player").iterator().next();
 
                                                 OfflineAdvancementLookup.edit(profile.getId(), handle -> {
                                                     handle.grant(server.getAdvancementLoader().get(Identifier.of("story/iron_tools")));
@@ -274,14 +277,14 @@ public class Uwu implements ModInitializer {
                                         StringArgumentType.getString(context, "config")
                                 ).get(new Option.Key(StringArgumentType.getString(context, "option")));
 
-                                context.getSource().sendFeedback(() -> Text.literal(String.valueOf(value)), false);
+                                context.getSource().sendSuccess(() -> Text.literal(String.valueOf(value)), false);
 
                                 return 0;
                             }))));
 
             dispatcher.register(literal("kodeck_test")
                     .executes(context -> {
-                        var rand = context.getSource().getWorld().random;
+                        var rand = context.getSource().getLevel().random;
                         var source = context.getSource();
 
                         //--
@@ -336,7 +339,7 @@ public class Uwu implements ModInitializer {
 
                         if (source.getPlayer() == null) return 0;
 
-                        ItemStack handStack = source.getPlayer().getStackInHand(Hand.MAIN_HAND);
+                        ItemStack handStack = source.getPlayer().getItemInHand(InteractionHand.MAIN_HAND);
 
                         LOGGER.info(handStack.toString());
                         LOGGER.info(handStack.getComponents().toString().replace("\n", "\\n"));
@@ -346,7 +349,7 @@ public class Uwu implements ModInitializer {
                         JsonElement stackJsonData;
 
                         try {
-                            stackJsonData = MinecraftEndecs.ITEM_STACK.encodeFully(SerializationContext.attributes(RegistriesAttribute.of(context.getSource().getWorld().getRegistryManager())), GsonSerializer::of, handStack);
+                            stackJsonData = MinecraftEndecs.ITEM_STACK.encodeFully(SerializationContext.attributes(RegistriesAttribute.of(context.getSource().getLevel().registryAccess())), GsonSerializer::of, handStack);
                         } catch (Exception exception){
                             LOGGER.info(exception.getMessage());
                             LOGGER.info((Arrays.toString(exception.getStackTrace())));
@@ -359,7 +362,7 @@ public class Uwu implements ModInitializer {
                         LOGGER.info("---");
 
                         try {
-                            handStack = MinecraftEndecs.ITEM_STACK.decodeFully(SerializationContext.attributes(RegistriesAttribute.of(context.getSource().getWorld().getRegistryManager())), GsonDeserializer::of, stackJsonData);
+                            handStack = MinecraftEndecs.ITEM_STACK.decodeFully(SerializationContext.attributes(RegistriesAttribute.of(context.getSource().getLevel().registryAccess())), GsonDeserializer::of, stackJsonData);
                         } catch (Exception exception){
                             LOGGER.info(exception.getMessage());
                             LOGGER.info((Arrays.toString(exception.getStackTrace())));
@@ -377,7 +380,7 @@ public class Uwu implements ModInitializer {
                         {
                             LOGGER.info("--- Format Based Endec Test");
 
-                            var nbtDataStack = handStack.encode(access);
+                            var nbtDataStack = handStack.save(access);
 
                             LOGGER.info("  Input:  " + nbtDataStack.asString().replace("\n", "\\n"));
 
@@ -399,7 +402,7 @@ public class Uwu implements ModInitializer {
                         {
                             LOGGER.info("--- Transpose Format Based Endec Test");
 
-                            var nbtDataStack = handStack.encode(access);
+                            var nbtDataStack = handStack.save(access);
 
                             LOGGER.info("  Input:  " + nbtDataStack.asString().replace("\n", "\\n"));
 
@@ -458,19 +461,19 @@ public class Uwu implements ModInitializer {
 
                         //Vanilla
                         iterations("Vanilla", (buf) -> {
-                            ItemStack stack = source.getPlayer().getStackInHand(Hand.MAIN_HAND);
+                            ItemStack stack = source.getPlayer().getItemInHand(InteractionHand.MAIN_HAND);
 
-                            ItemStack.PACKET_CODEC.encode(buf, stack);
-                            var stackFromByte = ItemStack.PACKET_CODEC.decode(buf);
+                            ItemStack.STREAM_CODEC.encode(buf, stack);
+                            var stackFromByte = ItemStack.STREAM_CODEC.decode(buf);
                         });
 
                         //Codeck
                         try {
                             iterations("Endec", (buf) -> {
-                                ItemStack stack = source.getPlayer().getStackInHand(Hand.MAIN_HAND);
-                                buf.write(SerializationContext.attributes(RegistriesAttribute.of(context.getSource().getWorld().getRegistryManager())), MinecraftEndecs.ITEM_STACK, stack);
+                                ItemStack stack = source.getPlayer().getItemInHand(InteractionHand.MAIN_HAND);
+                                buf.write(SerializationContext.attributes(RegistriesAttribute.of(context.getSource().getLevel().registryAccess())), MinecraftEndecs.ITEM_STACK, stack);
 
-                                var stackFromByte = buf.read(SerializationContext.attributes(RegistriesAttribute.of(context.getSource().getWorld().getRegistryManager())), MinecraftEndecs.ITEM_STACK);
+                                var stackFromByte = buf.read(SerializationContext.attributes(RegistriesAttribute.of(context.getSource().getLevel().registryAccess())), MinecraftEndecs.ITEM_STACK);
                             });
                         } catch (Exception exception){
                             LOGGER.info(exception.getMessage());
@@ -489,7 +492,7 @@ public class Uwu implements ModInitializer {
         UwuOptionalNetExample.init();
     }
 
-    private static void iterations(String label, Consumer<RegistryByteBuf> action){
+    private static void iterations(String label, Consumer<RegistryFriendlyByteBuf> action){
         int maxTrials = 3;
         int maxIterations = 50;
 
@@ -502,7 +505,7 @@ public class Uwu implements ModInitializer {
             durations.clear();
 
             for (int i = 0; i < maxIterations; i++) {
-                RegistryByteBuf buf = new RegistryByteBuf(Unpooled.buffer(), Owo.currentServer().getRegistryManager());
+                RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), Owo.currentServer().getRegistryManager());
 
                 long startTime = System.nanoTime();
 

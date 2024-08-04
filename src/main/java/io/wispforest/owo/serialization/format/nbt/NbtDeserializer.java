@@ -61,12 +61,12 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
 
     @Override
     public int readVarInt(SerializationContext ctx) {
-        return this.getAs(this.getValue(), AbstractNbtNumber.class).intValue();
+        return this.getAs(this.getValue(), NbtNumber.class).intValue();
     }
 
     @Override
     public long readVarLong(SerializationContext ctx) {
-        return this.getAs(this.getValue(), AbstractNbtNumber.class).longValue();
+        return this.getAs(this.getValue(), NbtNumber.class).longValue();
     }
 
     // ---
@@ -103,17 +103,17 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
     @Override
     public <E> Deserializer.Sequence<E> sequence(SerializationContext ctx, Endec<E> elementEndec) {
         //noinspection unchecked
-        return new Sequence<>(ctx, elementEndec, this.getAs(this.getValue(), AbstractNbtList.class));
+        return new io.wispforest.owo.serialization.format.nbt.NbtDeserializer.Sequence<>(ctx, elementEndec, this.getAs(this.getValue(), NbtCollection.class));
     }
 
     @Override
     public <V> Deserializer.Map<V> map(SerializationContext ctx, Endec<V> valueEndec) {
-        return new Map<>(ctx, valueEndec, this.getAs(this.getValue(), NbtCompound.class));
+        return new io.wispforest.owo.serialization.format.nbt.NbtDeserializer.Map<>(ctx, valueEndec, this.getAs(this.getValue(), NbtCompound.class));
     }
 
     @Override
     public Deserializer.Struct struct() {
-        return new Struct(this.getAs(this.getValue(), NbtCompound.class));
+        return new io.wispforest.owo.serialization.format.nbt.NbtDeserializer.Struct(this.getAs(this.getValue(), NbtCompound.class));
     }
 
     // ---
@@ -124,7 +124,7 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
     }
 
     private <S> void decodeValue(SerializationContext ctx, Serializer<S> visitor, NbtElement value) {
-        switch (value.getType()) {
+        switch (value.typeId()) {
             case NbtElement.BYTE_TYPE -> visitor.writeByte(ctx, ((NbtByte) value).byteValue());
             case NbtElement.SHORT_TYPE -> visitor.writeShort(ctx, ((NbtShort) value).shortValue());
             case NbtElement.INT_TYPE -> visitor.writeInt(ctx, ((NbtInt) value).intValue());
@@ -134,15 +134,15 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
             case NbtElement.STRING_TYPE -> visitor.writeString(ctx, value.asString());
             case NbtElement.BYTE_ARRAY_TYPE -> visitor.writeBytes(ctx, ((NbtByteArray) value).getByteArray());
             case NbtElement.INT_ARRAY_TYPE, NbtElement.LONG_ARRAY_TYPE, NbtElement.LIST_TYPE -> {
-                var list = (AbstractNbtList<?>) value;
+                var list = (NbtCollection<?>) value;
                 try (var sequence = visitor.sequence(ctx, Endec.<NbtElement>of(this::decodeValue, (ctx1, deserializer) -> null), list.size())) {
                     list.forEach(sequence::element);
                 }
             }
             case NbtElement.COMPOUND_TYPE -> {
                 var compound = (NbtCompound) value;
-                try (var map = visitor.map(ctx, Endec.<NbtElement>of(this::decodeValue, (ctx1, deserializer) -> null), compound.getSize())) {
-                    for (var key : compound.getKeys()) {
+                try (var map = visitor.map(ctx, Endec.<NbtElement>of(this::decodeValue, (ctx1, deserializer) -> null), compound.size())) {
+                    for (var key : compound.keySet()) {
                         map.entry(key, compound.get(key));
                     }
                 }
@@ -202,8 +202,8 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
             this.valueEndec = valueEndec;
 
             this.compound = compound;
-            this.keys = compound.getKeys().iterator();
-            this.size = compound.getSize();
+            this.keys = compound.keySet().iterator();
+            this.size = compound.size();
         }
 
         @Override

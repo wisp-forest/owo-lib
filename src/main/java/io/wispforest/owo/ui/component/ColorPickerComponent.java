@@ -1,5 +1,13 @@
 package io.wispforest.owo.ui.component;
 
+import ;
+import I;
+import Z;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tessellator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import io.wispforest.owo.client.OwoClient;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.Color;
@@ -10,12 +18,9 @@ import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.Observable;
-import net.minecraft.client.render.BufferRenderer;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.render.VertexFormats;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 import org.w3c.dom.Element;
 
 import java.util.Map;
@@ -53,20 +58,20 @@ public class ColorPickerComponent extends BaseComponent {
 
         // Color area
 
-        var buffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
-        var matrix = context.getMatrices().peek().getPositionMatrix();
+        var buffer = Tessellator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        var matrix = context.matrixStack().peek().model();
 
-        buffer.vertex(matrix, this.renderX(), this.renderY(), 0)
+        buffer.addVertex(matrix, this.renderX(), this.renderY(), 0)
                 .color(this.hue, 0f, 1f, 1f);
-        buffer.vertex(matrix, this.renderX(), this.renderY() + this.renderHeight(), 0)
+        buffer.addVertex(matrix, this.renderX(), this.renderY() + this.renderHeight(), 0)
                 .color(this.hue, 0f, 0f, 1f);
-        buffer.vertex(matrix, this.renderX() + this.colorAreaWidth(), this.renderY() + this.renderHeight(), 0)
+        buffer.addVertex(matrix, this.renderX() + this.colorAreaWidth(), this.renderY() + this.renderHeight(), 0)
                 .color(this.hue, 1f, 0f, 1f);
-        buffer.vertex(matrix, this.renderX() + this.colorAreaWidth(), this.renderY(), 0)
+        buffer.addVertex(matrix, this.renderX() + this.colorAreaWidth(), this.renderY(), 0)
                 .color(this.hue, 1f, 1f, 1f);
 
         OwoClient.HSV_PROGRAM.use();
-        BufferRenderer.drawWithGlobalProgram(buffer.end());
+        BufferUploader.drawWithShader(buffer.buildOrThrow());
 
         context.drawRectOutline(
                 (int) (this.renderX() + (this.saturation * this.colorAreaWidth()) - 1),

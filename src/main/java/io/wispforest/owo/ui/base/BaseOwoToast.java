@@ -3,15 +3,16 @@ package io.wispforest.owo.ui.base;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.core.Size;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.toast.Toast;
-import net.minecraft.client.toast.ToastManager;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.function.Supplier;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.toasts.Toast;
+import net.minecraft.client.gui.components.toasts.ToastComponent;
 
 @ApiStatus.Experimental
 public abstract class BaseOwoToast<R extends ParentComponent> implements Toast {
@@ -34,23 +35,23 @@ public abstract class BaseOwoToast<R extends ParentComponent> implements Toast {
     }
 
     @Override
-    public Visibility draw(DrawContext context, ToastManager manager, long startTime) {
-        var client = MinecraftClient.getInstance();
+    public Visibility render(GuiGraphics context, ToastComponent manager, long startTime) {
+        var client = Minecraft.getInstance();
 
-        var tickCounter = MinecraftClient.getInstance().getRenderTickCounter();
+        var tickCounter = Minecraft.getInstance().getTimer();
 
-        this.rootComponent.draw(OwoUIDrawContext.of(context), -1000, -1000, tickCounter.getTickDelta(false), tickCounter.getLastFrameDuration());
+        this.rootComponent.draw(OwoUIDrawContext.of(context), -1000, -1000, tickCounter.getGameTimeDeltaPartialTick(false), tickCounter.getGameTimeDeltaTicks());
 
         return this.visibilityPredicate.test(this, startTime);
     }
 
     @Override
-    public int getHeight() {
+    public int height() {
         return this.rootComponent.fullSize().height();
     }
 
     @Override
-    public int getWidth() {
+    public int width() {
         return this.rootComponent.fullSize().width();
     }
 

@@ -1,5 +1,7 @@
 package io.wispforest.owo.serialization.endec;
 
+import ;
+import I;
 import com.mojang.datafixers.util.Function3;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.SerializationAttributes;
@@ -7,17 +9,22 @@ import io.wispforest.endec.impl.ReflectiveEndecBuilder;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.serialization.CodecUtils;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextCodecs;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.network.chat.Text;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.math.*;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 
 import java.util.List;
@@ -29,7 +36,7 @@ public final class MinecraftEndecs {
 
     // --- MC Types ---
 
-    public static final Endec<PacketByteBuf> PACKET_BYTE_BUF = Endec.BYTES
+    public static final Endec<FriendlyByteBuf> PACKET_BYTE_BUF = Endec.BYTES
             .xmap(bytes -> {
                 var buffer = PacketByteBufs.create();
                 buffer.writeBytes(bytes);
@@ -46,12 +53,12 @@ public final class MinecraftEndecs {
                 return bytes;
             });
 
-    public static final Endec<Identifier> IDENTIFIER = Endec.STRING.xmap(Identifier::of, Identifier::toString);
-    public static final Endec<ItemStack> ITEM_STACK = CodecUtils.toEndecWithRegistries(ItemStack.OPTIONAL_CODEC, ItemStack.OPTIONAL_PACKET_CODEC);
-    public static final Endec<Text> TEXT = CodecUtils.toEndec(TextCodecs.CODEC, TextCodecs.PACKET_CODEC);
+    public static final Endec<Identifier> IDENTIFIER = Endec.STRING.xmap(Identifier::parse, Identifier::toString);
+    public static final Endec<ItemStack> ITEM_STACK = CodecUtils.toEndecWithRegistries(ItemStack.OPTIONAL_CODEC, ItemStack.OPTIONAL_STREAM_CODEC);
+    public static final Endec<Text> TEXT = CodecUtils.toEndec(ComponentSerialization.CODEC, ComponentSerialization.TRUSTED_CONTEXT_FREE_STREAM_CODEC);
 
     public static final Endec<Vec3i> VEC3I = vectorEndec("Vec3i", Endec.INT, Vec3i::new, Vec3i::getX, Vec3i::getY, Vec3i::getZ);
-    public static final Endec<Vec3d> VEC3D = vectorEndec("Vec3d", Endec.DOUBLE, Vec3d::new, Vec3d::getX, Vec3d::getY, Vec3d::getZ);
+    public static final Endec<Vec3> VEC3D = vectorEndec("Vec3d", Endec.DOUBLE, Vec3::new, Vec3::x, Vec3::y, Vec3::z);
     public static final Endec<Vector3f> VECTOR3F = vectorEndec("Vector3f", Endec.FLOAT, Vector3f::new, Vector3f::x, Vector3f::y, Vector3f::z);
 
     public static final Endec<BlockPos> BLOCK_POS = Endec
@@ -59,7 +66,7 @@ public final class MinecraftEndecs {
                     SerializationAttributes.HUMAN_READABLE,
                     vectorEndec("BlockPos", Endec.INT, BlockPos::new, BlockPos::getX, BlockPos::getY, BlockPos::getZ)
             ).orElse(
-                    Endec.LONG.xmap(BlockPos::fromLong, BlockPos::asLong)
+                    Endec.LONG.xmap(BlockPos::of, BlockPos::asLong)
             );
 
     public static final Endec<ChunkPos> CHUNK_POS = Endec
@@ -77,27 +84,27 @@ public final class MinecraftEndecs {
             .orElse(Endec.LONG.xmap(ChunkPos::new, ChunkPos::toLong));
 
     public static final Endec<BlockHitResult> BLOCK_HIT_RESULT = StructEndecBuilder.of(
-            VEC3D.fieldOf("pos", BlockHitResult::getPos),
-            Endec.forEnum(Direction.class).fieldOf("side", BlockHitResult::getSide),
+            VEC3D.fieldOf("pos", BlockHitResult::getLocation),
+            Endec.forEnum(Direction.class).fieldOf("side", BlockHitResult::getDirection),
             BLOCK_POS.fieldOf("block_pos", BlockHitResult::getBlockPos),
-            Endec.BOOLEAN.fieldOf("inside_block", BlockHitResult::isInsideBlock),
+            Endec.BOOLEAN.fieldOf("inside_block", BlockHitResult::isInside),
             Endec.BOOLEAN.fieldOf("missed", $ -> $.getType() == HitResult.Type.MISS),
             (pos, side, blockPos, insideBlock, missed) -> !missed
                     ? new BlockHitResult(pos, side, blockPos, insideBlock)
-                    : BlockHitResult.createMissed(pos, side, blockPos)
+                    : BlockHitResult.miss(pos, side, blockPos)
     );
 
     // --- Constructors for MC types ---
 
     public static ReflectiveEndecBuilder addDefaults(ReflectiveEndecBuilder builder) {
-        builder.register(PACKET_BYTE_BUF, PacketByteBuf.class);
+        builder.register(PACKET_BYTE_BUF, FriendlyByteBuf.class);
 
         builder.register(IDENTIFIER, Identifier.class)
                 .register(ITEM_STACK, ItemStack.class)
                 .register(TEXT, Text.class);
 
         builder.register(VEC3I, Vec3i.class)
-                .register(VEC3D, Vec3d.class)
+                .register(VEC3D, Vec3.class)
                 .register(VECTOR3F, Vector3f.class);
 
         builder.register(BLOCK_POS, BlockPos.class)
@@ -112,13 +119,13 @@ public final class MinecraftEndecs {
         return IDENTIFIER.xmap(registry::get, registry::getId);
     }
 
-    public static <T> Endec<TagKey<T>> unprefixedTagKey(RegistryKey<? extends Registry<T>> registry) {
+    public static <T> Endec<TagKey<T>> unprefixedTagKey(ResourceKey<? extends Registry<T>> registry) {
         return IDENTIFIER.xmap(id -> TagKey.of(registry, id), TagKey::id);
     }
 
-    public static <T> Endec<TagKey<T>> prefixedTagKey(RegistryKey<? extends Registry<T>> registry) {
+    public static <T> Endec<TagKey<T>> prefixedTagKey(ResourceKey<? extends Registry<T>> registry) {
         return Endec.STRING.xmap(
-                s -> TagKey.of(registry, Identifier.of(s.substring(1))),
+                s -> TagKey.of(registry, Identifier.parse(s.substring(1))),
                 tag -> "#" + tag.id()
         );
     }

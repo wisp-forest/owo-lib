@@ -7,22 +7,22 @@ import io.wispforest.owo.ui.inject.GreedyInputComponent;
 import io.wispforest.owo.ui.util.DisposableScreen;
 import io.wispforest.owo.ui.util.UIErrorToast;
 import io.wispforest.owo.util.pond.OwoSlotExtension;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
 import java.util.function.BiFunction;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.network.chat.Text;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
 
-public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends ScreenHandler> extends HandledScreen<S> implements DisposableScreen {
+public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends AbstractContainerMenu> extends AbstractContainerScreen<S> implements DisposableScreen {
 
     /**
      * The UI adapter of this screen. This handles
@@ -38,7 +38,7 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
      */
     protected boolean invalid = false;
 
-    protected BaseOwoHandledScreen(S handler, PlayerInventory inventory, Text title) {
+    protected BaseOwoHandledScreen(S handler, Inventory inventory, Text title) {
         super(handler, inventory, title);
     }
 
@@ -72,7 +72,7 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
             // If it was, only resize the adapter instead of recreating it - this preserves UI state
             this.uiAdapter.moveAndResize(0, 0, this.width, this.height);
             // Re-add it as a child to circumvent vanilla clearing them
-            this.addDrawableChild(this.uiAdapter);
+            this.addRenderableWidget(this.uiAdapter);
         } else {
             try {
                 this.uiAdapter = this.createAdapter();
@@ -95,7 +95,7 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
      * @param index The index of the slot to disable
      */
     protected void disableSlot(int index) {
-        ((OwoSlotExtension) this.handler.slots.get(index)).owo$setDisabledOverride(true);
+        ((OwoSlotExtension) this.menu.slots.get(index)).owo$setDisabledOverride(true);
     }
 
     /**
@@ -115,7 +115,7 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
      * @param index The index of the slot to enable
      */
     protected void enableSlot(int index) {
-        ((OwoSlotExtension) this.handler.slots.get(index)).owo$setDisabledOverride(false);
+        ((OwoSlotExtension) this.menu.slots.get(index)).owo$setDisabledOverride(false);
     }
 
     /**
@@ -128,7 +128,7 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
     }
 
     protected boolean isSlotEnabled(int index) {
-        return ((OwoSlotExtension) this.handler.slots.get(index)).owo$getDisabledOverride();
+        return ((OwoSlotExtension) this.menu.slots.get(index)).owo$getDisabledOverride();
     }
 
     protected boolean isSlotEnabled(Slot slot) {
@@ -155,37 +155,37 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
     }
 
     @Override
-    public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {}
+    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {}
 
     @Override
-    public void render(DrawContext vanillaContext, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics vanillaContext, int mouseX, int mouseY, float delta) {
         var context = OwoUIDrawContext.of(vanillaContext);
         if (!this.invalid) {
             super.render(context, mouseX, mouseY, delta);
 
             if (this.uiAdapter.enableInspector) {
-                context.getMatrices().translate(0, 0, 500);
+                context.matrixStack().translate(0, 0, 500);
 
-                for (int i = 0; i < this.handler.slots.size(); i++) {
-                    var slot = this.handler.slots.get(i);
-                    if (!slot.isEnabled()) continue;
+                for (int i = 0; i < this.menu.slots.size(); i++) {
+                    var slot = this.menu.slots.get(i);
+                    if (!slot.isActive()) continue;
 
                     context.drawText(Text.literal("H:" + i),
-                            this.x + slot.x + 15, this.y + slot.y + 9, .5f, 0x0096FF,
+                            this.leftPos + slot.x + 15, this.topPos + slot.y + 9, .5f, 0x0096FF,
                             OwoUIDrawContext.TextAnchor.BOTTOM_RIGHT
                     );
-                    context.drawText(Text.literal("I:" + slot.getIndex()),
-                            this.x + slot.x + 15, this.y + slot.y + 15, .5f, 0x5800FF,
+                    context.drawText(Text.literal("I:" + slot.getContainerSlot()),
+                            this.leftPos + slot.x + 15, this.topPos + slot.y + 15, .5f, 0x5800FF,
                             OwoUIDrawContext.TextAnchor.BOTTOM_RIGHT
                     );
                 }
 
-                context.getMatrices().translate(0, 0, -500);
+                context.matrixStack().translate(0, 0, -500);
             }
 
-            this.drawMouseoverTooltip(context, mouseX, mouseY);
+            this.renderTooltip(context, mouseX, mouseY);
         } else {
-            this.close();
+            this.onClose();
         }
     }
 
@@ -207,7 +207,7 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
 
     @Nullable
     @Override
-    public Element getFocused() {
+    public GuiEventListener getFocused() {
         return this.uiAdapter;
     }
 
@@ -225,7 +225,7 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
     }
 
     @Override
-    protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {}
+    protected void renderBg(GuiGraphics context, float delta, int mouseX, int mouseY) {}
 
     public class SlotComponent extends BaseComponent {
 
@@ -233,7 +233,7 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
         protected boolean didDraw = false;
 
         protected SlotComponent(int index) {
-            this.slot = BaseOwoHandledScreen.this.handler.getSlot(index);
+            this.slot = BaseOwoHandledScreen.this.menu.getSlot(index);
         }
 
         @Override
@@ -259,7 +259,7 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
 
         @Override
         public void drawTooltip(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
-            if (!this.slot.hasStack()) {
+            if (!this.slot.hasItem()) {
                 super.drawTooltip(context, mouseX, mouseY, partialTicks, delta);
             }
         }
@@ -282,13 +282,13 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
         @Override
         public void updateX(int x) {
             super.updateX(x);
-            ((SlotAccessor) this.slot).owo$setX(x - BaseOwoHandledScreen.this.x);
+            ((SlotAccessor) this.slot).owo$setX(x - BaseOwoHandledScreen.this.leftPos);
         }
 
         @Override
         public void updateY(int y) {
             super.updateY(y);
-            ((SlotAccessor) this.slot).owo$setY(y - BaseOwoHandledScreen.this.y);
+            ((SlotAccessor) this.slot).owo$setY(y - BaseOwoHandledScreen.this.topPos);
         }
     }
 }

@@ -1,7 +1,7 @@
 package io.wispforest.owo.mixin.tweaks;
 
+import ;
 import com.mojang.logging.LogUtils;
-import net.minecraft.util.Util;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -10,8 +10,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.util.concurrent.CompletableFuture;
+import net.minecraft.Util;
 
-@Mixin(value = Util.OperatingSystem.class)
+@Mixin(value = Util.OS.class)
 public abstract class OperatingSystemMixin {
 
     @Shadow protected abstract String[] getURIOpenCommand(URI uri);
@@ -36,6 +37,6 @@ public abstract class OperatingSystemMixin {
             } catch (IOException e) {
                 LogUtils.getLogger().error("Couldn't open uri '{}'", uri, e);
             }
-        }, Util.getMainWorkerExecutor());
+        }, Util.backgroundExecutor());
     }
 }

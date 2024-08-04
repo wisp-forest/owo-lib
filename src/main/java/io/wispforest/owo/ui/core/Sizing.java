@@ -329,7 +329,7 @@ public class Sizing implements Animatable<Sizing> {
         if (next.method != this.method) {
             return new MergedSizing(this, next, delta);
         } else {
-            return new Sizing(MathHelper.lerp(delta, this.value, next.value), this.method);
+            return new Sizing(MathHelper.lerpInt(delta, this.value, next.value), this.method);
         }
     }
 
@@ -388,7 +388,7 @@ public class Sizing implements Animatable<Sizing> {
 
         @Override
         public int inflate(int space, Function<Sizing, Integer> contentSizeFunction) {
-            return MathHelper.lerp(
+            return MathHelper.lerpInt(
                     this.delta,
                     this.first.inflate(space, contentSizeFunction),
                     this.second.inflate(space, contentSizeFunction)

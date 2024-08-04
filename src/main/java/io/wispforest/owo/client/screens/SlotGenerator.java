@@ -1,14 +1,13 @@
 package io.wispforest.owo.client.screens;
 
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.screen.slot.Slot;
-
 import java.util.function.Consumer;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.Slot;
 
 /**
  * Stateful slot generation utility for easily
- * arranging the slot grid used in a {@link net.minecraft.screen.ScreenHandler}
+ * arranging the slot grid used in a {@link net.minecraft.world.inventory.AbstractContainerMenu}
  */
 public final class SlotGenerator {
 
@@ -80,7 +79,7 @@ public final class SlotGenerator {
 
     /**
      * Reset the slot factory of this generator
-     * to the default {@link Slot#Slot(Inventory, int, int, int)} constructor
+     * to the default {@link Slot#Slot(Container, int, int, int)} constructor
      */
     public SlotGenerator defaultSlotFactory() {
         this.slotFactory = Slot::new;
@@ -96,7 +95,7 @@ public final class SlotGenerator {
         return this;
     }
 
-    public SlotGenerator grid(Inventory inventory, int startIndex, int width, int height) {
+    public SlotGenerator grid(Container inventory, int startIndex, int width, int height) {
         for (int row = 0; row < height; row++) {
             for (int column = 0; column < width; column++) {
                 slotConsumer.accept(this.slotFactory.create(
@@ -111,7 +110,7 @@ public final class SlotGenerator {
         return this;
     }
 
-    public SlotGenerator playerInventory(PlayerInventory playerInventory) {
+    public SlotGenerator playerInventory(Inventory playerInventory) {
         this.grid(playerInventory, 9, 9, 3);
         this.anchorY += 58;
         this.grid(playerInventory, 0, 9, 1);
@@ -122,6 +121,6 @@ public final class SlotGenerator {
 
     @FunctionalInterface
     public interface SlotFactory {
-        Slot create(Inventory inventory, int index, int x, int y);
+        Slot create(Container inventory, int index, int x, int y);
     }
 }

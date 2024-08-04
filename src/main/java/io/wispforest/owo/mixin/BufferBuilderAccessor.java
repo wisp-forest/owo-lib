@@ -1,7 +1,7 @@
 package io.wispforest.owo.mixin;
 
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.VertexFormat;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
@@ -11,5 +11,5 @@ public interface BufferBuilderAccessor {
 
     @Accessor("format") VertexFormat getFormat();
 
-    @Accessor("drawMode") VertexFormat.DrawMode getDrawMode();
+    @Accessor("drawMode") VertexFormat.Mode getDrawMode();
 }

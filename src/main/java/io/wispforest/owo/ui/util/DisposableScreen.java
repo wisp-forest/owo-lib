@@ -1,6 +1,6 @@
 package io.wispforest.owo.ui.util;
 
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screens.Screen;
 
 /**
  * Screens that wish to be notified when the players navigates back to

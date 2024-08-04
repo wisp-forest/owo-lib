@@ -1,5 +1,6 @@
 package io.wispforest.owo.renderdoc;
 
+import ;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.ptr.IntByReference;
@@ -8,7 +9,6 @@ import com.sun.jna.ptr.PointerByReference;
 import io.wispforest.owo.Owo;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.util.Util;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -18,6 +18,8 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Map;
+import net.minecraft.Util;
+import net.minecraft.Util.OS;
 
 @ApiStatus.Experimental
 @SuppressWarnings({"unused", "UnusedReturnValue"})
@@ -31,12 +33,12 @@ public final class RenderDoc {
         var apiPointer = new PointerByReference();
         RenderdocLibrary.RenderdocApi apiInstance = null;
 
-        var os = Util.getOperatingSystem();
+        var os = Util.getPlatform();
 
-        if (os == Util.OperatingSystem.WINDOWS || os == Util.OperatingSystem.LINUX) {
+        if (os == Util.OS.WINDOWS || os == Util.OS.LINUX) {
             try {
                 RenderdocLibrary renderdocLibrary;
-                if (os == Util.OperatingSystem.WINDOWS) {
+                if (os == Util.OS.WINDOWS) {
                     renderdocLibrary = Native.load("renderdoc", RenderdocLibrary.class);
                 } else {
                     int flags = DynamicLinkLoader.RTLD_NOW | DynamicLinkLoader.RTLD_NOLOAD;

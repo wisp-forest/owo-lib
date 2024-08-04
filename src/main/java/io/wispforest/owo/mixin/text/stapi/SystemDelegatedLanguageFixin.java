@@ -1,8 +1,8 @@
 package io.wispforest.owo.mixin.text.stapi;
 
 import io.wispforest.owo.text.TextLanguage;
-import net.minecraft.text.Text;
-import net.minecraft.util.Language;
+import net.minecraft.locale.Language;
+import net.minecraft.network.chat.Text;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;

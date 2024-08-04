@@ -1,7 +1,7 @@
 package io.wispforest.owo.particles.systems;
 
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
 public interface ParticleSystemExecutor<T> {
     /**
@@ -13,5 +13,5 @@ public interface ParticleSystemExecutor<T> {
      * @param pos   The position to display at
      * @param data  The data to display with
      */
-    void executeParticleSystem(World world, Vec3d pos, T data);
+    void executeParticleSystem(Level world, Vec3 pos, T data);
 }

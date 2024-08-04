@@ -3,25 +3,25 @@ package io.wispforest.owo.mixin.text;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.*;
 import io.wispforest.owo.text.CustomTextRegistry;
-import net.minecraft.text.TextCodecs;
-import net.minecraft.text.TextContent;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.dynamic.Codecs;
+import io.wispforest.owo.text.CustomTextRegistry.Entry;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 import java.util.stream.Stream;
+import net.minecraft.network.chat.ComponentContents;
+import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.util.StringRepresentable;
 
-@Mixin(TextCodecs.class)
+@Mixin(ComponentSerialization.class)
 public abstract class TextCodecsMixin {
 
     @ModifyVariable(method = "dispatchingCodec", at = @At(value = "STORE", ordinal = 0))
-    private static <T extends StringIdentifiable> Codec<T> injectCustomTextTypesExplicit(Codec<T> codec, T[] types) {
-        if (!types.getClass().getComponentType().isAssignableFrom(TextContent.Type.class)) return codec;
+    private static <T extends StringRepresentable> Codec<T> injectCustomTextTypesExplicit(Codec<T> codec, T[] types) {
+        if (!types.getClass().getComponentType().isAssignableFrom(ComponentContents.Type.class)) return codec;
 
         //noinspection unchecked
-        var customTextTypeCodec = Codec.stringResolver(StringIdentifiable::asString, s -> (T) CustomTextRegistry.typesMap().get(s).type());
+        var customTextTypeCodec = Codec.stringResolver(StringRepresentable::getSerializedName, s -> (T) CustomTextRegistry.typesMap().get(s).type());
 
         return new Codec<>() {
             @Override
@@ -43,8 +43,8 @@ public abstract class TextCodecsMixin {
     }
 
     @ModifyVariable(method = "dispatchingCodec", at = @At(value = "STORE", ordinal = 0))
-    private static <T extends StringIdentifiable, E> MapCodec<E> injectCustomTextTypesFuzzy(MapCodec<E> codec, T[] types) {
-        if (!types.getClass().getComponentType().isAssignableFrom(TextContent.Type.class)) return codec;
+    private static <T extends StringRepresentable, E> MapCodec<E> injectCustomTextTypesFuzzy(MapCodec<E> codec, T[] types) {
+        if (!types.getClass().getComponentType().isAssignableFrom(ComponentContents.Type.class)) return codec;
 
         return new MapCodec<>() {
             @Override

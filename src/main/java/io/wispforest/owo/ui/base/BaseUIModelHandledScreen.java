@@ -5,15 +5,15 @@ import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.parsing.ConfigureHotReloadScreen;
 import io.wispforest.owo.ui.parsing.UIModel;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.chat.Text;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
-public abstract class BaseUIModelHandledScreen<R extends ParentComponent, S extends ScreenHandler> extends BaseOwoHandledScreen<R, S> {
+public abstract class BaseUIModelHandledScreen<R extends ParentComponent, S extends AbstractContainerMenu> extends BaseOwoHandledScreen<R, S> {
 
     /**
      * The UI model this screen is built upon, parsed from XML.
@@ -25,7 +25,7 @@ public abstract class BaseUIModelHandledScreen<R extends ParentComponent, S exte
 
     protected final @Nullable Identifier modelId;
 
-    protected BaseUIModelHandledScreen(S handler, PlayerInventory inventory, Text title, Class<R> rootComponentClass, BaseUIModelScreen.DataSource source) {
+    protected BaseUIModelHandledScreen(S handler, Inventory inventory, Text title, Class<R> rootComponentClass, BaseUIModelScreen.DataSource source) {
         super(handler, inventory, title);
         var providedModel = source.get();
         if (providedModel == null) {
@@ -41,7 +41,7 @@ public abstract class BaseUIModelHandledScreen<R extends ParentComponent, S exte
                 : null;
     }
 
-    protected BaseUIModelHandledScreen(S handler, PlayerInventory inventory, Text title, Class<R> rootComponentClass, Identifier modelId) {
+    protected BaseUIModelHandledScreen(S handler, Inventory inventory, Text title, Class<R> rootComponentClass, Identifier modelId) {
         this(handler, inventory, title, rootComponentClass, BaseUIModelScreen.DataSource.asset(modelId));
     }
 

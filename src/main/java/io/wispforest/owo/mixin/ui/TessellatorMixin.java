@@ -1,10 +1,11 @@
 package io.wispforest.owo.mixin.ui;
 
+import Z;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.Tessellator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import io.wispforest.owo.mixin.BufferBuilderAccessor;
 import io.wispforest.owo.util.pond.OwoTessellatorExtension;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormat;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -23,7 +24,7 @@ public class TessellatorMixin implements OwoTessellatorExtension {
     private BufferBuilder bufferBuilder = null;
 
     @Inject(method = "begin", at = @At("HEAD"), cancellable = true)
-    private void skipBegin(VertexFormat.DrawMode drawMode, VertexFormat format, CallbackInfoReturnable<BufferBuilder> cir) {
+    private void skipBegin(VertexFormat.Mode drawMode, VertexFormat format, CallbackInfoReturnable<BufferBuilder> cir) {
         if(this.bufferBuilder == null) return;
 
         var bl = this.owo$skipBegin

@@ -13,16 +13,16 @@ import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.owo.util.NumberReflection;
 import io.wispforest.owo.util.ReflectionUtils;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import net.minecraft.TextFormatting;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Text;
 
 @ApiStatus.Internal
 public class ListOptionContainer<T> extends CollapsibleContainer implements OptionValueProvider {
@@ -30,7 +30,7 @@ public class ListOptionContainer<T> extends CollapsibleContainer implements Opti
     protected final Option<List<T>> backingOption;
     protected final List<T> backingList;
 
-    protected final ButtonWidget resetButton;
+    protected final Button resetButton;
 
     @SuppressWarnings("unchecked")
     public ListOptionContainer(Option<List<T>> option) {
@@ -50,11 +50,11 @@ public class ListOptionContainer<T> extends CollapsibleContainer implements Opti
         this.titleLayout.verticalAlignment(VerticalAlignment.CENTER);
 
         if (!option.detached()) {
-            this.titleLayout.child(Components.label(Text.translatable("text.owo.config.list.add_entry").formatted(Formatting.GRAY)).<LabelComponent>configure(label -> {
+            this.titleLayout.child(Components.label(Text.translatable("text.owo.config.list.add_entry").withStyle(TextFormatting.GRAY)).<LabelComponent>configure(label -> {
                 label.cursorStyle(CursorStyle.HAND);
 
-                label.mouseEnter().subscribe(() -> label.text(label.text().copy().styled(style -> style.withColor(Formatting.YELLOW))));
-                label.mouseLeave().subscribe(() -> label.text(label.text().copy().styled(style -> style.withColor(Formatting.GRAY))));
+                label.mouseEnter().subscribe(() -> label.text(label.text().copy().withStyle(style -> style.withColor(TextFormatting.YELLOW))));
+                label.mouseLeave().subscribe(() -> label.text(label.text().copy().withStyle(style -> style.withColor(TextFormatting.GRAY))));
                 label.mouseDown().subscribe((mouseX, mouseY, button) -> {
                     UISounds.playInteractionSound();
                     this.backingList.add((T) "");
@@ -90,7 +90,7 @@ public class ListOptionContainer<T> extends CollapsibleContainer implements Opti
         this.titleLayout.child(new SearchAnchorComponent(
                 this.titleLayout,
                 option.key(),
-                () -> I18n.translate("text.config." + option.configName() + ".option." + option.key().asString()),
+                () -> I18n.get("text.config." + option.configName() + ".option." + option.key().asString()),
                 () -> this.backingList.stream().map(Objects::toString).collect(Collectors.joining())
         ));
     }
@@ -105,12 +105,12 @@ public class ListOptionContainer<T> extends CollapsibleContainer implements Opti
             container.verticalAlignment(VerticalAlignment.CENTER);
 
             int optionIndex = i;
-            final var label = Components.label(TextOps.withFormatting("- ", Formatting.GRAY));
+            final var label = Components.label(TextOps.withFormatting("- ", TextFormatting.GRAY));
             label.margins(Insets.left(10));
             if (!this.backingOption.detached()) {
                 label.cursorStyle(CursorStyle.HAND);
-                label.mouseEnter().subscribe(() -> label.text(TextOps.withFormatting("x ", Formatting.GRAY)));
-                label.mouseLeave().subscribe(() -> label.text(TextOps.withFormatting("- ", Formatting.GRAY)));
+                label.mouseEnter().subscribe(() -> label.text(TextOps.withFormatting("x ", TextFormatting.GRAY)));
+                label.mouseLeave().subscribe(() -> label.text(TextOps.withFormatting("- ", TextFormatting.GRAY)));
                 label.mouseDown().subscribe((mouseX, mouseY, button) -> {
                     this.backingList.remove(optionIndex);
                     this.refreshResetButton();
@@ -123,9 +123,9 @@ public class ListOptionContainer<T> extends CollapsibleContainer implements Opti
             container.child(label);
 
             final var box = new ConfigTextBox();
-            box.setText(this.backingList.get(i).toString());
-            box.setCursorToStart(false);
-            box.setDrawsBackground(false);
+            box.setValue(this.backingList.get(i).toString());
+            box.moveCursorToStart(false);
+            box.setBordered(false);
             box.margins(Insets.vertical(2));
             box.horizontalSizing(Sizing.fill(95));
             box.verticalSizing(Sizing.fixed(8));

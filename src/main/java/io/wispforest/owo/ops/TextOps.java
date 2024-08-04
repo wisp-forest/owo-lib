@@ -1,8 +1,14 @@
 package io.wispforest.owo.ops;
 
-import net.minecraft.client.font.TextRenderer;
+import ;
+import net.minecraft.TextFormatting;
+import net.minecraft.client.gui.Font;
+import net.minecraft.network.chat.MutableText;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.Text;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.text.*;
-import net.minecraft.util.Formatting;
+import net.minecraft.util.FormattedCharSequence;
 
 /**
  * A collection of common operations
@@ -42,14 +48,14 @@ public final class TextOps {
      *
      * @param text  The text to create
      * @param color The color to use in {@code RRGGBB} format
-     * @return The colored text, specifically a {@link TranslatableTextContent}
+     * @return The colored text, specifically a {@link TranslatableContents}
      */
     public static MutableText translateWithColor(String text, int color) {
         return Text.translatable(text).setStyle(Style.EMPTY.withColor(color));
     }
 
     /**
-     * Applies multiple {@link Formatting}s to the given String, with
+     * Applies multiple {@link TextFormatting}s to the given String, with
      * each one after the first one beginning on a {@code §} symbol.
      * The amount of {@code §} symbols must equal the amount of
      * supplied formattings - 1
@@ -58,14 +64,14 @@ public final class TextOps {
      * @param formatting The formattings to apply
      * @return The formatted text
      */
-    public static MutableText withFormatting(String text, Formatting... formatting) {
+    public static MutableText withFormatting(String text, TextFormatting... formatting) {
         var textPieces = text.split("§");
         if (formatting.length != textPieces.length) return withColor("unmatched format specifiers - this is a bug", 0xff007f);
 
-        var textBase = Text.literal(textPieces[0]).formatted(formatting[0]);
+        var textBase = Text.literal(textPieces[0]).withStyle(formatting[0]);
 
         for (int i = 1; i < textPieces.length; i++) {
-            textBase.append(Text.literal(textPieces[i]).formatted(formatting[i]));
+            textBase.append(Text.literal(textPieces[i]).withStyle(formatting[i]));
         }
 
         return textBase;
@@ -80,7 +86,7 @@ public final class TextOps {
      * @param text   The text to colorize, with optional color delimiters
      * @param colors The colors to apply, in {@code RRGGBB} format
      * @return The colorized text
-     * @see #color(Formatting)
+     * @see #color(TextFormatting)
      */
     public static MutableText withColor(String text, int... colors) {
         var textPieces = text.split("§");
@@ -105,9 +111,9 @@ public final class TextOps {
      * @param texts    The texts to check
      * @return The width of the widest text in the collection
      */
-    public static int width(TextRenderer renderer, Iterable<Text> texts) {
+    public static int width(Font renderer, Iterable<Text> texts) {
         int width = 0;
-        for (var text : texts) width = Math.max(width, renderer.getWidth(text));
+        for (var text : texts) width = Math.max(width, renderer.width(text));
         return width;
     }
 
@@ -121,9 +127,9 @@ public final class TextOps {
      * @param texts    The texts to check
      * @return The width of the widest text in the collection
      */
-    public static int widthOrdered(TextRenderer renderer, Iterable<OrderedText> texts) {
+    public static int widthOrdered(Font renderer, Iterable<FormattedCharSequence> texts) {
         int width = 0;
-        for (var text : texts) width = Math.max(width, renderer.getWidth(text));
+        for (var text : texts) width = Math.max(width, renderer.width(text));
         return width;
     }
 
@@ -131,8 +137,8 @@ public final class TextOps {
      * @return The color value associated with the given formatting
      * in {@code RRGGBB} format, or {@code 0} if there is none
      */
-    public static int color(Formatting formatting) {
-        return formatting.getColorValue() == null ? 0 : formatting.getColorValue();
+    public static int color(TextFormatting formatting) {
+        return formatting.color() == null ? 0 : formatting.color();
     }
 
 }

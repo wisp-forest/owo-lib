@@ -1,6 +1,7 @@
 package io.wispforest.owo.ui.component;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.MatrixStack;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.AnimatableProperty;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
@@ -8,10 +9,10 @@ import io.wispforest.owo.ui.core.PositionedRectangle;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
-import net.minecraft.util.Identifier;
 import org.w3c.dom.Element;
 
 import java.util.Map;
+import net.minecraft.resources.Identifier;
 
 public class TextureComponent extends BaseComponent {
 
@@ -60,7 +61,7 @@ public class TextureComponent extends BaseComponent {
             RenderSystem.defaultBlendFunc();
         }
 
-        var matrices = context.getMatrices();
+        var matrices = context.matrixStack();
         matrices.push();
         matrices.translate(x, y, 0);
         matrices.scale(this.width / (float) this.regionWidth, this.height / (float) this.regionHeight, 0);

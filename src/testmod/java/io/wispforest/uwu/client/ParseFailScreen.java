@@ -2,7 +2,7 @@ package io.wispforest.uwu.client;
 
 import io.wispforest.owo.ui.base.BaseUIModelScreen;
 import io.wispforest.owo.ui.container.FlowLayout;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 
 public class ParseFailScreen extends BaseUIModelScreen<FlowLayout> {
 

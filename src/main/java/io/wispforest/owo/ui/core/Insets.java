@@ -50,10 +50,10 @@ public record Insets(int top, int bottom, int left, int right) implements Animat
     @Override
     public Insets interpolate(Insets next, float delta) {
         return new Insets(
-                (int) MathHelper.lerp(delta, this.top, next.top),
-                (int) MathHelper.lerp(delta, this.bottom, next.bottom),
-                (int) MathHelper.lerp(delta, this.left, next.left),
-                (int) MathHelper.lerp(delta, this.right, next.right)
+                (int) MathHelper.lerpInt(delta, this.top, next.top),
+                (int) MathHelper.lerpInt(delta, this.bottom, next.bottom),
+                (int) MathHelper.lerpInt(delta, this.left, next.left),
+                (int) MathHelper.lerpInt(delta, this.right, next.right)
         );
     }
 

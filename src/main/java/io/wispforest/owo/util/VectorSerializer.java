@@ -1,16 +1,16 @@
 package io.wispforest.owo.util;
 
+import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.*;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
 import java.util.List;
 
 /**
- * Utility class for reading and storing {@link Vec3d} and
+ * Utility class for reading and storing {@link Vec3} and
  * {@link Vector3f} from and into {@link net.minecraft.nbt.NbtCompound}
  */
 public final class VectorSerializer {
@@ -26,7 +26,7 @@ public final class VectorSerializer {
      * @param vec3d The vector to serialize
      * @return {@code nbt}
      */
-    public static NbtCompound put(NbtCompound nbt, String key, Vec3d vec3d) {
+    public static NbtCompound put(NbtCompound nbt, String key, Vec3 vec3d) {
 
         NbtList vectorArray = new NbtList();
         vectorArray.add(NbtDouble.of(vec3d.x));
@@ -83,14 +83,14 @@ public final class VectorSerializer {
      * @param key The key the read from
      * @return The deserialized vector
      */
-    public static Vec3d get(NbtCompound nbt, String key) {
+    public static Vec3 get(NbtCompound nbt, String key) {
 
         NbtList vectorArray = nbt.getList(key, NbtElement.DOUBLE_TYPE);
         double x = vectorArray.getDouble(0);
         double y = vectorArray.getDouble(1);
         double z = vectorArray.getDouble(2);
 
-        return new Vec3d(x, y, z);
+        return new Vec3(x, y, z);
     }
 
     /**
@@ -135,7 +135,7 @@ public final class VectorSerializer {
      * @param vec3d  The vector to write
      * @param buffer The packet buffer to write into
      */
-    public static void write(PacketByteBuf buffer, Vec3d vec3d) {
+    public static void write(FriendlyByteBuf buffer, Vec3 vec3d) {
         buffer.writeDouble(vec3d.x);
         buffer.writeDouble(vec3d.y);
         buffer.writeDouble(vec3d.z);
@@ -147,7 +147,7 @@ public final class VectorSerializer {
      * @param vec3f  The vector to write
      * @param buffer The packet buffer to write into
      */
-    public static void writef(PacketByteBuf buffer, Vector3f vec3f) {
+    public static void writef(FriendlyByteBuf buffer, Vector3f vec3f) {
         buffer.writeFloat(vec3f.x);
         buffer.writeFloat(vec3f.y);
         buffer.writeFloat(vec3f.z);
@@ -159,7 +159,7 @@ public final class VectorSerializer {
      * @param vec3i  The vector to write
      * @param buffer The packet buffer to write into
      */
-    public static void writei(PacketByteBuf buffer, Vec3i vec3i) {
+    public static void writei(FriendlyByteBuf buffer, Vec3i vec3i) {
         buffer.writeInt(vec3i.getX());
         buffer.writeInt(vec3i.getY());
         buffer.writeInt(vec3i.getZ());
@@ -171,8 +171,8 @@ public final class VectorSerializer {
      * @param buffer The buffer to read from
      * @return The deserialized vector
      */
-    public static Vec3d read(PacketByteBuf buffer) {
-        return new Vec3d(buffer.readDouble(), buffer.readDouble(), buffer.readDouble());
+    public static Vec3 read(FriendlyByteBuf buffer) {
+        return new Vec3(buffer.readDouble(), buffer.readDouble(), buffer.readDouble());
     }
 
     /**
@@ -181,7 +181,7 @@ public final class VectorSerializer {
      * @param buffer The buffer to read from
      * @return The deserialized vector
      */
-    public static Vector3f readf(PacketByteBuf buffer) {
+    public static Vector3f readf(FriendlyByteBuf buffer) {
         return new Vector3f(buffer.readFloat(), buffer.readFloat(), buffer.readFloat());
     }
 
@@ -191,7 +191,7 @@ public final class VectorSerializer {
      * @param buffer The buffer to read from
      * @return The deserialized vector
      */
-    public static Vec3i readi(PacketByteBuf buffer) {
+    public static Vec3i readi(FriendlyByteBuf buffer) {
         return new Vec3i(buffer.readInt(), buffer.readInt(), buffer.readInt());
     }
 }

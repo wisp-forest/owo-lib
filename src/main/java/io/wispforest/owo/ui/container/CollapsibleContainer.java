@@ -1,5 +1,8 @@
 package io.wispforest.owo.ui.container;
 
+import Z;
+import com.mojang.blaze3d.vertex.MatrixStack;
+import com.mojang.math.Axis;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.core.*;
@@ -8,9 +11,6 @@ import io.wispforest.owo.ui.util.Delta;
 import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.RotationAxis;
 import org.lwjgl.glfw.GLFW;
 import org.w3c.dom.Element;
 
@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import net.minecraft.TextFormatting;
+import net.minecraft.network.chat.Text;
 
 public class CollapsibleContainer extends FlowLayout {
 
@@ -48,7 +50,7 @@ public class CollapsibleContainer extends FlowLayout {
         this.titleLayout.padding(Insets.of(5, 5, 5, 0));
         this.allowOverflow(true);
 
-        title = title.copy().formatted(Formatting.UNDERLINE);
+        title = title.copy().withStyle(TextFormatting.UNDERLINE);
         this.titleLayout.child(Components.label(title).cursorStyle(CursorStyle.HAND));
 
         this.spinnyBoi = new SpinnyBoiComponent();
@@ -202,11 +204,11 @@ public class CollapsibleContainer extends FlowLayout {
 
         @Override
         public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
-            var matrices = context.getMatrices();
+            var matrices = context.matrixStack();
 
             matrices.push();
             matrices.translate(this.x + this.width / 2f - 1, this.y + this.height / 2f - 1, 0);
-            matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(this.rotation));
+            matrices.rotate(Axis.ZP.rotationDegrees(this.rotation));
             matrices.translate(-(this.x + this.width / 2f - 1), -(this.y + this.height / 2f - 1), 0);
 
             super.draw(context, mouseX, mouseY, partialTicks, delta);

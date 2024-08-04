@@ -2,7 +2,7 @@ package io.wispforest.owo.ui.event;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 
 public interface ClientRenderCallback {
 
@@ -26,5 +26,5 @@ public interface ClientRenderCallback {
         }
     });
 
-    void onRender(MinecraftClient client);
+    void onRender(Minecraft client);
 }

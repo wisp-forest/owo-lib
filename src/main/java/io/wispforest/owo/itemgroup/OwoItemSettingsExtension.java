@@ -1,23 +1,22 @@
 package io.wispforest.owo.itemgroup;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.util.Hand;
-import net.minecraft.world.World;
-
 import java.util.function.BiConsumer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.Level;
 
 public interface OwoItemSettingsExtension {
 
-    default Item.Settings group(ItemGroupReference ref) {
+    default Item.Properties group(ItemGroupReference ref) {
         throw new IllegalStateException("Implemented in mixin.");
     }
 
     /**
      * @param group The item group this item should appear in
      */
-    default Item.Settings group(OwoItemGroup group) {
+    default Item.Properties group(OwoItemGroup group) {
         throw new IllegalStateException("Implemented in mixin.");
     }
 
@@ -25,7 +24,7 @@ public interface OwoItemSettingsExtension {
         throw new IllegalStateException("Implemented in mixin.");
     }
 
-    default Item.Settings tab(int tab) {
+    default Item.Properties tab(int tab) {
         throw new IllegalStateException("Implemented in mixin.");
     }
 
@@ -37,20 +36,20 @@ public interface OwoItemSettingsExtension {
      * @param generator The function this item uses for creating stacks in the
      *                  {@link OwoItemGroup} it is in, by default this will be {@link OwoItemGroup#DEFAULT_STACK_GENERATOR}
      */
-    default Item.Settings stackGenerator(BiConsumer<Item, ItemGroup.Entries> generator) {
+    default Item.Properties stackGenerator(BiConsumer<Item, CreativeModeTab.Output> generator) {
         throw new IllegalStateException("Implemented in mixin.");
     }
 
-    default BiConsumer<Item, ItemGroup.Entries> stackGenerator() {
+    default BiConsumer<Item, CreativeModeTab.Output> stackGenerator() {
         throw new IllegalStateException("Implemented in mixin.");
     }
 
     /**
-     * Automatically increment {@link net.minecraft.stat.Stats#USED}
-     * for this item every time {@link Item#use(World, PlayerEntity, Hand)}
+     * Automatically increment {@link net.minecraft.stats.Stats#ITEM_USED}
+     * for this item every time {@link Item#use(Level, Player, InteractionHand)}
      * returns an accepted result
      */
-    default Item.Settings trackUsageStat() {
+    default Item.Properties trackUsageStat() {
         throw new IllegalStateException("Implemented in mixin.");
     }
 

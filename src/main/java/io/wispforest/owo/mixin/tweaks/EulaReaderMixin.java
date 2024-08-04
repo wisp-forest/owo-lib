@@ -1,6 +1,5 @@
 package io.wispforest.owo.mixin.tweaks;
 
-import net.minecraft.server.dedicated.EulaReader;
 import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -10,12 +9,15 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
 import java.util.Scanner;
+import net.minecraft.server.Eula;
 
-@Mixin(EulaReader.class)
+@Mixin(Eula.class)
 public abstract class EulaReaderMixin {
 
     @Shadow

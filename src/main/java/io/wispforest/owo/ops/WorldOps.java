@@ -1,22 +1,22 @@
 package io.wispforest.owo.ops;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockEntityProvider;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.s2c.play.EntityStatusEffectS2CPacket;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.BlockEntityProvider;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * A collection of common operations done on {@link World}
+ * A collection of common operations done on {@link Level}
  */
 public final class WorldOps {
 
@@ -29,7 +29,7 @@ public final class WorldOps {
      * @param pos       The position of the block to break
      * @param breakItem The item to break the block with
      */
-    public static void breakBlockWithItem(World world, BlockPos pos, ItemStack breakItem) {
+    public static void breakBlockWithItem(Level world, BlockPos pos, ItemStack breakItem) {
         breakBlockWithItem(world, pos, breakItem, null);
     }
 
@@ -41,10 +41,10 @@ public final class WorldOps {
      * @param breakItem      The item to break the block with
      * @param breakingEntity The entity which is breaking the block
      */
-    public static void breakBlockWithItem(World world, BlockPos pos, ItemStack breakItem, @Nullable Entity breakingEntity) {
+    public static void breakBlockWithItem(Level world, BlockPos pos, ItemStack breakItem, @Nullable Entity breakingEntity) {
         BlockEntity breakEntity = world.getBlockState(pos).getBlock() instanceof BlockEntityProvider ? world.getBlockEntity(pos) : null;
-        Block.dropStacks(world.getBlockState(pos), world, pos, breakEntity, breakingEntity, breakItem);
-        world.breakBlock(pos, false, breakingEntity);
+        Block.dropResources(world.getBlockState(pos), world, pos, breakEntity, breakingEntity, breakItem);
+        world.destroyBlock(pos, false, breakingEntity);
     }
 
     /**
@@ -56,11 +56,11 @@ public final class WorldOps {
      * @param sound    The sound to play
      * @param category The category for the sound
      */
-    public static void playSound(World world, Vec3d pos, SoundEvent sound, SoundCategory category) {
-        playSound(world, BlockPos.ofFloored(pos), sound, category, 1, 1);
+    public static void playSound(Level world, Vec3 pos, SoundEvent sound, SoundSource category) {
+        playSound(world, BlockPos.of(pos), sound, category, 1, 1);
     }
 
-    public static void playSound(World world, BlockPos pos, SoundEvent sound, SoundCategory category) {
+    public static void playSound(Level world, BlockPos pos, SoundEvent sound, SoundSource category) {
         playSound(world, pos, sound, category, 1, 1);
     }
 
@@ -75,31 +75,31 @@ public final class WorldOps {
      * @param volume   The volume to play the sound at
      * @param pitch    The pitch, or speed, to play the sound at
      */
-    public static void playSound(World world, Vec3d pos, SoundEvent sound, SoundCategory category, float volume, float pitch) {
-        world.playSound(null, BlockPos.ofFloored(pos), sound, category, volume, pitch);
+    public static void playSound(Level world, Vec3 pos, SoundEvent sound, SoundSource category, float volume, float pitch) {
+        world.playSound(null, BlockPos.of(pos), sound, category, volume, pitch);
     }
 
-    public static void playSound(World world, BlockPos pos, SoundEvent sound, SoundCategory category, float volume, float pitch) {
+    public static void playSound(Level world, BlockPos pos, SoundEvent sound, SoundSource category, float volume, float pitch) {
         world.playSound(null, pos, sound, category, volume, pitch);
     }
 
     /**
      * Causes a block update at the given position, if {@code world}
-     * is an instance of {@link ServerWorld}
+     * is an instance of {@link ServerLevel}
      *
      * @param world The target world
      * @param pos   The target position
      */
-    public static void updateIfOnServer(World world, BlockPos pos) {
-        if (!(world instanceof ServerWorld serverWorld)) return;
-        serverWorld.getChunkManager().markForUpdate(pos);
+    public static void updateIfOnServer(Level world, BlockPos pos) {
+        if (!(world instanceof ServerLevel serverWorld)) return;
+        serverWorld.getChunkSource().markForUpdate(pos);
     }
 
     /**
-     * Same as {@link WorldOps#teleportToWorld(ServerPlayerEntity, ServerWorld, Vec3d, float, float)} but defaults
+     * Same as {@link WorldOps#teleportToWorld(ServerPlayer, ServerLevel, Vec3, float, float)} but defaults
      * to {@code 0} for {@code pitch} and {@code yaw}
      */
-    public static void teleportToWorld(ServerPlayerEntity player, ServerWorld target, Vec3d pos) {
+    public static void teleportToWorld(ServerPlayer player, ServerLevel target, Vec3 pos) {
         teleportToWorld(player, target, pos, 0, 0);
     }
 
@@ -113,12 +113,12 @@ public final class WorldOps {
      * @param yaw    The target yaw
      * @param pitch  The target pitch
      */
-    public static void teleportToWorld(ServerPlayerEntity player, ServerWorld target, Vec3d pos, float yaw, float pitch) {
-        player.teleport(target, pos.x, pos.y, pos.z, yaw, pitch);
-        player.addExperience(0);
+    public static void teleportToWorld(ServerPlayer player, ServerLevel target, Vec3 pos, float yaw, float pitch) {
+        player.teleportTo(target, pos.x, pos.y, pos.z, yaw, pitch);
+        player.giveExperiencePoints(0);
 
-        player.getStatusEffects().forEach(effect -> {
-            player.networkHandler.sendPacket(new EntityStatusEffectS2CPacket(player.getId(), effect, false));
+        player.getActiveEffects().forEach(effect -> {
+            player.connection.send(new ClientboundUpdateMobEffectPacket(player.getId(), effect, false));
         });
     }
 

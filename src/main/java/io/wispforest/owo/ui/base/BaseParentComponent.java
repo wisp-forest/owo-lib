@@ -4,7 +4,6 @@ import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.FocusHandler;
 import io.wispforest.owo.ui.util.ScissorStack;
 import io.wispforest.owo.util.Observable;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -340,7 +339,7 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
     protected void drawChildren(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta, List<? extends Component> children) {
         if (!this.allowOverflow) {
             var padding = this.padding.get();
-            ScissorStack.push(this.x + padding.left(), this.y + padding.top(), this.width - padding.horizontal(), this.height - padding.vertical(), context.getMatrices());
+            ScissorStack.push(this.x + padding.left(), this.y + padding.top(), this.width - padding.horizontal(), this.height - padding.vertical(), context.matrixStack());
         }
 
         var focusHandler = this.focusHandler();
@@ -348,15 +347,15 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
         for (int i = 0; i < children.size(); i++) {
             final var child = children.get(i);
 
-            if (!ScissorStack.isVisible(child, context.getMatrices())) continue;
-            context.getMatrices().translate(0, 0, child.zIndex() + 1);
+            if (!ScissorStack.isVisible(child, context.matrixStack())) continue;
+            context.matrixStack().translate(0, 0, child.zIndex() + 1);
 
             child.draw(context, mouseX, mouseY, partialTicks, delta);
             if (focusHandler.lastFocusSource() == FocusSource.KEYBOARD_CYCLE && focusHandler.focused() == child) {
                 child.drawFocusHighlight(context, mouseX, mouseY, partialTicks, delta);
             }
 
-            context.getMatrices().translate(0, 0, -child.zIndex() - 1);
+            context.matrixStack().translate(0, 0, -child.zIndex() - 1);
         }
 
         if (!this.allowOverflow) {
@@ -375,8 +374,8 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
         final var padding = this.padding.get();
 
         return Size.of(
-                MathHelper.lerp(this.horizontalSizing.get().contentFactor(), this.width - padding.horizontal(), thisSpace.width() - padding.horizontal()),
-                MathHelper.lerp(this.verticalSizing.get().contentFactor(), this.height - padding.vertical(), thisSpace.height() - padding.vertical())
+                MathHelper.lerpInt(this.horizontalSizing.get().contentFactor(), this.width - padding.horizontal(), thisSpace.width() - padding.horizontal()),
+                MathHelper.lerpInt(this.verticalSizing.get().contentFactor(), this.height - padding.vertical(), thisSpace.height() - padding.vertical())
         );
     }
 

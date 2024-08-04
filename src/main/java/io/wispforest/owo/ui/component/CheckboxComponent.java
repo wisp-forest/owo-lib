@@ -7,33 +7,33 @@ import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.util.Observable;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.widget.CheckboxWidget;
-import net.minecraft.text.Text;
 import org.w3c.dom.Element;
 
 import java.util.Map;
 import java.util.function.Consumer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.Checkbox;
+import net.minecraft.network.chat.Text;
 
-public class CheckboxComponent extends CheckboxWidget {
+public class CheckboxComponent extends Checkbox {
 
     protected final Observable<Boolean> listeners;
 
     protected CheckboxComponent(Text message) {
-        super(0, 0, 0, message, MinecraftClient.getInstance().textRenderer, false, (checkbox, checked) -> {});
-        this.listeners = Observable.of(this.isChecked());
+        super(0, 0, 0, message, Minecraft.getInstance().font, false, (checkbox, checked) -> {});
+        this.listeners = Observable.of(this.selected());
         this.sizing(Sizing.content(), Sizing.fixed(20));
     }
 
     @Override
     public void onPress() {
         super.onPress();
-        this.listeners.set(this.isChecked());
+        this.listeners.set(this.selected());
     }
 
     public CheckboxComponent checked(boolean checked) {
         ((CheckboxWidgetAccessor) this).owo$setChecked(checked);
-        this.listeners.set(this.isChecked());
+        this.listeners.set(this.selected());
         return this;
     }
 

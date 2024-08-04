@@ -12,10 +12,12 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.screens.inventory.MenuAccess;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
@@ -30,7 +32,7 @@ public class ScreenInternals {
         PayloadTypeRegistry.playS2C().register(SyncPropertiesPacket.ID, CodecUtils.toPacketCodec(SyncPropertiesPacket.ENDEC));
 
         ServerPlayNetworking.registerGlobalReceiver(LocalPacket.ID, (payload, context) -> {
-            var screenHandler = context.player().currentScreenHandler;
+            var screenHandler = context.player().containerMenu;
 
             if (screenHandler == null) {
                 Owo.LOGGER.error("Received local packet for null ScreenHandler");
@@ -41,8 +43,8 @@ public class ScreenInternals {
         });
     }
 
-    public record LocalPacket(int packetId, PacketByteBuf payload) implements CustomPayload {
-        public static final Id<LocalPacket> ID = new Id<>(Identifier.of("owo", "local_packet"));
+    public record LocalPacket(int packetId, FriendlyByteBuf payload) implements CustomPacketPayload {
+        public static final Type<LocalPacket> ID = new Type<>(Identifier.of("owo", "local_packet"));
         public static final Endec<LocalPacket> ENDEC = StructEndecBuilder.of(
             Endec.VAR_INT.fieldOf("packetId", LocalPacket::packetId),
             MinecraftEndecs.PACKET_BYTE_BUF.fieldOf("payload", LocalPacket::payload),
@@ -50,20 +52,20 @@ public class ScreenInternals {
         );
 
         @Override
-        public Id<? extends CustomPayload> getId() {
+        public Type<? extends CustomPacketPayload> type() {
             return ID;
         }
     }
 
-    public record SyncPropertiesPacket(PacketByteBuf payload) implements CustomPayload {
-        public static final Id<SyncPropertiesPacket> ID = new Id<>(SYNC_PROPERTIES);
+    public record SyncPropertiesPacket(FriendlyByteBuf payload) implements CustomPacketPayload {
+        public static final Type<SyncPropertiesPacket> ID = new Type<>(SYNC_PROPERTIES);
         public static final Endec<SyncPropertiesPacket> ENDEC = StructEndecBuilder.of(
             MinecraftEndecs.PACKET_BYTE_BUF.fieldOf("payload", SyncPropertiesPacket::payload),
             SyncPropertiesPacket::new
         );
 
         @Override
-        public Id<? extends CustomPayload> getId() {
+        public Type<? extends CustomPacketPayload> type() {
             return ID;
         }
     }
@@ -72,12 +74,12 @@ public class ScreenInternals {
     public static class Client {
         public static void init() {
             ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
-                if (screen instanceof ScreenHandlerProvider<?> handled)
-                    ((OwoScreenHandlerExtension) handled.getScreenHandler()).owo$attachToPlayer(client.player);
+                if (screen instanceof MenuAccess<?> handled)
+                    ((OwoScreenHandlerExtension) handled.getMenu()).owo$attachToPlayer(client.player);
             });
 
             ClientPlayNetworking.registerGlobalReceiver(LocalPacket.ID, (payload, context) -> {
-                var screenHandler = context.player().currentScreenHandler;
+                var screenHandler = context.player().containerMenu;
 
                 if (screenHandler == null) {
                     Owo.LOGGER.error("Received local packet for null ScreenHandler");
@@ -88,7 +90,7 @@ public class ScreenInternals {
             });
 
             ClientPlayNetworking.registerGlobalReceiver(SyncPropertiesPacket.ID, (payload, context) -> {
-                var screenHandler = context.player().currentScreenHandler;
+                var screenHandler = context.player().containerMenu;
 
                 if (screenHandler == null) {
                     Owo.LOGGER.error("Received sync properties packet for null ScreenHandler");

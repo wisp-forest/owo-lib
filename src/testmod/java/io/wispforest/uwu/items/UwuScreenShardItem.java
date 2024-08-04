@@ -4,45 +4,45 @@ import io.wispforest.uwu.EpicScreenHandler;
 import io.wispforest.uwu.client.SelectUwuScreenScreen;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.NamedScreenHandlerFactory;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerContext;
-import net.minecraft.text.Text;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Rarity;
-import net.minecraft.util.TypedActionResult;
-import net.minecraft.world.World;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Text;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 public class UwuScreenShardItem extends Item {
 
     public UwuScreenShardItem() {
-        super(new Settings().rarity(Rarity.UNCOMMON));
+        super(new Properties().rarity(Rarity.UNCOMMON));
     }
 
     @Override
     @Environment(EnvType.CLIENT)
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        if (user.isSneaking()) {
-            if (world.isClient) MinecraftClient.getInstance().setScreen(new SelectUwuScreenScreen());
-        } else if (!world.isClient) {
-            user.openHandledScreen(new NamedScreenHandlerFactory() {
+    public InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
+        if (user.isShiftKeyDown()) {
+            if (world.isClientSide) Minecraft.getInstance().setScreen(new SelectUwuScreenScreen());
+        } else if (!world.isClientSide) {
+            user.openMenu(new MenuProvider() {
                 @Override
                 public Text getDisplayName() {
                     return Text.literal("bruh momento");
                 }
 
                 @Override
-                public @NotNull ScreenHandler createMenu(int syncId, PlayerInventory inv, PlayerEntity player) {
-                    return new EpicScreenHandler(syncId, inv, ScreenHandlerContext.create(world, player.getBlockPos()));
+                public @NotNull AbstractContainerMenu createMenu(int syncId, Inventory inv, Player player) {
+                    return new EpicScreenHandler(syncId, inv, ContainerLevelAccess.create(world, player.getBlockPos()));
                 }
             });
         }
-        return TypedActionResult.pass(user.getStackInHand(hand));
+        return InteractionResultHolder.pass(user.getItemInHand(hand));
     }
 }

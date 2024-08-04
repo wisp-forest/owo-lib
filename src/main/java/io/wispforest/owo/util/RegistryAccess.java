@@ -1,8 +1,8 @@
 package io.wispforest.owo.util;
 
-import net.minecraft.registry.Registry;
-import net.minecraft.util.Identifier;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,18 +12,18 @@ public final class RegistryAccess {
     private RegistryAccess() {}
 
     /**
-     * @deprecated Use {@link Registry#getEntry(Identifier)}
+     * @deprecated Use {@link Registry#getHolder(Identifier)}
      */
     @Nullable
-    public static <T> RegistryEntry<T> getEntry(Registry<T> registry, Identifier id) {
-        return registry.getEntry(id).orElse(null);
+    public static <T> Holder<T> getEntry(Registry<T> registry, Identifier id) {
+        return registry.getHolder(id).orElse(null);
     }
 
     /**
-     * @deprecated Use {@link Registry#getEntry(T)}
+     * @deprecated Use {@link Registry#wrapAsHolder(T)}
      */
     @Nullable
-    public static <T> RegistryEntry<T> getEntry(Registry<T> registry, T value) {
-        return registry.getEntry(value);
+    public static <T> Holder<T> getEntry(Registry<T> registry, T value) {
+        return registry.wrapAsHolder(value);
     }
 }

@@ -2,10 +2,9 @@ package io.wispforest.owo.ui.core;
 
 import com.google.common.collect.ImmutableMap;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
-import net.minecraft.util.DyeColor;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.ColorHelper;
+import net.minecraft.TextFormatting;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.item.DyeColor;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Node;
 
@@ -21,8 +20,8 @@ public record Color(float red, float green, float blue, float alpha) implements 
     public static final Color GREEN = Color.ofRgb(0x00FF00);
     public static final Color BLUE = Color.ofRgb(0x0000FF);
 
-    private static final Map<String, Color> NAMED_TEXT_COLORS = Stream.of(Formatting.values())
-            .filter(Formatting::isColor)
+    private static final Map<String, Color> NAMED_TEXT_COLORS = Stream.of(TextFormatting.values())
+            .filter(TextFormatting::isColor)
             .collect(ImmutableMap.toImmutableMap(formatting -> {
                 return formatting.getName().toLowerCase(Locale.ROOT).replace("_", "-");
             }, Color::ofFormatting));
@@ -59,13 +58,13 @@ public record Color(float red, float green, float blue, float alpha) implements 
         return ofArgb((int) (alpha * 255) << 24 | MathHelper.hsvToRgb(hue - .5e-7f, saturation, value));
     }
 
-    public static Color ofFormatting(@NotNull Formatting formatting) {
-        var colorValue = formatting.getColorValue();
+    public static Color ofFormatting(@NotNull TextFormatting formatting) {
+        var colorValue = formatting.color();
         return ofRgb(colorValue == null ? 0 : colorValue);
     }
 
     public static Color ofDye(@NotNull DyeColor dyeColor) {
-        return ofArgb(dyeColor.getEntityColor());
+        return ofArgb(dyeColor.getTextureDiffuseColor());
     }
 
     /**

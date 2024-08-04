@@ -1,9 +1,9 @@
 package io.wispforest.owo.ui.event;
 
+import com.mojang.blaze3d.platform.Window;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.util.Window;
+import net.minecraft.client.Minecraft;
 
 public interface WindowResizeCallback {
 
@@ -19,6 +19,6 @@ public interface WindowResizeCallback {
      * @param client The currently active client
      * @param window The window which was resized
      */
-    void onResized(MinecraftClient client, Window window);
+    void onResized(Minecraft client, Window window);
 
 }

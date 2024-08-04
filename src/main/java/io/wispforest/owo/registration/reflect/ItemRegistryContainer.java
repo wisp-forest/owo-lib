@@ -1,13 +1,13 @@
 package io.wispforest.owo.registration.reflect;
 
-import net.minecraft.item.Item;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.Item;
 
 public interface ItemRegistryContainer extends AutoRegistryContainer<Item> {
     @Override
     default Registry<Item> getRegistry() {
-        return Registries.ITEM;
+        return BuiltInRegistries.ITEM;
     }
 
     @Override

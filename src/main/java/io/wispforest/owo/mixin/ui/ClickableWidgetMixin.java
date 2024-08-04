@@ -9,9 +9,6 @@ import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.FocusHandler;
 import io.wispforest.owo.util.EventSource;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.gui.widget.ClickableWidget;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -24,10 +21,13 @@ import org.w3c.dom.Element;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 
 @SuppressWarnings("ConstantConditions")
-@Mixin(ClickableWidget.class)
-public abstract class ClickableWidgetMixin implements ComponentStub, net.minecraft.client.gui.Element {
+@Mixin(AbstractWidget.class)
+public abstract class ClickableWidgetMixin implements ComponentStub, net.minecraft.client.gui.components.events.GuiEventListener {
 
     @Shadow public boolean active;
 
@@ -279,12 +279,12 @@ public abstract class ClickableWidgetMixin implements ComponentStub, net.minecra
     }
 
     @Override
-    public Component tooltip(List<TooltipComponent> tooltip) {
+    public Component tooltip(List<ClientTooltipComponent> tooltip) {
         return this.owo$getWrapper().tooltip(tooltip);
     }
 
     @Override
-    public List<TooltipComponent> tooltip() {
+    public List<ClientTooltipComponent> tooltip() {
         return this.owo$getWrapper().tooltip();
     }
 
@@ -312,7 +312,7 @@ public abstract class ClickableWidgetMixin implements ComponentStub, net.minecra
     @Unique
     protected VanillaWidgetComponent owo$getWrapper() {
         if (this.owo$wrapper == null) {
-            this.owo$wrapper = Components.wrapVanillaWidget((ClickableWidget) (Object) this);
+            this.owo$wrapper = Components.wrapVanillaWidget((AbstractWidget) (Object) this);
         }
 
         return this.owo$wrapper;
@@ -367,7 +367,7 @@ public abstract class ClickableWidgetMixin implements ComponentStub, net.minecra
     }
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/ClickableWidget;renderWidget(Lnet/minecraft/client/gui/DrawContext;IIF)V"))
-    private void setHovered(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+    private void setHovered(GuiGraphics context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         if (this.owo$wrapper != null) this.hovered = this.hovered && this.owo$wrapper.hovered();
     }
 }

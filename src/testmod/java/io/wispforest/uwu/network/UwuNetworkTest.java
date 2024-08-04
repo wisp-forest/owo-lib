@@ -1,12 +1,13 @@
 package io.wispforest.uwu.network;
 
 import io.wispforest.endec.Endec;
+import io.wispforest.endec.StructEndec;
 import io.wispforest.endec.format.bytebuf.ByteBufDeserializer;
 import io.wispforest.endec.format.bytebuf.ByteBufSerializer;
 import io.wispforest.endec.impl.RecordEndec;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-
+import net.minecraft.network.FriendlyByteBuf;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;

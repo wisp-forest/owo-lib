@@ -1,14 +1,18 @@
 package io.wispforest.owo.compat.rei;
 
+import J;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.math.Axis;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.mixin.itemgroup.CreativeInventoryScreenAccessor;
 import io.wispforest.owo.mixin.ui.access.BaseOwoHandledScreenAccessor;
 import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
 import io.wispforest.owo.ui.core.Component;
+import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.ParentComponent;
+import io.wispforest.owo.ui.core.Size;
 import io.wispforest.owo.ui.core.Surface;
 import io.wispforest.owo.ui.util.ScissorStack;
 import io.wispforest.owo.util.pond.OwoCreativeInventoryScreenExtensions;
@@ -20,12 +24,12 @@ import me.shedaniel.rei.api.client.registry.screen.OverlayDecider;
 import me.shedaniel.rei.api.client.registry.screen.OverlayRendererProvider;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
-import net.minecraft.util.math.RotationAxis;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.world.item.CreativeModeTab;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
+import org.joml.Matrix4fStack;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -37,7 +41,7 @@ public class OwoReiPlugin implements REIClientPlugin {
 
     @Override
     public void registerExclusionZones(ExclusionZones zones) {
-        zones.register(CreativeInventoryScreen.class, screen -> {
+        zones.register(CreativeModeInventoryScreen.class, screen -> {
             var group = CreativeInventoryScreenAccessor.owo$getSelectedTab();
             if (!(group instanceof OwoItemGroup owoGroup)) return Collections.emptySet();
             if (owoGroup.getButtons().isEmpty()) return Collections.emptySet();
@@ -146,13 +150,13 @@ public class OwoReiPlugin implements REIClientPlugin {
             modelView.translate((float) (Math.sin(time / 1000d) * .75f) * screen.width, (float) (Math.sin(time / 500d) * .75f) * screen.height, 0);
 
             modelView.translate(screen.width / 2f, screen.height / 2f, 0);
-            modelView.rotate(RotationAxis.POSITIVE_Z.rotationDegrees((float) (time / 25d % 360d)));
+            modelView.rotate(Axis.ZP.rotationDegrees((float) (time / 25d % 360d)));
             modelView.translate(screen.width / -2f, screen.height / -2f, 0);
 
             for (int i = 0; i < 20; i++) {
                 modelView.pushMatrix();
                 modelView.translate(screen.width / 2f, screen.height / 2f, 0);
-                modelView.rotate(RotationAxis.POSITIVE_Z.rotationDegrees(i * 18));
+                modelView.rotate(Axis.ZP.rotationDegrees(i * 18));
                 modelView.translate(screen.width / -2f, screen.height / -2f, 0);
 
                 RenderSystem.applyModelViewMatrix();

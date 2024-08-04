@@ -2,7 +2,7 @@ package io.wispforest.owo.ui.container;
 
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.Sizing;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Text;
 
 public final class Containers {
 

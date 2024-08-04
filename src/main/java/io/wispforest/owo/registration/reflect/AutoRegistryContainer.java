@@ -1,9 +1,8 @@
 package io.wispforest.owo.registration.reflect;
 
 import io.wispforest.owo.registration.annotations.AssignedName;
-import net.minecraft.registry.Registry;
-
 import java.lang.reflect.Field;
+import net.minecraft.core.Registry;
 
 /**
  * A special version of {@link FieldProcessingSubject} that contains fields which should

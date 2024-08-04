@@ -4,12 +4,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.mojang.serialization.JsonOps;
 import io.wispforest.owo.text.LanguageAccess;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextCodecs;
-import net.minecraft.util.JsonHelper;
-import net.minecraft.util.Language;
-import net.minecraft.util.Util;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,6 +11,10 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 import java.io.InputStream;
 import java.util.function.BiConsumer;
+import net.minecraft.locale.Language;
+import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.network.chat.MutableText;
+import net.minecraft.util.GsonHelper;
 
 @Mixin(Language.class)
 public class LanguageMixin {
@@ -28,13 +26,13 @@ public class LanguageMixin {
         if (!el.isJsonPrimitive() && LanguageAccess.textConsumer != null) {
             skipNext = true;
 
-            MutableText text = (MutableText) TextCodecs.CODEC.parse(JsonOps.INSTANCE, el).getOrThrow(JsonParseException::new);
+            MutableText text = (MutableText) ComponentSerialization.CODEC.parse(JsonOps.INSTANCE, el).getOrThrow(JsonParseException::new);
             LanguageAccess.textConsumer.accept(str, text);
 
             return "";
         } else if (el.isJsonPrimitive()) {
             skipNext = false;
-            return JsonHelper.asString(el, str);
+            return GsonHelper.convertToString(el, str);
         } else {
             skipNext = true;
             return "";

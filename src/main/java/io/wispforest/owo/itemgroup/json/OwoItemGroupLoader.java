@@ -9,13 +9,14 @@ import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
 import io.wispforest.owo.moddata.ModDataConsumer;
 import io.wispforest.owo.util.pond.OwoItemExtensions;
 import net.fabricmc.fabric.api.event.registry.RegistryEntryAddedCallback;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemGroups;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.JsonHelper;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.tags.TagKey;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.Item;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ import java.util.Map;
  * Manages loading and adding JSON-based tabs to preexisting {@code ItemGroup}s
  * without needing to depend on owo
  * <p>
- * This is used instead of a {@link net.minecraft.resource.JsonDataLoader} because
+ * This is used instead of a {@link net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener} because
  * it needs to load on the client
  */
 @ApiStatus.Internal
@@ -38,8 +39,8 @@ public class OwoItemGroupLoader implements ModDataConsumer {
 
     private OwoItemGroupLoader() {}
 
-    public static void onGroupCreated(ItemGroup group) {
-        var groupId = Registries.ITEM_GROUP.getId(group);
+    public static void onGroupCreated(CreativeModeTab group) {
+        var groupId = BuiltInRegistries.CREATIVE_MODE_TAB.getId(group);
 
         if (!BUFFERED_GROUPS.containsKey(groupId)) return;
         INSTANCE.acceptParsedFile(groupId, BUFFERED_GROUPS.remove(groupId));
@@ -47,11 +48,11 @@ public class OwoItemGroupLoader implements ModDataConsumer {
 
     @Override
     public void acceptParsedFile(Identifier id, JsonObject json) {
-        var targetGroupId = Identifier.of(JsonHelper.getString(json, "target_group"));
+        var targetGroupId = Identifier.parse(GsonHelper.getAsString(json, "target_group"));
 
-        ItemGroup searchGroup = null;
-        for (ItemGroup group : ItemGroups.getGroups()) {
-            if (Registries.ITEM_GROUP.getId(group).equals(targetGroupId)) {
+        CreativeModeTab searchGroup = null;
+        for (CreativeModeTab group : CreativeModeTabs.allTabs()) {
+            if (BuiltInRegistries.CREATIVE_MODE_TAB.getId(group).equals(targetGroupId)) {
                 searchGroup = group;
                 break;
             }
@@ -64,48 +65,48 @@ public class OwoItemGroupLoader implements ModDataConsumer {
 
         final var targetGroup = searchGroup;
 
-        var tabsArray = JsonHelper.getArray(json, "tabs", new JsonArray());
+        var tabsArray = GsonHelper.getAsJsonArray(json, "tabs", new JsonArray());
         var tabs = new ArrayList<ItemGroupTab>();
 
         tabsArray.forEach(jsonElement -> {
             if (!jsonElement.isJsonObject()) return;
             var tabObject = jsonElement.getAsJsonObject();
 
-            var texture = Identifier.of(JsonHelper.getString(tabObject, "texture", ItemGroupTab.DEFAULT_TEXTURE.toString()));
+            var texture = Identifier.parse(GsonHelper.getAsString(tabObject, "texture", ItemGroupTab.DEFAULT_TEXTURE.toString()));
 
-            var tag = TagKey.of(RegistryKeys.ITEM, Identifier.of(JsonHelper.getString(tabObject, "tag")));
-            var icon = Registries.ITEM.get(Identifier.of(JsonHelper.getString(tabObject, "icon")));
-            var name = JsonHelper.getString(tabObject, "name");
+            var tag = TagKey.of(Registries.ITEM, Identifier.parse(GsonHelper.getAsString(tabObject, "tag")));
+            var icon = BuiltInRegistries.ITEM.get(Identifier.parse(GsonHelper.getAsString(tabObject, "icon")));
+            var name = GsonHelper.getAsString(tabObject, "name");
 
             tabs.add(new ItemGroupTab(
                     Icon.of(icon),
                     OwoItemGroup.ButtonDefinition.tooltipFor(targetGroup, "tab", name),
-                    (context, entries) -> Registries.ITEM.stream().filter(item -> item.getRegistryEntry().isIn(tag)).forEach(entries::add),
+                    (context, entries) -> BuiltInRegistries.ITEM.stream().filter(item -> item.builtInRegistryHolder().isIn(tag)).forEach(entries::accept),
                     texture,
                     false
             ));
         });
 
-        var buttonsArray = JsonHelper.getArray(json, "buttons", new JsonArray());
+        var buttonsArray = GsonHelper.getAsJsonArray(json, "buttons", new JsonArray());
         var buttons = new ArrayList<ItemGroupButton>();
 
         buttonsArray.forEach(jsonElement -> {
             if (!jsonElement.isJsonObject()) return;
             var buttonObject = jsonElement.getAsJsonObject();
 
-            String link = JsonHelper.getString(buttonObject, "link");
-            String name = JsonHelper.getString(buttonObject, "name");
+            String link = GsonHelper.getAsString(buttonObject, "link");
+            String name = GsonHelper.getAsString(buttonObject, "name");
 
-            int u = JsonHelper.getInt(buttonObject, "texture_u");
-            int v = JsonHelper.getInt(buttonObject, "texture_v");
+            int u = GsonHelper.getAsInt(buttonObject, "texture_u");
+            int v = GsonHelper.getAsInt(buttonObject, "texture_v");
 
-            int textureWidth = JsonHelper.getInt(buttonObject, "texture_width", 64);
-            int textureHeight = JsonHelper.getInt(buttonObject, "texture_height", 64);
+            int textureWidth = GsonHelper.getAsInt(buttonObject, "texture_width", 64);
+            int textureHeight = GsonHelper.getAsInt(buttonObject, "texture_height", 64);
 
-            final var textureId = JsonHelper.getString(buttonObject, "texture", null);
+            final var textureId = GsonHelper.getAsString(buttonObject, "texture", null);
             var texture = textureId == null
                     ? ItemGroupButton.ICONS_TEXTURE
-                    : Identifier.of(textureId);
+                    : Identifier.parse(textureId);
 
             buttons.add(ItemGroupButton.link(targetGroup, Icon.of(texture, u, v, textureWidth, textureHeight), name, link));
         });
@@ -114,13 +115,13 @@ public class OwoItemGroupLoader implements ModDataConsumer {
             wrapper.addTabs(tabs);
             wrapper.addButtons(buttons);
 
-            if (JsonHelper.getBoolean(json, "extend", false)) wrapper.markExtension();
+            if (GsonHelper.getAsBoolean(json, "extend", false)) wrapper.markExtension();
         } else {
             var wrapper = new WrapperGroup(targetGroup, targetGroupId, tabs, buttons);
             wrapper.initialize();
-            if (JsonHelper.getBoolean(json, "extend", false)) wrapper.markExtension();
+            if (GsonHelper.getAsBoolean(json, "extend", false)) wrapper.markExtension();
 
-            Registries.ITEM.stream()
+            BuiltInRegistries.ITEM.stream()
                     .filter(item -> ((OwoItemExtensions) item).owo$group() == targetGroup)
                     .forEach(item -> ((OwoItemExtensions) item).owo$setGroup(wrapper));
         }
@@ -132,7 +133,7 @@ public class OwoItemGroupLoader implements ModDataConsumer {
     }
 
     static {
-        RegistryEntryAddedCallback.event(Registries.ITEM_GROUP).register((rawId, id, group) -> {
+        RegistryEntryAddedCallback.event(BuiltInRegistries.CREATIVE_MODE_TAB).register((rawId, id, group) -> {
             OwoItemGroupLoader.onGroupCreated(group);
         });
     }

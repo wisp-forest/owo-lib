@@ -1,11 +1,11 @@
 package io.wispforest.owo.blockentity;
 
+import io.wispforest.owo.blockentity.LinearProcessExecutor.ProcessStep;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.world.World;
-
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
+import net.minecraft.world.level.Level;
 
 /**
  * Represents a process made of steps than can be executed tick by tick using a respective
@@ -20,14 +20,14 @@ import java.util.function.Predicate;
  * length. Then, in the constructor of each object that will use an executor, use {@link #createExecutor(Object)} to
  * obtain an instance. This then has to be told whether it lives on the client or server using
  * {@link #configureExecutor(LinearProcessExecutor, boolean)}. On a BlockEntity this can be achieved by overriding
- * {@link net.minecraft.block.entity.BlockEntity#setWorld(World)} and configuring after the super call using the provided
+ * {@link net.minecraft.world.level.block.entity.BlockEntity#setLevel(Level)} and configuring after the super call using the provided
  * world
  * <p>
  * Steps and events should be added to process once, ideally in the {@code static} initializer block of the containing class.
  * After the process is complete, call {@link #finish()} to prevent further changes
  *
  * @param <T> The type of object this process will be executed on,
- *            a {@link net.minecraft.block.entity.BlockEntity} in most cases
+ *            a {@link net.minecraft.world.level.block.entity.BlockEntity} in most cases
  */
 public class LinearProcess<T> {
 

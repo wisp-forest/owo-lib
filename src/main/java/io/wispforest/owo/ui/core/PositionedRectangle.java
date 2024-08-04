@@ -67,10 +67,10 @@ public interface PositionedRectangle extends Animatable<PositionedRectangle> {
     @Override
     default PositionedRectangle interpolate(PositionedRectangle next, float delta) {
         return PositionedRectangle.of(
-                (int) MathHelper.lerp(delta, this.x(), next.x()),
-                (int) MathHelper.lerp(delta, this.y(), next.y()),
-                (int) MathHelper.lerp(delta, this.width(), next.width()),
-                (int) MathHelper.lerp(delta, this.height(), next.height())
+                (int) MathHelper.lerpInt(delta, this.x(), next.x()),
+                (int) MathHelper.lerpInt(delta, this.y(), next.y()),
+                (int) MathHelper.lerpInt(delta, this.width(), next.width()),
+                (int) MathHelper.lerpInt(delta, this.height(), next.height())
         );
     }
 

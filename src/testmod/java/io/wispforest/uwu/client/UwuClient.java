@@ -20,20 +20,14 @@ import io.wispforest.uwu.network.UwuOptionalNetExample;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.GameMenuScreen;
-import net.minecraft.client.gui.screen.ingame.HandledScreens;
-import net.minecraft.client.gui.screen.ingame.InventoryScreen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.passive.AllayEntity;
-import net.minecraft.item.Items;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableTextContent;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.gui.screens.PauseScreen;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.network.chat.Text;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Items;
 import org.lwjgl.glfw.GLFW;
 
 import java.nio.file.Path;
@@ -47,19 +41,19 @@ public class UwuClient implements ClientModInitializer {
         UwuNetworkExample.Client.init();
         UwuOptionalNetExample.Client.init();
 
-        HandledScreens.register(Uwu.EPIC_SCREEN_HANDLER_TYPE, EpicHandledScreen::new);
+        MenuScreens.register(Uwu.EPIC_SCREEN_HANDLER_TYPE, EpicHandledScreen::new);
 //        HandledScreens.register(EPIC_SCREEN_HANDLER_TYPE, EpicHandledModelScreen::new);
 
-        final var binding = new KeyBinding("key.uwu.hud_test", GLFW.GLFW_KEY_J, "misc");
+        final var binding = new KeyMapping("key.uwu.hud_test", GLFW.GLFW_KEY_J, "misc");
         KeyBindingHelper.registerKeyBinding(binding);
 
-        final var bindingButCooler = new KeyBinding("key.uwu.hud_test_two", GLFW.GLFW_KEY_K, "misc");
+        final var bindingButCooler = new KeyMapping("key.uwu.hud_test_two", GLFW.GLFW_KEY_K, "misc");
         KeyBindingHelper.registerKeyBinding(bindingButCooler);
 
         final var hudComponentId = Identifier.of("uwu", "test_element");
         final Supplier<Component> hudComponent = () ->
                 Containers.verticalFlow(Sizing.content(), Sizing.content())
-                        .child(Components.item(Items.DIAMOND.getDefaultStack()).margins(Insets.of(3)))
+                        .child(Components.item(Items.DIAMOND.getDefaultInstance()).margins(Insets.of(3)))
                         .child(Components.label(Text.literal("epic stuff in hud")))
                         .child(Components.entity(Sizing.fixed(50), EntityType.ALLAY, null))
                         .alignment(HorizontalAlignment.CENTER, VerticalAlignment.CENTER)
@@ -73,7 +67,7 @@ public class UwuClient implements ClientModInitializer {
         Hud.add(coolerComponentId, coolerComponent);
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (binding.wasPressed()) {
+            while (binding.consumeClick()) {
                 if (Hud.hasComponent(hudComponentId)) {
                     Hud.remove(hudComponentId);
                 } else {
@@ -81,12 +75,12 @@ public class UwuClient implements ClientModInitializer {
                 }
             }
 
-            if (bindingButCooler.wasPressed()) {
+            if (bindingButCooler.consumeClick()) {
                 Hud.remove(coolerComponentId);
                 Hud.add(coolerComponentId, coolerComponent);
 
                 //noinspection StatementWithEmptyBody
-                while (bindingButCooler.wasPressed()) {}
+                while (bindingButCooler.consumeClick()) {}
             }
         });
 
@@ -137,7 +131,7 @@ public class UwuClient implements ClientModInitializer {
                                 }, Layer.Instance.AnchorSide.RIGHT, 0, layout);
                             })
             );
-        }, GameMenuScreen.class);
+        }, PauseScreen.class);
 
         Layers.add(Containers::verticalFlow, instance -> {
             ButtonComponent button;

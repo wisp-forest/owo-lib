@@ -1,19 +1,20 @@
 package io.wispforest.owo.ui.container;
 
+import F;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.Delta;
 import io.wispforest.owo.ui.util.NinePatchTexture;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 import org.lwjgl.glfw.GLFW;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -118,15 +119,15 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
         }
 
         // Draw, adding the fractional part of the offset via matrix translation
-        context.getMatrices().push();
+        context.matrixStack().push();
 
         double visualOffset = -(this.currentScrollPosition % 1d);
         if (visualOffset > 9999999e-7 || visualOffset < .1e-6) visualOffset = 0;
 
-        context.getMatrices().translate(this.direction.choose(visualOffset, 0), this.direction.choose(0, visualOffset), 0);
+        context.matrixStack().translate(this.direction.choose(visualOffset, 0), this.direction.choose(0, visualOffset), 0);
         this.drawChildren(context, mouseX, mouseY, partialTicks, delta, this.childView);
 
-        context.getMatrices().pop();
+        context.matrixStack().pop();
 
         // -----
 

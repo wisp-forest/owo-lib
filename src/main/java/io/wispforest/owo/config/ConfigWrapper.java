@@ -1,8 +1,10 @@
 package io.wispforest.owo.config;
 
 import blue.endless.jankson.Jankson;
+import blue.endless.jankson.Jankson.Builder;
 import blue.endless.jankson.JsonElement;
 import blue.endless.jankson.JsonGrammar;
+import blue.endless.jankson.JsonObject;
 import blue.endless.jankson.JsonPrimitive;
 import blue.endless.jankson.api.DeserializationException;
 import blue.endless.jankson.api.SyntaxError;
@@ -10,6 +12,9 @@ import blue.endless.jankson.impl.POJODeserializer;
 import blue.endless.jankson.magic.TypeMagic;
 import io.wispforest.endec.impl.ReflectiveEndecBuilder;
 import io.wispforest.owo.Owo;
+import io.wispforest.owo.config.Option.BoundField;
+import io.wispforest.owo.config.Option.Key;
+import io.wispforest.owo.config.Option.SyncMode;
 import io.wispforest.owo.config.annotation.*;
 import io.wispforest.owo.config.ui.ConfigScreen;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
@@ -19,18 +24,20 @@ import io.wispforest.owo.util.Observable;
 import io.wispforest.owo.util.ReflectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -90,7 +97,7 @@ public abstract class ConfigWrapper<C> {
             var modmenuAnnotation = clazz.getAnnotation(Modmenu.class);
             ConfigScreen.registerProvider(
                     modmenuAnnotation.modId(),
-                    screen -> ConfigScreen.createWithCustomModel(Identifier.of(modmenuAnnotation.uiModelId()), this, screen)
+                    screen -> ConfigScreen.createWithCustomModel(Identifier.parse(modmenuAnnotation.uiModelId()), this, screen)
             );
         }
 

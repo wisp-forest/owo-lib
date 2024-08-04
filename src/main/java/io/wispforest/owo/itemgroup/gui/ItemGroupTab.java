@@ -3,9 +3,9 @@ package io.wispforest.owo.itemgroup.gui;
 import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.OwoItemSettingsExtension;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.chat.Text;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.CreativeModeTab;
 
 /**
  * Represents a tab inside an {@link OwoItemGroup} that contains all items in the
@@ -29,6 +29,6 @@ public record ItemGroupTab(
 
     @FunctionalInterface
     public interface ContentSupplier {
-        void addItems(ItemGroup.DisplayContext context, ItemGroup.Entries entries);
+        void addItems(CreativeModeTab.ItemDisplayParameters context, CreativeModeTab.Output entries);
     }
 }

@@ -9,11 +9,9 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.util.math.MatrixStack;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -29,8 +27,8 @@ public class ReiUIAdapter<T extends ParentComponent> extends Widget {
         this.adapter = OwoUIAdapter.createWithoutScreen(bounds.x, bounds.y, bounds.width, bounds.height, rootComponentMaker);
         this.adapter.inspectorZOffset = 900;
 
-        if (MinecraftClient.getInstance().currentScreen != null) {
-            ScreenEvents.remove(MinecraftClient.getInstance().currentScreen).register(screen -> this.adapter.dispose());
+        if (Minecraft.getInstance().screen != null) {
+            ScreenEvents.remove(Minecraft.getInstance().screen).register(screen -> this.adapter.dispose());
         }
     }
 
@@ -93,16 +91,16 @@ public class ReiUIAdapter<T extends ParentComponent> extends Widget {
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float partialTicks) {
-        ScissorStack.push(this.adapter.x(), this.adapter.y(), this.adapter.width(), this.adapter.height(), context.getMatrices());
+    public void render(GuiGraphics context, int mouseX, int mouseY, float partialTicks) {
+        ScissorStack.push(this.adapter.x(), this.adapter.y(), this.adapter.width(), this.adapter.height(), context.matrixStack());
         this.adapter.render(context, mouseX, mouseY, partialTicks);
         ScissorStack.pop();
 
-        context.draw();
+        context.flush();
     }
 
     @Override
-    public List<? extends Element> children() {
+    public List<? extends GuiEventListener> children() {
         return List.of();
     }
 }

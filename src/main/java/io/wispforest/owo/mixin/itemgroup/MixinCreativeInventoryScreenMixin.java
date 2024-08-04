@@ -2,8 +2,8 @@ package io.wispforest.owo.mixin.itemgroup;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
-import net.minecraft.item.ItemGroup;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.world.item.CreativeModeTab;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -12,29 +12,29 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @SuppressWarnings({"MixinAnnotationTarget", "UnresolvedMixinReference"})
-@Mixin(value = CreativeInventoryScreen.class, priority = 1100)
+@Mixin(value = CreativeModeInventoryScreen.class, priority = 1100)
 public abstract class MixinCreativeInventoryScreenMixin {
 
     @Shadow
-    private static ItemGroup selectedTab;
+    private static CreativeModeTab selectedTab;
 
     @Shadow(remap = false) // FAPI
     private static int currentPage;
 
-    private static final Int2ObjectMap<ItemGroup> owo$selectedTabForPage = new Int2ObjectOpenHashMap<>();
+    private static final Int2ObjectMap<CreativeModeTab> owo$selectedTabForPage = new Int2ObjectOpenHashMap<>();
     private static boolean owo$calledFromInit = false;
 
     @Shadow(remap = false) // FAPI
-    private boolean isGroupVisible(ItemGroup itemGroup) { throw new RuntimeException(); }
+    private boolean isGroupVisible(CreativeModeTab itemGroup) { throw new RuntimeException(); }
 
     @Shadow(remap = false) // FAPI
     private void updateSelection() {}
 
     @Shadow
-    protected abstract void setSelectedTab(ItemGroup group);
+    protected abstract void setSelectedTab(CreativeModeTab group);
 
     @Inject(method = "setSelectedTab", at = @At("TAIL"))
-    private void captureSetTab(ItemGroup group, CallbackInfo ci) {
+    private void captureSetTab(CreativeModeTab group, CallbackInfo ci) {
         owo$selectedTabForPage.put(currentPage, group);
     }
 

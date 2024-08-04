@@ -1,30 +1,35 @@
 package io.wispforest.owo.ui.container;
 
+import I;
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.MatrixStack;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.math.Axis;
 import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
+import io.wispforest.owo.ui.core.Size;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
 import io.wispforest.owo.ui.util.ScissorStack;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.Framebuffer;
-import net.minecraft.client.gl.SimpleFramebuffer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.BufferRenderer;
-import net.minecraft.client.render.GameRenderer;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.render.VertexFormats;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.RotationAxis;
 import org.jetbrains.annotations.ApiStatus;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL30;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.function.Consumer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.GameRenderer;
 
 /**
  * An experimental wrapper component that allows arbitrary rendering
@@ -41,7 +46,7 @@ import java.util.function.Consumer;
 @ApiStatus.Experimental
 public class RenderEffectWrapper<C extends Component> extends WrappingParentComponent<C> {
 
-    protected static final List<Framebuffer> FRAMEBUFFERS = new ArrayList<>();
+    protected static final List<RenderTarget> FRAMEBUFFERS = new ArrayList<>();
     protected static int drawDepth = 0;
 
     protected final List<RenderEffectSlot> effects = new ArrayList<>();
@@ -58,16 +63,16 @@ public class RenderEffectWrapper<C extends Component> extends WrappingParentComp
         try {
             drawDepth++;
 
-            var window = MinecraftClient.getInstance().getWindow();
+            var window = Minecraft.getInstance().getWindow();
             while (drawDepth > FRAMEBUFFERS.size()) {
-                FRAMEBUFFERS.add(new SimpleFramebuffer(window.getFramebufferWidth(), window.getFramebufferHeight(), true, MinecraftClient.IS_SYSTEM_MAC));
+                FRAMEBUFFERS.add(new TextureTarget(window.getWidth(), window.getHeight(), true, Minecraft.ON_OSX));
             }
 
             var previousFramebuffer = GlStateManager.getBoundFramebuffer();
             var framebuffer = FRAMEBUFFERS.get(drawDepth - 1);
             framebuffer.setClearColor(0, 0, 0, 0);
-            ScissorStack.drawUnclipped(() -> framebuffer.clear(MinecraftClient.IS_SYSTEM_MAC));
-            framebuffer.beginWrite(false);
+            ScissorStack.drawUnclipped(() -> framebuffer.clear(Minecraft.ON_OSX));
+            framebuffer.bindWrite(false);
 
             this.drawChildren(context, mouseX, mouseY, partialTicks, delta, this.childView);
 
@@ -78,17 +83,17 @@ public class RenderEffectWrapper<C extends Component> extends WrappingParentComp
                 iter.next().effect.setup(this, context, partialTicks, delta);
             }
 
-            var buffer = RenderSystem.renderThreadTesselator().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
-            var matrix = context.getMatrices().peek().getPositionMatrix();
+            var buffer = RenderSystem.renderThreadTesselator().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+            var matrix = context.matrixStack().peek().model();
 
-            buffer.vertex(matrix, 0, window.getScaledHeight(), 0).texture(0, 0).color(1f, 1f, 1f, 1f);
-            buffer.vertex(matrix, window.getScaledWidth(), window.getScaledHeight(), 0).texture(1, 0).color(1f, 1f, 1f, 1f);
-            buffer.vertex(matrix, window.getScaledWidth(), 0, 0).texture(1, 1).color(1f, 1f, 1f, 1f);
-            buffer.vertex(matrix, 0, 0, 0).texture(0, 1).color(1f, 1f, 1f, 1f);
+            buffer.addVertex(matrix, 0, window.getGuiScaledHeight(), 0).uv(0, 0).color(1f, 1f, 1f, 1f);
+            buffer.addVertex(matrix, window.getGuiScaledWidth(), window.getGuiScaledHeight(), 0).uv(1, 0).color(1f, 1f, 1f, 1f);
+            buffer.addVertex(matrix, window.getGuiScaledWidth(), 0, 0).uv(1, 1).color(1f, 1f, 1f, 1f);
+            buffer.addVertex(matrix, 0, 0, 0).uv(0, 1).color(1f, 1f, 1f, 1f);
 
-            RenderSystem.setShaderTexture(0, framebuffer.getColorAttachment());
-            RenderSystem.setShader(GameRenderer::getPositionTexColorProgram);
-            BufferRenderer.drawWithGlobalProgram(buffer.end());
+            RenderSystem.setShaderTexture(0, framebuffer.getColorTextureId());
+            RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+            BufferUploader.drawWithShader(buffer.buildOrThrow());
 
             while (iter.hasPrevious()) {
                 iter.previous().effect.cleanup(this, context, partialTicks, delta);
@@ -124,7 +129,7 @@ public class RenderEffectWrapper<C extends Component> extends WrappingParentComp
     static {
         WindowResizeCallback.EVENT.register((client, window) -> {
             FRAMEBUFFERS.forEach(framebuffer -> {
-                framebuffer.resize(window.getFramebufferWidth(), window.getFramebufferHeight(), MinecraftClient.IS_SYSTEM_MAC);
+                framebuffer.resize(window.getWidth(), window.getHeight(), Minecraft.ON_OSX);
             });
         });
     }
@@ -156,9 +161,9 @@ public class RenderEffectWrapper<C extends Component> extends WrappingParentComp
     }
 
     public interface RenderEffect {
-        void setup(Component component, DrawContext context, float partialTicks, float delta);
+        void setup(Component component, GuiGraphics context, float partialTicks, float delta);
 
-        void cleanup(Component component, DrawContext context, float partialTicks, float delta);
+        void cleanup(Component component, GuiGraphics context, float partialTicks, float delta);
 
         /**
          * Create an effect instance which rotates the
@@ -167,7 +172,7 @@ public class RenderEffectWrapper<C extends Component> extends WrappingParentComp
          * @param angle The angle to rotate by, in degrees
          */
         static RenderEffect rotate(float angle) {
-            return rotate(RotationAxis.POSITIVE_Z, angle);
+            return rotate(Axis.ZP, angle);
         }
 
         /**
@@ -177,22 +182,22 @@ public class RenderEffectWrapper<C extends Component> extends WrappingParentComp
          * @param axis  The axis rotate on
          * @param angle The angle to rotate by, in degrees
          */
-        static RenderEffect rotate(RotationAxis axis, float angle) {
+        static RenderEffect rotate(Axis axis, float angle) {
             return new RenderEffect() {
                 @Override
-                public void setup(Component component, DrawContext context, float partialTicks, float delta) {
+                public void setup(Component component, GuiGraphics context, float partialTicks, float delta) {
                     var size = component.fullSize();
-                    var matrices = context.getMatrices();
+                    var matrices = context.matrixStack();
 
                     matrices.push();
                     matrices.translate(component.x() + size.width() / 2f, component.y() + size.height() / 2f, 0);
-                    matrices.multiply(axis.rotationDegrees(angle));
+                    matrices.rotate(axis.rotationDegrees(angle));
                     matrices.translate(-(component.x() + size.width() / 2f), -(component.y() + size.height() / 2f), 0);
                 }
 
                 @Override
-                public void cleanup(Component component, DrawContext context, float partialTicks, float delta) {
-                    context.getMatrices().pop();
+                public void cleanup(Component component, GuiGraphics context, float partialTicks, float delta) {
+                    context.matrixStack().pop();
                 }
             };
         }
@@ -212,7 +217,7 @@ public class RenderEffectWrapper<C extends Component> extends WrappingParentComp
                 private float[] colors = null;
 
                 @Override
-                public void setup(Component component, DrawContext context, float partialTicks, float delta) {
+                public void setup(Component component, GuiGraphics context, float partialTicks, float delta) {
                     this.colors = RenderSystem.getShaderColor().clone();
                     RenderSystem.setShaderColor(colors[0] * color.red(), colors[1] * color.green(), colors[2] * color.blue(), colors[3] * color.alpha());
 
@@ -223,7 +228,7 @@ public class RenderEffectWrapper<C extends Component> extends WrappingParentComp
                 }
 
                 @Override
-                public void cleanup(Component component, DrawContext context, float partialTicks, float delta) {
+                public void cleanup(Component component, GuiGraphics context, float partialTicks, float delta) {
                     RenderSystem.setShaderColor(colors[0], colors[1], colors[2], colors[3]);
                 }
             };
@@ -237,7 +242,7 @@ public class RenderEffectWrapper<C extends Component> extends WrappingParentComp
          */
         static RenderEffect transform(Matrix4f transform) {
             return transform(matrices -> {
-                matrices.multiplyPositionMatrix(transform);
+                matrices.multiply(transform);
             });
         }
 
@@ -250,14 +255,14 @@ public class RenderEffectWrapper<C extends Component> extends WrappingParentComp
         static RenderEffect transform(Consumer<MatrixStack> transform) {
             return new RenderEffect() {
                 @Override
-                public void setup(Component component, DrawContext context, float partialTicks, float delta) {
-                    context.getMatrices().push();
-                    transform.accept(context.getMatrices());
+                public void setup(Component component, GuiGraphics context, float partialTicks, float delta) {
+                    context.matrixStack().push();
+                    transform.accept(context.matrixStack());
                 }
 
                 @Override
-                public void cleanup(Component component, DrawContext context, float partialTicks, float delta) {
-                    context.getMatrices().pop();
+                public void cleanup(Component component, GuiGraphics context, float partialTicks, float delta) {
+                    context.matrixStack().pop();
                 }
             };
         }

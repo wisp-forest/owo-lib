@@ -13,17 +13,14 @@ import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.mixin.offline.AdvancementProgressAccessor;
-import net.minecraft.GameVersion;
 import net.minecraft.SharedConstants;
-import net.minecraft.advancement.Advancement;
-import net.minecraft.advancement.AdvancementEntry;
-import net.minecraft.advancement.AdvancementProgress;
-import net.minecraft.advancement.PlayerAdvancementTracker;
-import net.minecraft.datafixer.DataFixTypes;
-import net.minecraft.datafixer.Schemas;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Util;
-import net.minecraft.util.WorldSavePath;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.advancements.AdvancementProgress;
+import net.minecraft.advancements.AdvancementRequirements;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.datafix.DataFixTypes;
+import net.minecraft.util.datafix.DataFixers;
+import net.minecraft.world.level.storage.LevelResource;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
@@ -45,9 +42,9 @@ public final class OfflineAdvancementLookup {
 
     private OfflineAdvancementLookup() {}
 
-    public static final Codec<Map<Identifier, AdvancementProgress>> CODEC = DataFixTypes.ADVANCEMENTS.createDataFixingCodec(
+    public static final Codec<Map<Identifier, AdvancementProgress>> CODEC = DataFixTypes.ADVANCEMENTS.wrapCodec(
         Codec.unboundedMap(Identifier.CODEC, AdvancementProgress.CODEC),
-        Schemas.getFixer(),
+        DataFixers.getDataFixer(),
         1343
     );
 
@@ -62,7 +59,7 @@ public final class OfflineAdvancementLookup {
         DataSavedEvents.ADVANCEMENTS.invoker().onSaved(player, map);
 
         try {
-            Path advancementsPath = Owo.currentServer().getSavePath(WorldSavePath.ADVANCEMENTS);
+            Path advancementsPath = Owo.currentServer().getWorldPath(LevelResource.PLAYER_ADVANCEMENTS_DIR);
             Path advancementPath = advancementsPath.resolve(player.toString() + ".json");
             JsonElement saved = CODEC.encodeStart(JsonOps.INSTANCE, map).getOrThrow(IllegalStateException::new);
 
@@ -86,7 +83,7 @@ public final class OfflineAdvancementLookup {
      */
     public static @Nullable Map<Identifier, AdvancementProgress> get(UUID player) {
         try {
-            Path advancementsPath = Owo.currentServer().getSavePath(WorldSavePath.ADVANCEMENTS);
+            Path advancementsPath = Owo.currentServer().getWorldPath(LevelResource.PLAYER_ADVANCEMENTS_DIR);
 
             if (!Files.exists(advancementsPath))
                 return null;
@@ -109,8 +106,8 @@ public final class OfflineAdvancementLookup {
             for (Map.Entry<Identifier, AdvancementProgress> entry : parsedMap.entrySet()) {
                 var requirements = ((AdvancementProgressAccessor) entry.getValue()).getRequirements();
 
-                if (requirements.getLength() == 0) {
-                    AdvancementEntry adv = Owo.currentServer().getAdvancementLoader().get(entry.getKey());
+                if (requirements.size() == 0) {
+                    AdvancementHolder adv = Owo.currentServer().getAdvancements().get(entry.getKey());
 
                     if (adv != null) {
                         ((AdvancementProgressAccessor) entry.getValue()).setRequirements(adv.value().requirements());
@@ -145,7 +142,7 @@ public final class OfflineAdvancementLookup {
      * @return The UUID of every player that has saved advancements
      */
     public static List<UUID> savedPlayers() {
-        Path advancementsPath = Owo.currentServer().getSavePath(WorldSavePath.ADVANCEMENTS);
+        Path advancementsPath = Owo.currentServer().getWorldPath(LevelResource.PLAYER_ADVANCEMENTS_DIR);
 
         if (!Files.isDirectory(advancementsPath))
             return Collections.emptyList();

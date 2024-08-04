@@ -1,5 +1,7 @@
 package io.wispforest.owo.ui.component;
 
+import Z;
+import com.mojang.blaze3d.vertex.MatrixStack;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.mixin.ui.access.EditBoxAccessor;
 import io.wispforest.owo.mixin.ui.access.EditBoxWidgetAccessor;
@@ -11,37 +13,38 @@ import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.Observable;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.EditBox;
-import net.minecraft.client.gui.widget.EditBoxWidget;
-import net.minecraft.client.input.CursorMovement;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 import org.w3c.dom.Element;
 
 import java.util.Map;
 import java.util.function.Consumer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.MultiLineEditBox;
+import net.minecraft.client.gui.components.MultilineTextField;
+import net.minecraft.client.gui.components.Whence;
+import net.minecraft.network.chat.MutableText;
+import net.minecraft.network.chat.Text;
 
-public class TextAreaComponent extends EditBoxWidget {
+public class TextAreaComponent extends MultiLineEditBox {
 
     protected final Observable<String> textValue = Observable.of("");
     protected final EventStream<OnChanged> changedEvents = OnChanged.newStream();
-    protected final EditBox editBox;
+    protected final MultilineTextField editBox;
 
     protected final Observable<Boolean> displayCharCount = Observable.of(false);
     protected final Observable<Integer> maxLines = Observable.of(-1);
 
     protected TextAreaComponent(Sizing horizontalSizing, Sizing verticalSizing) {
-        super(MinecraftClient.getInstance().textRenderer, 0, 0, 0, 0, Text.empty(), Text.empty());
+        super(Minecraft.getInstance().font, 0, 0, 0, 0, Text.empty(), Text.empty());
         this.editBox = ((EditBoxWidgetAccessor) this).owo$getEditBox();
         this.sizing(horizontalSizing, verticalSizing);
 
         this.textValue.observe(this.changedEvents.sink()::onChanged);
         Observable.observeAll(this.widgetWrapper()::notifyParentIfMounted, this.displayCharCount, this.maxLines);
 
-        super.setChangeListener(s -> {
+        super.setValueListener(s -> {
             this.textValue.set(s);
 
             if (this.maxLines.get() < 0) return;
@@ -51,41 +54,41 @@ public class TextAreaComponent extends EditBoxWidget {
 
     @Override
     @Deprecated(forRemoval = true)
-    public void setChangeListener(Consumer<String> changeListener) {
+    public void setValueListener(Consumer<String> changeListener) {
         Owo.debugWarn(Owo.LOGGER, "setChangeListener stub on TextAreaComponent invoked");
     }
 
     @Override
     public void update(float delta, int mouseX, int mouseY) {
         super.update(delta, mouseX, mouseY);
-        this.cursorStyle(this.overflows() && mouseX >= this.getX() + this.width - 9 ? CursorStyle.NONE : CursorStyle.TEXT);
+        this.cursorStyle(this.scrollbarVisible() && mouseX >= this.getX() + this.width - 9 ? CursorStyle.NONE : CursorStyle.TEXT);
     }
 
     @Override
-    protected void renderOverlay(DrawContext context) {
+    protected void renderDecorations(GuiGraphics context) {
         this.height -= 1;
 
-        var matrices = context.getMatrices();
+        var matrices = context.matrixStack();
         matrices.push();
         matrices.translate(-9, 1, 0);
 
-        int previousMaxLength = this.editBox.getMaxLength();
-        this.editBox.setMaxLength(Integer.MAX_VALUE);
+        int previousMaxLength = this.editBox.characterLimit();
+        this.editBox.setCharacterLimit(Integer.MAX_VALUE);
 
-        super.renderOverlay(context);
+        super.renderDecorations(context);
 
-        this.editBox.setMaxLength(previousMaxLength);
+        this.editBox.setCharacterLimit(previousMaxLength);
 
         matrices.pop();
         this.height += 1;
 
         if (this.displayCharCount.get()) {
-            var text = this.editBox.hasMaxLength()
-                    ? Text.translatable("gui.multiLineEditBox.character_limit", this.editBox.getText().length(), this.editBox.getMaxLength())
-                    : Text.literal(String.valueOf(this.editBox.getText().length()));
+            var text = this.editBox.hasCharacterLimit()
+                    ? Text.translatable("gui.multiLineEditBox.character_limit", this.editBox.value().length(), this.editBox.characterLimit())
+                    : Text.literal(String.valueOf(this.editBox.value().length()));
 
-            var textRenderer = MinecraftClient.getInstance().textRenderer;
-            context.drawTextWithShadow(textRenderer, text, this.getX() + this.width - textRenderer.getWidth(text), this.getY() + this.height + 3, 0xa0a0a0);
+            var textRenderer = Minecraft.getInstance().font;
+            context.drawShadowedText(textRenderer, text, this.getX() + this.width - textRenderer.width(text), this.getY() + this.height + 3, 0xa0a0a0);
         }
     }
 
@@ -103,7 +106,7 @@ public class TextAreaComponent extends EditBoxWidget {
         boolean result = super.keyPressed(keyCode, scanCode, modifiers);
 
         if (keyCode == GLFW.GLFW_KEY_TAB) {
-            this.editBox.replaceSelection("    ");
+            this.editBox.insertText("    ");
             return true;
         } else {
             return result;
@@ -114,16 +117,16 @@ public class TextAreaComponent extends EditBoxWidget {
     public void inflate(Size space) {
         super.inflate(space);
 
-        int cursor = this.editBox.getCursor();
+        int cursor = this.editBox.cursor();
         int selection = ((EditBoxAccessor) this.editBox).owo$getSelectionEnd();
 
-        ((EditBoxAccessor) this.editBox).owo$setWidth(this.width() - this.getPaddingDoubled() - 9);
-        this.editBox.setText(this.getText());
+        ((EditBoxAccessor) this.editBox).owo$setWidth(this.width() - this.totalInnerPadding() - 9);
+        this.editBox.setValue(this.getValue());
 
         super.inflate(space);
-        this.editBox.setText(this.getText());
+        this.editBox.setValue(this.getValue());
 
-        this.editBox.moveCursor(CursorMovement.ABSOLUTE, cursor);
+        this.editBox.seekCursor(Whence.ABSOLUTE, cursor);
         ((EditBoxAccessor) this.editBox).owo$setSelectionEnd(selection);
     }
 
@@ -150,7 +153,7 @@ public class TextAreaComponent extends EditBoxWidget {
     }
 
     public TextAreaComponent text(String text) {
-        this.setText(text);
+        this.setValue(text);
         return this;
     }
 
@@ -164,7 +167,7 @@ public class TextAreaComponent extends EditBoxWidget {
         super.parseProperties(model, element, children);
 
         UIParsing.apply(children, "display-char-count", UIParsing::parseBool, this::displayCharCount);
-        UIParsing.apply(children, "max-length", UIParsing::parseUnsignedInt, this::setMaxLength);
+        UIParsing.apply(children, "max-length", UIParsing::parseUnsignedInt, this::setCharacterLimit);
         UIParsing.apply(children, "max-lines", UIParsing::parseUnsignedInt, this::maxLines);
         UIParsing.apply(children, "text", $ -> $.getTextContent().strip(), this::text);
     }

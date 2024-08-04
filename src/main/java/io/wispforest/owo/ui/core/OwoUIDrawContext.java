@@ -2,29 +2,38 @@ package io.wispforest.owo.ui.core;
 
 import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tessellator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import io.wispforest.owo.client.OwoClient;
 import io.wispforest.owo.mixin.ui.DrawContextInvoker;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
 import io.wispforest.owo.ui.util.NinePatchTexture;
 import io.wispforest.owo.util.pond.OwoTessellatorExtension;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.client.render.*;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.network.chat.MutableText;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.Text;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 import org.joml.Vector2d;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class OwoUIDrawContext extends DrawContext {
+public class OwoUIDrawContext extends GuiGraphics {
 
     @Deprecated
     public static final Identifier PANEL_TEXTURE = Identifier.of("owo", "textures/gui/panel.png");
@@ -39,12 +48,12 @@ public class OwoUIDrawContext extends DrawContext {
 
     private boolean recording = false;
 
-    private OwoUIDrawContext(MinecraftClient client, VertexConsumerProvider.Immediate vertexConsumers) {
+    private OwoUIDrawContext(Minecraft client, MultiBufferSource.BufferSource vertexConsumers) {
         super(client, vertexConsumers);
     }
 
-    public static OwoUIDrawContext of(DrawContext context) {
-        var owoContext = new OwoUIDrawContext(MinecraftClient.getInstance(), context.getVertexConsumers());
+    public static OwoUIDrawContext of(GuiGraphics context) {
+        var owoContext = new OwoUIDrawContext(Minecraft.getInstance(), context.bufferSource());
         ((DrawContextInvoker) owoContext).owo$setScissorStack(((DrawContextInvoker) context).owo$getScissorStack());
         ((DrawContextInvoker) owoContext).owo$setMatrices(((DrawContextInvoker) context).owo$getMatrices());
 
@@ -72,7 +81,7 @@ public class OwoUIDrawContext extends DrawContext {
 
         extension.owo$setStoredBuilder(null);
 
-        BufferRenderer.drawWithGlobalProgram(buffer.end());
+        BufferUploader.drawWithShader(buffer.buildOrThrow());
     }
 
     /**
@@ -105,19 +114,19 @@ public class OwoUIDrawContext extends DrawContext {
      * @param bottomLeftColor  The color at the rectangle's bottom left corner
      */
     public void drawGradientRect(int x, int y, int width, int height, int topLeftColor, int topRightColor, int bottomRightColor, int bottomLeftColor) {
-        var buffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
-        var matrix = this.getMatrices().peek().getPositionMatrix();
+        var buffer = Tessellator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        var matrix = this.matrixStack().peek().model();
 
-        buffer.vertex(matrix, x + width, y, 0).color(topRightColor);
-        buffer.vertex(matrix, x, y, 0).color(topLeftColor);
-        buffer.vertex(matrix, x, y + height, 0).color(bottomLeftColor);
-        buffer.vertex(matrix, x + width, y + height, 0).color(bottomRightColor);
+        buffer.addVertex(matrix, x + width, y, 0).color(topRightColor);
+        buffer.addVertex(matrix, x, y, 0).color(topLeftColor);
+        buffer.addVertex(matrix, x, y + height, 0).color(bottomLeftColor);
+        buffer.addVertex(matrix, x + width, y + height, 0).color(bottomRightColor);
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
 
-        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
-        BufferRenderer.drawWithGlobalProgram(buffer.end());
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
+        BufferUploader.drawWithShader(buffer.buildOrThrow());
 
         RenderSystem.disableBlend();
     }
@@ -137,16 +146,16 @@ public class OwoUIDrawContext extends DrawContext {
     }
 
     public void drawSpectrum(int x, int y, int width, int height, boolean vertical) {
-        var buffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
-        var matrix = this.getMatrices().peek().getPositionMatrix();
+        var buffer = Tessellator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        var matrix = this.matrixStack().peek().model();
 
-        buffer.vertex(matrix, x, y, 0).color(1f, 1f, 1f, 1f);
-        buffer.vertex(matrix, x, y + height, 0).color(vertical ? 0f : 1f, 1f, 1f, 1f);
-        buffer.vertex(matrix, x + width, y + height, 0).color(0f, 1f, 1f, 1f);
-        buffer.vertex(matrix, x + width, y, 0).color(vertical ? 1f : 0f, 1f, 1f, 1f);
+        buffer.addVertex(matrix, x, y, 0).color(1f, 1f, 1f, 1f);
+        buffer.addVertex(matrix, x, y + height, 0).color(vertical ? 0f : 1f, 1f, 1f, 1f);
+        buffer.addVertex(matrix, x + width, y + height, 0).color(0f, 1f, 1f, 1f);
+        buffer.addVertex(matrix, x + width, y, 0).color(vertical ? 1f : 0f, 1f, 1f, 1f);
 
         OwoClient.HSV_PROGRAM.use();
-        BufferRenderer.drawWithGlobalProgram(buffer.end());
+        BufferUploader.drawWithShader(buffer.buildOrThrow());
     }
 
     public void drawText(Text text, float x, float y, float scale, int color) {
@@ -154,23 +163,23 @@ public class OwoUIDrawContext extends DrawContext {
     }
 
     public void drawText(Text text, float x, float y, float scale, int color, TextAnchor anchorPoint) {
-        final var textRenderer = MinecraftClient.getInstance().textRenderer;
+        final var textRenderer = Minecraft.getInstance().font;
 
-        this.getMatrices().push();
-        this.getMatrices().scale(scale, scale, 1);
+        this.matrixStack().push();
+        this.matrixStack().scale(scale, scale, 1);
 
         switch (anchorPoint) {
-            case TOP_RIGHT -> x -= textRenderer.getWidth(text) * scale;
-            case BOTTOM_LEFT -> y -= textRenderer.fontHeight * scale;
+            case TOP_RIGHT -> x -= textRenderer.width(text) * scale;
+            case BOTTOM_LEFT -> y -= textRenderer.lineHeight * scale;
             case BOTTOM_RIGHT -> {
-                x -= textRenderer.getWidth(text) * scale;
-                y -= textRenderer.fontHeight * scale;
+                x -= textRenderer.width(text) * scale;
+                y -= textRenderer.lineHeight * scale;
             }
         }
 
 
         this.drawText(textRenderer, text, (int) (x * (1 / scale)), (int) (y * (1 / scale)), color, false);
-        this.getMatrices().pop();
+        this.matrixStack().pop();
     }
 
     public enum TextAnchor {
@@ -180,20 +189,20 @@ public class OwoUIDrawContext extends DrawContext {
     public void drawLine(int x1, int y1, int x2, int y2, double thiccness, Color color) {
         var offset = new Vector2d(x2 - x1, y2 - y1).perpendicular().normalize().mul(thiccness * .5d);
 
-        var buffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
-        var matrix = this.getMatrices().peek().getPositionMatrix();
+        var buffer = Tessellator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        var matrix = this.matrixStack().peek().model();
         int vColor = color.argb();
 
-        buffer.vertex(matrix, (float) (x1 + offset.x), (float) (y1 + offset.y), 0).color(vColor);
-        buffer.vertex(matrix, (float) (x1 - offset.x), (float) (y1 - offset.y), 0).color(vColor);
-        buffer.vertex(matrix, (float) (x2 - offset.x), (float) (y2 - offset.y), 0).color(vColor);
-        buffer.vertex(matrix, (float) (x2 + offset.x), (float) (y2 + offset.y), 0).color(vColor);
+        buffer.addVertex(matrix, (float) (x1 + offset.x), (float) (y1 + offset.y), 0).color(vColor);
+        buffer.addVertex(matrix, (float) (x1 - offset.x), (float) (y1 - offset.y), 0).color(vColor);
+        buffer.addVertex(matrix, (float) (x2 - offset.x), (float) (y2 - offset.y), 0).color(vColor);
+        buffer.addVertex(matrix, (float) (x2 + offset.x), (float) (y2 + offset.y), 0).color(vColor);
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
 
-        BufferRenderer.drawWithGlobalProgram(buffer.end());
+        BufferUploader.drawWithShader(buffer.buildOrThrow());
     }
 
     public void drawCircle(int centerX, int centerY, int segments, double radius, Color color) {
@@ -203,25 +212,25 @@ public class OwoUIDrawContext extends DrawContext {
     public void drawCircle(int centerX, int centerY, double angleFrom, double angleTo, int segments, double radius, Color color) {
         Preconditions.checkArgument(angleFrom < angleTo, "angleFrom must be less than angleTo");
 
-        var buffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
-        var matrix = this.getMatrices().peek().getPositionMatrix();
+        var buffer = Tessellator.getInstance().begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
+        var matrix = this.matrixStack().peek().model();
 
         double angleStep = Math.toRadians(angleTo - angleFrom) / segments;
         int vColor = color.argb();
 
-        buffer.vertex(matrix, centerX, centerY, 0).color(vColor);
+        buffer.addVertex(matrix, centerX, centerY, 0).color(vColor);
 
         for (int i = segments; i >= 0; i--) {
             double theta = Math.toRadians(angleFrom) + i * angleStep;
-            buffer.vertex(matrix, (float) (centerX - Math.cos(theta) * radius), (float) (centerY - Math.sin(theta) * radius), 0)
+            buffer.addVertex(matrix, (float) (centerX - Math.cos(theta) * radius), (float) (centerY - Math.sin(theta) * radius), 0)
                     .color(vColor);
         }
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
 
-        BufferRenderer.drawWithGlobalProgram(buffer.end());
+        BufferUploader.drawWithShader(buffer.buildOrThrow());
     }
 
     public void drawRing(int centerX, int centerY, int segments, double innerRadius, double outerRadius, Color innerColor, Color outerColor) {
@@ -232,8 +241,8 @@ public class OwoUIDrawContext extends DrawContext {
         Preconditions.checkArgument(angleFrom < angleTo, "angleFrom must be less than angleTo");
         Preconditions.checkArgument(innerRadius < outerRadius, "innerRadius must be less than outerRadius");
 
-        var buffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR);
-        var matrix = this.getMatrices().peek().getPositionMatrix();
+        var buffer = Tessellator.getInstance().begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+        var matrix = this.matrixStack().peek().model();
 
         double angleStep = Math.toRadians(angleTo - angleFrom) / segments;
         int inColor = innerColor.argb();
@@ -242,21 +251,21 @@ public class OwoUIDrawContext extends DrawContext {
         for (int i = 0; i <= segments; i++) {
             double theta = Math.toRadians(angleFrom) + i * angleStep;
 
-            buffer.vertex(matrix, (float) (centerX - Math.cos(theta) * outerRadius), (float) (centerY - Math.sin(theta) * outerRadius), 0)
+            buffer.addVertex(matrix, (float) (centerX - Math.cos(theta) * outerRadius), (float) (centerY - Math.sin(theta) * outerRadius), 0)
                     .color(outColor);
-            buffer.vertex(matrix, (float) (centerX - Math.cos(theta) * innerRadius), (float) (centerY - Math.sin(theta) * innerRadius), 0)
+            buffer.addVertex(matrix, (float) (centerX - Math.cos(theta) * innerRadius), (float) (centerY - Math.sin(theta) * innerRadius), 0)
                     .color(inColor);
         }
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
 
-        BufferRenderer.drawWithGlobalProgram(buffer.end());
+        BufferUploader.drawWithShader(buffer.buildOrThrow());
     }
 
-    public void drawTooltip(TextRenderer textRenderer, int x, int y, List<TooltipComponent> components) {
-        ((DrawContextInvoker) this).owo$renderTooltipFromComponents(textRenderer, components, x, y, HoveredTooltipPositioner.INSTANCE);
+    public void drawTooltip(Font textRenderer, int x, int y, List<ClientTooltipComponent> components) {
+        ((DrawContextInvoker) this).owo$renderTooltipFromComponents(textRenderer, components, x, y, DefaultTooltipPositioner.INSTANCE);
     }
 
     // --- debug rendering ---
@@ -291,8 +300,8 @@ public class OwoUIDrawContext extends DrawContext {
      */
     public void drawInspector(ParentComponent root, double mouseX, double mouseY, boolean onlyHovered) {
         RenderSystem.disableDepthTest();
-        var client = MinecraftClient.getInstance();
-        var textRenderer = client.textRenderer;
+        var client = Minecraft.getInstance();
+        var textRenderer = client.font;
 
         var children = new ArrayList<Component>();
         if (!onlyHovered) {
@@ -315,9 +324,9 @@ public class OwoUIDrawContext extends DrawContext {
 
                 int inspectorX = child.x() + 1;
                 int inspectorY = child.y() + child.height() + child.margins().get().bottom() + 1;
-                int inspectorHeight = textRenderer.fontHeight * 2 + 4;
+                int inspectorHeight = textRenderer.lineHeight * 2 + 4;
 
-                if (inspectorY > client.getWindow().getScaledHeight() - inspectorHeight) {
+                if (inspectorY > client.getWindow().getGuiScaledHeight() - inspectorHeight) {
                     inspectorY -= child.fullSize().height() + inspectorHeight + 1;
                     if (inspectorY < 0) inspectorY = 1;
                     if (child instanceof ParentComponent parentComponent) {
@@ -326,7 +335,7 @@ public class OwoUIDrawContext extends DrawContext {
                     }
                 }
 
-                final var nameText = Text.of(child.getClass().getSimpleName() + (child.id() != null ? " '" + child.id() + "'" : ""));
+                final var nameText = Text.nullToEmpty(child.getClass().getSimpleName() + (child.id() != null ? " '" + child.id() + "'" : ""));
                 final var descriptor = Text.literal(child.x() + "," + child.y() + " (" + child.width() + "," + child.height() + ")"
                         + " <" + margins.top() + "," + margins.bottom() + "," + margins.left() + "," + margins.right() + "> ");
                 if (child instanceof ParentComponent parentComponent) {
@@ -334,12 +343,12 @@ public class OwoUIDrawContext extends DrawContext {
                     descriptor.append(" >" + padding.top() + "," + padding.bottom() + "," + padding.left() + "," + padding.right() + "<");
                 }
 
-                int width = Math.max(textRenderer.getWidth(nameText), textRenderer.getWidth(descriptor));
+                int width = Math.max(textRenderer.width(nameText), textRenderer.width(descriptor));
                 fill(inspectorX, inspectorY, inspectorX + width + 3, inspectorY + inspectorHeight, 0xA7000000);
                 drawRectOutline(inspectorX, inspectorY, width + 3, inspectorHeight, 0xA7000000);
 
                 this.drawText(textRenderer, nameText, inspectorX + 2, inspectorY + 2, 0xFFFFFF, false);
-                this.drawText(textRenderer, descriptor, inspectorX + 2, inspectorY + textRenderer.fontHeight + 2, 0xFFFFFF, false);
+                this.drawText(textRenderer, descriptor, inspectorX + 2, inspectorY + textRenderer.lineHeight + 2, 0xFFFFFF, false);
             }
         }
 
@@ -360,11 +369,11 @@ public class OwoUIDrawContext extends DrawContext {
             if (INSTANCE == null) {
                 INSTANCE = new UtilityScreen();
 
-                final var client = MinecraftClient.getInstance();
+                final var client = Minecraft.getInstance();
                 INSTANCE.init(
                         client,
-                        client.getWindow().getScaledWidth(),
-                        client.getWindow().getScaledHeight()
+                        client.getWindow().getGuiScaledWidth(),
+                        client.getWindow().getGuiScaledHeight()
                 );
             }
 
@@ -372,10 +381,10 @@ public class OwoUIDrawContext extends DrawContext {
         }
 
         /**
-         * Set the screen to which the game should return after the {@link net.minecraft.client.gui.screen.ConfirmLinkScreen}
-         * opened by {@link #handleTextClick(Style)} to {@code screen}
+         * Set the screen to which the game should return after the {@link net.minecraft.client.gui.screens.ConfirmLinkScreen}
+         * opened by {@link #handleComponentClicked(Style)} to {@code screen}
          *
-         * @see #handleTextClick(Style)
+         * @see #handleComponentClicked(Style)
          */
         public void setLinkSource(Screen screen) {
             this.linkSourceScreen = screen;
@@ -386,7 +395,7 @@ public class OwoUIDrawContext extends DrawContext {
          * in {@link io.wispforest.owo.ui.component.LabelComponent}
          */
         public void captureLinkSource() {
-            this.setLinkSource(this.client.currentScreen);
+            this.setLinkSource(this.client.screen);
         }
 
         @ApiStatus.Internal
@@ -403,14 +412,14 @@ public class OwoUIDrawContext extends DrawContext {
          * or {@link #setLinkSource(Screen)} must be called prior to invoking this method
          */
         @Override
-        public boolean handleTextClick(@Nullable Style style) {
-            return super.handleTextClick(style);
+        public boolean handleComponentClicked(@Nullable Style style) {
+            return super.handleComponentClicked(style);
         }
 
         static {
             WindowResizeCallback.EVENT.register((client, window) -> {
                 if (INSTANCE == null) return;
-                INSTANCE.init(client, window.getScaledWidth(), window.getScaledHeight());
+                INSTANCE.init(client, window.getGuiScaledWidth(), window.getGuiScaledHeight());
             });
         }
     }

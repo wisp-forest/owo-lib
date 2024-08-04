@@ -1,35 +1,35 @@
 package io.wispforest.uwu;
 
+import C;
 import io.wispforest.owo.client.screens.ScreenUtils;
 import io.wispforest.owo.client.screens.SlotGenerator;
 import io.wispforest.owo.client.screens.SyncedProperty;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerContext;
-import net.minecraft.screen.slot.SlotActionType;
-
 import java.util.concurrent.ThreadLocalRandom;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.item.ItemStack;
 
-public class EpicScreenHandler extends ScreenHandler {
+public class EpicScreenHandler extends AbstractContainerMenu {
     private static final char[] VOWELS = {'a', 'e', 'i', 'o', 'u'};
     private static final char[] CONSONANTS = {'b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'y', 'z'};
 
-    private final ScreenHandlerContext context;
+    private final ContainerLevelAccess context;
 
     public final SyncedProperty<String> epicNumber;
 
-    public EpicScreenHandler(int syncId, PlayerInventory inventory) {
-        this(syncId, inventory, ScreenHandlerContext.EMPTY);
+    public EpicScreenHandler(int syncId, Inventory inventory) {
+        this(syncId, inventory, ContainerLevelAccess.NULL);
     }
 
-    public EpicScreenHandler(int syncId, PlayerInventory inventory, ScreenHandlerContext context) {
+    public EpicScreenHandler(int syncId, Inventory inventory, ContainerLevelAccess context) {
         super(Uwu.EPIC_SCREEN_HANDLER_TYPE, syncId);
         this.context = context;
         SlotGenerator.begin(this::addSlot, 8, 84)
-                .grid(new SimpleInventory(4), 0, 4, 1)
+                .grid(new SimpleContainer(4), 0, 4, 1)
                 .playerInventory(inventory);
 
         this.epicNumber = this.createProperty(String.class, "");
@@ -48,11 +48,11 @@ public class EpicScreenHandler extends ScreenHandler {
     }
 
     @Override
-    public void onSlotClick(int slotIndex, int button, SlotActionType actionType, PlayerEntity player) {
-        if (!player.getWorld().isClient)
+    public void clicked(int slotIndex, int button, ClickType actionType, Player player) {
+        if (!player.level().isClientSide)
             this.sendMessage(new MaldMessage(slotIndex));
 
-        super.onSlotClick(slotIndex, button, actionType, player);
+        super.clicked(slotIndex, button, actionType, player);
     }
 
     // made originally by det hoonter tm
@@ -72,12 +72,12 @@ public class EpicScreenHandler extends ScreenHandler {
     }
 
     @Override
-    public ItemStack quickMove(PlayerEntity player, int index) {
+    public ItemStack quickMoveStack(Player player, int index) {
         return ScreenUtils.handleSlotTransfer(this, index, 4);
     }
 
     @Override
-    public boolean canUse(PlayerEntity player) {
+    public boolean stillValid(Player player) {
         return true;
     }
 

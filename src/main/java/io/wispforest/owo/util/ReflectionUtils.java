@@ -1,5 +1,6 @@
 package io.wispforest.owo.util;
 
+import ;
 import io.wispforest.owo.registration.annotations.AssignedName;
 import io.wispforest.owo.registration.annotations.IterationIgnored;
 import org.jetbrains.annotations.ApiStatus;

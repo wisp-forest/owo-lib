@@ -7,29 +7,30 @@ import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.SpriteUtilInvoker;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.util.SpriteIdentifier;
 import org.w3c.dom.Element;
 
 import java.util.Map;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.Material;
+import net.minecraft.resources.Identifier;
 
 public class SpriteComponent extends BaseComponent {
 
-    protected final Sprite sprite;
+    protected final TextureAtlasSprite sprite;
     protected boolean blend = false;
 
-    protected SpriteComponent(Sprite sprite) {
+    protected SpriteComponent(TextureAtlasSprite sprite) {
         this.sprite = sprite;
     }
 
     @Override
     protected int determineHorizontalContentSize(Sizing sizing) {
-        return this.sprite.getContents().getWidth();
+        return this.sprite.contents().width();
     }
 
     @Override
     protected int determineVerticalContentSize(Sizing sizing) {
-        return this.sprite.getContents().getHeight();
+        return this.sprite.contents().height();
     }
 
     @Override
@@ -68,6 +69,6 @@ public class SpriteComponent extends BaseComponent {
         var atlas = UIParsing.parseIdentifier(element.getAttributeNode("atlas"));
         var sprite = UIParsing.parseIdentifier(element.getAttributeNode("sprite"));
 
-        return Components.sprite(new SpriteIdentifier(atlas, sprite));
+        return Components.sprite(new Material(atlas, sprite));
     }
 }

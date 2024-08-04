@@ -1,12 +1,12 @@
 package io.wispforest.owo.ui.util;
 
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.util.math.MatrixStack;
+import com.mojang.blaze3d.vertex.MatrixStack;
+import net.minecraft.client.gui.GuiGraphics;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
 /**
- * Helper interface implemented on top of the {@link DrawContext} to allow for easier matrix stack transformations
+ * Helper interface implemented on top of the {@link GuiGraphics} to allow for easier matrix stack transformations
  */
 public interface MatrixStackTransformer {
 
@@ -26,12 +26,12 @@ public interface MatrixStackTransformer {
     }
 
     default MatrixStackTransformer multiply(Quaternionf quaternion) {
-        this.getMatrixStack().multiply(quaternion);
+        this.getMatrixStack().rotate(quaternion);
         return this;
     }
 
     default MatrixStackTransformer multiply(Quaternionf quaternion, float originX, float originY, float originZ) {
-        this.getMatrixStack().multiply(quaternion, originX, originY, originZ);
+        this.getMatrixStack().rotateAround(quaternion, originX, originY, originZ);
         return this;
     }
 
@@ -46,7 +46,7 @@ public interface MatrixStackTransformer {
     }
 
     default MatrixStackTransformer multiplyPositionMatrix(Matrix4f matrix) {
-        this.getMatrixStack().multiplyPositionMatrix(matrix);
+        this.getMatrixStack().multiply(matrix);
         return this;
     }
 

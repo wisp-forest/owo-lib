@@ -4,19 +4,19 @@ import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.Sizing;
-import net.minecraft.block.BlockEntityProvider;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.util.SpriteIdentifier;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.Material;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.chat.Text;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.BlockEntityProvider;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -57,7 +57,7 @@ public final class Components {
 
     public static TextAreaComponent textArea(Sizing horizontalSizing, Sizing verticalSizing, String text) {
         var textArea = new TextAreaComponent(horizontalSizing, verticalSizing);
-        textArea.setText(text);
+        textArea.setValue(text);
         return textArea;
     }
 
@@ -86,7 +86,7 @@ public final class Components {
     }
 
     public static BlockComponent block(BlockState state, @Nullable NbtCompound nbt) {
-        final var client = MinecraftClient.getInstance();
+        final var client = Minecraft.getInstance();
 
         BlockEntity blockEntity = null;
 
@@ -114,15 +114,15 @@ public final class Components {
         return new DiscreteSliderComponent(horizontalSizing, min, max);
     }
 
-    public static SpriteComponent sprite(SpriteIdentifier spriteId) {
+    public static SpriteComponent sprite(Material spriteId) {
         return new SpriteComponent(
-                spriteId.getAtlasId().equals(Identifier.of("textures/atlas/gui.png"))
-                        ? MinecraftClient.getInstance().getGuiAtlasManager().getSprite(spriteId.getTextureId())
-                        : spriteId.getSprite()
+                spriteId.atlasLocation().equals(Identifier.parse("textures/atlas/gui.png"))
+                        ? Minecraft.getInstance().getGuiSprites().getSprite(spriteId.texture())
+                        : spriteId.sprite()
         );
     }
 
-    public static SpriteComponent sprite(Sprite sprite) {
+    public static SpriteComponent sprite(TextureAtlasSprite sprite) {
         return new SpriteComponent(sprite);
     }
 
@@ -173,7 +173,7 @@ public final class Components {
         return layout;
     }
 
-    public static VanillaWidgetComponent wrapVanillaWidget(ClickableWidget widget) {
+    public static VanillaWidgetComponent wrapVanillaWidget(AbstractWidget widget) {
         return new VanillaWidgetComponent(widget);
     }
 

@@ -1,13 +1,13 @@
 package io.wispforest.owo.mixin.ui;
 
 import com.llamalad7.mixinextras.sugar.Local;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.Tessellator;
 import io.wispforest.owo.mixin.BufferBuilderAccessor;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.util.pond.OwoTessellatorExtension;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.resources.Identifier;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-@Mixin(DrawContext.class)
+@Mixin(GuiGraphics.class)
 public class DrawContextMixin {
 
     @SuppressWarnings("ConstantValue")

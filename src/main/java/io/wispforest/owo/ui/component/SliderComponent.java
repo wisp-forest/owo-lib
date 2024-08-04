@@ -5,15 +5,16 @@ import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
-import net.minecraft.client.gui.widget.SliderWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.components.AbstractSliderButton;
+import net.minecraft.network.chat.MutableText;
+import net.minecraft.network.chat.Text;
 import net.minecraft.util.math.MathHelper;
 import org.w3c.dom.Element;
 
 import java.util.Map;
 import java.util.function.Function;
 
-public class SliderComponent extends SliderWidget {
+public class SliderComponent extends AbstractSliderButton {
 
     protected final EventStream<OnChanged> changedEvents = OnChanged.newStream();
     protected final EventStream<OnSlideEnd> slideEndEvents = OnSlideEnd.newStream();

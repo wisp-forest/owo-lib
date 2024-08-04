@@ -1,11 +1,10 @@
 package io.wispforest.owo.registration;
 
-import net.minecraft.registry.Registry;
-import net.minecraft.util.Identifier;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.Identifier;
 
 /**
  * An action to be executed by a {@link RegistryHelper} if and only if

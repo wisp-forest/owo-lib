@@ -3,9 +3,8 @@ package io.wispforest.owo.serialization.format.nbt;
 import io.wispforest.endec.*;
 import io.wispforest.endec.util.RecursiveSerializer;
 import net.minecraft.nbt.*;
-import net.minecraft.network.encoding.VarInts;
-import net.minecraft.network.encoding.VarLongs;
-
+import net.minecraft.network.VarInt;
+import net.minecraft.network.VarLong;
 import java.util.Optional;
 
 public class NbtSerializer extends RecursiveSerializer<NbtElement> implements SelfDescribedSerializer<NbtElement> {
@@ -61,7 +60,7 @@ public class NbtSerializer extends RecursiveSerializer<NbtElement> implements Se
 
     @Override
     public void writeVarInt(SerializationContext ctx, int value) {
-        this.consume(switch (VarInts.getSizeInBytes(value)) {
+        this.consume(switch (VarInt.getByteSize(value)) {
             case 0, 1 -> NbtByte.of((byte) value);
             case 2 -> NbtShort.of((short) value);
             default -> NbtInt.of(value);
@@ -70,7 +69,7 @@ public class NbtSerializer extends RecursiveSerializer<NbtElement> implements Se
 
     @Override
     public void writeVarLong(SerializationContext ctx, long value) {
-        this.consume(switch (VarLongs.getSizeInBytes(value)) {
+        this.consume(switch (VarLong.getByteSize(value)) {
             case 0, 1 -> NbtByte.of((byte) value);
             case 2 -> NbtShort.of((short) value);
             case 3, 4 -> NbtInt.of((int) value);
@@ -111,17 +110,17 @@ public class NbtSerializer extends RecursiveSerializer<NbtElement> implements Se
 
     @Override
     public <E> Serializer.Sequence<E> sequence(SerializationContext ctx, Endec<E> elementEndec, int size) {
-        return new Sequence<>(ctx, elementEndec);
+        return new io.wispforest.owo.serialization.format.nbt.NbtSerializer.Sequence<>(ctx, elementEndec);
     }
 
     @Override
     public <V> Serializer.Map<V> map(SerializationContext ctx, Endec<V> valueEndec, int size) {
-        return new Map<>(ctx, valueEndec);
+        return new io.wispforest.owo.serialization.format.nbt.NbtSerializer.Map<>(ctx, valueEndec);
     }
 
     @Override
     public Struct struct() {
-        return new Map<>(null, null);
+        return new io.wispforest.owo.serialization.format.nbt.NbtSerializer.Map<>(null, null);
     }
 
     // ---

@@ -8,15 +8,15 @@ import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.inject.GreedyInputComponent;
 import io.wispforest.owo.ui.util.DisposableScreen;
 import io.wispforest.owo.ui.util.UIErrorToast;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.function.BiFunction;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Text;
 
 /**
  * A minimal implementation of a Screen which fully
@@ -84,7 +84,7 @@ public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen im
             // If it was, only resize the adapter instead of recreating it - this preserves UI state
             this.uiAdapter.moveAndResize(0, 0, this.width, this.height);
             // Re-add it as a child to circumvent vanilla clearing them
-            this.addDrawableChild(this.uiAdapter);
+            this.addRenderableWidget(this.uiAdapter);
         } else {
             try {
                 this.uiAdapter = this.createAdapter();
@@ -108,14 +108,14 @@ public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen im
     }
 
     @Override
-    public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {}
+    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {}
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         if (!this.invalid) {
             super.render(context, mouseX, mouseY, delta);
         } else {
-            this.close();
+            this.onClose();
         }
     }
 
@@ -134,7 +134,7 @@ public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen im
         }
 
         if (keyCode == GLFW.GLFW_KEY_ESCAPE && this.shouldCloseOnEsc()) {
-            this.close();
+            this.onClose();
             return true;
         }
 
@@ -150,7 +150,7 @@ public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen im
 
     @Nullable
     @Override
-    public Element getFocused() {
+    public GuiEventListener getFocused() {
         return this.uiAdapter;
     }
 

@@ -1,19 +1,22 @@
 package io.wispforest.owo.config.ui;
 
+import D;
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.config.annotation.RangeConstraint;
 import io.wispforest.owo.config.ui.component.*;
+import io.wispforest.owo.ui.base.BaseParentComponent;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Positioning;
 import io.wispforest.owo.ui.parsing.UIModel;
-import net.minecraft.text.Text;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import net.minecraft.network.chat.Text;
 
 @SuppressWarnings("ConstantConditions")
 public class OptionComponents {
@@ -35,9 +38,9 @@ public class OptionComponents {
             resetButton.active = false;
             valueBox.setEditable(false);
         } else {
-            resetButton.active = !valueBox.getText().equals(toStringFunction.apply(option.defaultValue()));
+            resetButton.active = !valueBox.getValue().equals(toStringFunction.apply(option.defaultValue()));
             resetButton.onPress(button -> {
-                valueBox.setText(toStringFunction.apply(option.defaultValue()));
+                valueBox.setValue(toStringFunction.apply(option.defaultValue()));
                 button.active = false;
             });
 
@@ -50,7 +53,7 @@ public class OptionComponents {
                 optionComponent,
                 option.key(),
                 () -> optionComponent.childById(LabelComponent.class, "option-name").text().getString(),
-                valueBox::getText
+                valueBox::getValue
         ));
 
         return new OptionComponentFactory.Result<>(optionComponent, valueBox);
@@ -142,7 +145,7 @@ public class OptionComponents {
                 optionComponent,
                 option.key(),
                 () -> optionComponent.childById(LabelComponent.class, "option-name").text().getString(),
-                () -> textMode.isTrue() ? textInput.getText() : sliderInput.getMessage().getString()
+                () -> textMode.isTrue() ? textInput.getValue() : sliderInput.getMessage().getString()
         ));
 
         return new OptionComponentFactory.Result<>(optionComponent, new OptionValueProvider() {

@@ -1,13 +1,14 @@
 package io.wispforest.owo.shader;
 
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.pipeline.TextureTarget;
+import com.mojang.blaze3d.platform.Window;
+import com.mojang.blaze3d.shaders.Uniform;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import io.wispforest.owo.ui.core.Surface;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.Framebuffer;
-import net.minecraft.client.gl.GlUniform;
-import net.minecraft.client.gl.SimpleFramebuffer;
-import net.minecraft.client.render.VertexFormats;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.Identifier;
 import org.lwjgl.opengl.GL30;
 
 /**
@@ -17,18 +18,18 @@ import org.lwjgl.opengl.GL30;
  */
 public class BlurProgram extends GlProgram {
 
-    private GlUniform inputResolution;
-    private GlUniform directions;
-    private GlUniform quality;
-    private GlUniform size;
-    private Framebuffer input;
+    private Uniform inputResolution;
+    private Uniform directions;
+    private Uniform quality;
+    private Uniform size;
+    private RenderTarget input;
 
     public BlurProgram() {
-        super(Identifier.of("owo", "blur"), VertexFormats.POSITION);
+        super(Identifier.of("owo", "blur"), DefaultVertexFormat.POSITION);
 
         WindowResizeCallback.EVENT.register((client, window) -> {
             if (this.input == null) return;
-            this.input.resize(window.getFramebufferWidth(), window.getFramebufferHeight(), MinecraftClient.IS_SYSTEM_MAC);
+            this.input.resize(window.getWidth(), window.getHeight(), Minecraft.ON_OSX);
         });
     }
 
@@ -40,15 +41,15 @@ public class BlurProgram extends GlProgram {
 
     @Override
     public void use() {
-        var buffer = MinecraftClient.getInstance().getFramebuffer();
+        var buffer = Minecraft.getInstance().getMainRenderTarget();
 
-        this.input.beginWrite(false);
-        GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, buffer.fbo);
-        GL30.glBlitFramebuffer(0, 0, buffer.textureWidth, buffer.textureHeight, 0, 0, buffer.textureWidth, buffer.textureHeight, GL30.GL_COLOR_BUFFER_BIT, GL30.GL_LINEAR);
-        buffer.beginWrite(false);
+        this.input.bindWrite(false);
+        GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, buffer.frameBufferId);
+        GL30.glBlitFramebuffer(0, 0, buffer.width, buffer.height, 0, 0, buffer.width, buffer.height, GL30.GL_COLOR_BUFFER_BIT, GL30.GL_LINEAR);
+        buffer.bindWrite(false);
 
-        this.inputResolution.set((float) buffer.textureWidth, (float) buffer.textureHeight);
-        this.backingProgram.addSampler("InputSampler", this.input.getColorAttachment());
+        this.inputResolution.set((float) buffer.width, (float) buffer.height);
+        this.backingProgram.setSampler("InputSampler", this.input.getColorTextureId());
 
         super.use();
     }
@@ -60,7 +61,7 @@ public class BlurProgram extends GlProgram {
         this.quality = this.findUniform("Quality");
         this.size = this.findUniform("Size");
 
-        var window = MinecraftClient.getInstance().getWindow();
-        this.input = new SimpleFramebuffer(window.getFramebufferWidth(), window.getFramebufferHeight(), false, MinecraftClient.IS_SYSTEM_MAC);
+        var window = Minecraft.getInstance().getWindow();
+        this.input = new TextureTarget(window.getWidth(), window.getHeight(), false, Minecraft.ON_OSX);
     }
 }

@@ -2,23 +2,25 @@ package io.wispforest.owo.ui.parsing;
 
 import blue.endless.jankson.Jankson;
 import blue.endless.jankson.JsonGrammar;
+import blue.endless.jankson.JsonObject;
 import blue.endless.jankson.JsonPrimitive;
 import blue.endless.jankson.api.SyntaxError;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.ops.TextOps;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.resource.SynchronousResourceReloader;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
+import net.minecraft.TextFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.io.ResourceManager;
+import net.minecraft.resources.io.SynchronousResourceReloader;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -55,7 +57,7 @@ public class UIModelLoader implements SynchronousResourceReloader, IdentifiableR
             try (var stream = Files.newInputStream(HOT_RELOAD_LOCATIONS.get(id))) {
                 return UIModel.load(stream);
             } catch (ParserConfigurationException | IOException | SAXException e) {
-                MinecraftClient.getInstance().player.sendMessage(TextOps.concat(Owo.PREFIX, TextOps.withFormatting("hot ui model reload failed, check the log for details", Formatting.RED)));
+                Minecraft.getInstance().player.sendSystemMessage(TextOps.concat(Owo.PREFIX, TextOps.withFormatting("hot ui model reload failed, check the log for details", TextFormatting.RED)));
                 Owo.LOGGER.error("Hot UI model reload failed", e);
             }
         }
@@ -108,14 +110,14 @@ public class UIModelLoader implements SynchronousResourceReloader, IdentifiableR
     public void reload(ResourceManager manager) {
         LOADED_MODELS.clear();
 
-        manager.findResources("owo_ui", identifier -> identifier.getPath().endsWith(".xml")).forEach((resourceId, resource) -> {
+        manager.findResources("owo_ui", identifier -> identifier.path().endsWith(".xml")).forEach((resourceId, resource) -> {
             try {
                 var modelId = Identifier.of(
-                        resourceId.getNamespace(),
-                        resourceId.getPath().substring(7, resourceId.getPath().length() - 4)
+                        resourceId.namespace(),
+                        resourceId.path().substring(7, resourceId.path().length() - 4)
                 );
 
-                LOADED_MODELS.put(modelId, UIModel.load(resource.getInputStream()));
+                LOADED_MODELS.put(modelId, UIModel.load(resource.open()));
             } catch (ParserConfigurationException | IOException | SAXException e) {
                 Owo.LOGGER.error("Could not parse UI model {}", resourceId, e);
             }
@@ -135,7 +137,7 @@ public class UIModelLoader implements SynchronousResourceReloader, IdentifiableR
                 var associations = JANKSON.load(stream);
                 associations.forEach((key, value) -> {
                     if (!(value instanceof JsonPrimitive primitive)) return;
-                    HOT_RELOAD_LOCATIONS.put(Identifier.of(key), Path.of(primitive.asString()));
+                    HOT_RELOAD_LOCATIONS.put(Identifier.parse(key), Path.of(primitive.asString()));
                 });
             } catch (IOException | SyntaxError ignored) {}
         }

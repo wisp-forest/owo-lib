@@ -7,17 +7,19 @@ import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.mixin.itemgroup.CreativeInventoryScreenAccessor;
 import io.wispforest.owo.mixin.ui.access.BaseOwoHandledScreenAccessor;
 import io.wispforest.owo.ui.core.Component;
+import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.core.ParentComponent;
+import io.wispforest.owo.ui.core.Size;
 import io.wispforest.owo.ui.core.Surface;
 import io.wispforest.owo.util.pond.OwoCreativeInventoryScreenExtensions;
-import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
-
 import java.util.ArrayList;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.world.item.CreativeModeTab;
 
 public class OwoEmiPlugin implements EmiPlugin {
     @Override
     public void register(EmiRegistry registry) {
-        registry.addExclusionArea(CreativeInventoryScreen.class, (screen, consumer) -> {
+        registry.addExclusionArea(CreativeModeInventoryScreen.class, (screen, consumer) -> {
             var group = CreativeInventoryScreenAccessor.owo$getSelectedTab();
             if (!(group instanceof OwoItemGroup owoGroup)) return;
             if (owoGroup.getButtons().isEmpty()) return;

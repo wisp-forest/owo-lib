@@ -1,5 +1,6 @@
 package io.wispforest.owo.ui.hud;
 
+import com.mojang.blaze3d.platform.Window;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.OwoUIAdapter;
@@ -7,8 +8,8 @@ import io.wispforest.owo.ui.event.ClientRenderCallback;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -80,9 +81,9 @@ public class Hud {
     }
 
     private static void initializeAdapter() {
-        var window = MinecraftClient.getInstance().getWindow();
+        var window = Minecraft.getInstance().getWindow();
         adapter = OwoUIAdapter.createWithoutScreen(
-                0, 0, window.getScaledWidth(), window.getScaledHeight(), HudContainer::new
+                0, 0, window.getGuiScaledWidth(), window.getGuiScaledHeight(), HudContainer::new
         );
 
         adapter.inflateAndMount();
@@ -91,11 +92,11 @@ public class Hud {
     static {
         WindowResizeCallback.EVENT.register((client, window) -> {
             if (adapter == null) return;
-            adapter.moveAndResize(0, 0, window.getScaledWidth(), window.getScaledHeight());
+            adapter.moveAndResize(0, 0, window.getGuiScaledWidth(), window.getGuiScaledHeight());
         });
 
         ClientRenderCallback.BEFORE.register(client -> {
-            if (client.world == null) return;
+            if (client.level == null) return;
             if (!pendingActions.isEmpty()) {
                 if (adapter == null) initializeAdapter();
 
@@ -108,7 +109,7 @@ public class Hud {
             if (adapter == null || suppress) return;
 
             context.push().translate(0, 0, 100);
-            adapter.render(context, -69, -69, tickDelta.getTickDelta(false));
+            adapter.render(context, -69, -69, tickDelta.getGameTimeDeltaPartialTick(false));
             context.pop();
         });
     }

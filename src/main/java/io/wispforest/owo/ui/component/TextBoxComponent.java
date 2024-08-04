@@ -9,18 +9,16 @@ import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.Observable;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 import org.w3c.dom.Element;
 
 import java.util.Map;
 import java.util.function.Consumer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.network.chat.Text;
 
-public class TextBoxComponent extends TextFieldWidget {
+public class TextBoxComponent extends EditBox {
 
     protected final Observable<Boolean> showsBackground = Observable.of(((TextFieldWidgetAccessor) this).owo$drawsBackground());
 
@@ -28,7 +26,7 @@ public class TextBoxComponent extends TextFieldWidget {
     protected final EventStream<OnChanged> changedEvents = OnChanged.newStream();
 
     protected TextBoxComponent(Sizing horizontalSizing) {
-        super(MinecraftClient.getInstance().textRenderer, 0, 0, 0, 0, Text.empty());
+        super(Minecraft.getInstance().font, 0, 0, 0, 0, Text.empty());
 
         this.textValue.observe(this.changedEvents.sink()::onChanged);
         this.sizing(horizontalSizing, Sizing.content());
@@ -41,8 +39,8 @@ public class TextBoxComponent extends TextFieldWidget {
      */
     @Override
     @Deprecated(forRemoval = true)
-    public void setChangedListener(Consumer<String> changedListener) {
-        super.setChangedListener(changedListener);
+    public void setResponder(Consumer<String> changedListener) {
+        super.setResponder(changedListener);
     }
 
     @Override
@@ -55,7 +53,7 @@ public class TextBoxComponent extends TextFieldWidget {
         boolean result = super.keyPressed(keyCode, scanCode, modifiers);
 
         if (keyCode == GLFW.GLFW_KEY_TAB) {
-            this.write("    ");
+            this.insertText("    ");
             return true;
         } else {
             return result;
@@ -63,8 +61,8 @@ public class TextBoxComponent extends TextFieldWidget {
     }
 
     @Override
-    public void setDrawsBackground(boolean drawsBackground) {
-        super.setDrawsBackground(drawsBackground);
+    public void setBordered(boolean drawsBackground) {
+        super.setBordered(drawsBackground);
         this.showsBackground.set(drawsBackground);
     }
 
@@ -73,15 +71,15 @@ public class TextBoxComponent extends TextFieldWidget {
     }
 
     public TextBoxComponent text(String text) {
-        this.setText(text);
-        this.setCursorToStart(false);
+        this.setValue(text);
+        this.moveCursorToStart(false);
         return this;
     }
 
     @Override
     public void parseProperties(UIModel spec, Element element, Map<String, Element> children) {
         super.parseProperties(spec, element, children);
-        UIParsing.apply(children, "show-background", UIParsing::parseBool, this::setDrawsBackground);
+        UIParsing.apply(children, "show-background", UIParsing::parseBool, this::setBordered);
         UIParsing.apply(children, "max-length", UIParsing::parseUnsignedInt, this::setMaxLength);
         UIParsing.apply(children, "text", e -> e.getTextContent().strip(), this::text);
     }

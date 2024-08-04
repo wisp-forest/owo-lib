@@ -3,38 +3,40 @@ package io.wispforest.owo.command.debug;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.argument.IdentifierArgumentType;
-import net.minecraft.command.argument.ItemStackArgumentType;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.NbtComponent;
-import net.minecraft.server.command.LootCommand;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.IdentifierArgument;
+import net.minecraft.commands.arguments.item.ItemArgument;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.commands.LootCommand;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 
 public class MakeLootContainerCommand {
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess) {
         dispatcher.register(literal("make-loot-container")
-                .then(argument("item", ItemStackArgumentType.itemStack(registryAccess))
-                        .then(argument("loot_table", IdentifierArgumentType.identifier())
-                                .suggests(LootCommand.SUGGESTION_PROVIDER)
+                .then(argument("item", ItemArgument.item(registryAccess))
+                        .then(argument("loot_table", IdentifierArgument.id())
+                                .suggests(LootCommand.SUGGEST_LOOT_TABLE)
                                 .executes(MakeLootContainerCommand::execute))));
     }
 
-    private static int execute(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-        var targetStack = ItemStackArgumentType.getItemStackArgument(context, "item").createStack(1, false);
-        var tableId = IdentifierArgumentType.getIdentifier(context, "loot_table");
+    private static int execute(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        var targetStack = ItemArgument.getItem(context, "item").createItemStack(1, false);
+        var tableId = IdentifierArgument.getId(context, "loot_table");
 
-        var blockEntityTag = targetStack.getOrDefault(DataComponentTypes.BLOCK_ENTITY_DATA, NbtComponent.DEFAULT);
-        blockEntityTag = blockEntityTag.apply(x -> {
+        var blockEntityTag = targetStack.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY);
+        blockEntityTag = blockEntityTag.update(x -> {
             x.putString("LootTable", tableId.toString());
         });
-        targetStack.set(DataComponentTypes.BLOCK_ENTITY_DATA, blockEntityTag);
+        targetStack.set(DataComponents.BLOCK_ENTITY_DATA, blockEntityTag);
 
-        context.getSource().getPlayer().getInventory().offerOrDrop(targetStack);
+        context.getSource().getPlayer().getInventory().placeItemBackInInventory(targetStack);
 
         return 0;
     }

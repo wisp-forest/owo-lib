@@ -4,7 +4,11 @@ import io.wispforest.owo.mixin.ui.access.ClickableWidgetAccessor;
 import io.wispforest.owo.mixin.ui.access.TextFieldWidgetAccessor;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.*;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Checkbox;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.widget.*;
 import net.minecraft.util.math.MathHelper;
 
@@ -12,15 +16,15 @@ import java.util.function.Consumer;
 
 public class VanillaWidgetComponent extends BaseComponent {
 
-    private final ClickableWidget widget;
+    private final AbstractWidget widget;
 
-    protected VanillaWidgetComponent(ClickableWidget widget) {
+    protected VanillaWidgetComponent(AbstractWidget widget) {
         this.widget = widget;
 
         this.horizontalSizing.set(Sizing.fixed(this.widget.getWidth()));
         this.verticalSizing.set(Sizing.fixed(this.widget.getHeight()));
 
-        if (widget instanceof TextFieldWidget) {
+        if (widget instanceof EditBox) {
             this.margins(Insets.none());
         }
     }
@@ -53,16 +57,16 @@ public class VanillaWidgetComponent extends BaseComponent {
 
     @Override
     protected int determineVerticalContentSize(Sizing sizing) {
-        if (this.widget instanceof ButtonWidget || this.widget instanceof CheckboxWidget || this.widget instanceof SliderComponent) {
+        if (this.widget instanceof Button || this.widget instanceof Checkbox || this.widget instanceof SliderComponent) {
             return 20;
-        } else if (this.widget instanceof TextFieldWidget textField) {
+        } else if (this.widget instanceof EditBox textField) {
             if (((TextFieldWidgetAccessor) textField).owo$drawsBackground()) {
                 return 20;
             } else {
                 return 9;
             }
         } else if (this.widget instanceof TextAreaComponent textArea && textArea.maxLines() > 0) {
-            return MathHelper.clamp(textArea.getContentsHeight() / 9 + 1, 2, textArea.maxLines()) * 9 + (textArea.displayCharCount() ? 9 + 12 : 9);
+            return MathHelper.clamp(textArea.getInnerHeight() / 9 + 1, 2, textArea.maxLines()) * 9 + (textArea.displayCharCount() ? 9 + 12 : 9);
         } else {
             throw new UnsupportedOperationException(this.widget.getClass().getSimpleName() + " does not support Sizing.content() on the vertical axis");
         }
@@ -70,10 +74,10 @@ public class VanillaWidgetComponent extends BaseComponent {
 
     @Override
     protected int determineHorizontalContentSize(Sizing sizing) {
-        if (this.widget instanceof ButtonWidget button) {
-            return MinecraftClient.getInstance().textRenderer.getWidth(button.getMessage()) + 8;
-        } else if (this.widget instanceof CheckboxWidget checkbox) {
-            return MinecraftClient.getInstance().textRenderer.getWidth(checkbox.getMessage()) + 24;
+        if (this.widget instanceof Button button) {
+            return Minecraft.getInstance().font.width(button.getMessage()) + 8;
+        } else if (this.widget instanceof Checkbox checkbox) {
+            return Minecraft.getInstance().font.width(checkbox.getMessage()) + 24;
         } else {
             throw new UnsupportedOperationException(this.widget.getClass().getSimpleName() + " does not support Sizing.content() on the horizontal axis");
         }
@@ -81,7 +85,7 @@ public class VanillaWidgetComponent extends BaseComponent {
 
     @Override
     public BaseComponent margins(Insets margins) {
-        if (widget instanceof TextFieldWidget) {
+        if (widget instanceof EditBox) {
             return super.margins(margins.add(1, 1, 1, 1));
         } else {
             return super.margins(margins);

@@ -5,11 +5,11 @@ import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.event.*;
 import io.wispforest.owo.ui.util.FocusHandler;
 import io.wispforest.owo.util.EventSource;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Consumer;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 
 /**
  * Stub-version of component which adds implementations for all methods
@@ -94,12 +94,12 @@ public interface ComponentStub extends Component {
     }
 
     @Override
-    default Component tooltip(List<TooltipComponent> tooltip) {
+    default Component tooltip(List<ClientTooltipComponent> tooltip) {
         throw new IllegalStateException("Interface stub method called");
     }
 
     @Override
-    default List<TooltipComponent> tooltip() {
+    default List<ClientTooltipComponent> tooltip() {
         throw new IllegalStateException("Interface stub method called");
     }
 

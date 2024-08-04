@@ -3,9 +3,8 @@ package io.wispforest.uwu.config;
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.config.annotation.*;
 import io.wispforest.owo.ui.core.Color;
-import net.minecraft.util.Identifier;
-
 import java.util.Set;
+import net.minecraft.resources.Identifier;
 
 @Modmenu(modId = "fabric")
 @Config(name = "uowou", wrapperName = "BruhConfig")

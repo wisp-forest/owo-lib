@@ -9,9 +9,9 @@ import io.wispforest.owo.util.Wisdom;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.TextFormatting;
+import net.minecraft.network.chat.Text;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
@@ -28,11 +28,11 @@ public class Owo implements ModInitializer {
     public static final Logger LOGGER = LogManager.getLogger("owo");
     private static MinecraftServer SERVER;
 
-    public static final Text PREFIX = Text.empty().formatted(Formatting.GRAY)
+    public static final Text PREFIX = Text.empty().withStyle(TextFormatting.GRAY)
             .append(withColor("o", 0x3955e5))
             .append(withColor("ω", 0x13a6f0))
             .append(withColor("o", 0x3955e5))
-            .append(Text.literal(" > ").formatted(Formatting.GRAY));
+            .append(Text.literal(" > ").withStyle(TextFormatting.GRAY));
 
     static {
         boolean debug = FabricLoader.getInstance().isDevelopmentEnvironment();

@@ -15,15 +15,16 @@ import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.serialization.format.edm.EdmOps;
 import io.wispforest.owo.util.Scary;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.registry.RegistryOps;
-import net.minecraft.util.dynamic.ForwardingDynamicOps;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.DelegatingOps;
+import net.minecraft.resources.RegistryOps;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -60,7 +61,7 @@ public class CodecUtils {
         );
     }
 
-    public static <T> Endec<T> toEndec(Codec<T> codec, PacketCodec<ByteBuf, T> packetCodec) {
+    public static <T> Endec<T> toEndec(Codec<T> codec, StreamCodec<ByteBuf, T> packetCodec) {
         return Endec.of(
                 (ctx, serializer, value) -> {
                     if (serializer instanceof ByteBufSerializer<?>) {
@@ -88,27 +89,27 @@ public class CodecUtils {
         );
     }
 
-    public static <T> Endec<T> toEndecWithRegistries(Codec<T> codec, PacketCodec<RegistryByteBuf, T> packetCodec) {
+    public static <T> Endec<T> toEndecWithRegistries(Codec<T> codec, StreamCodec<RegistryFriendlyByteBuf, T> packetCodec) {
         return Endec.of(
                 (ctx, serializer, value) -> {
                     if (serializer instanceof ByteBufSerializer<?>) {
-                        var buffer = new RegistryByteBuf(PacketByteBufs.create(), ctx.requireAttributeValue(RegistriesAttribute.REGISTRIES).registryManager());
+                        var buffer = new RegistryFriendlyByteBuf(PacketByteBufs.create(), ctx.requireAttributeValue(RegistriesAttribute.REGISTRIES).registryManager());
                         packetCodec.encode(buffer, value);
 
                         MinecraftEndecs.PACKET_BYTE_BUF.encode(ctx, serializer, buffer);
                         return;
                     }
 
-                    var ops = RegistryOps.of(EdmOps.withContext(ctx), ctx.requireAttributeValue(RegistriesAttribute.REGISTRIES).infoGetter());
+                    var ops = RegistryOps.create(EdmOps.withContext(ctx), ctx.requireAttributeValue(RegistriesAttribute.REGISTRIES).infoGetter());
                     EdmEndec.INSTANCE.encode(ctx, serializer, codec.encodeStart(ops, value).getOrThrow(IllegalStateException::new));
                 },
                 (ctx, deserializer) -> {
                     if (deserializer instanceof ByteBufDeserializer) {
                         var buffer = MinecraftEndecs.PACKET_BYTE_BUF.decode(ctx, deserializer);
-                        return packetCodec.decode(new RegistryByteBuf(buffer, ctx.requireAttributeValue(RegistriesAttribute.REGISTRIES).registryManager()));
+                        return packetCodec.decode(new RegistryFriendlyByteBuf(buffer, ctx.requireAttributeValue(RegistriesAttribute.REGISTRIES).registryManager()));
                     }
 
-                    var ops = RegistryOps.of(EdmOps.withContext(ctx), ctx.requireAttributeValue(RegistriesAttribute.REGISTRIES).infoGetter());
+                    var ops = RegistryOps.create(EdmOps.withContext(ctx), ctx.requireAttributeValue(RegistriesAttribute.REGISTRIES).infoGetter());
                     return codec.parse(ops, EdmEndec.INSTANCE.decode(ctx, deserializer)).getOrThrow(IllegalStateException::new);
                 }
         );
@@ -263,12 +264,12 @@ public class CodecUtils {
     // mostly impossible because the system turns into one opaque spaghetti mess
     //
     // glisco, 28.04.2024
-    public static <B extends PacketByteBuf, T> PacketCodec<B, T> toPacketCodec(Endec<T> endec) {
-        return new PacketCodec<>() {
+    public static <B extends FriendlyByteBuf, T> StreamCodec<B, T> toPacketCodec(Endec<T> endec) {
+        return new StreamCodec<>() {
             @Override
             public T decode(B buf) {
-                var ctx = buf instanceof RegistryByteBuf registryByteBuf
-                        ? SerializationContext.attributes(RegistriesAttribute.of(registryByteBuf.getRegistryManager()))
+                var ctx = buf instanceof RegistryFriendlyByteBuf registryByteBuf
+                        ? SerializationContext.attributes(RegistriesAttribute.of(registryByteBuf.registryAccess()))
                         : SerializationContext.empty();
 
                 return endec.decode(ctx, ByteBufDeserializer.of(buf));
@@ -276,8 +277,8 @@ public class CodecUtils {
 
             @Override
             public void encode(B buf, T value) {
-                var ctx = buf instanceof RegistryByteBuf registryByteBuf
-                        ? SerializationContext.attributes(RegistriesAttribute.of(registryByteBuf.getRegistryManager()))
+                var ctx = buf instanceof RegistryFriendlyByteBuf registryByteBuf
+                        ? SerializationContext.attributes(RegistriesAttribute.of(registryByteBuf.registryAccess()))
                         : SerializationContext.empty();
 
                 endec.encode(ctx, ByteBufSerializer.of(buf), value);
@@ -289,7 +290,7 @@ public class CodecUtils {
 
     public static SerializationContext createContext(DynamicOps<?> ops, SerializationContext assumedContext) {
         var rootOps = ops;
-        while (rootOps instanceof ForwardingDynamicOps<?>) rootOps = ((ForwardingDynamicOpsAccessor<?>) rootOps).owo$delegate();
+        while (rootOps instanceof DelegatingOps<?>) rootOps = ((ForwardingDynamicOpsAccessor<?>) rootOps).owo$delegate();
 
         var context = rootOps instanceof EdmOps edmOps
                 ? edmOps.capturedContext().and(assumedContext)
@@ -306,7 +307,7 @@ public class CodecUtils {
         DynamicOps<EdmElement<?>> ops = EdmOps.withContext(ctx);
 
         if (ctx.hasAttribute(RegistriesAttribute.REGISTRIES)) {
-            ops = RegistryOps.of(ops, ctx.getAttributeValue(RegistriesAttribute.REGISTRIES).infoGetter());
+            ops = RegistryOps.create(ops, ctx.getAttributeValue(RegistriesAttribute.REGISTRIES).infoGetter());
         }
 
         return ops;

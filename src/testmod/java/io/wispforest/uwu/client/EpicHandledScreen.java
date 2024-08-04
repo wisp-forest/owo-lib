@@ -1,5 +1,6 @@
 package io.wispforest.uwu.client;
 
+import OwoUIAdapter;
 import io.wispforest.owo.mixin.ui.SlotAccessor;
 import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
 import io.wispforest.owo.ui.component.ButtonComponent;
@@ -9,12 +10,12 @@ import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.uwu.EpicScreenHandler;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.chat.Text;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Inventory;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
@@ -22,7 +23,7 @@ public class EpicHandledScreen extends BaseOwoHandledScreen<FlowLayout, EpicScre
     private LabelComponent numberLabel;
 
 
-    public EpicHandledScreen(EpicScreenHandler handler, PlayerInventory inventory, Text title) {
+    public EpicHandledScreen(EpicScreenHandler handler, Inventory inventory, Text title) {
         super(handler, inventory, title);
     }
 
@@ -40,7 +41,7 @@ public class EpicHandledScreen extends BaseOwoHandledScreen<FlowLayout, EpicScre
         selectBox.setTextPredicate(s -> s.matches("\\d*"));
 
         rootComponent.child(
-                Components.texture(Identifier.of("textures/gui/container/shulker_box.png"), 0, 0, 176, 166)
+                Components.texture(Identifier.parse("textures/gui/container/shulker_box.png"), 0, 0, 176, 166)
         ).child(
                 Containers.draggable(
                         Sizing.content(), Sizing.content(),
@@ -51,18 +52,18 @@ public class EpicHandledScreen extends BaseOwoHandledScreen<FlowLayout, EpicScre
                                         .horizontalSizing(Sizing.fixed(100)))
                                 .child(Components.entity(Sizing.fixed(100), EntityType.FROG, frogeNbt).scale(.75f).allowMouseRotation(true).tooltip(Text.literal(":)")))
                                 .child(Containers.horizontalFlow(Sizing.fixed(100), Sizing.content())
-                                        .child(Components.button(Text.of("✔"), (ButtonComponent button) -> {
+                                        .child(Components.button(Text.nullToEmpty("✔"), (ButtonComponent button) -> {
                                             this.enableSlot(Integer.parseInt(selectBox.getText()));
                                         }).tooltip(Text.literal("Enable")))
                                         .child(selectBox.margins(Insets.horizontal(3)).tooltip(Text.literal("Slot Index")))
-                                        .child(Components.button(Text.of("❌"), (ButtonComponent button) -> {
+                                        .child(Components.button(Text.nullToEmpty("❌"), (ButtonComponent button) -> {
                                             this.disableSlot(Integer.parseInt(selectBox.getText()));
                                         }).tooltip(Text.literal("Disable"))).verticalAlignment(VerticalAlignment.CENTER).horizontalAlignment(HorizontalAlignment.CENTER))
                                 .allowOverflow(true)
                 ).surface(Surface.DARK_PANEL).padding(Insets.of(5)).allowOverflow(true).zIndex(500).positioning(Positioning.absolute(100, 100))
         ).child(
                 Containers.verticalScroll(Sizing.content(), Sizing.fill(50), Containers.verticalFlow(Sizing.content(), Sizing.content())
-                        .child(this.slotAsComponent(0).tooltip(Text.of("bruh")))
+                        .child(this.slotAsComponent(0).tooltip(Text.nullToEmpty("bruh")))
                         .child(Components.box(Sizing.fixed(50), Sizing.fixed(35)).startColor(Color.RED).endColor(Color.BLUE).fill(true).tooltip(Text.literal("very very long tooltip")))
                         .child(this.slotAsComponent(1))
                         .child(Components.box(Sizing.fixed(50), Sizing.fixed(35)).startColor(Color.BLUE).endColor(Color.RED).fill(true))

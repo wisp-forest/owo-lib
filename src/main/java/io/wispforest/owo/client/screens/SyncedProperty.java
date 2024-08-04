@@ -2,7 +2,7 @@ package io.wispforest.owo.client.screens;
 
 import io.wispforest.endec.Endec;
 import io.wispforest.owo.util.Observable;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.ApiStatus;
 
 public class SyncedProperty<T> extends Observable<T> {
@@ -28,13 +28,13 @@ public class SyncedProperty<T> extends Observable<T> {
     }
 
     @ApiStatus.Internal
-    public void write(PacketByteBuf buf) {
+    public void write(FriendlyByteBuf buf) {
         needsSync = false;
         buf.write(this.endec, value);
     }
 
     @ApiStatus.Internal
-    public void read(PacketByteBuf buf) {
+    public void read(FriendlyByteBuf buf) {
         this.set(buf.read(this.endec));
     }
 

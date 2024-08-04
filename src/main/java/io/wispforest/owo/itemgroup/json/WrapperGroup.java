@@ -6,16 +6,16 @@ import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
 import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
 import io.wispforest.owo.mixin.itemgroup.ItemGroupAccessor;
 import io.wispforest.owo.util.pond.OwoSimpleRegistryExtensions;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntryInfo;
-import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collection;
 import java.util.List;
+import net.minecraft.core.RegistrationInfo;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.CreativeModeTab;
 
 /**
  * Used to replace a vanilla or modded item group to add the JSON-defined
@@ -24,20 +24,20 @@ import java.util.List;
 @ApiStatus.Internal
 public class WrapperGroup extends OwoItemGroup {
 
-    private final ItemGroup parent;
+    private final CreativeModeTab parent;
     private boolean extension = false;
 
     @SuppressWarnings("unchecked")
-    public WrapperGroup(ItemGroup parent, Identifier parentId, List<ItemGroupTab> tabs, List<ItemGroupButton> buttons) {
-        super(parentId, owoItemGroup -> {}, () -> Icon.of(parent.getIcon()), 4, 4, null, null, null, true, false, false);
+    public WrapperGroup(CreativeModeTab parent, Identifier parentId, List<ItemGroupTab> tabs, List<ItemGroupButton> buttons) {
+        super(parentId, owoItemGroup -> {}, () -> Icon.of(parent.getIconItem()), 4, 4, null, null, null, true, false, false);
 
-        int parentRawId = Registries.ITEM_GROUP.getRawId(parent);
+        int parentRawId = BuiltInRegistries.CREATIVE_MODE_TAB.getRawId(parent);
 
-        ((OwoSimpleRegistryExtensions<ItemGroup>) Registries.ITEM_GROUP).owo$set(parentRawId, RegistryKey.of(RegistryKeys.ITEM_GROUP, parentId), this, RegistryEntryInfo.DEFAULT);
+        ((OwoSimpleRegistryExtensions<CreativeModeTab>) BuiltInRegistries.CREATIVE_MODE_TAB).owo$set(parentRawId, ResourceKey.of(Registries.CREATIVE_MODE_TAB, parentId), this, RegistrationInfo.BUILT_IN);
 
         ((ItemGroupAccessor) this).owo$setDisplayName(parent.getDisplayName());
-        ((ItemGroupAccessor) this).owo$setColumn(parent.getColumn());
-        ((ItemGroupAccessor) this).owo$setRow(parent.getRow());
+        ((ItemGroupAccessor) this).owo$setColumn(parent.column());
+        ((ItemGroupAccessor) this).owo$setRow(parent.row());
 
         this.parent = parent;
 
@@ -62,7 +62,7 @@ public class WrapperGroup extends OwoItemGroup {
         }
 
         this.tabs.add(0, new ItemGroupTab(
-                Icon.of(this.parent.getIcon()),
+                Icon.of(this.parent.getIconItem()),
                 this.parent.getDisplayName(),
                 ((ItemGroupAccessor) this.parent).owo$getEntryCollector()::accept,
                 ItemGroupTab.DEFAULT_TEXTURE,

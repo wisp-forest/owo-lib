@@ -15,36 +15,38 @@ import io.wispforest.owo.serialization.RegistriesAttribute;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.uwu.Uwu;
 import io.wispforest.uwu.text.BasedTextContent;
-import net.minecraft.component.ComponentType;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.NbtComponent;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUsageContext;
-import net.minecraft.item.Items;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryOps;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextCodecs;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.core.Holder.Reference;
+import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.MutableText;
+import net.minecraft.network.chat.Text;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.RegistryOps;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
 public class UwuTestStickItem extends Item {
 
-    private static final ComponentType<Text> TEXT_COMPONENT = Registry.register(
-            Registries.DATA_COMPONENT_TYPE,
+    private static final DataComponentType<Text> TEXT_COMPONENT = Registry.register(
+            BuiltInRegistries.DATA_COMPONENT_TYPE,
             Identifier.of("uwu", "text"),
-            ComponentType.<Text>builder()
+            DataComponentType.<Text>builder()
                     .endec(MinecraftEndecs.TEXT)
                     .build()
     );
@@ -66,7 +68,7 @@ public class UwuTestStickItem extends Item {
     private static final KeyedEndec<String> KYED = YEP_SAME_HERE.keyed("kyed", (String) null);
 
     public UwuTestStickItem() {
-        super(new Item.Settings()
+        super(new Item.Properties()
                 .group(Uwu.SIX_TAB_GROUP).tab(3).maxCount(1)
                 .trackUsageStat()
                 .stackGenerator(OwoItemGroup.DEFAULT_STACK_GENERATOR.andThen((item, stacks) -> {
@@ -81,78 +83,78 @@ public class UwuTestStickItem extends Item {
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        if (user.isSneaking()) {
-            if (world.isClient) return TypedActionResult.success(user.getStackInHand(hand));
+    public InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
+        if (user.isShiftKeyDown()) {
+            if (world.isClientSide) return InteractionResultHolder.success(user.getItemInHand(hand));
 
             Uwu.CHANNEL.serverHandle(user).send(new Uwu.OtherTestMessage(user.getBlockPos(), "based"));
 
             var server = user.getServer();
-            var teleportTo = world.getRegistryKey() == World.END ? server.getWorld(World.OVERWORLD) : server.getWorld(World.END);
+            var teleportTo = world.dimension() == Level.END ? server.getLevel(Level.OVERWORLD) : server.getLevel(Level.END);
 
-            WorldOps.teleportToWorld((ServerPlayerEntity) user, teleportTo, new Vec3d(0, 128, 0));
+            WorldOps.teleportToWorld((ServerPlayer) user, teleportTo, new Vec3(0, 128, 0));
 
-            return TypedActionResult.success(user.getStackInHand(hand));
+            return InteractionResultHolder.success(user.getItemInHand(hand));
         } else {
-            if (!world.isClient) return TypedActionResult.success(user.getStackInHand(hand));
+            if (!world.isClientSide) return InteractionResultHolder.success(user.getItemInHand(hand));
 
             Uwu.CHANNEL.clientHandle().send(Uwu.MESSAGE);
 
-            Uwu.CUBE.spawn(world, user.getEyePos().add(user.getRotationVec(0).multiply(3)).subtract(.5, .5, .5), null);
-            user.sendMessage(Text.translatable("uwu.a", "bruh"));
+            Uwu.CUBE.spawn(world, user.getEyePosition().add(user.getViewVector(0).scale(3)).subtract(.5, .5, .5), null);
+            user.sendSystemMessage(Text.translatable("uwu.a", "bruh"));
 
-            return TypedActionResult.success(user.getStackInHand(hand));
+            return InteractionResultHolder.success(user.getItemInHand(hand));
         }
     }
 
     @Override
-    public ActionResult useOnBlock(ItemUsageContext context) {
-        if (!context.getPlayer().isSneaking()) {
-            if (context.getWorld().isClient) Uwu.CHANNEL.clientHandle().send(new ThatPacket("stringnite"));
+    public InteractionResult useOn(UseOnContext context) {
+        if (!context.getPlayer().isShiftKeyDown()) {
+            if (context.getLevel().isClientSide) Uwu.CHANNEL.clientHandle().send(new ThatPacket("stringnite"));
 
             try {
-                var stack = context.getStack();
-                var data = stack.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT).getNbt()
-                        .get(SerializationContext.attributes(RegistriesAttribute.of(context.getWorld().getRegistryManager())), KYED);
+                var stack = context.getItemInHand();
+                var data = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).getUnsafe()
+                        .get(SerializationContext.attributes(RegistriesAttribute.of(context.getLevel().registryAccess())), KYED);
 
-                context.getPlayer().sendMessage(Text.literal("current: " + data));
+                context.getPlayer().sendSystemMessage(Text.literal("current: " + data));
 
-                stack.apply(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT, nbt -> {
-                    return nbt.apply(nbtCompound -> nbtCompound.put(
-                            SerializationContext.attributes(RegistriesAttribute.of(context.getWorld().getRegistryManager())),
+                stack.update(DataComponents.CUSTOM_DATA, CustomData.EMPTY, nbt -> {
+                    return nbt.update(nbtCompound -> nbtCompound.put(
+                            SerializationContext.attributes(RegistriesAttribute.of(context.getLevel().registryAccess())),
                             KYED,
-                            String.valueOf(context.getWorld().random.nextInt(10000))
+                            String.valueOf(context.getLevel().random.nextInt(10000))
                     ));
                 });
-                context.getPlayer().sendMessage(Text.literal("modified"));
+                context.getPlayer().sendSystemMessage(Text.literal("modified"));
             } catch (Exception bruh) {
-                context.getPlayer().sendMessage(Text.literal("bruh: " + bruh.getMessage()));
+                context.getPlayer().sendSystemMessage(Text.literal("bruh: " + bruh.getMessage()));
             }
 
-            return ActionResult.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
 
-        if (context.getWorld().isClient) return ActionResult.SUCCESS;
+        if (context.getLevel().isClientSide) return InteractionResult.SUCCESS;
 
         final var breakStack = new ItemStack(Items.NETHERITE_PICKAXE);
 
-        final var fortune = context.getWorld().getRegistryManager().get(RegistryKeys.ENCHANTMENT).getEntry(Enchantments.FORTUNE).orElseThrow();
-        breakStack.addEnchantment(fortune, 3);
-        WorldOps.breakBlockWithItem(context.getWorld(), context.getBlockPos(), breakStack);
+        final var fortune = context.getLevel().registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolder(Enchantments.FORTUNE).orElseThrow();
+        breakStack.enchant(fortune, 3);
+        WorldOps.breakBlockWithItem(context.getLevel(), context.getClickedPos(), breakStack);
 
-        final var stickStack = context.getStack();
+        final var stickStack = context.getItemInHand();
 
-        if (!stickStack.contains(TEXT_COMPONENT)) {
-            stickStack.set(TEXT_COMPONENT, Text.of(String.valueOf(context.getWorld().random.nextInt(1000000))));
+        if (!stickStack.has(TEXT_COMPONENT)) {
+            stickStack.set(TEXT_COMPONENT, Text.nullToEmpty(String.valueOf(context.getLevel().random.nextInt(1000000))));
         }
 
         stickStack.set(TEXT_COMPONENT, MutableText.of(new BasedTextContent("basednite, ")).append(stickStack.get(TEXT_COMPONENT)));
 
-        context.getPlayer().sendMessage(stickStack.get(TEXT_COMPONENT), false);
+        context.getPlayer().displayClientMessage(stickStack.get(TEXT_COMPONENT), false);
 
-        Uwu.BREAK_BLOCK_PARTICLES.spawn(context.getWorld(), Vec3d.of(context.getBlockPos()), null);
+        Uwu.BREAK_BLOCK_PARTICLES.spawn(context.getLevel(), Vec3.atLowerCornerOf(context.getClickedPos()), null);
 
-        return ActionResult.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     private record ThatPacket(String mhmm) {}

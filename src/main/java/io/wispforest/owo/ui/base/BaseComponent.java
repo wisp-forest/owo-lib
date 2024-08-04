@@ -6,11 +6,11 @@ import io.wispforest.owo.ui.util.FocusHandler;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.Observable;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Consumer;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 
 /**
  * The reference implementation of the {@link Component} interface,
@@ -48,7 +48,7 @@ public abstract class BaseComponent implements Component {
     protected boolean dirty = false;
 
     protected CursorStyle cursorStyle = CursorStyle.NONE;
-    protected List<TooltipComponent> tooltip = List.of();
+    protected List<ClientTooltipComponent> tooltip = List.of();
 
     protected int x, y;
     protected int width, height;
@@ -262,13 +262,13 @@ public abstract class BaseComponent implements Component {
     }
 
     @Override
-    public Component tooltip(List<TooltipComponent> tooltip) {
+    public Component tooltip(List<ClientTooltipComponent> tooltip) {
         this.tooltip = tooltip;
         return this;
     }
 
     @Override
-    public List<TooltipComponent> tooltip() {
+    public List<ClientTooltipComponent> tooltip() {
         return this.tooltip;
     }
 

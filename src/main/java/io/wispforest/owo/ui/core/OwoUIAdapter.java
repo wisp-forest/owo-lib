@@ -1,20 +1,22 @@
 package io.wispforest.owo.ui.core;
 
+import F;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.renderdoc.RenderDoc;
 import io.wispforest.owo.ui.util.CursorAdapter;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.Drawable;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.Selectable;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.function.BiFunction;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Renderable;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.screens.Screen;
 
 /**
  * A UI adapter constitutes the main entrypoint to using owo-ui.
@@ -29,7 +31,7 @@ import java.util.function.BiFunction;
  *
  * @see io.wispforest.owo.ui.base.BaseOwoScreen
  */
-public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawable, Selectable {
+public class OwoUIAdapter<R extends ParentComponent> implements GuiEventListener, Renderable, NarratableEntry {
 
     private static boolean isRendering = false;
 
@@ -70,7 +72,7 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
         var rootComponent = rootComponentMaker.apply(Sizing.fill(100), Sizing.fill(100));
 
         var adapter = new OwoUIAdapter<>(0, 0, screen.width, screen.height, rootComponent);
-        screen.addDrawableChild(adapter);
+        screen.addRenderableWidget(adapter);
         screen.setFocused(adapter);
 
         return adapter;
@@ -157,7 +159,7 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float partialTicks) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float partialTicks) {
         if (!(context instanceof OwoUIDrawContext)) context = OwoUIDrawContext.of(context);
         var owoContext = (OwoUIDrawContext) context;
 
@@ -166,15 +168,15 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
 
             if (this.captureFrame) RenderDoc.startFrameCapture();
 
-            final var delta = MinecraftClient.getInstance().getRenderTickCounter().getLastFrameDuration();
-            final var window = MinecraftClient.getInstance().getWindow();
+            final var delta = Minecraft.getInstance().getTimer().getGameTimeDeltaTicks();
+            final var window = Minecraft.getInstance().getWindow();
 
             this.rootComponent.update(delta, mouseX, mouseY);
 
             RenderSystem.enableDepthTest();
             GlStateManager._enableScissorTest();
 
-            GlStateManager._scissorBox(0, 0, window.getFramebufferWidth(), window.getFramebufferHeight());
+            GlStateManager._scissorBox(0, 0, window.getWidth(), window.getHeight());
             this.rootComponent.draw(owoContext, mouseX, mouseY, partialTicks, delta);
 
             GlStateManager._disableScissorTest();
@@ -188,9 +190,9 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
             }
 
             if (this.enableInspector) {
-                context.getMatrices().translate(0, 0, this.inspectorZOffset);
+                context.matrixStack().translate(0, 0, this.inspectorZOffset);
                 owoContext.drawInspector(this.rootComponent, mouseX, mouseY, !this.globalInspector);
-                context.getMatrices().translate(0, 0, -this.inspectorZOffset);
+                context.matrixStack().translate(0, 0, -this.inspectorZOffset);
             }
 
             if (this.captureFrame) RenderDoc.endFrameCapture();
@@ -258,12 +260,12 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
     }
 
     @Override
-    public SelectionType getType() {
-        return SelectionType.NONE;
+    public NarrationPriority narrationPriority() {
+        return NarrationPriority.NONE;
     }
 
     @Override
-    public void appendNarrations(NarrationMessageBuilder builder) {}
+    public void updateNarration(NarrationElementOutput builder) {}
 
     public static boolean isRendering() {
         return isRendering;

@@ -1,22 +1,21 @@
 package io.wispforest.owo.mixin.ui;
 
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.gui.tooltip.TooltipPositioner;
-import net.minecraft.client.util.math.MatrixStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
-
+import com.mojang.blaze3d.vertex.MatrixStack;
 import java.util.List;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
 
-@Mixin(DrawContext.class)
+@Mixin(GuiGraphics.class)
 public interface DrawContextInvoker {
 
     @Invoker("drawTooltip")
-    void owo$renderTooltipFromComponents(TextRenderer textRenderer, List<TooltipComponent> components, int x, int y, TooltipPositioner positioner);
+    void owo$renderTooltipFromComponents(Font textRenderer, List<ClientTooltipComponent> components, int x, int y, ClientTooltipPositioner positioner);
 
     @Accessor("matrices")
     MatrixStack owo$getMatrices();
@@ -26,9 +25,9 @@ public interface DrawContextInvoker {
     void owo$setMatrices(MatrixStack matrices);
 
     @Accessor("scissorStack")
-    DrawContext.ScissorStack owo$getScissorStack();
+    GuiGraphics.ScissorStack owo$getScissorStack();
 
     @Mutable
     @Accessor("scissorStack")
-    void owo$setScissorStack(DrawContext.ScissorStack scissorStack);
+    void owo$setScissorStack(GuiGraphics.ScissorStack scissorStack);
 }

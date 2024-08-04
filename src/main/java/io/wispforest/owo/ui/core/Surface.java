@@ -1,19 +1,29 @@
 package io.wispforest.owo.ui.core;
 
+import D;
+import F;
+import I;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tessellator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import io.wispforest.owo.client.OwoClient;
 import io.wispforest.owo.mixin.ScreenAccessor;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.NinePatchTexture;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.CubeMapRenderer;
-import net.minecraft.client.gui.RotatingCubeMapRenderer;
-import net.minecraft.client.gui.tooltip.TooltipBackgroundRenderer;
+import java.util.List;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.tooltip.TooltipRenderUtil;
 import net.minecraft.client.render.*;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.renderer.PanoramaRenderer;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.math.MathHelper;
+import org.joml.Matrix4f;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -42,47 +52,47 @@ public interface Surface {
             .and(Surface.blur(5, 10));
 
     Surface TOOLTIP = (context, component) -> {
-        context.draw(() -> {
+        context.drawManaged(() -> {
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
 
-            TooltipBackgroundRenderer.render(context, component.x() + 4, component.y() + 4, component.width() - 8, component.height() - 8, 0);
+            TooltipRenderUtil.renderTooltipBackground(context, component.x() + 4, component.y() + 4, component.width() - 8, component.height() - 8, 0);
         });
     };
 
     static Surface blur(float quality, float size) {
         return (context, component) -> {
-            var buffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION);
-            var matrix = context.getMatrices().peek().getPositionMatrix();
+            var buffer = Tessellator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
+            var matrix = context.matrixStack().peek().model();
 
-            buffer.vertex(matrix, component.x(), component.y(), 0);
-            buffer.vertex(matrix, component.x(), component.y() + component.height(), 0);
-            buffer.vertex(matrix, component.x() + component.width(), component.y() + component.height(), 0);
-            buffer.vertex(matrix, component.x() + component.width(), component.y(), 0);
+            buffer.addVertex(matrix, component.x(), component.y(), 0);
+            buffer.addVertex(matrix, component.x(), component.y() + component.height(), 0);
+            buffer.addVertex(matrix, component.x() + component.width(), component.y() + component.height(), 0);
+            buffer.addVertex(matrix, component.x() + component.width(), component.y(), 0);
 
             OwoClient.BLUR_PROGRAM.setParameters(16, quality, size);
             OwoClient.BLUR_PROGRAM.use();
-            BufferRenderer.drawWithGlobalProgram(buffer.end());
+            BufferUploader.drawWithShader(buffer.buildOrThrow());
         };
     }
 
     static Surface vanillaPanorama(boolean alwaysVisible) {
-        return panorama(new RotatingCubeMapRenderer(ScreenAccessor.owo$PANORAMA_RENDERER()), alwaysVisible);
+        return panorama(new PanoramaRenderer(ScreenAccessor.owo$PANORAMA_RENDERER()), alwaysVisible);
     }
 
-    static Surface panorama(RotatingCubeMapRenderer renderer, boolean alwaysVisible) {
+    static Surface panorama(PanoramaRenderer renderer, boolean alwaysVisible) {
         return (context, component) -> {
-            if (!alwaysVisible && MinecraftClient.getInstance().world != null) return;
+            if (!alwaysVisible && Minecraft.getInstance().level != null) return;
 
-            var client = MinecraftClient.getInstance();
+            var client = Minecraft.getInstance();
 
-            int prevX = GlStateManager.Viewport.getX();
-            int prevY = GlStateManager.Viewport.getY();
-            int prevWidth = GlStateManager.Viewport.getWidth();
-            int prevHeight = GlStateManager.Viewport.getHeight();
+            int prevX = GlStateManager.Viewport.x();
+            int prevY = GlStateManager.Viewport.y();
+            int prevWidth = GlStateManager.Viewport.width();
+            int prevHeight = GlStateManager.Viewport.height();
 
             var window = client.getWindow();
-            var scale = window.getScaleFactor();
+            var scale = window.getGuiScale();
 
             var x = component.x();
             var y = component.y();
@@ -91,12 +101,12 @@ public interface Surface {
 
             RenderSystem.viewport(
                     (int) (x * scale),
-                    (int) (window.getFramebufferHeight() - (y * scale) - height * scale),
-                    MathHelper.clamp((int) (width * scale), 0, window.getFramebufferWidth()),
-                    MathHelper.clamp((int) (height * scale), 0, window.getFramebufferHeight())
+                    (int) (window.getHeight() - (y * scale) - height * scale),
+                    MathHelper.clamp((int) (width * scale), 0, window.getWidth()),
+                    MathHelper.clamp((int) (height * scale), 0, window.getHeight())
             );
 
-            var delta = client.getRenderTickCounter().getLastDuration();
+            var delta = client.getTimer().getRealtimeDeltaTicks();
 
             RenderSystem.disableDepthTest();
 

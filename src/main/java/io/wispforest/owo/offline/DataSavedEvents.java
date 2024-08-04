@@ -2,10 +2,9 @@ package io.wispforest.owo.offline;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.advancement.AdvancementProgress;
+import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.resources.Identifier;
 import java.util.Map;
 import java.util.UUID;
 

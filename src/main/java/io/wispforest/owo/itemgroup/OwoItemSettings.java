@@ -3,20 +3,19 @@ package io.wispforest.owo.itemgroup;
 import io.wispforest.owo.Owo;
 import net.fabricmc.fabric.api.item.v1.CustomDamageHandler;
 import net.fabricmc.fabric.api.item.v1.EquipmentSlotProvider;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Rarity;
-import net.minecraft.world.World;
-
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Rarity;
+import net.minecraft.world.level.Level;
 import java.util.function.BiConsumer;
 
 /**
  * @deprecated Replaced with {@link OwoItemSettingsExtension}.
  */
 @Deprecated(forRemoval = true)
-public class OwoItemSettings extends Item.Settings {
+public class OwoItemSettings extends Item.Properties {
     public OwoItemSettings group(ItemGroupReference ref) {
         return (OwoItemSettings) super.group(ref);
     }
@@ -44,17 +43,17 @@ public class OwoItemSettings extends Item.Settings {
      * @param generator The function this item uses for creating stacks in the
      *                  {@link OwoItemGroup} it is in, by default this will be {@link OwoItemGroup#DEFAULT_STACK_GENERATOR}
      */
-    public OwoItemSettings stackGenerator(BiConsumer<Item, ItemGroup.Entries> generator) {
+    public OwoItemSettings stackGenerator(BiConsumer<Item, CreativeModeTab.Output> generator) {
         return (OwoItemSettings) super.stackGenerator(generator);
     }
 
-    public BiConsumer<Item, ItemGroup.Entries> stackGenerator() {
+    public BiConsumer<Item, CreativeModeTab.Output> stackGenerator() {
         return super.stackGenerator();
     }
 
     /**
-     * Automatically increment {@link net.minecraft.stat.Stats#USED}
-     * for this item every time {@link Item#use(World, PlayerEntity, Hand)}
+     * Automatically increment {@link net.minecraft.stats.Stats#ITEM_USED}
+     * for this item every time {@link Item#use(Level, Player, InteractionHand)}
      * returns an accepted result
      */
     public OwoItemSettings trackUsageStat() {
@@ -76,18 +75,18 @@ public class OwoItemSettings extends Item.Settings {
     }
 
     @Override
-    public OwoItemSettings maxCount(int maxCount) {
-        return (OwoItemSettings) super.maxCount(maxCount);
+    public OwoItemSettings stacksTo(int maxCount) {
+        return (OwoItemSettings) super.stacksTo(maxCount);
     }
 
     @Override
-    public OwoItemSettings maxDamage(int maxDamage) {
-        return (OwoItemSettings) super.maxDamage(maxDamage);
+    public OwoItemSettings durability(int maxDamage) {
+        return (OwoItemSettings) super.durability(maxDamage);
     }
 
     @Override
-    public OwoItemSettings recipeRemainder(Item recipeRemainder) {
-        return (OwoItemSettings) super.recipeRemainder(recipeRemainder);
+    public OwoItemSettings craftRemainder(Item recipeRemainder) {
+        return (OwoItemSettings) super.craftRemainder(recipeRemainder);
     }
 
     @Override
@@ -96,7 +95,7 @@ public class OwoItemSettings extends Item.Settings {
     }
 
     @Override
-    public OwoItemSettings fireproof() {
-        return (OwoItemSettings) super.fireproof();
+    public OwoItemSettings fireResistant() {
+        return (OwoItemSettings) super.fireResistant();
     }
 }

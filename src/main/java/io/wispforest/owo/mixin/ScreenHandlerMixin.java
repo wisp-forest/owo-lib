@@ -3,6 +3,7 @@ package io.wispforest.owo.mixin;
 import io.wispforest.endec.impl.ReflectiveEndecBuilder;
 import io.wispforest.owo.client.screens.OwoScreenHandler;
 import io.wispforest.owo.client.screens.ScreenInternals;
+import io.wispforest.owo.client.screens.ScreenInternals.LocalPacket;
 import io.wispforest.owo.client.screens.ScreenhandlerMessageData;
 import io.wispforest.owo.client.screens.SyncedProperty;
 import io.wispforest.owo.network.NetworkException;
@@ -14,11 +15,12 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerType;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.MenuType;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -33,7 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-@Mixin(ScreenHandler.class)
+@Mixin(AbstractContainerMenu.class)
 public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenHandlerExtension {
 
     @Shadow private boolean disableSync;
@@ -44,13 +46,13 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
     private final List<ScreenhandlerMessageData<?>> owo$clientboundMessages = new ArrayList<>();
     private final List<ScreenhandlerMessageData<?>> owo$serverboundMessages = new ArrayList<>();
 
-    private PlayerEntity owo$player = null;
+    private Player owo$player = null;
 
     @Unique
     private ReflectiveEndecBuilder builder;
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void createReflectiveBuilder(ScreenHandlerType type, int syncId, CallbackInfo ci) {
+    private void createReflectiveBuilder(MenuType type, int syncId, CallbackInfo ci) {
         this.builder = MinecraftEndecs.addDefaults(new ReflectiveEndecBuilder());
     }
 
@@ -60,12 +62,12 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
     }
 
     @Override
-    public void owo$attachToPlayer(PlayerEntity player) {
+    public void owo$attachToPlayer(Player player) {
         this.owo$player = player;
     }
 
     @Override
-    public PlayerEntity player() {
+    public Player player() {
         return this.owo$player;
     }
 
@@ -112,13 +114,13 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
         var packet = new ScreenInternals.LocalPacket(messageData.id(), buf);
 
         if (messageData.clientbound()) {
-            if (!(this.owo$player instanceof ServerPlayerEntity serverPlayer)) {
+            if (!(this.owo$player instanceof ServerPlayer serverPlayer)) {
                 throw new NetworkException("Tried to send clientbound message on the server");
             }
 
             ServerPlayNetworking.send(serverPlayer, packet);
         } else {
-            if (!this.owo$player.getWorld().isClient) {
+            if (!this.owo$player.level().isClientSide) {
                 throw new NetworkException("Tried to send serverbound message on the client");
             }
 
@@ -128,7 +130,7 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
 
     @Unique
     @Environment(EnvType.CLIENT)
-    private void owo$sendToServer(CustomPayload payload) {
+    private void owo$sendToServer(CustomPacketPayload payload) {
         ClientPlayNetworking.send(payload);
     }
 
@@ -172,7 +174,7 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
     @Unique
     private void syncProperties() {
         if (this.owo$player == null) return;
-        if (!(this.owo$player instanceof ServerPlayerEntity player)) return;
+        if (!(this.owo$player instanceof ServerPlayer player)) return;
 
         int count = 0;
 

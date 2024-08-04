@@ -17,10 +17,9 @@ import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
-import net.minecraft.item.Items;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.network.chat.Text;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.Items;
 import java.util.Collections;
 import java.util.List;
 
@@ -40,16 +39,16 @@ public class UiCategory implements DisplayCategory<Display> {
         var inner = Containers.verticalFlow(Sizing.fill(100), Sizing.content());
         inner.horizontalAlignment(HorizontalAlignment.CENTER).surface(Surface.flat(0xFF00FFAF));
 
-        inner.child(Components.label(Text.of("A demonstration\ninside REI"))
+        inner.child(Components.label(Text.nullToEmpty("A demonstration\ninside REI"))
                 .color(Color.BLACK)
                 .positioning(Positioning.absolute(3, 3))
         );
 
         var animation = inner.horizontalSizing().animate(250, Easing.QUADRATIC, Sizing.fill(65));
-        inner.child(Components.button(Text.of("shrink"), (ButtonComponent button) -> animation.forwards())
+        inner.child(Components.button(Text.nullToEmpty("shrink"), (ButtonComponent button) -> animation.forwards())
                 .margins(Insets.vertical(25))
                 .horizontalSizing(Sizing.fixed(60)));
-        inner.child(Components.button(Text.of("grow"), (ButtonComponent button) -> animation.backwards())
+        inner.child(Components.button(Text.nullToEmpty("grow"), (ButtonComponent button) -> animation.backwards())
                 .margins(Insets.vertical(25))
                 .horizontalSizing(Sizing.fixed(60)));
 
@@ -68,7 +67,7 @@ public class UiCategory implements DisplayCategory<Display> {
 
     @Override
     public Text getTitle() {
-        return Text.of("yes its gui very epic");
+        return Text.nullToEmpty("yes its gui very epic");
     }
 
     @Override

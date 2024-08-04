@@ -12,9 +12,9 @@ import io.wispforest.owo.ui.util.NinePatchTexture;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.Observable;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.network.chat.Text;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
@@ -177,7 +177,7 @@ public class SlimSliderComponent extends BaseComponent {
         if (this.tooltipSupplier != null) {
             this.tooltip(this.tooltipSupplier.apply(this.value()));
         } else {
-            this.tooltip((List<TooltipComponent>) null);
+            this.tooltip((List<ClientTooltipComponent>) null);
         }
     }
 

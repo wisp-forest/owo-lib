@@ -1,11 +1,11 @@
 package io.wispforest.owo.network;
 
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 
-public record ServerAccess(ServerPlayerEntity player) implements
-        OwoNetChannel.EnvironmentAccess<ServerPlayerEntity, MinecraftServer, ServerPlayNetworkHandler> {
+public record ServerAccess(ServerPlayer player) implements
+        OwoNetChannel.EnvironmentAccess<ServerPlayer, MinecraftServer, ServerGamePacketListenerImpl> {
 
     @Override
     public MinecraftServer runtime() {
@@ -13,7 +13,7 @@ public record ServerAccess(ServerPlayerEntity player) implements
     }
 
     @Override
-    public ServerPlayNetworkHandler netHandler() {
-        return player.networkHandler;
+    public ServerGamePacketListenerImpl netHandler() {
+        return player.connection;
     }
 }

@@ -8,14 +8,11 @@ import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.PositionedRectangle;
 import io.wispforest.owo.ui.core.Size;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.resource.JsonDataLoader;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.JsonHelper;
-import net.minecraft.util.profiler.Profiler;
-
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.io.ResourceManager;
+import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.util.profiling.Profiler;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -152,7 +149,7 @@ public class NinePatchTexture {
         action.accept(MetadataLoader.LOADED_TEXTURES.get(texture));
     }
 
-    public static class MetadataLoader extends JsonDataLoader implements IdentifiableResourceReloadListener {
+    public static class MetadataLoader extends SimpleJsonResourceReloadListener implements IdentifiableResourceReloadListener {
 
         private static final Map<Identifier, NinePatchTexture> LOADED_TEXTURES = new HashMap<>();
 
@@ -170,23 +167,23 @@ public class NinePatchTexture {
             prepared.forEach((resourceId, jsonElement) -> {
                 if (!(jsonElement instanceof JsonObject object)) return;
 
-                var texture = Identifier.of(JsonHelper.getString(object, "texture"));
-                var textureSize = Size.of(JsonHelper.getInt(object, "texture_width"), JsonHelper.getInt(object, "texture_height"));
+                var texture = Identifier.parse(GsonHelper.getAsString(object, "texture"));
+                var textureSize = Size.of(GsonHelper.getAsInt(object, "texture_width"), GsonHelper.getAsInt(object, "texture_height"));
 
-                int u = JsonHelper.getInt(object, "u", 0), v = JsonHelper.getInt(object, "v", 0);
-                boolean repeat = JsonHelper.getBoolean(object, "repeat");
+                int u = GsonHelper.getAsInt(object, "u", 0), v = GsonHelper.getAsInt(object, "v", 0);
+                boolean repeat = GsonHelper.getAsBoolean(object, "repeat");
 
                 if (object.has("corner_patch_size")) {
-                    var cornerPatchObject = JsonHelper.getObject(object, "corner_patch_size");
-                    var centerPatchObject = JsonHelper.getObject(object, "center_patch_size");
+                    var cornerPatchObject = GsonHelper.getAsJsonObject(object, "corner_patch_size");
+                    var centerPatchObject = GsonHelper.getAsJsonObject(object, "center_patch_size");
 
-                    var cornerPatchSize = Size.of(JsonHelper.getInt(cornerPatchObject, "width"), JsonHelper.getInt(cornerPatchObject, "height"));
-                    var centerPatchSize = Size.of(JsonHelper.getInt(centerPatchObject, "width"), JsonHelper.getInt(centerPatchObject, "height"));
+                    var cornerPatchSize = Size.of(GsonHelper.getAsInt(cornerPatchObject, "width"), GsonHelper.getAsInt(cornerPatchObject, "height"));
+                    var centerPatchSize = Size.of(GsonHelper.getAsInt(centerPatchObject, "width"), GsonHelper.getAsInt(centerPatchObject, "height"));
 
                     LOADED_TEXTURES.put(resourceId, new NinePatchTexture(texture, u, v, cornerPatchSize, centerPatchSize, textureSize, repeat));
                 } else {
-                    var patchSizeObject = JsonHelper.getObject(object, "patch_size");
-                    var patchSize = Size.of(JsonHelper.getInt(patchSizeObject, "width"), JsonHelper.getInt(patchSizeObject, "height"));
+                    var patchSizeObject = GsonHelper.getAsJsonObject(object, "patch_size");
+                    var patchSize = Size.of(GsonHelper.getAsInt(patchSizeObject, "width"), GsonHelper.getAsInt(patchSizeObject, "height"));
 
                     LOADED_TEXTURES.put(resourceId, new NinePatchTexture(texture, u, v, patchSize, textureSize, repeat));
                 }

@@ -2,7 +2,7 @@ package io.wispforest.owo.config.ui.component;
 
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.core.Sizing;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Text;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal

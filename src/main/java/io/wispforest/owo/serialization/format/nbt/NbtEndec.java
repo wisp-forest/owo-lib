@@ -1,5 +1,6 @@
 package io.wispforest.owo.serialization.format.nbt;
 
+import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import io.wispforest.endec.*;
 import net.minecraft.nbt.NbtCompound;
@@ -25,7 +26,7 @@ public final class NbtEndec implements Endec<NbtElement> {
 
         try {
             var output = ByteStreams.newDataOutput();
-            NbtIo.writeForPacket(value, output);
+            NbtIo.writeNbt(value, output);
 
             serializer.writeBytes(ctx, output.toByteArray());
         } catch (IOException e) {
@@ -43,7 +44,7 @@ public final class NbtEndec implements Endec<NbtElement> {
         }
 
         try {
-            return NbtIo.read(ByteStreams.newDataInput(deserializer.readBytes(ctx)), NbtSizeTracker.ofUnlimitedBytes());
+            return NbtIo.readNbt(ByteStreams.newDataInput(deserializer.readBytes(ctx)), NbtSizeTracker.ofUnlimitedBytes());
         } catch (IOException e) {
             throw new RuntimeException("Failed to parse binary NBT in NbtEndec", e);
         }

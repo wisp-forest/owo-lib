@@ -1,5 +1,6 @@
 package io.wispforest.owo.config.ui.component;
 
+import D;
 import io.wispforest.owo.ui.component.TextBoxComponent;
 import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.Sizing;
@@ -26,7 +27,7 @@ public class ConfigTextBox extends TextBoxComponent implements OptionValueProvid
         this.setMaxLength(Integer.MAX_VALUE);
 
         this.textValue.observe(s -> {
-            this.setEditableColor(this.applyPredicate.test(s) ? this.validColor : this.invalidColor);
+            this.setTextColor(this.applyPredicate.test(s) ? this.validColor : this.invalidColor);
         });
     }
 
@@ -57,17 +58,17 @@ public class ConfigTextBox extends TextBoxComponent implements OptionValueProvid
 
     @Override
     public boolean isValid() {
-        return this.applyPredicate.test(this.getText());
+        return this.applyPredicate.test(this.getValue());
     }
 
     @Override
     public Object parsedValue() {
-        return this.valueParser.apply(this.getText());
+        return this.valueParser.apply(this.getValue());
     }
 
     public ConfigTextBox inputPredicate(Predicate<String> inputPredicate) {
         this.inputPredicate = inputPredicate;
-        this.setTextPredicate(this.inputPredicate);
+        this.setFilter(this.inputPredicate);
         return this;
     }
 

@@ -1,13 +1,13 @@
 package io.wispforest.owo.offline;
 
 import io.wispforest.owo.Owo;
-import net.minecraft.datafixer.DataFixTypes;
-import net.minecraft.datafixer.Schemas;
+import net.minecraft.Util;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtSizeTracker;
-import net.minecraft.util.Util;
-import net.minecraft.util.WorldSavePath;
+import net.minecraft.util.datafix.DataFixTypes;
+import net.minecraft.util.datafix.DataFixers;
+import net.minecraft.world.level.storage.LevelResource;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -39,12 +39,12 @@ public final class OfflineDataLookup {
         DataSavedEvents.PLAYER_DATA.invoker().onSaved(player, nbt);
 
         try {
-            var savedPlayersPath = Owo.currentServer().getSavePath(WorldSavePath.PLAYERDATA);
+            var savedPlayersPath = Owo.currentServer().getWorldPath(LevelResource.PLAYER_DATA_DIR);
             var file = Files.createTempFile(savedPlayersPath, player.toString() + "-", ".dat");
             NbtIo.writeCompressed(nbt, file);
             var newDataFile = savedPlayersPath.resolve(player + ".dat");
             var oldDataFile = savedPlayersPath.resolve(player + ".dat_old");
-            Util.backupAndReplace(newDataFile, file, oldDataFile);
+            Util.safeReplaceFile(newDataFile, file, oldDataFile);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -59,11 +59,11 @@ public final class OfflineDataLookup {
      */
     public static @Nullable NbtCompound get(UUID player) {
         try {
-            Path savedPlayersPath = Owo.currentServer().getSavePath(WorldSavePath.PLAYERDATA);
+            Path savedPlayersPath = Owo.currentServer().getWorldPath(LevelResource.PLAYER_DATA_DIR);
             Path savedDataPath = savedPlayersPath.resolve(player.toString() + ".dat");
             NbtCompound rawNbt = NbtIo.readCompressed(savedDataPath, NbtSizeTracker.ofUnlimitedBytes());
             int dataVersion = rawNbt.contains("DataVersion", 3) ? rawNbt.getInt("DataVersion") : -1;
-            return DataFixTypes.PLAYER.update(Schemas.getFixer(), rawNbt, dataVersion);
+            return DataFixTypes.PLAYER.updateToCurrentVersion(DataFixers.getDataFixer(), rawNbt, dataVersion);
         } catch (IOException e) {
             Owo.LOGGER.error("Couldn't get player data for offline player {}", player, e);
             return null;
@@ -86,7 +86,7 @@ public final class OfflineDataLookup {
      */
     public static List<UUID> savedPlayers() {
         List<UUID> list = new ArrayList<>();
-        Path savedPlayersPath = Owo.currentServer().getSavePath(WorldSavePath.PLAYERDATA);
+        Path savedPlayersPath = Owo.currentServer().getWorldPath(LevelResource.PLAYER_DATA_DIR);
 
         if (!Files.isDirectory(savedPlayersPath))
             return Collections.emptyList();

@@ -1,9 +1,9 @@
 package io.wispforest.owo.mixin;
 
 import io.wispforest.owo.serialization.OwoComponentTypeBuilder;
-import net.minecraft.component.ComponentType;
+import net.minecraft.core.component.DataComponentType;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(ComponentType.Builder.class)
+@Mixin(DataComponentType.Builder.class)
 public class ComponentTypeBuilderMixin<T> implements OwoComponentTypeBuilder<T> {
 }

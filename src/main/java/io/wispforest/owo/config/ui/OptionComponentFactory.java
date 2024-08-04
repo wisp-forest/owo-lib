@@ -14,11 +14,11 @@ import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.util.NumberReflection;
-import net.minecraft.util.Identifier;
-
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import net.minecraft.resources.Identifier;
 
 /**
  * A function which creates an instance of {@link OptionValueProvider}
@@ -59,7 +59,7 @@ public interface OptionComponentFactory<T> {
         return OptionComponents.createTextBox(model, option, configTextBox -> {
             configTextBox.inputPredicate(s -> s.matches("[a-z0-9_.:\\-]*"));
             configTextBox.applyPredicate(s -> Identifier.tryParse(s) != null);
-            configTextBox.valueParser(Identifier::of);
+            configTextBox.valueParser(Identifier::parse);
         });
     };
 
