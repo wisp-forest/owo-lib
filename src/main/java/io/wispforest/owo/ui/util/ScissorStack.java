@@ -1,12 +1,9 @@
 package io.wispforest.owo.ui.util;
 
-import D;
 import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.MatrixStack;
 import io.wispforest.owo.ui.core.Component;
-import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.ui.core.PositionedRectangle;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.MathHelper;

@@ -1,12 +1,12 @@
 package io.wispforest.owo.mixin;
 
 import io.wispforest.owo.network.OwoClientConnectionExtension;
+import net.minecraft.network.Connection;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Collections;
 import java.util.Set;
-import net.minecraft.network.Connection;
-import net.minecraft.resources.Identifier;
 
 @Mixin(Connection.class)
 public class ClientConnectionMixin implements OwoClientConnectionExtension {

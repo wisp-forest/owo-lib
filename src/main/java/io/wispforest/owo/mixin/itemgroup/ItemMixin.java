@@ -2,6 +2,8 @@ package io.wispforest.owo.mixin.itemgroup;
 
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.util.pond.OwoItemExtensions;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -10,8 +12,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.function.BiConsumer;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
 
 @Mixin(Item.class)
 public class ItemMixin implements OwoItemExtensions {

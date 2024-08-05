@@ -1,8 +1,9 @@
 package io.wispforest.owo.text;
 
+import net.minecraft.network.chat.contents.TranslatableContents;
+
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.network.chat.contents.TranslatableContents;
 
 public class TranslationContext {
     private static final ThreadLocal<List<TranslatableContents>> translationStack = ThreadLocal.withInitial(ArrayList::new);

@@ -1,6 +1,5 @@
 package io.wispforest.owo.mixin.ui.layers;
 
-import io.wispforest.owo.ui.layers.Layer.Instance;
 import io.wispforest.owo.ui.layers.Layers;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.gui.screens.Screen;

@@ -1,10 +1,10 @@
 package io.wispforest.owo.text;
 
+import net.minecraft.network.chat.ComponentContents;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.HashMap;
 import java.util.Map;
-import net.minecraft.network.chat.ComponentContents;
 
 public final class CustomTextRegistry {
 

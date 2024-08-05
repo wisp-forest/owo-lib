@@ -3,15 +3,14 @@ package io.wispforest.owo.mixin.text;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.*;
 import io.wispforest.owo.text.CustomTextRegistry;
-import io.wispforest.owo.text.CustomTextRegistry.Entry;
+import net.minecraft.network.chat.ComponentContents;
+import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.util.StringRepresentable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 import java.util.stream.Stream;
-import net.minecraft.network.chat.ComponentContents;
-import net.minecraft.network.chat.ComponentSerialization;
-import net.minecraft.util.StringRepresentable;
 
 @Mixin(ComponentSerialization.class)
 public abstract class TextCodecsMixin {

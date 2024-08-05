@@ -3,6 +3,10 @@ package io.wispforest.owo.mixin.text;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.text.TextLanguage;
 import io.wispforest.owo.text.TranslationContext;
+import net.minecraft.locale.Language;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.Text;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -14,10 +18,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import net.minecraft.locale.Language;
-import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.Text;
-import net.minecraft.network.chat.contents.TranslatableContents;
 
 @Mixin(TranslatableContents.class)
 public class TranslatableTextContentMixin {

@@ -1,6 +1,5 @@
 package io.wispforest.owo.mixin.ui;
 
-import Z;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.Tessellator;
 import com.mojang.blaze3d.vertex.VertexFormat;

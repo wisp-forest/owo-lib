@@ -1,10 +1,8 @@
 package io.wispforest.owo.client.screens;
 
 import io.wispforest.owo.mixin.ScreenHandlerInvoker;
-import net.minecraft.core.NonNullList;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 /**

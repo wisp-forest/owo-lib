@@ -1,10 +1,13 @@
 package io.wispforest.owo.mixin.text;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
 import io.wispforest.owo.text.LanguageAccess;
 import io.wispforest.owo.text.TextLanguage;
 import io.wispforest.owo.util.KawaiiUtil;
+import net.minecraft.client.resources.language.ClientLanguage;
+import net.minecraft.client.resources.language.LanguageInfo;
+import net.minecraft.network.chat.Text;
+import net.minecraft.resources.io.ResourceManager;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -18,10 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import net.minecraft.client.resources.language.ClientLanguage;
-import net.minecraft.client.resources.language.LanguageInfo;
-import net.minecraft.network.chat.Text;
-import net.minecraft.resources.io.ResourceManager;
 
 @Mixin(ClientLanguage.class)
 public class TranslationStorageMixin implements TextLanguage {

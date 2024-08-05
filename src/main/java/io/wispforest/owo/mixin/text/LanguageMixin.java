@@ -4,6 +4,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.mojang.serialization.JsonOps;
 import io.wispforest.owo.text.LanguageAccess;
+import net.minecraft.locale.Language;
+import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.network.chat.MutableText;
+import net.minecraft.util.GsonHelper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -11,10 +15,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 import java.io.InputStream;
 import java.util.function.BiConsumer;
-import net.minecraft.locale.Language;
-import net.minecraft.network.chat.ComponentSerialization;
-import net.minecraft.network.chat.MutableText;
-import net.minecraft.util.GsonHelper;
 
 @Mixin(Language.class)
 public class LanguageMixin {

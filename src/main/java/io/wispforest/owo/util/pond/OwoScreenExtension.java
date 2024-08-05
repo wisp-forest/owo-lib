@@ -2,8 +2,9 @@ package io.wispforest.owo.util.pond;
 
 import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.layers.Layer;
-import java.util.List;
 import net.minecraft.client.gui.screens.Screen;
+
+import java.util.List;
 
 public interface OwoScreenExtension {
     List<Layer<?, ?>.Instance> owo$getInstancesView();

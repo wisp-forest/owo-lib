@@ -3,12 +3,12 @@ package io.wispforest.owo.ui.component;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
+import net.minecraft.network.chat.Text;
 import org.w3c.dom.Element;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Map;
-import net.minecraft.network.chat.Text;
 
 public class DiscreteSliderComponent extends SliderComponent {
 

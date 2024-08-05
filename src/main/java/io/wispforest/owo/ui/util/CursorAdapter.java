@@ -2,10 +2,10 @@ package io.wispforest.owo.ui.util;
 
 import com.mojang.blaze3d.platform.Window;
 import io.wispforest.owo.ui.core.CursorStyle;
+import net.minecraft.client.Minecraft;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.EnumMap;
-import net.minecraft.client.Minecraft;
 
 public class CursorAdapter {
 

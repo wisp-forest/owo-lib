@@ -5,11 +5,11 @@ import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.event.*;
 import io.wispforest.owo.ui.util.FocusHandler;
 import io.wispforest.owo.util.EventSource;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Consumer;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 
 /**
  * Stub-version of component which adds implementations for all methods

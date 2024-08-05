@@ -11,19 +11,17 @@ import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.NinePatchTexture;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.WidgetTooltipHolder;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.network.chat.Text;
 import net.minecraft.resources.Identifier;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
+import java.util.Map;
+import java.util.function.Consumer;
 
 public class ButtonComponent extends Button {
 

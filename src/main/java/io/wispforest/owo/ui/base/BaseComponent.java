@@ -6,11 +6,11 @@ import io.wispforest.owo.ui.util.FocusHandler;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.Observable;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Consumer;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 
 /**
  * The reference implementation of the {@link Component} interface,

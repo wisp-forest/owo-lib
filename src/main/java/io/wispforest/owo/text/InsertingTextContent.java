@@ -3,12 +3,12 @@ package io.wispforest.owo.text;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.serialization.CodecUtils;
-import java.util.Optional;
 import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.Text;
-import net.minecraft.network.chat.contents.TranslatableContents;
+
+import java.util.Optional;
 
 public record InsertingTextContent(int index) implements ComponentContents {
 

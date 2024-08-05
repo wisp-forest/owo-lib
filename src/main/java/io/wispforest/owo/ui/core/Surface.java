@@ -1,12 +1,7 @@
 package io.wispforest.owo.ui.core;
 
-import D;
-import F;
-import I;
 import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tessellator;
@@ -16,14 +11,11 @@ import io.wispforest.owo.mixin.ScreenAccessor;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.NinePatchTexture;
-import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.tooltip.TooltipRenderUtil;
-import net.minecraft.client.render.*;
 import net.minecraft.client.renderer.PanoramaRenderer;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.math.MathHelper;
-import org.joml.Matrix4f;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 

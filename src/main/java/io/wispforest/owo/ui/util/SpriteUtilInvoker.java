@@ -3,10 +3,10 @@ package io.wispforest.owo.ui.util;
 import io.wispforest.owo.Owo;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.lang.reflect.Method;
 
 public class SpriteUtilInvoker {
     private static final MethodHandle MARK_SPRITE_ACTIVE = getMarkSpriteActive();

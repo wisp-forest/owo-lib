@@ -3,11 +3,11 @@ package io.wispforest.owo.mixin.itemgroup;
 import io.wispforest.owo.itemgroup.ItemGroupReference;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.OwoItemSettingsExtension;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.function.BiConsumer;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
 
 @Mixin(Item.Properties.class)
 public class ItemSettingsMixin implements OwoItemSettingsExtension {

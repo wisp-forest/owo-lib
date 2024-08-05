@@ -3,7 +3,6 @@ package io.wispforest.owo.ui.util;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.PositionedRectangle;
 import io.wispforest.owo.ui.core.Size;
@@ -13,6 +12,7 @@ import net.minecraft.resources.io.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.Profiler;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;

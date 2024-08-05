@@ -1,13 +1,11 @@
 package io.wispforest.owo.ops;
 
-import ;
 import net.minecraft.TextFormatting;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.MutableText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.Text;
 import net.minecraft.network.chat.contents.TranslatableContents;
-import net.minecraft.text.*;
 import net.minecraft.util.FormattedCharSequence;
 
 /**

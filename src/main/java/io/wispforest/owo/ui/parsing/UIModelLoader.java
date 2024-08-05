@@ -2,7 +2,6 @@ package io.wispforest.owo.ui.parsing;
 
 import blue.endless.jankson.Jankson;
 import blue.endless.jankson.JsonGrammar;
-import blue.endless.jankson.JsonObject;
 import blue.endless.jankson.JsonPrimitive;
 import blue.endless.jankson.api.SyntaxError;
 import io.wispforest.owo.Owo;
@@ -20,7 +19,6 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;

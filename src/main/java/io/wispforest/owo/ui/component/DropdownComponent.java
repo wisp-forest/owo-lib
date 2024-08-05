@@ -1,6 +1,5 @@
 package io.wispforest.owo.ui.component;
 
-import Z;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
@@ -11,13 +10,12 @@ import io.wispforest.owo.ui.util.UISounds;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.minecraft.TextFormatting;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.MutableText;
 import net.minecraft.network.chat.Text;
 import net.minecraft.resources.Identifier;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import java.util.List;
+
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;

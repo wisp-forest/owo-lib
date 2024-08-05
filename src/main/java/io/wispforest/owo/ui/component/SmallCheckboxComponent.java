@@ -11,14 +11,14 @@ import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.Observable;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Text;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 import org.w3c.dom.Element;
 
 import java.util.Map;
-import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.Text;
-import net.minecraft.resources.Identifier;
 
 public class SmallCheckboxComponent extends BaseComponent {
 

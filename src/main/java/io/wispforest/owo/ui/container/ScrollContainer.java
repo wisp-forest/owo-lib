@@ -1,6 +1,5 @@
 package io.wispforest.owo.ui.container;
 
-import F;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
@@ -14,7 +13,7 @@ import org.jetbrains.annotations.Range;
 import org.lwjgl.glfw.GLFW;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import java.util.List;
+
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;

@@ -1,7 +1,5 @@
 package io.wispforest.owo.ui.component;
 
-import Z;
-import com.mojang.blaze3d.vertex.MatrixStack;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.mixin.ui.access.EditBoxAccessor;
 import io.wispforest.owo.mixin.ui.access.EditBoxWidgetAccessor;
@@ -13,19 +11,17 @@ import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.Observable;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.MultiLineEditBox;
+import net.minecraft.client.gui.components.MultilineTextField;
+import net.minecraft.client.gui.components.Whence;
+import net.minecraft.network.chat.Text;
 import org.lwjgl.glfw.GLFW;
 import org.w3c.dom.Element;
 
 import java.util.Map;
 import java.util.function.Consumer;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.MultiLineEditBox;
-import net.minecraft.client.gui.components.MultilineTextField;
-import net.minecraft.client.gui.components.Whence;
-import net.minecraft.network.chat.MutableText;
-import net.minecraft.network.chat.Text;
 
 public class TextAreaComponent extends MultiLineEditBox {
 

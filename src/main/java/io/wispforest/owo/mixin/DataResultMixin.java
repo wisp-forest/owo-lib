@@ -1,6 +1,5 @@
 package io.wispforest.owo.mixin;
 
-import ;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import com.mojang.serialization.DataResult;
@@ -11,7 +10,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import java.lang.reflect.Field;
+
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;

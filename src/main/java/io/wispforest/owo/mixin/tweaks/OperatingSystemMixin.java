@@ -1,16 +1,14 @@
 package io.wispforest.owo.mixin.tweaks;
 
-import ;
 import com.mojang.logging.LogUtils;
+import net.minecraft.Util;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URL;
 import java.util.concurrent.CompletableFuture;
-import net.minecraft.Util;
 
 @Mixin(value = Util.OS.class)
 public abstract class OperatingSystemMixin {

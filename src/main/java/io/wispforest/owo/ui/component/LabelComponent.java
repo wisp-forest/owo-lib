@@ -1,22 +1,21 @@
 package io.wispforest.owo.ui.component;
 
-import com.mojang.blaze3d.vertex.MatrixStack;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.util.Observable;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.Text;
+import net.minecraft.util.FormattedCharSequence;
 import org.w3c.dom.Element;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.Text;
-import net.minecraft.util.FormattedCharSequence;
 
 public class LabelComponent extends BaseComponent {
 

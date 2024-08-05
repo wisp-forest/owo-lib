@@ -1,6 +1,5 @@
 package io.wispforest.owo.ops;
 
-import io.wispforest.owo.Owo;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;

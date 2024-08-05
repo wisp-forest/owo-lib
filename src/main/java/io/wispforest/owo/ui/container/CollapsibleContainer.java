@@ -1,7 +1,5 @@
 package io.wispforest.owo.ui.container;
 
-import Z;
-import com.mojang.blaze3d.vertex.MatrixStack;
 import com.mojang.math.Axis;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
@@ -11,6 +9,8 @@ import io.wispforest.owo.ui.util.Delta;
 import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
+import net.minecraft.TextFormatting;
+import net.minecraft.network.chat.Text;
 import org.lwjgl.glfw.GLFW;
 import org.w3c.dom.Element;
 
@@ -18,8 +18,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import net.minecraft.TextFormatting;
-import net.minecraft.network.chat.Text;
 
 public class CollapsibleContainer extends FlowLayout {
 

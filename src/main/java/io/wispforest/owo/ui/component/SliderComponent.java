@@ -6,7 +6,6 @@ import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import net.minecraft.client.gui.components.AbstractSliderButton;
-import net.minecraft.network.chat.MutableText;
 import net.minecraft.network.chat.Text;
 import net.minecraft.util.math.MathHelper;
 import org.w3c.dom.Element;

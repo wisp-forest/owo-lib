@@ -2,9 +2,10 @@ package io.wispforest.owo.util;
 
 import com.google.common.collect.ImmutableList;
 import io.wispforest.owo.Owo;
-import java.util.List;
 import net.minecraft.Util;
 import net.minecraft.util.RandomSource;
+
+import java.util.List;
 
 public final class Wisdom {
 

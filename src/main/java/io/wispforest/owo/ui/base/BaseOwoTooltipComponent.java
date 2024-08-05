@@ -3,14 +3,13 @@ package io.wispforest.owo.ui.base;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.core.Size;
-import org.jetbrains.annotations.ApiStatus;
-
-import java.util.function.Supplier;
-import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import org.jetbrains.annotations.ApiStatus;
+
+import java.util.function.Supplier;
 
 @ApiStatus.Experimental
 public abstract class BaseOwoTooltipComponent<R extends ParentComponent> implements ClientTooltipComponent {
