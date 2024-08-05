@@ -28,7 +28,7 @@ public abstract class SliderWidgetMixin extends AbstractWidget {
         super(x, y, width, height, message);
     }
 
-    @ModifyArg(method = "keyPressed", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/SliderWidget;setValue(D)V"))
+    @ModifyArg(method = "keyPressed", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/AbstractSliderButton;setValue(D)V"))
     private double injectCustomStep(double value) {
         if (!((Object) this instanceof SliderComponent slider)) return value;
         return this.value + Math.signum(value - this.value) * slider.scrollStep();

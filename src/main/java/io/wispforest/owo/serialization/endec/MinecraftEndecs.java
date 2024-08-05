@@ -1,7 +1,5 @@
 package io.wispforest.owo.serialization.endec;
 
-import ;
-import I;
 import com.mojang.datafixers.util.Function3;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.SerializationAttributes;

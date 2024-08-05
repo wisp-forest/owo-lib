@@ -1,6 +1,5 @@
 package io.wispforest.uwu;
 
-import C;
 import io.wispforest.owo.client.screens.ScreenUtils;
 import io.wispforest.owo.client.screens.SlotGenerator;
 import io.wispforest.owo.client.screens.SyncedProperty;

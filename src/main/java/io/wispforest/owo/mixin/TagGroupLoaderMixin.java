@@ -20,14 +20,14 @@ public class TagGroupLoaderMixin {
 
     @Shadow
     @Final
-    private String dataType;
+    private String directory;
 
-    @Inject(method = "loadTags", at = @At("TAIL"))
+    @Inject(method = "load", at = @At("TAIL"))
     public void injectValues(ResourceManager manager, CallbackInfoReturnable<Map<Identifier, List<TagLoader.EntryWithSource>>> cir) {
         var map = cir.getReturnValue();
 
         TagInjector.ADDITIONS.forEach((location, entries) -> {
-            if (!this.dataType.equals(location.type())) return;
+            if (!this.directory.equals(location.type())) return;
 
             var list = map.computeIfAbsent(location.tagId(), id -> new ArrayList<>());
             entries.forEach(addition -> list.add(new TagLoader.EntryWithSource(addition, "owo")));

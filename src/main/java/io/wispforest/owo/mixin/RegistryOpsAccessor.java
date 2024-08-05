@@ -6,6 +6,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(RegistryOps.class)
 public interface RegistryOpsAccessor {
-    @Accessor("registryInfoGetter")
+    @Accessor("lookupProvider")
     RegistryOps.RegistryInfoLookup owo$infoGetter();
 }

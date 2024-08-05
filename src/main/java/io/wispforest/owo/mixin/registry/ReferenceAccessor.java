@@ -7,9 +7,9 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(Holder.Reference.class)
 public interface ReferenceAccessor<T> {
-    @Invoker("setRegistryKey")
+    @Invoker("bindKey")
     void owo$setRegistryKey(ResourceKey<T> registryKey);
 
-    @Invoker("setValue")
+    @Invoker("bindValue")
     void owo$setValue(T value);
 }

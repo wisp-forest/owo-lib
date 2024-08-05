@@ -10,7 +10,7 @@ import java.util.Map;
 @Mixin(ShaderInstance.class)
 public interface ShaderProgramAccessor {
 
-    @Accessor("loadedUniforms")
+    @Accessor("uniformMap")
     Map<String, Uniform> owo$getLoadedUniforms();
 
 }

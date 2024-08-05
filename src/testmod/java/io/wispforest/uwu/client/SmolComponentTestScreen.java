@@ -6,6 +6,7 @@ import io.wispforest.owo.ui.component.SlimSliderComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.ui.core.Sizing;
+import net.minecraft.network.chat.Text;
 import net.minecraft.resources.Identifier;
 
 public class SmolComponentTestScreen extends BaseUIModelScreen<FlowLayout> {
@@ -20,11 +21,11 @@ public class SmolComponentTestScreen extends BaseUIModelScreen<FlowLayout> {
         rootComponent.childById(SlimSliderComponent.class, "precise-slider").tooltipSupplier(SlimSliderComponent.valueTooltipSupplier(2));
 
         rootComponent.childById(SlimSliderComponent.class, "tiny-steppy-man").tooltipSupplier(SlimSliderComponent.VALUE_TOOLTIP_SUPPLIER).onChanged().subscribe(value -> {
-            this.client.player.sendMessage(Text.literal("tiny steppy man: " + value));
+            this.client.player.sendSystemMessage(Text.literal("tiny steppy man: " + value));
         });
 
         rootComponent.childById(SlimSliderComponent.class, "big-steppy-man").tooltipSupplier(value -> Text.literal("big steppy man: " + value)).onChanged().subscribe(value -> {
-            this.client.player.sendMessage(Text.literal("big steppy man: " + value));
+            this.client.player.sendSystemMessage(Text.literal("big steppy man: " + value));
         });
 
         rootComponent.childById(SlimSliderComponent.class, "inset-slider").<SlimSliderComponent>configure(slider -> {

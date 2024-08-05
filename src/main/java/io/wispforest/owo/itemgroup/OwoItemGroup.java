@@ -10,7 +10,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.item.*;
 import net.minecraft.network.chat.Text;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
@@ -291,7 +290,8 @@ public abstract class OwoItemGroup extends CreativeModeTab {
         return this.activeTabs.contains(tab);
     }
 
-    public @Nullable Identifier getBackgroundTexture() {
+    // TODO: this has been renamed to getBackgroundTextureOwo because the vanilla method is now getBackgroundTexture
+    public @Nullable Identifier getBackgroundTextureOwo() {
         return this.backgroundTexture;
     }
 

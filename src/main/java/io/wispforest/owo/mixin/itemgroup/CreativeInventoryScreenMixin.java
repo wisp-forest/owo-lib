@@ -43,10 +43,10 @@ public abstract class CreativeInventoryScreenMixin extends EffectRenderingInvent
     protected abstract void init();
 
     @Shadow
-    protected abstract boolean shouldShowOperatorTab(Player player);
+    protected abstract boolean hasPermissions(Player player);
 
     @Shadow
-    protected abstract boolean hasScrollbar();
+    protected abstract boolean canScroll();
 
     @Unique
     private final List<ItemGroupButtonWidget> owoButtons = new ArrayList<>();
@@ -66,28 +66,28 @@ public abstract class CreativeInventoryScreenMixin extends EffectRenderingInvent
     // Background
     // ----------
 
-    @ModifyArg(method = "drawBackground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawTexture(Lnet/minecraft/util/Identifier;IIIIII)V", ordinal = 0))
+    @ModifyArg(method = "renderBg", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;drawTexture(Lnet/minecraft/resources/Identifier;IIIIII)V", ordinal = 0))
     private Identifier injectCustomGroupTexture(Identifier original) {
-        if (!(selectedTab instanceof OwoItemGroup owoGroup) || owoGroup.getBackgroundTexture() == null) return original;
-        return owoGroup.getBackgroundTexture();
+        if (!(selectedTab instanceof OwoItemGroup owoGroup) || owoGroup.getBackgroundTextureOwo() == null) return original;
+        return owoGroup.getBackgroundTextureOwo();
     }
 
     // ----------------
     // Scrollbar slider
     // ----------------
 
-    @ModifyArgs(method = "drawBackground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Lnet/minecraft/util/Identifier;IIII)V"))
+    @ModifyArgs(method = "renderBg", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;drawGuiTexture(Lnet/minecraft/resources/Identifier;IIII)V"))
     private void injectCustomScrollbarTexture(Args args) {
         if (!(selectedTab instanceof OwoItemGroup owoGroup) || owoGroup.getScrollerTextures() == null) return;
 
-        args.set(0, this.hasScrollbar() ? owoGroup.getScrollerTextures().enabled() : owoGroup.getScrollerTextures().disabled());
+        args.set(0, this.canScroll() ? owoGroup.getScrollerTextures().enabled() : owoGroup.getScrollerTextures().disabled());
     }
 
     // -------------
     // Group headers
     // -------------
 
-    @ModifyArg(method = "renderTabIcon", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Lnet/minecraft/util/Identifier;IIII)V"))
+    @ModifyArg(method = "renderTabButton", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;drawGuiTexture(Lnet/minecraft/resources/Identifier;IIII)V"))
     private Identifier injectCustomTabTexture(Identifier texture, @Local(argsOnly = true) CreativeModeTab group) {
         if(!(group instanceof OwoItemGroup contextGroup) || contextGroup.getTabTextures() == null) return texture;
 
@@ -97,7 +97,7 @@ public abstract class CreativeInventoryScreenMixin extends EffectRenderingInvent
                 : selectedTab == contextGroup ? contextGroup.column() == 0 ? textures.bottomSelectedFirstColumn() : textures.bottomSelected() : textures.bottomUnselected();
     }
 
-    @Inject(method = "renderTabIcon", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemGroup;getIcon()Lnet/minecraft/item/ItemStack;"), locals = LocalCapture.CAPTURE_FAILHARD)
+    @Inject(method = "renderTabButton", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/CreativeModeTab;getIconItem()Lnet/minecraft/world/item/ItemStack;"), locals = LocalCapture.CAPTURE_FAILHARD)
     private void renderOwoIcon(GuiGraphics context, CreativeModeTab group, CallbackInfo ci, boolean bl, boolean bl2, int i, int j, int k) {
         if (!(group instanceof OwoItemGroup owoGroup)) return;
 
@@ -111,7 +111,7 @@ public abstract class CreativeInventoryScreenMixin extends EffectRenderingInvent
     // oωo tab title
     // -------------
 
-    @ModifyArg(method = "drawForeground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawText(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/text/Text;IIIZ)I"))
+    @ModifyArg(method = "renderLabels", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;drawText(Lnet/minecraft/client/gui/Font;Lnet/minecraft/network/chat/Text;IIIZ)I"))
     private Text injectTabNameAsTitle(Text original) {
         if (!(selectedTab instanceof OwoItemGroup owoGroup) || !owoGroup.hasDynamicTitle() || owoGroup.selectedTabs().size() != 1) {
             return original;
@@ -133,7 +133,7 @@ public abstract class CreativeInventoryScreenMixin extends EffectRenderingInvent
     // oωo tab buttons
     // ---------------
 
-    @Inject(at = @At("HEAD"), method = "setSelectedTab(Lnet/minecraft/item/ItemGroup;)V")
+    @Inject(at = @At("HEAD"), method = "selectTab")
     private void setSelectedTab(CreativeModeTab group, CallbackInfo ci) {
         this.owoButtons.forEach(this::removeWidget);
         this.owoButtons.clear();
@@ -216,7 +216,7 @@ public abstract class CreativeInventoryScreenMixin extends EffectRenderingInvent
     @Unique
     private Consumer<ItemGroupButtonWidget> owo$createSelectAction(OwoItemGroup group, int tabIdx) {
         return button -> {
-            var context = new CreativeModeTab.ItemDisplayParameters(this.enabledFeatures, this.shouldShowOperatorTab(this.menu.player()), this.menu.player().level().registryAccess());
+            var context = new CreativeModeTab.ItemDisplayParameters(this.enabledFeatures, this.hasPermissions(this.menu.player()), this.menu.player().level().registryAccess());
             if (Screen.hasShiftDown()) {
                 group.toggleTab(tabIdx, context);
             } else {

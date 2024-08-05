@@ -1,6 +1,5 @@
 package io.wispforest.uwu.client;
 
-import OwoUIAdapter;
 import io.wispforest.owo.config.ui.ConfigScreen;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.base.BaseUIModelScreen;
@@ -10,6 +9,7 @@ import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.uwu.Uwu;
 import net.minecraft.network.chat.Text;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 public class SelectUwuScreenScreen extends BaseOwoScreen<FlowLayout> {

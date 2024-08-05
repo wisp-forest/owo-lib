@@ -12,14 +12,14 @@ import java.util.Set;
 @Mixin(CreativeModeTab.class)
 public interface ItemGroupAccessor {
 
-    @Accessor("entryCollector")
+    @Accessor("displayItemsGenerator")
     CreativeModeTab.DisplayItemsGenerator owo$getEntryCollector();
 
     @Mutable
-    @Accessor("entryCollector")
+    @Accessor("displayItemsGenerator")
     void owo$setEntryCollector(CreativeModeTab.DisplayItemsGenerator collector);
 
-    @Accessor("searchTabStacks")
+    @Accessor("displayItemsSearchTab")
     void owo$setSearchTabStacks(Set<ItemStack> searchTabStacks);
 
     @Mutable

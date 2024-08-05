@@ -1,6 +1,5 @@
 package io.wispforest.uwu.client;
 
-import OwoUIAdapter;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;

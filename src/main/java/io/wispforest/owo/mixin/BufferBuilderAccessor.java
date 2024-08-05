@@ -11,5 +11,5 @@ public interface BufferBuilderAccessor {
 
     @Accessor("format") VertexFormat getFormat();
 
-    @Accessor("drawMode") VertexFormat.Mode getDrawMode();
+    @Accessor("mode") VertexFormat.Mode getDrawMode();
 }

@@ -11,12 +11,11 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 @Mixin(PlayerAdvancements.class)
 public class PlayerAdvancementTrackerMixin {
     @Shadow
-    private ServerPlayer owner;
+    private ServerPlayer player;
 
-    @SuppressWarnings("unchecked")
     @ModifyArg(method = "save", at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/Codec;encodeStart(Lcom/mojang/serialization/DynamicOps;Ljava/lang/Object;)Lcom/mojang/serialization/DataResult;", remap = false), index = 1)
     private Object onAdvancementsSaved(Object map) {
-        DataSavedEvents.ADVANCEMENTS.invoker().onSaved(owner.getUuid(), ((ProgressMapAccessor) map).getMap());
+        DataSavedEvents.ADVANCEMENTS.invoker().onSaved(player.getUuid(), ((ProgressMapAccessor) map).getMap());
         return map;
     }
 }

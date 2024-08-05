@@ -21,19 +21,19 @@ public class EntityRendererMixin<T extends Entity> {
 
     @Shadow
     @Final
-    protected EntityRenderDispatcher dispatcher;
+    protected EntityRenderDispatcher entityRenderDispatcher;
 
-    @Inject(method = "renderLabelIfPresent", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "renderNameTag", at = @At("HEAD"), cancellable = true)
     private void cancelLabel(T entity, Text text, MatrixStack matrices, MultiBufferSource vertexConsumers, int light, float tickDelta, CallbackInfo ci) {
-        if (((OwoEntityRenderDispatcherExtension) this.dispatcher).owo$showNametag()) return;
+        if (((OwoEntityRenderDispatcherExtension) this.entityRenderDispatcher).owo$showNametag()) return;
         ci.cancel();
     }
 
-    @Inject(method = "renderLabelIfPresent", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/MatrixStack;multiply(Lorg/joml/Quaternionf;)V", shift = At.Shift.AFTER))
+    @Inject(method = "renderNameTag", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/MatrixStack;rotate(Lorg/joml/Quaternionf;)V", shift = At.Shift.AFTER))
     private void adjustLabelRotation(T entity, Text text, MatrixStack matrices, MultiBufferSource vertexConsumers, int light, float tickDelta, CallbackInfo ci) {
-        if (!((OwoEntityRenderDispatcherExtension) this.dispatcher).owo$counterRotate()) return;
+        if (!((OwoEntityRenderDispatcherExtension) this.entityRenderDispatcher).owo$counterRotate()) return;
 
-        matrices.rotate(new Quaternionf(this.dispatcher.cameraOrientation()).invert());
+        matrices.rotate(new Quaternionf(this.entityRenderDispatcher.cameraOrientation()).invert());
         matrices.rotate(Axis.YP.rotationDegrees(180));
     }
 

@@ -7,10 +7,10 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(AbstractContainerScreen.class)
 public interface HandledScreenAccessor {
 
-    @Accessor("x")
+    @Accessor("leftPos")
     int owo$getRootX();
 
-    @Accessor("y")
+    @Accessor("topPos")
     int owo$getRootY();
 
 }

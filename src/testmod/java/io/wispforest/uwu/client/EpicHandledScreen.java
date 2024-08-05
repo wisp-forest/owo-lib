@@ -1,6 +1,5 @@
 package io.wispforest.uwu.client;
 
-import OwoUIAdapter;
 import io.wispforest.owo.mixin.ui.SlotAccessor;
 import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
 import io.wispforest.owo.ui.component.ButtonComponent;
@@ -38,7 +37,7 @@ public class EpicHandledScreen extends BaseOwoHandledScreen<FlowLayout, EpicScre
         frogeNbt.putString("variant", "delightful:froge");
 
         var selectBox = Components.textBox(Sizing.fixed(40));
-        selectBox.setTextPredicate(s -> s.matches("\\d*"));
+        selectBox.setFilter(s -> s.matches("\\d*"));
 
         rootComponent.child(
                 Components.texture(Identifier.parse("textures/gui/container/shulker_box.png"), 0, 0, 176, 166)
@@ -53,11 +52,11 @@ public class EpicHandledScreen extends BaseOwoHandledScreen<FlowLayout, EpicScre
                                 .child(Components.entity(Sizing.fixed(100), EntityType.FROG, frogeNbt).scale(.75f).allowMouseRotation(true).tooltip(Text.literal(":)")))
                                 .child(Containers.horizontalFlow(Sizing.fixed(100), Sizing.content())
                                         .child(Components.button(Text.nullToEmpty("✔"), (ButtonComponent button) -> {
-                                            this.enableSlot(Integer.parseInt(selectBox.getText()));
+                                            this.enableSlot(Integer.parseInt(selectBox.getValue()));
                                         }).tooltip(Text.literal("Enable")))
                                         .child(selectBox.margins(Insets.horizontal(3)).tooltip(Text.literal("Slot Index")))
                                         .child(Components.button(Text.nullToEmpty("❌"), (ButtonComponent button) -> {
-                                            this.disableSlot(Integer.parseInt(selectBox.getText()));
+                                            this.disableSlot(Integer.parseInt(selectBox.getValue()));
                                         }).tooltip(Text.literal("Disable"))).verticalAlignment(VerticalAlignment.CENTER).horizontalAlignment(HorizontalAlignment.CENTER))
                                 .allowOverflow(true)
                 ).surface(Surface.DARK_PANEL).padding(Insets.of(5)).allowOverflow(true).zIndex(500).positioning(Positioning.absolute(100, 100))
@@ -75,16 +74,16 @@ public class EpicHandledScreen extends BaseOwoHandledScreen<FlowLayout, EpicScre
         ).surface(Surface.VANILLA_TRANSLUCENT).verticalAlignment(VerticalAlignment.CENTER).horizontalAlignment(HorizontalAlignment.CENTER);
 
         rootComponent.child(
-                (numberLabel = Components.label(Text.literal(handler.epicNumber.get())))
+                (numberLabel = Components.label(Text.literal(menu.epicNumber.get())))
                         .positioning(Positioning.absolute(0, 0))
         );
 
-        handler.epicNumber.observe(value -> numberLabel.text(Text.literal(value)));
+        menu.epicNumber.observe(value -> numberLabel.text(Text.literal(value)));
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (Screen.hasAltDown() && this.focusedSlot != null) {
+        if (Screen.hasAltDown() && this.hoveredSlot != null) {
             return false;
         }
 
@@ -98,10 +97,10 @@ public class EpicHandledScreen extends BaseOwoHandledScreen<FlowLayout, EpicScre
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (Screen.hasAltDown() && this.focusedSlot != null) {
-            var accessor = ((SlotAccessor) this.focusedSlot);
-            accessor.owo$setX((int) Math.round(this.focusedSlot.x + deltaX));
-            accessor.owo$setY((int) Math.round(this.focusedSlot.y + deltaY));
+        if (Screen.hasAltDown() && this.hoveredSlot != null) {
+            var accessor = ((SlotAccessor) this.hoveredSlot);
+            accessor.owo$setX((int) Math.round(this.hoveredSlot.x + deltaX));
+            accessor.owo$setY((int) Math.round(this.hoveredSlot.y + deltaY));
         }
 
         return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);

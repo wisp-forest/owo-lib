@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class ServerPlayerEntityMixin {
 
     @SuppressWarnings("ConstantConditions")
-    @Inject(method = "onScreenHandlerOpened", at = @At("HEAD"))
+    @Inject(method = "initMenu", at = @At("HEAD"))
     private void attachScreenHandler(AbstractContainerMenu screenHandler, CallbackInfo ci) {
         ((OwoScreenHandlerExtension) screenHandler).owo$attachToPlayer((ServerPlayer) (Object) this);
     }

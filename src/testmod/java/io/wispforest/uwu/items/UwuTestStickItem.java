@@ -69,12 +69,12 @@ public class UwuTestStickItem extends Item {
 
     public UwuTestStickItem() {
         super(new Item.Properties()
-                .group(Uwu.SIX_TAB_GROUP).tab(3).maxCount(1)
+                .group(Uwu.SIX_TAB_GROUP).tab(3).stacksTo(1)
                 .trackUsageStat()
                 .stackGenerator(OwoItemGroup.DEFAULT_STACK_GENERATOR.andThen((item, stacks) -> {
                     final var stack = new ItemStack(item);
-                    stack.set(DataComponentTypes.CUSTOM_NAME, Text.literal("the stick of the test").styled(style -> style.withItalic(false)));
-                    stacks.add(stack);
+                    stack.set(DataComponents.CUSTOM_NAME, Text.literal("the stick of the test").withStyle(style -> style.withItalic(false)));
+                    stacks.accept(stack);
                 })));
 
         Uwu.CHANNEL.registerServerbound(ThatPacket.class, StructEndecBuilder.of(YEP_SAME_HERE.fieldOf("mhmm", ThatPacket::mhmm), ThatPacket::new), (message, access) -> {

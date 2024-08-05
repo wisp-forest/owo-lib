@@ -18,7 +18,7 @@ import java.util.function.Consumer;
 @Mixin(GameRenderer.class)
 public class GameRendererMixin {
 
-    @Inject(method = "loadPrograms", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
+    @Inject(method = "reloadShaders", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
     void loadAllTheShaders(ResourceProvider factory, CallbackInfo ci, List<Program> stages, List<Pair<ShaderInstance, Consumer<ShaderInstance>>> shadersToLoad) {
         GlProgram.forEachProgram(loader -> shadersToLoad.add(new Pair<>(loader.getA().apply(factory), loader.getB())));
     }

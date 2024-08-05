@@ -12,10 +12,10 @@ public interface EditBoxAccessor {
     @Accessor("width")
     void owo$setWidth(int width);
 
-    @Accessor("selectionEnd")
+    @Accessor("selectCursor")
     void owo$setSelectionEnd(int width);
 
-    @Accessor("selectionEnd")
+    @Accessor("selectCursor")
     int owo$getSelectionEnd();
 
 }

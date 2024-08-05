@@ -15,13 +15,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class TextFieldWidgetMixin extends AbstractWidget {
 
     @Shadow
-    private String text;
+    private String value;
 
     public TextFieldWidgetMixin(int x, int y, int width, int height, Text message) {
         super(x, y, width, height, message);
     }
 
-    @Inject(method = "getWordSkipPosition(IIZ)I", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "getWordPosition(IIZ)I", at = @At("HEAD"), cancellable = true)
     private void iProvideUsefulSeparators(int wordOffset, int cursorPosition, boolean skipOverSpaces, CallbackInfoReturnable<Integer> cir) {
         if (!Owo.DEBUG) return;
 
@@ -31,10 +31,10 @@ public abstract class TextFieldWidgetMixin extends AbstractWidget {
         for (int i = 0; i < wordsToSkip; i++) {
             if (forward) {
                 cursorPosition++;
-                while (cursorPosition < this.text.length() && owo$isWordChar(this.text.charAt(cursorPosition))) cursorPosition++;
+                while (cursorPosition < this.value.length() && owo$isWordChar(this.value.charAt(cursorPosition))) cursorPosition++;
             } else if (cursorPosition > 0) {
                 cursorPosition--;
-                while (cursorPosition > 0 && owo$isWordChar(this.text.charAt(cursorPosition - 1))) cursorPosition--;
+                while (cursorPosition > 0 && owo$isWordChar(this.value.charAt(cursorPosition - 1))) cursorPosition--;
             }
         }
 

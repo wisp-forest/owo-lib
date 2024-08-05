@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 @Mixin(ComponentSerialization.class)
 public abstract class TextCodecsMixin {
 
-    @ModifyVariable(method = "dispatchingCodec", at = @At(value = "STORE", ordinal = 0))
+    @ModifyVariable(method = "createLegacyComponentMatcher", at = @At(value = "STORE", ordinal = 0))
     private static <T extends StringRepresentable> Codec<T> injectCustomTextTypesExplicit(Codec<T> codec, T[] types) {
         if (!types.getClass().getComponentType().isAssignableFrom(ComponentContents.Type.class)) return codec;
 
@@ -41,7 +41,7 @@ public abstract class TextCodecsMixin {
         };
     }
 
-    @ModifyVariable(method = "dispatchingCodec", at = @At(value = "STORE", ordinal = 0))
+    @ModifyVariable(method = "createLegacyComponentMatcher", at = @At(value = "STORE", ordinal = 0))
     private static <T extends StringRepresentable, E> MapCodec<E> injectCustomTextTypesFuzzy(MapCodec<E> codec, T[] types) {
         if (!types.getClass().getComponentType().isAssignableFrom(ComponentContents.Type.class)) return codec;
 

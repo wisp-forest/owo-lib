@@ -31,7 +31,7 @@ public abstract class ClickableWidgetMixin implements ComponentStub, net.minecra
 
     @Shadow public boolean active;
 
-    @Shadow protected boolean hovered;
+    @Shadow protected boolean isHovered;
     @Unique
     protected VanillaWidgetComponent owo$wrapper = null;
 
@@ -366,8 +366,8 @@ public abstract class ClickableWidgetMixin implements ComponentStub, net.minecra
         return CursorStyle.POINTER;
     }
 
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/ClickableWidget;renderWidget(Lnet/minecraft/client/gui/DrawContext;IIF)V"))
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/AbstractWidget;renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V"))
     private void setHovered(GuiGraphics context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-        if (this.owo$wrapper != null) this.hovered = this.hovered && this.owo$wrapper.hovered();
+        if (this.owo$wrapper != null) this.isHovered = this.isHovered && this.owo$wrapper.hovered();
     }
 }

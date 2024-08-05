@@ -18,11 +18,11 @@ public interface DrawContextInvoker {
     @Invoker("drawTooltip")
     void owo$renderTooltipFromComponents(Font textRenderer, List<ClientTooltipComponent> components, int x, int y, ClientTooltipPositioner positioner);
 
-    @Accessor("matrices")
+    @Accessor("matrixStack")
     MatrixStack owo$getMatrices();
 
     @Mutable
-    @Accessor("matrices")
+    @Accessor("matrixStack")
     void owo$setMatrices(MatrixStack matrices);
 
     @Accessor("scissorStack")

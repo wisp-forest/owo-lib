@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(PlayerDataStorage.class)
 public class WorldSaveHandlerMixin {
-    @Inject(method = "savePlayerData", at = @At(value = "INVOKE", target = "Ljava/nio/file/Files;createTempFile(Ljava/nio/file/Path;Ljava/lang/String;Ljava/lang/String;[Ljava/nio/file/attribute/FileAttribute;)Ljava/nio/file/Path;"), locals = LocalCapture.CAPTURE_FAILHARD)
+    @Inject(method = "save", at = @At(value = "INVOKE", target = "Ljava/nio/file/Files;createTempFile(Ljava/nio/file/Path;Ljava/lang/String;Ljava/lang/String;[Ljava/nio/file/attribute/FileAttribute;)Ljava/nio/file/Path;"), locals = LocalCapture.CAPTURE_FAILHARD)
     public void onPlayerDataSaved(Player player, CallbackInfo ci, NbtCompound tag) {
         DataSavedEvents.PLAYER_DATA.invoker().onSaved(player.getUuid(), tag);
     }

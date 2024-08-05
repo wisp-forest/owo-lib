@@ -18,9 +18,9 @@ public class EpicHandledModelScreen extends BaseUIModelHandledScreen<FlowLayout,
     @Override
     protected void build(FlowLayout rootComponent) {
         var indexField = rootComponent.childById(EditBox.class, "index-field");
-        indexField.setTextPredicate(s -> s.matches("\\d*"));
+        indexField.setFilter(s -> s.matches("\\d*"));
 
-        rootComponent.childById(ButtonComponent.class, "enable-button").onPress(button -> this.enableSlot(Integer.parseInt(indexField.getText())));
-        rootComponent.childById(ButtonComponent.class, "disable-button").onPress(button -> this.disableSlot(Integer.parseInt(indexField.getText())));
+        rootComponent.childById(ButtonComponent.class, "enable-button").onPress(button -> this.enableSlot(Integer.parseInt(indexField.getValue())));
+        rootComponent.childById(ButtonComponent.class, "disable-button").onPress(button -> this.disableSlot(Integer.parseInt(indexField.getValue())));
     }
 }

@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 @Mixin(EffectRenderingInventoryScreen.class)
 public class AbstractInventoryScreenMixin {
 
-    @ModifyVariable(method = "drawStatusEffects", at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/screen/ingame/AbstractInventoryScreen;width:I", ordinal = 0), ordinal = 2)
+    @ModifyVariable(method = "renderEffects", at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/screens/inventory/EffectRenderingInventoryScreen;width:I", ordinal = 0), ordinal = 2)
     private int shiftStatusEffects(int x) {
         if (!((Object) this instanceof CreativeModeInventoryScreen)) return x;
         if (!(CreativeInventoryScreenAccessor.owo$getSelectedTab() instanceof OwoItemGroup group)) return x;

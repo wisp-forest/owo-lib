@@ -40,7 +40,7 @@ public abstract class HandledScreenMixin extends Screen {
         owo$inOwoScreen = false;
     }
 
-    @Inject(method = "drawSlot", at = @At("HEAD"))
+    @Inject(method = "renderSlot", at = @At("HEAD"))
     private void injectSlotScissors(GuiGraphics context, Slot slot, CallbackInfo ci) {
         if (!owo$inOwoScreen) return;
 
@@ -51,7 +51,7 @@ public abstract class HandledScreenMixin extends Screen {
         GlStateManager._scissorBox(scissorArea.x(), scissorArea.y(), scissorArea.width(), scissorArea.height());
     }
 
-    @Inject(method = "drawSlot", at = @At("RETURN"))
+    @Inject(method = "renderSlot", at = @At("RETURN"))
     private void clearSlotScissors(GuiGraphics context, Slot slot, CallbackInfo ci) {
         if (!owo$inOwoScreen) return;
 
@@ -61,25 +61,25 @@ public abstract class HandledScreenMixin extends Screen {
         GlStateManager._disableScissorTest();
     }
 
-    @Inject(method = "drawSlotHighlight", at = @At(value = "HEAD"))
+    @Inject(method = "renderSlotHighlight", at = @At(value = "HEAD"))
     private static void enableSlotDepth(GuiGraphics context, int x, int y, int z, CallbackInfo ci) {
         if (!owo$inOwoScreen) return;
         RenderSystem.enableDepthTest();
         context.matrixStack().translate(0, 0, 300);
     }
 
-    @Inject(method = "drawSlotHighlight", at = @At("TAIL"))
+    @Inject(method = "renderSlotHighlight", at = @At("TAIL"))
     private static void clearSlotDepth(GuiGraphics context, int x, int y, int z, CallbackInfo ci) {
         if (!owo$inOwoScreen) return;
         context.matrixStack().translate(0, 0, -300);
     }
 
-    @ModifyVariable(method = "mouseClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/option/SimpleOption;getValue()Ljava/lang/Object;", ordinal = 0), ordinal = 3)
+    @ModifyVariable(method = "mouseClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/OptionInstance;get()Ljava/lang/Object;", ordinal = 0), ordinal = 3)
     private int doNoThrow(int slotId, @Local() Slot slot) {
         return (((Object) this instanceof BaseOwoHandledScreen<?, ?>) && slot != null) ? slot.index : slotId;
     }
 
-    @Inject(method = "keyPressed", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/HandledScreen;handleHotbarKeyPressed(II)Z"), cancellable = true)
+    @Inject(method = "keyPressed", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/inventory/AbstractContainerScreen;checkHotbarKeyPressed(II)Z"), cancellable = true)
     private void closeIt(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
         if (!((Object) this instanceof BaseOwoHandledScreen<?, ?>)) return;
 

@@ -17,7 +17,7 @@ public abstract class TextFieldWidgetMixin extends AbstractWidget implements Gre
         super(x, y, width, height, message);
     }
 
-    @Inject(method = "onChanged", at = @At("HEAD"))
+    @Inject(method = "onValueChange", at = @At("HEAD"))
     private void callOwoListener(String newText, CallbackInfo ci) {
         if (!(this instanceof TextBoxComponentAccessor accessor)) return;
         accessor.owo$textValue().set(newText);

@@ -28,7 +28,7 @@ public class TranslationStorageMixin implements TextLanguage {
     @Mutable
     @Shadow
     @Final
-    private Map<String, String> translations;
+    private Map<String, String> storage;
 
     private static Map<String, Text> owo$buildingTextMap;
 
@@ -40,10 +40,10 @@ public class TranslationStorageMixin implements TextLanguage {
 
         var builder = ImmutableMap.<String, String>builder();
         translations.forEach((s, s2) -> builder.put(s, KawaiiUtil.uwuify(s2)));
-        this.translations = builder.build();
+        this.storage = builder.build();
     }
 
-    @Inject(method = "load(Lnet/minecraft/resource/ResourceManager;Ljava/util/List;Z)Lnet/minecraft/client/resource/language/TranslationStorage;", at = @At("HEAD"))
+    @Inject(method = "loadFrom", at = @At("HEAD"))
     private static void initTextMap(ResourceManager resourceManager, List<LanguageInfo> definitions, boolean leftToRight, CallbackInfoReturnable<ClientLanguage> cir) {
         owo$buildingTextMap = new HashMap<>();
         LanguageAccess.textConsumer = owo$buildingTextMap::put;
@@ -55,13 +55,13 @@ public class TranslationStorageMixin implements TextLanguage {
         owo$buildingTextMap = null;
     }
 
-    @Inject(method = "hasTranslation", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "has", at = @At("HEAD"), cancellable = true)
     private void hasTranslation(String key, CallbackInfoReturnable<Boolean> cir) {
         if (this.owo$textMap.containsKey(key))
             cir.setReturnValue(true);
     }
 
-    @Inject(method = "get", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "getOrDefault", at = @At("HEAD"), cancellable = true)
     private void get(String key, String fallback, CallbackInfoReturnable<String> cir) {
         if (this.owo$textMap.containsKey(key))
             cir.setReturnValue(this.owo$textMap.get(key).getString());

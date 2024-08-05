@@ -1,6 +1,5 @@
 package io.wispforest.owo.config.ui;
 
-import D;
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.config.annotation.RangeConstraint;
 import io.wispforest.owo.config.ui.component.*;

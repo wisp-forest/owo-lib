@@ -42,7 +42,7 @@ public class EntityRenderDispatcherMixin implements OwoEntityRenderDispatcherExt
 
     @Shadow public Camera camera;
 
-    @Inject(method = "renderFire", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/MatrixStack;multiply(Lorg/joml/Quaternionf;)V", shift = At.Shift.AFTER))
+    @Inject(method = "renderFlame", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/MatrixStack;rotate(Lorg/joml/Quaternionf;)V", shift = At.Shift.AFTER))
     private void cancelFireRotation(MatrixStack matrices, MultiBufferSource vertexConsumers, Entity entity, Quaternionf rotation, CallbackInfo ci) {
         if (!this.owo$counterRotate) return;
         matrices.rotate(Axis.YP.rotationDegrees(this.camera.getYRot() + 170));

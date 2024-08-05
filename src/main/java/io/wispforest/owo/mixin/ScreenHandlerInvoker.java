@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(AbstractContainerMenu.class)
 public interface ScreenHandlerInvoker {
 
-    @Invoker("insertItem")
+    @Invoker("moveItemStackTo")
     boolean owo$insertItem(ItemStack stack, int startIndex, int endIndex, boolean fromLast);
 
 }

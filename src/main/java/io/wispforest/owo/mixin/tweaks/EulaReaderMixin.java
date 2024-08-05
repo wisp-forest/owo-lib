@@ -24,13 +24,13 @@ public abstract class EulaReaderMixin {
 
     @Shadow
     @Final
-    private Path eulaFile;
+    private Path file;
 
-    @Shadow public abstract boolean isEulaAgreedTo();
+    @Shadow public abstract boolean hasAgreedToEULA();
 
-    @Inject(method = "checkEulaAgreement", at = @At(value = "TAIL"), cancellable = true)
+    @Inject(method = "readFile", at = @At(value = "TAIL"), cancellable = true)
     private void overrideEulaAgreement(CallbackInfoReturnable<Boolean> cir) {
-        if (this.isEulaAgreedTo()) return;
+        if (this.hasAgreedToEULA()) return;
 
         var scanner = new Scanner(System.in);
         LOGGER.info("By answering 'true' to this prompt you are indicating your agreement to Minecraft's EULA (https://account.mojang.com/documents/minecraft_eula)\nEULA:");
@@ -38,7 +38,7 @@ public abstract class EulaReaderMixin {
         var input = scanner.next();
         if (!input.equalsIgnoreCase("true")) return;
 
-        try (var inStream = Files.newInputStream(this.eulaFile); var outStream = Files.newOutputStream(this.eulaFile)) {
+        try (var inStream = Files.newInputStream(this.file); var outStream = Files.newOutputStream(this.file)) {
             var properties = new Properties();
             properties.load(inStream);
             properties.setProperty("eula", "true");

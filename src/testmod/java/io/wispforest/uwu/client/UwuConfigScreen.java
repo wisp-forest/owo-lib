@@ -37,7 +37,7 @@ public class UwuConfigScreen extends BaseUIModelScreen<FlowLayout> {
 
         var valueBox = option.childById(EditBox.class, "value-box");
         option.childById(ButtonComponent.class, "reset-button").onPress(button -> {
-            valueBox.setText(String.valueOf(index * index));
+            valueBox.setValue(String.valueOf(index * index));
         });
 
         return option;

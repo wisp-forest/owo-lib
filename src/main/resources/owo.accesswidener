@@ -1,12 +1,12 @@
 accessWidener v2 named
 
-accessible method net/minecraft/client/gui/screen/Screen addDrawableChild (Lnet/minecraft/client/gui/Element;)Lnet/minecraft/client/gui/Element;
+accessible method net/minecraft/client/gui/screens/Screen addRenderableWidget (Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;
 
-extendable method net/minecraft/item/ItemGroup <init> (Lnet/minecraft/item/ItemGroup$Row;ILnet/minecraft/item/ItemGroup$Type;Lnet/minecraft/text/Text;Ljava/util/function/Supplier;Lnet/minecraft/item/ItemGroup$EntryCollector;)V
-transitive-accessible class net/minecraft/item/ItemGroup$Entries
-transitive-accessible class net/minecraft/item/ItemGroup$EntriesImpl
+extendable method net/minecraft/world/item/CreativeModeTab <init> (Lnet/minecraft/world/item/CreativeModeTab$Row;ILnet/minecraft/world/item/CreativeModeTab$Type;Lnet/minecraft/network/chat/Text;Ljava/util/function/Supplier;Lnet/minecraft/world/item/CreativeModeTab$DisplayItemsGenerator;)V
+transitive-accessible class net/minecraft/world/item/CreativeModeTab$Output
+transitive-accessible class net/minecraft/world/item/CreativeModeTab$ItemDisplayBuilder
 
-transitive-accessible class net/minecraft/client/gui/DrawContext$ScissorStack
-transitive-extendable method net/minecraft/client/gui/widget/CheckboxWidget <init> (IIILnet/minecraft/text/Text;Lnet/minecraft/client/font/TextRenderer;ZLnet/minecraft/client/gui/widget/CheckboxWidget$Callback;)V
+transitive-accessible class net/minecraft/client/gui/GuiGraphics$ScissorStack
+transitive-extendable method net/minecraft/client/gui/components/Checkbox <init> (IIILnet/minecraft/network/chat/Text;Lnet/minecraft/client/gui/Font;ZLnet/minecraft/client/gui/components/Checkbox$OnValueChange;)V
 
-accessible class net/minecraft/registry/RegistryOps$CachedRegistryInfoGetter
+accessible class net/minecraft/resources/RegistryOps$HolderLookupAdapter

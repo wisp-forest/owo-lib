@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.Map;
 
-@Mixin(targets = "net/minecraft/advancement/PlayerAdvancementTracker$ProgressMap")
+@Mixin(targets = "net/minecraft/server/PlayerAdvancements$Data")
 public interface ProgressMapAccessor {
     @Accessor
     Map<Identifier, AdvancementProgress> getMap();

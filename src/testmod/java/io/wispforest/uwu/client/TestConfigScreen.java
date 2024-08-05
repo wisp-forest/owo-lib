@@ -1,6 +1,5 @@
 package io.wispforest.uwu.client;
 
-import OwoUIAdapter;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.ButtonComponent;
@@ -69,7 +68,7 @@ public class TestConfigScreen extends BaseOwoScreen<FlowLayout> {
             valueLayout.child(valueBox.margins(Insets.horizontal(5)));
 
             valueLayout.child(Components.button(Text.literal("⇄"), (ButtonComponent button) -> {
-                valueBox.setText(option.value);
+                valueBox.setValue(option.value);
             }).margins(Insets.right(5)));
         }
 

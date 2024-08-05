@@ -1,6 +1,5 @@
 package io.wispforest.owo.config.ui.component;
 
-import D;
 import io.wispforest.owo.ui.component.TextBoxComponent;
 import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.Sizing;

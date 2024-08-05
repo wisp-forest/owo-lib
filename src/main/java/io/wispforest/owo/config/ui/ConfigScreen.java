@@ -1,8 +1,5 @@
 package io.wispforest.owo.config.ui;
 
-import ;
-import I;
-import Z;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.ConfigWrapper;
 import io.wispforest.owo.config.Option;

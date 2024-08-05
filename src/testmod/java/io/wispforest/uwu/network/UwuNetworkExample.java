@@ -10,6 +10,7 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.network.chat.Text;
 import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
 
@@ -29,7 +30,7 @@ public class UwuNetworkExample {
         REGISTRY.put("two", RecordEndec.create(CHANNEL.builder(), DispatchedSubclassTwo.class));
 
         CHANNEL.registerClientbound(StringPacket.class, (message, access) -> {
-            access.player().sendMessage(Text.of(message.value()), false);
+            access.player().displayClientMessage(Text.literal(message.value()), false);
         });
 
         CHANNEL.registerServerbound(KeycodePacket.class, (message, access) -> {
@@ -37,19 +38,19 @@ public class UwuNetworkExample {
         });
 
         CHANNEL.registerServerbound(MaldingPacket.class, (message, access) -> {
-            access.player().sendMessage(Text.of(message.toString()), false);
+            access.player().displayClientMessage(Text.literal(message.toString()), false);
         });
 
         CHANNEL.registerServerbound(NullablePacket.class, (message, access) -> {
             if(message.name() == null && message.names() == null) {
-                access.player().sendMessage(Text.of("NULLABLITY FOR THE WIN"));
+                access.player().sendSystemMessage(Text.literal("NULLABLITY FOR THE WIN"));
             } else {
                 var text = Text.literal("");
 
-                text.append(Text.of(String.valueOf(message.name())));
-                text.append(Text.of(String.valueOf(message.names())));
+                text.append(Text.literal(String.valueOf(message.name())));
+                text.append(Text.literal(String.valueOf(message.names())));
 
-                access.player().sendMessage(text);
+                access.player().sendSystemMessage(text);
             }
         });
     }

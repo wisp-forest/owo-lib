@@ -1,6 +1,5 @@
 package io.wispforest.owo.particles;
 
-import D;
 import io.wispforest.owo.util.VectorRandomUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;

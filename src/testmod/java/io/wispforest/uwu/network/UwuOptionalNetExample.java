@@ -24,7 +24,7 @@ public class UwuOptionalNetExample {
             var serverChannel = OwoNetChannel.createOptional(Identifier.of("uwu", "optional_server"));
 
             serverChannel.registerClientbound(StringPacket.class, (message, access) -> {
-                access.player().sendMessage(Text.of(message.value()), false);
+                access.player().displayClientMessage(Text.literal(message.value()), false);
             });
 
             CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> {

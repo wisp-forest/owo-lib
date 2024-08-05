@@ -35,8 +35,6 @@ import java.util.regex.Pattern;
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 
-import ;
-
 public class DumpdataCommand {
 
     private static final int GENERAL_PURPLE = 0xB983FF;

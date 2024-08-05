@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ServerPlayerGameMode.class)
 public class ServerPlayerInteractionManagerMixin {
 
-    @Inject(method = "interactItem", at = @At("RETURN"))
+    @Inject(method = "useItem", at = @At("RETURN"))
     private void incrementUseState(ServerPlayer player, Level world, ItemStack stack, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
         if (!((OwoItemExtensions) stack.getItem()).owo$shouldTrackUsageStat() || !cir.getReturnValue().indicateItemUse()) {
             return;

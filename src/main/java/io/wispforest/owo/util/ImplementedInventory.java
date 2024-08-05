@@ -76,7 +76,7 @@ public interface ImplementedInventory extends Container {
     default ItemStack removeItem(int slot, int count) {
         ItemStack result = ContainerHelper.removeItem(getItems(), slot, count);
         if (!result.isEmpty()) {
-            markDirty();
+            setChanged();
         }
         return result;
     }
@@ -121,7 +121,7 @@ public interface ImplementedInventory extends Container {
      * the inventory contents and notify neighboring blocks of inventory changes.
      */
     @Override
-    default void markDirty() {
+    default void setChanged() {
         // Override if you want behavior.
     }
 

@@ -39,7 +39,7 @@ public class SlotMixin implements OwoSlotExtension {
         return this.owo$scissorArea;
     }
 
-    @Inject(method = "isEnabled", at = @At("TAIL"), cancellable = true)
+    @Inject(method = "isActive", at = @At("TAIL"), cancellable = true)
     private void injectOverride(CallbackInfoReturnable<Boolean> cir) {
         if (!this.owo$disabledOverride) return;
         cir.setReturnValue(false);

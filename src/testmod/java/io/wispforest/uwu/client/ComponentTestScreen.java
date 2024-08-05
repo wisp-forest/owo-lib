@@ -1,7 +1,7 @@
 package io.wispforest.uwu.client;
 
-import OwoUIAdapter;
 import com.mojang.authlib.GameProfile;
+import com.mojang.math.Axis;
 import io.wispforest.owo.ui.component.*;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
@@ -10,6 +10,7 @@ import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.core.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -58,7 +59,7 @@ public class ComponentTestScreen extends Screen {
                         .child(Components.button(Text.nullToEmpty("Dark Background"), button -> rootComponent.surface(Surface.flat(0x77000000))).horizontalSizing(Sizing.fixed(95)))
                         .child(Components.button(Text.nullToEmpty("No Background"), button -> rootComponent.surface(Surface.BLANK)).margins(Insets.vertical(5)).horizontalSizing(Sizing.fixed(95)))
                         .child(Components.button(Text.nullToEmpty("Dirt Background"), button -> rootComponent.surface(Surface.OPTIONS_BACKGROUND)).horizontalSizing(Sizing.fixed(95)))
-                        .child(Components.checkbox(Text.nullToEmpty("bruh")).onChanged(aBoolean -> this.client.player.sendMessage(Text.of("bruh: " + aBoolean))).margins(Insets.top(5)))
+                        .child(Components.checkbox(Text.nullToEmpty("bruh")).onChanged(aBoolean -> this.client.player.sendSystemMessage(Text.literal("bruh: " + aBoolean))).margins(Insets.top(5)))
                         .padding(Insets.of(10))
                         .surface(Surface.vanillaPanorama(true))
                         .positioning(Positioning.relative(1, 1))
@@ -68,7 +69,7 @@ public class ComponentTestScreen extends Screen {
         var verticalAnimation = innerLayout.verticalSizing().animate(350, Easing.SINE, Sizing.content(50));
 
         verticalAnimation.finished().subscribe((direction, looping) -> {
-            client.inGameHud.getChatHud().addMessage(Text.literal("vertical animation finished in direction " + direction.name()));
+            client.gui.getChat().addMessage(Text.literal("vertical animation finished in direction " + direction.name()));
         });
 
         final var bruh = Components.box(Sizing.fixed(150), Sizing.fixed(20));
@@ -94,11 +95,11 @@ public class ComponentTestScreen extends Screen {
                             verticalAnimation.reverse();
 
                             button.setMessage(verticalAnimation.direction() == Animation.Direction.FORWARDS
-                                    ? Text.of("-")
-                                    : Text.of("+")
+                                    ? Text.literal("-")
+                                    : Text.literal("+")
                             );
                         }).<ButtonComponent>configure(button -> {
-                            button.setTooltip(Tooltip.of(Text.of("a vanilla tooltip")));
+                            button.setTooltip(Tooltip.create(Text.literal("a vanilla tooltip")));
                             button.margins(Insets.of(5)).sizing(Sizing.fixed(12));
                         })
                 )
@@ -109,7 +110,7 @@ public class ComponentTestScreen extends Screen {
 
         innerLayout.child(Components.textArea(Sizing.fixed(75), Sizing.content()).maxLines(5).displayCharCount(true));
         innerLayout.child(Components.textArea(Sizing.fixed(75), Sizing.fixed(75)).<TextAreaComponent>configure(textArea -> {
-            textArea.displayCharCount(true).setMaxLength(100);
+            textArea.displayCharCount(true).setCharacterLimit(100);
         }));
 
         rootComponent.child(Containers.horizontalScroll(Sizing.fill(20), Sizing.content(), innerLayout)
@@ -136,8 +137,8 @@ public class ComponentTestScreen extends Screen {
                 .child(Components.label(Text.literal("AAAAAAAAAAAAAAAAAAA").append(Text.literal("Layout")
                                 .withStyle(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackInfo(Items.SCULK_SHRIEKER.getDefaultInstance())))))
                         .append(Text.literal("\nAAAAAAAAAAAAAAA"))).margins(Insets.of(5)))
-                .child(Components.button(Text.nullToEmpty("⇄"), button -> this.clearAndInit()).sizing(Sizing.fixed(20)))
-                .child(Components.button(Text.nullToEmpty("X"), button -> this.close()).sizing(Sizing.fixed(20)))
+                .child(Components.button(Text.nullToEmpty("⇄"), button -> this.rebuildWidgets()).sizing(Sizing.fixed(20)))
+                .child(Components.button(Text.nullToEmpty("X"), button -> this.onClose()).sizing(Sizing.fixed(20)))
                 .positioning(Positioning.relative(100, 0))
                 .verticalAlignment(VerticalAlignment.CENTER)
                 .surface(Surface.TOOLTIP)
@@ -170,7 +171,7 @@ public class ComponentTestScreen extends Screen {
                                 .message(value -> Text.translatable("text.ui.test_slider", value))
                                 .onChanged().subscribe(value -> {
                                     slider.parent().surface(Surface.blur(3, (float) (value * 3)));
-                                    this.client.player.sendMessage(Text.of("sliding towards " + value));
+                                    this.client.player.sendSystemMessage(Text.literal("sliding towards " + value));
                                 })
                 ))
                 .gap(10)
@@ -187,9 +188,9 @@ public class ComponentTestScreen extends Screen {
                 .text(Text.nullToEmpty("very good"))
                 .checkbox(Text.nullToEmpty("checking time"), false, aBoolean -> {})
                 .nested(Text.nullToEmpty("nested entry"), Sizing.content(), nested -> {
-                    nested.text(Text.of("nest title"))
+                    nested.text(Text.literal("nest title"))
                             .divider()
-                            .button(Text.of("nest button"), dropdownComponent -> {});
+                            .button(Text.literal("nest button"), dropdownComponent -> {});
                 });
 
         var dropdownButton = Components.button(Text.nullToEmpty("Dropdown"), button -> {
@@ -204,7 +205,7 @@ public class ComponentTestScreen extends Screen {
                                 .child(Containers.renderEffect(
                                         Components.sprite(new Material(TextureAtlas.LOCATION_BLOCKS, Identifier.parse("block/stone"))).margins(Insets.of(5))
                                 ).<RenderEffectWrapper<?>>configure(wrapper -> {
-                                    wrapper.effect(RenderEffectWrapper.RenderEffect.rotate(RotationAxis.POSITIVE_Z, -45));
+                                    wrapper.effect(RenderEffectWrapper.RenderEffect.rotate(Axis.ZP, -45));
                                     wrapper.effect(RenderEffectWrapper.RenderEffect.color(Color.ofHsv(.5f, 1f, 1f)));
                                 }))
                                 .child(dropdownButton)
@@ -280,7 +281,7 @@ public class ComponentTestScreen extends Screen {
 
         // i knew it all along, chyz truly is a pig
         var pig = EntityComponent.createRenderablePlayer(new GameProfile(UUID.fromString("09de8a6d-86bf-4c15-bb93-ce3384ce4e96"), "chyzman"));
-        pig.setOnFire(true);
+        pig.setSharedFlagOnFire(true);
 
         rootComponent.child(
                 Components.entity(Sizing.fixed(100), pig)
@@ -311,7 +312,7 @@ public class ComponentTestScreen extends Screen {
                 buttonGrid.child(
                         Components.button(Text.nullToEmpty("" + (row * 5 + column)), button -> {
                             if (button.getMessage().getString().equals("11")) {
-                                buttonGrid.child(Components.button(Text.of("long boiii"), b -> buttonGrid.child(button, 2, 1)).margins(Insets.of(3)), 2, 1);
+                                buttonGrid.child(Components.button(Text.literal("long boiii"), b -> buttonGrid.child(button, 2, 1)).margins(Insets.of(3)), 2, 1);
                             } else if (button.getMessage().getString().equals("8")) {
                                 final var box = Components.textBox(Sizing.fill(10));
                                 box.setSuggestion("thicc boi");

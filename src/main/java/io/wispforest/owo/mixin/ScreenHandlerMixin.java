@@ -36,7 +36,7 @@ import java.util.function.Consumer;
 @Mixin(AbstractContainerMenu.class)
 public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenHandlerExtension {
 
-    @Shadow private boolean disableSync;
+    @Shadow private boolean suppressRemoteUpdates;
 
     private final List<SyncedProperty<?>> owo$properties = new ArrayList<>();
 
@@ -157,14 +157,14 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
         }
     }
 
-    @Inject(method = "syncState", at = @At("RETURN"))
+    @Inject(method = "sendAllDataToRemote", at = @At("RETURN"))
     private void syncOnSyncState(CallbackInfo ci) {
         this.syncProperties();
     }
 
-    @Inject(method = "sendContentUpdates", at = @At("RETURN"))
+    @Inject(method = "broadcastChanges", at = @At("RETURN"))
     private void syncOnSendContentUpdates(CallbackInfo ci) {
-        if (disableSync) return;
+        if (suppressRemoteUpdates) return;
 
         this.syncProperties();
     }

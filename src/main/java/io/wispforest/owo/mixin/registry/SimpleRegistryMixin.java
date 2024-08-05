@@ -23,22 +23,22 @@ import java.util.Objects;
 @Mixin(MappedRegistry.class)
 public abstract class SimpleRegistryMixin<T> implements WritableRegistry<T>, OwoSimpleRegistryExtensions<T> {
 
-    @Shadow private Map<T, Holder.Reference<T>> intrusiveValueToEntry;
-    @Shadow @Final private Map<ResourceKey<T>, Holder.Reference<T>> keyToEntry;
-    @Shadow @Final private Map<Identifier, Holder.Reference<T>> idToEntry;
-    @Shadow @Final private Map<T, Holder.Reference<T>> valueToEntry;
-    @Shadow @Final private ObjectList<Holder.Reference<T>> rawIdToEntry;
-    @Shadow @Final private Reference2IntMap<T> entryToRawId;
-    @Shadow @Final private Map<ResourceKey<T>, RegistrationInfo> keyToEntryInfo;
-    @Shadow private Lifecycle lifecycle;
+    @Shadow private Map<T, Holder.Reference<T>> unregisteredIntrusiveHolders;
+    @Shadow @Final private Map<ResourceKey<T>, Holder.Reference<T>> byKey;
+    @Shadow @Final private Map<Identifier, Holder.Reference<T>> byLocation;
+    @Shadow @Final private Map<T, Holder.Reference<T>> byValue;
+    @Shadow @Final private ObjectList<Holder.Reference<T>> byId;
+    @Shadow @Final private Reference2IntMap<T> toId;
+    @Shadow @Final private Map<ResourceKey<T>, RegistrationInfo> registrationInfos;
+    @Shadow private Lifecycle registryLifecycle;
 
     //--
 
     /**
-     * Copy of the {@link MappedRegistry#register} function but uses {@link List#set} instead of {@link List#add} for {@link MappedRegistry#rawIdToEntry}
+     * Copy of the {@link MappedRegistry#register} function but uses {@link List#set} instead of {@link List#add} for {@link MappedRegistry#byId}
      */
     public Holder.Reference<T> owo$set(int id, ResourceKey<T> arg, T object, RegistrationInfo arg2) {
-        this.valueToEntry.remove(object);
+        this.byValue.remove(object);
 
         OwoFreezer.checkRegister("Registry Set Calls"); //this.assertNotFrozen(arg);
 
@@ -47,8 +47,8 @@ public abstract class SimpleRegistryMixin<T> implements WritableRegistry<T>, Owo
 
         Holder.Reference<T> reference;
 
-        if (this.intrusiveValueToEntry != null) {
-            reference = this.intrusiveValueToEntry.remove(object);
+        if (this.unregisteredIntrusiveHolders != null) {
+            reference = this.unregisteredIntrusiveHolders.remove(object);
 
             if (reference == null) {
                 throw new AssertionError("Missing intrusive holder for " + arg + ":" + object);
@@ -56,17 +56,17 @@ public abstract class SimpleRegistryMixin<T> implements WritableRegistry<T>, Owo
 
             ((ReferenceAccessor<T>) reference).owo$setRegistryKey(arg);
         } else {
-            reference = this.keyToEntry.computeIfAbsent(arg, k -> Holder.Reference.createStandAlone(this.holderOwner(), k));
+            reference = this.byKey.computeIfAbsent(arg, k -> Holder.Reference.createStandAlone(this.holderOwner(), k));
             ((ReferenceAccessor<T>) reference).owo$setValue((T)object);
         }
 
-        this.keyToEntry.put(arg, reference);
-        this.idToEntry.put(arg.value(), reference);
-        this.valueToEntry.put(object, reference);
-        this.rawIdToEntry.set(id, reference);
-        this.entryToRawId.put(object, id);
-        this.keyToEntryInfo.put(arg, arg2);
-        this.lifecycle = this.lifecycle.add(arg2.lifecycle());
+        this.byKey.put(arg, reference);
+        this.byLocation.put(arg.value(), reference);
+        this.byValue.put(object, reference);
+        this.byId.set(id, reference);
+        this.toId.put(object, id);
+        this.registrationInfos.put(arg, arg2);
+        this.registryLifecycle = this.registryLifecycle.add(arg2.lifecycle());
 
         // TODO: SHOULD WE BE REFIREING THE EVENT?
         RegistryEntryAddedCallback.event(this).invoker().onEntryAdded(id, arg.value(), (T)object);

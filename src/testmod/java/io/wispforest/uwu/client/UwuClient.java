@@ -21,12 +21,18 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Text;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.allay.Allay;
 import net.minecraft.world.item.Items;
 import org.lwjgl.glfw.GLFW;
 
@@ -85,7 +91,7 @@ public class UwuClient implements ClientModInitializer {
         });
 
         Uwu.CHANNEL.registerClientbound(Uwu.OtherTestMessage.class, (message, access) -> {
-            access.player().sendMessage(Text.of("Message '" + message.message() + "' from " + message.pos()), false);
+            access.player().displayClientMessage(Text.literal("Message '" + message.message() + "' from " + message.pos()), false);
         });
 
         if (Uwu.WE_TESTEN_HANDSHAKE) {
@@ -107,11 +113,11 @@ public class UwuClient implements ClientModInitializer {
         });
 
         Layers.add(Containers::verticalFlow, instance -> {
-            if (MinecraftClient.getInstance().world == null) return;
+            if (Minecraft.getInstance().level == null) return;
 
             instance.adapter.rootComponent.child(
                     Containers.horizontalFlow(Sizing.content(), Sizing.content())
-                            .child(Components.entity(Sizing.fixed(20), EntityType.ALLAY, null).<EntityComponent<AllayEntity>>configure(component -> {
+                            .child(Components.entity(Sizing.fixed(20), EntityType.ALLAY, null).<EntityComponent<Allay>>configure(component -> {
                                 component.allowMouseRotation(true)
                                         .scale(.75f);
 
@@ -119,15 +125,15 @@ public class UwuClient implements ClientModInitializer {
                                     UISounds.playInteractionSound();
                                     return true;
                                 });
-                            })).child(Components.textBox(Sizing.fixed(100), "allay text").<TextFieldWidget>configure(textBox -> {
+                            })).child(Components.textBox(Sizing.fixed(100), "allay text").<EditBox>configure(textBox -> {
                                 textBox.verticalSizing(Sizing.fixed(9));
-                                textBox.setDrawsBackground(false);
+                                textBox.setBordered(false);
                             })).<FlowLayout>configure(layout -> {
                                 layout.gap(5).margins(Insets.left(4)).verticalAlignment(VerticalAlignment.CENTER);
 
                                 instance.alignComponentToWidget(widget -> {
-                                    if (!(widget instanceof ButtonWidget button)) return false;
-                                    return button.getMessage().getContent() instanceof TranslatableTextContent translatable && translatable.getKey().equals("gui.stats");
+                                    if (!(widget instanceof Button button)) return false;
+                                    return button.getMessage().getContents() instanceof TranslatableContents translatable && translatable.getKey().equals("gui.stats");
                                 }, Layer.Instance.AnchorSide.RIGHT, 0, layout);
                             })
             );
@@ -137,7 +143,7 @@ public class UwuClient implements ClientModInitializer {
             ButtonComponent button;
             instance.adapter.rootComponent.child(
                     (button = Components.button(Text.literal(":)"), buttonComponent -> {
-                        MinecraftClient.getInstance().player.sendMessage(Text.literal("handled screen moment"));
+                        Minecraft.getInstance().player.sendSystemMessage(Text.literal("handled screen moment"));
                     })).verticalSizing(Sizing.fixed(12))
             );
 

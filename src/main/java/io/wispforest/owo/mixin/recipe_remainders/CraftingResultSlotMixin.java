@@ -20,7 +20,7 @@ public class CraftingResultSlotMixin {
     @Final
     private Player player;
 
-    @Inject(method = "onTakeItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/RecipeInputInventory;setStack(ILnet/minecraft/item/ItemStack;)V", ordinal = 1), locals = LocalCapture.CAPTURE_FAILHARD)
+    @Inject(method = "onTake", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/CraftingContainer;setItem(ILnet/minecraft/world/item/ItemStack;)V", ordinal = 1), locals = LocalCapture.CAPTURE_FAILHARD)
     private void fixRemainderStacking(Player player, ItemStack stack, CallbackInfo ci, CraftingInput.Positioned positioned, CraftingInput craftingRecipeInput, int i, int j, NonNullList defaultedList, int k, int l, int m, ItemStack itemStack, ItemStack remainderStack) {
         if (remainderStack.getCount() > remainderStack.getMaxStackSize()) {
             int excess = remainderStack.getCount() - remainderStack.getMaxStackSize();

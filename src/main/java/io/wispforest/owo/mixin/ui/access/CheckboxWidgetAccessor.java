@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(Checkbox.class)
 public interface CheckboxWidgetAccessor {
-    @Accessor("checked")
+    @Accessor("selected")
     void owo$setChecked(boolean checked);
 
     @Accessor("textWidget")

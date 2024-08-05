@@ -40,7 +40,7 @@ public class Copenhagen {
     // now you would think this throws an error when you then try to modify those sections. but no.
     // it just silently deadlocks the entire game
     @SuppressWarnings("InvalidInjectorMethodSignature")
-    @Inject(method = "generateVeinPart", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/ChunkSection;setBlockState(IIILnet/minecraft/block/BlockState;Z)Lnet/minecraft/block/BlockState;"), locals = LocalCapture.CAPTURE_FAILHARD)
+    @Inject(method = "doPlace", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunkSection;setBlockState(IIILnet/minecraft/world/level/block/state/BlockState;Z)Lnet/minecraft/world/level/block/state/BlockState;"), locals = LocalCapture.CAPTURE_FAILHARD)
     private void malding(WorldGenLevel world, RandomSource random, OreConfiguration config, double startX, double endX, double startZ, double endZ,
                          double startY, double endY, int p_x, int p_y, int p_z, int p_horizontalSize, int p_verticalSize, CallbackInfoReturnable<Boolean> cir,
                          int i, BitSet bitSet, BlockPos.Mutable mutable, int j, double[] ds, BulkSectionAccess chunkSectionCache, int m, double d, double e,
@@ -53,7 +53,7 @@ public class Copenhagen {
 
     // now in here we read all the gleaming ore spots from our cache and actually cause a block update so that the
     // lighting calculations happen. all of this just so that some dumb orr block can glow.
-    @Inject(method = "generateVeinPart", at = @At("TAIL"))
+    @Inject(method = "doPlace", at = @At("TAIL"))
     private void coping(WorldGenLevel world, net.minecraft.util.RandomSource random, OreConfiguration config, double startX, double endX,
                         double startZ, double endZ, double startY, double endY, int x, int y, int z, int horizontalSize,
                         int verticalSize, CallbackInfoReturnable<Boolean> cir) {

@@ -25,7 +25,7 @@ import java.util.Optional;
 @Mixin(RecipeManager.class)
 public abstract class RecipeManagerMixin {
 
-    @Inject(method = "deserialize", at = @At(value = "RETURN"))
+    @Inject(method = "fromJson", at = @At(value = "RETURN"))
     private static void deserializeRecipeSpecificRemainders(Identifier id, JsonObject json, HolderLookup.Provider registryLookup, CallbackInfoReturnable<Recipe<?>> cir) {
         if (!json.has("owo:remainders")) return;
 
@@ -46,7 +46,7 @@ public abstract class RecipeManagerMixin {
         RecipeRemainderStorage.store(id, remainders);
     }
 
-    @Inject(method = "getRemainingStacks", at = @At(value = "RETURN", ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
+    @Inject(method = "getRemainingItemsFor", at = @At(value = "RETURN", ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
     private <I extends RecipeInput, R extends Recipe<I>> void addRecipeSpecificRemainders(RecipeType<R> type, I inventory, Level world, CallbackInfoReturnable<NonNullList<ItemStack>> cir, Optional<RecipeHolder<R>> optional) {
         if (optional.isEmpty() || !RecipeRemainderStorage.has(optional.get().id())) return;
 

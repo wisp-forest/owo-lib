@@ -8,12 +8,12 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(Screen.class)
 public interface ScreenAccessor {
-    @Accessor("PANORAMA_RENDERER")
+    @Accessor("CUBE_MAP")
     static CubeMap owo$PANORAMA_RENDERER() {
         throw new UnsupportedOperationException();
     }
 
-    @Accessor("ROTATING_PANORAMA_RENDERER")
+    @Accessor("PANORAMA")
     static PanoramaRenderer owo$ROTATING_PANORAMA_RENDERER() {
         throw new UnsupportedOperationException();
     }

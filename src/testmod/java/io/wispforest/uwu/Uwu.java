@@ -52,10 +52,13 @@ import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.advancements.AdvancementProgress;
+import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.NbtCompound;
@@ -85,8 +88,6 @@ import java.util.function.Consumer;
 
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
-
-import I;
 
 public class Uwu implements ModInitializer {
 
@@ -134,11 +135,11 @@ public class Uwu implements ModInitializer {
                 group.addTab(Icon.of(Items.EMERALD), "tab_2", null, false);
                 group.addTab(Icon.of(Items.AMETHYST_SHARD), "tab_3", null, false);
                 group.addTab(Icon.of(Items.GOLD_INGOT), "tab_4", null, false);
-                group.addCustomTab(Icon.of(Items.IRON_INGOT), "tab_5", (context, entries) -> entries.add(UwuItems.SCREEN_SHARD), false);
+                group.addCustomTab(Icon.of(Items.IRON_INGOT), "tab_5", (context, entries) -> entries.accept(UwuItems.SCREEN_SHARD), false);
                 group.addTab(Icon.of(Items.QUARTZ), "tab_6", null, false);
 
                 group.addButton(new ItemGroupButton(group, Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16), "owo", () -> {
-                    MinecraftClient.getInstance().player.sendMessage(Text.of("oωo button pressed!"), false);
+                    Minecraft.getInstance().player.displayClientMessage(Text.literal("oωo button pressed!"), false);
                 }));
             })
             .build();
@@ -214,14 +215,14 @@ public class Uwu implements ModInitializer {
         SINGLE_TAB_GROUP.initialize();
 
         CHANNEL.registerClientbound(TestMessage.class, (message, access) -> {
-            access.player().sendMessage(Text.of(message.string), false);
+            access.player().displayClientMessage(Text.literal(message.string), false);
         });
 
         CHANNEL.registerClientboundDeferred(OtherTestMessage.class);
 
         CHANNEL.registerServerbound(TestMessage.class, (message, access) -> {
-            access.player().sendMessage(Text.of(String.valueOf(message.bite)), false);
-            access.player().sendMessage(Text.of(String.valueOf(message)), false);
+            access.player().sendSystemMessage(Text.literal(String.valueOf(message.bite)), false);
+            access.player().sendSystemMessage(Text.literal(String.valueOf(message)), false);
         });
 
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER && WE_TESTEN_HANDSHAKE) {
@@ -263,7 +264,7 @@ public class Uwu implements ModInitializer {
                                                 GameProfile profile = GameProfileArgument.getGameProfiles(context, "player").iterator().next();
 
                                                 OfflineAdvancementLookup.edit(profile.getId(), handle -> {
-                                                    handle.grant(server.getAdvancementLoader().get(Identifier.of("story/iron_tools")));
+                                                    handle.grant(server.getAdvancements().get(Identifier.parse("story/iron_tools")));
                                                 });
 
                                                 return 0;
@@ -505,7 +506,7 @@ public class Uwu implements ModInitializer {
             durations.clear();
 
             for (int i = 0; i < maxIterations; i++) {
-                RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), Owo.currentServer().getRegistryManager());
+                RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), Owo.currentServer().registryAccess());
 
                 long startTime = System.nanoTime();
 

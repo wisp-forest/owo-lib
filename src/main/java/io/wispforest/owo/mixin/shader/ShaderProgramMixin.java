@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(ShaderInstance.class)
 public class ShaderProgramMixin {
 
-    @WrapOperation(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Identifier;ofVanilla(Ljava/lang/String;)Lnet/minecraft/util/Identifier;"), require = 0)
+    @WrapOperation(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/Identifier;ofDefault(Ljava/lang/String;)Lnet/minecraft/resources/Identifier;"), require = 0)
     private Identifier fixIdentifier(String path, Operation<Identifier> original, @Local(argsOnly = true) String name) {
         if ((Object) this instanceof GlProgram.OwoShaderProgram) {
             var pathParts = path.split(name);
