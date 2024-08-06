@@ -1,6 +1,7 @@
 package io.wispforest.owo.mixin.itemgroup;
 
 import net.minecraft.network.chat.Text;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,4 +34,12 @@ public interface CreativeModeTabAccessor {
     @Mutable
     @Accessor("row")
     void owo$setRow(CreativeModeTab.Row row);
+
+    @Accessor("backgroundTexture")
+    void owo$setBackgroundTexture(Identifier backgroundTexture);
+
+    @Accessor
+    static Identifier getDEFAULT_BACKGROUND() {
+        throw new UnsupportedOperationException();
+    }
 }

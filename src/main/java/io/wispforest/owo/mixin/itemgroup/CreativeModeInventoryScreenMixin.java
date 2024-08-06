@@ -62,16 +62,6 @@ public abstract class CreativeModeInventoryScreenMixin extends EffectRenderingIn
         this.enabledFeatures = enabledFeatures;
     }
 
-    // ----------
-    // Background
-    // ----------
-
-    @ModifyArg(method = "renderBg", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;drawTexture(Lnet/minecraft/resources/Identifier;IIIIII)V", ordinal = 0))
-    private Identifier injectCustomGroupTexture(Identifier original) {
-        if (!(selectedTab instanceof OwoItemGroup owoGroup) || owoGroup.getBackgroundTextureOwo() == null) return original;
-        return owoGroup.getBackgroundTextureOwo();
-    }
-
     // ----------------
     // Scrollbar slider
     // ----------------

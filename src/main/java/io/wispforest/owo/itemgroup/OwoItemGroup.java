@@ -55,7 +55,6 @@ public abstract class OwoItemGroup extends CreativeModeTab {
     private final IntSet activeTabsView = IntSets.unmodifiable(this.activeTabs);
     private boolean initialized = false;
 
-    private final @Nullable Identifier backgroundTexture;
     private final @Nullable ScrollerTextures scrollerTextures;
     private final @Nullable TabTextures tabTextures;
 
@@ -71,7 +70,7 @@ public abstract class OwoItemGroup extends CreativeModeTab {
         this.iconSupplier = iconSupplier;
         this.tabStackHeight = tabStackHeight;
         this.buttonStackHeight = buttonStackHeight;
-        this.backgroundTexture = backgroundTexture;
+        ((CreativeModeTabAccessor) this).owo$setBackgroundTexture(backgroundTexture);
         this.scrollerTextures = scrollerTextures;
         this.tabTextures = tabTextures;
         this.useDynamicTitle = useDynamicTitle;
@@ -290,11 +289,6 @@ public abstract class OwoItemGroup extends CreativeModeTab {
         return this.activeTabs.contains(tab);
     }
 
-    // TODO: this has been renamed to getBackgroundTextureOwo because the vanilla method is now getBackgroundTexture
-    public @Nullable Identifier getBackgroundTextureOwo() {
-        return this.backgroundTexture;
-    }
-
     public @Nullable ScrollerTextures getScrollerTextures() {
         return this.scrollerTextures;
     }
@@ -354,7 +348,7 @@ public abstract class OwoItemGroup extends CreativeModeTab {
         private Consumer<OwoItemGroup> initializer = owoItemGroup -> {};
         private int tabStackHeight = 4;
         private int buttonStackHeight = 4;
-        private @Nullable Identifier backgroundTexture = null;
+        private @Nullable Identifier backgroundTexture = CreativeModeTabAccessor.getDEFAULT_BACKGROUND();
         private @Nullable ScrollerTextures scrollerTextures = null;
         private @Nullable TabTextures tabTextures = null;
         private boolean useDynamicTitle = true;

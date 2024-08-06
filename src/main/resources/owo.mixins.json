@@ -42,7 +42,8 @@
     "ui.SlotAccessor",
     "ui.SlotMixin",
     "ui.access.BlockEntityAccessor",
-    "HolderLookupAdapterAccessor"
+    "HolderLookupAdapterAccessor",
+    "itemgroup.CreativeModeTabMixin"
   ],
   "client": [
     "ClientCommonPacketListenerImplAccessor",
