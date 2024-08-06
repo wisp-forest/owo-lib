@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.SharedConstants;
-import net.minecraft.client.MinecraftClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -79,7 +78,7 @@ public class OwoSentinel {
     @SuppressWarnings("deprecation")
     public static void downloadAndInstall(Consumer<String> logger) throws Exception {
         logger.accept("Fetching versions");
-        final URL url = new URL("https://api.modrinth.com/v2/project/owo-lib/version?game_versions=[%22" + SharedConstants.VERSION_NAME + "%22]&loaders=[%22fabric%22]");
+        final URL url = new URL("https://api.modrinth.com/v2/project/owo-lib/version?game_versions=[%22" + SharedConstants.VERSION_STRING + "%22]&loaders=[%22fabric%22]");
 
         final var response = GSON.fromJson(new InputStreamReader(url.openStream()), JsonArray.class);
 
