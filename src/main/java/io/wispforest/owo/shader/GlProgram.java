@@ -3,7 +3,7 @@ package io.wispforest.owo.shader;
 import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import io.wispforest.owo.mixin.shader.ShaderProgramAccessor;
+import io.wispforest.owo.mixin.shader.ShaderInstanceAccessor;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -80,7 +80,7 @@ public class GlProgram {
      * the value of the uniform, or {@code null} if no such uniform exists
      */
     protected @Nullable Uniform findUniform(String name) {
-        return ((ShaderProgramAccessor) this.backingProgram).owo$getLoadedUniforms().get(name);
+        return ((ShaderInstanceAccessor) this.backingProgram).owo$getUniformMap().get(name);
     }
 
     @ApiStatus.Internal

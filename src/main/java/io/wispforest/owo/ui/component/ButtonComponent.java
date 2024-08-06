@@ -1,8 +1,8 @@
 package io.wispforest.owo.ui.component;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import io.wispforest.owo.mixin.ui.access.ButtonWidgetAccessor;
-import io.wispforest.owo.mixin.ui.access.ClickableWidgetAccessor;
+import io.wispforest.owo.mixin.ui.access.ButtonAccessor;
+import io.wispforest.owo.mixin.ui.access.AbstractWidgetAccessor;
 import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.CursorStyle;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
@@ -50,13 +50,13 @@ public class ButtonComponent extends Button {
             context.drawText(textRenderer, this.getMessage(), (int) (this.getX() + this.width / 2f - textRenderer.width(this.getMessage()) / 2f), (int) (this.getY() + (this.height - 8) / 2f), color, false);
         }
 
-        var tooltip = ((ClickableWidgetAccessor) this).owo$getTooltip();
+        var tooltip = ((AbstractWidgetAccessor) this).owo$getTooltip();
         if (this.isHovered && tooltip.get() != null)
             context.drawTooltip(textRenderer, tooltip.get().toCharSequence(Minecraft.getInstance()), DefaultTooltipPositioner.INSTANCE, mouseX, mouseY);
     }
 
     public ButtonComponent onPress(Consumer<ButtonComponent> onPress) {
-        ((ButtonWidgetAccessor) this).owo$setOnPress(button -> onPress.accept((ButtonComponent) button));
+        ((ButtonAccessor) this).owo$setOnPress(button -> onPress.accept((ButtonComponent) button));
         return this;
     }
 

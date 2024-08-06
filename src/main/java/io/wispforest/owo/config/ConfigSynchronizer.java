@@ -3,8 +3,7 @@ package io.wispforest.owo.config;
 import com.google.common.collect.HashMultimap;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.Owo;
-import io.wispforest.owo.config.Option.Key;
-import io.wispforest.owo.mixin.ServerCommonNetworkHandlerAccessor;
+import io.wispforest.owo.mixin.ServerCommonPacketListenerImplAccessor;
 import io.wispforest.owo.ops.TextOps;
 import io.wispforest.endec.Endec;
 import io.wispforest.owo.serialization.CodecUtils;
@@ -24,7 +23,6 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.MutableText;
 import net.minecraft.network.chat.Text;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
@@ -33,7 +31,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.WeakHashMap;
 import java.util.function.BiConsumer;
 
@@ -60,7 +57,7 @@ public class ConfigSynchronizer {
      * or {@code null} if no config with the given name was synced
      */
     public static @Nullable Map<Option.Key, ?> getClientOptions(ServerPlayer player, String configName) {
-        var storage = CLIENT_OPTION_STORAGE.get(((ServerCommonNetworkHandlerAccessor) player.connection).owo$getConnection());
+        var storage = CLIENT_OPTION_STORAGE.get(((ServerCommonPacketListenerImplAccessor) player.connection).owo$getConnection());
         if (storage == null) return null;
 
         return storage.get(configName);
@@ -167,7 +164,7 @@ public class ConfigSynchronizer {
 
     private static void applyServer(ConfigSyncPacket payload, ServerPlayNetworking.Context context) {
         Owo.LOGGER.info("Receiving client config");
-        var connection = ((ServerCommonNetworkHandlerAccessor) context.player().connection).owo$getConnection();
+        var connection = ((ServerCommonPacketListenerImplAccessor) context.player().connection).owo$getConnection();
 
         read(payload, (option, optionBuf) -> {
             var config = CLIENT_OPTION_STORAGE.computeIfAbsent(connection, $ -> new HashMap<>()).computeIfAbsent(option.configName(), s -> new HashMap<>());

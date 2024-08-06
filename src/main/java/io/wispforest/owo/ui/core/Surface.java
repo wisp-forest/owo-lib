@@ -40,7 +40,7 @@ public interface Surface {
         );
     };
 
-    Surface OPTIONS_BACKGROUND = Surface.panorama(ScreenAccessor.owo$ROTATING_PANORAMA_RENDERER(), false)
+    Surface OPTIONS_BACKGROUND = Surface.panorama(ScreenAccessor.owo$PANORAMA(), false)
             .and(Surface.blur(5, 10));
 
     Surface TOOLTIP = (context, component) -> {
@@ -69,7 +69,7 @@ public interface Surface {
     }
 
     static Surface vanillaPanorama(boolean alwaysVisible) {
-        return panorama(new PanoramaRenderer(ScreenAccessor.owo$PANORAMA_RENDERER()), alwaysVisible);
+        return panorama(new PanoramaRenderer(ScreenAccessor.owo$CUBE_MAP()), alwaysVisible);
     }
 
     static Surface panorama(PanoramaRenderer renderer, boolean alwaysVisible) {

@@ -3,7 +3,7 @@ package io.wispforest.owo.itemgroup;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButtonWidget;
 import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
-import io.wispforest.owo.mixin.itemgroup.ItemGroupAccessor;
+import io.wispforest.owo.mixin.itemgroup.CreativeModeTabAccessor;
 import io.wispforest.owo.util.pond.OwoItemExtensions;
 import it.unimi.dsi.fastutil.ints.*;
 import net.fabricmc.api.EnvType;
@@ -78,7 +78,7 @@ public abstract class OwoItemGroup extends CreativeModeTab {
         this.displaySingleTab = displaySingleTab;
         this.allowMultiSelect = allowMultiSelect;
 
-        ((ItemGroupAccessor) this).owo$setEntryCollector((context, entries) -> {
+        ((CreativeModeTabAccessor) this).owo$setDisplayItemsGenerator((context, entries) -> {
             if (!this.initialized) {
                 throw new IllegalStateException("oωo item group not initialized, was 'initialize()' called?");
             }
@@ -206,7 +206,7 @@ public abstract class OwoItemGroup extends CreativeModeTab {
         this.collectItemsFromRegistry(searchEntries, -1);
         this.tabs.forEach(tab -> tab.contentSupplier().addItems(context, searchEntries));
 
-        ((ItemGroupAccessor) this).owo$setSearchTabStacks(searchEntries.searchTabContents);
+        ((CreativeModeTabAccessor) this).owo$setDisplayItemsSearchTab(searchEntries.searchTabContents);
     }
 
     protected void collectItemsFromRegistry(Output entries, int tab) {

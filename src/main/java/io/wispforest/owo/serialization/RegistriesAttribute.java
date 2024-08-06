@@ -1,7 +1,7 @@
 package io.wispforest.owo.serialization;
 
 import io.wispforest.endec.SerializationAttribute;
-import io.wispforest.owo.mixin.CachedRegistryInfoGetterAccessor;
+import io.wispforest.owo.mixin.HolderLookupAdapterAccessor;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.RegistryOps;
 import org.jetbrains.annotations.ApiStatus;
@@ -37,7 +37,7 @@ public final class RegistriesAttribute implements SerializationAttribute.Instanc
     public static RegistriesAttribute fromCachedInfoGetter(RegistryOps.HolderLookupAdapter cachedGetter) {
         RegistryAccess registryManager = null;
 
-        if(((CachedRegistryInfoGetterAccessor) (Object) cachedGetter).owo$getRegistriesLookup() instanceof RegistryAccess drm) {
+        if(((HolderLookupAdapterAccessor) (Object) cachedGetter).owo$getLookupProvider() instanceof RegistryAccess drm) {
             registryManager = drm;
         }
 

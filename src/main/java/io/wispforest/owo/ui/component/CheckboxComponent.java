@@ -1,6 +1,6 @@
 package io.wispforest.owo.ui.component;
 
-import io.wispforest.owo.mixin.ui.access.CheckboxWidgetAccessor;
+import io.wispforest.owo.mixin.ui.access.CheckboxAccessor;
 import io.wispforest.owo.ui.core.CursorStyle;
 import io.wispforest.owo.ui.core.Size;
 import io.wispforest.owo.ui.core.Sizing;
@@ -32,7 +32,7 @@ public class CheckboxComponent extends Checkbox {
     }
 
     public CheckboxComponent checked(boolean checked) {
-        ((CheckboxWidgetAccessor) this).owo$setChecked(checked);
+        ((CheckboxAccessor) this).owo$setSelected(checked);
         this.listeners.set(this.selected());
         return this;
     }
@@ -45,7 +45,7 @@ public class CheckboxComponent extends Checkbox {
     @Override
     public void inflate(Size space) {
         super.inflate(space);
-        ((CheckboxWidgetAccessor) this).owo$getTextWidget().setMaxWidth(this.width);
+        ((CheckboxAccessor) this).owo$getTextWidget().setMaxWidth(this.width);
     }
 
     @Override

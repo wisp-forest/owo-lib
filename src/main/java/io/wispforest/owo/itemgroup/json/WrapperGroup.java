@@ -4,8 +4,8 @@ import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
 import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
-import io.wispforest.owo.mixin.itemgroup.ItemGroupAccessor;
-import io.wispforest.owo.util.pond.OwoSimpleRegistryExtensions;
+import io.wispforest.owo.mixin.itemgroup.CreativeModeTabAccessor;
+import io.wispforest.owo.util.pond.OwoMappedRegistryExtensions;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collection;
@@ -33,11 +33,11 @@ public class WrapperGroup extends OwoItemGroup {
 
         int parentRawId = BuiltInRegistries.CREATIVE_MODE_TAB.getRawId(parent);
 
-        ((OwoSimpleRegistryExtensions<CreativeModeTab>) BuiltInRegistries.CREATIVE_MODE_TAB).owo$set(parentRawId, ResourceKey.of(Registries.CREATIVE_MODE_TAB, parentId), this, RegistrationInfo.BUILT_IN);
+        ((OwoMappedRegistryExtensions<CreativeModeTab>) BuiltInRegistries.CREATIVE_MODE_TAB).owo$set(parentRawId, ResourceKey.of(Registries.CREATIVE_MODE_TAB, parentId), this, RegistrationInfo.BUILT_IN);
 
-        ((ItemGroupAccessor) this).owo$setDisplayName(parent.getDisplayName());
-        ((ItemGroupAccessor) this).owo$setColumn(parent.column());
-        ((ItemGroupAccessor) this).owo$setRow(parent.row());
+        ((CreativeModeTabAccessor) this).owo$setDisplayName(parent.getDisplayName());
+        ((CreativeModeTabAccessor) this).owo$setColumn(parent.column());
+        ((CreativeModeTabAccessor) this).owo$setRow(parent.row());
 
         this.parent = parent;
 
@@ -64,7 +64,7 @@ public class WrapperGroup extends OwoItemGroup {
         this.tabs.add(0, new ItemGroupTab(
                 Icon.of(this.parent.getIconItem()),
                 this.parent.getDisplayName(),
-                ((ItemGroupAccessor) this.parent).owo$getEntryCollector()::accept,
+                ((CreativeModeTabAccessor) this.parent).owo$getDisplayItemsGenerator()::accept,
                 ItemGroupTab.DEFAULT_TEXTURE,
                 true
         ));

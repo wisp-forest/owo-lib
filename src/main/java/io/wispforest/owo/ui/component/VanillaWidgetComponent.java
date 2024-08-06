@@ -1,7 +1,7 @@
 package io.wispforest.owo.ui.component;
 
-import io.wispforest.owo.mixin.ui.access.ClickableWidgetAccessor;
-import io.wispforest.owo.mixin.ui.access.TextFieldWidgetAccessor;
+import io.wispforest.owo.mixin.ui.access.AbstractWidgetAccessor;
+import io.wispforest.owo.mixin.ui.access.EditBoxAccessor;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.*;
 import net.minecraft.client.Minecraft;
@@ -59,7 +59,7 @@ public class VanillaWidgetComponent extends BaseComponent {
         if (this.widget instanceof Button || this.widget instanceof Checkbox || this.widget instanceof SliderComponent) {
             return 20;
         } else if (this.widget instanceof EditBox textField) {
-            if (((TextFieldWidgetAccessor) textField).owo$drawsBackground()) {
+            if (((EditBoxAccessor) textField).owo$bordered()) {
                 return 20;
             } else {
                 return 9;
@@ -110,7 +110,7 @@ public class VanillaWidgetComponent extends BaseComponent {
     }
 
     private void applyToWidget() {
-        var accessor = (ClickableWidgetAccessor) this.widget;
+        var accessor = (AbstractWidgetAccessor) this.widget;
 
         accessor.owo$setX(this.x + this.widget.xOffset());
         accessor.owo$setY(this.y + this.widget.yOffset());

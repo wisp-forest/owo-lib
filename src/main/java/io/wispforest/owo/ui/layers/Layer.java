@@ -1,6 +1,6 @@
 package io.wispforest.owo.ui.layers;
 
-import io.wispforest.owo.mixin.ui.layers.HandledScreenAccessor;
+import io.wispforest.owo.mixin.ui.layers.AbstractContainerScreenAccessor;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.util.pond.OwoScreenExtension;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -149,8 +149,8 @@ public class Layer<S extends Screen, R extends ParentComponent> {
 
             this.layoutUpdaters.add(() -> {
                 component.positioning(Positioning.absolute(
-                        ((HandledScreenAccessor) handledScreen).owo$getRootX() + x,
-                        ((HandledScreenAccessor) handledScreen).owo$getRootY() + y
+                        ((AbstractContainerScreenAccessor) handledScreen).owo$getRootX() + x,
+                        ((AbstractContainerScreenAccessor) handledScreen).owo$getRootY() + y
                 ));
             });
         }

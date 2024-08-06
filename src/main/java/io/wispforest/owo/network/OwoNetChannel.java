@@ -2,7 +2,7 @@ package io.wispforest.owo.network;
 
 import io.wispforest.endec.impl.RecordEndec;
 import io.wispforest.endec.impl.ReflectiveEndecBuilder;
-import io.wispforest.owo.mixin.ServerCommonNetworkHandlerAccessor;
+import io.wispforest.owo.mixin.ServerCommonPacketListenerImplAccessor;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.StructEndec;
 import io.wispforest.owo.serialization.CodecUtils;
@@ -310,7 +310,7 @@ public class OwoNetChannel {
         if (required) return true;
 
         return OwoHandshake.isValidClient() ?
-                getChannelSet(((ServerCommonNetworkHandlerAccessor) networkHandler).owo$getConnection()).contains(this.packetId.id())
+                getChannelSet(((ServerCommonPacketListenerImplAccessor) networkHandler).owo$getConnection()).contains(this.packetId.id())
                 : ServerPlayNetworking.canSend(networkHandler, this.packetId);
     }
 
@@ -324,7 +324,7 @@ public class OwoNetChannel {
     }
 
     private static Set<Identifier> getChannelSet(Connection connection) {
-        return ((OwoClientConnectionExtension) connection).owo$getChannelSet();
+        return ((OwoConnectionExtension) connection).owo$getChannelSet();
     }
 
     /**

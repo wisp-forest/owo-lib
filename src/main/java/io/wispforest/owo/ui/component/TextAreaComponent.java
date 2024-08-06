@@ -1,8 +1,8 @@
 package io.wispforest.owo.ui.component;
 
 import io.wispforest.owo.Owo;
-import io.wispforest.owo.mixin.ui.access.EditBoxAccessor;
-import io.wispforest.owo.mixin.ui.access.EditBoxWidgetAccessor;
+import io.wispforest.owo.mixin.ui.access.MultilineTextFieldAccessor;
+import io.wispforest.owo.mixin.ui.access.MultiLineEditBoxAccessor;
 import io.wispforest.owo.ui.core.CursorStyle;
 import io.wispforest.owo.ui.core.Size;
 import io.wispforest.owo.ui.core.Sizing;
@@ -34,7 +34,7 @@ public class TextAreaComponent extends MultiLineEditBox {
 
     protected TextAreaComponent(Sizing horizontalSizing, Sizing verticalSizing) {
         super(Minecraft.getInstance().font, 0, 0, 0, 0, Text.empty(), Text.empty());
-        this.editBox = ((EditBoxWidgetAccessor) this).owo$getEditBox();
+        this.editBox = ((MultiLineEditBoxAccessor) this).owo$getTextField();
         this.sizing(horizontalSizing, verticalSizing);
 
         this.textValue.observe(this.changedEvents.sink()::onChanged);
@@ -114,16 +114,16 @@ public class TextAreaComponent extends MultiLineEditBox {
         super.inflate(space);
 
         int cursor = this.editBox.cursor();
-        int selection = ((EditBoxAccessor) this.editBox).owo$getSelectionEnd();
+        int selection = ((MultilineTextFieldAccessor) this.editBox).owo$getSelectCursor();
 
-        ((EditBoxAccessor) this.editBox).owo$setWidth(this.width() - this.totalInnerPadding() - 9);
+        ((MultilineTextFieldAccessor) this.editBox).owo$setWidth(this.width() - this.totalInnerPadding() - 9);
         this.editBox.setValue(this.getValue());
 
         super.inflate(space);
         this.editBox.setValue(this.getValue());
 
         this.editBox.seekCursor(Whence.ABSOLUTE, cursor);
-        ((EditBoxAccessor) this.editBox).owo$setSelectionEnd(selection);
+        ((MultilineTextFieldAccessor) this.editBox).owo$setSelectCursor(selection);
     }
 
     public EventSource<OnChanged> onChanged() {

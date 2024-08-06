@@ -8,7 +8,7 @@ import io.wispforest.endec.*;
 import io.wispforest.endec.format.bytebuf.ByteBufDeserializer;
 import io.wispforest.endec.format.bytebuf.ByteBufSerializer;
 import io.wispforest.endec.format.edm.*;
-import io.wispforest.owo.mixin.ForwardingDynamicOpsAccessor;
+import io.wispforest.owo.mixin.DelegatingOpsAccessor;
 import io.wispforest.owo.mixin.RegistryOpsAccessor;
 import io.wispforest.owo.serialization.endec.EitherEndec;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
@@ -24,7 +24,6 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -290,14 +289,14 @@ public class CodecUtils {
 
     public static SerializationContext createContext(DynamicOps<?> ops, SerializationContext assumedContext) {
         var rootOps = ops;
-        while (rootOps instanceof DelegatingOps<?>) rootOps = ((ForwardingDynamicOpsAccessor<?>) rootOps).owo$delegate();
+        while (rootOps instanceof DelegatingOps<?>) rootOps = ((DelegatingOpsAccessor<?>) rootOps).owo$delegate();
 
         var context = rootOps instanceof EdmOps edmOps
                 ? edmOps.capturedContext().and(assumedContext)
                 : assumedContext;
 
         if (ops instanceof RegistryOps<?> registryOps) {
-            context = context.withAttributes(RegistriesAttribute.tryFromCachedInfoGetter(((RegistryOpsAccessor) registryOps).owo$infoGetter()));
+            context = context.withAttributes(RegistriesAttribute.tryFromCachedInfoGetter(((RegistryOpsAccessor) registryOps).owo$lookupProvider()));
         }
 
         return context;

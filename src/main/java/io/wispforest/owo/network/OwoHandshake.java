@@ -2,8 +2,8 @@ package io.wispforest.owo.network;
 
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.Owo;
-import io.wispforest.owo.mixin.ClientCommonNetworkHandlerAccessor;
-import io.wispforest.owo.mixin.ServerCommonNetworkHandlerAccessor;
+import io.wispforest.owo.mixin.ClientCommonPacketListenerImplAccessor;
+import io.wispforest.owo.mixin.ServerCommonPacketListenerImplAccessor;
 import io.wispforest.owo.ops.TextOps;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
 import io.wispforest.endec.Endec;
@@ -35,7 +35,6 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.ToIntFunction;
 
@@ -155,7 +154,7 @@ public final class OwoHandshake {
             context.responseSender().disconnect(TextOps.concat(PREFIX, Text.nullToEmpty(disconnectMessage.toString())));
         }
 
-        ((OwoClientConnectionExtension) ((ServerCommonNetworkHandlerAccessor) context.networkHandler()).owo$getConnection()).owo$setChannelSet(filterOptionalServices(response.optionalChannels(), OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel));
+        ((OwoConnectionExtension) ((ServerCommonPacketListenerImplAccessor) context.networkHandler()).owo$getConnection()).owo$setChannelSet(filterOptionalServices(response.optionalChannels(), OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel));
 
         Owo.LOGGER.info("[Handshake] Handshake completed successfully");
     }
@@ -165,7 +164,7 @@ public final class OwoHandshake {
         if (ClientConfigurationNetworking.canSend(CHANNEL_ID) || !HANDSHAKE_REQUIRED || !ENABLED) return;
 
         client.execute(() -> {
-            ((ClientCommonNetworkHandlerAccessor) handler)
+            ((ClientCommonPacketListenerImplAccessor) handler)
                     .getConnection()
                     .disconnect(TextOps.concat(PREFIX, Text.nullToEmpty("incompatible server")));
         });

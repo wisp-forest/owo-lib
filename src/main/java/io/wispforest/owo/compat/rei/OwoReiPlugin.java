@@ -4,14 +4,12 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Axis;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
-import io.wispforest.owo.mixin.itemgroup.CreativeInventoryScreenAccessor;
+import io.wispforest.owo.mixin.itemgroup.CreativeModeInventoryScreenAccessor;
 import io.wispforest.owo.mixin.ui.access.BaseOwoHandledScreenAccessor;
 import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
 import io.wispforest.owo.ui.core.Component;
-import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.ParentComponent;
-import io.wispforest.owo.ui.core.Size;
 import io.wispforest.owo.ui.core.Surface;
 import io.wispforest.owo.ui.util.ScissorStack;
 import io.wispforest.owo.util.pond.OwoCreativeInventoryScreenExtensions;
@@ -25,10 +23,9 @@ import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
-import net.minecraft.world.item.CreativeModeTab;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4fStack;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -41,7 +38,7 @@ public class OwoReiPlugin implements REIClientPlugin {
     @Override
     public void registerExclusionZones(ExclusionZones zones) {
         zones.register(CreativeModeInventoryScreen.class, screen -> {
-            var group = CreativeInventoryScreenAccessor.owo$getSelectedTab();
+            var group = CreativeModeInventoryScreenAccessor.owo$getSelectedTab();
             if (!(group instanceof OwoItemGroup owoGroup)) return Collections.emptySet();
             if (owoGroup.getButtons().isEmpty()) return Collections.emptySet();
 

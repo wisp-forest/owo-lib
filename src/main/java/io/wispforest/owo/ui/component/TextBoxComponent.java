@@ -1,6 +1,6 @@
 package io.wispforest.owo.ui.component;
 
-import io.wispforest.owo.mixin.ui.access.TextFieldWidgetAccessor;
+import io.wispforest.owo.mixin.ui.access.EditBoxAccessor;
 import io.wispforest.owo.ui.core.CursorStyle;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.Sizing;
@@ -20,7 +20,7 @@ import java.util.function.Consumer;
 
 public class TextBoxComponent extends EditBox {
 
-    protected final Observable<Boolean> showsBackground = Observable.of(((TextFieldWidgetAccessor) this).owo$drawsBackground());
+    protected final Observable<Boolean> showsBackground = Observable.of(((EditBoxAccessor) this).owo$bordered());
 
     protected final Observable<String> textValue = Observable.of("");
     protected final EventStream<OnChanged> changedEvents = OnChanged.newStream();

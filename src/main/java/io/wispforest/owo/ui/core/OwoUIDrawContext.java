@@ -7,7 +7,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tessellator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import io.wispforest.owo.client.OwoClient;
-import io.wispforest.owo.mixin.ui.DrawContextInvoker;
+import io.wispforest.owo.mixin.ui.GuiGraphicsInvoker;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
 import io.wispforest.owo.ui.util.NinePatchTexture;
 import io.wispforest.owo.util.pond.OwoTessellatorExtension;
@@ -50,8 +50,8 @@ public class OwoUIDrawContext extends GuiGraphics {
 
     public static OwoUIDrawContext of(GuiGraphics context) {
         var owoContext = new OwoUIDrawContext(Minecraft.getInstance(), context.bufferSource());
-        ((DrawContextInvoker) owoContext).owo$setScissorStack(((DrawContextInvoker) context).owo$getScissorStack());
-        ((DrawContextInvoker) owoContext).owo$setMatrices(((DrawContextInvoker) context).owo$getMatrices());
+        ((GuiGraphicsInvoker) owoContext).owo$setScissorStack(((GuiGraphicsInvoker) context).owo$getScissorStack());
+        ((GuiGraphicsInvoker) owoContext).owo$setMatrixStack(((GuiGraphicsInvoker) context).owo$getMatrixStack());
 
         return owoContext;
     }
@@ -261,7 +261,7 @@ public class OwoUIDrawContext extends GuiGraphics {
     }
 
     public void drawTooltip(Font textRenderer, int x, int y, List<ClientTooltipComponent> components) {
-        ((DrawContextInvoker) this).owo$renderTooltipFromComponents(textRenderer, components, x, y, DefaultTooltipPositioner.INSTANCE);
+        ((GuiGraphicsInvoker) this).owo$renderTooltipFromComponents(textRenderer, components, x, y, DefaultTooltipPositioner.INSTANCE);
     }
 
     // --- debug rendering ---

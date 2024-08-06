@@ -27,7 +27,7 @@ public class TessellatorMixin implements OwoTessellatorExtension {
         if(this.bufferBuilder == null) return;
 
         var bl = this.owo$skipBegin
-                && builderAccessor().getDrawMode().equals(drawMode)
+                && builderAccessor().getMode().equals(drawMode)
                 && builderAccessor().getFormat().equals(format);
 
         if (!bl) return;

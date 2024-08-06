@@ -1,6 +1,6 @@
 package io.wispforest.owo.ops;
 
-import io.wispforest.owo.mixin.SetComponentsLootFunctionAccessor;
+import io.wispforest.owo.mixin.SetComponentsFunctionAccessor;
 import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
@@ -68,7 +68,7 @@ public final class LootOps {
     public static void injectItemStack(ItemStack stack, float chance, Identifier... targetTables) {
         ADDITIONS.put(targetTables, () -> LootItem.lootTableItem(stack.getItem())
                 .when(LootItemRandomChanceCondition.randomChance(chance))
-                .apply(() -> SetComponentsLootFunctionAccessor.createSetComponentsLootFunction(List.of(), stack.getComponentsPatch()))
+                .apply(() -> SetComponentsFunctionAccessor.createSetComponentsFunction(List.of(), stack.getComponentsPatch()))
                 .apply(SetItemCountFunction.setCount(ConstantValue.exactly(stack.getCount())))
                 .build());
     }

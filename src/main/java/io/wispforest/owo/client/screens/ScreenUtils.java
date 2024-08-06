@@ -1,6 +1,6 @@
 package io.wispforest.owo.client.screens;
 
-import io.wispforest.owo.mixin.ScreenHandlerInvoker;
+import io.wispforest.owo.mixin.AbstractContainerMenuInvoker;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
@@ -77,7 +77,7 @@ public class ScreenUtils {
      */
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean insertIntoSlotRange(AbstractContainerMenu handler, ItemStack addition, int beginIndex, int endIndex, boolean fromLast) {
-        return ((ScreenHandlerInvoker) handler).owo$insertItem(addition, beginIndex, endIndex, fromLast);
+        return ((AbstractContainerMenuInvoker) handler).owo$moveItemStackTo(addition, beginIndex, endIndex, fromLast);
     }
 
 }

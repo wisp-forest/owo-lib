@@ -15,7 +15,7 @@ public class PlayerAdvancementTrackerMixin {
 
     @ModifyArg(method = "save", at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/Codec;encodeStart(Lcom/mojang/serialization/DynamicOps;Ljava/lang/Object;)Lcom/mojang/serialization/DataResult;", remap = false), index = 1)
     private Object onAdvancementsSaved(Object map) {
-        DataSavedEvents.ADVANCEMENTS.invoker().onSaved(player.getUuid(), ((ProgressMapAccessor) map).getMap());
+        DataSavedEvents.ADVANCEMENTS.invoker().onSaved(player.getUuid(), ((PlayerAdvancementsDataAccessor) map).getMap());
         return map;
     }
 }
