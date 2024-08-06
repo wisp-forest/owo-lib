@@ -25,17 +25,17 @@ public abstract class SimpleRegistryMixin<T> implements WritableRegistry<T>, Owo
 
     @Shadow private Map<T, Holder.Reference<T>> unregisteredIntrusiveHolders;
     @Shadow @Final private Map<ResourceKey<T>, Holder.Reference<T>> byKey;
-    @Shadow @Final private Map<Identifier, Holder.Reference<T>> byLocation;
+    @Shadow @Final private Map<Identifier, Holder.Reference<T>> byId;
     @Shadow @Final private Map<T, Holder.Reference<T>> byValue;
-    @Shadow @Final private ObjectList<Holder.Reference<T>> byId;
-    @Shadow @Final private Reference2IntMap<T> toId;
+    @Shadow @Final private ObjectList<Holder.Reference<T>> byRawId;
+    @Shadow @Final private Reference2IntMap<T> toRawId;
     @Shadow @Final private Map<ResourceKey<T>, RegistrationInfo> registrationInfos;
     @Shadow private Lifecycle registryLifecycle;
 
     //--
 
     /**
-     * Copy of the {@link MappedRegistry#register} function but uses {@link List#set} instead of {@link List#add} for {@link MappedRegistry#byId}
+     * Copy of the {@link MappedRegistry#register} function but uses {@link List#set} instead of {@link List#add} for {@link MappedRegistry#byRawId}
      */
     public Holder.Reference<T> owo$set(int id, ResourceKey<T> arg, T object, RegistrationInfo arg2) {
         this.byValue.remove(object);
@@ -61,10 +61,10 @@ public abstract class SimpleRegistryMixin<T> implements WritableRegistry<T>, Owo
         }
 
         this.byKey.put(arg, reference);
-        this.byLocation.put(arg.value(), reference);
+        this.byId.put(arg.value(), reference);
         this.byValue.put(object, reference);
-        this.byId.set(id, reference);
-        this.toId.put(object, id);
+        this.byRawId.set(id, reference);
+        this.toRawId.put(object, id);
         this.registrationInfos.put(arg, arg2);
         this.registryLifecycle = this.registryLifecycle.add(arg2.lifecycle());
 
