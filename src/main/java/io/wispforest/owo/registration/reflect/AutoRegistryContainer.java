@@ -1,6 +1,8 @@
 package io.wispforest.owo.registration.reflect;
 
 import io.wispforest.owo.registration.annotations.AssignedName;
+import io.wispforest.owo.registration.reflect.entry.MemoizedEntry;
+import io.wispforest.owo.registration.reflect.entry.TypedRegistryEntry;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.entry.RegistryEntry;
 
@@ -36,16 +38,20 @@ public abstract class AutoRegistryContainer<T> implements FieldProcessingSubject
     /**
      * Convenience-alias for {@link FieldRegistrationHandler#register(Class, String, boolean)}
      */
-    static <T> void register(Class<? extends AutoRegistryContainer<T>> container, String namespace, boolean recurse) {
+    public static <T> void register(Class<? extends AutoRegistryContainer<T>> container, String namespace, boolean recurse) {
         FieldRegistrationHandler.register(container, namespace, recurse);
     }
 
     @SuppressWarnings({"unchecked"})
-    static <T> Class<T> conform(Class<?> input) {
+    protected static <T> Class<T> conform(Class<?> input) {
         return (Class<T>) input;
     }
 
     public static <T> RegistryEntry<T> entry(Supplier<T> supplier) {
         return MemoizedEntry.ofEntry(supplier);
+    }
+
+    public static <T extends B, B> TypedRegistryEntry<T, B> typedEntry(Supplier<T> supplier) {
+        return MemoizedEntry.ofTypedEntry(supplier);
     }
 }

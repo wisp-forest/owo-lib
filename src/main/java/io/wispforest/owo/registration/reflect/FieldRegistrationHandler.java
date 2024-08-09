@@ -2,6 +2,8 @@ package io.wispforest.owo.registration.reflect;
 
 import io.wispforest.owo.registration.annotations.IterationIgnored;
 import io.wispforest.owo.registration.annotations.RegistryNamespace;
+import io.wispforest.owo.registration.reflect.entry.MemoizedEntry;
+import io.wispforest.owo.registration.reflect.entry.MemoizedRegistryEntry;
 import io.wispforest.owo.util.ReflectionUtils;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;

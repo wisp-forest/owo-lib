@@ -1,4 +1,4 @@
-package io.wispforest.owo.registration.reflect;
+package io.wispforest.owo.registration.reflect.entry;
 
 import net.minecraft.registry.entry.RegistryEntry;
 import org.jetbrains.annotations.Nullable;
@@ -22,8 +22,18 @@ public class MemoizedEntry<T> implements Supplier<T> {
         return new MemoizedEntry<>(supplier);
     }
 
+    public static <T extends B, B> TypedRegistryEntry<T, B> ofTypedEntry(Supplier<T> supplier) {
+        if(supplier instanceof MemoizedRegistryEntry memorizedRegistryEntry) {
+            return memorizedRegistryEntry;
+        } else if(supplier instanceof MemoizedEntry<T> memoizedSupplier) {
+            supplier = memoizedSupplier.factory;
+        }
+
+        return new MemoizedRegistryEntry<>(supplier);
+    }
+
     public static <T> RegistryEntry<T> ofEntry(Supplier<T> supplier) {
-        if(supplier instanceof MemoizedRegistryEntry<T> memorizedRegistryEntry) {
+        if(supplier instanceof MemoizedRegistryEntry<T, T> memorizedRegistryEntry) {
             return memorizedRegistryEntry;
         } else if(supplier instanceof MemoizedEntry<T> memoizedSupplier) {
             supplier = memoizedSupplier.factory;
