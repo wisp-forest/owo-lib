@@ -56,7 +56,9 @@ public final class Wisdom {
             "I saw ppl complain that minor updates between big updates will ruin it for modders but I thought modders were very good and they can do what we do in a week so they should be ok with updating their mods to new versions in a day, right? :titantroll:",
             "that's a CanPickUpLoot baby zombie, the most annoying thing ever. he runs around like crazy and picks up all your shit",
             "blod: I think I need to take a book out of your page",
-            "blod: he her"
+            "blod: he her",
+            "BasiqueEvangelist: what if... iphones",
+            "Cheese Cheese Creeper, the newest release from MC Basic"
     );
 
     public static void spread() {
