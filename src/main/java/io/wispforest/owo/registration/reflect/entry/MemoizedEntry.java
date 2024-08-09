@@ -33,7 +33,7 @@ public class MemoizedEntry<T> implements Supplier<T> {
     }
 
     public static <T> RegistryEntry<T> ofEntry(Supplier<T> supplier) {
-        if(supplier instanceof MemoizedRegistryEntry<T, T> memorizedRegistryEntry) {
+        if(supplier instanceof MemoizedRegistryEntry memorizedRegistryEntry) {
             return memorizedRegistryEntry;
         } else if(supplier instanceof MemoizedEntry<T> memoizedSupplier) {
             supplier = memoizedSupplier.factory;
