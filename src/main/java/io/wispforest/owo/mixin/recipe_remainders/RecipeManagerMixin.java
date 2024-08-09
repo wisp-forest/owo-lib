@@ -1,35 +1,41 @@
 package io.wispforest.owo.mixin.recipe_remainders;
 
-import com.google.gson.JsonObject;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
+import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.serialization.JsonOps;
 import io.wispforest.owo.util.RecipeRemainderStorage;
-import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.*;
+import net.minecraft.recipe.Recipe;
+import net.minecraft.recipe.RecipeEntry;
+import net.minecraft.recipe.RecipeManager;
+import net.minecraft.recipe.RecipeType;
 import net.minecraft.recipe.input.RecipeInput;
-import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
-import net.minecraft.util.Util;
 import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.util.profiler.Profiler;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Mixin(RecipeManager.class)
 public abstract class RecipeManagerMixin {
 
-    @Inject(method = "deserialize", at = @At(value = "RETURN"))
-    private static void deserializeRecipeSpecificRemainders(Identifier id, JsonObject json, RegistryWrapper.WrapperLookup registryLookup, CallbackInfoReturnable<Recipe<?>> cir) {
+    @Inject(method = "apply(Ljava/util/Map;Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/util/profiler/Profiler;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/recipe/RecipeEntry;<init>(Lnet/minecraft/util/Identifier;Lnet/minecraft/recipe/Recipe;)V"))
+    private void deserializeRecipeSpecificRemainders(Map<Identifier, JsonElement> map, ResourceManager resourceManager, Profiler profiler, CallbackInfo ci, @Local Map.Entry<Identifier, JsonElement> entry) {
+        var json = entry.getValue().getAsJsonObject();
         if (!json.has("owo:remainders")) return;
 
         var remainders = new HashMap<Item, ItemStack>();
@@ -46,7 +52,7 @@ public abstract class RecipeManagerMixin {
         }
 
         if (remainders.isEmpty()) return;
-        RecipeRemainderStorage.store(id, remainders);
+        RecipeRemainderStorage.store(entry.getKey(), remainders);
     }
 
     @Inject(method = "getRemainingStacks", at = @At(value = "RETURN", ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
