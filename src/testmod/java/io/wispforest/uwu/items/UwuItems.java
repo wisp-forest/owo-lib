@@ -13,6 +13,7 @@ public class UwuItems implements ItemRegistryContainer {
 
     public static final Item TEST_STICK = new UwuTestStickItem();
     public static final Item SCREEN_SHARD = new UwuScreenShardItem();
+    public static final Item COUNTER = new UwuCounterItem();
 
     @RegistryNamespace("uowou")
     public static class OwoCompatItems implements ItemRegistryContainer {

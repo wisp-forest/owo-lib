@@ -79,6 +79,9 @@
       ],
       "net/minecraft/class_1792\u0024class_1793": [
         "io/wispforest/owo/itemgroup/OwoItemSettingsExtension"
+      ],
+      "net/minecraft/class_1792": [
+        "io/wispforest/owo/ext/OwoItem"
       ]
     }
   }
