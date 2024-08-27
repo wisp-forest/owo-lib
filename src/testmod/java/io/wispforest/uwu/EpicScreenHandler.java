@@ -3,13 +3,16 @@ package io.wispforest.uwu;
 import io.wispforest.owo.client.screens.ScreenUtils;
 import io.wispforest.owo.client.screens.SlotGenerator;
 import io.wispforest.owo.client.screens.SyncedProperty;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.text.Text;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -20,6 +23,7 @@ public class EpicScreenHandler extends ScreenHandler {
     private final ScreenHandlerContext context;
 
     public final SyncedProperty<String> epicNumber;
+    public final SyncedProperty<ItemStack> cringeStack;
 
     public EpicScreenHandler(int syncId, PlayerInventory inventory) {
         this(syncId, inventory, ScreenHandlerContext.EMPTY);
@@ -35,6 +39,8 @@ public class EpicScreenHandler extends ScreenHandler {
         this.epicNumber = this.createProperty(String.class, "");
         this.epicNumber.set(generateEpicName());
 
+        this.cringeStack = this.createProperty(ItemStack.class, ItemStack.EMPTY);
+
         this.addClientboundMessage(MaldMessage.class, this::handleMald);
         this.addServerboundMessage(EpicMessage.class, this::handleEpic);
     }
@@ -45,6 +51,10 @@ public class EpicScreenHandler extends ScreenHandler {
 
     private void handleEpic(EpicMessage r) {
         this.epicNumber.set(generateEpicName() + " " + r.number);
+
+        var stacc = Items.FEATHER.getDefaultStack();
+        stacc.set(DataComponentTypes.CUSTOM_NAME, Text.literal(this.epicNumber.get()));
+        this.cringeStack.set(stacc);
     }
 
     @Override
