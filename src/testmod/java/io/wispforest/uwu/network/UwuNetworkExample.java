@@ -1,7 +1,6 @@
 package io.wispforest.uwu.network;
 
 import io.wispforest.endec.impl.RecordEndec;
-import io.wispforest.endec.impl.ReflectiveEndecBuilder;
 import io.wispforest.owo.network.OwoNetChannel;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.StructEndec;
@@ -9,7 +8,9 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.option.KeyBinding;
+import net.minecraft.item.Items;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
@@ -28,6 +29,7 @@ public class UwuNetworkExample {
 
         REGISTRY.put("one", RecordEndec.create(CHANNEL.builder(), DispatchedSubclassOne.class));
         REGISTRY.put("two", RecordEndec.create(CHANNEL.builder(), DispatchedSubclassTwo.class));
+        REGISTRY.put("three", RecordEndec.create(CHANNEL.builder(), DispatchedSubclassThree.class));
 
         CHANNEL.registerClientbound(StringPacket.class, (message, access) -> {
             access.player().sendMessage(Text.of(message.value()), false);
@@ -67,6 +69,7 @@ public class UwuNetworkExample {
 
                     CHANNEL.clientHandle().send(new MaldingPacket(new DispatchedSubclassOne("base")));
                     CHANNEL.clientHandle().send(new MaldingPacket(new DispatchedSubclassTwo(20)));
+                    CHANNEL.clientHandle().send(new MaldingPacket(new DispatchedSubclassThree(Items.ACACIA_BOAT, Blocks.DRAGON_EGG)));
 
                     CHANNEL.clientHandle().send(new NullablePacket(null, null));
                     CHANNEL.clientHandle().send(new NullablePacket("Weeee", null));
