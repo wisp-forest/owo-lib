@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.event.registry.RegistryAttribute;
 import net.fabricmc.fabric.api.event.registry.RegistryAttributeHolder;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
@@ -92,6 +93,11 @@ public final class MinecraftEndecs {
                     : BlockHitResult.createMissed(pos, side, blockPos)
     );
 
+    public static final Endec<BlockState> BLOCK_STATE = Endec.ifAttr(
+            MinecraftSerializationAttributes.NETWORK, Endec.VAR_INT.xmap(Block.STATE_IDS::get, Block.STATE_IDS::getRawId)
+        )
+        .orElse(CodecUtils.toEndec(BlockState.CODEC));
+
     // --- Constructors for MC types ---
 
     public static ReflectiveEndecBuilder addDefaults(ReflectiveEndecBuilder builder) {
@@ -112,6 +118,8 @@ public final class MinecraftEndecs {
 
         builder.register(ofRegistry(Registries.ITEM), Item.class)
                .register(ofRegistry(Registries.BLOCK), Block.class);
+
+        builder.register(BLOCK_STATE, BlockState.class);
 
         return builder;
     }

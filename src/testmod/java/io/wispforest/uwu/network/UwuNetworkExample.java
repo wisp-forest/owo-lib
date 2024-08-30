@@ -9,10 +9,12 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.item.Items;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Direction;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.HashMap;
@@ -69,7 +71,11 @@ public class UwuNetworkExample {
 
                     CHANNEL.clientHandle().send(new MaldingPacket(new DispatchedSubclassOne("base")));
                     CHANNEL.clientHandle().send(new MaldingPacket(new DispatchedSubclassTwo(20)));
-                    CHANNEL.clientHandle().send(new MaldingPacket(new DispatchedSubclassThree(Items.ACACIA_BOAT, Blocks.DRAGON_EGG)));
+                    CHANNEL.clientHandle().send(new MaldingPacket(new DispatchedSubclassThree(
+                        Items.ACACIA_BOAT,
+                        Blocks.DRAGON_EGG,
+                        Blocks.OAK_STAIRS.getDefaultState().with(HorizontalFacingBlock.FACING, Direction.EAST)
+                    )));
 
                     CHANNEL.clientHandle().send(new NullablePacket(null, null));
                     CHANNEL.clientHandle().send(new NullablePacket("Weeee", null));
