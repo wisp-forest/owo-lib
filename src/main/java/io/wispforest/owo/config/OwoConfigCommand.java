@@ -10,10 +10,12 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.ui.ConfigScreen;
+import io.wispforest.owo.config.ui.ConfigScreenProviders;
 import io.wispforest.owo.ops.TextOps;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.text.Text;
@@ -35,15 +37,15 @@ public class OwoConfigCommand {
                         })));
     }
 
-    private static class ConfigScreenArgumentType implements ArgumentType<ConfigScreen> {
+    private static class ConfigScreenArgumentType implements ArgumentType<Screen> {
 
         private static final SimpleCommandExceptionType NO_SUCH_CONFIG_SCREEN = new SimpleCommandExceptionType(
                 TextOps.concat(Owo.PREFIX, Text.literal("no config screen with that id"))
         );
 
         @Override
-        public ConfigScreen parse(StringReader reader) throws CommandSyntaxException {
-            var provider = ConfigScreen.getProvider(reader.readString());
+        public Screen parse(StringReader reader) throws CommandSyntaxException {
+            var provider = ConfigScreenProviders.get(reader.readString());
             if (provider == null) throw NO_SUCH_CONFIG_SCREEN.create();
 
             return provider.apply(null);
@@ -52,7 +54,7 @@ public class OwoConfigCommand {
         @Override
         public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
             var configNames = new ArrayList<String>();
-            ConfigScreen.forEachProvider((s, screenFunction) -> configNames.add(s));
+            ConfigScreenProviders.forEach((s, screenFunction) -> configNames.add(s));
             return CommandSource.suggestMatching(configNames, builder);
         }
     }
