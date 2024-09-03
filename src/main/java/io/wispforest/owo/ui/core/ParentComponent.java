@@ -91,6 +91,15 @@ public interface ParentComponent extends Component {
     ParentComponent padding(Insets padding);
 
     /**
+     * Set the internal padding of this component
+     *
+     * @param padding The new padding to use
+     */
+    default ParentComponent padding(int padding) {
+        return this.padding(Insets.of(padding));
+    }
+
+    /**
      * @return The internal padding of this component
      */
     AnimatableProperty<Insets> padding();
