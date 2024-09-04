@@ -102,6 +102,10 @@ public final class Components {
         return new LabelComponent(text);
     }
 
+    public static LabelComponent label(String string) {
+        return new LabelComponent(Text.literal(string));
+    }
+
     public static CheckboxComponent checkbox(Text message) {
         return new CheckboxComponent(message);
     }
