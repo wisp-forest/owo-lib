@@ -23,7 +23,6 @@ import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.owo.util.NumberReflection;
 import io.wispforest.owo.util.ReflectionUtils;
 import org.apache.commons.lang3.mutable.MutableBoolean;
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -57,8 +56,6 @@ import net.minecraft.util.FormattedCharSequence;
 public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
 
     public static final Identifier DEFAULT_MODEL_ID = Identifier.of("owo", "config");
-
-    private static final Map<String, Function<Screen, ? extends ConfigScreen>> CONFIG_SCREEN_PROVIDERS = new HashMap<>();
 
     private static final Map<Predicate<Option<?>>, OptionComponentFactory<?>> DEFAULT_FACTORIES = new HashMap<>();
     /**
@@ -107,35 +104,27 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
     }
 
     /**
-     * Register the given config screen provider. This is primarily
-     * used for making your config available in ModMenu and to the
-     * {@code /owo-config} command, although other places my use it as well
-     *
-     * @param modId    The mod id for which to supply a config screen
-     * @param supplier The supplier to register - this gets the parent screen
-     *                 as argument
-     * @throws IllegalArgumentException If a config screen provider is
-     *                                  already registered for the given mod id
+     * @deprecated Use {@link ConfigScreenProviders#register(String, Function)} instead
      */
+    @Deprecated(forRemoval = true)
     public static <S extends ConfigScreen> void registerProvider(String modId, Function<Screen, S> supplier) {
-        if (CONFIG_SCREEN_PROVIDERS.put(modId, supplier) != null) {
-            throw new IllegalArgumentException("Tried to register config screen provider for mod id " + modId + " twice");
-        }
+        ConfigScreenProviders.registerOwoConfigScreen(modId, supplier);
     }
 
     /**
-     * Get the config screen provider associated with
-     * the given mod id
-     *
-     * @return The associated config screen provider, or {@code null} if
-     * none is registered
+     * @deprecated Use {@link ConfigScreenProviders#get(String)} instead
      */
+    @Deprecated(forRemoval = true)
     public static @Nullable Function<Screen, ? extends ConfigScreen> getProvider(String modId) {
-        return CONFIG_SCREEN_PROVIDERS.get(modId);
+        return ConfigScreenProviders.getOwoProvider(modId);
     }
 
+    /**
+     * @deprecated Use {@link ConfigScreenProviders#forEach(BiConsumer)} instead
+     */
+    @Deprecated(forRemoval = true)
     public static void forEachProvider(BiConsumer<String, Function<Screen, ? extends ConfigScreen>> action) {
-        CONFIG_SCREEN_PROVIDERS.forEach(action);
+        ConfigScreenProviders.forEachOwoProvider(action);
     }
 
     @Override
@@ -465,7 +454,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
         UIParsing.registerFactory("config-text-box", element -> new ConfigTextBox());
     }
 
-    private record SearchMatches(String query, List<SearchAnchorComponent> matches) {}
+    protected record SearchMatches(String query, List<SearchAnchorComponent> matches) {}
 
     public static class SearchHighlighterComponent extends BaseComponent {
 

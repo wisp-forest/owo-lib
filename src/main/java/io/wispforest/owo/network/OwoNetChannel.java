@@ -444,27 +444,6 @@ public class OwoNetChannel {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private <R extends Record> FriendlyByteBuf encode(R message, EnvType target) {
-        var buffer = PacketByteBufs.create();
-
-        final var messageClass = message.getClass();
-
-        if (!this.endecsByClass.containsKey(messageClass)) {
-            throw new NetworkException("Message class '" + messageClass + "' is not registered");
-        }
-
-        final IndexedEndec<R> endec = (IndexedEndec<R>) this.endecsByClass.get(messageClass);
-        if (endec.handlerIndex(target) == -1) {
-            throw new NetworkException("Message class '" + messageClass + "' has no handler registered for target environment " + target);
-        }
-
-        buffer.writeVarInt(endec.handlerIndex(target));
-        buffer.write(endec.endec, message);
-
-        return buffer;
-    }
-
     public class ClientHandle {
 
         /**

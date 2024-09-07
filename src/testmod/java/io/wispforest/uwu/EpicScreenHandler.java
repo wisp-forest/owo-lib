@@ -4,6 +4,9 @@ import io.wispforest.owo.client.screens.ScreenUtils;
 import io.wispforest.owo.client.screens.SlotGenerator;
 import io.wispforest.owo.client.screens.SyncedProperty;
 import java.util.concurrent.ThreadLocalRandom;
+
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Text;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -11,6 +14,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 public class EpicScreenHandler extends AbstractContainerMenu {
     private static final char[] VOWELS = {'a', 'e', 'i', 'o', 'u'};
@@ -19,6 +23,7 @@ public class EpicScreenHandler extends AbstractContainerMenu {
     private final ContainerLevelAccess context;
 
     public final SyncedProperty<String> epicNumber;
+    public final SyncedProperty<ItemStack> cringeStack;
 
     public EpicScreenHandler(int syncId, Inventory inventory) {
         this(syncId, inventory, ContainerLevelAccess.NULL);
@@ -34,6 +39,8 @@ public class EpicScreenHandler extends AbstractContainerMenu {
         this.epicNumber = this.createProperty(String.class, "");
         this.epicNumber.set(generateEpicName());
 
+        this.cringeStack = this.createProperty(ItemStack.class, ItemStack.EMPTY);
+
         this.addClientboundMessage(MaldMessage.class, this::handleMald);
         this.addServerboundMessage(EpicMessage.class, this::handleEpic);
     }
@@ -44,6 +51,10 @@ public class EpicScreenHandler extends AbstractContainerMenu {
 
     private void handleEpic(EpicMessage r) {
         this.epicNumber.set(generateEpicName() + " " + r.number);
+
+        var stacc = Items.FEATHER.getDefaultInstance();
+        stacc.set(DataComponents.CUSTOM_NAME, Text.literal(this.epicNumber.get()));
+        this.cringeStack.set(stacc);
     }
 
     @Override
