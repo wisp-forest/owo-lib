@@ -7,11 +7,11 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(PatchedDataComponentMap.class)
-public interface ComponentMapImplAccessor {
+public interface PatchedDataComponentMapAccessor {
     @Accessor("prototype")
-    DataComponentMap owo$getBaseComponents();
+    DataComponentMap owo$getPrototype();
 
     @Accessor("prototype")
     @Mutable
-    void owo$setBaseComponents(DataComponentMap baseComponents);
+    void owo$setPrototype(DataComponentMap prototype);
 }

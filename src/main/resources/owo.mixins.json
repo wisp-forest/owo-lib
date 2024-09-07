@@ -11,7 +11,7 @@
     "DataResultMixin",
     "DataResultMixin$DataResultErrorMixin",
     "DelegatingOpsAccessor",
-    "ext.ComponentMapImplAccessor",
+    "ext.PatchedDataComponentMapAccessor",
     "ext.ComponentMapImplMixin",
     "ext.ItemMixin",
     "ext.ItemStackMixin",

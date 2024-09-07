@@ -22,13 +22,13 @@ public class ItemStackMixin {
 
     @Inject(method = "<init>(Lnet/minecraft/world/level/ItemLike;ILnet/minecraft/core/component/PatchedDataComponentMap;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;verifyComponentsAfterLoad(Lnet/minecraft/world/item/ItemStack;)V"))
     private void injectDerivedComponentMap(ItemLike item, int count, PatchedDataComponentMap components, CallbackInfo ci) {
-        var base = ((ComponentMapImplAccessor)(Object) this.components).owo$getBaseComponents();
+        var base = ((PatchedDataComponentMapAccessor)(Object) this.components).owo$getPrototype();
 
         if (base instanceof DerivedComponentMap derived) {
             owo$derivedMap = derived;
         } else {
             owo$derivedMap = new DerivedComponentMap(base);
-            ((ComponentMapImplAccessor)(Object) this.components).owo$setBaseComponents(owo$derivedMap);
+            ((PatchedDataComponentMapAccessor)(Object) this.components).owo$setPrototype(owo$derivedMap);
         }
     }
 
