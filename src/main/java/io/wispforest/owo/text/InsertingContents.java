@@ -10,10 +10,10 @@ import net.minecraft.network.chat.Text;
 
 import java.util.Optional;
 
-public record InsertingTextContent(int index) implements ComponentContents {
+public record InsertingContents(int index) implements ComponentContents {
 
-    public static final ComponentContents.Type<InsertingTextContent> TYPE = new Type<>(
-            CodecUtils.toMapCodec(StructEndecBuilder.of(Endec.INT.fieldOf("index", InsertingTextContent::index), InsertingTextContent::new)),
+    public static final ComponentContents.Type<InsertingContents> TYPE = new Type<>(
+            CodecUtils.toMapCodec(StructEndecBuilder.of(Endec.INT.fieldOf("index", InsertingContents::index), InsertingContents::new)),
             "owo:insert"
     );
 

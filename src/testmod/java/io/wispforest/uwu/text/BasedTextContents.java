@@ -8,15 +8,15 @@ import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 
-public class BasedTextContent implements ComponentContents {
+public class BasedTextContents implements ComponentContents {
 
-    public static final Type<BasedTextContent> TYPE = new Type<>(
-            CodecUtils.toMapCodec(StructEndecBuilder.of(Endec.STRING.fieldOf("based", o -> o.basedText), BasedTextContent::new)),
+    public static final Type<BasedTextContents> TYPE = new Type<>(
+            CodecUtils.toMapCodec(StructEndecBuilder.of(Endec.STRING.fieldOf("based", o -> o.basedText), BasedTextContents::new)),
             "uwu:based");
 
     private final String basedText;
 
-    public BasedTextContent(String basedText) {
+    public BasedTextContents(String basedText) {
         this.basedText = basedText;
     }
 

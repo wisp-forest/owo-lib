@@ -4,7 +4,7 @@ import io.wispforest.owo.client.screens.ScreenInternals;
 import io.wispforest.owo.command.debug.OwoDebugCommands;
 import io.wispforest.owo.ops.LootOps;
 import io.wispforest.owo.text.CustomTextRegistry;
-import io.wispforest.owo.text.InsertingTextContent;
+import io.wispforest.owo.text.InsertingContents;
 import io.wispforest.owo.util.Wisdom;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -49,7 +49,7 @@ public class Owo implements ModInitializer {
     @ApiStatus.Internal
     public void onInitialize() {
         LootOps.registerListener();
-        CustomTextRegistry.register(InsertingTextContent.TYPE, "index");
+        CustomTextRegistry.register(InsertingContents.TYPE, "index");
         ScreenInternals.init();
 
         ServerLifecycleEvents.SERVER_STARTING.register(server -> SERVER = server);

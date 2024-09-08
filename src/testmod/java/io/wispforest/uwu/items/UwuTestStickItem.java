@@ -14,8 +14,7 @@ import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.RegistriesAttribute;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.uwu.Uwu;
-import io.wispforest.uwu.text.BasedTextContent;
-import net.minecraft.core.Holder.Reference;
+import io.wispforest.uwu.text.BasedTextContents;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
@@ -25,8 +24,6 @@ import net.minecraft.network.chat.MutableText;
 import net.minecraft.network.chat.Text;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.RegistryOps;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -148,7 +145,7 @@ public class UwuTestStickItem extends Item {
             stickStack.set(TEXT_COMPONENT, Text.nullToEmpty(String.valueOf(context.getLevel().random.nextInt(1000000))));
         }
 
-        stickStack.set(TEXT_COMPONENT, MutableText.of(new BasedTextContent("basednite, ")).append(stickStack.get(TEXT_COMPONENT)));
+        stickStack.set(TEXT_COMPONENT, MutableText.of(new BasedTextContents("basednite, ")).append(stickStack.get(TEXT_COMPONENT)));
 
         context.getPlayer().displayClientMessage(stickStack.get(TEXT_COMPONENT), false);
 
