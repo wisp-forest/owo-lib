@@ -1,6 +1,5 @@
 package io.wispforest.owo.itemgroup;
 
-import io.wispforest.owo.Owo;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -16,8 +15,9 @@ import java.util.function.Supplier;
  */
 @Deprecated(forRemoval = true)
 public class OwoItemSettings extends Item.Settings {
+    
     public OwoItemSettings group(ItemGroupReference ref) {
-        return (OwoItemSettings) super.groupSup(ref);
+        return (OwoItemSettings) super.group(ref);
     }
 
     /**
@@ -38,7 +38,7 @@ public class OwoItemSettings extends Item.Settings {
     }
 
     public Supplier<OwoItemGroup> groupSupplier() {
-        return this.groupSupplier();
+        return super.groupSupplier();
     }
 
     public OwoItemSettings tab(int tab) {
