@@ -32,7 +32,7 @@ public abstract class TextFieldWidgetMixin extends ClickableWidget {
             if (forward) {
                 cursorPosition++;
                 while (cursorPosition < this.text.length() && owo$isWordChar(this.text.charAt(cursorPosition))) cursorPosition++;
-            } else {
+            } else if (cursorPosition > 0) {
                 cursorPosition--;
                 while (cursorPosition > 0 && owo$isWordChar(this.text.charAt(cursorPosition - 1))) cursorPosition--;
             }

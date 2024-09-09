@@ -1,17 +1,16 @@
 package io.wispforest.owo.itemgroup.json;
 
-import com.mojang.serialization.Lifecycle;
 import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
 import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
 import io.wispforest.owo.mixin.itemgroup.ItemGroupAccessor;
-import io.wispforest.owo.mixin.ui.SimpleRegistryAccessor;
+import io.wispforest.owo.util.pond.OwoSimpleRegistryExtensions;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.SimpleRegistry;
+import net.minecraft.registry.entry.RegistryEntryInfo;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -34,9 +33,7 @@ public class WrapperGroup extends OwoItemGroup {
 
         int parentRawId = Registries.ITEM_GROUP.getRawId(parent);
 
-        // TODO: set doesn't exist anymore. figure out what to do.
-//        ((SimpleRegistryAccessor<ItemGroup>) Registries.ITEM_GROUP).owo$getValueToEntry().remove(parent);
-//        ((SimpleRegistry<ItemGroup>) Registries.ITEM_GROUP).set(parentRawId, RegistryKey.of(RegistryKeys.ITEM_GROUP, parentId), this, Lifecycle.stable());
+        ((OwoSimpleRegistryExtensions<ItemGroup>) Registries.ITEM_GROUP).owo$set(parentRawId, RegistryKey.of(RegistryKeys.ITEM_GROUP, parentId), this, RegistryEntryInfo.DEFAULT);
 
         ((ItemGroupAccessor) this).owo$setDisplayName(parent.getDisplayName());
         ((ItemGroupAccessor) this).owo$setColumn(parent.getColumn());

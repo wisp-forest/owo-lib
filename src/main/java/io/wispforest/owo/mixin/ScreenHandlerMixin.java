@@ -1,5 +1,6 @@
 package io.wispforest.owo.mixin;
 
+import io.wispforest.endec.SerializationContext;
 import io.wispforest.endec.impl.ReflectiveEndecBuilder;
 import io.wispforest.owo.client.screens.OwoScreenHandler;
 import io.wispforest.owo.client.screens.ScreenInternals;
@@ -7,6 +8,7 @@ import io.wispforest.owo.client.screens.ScreenhandlerMessageData;
 import io.wispforest.owo.client.screens.SyncedProperty;
 import io.wispforest.owo.network.NetworkException;
 import io.wispforest.endec.Endec;
+import io.wispforest.owo.serialization.RegistriesAttribute;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.util.pond.OwoScreenHandlerExtension;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -106,8 +108,9 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
             throw new NetworkException("Tried to send message of unknown type " + message.getClass());
         }
 
+        var ctx = SerializationContext.attributes(RegistriesAttribute.of(this.owo$player.getRegistryManager()));
         var buf = PacketByteBufs.create();
-        buf.write(messageData.endec(), message);
+        buf.write(ctx, messageData.endec(), message);
 
         var packet = new ScreenInternals.LocalPacket(messageData.id(), buf);
 
@@ -136,13 +139,14 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
     @SuppressWarnings({"rawtypes", "unchecked"})
     public void owo$handlePacket(ScreenInternals.LocalPacket packet, boolean clientbound) {
         ScreenhandlerMessageData messageData = (clientbound ? this.owo$clientboundMessages : this.owo$serverboundMessages).get(packet.packetId());
+        var ctx = SerializationContext.attributes(RegistriesAttribute.of(this.owo$player.getRegistryManager()));
 
-        messageData.handler().accept(packet.payload().read(messageData.endec()));
+        messageData.handler().accept(packet.payload().read(ctx, messageData.endec()));
     }
 
     @Override
     public <T> SyncedProperty<T> createProperty(Class<T> clazz, Endec<T> endec, T initial) {
-        var prop = new SyncedProperty<>(this.owo$properties.size(), endec, initial);
+        var prop = new SyncedProperty<>(this.owo$properties.size(), endec, initial, (ScreenHandler)(Object) this);
         this.owo$properties.add(prop);
         return prop;
     }

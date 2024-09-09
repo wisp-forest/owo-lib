@@ -6,6 +6,7 @@ import org.w3c.dom.Element;
 
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Random;
 import java.util.function.Function;
 
 public class Sizing implements Animatable<Sizing> {
@@ -55,7 +56,7 @@ public class Sizing implements Animatable<Sizing> {
     public static Sizing content(int padding) {
         return new Sizing(padding, Method.CONTENT);
     }
-    
+
     /**
      * Dynamically size the component to fill the available space
      */
@@ -88,6 +89,211 @@ public class Sizing implements Animatable<Sizing> {
      */
     public static Sizing expand(int percent) {
         return new Sizing(percent, Method.EXPAND);
+    }
+
+    /**
+     * A collection of utility methods for generating random sizing instances
+     *
+     * @author chyzman
+     */
+    public static class Random {
+        private static final java.util.Random SIZING_RANDOM = new java.util.Random();
+
+        /**
+         * Generate a random fill sizing instance with a value between {@code min} and {@code max}
+         *
+         * @param min The minimum value
+         * @param max The maximum value
+         * @return A random sizing instance
+         */
+        public static Sizing fill(int min, int max) {
+            return Sizing.fill(SIZING_RANDOM.nextInt(min, max));
+        }
+
+        /**
+         * Generate a random fill sizing instance with a value between 0 and {@code max}
+         *
+         * @param max The maximum value
+         * @return A random sizing instance
+         */
+        public static Sizing fill(int max) {
+            return Sizing.fill(SIZING_RANDOM.nextInt(0, max));
+        }
+
+        /**
+         * Generate a random fill sizing instance with a value between 0 and 100
+         *
+         * @return A random sizing instance
+         */
+        public static Sizing fill() {
+            return Sizing.fill(SIZING_RANDOM.nextInt(0, 100));
+        }
+
+        /**
+         * Generate a random expand sizing instance with a value between {@code min} and {@code max}
+         *
+         * @param min The minimum value
+         * @param max The maximum value
+         * @return A random sizing instance
+         */
+        public static Sizing expand(int min, int max) {
+            return Sizing.expand(SIZING_RANDOM.nextInt(min, max));
+        }
+
+        /**
+         * Generate a random expand sizing instance with a value between 0 and {@code max}
+         *
+         * @param max The maximum value
+         * @return A random sizing instance
+         */
+        public static Sizing expand(int max) {
+            return Sizing.expand(SIZING_RANDOM.nextInt(0, max));
+        }
+
+        /**
+         * Generate a random expand sizing instance with a value between 0 and 100
+         *
+         * @return A random sizing instance
+         */
+        public static Sizing expand() {
+            return Sizing.expand(SIZING_RANDOM.nextInt(0, 100));
+        }
+
+        /**
+         * Generate a random fixed sizing instance with a value between {@code min} and {@code max}
+         *
+         * @param min The minimum value
+         * @param max The maximum value
+         * @return A random sizing instance
+         */
+        public static Sizing fixed(int min, int max) {
+            return Sizing.fixed(SIZING_RANDOM.nextInt(min, max));
+        }
+
+        /**
+         * Generate a random fixed sizing instance with a value between 0 and {@code max}
+         *
+         * @param max The maximum value
+         * @return A random sizing instance
+         */
+        public static Sizing fixed(int max) {
+            return Sizing.fixed(SIZING_RANDOM.nextInt(0, max));
+        }
+
+        /**
+         * Generate a random fixed sizing instance with a value between 0 and 100
+         *
+         * @return A random sizing instance
+         */
+        public static Sizing fixed() {
+            return Sizing.fixed(SIZING_RANDOM.nextInt(0, 100));
+        }
+
+        /**
+         * Generate a random content sizing instance with a padding value between {@code min} and {@code max}
+         *
+         * @param min The minimum value
+         * @param max The maximum value
+         * @return A random sizing instance
+         */
+        public static Sizing content(int min, int max) {
+            return Sizing.content(SIZING_RANDOM.nextInt(min, max));
+        }
+
+        /**
+         * Generate a random content sizing instance with a padding value between 0 and {@code max}
+         *
+         * @param max The maximum value
+         * @return A random sizing instance
+         */
+        public static Sizing content(int max) {
+            return Sizing.content(SIZING_RANDOM.nextInt(0, max));
+        }
+
+        /**
+         * Generate a random content sizing instance with a padding value between 0 and 100
+         *
+         * @return A random sizing instance
+         */
+        public static Sizing content() {
+            return Sizing.content(SIZING_RANDOM.nextInt(0, 100));
+        }
+
+        /**
+         * Generate a random sizing instance with a value between {@code min} and {@code max}
+         *
+         * @param min The minimum value
+         * @param max The maximum value
+         * @return A random sizing instance
+         * @apiNote May crash if put on a component that doesn't support content sizing
+         */
+        public static Sizing random(int min, int max) {
+            return switch (SIZING_RANDOM.nextInt(0, 4)) {
+                case 0 -> fill(min, max);
+                case 1 -> expand(min, max);
+                case 2 -> fixed(min, max);
+                case 3 -> content(min, max);
+                default -> throw new IllegalStateException("Unexpected value: " + SIZING_RANDOM.nextInt(0, 4));
+            };
+        }
+
+        /**
+         * Generate a random sizing instance with a value between 0 and {@code max}
+         *
+         * @param max The maximum value
+         * @return A random sizing instance
+         * @apiNote May crash if put on a component that doesn't support content sizing
+         */
+        public static Sizing random(int max) {
+            return random(0, max);
+        }
+
+        /**
+         * Generate a random sizing instance with a value between 0 and 100
+         *
+         * @return A random sizing instance
+         * @apiNote May crash if put on a component that doesn't support content sizing
+         */
+        public static Sizing random() {
+            return random(0, 100);
+        }
+
+        /**
+         * Generate a random sizing instance with a value between {@code min} and {@code max}
+         * that is not content-based
+         *
+         * @param min The minimum value
+         * @param max The maximum value
+         * @return A random sizing instance
+         */
+        public static Sizing noContent(int min, int max) {
+            return switch (SIZING_RANDOM.nextInt(0, 3)) {
+                case 0 -> fill(min, max);
+                case 1 -> expand(min, max);
+                case 2 -> fixed(min, max);
+                default -> throw new IllegalStateException("Unexpected value: " + SIZING_RANDOM.nextInt(0, 3));
+            };
+        }
+
+        /**
+         * Generate a random sizing instance with a value between 0 and {@code max}
+         * that is not content-based
+         *
+         * @param max The maximum value
+         * @return A random sizing instance
+         */
+        public static Sizing noContent(int max) {
+            return noContent(0, max);
+        }
+
+        /**
+         * Generate a random sizing instance that is not content-based
+         *
+         * @return A random sizing instance
+         */
+        public static Sizing noContent() {
+            return noContent(0, 100);
+        }
     }
 
     /**

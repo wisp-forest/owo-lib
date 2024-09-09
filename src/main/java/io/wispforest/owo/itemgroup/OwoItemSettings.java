@@ -1,28 +1,23 @@
 package io.wispforest.owo.itemgroup;
 
+import io.wispforest.owo.Owo;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Rarity;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
+/**
+ * @deprecated Replaced with {@link OwoItemSettingsExtension}.
+ */
+@Deprecated(forRemoval = true)
 public class OwoItemSettings extends Item.Settings {
-
-    @Nullable
-    private Supplier<OwoItemGroup> group = () -> null;
-    private int tab = 0;
-    private BiConsumer<Item, ItemGroup.Entries> stackGenerator = OwoItemGroup.DEFAULT_STACK_GENERATOR;
-    private boolean trackUsageStat = false;
-
     public OwoItemSettings group(ItemGroupReference ref) {
-        this.group = ref.groupSup();
-        this.tab = ref.tab();
-        return this;
+        return (OwoItemSettings) super.groupSup(ref);
     }
 
     /**
@@ -30,31 +25,28 @@ public class OwoItemSettings extends Item.Settings {
      */
     @Deprecated
     public OwoItemSettings group(OwoItemGroup group) {
-        this.group = () -> group;
-        return this;
+        return (OwoItemSettings) super.group(group);
     }
 
     @Deprecated
     public OwoItemGroup group() {
-        return this.group.get();
+        return this.groupSupplier().get();
     }
 
     public OwoItemSettings group(Supplier<OwoItemGroup> groupSupplier) {
-        this.group = groupSupplier;
-        return this;
+        return (OwoItemSettings) super.group(groupSupplier);
     }
 
     public Supplier<OwoItemGroup> groupSupplier() {
-        return this.group;
+        return this.groupSupplier();
     }
 
     public OwoItemSettings tab(int tab) {
-        this.tab = tab;
-        return this;
+        return (OwoItemSettings) super.tab(tab);
     }
 
     public int tab() {
-        return this.tab;
+        return super.tab();
     }
 
     /**
@@ -62,12 +54,11 @@ public class OwoItemSettings extends Item.Settings {
      *                  {@link OwoItemGroup} it is in, by default this will be {@link OwoItemGroup#DEFAULT_STACK_GENERATOR}
      */
     public OwoItemSettings stackGenerator(BiConsumer<Item, ItemGroup.Entries> generator) {
-        this.stackGenerator = generator;
-        return this;
+        return (OwoItemSettings) super.stackGenerator(generator);
     }
 
     public BiConsumer<Item, ItemGroup.Entries> stackGenerator() {
-        return this.stackGenerator;
+        return super.stackGenerator();
     }
 
     /**
@@ -76,12 +67,11 @@ public class OwoItemSettings extends Item.Settings {
      * returns an accepted result
      */
     public OwoItemSettings trackUsageStat() {
-        this.trackUsageStat = true;
-        return this;
+        return (OwoItemSettings) super.trackUsageStat();
     }
 
     public boolean shouldTrackUsageStat() {
-        return this.trackUsageStat;
+        return super.shouldTrackUsageStat();
     }
 
     @Override
