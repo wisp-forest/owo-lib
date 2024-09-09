@@ -5,13 +5,13 @@ import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.pond.OwoSimpleRegistryExtensions;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
-import net.fabricmc.fabric.api.event.registry.RegistryEntryAddedCallback;
 import net.minecraft.registry.MutableRegistry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.SimpleRegistry;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.entry.RegistryEntryInfo;
 import net.minecraft.util.Identifier;
+import net.neoforged.neoforge.registries.BaseMappedRegistry;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 
 @Mixin(SimpleRegistry.class)
-public abstract class SimpleRegistryMixin<T> implements MutableRegistry<T>, OwoSimpleRegistryExtensions<T> {
+public abstract class SimpleRegistryMixin<T> extends BaseMappedRegistry<T> implements MutableRegistry<T>, OwoSimpleRegistryExtensions<T> {
 
     @Shadow private Map<T, RegistryEntry.Reference<T>> intrusiveValueToEntry;
     @Shadow @Final private Map<RegistryKey<T>, RegistryEntry.Reference<T>> keyToEntry;
@@ -69,7 +69,7 @@ public abstract class SimpleRegistryMixin<T> implements MutableRegistry<T>, OwoS
         this.lifecycle = this.lifecycle.add(arg2.lifecycle());
 
         // TODO: SHOULD WE BE REFIREING THE EVENT?
-        RegistryEntryAddedCallback.event(this).invoker().onEntryAdded(id, arg.getValue(), (T)object);
+        this.addCallbacks.forEach(tAddCallback -> tAddCallback.onAdd(this, id, arg, object));
 
         return reference;
     }
