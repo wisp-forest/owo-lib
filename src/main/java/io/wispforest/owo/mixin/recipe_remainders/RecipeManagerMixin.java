@@ -19,6 +19,8 @@ import net.minecraft.util.JsonHelper;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraft.world.World;
+import net.neoforged.neoforge.common.conditions.WithConditions;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -33,8 +35,12 @@ import java.util.Optional;
 @Mixin(RecipeManager.class)
 public abstract class RecipeManagerMixin {
 
-    @Inject(method = "apply(Ljava/util/Map;Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/util/profiler/Profiler;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/recipe/RecipeEntry;<init>(Lnet/minecraft/util/Identifier;Lnet/minecraft/recipe/Recipe;)V"))
-    private void deserializeRecipeSpecificRemainders(Map<Identifier, JsonElement> map, ResourceManager resourceManager, Profiler profiler, CallbackInfo ci, @Local Map.Entry<Identifier, JsonElement> entry) {
+    public final ThreadLocal<Map.Entry<Identifier, JsonElement>> previousMapEntry = ThreadLocal.withInitial(() -> null);
+
+    @Inject(method = "apply(Ljava/util/Map;Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/util/profiler/Profiler;)V", at = @At(value = "INVOKE", target = "Ljava/util/Optional;ifPresentOrElse(Ljava/util/function/Consumer;Ljava/lang/Runnable;)V"))
+    private void deserializeRecipeSpecificRemainders(Map<Identifier, JsonElement> map, ResourceManager resourceManager, Profiler profiler, CallbackInfo ci, @Local Map.Entry<Identifier, JsonElement> entry, @Local Optional<WithConditions<Recipe<?>>> decoded) {
+        if(decoded.isEmpty()) return;
+
         var json = entry.getValue().getAsJsonObject();
         if (!json.has("owo:remainders")) return;
 

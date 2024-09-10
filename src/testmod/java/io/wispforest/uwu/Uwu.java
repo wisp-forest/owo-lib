@@ -240,8 +240,8 @@ public class Uwu {
             new ParticleSystemController(Identifier.of("uwu", "server_only_particles"));
         }
 
-        System.out.println(RegistryAccess.getEntry(Registries.ITEM, Items.ACACIA_BOAT));
-        System.out.println(RegistryAccess.getEntry(Registries.ITEM, Identifier.of("acacia_planks")));
+        System.out.println(Registries.ITEM.getEntry(Items.ACACIA_BOAT));
+        System.out.println(Registries.ITEM.getEntry(Identifier.of("acacia_planks")));
 
 //        UwuShapedRecipe.init();
 

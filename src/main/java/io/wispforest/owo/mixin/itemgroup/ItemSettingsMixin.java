@@ -41,7 +41,7 @@ public class ItemSettingsMixin implements OwoItemSettingsExtension {
 
     @Override
     public OwoItemGroup group() {
-        return owo$group.get();
+        return owo$group != null ? owo$group.get() : null;
     }
 
     @Override

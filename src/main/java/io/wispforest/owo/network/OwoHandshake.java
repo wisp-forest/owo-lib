@@ -31,6 +31,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.loading.FMLLoader;
 import org.jetbrains.annotations.ApiStatus;
+import org.sinytra.fabric.networking_api.client.NeoClientConfigurationNetworking;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -161,7 +162,8 @@ public final class OwoHandshake {
 
     @OnlyIn(Dist.CLIENT)
     private static void handleReadyClient(ClientConfigurationNetworkHandler handler, MinecraftClient client) {
-        if (ClientConfigurationNetworking.canSend(CHANNEL_ID) || !HANDSHAKE_REQUIRED || !ENABLED) return;
+        // TODO: Report issues with ClientConfigurationNetworking.canSend(CHANNEL_ID)
+        if (NeoClientConfigurationNetworking.canSend(CHANNEL_ID) || !HANDSHAKE_REQUIRED || !ENABLED) return;
 
         client.execute(() -> {
             ((ClientCommonNetworkHandlerAccessor) handler)
