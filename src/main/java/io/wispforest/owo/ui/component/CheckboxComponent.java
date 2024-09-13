@@ -49,6 +49,12 @@ public class CheckboxComponent extends CheckboxWidget {
     }
 
     @Override
+    public void setMessage(Text message) {
+        super.setMessage(message);
+        ((CheckboxWidgetAccessor)this).owo$getTextWidget().setMessage(message);
+    }
+
+    @Override
     public void parseProperties(UIModel model, Element element, Map<String, Element> children) {
         super.parseProperties(model, element, children);
         UIParsing.apply(children, "checked", UIParsing::parseBool, this::checked);
