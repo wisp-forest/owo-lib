@@ -2,6 +2,7 @@ package io.wispforest.owo.compat.rei;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import dev.emi.emi.api.widget.Bounds;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.mixin.itemgroup.CreativeInventoryScreenAccessor;
 import io.wispforest.owo.mixin.ui.access.BaseOwoHandledScreenAccessor;
@@ -22,6 +23,7 @@ import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
+import net.minecraft.screen.ScreenHandler;
 import net.minecraft.util.math.RotationAxis;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -59,24 +61,9 @@ public class OwoReiPlugin implements REIClientPlugin {
         });
 
         zones.register(BaseOwoHandledScreen.class, screen -> {
-            if (screen.children().isEmpty()) return List.of();
-
-            var adapter = ((BaseOwoHandledScreenAccessor) screen).owo$getUIAdapter();
-            if (adapter == null) return List.of();
-
-            var rootComponent = adapter.rootComponent;
-            var children = new ArrayList<Component>();
-            rootComponent.collectDescendants(children);
-            children.remove(rootComponent);
-
-            var rectangles = new ArrayList<Rectangle>();
-            children.forEach(component -> {
-                if (component instanceof ParentComponent parent && parent.surface() == Surface.BLANK) return;
-
-                var size = component.fullSize();
-                rectangles.add(new Rectangle(component.x(), component.y(), size.width(), size.height()));
-            });
-            return rectangles;
+            return ((BaseOwoHandledScreen<?, ?>) screen).getExclusionAreas().stream()
+                    .map(rect -> new Rectangle(rect.x(), rect.y(), rect.width(), rect.height()))
+                    .toList();
         });
     }
 
