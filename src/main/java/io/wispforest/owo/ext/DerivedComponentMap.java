@@ -8,6 +8,7 @@ import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
 import java.util.Set;
 
 @ApiStatus.Internal
@@ -52,13 +53,11 @@ public class DerivedComponentMap implements ComponentMap {
         if (o == null || getClass() != o.getClass()) return false;
 
         DerivedComponentMap that = (DerivedComponentMap) o;
-        return base.equals(that.base) && delegate.equals(that.delegate);
+        return Objects.equals(base, that.base);
     }
 
     @Override
     public int hashCode() {
-        int result = base.hashCode();
-        result = 31 * result + delegate.hashCode();
-        return result;
+        return Objects.hashCode(base);
     }
 }

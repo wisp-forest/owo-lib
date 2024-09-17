@@ -5,7 +5,7 @@ import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.event.ClientRenderCallback;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
-import jdk.jfr.Event;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.Identifier;
 import net.neoforged.neoforge.client.event.CustomizeGuiOverlayEvent;
@@ -13,7 +13,10 @@ import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -84,7 +87,7 @@ public class Hud {
     private static void initializeAdapter() {
         var window = MinecraftClient.getInstance().getWindow();
         adapter = OwoUIAdapter.createWithoutScreen(
-                0, 0, window.getScaledWidth(), window.getScaledHeight(), HudContainer::new
+            0, 0, window.getScaledWidth(), window.getScaledHeight(), HudContainer::new
         );
 
         adapter.inflateAndMount();
@@ -110,7 +113,7 @@ public class Hud {
             var context = event.getGuiGraphics();
             var tickDelta = event.getPartialTick();
 
-            if (adapter == null || suppress) return;
+            if (adapter == null || suppress || MinecraftClient.getInstance().options.hudHidden) return;
 
             context.push().translate(0, 0, 100);
             adapter.render(context, -69, -69, tickDelta.getTickDelta(false));

@@ -25,6 +25,7 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
+import net.minecraft.util.Colors;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.RotationAxis;
 import org.jetbrains.annotations.Nullable;
@@ -36,6 +37,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
@@ -351,6 +353,26 @@ public class ComponentTestScreen extends Screen {
                         .padding(Insets.of(4, 5, 5, 5))
                         .margins(Insets.bottom(5))
                         .positioning(Positioning.relative(50, 100))
+        );
+
+        rootComponent.child(
+                Containers.verticalFlow(Sizing.content(), Sizing.content())
+                        .child(Components.label(Text.literal("Cursor Tester").withColor(Colors.GRAY))
+                                .tooltip(Text.literal("by chyzman")))
+                        .child(
+                                Components.list(
+                                        Arrays.stream(CursorStyle.values()).toList(),
+                                        flowLayout -> flowLayout.margins(Insets.bottom(10)),
+                                        cursor -> Components.label(Text.literal(cursor.toString()).withColor(Colors.GRAY))
+                                                .cursorStyle(cursor)
+                                                .margins(Insets.horizontal(3)),
+                                        true
+                                )
+                        )
+                        .surface(Surface.PANEL)
+                        .padding(Insets.of(4, 5, 5, 5))
+                        .margins(Insets.bottom(5))
+                        .positioning(Positioning.relative(100, 100))
         );
 
         // infinity scroll test

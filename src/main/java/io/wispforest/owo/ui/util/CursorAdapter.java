@@ -9,7 +9,7 @@ import java.util.EnumMap;
 
 public class CursorAdapter {
 
-    protected static final CursorStyle[] ACTIVE_STYLES = {CursorStyle.POINTER, CursorStyle.TEXT, CursorStyle.HAND, CursorStyle.MOVE};
+    protected static final CursorStyle[] ACTIVE_STYLES = {CursorStyle.POINTER, CursorStyle.TEXT, CursorStyle.HAND, CursorStyle.CROSSHAIR, CursorStyle.MOVE, CursorStyle.HORIZONTAL_RESIZE, CursorStyle.VERTICAL_RESIZE, CursorStyle.NWSE_RESIZE, CursorStyle.NESW_RESIZE, CursorStyle.NOT_ALLOWED};
 
     protected final EnumMap<CursorStyle, Long> cursors = new EnumMap<>(CursorStyle.class);
     protected final long windowHandle;
@@ -20,7 +20,10 @@ public class CursorAdapter {
     protected CursorAdapter(long windowHandle) {
         this.windowHandle = windowHandle;
         for (var style : ACTIVE_STYLES) {
-            this.cursors.put(style, GLFW.glfwCreateStandardCursor(style.glfw));
+            var pointer = GLFW.glfwCreateStandardCursor(style.glfw);
+            if (pointer == 0) continue;
+
+            this.cursors.put(style, pointer);
         }
     }
 
@@ -42,7 +45,7 @@ public class CursorAdapter {
         if (style == CursorStyle.NONE) {
             GLFW.glfwSetCursor(this.windowHandle, 0);
         } else {
-            GLFW.glfwSetCursor(this.windowHandle, this.cursors.get(style));
+            GLFW.glfwSetCursor(this.windowHandle, this.cursors.getOrDefault(style, 0L));
         }
         this.lastCursorStyle = style;
     }

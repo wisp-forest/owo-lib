@@ -71,10 +71,10 @@ public final class ScissorStack {
         var scale = window.getScaleFactor();
 
         GL11.glScissor(
-                (int) (newFrame.x() * scale),
-                (int) (window.getFramebufferHeight() - (newFrame.y() * scale) - newFrame.height() * scale),
-                MathHelper.clamp((int) (newFrame.width() * scale), 0, window.getFramebufferWidth()),
-                MathHelper.clamp((int) (newFrame.height() * scale), 0, window.getFramebufferHeight())
+                Math.max(0, (int) (newFrame.x() * scale)),
+                Math.max((int) (window.getFramebufferHeight() - (newFrame.y() * scale) - newFrame.height() * scale), 0),
+                Math.min(MathHelper.clamp((int) (newFrame.width() * scale), 0, window.getFramebufferWidth()), window.getFramebufferWidth()),
+                Math.min(MathHelper.clamp((int) (newFrame.height() * scale), 0, window.getFramebufferHeight()), window.getFramebufferHeight())
         );
     }
 
