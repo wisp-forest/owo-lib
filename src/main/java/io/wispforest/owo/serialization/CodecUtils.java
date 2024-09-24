@@ -21,6 +21,7 @@ import io.wispforest.owo.serialization.format.edm.EdmOps;
 import io.wispforest.owo.serialization.format.nbt.NbtDeserializer;
 import io.wispforest.owo.serialization.format.nbt.NbtEndec;
 import io.wispforest.owo.serialization.format.nbt.NbtSerializer;
+import io.wispforest.owo.util.Scary;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
@@ -279,13 +280,13 @@ public class CodecUtils {
     }
 
     /*
-     * This method overall should be fine but do not expect such tot work always as it could be a problem as
+     * This method overall should be fine but do not expect such to work always as it could be a problem as
      * it bypasses certain features about Deserializer API that may be an issue but is low chance for general
      * cases within Minecraft.
      *
      * blodhgarm: 21.07.2024
      */
-    //@Scary
+    @Scary
     @ApiStatus.Experimental
     public static <T> StructEndec<T> toStructEndec(MapCodec<T> mapCodec) {
         return new StructEndec<T>() {
