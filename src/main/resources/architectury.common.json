@@ -1,5 +1,4 @@
 {
-  "accessWidener": "owo.accesswidener",
   "injected_interfaces": {
     "net/minecraft/class_2487": [
       "io/wispforest/endec/util/MapCarrier"

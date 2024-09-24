@@ -77,6 +77,8 @@ allprojects {
         publications {
             mavenJava(MavenPublication) {
                 from components.java
+
+                artifactId = project.archivesBaseName
             }
         }
 
@@ -149,37 +151,26 @@ loom {
     accessWidenerPath = file("src/main/resources/owo.accesswidener")
 
     neoForge {
-//        convertAccessWideners = true
-//        extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
+        // TODO: Figure out within the future
+//        publish file("src/main/resources/interfaces.json")
+//        publish file("src/main/resources/META-INF/owo.accesstransformer.cfg")
     }
 }
 
-//remapJar {
-//    dependsOn(processResources)
-//    atAccessWideners.add("owo_fun.accesswidener")
-//}
-
 dependencies {
-//    modLocalRuntime("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}")
+    //modLocalRuntime("me.shedaniel:RoughlyEnoughItems-neoforge:${project.rei_version}")
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin:${project.rei_version}")
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-neoforge:${project.rei_version}")
 
     modCompileOnly("dev.emi:emi-neoforge:${project.emi_version}")
-//    modLocalRuntime("dev.emi:emi-fabric:${project.emi_version}")
-
-//    modCompileOnly("com.terraformersmc:modmenu:${project.modmenu_version}")
-//    modLocalRuntime("com.terraformersmc:modmenu:${project.modmenu_version}")
 
     forgeRuntimeLibrary(include(api("io.wispforest:endec:0.1.5")))
     forgeRuntimeLibrary(include(api("io.wispforest.endec:netty:0.1.2")))
     forgeRuntimeLibrary(include(api("io.wispforest.endec:gson:0.1.3")))
     forgeRuntimeLibrary(include(api("io.wispforest.endec:jankson:0.1.3")))
 
-    include api(forgeRuntimeLibrary("blue.endless:jankson:${project.jankson_version}"))
+    forgeRuntimeLibrary(include(api("blue.endless:jankson:${project.jankson_version}")))
 
-//    modCompileOnly("xyz.nucleoid:server-translations-api:${project.stapi_version}")
-
-    //
     include("org.sinytra:forgified-fabric-loader:2.5.29+0.16.0+1.21:full")
     api("org.sinytra:forgified-fabric-loader:2.5.29+0.16.0+1.21")
 
