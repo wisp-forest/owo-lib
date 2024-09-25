@@ -4,6 +4,7 @@ import io.wispforest.owo.Owo;
 import io.wispforest.owo.client.screens.ScreenInternals;
 import io.wispforest.owo.command.debug.OwoDebugCommands;
 import io.wispforest.owo.config.OwoConfigCommand;
+import io.wispforest.owo.config.ui.ConfigScreenProviders;
 import io.wispforest.owo.itemgroup.json.OwoItemGroupLoader;
 import io.wispforest.owo.moddata.ModDataLoader;
 import io.wispforest.owo.shader.BlurProgram;
@@ -16,9 +17,12 @@ import net.minecraft.util.Util;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -80,5 +84,12 @@ public class OwoClient {
 
         if (!Owo.DEBUG) return;
         OwoDebugCommands.Client.register();
+
+        modBus.addListener(FMLClientSetupEvent.class, event -> {
+            ConfigScreenProviders.forEach((modId, screenFactory) -> {
+                ModList.get().getModContainerById(modId)
+                        .ifPresent(mod -> mod.registerExtensionPoint(IConfigScreenFactory.class, (modContainer, modsScreen) -> screenFactory.apply(modsScreen)));
+            });
+        });
     }
 }
