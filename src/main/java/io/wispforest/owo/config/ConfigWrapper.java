@@ -8,6 +8,9 @@ import blue.endless.jankson.api.DeserializationException;
 import blue.endless.jankson.api.SyntaxError;
 import blue.endless.jankson.impl.POJODeserializer;
 import blue.endless.jankson.magic.TypeMagic;
+import io.wispforest.endec.Endec;
+import io.wispforest.endec.format.jankson.JanksonDeserializer;
+import io.wispforest.endec.format.jankson.JanksonSerializer;
 import io.wispforest.endec.impl.ReflectiveEndecBuilder;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.annotation.*;
@@ -34,6 +37,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 /**
@@ -61,23 +65,34 @@ public abstract class ConfigWrapper<C> {
 
     protected final ReflectiveEndecBuilder builder;
 
-    protected ConfigWrapper(Class<C> clazz) {
-        this(clazz, builder -> {});
+    @Deprecated
+    protected ConfigWrapper(Class<C> clazz, Consumer<Jankson.Builder> janksonBuilder) {
+        this(clazz, (SerializationBuilder serializationBuilder) -> janksonBuilder.accept(serializationBuilder.janksonBuilder()));
     }
 
-    protected ConfigWrapper(Class<C> clazz, Consumer<Jankson.Builder> janksonBuilder) {
+    protected ConfigWrapper(Class<C> clazz) {
+        this(clazz, (SerializationBuilder builder) -> {});
+    }
+
+    protected ConfigWrapper(Class<C> clazz, BuilderConsumer consumer) {
         this.builder = MinecraftEndecs.addDefaults(new ReflectiveEndecBuilder());
 
         ReflectionUtils.requireZeroArgsConstructor(clazz, s -> "Config model class " + s + " must provide a zero-args constructor");
         this.instance = ReflectionUtils.tryInstantiateWithNoArgs(clazz);
 
-        var builder = Jankson.builder()
+        var janksonBuilder = Jankson.builder();
+
+        var builder = new SerializationBuilder(janksonBuilder, this.builder);
+
+        builder.janksonBuilder()
                 .registerSerializer(Identifier.class, (identifier, marshaller) -> new JsonPrimitive(identifier.toString()))
-                .registerDeserializer(JsonPrimitive.class, Identifier.class, (primitive, m) -> Identifier.tryParse(primitive.asString()))
-                .registerSerializer(Color.class, (color, marshaller) -> new JsonPrimitive(color.asHexString(true)))
-                .registerDeserializer(JsonPrimitive.class, Color.class, (primitive, m) -> Color.ofArgb(Integer.parseUnsignedInt(primitive.asString().substring(1), 16)));
-        janksonBuilder.accept(builder);
-        this.jankson = builder.build();
+                .registerDeserializer(JsonPrimitive.class, Identifier.class, (primitive, m) -> Identifier.tryParse(primitive.asString()));
+
+        builder.addEndec(Color.class, Color.RGBA_HEX_ENDEC);
+
+        consumer.build(builder);
+
+        this.jankson = janksonBuilder.build();
 
         var configAnnotation = clazz.getAnnotation(Config.class);
         this.name = configAnnotation.name();
@@ -366,4 +381,19 @@ public abstract class ConfigWrapper<C> {
         }
     }
 
+    public record SerializationBuilder(Jankson.Builder janksonBuilder, ReflectiveEndecBuilder endecBuilder) {
+        public <T> SerializationBuilder addEndec(Class<T> clazz, Endec<T> endec) {
+            endecBuilder().register(endec, clazz);
+
+            janksonBuilder()
+                    .registerSerializer(clazz, (t, marshaller) -> endec.encodeFully(JanksonSerializer::of, t))
+                    .registerDeserializer(JsonElement.class, clazz, (element, marshaller) -> endec.decodeFully(JanksonDeserializer::of, element));
+
+            return this;
+        }
+    }
+
+    public interface BuilderConsumer {
+        void build(SerializationBuilder builder);
+    }
 }
