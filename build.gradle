@@ -164,10 +164,10 @@ dependencies {
 
     modCompileOnly("dev.emi:emi-neoforge:${project.emi_version}")
 
-    forgeRuntimeLibrary(include(api("io.wispforest:endec:0.1.5")))
-    forgeRuntimeLibrary(include(api("io.wispforest.endec:netty:0.1.2")))
-    forgeRuntimeLibrary(include(api("io.wispforest.endec:gson:0.1.3")))
-    forgeRuntimeLibrary(include(api("io.wispforest.endec:jankson:0.1.3")))
+    forgeRuntimeLibrary(include(api("io.wispforest:endec:0.1.8")))
+    forgeRuntimeLibrary(include(api("io.wispforest.endec:netty:0.1.4")))
+    forgeRuntimeLibrary(include(api("io.wispforest.endec:gson:0.1.5")))
+    forgeRuntimeLibrary(include(api("io.wispforest.endec:jankson:0.1.5")))
 
     forgeRuntimeLibrary(include(api("blue.endless:jankson:${project.jankson_version}")))
 
