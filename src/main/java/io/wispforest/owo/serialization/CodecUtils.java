@@ -1,5 +1,8 @@
 package io.wispforest.owo.serialization;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.*;
@@ -11,6 +14,9 @@ import io.wispforest.endec.format.bytebuf.ByteBufSerializer;
 import io.wispforest.endec.format.edm.*;
 import io.wispforest.endec.format.forwarding.ForwardingDeserializer;
 import io.wispforest.endec.format.forwarding.ForwardingSerializer;
+import io.wispforest.endec.format.gson.GsonDeserializer;
+import io.wispforest.endec.format.gson.GsonEndec;
+import io.wispforest.endec.format.gson.GsonSerializer;
 import io.wispforest.owo.mixin.ForwardingDynamicOpsAccessor;
 import io.wispforest.owo.mixin.RegistryOpsAccessor;
 import io.wispforest.owo.serialization.endec.EitherEndec;
@@ -38,9 +44,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collector;
 import java.util.stream.Stream;
 
+@SuppressWarnings({"unchecked"})
 public class CodecUtils {
 
     /**
@@ -65,10 +71,11 @@ public class CodecUtils {
 
     private static <T> Endec.Encoder<T> encoderOfCodec(Codec<T> codec) {
         return (ctx, serializer, value) -> {
-            var pair = convertToOps(serializer, ctx);
+            var unpackedSerializer = unpackSerializer(serializer);
+            var pair = (Pair<DynamicOps, CodecInteropBinding>) (Object) convertToOps(unpackedSerializer, ctx);
 
             if(pair != null) {
-                setDecodedValueUnsafe(pair.getSecond(), serializer, codec.encodeStart(pair.getFirst(), value).getOrThrow());
+                setDecodedValueUnsafe(pair.getSecond(), unpackedSerializer, codec.encodeStart(pair.getFirst(), value).getOrThrow());
             } else {
                 EdmEndec.INSTANCE.encode(ctx, serializer, codec.encodeStart(createEdmOps(ctx), value).getOrThrow());
             }
@@ -77,10 +84,11 @@ public class CodecUtils {
 
     private static <T> Endec.Decoder<T> decoderOfCodec(Codec<T> codec) {
         return (ctx, deserializer) -> {
-            var pair = CodecUtils.convertToOps(deserializer, ctx);
+            var unpackedDeserializer = unpackDeserializer(deserializer);
+            var pair = (Pair<DynamicOps, CodecInteropBinding>) (Object) CodecUtils.convertToOps(unpackedDeserializer, ctx);
 
             return (pair != null)
-                    ? codec.parse((DynamicOps<Object>) pair.getFirst(), getEncodedValueUnsafe(pair.getSecond(), deserializer)).getOrThrow()
+                    ? codec.parse((DynamicOps<Object>) pair.getFirst(), getEncodedValueUnsafe(pair.getSecond(), unpackedDeserializer)).getOrThrow()
                     : codec.parse(createEdmOps(ctx), EdmEndec.INSTANCE.decode(ctx, deserializer)).getOrThrow();
         };
     }
@@ -292,10 +300,11 @@ public class CodecUtils {
         return new StructEndec<T>() {
             @Override
             public void encodeStruct(SerializationContext ctx, Serializer<?> serializer, Serializer.Struct struct, T value) {
-                var pair = convertToOps(serializer, ctx);
+                var unpackedSerializer = unpackSerializer(serializer);
+                var pair = (Pair<DynamicOps, CodecInteropBinding>) (Object) convertToOps(unpackedSerializer, ctx);
 
                 if(pair != null) {
-                    setEncodedValueStructUnsafe(pair.getSecond(), pair.getFirst(), serializer, struct, mapCodec, value);
+                    setEncodedValueStruct(pair.getSecond(), pair.getFirst(), unpackedSerializer, struct, mapCodec, value);
                 } else {
                     var edmOps = createEdmOps(ctx);
 
@@ -313,10 +322,11 @@ public class CodecUtils {
 
             @Override
             public T decodeStruct(SerializationContext ctx, Deserializer<?> deserializer, Deserializer.Struct struct) {
-                var pair = convertToOps(deserializer, ctx);
+                var unpackepDeserializer = unpackDeserializer(deserializer);
+                var pair = (Pair<DynamicOps, CodecInteropBinding>) (Object) convertToOps(unpackepDeserializer, ctx);
 
                 if(pair != null) {
-                    return getEncodedValueStructUnsafe(pair.getSecond(), pair.getFirst(), deserializer, struct, mapCodec);
+                    return (T) getEncodedValueStruct(pair.getSecond(), pair.getFirst(), unpackepDeserializer, struct, mapCodec);
                 } else {
                     var edmMap = ((deserializer instanceof SelfDescribedDeserializer<?>)
                             ? EdmEndec.MAP.decode(ctx, deserializer)
@@ -403,11 +413,11 @@ public class CodecUtils {
 
     //--
 
-    private static final Map<Class<? extends Serializer<?>>, CodecInteropBinding<?>> serializerToBinding = new HashMap<>();
-    private static final Map<Class<? extends Deserializer<?>>, CodecInteropBinding<?>> deserializerToBinding = new HashMap<>();
-    private static final Map<Class<? extends DynamicOps<?>>, CodecInteropBinding<?>> opsToBinding = new HashMap<>();
+    private static final Map<Class<? extends Serializer<?>>, CodecInteropBinding<?, ?, ?>> serializerToBinding = new HashMap<>();
+    private static final Map<Class<? extends Deserializer<?>>, CodecInteropBinding<?, ?, ?>> deserializerToBinding = new HashMap<>();
+    private static final Map<Class<? extends DynamicOps<?>>, CodecInteropBinding<?, ?, ?>> opsToBinding = new HashMap<>();
 
-    public static <T> void registerInteropBinding(CodecInteropBinding<T> binding) {
+    public static void registerInteropBinding(CodecInteropBinding<?, ?, ?> binding) {
         if (serializerToBinding.containsKey(binding.serializerClass())) {
             throw new IllegalStateException("Unable to add the given CodecInteropBinding as the given Serializer clazz was already added by another! [Class: " + binding.serializerClass() + "]");
         }
@@ -442,34 +452,34 @@ public class CodecUtils {
     }
 
     @Nullable
-    private static <T> Pair<DynamicOps<T>, CodecInteropBinding<T>> convertToOps(Serializer<T> serializer, SerializationContext ctx) {
-        var bindings = serializerToBinding.get(unpackSerializer(serializer).getClass());
+    private static <T, S extends Serializer<T>> Pair<DynamicOps<T>, CodecInteropBinding<T, S, ?>> convertToOps(Serializer<T> serializer, SerializationContext ctx) {
+        var bindings = (CodecInteropBinding<T, S, ?>) serializerToBinding.get(serializer.getClass());
 
         if(bindings != null) {
-            DynamicOps<T> ops = ContextedDelegatingOps.withContext(ctx, ((CodecInteropBinding<T>) bindings).getOps());
+            DynamicOps<T> ops = ContextedDelegatingOps.withContext(ctx, bindings.getOps());
 
             if (ctx.hasAttribute(RegistriesAttribute.REGISTRIES)) {
                 ops = RegistryOps.of(ops, ctx.getAttributeValue(RegistriesAttribute.REGISTRIES).infoGetter());
             }
 
-            return new Pair<>(ops, (CodecInteropBinding<T>) bindings);
+            return new Pair<>(ops, bindings);
         }
 
         return null;
     }
 
     @Nullable
-    private static <T> Pair<DynamicOps<T>, CodecInteropBinding<T>> convertToOps(Deserializer<T> deserializer, SerializationContext ctx) {
-        var bindings = deserializerToBinding.get(unpackDeserializer(deserializer).getClass());
+    private static <T, D extends Deserializer<T>> Pair<DynamicOps<T>, CodecInteropBinding<T, ?, D>> convertToOps(Deserializer<T> deserializer, SerializationContext ctx) {
+        var bindings = (CodecInteropBinding<T, ?, D>) deserializerToBinding.get(deserializer.getClass());
 
         if (bindings != null) {
-            DynamicOps<T> ops = ContextedDelegatingOps.withContext(ctx, ((CodecInteropBinding<T>) bindings).getOps());
+            DynamicOps<T> ops = ContextedDelegatingOps.withContext(ctx, (bindings).getOps());
 
             if (ctx.hasAttribute(RegistriesAttribute.REGISTRIES)) {
                 ops = RegistryOps.of(ops, ctx.getAttributeValue(RegistriesAttribute.REGISTRIES).infoGetter());
             }
 
-            return new Pair<>(ops, (CodecInteropBinding<T>) bindings);
+            return new Pair<>(ops, bindings);
         }
 
         return null;
@@ -477,85 +487,67 @@ public class CodecUtils {
 
     @Nullable
     private static <T> Deserializer<T> convertToDeserializer(DynamicOps<T> dynamicOps, T t) {
-        var bindings = opsToBinding.get(unpackOps(dynamicOps).getClass());
+        var bindings = (CodecInteropBinding<T, ?, Deserializer<T>>) opsToBinding.get(unpackOps(dynamicOps).getClass());
 
-        return (bindings != null) ? ((CodecInteropBinding<T>) bindings).createDeserializer(t) : null;
+        return (bindings != null) ? bindings.createDeserializer(t) : null;
     }
 
     @Nullable
     private static <T> Deserializer<T> convertToDeserializerStruct(DynamicOps<T> dynamicOps, MapLike<T> mapLike) {
-        var bindings = opsToBinding.get(unpackOps(dynamicOps).getClass());
+        var bindings = (CodecInteropBinding<T, ?, Deserializer<T>>) opsToBinding.get(unpackOps(dynamicOps).getClass());
 
         return (bindings != null)
-                ? ((CodecInteropBinding<T>) bindings).createDeserializer(((CodecInteropBinding<T>) bindings).convertMapLike(mapLike))
+                ? bindings.createDeserializer(bindings.convertMapLike(mapLike))
                 : null;
     }
 
     @Nullable
     private static <T> Pair<Serializer<T>, Function<T, RecordBuilder<T>>> convertToSerializerStruct(DynamicOps<T> dynamicOps, RecordBuilder<T> builder) {
-        var bindings = opsToBinding.get(unpackOps(dynamicOps).getClass());
+        var bindings = (CodecInteropBinding<T, Serializer<T>, ?>) opsToBinding.get(unpackOps(dynamicOps).getClass());
 
         return (bindings != null)
-                ? new Pair<>(((CodecInteropBinding<T>) bindings).createSerializer(), t -> ((CodecInteropBinding<T>) bindings).addToBuilder(t, builder))
+                ? new Pair<>(bindings.createSerializer(), t -> bindings.addToBuilder(t, builder))
                 : null;
     }
 
     @Nullable
     private static <T> Serializer<T> convertToSerializer(DynamicOps<T> dynamicOps) {
-        var bindings = opsToBinding.get(unpackOps(dynamicOps).getClass());
+        var bindings = (CodecInteropBinding<T, Serializer<T>, ?>) opsToBinding.get(unpackOps(dynamicOps).getClass());
 
-        return (bindings != null) ? ((CodecInteropBinding<T>) bindings).createSerializer() : null;
+        return (bindings != null) ? bindings.createSerializer() : null;
     }
 
     //--
 
-    private static <T> void setDecodedValueUnsafe(CodecInteropBinding<T> binding, Serializer<?> serializer, Object t) {
-        try {
-            binding.setEncodedValue((Serializer<T>) serializer, (T) t);
-        } catch (ClassCastException e) {
-            throw new IllegalStateException("Unable to set the given encoded value into the passed Serializer as its not the correct type!", e);
-        }
+    private static <T, S extends Serializer<T>> void setDecodedValueUnsafe(CodecInteropBinding<T, S, ?> binding, S serializer, Object t) {
+        binding.setEncodedValue(serializer, (T) t);
     }
 
-    private static <T> T getEncodedValueUnsafe(CodecInteropBinding<T> binding, Deserializer<?> deserializer) {
-        try {
-            return binding.getEncodedValue((Deserializer<T>) deserializer);
-        } catch (ClassCastException e) {
-            throw new IllegalStateException("Unable to get the given encoded value from the passed Deserializer as its not the correct type!", e);
-        }
+    private static <T, D extends Deserializer<T>> T getEncodedValueUnsafe(CodecInteropBinding<T, ?, D> binding, D deserializer) {
+        return binding.getEncodedValue(deserializer);
     }
 
-    private static <T, V> void setEncodedValueStructUnsafe(CodecInteropBinding<T> binding, DynamicOps<?> ops, Serializer<?> serializer, Serializer.Struct struct, MapCodec<V> mapCodec, V v) {
-        try {
-            var typedOps = (DynamicOps<T>) ops;
-            var t = mapCodec.encode(v, typedOps, typedOps.mapBuilder()).build(typedOps.emptyMap()).getOrThrow();
+    private static <T, V, S extends Serializer<T>> void setEncodedValueStruct(CodecInteropBinding<T, S, ?> binding, DynamicOps<T> ops, S serializer, Serializer.Struct struct, MapCodec<V> mapCodec, V v) {
+        var t = mapCodec.encode(v, ops, ops.mapBuilder()).build(ops.emptyMap()).getOrThrow();
 
-            binding.setEncodedValueStruct(SerializationContext.empty(), serializer, struct, t);
-        } catch (ClassCastException e) {
-            throw new IllegalStateException("Unable to set the given encoded value into the passed Struct Serializer as its not the correct type!", e);
-        }
+        binding.setEncodedValueStruct(SerializationContext.empty(), serializer, struct, t);
     }
 
-    private static <T, V> V getEncodedValueStructUnsafe(CodecInteropBinding<T> binding, DynamicOps<?> ops, Deserializer<?> deserializer, Deserializer.Struct struct, MapCodec<V> mapCodec) {
-        try {
-            var typedOps = (DynamicOps<T>) ops;
-            var t = binding.getEncodedValueStruct(SerializationContext.empty(), deserializer, struct);
+    private static <T, V, D extends Deserializer<T>> V getEncodedValueStruct(CodecInteropBinding<T, ?, D> binding, DynamicOps<T> ops, D deserializer, Deserializer.Struct struct, MapCodec<V> mapCodec) {
+        var t = binding.getEncodedValueStruct(SerializationContext.empty(), deserializer, struct);
 
-            return mapCodec.decode(typedOps, typedOps.getMap(t).getOrThrow()).getOrThrow();
-        } catch (ClassCastException e) {
-            throw new IllegalStateException("Unable to set the given encoded value into the passed Struct Deserializer as its not the correct type!", e);
-        }
+        return mapCodec.decode(ops, ops.getMap(t).getOrThrow()).getOrThrow();
     }
 
-    public interface CodecInteropBinding<T> {
+    public interface CodecInteropBinding<T, S extends Serializer<T>, D extends Deserializer<T>> {
         Class<? extends Serializer<T>> serializerClass();
         Class<? extends Deserializer<T>> deserializerClass();
         Class<? extends DynamicOps<T>> opsClass();
 
         //--
 
-        Serializer<T> createSerializer();
-        Deserializer<T> createDeserializer(T t);
+        S createSerializer();
+        D createDeserializer(T t);
         DynamicOps<T> getOps();
 
         //-
@@ -565,17 +557,17 @@ public class CodecUtils {
 
         //--
 
-        void setEncodedValue(Serializer<T> serializer, T t);
-        T getEncodedValue(Deserializer<T> deserializer);
+        void setEncodedValue(S serializer, T t);
+        T getEncodedValue(D deserializer);
 
         //--
 
-        void setEncodedValueStruct(SerializationContext ctx, Serializer<?> serializer, Serializer.Struct struct, T t);
-        T getEncodedValueStruct(SerializationContext ctx, Deserializer<?> serializer, Deserializer.Struct struct);
+        void setEncodedValueStruct(SerializationContext ctx, S serializer, Serializer.Struct struct, T t);
+        T getEncodedValueStruct(SerializationContext ctx, D serializer, Deserializer.Struct struct);
     }
 
     static {
-        registerInteropBinding(new CodecInteropBinding<NbtElement>() {
+        registerInteropBinding(new CodecInteropBinding<NbtElement, NbtSerializer, NbtDeserializer>() {
             @Override
             public Class<? extends Serializer<NbtElement>> serializerClass() {
                 return NbtSerializer.class;
@@ -592,12 +584,12 @@ public class CodecUtils {
             }
 
             @Override
-            public Serializer<NbtElement> createSerializer() {
+            public NbtSerializer createSerializer() {
                 return NbtSerializer.of();
             }
 
             @Override
-            public Deserializer<NbtElement> createDeserializer(NbtElement tag) {
+            public NbtDeserializer createDeserializer(NbtElement tag) {
                 return NbtDeserializer.of(tag);
             }
 
@@ -608,13 +600,18 @@ public class CodecUtils {
 
             @Override
             public NbtElement convertMapLike(MapLike<NbtElement> mapLike) {
-                return mapLike.entries().map(pair -> {
-                    return pair.mapFirst(tag -> {
-                        if(!(tag instanceof NbtString stringTag)) throw new IllegalStateException("Unable to parse key: " + tag);
+                var compound = new NbtCompound();
 
-                        return stringTag.asString();
-                    });
-                }).collect(Collector.of(NbtCompound::new, (compound, pair) -> compound.put(pair.getFirst(), pair.getSecond()), NbtCompound::copyFrom));
+                mapLike.entries().forEach(pairs -> {
+                    var key = pairs.getFirst();
+                    var value = pairs.getSecond();
+
+                    if(!(key instanceof NbtString primitive)) throw new IllegalStateException("Unable to parse key: " + key);
+
+                    compound.put(primitive.asString(), value);
+                });
+
+                return compound;
             }
 
             @Override
@@ -631,37 +628,120 @@ public class CodecUtils {
             }
 
             @Override
-            public void setEncodedValue(Serializer<NbtElement> serializer, NbtElement tag) {
-                ((SelfDescribedDeserializer<NbtElement>) createDeserializer(tag)).readAny(SerializationContext.empty(), serializer);
+            public void setEncodedValue(NbtSerializer serializer, NbtElement tag) {
+                createDeserializer(tag).readAny(SerializationContext.empty(), serializer);
             }
 
             @Override
-            public NbtElement getEncodedValue(Deserializer<NbtElement> deserializer) {
+            public NbtElement getEncodedValue(NbtDeserializer deserializer) {
                 var serializer = createSerializer();
 
-                ((SelfDescribedDeserializer<NbtElement>) deserializer).readAny(SerializationContext.empty(), serializer);
+                deserializer.readAny(SerializationContext.empty(), serializer);
 
                 return serializer.result();
             }
 
             @Override
-            public void setEncodedValueStruct(SerializationContext ctx, Serializer<?> serializer, Serializer.Struct struct, NbtElement tag) {
+            public void setEncodedValueStruct(SerializationContext ctx, NbtSerializer serializer, Serializer.Struct struct, NbtElement tag) {
                 if(!(tag instanceof NbtCompound compoundTag)) {
                     throw new IllegalStateException("Unable to add to builder as the given Tag was not a CompoundTag: " + tag);
                 }
 
-                if (serializer instanceof SelfDescribedSerializer<?>) {
-                    compoundTag.getKeys().forEach(key -> struct.field(key, ctx, NbtEndec.ELEMENT, compoundTag.get(key)));
-                } else {
-                    struct.field("element", ctx, NbtEndec.COMPOUND, compoundTag);
-                }
+                compoundTag.getKeys().forEach(key -> struct.field(key, ctx, NbtEndec.ELEMENT, compoundTag.get(key)));
             }
 
             @Override
-            public NbtElement getEncodedValueStruct(SerializationContext ctx, Deserializer<?> deserializer, Deserializer.Struct struct) {
-                return ((deserializer instanceof SelfDescribedDeserializer<?>)
-                        ? NbtEndec.COMPOUND.decode(ctx, deserializer)
-                        : struct.field("element", ctx, NbtEndec.ELEMENT));
+            public NbtElement getEncodedValueStruct(SerializationContext ctx, NbtDeserializer deserializer, Deserializer.Struct struct) {
+                return NbtEndec.COMPOUND.decode(ctx, deserializer);
+            }
+        });
+
+        registerInteropBinding(new CodecInteropBinding<JsonElement, GsonSerializer, GsonDeserializer>() {
+            @Override
+            public Class<? extends Serializer<JsonElement>> serializerClass() {
+                return GsonSerializer.class;
+            }
+
+            @Override
+            public Class<? extends Deserializer<JsonElement>> deserializerClass() {
+                return GsonDeserializer.class;
+            }
+
+            @Override
+            public Class<? extends DynamicOps<JsonElement>> opsClass() {
+                return JsonOps.class;
+            }
+
+            @Override
+            public GsonSerializer createSerializer() {
+                return GsonSerializer.of();
+            }
+
+            @Override
+            public GsonDeserializer createDeserializer(JsonElement jsonElement) {
+                return GsonDeserializer.of(jsonElement);
+            }
+
+            @Override
+            public DynamicOps<JsonElement> getOps() {
+                return JsonOps.INSTANCE;
+            }
+
+            @Override
+            public JsonElement convertMapLike(MapLike<JsonElement> mapLike) {
+                var jsonObject = new JsonObject();
+
+                mapLike.entries().forEach(pairs -> {
+                    var key = pairs.getFirst();
+                    var value = pairs.getSecond();
+
+                    if(!(key instanceof JsonPrimitive primitive && primitive.isString())) throw new IllegalStateException("Unable to parse key: " + key);
+
+                    jsonObject.add(primitive.getAsString(), value);
+                });
+
+                return jsonObject;
+            }
+
+            @Override
+            public RecordBuilder<JsonElement> addToBuilder(JsonElement jsonElement, RecordBuilder<JsonElement> builder) {
+                if(!(jsonElement instanceof JsonObject jsonObject)) {
+                    throw new IllegalStateException("Unable to add to builder as the given JsonElement was not a JsonObject: " + jsonElement);
+                }
+
+                var result = builder;
+
+                for (var entry : jsonObject.asMap().entrySet()) result = result.add(entry.getKey(), entry.getValue());
+
+                return result;
+            }
+
+            @Override
+            public void setEncodedValue(GsonSerializer serializer, JsonElement tag) {
+                createDeserializer(tag).readAny(SerializationContext.empty(), serializer);
+            }
+
+            @Override
+            public JsonElement getEncodedValue(GsonDeserializer deserializer) {
+                var serializer = createSerializer();
+
+                deserializer.readAny(SerializationContext.empty(), serializer);
+
+                return serializer.result();
+            }
+
+            @Override
+            public void setEncodedValueStruct(SerializationContext ctx, GsonSerializer serializer, Serializer.Struct struct, JsonElement jsonElement) {
+                if(!(jsonElement instanceof JsonObject jsonObject)) {
+                    throw new IllegalStateException("Unable to add to builder as the given JsonElement was not a JsonObject: " + jsonElement);
+                }
+
+                jsonObject.asMap().forEach((key, element) ->  struct.field(key, ctx, GsonEndec.INSTANCE, element));
+            }
+
+            @Override
+            public JsonElement getEncodedValueStruct(SerializationContext ctx, GsonDeserializer serializer, Deserializer.Struct struct) {
+                return GsonEndec.INSTANCE.decode(ctx, serializer);
             }
         });
     }
