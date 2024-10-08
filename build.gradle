@@ -158,6 +158,9 @@ loom {
 }
 
 dependencies {
+    implementation("org.sinytra:forgified-fabric-loader:${project.loader_version}")
+    modImplementation("org.sinytra.forgified-fabric-api:forgified-fabric-api:${project.fabric_version}")
+
     //modLocalRuntime("me.shedaniel:RoughlyEnoughItems-neoforge:${project.rei_version}")
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin:${project.rei_version}")
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-neoforge:${project.rei_version}")
@@ -171,12 +174,10 @@ dependencies {
 
     forgeRuntimeLibrary(include(api("blue.endless:jankson:${project.jankson_version}")))
 
-    include("org.sinytra:forgified-fabric-loader:2.5.29+0.16.0+1.21:full")
-    api("org.sinytra:forgified-fabric-loader:2.5.29+0.16.0+1.21")
-
-    include modApi("org.sinytra.forgified-fabric-api:fabric-api-base:0.4.42+d1308dedd1") { exclude group: "fabric-api" }
-    include modApi("org.sinytra.forgified-fabric-api:fabric-networking-api-v1:4.2.2+a92978fd19") { exclude group: "fabric-api" }
-    include modApi("org.sinytra.forgified-fabric-api:fabric-screen-api-v1:2.0.24+79a4c2b0d1") { exclude group: "fabric-api" }
+//    include("org.sinytra:forgified-fabric-loader:2.5.29+0.16.0+1.21:full")
+//    include modApi("org.sinytra.forgified-fabric-api:fabric-api-base:0.4.42+d1308dedd1") { exclude group: "fabric-api" }
+//    include modApi("org.sinytra.forgified-fabric-api:fabric-networking-api-v1:4.2.2+a92978fd19") { exclude group: "fabric-api" }
+//    include modApi("org.sinytra.forgified-fabric-api:fabric-screen-api-v1:2.0.24+79a4c2b0d1") { exclude group: "fabric-api" }
 
     testmodImplementation sourceSets.main.output
     testmodAnnotationProcessor sourceSets.main.output
