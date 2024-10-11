@@ -4,8 +4,8 @@
         "srcrgb": "srcalpha",
         "dstrgb": "1-srcalpha"
     },
-    "vertex": "position",
-    "fragment": "owo:blur",
+    "vertex": "core/position",
+    "fragment": "owo:core/blur",
     "attributes": [],
     "samplers": [
         { "name": "InputSampler" }

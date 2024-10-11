@@ -4,8 +4,8 @@
         "srcrgb": "srcalpha",
         "dstrgb": "1-srcalpha"
     },
-    "vertex": "position_color",
-    "fragment": "owo:spectrum",
+    "vertex": "core/position_color",
+    "fragment": "owo:core/spectrum",
     "attributes": [],
     "samplers": [],
     "uniforms": [
