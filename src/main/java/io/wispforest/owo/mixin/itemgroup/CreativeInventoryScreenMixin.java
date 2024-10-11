@@ -76,11 +76,11 @@ public abstract class CreativeInventoryScreenMixin extends HandledScreen<Creativ
     // Scrollbar slider
     // ----------------
 
-    @ModifyArgs(method = "drawBackground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Ljava/util/function/Function;Lnet/minecraft/util/Identifier;IIII)V"))
-    private void injectCustomScrollbarTexture(Args args) {
-        if (!(selectedTab instanceof OwoItemGroup owoGroup) || owoGroup.getScrollerTextures() == null) return;
+    @ModifyArg(method = "drawBackground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Ljava/util/function/Function;Lnet/minecraft/util/Identifier;IIII)V"))
+    private Identifier injectCustomScrollbarTexture(Identifier original) {
+        if (!(selectedTab instanceof OwoItemGroup owoGroup) || owoGroup.getScrollerTextures() == null) return original;
 
-        args.set(0, this.hasScrollbar() ? owoGroup.getScrollerTextures().enabled() : owoGroup.getScrollerTextures().disabled());
+        return this.hasScrollbar() ? owoGroup.getScrollerTextures().enabled() : owoGroup.getScrollerTextures().disabled();
     }
 
     // -------------
