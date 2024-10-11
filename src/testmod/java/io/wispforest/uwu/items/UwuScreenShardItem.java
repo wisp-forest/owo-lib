@@ -21,8 +21,8 @@ import org.jetbrains.annotations.NotNull;
 
 public class UwuScreenShardItem extends Item {
 
-    public UwuScreenShardItem() {
-        super(new Settings().rarity(Rarity.UNCOMMON));
+    public UwuScreenShardItem(Item.Settings settings) {
+        super(settings.rarity(Rarity.UNCOMMON));
     }
 
     @Override

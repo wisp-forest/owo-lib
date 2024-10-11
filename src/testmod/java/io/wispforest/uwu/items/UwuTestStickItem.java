@@ -67,8 +67,8 @@ public class UwuTestStickItem extends Item {
     private static final Endec<String> YEP_SAME_HERE = CodecUtils.toEndec(CodecUtils.toCodec(CodecUtils.toEndec(THIS_CODEC_NEEDS_REGISTRIES)));
     private static final KeyedEndec<String> KYED = YEP_SAME_HERE.keyed("kyed", (String) null);
 
-    public UwuTestStickItem() {
-        super(new Item.Settings()
+    public UwuTestStickItem(Item.Settings settings) {
+        super(settings
                 .group(Uwu.SIX_TAB_GROUP).tab(3).maxCount(1)
                 .trackUsageStat()
                 .stackGenerator(OwoItemGroup.DEFAULT_STACK_GENERATOR.andThen((item, stacks) -> {

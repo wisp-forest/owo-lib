@@ -29,8 +29,8 @@ public class UwuCounterItem extends Item {
             .build()
     );
 
-    public UwuCounterItem() {
-        super(new Settings().rarity(Rarity.UNCOMMON));
+    public UwuCounterItem(Item.Settings settings) {
+        super(settings.rarity(Rarity.UNCOMMON));
     }
 
     @Override
