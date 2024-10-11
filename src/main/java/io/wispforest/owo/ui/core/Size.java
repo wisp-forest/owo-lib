@@ -1,5 +1,8 @@
 package io.wispforest.owo.ui.core;
 
+import io.wispforest.endec.Endec;
+import io.wispforest.endec.StructEndec;
+import io.wispforest.endec.impl.StructEndecBuilder;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
@@ -10,6 +13,8 @@ import org.jetbrains.annotations.ApiStatus;
  * @param height The height of the rectangle
  */
 public record Size(int width, int height) {
+
+    public static final Endec<Size> ENDEC = createEndec("width", "height");
 
     private static final Size ZERO = new Size(0, 0);
 
@@ -30,5 +35,13 @@ public record Size(int width, int height) {
      */
     public static Size zero() {
         return ZERO;
+    }
+
+    public static StructEndec<Size> createEndec(String widthName, String heightName) {
+        return StructEndecBuilder.of(
+                Endec.INT.fieldOf(widthName, Size::width),
+                Endec.INT.fieldOf(heightName, Size::height),
+                Size::of
+        );
     }
 }

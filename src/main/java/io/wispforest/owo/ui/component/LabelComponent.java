@@ -198,22 +198,20 @@ public class LabelComponent extends BaseComponent {
         final int lambdaX = x;
         final int lambdaY = y;
 
-        context.draw(() -> {
-            for (int i = 0; i < this.wrappedText.size(); i++) {
-                var renderText = this.wrappedText.get(i);
-                int renderX = lambdaX;
+        for (int i = 0; i < this.wrappedText.size(); i++) {
+            var renderText = this.wrappedText.get(i);
+            int renderX = lambdaX;
 
-                switch (this.horizontalTextAlignment) {
-                    case CENTER -> renderX += (this.width - this.textRenderer.getWidth(renderText)) / 2;
-                    case RIGHT -> renderX += this.width - this.textRenderer.getWidth(renderText);
-                }
-
-                int renderY = lambdaY + i * (this.lineHeight() + this.lineSpacing());
-                renderY += this.lineHeight() - this.textRenderer.fontHeight;
-
-                context.drawText(this.textRenderer, renderText, renderX, renderY, this.color.get().argb(), this.shadow);
+            switch (this.horizontalTextAlignment) {
+                case CENTER -> renderX += (this.width - this.textRenderer.getWidth(renderText)) / 2;
+                case RIGHT -> renderX += this.width - this.textRenderer.getWidth(renderText);
             }
-        });
+
+            int renderY = lambdaY + i * (this.lineHeight() + this.lineSpacing());
+            renderY += this.lineHeight() - this.textRenderer.fontHeight;
+
+            context.drawText(this.textRenderer, renderText, renderX, renderY, this.color.get().argb(), this.shadow);
+        }
 
         matrices.pop();
     }

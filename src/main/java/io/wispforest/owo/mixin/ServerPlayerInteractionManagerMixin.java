@@ -18,11 +18,11 @@ public class ServerPlayerInteractionManagerMixin {
 
     @Inject(method = "interactItem", at = @At("RETURN"))
     private void incrementUseState(ServerPlayerEntity player, World world, ItemStack stack, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
-        if (!((OwoItemExtensions) stack.getItem()).owo$shouldTrackUsageStat() || !cir.getReturnValue().shouldIncrementStat()) {
-            return;
-        }
+        var result = cir.getReturnValue();
 
-        player.incrementStat(Stats.USED.getOrCreateStat(stack.getItem()));
+        if(((OwoItemExtensions) stack.getItem()).owo$shouldTrackUsageStat() || (result instanceof ActionResult.Success successResult && successResult.shouldIncrementStat())) {
+            player.incrementStat(Stats.USED.getOrCreateStat(stack.getItem()));
+        }
     }
 
 }

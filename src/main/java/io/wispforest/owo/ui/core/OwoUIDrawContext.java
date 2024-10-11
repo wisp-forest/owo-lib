@@ -4,11 +4,13 @@ import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.client.OwoClient;
 import io.wispforest.owo.mixin.ui.DrawContextInvoker;
+import io.wispforest.owo.mixin.ui.access.DrawContextAccessor;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
 import io.wispforest.owo.ui.util.NinePatchTexture;
 import io.wispforest.owo.util.pond.OwoTessellatorExtension;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
@@ -44,7 +46,7 @@ public class OwoUIDrawContext extends DrawContext {
     }
 
     public static OwoUIDrawContext of(DrawContext context) {
-        var owoContext = new OwoUIDrawContext(MinecraftClient.getInstance(), context.getVertexConsumers());
+        var owoContext = new OwoUIDrawContext(MinecraftClient.getInstance(), ((DrawContextAccessor)context).getVertexConsumers());
         ((DrawContextInvoker) owoContext).owo$setScissorStack(((DrawContextInvoker) context).owo$getScissorStack());
         ((DrawContextInvoker) owoContext).owo$setMatrices(((DrawContextInvoker) context).owo$getMatrices());
 
@@ -116,7 +118,7 @@ public class OwoUIDrawContext extends DrawContext {
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
 
-        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+        RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
         BufferRenderer.drawWithGlobalProgram(buffer.end());
 
         RenderSystem.disableBlend();
@@ -191,7 +193,7 @@ public class OwoUIDrawContext extends DrawContext {
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+        RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
 
         BufferRenderer.drawWithGlobalProgram(buffer.end());
     }
@@ -219,7 +221,7 @@ public class OwoUIDrawContext extends DrawContext {
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+        RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
 
         BufferRenderer.drawWithGlobalProgram(buffer.end());
     }
@@ -250,13 +252,17 @@ public class OwoUIDrawContext extends DrawContext {
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+        RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
 
         BufferRenderer.drawWithGlobalProgram(buffer.end());
     }
 
     public void drawTooltip(TextRenderer textRenderer, int x, int y, List<TooltipComponent> components) {
-        ((DrawContextInvoker) this).owo$renderTooltipFromComponents(textRenderer, components, x, y, HoveredTooltipPositioner.INSTANCE);
+        drawTooltip(textRenderer, x, y, components, null);
+    }
+
+    public void drawTooltip(TextRenderer textRenderer, int x, int y, List<TooltipComponent> components, @Nullable Identifier texture) {
+        ((DrawContextInvoker) this).owo$renderTooltipFromComponents(textRenderer, components, x, y, HoveredTooltipPositioner.INSTANCE, texture);
     }
 
     // --- debug rendering ---

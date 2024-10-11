@@ -25,6 +25,8 @@ public class UIErrorToast implements Toast {
     private final TextRenderer textRenderer;
     private final int width;
 
+    protected Visibility visibility = Toast.Visibility.HIDE;
+
     public UIErrorToast(Throwable error) {
         this.textRenderer = MinecraftClient.getInstance().textRenderer;
         var texts = this.initText(String.valueOf(error.getMessage()), (consumer) -> {
@@ -72,7 +74,12 @@ public class UIErrorToast implements Toast {
     }
 
     @Override
-    public Visibility draw(DrawContext context, ToastManager manager, long startTime) {
+    public void update(ToastManager manager, long time) {
+        // TODO: IS THIS NEEDED!
+    }
+
+    @Override
+    public void draw(DrawContext context, TextRenderer renderer, long startTime) {
         var owoContext = OwoUIDrawContext.of(context);
 
         owoContext.fill(0, 0, this.getWidth(), this.getHeight(), 0x77000000);
@@ -85,9 +92,13 @@ public class UIErrorToast implements Toast {
             owoContext.drawText(this.textRenderer, this.errorMessage.get(i), 4, 4 + i * 11, 0xFFFFFF, false);
         }
 
-        return startTime > 10000 ? Visibility.HIDE : Visibility.SHOW;
+        this.visibility = startTime > 10000 ? Visibility.HIDE : Visibility.SHOW;;
     }
 
+    @Override
+    public Visibility getVisibility() {
+        return this.visibility;
+    }
 
     @Override
     public int getHeight() {

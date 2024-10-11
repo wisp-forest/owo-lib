@@ -25,9 +25,7 @@ public abstract class BaseOwoTooltipComponent<R extends ParentComponent> impleme
     }
 
     @Override
-    public void drawItems(TextRenderer textRenderer, int x, int y, DrawContext context) {
-        var client = MinecraftClient.getInstance();
-
+    public void drawItems(TextRenderer textRenderer, int x, int y, int width, int height, DrawContext context) {
         var tickCounter = MinecraftClient.getInstance().getRenderTickCounter();
 
         this.rootComponent.moveTo(x, y);
@@ -35,7 +33,7 @@ public abstract class BaseOwoTooltipComponent<R extends ParentComponent> impleme
     }
 
     @Override
-    public int getHeight() {
+    public int getHeight(TextRenderer textRenderer) {
         return this.rootComponent.fullSize().height();
     }
 

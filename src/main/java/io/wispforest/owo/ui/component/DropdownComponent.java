@@ -9,6 +9,7 @@ import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.UISounds;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -197,7 +198,7 @@ public class DropdownComponent extends FlowLayout {
     }
 
     protected static void drawIconFromTexture(OwoUIDrawContext context, ParentComponent dropdown, int y, int u, int v) {
-        context.drawTexture(ICONS_TEXTURE,
+        context.drawTexture(RenderLayer::getGuiTextured, ICONS_TEXTURE,
                 dropdown.x() + dropdown.width() - dropdown.padding().get().right() - 10, y,
                 u, v,
                 9, 9,

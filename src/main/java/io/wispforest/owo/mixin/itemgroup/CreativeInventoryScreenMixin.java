@@ -9,8 +9,8 @@ import io.wispforest.owo.ui.util.CursorAdapter;
 import io.wispforest.owo.util.pond.OwoCreativeInventoryScreenExtensions;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -18,7 +18,6 @@ import net.minecraft.item.ItemGroup;
 import net.minecraft.resource.featuretoggle.FeatureSet;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -35,7 +34,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 @Mixin(CreativeInventoryScreen.class)
-public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScreen<CreativeInventoryScreen.CreativeScreenHandler> implements OwoCreativeInventoryScreenExtensions {
+public abstract class CreativeInventoryScreenMixin extends HandledScreen<CreativeInventoryScreen.CreativeScreenHandler> implements OwoCreativeInventoryScreenExtensions {
 
     @Shadow
     private static ItemGroup selectedTab;
@@ -67,7 +66,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
     // Background
     // ----------
 
-    @ModifyArg(method = "drawBackground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawTexture(Lnet/minecraft/util/Identifier;IIIIII)V", ordinal = 0))
+    @ModifyArg(method = "drawBackground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawTexture(Ljava/util/function/Function;Lnet/minecraft/util/Identifier;IIFFIIII)V", ordinal = 0))
     private Identifier injectCustomGroupTexture(Identifier original) {
         if (!(selectedTab instanceof OwoItemGroup owoGroup) || owoGroup.getBackgroundTexture() == null) return original;
         return owoGroup.getBackgroundTexture();
@@ -77,7 +76,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
     // Scrollbar slider
     // ----------------
 
-    @ModifyArgs(method = "drawBackground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Lnet/minecraft/util/Identifier;IIII)V"))
+    @ModifyArgs(method = "drawBackground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Ljava/util/function/Function;Lnet/minecraft/util/Identifier;IIII)V"))
     private void injectCustomScrollbarTexture(Args args) {
         if (!(selectedTab instanceof OwoItemGroup owoGroup) || owoGroup.getScrollerTextures() == null) return;
 
@@ -88,7 +87,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
     // Group headers
     // -------------
 
-    @ModifyArg(method = "renderTabIcon", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Lnet/minecraft/util/Identifier;IIII)V"))
+    @ModifyArg(method = "renderTabIcon", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Ljava/util/function/Function;Lnet/minecraft/util/Identifier;IIII)V"))
     private Identifier injectCustomTabTexture(Identifier texture, @Local(argsOnly = true) ItemGroup group) {
         if(!(group instanceof OwoItemGroup contextGroup) || contextGroup.getTabTextures() == null) return texture;
 

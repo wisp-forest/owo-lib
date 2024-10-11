@@ -2,10 +2,9 @@ package io.wispforest.owo.util;
 
 import com.google.common.collect.ForwardingMap;
 import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
+
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.TagEntry;
-import net.minecraft.registry.tag.TagManagerLoader;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;

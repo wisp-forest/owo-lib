@@ -3,6 +3,7 @@ package io.wispforest.owo.client.texture;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
@@ -91,7 +92,7 @@ public class AnimatedTextureDrawable implements Drawable {
         RenderSystem.enableBlend();
         RenderSystem.enableDepthTest();
 
-        context.drawTexture(this.texture, x, y, (frame / rows) * metadata.frameWidth(), (frame % rows) * metadata.frameHeight(), width, height, metadata.width(), metadata.height());
+        context.drawTexture(RenderLayer::getGuiTextured, this.texture, x, y, (frame / rows) * metadata.frameWidth(), (frame % rows) * metadata.frameHeight(), width, height, metadata.width(), metadata.height());
 
         RenderSystem.disableDepthTest();
         RenderSystem.disableBlend();

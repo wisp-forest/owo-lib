@@ -7,6 +7,7 @@ import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.SpriteUtilInvoker;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.SpriteIdentifier;
 import org.w3c.dom.Element;
@@ -41,7 +42,7 @@ public class SpriteComponent extends BaseComponent {
             RenderSystem.defaultBlendFunc();
         }
 
-        context.drawSprite(this.x, this.y, 0, this.width, this.height, this.sprite);
+        context.drawSprite(RenderLayer::getGuiTextured, this.sprite, this.x, this.y, this.width, this.height);
 
         if (this.blend) {
             RenderSystem.disableBlend();

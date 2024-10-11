@@ -10,6 +10,7 @@ import io.wispforest.owo.ui.event.WindowResizeCallback;
 import io.wispforest.owo.ui.util.ScissorStack;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
+import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.gl.SimpleFramebuffer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.BufferRenderer;
@@ -60,13 +61,13 @@ public class RenderEffectWrapper<C extends Component> extends WrappingParentComp
 
             var window = MinecraftClient.getInstance().getWindow();
             while (drawDepth > FRAMEBUFFERS.size()) {
-                FRAMEBUFFERS.add(new SimpleFramebuffer(window.getFramebufferWidth(), window.getFramebufferHeight(), true, MinecraftClient.IS_SYSTEM_MAC));
+                FRAMEBUFFERS.add(new SimpleFramebuffer(window.getFramebufferWidth(), window.getFramebufferHeight(), true));
             }
 
             var previousFramebuffer = GlStateManager.getBoundFramebuffer();
             var framebuffer = FRAMEBUFFERS.get(drawDepth - 1);
             framebuffer.setClearColor(0, 0, 0, 0);
-            ScissorStack.drawUnclipped(() -> framebuffer.clear(MinecraftClient.IS_SYSTEM_MAC));
+            ScissorStack.drawUnclipped(framebuffer::clear);
             framebuffer.beginWrite(false);
 
             this.drawChildren(context, mouseX, mouseY, partialTicks, delta, this.childView);
@@ -87,7 +88,7 @@ public class RenderEffectWrapper<C extends Component> extends WrappingParentComp
             buffer.vertex(matrix, 0, 0, 0).texture(0, 1).color(1f, 1f, 1f, 1f);
 
             RenderSystem.setShaderTexture(0, framebuffer.getColorAttachment());
-            RenderSystem.setShader(GameRenderer::getPositionTexColorProgram);
+            RenderSystem.setShader(ShaderProgramKeys.POSITION_TEX_COLOR);
             BufferRenderer.drawWithGlobalProgram(buffer.end());
 
             while (iter.hasPrevious()) {
@@ -124,7 +125,7 @@ public class RenderEffectWrapper<C extends Component> extends WrappingParentComp
     static {
         WindowResizeCallback.EVENT.register((client, window) -> {
             FRAMEBUFFERS.forEach(framebuffer -> {
-                framebuffer.resize(window.getFramebufferWidth(), window.getFramebufferHeight(), MinecraftClient.IS_SYSTEM_MAC);
+                framebuffer.resize(window.getFramebufferWidth(), window.getFramebufferHeight());
             });
         });
     }

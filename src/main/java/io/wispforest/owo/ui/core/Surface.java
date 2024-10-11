@@ -14,6 +14,7 @@ import net.minecraft.client.gui.tooltip.TooltipBackgroundRenderer;
 import net.minecraft.client.render.*;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
+import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -41,14 +42,16 @@ public interface Surface {
     Surface OPTIONS_BACKGROUND = Surface.panorama(ScreenAccessor.owo$ROTATING_PANORAMA_RENDERER(), false)
             .and(Surface.blur(5, 10));
 
-    Surface TOOLTIP = (context, component) -> {
-        context.draw(() -> {
+    Surface TOOLTIP = tooltip(null);
+
+    static Surface tooltip(@Nullable Identifier texture) {
+        return (context, component) -> {
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
 
-            TooltipBackgroundRenderer.render(context, component.x() + 4, component.y() + 4, component.width() - 8, component.height() - 8, 0);
-        });
-    };
+            TooltipBackgroundRenderer.render(context, component.x() + 4, component.y() + 4, component.width() - 8, component.height() - 8, 0, texture);
+        };
+    }
 
     static Surface blur(float quality, float size) {
         return (context, component) -> {
@@ -120,7 +123,7 @@ public interface Surface {
 
     static Surface tiled(Identifier texture, int textureWidth, int textureHeight) {
         return (context, component) -> {
-            context.drawTexture(texture, component.x(), component.y(), 0, 0, component.width(), component.height(), textureWidth, textureHeight);
+            context.drawTexture(RenderLayer::getGuiTextured, texture, component.x(), component.y(), 0, 0, component.width(), component.height(), textureWidth, textureHeight);
         };
     }
 

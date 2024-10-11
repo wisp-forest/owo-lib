@@ -4,6 +4,7 @@ import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.core.Size;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.toast.Toast;
 import net.minecraft.client.toast.ToastManager;
@@ -21,6 +22,8 @@ public abstract class BaseOwoToast<R extends ParentComponent> implements Toast {
 
     protected int virtualWidth = 1000, virtualHeight = 1000;
 
+    protected Visibility visibility = Toast.Visibility.HIDE;
+
     protected BaseOwoToast(Supplier<R> components, VisibilityPredicate<R> predicate) {
         this.rootComponent = components.get();
         this.visibilityPredicate = predicate;
@@ -34,14 +37,22 @@ public abstract class BaseOwoToast<R extends ParentComponent> implements Toast {
     }
 
     @Override
-    public Visibility draw(DrawContext context, ToastManager manager, long startTime) {
-        var client = MinecraftClient.getInstance();
+    public void update(ToastManager manager, long time) {
+        // TODO: WHAT THE HELL GOES HERE?
+    }
 
+    @Override
+    public void draw(DrawContext context, TextRenderer renderer, long startTime) {
         var tickCounter = MinecraftClient.getInstance().getRenderTickCounter();
 
         this.rootComponent.draw(OwoUIDrawContext.of(context), -1000, -1000, tickCounter.getTickDelta(false), tickCounter.getLastFrameDuration());
 
-        return this.visibilityPredicate.test(this, startTime);
+        this.visibility = this.visibilityPredicate.test(this, startTime);
+    }
+
+    @Override
+    public Visibility getVisibility() {
+        return this.visibility;
     }
 
     @Override

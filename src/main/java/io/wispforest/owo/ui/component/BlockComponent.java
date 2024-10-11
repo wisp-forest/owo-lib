@@ -47,7 +47,8 @@ public class BlockComponent extends BaseComponent {
 
         context.getMatrices().translate(-.5, -.5, -.5);
 
-        RenderSystem.runAsFancy(() -> {
+        // TODO: IS THIS NEEDED ANYMORE?
+        //RenderSystem.runAsFancy(() -> {
             final var vertexConsumers = client.getBufferBuilders().getEntityVertexConsumers();
             if (this.state.getRenderType() != BlockRenderType.ENTITYBLOCK_ANIMATED) {
                 this.client.getBlockRenderManager().renderBlockAsEntity(
@@ -66,7 +67,7 @@ public class BlockComponent extends BaseComponent {
             RenderSystem.setShaderLights(new Vector3f(-1.5f, -.5f, 0), new Vector3f(0, -1, 0));
             vertexConsumers.draw();
             DiffuseLighting.enableGuiDepthLighting();
-        });
+        //});
 
         context.getMatrices().pop();
     }
@@ -94,7 +95,7 @@ public class BlockComponent extends BaseComponent {
         UIParsing.expectAttributes(element, "state");
 
         try {
-            var result = BlockArgumentParser.block(Registries.BLOCK.getReadOnlyWrapper(), element.getAttribute("state"), true);
+            var result = BlockArgumentParser.block(Registries.BLOCK, element.getAttribute("state"), true);
             return Components.block(result.blockState(), result.nbt());
         } catch (CommandSyntaxException cse) {
             throw new UIModelParsingException("Invalid block state", cse);

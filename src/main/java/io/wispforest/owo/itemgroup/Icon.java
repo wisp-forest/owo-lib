@@ -5,6 +5,7 @@ import io.wispforest.owo.client.texture.SpriteSheetMetadata;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
@@ -34,12 +35,7 @@ public interface Icon {
     }
 
     static Icon of(Identifier texture, int u, int v, int textureWidth, int textureHeight) {
-        return new Icon() {
-            @Override
-            public void render(DrawContext context, int x, int y, int mouseX, int mouseY, float delta) {
-                context.drawTexture(texture, x, y, u, v, 16, 16, textureWidth, textureHeight);
-            }
-        };
+        return (context, x, y, mouseX, mouseY, delta) -> context.drawTexture(RenderLayer::getGuiTextured, texture, x, y, u, v, 16, 16, textureWidth, textureHeight);
     }
 
     /**

@@ -37,7 +37,6 @@ import io.wispforest.owo.serialization.format.nbt.NbtEndec;
 import io.wispforest.owo.serialization.format.nbt.NbtSerializer;
 import io.wispforest.owo.text.CustomTextRegistry;
 import io.wispforest.owo.ui.core.Color;
-import io.wispforest.owo.util.RegistryAccess;
 import io.wispforest.owo.util.TagInjector;
 import io.wispforest.uwu.config.BruhConfig;
 import io.wispforest.uwu.config.UwuConfig;
@@ -226,8 +225,8 @@ public class Uwu implements ModInitializer {
             new ParticleSystemController(Identifier.of("uwu", "server_only_particles"));
         }
 
-        System.out.println(RegistryAccess.getEntry(Registries.ITEM, Items.ACACIA_BOAT));
-        System.out.println(RegistryAccess.getEntry(Registries.ITEM, Identifier.of("acacia_planks")));
+        System.out.println(Registries.ITEM.getEntry(Items.ACACIA_BOAT));
+        System.out.println(Registries.ITEM.getEntry(Identifier.of("acacia_planks")));
 
 //        UwuShapedRecipe.init();
 
@@ -377,7 +376,7 @@ public class Uwu implements ModInitializer {
                         {
                             LOGGER.info("--- Format Based Endec Test");
 
-                            var nbtDataStack = handStack.encode(access);
+                            var nbtDataStack = handStack.toNbt(access);
 
                             LOGGER.info("  Input:  " + nbtDataStack.asString().replace("\n", "\\n"));
 
@@ -399,7 +398,7 @@ public class Uwu implements ModInitializer {
                         {
                             LOGGER.info("--- Transpose Format Based Endec Test");
 
-                            var nbtDataStack = handStack.encode(access);
+                            var nbtDataStack = handStack.toNbt(access);
 
                             LOGGER.info("  Input:  " + nbtDataStack.asString().replace("\n", "\\n"));
 
