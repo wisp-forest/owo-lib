@@ -9,6 +9,7 @@ import java.lang.reflect.*;
 import java.util.Locale;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 @ApiStatus.Experimental
 public final class ReflectionUtils {
@@ -182,5 +183,9 @@ public final class ReflectionUtils {
     @FunctionalInterface
     public interface FieldConsumer<F> {
         void accept(F value, String name, Field field);
+
+        default void accept(Supplier<F> value, String name, Field field) {
+            accept(value.get(), name, field);
+        }
     }
 }

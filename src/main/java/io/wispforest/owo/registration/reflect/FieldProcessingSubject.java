@@ -3,6 +3,7 @@ package io.wispforest.owo.registration.reflect;
 import io.wispforest.owo.registration.annotations.AssignedName;
 
 import java.lang.reflect.Field;
+import java.util.function.Supplier;
 
 /**
  * A class that can have its accessible static fields that match the
@@ -28,6 +29,10 @@ public interface FieldProcessingSubject<T> {
      * @return {@code true} if the inspected field should be processed
      */
     default boolean shouldProcessField(T value, String identifier, Field field) {
+        return true;
+    }
+
+    default boolean shouldProcessField(Supplier<T> value, String identifier, Field field) {
         return true;
     }
 

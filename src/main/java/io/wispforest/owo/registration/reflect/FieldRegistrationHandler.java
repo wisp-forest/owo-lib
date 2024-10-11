@@ -6,8 +6,10 @@ import io.wispforest.owo.registration.reflect.entry.MemoizedEntry;
 import io.wispforest.owo.registration.reflect.entry.MemoizedRegistryEntry;
 import io.wispforest.owo.util.ReflectionUtils;
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.Identifier;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.util.function.Supplier;
@@ -72,20 +74,40 @@ public final class FieldRegistrationHandler {
     public static <T> void register(Class<? extends AutoRegistryContainer<T>> clazz, String namespace, boolean recurseIntoInnerClasses) {
         AutoRegistryContainer<T> container = ReflectionUtils.tryInstantiateWithNoArgs(clazz);
 
-        iterateAccessibleStaticFieldsAllowingMemorizedSuppliers(clazz, container.getTargetFieldType(), createProcessor((fieldValue, identifier, field) -> {
-            var reference = Registry.registerReference(container.getRegistry(), Identifier.of(namespace, identifier), fieldValue);
+        iterateAccessibleStaticFieldsAllowingMemorizedSuppliers(clazz, container.getTargetFieldType(), createProcessor(new ReflectionUtils.FieldConsumer<T>() {
+            @Override
+            public void accept(T fieldValue, String identifier, Field field) {
+                var reference = Registry.registerReference(container.getRegistry(), Identifier.of(namespace, identifier), fieldValue);
 
-            try {
-                var object = field.get(null);
+                try {
+                    var object = field.get(null);
 
-                if(object instanceof MemoizedRegistryEntry memorizedRegistryEntry) {
-                    memorizedRegistryEntry.setEntry(reference);
+                    if(object instanceof MemoizedRegistryEntry memorizedRegistryEntry) {
+                        memorizedRegistryEntry.setEntry(reference);
+                    }
+                } catch (IllegalArgumentException | IllegalAccessException e) {
+                    throw new RuntimeException(e);
                 }
-            } catch (IllegalArgumentException | IllegalAccessException e) {
-                throw new RuntimeException(e);
+
+                container.postProcessField(namespace, fieldValue, identifier, field);
             }
 
-            container.postProcessField(namespace, fieldValue, identifier, field);
+            @Override
+            public void accept(Supplier<T> fieldValue, String identifier, Field field) {
+                var registryKey = RegistryKey.of(container.getRegistry().getKey(), Identifier.of(namespace, identifier));
+
+                if (fieldValue instanceof MemoizedRegistryEntry<?, T> memoizedRegistryEntry) {
+                    memoizedRegistryEntry.setup(registryKey);
+                }
+
+                var reference = Registry.registerReference(container.getRegistry(), registryKey, fieldValue.get());
+
+                if(fieldValue instanceof MemoizedRegistryEntry memorizedRegistryEntry) {
+                    memorizedRegistryEntry.setEntry(reference);
+                }
+
+                container.postProcessField(namespace, fieldValue, identifier, field);
+            }
         }, container));
 
         if (recurseIntoInnerClasses) {
@@ -100,9 +122,18 @@ public final class FieldRegistrationHandler {
     }
 
     private static <T> ReflectionUtils.FieldConsumer<T> createProcessor(ReflectionUtils.FieldConsumer<T> delegate, FieldProcessingSubject<T> handler) {
-        return (value, name, field) -> {
-            if (!handler.shouldProcessField(value, name, field)) return;
-            delegate.accept(value, name, field);
+        return new ReflectionUtils.FieldConsumer<T>() {
+            @Override
+            public void accept(T value, String name, Field field) {
+                if (!handler.shouldProcessField(value, name, field)) return;
+                delegate.accept(value, name, field);
+            }
+
+            @Override
+            public void accept(Supplier<T> value, String name, Field field) {
+                if (!handler.shouldProcessField(value, name, field)) return;
+                delegate.accept(value, name, field);
+            }
         };
     }
 
@@ -122,11 +153,7 @@ public final class FieldRegistrationHandler {
 
             var valueType = fieldValue.getClass();
 
-            F finalValue = null;
-
             if (!targetFieldType.isAssignableFrom(valueType)) {
-                boolean isValid = false;
-
                 if(Supplier.class.isAssignableFrom(field.getType()) && field.getGenericType() instanceof ParameterizedType parameterizedType) {
                     var genericType = parameterizedType.getActualTypeArguments()[0];
 
@@ -135,19 +162,12 @@ public final class FieldRegistrationHandler {
                             throw new IllegalStateException("A given Supplier object must be of a memoized variant or problems may occur! [Field: " + field.getName() + "]");
                         }
 
-                        finalValue = (F) ((Supplier) fieldValue).get();
-
-
-                        isValid = true;
+                        fieldConsumer.accept((Supplier<F>) fieldValue, ReflectionUtils.getFieldName(field), field);
                     }
                 }
-
-                if(!isValid) continue;
             } else {
-                finalValue = (F) fieldValue;
+                fieldConsumer.accept((F) fieldValue, ReflectionUtils.getFieldName(field), field);
             }
-
-            fieldConsumer.accept(finalValue, ReflectionUtils.getFieldName(field), field);
         }
     }
 

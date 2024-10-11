@@ -28,6 +28,10 @@ public class MemoizedRegistryEntry<T extends B, B> extends MemoizedEntry<B> impl
         this.registryEntry = registryEntry;
     }
 
+    public void setup(RegistryKey<B> registryKey) {
+       // NO-OP
+    }
+
     private RegistryEntry<T> getTypedEntry() {
         if(this.registryEntry == null) {
             throw new IllegalStateException("Unable to get the wrapped registry entry as it has not been set yet!");

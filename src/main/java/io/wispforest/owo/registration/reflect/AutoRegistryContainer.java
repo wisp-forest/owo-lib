@@ -35,6 +35,8 @@ public abstract class AutoRegistryContainer<T> implements FieldProcessingSubject
      */
     public void postProcessField(String namespace, T value, String identifier, Field field) {}
 
+    public void postProcessField(String namespace, Supplier<T> value, String identifier, Field field) {}
+
     /**
      * Convenience-alias for {@link FieldRegistrationHandler#register(Class, String, boolean)}
      */
