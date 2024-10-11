@@ -7,7 +7,7 @@ import io.wispforest.owo.mixin.ui.DrawContextInvoker;
 import io.wispforest.owo.mixin.ui.access.DrawContextAccessor;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
 import io.wispforest.owo.ui.util.NinePatchTexture;
-import io.wispforest.owo.util.pond.OwoTessellatorExtension;
+import io.wispforest.owo.util.pond.OwoImmediateExtension;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gl.ShaderProgramKeys;
@@ -25,6 +25,8 @@ import org.joml.Vector2d;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class OwoUIDrawContext extends DrawContext {
 
@@ -57,24 +59,34 @@ public class OwoUIDrawContext extends DrawContext {
         return UtilityScreen.get();
     }
 
-    public void recordQuads() {
-        recording = true;
+    public void recordQuads(RenderLayer renderLayer) {
+        var vertexConsumers = ((DrawContextAccessor)this).getVertexConsumers();
+
+        if (vertexConsumers instanceof OwoImmediateExtension extension) {
+            extension.owo$addBatchedLayer(renderLayer);
+        }
     }
 
-    public boolean recording() {
-        return recording;
+    public void submitQuads(RenderLayer renderLayer) {
+        var vertexConsumers = ((DrawContextAccessor)this).getVertexConsumers();
+
+        vertexConsumers.draw(renderLayer);
     }
 
-    public void submitQuads() {
-        recording = false;
+    public interface BatchedDraw {
+        void draw(Function<Identifier, RenderLayer> renderLayerFactory);
+    }
 
-        var extension = ((OwoTessellatorExtension) Tessellator.getInstance());
+    public void batchRenderLayer(Identifier texture, Function<Identifier, RenderLayer> renderLayerFactory, BatchedDraw batchedDraw) {
+        batchRenderLayer(renderLayerFactory.apply(texture), batchedDraw);
+    }
 
-        var buffer = extension.owo$getStoredBuilder();
+    public void batchRenderLayer(RenderLayer renderLayer, BatchedDraw batchedDraw) {
+        recordQuads(renderLayer);
 
-        extension.owo$setStoredBuilder(null);
+        batchedDraw.draw(identifier -> renderLayer);
 
-        BufferRenderer.drawWithGlobalProgram(buffer.end());
+        submitQuads(renderLayer);
     }
 
     /**
