@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * A simple wrapper around Minecraft's built-in core shaders. In order to load and use
@@ -33,6 +34,8 @@ import java.util.function.Function;
  */
 public class GlProgram {
 
+    private static final List<Runnable> REGISTERED_PROGRAMS = new ArrayList<>();
+
     /**
      * The actual Minecraft shader program
      * which is represented and wrapped by this
@@ -42,13 +45,18 @@ public class GlProgram {
     protected ShaderProgramKey programKey;
 
     public GlProgram(Identifier id, VertexFormat vertexFormat) {
-        this.programKey = new ShaderProgramKey(id, vertexFormat, Defines.EMPTY);
+        this.programKey = new ShaderProgramKey(id.withPrefixedPath("core/"), vertexFormat, Defines.EMPTY);
 
-        try {
-            MinecraftClient.getInstance().getShaderLoader().getProgramToLoad(programKey);
-        } catch (ShaderLoader.LoadException e) {
-            throw new RuntimeException("Failed to initialized owo shader program", e);
-        }
+        REGISTERED_PROGRAMS.add(
+                () -> {
+                    try {
+                        this.backingProgram = MinecraftClient.getInstance().getShaderLoader().getProgramToLoad(programKey);
+                        this.setup();
+                    } catch (ShaderLoader.LoadException e) {
+                        throw new RuntimeException("Failed to initialized owo shader program", e);
+                    }
+                }
+        );
     }
 
     /**
@@ -74,5 +82,10 @@ public class GlProgram {
      */
     protected @Nullable GlUniform findUniform(String name) {
         return ((ShaderProgramAccessor) this.backingProgram).owo$getLoadedUniforms().get(name);
+    }
+
+    @ApiStatus.Internal
+    public static void forEachProgram(Consumer<Runnable> loader) {
+        REGISTERED_PROGRAMS.forEach(loader);
     }
 }
