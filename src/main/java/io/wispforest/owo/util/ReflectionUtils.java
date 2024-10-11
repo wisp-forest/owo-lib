@@ -82,6 +82,7 @@ public final class ReflectionUtils {
     public static <C, F> void iterateAccessibleStaticFields(Class<C> clazz, Class<F> targetFieldType, FieldConsumer<F> fieldConsumer) {
         for (var field : clazz.getDeclaredFields()) {
             if (!Modifier.isStatic(field.getModifiers())) continue;
+            if (field.isAnnotationPresent(IterationIgnored.class)) continue;
 
             F value;
             try {
@@ -91,7 +92,6 @@ public final class ReflectionUtils {
             }
 
             if (value == null || !targetFieldType.isAssignableFrom(value.getClass())) continue;
-            if (field.isAnnotationPresent(IterationIgnored.class)) continue;
 
             fieldConsumer.accept(value, getFieldName(field), field);
         }

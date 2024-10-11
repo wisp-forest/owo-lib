@@ -82,6 +82,9 @@
       ],
       "net/minecraft/class_1792": [
         "io/wispforest/owo/ext/OwoItem"
+      ],
+      "net/minecraft/class_6880": [
+        "io/wispforest/owo/util/pond/OwoInjectedSupplier<TT;>"
       ]
     }
   }

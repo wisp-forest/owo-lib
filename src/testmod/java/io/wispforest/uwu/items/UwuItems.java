@@ -2,21 +2,25 @@ package io.wispforest.uwu.items;
 
 import io.wispforest.owo.registration.annotations.AssignedName;
 import io.wispforest.owo.registration.annotations.RegistryNamespace;
-import io.wispforest.owo.registration.reflect.ItemRegistryContainer;
+import io.wispforest.owo.registration.reflect.item.ItemRegistryContainer;
+import io.wispforest.owo.registration.reflect.item.ItemRegistryEntry;
+import io.wispforest.owo.registration.reflect.entry.TypedRegistryEntry;
 import io.wispforest.uwu.Uwu;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.component.type.FoodComponents;
 import net.minecraft.item.Item;
+import net.minecraft.registry.entry.RegistryEntry;
 
 import java.lang.reflect.Field;
 
-public class UwuItems implements ItemRegistryContainer {
+public class UwuItems extends ItemRegistryContainer {
 
-    public static final Item TEST_STICK = new UwuTestStickItem();
+    public static final ItemRegistryEntry<UwuTestStickItem> TEST_STICK = item(UwuTestStickItem::new);
     public static final Item SCREEN_SHARD = new UwuScreenShardItem();
     public static final Item COUNTER = new UwuCounterItem();
 
     @RegistryNamespace("uowou")
-    public static class OwoCompatItems implements ItemRegistryContainer {
+    public static class OwoCompatItems extends ItemRegistryContainer {
 
         @AssignedName("owo_ingot")
         public static final Item OWO_COMPAT_ITEM = new Item(new Item.Settings().group(Uwu.FOUR_TAB_GROUP).tab(2));
@@ -27,4 +31,11 @@ public class UwuItems implements ItemRegistryContainer {
         }
     }
 
+    @RegistryNamespace("supplied")
+    public static class OwoTestingSuppliers extends ItemRegistryContainer {
+        public static final TypedRegistryEntry<Item, Item> RANDOM_1 = typedEntry(() -> new Item(new Item.Settings().fireproof().maxCount(1)));
+        public static final RegistryEntry<Item> RANDOM_2 = entry(() -> new Item(new Item.Settings().food(FoodComponents.APPLE).maxCount(65)));
+        public static final RegistryEntry<Item> RANDOM_3 = entry(() -> new Item(new Item.Settings().food(FoodComponents.APPLE).maxCount(65)));
+        public static final RegistryEntry<Item> RANDOM_4 = entry(() -> new Item(new Item.Settings().food(FoodComponents.APPLE).maxCount(65)));
+    }
 }

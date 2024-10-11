@@ -28,6 +28,8 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryOps;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -82,6 +84,7 @@ public class UwuTestStickItem extends Item {
 
     @Override
     public ActionResult use(World world, PlayerEntity user, Hand hand) {
+        test(UwuItems.TEST_STICK);
         if (user.isSneaking()) {
             if (world.isClient) return ActionResult.SUCCESS;
 
@@ -103,6 +106,10 @@ public class UwuTestStickItem extends Item {
 
             return ActionResult.SUCCESS;
         }
+    }
+
+    public void test(RegistryEntry<Item> entry) {
+        System.out.println(entry.value());
     }
 
     @Override

@@ -1,6 +1,7 @@
-package io.wispforest.owo.registration.reflect;
+package io.wispforest.owo.registration.reflect.block;
 
 import io.wispforest.owo.registration.annotations.AssignedName;
+import io.wispforest.owo.registration.reflect.AutoRegistryContainer;
 import net.minecraft.block.Block;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
@@ -13,23 +14,28 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
+import java.util.function.Supplier;
 
-public interface BlockRegistryContainer extends AutoRegistryContainer<Block> {
+public abstract class BlockRegistryContainer extends AutoRegistryContainer<Block> {
 
     @Override
-    default Registry<Block> getRegistry() {
+    public final Registry<Block> getRegistry() {
         return Registries.BLOCK;
     }
 
     @Override
-    default Class<Block> getTargetFieldType() {
+    public final Class<Block> getTargetFieldType() {
         return Block.class;
     }
 
     @Override
-    default void postProcessField(String namespace, Block value, String identifier, Field field) {
+    public void postProcessField(String namespace, Block value, String identifier, Field field) {
         if (field.isAnnotationPresent(NoBlockItem.class)) return;
         Registry.register(Registries.ITEM, Identifier.of(namespace, identifier), createBlockItem(value, identifier));
+    }
+
+    public static <T extends Block> BlockRegistryEntry<T> block(Supplier<T> supplier) {
+        return new BlockRegistryEntry<>(supplier);
     }
 
     /**
@@ -40,7 +46,7 @@ public interface BlockRegistryContainer extends AutoRegistryContainer<Block> {
      *                   annotation and always fully lowercase
      * @return The created BlockItem instance
      */
-    default BlockItem createBlockItem(Block block, String identifier) {
+    public BlockItem createBlockItem(Block block, String identifier) {
         return new BlockItem(block, new Item.Settings());
     }
 
