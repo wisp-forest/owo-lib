@@ -61,8 +61,7 @@ public abstract class HandledScreenMixin extends Screen {
         GlStateManager._disableScissorTest();
     }
 
-    //TODO: MUST FIX!
-
+    //TODO: FIGURE OUT IF SUCH IS STILL NEEDED ANYMORE?
 //    @Inject(method = "drawSlotHighlight", at = @At(value = "HEAD"))
 //    private static void enableSlotDepth(DrawContext context, int x, int y, int z, CallbackInfo ci) {
 //        if (!owo$inOwoScreen) return;

@@ -75,7 +75,7 @@ public class UIErrorToast implements Toast {
 
     @Override
     public void update(ToastManager manager, long time) {
-        // TODO: IS THIS NEEDED!
+        // TODO: WHAT THE HELL GOES HERE?
     }
 
     @Override
