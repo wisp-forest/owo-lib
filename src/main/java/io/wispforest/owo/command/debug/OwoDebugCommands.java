@@ -70,7 +70,7 @@ public class OwoDebugCommands {
             dispatcher.register(literal("query-poi").then(argument("poi_type", IdentifierArgumentType.identifier()).suggests(POI_TYPES)
                     .then(argument("radius", IntegerArgumentType.integer()).executes(context -> {
                         var player = context.getSource().getPlayer();
-                        var poiType = Registries.POINT_OF_INTEREST_TYPE.getOrEmpty(IdentifierArgumentType.getIdentifier(context, "poi_type"))
+                        var poiType = Registries.POINT_OF_INTEREST_TYPE.getOptionalValue(IdentifierArgumentType.getIdentifier(context, "poi_type"))
                                 .orElseThrow(NO_POI_TYPE::create);
 
                         var entries = ((ServerWorld) player.getWorld()).getPointOfInterestStorage().getInCircle(type -> type.value() == poiType,

@@ -3,7 +3,7 @@ package io.wispforest.owo.mixin.ext;
 import io.wispforest.owo.ext.DerivedComponentMap;
 import net.minecraft.component.ComponentChanges;
 import net.minecraft.component.ComponentMap;
-import net.minecraft.component.ComponentMapImpl;
+import net.minecraft.component.MergedComponentMap;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Final;
@@ -16,25 +16,26 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ItemStack.class)
 public class ItemStackMixin {
-    @Shadow @Final ComponentMapImpl components;
+    @Shadow @Final
+    MergedComponentMap components;
 
     @Unique private DerivedComponentMap owo$derivedMap;
 
-    @Inject(method = "<init>(Lnet/minecraft/item/ItemConvertible;ILnet/minecraft/component/ComponentMapImpl;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/Item;postProcessComponents(Lnet/minecraft/item/ItemStack;)V"))
-    private void injectDerivedComponentMap(ItemConvertible item, int count, ComponentMapImpl components, CallbackInfo ci) {
-        var base = ((ComponentMapImplAccessor)(Object) this.components).owo$getBaseComponents();
+    @Inject(method = "<init>(Lnet/minecraft/item/ItemConvertible;ILnet/minecraft/component/MergedComponentMap;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/Item;postProcessComponents(Lnet/minecraft/item/ItemStack;)V"))
+    private void injectDerivedComponentMap(ItemConvertible item, int count, MergedComponentMap components, CallbackInfo ci) {
+        var base = ((MergedComponentMapAccessor)(Object) this.components).owo$getBaseComponents();
 
         if (base instanceof DerivedComponentMap derived) {
             owo$derivedMap = derived;
         } else {
             owo$derivedMap = new DerivedComponentMap(base);
-            ((ComponentMapImplAccessor)(Object) this.components).owo$setBaseComponents(owo$derivedMap);
+            ((MergedComponentMapAccessor)(Object) this.components).owo$setBaseComponents(owo$derivedMap);
         }
     }
 
     // TODO: for some reason mixin doesn't like it if I put all the injects in one method.
-    @Inject(method = "<init>(Lnet/minecraft/item/ItemConvertible;ILnet/minecraft/component/ComponentMapImpl;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/Item;postProcessComponents(Lnet/minecraft/item/ItemStack;)V", shift = At.Shift.AFTER))
-    private void deriveComponents1(ItemConvertible item, int count, ComponentMapImpl components, CallbackInfo ci) {
+    @Inject(method = "<init>(Lnet/minecraft/item/ItemConvertible;ILnet/minecraft/component/MergedComponentMap;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/Item;postProcessComponents(Lnet/minecraft/item/ItemStack;)V", shift = At.Shift.AFTER))
+    private void deriveComponents1(ItemConvertible item, int count, MergedComponentMap components, CallbackInfo ci) {
         if (owo$derivedMap == null) return;
         owo$derivedMap.derive((ItemStack)(Object) this);
     }

@@ -198,7 +198,7 @@ public class LabelComponent extends BaseComponent {
         final int lambdaX = x;
         final int lambdaY = y;
 
-        context.draw(() -> {
+        context.draw((vertexConsumerProvider) -> {
             for (int i = 0; i < this.wrappedText.size(); i++) {
                 var renderText = this.wrappedText.get(i);
                 int renderX = lambdaX;

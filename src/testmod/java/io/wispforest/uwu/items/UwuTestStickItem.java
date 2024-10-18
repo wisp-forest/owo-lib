@@ -31,11 +31,9 @@ import net.minecraft.registry.RegistryOps;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TextCodecs;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
@@ -65,8 +63,8 @@ public class UwuTestStickItem extends Item {
     private static final Endec<String> YEP_SAME_HERE = CodecUtils.toEndec(CodecUtils.toCodec(CodecUtils.toEndec(THIS_CODEC_NEEDS_REGISTRIES)));
     private static final KeyedEndec<String> KYED = YEP_SAME_HERE.keyed("kyed", (String) null);
 
-    public UwuTestStickItem() {
-        super(new Item.Settings()
+    public UwuTestStickItem(Item.Settings settings) {
+        super(settings
                 .group(Uwu.SIX_TAB_GROUP).tab(3).maxCount(1)
                 .trackUsageStat()
                 .stackGenerator(OwoItemGroup.DEFAULT_STACK_GENERATOR.andThen((item, stacks) -> {
@@ -81,9 +79,9 @@ public class UwuTestStickItem extends Item {
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
         if (user.isSneaking()) {
-            if (world.isClient) return TypedActionResult.success(user.getStackInHand(hand));
+            if (world.isClient) return ActionResult.SUCCESS;
 
             Uwu.CHANNEL.serverHandle(user).send(new Uwu.OtherTestMessage(user.getBlockPos(), "based"));
 
@@ -92,17 +90,16 @@ public class UwuTestStickItem extends Item {
 
             WorldOps.teleportToWorld((ServerPlayerEntity) user, teleportTo, new Vec3d(0, 128, 0));
 
-            return TypedActionResult.success(user.getStackInHand(hand));
         } else {
-            if (!world.isClient) return TypedActionResult.success(user.getStackInHand(hand));
+            if (!world.isClient) return ActionResult.SUCCESS;
 
             Uwu.CHANNEL.clientHandle().send(Uwu.MESSAGE);
 
             Uwu.CUBE.spawn(world, user.getEyePos().add(user.getRotationVec(0).multiply(3)).subtract(.5, .5, .5), null);
-            user.sendMessage(Text.translatable("uwu.a", "bruh"));
-
-            return TypedActionResult.success(user.getStackInHand(hand));
+            user.sendMessage(Text.translatable("uwu.a", "bruh"), false);
         }
+
+        return ActionResult.SUCCESS;
     }
 
     @Override
@@ -115,7 +112,7 @@ public class UwuTestStickItem extends Item {
                 var data = stack.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT).getNbt()
                         .get(SerializationContext.attributes(RegistriesAttribute.of(context.getWorld().getRegistryManager())), KYED);
 
-                context.getPlayer().sendMessage(Text.literal("current: " + data));
+                context.getPlayer().sendMessage(Text.literal("current: " + data), false);
 
                 stack.apply(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT, nbt -> {
                     return nbt.apply(nbtCompound -> nbtCompound.put(
@@ -124,9 +121,9 @@ public class UwuTestStickItem extends Item {
                             String.valueOf(context.getWorld().random.nextInt(10000))
                     ));
                 });
-                context.getPlayer().sendMessage(Text.literal("modified"));
+                context.getPlayer().sendMessage(Text.literal("modified"), false);
             } catch (Exception bruh) {
-                context.getPlayer().sendMessage(Text.literal("bruh: " + bruh.getMessage()));
+                context.getPlayer().sendMessage(Text.literal("bruh: " + bruh.getMessage()), false);
             }
 
             return ActionResult.SUCCESS;
@@ -136,7 +133,7 @@ public class UwuTestStickItem extends Item {
 
         final var breakStack = new ItemStack(Items.NETHERITE_PICKAXE);
 
-        final var fortune = context.getWorld().getRegistryManager().get(RegistryKeys.ENCHANTMENT).getEntry(Enchantments.FORTUNE).orElseThrow();
+        final var fortune = context.getWorld().getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT).getOrThrow(Enchantments.FORTUNE);
         breakStack.addEnchantment(fortune, 3);
         WorldOps.breakBlockWithItem(context.getWorld(), context.getBlockPos(), breakStack);
 

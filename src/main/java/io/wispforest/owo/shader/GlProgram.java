@@ -2,8 +2,9 @@ package io.wispforest.owo.shader;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.mixin.shader.ShaderProgramAccessor;
-import net.minecraft.client.gl.GlUniform;
-import net.minecraft.client.gl.ShaderProgram;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gl.*;
+import net.minecraft.client.render.RenderPhase;
 import net.minecraft.client.render.VertexFormat;
 import net.minecraft.resource.ResourceFactory;
 import net.minecraft.util.Identifier;
@@ -33,7 +34,7 @@ import java.util.function.Function;
  */
 public class GlProgram {
 
-    private static final List<Pair<Function<ResourceFactory, ShaderProgram>, Consumer<ShaderProgram>>> REGISTERED_PROGRAMS = new ArrayList<>();
+    private static final List<Runnable> REGISTERED_PROGRAMS = new ArrayList<>();
 
     /**
      * The actual Minecraft shader program
@@ -42,20 +43,25 @@ public class GlProgram {
      */
     protected ShaderProgram backingProgram;
 
+    protected ShaderProgramKey programKey;
+
     public GlProgram(Identifier id, VertexFormat vertexFormat) {
-        REGISTERED_PROGRAMS.add(new Pair<>(
-                resourceFactory -> {
+        this.programKey = new ShaderProgramKey(id.withPrefixedPath("core/"), vertexFormat, Defines.EMPTY);
+
+        REGISTERED_PROGRAMS.add(
+                () -> {
                     try {
-                        return new OwoShaderProgram(resourceFactory, id.toString(), vertexFormat);
-                    } catch (IOException e) {
+                        this.backingProgram = MinecraftClient.getInstance().getShaderLoader().getProgramToLoad(programKey);
+                        this.setup();
+                    } catch (ShaderLoader.LoadException e) {
                         throw new RuntimeException("Failed to initialized owo shader program", e);
                     }
-                },
-                program -> {
-                    this.backingProgram = program;
-                    this.setup();
                 }
-        ));
+        );
+    }
+
+    public RenderPhase.ShaderProgram renderPhaseProgram() {
+        return new RenderPhase.ShaderProgram(programKey);
     }
 
     /**
@@ -67,7 +73,7 @@ public class GlProgram {
      * invoking {@code use()}
      */
     public void use() {
-        RenderSystem.setShader(() -> this.backingProgram);
+        RenderSystem.setShader(this.programKey);
     }
 
     protected void setup() {}
@@ -84,13 +90,7 @@ public class GlProgram {
     }
 
     @ApiStatus.Internal
-    public static void forEachProgram(Consumer<Pair<Function<ResourceFactory, ShaderProgram>, Consumer<ShaderProgram>>> loader) {
+    public static void forEachProgram(Consumer<Runnable> loader) {
         REGISTERED_PROGRAMS.forEach(loader);
-    }
-
-    public static class OwoShaderProgram extends ShaderProgram {
-        private OwoShaderProgram(ResourceFactory factory, String name, VertexFormat format) throws IOException {
-            super(factory, name, format);
-        }
     }
 }

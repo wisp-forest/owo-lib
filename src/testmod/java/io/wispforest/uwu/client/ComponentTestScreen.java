@@ -60,7 +60,7 @@ public class ComponentTestScreen extends Screen {
                         .child(Components.button(Text.of("Dark Background"), button -> rootComponent.surface(Surface.flat(0x77000000))).horizontalSizing(Sizing.fixed(95)))
                         .child(Components.button(Text.of("No Background"), button -> rootComponent.surface(Surface.BLANK)).margins(Insets.vertical(5)).horizontalSizing(Sizing.fixed(95)))
                         .child(Components.button(Text.of("Dirt Background"), button -> rootComponent.surface(Surface.OPTIONS_BACKGROUND)).horizontalSizing(Sizing.fixed(95)))
-                        .child(Components.checkbox(Text.of("bruh")).onChanged(aBoolean -> this.client.player.sendMessage(Text.of("bruh: " + aBoolean))).margins(Insets.top(5)))
+                        .child(Components.checkbox(Text.of("bruh")).onChanged(aBoolean -> this.client.player.sendMessage(Text.of("bruh: " + aBoolean), false)).margins(Insets.top(5)))
                         .padding(Insets.of(10))
                         .surface(Surface.vanillaPanorama(true))
                         .positioning(Positioning.relative(1, 1))
@@ -172,7 +172,7 @@ public class ComponentTestScreen extends Screen {
                                 .message(value -> Text.translatable("text.ui.test_slider", value))
                                 .onChanged().subscribe(value -> {
                                     slider.parent().surface(Surface.blur(3, (float) (value * 3)));
-                                    this.client.player.sendMessage(Text.of("sliding towards " + value));
+                                    this.client.player.sendMessage(Text.of("sliding towards " + value), false);
                                 })
                 ))
                 .gap(10)

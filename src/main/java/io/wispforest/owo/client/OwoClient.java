@@ -15,7 +15,9 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.client.render.VertexFormats;
+import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
@@ -74,5 +76,10 @@ public class OwoClient implements ClientModInitializer {
 
         if (!Owo.DEBUG) return;
         OwoDebugCommands.Client.register();
+
+        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
+            @Override public Identifier getFabricId() { return Identifier.of("owo", "after_shader_load"); }
+            @Override public void reload(ResourceManager manager) { GlProgram.forEachProgram(Runnable::run); }
+        });
     }
 }

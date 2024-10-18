@@ -17,7 +17,7 @@ import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.item.ItemRenderer;
-import net.minecraft.client.render.model.json.ModelTransformationMode;
+import net.minecraft.item.ModelTransformationMode;
 import net.minecraft.command.argument.ItemStringReader;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -95,7 +95,7 @@ public class ItemComponent extends BaseComponent {
         matrices.pop();
 
         if (this.showOverlay) {
-            context.drawItemInSlot(client.textRenderer, this.stack, this.x, this.y);
+            context.drawStackOverlay(client.textRenderer, this.stack, this.x, this.y);
         }
         if (notSideLit) {
             DiffuseLighting.enableGuiDepthLighting();
@@ -185,13 +185,13 @@ public class ItemComponent extends BaseComponent {
         UIParsing.apply(children, "item", UIParsing::parseIdentifier, itemId -> {
             Owo.debugWarn(Owo.LOGGER, "Deprecated <item> property populated on item component - migrate to <stack> instead");
 
-            var item = Registries.ITEM.getOrEmpty(itemId).orElseThrow(() -> new UIModelParsingException("Unknown item " + itemId));
+            var item = Registries.ITEM.getOptionalValue(itemId).orElseThrow(() -> new UIModelParsingException("Unknown item " + itemId));
             this.stack(item.getDefaultStack());
         });
 
         UIParsing.apply(children, "stack", $ -> $.getTextContent().strip(), stackString -> {
             try {
-                var result = new ItemStringReader(RegistryWrapper.WrapperLookup.of(Stream.of(Registries.ITEM.getReadOnlyWrapper())))
+                var result = new ItemStringReader(RegistryWrapper.WrapperLookup.of(Stream.of(Registries.ITEM)))
                     .consume(new StringReader(stackString));
 
                 var stack = new ItemStack(result.item());
