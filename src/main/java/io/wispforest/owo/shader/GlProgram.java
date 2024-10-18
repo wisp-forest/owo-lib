@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.mixin.shader.ShaderProgramAccessor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.*;
+import net.minecraft.client.render.RenderPhase;
 import net.minecraft.client.render.VertexFormat;
 import net.minecraft.resource.ResourceFactory;
 import net.minecraft.util.Identifier;
@@ -57,6 +58,10 @@ public class GlProgram {
                     }
                 }
         );
+    }
+
+    public RenderPhase.ShaderProgram renderPhaseProgram() {
+        return new RenderPhase.ShaderProgram(programKey);
     }
 
     /**

@@ -1,10 +1,5 @@
 {
-    "blend": {
-        "func": "add",
-        "srcrgb": "srcalpha",
-        "dstrgb": "1-srcalpha"
-    },
-    "vertex": "core/position",
+    "vertex": "minecraft:core/position",
     "fragment": "owo:core/blur",
     "attributes": [],
     "samplers": [

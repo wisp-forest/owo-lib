@@ -86,5 +86,4 @@ public class CraftingResultSlotMixin {
 
         return mappedValue;
     }
-
 }

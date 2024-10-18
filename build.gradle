@@ -115,6 +115,13 @@ loom {
             name = "Testmod Server"
             source sourceSets.testmod
         }
+        testmodClient_renderDoc {
+            client()
+            ideConfigGenerated project.rootProject == project
+            name = "Testmod Client - (RenderDoc)"
+            source sourceSets.testmod
+            vmArg "-Dowo.renderdocPath=${System.getenv('renderDocPath')}"
+        }
     }
 
     accessWidenerPath = file("src/main/resources/owo.accesswidener")
@@ -129,7 +136,7 @@ dependencies {
 //    modLocalRuntime("dev.emi:emi-fabric:${project.emi_version}")
 
     modCompileOnly("com.terraformersmc:modmenu:${project.modmenu_version}")
-    modLocalRuntime("com.terraformersmc:modmenu:${project.modmenu_version}")
+    //modLocalRuntime("com.terraformersmc:modmenu:${project.modmenu_version}")
 
     include api("io.wispforest:endec:0.1.5")
     include api("io.wispforest.endec:netty:0.1.2")

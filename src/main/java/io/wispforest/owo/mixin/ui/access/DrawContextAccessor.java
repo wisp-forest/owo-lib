@@ -9,5 +9,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface DrawContextAccessor {
 
     @Accessor("vertexConsumers")
-    VertexConsumerProvider.Immediate getVertexConsumers();
+    VertexConsumerProvider.Immediate owo$getVertexConsumers();
 }

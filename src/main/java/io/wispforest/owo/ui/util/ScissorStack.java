@@ -2,9 +2,12 @@ package io.wispforest.owo.ui.util;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import io.wispforest.owo.mixin.ui.access.DrawContextAccessor;
 import io.wispforest.owo.ui.core.Component;
+import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.PositionedRectangle;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
@@ -31,8 +34,14 @@ public final class ScissorStack {
                 (int) (window.getScaledHeight() - (y / scale) - height / scale),
                 (int) (width / scale),
                 (int) (height / scale),
-                null
+                (MatrixStack) null
         );
+    }
+
+    public static void push(int x, int y, int width, int height, DrawContext context) {
+        context.draw();
+
+        push(x, y, width, height, context.getMatrices());
     }
 
     public static void push(int x, int y, int width, int height, @Nullable MatrixStack matrices) {

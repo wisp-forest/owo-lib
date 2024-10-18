@@ -340,7 +340,7 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
     protected void drawChildren(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta, List<? extends Component> children) {
         if (!this.allowOverflow) {
             var padding = this.padding.get();
-            ScissorStack.push(this.x + padding.left(), this.y + padding.top(), this.width - padding.horizontal(), this.height - padding.vertical(), context.getMatrices());
+            ScissorStack.push(this.x + padding.left(), this.y + padding.top(), this.width - padding.horizontal(), this.height - padding.vertical(), context);
         }
 
         var focusHandler = this.focusHandler();
@@ -360,6 +360,8 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
         }
 
         if (!this.allowOverflow) {
+            //context.getVertexConsumers().draw();
+
             ScissorStack.pop();
         }
     }
