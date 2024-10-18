@@ -56,6 +56,10 @@ public class OwoClient implements ClientModInitializer {
 
         ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new UIModelLoader());
         ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new NinePatchTexture.MetadataLoader());
+        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
+            @Override public Identifier getFabricId() { return Identifier.of("owo", "after_shader_load"); }
+            @Override public void reload(ResourceManager manager) { GlProgram.forEachProgram(Runnable::run); }
+        });
 
         final var renderdocPath = System.getProperty("owo.renderdocPath");
         if (renderdocPath != null) {
@@ -74,12 +78,8 @@ public class OwoClient implements ClientModInitializer {
 
         ClientCommandRegistrationCallback.EVENT.register(OwoConfigCommand::register);
 
-        if (!Owo.DEBUG) return;
-        OwoDebugCommands.Client.register();
-
-        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
-            @Override public Identifier getFabricId() { return Identifier.of("owo", "after_shader_load"); }
-            @Override public void reload(ResourceManager manager) { GlProgram.forEachProgram(Runnable::run); }
-        });
+        if (Owo.DEBUG) {
+            OwoDebugCommands.Client.register();
+        }
     }
 }
