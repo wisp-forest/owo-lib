@@ -18,7 +18,7 @@
     "io/wispforest/owo/ui/util/MatrixStackTransformer"
   ],
   "net/minecraft/core/component/DataComponentType\u0024Builder": [
-    "io/wispforest/owo/serialization/OwoComponentTypeBuilder<T;>"
+    "io/wispforest/owo/serialization/OwoComponentTypeBuilder<T>"
   ],
   "net/minecraft/world/item/Item\u0024Properties": [
     "io/wispforest/owo/itemgroup/OwoItemSettingsExtension"

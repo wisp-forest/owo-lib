@@ -34,9 +34,9 @@ versionRange = "[1.21,)"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.owo]]
-modId = "fabric_api"
-required = true
-versionRange = "[0.104.0+2.0.14+1.21.1,)"
-ordering = "NONE"
-side = "BOTH"
+#[[dependencies.owo]]
+#modId = "fabric_api"
+#required = true
+#versionRange = "[0.104.0+2.0.14+1.21.1,)"
+#ordering = "NONE"
+#side = "BOTH"
