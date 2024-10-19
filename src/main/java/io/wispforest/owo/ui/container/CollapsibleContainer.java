@@ -51,12 +51,10 @@ public class CollapsibleContainer extends FlowLayout {
         title = title.copy().formatted(Formatting.UNDERLINE);
         this.titleLayout.child(Components.label(title).cursorStyle(CursorStyle.HAND));
 
-        this.spinnyBoi = new SpinnyBoiComponent();
+        this.spinnyBoi = new SpinnyBoiComponent(expanded);
         this.titleLayout.child(spinnyBoi);
 
         this.expanded = expanded;
-        this.spinnyBoi.targetRotation = expanded ? 90 : 0;
-        this.spinnyBoi.rotation = this.spinnyBoi.targetRotation;
 
         super.child(this.titleLayout);
 
@@ -88,10 +86,10 @@ public class CollapsibleContainer extends FlowLayout {
     public void toggleExpansion() {
         if (expanded) {
             this.contentLayout.clearChildren();
-            this.spinnyBoi.targetRotation = 0;
+            this.spinnyBoi.expanded(false);
         } else {
             this.contentLayout.children(this.collapsibleChildren);
-            this.spinnyBoi.targetRotation = 90;
+            this.spinnyBoi.expanded(true);
         }
 
         this.expanded = !this.expanded;
@@ -185,19 +183,72 @@ public class CollapsibleContainer extends FlowLayout {
 
     public static class SpinnyBoiComponent extends LabelComponent {
 
-        protected float rotation = 90;
-        public float targetRotation = 90;
+        protected boolean expanded;
 
-        public SpinnyBoiComponent() {
+        protected float baseRotation;
+        protected float expandedRotation;
+
+        protected float rotation;
+
+        public SpinnyBoiComponent(boolean expanded, float baseRotation, float expandedRotation) {
             super(Text.literal(">"));
+
+            this.expanded = expanded;
+            this.baseRotation = baseRotation;
+            this.expandedRotation = expandedRotation;
+            this.rotation = expanded ? expandedRotation : baseRotation;
+
             this.margins(Insets.of(0, 0, 5, 10));
             this.cursorStyle(CursorStyle.HAND);
+        }
+
+        public SpinnyBoiComponent(boolean expanded) {
+            this(expanded, 0, 90);
+        }
+
+        public SpinnyBoiComponent() {
+            this(false);
+        }
+
+        public void toggle() {
+            this.expanded = !this.expanded;
+        }
+
+        public boolean expanded() {
+            return this.expanded;
+        }
+
+        public SpinnyBoiComponent expanded(boolean expanded) {
+            this.expanded = expanded;
+            return this;
+        }
+
+        public float targetRotation() {
+            return this.expanded ? this.expandedRotation : this.baseRotation;
+        }
+
+        public float baseRotation() {
+            return this.baseRotation;
+        }
+
+        public SpinnyBoiComponent baseRotation(float baseRotation) {
+            this.baseRotation = baseRotation;
+            return this;
+        }
+
+        public float expandedRotation() {
+            return this.expandedRotation;
+        }
+
+        public SpinnyBoiComponent expandedRotation(float expandedRotation) {
+            this.expandedRotation = expandedRotation;
+            return this;
         }
 
         @Override
         public void update(float delta, int mouseX, int mouseY) {
             super.update(delta, mouseX, mouseY);
-            this.rotation += Delta.compute(this.rotation, this.targetRotation, delta * .65);
+            this.rotation += Delta.compute(this.rotation, this.targetRotation(), delta * .65f);
         }
 
         @Override
