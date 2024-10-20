@@ -7,6 +7,7 @@ license = "MIT"
 modId = "owo"
 version = "${version}"
 displayName = "oωo"
+provides = ["owo-lib", "owo_lib", "owo-impl", "owo_impl"]
 authors = "glisco, Blodhgarm, BasiqueEvangelist, Noaaan"
 credits = ""
 description = '''
