@@ -211,7 +211,11 @@ public class NinePatchTexture {
             Endec.INT.optionalFieldOf("u", (texture) -> texture.u, 0),
             Endec.INT.optionalFieldOf("v", (texture) -> texture.v, 0),
             PatchSizing.ENDEC.flatFieldOf((texture) -> texture.patchSizing),
-            Size.createEndec("texture_width", "texture_height").flatFieldOf((texture) -> texture.textureSize),
+            StructEndecBuilder.of(
+                    Endec.INT.fieldOf("texture_width", Size::width),
+                    Endec.INT.fieldOf("texture_height", Size::height),
+                    Size::of
+            ).flatFieldOf((texture) -> texture.textureSize),
             Endec.BOOLEAN.fieldOf("repeat", (texture) -> texture.repeat),
             NinePatchTexture::new
     );
