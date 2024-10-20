@@ -6,17 +6,13 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.*;
 import net.minecraft.client.render.RenderPhase;
 import net.minecraft.client.render.VertexFormat;
-import net.minecraft.resource.ResourceFactory;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * A simple wrapper around Minecraft's built-in core shaders. In order to load and use
@@ -86,11 +82,11 @@ public class GlProgram {
      * the value of the uniform, or {@code null} if no such uniform exists
      */
     protected @Nullable GlUniform findUniform(String name) {
-        return ((ShaderProgramAccessor) this.backingProgram).owo$getLoadedUniforms().get(name);
+        return ((ShaderProgramAccessor) this.backingProgram).owo$getUniformsByName().get(name);
     }
 
     @ApiStatus.Internal
-    public static void forEachProgram(Consumer<Runnable> loader) {
-        REGISTERED_PROGRAMS.forEach(loader);
+    public static void loadAndSetupPrograms() {
+        REGISTERED_PROGRAMS.forEach(Runnable::run);
     }
 }

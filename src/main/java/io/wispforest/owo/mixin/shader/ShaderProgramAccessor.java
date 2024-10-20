@@ -11,6 +11,6 @@ import java.util.Map;
 public interface ShaderProgramAccessor {
 
     @Accessor("uniformsByName")
-    Map<String, GlUniform> owo$getLoadedUniforms();
+    Map<String, GlUniform> owo$getUniformsByName();
 
 }
