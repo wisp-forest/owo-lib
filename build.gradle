@@ -9,6 +9,8 @@ base {
 }
 
 allprojects {
+    if (project.name == "owo-neo-publish") return;
+
     apply plugin: "java"
     apply plugin: "dev.architectury.loom"
     apply plugin: "maven-publish"
