@@ -1,5 +1,8 @@
 package io.wispforest.owo.mixin.ui;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -88,5 +91,15 @@ public abstract class HandledScreenMixin extends Screen {
             this.close();
             cir.setReturnValue(true);
         }
+    }
+
+    // Fixes issues with scrolling with screens extending Handled and using UIAdapter
+    @WrapMethod(method = "mouseScrolled")
+    private boolean owo$useSuperMouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount, Operation<Boolean> original){
+        var bl = original.call(mouseX, mouseY, horizontalAmount, verticalAmount);
+
+        if (bl) return true;
+
+        return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
 }

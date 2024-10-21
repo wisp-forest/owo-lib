@@ -43,7 +43,7 @@ public class SpriteComponent extends BaseComponent {
             RenderSystem.defaultBlendFunc();
         }
 
-        context.drawSprite(identifier -> OwoUIRenderLayers.getGuiTextured(identifier, this.blend), this.sprite, this.x, this.y, this.width, this.height);
+        context.drawSpriteStretched(identifier -> OwoUIRenderLayers.getGuiTextured(identifier, this.blend), this.sprite, this.x, this.y, this.width, this.height);
 
         if (this.blend) {
             RenderSystem.disableBlend();
