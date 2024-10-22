@@ -1,6 +1,5 @@
 package io.wispforest.owo.ui.component;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.CursorStyle;
@@ -75,10 +74,10 @@ public class SlimSliderComponent extends BaseComponent {
     public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
         if (this.axis == Axis.HORIZONTAL) {
             NinePatchTexture.draw(TRACK_TEXTURE, context, this.x + 1, this.y + 3, this.width - 2, 3);
-            context.drawTexture(RenderLayer::getGuiTextured, TEXTURE, (int) (this.x + (this.width - 4) * this.value.get()), this.y + 1, 4, 7, 0, 3, 4, 7, 16, 16);
+            context.drawTexture(RenderLayer::getGuiTextured, TEXTURE, (int) (this.x + (this.width - 4) * this.value.get()), this.y + 1, 0, 3, 4, 7, 4, 7, 16, 16);
         } else {
             NinePatchTexture.draw(TRACK_TEXTURE, context, this.x + 3, this.y + 1, 3, this.height - 2);
-            context.drawTexture(RenderLayer::getGuiTextured, TEXTURE, this.x + 1, (int) (this.y + (this.height - 4) * this.value.get()), 7, 4, 4, 3, 7, 4, 16, 16);
+            context.drawTexture(RenderLayer::getGuiTextured, TEXTURE, this.x + 1, (int) (this.y + (this.height - 4) * this.value.get()), 4, 3, 7, 4, 7, 4, 16, 16);
         }
     }
 
@@ -105,8 +104,8 @@ public class SlimSliderComponent extends BaseComponent {
 
     protected void setValueFromMouse(double mouseX, double mouseY) {
         this.value(this.axis == Axis.VERTICAL
-                ? this.min + (mouseY / this.height) * (this.max - this.min)
-                : this.min + (mouseX / this.width) * (this.max - this.min));
+            ? this.min + (mouseY / this.height) * (this.max - this.min)
+            : this.min + (mouseX / this.width) * (this.max - this.min));
     }
 
     @Override
@@ -194,8 +193,8 @@ public class SlimSliderComponent extends BaseComponent {
 
     public static Component parse(Element element) {
         return element.getAttribute("direction").equals("vertical")
-                ? new SlimSliderComponent(Axis.VERTICAL)
-                : new SlimSliderComponent(Axis.HORIZONTAL);
+            ? new SlimSliderComponent(Axis.VERTICAL)
+            : new SlimSliderComponent(Axis.HORIZONTAL);
     }
 
     public static Function<Double, Text> valueTooltipSupplier(int decimalPlaces) {

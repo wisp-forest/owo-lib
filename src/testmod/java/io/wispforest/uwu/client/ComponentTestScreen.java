@@ -275,7 +275,7 @@ public class ComponentTestScreen extends Screen {
                                             .selectedColor(Color.ofArgb(0x7F3955E5))
                                             .sizing(Sizing.fixed(160), Sizing.fixed(100))
                                     ).padding(Insets.of(5)).surface(Surface.DARK_PANEL)
-                    ));
+                    ).zIndex(1000));
                 })
         );
 

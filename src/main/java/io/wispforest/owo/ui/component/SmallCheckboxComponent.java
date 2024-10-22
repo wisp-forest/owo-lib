@@ -48,9 +48,9 @@ public class SmallCheckboxComponent extends BaseComponent {
             context.drawText(MinecraftClient.getInstance().textRenderer, this.label.get(), this.x + 13 + 2, this.y + 3, Color.WHITE.argb(), this.labelShadow);
         }
 
-        context.drawTexture(RenderLayer::getGuiTextured, TEXTURE, this.x, this.y, 13, 13, 0, 0, 13, 13, 32, 16);
+        context.drawTexture(RenderLayer::getGuiTextured, TEXTURE, this.x, this.y, 0, 0, 13, 13, 13, 13, 32, 16);
         if (this.checked) {
-            context.drawTexture(RenderLayer::getGuiTextured, TEXTURE, this.x, this.y, 13, 13, 16, 0, 13, 13, 32, 16);
+            context.drawTexture(RenderLayer::getGuiTextured, TEXTURE, this.x, this.y, 16, 0, 13, 13, 13, 13, 32, 16);
         }
     }
 

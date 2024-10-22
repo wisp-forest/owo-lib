@@ -14,12 +14,12 @@ import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.gl.SimpleFramebuffer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.BufferRenderer;
-import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.RotationAxis;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL30;
 
@@ -42,6 +42,8 @@ import java.util.function.Consumer;
 @ApiStatus.Experimental
 public class RenderEffectWrapper<C extends Component> extends WrappingParentComponent<C> {
 
+    private static @Nullable Framebuffer currentFramebuffer = null;
+
     protected static final List<Framebuffer> FRAMEBUFFERS = new ArrayList<>();
     protected static int drawDepth = 0;
 
@@ -55,6 +57,7 @@ public class RenderEffectWrapper<C extends Component> extends WrappingParentComp
     @Override
     public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
         super.draw(context, mouseX, mouseY, partialTicks, delta);
+        context.draw();
 
         try {
             drawDepth++;
@@ -70,9 +73,14 @@ public class RenderEffectWrapper<C extends Component> extends WrappingParentComp
             ScissorStack.drawUnclipped(framebuffer::clear);
             framebuffer.beginWrite(false);
 
+            var lastFramebuffer = currentFramebuffer;
+            currentFramebuffer = framebuffer;
+
             this.drawChildren(context, mouseX, mouseY, partialTicks, delta, this.childView);
+            context.draw();
 
             GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, previousFramebuffer);
+            currentFramebuffer = lastFramebuffer;
 
             var iter = this.effects.listIterator();
             while (iter.hasNext()) {
@@ -120,6 +128,11 @@ public class RenderEffectWrapper<C extends Component> extends WrappingParentComp
      */
     public void clearEffects() {
         this.effects.clear();
+    }
+
+    @ApiStatus.Internal
+    public static @Nullable Framebuffer currentFramebuffer() {
+        return currentFramebuffer;
     }
 
     static {
