@@ -6,7 +6,6 @@ import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.mixin.itemgroup.CreativeInventoryScreenAccessor;
 import io.wispforest.owo.mixin.ui.access.BaseOwoHandledScreenAccessor;
 import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
-import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.core.Surface;
@@ -28,7 +27,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 public class OwoReiPlugin implements REIClientPlugin {
 
@@ -59,24 +57,9 @@ public class OwoReiPlugin implements REIClientPlugin {
         });
 
         zones.register(BaseOwoHandledScreen.class, screen -> {
-            if (screen.children().isEmpty()) return List.of();
-
-            var adapter = ((BaseOwoHandledScreenAccessor) screen).owo$getUIAdapter();
-            if (adapter == null) return List.of();
-
-            var rootComponent = adapter.rootComponent;
-            var children = new ArrayList<Component>();
-            rootComponent.collectDescendants(children);
-            children.remove(rootComponent);
-
-            var rectangles = new ArrayList<Rectangle>();
-            children.forEach(component -> {
-                if (component instanceof ParentComponent parent && parent.surface() == Surface.BLANK) return;
-
-                var size = component.fullSize();
-                rectangles.add(new Rectangle(component.x(), component.y(), size.width(), size.height()));
-            });
-            return rectangles;
+            return ((BaseOwoHandledScreen<?, ?>) screen).componentsForExclusionAreas()
+                    .map(rect -> new Rectangle(rect.x(), rect.y(), rect.width(), rect.height()))
+                    .toList();
         });
     }
 
