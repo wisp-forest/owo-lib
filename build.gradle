@@ -63,9 +63,6 @@ allprojects {
             toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
         }
         archivesBaseName = project.archives_base_name
-        // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-        // if it is present.
-        // If you remove this line, sources will not be generated.
         withSourcesJar()
     }
 
@@ -76,14 +73,6 @@ allprojects {
     }
 
     publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                from components.java
-
-                artifactId = project.archivesBaseName
-            }
-        }
-
         repositories {
             maven {
                 url ENV.MAVEN_URL
