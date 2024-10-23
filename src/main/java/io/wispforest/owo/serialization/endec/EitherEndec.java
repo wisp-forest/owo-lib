@@ -20,17 +20,15 @@ public final class EitherEndec<L, R> implements Endec<Either<L, R>> {
     @Override
     public void encode(SerializationContext ctx, Serializer<?> serializer, Either<L, R> either) {
         if (serializer instanceof SelfDescribedSerializer<?>) {
-            either.ifLeft(left -> this.leftEndec.encode(ctx, serializer, left)).ifRight(right -> this.rightEndec.encode(ctx, serializer, right));
+            either.ifLeft(left -> this.leftEndec.encode(ctx, serializer, left))
+                    .ifRight(right -> this.rightEndec.encode(ctx, serializer, right));
         } else {
-            either.ifLeft(left -> {
-                try (var struct = serializer.struct()) {
-                    struct.field("is_left", ctx, Endec.BOOLEAN, true).field("left", ctx, this.leftEndec, left);
-                }
-            }).ifRight(right -> {
-                try (var struct = serializer.struct()) {
-                    struct.field("is_left", ctx, Endec.BOOLEAN, false).field("right", ctx, this.rightEndec, right);
-                }
-            });
+            try (var struct = serializer.struct()) {
+                struct.field("is_left", ctx, Endec.BOOLEAN, either.left().isPresent());
+
+                either.ifLeft(left -> struct.field("left", ctx, this.leftEndec, left))
+                        .ifRight(right -> struct.field("right", ctx, this.rightEndec, right));
+            }
         }
     }
 
@@ -61,11 +59,10 @@ public final class EitherEndec<L, R> implements Endec<Either<L, R>> {
             throw new IllegalStateException("Neither alternative read successfully");
         } else {
             var struct = deserializer.struct();
-            if (struct.field("is_left", ctx, Endec.BOOLEAN)) {
-                return Either.left(struct.field("left", ctx, this.leftEndec));
-            } else {
-                return Either.right(struct.field("right", ctx, this.rightEndec));
-            }
+
+            return (struct.field("is_left", ctx, Endec.BOOLEAN))
+                    ? Either.left(struct.field("left", ctx, this.leftEndec))
+                    : Either.right(struct.field("right", ctx, this.rightEndec));
         }
 
     }
