@@ -95,7 +95,7 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
      * @param index The index of the slot to disable
      */
     protected void disableSlot(int index) {
-        ((OwoSlotExtension) this.handler.slots.get(index)).owo$setDisabledOverride(true);
+        this.disableSlot(this.handler.slots.get(index));
     }
 
     /**
@@ -115,7 +115,7 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
      * @param index The index of the slot to enable
      */
     protected void enableSlot(int index) {
-        ((OwoSlotExtension) this.handler.slots.get(index)).owo$setDisabledOverride(false);
+        this.enableSlot(this.handler.slots.get(index));
     }
 
     /**
@@ -124,15 +124,23 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
      * a slot that is disabled through its own will
      */
     protected void enableSlot(Slot slot) {
-        ((OwoSlotExtension) slot).owo$setDisabledOverride(true);
+        ((OwoSlotExtension) slot).owo$setDisabledOverride(false);
     }
 
+    /**
+     * @return whether the given slot is enabled or disabled
+     * using the {@link OwoSlotExtension} disabling functionality
+     */
     protected boolean isSlotEnabled(int index) {
-        return ((OwoSlotExtension) this.handler.slots.get(index)).owo$getDisabledOverride();
+        return isSlotEnabled(this.handler.slots.get(index));
     }
 
+    /**
+     * @return whether the given slot is enabled or disabled
+     * using the {@link OwoSlotExtension} disabling functionality
+     */
     protected boolean isSlotEnabled(Slot slot) {
-        return ((OwoSlotExtension) slot).owo$getDisabledOverride();
+        return !((OwoSlotExtension) slot).owo$getDisabledOverride();
     }
 
     /**
