@@ -1,10 +1,10 @@
 package io.wispforest.owo.mixin;
 
-import net.minecraft.client.gui.CubeMapRenderer;
-import net.minecraft.client.gui.RotatingCubeMapRenderer;
+import net.minecraft.client.gui.*;
 import net.minecraft.client.gui.screen.Screen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(Screen.class)
 public interface ScreenAccessor {
@@ -17,4 +17,7 @@ public interface ScreenAccessor {
     static RotatingCubeMapRenderer owo$ROTATING_PANORAMA_RENDERER() {
         throw new UnsupportedOperationException();
     }
+
+    @Invoker("addDrawableChild")
+    <T extends Element & Drawable & Selectable> T owo$addDrawableChild(T drawableElement);
 }

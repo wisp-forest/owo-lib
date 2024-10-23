@@ -3,22 +3,24 @@ package io.wispforest.owo;
 import io.wispforest.owo.client.screens.ScreenInternals;
 import io.wispforest.owo.command.debug.OwoDebugCommands;
 import io.wispforest.owo.ops.LootOps;
-import io.wispforest.owo.text.CustomTextRegistry;
-import io.wispforest.owo.text.InsertingTextContent;
+import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.Wisdom;
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
+import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
 
 import static io.wispforest.owo.ops.TextOps.withColor;
 
-public class Owo implements ModInitializer {
+@Mod("owo")
+public class Owo {
 
     /**
      * Whether oωo debug is enabled, this defaults to {@code true} in a development environment.
@@ -26,7 +28,6 @@ public class Owo implements ModInitializer {
      */
     public static final boolean DEBUG;
     public static final Logger LOGGER = LogManager.getLogger("owo");
-    private static MinecraftServer SERVER;
 
     public static final Text PREFIX = Text.empty().formatted(Formatting.GRAY)
             .append(withColor("o", 0x3955e5))
@@ -35,7 +36,7 @@ public class Owo implements ModInitializer {
             .append(Text.literal(" > ").formatted(Formatting.GRAY));
 
     static {
-        boolean debug = FabricLoader.getInstance().isDevelopmentEnvironment();
+        boolean debug = !FMLLoader.isProduction();
         if (System.getProperty("owo.debug") != null) debug = Boolean.getBoolean("owo.debug");
         if (Boolean.getBoolean("owo.forceDisableDebug")) {
             LOGGER.warn("Deprecated system property 'owo.forceDisableDebug=true' was used - use 'owo.debug=false' instead");
@@ -45,21 +46,17 @@ public class Owo implements ModInitializer {
         DEBUG = debug;
     }
 
-    @Override
-    @ApiStatus.Internal
-    public void onInitialize() {
+    public Owo(IEventBus modBus) {
         LootOps.registerListener();
-        CustomTextRegistry.register(InsertingTextContent.TYPE, "index");
         ScreenInternals.init();
 
-        ServerLifecycleEvents.SERVER_STARTING.register(server -> SERVER = server);
-        ServerLifecycleEvents.SERVER_STOPPED.register(server -> SERVER = null);
+        modBus.addListener((FMLLoadCompleteEvent event) -> OwoFreezer.freeze());
 
         Wisdom.spread();
 
         if (!DEBUG) return;
 
-        OwoDebugCommands.register();
+        OwoDebugCommands.register(modBus);
     }
 
     @ApiStatus.Internal
@@ -80,7 +77,7 @@ public class Owo implements ModInitializer {
      * a local singleplayer world and {@code null} otherwise
      */
     public static MinecraftServer currentServer() {
-        return SERVER;
+        return ServerLifecycleHooks.getCurrentServer();
     }
 
 }

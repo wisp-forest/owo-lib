@@ -1,12 +1,18 @@
 //file:noinspection GradlePackageVersionRange
 plugins {
-    id 'fabric-loom' version '1.6-SNAPSHOT'
+    id "dev.architectury.loom" version "1.7.410"
     id 'maven-publish'
 }
 
+base {
+    archivesName = project.archives_base_name
+}
+
 allprojects {
+    if (project.name == "owo-neo-publish") return;
+
     apply plugin: "java"
-    apply plugin: "fabric-loom"
+    apply plugin: "dev.architectury.loom"
     apply plugin: "maven-publish"
 
     def ENV = System.getenv()
@@ -14,19 +20,27 @@ allprojects {
     version = "${project.mod_version}+${rootProject.minecraft_base_version}"
     group = rootProject.maven_group
 
+    repositories {
+        maven { url 'https://maven.neoforged.net/releases/' }
+    }
+
     dependencies {
         minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
-        mappings "net.fabricmc:yarn:${rootProject.yarn_mappings}:v2"
-        modImplementation "net.fabricmc:fabric-loader:${rootProject.loader_version}"
+        mappings loom.layered {
+            it.mappings("net.fabricmc:yarn:${rootProject.yarn_mappings}:v2")
+            it.mappings("dev.architectury:yarn-mappings-patch-neoforge:1.21+build.4")
+        }
+        //modImplementation "net.fabricmc:fabric-loader:${rootProject.loader_version}"
 
-        modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+        neoForge "net.neoforged:neoforge:${project.neoforge_version}"
+        //modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     }
 
     processResources {
         inputs.property "version", project.version
         filteringCharset "UTF-8"
 
-        filesMatching("fabric.mod.json") {
+        filesMatching("META-INF/neoforge.mods.toml") {
             expand "version": project.version
         }
     }
@@ -65,6 +79,8 @@ allprojects {
         publications {
             mavenJava(MavenPublication) {
                 from components.java
+
+                artifactId = project.archivesBaseName
             }
         }
 
@@ -90,7 +106,8 @@ repositories {
         }
     }
     maven { url "https://maven.nucleoid.xyz/" }
-    maven { url 'https://maven.wispforest.io' }
+    maven { url 'https://maven.wispforest.io/releases' }
+    maven { url "https://maven.su5ed.dev/releases" }
     mavenLocal()
 }
 
@@ -107,38 +124,62 @@ loom {
             client()
             ideConfigGenerated project.rootProject == project
             name = "Testmod Client"
+            mods {
+                create("uwu") {
+                    sourceSet sourceSets.testmod
+                }
+                create("owo"){
+                    sourceSet sourceSets.main
+                }
+            }
             source sourceSets.testmod
         }
         testmodServer {
             server()
             ideConfigGenerated project.rootProject == project
             name = "Testmod Server"
+            mods {
+                create("uwu") {
+                    sourceSet sourceSets.testmod
+                }
+                create("owo"){
+                    sourceSet sourceSets.main
+                }
+            }
             source sourceSets.testmod
         }
     }
 
     accessWidenerPath = file("src/main/resources/owo.accesswidener")
+
+    neoForge {
+        // TODO: Figure out within the future
+//        publish file("src/main/resources/interfaces.json")
+//        publish file("src/main/resources/META-INF/owo.accesstransformer.cfg")
+    }
 }
 
 dependencies {
-//    modLocalRuntime("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}")
+    //implementation("org.sinytra:forgified-fabric-loader:${project.loader_version}")
+    //modImplementation("org.sinytra.forgified-fabric-api:forgified-fabric-api:${project.fabric_version}")
+
+    //modLocalRuntime("me.shedaniel:RoughlyEnoughItems-neoforge:${project.rei_version}")
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin:${project.rei_version}")
-    modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}")
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-neoforge:${project.rei_version}")
 
-    modCompileOnly("dev.emi:emi-fabric:${project.emi_version}")
-//    modLocalRuntime("dev.emi:emi-fabric:${project.emi_version}")
+    modCompileOnly("dev.emi:emi-neoforge:${project.emi_version}")
 
-    modCompileOnly("com.terraformersmc:modmenu:${project.modmenu_version}")
-    modLocalRuntime("com.terraformersmc:modmenu:${project.modmenu_version}")
+    forgeRuntimeLibrary(include(api("io.wispforest:endec:0.1.8")))
+    forgeRuntimeLibrary(include(api("io.wispforest.endec:netty:0.1.4")))
+    forgeRuntimeLibrary(include(api("io.wispforest.endec:gson:0.1.5")))
+    forgeRuntimeLibrary(include(api("io.wispforest.endec:jankson:0.1.5")))
 
-    include api("io.wispforest:endec:0.1.5")
-    include api("io.wispforest.endec:netty:0.1.2")
-    include api("io.wispforest.endec:gson:0.1.3")
-    include api("io.wispforest.endec:jankson:0.1.3")
+    forgeRuntimeLibrary(include(api("blue.endless:jankson:${project.jankson_version}")))
 
-    include api("blue.endless:jankson:${project.jankson_version}")
-
-    modCompileOnly("xyz.nucleoid:server-translations-api:${project.stapi_version}")
+    include implementation("org.sinytra:forgified-fabric-loader:${project.loader_version}:full")
+    include modApi("org.sinytra.forgified-fabric-api:fabric-api-base:0.4.42+d1308dedd1") { exclude group: "fabric-api" }
+    include modApi("org.sinytra.forgified-fabric-api:fabric-networking-api-v1:4.2.2+a92978fd19") { exclude group: "fabric-api" }
+    include modApi("org.sinytra.forgified-fabric-api:fabric-screen-api-v1:2.0.24+79a4c2b0d1") { exclude group: "fabric-api" }
 
     testmodImplementation sourceSets.main.output
     testmodAnnotationProcessor sourceSets.main.output

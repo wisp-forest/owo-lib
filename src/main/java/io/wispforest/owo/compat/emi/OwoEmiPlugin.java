@@ -1,5 +1,6 @@
 package io.wispforest.owo.compat.emi;
 
+import dev.emi.emi.api.EmiEntrypoint;
 import dev.emi.emi.api.EmiPlugin;
 import dev.emi.emi.api.EmiRegistry;
 import dev.emi.emi.api.widget.Bounds;
@@ -14,6 +15,7 @@ import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 
 import java.util.ArrayList;
 
+@EmiEntrypoint
 public class OwoEmiPlugin implements EmiPlugin {
     @Override
     public void register(EmiRegistry registry) {

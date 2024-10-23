@@ -1,17 +1,18 @@
 package io.wispforest.uwu.network;
 
 import io.wispforest.endec.impl.RecordEndec;
-import io.wispforest.endec.impl.ReflectiveEndecBuilder;
 import io.wispforest.owo.network.OwoNetChannel;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.StructEndec;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.HashMap;
@@ -55,15 +56,19 @@ public class UwuNetworkExample {
         });
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public static final class Client {
         public static final KeyBinding NETWORK_TEST = new KeyBinding("key.uwu.network_test", GLFW.GLFW_KEY_U, "misc");
 
-        public static void init() {
-            KeyBindingHelper.registerKeyBinding(NETWORK_TEST);
-            ClientTickEvents.END_CLIENT_TICK.register(client -> {
+        public static void init(IEventBus eventBus) {
+            eventBus.addListener((RegisterKeyMappingsEvent mappingsEvent) -> {
+                mappingsEvent.register(NETWORK_TEST);
+            });
+
+            NeoForge.EVENT_BUS.addListener((ClientTickEvent.Post clientEvent) -> {
                 while (NETWORK_TEST.wasPressed()) {
-                    CHANNEL.clientHandle().send(new KeycodePacket(KeyBindingHelper.getBoundKeyOf(NETWORK_TEST).getCode()));
+
+                    CHANNEL.clientHandle().send(new KeycodePacket(NETWORK_TEST.getKey().getCode()));
 
                     CHANNEL.clientHandle().send(new MaldingPacket(new DispatchedSubclassOne("base")));
                     CHANNEL.clientHandle().send(new MaldingPacket(new DispatchedSubclassTwo(20)));

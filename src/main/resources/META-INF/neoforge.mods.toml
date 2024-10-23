@@ -1,0 +1,43 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+#issueTrackerURL = ""
+license = "MIT"
+
+[[mods]]
+modId = "owo"
+version = "${version}"
+displayName = "oωo"
+provides = ["owo-lib", "owo_lib", "owo-impl", "owo_impl"]
+authors = "glisco, Blodhgarm, BasiqueEvangelist, Noaaan"
+credits = ""
+description = '''
+yes its bad i know thanks
+'''
+logoFile = "assets/owo/icon.png"
+
+[[accessTransformers]]
+file="META-INF/owo.accesstransformer.cfg"
+
+[[mixins]]
+config = 'owo.mixins.json'
+
+[[dependencies.owo]]
+modId = "neoforge"
+required = true
+versionRange = "[21,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.owo]]
+modId = "minecraft"
+required = true
+versionRange = "[1.21,)"
+ordering = "NONE"
+side = "BOTH"
+
+#[[dependencies.owo]]
+#modId = "fabric_api"
+#required = true
+#versionRange = "[0.104.0+2.0.14+1.21.1,)"
+#ordering = "NONE"
+#side = "BOTH"

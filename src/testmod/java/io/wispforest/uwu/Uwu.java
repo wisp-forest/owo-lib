@@ -44,12 +44,7 @@ import io.wispforest.uwu.config.UwuConfig;
 import io.wispforest.uwu.items.UwuItems;
 import io.wispforest.uwu.network.*;
 import io.wispforest.uwu.text.BasedTextContent;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
@@ -77,6 +72,14 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.RegisterEvent;
 import org.slf4j.Logger;
 
 import java.util.*;
@@ -85,7 +88,8 @@ import java.util.function.Consumer;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
-public class Uwu implements ModInitializer {
+@Mod(value = "uwu")
+public class Uwu {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -96,60 +100,15 @@ public class Uwu implements ModInitializer {
     public static final Identifier OWO_ICON_TEXTURE = Identifier.of("uwu", "textures/gui/icon.png");
     public static final Identifier ANIMATED_BUTTON_TEXTURE = Identifier.of("uwu", "textures/gui/animated_icon_test.png");
 
-    public static final ScreenHandlerType<EpicScreenHandler> EPIC_SCREEN_HANDLER_TYPE = Registry.register(
-        Registries.SCREEN_HANDLER,
-        Identifier.of("uwu", "epic_screen_handler"),
-        new ScreenHandlerType<>(EpicScreenHandler::new, FeatureFlags.VANILLA_FEATURES)
-    );
+    public static ScreenHandlerType<EpicScreenHandler> EPIC_SCREEN_HANDLER_TYPE;
 
-    public static final OwoItemGroup FOUR_TAB_GROUP = OwoItemGroup.builder(Identifier.of("uwu", "four_tab_group"), () -> Icon.of(Items.AXOLOTL_BUCKET))
-            .disableDynamicTitle()
-            .buttonStackHeight(1)
-            .initializer(group -> {
-                group.addTab(Icon.of(ANIMATED_BUTTON_TEXTURE, 32, 1000, false), "tab_1", null, true);
-                group.addTab(Icon.of(Items.EMERALD), "tab_2", TAB_2_CONTENT, false);
-                group.addTab(Icon.of(Items.AMETHYST_SHARD), "tab_3", null, false);
-                group.addTab(Icon.of(Items.GOLD_INGOT), "tab_4", null, false);
+    public static OwoItemGroup FOUR_TAB_GROUP;
 
-                group.addButton(ItemGroupButton.github(group, "https://github.com/wisp-forest/owo-lib"));
-            })
-            .build();
+    public static OwoItemGroup SIX_TAB_GROUP;
 
-    public static final OwoItemGroup SIX_TAB_GROUP = OwoItemGroup.builder(Identifier.of("uwu", "six_tab_group"), () -> Icon.of(Items.POWDER_SNOW_BUCKET))
-            .tabStackHeight(3)
-            .backgroundTexture(GROUP_TEXTURE)
-            .scrollerTextures(new OwoItemGroup.ScrollerTextures(Identifier.of("uwu", "scroller"), Identifier.of("uwu", "scroller_disabled")))
-            .tabTextures(new OwoItemGroup.TabTextures(
-                    Identifier.of("uwu", "top_selected"),
-                    Identifier.of("uwu", "top_selected_first_column"),
-                    Identifier.of("uwu", "top_unselected"),
-                    Identifier.of("uwu", "bottom_selected"),
-                    Identifier.of("uwu", "bottom_selected_first_column"),
-                    Identifier.of("uwu", "bottom_unselected")))
-            .initializer(group -> {
-                group.addTab(Icon.of(Items.DIAMOND), "tab_1", null, true);
-                group.addTab(Icon.of(Items.EMERALD), "tab_2", null, false);
-                group.addTab(Icon.of(Items.AMETHYST_SHARD), "tab_3", null, false);
-                group.addTab(Icon.of(Items.GOLD_INGOT), "tab_4", null, false);
-                group.addCustomTab(Icon.of(Items.IRON_INGOT), "tab_5", (context, entries) -> entries.add(UwuItems.SCREEN_SHARD), false);
-                group.addTab(Icon.of(Items.QUARTZ), "tab_6", null, false);
+    public static OwoItemGroup SINGLE_TAB_GROUP;
 
-                group.addButton(new ItemGroupButton(group, Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16), "owo", () -> {
-                    MinecraftClient.getInstance().player.sendMessage(Text.of("oωo button pressed!"), false);
-                }));
-            })
-            .build();
-
-    public static final OwoItemGroup SINGLE_TAB_GROUP = OwoItemGroup.builder(Identifier.of("uwu", "single_tab_group"), () -> Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16))
-            .displaySingleTab()
-            .initializer(group -> group.addTab(Icon.of(Items.SPONGE), "tab_1", null, true))
-            .build();
-
-    public static final ItemGroup VANILLA_GROUP = Registry.register(Registries.ITEM_GROUP, Identifier.of("uwu", "vanilla_group"), FabricItemGroup.builder()
-            .displayName(Text.literal("who did this"))
-            .icon(Items.ACACIA_BOAT::getDefaultStack)
-            .entries((context, entries) -> entries.add(Items.MANGROVE_CHEST_BOAT))
-            .build());
+    public static ItemGroup VANILLA_GROUP;
 
     public static final OwoNetChannel CHANNEL = OwoNetChannel.create(Identifier.of("uwu", "uwu"));
 
@@ -178,8 +137,69 @@ public class Uwu implements ModInitializer {
         builder.registerSerializer(Color.class, (color, marshaller) -> new JsonPrimitive("bruv"));
     });
 
-    @Override
-    public void onInitialize() {
+    public Uwu(IEventBus eventBus) {
+        eventBus.addListener(RegisterEvent.class, event -> {
+            event.register(RegistryKeys.SCREEN_HANDLER, Identifier.of("uwu", "epic_screen_handler"), () -> EPIC_SCREEN_HANDLER_TYPE = new ScreenHandlerType<>(EpicScreenHandler::new, FeatureFlags.VANILLA_FEATURES));
+
+            event.register(RegistryKeys.ITEM_GROUP, helper -> {
+                FOUR_TAB_GROUP = OwoItemGroup.builder(Identifier.of("uwu", "four_tab_group"), () -> Icon.of(Items.AXOLOTL_BUCKET))
+                        .disableDynamicTitle()
+                        .buttonStackHeight(1)
+                        .initializer(group -> {
+                            group.addTab(Icon.of(ANIMATED_BUTTON_TEXTURE, 32, 1000, false), "tab_1", null, true);
+                            group.addTab(Icon.of(Items.EMERALD), "tab_2", TAB_2_CONTENT, false);
+                            group.addTab(Icon.of(Items.AMETHYST_SHARD), "tab_3", null, false);
+                            group.addTab(Icon.of(Items.GOLD_INGOT), "tab_4", null, false);
+
+                            group.addButton(ItemGroupButton.github(group, "https://github.com/wisp-forest/owo-lib"));
+                        })
+                        .build();
+
+                SIX_TAB_GROUP = OwoItemGroup.builder(Identifier.of("uwu", "six_tab_group"), () -> Icon.of(Items.POWDER_SNOW_BUCKET))
+                        .tabStackHeight(3)
+                        .backgroundTexture(GROUP_TEXTURE)
+                        .scrollerTextures(new OwoItemGroup.ScrollerTextures(Identifier.of("uwu", "scroller"), Identifier.of("uwu", "scroller_disabled")))
+                        .tabTextures(new OwoItemGroup.TabTextures(
+                                Identifier.of("uwu", "top_selected"),
+                                Identifier.of("uwu", "top_selected_first_column"),
+                                Identifier.of("uwu", "top_unselected"),
+                                Identifier.of("uwu", "bottom_selected"),
+                                Identifier.of("uwu", "bottom_selected_first_column"),
+                                Identifier.of("uwu", "bottom_unselected")))
+                        .initializer(group -> {
+                            group.addTab(Icon.of(Items.DIAMOND), "tab_1", null, true);
+                            group.addTab(Icon.of(Items.EMERALD), "tab_2", null, false);
+                            group.addTab(Icon.of(Items.AMETHYST_SHARD), "tab_3", null, false);
+                            group.addTab(Icon.of(Items.GOLD_INGOT), "tab_4", null, false);
+                            group.addCustomTab(Icon.of(Items.IRON_INGOT), "tab_5", (context, entries) -> entries.add(UwuItems.SCREEN_SHARD), false);
+                            group.addTab(Icon.of(Items.QUARTZ), "tab_6", null, false);
+
+                            group.addButton(new ItemGroupButton(group, Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16), "owo", () -> {
+                                MinecraftClient.getInstance().player.sendMessage(Text.of("oωo button pressed!"), false);
+                            }));
+                        })
+                        .build();
+
+                SINGLE_TAB_GROUP = OwoItemGroup.builder(Identifier.of("uwu", "single_tab_group"), () -> Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16))
+                        .displaySingleTab()
+                        .initializer(group -> group.addTab(Icon.of(Items.SPONGE), "tab_1", null, true))
+                        .build();
+
+                VANILLA_GROUP = Registry.register(Registries.ITEM_GROUP, Identifier.of("uwu", "vanilla_group"), ItemGroup.builder()
+                        .displayName(Text.literal("who did this"))
+                        .icon(Items.ACACIA_BOAT::getDefaultStack)
+                        .entries((context, entries) -> entries.add(Items.MANGROVE_CHEST_BOAT))
+                        .build());
+
+                FOUR_TAB_GROUP.initialize();
+                SIX_TAB_GROUP.initialize();
+                SINGLE_TAB_GROUP.initialize();
+            });
+
+            event.register(RegistryKeys.ITEM, helper -> {
+                FieldRegistrationHandler.register(UwuItems.class, "uwu", true);
+            });
+        });
 
         var stackEndec = CodecUtils.toEndec(ItemStack.CODEC);
         var stackData = """
@@ -201,14 +221,8 @@ public class Uwu implements ModInitializer {
         System.out.println(serializer.result().read(SerializationContext.empty(), stackEndec));
         System.out.println(CodecUtils.toCodec(MinecraftEndecs.BLOCK_POS).encodeStart(NbtOps.INSTANCE, new BlockPos(34, 35, 69)).result().get());
 
-        FieldRegistrationHandler.register(UwuItems.class, "uwu", true);
-
         TagInjector.inject(Registries.BLOCK, BlockTags.BASE_STONE_OVERWORLD.id(), Blocks.GLASS);
         TagInjector.injectTagReference(Registries.ITEM, ItemTags.COALS.id(), ItemTags.FOX_FOOD.id());
-
-        FOUR_TAB_GROUP.initialize();
-        SIX_TAB_GROUP.initialize();
-        SINGLE_TAB_GROUP.initialize();
 
         CHANNEL.registerClientbound(TestMessage.class, (message, access) -> {
             access.player().sendMessage(Text.of(message.string), false);
@@ -221,17 +235,21 @@ public class Uwu implements ModInitializer {
             access.player().sendMessage(Text.of(String.valueOf(message)), false);
         });
 
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER && WE_TESTEN_HANDSHAKE) {
+        if (FMLLoader.getDist() == Dist.DEDICATED_SERVER && WE_TESTEN_HANDSHAKE) {
             OwoNetChannel.create(Identifier.of("uwu", "server_only_channel"));
             new ParticleSystemController(Identifier.of("uwu", "server_only_particles"));
         }
 
-        System.out.println(RegistryAccess.getEntry(Registries.ITEM, Items.ACACIA_BOAT));
-        System.out.println(RegistryAccess.getEntry(Registries.ITEM, Identifier.of("acacia_planks")));
+        System.out.println(Registries.ITEM.getEntry(Items.ACACIA_BOAT));
+        System.out.println(Registries.ITEM.getEntry(Identifier.of("acacia_planks")));
 
 //        UwuShapedRecipe.init();
 
-        CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> {
+        NeoForge.EVENT_BUS.addListener((RegisterCommandsEvent commandEvent) -> {
+            var dispatcher = commandEvent.getDispatcher();
+            var access = commandEvent.getBuildContext();
+            var environment = commandEvent.getCommandSelection();
+
             dispatcher.register(
                     literal("show_nbt")
                             .then(argument("player", GameProfileArgumentType.gameProfile())

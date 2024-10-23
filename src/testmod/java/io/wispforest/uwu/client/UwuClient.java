@@ -17,9 +17,6 @@ import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.uwu.Uwu;
 import io.wispforest.uwu.network.UwuNetworkExample;
 import io.wispforest.uwu.network.UwuOptionalNetExample;
-import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
@@ -34,27 +31,38 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableTextContent;
 import net.minecraft.util.Identifier;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import org.lwjgl.glfw.GLFW;
 
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public class UwuClient implements ClientModInitializer {
+@Mod(value = "uwu", dist = Dist.CLIENT)
+public class UwuClient {
 
-    @Override
-    public void onInitializeClient() {
-        UwuNetworkExample.Client.init();
-        UwuOptionalNetExample.Client.init();
+    public UwuClient(IEventBus modBus) {
+        UwuNetworkExample.Client.init(modBus);
+        UwuOptionalNetExample.Client.init(modBus);
 
-        HandledScreens.register(Uwu.EPIC_SCREEN_HANDLER_TYPE, EpicHandledScreen::new);
-//        HandledScreens.register(EPIC_SCREEN_HANDLER_TYPE, EpicHandledModelScreen::new);
+        modBus.addListener(RegisterMenuScreensEvent.class, event -> {
+            event.register(Uwu.EPIC_SCREEN_HANDLER_TYPE, EpicHandledScreen::new);
+//            HandledScreens.register(EPIC_SCREEN_HANDLER_TYPE, EpicHandledModelScreen::new);
+        });
 
         final var binding = new KeyBinding("key.uwu.hud_test", GLFW.GLFW_KEY_J, "misc");
-        KeyBindingHelper.registerKeyBinding(binding);
-
         final var bindingButCooler = new KeyBinding("key.uwu.hud_test_two", GLFW.GLFW_KEY_K, "misc");
-        KeyBindingHelper.registerKeyBinding(bindingButCooler);
+
+        modBus.addListener(RegisterKeyMappingsEvent.class, event -> {
+            event.register(binding);
+            event.register(bindingButCooler);
+        });
 
         final var hudComponentId = Identifier.of("uwu", "test_element");
         final Supplier<Component> hudComponent = () ->
@@ -72,7 +80,7 @@ public class UwuClient implements ClientModInitializer {
         final Supplier<Component> coolerComponent = () -> UIModel.load(Path.of("../src/testmod/resources/assets/uwu/owo_ui/test_element_two.xml")).expandTemplate(FlowLayout.class, "hud-element", Map.of());
         Hud.add(coolerComponentId, coolerComponent);
 
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+        NeoForge.EVENT_BUS.addListener(ClientTickEvent.Post.class, event -> {
             while (binding.wasPressed()) {
                 if (Hud.hasComponent(hudComponentId)) {
                     Hud.remove(hudComponentId);

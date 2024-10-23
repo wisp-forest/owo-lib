@@ -6,8 +6,6 @@ import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
 import io.wispforest.owo.mixin.itemgroup.ItemGroupAccessor;
 import io.wispforest.owo.util.pond.OwoItemExtensions;
 import it.unimi.dsi.fastutil.ints.*;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.item.*;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -15,6 +13,8 @@ import net.minecraft.registry.tag.TagKey;
 import net.minecraft.resource.featuretoggle.FeatureSet;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLLoader;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -62,7 +62,7 @@ public abstract class OwoItemGroup extends ItemGroup {
     private final boolean allowMultiSelect;
 
     protected OwoItemGroup(Identifier id, Consumer<OwoItemGroup> initializer, Supplier<Icon> iconSupplier, int tabStackHeight, int buttonStackHeight, @Nullable Identifier backgroundTexture, @Nullable ScrollerTextures scrollerTextures, @Nullable TabTextures tabTextures, boolean useDynamicTitle, boolean displaySingleTab, boolean allowMultiSelect) {
-        super(null, -1, Type.CATEGORY, Text.translatable("itemGroup.%s.%s".formatted(id.getNamespace(), id.getPath())), () -> ItemStack.EMPTY, (displayContext, entries) -> {});
+        super(null, -1, Type.CATEGORY, Text.translatable("itemGroup.%s.%s".formatted(id.getNamespace(), id.getPath())), () -> ItemStack.EMPTY, (displayContext, entries) -> {}, null, false, 89, Identifier.ofVanilla("textures/gui/container/creative_inventory/tabs.png"), 4210752, -2130706433, new ArrayList<>(), new ArrayList<>());
         this.initializer = initializer;
         this.iconSupplier = iconSupplier;
         this.tabStackHeight = tabStackHeight;
@@ -101,7 +101,7 @@ public abstract class OwoItemGroup extends ItemGroup {
     public void initialize() {
         if (this.initialized) return;
 
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) this.initializer.accept(this);
+        if (FMLLoader.getDist() == Dist.CLIENT) this.initializer.accept(this);
         if (this.tabs.isEmpty()) this.tabs.add(PLACEHOLDER_TAB);
 
         if (this.allowMultiSelect) {

@@ -23,8 +23,6 @@ public class ScreenMixin {
         return original;
     }
 
-
-
     @ModifyArg(method = "method_61039", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;setScreen(Lnet/minecraft/client/gui/screen/Screen;)V"), index = 0)
     private @Nullable Screen injectProperLinkSource(@Nullable Screen screen) {
         if ((Object) this != OwoUIDrawContext.utilityScreen()) return screen;

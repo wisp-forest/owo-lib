@@ -11,27 +11,27 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Keyboard.class)
 public class KeyboardMixin {
+//TODO: FIX THIS AS IT IS BROKEN I GUESS BECAUSE OF TARGET
 
-    @Inject(method = "method_1473", at = @At("HEAD"), cancellable = true)
-    private static void captureScreenCharTyped(Element element, char character, int modifiers, CallbackInfo ci) {
-        boolean handled = false;
-        for (var instance : Layers.getInstances(MinecraftClient.getInstance().currentScreen)) {
-            handled = instance.adapter.charTyped(character, modifiers);
-            if (handled) break;
-        }
-
-        if (handled) ci.cancel();
-    }
-
-    @Inject(method = "method_1458", at = @At("HEAD"), cancellable = true)
-    private static void captureScreenCharTyped(Element element, int character, int modifiers, CallbackInfo ci) {
-        boolean handled = false;
-        for (var instance : Layers.getInstances(MinecraftClient.getInstance().currentScreen)) {
-            handled = instance.adapter.charTyped((char) character, modifiers);
-            if (handled) break;
-        }
-
-        if (handled) ci.cancel();
-    }
-
+//    @Inject(method = "method_1473", at = @At("HEAD"), cancellable = true)
+//    private static void captureScreenCharTyped(Element element, char character, int modifiers, CallbackInfo ci) {
+//        boolean handled = false;
+//        for (var instance : Layers.getInstances(MinecraftClient.getInstance().currentScreen)) {
+//            handled = instance.adapter.charTyped(character, modifiers);
+//            if (handled) break;
+//        }
+//
+//        if (handled) ci.cancel();
+//    }
+//
+//    @Inject(method = "method_1458", at = @At("HEAD"), cancellable = true)
+//    private static void captureScreenCharTyped(Element element, int character, int modifiers, CallbackInfo ci) {
+//        boolean handled = false;
+//        for (var instance : Layers.getInstances(MinecraftClient.getInstance().currentScreen)) {
+//            handled = instance.adapter.charTyped((char) character, modifiers);
+//            if (handled) break;
+//        }
+//
+//        if (handled) ci.cancel();
+//    }
 }

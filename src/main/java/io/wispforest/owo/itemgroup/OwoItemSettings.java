@@ -1,8 +1,5 @@
 package io.wispforest.owo.itemgroup;
 
-import io.wispforest.owo.Owo;
-import net.fabricmc.fabric.api.item.v1.CustomDamageHandler;
-import net.fabricmc.fabric.api.item.v1.EquipmentSlotProvider;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -11,12 +8,14 @@ import net.minecraft.util.Rarity;
 import net.minecraft.world.World;
 
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 /**
  * @deprecated Replaced with {@link OwoItemSettingsExtension}.
  */
 @Deprecated(forRemoval = true)
 public class OwoItemSettings extends Item.Settings {
+    
     public OwoItemSettings group(ItemGroupReference ref) {
         return (OwoItemSettings) super.group(ref);
     }
@@ -24,12 +23,22 @@ public class OwoItemSettings extends Item.Settings {
     /**
      * @param group The item group this item should appear in
      */
+    @Deprecated
     public OwoItemSettings group(OwoItemGroup group) {
         return (OwoItemSettings) super.group(group);
     }
 
+    @Deprecated
     public OwoItemGroup group() {
-        return super.group();
+        return this.groupSupplier().get();
+    }
+
+    public OwoItemSettings group(Supplier<OwoItemGroup> groupSupplier) {
+        return (OwoItemSettings) super.group(groupSupplier);
+    }
+
+    public Supplier<OwoItemGroup> groupSupplier() {
+        return super.groupSupplier();
     }
 
     public OwoItemSettings tab(int tab) {
@@ -63,16 +72,6 @@ public class OwoItemSettings extends Item.Settings {
 
     public boolean shouldTrackUsageStat() {
         return super.shouldTrackUsageStat();
-    }
-
-    @Override
-    public OwoItemSettings equipmentSlot(EquipmentSlotProvider equipmentSlotProvider) {
-        return (OwoItemSettings) super.equipmentSlot(equipmentSlotProvider);
-    }
-
-    @Override
-    public OwoItemSettings customDamage(CustomDamageHandler handler) {
-        return (OwoItemSettings) super.customDamage(handler);
     }
 
     @Override
