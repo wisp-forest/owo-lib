@@ -5,14 +5,9 @@ import dev.emi.emi.api.EmiRegistry;
 import dev.emi.emi.api.widget.Bounds;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.mixin.itemgroup.CreativeInventoryScreenAccessor;
-import io.wispforest.owo.mixin.ui.access.BaseOwoHandledScreenAccessor;
-import io.wispforest.owo.ui.core.Component;
-import io.wispforest.owo.ui.core.ParentComponent;
-import io.wispforest.owo.ui.core.Surface;
+import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
 import io.wispforest.owo.util.pond.OwoCreativeInventoryScreenExtensions;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
-
-import java.util.ArrayList;
 
 public class OwoEmiPlugin implements EmiPlugin {
     @Override
@@ -36,22 +31,11 @@ public class OwoEmiPlugin implements EmiPlugin {
         });
 
         registry.addGenericExclusionArea((screen, consumer) -> {
-            if (screen.children().isEmpty() || !(screen instanceof BaseOwoHandledScreenAccessor accessor)) return;
+            if (!(screen instanceof BaseOwoHandledScreen<?, ?> owoHandledScreen)) return;
 
-            var adapter = accessor.owo$getUIAdapter();
-            if (adapter == null) return;
-
-            var rootComponent = adapter.rootComponent;
-            var children = new ArrayList<Component>();
-            rootComponent.collectDescendants(children);
-            children.remove(rootComponent);
-
-            children.forEach(component -> {
-                if (component instanceof ParentComponent parent && parent.surface() == Surface.BLANK) return;
-
-                var size = component.fullSize();
-                consumer.accept(new Bounds(component.x(), component.y(), size.width(), size.height()));
-            });
+            owoHandledScreen.componentsForExclusionAreas()
+                .map(component -> new Bounds(component.x(), component.y(), component.width(), component.height()))
+                .forEach(consumer);
         });
     }
 }
