@@ -88,25 +88,6 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
     }
 
     /**
-     * Moves the slot with the given index off the screen
-     * to prevent player intractability when disabled or enabled
-     *
-     * @param index The index of the slot to disable
-     */
-    protected void hideSlot(int index) {
-        hideSlot(this.handler.slots.get(index));
-    }
-
-    /**
-     * Moves the slot off the screen to prevent player
-     * intractability when disabled or enabled
-     */
-    protected void hideSlot(Slot slot) {
-        ((SlotAccessor) slot).owo$setX(-300);
-        ((SlotAccessor) slot).owo$setY(-300);
-    }
-
-    /**
      * Disable the slot at the given index. Note
      * that this is hard override and the slot cannot
      * re-enable itself
