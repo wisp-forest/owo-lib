@@ -205,6 +205,11 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
         return this.uiAdapter.mouseDragged(mouseX, mouseY, button, deltaX, deltaY) || super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
     }
 
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        return this.uiAdapter.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount) || super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+    }
+
     @Nullable
     @Override
     public Element getFocused() {

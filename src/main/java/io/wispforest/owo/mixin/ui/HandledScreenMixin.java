@@ -92,14 +92,4 @@ public abstract class HandledScreenMixin extends Screen {
             cir.setReturnValue(true);
         }
     }
-
-    // Fixes issues with scrolling with screens extending Handled and using UIAdapter
-    @WrapMethod(method = "mouseScrolled")
-    private boolean owo$useSuperMouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount, Operation<Boolean> original){
-        var bl = original.call(mouseX, mouseY, horizontalAmount, verticalAmount);
-
-        if (bl) return true;
-
-        return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
-    }
 }
