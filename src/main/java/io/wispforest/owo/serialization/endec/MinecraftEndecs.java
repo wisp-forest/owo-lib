@@ -1,14 +1,20 @@
 package io.wispforest.owo.serialization.endec;
 
 import com.mojang.datafixers.util.Function3;
-import io.wispforest.endec.Endec;
-import io.wispforest.endec.SerializationAttributes;
+import io.wispforest.endec.*;
 import io.wispforest.endec.impl.ReflectiveEndecBuilder;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.serialization.CodecUtils;
+import io.wispforest.owo.serialization.MinecraftSerializationAttributes;
+import net.fabricmc.fabric.api.event.registry.RegistryAttribute;
+import net.fabricmc.fabric.api.event.registry.RegistryAttributeHolder;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.tag.TagKey;
@@ -87,6 +93,11 @@ public final class MinecraftEndecs {
                     : BlockHitResult.createMissed(pos, side, blockPos)
     );
 
+    public static final Endec<BlockState> BLOCK_STATE = Endec.ifAttr(
+            MinecraftSerializationAttributes.NETWORK, Endec.VAR_INT.xmap(Block.STATE_IDS::get, Block.STATE_IDS::getRawId)
+        )
+        .orElse(CodecUtils.toEndec(BlockState.CODEC));
+
     // --- Constructors for MC types ---
 
     public static ReflectiveEndecBuilder addDefaults(ReflectiveEndecBuilder builder) {
@@ -105,11 +116,39 @@ public final class MinecraftEndecs {
 
         builder.register(BLOCK_HIT_RESULT, BlockHitResult.class);
 
+        builder.register(ofRegistry(Registries.ITEM), Item.class)
+               .register(ofRegistry(Registries.BLOCK), Block.class);
+
+        builder.register(BLOCK_STATE, BlockState.class);
+
         return builder;
     }
 
     public static <T> Endec<T> ofRegistry(Registry<T> registry) {
-        return IDENTIFIER.xmap(registry::get, registry::getId);
+        Endec<T> idEndec = IDENTIFIER.xmap(registry::get, registry::getId);
+        Endec<T> rawIdEndec = Endec.VAR_INT.xmap(registry::get, registry::getRawId);
+
+        return new Endec<>() {
+            @Override
+            public void encode(SerializationContext ctx, Serializer<?> serializer, T value) {
+                if (RegistryAttributeHolder.get(registry).hasAttribute(RegistryAttribute.SYNCED)
+                    && ctx.hasAttribute(MinecraftSerializationAttributes.NETWORK)) {
+                    rawIdEndec.encode(ctx, serializer, value);
+                } else {
+                    idEndec.encode(ctx, serializer, value);
+                }
+            }
+
+            @Override
+            public T decode(SerializationContext ctx, Deserializer<?> deserializer) {
+                if (RegistryAttributeHolder.get(registry).hasAttribute(RegistryAttribute.SYNCED)
+                    && ctx.hasAttribute(MinecraftSerializationAttributes.NETWORK)) {
+                    return rawIdEndec.decode(ctx, deserializer);
+                } else {
+                    return idEndec.decode(ctx, deserializer);
+                }
+            }
+        };
     }
 
     public static <T> Endec<TagKey<T>> unprefixedTagKey(RegistryKey<? extends Registry<T>> registry) {
