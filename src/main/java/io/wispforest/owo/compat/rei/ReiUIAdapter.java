@@ -94,7 +94,7 @@ public class ReiUIAdapter<T extends ParentComponent> extends Widget {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float partialTicks) {
-        ScissorStack.push(this.adapter.x(), this.adapter.y(), this.adapter.width(), this.adapter.height(), context.getMatrices());
+        ScissorStack.push(this.adapter.x(), this.adapter.y(), this.adapter.width(), this.adapter.height(), context);
         this.adapter.render(context, mouseX, mouseY, partialTicks);
         ScissorStack.pop();
 

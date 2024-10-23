@@ -4,6 +4,7 @@ import io.wispforest.owo.util.pond.OwoEntityRenderDispatcherExtension;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
+import net.minecraft.client.render.entity.state.EntityRenderState;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.RotationAxis;
@@ -43,7 +44,7 @@ public class EntityRenderDispatcherMixin implements OwoEntityRenderDispatcherExt
     @Shadow public Camera camera;
 
     @Inject(method = "renderFire", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/MatrixStack;multiply(Lorg/joml/Quaternionf;)V", shift = At.Shift.AFTER))
-    private void cancelFireRotation(MatrixStack matrices, VertexConsumerProvider vertexConsumers, Entity entity, Quaternionf rotation, CallbackInfo ci) {
+    private void cancelFireRotation(MatrixStack matrices, VertexConsumerProvider vertexConsumers, EntityRenderState renderState, Quaternionf rotation, CallbackInfo ci) {
         if (!this.owo$counterRotate) return;
         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(this.camera.getYaw() + 170));
         matrices.translate(0, 0, .1);

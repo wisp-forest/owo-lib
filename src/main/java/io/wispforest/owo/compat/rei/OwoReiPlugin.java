@@ -155,7 +155,6 @@ public class OwoReiPlugin implements REIClientPlugin {
                 modelView.rotate(RotationAxis.POSITIVE_Z.rotationDegrees(i * 18));
                 modelView.translate(screen.width / -2f, screen.height / -2f, 0);
 
-                RenderSystem.applyModelViewMatrix();
                 ScissorStack.pushDirect(0, 0, Integer.MAX_VALUE, Integer.MAX_VALUE);
                 renderFunction.run();
                 GlStateManager._enableScissorTest();
@@ -164,7 +163,6 @@ public class OwoReiPlugin implements REIClientPlugin {
             }
 
             modelView.popMatrix();
-            RenderSystem.applyModelViewMatrix();
         } else {
             ScissorStack.pushDirect(0, 0, Integer.MAX_VALUE, Integer.MAX_VALUE);
             renderFunction.run();

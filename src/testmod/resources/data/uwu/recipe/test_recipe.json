@@ -1,12 +1,8 @@
 {
   "type": "minecraft:crafting_shaped",
   "key": {
-    "#": {
-      "item": "minecraft:stick"
-    },
-    "X": {
-      "item": "minecraft:sand"
-    }
+    "#": "minecraft:stick",
+    "X": "minecraft:sand"
   },
   "owo:remainders": {
     "minecraft:sand": "minecraft:sand",
