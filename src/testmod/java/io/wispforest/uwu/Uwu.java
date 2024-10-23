@@ -174,7 +174,7 @@ public class Uwu implements ModInitializer {
 
     public static final UwuConfig CONFIG = UwuConfig.createAndLoad();
     public static final BruhConfig BRUHHHHH = BruhConfig.createAndLoad(builder -> {
-        builder.registerSerializer(Color.class, (color, marshaller) -> new JsonPrimitive("bruv"));
+        builder.janksonBuilder().registerSerializer(Color.class, (color, marshaller) -> new JsonPrimitive("bruv"));
     });
 
     @Override
