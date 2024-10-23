@@ -58,7 +58,9 @@ public final class Wisdom {
             "blod: I think I need to take a book out of your page",
             "blod: he her",
             "BasiqueEvangelist: what if... iphones",
-            "Cheese Cheese Creeper, the newest release from MC Basic"
+            "Cheese Cheese Creeper, the newest release from MC Basic",
+            "rai: if all you have is mixin, every class looks like mojank",
+            "can owls meow"
     );
 
     public static void spread() {
