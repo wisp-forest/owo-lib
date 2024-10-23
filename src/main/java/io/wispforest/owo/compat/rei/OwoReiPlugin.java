@@ -2,12 +2,10 @@ package io.wispforest.owo.compat.rei;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import dev.emi.emi.api.widget.Bounds;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.mixin.itemgroup.CreativeInventoryScreenAccessor;
 import io.wispforest.owo.mixin.ui.access.BaseOwoHandledScreenAccessor;
 import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
-import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.core.Surface;
@@ -23,14 +21,12 @@ import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
-import net.minecraft.screen.ScreenHandler;
 import net.minecraft.util.math.RotationAxis;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 public class OwoReiPlugin implements REIClientPlugin {
 
@@ -61,7 +57,7 @@ public class OwoReiPlugin implements REIClientPlugin {
         });
 
         zones.register(BaseOwoHandledScreen.class, screen -> {
-            return ((BaseOwoHandledScreen<?, ?>) screen).getExclusionAreas().stream()
+            return ((BaseOwoHandledScreen<?, ?>) screen).componentsForExclusionAreas()
                     .map(rect -> new Rectangle(rect.x(), rect.y(), rect.width(), rect.height()))
                     .toList();
         });
