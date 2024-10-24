@@ -72,6 +72,12 @@ tasks.withType<JavaCompile>().configureEach {
     }
 }
 
+//tasks.getByName("build") {
+//    onlyIf("test") {
+//        false;
+//    }
+//}
+
 java {
     val javaVersion = JavaVersion.toVersion(targetJavaVersion)
     if (JavaVersion.current() < javaVersion) {
@@ -83,6 +89,8 @@ java {
     val data: MutableMap<String, Set<PublishArtifact>> = mutableMapOf();
 
     for (cfg in rootProject.configurations) {
+        if (cfg.name.equals("runtimeElements")) continue;
+
         with(cfg.artifacts) {
             val publishArtifact = this.filter {
                     publishArtifact -> return@filter publishArtifact.file.name.contains("owo-lib");
