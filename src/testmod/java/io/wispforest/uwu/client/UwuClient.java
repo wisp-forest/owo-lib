@@ -151,7 +151,7 @@ public class UwuClient {
             ButtonComponent button;
             instance.adapter.rootComponent.child(
                     (button = Components.button(Text.literal(":)"), buttonComponent -> {
-                        MinecraftClient.getInstance().player.sendMessage(Text.literal("handled screen moment"));
+                        MinecraftClient.getInstance().player.sendMessage(Text.literal("handled screen moment"), false);
                     })).verticalSizing(Sizing.fixed(12))
             );
 

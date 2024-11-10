@@ -1,5 +1,7 @@
 package io.wispforest.owo.mixin.ui.layers;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import io.wispforest.owo.ui.layers.Layers;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.gui.screen.Screen;
@@ -12,18 +14,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Mouse.class)
 public class MouseMixin {
 
-    //TODO: FIX THIS AS IT IS BROKEN I GUESS BECAUSE OF TARGET
-
     @Shadow private int activeButton;
 
-//    @Inject(method = "method_55795", at = @At("HEAD"), cancellable = true)
-//    private void captureScreenMouseDrag(Screen screen, double mouseX, double mouseY, double deltaX, double deltaY, CallbackInfo ci) {
-//        boolean handled = false;
-//        for (var instance : Layers.getInstances(screen)) {
-//            handled = instance.adapter.mouseDragged(mouseX, mouseY, this.activeButton, deltaX, deltaY);
-//            if (handled) break;
-//        }
-//
-//        if (handled) ci.cancel();
-//    }
+    @WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;mouseDragged(DDIDD)Z"))
+    private boolean captureScreenMouseDrag(Screen screen, double mouseX, double mouseY, int i, double deltaX, double deltaY, Operation<Boolean> original) {
+        boolean handled = false;
+        for (var instance : Layers.getInstances(screen)) {
+            handled = instance.adapter.mouseDragged(mouseX, mouseY, this.activeButton, deltaX, deltaY);
+            if (handled) break;
+        }
+
+        return handled || original.call(screen, mouseX, mouseY, i, deltaX, deltaY);
+    }
 }

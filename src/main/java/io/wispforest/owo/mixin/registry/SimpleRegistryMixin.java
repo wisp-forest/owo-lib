@@ -56,7 +56,7 @@ public abstract class SimpleRegistryMixin<T> extends BaseMappedRegistry<T> imple
 
             ((ReferenceAccessor<T>) reference).owo$setRegistryKey(arg);
         } else {
-            reference = this.keyToEntry.computeIfAbsent(arg, k -> RegistryEntry.Reference.standAlone(this.getEntryOwner(), k));
+            reference = this.keyToEntry.computeIfAbsent(arg, k -> RegistryEntry.Reference.standAlone(this, k));
             ((ReferenceAccessor<T>) reference).owo$setValue((T)object);
         }
 

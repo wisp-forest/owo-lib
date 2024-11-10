@@ -15,6 +15,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Set;
+
 /**
  * A collection of common operations done on {@link World}
  */
@@ -114,7 +116,7 @@ public final class WorldOps {
      * @param pitch  The target pitch
      */
     public static void teleportToWorld(ServerPlayerEntity player, ServerWorld target, Vec3d pos, float yaw, float pitch) {
-        player.teleport(target, pos.x, pos.y, pos.z, yaw, pitch);
+        player.teleport(target, pos.x, pos.y, pos.z, Set.of(), yaw, pitch, false);
         player.addExperience(0);
 
         player.getStatusEffects().forEach(effect -> {

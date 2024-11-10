@@ -2,7 +2,7 @@ package io.wispforest.owo.ext;
 
 import net.minecraft.component.ComponentChanges;
 import net.minecraft.component.ComponentMap;
-import net.minecraft.component.ComponentMapImpl;
+import net.minecraft.component.MergedComponentMap;
 import net.minecraft.component.ComponentType;
 import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
@@ -14,11 +14,11 @@ import java.util.Set;
 @ApiStatus.Internal
 public class DerivedComponentMap implements ComponentMap {
     private final ComponentMap base;
-    private final ComponentMapImpl delegate;
+    private final MergedComponentMap delegate;
 
     public DerivedComponentMap(ComponentMap base) {
         this.base = base;
-        this.delegate = new ComponentMapImpl(base);
+        this.delegate = new MergedComponentMap(base);
     }
 
     public static ComponentMap reWrapIfNeeded(ComponentMap original) {

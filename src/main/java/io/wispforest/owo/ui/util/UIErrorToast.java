@@ -71,8 +71,20 @@ public class UIErrorToast implements Toast {
         );
     }
 
+    private Visibility visibility = Visibility.HIDE;
+
     @Override
-    public Visibility draw(DrawContext context, ToastManager manager, long startTime) {
+    public void update(ToastManager manager, long time) {
+        this.visibility = time > 10000 ? Visibility.HIDE : Visibility.SHOW;
+    }
+
+    @Override
+    public Visibility getVisibility() {
+        return this.visibility;
+    }
+
+    @Override
+    public void draw(DrawContext context, TextRenderer textRenderer, long startTime) {
         var owoContext = OwoUIDrawContext.of(context);
 
         owoContext.fill(0, 0, this.getWidth(), this.getHeight(), 0x77000000);
@@ -84,10 +96,7 @@ public class UIErrorToast implements Toast {
         for (int i = 1; i < this.errorMessage.size(); i++) {
             owoContext.drawText(this.textRenderer, this.errorMessage.get(i), 4, 4 + i * 11, 0xFFFFFF, false);
         }
-
-        return startTime > 10000 ? Visibility.HIDE : Visibility.SHOW;
     }
-
 
     @Override
     public int getHeight() {

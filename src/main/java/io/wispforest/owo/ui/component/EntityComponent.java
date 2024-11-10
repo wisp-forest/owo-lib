@@ -24,6 +24,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.player.PlayerModelPart;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.StringNbtReader;
@@ -72,7 +73,7 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
         this.dispatcher = client.getEntityRenderDispatcher();
         this.entityBuffers = client.getBufferBuilders().getEntityVertexConsumers();
 
-        this.entity = type.create(client.world);
+        this.entity = type.create(client.world, SpawnReason.BREEDING);
         if (nbt != null) entity.readNbt(nbt);
         entity.updatePosition(client.player.getX(), client.player.getY(), client.player.getZ());
 
@@ -117,7 +118,7 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
 
         RenderSystem.setShaderLights(new Vector3f(.15f, 1, 0), new Vector3f(.15f, -1, 0));
         this.dispatcher.setRenderShadows(false);
-        this.dispatcher.render(this.entity, 0, 0, 0, 0, 0, matrices, this.entityBuffers, LightmapTextureManager.MAX_LIGHT_COORDINATE);
+        this.dispatcher.render(this.entity, 0, 0, 0, 0, matrices, this.entityBuffers, LightmapTextureManager.MAX_LIGHT_COORDINATE);
         this.dispatcher.setRenderShadows(true);
         this.entityBuffers.draw();
         DiffuseLighting.enableGuiDepthLighting();
@@ -228,7 +229,7 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
     public static EntityComponent<?> parse(Element element) {
         UIParsing.expectAttributes(element, "type");
         var entityId = UIParsing.parseIdentifier(element.getAttributeNode("type"));
-        var entityType = Registries.ENTITY_TYPE.getOrEmpty(entityId).orElseThrow(() -> new UIModelParsingException("Unknown entity type " + entityId));
+        var entityType = Registries.ENTITY_TYPE.getOptionalValue(entityId).orElseThrow(() -> new UIModelParsingException("Unknown entity type " + entityId));
 
         NbtCompound nbt = null;
         if (element.hasAttribute("nbt")) {
@@ -255,7 +256,7 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
                                     profile, new WorldSession(TelemetrySender.NOOP, false, Duration.ZERO, ""),
                                     MinecraftClient.getInstance().world.getRegistryManager().toImmutable(),
                                     MinecraftClient.getInstance().world.getEnabledFeatures(),
-                                    "Wisp Forest Enterprises", null, null, Map.of(), null, false, Map.of(), ServerLinks.EMPTY
+                                    "Wisp Forest Enterprises", null, null, Map.of(), null, Map.of(), ServerLinks.EMPTY
                     )),
                     null, null, false, false
             );

@@ -15,6 +15,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.w3c.dom.Element;
@@ -136,7 +137,7 @@ public class ButtonComponent extends ButtonWidget {
                 }
 
                 RenderSystem.enableDepthTest();
-                context.drawTexture(texture, button.getX(), button.getY(), u, renderV, button.width, button.height, textureWidth, textureHeight);
+                context.drawTexture(RenderLayer::getGuiTextured, texture, button.getX(), button.getY(), u, renderV, button.width, button.height, textureWidth, textureHeight);
             };
         }
 

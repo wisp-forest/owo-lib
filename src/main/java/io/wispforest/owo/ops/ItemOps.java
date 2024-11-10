@@ -119,7 +119,7 @@ public final class ItemOps {
     public static void store(RegistryWrapper.WrapperLookup registries, ItemStack stack, NbtCompound nbt, String key) {
         if (stack.isEmpty()) return;
 
-        nbt.put(key, stack.encode(registries));
+        nbt.put(key, stack.toNbt(registries));
     }
 
     /**

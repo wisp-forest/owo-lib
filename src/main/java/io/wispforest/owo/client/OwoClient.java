@@ -11,9 +11,16 @@ import io.wispforest.owo.shader.BlurProgram;
 import io.wispforest.owo.shader.GlProgram;
 import io.wispforest.owo.ui.parsing.UIModelLoader;
 import io.wispforest.owo.ui.util.NinePatchTexture;
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.render.VertexFormats;
+import net.minecraft.resource.ResourceManager;
+import net.minecraft.resource.ResourceType;
+import net.minecraft.resource.SinglePreparationResourceReloader;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
+import net.minecraft.util.profiler.Profiler;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.IEventBus;
@@ -61,6 +68,10 @@ public class OwoClient {
         modBus.addListener((RegisterClientReloadListenersEvent event) -> {
             event.registerReloadListener(new UIModelLoader());
             event.registerReloadListener(new NinePatchTexture.MetadataLoader());
+            event.registerReloadListener(new SinglePreparationResourceReloader<>() {
+                @Override protected Object prepare(ResourceManager manager, Profiler profiler) { return null; }
+                @Override protected void apply(Object prepared, ResourceManager manager, Profiler profiler) { GlProgram.loadAndSetupPrograms(); }
+            });
         });
 
         final var renderdocPath = System.getProperty("owo.renderdocPath");
@@ -82,8 +93,9 @@ public class OwoClient {
             OwoConfigCommand.register(event.getDispatcher(), event.getBuildContext());
         });
 
-        if (!Owo.DEBUG) return;
-        OwoDebugCommands.Client.register();
+        if (Owo.DEBUG) {
+            OwoDebugCommands.Client.register();
+        }
 
         modBus.addListener(FMLClientSetupEvent.class, event -> {
             ConfigScreenProviders.forEach((modId, screenFactory) -> {

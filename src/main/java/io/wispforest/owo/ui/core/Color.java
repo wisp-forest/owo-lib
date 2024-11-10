@@ -1,6 +1,7 @@
 package io.wispforest.owo.ui.core;
 
 import com.google.common.collect.ImmutableMap;
+import io.wispforest.endec.Endec;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Formatting;
@@ -14,6 +15,11 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public record Color(float red, float green, float blue, float alpha) implements Animatable<Color> {
+
+    public static final Endec<Color> RGBA_HEX_ENDEC = Endec.STRING.xmap(
+            string -> Color.ofArgb(Integer.parseUnsignedInt(string.substring(1), 16)),
+            color -> color.asHexString(true)
+    );
 
     public static final Color BLACK = Color.ofRgb(0);
     public static final Color WHITE = Color.ofRgb(0xFFFFFF);

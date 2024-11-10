@@ -7,5 +7,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(RegistryOps.CachedRegistryInfoGetter.class)
 public interface CachedRegistryInfoGetterAccessor {
-    @Accessor("registriesLookup") RegistryWrapper.WrapperLookup owo$getRegistriesLookup();
+    @Accessor("registries") RegistryWrapper.WrapperLookup owo$getRegistriesLookup();
 }

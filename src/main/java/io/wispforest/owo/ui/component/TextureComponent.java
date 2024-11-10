@@ -2,10 +2,7 @@ package io.wispforest.owo.ui.component;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.base.BaseComponent;
-import io.wispforest.owo.ui.core.AnimatableProperty;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
-import io.wispforest.owo.ui.core.PositionedRectangle;
-import io.wispforest.owo.ui.core.Sizing;
+import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import net.minecraft.util.Identifier;
@@ -70,16 +67,17 @@ public class TextureComponent extends BaseComponent {
         int bottomEdge = Math.min(visibleArea.y() + visibleArea.height(), regionHeight);
         int rightEdge = Math.min(visibleArea.x() + visibleArea.width(), regionWidth);
 
-        context.drawTexture(this.texture,
-                visibleArea.x(),
-                visibleArea.y(),
-                rightEdge - visibleArea.x(),
-                bottomEdge - visibleArea.y(),
-                this.u + visibleArea.x(),
-                this.v + visibleArea.y(),
-                rightEdge - visibleArea.x(),
-                bottomEdge - visibleArea.y(),
-                this.textureWidth, this.textureHeight
+        context.drawTexture(identifier -> OwoUIRenderLayers.getGuiTextured(identifier, this.blend),
+            this.texture,
+            visibleArea.x(),
+            visibleArea.y(),
+            this.u + visibleArea.x(),
+            this.v + visibleArea.y(),
+            rightEdge - visibleArea.x(),
+            bottomEdge - visibleArea.y(),
+            rightEdge - visibleArea.x(),
+            bottomEdge - visibleArea.y(),
+            this.textureWidth, this.textureHeight
         );
 
         if (this.blend) {

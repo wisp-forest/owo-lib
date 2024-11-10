@@ -28,7 +28,7 @@ public class BlurProgram extends GlProgram {
 
         WindowResizeCallback.EVENT.register((client, window) -> {
             if (this.input == null) return;
-            this.input.resize(window.getFramebufferWidth(), window.getFramebufferHeight(), MinecraftClient.IS_SYSTEM_MAC);
+            this.input.resize(window.getFramebufferWidth(), window.getFramebufferHeight());
         });
     }
 
@@ -48,7 +48,7 @@ public class BlurProgram extends GlProgram {
         buffer.beginWrite(false);
 
         this.inputResolution.set((float) buffer.textureWidth, (float) buffer.textureHeight);
-        this.backingProgram.addSampler("InputSampler", this.input.getColorAttachment());
+        this.backingProgram.addSamplerTexture("InputSampler", this.input.getColorAttachment());
 
         super.use();
     }
@@ -61,6 +61,6 @@ public class BlurProgram extends GlProgram {
         this.size = this.findUniform("Size");
 
         var window = MinecraftClient.getInstance().getWindow();
-        this.input = new SimpleFramebuffer(window.getFramebufferWidth(), window.getFramebufferHeight(), false, MinecraftClient.IS_SYSTEM_MAC);
+        this.input = new SimpleFramebuffer(window.getFramebufferWidth(), window.getFramebufferHeight(), false);
     }
 }

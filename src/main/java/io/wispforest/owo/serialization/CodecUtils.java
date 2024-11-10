@@ -21,6 +21,7 @@ import io.wispforest.owo.mixin.ForwardingDynamicOpsAccessor;
 import io.wispforest.owo.mixin.RegistryOpsAccessor;
 import io.wispforest.owo.serialization.endec.EitherEndec;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
+import io.wispforest.owo.serialization.endec.StructEitherEndec;
 import io.wispforest.owo.serialization.format.ContextHolder;
 import io.wispforest.owo.serialization.format.DynamicOpsWithContext;
 import io.wispforest.owo.serialization.format.edm.EdmOps;
@@ -173,6 +174,26 @@ public class CodecUtils {
         return new EitherEndec<>(first, second, true);
     }
 
+    /**
+     * Create a structured endec which serializes an instance of {@link Either}, using {@code first}
+     * for the left and {@code second} for the right variant
+     * <p>
+     * In a self-describing format, the serialized representation is simply that of the endec of
+     * whichever variant is represented. In the general for non-self-described formats, the
+     * which variant is represented must also be stored
+     */
+    public static <F, S> StructEndec<Either<F, S>> eitherStructEndec(StructEndec<F> first, StructEndec<S> second) {
+        return new StructEitherEndec<>(first, second, false);
+    }
+
+    /**
+     * Like {@link #eitherStructEndec(StructEndec, StructEndec)}, but ensures when decoding from a self-described format
+     * that only {@code first} or {@code second}, but not both, succeed
+     */
+    public static <F, S> StructEndec<Either<F, S>> xorStructEndec(StructEndec<F> first, StructEndec<S> second) {
+        return new StructEitherEndec<>(first, second, true);
+    }
+
     //--
 
     /**
@@ -250,7 +271,7 @@ public class CodecUtils {
                             );
                         });
 
-                        return structEndec.decode(context, LenientEdmDeserializer.of(EdmElement.wrapMap(map)));
+                        return structEndec.decode(context, LenientEdmDeserializer.of(EdmElement.consumeMap(map)));
                     }
                 });
             }

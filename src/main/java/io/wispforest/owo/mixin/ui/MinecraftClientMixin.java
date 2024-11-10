@@ -44,7 +44,7 @@ public class MinecraftClientMixin {
         ClientRenderCallback.BEFORE.invoker().onRender((MinecraftClient) (Object) this);
     }
 
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/Window;swapBuffers()V", shift = At.Shift.AFTER))
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/Window;swapBuffers(Lnet/minecraft/client/util/tracy/TracyFrameCapturer;)V", shift = At.Shift.AFTER))
     private void afterRender(boolean tick, CallbackInfo ci) {
         ClientRenderCallback.AFTER.invoker().onRender((MinecraftClient) (Object) this);
     }
