@@ -5,6 +5,7 @@ import io.wispforest.endec.impl.ReflectiveEndecBuilder;
 import io.wispforest.owo.mixin.ServerCommonNetworkHandlerAccessor;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.StructEndec;
+import io.wispforest.owo.network.neoforge.NeoOwoNetworking;
 import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.util.OwoFreezer;
@@ -13,16 +14,11 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.ClientConnection;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
@@ -30,9 +26,11 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.neoforge.network.registration.NetworkRegistry;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -152,17 +150,18 @@ public class OwoNetChannel {
             )
             .xmap(x -> new MessagePayload(this.packetId, x), x -> x.message);
 
-        PayloadTypeRegistry.playC2S().register(this.packetId, CodecUtils.toPacketCodec(serverEndec));
-        PayloadTypeRegistry.playS2C().register(this.packetId, CodecUtils.toPacketCodec(clientEndec));
+        NeoOwoNetworking.registerMessageCodecs(this.packetId, CodecUtils.toPacketCodec(serverEndec), CodecUtils.toPacketCodec(clientEndec));
 
-        ServerPlayNetworking.registerGlobalReceiver(this.packetId, (payload, context) -> {
-            serverHandlers.get(endecsByClass.get(payload.message().getClass()).serverHandlerIndex).handle(payload.message, new ServerAccess(context.player()));
+        NeoOwoNetworking.registerServerMessageHandler(this.packetId, (payload, player) -> {
+            serverHandlers.get(endecsByClass.get(payload.message().getClass()).serverHandlerIndex).handle(payload.message, new ServerAccess((ServerPlayerEntity) player));
         });
 
         if (FMLLoader.getDist() == Dist.CLIENT) {
-            ClientPlayNetworking.registerGlobalReceiver(this.packetId, (payload, context) -> {
-                clientHandlers.get(endecsByClass.get(payload.message.getClass()).clientHandlerIndex).handle(payload.message, new ClientAccess(context.player().networkHandler));
+            NeoOwoNetworking.registerClientMessageHandler(this.packetId, (payload, player) -> {
+                clientHandlers.get(endecsByClass.get(payload.message.getClass()).clientHandlerIndex).handle(payload.message, new ClientAccess(((ClientPlayerEntity) player).networkHandler));
             });
+        } else {
+            NeoOwoNetworking.registerClientMessageHandler(this.packetId, NeoOwoNetworking.PayloadHandler.empty());
         }
 
         clientHandlers.add(null);
@@ -312,7 +311,7 @@ public class OwoNetChannel {
 
         return OwoHandshake.isValidClient() ?
                 getChannelSet(((ServerCommonNetworkHandlerAccessor) networkHandler).owo$getConnection()).contains(this.packetId.id())
-                : ServerPlayNetworking.canSend(networkHandler, this.packetId);
+                : NetworkRegistry.hasChannel(networkHandler, this.packetId.id());
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -321,7 +320,7 @@ public class OwoNetChannel {
 
         return OwoHandshake.isValidClient() ?
                 getChannelSet(MinecraftClient.getInstance().getNetworkHandler().getConnection()).contains(this.packetId.id())
-                : ClientPlayNetworking.canSend(this.packetId);
+                : NetworkRegistry.hasChannel(MinecraftClient.getInstance().getNetworkHandler(), this.packetId.id());
     }
 
     private static Set<Identifier> getChannelSet(ClientConnection connection) {
@@ -353,22 +352,21 @@ public class OwoNetChannel {
      * to all players on the given server
      */
     public ServerHandle serverHandle(MinecraftServer server) {
+        Objects.requireNonNull(server, "The server cannot be null");
         var handle = getServerHandle();
-        handle.targets = PlayerLookup.all(server);
+        handle.targets = Collections.unmodifiableCollection(server.getPlayerManager().getPlayerList());
         return handle;
     }
 
     /**
      * Obtains a server handle used to send packets
-     * <i>to all given players</i>. Use {@link PlayerLookup} to obtain
-     * the required collections
+     * <i>to all given players</i>.
      * <p>
      * <b>This handle will be reused - do not retain references</b>
      *
      * @param targets The players to target
      * @return A server handle configured for sending packets
      * to all players in the given collection
-     * @see PlayerLookup
      */
     public ServerHandle serverHandle(Collection<ServerPlayerEntity> targets) {
         var handle = getServerHandle();
@@ -406,7 +404,7 @@ public class OwoNetChannel {
      */
     public ServerHandle serverHandle(BlockEntity entity) {
         if (entity.getWorld().isClient) throw new NetworkException("Server handle cannot be obtained on the client");
-        return serverHandle(PlayerLookup.tracking(entity));
+        return serverHandle((ServerWorld) entity.getWorld(), entity.getPos());
     }
 
     /**
@@ -421,7 +419,7 @@ public class OwoNetChannel {
      * to all players tracking the given position in the given world
      */
     public ServerHandle serverHandle(ServerWorld world, BlockPos pos) {
-        return serverHandle(PlayerLookup.tracking(world, pos));
+        return serverHandle(Collections.unmodifiableCollection(world.getChunkManager().chunkLoadingManager.getPlayersWatchingChunk(new ChunkPos(pos), false)));
     }
 
     private ServerHandle getServerHandle() {
@@ -454,7 +452,7 @@ public class OwoNetChannel {
          * @see #send(Record[])
          */
         public <R extends Record> void send(R message) {
-            ClientPlayNetworking.send(new MessagePayload(packetId, message));
+            MinecraftClient.getInstance().getNetworkHandler().send(new MessagePayload(packetId, message));
         }
 
         /**
@@ -481,7 +479,7 @@ public class OwoNetChannel {
          * @see #send(Record[])
          */
         public <R extends Record> void send(R message) {
-            this.targets.forEach(player -> ServerPlayNetworking.send(player, new MessagePayload(packetId, message)));
+            this.targets.forEach(player -> player.networkHandler.send(new MessagePayload(packetId, message)));
             this.targets = null;
         }
 
@@ -496,7 +494,7 @@ public class OwoNetChannel {
         public final <R extends Record> void send(R... messages) {
             this.targets.forEach(player -> {
                 for (R message : messages) {
-                    ServerPlayNetworking.send(player, new MessagePayload(packetId, message));
+                    player.networkHandler.send(new MessagePayload(packetId, message));
                 }
             });
             this.targets = null;
@@ -597,7 +595,7 @@ public class OwoNetChannel {
         }
     }
 
-    record MessagePayload(CustomPayload.Id<MessagePayload> id, Record message) implements CustomPayload {
+    public record MessagePayload(CustomPayload.Id<MessagePayload> id, Record message) implements CustomPayload {
         @Override
         public Id<? extends CustomPayload> getId() {
             return id;

@@ -43,7 +43,6 @@ import io.wispforest.uwu.config.UwuConfig;
 import io.wispforest.uwu.items.UwuItems;
 import io.wispforest.uwu.network.*;
 import io.wispforest.uwu.text.BasedTextContent;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
@@ -55,6 +54,7 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.Registries;
@@ -133,7 +133,7 @@ public class Uwu {
 
     public static final UwuConfig CONFIG = UwuConfig.createAndLoad();
     public static final BruhConfig BRUHHHHH = BruhConfig.createAndLoad(builder -> {
-        builder.registerSerializer(Color.class, (color, marshaller) -> new JsonPrimitive("bruv"));
+        builder.janksonBuilder().registerSerializer(Color.class, (color, marshaller) -> new JsonPrimitive("bruv"));
     });
 
     public Uwu(IEventBus eventBus) {
@@ -196,7 +196,7 @@ public class Uwu {
             });
 
             event.register(RegistryKeys.ITEM, helper -> {
-                FieldRegistrationHandler.register(UwuItems.class, "uwu", true);
+                UwuItems.init();
             });
         });
 
@@ -214,13 +214,11 @@ public class Uwu {
         var stacknite = stackEndec.decode(SerializationContext.empty(), GsonDeserializer.of(new Gson().fromJson(stackData, JsonObject.class)));
         System.out.println(stacknite);
 
-        var serializer = ByteBufSerializer.of(PacketByteBufs.create());
+        var serializer = ByteBufSerializer.of(new PacketByteBuf(Unpooled.buffer()));
         stackEndec.encode(SerializationContext.empty(), serializer, stacknite);
 
         System.out.println(serializer.result().read(SerializationContext.empty(), stackEndec));
         System.out.println(CodecUtils.toCodec(MinecraftEndecs.BLOCK_POS).encodeStart(NbtOps.INSTANCE, new BlockPos(34, 35, 69)).result().get());
-
-        UwuItems.init();
 
         TagInjector.inject(Registries.BLOCK, BlockTags.BASE_STONE_OVERWORLD.id(), Blocks.GLASS);
         TagInjector.injectTagReference(Registries.ITEM, ItemTags.COALS.id(), ItemTags.FOX_FOOD.id());

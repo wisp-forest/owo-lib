@@ -68,9 +68,9 @@ public class OwoClient {
         modBus.addListener((RegisterClientReloadListenersEvent event) -> {
             event.registerReloadListener(new UIModelLoader());
             event.registerReloadListener(new NinePatchTexture.MetadataLoader());
-            event.registerReloadListener(new SinglePreparationResourceReloader<>() {
-                @Override protected Object prepare(ResourceManager manager, Profiler profiler) { return null; }
-                @Override protected void apply(Object prepared, ResourceManager manager, Profiler profiler) { GlProgram.loadAndSetupPrograms(); }
+            event.registerReloadListener(new SinglePreparationResourceReloader<Void>() {
+                @Override protected Void prepare(ResourceManager manager, Profiler profiler) { return null; }
+                @Override protected void apply(Void prepared, ResourceManager manager, Profiler profiler) { GlProgram.loadAndSetupPrograms(); }
             });
         });
 
