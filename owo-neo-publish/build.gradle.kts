@@ -37,10 +37,7 @@ dependencies {
 
     api("blue.endless:jankson:${project.property("jankson_version")}")
 
-    api("org.sinytra:forgified-fabric-loader:${project.property("loader_version")}:full")
     api("org.sinytra.forgified-fabric-api:fabric-api-base:0.4.42+d1308dedd1") { exclude(group = "fabric-api")  }
-    api("org.sinytra.forgified-fabric-api:fabric-networking-api-v1:4.2.2+a92978fd19") { exclude(group = "fabric-api") }
-    api("org.sinytra.forgified-fabric-api:fabric-screen-api-v1:2.0.24+79a4c2b0d1") { exclude(group = "fabric-api") }
 }
 
 neoForge {

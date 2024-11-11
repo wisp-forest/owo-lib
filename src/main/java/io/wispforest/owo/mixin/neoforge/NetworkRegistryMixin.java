@@ -1,27 +1,25 @@
 package io.wispforest.owo.mixin.neoforge;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import io.wispforest.owo.network.neoforge.SidedPacketCodec;
 import net.minecraft.network.NetworkSide;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.neoforged.neoforge.network.registration.NetworkRegistry;
-import net.neoforged.neoforge.network.registration.PayloadRegistration;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(value = NetworkRegistry.class, remap = false)
+@Mixin(value = NetworkRegistry.class)
 public class NetworkRegistryMixin {
 
-    @WrapOperation(method = "getCodec", at = @At(value = "INVOKE", target = "Lnet/neoforged/neoforge/network/registration/PayloadRegistration;codec()Lnet/minecraft/network/codec/PacketCodec;"))
-    private static PacketCodec owo$unpackSidedCodec(PayloadRegistration instance, Operation<PacketCodec> original, @Local(argsOnly = true) NetworkSide flow) {
-        var codec = original.call(instance);
-
-        if (codec instanceof SidedPacketCodec<?> sidedPacketCodec) {
-            codec = sidedPacketCodec.getCodec(flow);
+    @ModifyReturnValue(method = "getCodec", at = @At(value = "RETURN", ordinal = 3))
+    private static PacketCodec<? super PacketByteBuf, ? extends CustomPayload> owo$unpackSidedCodec(PacketCodec<? super PacketByteBuf, ? extends CustomPayload> original, @Local(argsOnly = true) NetworkSide flow) {
+        if (original instanceof SidedPacketCodec<?> sidedPacketCodec) {
+            original = (PacketCodec<? super PacketByteBuf, ? extends CustomPayload>) sidedPacketCodec.getCodec(flow);
         }
 
-        return codec;
+        return original;
     }
 }
