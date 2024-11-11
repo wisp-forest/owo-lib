@@ -4,6 +4,7 @@ import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.mixin.ClientCommonNetworkHandlerAccessor;
 import io.wispforest.owo.mixin.ServerCommonNetworkHandlerAccessor;
+import io.wispforest.owo.network.neoforge.SidedPacketCodec;
 import io.wispforest.owo.ops.TextOps;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
 import io.wispforest.endec.Endec;
@@ -11,14 +12,9 @@ import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.ServicesFrozenException;
-import net.fabricmc.fabric.api.client.networking.v1.ClientConfigurationConnectionEvents;
-import net.fabricmc.fabric.api.client.networking.v1.ClientConfigurationNetworking;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-import net.fabricmc.fabric.api.networking.v1.ServerConfigurationConnectionEvents;
-import net.fabricmc.fabric.api.networking.v1.ServerConfigurationNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientConfigurationNetworkHandler;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.MinecraftServer;
@@ -29,9 +25,12 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.neoforge.network.event.RegisterConfigurationTasksEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.neoforged.neoforge.network.handling.ServerPayloadContext;
+import net.neoforged.neoforge.network.registration.NetworkRegistry;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import org.jetbrains.annotations.ApiStatus;
-import org.sinytra.fabric.networking_api.client.NeoClientConfigurationNetworking;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -72,32 +71,37 @@ public final class OwoHandshake {
         HANDSHAKE_REQUIRED = true;
     }
 
-    static {
-        PayloadTypeRegistry.configurationS2C().register(HandshakeRequest.ID, CodecUtils.toPacketCodec(HandshakeRequest.ENDEC));
-        PayloadTypeRegistry.configurationC2S().register(HandshakeResponse.ID, CodecUtils.toPacketCodec(HandshakeResponse.ENDEC));
+    public static void register(PayloadRegistrar registrar) {
+        registrar.configurationBidirectional(
+                new CustomPayload.Id<CustomPayload>(OwoHandshake.CHANNEL_ID),
+                new SidedPacketCodec<CustomPayload>(
+                        CodecUtils.toPacketCodec(HandshakeResponse.ENDEC.xmap(response -> response, customPayload -> (HandshakeResponse) customPayload)),
+                        CodecUtils.toPacketCodec(HandshakeRequest.ENDEC.xmap(request -> request, customPayload -> (HandshakeRequest) customPayload))
+                ),
+                (payload, context) -> {
+                    if (payload instanceof HandshakeRequest request) {
+                        OwoHandshake.syncClient(request, context);
+                    } else if (payload instanceof HandshakeResponse response) {
+                        OwoHandshake.syncServer(response, context);
+                    } else {
+                        throw new IllegalStateException("OWO_NEO: HOW DID YOU GET HERE!");
+                    }
+                }
+        );
 
-        ServerConfigurationConnectionEvents.CONFIGURE.register(OwoHandshake::configureStart);
-        ServerConfigurationNetworking.registerGlobalReceiver(HandshakeResponse.ID, OwoHandshake::syncServer);
+        Owo.getModBus().addListener((RegisterConfigurationTasksEvent event) -> {
+            var listener = (ServerConfigurationNetworkHandler) event.getListener();
+            OwoHandshake.configureStart(listener, ((ServerCommonNetworkHandlerAccessor) listener).owo$server());
+        });
 
-        if (FMLLoader.getDist() == Dist.CLIENT) {
-            if (!ENABLED) {
-                PayloadTypeRegistry.configurationS2C().register(HandshakeOff.ID, PacketCodec.unit(new HandshakeOff()));
-                ClientConfigurationNetworking.registerGlobalReceiver(HandshakeOff.ID, (payload, context) -> {});
-            }
-
-            ClientConfigurationNetworking.registerGlobalReceiver(HandshakeRequest.ID, OwoHandshake::syncClient);
-            ClientConfigurationConnectionEvents.READY.register(OwoHandshake::handleReadyClient);
-
-            ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
-                QUERY_RECEIVED = false;
-                QueuedChannelSet.channels = null;
-            });
-
-            ClientConfigurationConnectionEvents.DISCONNECT.register((handler, client) -> {
-                QUERY_RECEIVED = false;
-                QueuedChannelSet.channels = null;
-            });
+        if (!ENABLED) {
+            registrar.configurationToClient(HandshakeOff.ID, PacketCodec.unit(new HandshakeOff()), (payload, context) -> {});
         }
+    }
+
+    public static void onDisconnect() {
+        QUERY_RECEIVED = false;
+        QueuedChannelSet.channels = null;
     }
 
     public static boolean isValidClient() {
@@ -111,12 +115,12 @@ public final class OwoHandshake {
     private static void configureStart(ServerConfigurationNetworkHandler handler, MinecraftServer server) {
         if (!ENABLED) return;
 
-        if (ServerConfigurationNetworking.canSend(handler, OFF_CHANNEL_ID)) {
+        if (NetworkRegistry.hasChannel(handler, OFF_CHANNEL_ID)) {
             Owo.LOGGER.info("[Handshake] Handshake disabled by client, skipping");
             return;
         }
 
-        if (!ServerConfigurationNetworking.canSend(handler, CHANNEL_ID)) {
+        if (!NetworkRegistry.hasChannel(handler, CHANNEL_ID)) {
             if (!HANDSHAKE_REQUIRED) return;
 
             handler.disconnect(TextOps.concat(PREFIX, Text.of("incompatible client")));
@@ -125,12 +129,12 @@ public final class OwoHandshake {
         }
 
         var optionalChannels = formatHashes(OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel);
-        ServerConfigurationNetworking.send(handler, new HandshakeRequest(optionalChannels));
+        handler.send(new HandshakeRequest(optionalChannels));
         Owo.LOGGER.info("[Handshake] Sending channel packet");
     }
 
     @OnlyIn(Dist.CLIENT)
-    private static void syncClient(HandshakeRequest request, ClientConfigurationNetworking.Context context) {
+    private static void syncClient(HandshakeRequest request, IPayloadContext context) {
         Owo.LOGGER.info("[Handshake] Sending client channels");
         QUERY_RECEIVED = true;
 
@@ -140,10 +144,10 @@ public final class OwoHandshake {
         var requiredControllers = formatHashes(ParticleSystemController.REGISTERED_CONTROLLERS, OwoHandshake::hashController);
         var optionalChannels = formatHashes(OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel);
 
-        context.responseSender().sendPacket(new HandshakeResponse(requiredChannels, requiredControllers, optionalChannels));
+        context.reply(new HandshakeResponse(requiredChannels, requiredControllers, optionalChannels));
     }
 
-    private static void syncServer(HandshakeResponse response, ServerConfigurationNetworking.Context context) {
+    private static void syncServer(HandshakeResponse response, IPayloadContext context) {
         Owo.LOGGER.info("[Handshake] Receiving client channels");
 
         StringBuilder disconnectMessage = new StringBuilder();
@@ -152,18 +156,18 @@ public final class OwoHandshake {
         isAllGood &= verifyReceivedHashes("controllers", response.requiredControllers(), ParticleSystemController.REGISTERED_CONTROLLERS, OwoHandshake::hashController, disconnectMessage);
 
         if (!isAllGood) {
-            context.responseSender().disconnect(TextOps.concat(PREFIX, Text.of(disconnectMessage.toString())));
+            context.disconnect(TextOps.concat(PREFIX, Text.of(disconnectMessage.toString())));
         }
 
-        ((OwoClientConnectionExtension) ((ServerCommonNetworkHandlerAccessor) context.networkHandler()).owo$getConnection()).owo$setChannelSet(filterOptionalServices(response.optionalChannels(), OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel));
+        ((OwoClientConnectionExtension) ((ServerCommonNetworkHandlerAccessor) ((ServerPayloadContext)context).listener()).owo$getConnection()).owo$setChannelSet(filterOptionalServices(response.optionalChannels(), OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel));
 
         Owo.LOGGER.info("[Handshake] Handshake completed successfully");
     }
 
     @OnlyIn(Dist.CLIENT)
-    private static void handleReadyClient(ClientConfigurationNetworkHandler handler, MinecraftClient client) {
+    public static void handleReadyClient(ClientConfigurationNetworkHandler handler, MinecraftClient client) {
         // TODO: Report issues with ClientConfigurationNetworking.canSend(CHANNEL_ID)
-        if (NeoClientConfigurationNetworking.canSend(CHANNEL_ID) || !HANDSHAKE_REQUIRED || !ENABLED) return;
+        if (NetworkRegistry.hasChannel(handler, CHANNEL_ID) || !HANDSHAKE_REQUIRED || !ENABLED) return;
 
         client.execute(() -> {
             ((ClientCommonNetworkHandlerAccessor) handler)

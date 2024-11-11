@@ -8,6 +8,7 @@ import net.minecraft.client.render.VertexFormat;
 import net.minecraft.resource.ResourceFactory;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
+import net.neoforged.fml.ModLoader;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -85,7 +86,7 @@ public class GlProgram {
 
     @ApiStatus.Internal
     public static void forEachProgram(Consumer<Pair<Function<ResourceFactory, ShaderProgram>, Consumer<ShaderProgram>>> loader) {
-        REGISTERED_PROGRAMS.forEach(loader);
+        if (!ModLoader.hasErrors()) REGISTERED_PROGRAMS.forEach(loader);
     }
 
     public static class OwoShaderProgram extends ShaderProgram {

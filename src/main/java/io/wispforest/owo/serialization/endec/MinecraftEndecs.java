@@ -1,12 +1,12 @@
 package io.wispforest.owo.serialization.endec;
 
 import com.mojang.datafixers.util.Function3;
+import io.netty.buffer.Unpooled;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.SerializationAttributes;
 import io.wispforest.endec.impl.ReflectiveEndecBuilder;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.serialization.CodecUtils;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.Registry;
@@ -31,7 +31,7 @@ public final class MinecraftEndecs {
 
     public static final Endec<PacketByteBuf> PACKET_BYTE_BUF = Endec.BYTES
             .xmap(bytes -> {
-                var buffer = PacketByteBufs.create();
+                var buffer = new PacketByteBuf(Unpooled.buffer());
                 buffer.writeBytes(bytes);
 
                 return buffer;
