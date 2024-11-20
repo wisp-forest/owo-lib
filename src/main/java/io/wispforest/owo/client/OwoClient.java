@@ -12,6 +12,8 @@ import io.wispforest.owo.shader.GlProgram;
 import io.wispforest.owo.ui.parsing.UIModelLoader;
 import io.wispforest.owo.ui.util.NinePatchTexture;
 import net.minecraft.client.render.VertexFormats;
+import net.minecraft.resource.ResourceManager;
+import net.minecraft.resource.SinglePreparationResourceReloader;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.neoforged.api.distmarker.Dist;
