@@ -62,11 +62,11 @@ public class Owo {
 
         Wisdom.spread();
 
-        if (!DEBUG) return;
-
-        OwoDebugCommands.register(modBus);
-
         modBus.addListener(NeoOwoNetworking::onNetworkRegister);
+
+        if (DEBUG) {
+            OwoDebugCommands.register(modBus);
+        }
     }
 
     @ApiStatus.Internal
