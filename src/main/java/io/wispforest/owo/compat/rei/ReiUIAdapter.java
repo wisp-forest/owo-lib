@@ -30,7 +30,9 @@ public class ReiUIAdapter<T extends ParentComponent> extends Widget {
         this.adapter = OwoUIAdapter.createWithoutScreen(bounds.x, bounds.y, bounds.width, bounds.height, rootComponentMaker);
         this.adapter.inspectorZOffset = 900;
 
-        if (MinecraftClient.getInstance().currentScreen != null) {
+        var screenWithREI = MinecraftClient.getInstance().currentScreen;
+
+        if (screenWithREI != null) {
             currentREIAdapters.computeIfAbsent(MinecraftClient.getInstance().currentScreen, screen -> new HashSet<>()).add(this.adapter);
         }
     }
@@ -114,6 +116,13 @@ public class ReiUIAdapter<T extends ParentComponent> extends Widget {
             var adapters = currentREIAdapters.remove(event.getScreen());
 
             if (adapters != null) adapters.forEach(OwoUIAdapter::dispose);
+        });
+        NeoForge.EVENT_BUS.<ScreenEvent.Render.Post>addListener((event) -> {
+            var adapters = currentREIAdapters.get(event.getScreen());
+
+            if (adapters != null) adapters.forEach(adapter -> {
+                adapter.drawTooltip(event.getGuiGraphics(), event.getMouseX(), event.getMouseY(), event.getPartialTick());
+            });
         });
     }
 }

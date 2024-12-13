@@ -93,6 +93,10 @@ public final class Layers {
             for (var instance : getInstances(event.getScreen())) {
                 instance.adapter.render(event.getGuiGraphics(), event.getMouseX(), event.getMouseY(), event.getPartialTick());
             }
+
+            for (var instance : getInstances(event.getScreen())) {
+                instance.adapter.drawTooltip(event.getGuiGraphics(), event.getMouseX(), event.getMouseY(), event.getPartialTick());
+            }
         });
 
         NeoForge.EVENT_BUS.<ScreenEvent.MouseButtonPressed.Pre>addListener(EventPriority.LOW, (event) -> {

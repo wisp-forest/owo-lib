@@ -10,3 +10,7 @@ transitive-extendable method net/minecraft/client/gui/widget/CheckboxWidget <ini
 accessible class net/minecraft/registry/RegistryOps$CachedRegistryInfoGetter
 
 accessible class net/minecraft/server/world/ServerChunkLoadingManager$EntityTracker
+
+extendable method net/minecraft/client/gui/screen/ingame/HandledScreen drawSlotHighlightBack (Lnet/minecraft/client/gui/DrawContext;)V
+extendable method net/minecraft/client/gui/screen/ingame/HandledScreen drawSlotHighlightFront (Lnet/minecraft/client/gui/DrawContext;)V
+extendable method net/minecraft/client/gui/screen/ingame/HandledScreen drawItem (Lnet/minecraft/client/gui/DrawContext;Lnet/minecraft/item/ItemStack;IILjava/lang/String;)V
