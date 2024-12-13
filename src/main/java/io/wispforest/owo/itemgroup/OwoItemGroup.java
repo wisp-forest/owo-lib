@@ -454,4 +454,10 @@ public abstract class OwoItemGroup extends ItemGroup {
         }
 
     }
+
+    // Here to trick neo to actually always care about owo item groups even if it might be empty
+    @Override
+    public boolean hasStacks() {
+        return true;
+    }
 }
