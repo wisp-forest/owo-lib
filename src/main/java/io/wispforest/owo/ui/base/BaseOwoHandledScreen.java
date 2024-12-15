@@ -92,10 +92,6 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
                 this.invalid = true;
             }
         }
-
-        ScreenEvents.afterRender(this).register((screen, drawContext, mouseX, mouseY, tickDelta) -> {
-            if (this.uiAdapter != null) this.uiAdapter.drawTooltip(drawContext, mouseX, mouseY, tickDelta);
-        });
     }
 
     /**
