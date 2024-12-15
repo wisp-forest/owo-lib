@@ -99,6 +99,10 @@ public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen im
                 this.invalid = true;
             }
         }
+
+        ScreenEvents.afterRender(this).register((screen, drawContext, mouseX, mouseY, tickDelta) -> {
+            if (this.uiAdapter != null) this.uiAdapter.drawTooltip(drawContext, mouseX, mouseY, tickDelta);
+        });
     }
 
     /**
