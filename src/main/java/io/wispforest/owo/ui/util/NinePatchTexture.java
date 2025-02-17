@@ -261,8 +261,7 @@ public class NinePatchTexture {
             super(CodecUtils.toCodec(NinePatchTexture.ENDEC), ResourceFinder.json("nine_patch_textures"));
         }
 
-//        @Override
-        public Identifier getFabricId() {
+        public static Identifier getFabricId() {
             return Identifier.of("owo", "nine_patch_metadata");
         }
 

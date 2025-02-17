@@ -23,8 +23,8 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
-import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.ApiStatus;
@@ -61,10 +61,10 @@ public class OwoClient {
         ModDataLoader.load(OwoItemGroupLoader.INSTANCE);
         OwoItemGroupLoader.initItemGroupCallback();
 
-        modBus.addListener((RegisterClientReloadListenersEvent event) -> {
-            event.registerReloadListener(new UIModelLoader());
-            event.registerReloadListener(new NinePatchTexture.MetadataLoader());
-            event.registerReloadListener(new SinglePreparationResourceReloader<Void>() {
+        modBus.addListener((AddClientReloadListenersEvent event) -> {
+            event.addListener(UIModelLoader.getFabricId(), new UIModelLoader());
+            event.addListener(NinePatchTexture.MetadataLoader.getFabricId(), new NinePatchTexture.MetadataLoader());
+            event.addListener(Identifier.of("owo", "after_shader_load"), new SinglePreparationResourceReloader<Void>() {
                 @Override protected Void prepare(ResourceManager manager, Profiler profiler) { return null; }
                 @Override protected void apply(Void prepared, ResourceManager manager, Profiler profiler) { GlProgram.loadAndSetupPrograms(); }
             });

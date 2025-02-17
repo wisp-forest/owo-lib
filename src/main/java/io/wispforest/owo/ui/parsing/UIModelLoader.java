@@ -98,6 +98,10 @@ public class UIModelLoader implements SynchronousResourceReloader {
         return Collections.unmodifiableSet(LOADED_MODELS.keySet());
     }
 
+    public static Identifier getFabricId() {
+        return Identifier.of("owo", "ui-model-loader");
+    }
+
     @Override
     public void reload(ResourceManager manager) {
         LOADED_MODELS.clear();

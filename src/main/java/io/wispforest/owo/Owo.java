@@ -5,6 +5,7 @@ import io.wispforest.owo.command.debug.OwoDebugCommands;
 import io.wispforest.owo.network.neoforge.NeoOwoNetworking;
 import io.wispforest.owo.ops.LootOps;
 import io.wispforest.owo.util.OwoFreezer;
+import io.wispforest.owo.util.RecipeRemainderStorage;
 import io.wispforest.owo.util.Wisdom;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
@@ -13,6 +14,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -63,6 +65,7 @@ public class Owo {
         Wisdom.spread();
 
         modBus.addListener(NeoOwoNetworking::onNetworkRegister);
+        NeoForge.EVENT_BUS.addListener(RecipeRemainderStorage::addReloadListener);
 
         if (DEBUG) {
             OwoDebugCommands.register(modBus);
