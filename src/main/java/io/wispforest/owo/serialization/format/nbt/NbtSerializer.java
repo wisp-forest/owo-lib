@@ -6,6 +6,8 @@ import net.minecraft.nbt.*;
 import net.minecraft.network.encoding.VarInts;
 import net.minecraft.network.encoding.VarLongs;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class NbtSerializer extends RecursiveSerializer<NbtElement> implements SelfDescribedSerializer<NbtElement> {
@@ -204,7 +206,32 @@ public class NbtSerializer extends RecursiveSerializer<NbtElement> implements Se
 
         @Override
         public void end() {
-            NbtSerializer.this.consume(this.result);
+            var convertedResult = switch (this.result.getHeldType()) {
+                case NbtElement.BYTE_TYPE -> {
+                    var list = new ArrayList<Byte>();
+                    for (var nbtElement : this.result) {
+                        list.add(((AbstractNbtNumber) nbtElement).byteValue());
+                    }
+                    yield new NbtByteArray(list);
+                }
+                case NbtElement.INT_TYPE -> {
+                    var list = new ArrayList<Integer>();
+                    for (var nbtElement : this.result) {
+                        list.add(((AbstractNbtNumber) nbtElement).intValue());
+                    }
+                    yield new NbtIntArray(list);
+                }
+                case NbtElement.LONG_TYPE -> {
+                    var list = new ArrayList<Long>();
+                    for (NbtElement nbtElement : this.result) {
+                        list.add(((AbstractNbtNumber) nbtElement).longValue());
+                    }
+                    yield new NbtLongArray(list);
+                }
+                default -> this.result;
+            };
+
+            NbtSerializer.this.consume(convertedResult);
         }
     }
 }
