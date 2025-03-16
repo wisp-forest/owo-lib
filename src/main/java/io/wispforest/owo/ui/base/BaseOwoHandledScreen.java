@@ -15,12 +15,15 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
+import java.util.ArrayList;
 import java.util.function.BiFunction;
+import java.util.stream.Stream;
 
 public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends ScreenHandler> extends HandledScreen<S> implements DisposableScreen {
 
@@ -95,7 +98,7 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
      * @param index The index of the slot to disable
      */
     protected void disableSlot(int index) {
-        ((OwoSlotExtension) this.handler.slots.get(index)).owo$setDisabledOverride(true);
+        this.disableSlot(this.handler.slots.get(index));
     }
 
     /**
@@ -115,7 +118,7 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
      * @param index The index of the slot to enable
      */
     protected void enableSlot(int index) {
-        ((OwoSlotExtension) this.handler.slots.get(index)).owo$setDisabledOverride(false);
+        this.enableSlot(this.handler.slots.get(index));
     }
 
     /**
@@ -124,15 +127,23 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
      * a slot that is disabled through its own will
      */
     protected void enableSlot(Slot slot) {
-        ((OwoSlotExtension) slot).owo$setDisabledOverride(true);
+        ((OwoSlotExtension) slot).owo$setDisabledOverride(false);
     }
 
+    /**
+     * @return whether the given slot is enabled or disabled
+     * using the {@link OwoSlotExtension} disabling functionality
+     */
     protected boolean isSlotEnabled(int index) {
-        return ((OwoSlotExtension) this.handler.slots.get(index)).owo$getDisabledOverride();
+        return isSlotEnabled(this.handler.slots.get(index));
     }
 
+    /**
+     * @return whether the given slot is enabled or disabled
+     * using the {@link OwoSlotExtension} disabling functionality
+     */
     protected boolean isSlotEnabled(Slot slot) {
-        return ((OwoSlotExtension) slot).owo$getDisabledOverride();
+        return !((OwoSlotExtension) slot).owo$getDisabledOverride();
     }
 
     /**
@@ -154,6 +165,24 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
         return this.uiAdapter.rootComponent.childById(expectedClass, id);
     }
 
+    /**
+     * Compute a stream of all components for which to
+     * generate exclusion areas in a recipe viewer overlay.
+     * Called by the REI and EMI plugins
+     */
+    @ApiStatus.OverrideOnly
+    public Stream<Component> componentsForExclusionAreas() {
+        if (this.children().isEmpty()) return Stream.of();
+
+        var rootComponent = uiAdapter.rootComponent;
+        var children = new ArrayList<Component>();
+
+        rootComponent.collectDescendants(children);
+        children.remove(rootComponent);
+
+        return children.stream().filter(component -> !(component instanceof ParentComponent parent) || parent.surface() != Surface.BLANK);
+    }
+
     @Override
     public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {}
 
@@ -171,12 +200,12 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
                     if (!slot.isEnabled()) continue;
 
                     context.drawText(Text.literal("H:" + i),
-                            this.x + slot.x + 15, this.y + slot.y + 9, .5f, 0x0096FF,
-                            OwoUIDrawContext.TextAnchor.BOTTOM_RIGHT
+                        this.x + slot.x + 15, this.y + slot.y + 9, .5f, 0x0096FF,
+                        OwoUIDrawContext.TextAnchor.BOTTOM_RIGHT
                     );
                     context.drawText(Text.literal("I:" + slot.getIndex()),
-                            this.x + slot.x + 15, this.y + slot.y + 15, .5f, 0x5800FF,
-                            OwoUIDrawContext.TextAnchor.BOTTOM_RIGHT
+                        this.x + slot.x + 15, this.y + slot.y + 15, .5f, 0x5800FF,
+                        OwoUIDrawContext.TextAnchor.BOTTOM_RIGHT
                     );
                 }
 
@@ -192,8 +221,8 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if ((modifiers & GLFW.GLFW_MOD_CONTROL) == 0
-                && this.uiAdapter.rootComponent.focusHandler().focused() instanceof GreedyInputComponent inputComponent
-                && inputComponent.onKeyPress(keyCode, scanCode, modifiers)) {
+            && this.uiAdapter.rootComponent.focusHandler().focused() instanceof GreedyInputComponent inputComponent
+            && inputComponent.onKeyPress(keyCode, scanCode, modifiers)) {
             return true;
         }
 
@@ -244,7 +273,7 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
             GL11.glGetIntegerv(GL11.GL_SCISSOR_BOX, scissor);
 
             ((OwoSlotExtension) this.slot).owo$setScissorArea(PositionedRectangle.of(
-                    scissor[0], scissor[1], scissor[2], scissor[3]
+                scissor[0], scissor[1], scissor[2], scissor[3]
             ));
         }
 
