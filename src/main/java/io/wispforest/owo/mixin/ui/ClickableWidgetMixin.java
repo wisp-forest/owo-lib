@@ -276,12 +276,14 @@ public abstract class ClickableWidgetMixin implements ComponentStub, net.minecra
 
     @Override
     public Component cursorStyle(CursorStyle style) {
-        return this.owo$getWrapper().cursorStyle(style);
+        this.owo$getWrapper().cursorStyle(style);
+        return this;
     }
 
     @Override
     public Component tooltip(List<TooltipComponent> tooltip) {
-        return this.owo$getWrapper().tooltip(tooltip);
+        this.owo$getWrapper().tooltip(tooltip);
+        return this;
     }
 
     @Override
@@ -291,7 +293,8 @@ public abstract class ClickableWidgetMixin implements ComponentStub, net.minecra
 
     @Override
     public Component zIndex(int zIndex) {
-        return this.owo$getWrapper().zIndex(zIndex);
+        this.owo$getWrapper().zIndex(zIndex);
+        return this;
     }
 
     @Override
