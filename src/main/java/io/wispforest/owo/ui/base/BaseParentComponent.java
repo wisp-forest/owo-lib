@@ -42,6 +42,7 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
         ParentComponent.super.update(delta, mouseX, mouseY);
         super.update(delta, mouseX, mouseY);
         this.parentUpdate(delta, mouseX, mouseY);
+        this.componentUpdateEvents.sink().onUpdate(delta, mouseX, mouseY);
 
         if (this.taskQueue != null) {
             this.taskQueue.forEach(Runnable::run);
@@ -238,15 +239,15 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
 
     @Override
     public boolean onKeyPress(int keyCode, int scanCode, int modifiers) {
-        if (this.focusHandler == null) return false;
-
-        if (keyCode == GLFW.GLFW_KEY_TAB) {
-            this.focusHandler.cycle((modifiers & GLFW.GLFW_MOD_SHIFT) == 0);
-        } else if ((keyCode == GLFW.GLFW_KEY_RIGHT || keyCode == GLFW.GLFW_KEY_LEFT || keyCode == GLFW.GLFW_KEY_DOWN || keyCode == GLFW.GLFW_KEY_UP)
-            && (modifiers & GLFW.GLFW_MOD_ALT) != 0) {
-            this.focusHandler.moveFocus(keyCode);
-        } else if (this.focusHandler.focused() != null) {
-            return this.focusHandler.focused().onKeyPress(keyCode, scanCode, modifiers);
+        if (this.focusHandler != null) {
+            if (keyCode == GLFW.GLFW_KEY_TAB) {
+                this.focusHandler.cycle((modifiers & GLFW.GLFW_MOD_SHIFT) == 0);
+            } else if ((keyCode == GLFW.GLFW_KEY_RIGHT || keyCode == GLFW.GLFW_KEY_LEFT || keyCode == GLFW.GLFW_KEY_DOWN || keyCode == GLFW.GLFW_KEY_UP)
+                    && (modifiers & GLFW.GLFW_MOD_ALT) != 0) {
+                this.focusHandler.moveFocus(keyCode);
+            } else if (this.focusHandler.focused() != null) {
+                return this.focusHandler.focused().onKeyPress(keyCode, scanCode, modifiers);
+            }
         }
 
         return super.onKeyPress(keyCode, scanCode, modifiers);
@@ -254,9 +255,7 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
 
     @Override
     public boolean onCharTyped(char chr, int modifiers) {
-        if (this.focusHandler == null) return false;
-
-        if (this.focusHandler.focused() != null) {
+        if (this.focusHandler != null && this.focusHandler.focused() != null) {
             return this.focusHandler.focused().onCharTyped(chr, modifiers);
         }
 

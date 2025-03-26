@@ -74,31 +74,25 @@ public interface PositionedRectangle extends Animatable<PositionedRectangle> {
         );
     }
 
+    static boolean areEqual(PositionedRectangle rect1, PositionedRectangle rect2) {
+        if (rect1 == rect2) return true;
+        return rect1.x() == rect2.x() &&
+                rect1.y() == rect2.y() &&
+                rect1.width() == rect2.width() &&
+                rect1.height() == rect2.height();
+    }
+
+    static <P extends PositionedRectangle> PositionedRectangle of(P rectangle) {
+        return of(rectangle.x(), rectangle.y(), rectangle.width(), rectangle.height());
+    }
+
     static PositionedRectangle of(int x, int y, Size size) {
         return of(x, y, size.width(), size.height());
     }
 
     static PositionedRectangle of(int x, int y, int width, int height) {
-        return new PositionedRectangle() {
-            @Override
-            public int x() {
-                return x;
-            }
-
-            @Override
-            public int y() {
-                return y;
-            }
-
-            @Override
-            public int width() {
-                return width;
-            }
-
-            @Override
-            public int height() {
-                return height;
-            }
-        };
+        return new PositionedRectangleImpl(x, y, width, height);
     }
+
+    record PositionedRectangleImpl(int x, int y, int width, int height) implements PositionedRectangle {}
 }

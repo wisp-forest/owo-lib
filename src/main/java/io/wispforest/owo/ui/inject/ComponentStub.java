@@ -5,6 +5,7 @@ import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.event.*;
 import io.wispforest.owo.ui.util.FocusHandler;
 import io.wispforest.owo.util.EventSource;
+import io.wispforest.owo.util.EventStream;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import org.jetbrains.annotations.Nullable;
 
@@ -270,6 +271,16 @@ public interface ComponentStub extends Component {
     }
 
     default int heightOffset() {
+        throw new IllegalStateException("Interface stub method called");
+    }
+
+    @Override
+    default EventSource<ComponentUpdate> componentUpdate() {
+        throw new IllegalStateException("Interface stub method called");
+    }
+
+    @Override
+    default boolean hovered() {
         throw new IllegalStateException("Interface stub method called");
     }
 }

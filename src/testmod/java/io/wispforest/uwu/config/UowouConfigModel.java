@@ -1,6 +1,6 @@
 package io.wispforest.uwu.config;
 
-import io.wispforest.owo.config.Option;
+import io.wispforest.owo.config.base.SyncMode;
 import io.wispforest.owo.config.annotation.*;
 import io.wispforest.owo.ui.core.Color;
 import net.minecraft.util.Identifier;
@@ -8,8 +8,8 @@ import net.minecraft.util.Identifier;
 import java.util.Set;
 
 @Modmenu(modId = "fabric")
-@Config(name = "uowou", wrapperName = "BruhConfig")
-@Sync(Option.SyncMode.OVERRIDE_CLIENT)
+@Config(modId = "fabric", name = "uowou", wrapperName = "BruhConfig")
+@Sync(SyncMode.OVERRIDE_CLIENT)
 public class UowouConfigModel {
 
     @RestartRequired
@@ -18,7 +18,7 @@ public class UowouConfigModel {
     @Hook
     public Identifier idPlease = Identifier.of("uowou", "bruh");
 
-    @Sync(Option.SyncMode.NONE)
+    @Sync(SyncMode.NONE)
     public Set<String> setPlease = Set.of("that's a value");
 
     public Color bruhve = Color.BLACK;

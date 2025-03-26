@@ -96,5 +96,164 @@
     {"text": " Quit", "color": "#FFEF52"},
     {"text": " to", "color": "#FF9052"},
     {"text": " Title", "color": "#FF5272"}
-  ]
+  ],
+
+  "text.config.full_test.title": "Full Test Config",
+
+  "text.config.full_test.option.number1": "Number 1 is really really really really really really really really really really really really really really really really really long",
+  "text.config.full_test.option.id1": "Id 1 asd asdasdads a as ad sa dasd as  sadd asd as das dasd as d",
+
+  "text.config.full_test.option.struct1": "Struct 1",
+  "text.config.full_test.option.struct1.amount": "Amount",
+  "text.config.full_test.option.struct1.name": "Name",
+
+  "text.config.full_test.option.struct2": "Struct 2",
+  "text.config.full_test.option.struct2.amount": "Amount",
+  "text.config.full_test.option.struct2.name": "Name",
+  "text.config.full_test.option.struct2.color": "Color",
+
+  "text.config.full_test.enum.dyeColor.white": "White",
+  "text.config.full_test.enum.dyeColor.orange": "Orange",
+  "text.config.full_test.enum.dyeColor.magenta": "Magenta",
+  "text.config.full_test.enum.dyeColor.light_blue": "Light Blue",
+  "text.config.full_test.enum.dyeColor.yellow": "Yellow",
+  "text.config.full_test.enum.dyeColor.lime": "Lime",
+  "text.config.full_test.enum.dyeColor.pink": "Pink",
+  "text.config.full_test.enum.dyeColor.gray": "Gray",
+  "text.config.full_test.enum.dyeColor.light_gray": "Light Gray",
+  "text.config.full_test.enum.dyeColor.cyan": "Cyan",
+  "text.config.full_test.enum.dyeColor.purple": "Purple",
+  "text.config.full_test.enum.dyeColor.blue": "Blue",
+  "text.config.full_test.enum.dyeColor.brown": "Brown",
+  "text.config.full_test.enum.dyeColor.green": "Green",
+  "text.config.full_test.enum.dyeColor.red": "Red",
+  "text.config.full_test.enum.dyeColor.black": "Black",
+
+  "text.config.full_test.option.struct3": "Struct 3",
+  "text.config.full_test.option.struct3.amount": "Amount",
+  "text.config.full_test.option.struct3.id": "Id",
+  "text.config.full_test.option.struct3.tag": "Tag",
+  "text.config.full_test.option.struct3.other": "Other",
+  "text.config.full_test.option.struct3.anotherTest": "Another Test",
+  "text.config.full_test.option.struct3.toggle": "Toggle",
+
+  "text.config.full_test.option.listNumbers": "List Number",
+  "text.config.full_test.option.listStrings": "List String",
+  "text.config.full_test.option.listIds": "List Id's",
+
+  "text.config.full_test.option.listStructList1": "Struct List 1",
+  "text.config.full_test.option.listStructList1.amount": "Amount",
+  "text.config.full_test.option.listStructList1.name": "Name",
+
+  "text.config.full_test.option.listStructList2": "Struct List 2",
+  "text.config.full_test.option.listStructList2.amount": "Amount",
+  "text.config.full_test.option.listStructList2.name": "Name",
+  "text.config.full_test.option.listStructList2.color": "Color",
+
+  "text.config.full_test.option.listStructList3": "Struct List 3",
+  "text.config.full_test.option.listStructList3.amount": "Amount",
+  "text.config.full_test.option.listStructList3.id": "Id",
+  "text.config.full_test.option.listStructList3.tag": "Tag",
+  "text.config.full_test.option.listStructList3.other": "Other",
+  "text.config.full_test.option.listStructList3.anotherTest": "Another Test",
+  "text.config.full_test.option.listStructList3.toggle": "Toggle",
+
+  "text.config.full_test.option.setNumbers": "Set Number",
+  "text.config.full_test.option.setStrings": "Set String",
+  "text.config.full_test.option.setIds": "Set Id's",
+
+  "text.config.full_test.option.setStruct1": "Struct Set 1",
+  "text.config.full_test.option.setStruct1.amount": "Amount",
+  "text.config.full_test.option.setStruct1.name": "Name",
+
+  "text.config.full_test.option.setStruct2": "Struct Set 2",
+  "text.config.full_test.option.setStruct2.amount": "Amount",
+  "text.config.full_test.option.setStruct2.name": "Name",
+  "text.config.full_test.option.setStruct2.color": "Color",
+
+  "text.config.full_test.option.setStruct3": "Struct Set 3",
+  "text.config.full_test.option.setStruct3.amount": "Amount",
+  "text.config.full_test.option.setStruct3.id": "Id",
+  "text.config.full_test.option.setStruct3.tag": "Tag",
+  "text.config.full_test.option.setStruct3.other": "Other",
+  "text.config.full_test.option.setStruct3.anotherTest": "Another Test",
+  "text.config.full_test.option.setStruct3.toggle": "Toggle",
+
+  "text.config.full_test.option.mapStringToNumber": "Map String To Number",
+  "text.config.full_test.option.mapStringToNumber.key": "Key",
+  "text.config.full_test.option.mapStringToNumber.value": "Value",
+
+  "text.config.full_test.option.mapStringToString": "Map String To String",
+  "text.config.full_test.option.mapStringToString.key": "Key",
+  "text.config.full_test.option.mapStringToString.value": "Value",
+
+  "text.config.full_test.option.mapStringToList": "Map String To List",
+  "text.config.full_test.option.mapStringToList.key": "Key",
+  "text.config.full_test.option.mapStringToList.value": "Value",
+
+  "text.config.full_test.option.mapStringToStruct1": "Map String To Struct 1",
+  "text.config.full_test.option.mapStringToStruct1.key": "Key",
+  "text.config.full_test.option.mapStringToStruct1.value.amount": "Amount",
+  "text.config.full_test.option.mapStringToStruct1.value.name": "Name",
+
+  "text.config.full_test.option.mapStringToStruct2": "Map String To Struct 2",
+  "text.config.full_test.option.mapStringToStruct2.key": "Key",
+  "text.config.full_test.option.mapStringToStruct2.value.amount": "Amount",
+  "text.config.full_test.option.mapStringToStruct2.value.name": "Name",
+  "text.config.full_test.option.mapStringToStruct2.value.color": "Color",
+
+  "text.config.full_test.option.mapStringToStruct3": "Map String To Struct 3",
+  "text.config.full_test.option.mapStringToStruct3.key": "Key",
+  "text.config.full_test.option.mapStringToStruct3.value.amount": "Amount",
+  "text.config.full_test.option.mapStringToStruct3.value.id": "Id",
+  "text.config.full_test.option.mapStringToStruct3.value.tag": "Tag",
+  "text.config.full_test.option.mapStringToStruct3.value.other": "Other",
+  "text.config.full_test.option.mapStringToStruct3.value.anotherTest": "Another Test",
+  "text.config.full_test.option.mapStringToStruct3.value.toggle": "Toggle",
+
+  "text.config.full_test.option.mapStringToSet": "Map String To Set",
+  "text.config.full_test.option.mapStringToSet.key": "Key",
+  "text.config.full_test.option.mapStringToSet.value": "Value",
+
+  "text.config.full_test.option.mapNumberToNumber": "Map Number To Number",
+  "text.config.full_test.option.mapNumberToNumber.key": "Key",
+  "text.config.full_test.option.mapNumberToNumber.value": "Value",
+
+  "text.config.full_test.option.mapNumberToString": "Map Number To String",
+  "text.config.full_test.option.mapNumberToString.key": "Key",
+  "text.config.full_test.option.mapNumberToString.value": "Value",
+
+  "text.config.full_test.option.mapNumberToList": "Map Number To List",
+  "text.config.full_test.option.mapNumberToList.key": "Key",
+  "text.config.full_test.option.mapNumberToList.value": "Value",
+
+  "text.config.full_test.option.mapNumberToSet": "Map Number To Set",
+  "text.config.full_test.option.mapNumberToSet.key": "Key",
+  "text.config.full_test.option.mapNumberToSet.value": "Value",
+
+  "text.config.full_test.option.mapNumberToStruct1": "Map Number To Struct 1",
+  "text.config.full_test.option.mapNumberToStruct1.key": "Key",
+  "text.config.full_test.option.mapNumberToStruct1.value.amount": "Amount",
+  "text.config.full_test.option.mapNumberToStruct1.value.name": "Name",
+
+  "text.config.full_test.option.mapNumberToStruct2": "Map Number To Struct 2",
+  "text.config.full_test.option.mapNumberToStruct2.key": "Key",
+  "text.config.full_test.option.mapNumberToStruct2.value.amount": "Amount",
+  "text.config.full_test.option.mapNumberToStruct2.value.name": "Name",
+  "text.config.full_test.option.mapNumberToStruct2.value.color": "Color",
+
+  "text.config.full_test.option.mapNumberToStruct3": "Map Number To Struct 3",
+  "text.config.full_test.option.mapNumberToStruct3.key": "Key",
+  "text.config.full_test.option.mapNumberToStruct3.value.amount": "Amount",
+  "text.config.full_test.option.mapNumberToStruct3.value.id": "Id",
+  "text.config.full_test.option.mapNumberToStruct3.value.tag": "Tag",
+  "text.config.full_test.option.mapNumberToStruct3.value.other": "Other",
+  "text.config.full_test.option.mapNumberToStruct3.value.anotherTest": "Another Test",
+  "text.config.full_test.option.mapNumberToStruct3.value.toggle": "Toggle",
+
+  "text.config.full_test.section.struct_objects": "Struct Objects",
+  "text.config.full_test.section.list_objects": "List Objects",
+  "text.config.full_test.section.set_objects": "Set Objects",
+  "text.config.full_test.section.string_map_objects": "String Map Objects",
+  "text.config.full_test.section.int_map_objects": "Int Map Objects"
 }

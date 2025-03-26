@@ -26,6 +26,8 @@ public @interface Config {
      */
     String name();
 
+    String modId();
+
     /**
      * @return {@code true} if all fields should be treated
      * as if they were annotated with {@link Hook}

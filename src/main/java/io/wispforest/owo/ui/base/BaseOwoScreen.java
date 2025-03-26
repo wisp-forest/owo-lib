@@ -88,7 +88,7 @@ public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen im
             this.addDrawableChild(this.uiAdapter);
         } else {
             try {
-                this.uiAdapter = this.createAdapter();
+                this.uiAdapter = this.createAdapter().allowInvalidRendering(false);
                 this.build(this.uiAdapter.rootComponent);
 
                 this.uiAdapter.inflateAndMount();
@@ -126,6 +126,14 @@ public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen im
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        var error = uiAdapter.currentError();
+
+        if (error != null) {
+            Owo.LOGGER.warn("Could not render owo screen", uiAdapter.currentError());
+            UIErrorToast.report(error);
+            this.invalid = true;
+        }
+
         if (!this.invalid) {
             super.render(context, mouseX, mouseY, delta);
         } else {

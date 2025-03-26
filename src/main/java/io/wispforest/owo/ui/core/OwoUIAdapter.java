@@ -5,6 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.renderdoc.RenderDoc;
 import io.wispforest.owo.ui.util.CursorAdapter;
+import io.wispforest.owo.ui.util.UIErrorToast;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
@@ -12,6 +13,7 @@ import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.function.BiFunction;
@@ -52,6 +54,10 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
     public boolean globalInspector = false;
     public int inspectorZOffset = 1000;
 
+    @Nullable
+    private Throwable currentError = null;
+    private boolean allowInvalidRendering = true;
+
     protected OwoUIAdapter(int x, int y, int width, int height, R rootComponent) {
         this.x = x;
         this.y = y;
@@ -60,6 +66,21 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
 
         this.cursorAdapter = CursorAdapter.ofClientWindow();
         this.rootComponent = rootComponent;
+    }
+
+    public boolean isValid() {
+        return this.currentError != null;
+    }
+
+    @Nullable
+    public Throwable currentError() {
+        return this.currentError;
+    }
+
+    public OwoUIAdapter<R> allowInvalidRendering(boolean value) {
+        this.allowInvalidRendering = value;
+
+        return this;
     }
 
     /**
@@ -191,6 +212,12 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
             }
 
             if (this.captureFrame) RenderDoc.endFrameCapture();
+        } catch (Exception error) {
+            if (this.allowInvalidRendering) {
+                throw error;
+            } else if(this.currentError == null) {
+                this.currentError = error;
+            }
         } finally {
             isRendering = false;
             this.captureFrame = false;

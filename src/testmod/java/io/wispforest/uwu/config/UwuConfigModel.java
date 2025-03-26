@@ -1,16 +1,16 @@
 package io.wispforest.uwu.config;
 
 import blue.endless.jankson.Comment;
-import io.wispforest.owo.config.Option;
+import io.wispforest.owo.config.base.SyncMode;
 import io.wispforest.owo.config.annotation.*;
 import io.wispforest.owo.ui.core.Color;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Sync(Option.SyncMode.OVERRIDE_CLIENT)
-@Modmenu(modId = "uwu", uiModelId = "uwu:config")
-@Config(name = "uwu", wrapperName = "UwuConfig")
+@Sync(SyncMode.OVERRIDE_CLIENT)
+@Modmenu(modId = "uwu", uiModelId = "uwu:config_duplicate", priorityOrder = 1)
+@Config(modId = "uwu", name = "uwu", wrapperName = "UwuConfig")
 public class UwuConfigModel {
 
     @SectionHeader("top")
@@ -55,7 +55,7 @@ public class UwuConfigModel {
         @Comment("Commented nesting")
         public SuperNested nestingTimeIntensifies = new SuperNested();
 
-        @Sync(Option.SyncMode.INFORM_SERVER)
+        @Sync(SyncMode.INFORM_SERVER)
         public List<Integer> nestedIntegers = new ArrayList<>(List.of(69, 34, 35, 420));
     }
 

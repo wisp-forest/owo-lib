@@ -3,6 +3,7 @@ package io.wispforest.owo.config;
 import io.wispforest.owo.config.annotation.Config;
 import io.wispforest.owo.config.annotation.Hook;
 import io.wispforest.owo.config.annotation.Nest;
+import io.wispforest.owo.config.base.Key;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -27,10 +28,13 @@ public class ConfigAP extends AbstractProcessor {
             package {package};
 
             import blue.endless.jankson.Jankson;
+            import io.wispforest.endec.impl.ReflectiveEndecBuilder;
             import io.wispforest.owo.config.ConfigWrapper;
             import io.wispforest.owo.config.ConfigWrapper.BuilderConsumer;
-            import io.wispforest.owo.config.Option;
+            import io.wispforest.owo.config.options.FieldOption;
+            import io.wispforest.owo.config.base.Key;
             import io.wispforest.owo.util.Observable;
+            import it.unimi.dsi.fastutil.Pair;
 
             import java.util.HashMap;
             import java.util.Map;
@@ -50,15 +54,19 @@ public class ConfigAP extends AbstractProcessor {
                     super({config_class_name}.class, consumer);
                 }
 
+                private {wrapper_class_name}(Class<{config_class_name}> clazz, Pair<Jankson, ReflectiveEndecBuilder> dataHandlers, boolean setupConfigSyncing) {
+                    super(clazz, dataHandlers, setupConfigSyncing);
+                }
+
                 public static {wrapper_class_name} createAndLoad() {
                     var wrapper = new {wrapper_class_name}();
-                    wrapper.load();
+                    wrapper.loadFile();
                     return wrapper;
                 }
 
                 public static {wrapper_class_name} createAndLoad(BuilderConsumer consumer) {
                     var wrapper = new {wrapper_class_name}(consumer);
-                    wrapper.load();
+                    wrapper.loadFile();
                     return wrapper;
                 }
 
@@ -123,10 +131,12 @@ public class ConfigAP extends AbstractProcessor {
                 var className = clazz.getQualifiedName().toString();
                 var wrapperName = annotated.getAnnotation(Config.class).wrapperName();
 
+                this.nestTypes.clear();
+
                 try {
                     var file = this.processingEnv.getFiler().createSourceFile(wrapperName);
                     try (var writer = new PrintWriter(file.openWriter())) {
-                        writer.println(makeWrapper(wrapperName, className, this.collectFields(Option.Key.ROOT, clazz, clazz.getAnnotation(Config.class).defaultHook())));
+                        writer.println(makeWrapper(wrapperName, className, this.collectFields(Key.ROOT, clazz, clazz.getAnnotation(Config.class).defaultHook())));
                     }
                 } catch (IOException e) {
                     throw new RuntimeException("Failed to generate config wrapper", e);
@@ -137,7 +147,7 @@ public class ConfigAP extends AbstractProcessor {
         return true;
     }
 
-    private List<ConfigField> collectFields(Option.Key parent, TypeElement clazz, boolean defaultHook) {
+    private List<ConfigField> collectFields(Key parent, TypeElement clazz, boolean defaultHook) {
         var messager = this.processingEnv.getMessager();
         var list = new ArrayList<ConfigField>();
 
@@ -209,28 +219,28 @@ public class ConfigAP extends AbstractProcessor {
                 .replace("{accessors}\n", accessorMethods.finish());
     }
 
-    private String makeGetAccessor(String fieldName, Option.Key fieldKey, TypeMirror fieldType) {
+    private String makeGetAccessor(String fieldName, Key fieldKey, TypeMirror fieldType) {
         return GET_ACCESSOR_TEMPLATE
                 .replace("{option_instance}", constantNameOf(fieldKey))
                 .replace("{field_name}", fieldName)
                 .replace("{field_type}", fieldType.toString());
     }
 
-    private String makeSetAccessor(String fieldName, Option.Key fieldKey, TypeMirror fieldType) {
+    private String makeSetAccessor(String fieldName, Key fieldKey, TypeMirror fieldType) {
         return SET_ACCESSOR_TEMPLATE
                 .replace("{option_instance}", constantNameOf(fieldKey))
                 .replace("{field_name}", fieldName)
                 .replace("{field_type}", fieldType.toString());
     }
 
-    private String makeSubscribe(String fieldName, Option.Key fieldKey, TypeMirror fieldType) {
+    private String makeSubscribe(String fieldName, Key fieldKey, TypeMirror fieldType) {
         return SUBSCRIBE_TEMPLATE
                 .replace("{option_instance}", constantNameOf(fieldKey))
                 .replace("{field_name}", fieldName)
                 .replace("{field_type}", this.primitivesToWrappers.getOrDefault(fieldType, fieldType).toString());
     }
 
-    private String constantNameOf(Option.Key key) {
+    private String constantNameOf(Key key) {
         return key.asString().replace(".", "_");
     }
 
@@ -240,11 +250,11 @@ public class ConfigAP extends AbstractProcessor {
 
     private final class ValueField implements ConfigField {
         private final String name;
-        private final Option.Key key;
+        private final Key key;
         private final TypeMirror type;
         private final boolean makeSubscribe;
 
-        private ValueField(String name, Option.Key key, TypeMirror type, boolean makeSubscribe) {
+        private ValueField(String name, Key key, TypeMirror type, boolean makeSubscribe) {
             this.name = name;
             this.key = key;
             this.type = type;
@@ -253,8 +263,8 @@ public class ConfigAP extends AbstractProcessor {
 
         @Override
         public void appendAccessors(Writer accessors, Writer optionInstances, Writer keyConstants) {
-            keyConstants.line("public final Option.Key " + constantNameOf(this.key) + " = new Option.Key(\"" + this.key.asString() + "\");");
-            optionInstances.line("private final Option<" + primitivesToWrappers.getOrDefault(type, type) + "> " + constantNameOf(this.key) + " = this.optionForKey(this.keys." + constantNameOf(this.key) + ");");
+            keyConstants.line("public final Key " + constantNameOf(this.key) + " = new Key(\"" + this.key.asString() + "\");");
+            optionInstances.line("private final FieldOption<" + primitivesToWrappers.getOrDefault(type, type) + "> " + constantNameOf(this.key) + " = this.optionForKey(this.keys." + constantNameOf(this.key) + ");");
 
             accessors.append(makeGetAccessor(this.name, this.key, this.type)).write("\n");
             accessors.append(makeSetAccessor(this.name, this.key, this.type)).write("\n");

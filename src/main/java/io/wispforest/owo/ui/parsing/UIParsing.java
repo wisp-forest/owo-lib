@@ -6,9 +6,14 @@ import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.Sizing;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.InvalidIdentifierException;
 import org.jetbrains.annotations.ApiStatus;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -201,9 +206,15 @@ public class UIParsing {
      * returned literally
      */
     public static Text parseText(Element element) {
-        return element.getAttribute("translate").equalsIgnoreCase("true")
+        var text = element.getAttribute("translate").equalsIgnoreCase("true")
                 ? Text.translatable(element.getTextContent())
                 : Text.literal(element.getTextContent());
+
+        if (element.getAttribute("bold").equalsIgnoreCase("true")) {
+            text.formatted(Formatting.BOLD);
+        }
+
+        return text;
     }
 
     public static <E extends Enum<E>> Function<Element, E> parseEnum(Class<E> enumClass) {
@@ -215,6 +226,38 @@ public class UIParsing {
 
             throw new UIModelParsingException("No such constant " + name + " in enum " + enumClass.getSimpleName());
         };
+    }
+
+    public static Vector3f parseVector3f(Element element) {
+        return new Vector3f(
+                parseOptionalAttribute(element, "x", 0f, UIParsing::parseFloat),
+                parseOptionalAttribute(element, "y", 0f, UIParsing::parseFloat),
+                parseOptionalAttribute(element, "z", 0f, UIParsing::parseFloat)
+        );
+    }
+
+    public static Vector4f parseVector4f(Element element) {
+        return new Vector4f(
+                parseOptionalAttribute(element, "x", 0f, UIParsing::parseFloat),
+                parseOptionalAttribute(element, "y", 0f, UIParsing::parseFloat),
+                parseOptionalAttribute(element, "z", 0f, UIParsing::parseFloat),
+                parseOptionalAttribute(element, "w", 0f, UIParsing::parseFloat)
+        );
+    }
+
+    public static Quaternionf parseQuaternionf(Element element) {
+        return new Quaternionf(
+                parseOptionalAttribute(element, "x", 0f, UIParsing::parseFloat),
+                parseOptionalAttribute(element, "y", 0f, UIParsing::parseFloat),
+                parseOptionalAttribute(element, "z", 0f, UIParsing::parseFloat),
+                parseOptionalAttribute(element, "w", 0f, UIParsing::parseFloat)
+        );
+    }
+
+    public static <T> T parseOptionalAttribute(Element element, String key, T defaultValue, Function<Attr, T> parser) {
+        return Optional.ofNullable(element.getAttributeNode(key))
+                .map(parser)
+                .orElse(defaultValue);
     }
 
     /**
@@ -298,6 +341,7 @@ public class UIParsing {
         registerFactory("scroll", ScrollContainer::parse);
         registerFactory("collapsible", CollapsibleContainer::parse);
         registerFactory("draggable", element -> Containers.draggable(Sizing.content(), Sizing.content(), null));
+        registerFactory("selectable", element -> Containers.selectable(Sizing.content(), Sizing.content(), null));
 
         // Textures
         registerFactory("sprite", SpriteComponent::parse);

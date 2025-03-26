@@ -6,6 +6,7 @@ import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.util.NumberReflection;
+import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.w3c.dom.Element;
 
@@ -30,9 +31,9 @@ public class ConfigTextBox extends TextBoxComponent implements OptionValueProvid
         });
     }
 
-    public ConfigTextBox configureForNumber(Class<? extends Number> fieldType) {
+    public ConfigTextBox configureForNumber(Class<? extends Number> fieldType, Double minNumber, Double maxNumber) {
         final boolean floatingPoint = NumberReflection.isFloatingPointType(fieldType);
-        final double min = NumberReflection.minValue(fieldType).doubleValue(), max = NumberReflection.maxValue(fieldType).doubleValue();
+        final double min = minNumber.doubleValue(), max = maxNumber.doubleValue();
 
         this.valueParser = s -> {
             try {
@@ -51,6 +52,14 @@ public class ConfigTextBox extends TextBoxComponent implements OptionValueProvid
                 return false;
             }
         });
+
+        return this;
+    }
+
+    public ConfigTextBox configureForIdentifier() {
+        this.inputPredicate(s -> s.matches("[a-z0-9_.:\\-]*"))
+                .applyPredicate(s -> Identifier.tryParse(s) != null)
+                .valueParser(Identifier::of);
 
         return this;
     }

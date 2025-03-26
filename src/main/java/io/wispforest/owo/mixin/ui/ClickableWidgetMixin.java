@@ -9,6 +9,7 @@ import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.FocusHandler;
 import io.wispforest.owo.util.EventSource;
+import io.wispforest.owo.util.EventStream;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.gui.widget.ClickableWidget;
@@ -369,5 +370,15 @@ public abstract class ClickableWidgetMixin implements ComponentStub, net.minecra
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/ClickableWidget;renderWidget(Lnet/minecraft/client/gui/DrawContext;IIF)V"))
     private void setHovered(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         if (this.owo$wrapper != null) this.hovered = this.hovered && this.owo$wrapper.hovered();
+    }
+
+    @Override
+    public EventSource<ComponentUpdate> componentUpdate() {
+        return this.owo$getWrapper().componentUpdate();
+    }
+
+    @Override
+    public boolean hovered() {
+        return this.hovered;
     }
 }

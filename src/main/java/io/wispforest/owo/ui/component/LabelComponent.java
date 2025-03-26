@@ -2,14 +2,22 @@ package io.wispforest.owo.ui.component;
 
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.*;
+import io.wispforest.owo.ui.event.MouseEnter;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
+import io.wispforest.owo.ui.util.ScissorStack;
+import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.Observable;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.Util;
+import net.minecraft.util.math.MathHelper;
+import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 
 import java.util.ArrayList;
@@ -28,10 +36,18 @@ public class LabelComponent extends BaseComponent {
     protected HorizontalAlignment horizontalTextAlignment = HorizontalAlignment.LEFT;
 
     protected final AnimatableProperty<Color> color = AnimatableProperty.of(Color.WHITE);
+
+    @Nullable
+    protected Text hoverText = null;
+    @Nullable
+    protected AnimatableProperty<Color> hoverColor = null;
+
     protected final Observable<Integer> lineHeight = Observable.of(this.textRenderer.fontHeight);
     protected final Observable<Integer> lineSpacing = Observable.of(2);
     protected boolean shadow;
     protected int maxWidth;
+
+    protected boolean scrolling = false;
 
     protected Function<Style, Boolean> textClickHandler = style -> {
         OwoUIDrawContext.utilityScreen().captureLinkSource();
@@ -61,6 +77,28 @@ public class LabelComponent extends BaseComponent {
         return this.text;
     }
 
+    public LabelComponent hoverText(@Nullable Text text) {
+        if (this.text.equals(text)) {
+            this.hoverText = null;
+        } else {
+            this.hoverText = text;
+        }
+
+        if (this.hoverText != null && this.hovered) {
+            this.notifyParentIfMounted();
+        }
+
+        return this;
+    }
+
+    public Text hoverText() {
+        return this.hoverText;
+    }
+
+    public Text currentText() {
+        return this.hoverText != null && this.hovered ? this.hoverText : this.text;
+    }
+
     public LabelComponent maxWidth(int maxWidth) {
         this.maxWidth = maxWidth;
         this.notifyParentIfMounted();
@@ -87,6 +125,24 @@ public class LabelComponent extends BaseComponent {
 
     public AnimatableProperty<Color> color() {
         return this.color;
+    }
+
+    public Color currentColor() {
+        return this.hoverColor != null && this.hovered ? this.hoverColor.get() : this.color.get();
+    }
+
+    public LabelComponent hoverColor(Color hoverColor) {
+        if (this.hoverColor == null) {
+            this.hoverColor = AnimatableProperty.of(hoverColor);
+        } else {
+            this.hoverColor.set(hoverColor);
+        }
+
+        return this;
+    }
+
+    public AnimatableProperty<Color> hoverColor() {
+        return this.hoverColor;
     }
 
     public LabelComponent verticalTextAlignment(VerticalAlignment verticalAlignment) {
@@ -134,6 +190,23 @@ public class LabelComponent extends BaseComponent {
         return textClickHandler;
     }
 
+    public LabelComponent scrolling(boolean value) {
+        this.scrolling = value;
+
+        return this;
+    }
+
+    public boolean scrolling() {
+        return this.scrolling;
+    }
+
+    @Override
+    protected void updateHoveredState(int mouseX, int mouseY, boolean nowHovered) {
+        super.updateHoveredState(mouseX, mouseY, nowHovered);
+
+        if (this.hoverText != null) this.notifyParentIfMounted();
+    }
+
     @Override
     protected int determineHorizontalContentSize(Sizing sizing) {
         int widestText = 0;
@@ -163,7 +236,17 @@ public class LabelComponent extends BaseComponent {
     }
 
     private void wrapLines() {
-        this.wrappedText = this.textRenderer.wrapLines(this.text, this.horizontalSizing.get().isContent() ? this.maxWidth : this.width);
+        int width;
+
+        if (scrolling) {
+            width = Integer.MAX_VALUE;
+        } else if(this.horizontalSizing.get().isContent()) {
+            width = this.maxWidth;
+        } else {
+            width = this.width;
+        }
+
+        this.wrappedText = this.textRenderer.wrapLines(this.currentText(), width);
     }
 
     protected int textHeight() {
@@ -178,10 +261,8 @@ public class LabelComponent extends BaseComponent {
 
     @Override
     public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
-        var matrices = context.getMatrices();
-
-        matrices.pushMatrix();
-        matrices.translate(0, 1f / MinecraftClient.getInstance().getWindow().getScaleFactor());
+        context.push()
+                .translate(0, 1 / MinecraftClient.getInstance().getWindow().getScaleFactor());
 
         int x = this.x;
         int y = this.y;
@@ -198,25 +279,119 @@ public class LabelComponent extends BaseComponent {
             case BOTTOM -> y += this.height - (this.textHeight());
         }
 
-        final int lambdaX = x;
-        final int lambdaY = y;
+        var color = currentColor();
 
+        if (this.scrolling) {
+            drawScrollableText(context, delta, x, y, color);
+        } else {
+            drawWrappedText(context, x, y, color);
+        }
+
+        context.pop();
+    }
+
+    protected void drawWrappedText(DrawContext context, int x, int y, Color color) {
         for (int i = 0; i < this.wrappedText.size(); i++) {
             var renderText = this.wrappedText.get(i);
-            int renderX = lambdaX;
+            int renderX = x;
 
             switch (this.horizontalTextAlignment) {
                 case CENTER -> renderX += (this.width - this.textRenderer.getWidth(renderText)) / 2;
                 case RIGHT -> renderX += this.width - this.textRenderer.getWidth(renderText);
             }
 
-            int renderY = lambdaY + i * (this.lineHeight() + this.lineSpacing());
+            int renderY = y + i * (this.lineHeight() + this.lineSpacing());
             renderY += this.lineHeight() - this.textRenderer.fontHeight;
 
-            context.drawText(this.textRenderer, renderText, renderX, renderY, this.color.get().argb(), this.shadow);
+            context.drawText(this.textRenderer, renderText, renderX, renderY, color.argb(), this.shadow);
         }
 
-        matrices.popMatrix();
+        context.draw();
+    }
+
+    public LabelComponent copyScrollData(LabelComponent component) {
+        this.offsetTotal = component.offsetTotal;
+        this.prevDirection = component.prevDirection;
+        this.currentDirection = component.currentDirection;
+        this.pausedTimeTotal = component.pausedTimeTotal;
+
+        return this;
+    }
+
+    private float offsetTotal = 0;
+
+    private Direction prevDirection = Direction.FORWARDS;
+    private Direction currentDirection = Direction.FORWARDS;
+
+    private float pausedTimeTotal = 0;
+
+    protected void drawScrollableText(OwoUIDrawContext context, float delta, int startX, int startY, Color color) {
+        int textWidth = textRenderer.getWidth(text);
+
+        int j = (startY + startY + this.height() - 9) / 2 + 1;
+
+        if (textWidth > this.width()) {
+            int scrollAmount = textWidth - this.width();
+
+            // 0 -> total / 2 : total / 2 -> total
+            //        -1      :        1
+            var baseRangeValue = (offsetTotal - (scrollAmount / 2f)) / (scrollAmount / 2f);
+
+            var offset = delta * ((baseRangeValue * baseRangeValue) / -1.1f + 1);
+
+            switch (currentDirection) {
+                case FORWARDS -> {
+                    if (offsetTotal + offset >= scrollAmount) {
+                        currentDirection = Direction.PAUSED;
+                        prevDirection = Direction.FORWARDS;
+
+                        offsetTotal = scrollAmount;
+                    } else {
+                        offsetTotal += offset;
+                    }
+                }
+                case BACKWARDS -> {
+                    if (offsetTotal - offset <= 0) {
+                        currentDirection = Direction.PAUSED;
+                        prevDirection = Direction.BACKWARDS;
+
+                        offsetTotal = 0;
+                    } else {
+                        offsetTotal -= offset;
+                    }
+                }
+                case PAUSED -> {
+                    if (pausedTimeTotal > (4 * 20)) {
+                        currentDirection = switch (prevDirection) {
+                            case FORWARDS -> Direction.BACKWARDS;
+                            case BACKWARDS, PAUSED -> Direction.FORWARDS;
+                        };
+
+                        pausedTimeTotal = 0;
+                    } else {
+                        pausedTimeTotal += delta;
+                    }
+                }
+            }
+
+            context.drawWithScissor(startX, startY, this.width(), this.height(), ctx -> {
+                ctx.drawText(textRenderer, this.currentText(), startX - Math.round(offsetTotal)/*- (int)scrolledOffset*/, y, color.argb(), this.shadow);
+            });
+        } else {
+            var offset = switch (this.horizontalTextAlignment) {
+                case CENTER -> (this.width - this.textRenderer.getWidth(this.currentText())) / 2;
+                case RIGHT -> this.width - this.textRenderer.getWidth(this.currentText());
+                case null, default -> 0;
+            };
+
+            context.drawText(textRenderer, this.currentText(), startX + offset, startY, color.argb(), this.shadow);
+        }
+    }
+
+    private enum Direction {
+        FORWARDS,
+        BACKWARDS,
+        PAUSED;
     }
 
     @Override
@@ -244,11 +419,14 @@ public class LabelComponent extends BaseComponent {
     public void parseProperties(UIModel model, Element element, Map<String, Element> children) {
         super.parseProperties(model, element, children);
         UIParsing.apply(children, "text", UIParsing::parseText, this::text);
+        UIParsing.apply(children, "hover-text", UIParsing::parseText, this::hoverText);
         UIParsing.apply(children, "max-width", UIParsing::parseUnsignedInt, this::maxWidth);
         UIParsing.apply(children, "color", Color::parse, this::color);
+        UIParsing.apply(children, "hover-color", Color::parse, this::hoverColor);
         UIParsing.apply(children, "shadow", UIParsing::parseBool, this::shadow);
         UIParsing.apply(children, "line-height", UIParsing::parseUnsignedInt, this::lineHeight);
         UIParsing.apply(children, "line-spacing", UIParsing::parseUnsignedInt, this::lineSpacing);
+        UIParsing.apply(children, "scrolling", UIParsing::parseBool, this::scrolling);
 
         UIParsing.apply(children, "vertical-text-alignment", VerticalAlignment::parse, this::verticalTextAlignment);
         UIParsing.apply(children, "horizontal-text-alignment", HorizontalAlignment::parse, this::horizontalTextAlignment);

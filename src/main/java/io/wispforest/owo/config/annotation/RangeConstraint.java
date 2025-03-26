@@ -12,13 +12,15 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface RangeConstraint {
-    double min();
+    double min() default -Double.MAX_VALUE;
 
-    double max();
+    double max() default Double.MAX_VALUE;
 
     /**
      * @return How many decimals places to show in the config
      * screen, if this is a floating point option
      */
     int decimalPlaces() default 2;
+
+    boolean useSlider() default true;
 }

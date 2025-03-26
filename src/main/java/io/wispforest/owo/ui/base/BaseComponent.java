@@ -43,6 +43,9 @@ public abstract class BaseComponent implements Component {
 
     protected final EventStream<MouseEnter> mouseEnterEvents = MouseEnter.newStream();
     protected final EventStream<MouseLeave> mouseLeaveEvents = MouseLeave.newStream();
+    protected final EventStream<ComponentUpdate> componentUpdateEvents = ComponentUpdate.newStream();
+
+    protected boolean prioritizedHover = false;
 
     protected boolean hovered = false;
     protected boolean dirty = false;
@@ -143,13 +146,23 @@ public abstract class BaseComponent implements Component {
         if (this.hovered != nowHovered) {
             this.updateHoveredState(mouseX, mouseY, nowHovered);
         }
+
+        // Will be called after parent components update method
+        if (!(this instanceof ParentComponent)) {
+            this.componentUpdateEvents.sink().onUpdate(delta, mouseX, mouseY);
+        }
+    }
+
+    @Override
+    public EventSource<ComponentUpdate> componentUpdate() {
+        return this.componentUpdateEvents.source();
     }
 
     protected void updateHoveredState(int mouseX, int mouseY, boolean nowHovered) {
         this.hovered = nowHovered;
 
         if (nowHovered) {
-            if (this.root() == null || this.root().childAt(mouseX, mouseY) != this) {
+            if (!this.prioritizedHover && (this.root() == null || this.root().childAt(mouseX, mouseY) != this)) {
                 this.hovered = false;
                 return;
             }
@@ -389,5 +402,10 @@ public abstract class BaseComponent implements Component {
     @Override
     public int height() {
         return this.height;
+    }
+
+    @Override
+    public boolean hovered() {
+        return this.hovered;
     }
 }

@@ -6,40 +6,107 @@ import org.joml.Matrix3x2f;
 import org.joml.Matrix3x2fStack;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
+import org.joml.Vector3d;
+import org.joml.Vector3f;
+
+import java.util.function.Consumer;
 
 /**
  * Helper interface implemented on top of the {@link DrawContext} to allow for easier matrix stack transformations
  */
-public interface MatrixStackTransformer {
+public interface MatrixStackTransformer<T extends MatrixStackTransformer<T>> {
 
-    default MatrixStackTransformer translate(double x, double y) {
-        this.getMatrixStack().translate((float) x, (float) y);
-        return this;
+    default T drawWithScissor(int x, int y, int width, int height, Consumer<T> consumer) {
+        pushScissor(x, y, width, height);
+
+        var t = this.owo$cast();
+
+        consumer.accept(t);
+
+        popScissor();
+
+        return t;
     }
 
-    default MatrixStackTransformer translate(float x, float y) {
-        this.getMatrixStack().translate(x, y);
-        return this;
+    default T pushScissor(int x, int y, int width, int height) {
+        throw new IllegalStateException("pushScissor() method hasn't been override leading to exception!");
     }
 
-    default MatrixStackTransformer scale(float x, float y) {
-        this.getMatrixStack().scale(x, y);
-        return this;
+    default T popScissor() {
+        throw new IllegalStateException("popScissor() method hasn't been override leading to exception!");
     }
 
-    default MatrixStackTransformer push() {
+    default T translate(Vector3f vec) {
+        return translate(vec.x(), vec.y(), vec.z());
+    }
+
+    default T translate(double x, double y, double z) {
+        this.getMatrixStack().translate(x, y, z);
+        return owo$cast();
+    }
+
+    default T translate(float x, float y, float z) {
+        this.getMatrixStack().translate(x, y, z);
+        return owo$cast();
+    }
+
+    default T scale(Vector3f vec) {
+        return scale(vec.x(), vec.y(), vec.z());
+    }
+
+    default T scale(float x, float y, float z) {
+        this.getMatrixStack().scale(x, y, z);
+        return owo$cast();
+    }
+
+    default T multiply(Quaternionf quaternion) {
+        this.getMatrixStack().multiply(quaternion);
+        return owo$cast();
+    }
+
+    default T multiply(Quaternionf quaternion, Vector3f origin) {
+        return multiply(quaternion, origin.x(), origin.y(), origin.z());
+    }
+
+    default T multiply(Quaternionf quaternion, float originX, float originY, float originZ) {
+        this.getMatrixStack().multiply(quaternion, originX, originY, originZ);
+        return owo$cast();
+    }
+
+    default T push() {
         this.getMatrixStack().pushMatrix();
-        return this;
+        return owo$cast();
     }
 
-    default MatrixStackTransformer pop() {
+    default T pop() {
         this.getMatrixStack().popMatrix();
-        return this;
+        return owo$cast();
     }
 
-    default MatrixStackTransformer mul(Matrix3x2f matrix) {
-        this.getMatrixStack().mul(matrix);
-        return this;
+    default T multiplyPositionMatrix(Matrix4f matrix) {
+        this.getMatrixStack().multiplyPositionMatrix(matrix);
+        return owo$cast();
+    }
+
+    default T applyStackTransformer(MatrixStackTransformer<?> transformer) {
+        return applyStack(transformer.getMatrixStack());
+    }
+
+    default T applyStack(MatrixStack stack) {
+        return applyStackEntry(stack.peek());
+    }
+
+    default T applyStackEntry(MatrixStack.Entry entry) {
+        var currentEntry = this.getMatrixStack().peek();
+
+        currentEntry.getPositionMatrix().mul(entry.getPositionMatrix());
+        currentEntry.getNormalMatrix().mul(entry.getNormalMatrix());
+
+        return owo$cast();
+    }
+
+    default T owo$cast() {
+        return (T) this;
     }
 
     default Matrix3x2fStack getMatrixStack(){

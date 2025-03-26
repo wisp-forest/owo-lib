@@ -6,6 +6,7 @@ import io.wispforest.owo.command.debug.OwoDebugCommands;
 import io.wispforest.owo.config.OwoConfigCommand;
 import io.wispforest.owo.itemgroup.json.OwoItemGroupLoader;
 import io.wispforest.owo.moddata.ModDataLoader;
+import io.wispforest.owo.packets.OwoPackets;
 import io.wispforest.owo.ui.core.OwoUIPipelines;
 import io.wispforest.owo.ui.parsing.UIModelLoader;
 import io.wispforest.owo.ui.util.NinePatchTexture;
@@ -66,7 +67,9 @@ public class OwoClient implements ClientModInitializer {
 
         ScreenInternals.Client.init();
 
-        ClientCommandRegistrationCallback.EVENT.register(OwoConfigCommand::register);
+        ClientCommandRegistrationCallback.EVENT.register(OwoConfigCommand::registerClient);
+
+        OwoPackets.initClientNetworking();
 
         if (Owo.DEBUG) {
             OwoDebugCommands.Client.register();

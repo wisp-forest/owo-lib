@@ -1,9 +1,6 @@
 package io.wispforest.owo.config;
 
-import blue.endless.jankson.Jankson;
-import blue.endless.jankson.JsonElement;
-import blue.endless.jankson.JsonGrammar;
-import blue.endless.jankson.JsonPrimitive;
+import blue.endless.jankson.*;
 import blue.endless.jankson.api.DeserializationException;
 import blue.endless.jankson.api.SyntaxError;
 import blue.endless.jankson.impl.POJODeserializer;
@@ -14,22 +11,28 @@ import io.wispforest.endec.format.jankson.JanksonSerializer;
 import io.wispforest.endec.impl.ReflectiveEndecBuilder;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.annotation.*;
+import io.wispforest.owo.config.base.BoundedAccess;
+import io.wispforest.owo.config.base.Key;
+import io.wispforest.owo.config.base.SyncMode;
+import io.wispforest.owo.config.options.FieldOption;
 import io.wispforest.owo.config.ui.ConfigScreen;
 import io.wispforest.owo.config.ui.ConfigScreenProviders;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.ui.core.Color;
-import io.wispforest.owo.util.NumberReflection;
 import io.wispforest.owo.util.Observable;
 import io.wispforest.owo.util.ReflectionUtils;
+import it.unimi.dsi.fastutil.Pair;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -37,8 +40,6 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
-import java.util.regex.Pattern;
 
 /**
  * The common base class of all generated config classes.
@@ -52,88 +53,138 @@ import java.util.regex.Pattern;
  */
 public abstract class ConfigWrapper<C> {
 
-    private static final Map<String, Class<?>> KNOWN_CONFIG_CLASSES = new HashMap<>();
+    private static final Map<Identifier, ConfigWrapper<?>> KNOWN_CONFIG_INSTANCES = new LinkedHashMap<>();
 
-    protected final String name;
+    protected final Identifier id;
     protected final C instance;
 
     protected boolean loading = false;
     protected final Jankson jankson;
 
-    @SuppressWarnings("rawtypes") protected final Map<Option.Key, Option> options = new LinkedHashMap<>();
-    @SuppressWarnings("rawtypes") protected final Map<Option.Key, Option> optionsView = Collections.unmodifiableMap(options);
+    @SuppressWarnings("rawtypes") protected final Map<Key, FieldOption> options = new LinkedHashMap<>();
+    @SuppressWarnings("rawtypes") protected final Map<Key, FieldOption> optionsView = Collections.unmodifiableMap(options);
 
     protected final ReflectiveEndecBuilder builder;
-
-    @Deprecated
-    protected ConfigWrapper(Class<C> clazz, Consumer<Jankson.Builder> janksonBuilder) {
-        this(clazz, (SerializationBuilder serializationBuilder) -> janksonBuilder.accept(serializationBuilder.janksonBuilder()));
-    }
 
     protected ConfigWrapper(Class<C> clazz) {
         this(clazz, (SerializationBuilder builder) -> {});
     }
 
     protected ConfigWrapper(Class<C> clazz, BuilderConsumer consumer) {
-        this.builder = MinecraftEndecs.addDefaults(new ReflectiveEndecBuilder());
+        this(clazz, BuilderConsumer.fullyBuild(consumer), true);
 
-        ReflectionUtils.requireZeroArgsConstructor(clazz, s -> "Config model class " + s + " must provide a zero-args constructor");
-        this.instance = ReflectionUtils.tryInstantiateWithNoArgs(clazz);
-
-        var janksonBuilder = Jankson.builder();
-
-        var builder = new SerializationBuilder(janksonBuilder, this.builder);
-
-        builder.janksonBuilder()
-                .registerSerializer(Identifier.class, (identifier, marshaller) -> new JsonPrimitive(identifier.toString()))
-                .registerDeserializer(JsonPrimitive.class, Identifier.class, (primitive, m) -> Identifier.tryParse(primitive.asString()));
-
-        builder.addEndec(Color.class, Color.RGBA_HEX_ENDEC);
-
-        consumer.build(builder);
-
-        this.jankson = janksonBuilder.build();
-
-        var configAnnotation = clazz.getAnnotation(Config.class);
-        this.name = configAnnotation.name();
-
-        if (KNOWN_CONFIG_CLASSES.put(this.name, this.getClass()) != null) {
-            throw new IllegalStateException("Config name '" + this.name + "'"
-                    + " is already taken an by instance of class '" + KNOWN_CONFIG_CLASSES.get(this.name).getName() + "'");
+        if (KNOWN_CONFIG_INSTANCES.containsKey(this.id)) {
+            throw new IllegalStateException("Config name '" + this.id + "'"
+                    + " is already taken an by instance of class '" + KNOWN_CONFIG_INSTANCES.get(this.id).getClass().getName() + "'");
+        } else {
+            KNOWN_CONFIG_INSTANCES.put(this.id, this);
         }
 
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT && clazz.isAnnotationPresent(Modmenu.class)) {
             var modmenuAnnotation = clazz.getAnnotation(Modmenu.class);
-            ConfigScreenProviders.register(
-                    modmenuAnnotation.modId(),
-                    screen -> ConfigScreen.createWithCustomModel(Identifier.of(modmenuAnnotation.uiModelId()), this, screen)
+            ConfigScreenProviders.<Screen, ConfigWrapper<?>>register(
+                    this.id,
+                    modmenuAnnotation.priorityOrder(),
+                    (Class<ConfigWrapper<?>>) this.getClass(),
+                    (screen, wrapper) -> ConfigScreen.createWithCustomModel(Identifier.of(modmenuAnnotation.uiModelId()), wrapper, screen)
             );
         }
+    }
+
+    protected ConfigWrapper(Class<C> clazz, Pair<Jankson, ReflectiveEndecBuilder> dataHandlers, boolean setupConfigSyncing) {
+        this.jankson = dataHandlers.left();
+        this.builder = dataHandlers.right();
+
+        ReflectionUtils.requireZeroArgsConstructor(clazz, s -> "Config model class " + s + " must provide a zero-args constructor");
+        this.instance = ReflectionUtils.tryInstantiateWithNoArgs(clazz);
+
+        var configAnnotation = clazz.getAnnotation(Config.class);
+        this.id = Identifier.of(configAnnotation.modId(), configAnnotation.name());
 
         try {
             this.initializeOptions(configAnnotation.saveOnModification());
-            for (var option : this.options.values()) {
-                if (option.syncMode().isNone()) continue;
 
-                ConfigSynchronizer.register(this);
-                break;
+            if (setupConfigSyncing) {
+                for (var option : this.options.values()) {
+                    if (option.syncMode().isNone()) continue;
+
+                    ConfigSynchronizer.register(this);
+                    break;
+                }
             }
         } catch (IllegalAccessException | NoSuchMethodException e) {
-            throw new RuntimeException("Failed to initialize config " + this.name, e);
+            throw new RuntimeException("Failed to initialize config " + this.id, e);
         }
+    }
+
+    public static Map<Identifier, ConfigWrapper<?>> getKnownConfigInstances() {
+        return Collections.unmodifiableMap(KNOWN_CONFIG_INSTANCES);
+    }
+
+    public static ConfigWrapper<?> getConfig(Identifier id) {
+        var wrapper = KNOWN_CONFIG_INSTANCES.get(id);
+
+        if (wrapper == null) {
+            throw new IllegalStateException("Unable to locate the given wrapper instance with the following id: " + id);
+        }
+
+        return wrapper;
+    }
+
+    public static Map<String, Map<String, ConfigWrapper<?>>> getGroupedConfigInstances() {
+        Map<String, Map<String, ConfigWrapper<?>>> baseMap = new HashMap<>();
+
+        for (var entry : KNOWN_CONFIG_INSTANCES.entrySet()) {
+            var configId = entry.getKey();
+            var wrapper = entry.getValue();
+
+            baseMap.computeIfAbsent(configId.getNamespace(), string -> new LinkedHashMap<>())
+                    .put(configId.getPath(), wrapper);
+        }
+
+        return baseMap;
     }
 
     /**
      * Save the config represented by this wrapper
      */
-    public void save() {
+    public void saveToFile() {
         if (this.loading) return;
 
         try {
             this.fileLocation().getParent().toFile().mkdirs();
-            Files.writeString(this.fileLocation(), this.jankson.toJson(this.instance).toJson(JsonGrammar.JANKSON), StandardCharsets.UTF_8);
+            Files.writeString(this.fileLocation(), saveToObject().toJson(JsonGrammar.JANKSON), StandardCharsets.UTF_8);
         } catch (IOException e) {
-            Owo.LOGGER.warn("Could not save config {}", this.name, e);
+            Owo.LOGGER.warn("Could not save config {}", this.id, e);
+        }
+    }
+
+    public JsonObject saveToObject() {
+        return (JsonObject) this.jankson.toJson(this.instance);
+    }
+
+    public void reload() {
+        if (memoryData == null) {
+            loadFile();
+        } else {
+            load(memoryData, false);
+        }
+    }
+
+    public void loadFile() {
+        if (!Files.exists(this.fileLocation())) {
+            this.saveToFile();
+            return;
+        }
+
+        try {
+            var configObject = this.jankson.load(Files.readString(this.fileLocation(), StandardCharsets.UTF_8));
+
+            load(configObject, true);
+        } catch (IOException | SyntaxError e) {
+            Owo.LOGGER.warn("Could not load config {}", this.id, e);
+        } finally {
+            this.loading = false;
         }
     }
 
@@ -142,15 +193,9 @@ public abstract class ConfigWrapper<C> {
      * its associated file, or create it if it does not exist
      */
     @SuppressWarnings({"unchecked"})
-    public void load() {
-        if (!Files.exists(this.fileLocation())) {
-            this.save();
-            return;
-        }
-
+    public boolean load(JsonObject configObject, boolean allowServerSync) {
         try {
             this.loading = true;
-            var configObject = this.jankson.load(Files.readString(this.fileLocation(), StandardCharsets.UTF_8));
 
             for (var option : this.options.values()) {
                 Object newValue;
@@ -163,13 +208,13 @@ public abstract class ConfigWrapper<C> {
                 }
 
                 if (Map.class.isAssignableFrom(clazz)) {
-                    var field = option.backingField().field();
+                    var genericType = option.getGenericType();
 
                     newValue = TypeMagic.createAndCast(clazz);
                     POJODeserializer.unpackMap(
                             (Map<Object, Object>) newValue,
-                            ReflectionUtils.getTypeArgument(field.getGenericType(), 0),
-                            ReflectionUtils.getTypeArgument(field.getGenericType(), 1),
+                            ReflectionUtils.getTypeArgument(genericType, 0),
+                            ReflectionUtils.getTypeArgument(genericType, 1),
                             element,
                             this.jankson.getMarshaller()
                     );
@@ -177,7 +222,7 @@ public abstract class ConfigWrapper<C> {
                     newValue = TypeMagic.createAndCast(clazz);
                     POJODeserializer.unpackCollection(
                             (Collection<Object>) newValue,
-                            ReflectionUtils.getTypeArgument(option.backingField().field().getGenericType(), 0),
+                            ReflectionUtils.getTypeArgument(option.getGenericType(), 0),
                             element,
                             this.jankson.getMarshaller()
                     );
@@ -189,24 +234,34 @@ public abstract class ConfigWrapper<C> {
 
                 option.set(newValue == null ? option.defaultValue() : newValue);
             }
-        } catch (IOException | SyntaxError | DeserializationException e) {
-            Owo.LOGGER.warn("Could not load config {}", this.name, e);
-        } finally {
-            this.loading = false;
+
+            var server = Owo.currentServer();
+
+            if (server != null && allowServerSync) {
+                for (var player : server.getPlayerManager().getPlayerList()) {
+                    ConfigSynchronizer.sendLoadedServerConfig(player.networkHandler::sendPacket, this.id);
+                }
+            }
+
+            return true;
+        } catch (DeserializationException e) {
+            Owo.LOGGER.warn("Could not load config {}", this.id, e);
+
+            return false;
         }
     }
 
     /**
      * Query the field associated with a given key. This is relevant
      * in cases where said field is annotated with {@link Nest}, meaning
-     * that {@link #optionForKey(Option.Key)} would return {@code null}
+     * that {@link #optionForKey(Key)} would return {@code null}
      * because the field won't be treated as an option in itself.
      *
      * @param key The for which to query the field
      * @return The field described by {@code key}, or {@code null}
      * if it does not point to a valid field in the config tree
      */
-    public @Nullable Field fieldForKey(Option.Key key) {
+    public @Nullable Field fieldForKey(Key key) {
         try {
             var path = new ArrayList<>(List.of(key.path()));
             var clazz = this.instance.getClass();
@@ -221,19 +276,23 @@ public abstract class ConfigWrapper<C> {
         }
     }
 
+    public Identifier id() {
+        return this.id;
+    }
+
     /**
      * @return The name of this config, used for translation
      * keys and the filename
      */
     public String name() {
-        return this.name;
+        return this.id.getPath();
     }
 
     /**
      * @return The location to which this config is saved
      */
     public Path fileLocation() {
-        return FabricLoader.getInstance().getConfigDir().resolve(this.name + ".json5");
+        return FabricLoader.getInstance().getConfigDir().resolve(this.name() + ".json5");
     }
 
     /**
@@ -244,7 +303,7 @@ public abstract class ConfigWrapper<C> {
      * if no such option exists
      */
     @SuppressWarnings("unchecked")
-    public <T> @Nullable Option<T> optionForKey(Option.Key key) {
+    public <T> @Nullable FieldOption<T> optionForKey(Key key) {
         return this.options.get(key);
     }
 
@@ -252,83 +311,39 @@ public abstract class ConfigWrapper<C> {
      * @return A view of all options contained in this config
      */
     @SuppressWarnings("unchecked")
-    public Map<Option.Key, Option<?>> allOptions() {
-        return (Map<Option.Key, Option<?>>) (Object) this.optionsView;
+    public Map<Key, FieldOption<?>> allOptions() {
+        return (Map<Key, FieldOption<?>>) (Object) this.optionsView;
     }
 
     /**
      * Execute the given action once for each option in this config
      */
-    public void forEachOption(Consumer<Option<?>> action) {
+    public void forEachOption(Consumer<FieldOption<?>> action) {
         for (var option : this.options.values()) {
             action.accept(option);
         }
     }
 
     private void initializeOptions(boolean hookSave) throws IllegalAccessException, NoSuchMethodException {
-        var fields = new LinkedHashMap<Option.Key, Option.BoundField<Object>>();
-        collectFieldValues(Option.Key.ROOT, this.instance, fields);
+        var fields = new LinkedHashMap<Key, BoundedAccess.BoundField<Object>>();
+        collectFieldValues(Key.ROOT, this.instance, fields);
 
         var instanceSyncMode = this.instance.getClass().isAnnotationPresent(Sync.class)
                 ? this.instance.getClass().getAnnotation(Sync.class).value()
-                : Option.SyncMode.NONE;
+                : SyncMode.NONE;
 
         for (var entry : fields.entrySet()) {
             var key = entry.getKey();
             var boundField = entry.getValue();
 
             var field = boundField.field();
-            var fieldType = field.getType();
 
-            Constraint constraint = null;
-            if (field.isAnnotationPresent(RangeConstraint.class)) {
-                var annotation = field.getAnnotation(RangeConstraint.class);
-
-                if (NumberReflection.isNumberType(fieldType)) {
-                    Predicate<?> predicate;
-                    if (fieldType == long.class || fieldType == Long.class) {
-                        predicate = o -> o != null && (Long) o >= annotation.min() && (Long) o <= annotation.max();
-                    } else {
-                        predicate = o -> o != null && ((Number) o).doubleValue() >= annotation.min() && ((Number) o).doubleValue() <= annotation.max();
-                    }
-
-                    constraint = new Constraint("Range from " + annotation.min() + " to " + annotation.max(), predicate);
-                } else {
-                    throw new IllegalStateException("@RangeConstraint can only be applied to numeric fields");
-                }
-            }
-
-            if (field.isAnnotationPresent(RegexConstraint.class)) {
-                var annotation = field.getAnnotation(RegexConstraint.class);
-
-                if (CharSequence.class.isAssignableFrom(fieldType)) {
-                    var pattern = Pattern.compile(annotation.value());
-                    constraint = new Constraint("Regex " + annotation.value(), o -> o != null && pattern.matcher((CharSequence) o).matches());
-                } else {
-                    throw new IllegalStateException("@RegexConstraint can only be applied to fields with a string representation");
-                }
-            }
-
-            if (field.isAnnotationPresent(PredicateConstraint.class)) {
-                var annotation = field.getAnnotation(PredicateConstraint.class);
-                var method = boundField.owner().getClass().getMethod(annotation.value(), fieldType);
-
-                if (method.getReturnType() != boolean.class) {
-                    throw new NoSuchMethodException("Return type of predicate implementation '" + annotation.value() + "' must be 'boolean'");
-                }
-
-                if (!Modifier.isStatic(method.getModifiers())) {
-                    throw new IllegalStateException("Predicate implementation '" + annotation.value() + "' must be static");
-                }
-
-                var handle = MethodHandles.publicLookup().unreflect(method);
-                constraint = new Constraint("Predicate method " + annotation.value(), o -> this.invokePredicate(handle, o));
-            }
+            var constraint = ConfigReflectionUtils.getConstraint(boundField);
 
             final var defaultValue = boundField.getValue();
 
             final var observable = Observable.of(defaultValue);
-            if (hookSave) observable.observe(o -> this.save());
+            if (hookSave) observable.observe(o -> this.saveToFile());
 
             var syncMode = instanceSyncMode;
             if (field.isAnnotationPresent(Sync.class)) {
@@ -345,11 +360,11 @@ public abstract class ConfigWrapper<C> {
                 }
             }
 
-            this.options.put(key, new Option<>(this.name, key, defaultValue, observable, boundField, constraint, syncMode, this.builder));
+            this.options.put(key, new FieldOption<>(this.id(), key, defaultValue, observable, boundField, constraint, syncMode, this.builder));
         }
     }
 
-    private void collectFieldValues(Option.Key parent, Object instance, Map<Option.Key, Option.BoundField<Object>> fields) throws IllegalAccessException {
+    private void collectFieldValues(Key parent, Object instance, Map<Key, BoundedAccess.BoundField<Object>> fields) throws IllegalAccessException {
         for (var field : instance.getClass().getDeclaredFields()) {
             if (Modifier.isTransient(field.getModifiers()) || Modifier.isStatic(field.getModifiers())) continue;
 
@@ -361,7 +376,7 @@ public abstract class ConfigWrapper<C> {
                     throw new IllegalStateException("Nested config option containers must never be null");
                 }
             } else {
-                fields.put(parent.child(field.getName()), new Option.BoundField<>(instance, field));
+                fields.put(parent.child(field.getName()), new BoundedAccess.BoundField<>(instance, field));
             }
         }
     }
@@ -395,5 +410,73 @@ public abstract class ConfigWrapper<C> {
 
     public interface BuilderConsumer {
         void build(SerializationBuilder builder);
+
+        static Pair<Jankson, ReflectiveEndecBuilder> fullyBuild(BuilderConsumer consumer) {
+            var builder = new SerializationBuilder(Jankson.builder(), MinecraftEndecs.addDefaults(new ReflectiveEndecBuilder()));
+
+            builder.janksonBuilder()
+                    .registerSerializer(Identifier.class, (identifier, marshaller) -> new JsonPrimitive(identifier.toString()))
+                    .registerDeserializer(JsonPrimitive.class, Identifier.class, (primitive, m) -> Identifier.tryParse(primitive.asString()));
+
+            builder.addEndec(Color.class, Color.RGBA_HEX_ENDEC);
+
+            consumer.build(builder);
+
+            return Pair.of(builder.janksonBuilder().build(), builder.endecBuilder());
+        }
+    }
+
+    public static ConfigWrapper<?> getOrDuplicateWrapper(Identifier configId, @Nullable JsonObject jsonObject) {
+        var wrapper = ConfigWrapper.getKnownConfigInstances().get(configId);
+
+        if (wrapper == null) {
+            throw new IllegalStateException("Unable to locate the given wrapper instance with the following id: " + configId);
+        }
+
+        if (jsonObject != null) {
+            wrapper = wrapper.attemptToDuplicate(jsonObject);
+        }
+
+        return wrapper;
+    }
+
+    //--
+
+    private boolean serverConfig = false;
+
+    public boolean isServerConfig() {
+        return this.serverConfig;
+    }
+
+    @Nullable
+    private JsonObject memoryData = null;
+
+    @ApiStatus.Internal
+    @Nullable
+    private ConfigWrapper<?> attemptToDuplicate(JsonObject jsonObject) {
+        var clazz = this.getClass();
+
+        try {
+            var constructor = clazz.getDeclaredConstructor(Class.class, Pair.class, boolean.class);
+
+            if (constructor.trySetAccessible()) {
+                var newWrapper = constructor.newInstance(this.instance.getClass(), Pair.of(this.jankson, this.builder), false);
+
+                if (newWrapper.load(jsonObject, false)) {
+                    newWrapper.serverConfig = true;
+                    newWrapper.memoryData = jsonObject;
+
+                    return newWrapper;
+                } else {
+                    Owo.LOGGER.warn("Could not load the given duplicated config {}", this.id);
+                }
+            } else {
+                Owo.LOGGER.warn("Could not construct the given duplicated config {} due to construct being in accessible", this.id);
+            }
+        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            Owo.LOGGER.warn("Could not duplicate the given config {}", this.id, e);
+        }
+
+        return null;
     }
 }

@@ -180,4 +180,36 @@ public record Color(float red, float green, float blue, float alpha) implements 
     public static int parseAndPack(Node node) {
         return parse(node).argb();
     }
+
+
+    public Color withRed(int red) {
+        return withRed(red / 255f);
+    }
+
+    public Color withRed(float red) {
+        return new Color(red, this.green(), this.blue(), this.alpha());
+    }
+
+    public Color withGreen(int green) {
+        return withGreen(green / 255f);
+    }
+
+    public Color withGreen(float green) {
+        return new Color(this.red(), green, this.blue(), this.alpha());
+    }
+    public Color withBlue(int blue) {
+        return withBlue(blue / 255f);
+    }
+
+    public Color withBlue(float blue) {
+        return new Color(this.red(), this.green(), blue, this.alpha());
+    }
+
+    public Color withAlpha(int alpha) {
+        return withAlpha(alpha / 255f);
+    }
+
+    public Color withAlpha(float alpha) {
+        return new Color(this.red(), this.green(), this.blue(), alpha);
+    }
 }

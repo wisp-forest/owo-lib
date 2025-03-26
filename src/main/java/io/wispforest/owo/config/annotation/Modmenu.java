@@ -31,4 +31,5 @@ public @interface Modmenu {
      */
     String uiModelId() default "owo:config";
 
+    int priorityOrder() default 0;
 }

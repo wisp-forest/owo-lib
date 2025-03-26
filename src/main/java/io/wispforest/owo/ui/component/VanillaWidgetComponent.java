@@ -25,10 +25,6 @@ public class VanillaWidgetComponent extends BaseComponent {
         }
     }
 
-    public boolean hovered() {
-        return this.hovered;
-    }
-
     @Override
     public void mount(ParentComponent parent, int x, int y) {
         super.mount(parent, x, y);
@@ -40,7 +36,7 @@ public class VanillaWidgetComponent extends BaseComponent {
         this.hovered = nowHovered;
 
         if (nowHovered) {
-            if (this.root() == null || this.root().childAt(mouseX, mouseY) != this.widget) {
+            if (!this.prioritizedHover && (this.root() == null || this.root().childAt(mouseX, mouseY) != this.widget)) {
                 this.hovered = false;
                 return;
             }

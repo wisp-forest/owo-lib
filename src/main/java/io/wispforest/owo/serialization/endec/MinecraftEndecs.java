@@ -1,10 +1,13 @@
 package io.wispforest.owo.serialization.endec;
 
+import blue.endless.jankson.JsonObject;
 import com.mojang.datafixers.util.Function3;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.SerializationAttributes;
+import io.wispforest.endec.format.jankson.JanksonEndec;
 import io.wispforest.endec.impl.ReflectiveEndecBuilder;
 import io.wispforest.endec.impl.StructEndecBuilder;
+import io.wispforest.owo.packets.s2c.OpenServerConfig;
 import io.wispforest.owo.serialization.CodecUtils;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.item.ItemStack;
@@ -86,6 +89,8 @@ public final class MinecraftEndecs {
                     ? new BlockHitResult(pos, side, blockPos, insideBlock)
                     : BlockHitResult.createMissed(pos, side, blockPos)
     );
+
+    public static final Endec<JsonObject> JANK_JSON_OBJECT = JanksonEndec.INSTANCE.xmap(e -> (JsonObject) e, obj -> obj);
 
     // --- Constructors for MC types ---
 

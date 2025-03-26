@@ -1,6 +1,6 @@
 package io.wispforest.owo.config.ui.component;
 
-import io.wispforest.owo.config.Option;
+import io.wispforest.owo.config.options.OptionControlSpec;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.core.Sizing;
 import net.minecraft.client.gui.screen.Screen;
@@ -16,7 +16,7 @@ import java.util.Locale;
 @ApiStatus.Internal
 public class ConfigEnumButton extends ButtonComponent implements OptionValueProvider {
 
-    @Nullable protected Option<? extends Enum<?>> backingOption = null;
+    @Nullable protected OptionControlSpec<? extends Enum<?>> backingOption = null;
     @Nullable protected Enum<?>[] backingValues = null;
     protected int selectedIndex = 0;
 
@@ -68,9 +68,9 @@ public class ConfigEnumButton extends ButtonComponent implements OptionValueProv
         );
     }
 
-    public ConfigEnumButton init(Option<? extends Enum<?>> option, int selectedIndex) {
+    public ConfigEnumButton init(OptionControlSpec<? extends Enum<?>> option, int selectedIndex) {
         this.backingOption = option;
-        this.backingValues = (Enum<?>[]) option.backingField().field().getType().getEnumConstants();
+        this.backingValues = option.clazz().getEnumConstants();
         this.selectedIndex = selectedIndex;
 
         this.updateMessage();

@@ -72,7 +72,7 @@
         "io/wispforest/owo/client/screens/OwoScreenHandler"
       ],
       "net/minecraft/class_332": [
-        "io/wispforest/owo/ui/util/MatrixStackTransformer"
+        "io/wispforest/owo/ui/util/MatrixStackTransformer<Lnet/minecraft/class_332;>"
       ],
       "net/minecraft/class_9331\u0024class_9332": [
         "io/wispforest/owo/serialization/OwoComponentTypeBuilder<TT;>"

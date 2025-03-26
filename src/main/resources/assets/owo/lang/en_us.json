@@ -35,6 +35,27 @@
   ],
   "text.owo.config.button.reload": "Reload",
   "text.owo.config.button.done": "Done",
+  "text.owo.config.label.environment": "Config Environment: ",
+  "#text.owo.config.label.environment.client": [
+    "Side: ",
+    {"text" : "Client", "color": "#32a852"},
+    ""
+  ],
+  "#text.owo.config.label.environment.server": [
+    "Side: ",
+    {"text" : "Server", "color": "#4287f5"},
+    ""
+  ],
+  "text.owo.config.label.environment.client": [
+    "",
+    {"text" : "Client", "color": "#32a852"},
+    ""
+  ],
+  "text.owo.config.label.environment.server": [
+    "",
+    {"text" : "Server", "color": "#4287f5"},
+    ""
+  ],
   "text.owo.config.sections_tooltip": "Sections",
   "text.owo.config.sections": {"text": "Sections", "underlined": true},
   "text.owo.config.list.add_entry": "Add entry",
@@ -51,5 +72,6 @@
     {"text": "❌", "color": "#EB1D36"},
     {"text": "]", "color": "gray"},
     " Disabled"
-  ]
+  ],
+  "text.owo.config_selection": "Configs from %d"
 }

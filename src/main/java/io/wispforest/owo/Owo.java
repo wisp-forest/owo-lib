@@ -2,16 +2,26 @@ package io.wispforest.owo;
 
 import io.wispforest.owo.client.screens.ScreenInternals;
 import io.wispforest.owo.command.debug.OwoDebugCommands;
+import io.wispforest.owo.config.OwoConfigCommand;
+import io.wispforest.owo.network.OwoNetChannel;
 import io.wispforest.owo.ops.LootOps;
+import io.wispforest.owo.packets.OwoPackets;
 import io.wispforest.owo.text.CustomTextRegistry;
 import io.wispforest.owo.text.InsertingTextContent;
 import io.wispforest.owo.util.Wisdom;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +67,10 @@ public class Owo implements ModInitializer {
 
         Wisdom.spread();
 
+        OwoConfigCommand.register();
+
+        OwoPackets.initNetworking();
+
         if (!DEBUG) return;
 
         OwoDebugCommands.register();
@@ -82,5 +96,4 @@ public class Owo implements ModInitializer {
     public static MinecraftServer currentServer() {
         return SERVER;
     }
-
 }

@@ -91,6 +91,7 @@ public class TextBoxComponent extends TextFieldWidget {
     @Override
     public void parseProperties(UIModel spec, Element element, Map<String, Element> children) {
         super.parseProperties(spec, element, children);
+        UIParsing.apply(children, "cursor-start", UIParsing::parseBool, this::setCursorToStart);
         UIParsing.apply(children, "show-background", UIParsing::parseBool, this::setDrawsBackground);
         UIParsing.apply(children, "max-length", UIParsing::parseUnsignedInt, this::setMaxLength);
         UIParsing.apply(children, "text", e -> e.getTextContent().strip(), this::text);
