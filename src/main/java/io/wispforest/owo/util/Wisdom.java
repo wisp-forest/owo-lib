@@ -58,7 +58,8 @@ public final class Wisdom {
             "blod: I think I need to take a book out of your page",
             "blod: he her",
             "BasiqueEvangelist: what if... iphones",
-            "Cheese Cheese Creeper, the newest release from MC Basic"
+            "Cheese Cheese Creeper, the newest release from MC Basic",
+            "they can live in peace knowing that having owolib in their pack will NOT install bonzi buddy to their pack dev computer... (;"
     );
 
     public static void spread() {
