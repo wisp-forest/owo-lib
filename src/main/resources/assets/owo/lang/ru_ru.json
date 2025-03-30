@@ -1,0 +1,61 @@
+{
+  "text.owo.itemGroup.tab_template": [
+    { "index": 0 },
+    { "text": " > ", "color": "gray" },
+    { "index": 1, "color": "dark_gray" }
+  ],
+  "text.owo.itemGroup.select_hint": {
+    "text": "Щёлкните ПКМ, чтобы выбрать несколько",
+    "color": "gray"
+  },
+  "text.owo.configure_hot_reload.title": "Настройка горячей перезагрузки",
+  "text.owo.configure_hot_reload.choose_file": "Выбрать файл",
+  "text.owo.configure_hot_reload.save": "Сохранить",
+  "text.owo.configure_hot_reload.model": [
+    { "text": "Модель: ", "color": "yellow" },
+    { "index": 0, "color": "gray" }
+  ],
+  "text.owo.configure_hot_reload.reload_from.unset": "Не выбрано",
+  "text.owo.configure_hot_reload.reload_from": [
+    { "text": "Перезагрузить из:", "color": "yellow" },
+    { "index": 0, "color": "gray" }
+  ],
+  "text.owo.config.search": "Поиск...",
+  "text.owo.config.search.matches": "%d из %d",
+  "text.owo.config.search.no_matches": "Нет совпадений",
+  "text.owo.config.must_restart": "Для применения некоторых внесённых вами изменений требуется перезагрузка",
+  "text.owo.config.button.exit_minecraft": "Выйти из Minecraft",
+  "text.owo.config.button.ignore_restart": "Перезагрузить позже",
+  "text.owo.config.button.range.edit_as_text": "Редактировать как текст",
+  "text.owo.config.button.range.edit_with_slider": "Редактировать с ползунком",
+  "text.owo.config.applies_after_restart": [
+    { "text": "⏻ ", "color": "#FAEA48" },
+    { "text": "Этот параметр применяется после перезагрузки", "color": "gray" }
+  ],
+  "text.owo.config.managed_by_server": [
+    { "text": "⚑ ", "color": "#EB1D36" },
+    {
+      "text": "Эта опция управляется сервером\n   Отключитесь, чтобы отредактировать",
+      "color": "gray"
+    }
+  ],
+  "text.owo.config.button.reload": "Перезагрузить",
+  "text.owo.config.button.done": "Готово",
+  "text.owo.config.sections_tooltip": "Разделы",
+  "text.owo.config.sections": { "text": "Разделы", "underlined": true },
+  "text.owo.config.list.add_entry": "Добавить запись",
+  "text.owo.config.boolean_toggle.enabled": [
+    "",
+    { "text": "[", "color": "gray" },
+    { "text": "✔", "color": "#28FFBF" },
+    { "text": "]", "color": "gray" },
+    " Включено"
+  ],
+  "text.owo.config.boolean_toggle.disabled": [
+    "",
+    { "text": "[", "color": "gray" },
+    { "text": "❌", "color": "#EB1D36" },
+    { "text": "]", "color": "gray" },
+    " Отключено"
+  ]
+}
