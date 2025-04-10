@@ -1,6 +1,7 @@
 package io.wispforest.owo.braid.framework.instance;
 
 import io.wispforest.owo.braid.core.Size;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Box;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
@@ -82,8 +83,16 @@ public class WidgetTransform {
         mat.translate((float) this.x, (float) this.y, 0);
     }
 
+    public void transformToParent(MatrixStack matrices) {
+        matrices.translate(this.x, this.y, 0);
+    }
+
     public void transformToWidget(Matrix4f mat) {
         mat.translate((float) -this.x, (float) -this.y, 0);
+    }
+
+    public void transformToWidget(MatrixStack matrices) {
+        matrices.translate(-this.x, -this.y, 0);
     }
 
     public void toParentCoordinates(Vector3f vec) {

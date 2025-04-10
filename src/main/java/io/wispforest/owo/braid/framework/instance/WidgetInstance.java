@@ -3,7 +3,7 @@ package io.wispforest.owo.braid.framework.instance;
 import com.google.common.base.Preconditions;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.Size;
-import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.braid.framework.widget.InstanceWidget;
 import net.minecraft.client.gui.DrawContext;
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public abstract class WidgetInstance<T extends Widget> implements Comparable<WidgetInstance<?>> {
+public abstract class WidgetInstance<T extends InstanceWidget> implements Comparable<WidgetInstance<?>> {
     public static final int FLAG_HIT_TEST_BOUNDARY = 0b1;
 
     public final WidgetTransform transform = this.createTransform();
@@ -27,7 +27,7 @@ public abstract class WidgetInstance<T extends Widget> implements Comparable<Wid
     private InstanceHost host;
     private WidgetInstance<?> parent;
 
-    public T widget;
+    protected T widget;
 
     // ---
 
@@ -87,6 +87,13 @@ public abstract class WidgetInstance<T extends Widget> implements Comparable<Wid
     }
 
     // ---
+
+    protected void drawChild(DrawContext ctx, WidgetInstance<?> child) {
+        ctx.push();
+        child.transform.transformToParent(ctx.getMatrices());
+        child.draw(ctx);
+        ctx.pop();
+    }
 
     public void clearLayoutCache(boolean recursive) {
         this.needsLayout = true;
@@ -179,6 +186,14 @@ public abstract class WidgetInstance<T extends Widget> implements Comparable<Wid
 
     public boolean hasParent() {
         return this.parent != null;
+    }
+
+    public void setWidget(T widget) {
+        this.widget = widget;
+    }
+
+    public T widget() {
+        return this.widget;
     }
 
     // ---

@@ -29,6 +29,10 @@ public abstract class Widget {
         return this;
     }
 
+    public @Nullable Key key() {
+        return this.key;
+    }
+
     // ---
 
     public abstract WidgetProxy proxy();

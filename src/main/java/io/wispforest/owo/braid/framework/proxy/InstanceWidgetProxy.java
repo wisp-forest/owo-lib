@@ -10,7 +10,7 @@ import java.util.List;
 
 public abstract non-sealed class InstanceWidgetProxy extends WidgetProxy implements InstanceListenerProxy {
 
-    public final WidgetInstance<InstanceWidget> instance;
+    protected final WidgetInstance<InstanceWidget> instance;
 
     private final List<InstanceListenerProxy> ancestorInstanceListeners = new ArrayList<>();
 
@@ -19,6 +19,10 @@ public abstract non-sealed class InstanceWidgetProxy extends WidgetProxy impleme
 
         //noinspection unchecked
         this.instance = (WidgetInstance<InstanceWidget>) widget.instantiate();
+    }
+
+    public WidgetInstance<? extends InstanceWidget> instance() {
+        return this.instance;
     }
 
     @Override
@@ -52,7 +56,7 @@ public abstract non-sealed class InstanceWidgetProxy extends WidgetProxy impleme
     @Override
     public void updateWidget(Widget newWidget) {
         super.updateWidget(newWidget);
-        this.instance.widget((InstanceWidget) newWidget);
+        this.instance.setWidget((InstanceWidget) newWidget);
     }
 
     @Override

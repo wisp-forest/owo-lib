@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.framework.instance;
 
+import net.minecraft.client.util.math.MatrixStack;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 import org.joml.Vector3f;
@@ -33,8 +34,18 @@ public class CustomWidgetTransform extends WidgetTransform {
     }
 
     @Override
+    public void transformToParent(MatrixStack matrices) {
+        matrices.peek().getPositionMatrix().mul(this.toParent());
+    }
+
+    @Override
     public void transformToWidget(Matrix4f mat) {
         mat.mul(this.toWidget());
+    }
+
+    @Override
+    public void transformToWidget(MatrixStack matrices) {
+        matrices.peek().getPositionMatrix().mul(this.toWidget());
     }
 
     @Override
