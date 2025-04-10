@@ -1,10 +1,212 @@
 package io.wispforest.owo.braid.framework.instance;
 
+import com.google.common.base.Preconditions;
+import io.wispforest.owo.braid.core.Constraints;
+import io.wispforest.owo.braid.core.Size;
 import io.wispforest.owo.braid.framework.widget.Widget;
+import net.minecraft.client.gui.DrawContext;
+import org.jetbrains.annotations.MustBeInvokedByOverriders;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
-public class WidgetInstance<T extends Widget> {
-    public void dispose() {}
-    public void widget(T newWidget) {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
+public abstract class WidgetInstance<T extends Widget> implements Comparable<WidgetInstance<?>> {
+    public static final int FLAG_HIT_TEST_BOUNDARY = 0b1;
+
+    public final WidgetTransform transform = this.createTransform();
+
+    public @Nullable Object parentData;
+    public int flags = 0;
+    private int depth = 0;
+
+    private InstanceHost host;
+    private WidgetInstance<?> parent;
+
+    public T widget;
+
+    // ---
+
+    private @Nullable Constraints constraints;
+    private boolean needsLayout = false;
+    private @Nullable WidgetInstance<?> relayoutBoundary;
+
+    public WidgetInstance(T widget) {
+        this.widget = widget;
+    }
+
+    protected WidgetTransform createTransform() {
+        return new WidgetTransform();
+    }
+
+    // ---
+
+    public final Size layout(Constraints constraints) {
+        if (!this.needsLayout && Objects.equals(constraints, this.constraints)) {
+            return this.transform.toSize();
+        }
+
+        this.constraints = constraints;
+        this.relayoutBoundary = constraints.isTight() || this.parent == null ? this : this.parent.relayoutBoundary;
+
+        this.doLayout(constraints);
+        this.needsLayout = false;
+
+        return transform.toSize();
+    }
+
+    protected abstract void doLayout(Constraints constraints);
+
+    // ---
+
+    public abstract void draw(DrawContext ctx);
+
+    public abstract void visitChildren(Visitor visitor);
+
+    // ---
+
+    public void attachHost(InstanceHost host) {
+        this.host = host;
+        this.visitChildren(child -> child.attachHost(host));
+    }
+
+    protected <W extends @Nullable WidgetInstance<?>> W adopt(W child) {
+        if (child == null || ((WidgetInstance<?>) child).parent == this) return child;
+
+        ((WidgetInstance<?>) child).depth = this.depth + 1;
+        ((WidgetInstance<?>) child).parent = this;
+        if (this.host != null) {
+            child.attachHost(this.host);
+        }
+
+        return child;
+    }
+
+    // ---
+
+    public void clearLayoutCache(boolean recursive) {
+        this.needsLayout = true;
+
+        if (recursive) {
+            this.visitChildren(child -> child.clearLayoutCache(true));
+        }
+    }
+
+    public void markNeedsLayout() {
+        this.needsLayout = true;
+
+        if (this.isRelayoutBoundary()) {
+            if (this.host != null) this.host.scheduleLayout(this);
+        } else {
+            if (this.parent != null) this.parent.markNeedsLayout();
+        }
+    }
+
+    private boolean debugDisposed = false;
+
+    @MustBeInvokedByOverriders
+    public void dispose() {
+        Preconditions.checkState(!this.debugDisposed, "tried to dispose a widget instance twice");
+        this.debugDisposed = true;
+    }
+
+    // ---
+
+    @SuppressWarnings("rawtypes")
+    public List<WidgetInstance<?>> ancestors() {
+        var result = new ArrayList<WidgetInstance<?>>();
+        WidgetInstance ancestor = this;
+
+        while (ancestor != null) {
+            result.add(ancestor);
+            ancestor = ancestor.parent;
+        }
+
+        return result;
+    }
+
+    public void hitTest(double x, double y, HitTestState state) {
+        if (this.hitTestSelf(x, y)) {
+            state.addHit(this, x, y);
+        }
+
+        var coordinates = new Vector3f();
+        this.visitChildren(child -> {
+            coordinates.set((float) x, (float) y, 0);
+            child.transform.toWidgetCoordinates(coordinates);
+
+            child.hitTest(coordinates.x, coordinates.y, state);
+        });
+    }
+
+    protected boolean hitTestSelf(double x, double y) {
+        return x >= 0 && x <= this.transform.width && y >= 0 && y <= this.transform.height;
+    }
+
+    public Matrix4f computeGlobalTransform() {
+        var result = new Matrix4f();
+
+        for (var ancestor : this.ancestors().reversed()) {
+            result.mul(ancestor.transform.toWidget());
+        }
+
+        result.mul(transform.toWidget());
+
+        return result;
+    }
+
+    // ---
+
+    public int depth() {
+        return this.depth;
+    }
+
+    public @Nullable InstanceHost host() {
+        return this.host;
+    }
+
+    public boolean needsLayout() {
+        return this.needsLayout;
+    }
+
+    public boolean isRelayoutBoundary() {
+        return this.relayoutBoundary == this;
+    }
+
+    public boolean hasParent() {
+        return this.parent != null;
+    }
+
+    // ---
+
+    @Override
+    public int compareTo(@NotNull WidgetInstance<?> o) {
+        return Integer.compare(this.depth, o.depth);
+    }
+
+    // ---
+
+    @FunctionalInterface
+    public interface Visitor {
+        void visit(WidgetInstance<?> child);
     }
 }
+
+//enum Visitors implements WidgetInstance.Visitor {
+//    MARK_NEEDS_LAYOUT(WidgetInstance::markNeedsLayout);
+//
+//    private final WidgetInstance.Visitor delegate;
+//
+//    Visitors(WidgetInstance.Visitor delegate) {
+//        this.delegate = delegate;
+//    }
+//
+//    @Override
+//    public void visit(WidgetInstance<?> child) {
+//        this.delegate.visit(child);
+//    }
+//}

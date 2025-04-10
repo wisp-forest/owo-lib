@@ -50,7 +50,7 @@ public abstract sealed class WidgetProxy implements BuildContext, Comparable<Wid
     }
 
     public void unmount() {
-        Preconditions.checkState(this.lifecycle == Lifecycle.LIVE, "proxy must be in live lifecycle state when unmount() is called");
+        Preconditions.checkState(this.lifecycle == Lifecycle.LIVE, "proxy must be in LIVE lifecycle state when unmount() is called");
         this.lifecycle = Lifecycle.DEAD;
 
         for (var dependency : this.dependencies.values()) {
