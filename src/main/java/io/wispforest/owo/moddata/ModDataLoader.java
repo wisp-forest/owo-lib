@@ -4,8 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import io.wispforest.owo.Owo;
 import net.minecraft.util.Identifier;
-import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.fml.loading.LoadingModList;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.IOException;
@@ -36,8 +36,8 @@ public final class ModDataLoader {
     public static void load(ModDataConsumer consumer) {
         Map<Identifier, JsonObject> foundFiles = new HashMap<>();
 
-        ModList.get().getMods().forEach(modInfo -> {
-            final var targetPath = modInfo.getOwningFile().getFile().getFilePath().resolve(String.format("data/%s/%s", modInfo.getModId(), consumer.getDataSubdirectory()));
+        LoadingModList.get().getMods().forEach(modInfo -> {
+            final var targetPath = modInfo.getOwningFile().getFile().getSecureJar().getRootPath().resolve(String.format("data/%s/%s", modInfo.getModId(), consumer.getDataSubdirectory()));
 
             tryLoadFilesFrom(foundFiles, modInfo.getModId(), targetPath);
         });
