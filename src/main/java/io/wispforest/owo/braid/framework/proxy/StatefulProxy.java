@@ -44,8 +44,8 @@ public class StatefulProxy extends ComposedProxy {
     @Override
     protected void doRebuild() {
         var newWidget = this.state.build(this);
-        super.doRebuild();
-
         this.child = this.refreshChild(this.child, newWidget, this.slot());
+
+        super.doRebuild();
     }
 }

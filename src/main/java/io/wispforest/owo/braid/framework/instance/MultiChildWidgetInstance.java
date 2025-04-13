@@ -29,7 +29,7 @@ public abstract class MultiChildWidgetInstance<T extends MultiChildInstanceWidge
     }
 
     public void insertChild(int index, WidgetInstance<?> child) {
-        this.children.set(index, child);
+        this.children.set(index, this.adopt(child));
         this.markNeedsLayout();
     }
 }

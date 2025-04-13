@@ -6,10 +6,9 @@ package io.wispforest;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
+import java.lang.reflect.InvocationTargetException;
 import java.security.ProtectionDomain;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class BraidReloadAgent {
     public static void premain(String agentArgs, Instrumentation instrumentation) {
@@ -21,19 +20,51 @@ public class BraidReloadAgent {
 class RedefinitionListener implements ClassFileTransformer {
 
     private final Map<String, Integer> classHashes = new HashMap<>();
+    private final Set<String> classesToWaitFor = new HashSet<>(Set.of(
+        "io/wispforest/owo/braid/framework/widget/Widget",
+        "io/wispforest/owo/braid/framework/proxy/WidgetState",
+        "io/wispforest/owo/braid/core/BraidHotReloadCallback"
+    ));
+
+    private ClassLoader braidClassLoader;
 
     @Override
     public byte[] transform(Module module, ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
-        var newHash = Arrays.hashCode(classfileBuffer);
+        if (!this.classesToWaitFor.isEmpty()) {
+            if (this.classesToWaitFor.contains(className)) {
+                this.classesToWaitFor.remove(className);
 
-        if (classBeingRedefined != null && this.classHashes.containsKey(className)) {
-            var hash = this.classHashes.get(className);
-            if (hash != newHash) {
-                System.out.println("REDEFINITION: " + className);
+                if (this.braidClassLoader == null) {
+                    this.braidClassLoader = loader;
+                }
             }
+
+            return ClassFileTransformer.super.transform(module, loader, className, classBeingRedefined, protectionDomain, classfileBuffer);
         }
 
-        this.classHashes.put(className, newHash);
+        try {
+            var widgetClass = Class.forName("io.wispforest.owo.braid.framework.widget.Widget", false, this.braidClassLoader);
+            var widgetStateClass = Class.forName("io.wispforest.owo.braid.framework.proxy.WidgetState", false, this.braidClassLoader);
+            var callbackClass = Class.forName("io.wispforest.owo.braid.core.BraidHotReloadCallback", false, this.braidClassLoader);
+
+            if (classBeingRedefined != null) {
+                if (widgetClass.isAssignableFrom(classBeingRedefined) || widgetStateClass.isAssignableFrom(classBeingRedefined)) {
+                    var newHash = Arrays.hashCode(classfileBuffer);
+
+                    if (this.classHashes.containsKey(className)) {
+                        var hash = this.classHashes.get(className);
+                        if (hash != newHash) {
+                            callbackClass.getMethod("invoke").invoke(null);
+                        }
+                    }
+
+                    this.classHashes.put(className, newHash);
+                }
+            }
+        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
+            System.out.println("braid reload agent error:");
+            ignored.printStackTrace();
+        }
 
         return ClassFileTransformer.super.transform(module, loader, className, classBeingRedefined, protectionDomain, classfileBuffer);
     }

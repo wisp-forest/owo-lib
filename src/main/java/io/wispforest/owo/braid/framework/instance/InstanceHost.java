@@ -1,9 +1,10 @@
 package io.wispforest.owo.braid.framework.instance;
 
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 
 public interface InstanceHost {
-    TextRenderer textRenderer();
+    MinecraftClient client();
 
     /// Schedule a [WidgetInstance#layout] invocation for `instance`,
     /// to be executed during the next layout pass.

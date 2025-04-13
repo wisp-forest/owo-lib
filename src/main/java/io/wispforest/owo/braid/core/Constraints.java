@@ -53,6 +53,10 @@ public record Constraints(double minWidth, double minHeight, double maxWidth, do
         return new Constraints(0, 0, maxSize.width(), maxSize.height());
     }
 
+    public static Constraints tightOnAxis(@Nullable Double horizontal, @Nullable Double vertical) {
+        return only(horizontal, vertical, horizontal, vertical);
+    }
+
     // ---
 
     public Constraints withMinWidth(double minWidth) {

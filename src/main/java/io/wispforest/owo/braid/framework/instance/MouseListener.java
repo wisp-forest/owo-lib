@@ -1,6 +1,6 @@
 package io.wispforest.owo.braid.framework.instance;
 
-import io.wispforest.owo.ui.core.CursorStyle;
+import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import org.jetbrains.annotations.Nullable;
 
 public interface MouseListener {

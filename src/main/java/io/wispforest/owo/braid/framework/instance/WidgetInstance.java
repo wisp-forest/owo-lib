@@ -95,6 +95,13 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
         ctx.pop();
     }
 
+    protected void sizeToChild(Constraints constraints, @Nullable WidgetInstance<?> child) {
+        if (child == null) return;
+
+        var childSize = child.layout(constraints);
+        this.transform.setSize(childSize);
+    }
+
     public void clearLayoutCache(boolean recursive) {
         this.needsLayout = true;
 
@@ -168,11 +175,26 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
 
     // ---
 
+
+    public @Nullable Constraints constraints() {
+        return this.constraints;
+    }
+
     public int depth() {
         return this.depth;
     }
 
-    public @Nullable InstanceHost host() {
+    public void setDepth(int depth) {
+        if (this.depth == depth) return;
+
+        this.depth = depth;
+        this.visitChildren(child -> child.setDepth(this.depth + 1));
+    }
+
+    /// To prevent excessive IDE warnings, the return type of this
+    /// getter is not annotated `@Nullable` even though if it is called
+    /// before this proxy is mounted it will (correctly) return null
+    public InstanceHost host() {
         return this.host;
     }
 

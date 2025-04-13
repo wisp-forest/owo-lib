@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.framework.proxy;
 
+import com.google.common.base.Preconditions;
 import io.wispforest.owo.braid.framework.instance.WidgetInstance;
 import io.wispforest.owo.braid.framework.widget.InstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
@@ -19,6 +20,7 @@ public abstract non-sealed class InstanceWidgetProxy extends WidgetProxy impleme
 
         //noinspection unchecked
         this.instance = (WidgetInstance<InstanceWidget>) widget.instantiate();
+        Preconditions.checkNotNull(this.instance, "Widget#instantiate must return a non-null instance");
     }
 
     public WidgetInstance<? extends InstanceWidget> instance() {

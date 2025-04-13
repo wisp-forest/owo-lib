@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class SingleChildWidgetInstance<T extends InstanceWidget> extends WidgetInstance<T> {
 
-    protected @Nullable WidgetInstance<?> child;
+    protected WidgetInstance<?> child;
 
     public SingleChildWidgetInstance(T widget) {
         super(widget);
@@ -15,7 +15,6 @@ public abstract class SingleChildWidgetInstance<T extends InstanceWidget> extend
 
     @Override
     public void draw(DrawContext ctx) {
-        //noinspection DataFlowIssue
         this.drawChild(ctx, this.child);
     }
 

@@ -39,7 +39,7 @@ public abstract sealed class WidgetProxy implements BuildContext, Comparable<Wid
 
         this.parent = parent;
         this.parentBuildScope = parent.buildScope();
-        this.depth(parent.depth + 1);
+        this.setDepth(parent.depth + 1);
         this.slot = slot;
         this.host = parent.host;
     }
@@ -195,11 +195,20 @@ public abstract sealed class WidgetProxy implements BuildContext, Comparable<Wid
         return this.depth;
     }
 
-    public void depth(int depth) {
+    public void setDepth(int depth) {
         if (this.depth == depth) return;
 
         this.depth = depth;
-        this.visitChildren(child -> child.depth(this.depth + 1));
+        this.visitChildren(child -> child.setDepth(this.depth + 1));
+    }
+
+    // ---
+
+    /// Set the host of this proxy, reserved for use by
+    /// root proxy implementations. In all other scenarios,
+    /// the host is to be taken from the parent in [#mount]
+    protected void rootSetHost(ProxyHost host) {
+        this.host = host;
     }
 
     // ---

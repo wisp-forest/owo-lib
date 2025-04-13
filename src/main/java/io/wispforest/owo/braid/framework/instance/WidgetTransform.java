@@ -48,6 +48,13 @@ public class WidgetTransform {
         return this.height;
     }
 
+    public void setSize(Size size) {
+        setState(() -> {
+            this.width = size.width();
+            this.height = size.height();
+        });
+    }
+
     public Size toSize() {
         return Size.of(this.width, this.height);
     }
