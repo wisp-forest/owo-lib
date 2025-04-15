@@ -1,5 +1,6 @@
 package io.wispforest.uwu.client;
 
+import io.wispforest.owo.braid.core.BraidScreen;
 import io.wispforest.owo.config.ui.ConfigScreen;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.base.BaseUIModelScreen;
@@ -8,6 +9,7 @@ import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.uwu.Uwu;
+import io.wispforest.uwu.client.braid.TestSelector;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
@@ -60,7 +62,7 @@ public class SelectUwuScreenScreen extends BaseOwoScreen<FlowLayout> {
         rightColumn.child(Components.button(Text.literal("smolnite"), button -> this.client.setScreen(new SmolComponentTestScreen())));
         rightColumn.child(Components.button(Text.literal("sizenite"), button -> this.client.setScreen(new SizingTestScreen())));
         rightColumn.child(Components.button(Text.literal("parse fail"), button -> this.client.setScreen(new ParseFailScreen())));
-        rightColumn.child(Components.button(Text.literal("braid"), button -> this.client.setScreen(new BraidTestScreen())));
+        rightColumn.child(Components.button(Text.literal("braid"), button -> this.client.setScreen(new BraidScreen(new TestSelector()))));
 
         this.uiAdapter.rootComponent.child(panel);
     }

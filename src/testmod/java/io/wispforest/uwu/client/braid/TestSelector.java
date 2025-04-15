@@ -1,6 +1,9 @@
-package io.wispforest.uwu.client;
+package io.wispforest.uwu.client.braid;
 
-import io.wispforest.owo.braid.core.*;
+import io.wispforest.owo.braid.core.Alignment;
+import io.wispforest.owo.braid.core.Insets;
+import io.wispforest.owo.braid.core.LayoutAxis;
+import io.wispforest.owo.braid.core.Size;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
@@ -21,8 +24,6 @@ import io.wispforest.owo.braid.widgets.window.Window;
 import io.wispforest.owo.braid.widgets.window.WindowController;
 import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.random.Random;
@@ -36,96 +37,18 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.DoubleFunction;
 
-public class BraidTestScreen extends Screen {
-
-    private AppState state;
-
-    public BraidTestScreen() {
-        super(Text.empty());
-    }
-
-    @Override
-    protected void init() {
-        super.init();
-
-        if (this.state == null) {
-            this.state = new AppState(
-                null,
-                this.client,
-                new TestSelector()
-            );
-        } else {
-            this.state.rootInstance().markNeedsLayout();
-        }
-    }
-
-    @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
-
-        this.state.updateWidgetsAndInteractions(
-            mouseX,
-            mouseY,
-            this.client.getRenderTickCounter().getTickDelta(false),
-            this.client.getRenderTickCounter().getLastFrameDuration()
-        );
-
-        this.state.draw(context);
-    }
-
-    @Override
-    public void removed() {
-        super.removed();
-        this.state.dispose();
-    }
-
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        return this.state.dispatchMouseDownEvent(mouseX, mouseY) || super.mouseClicked(mouseX, mouseY, button);
-    }
-
-    @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        return this.state.dispatchMouseDragEvent(mouseX, mouseY, deltaX, deltaY) || super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
-    }
-
-    @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        return this.state.dispatchMouseUpEvent() || super.mouseReleased(mouseX, mouseY, button);
-    }
-
-    @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        return this.state.dispatchMouseScrollEvent(mouseX, mouseY, horizontalAmount, verticalAmount) || super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
-    }
-
-    @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        return this.state.dispatchKeyDownEvent(keyCode, modifiers) || super.keyPressed(keyCode, scanCode, modifiers);
-    }
-
-    @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-        return this.state.dispatchKeyUpEvent(keyCode, modifiers) || super.keyReleased(keyCode, scanCode, modifiers);
-    }
-
-    @Override
-    public boolean charTyped(char chr, int modifiers) {
-        return this.state.dispatchCharEvent(chr, modifiers) || super.charTyped(chr, modifiers);
-    }
+public class TestSelector extends StatefulWidget {
 
     public enum Tests {
         COUNTER, FLEX, DRAGGING, SPLIT_PANE
     }
 
-    public class TestSelector extends StatefulWidget {
-        @Override
-        public WidgetState<TestSelector> createState() {
-            return new TestSelectorState();
-        }
+    @Override
+    public WidgetState<TestSelector> createState() {
+        return new State();
     }
 
-    class TestSelectorState extends WidgetState<TestSelector> {
+    public static class State extends WidgetState<TestSelector> {
 
         private Tests test = Tests.COUNTER;
 
@@ -172,101 +95,102 @@ public class BraidTestScreen extends Screen {
         }
     }
 
+
     public static class Counter extends StatefulWidget {
         @Override
         public WidgetState<Counter> createState() {
-            return new CounterState();
+            return new State();
         }
-    }
 
-    public static class CounterState extends WidgetState<Counter> {
-        private int count = 0;
+        public static class State extends WidgetState<Counter> {
+            private int count = 0;
 
-        @Override
-        public Widget build(BuildContext context) {
-            return new Sized(
-                50.0,
-                null,
-                new Column(
-                    new Label(
-                        LabelStyle.DEFAULT,
-                        false,
-                        Text.literal("count: " + this.count)
-                    ),
-                    new Row(
-                        new Flexible(
-                            new Button(
-                                Text.literal("+"),
-                                () -> this.setState(() -> this.count++)
-                            )
+            @Override
+            public Widget build(BuildContext context) {
+                return new Sized(
+                    50.0,
+                    null,
+                    new Column(
+                        new Label(
+                            LabelStyle.DEFAULT,
+                            false,
+                            Text.literal("count: " + this.count)
                         ),
-                        new Flexible(
-                            new Button(
-                                Text.literal("-"),
-                                () -> this.setState(() -> this.count--)
+                        new Row(
+                            new Flexible(
+                                new Button(
+                                    Text.literal("+"),
+                                    () -> this.setState(() -> this.count++)
+                                )
+                            ),
+                            new Flexible(
+                                new Button(
+                                    Text.literal("-"),
+                                    () -> this.setState(() -> this.count--)
+                                )
                             )
                         )
                     )
-                )
-            );
+                );
+            }
         }
     }
 
     public static class FunnySwitchLayout extends StatefulWidget {
         @Override
         public WidgetState<FunnySwitchLayout> createState() {
-            return new FunnySwitchLayoutState();
+            return new State();
         }
-    }
 
-    private static class FunnySwitchLayoutState extends WidgetState<FunnySwitchLayout> {
-        private LayoutAxis axis = LayoutAxis.HORIZONTAL;
+        private static class State extends WidgetState<FunnySwitchLayout> {
+            private LayoutAxis axis = LayoutAxis.HORIZONTAL;
 
-        @Override
-        public Widget build(BuildContext context) {
-            return new Flex(
-                this.axis,
-                MainAxisAlignment.START,
-                CrossAxisAlignment.CENTER,
-                new Button(
-                    Text.literal("switch axis"),
-                    () -> this.setState(() -> this.axis = this.axis.opposite())
-                ),
-                new Padding(Insets.all(5)),
-                new Panel(
-                    OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
-                    new Padding(
-                        Insets.all(10),
-                        new Column(
-                            MainAxisAlignment.START,
-                            CrossAxisAlignment.CENTER,
-                            new Label(Text.literal("that's text")),
-                            new Label(Text.literal("some more text")),
-                            new Padding(
-                                Insets.top(5),
-                                new Counter()
+            @Override
+            public Widget build(BuildContext context) {
+                return new Flex(
+                    this.axis,
+                    MainAxisAlignment.START,
+                    CrossAxisAlignment.CENTER,
+                    new Button(
+                        Text.literal("switch axis"),
+                        () -> this.setState(() -> this.axis = this.axis.opposite())
+                    ),
+                    new Padding(Insets.all(5)),
+                    new Panel(
+                        OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
+                        new Padding(
+                            Insets.all(10),
+                            new Column(
+                                MainAxisAlignment.START,
+                                CrossAxisAlignment.CENTER,
+                                new Label(Text.literal("that's text")),
+                                new Label(Text.literal("some more text")),
+                                new Padding(
+                                    Insets.top(5),
+                                    new Counter()
+                                )
+                            )
+                        )
+                    ),
+                    new Padding(Insets.all(5)),
+                    new Panel(
+                        OwoUIDrawContext.DARK_PANEL_NINE_PATCH_TEXTURE,
+                        new Padding(
+                            Insets.all(10),
+                            new Column(
+                                MainAxisAlignment.START,
+                                CrossAxisAlignment.CENTER,
+                                new Label(Text.literal("that's text")),
+                                new Label(Text.literal("some more text")),
+                                new Padding(
+                                    Insets.top(5),
+                                    new Counter()
+                                )
                             )
                         )
                     )
-                ),
-                new Padding(Insets.all(5)),
-                new Panel(
-                    OwoUIDrawContext.DARK_PANEL_NINE_PATCH_TEXTURE,
-                    new Padding(
-                        Insets.all(10),
-                        new Column(
-                            MainAxisAlignment.START,
-                            CrossAxisAlignment.CENTER,
-                            new Label(Text.literal("that's text")),
-                            new Label(Text.literal("some more text")),
-                            new Padding(
-                                Insets.top(5),
-                                new Counter()
-                            )
-                        )
-                    )
-                )
-            );
+                );
+            }
         }
     }
 
@@ -339,35 +263,35 @@ public class BraidTestScreen extends Screen {
 
         @Override
         public WidgetState<FunnyDragText> createState() {
-            return new FunnyDragTextState();
+            return new State();
         }
-    }
 
-    public static class FunnyDragTextState extends WidgetState<FunnyDragText> {
+        public static class State extends WidgetState<FunnyDragText> {
 
-        private double x = 0, y = 0;
+            private double x = 0, y = 0;
 
-        @Override
-        public Widget build(BuildContext context) {
-            return new DragArenaElement(
-                this.x,
-                this.y,
-                new MouseArea(
-                    widget -> widget
-                        .dragCallback(($, $$, dx, dy) -> this.setState(() -> {
-                            this.x += dx;
-                            this.y += dy;
-                        }))
-                        .cursorStyle(CursorStyle.HAND),
-                    new Panel(
-                        OwoUIDrawContext.DARK_PANEL_NINE_PATCH_TEXTURE,
-                        new Padding(
-                            Insets.all(5),
-                            new Label(this.widget().text)
+            @Override
+            public Widget build(BuildContext context) {
+                return new DragArenaElement(
+                    this.x,
+                    this.y,
+                    new MouseArea(
+                        widget -> widget
+                            .dragCallback(($, $$, dx, dy) -> this.setState(() -> {
+                                this.x += dx;
+                                this.y += dy;
+                            }))
+                            .cursorStyle(CursorStyle.HAND),
+                        new Panel(
+                            OwoUIDrawContext.DARK_PANEL_NINE_PATCH_TEXTURE,
+                            new Padding(
+                                Insets.all(5),
+                                new Label(this.widget().text)
+                            )
                         )
                     )
-                )
-            );
+                );
+            }
         }
     }
 
@@ -412,28 +336,27 @@ public class BraidTestScreen extends Screen {
 
         @Override
         public WidgetState<SliderWithText> createState() {
-            return new SliderWithTextState();
+            return new State();
         }
-    }
 
-    public static class SliderWithTextState extends WidgetState<SliderWithText> {
+        public static class State extends WidgetState<SliderWithText> {
 
-        private double value = 16;
+            private double value = 16;
 
-        @Override
-        public Widget build(BuildContext context) {
-            return new Column(
-                MainAxisAlignment.START,
-                CrossAxisAlignment.CENTER,
-                new Sized(
-                    100.0,
-                    20.0,
-                    new Slider(this.value, 0, 32, this.widget().step, newValue -> setState(() -> this.value = newValue))
-                ),
-                new Padding(Insets.all(5)),
-                new Label(this.widget().textSupplier.apply(this.value))
-            );
+            @Override
+            public Widget build(BuildContext context) {
+                return new Column(
+                    MainAxisAlignment.START,
+                    CrossAxisAlignment.CENTER,
+                    new Sized(
+                        100.0,
+                        20.0,
+                        new Slider(this.value, 0, 32, this.widget().step, newValue -> setState(() -> this.value = newValue))
+                    ),
+                    new Padding(Insets.all(5)),
+                    new Label(this.widget().textSupplier.apply(this.value))
+                );
+            }
         }
     }
 }
-

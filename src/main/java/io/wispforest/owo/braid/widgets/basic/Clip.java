@@ -1,6 +1,7 @@
 package io.wispforest.owo.braid.widgets.basic;
 
 import io.wispforest.owo.braid.core.Constraints;
+import io.wispforest.owo.braid.framework.instance.HitTestState;
 import io.wispforest.owo.braid.framework.instance.SingleChildWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
@@ -8,8 +9,18 @@ import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.util.ScissorStack;
 
 public class Clip extends SingleChildInstanceWidget {
-    public Clip(Widget child) {
+
+    public final boolean clipHitTest;
+    public final boolean clipDrawing;
+
+    public Clip(boolean clipHitTest, boolean clipDrawing, Widget child) {
         super(child);
+        this.clipHitTest = clipHitTest;
+        this.clipDrawing = clipDrawing;
+    }
+
+    public Clip(Widget child) {
+        this(true, true, child);
     }
 
     @Override
@@ -25,10 +36,24 @@ public class Clip extends SingleChildInstanceWidget {
 
         @Override
         public void draw(OwoUIDrawContext ctx) {
+            if (!this.widget.clipDrawing) {
+                super.draw(ctx);
+                return;
+            }
+
             ScissorStack.push(0, 0, (int) this.transform.width(), (int) this.transform.height(), ctx);
             super.draw(ctx);
             ctx.draw();
             ScissorStack.pop();
+        }
+
+        @Override
+        public void hitTest(double x, double y, HitTestState state) {
+            if (this.widget.clipHitTest && (x < 0 || x > this.transform.width() || y < 0 || y > this.transform.height())) {
+                return;
+            }
+
+            super.hitTest(x, y, state);
         }
 
         @Override
