@@ -1,6 +1,4 @@
-package io.wispforest.owo.braid.widgets.flex;
-
-import io.wispforest.owo.braid.core.Size;
+package io.wispforest.owo.braid.core;
 
 public enum LayoutAxis {
     HORIZONTAL,

@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets.flex;
 
+import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.framework.widget.Widget;
 
 import java.util.Arrays;

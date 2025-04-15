@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.framework.instance;
 
+import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.core.Size;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Box;
@@ -110,12 +111,40 @@ public class WidgetTransform {
         vec.sub((float) this.x, (float) this.y, 0);
     }
 
+    public void setExtent(LayoutAxis axis, double value) {
+        switch (axis) {
+            case HORIZONTAL -> setWidth(value);
+            case VERTICAL -> setHeight(value);
+        }
+    }
+
+    public double getExtent(LayoutAxis axis) {
+        return switch (axis) {
+            case HORIZONTAL -> width();
+            case VERTICAL -> height();
+        };
+    }
+
+    public void setCoordinate(LayoutAxis axis, double value) {
+        switch (axis) {
+            case HORIZONTAL -> setX(value);
+            case VERTICAL -> setY(value);
+        }
+    }
+
+    public double getCoordinate(LayoutAxis axis) {
+        return switch (axis) {
+            case HORIZONTAL -> x();
+            case VERTICAL -> y();
+        };
+    }
+
     protected void setState(Runnable action) {
         action.run();
         this.recompute();
     }
 
-    protected void recompute() {
+    public void recompute() {
         this.toParent = null;
         this.toWidget = null;
         this.aabb = null;

@@ -7,10 +7,10 @@ import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.basic.MouseArea;
 import io.wispforest.owo.braid.widgets.basic.Padding;
 import io.wispforest.owo.braid.widgets.basic.Panel;
+import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.core.Color;
@@ -40,18 +40,18 @@ class ButtonState extends WidgetState<Button> {
     @Override
     public Widget build(BuildContext context) {
         return new MouseArea(
-            (x, y) -> {
-                this.widget().onClick.run();
-                UISounds.playButtonSound();
-                },
-            () -> this.setState(() -> this.hovered = true),
-            () -> this.setState(() -> this.hovered = false),
-            null, null, null, null,
-            (x, y) -> CursorStyle.HAND,
+            widget -> widget
+                .clickCallback((x, y) -> {
+                    this.widget().onClick.run();
+                    UISounds.playButtonSound();
+                })
+                .enterCallback(() -> this.setState(() -> this.hovered = true))
+                .exitCallback(() -> this.setState(() -> this.hovered = false))
+                .cursorStyle(CursorStyle.HAND),
             new Panel(
                 this.hovered ? ButtonComponent.HOVERED_TEXTURE : ButtonComponent.ACTIVE_TEXTURE,
                 new Padding(
-                    Insets.both(5, 5),
+                    Insets.all(5),
                     new Label(
                         new LabelStyle(Alignment.CENTER, Color.WHITE, true),
                         true,

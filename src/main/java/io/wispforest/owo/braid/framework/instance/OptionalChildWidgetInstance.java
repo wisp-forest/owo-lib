@@ -2,7 +2,7 @@ package io.wispforest.owo.braid.framework.instance;
 
 import com.google.common.base.Preconditions;
 import io.wispforest.owo.braid.framework.widget.InstanceWidget;
-import net.minecraft.client.gui.DrawContext;
+import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class OptionalChildWidgetInstance<T extends InstanceWidget> extends WidgetInstance<T> {
@@ -14,7 +14,7 @@ public abstract class OptionalChildWidgetInstance<T extends InstanceWidget> exte
     }
 
     @Override
-    public void draw(DrawContext ctx) {
+    public void draw(OwoUIDrawContext ctx) {
         if (this.child != null) {
             this.drawChild(ctx, this.child);
         }

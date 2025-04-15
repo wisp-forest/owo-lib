@@ -6,39 +6,110 @@ import io.wispforest.owo.braid.framework.instance.MouseListener;
 import io.wispforest.owo.braid.framework.instance.SingleChildWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
 import org.jetbrains.annotations.Nullable;
 
 public class MouseArea extends SingleChildInstanceWidget {
 
-    public final @Nullable ClickCallback clickCallback;
-    public final @Nullable EnterCallback enterCallback;
-    public final @Nullable ExitCallback exitCallback;
-    public final @Nullable DragStartCallback dragStartCallback;
-    public final @Nullable DragCallback dragCallback;
-    public final @Nullable DragEndCallback dragEndCallback;
-    public final @Nullable ScrollCallback scrollCallback;
-    public final @Nullable CursorStyleSupplier cursorStyleSupplier;
+    private @Nullable ClickCallback clickCallback;
+    private @Nullable EnterCallback enterCallback;
+    private @Nullable ExitCallback exitCallback;
+    private @Nullable DragStartCallback dragStartCallback;
+    private @Nullable DragCallback dragCallback;
+    private @Nullable DragEndCallback dragEndCallback;
+    private @Nullable ScrollCallback scrollCallback;
+    private @Nullable CursorStyleSupplier cursorStyleSupplier;
 
     public MouseArea(
-        @Nullable ClickCallback clickCallback,
-        @Nullable EnterCallback enterCallback,
-        @Nullable ExitCallback exitCallback,
-        @Nullable DragStartCallback dragStartCallback,
-        @Nullable DragCallback dragCallback,
-        @Nullable DragEndCallback dragEndCallback,
-        @Nullable ScrollCallback scrollCallback,
-        @Nullable CursorStyleSupplier cursorStyleSupplier,
+        WidgetSetupCallback<MouseArea> setupCallback,
         Widget child
     ) {
         super(child);
+        setupCallback.setup(this);
+    }
+
+    public MouseArea clickCallback(@Nullable ClickCallback clickCallback) {
+        this.assertMutable();
         this.clickCallback = clickCallback;
+        return this;
+    }
+
+    public @Nullable ClickCallback clickCallback() {
+        return this.clickCallback;
+    }
+
+    public MouseArea enterCallback(@Nullable EnterCallback enterCallback) {
+        this.assertMutable();
         this.enterCallback = enterCallback;
+        return this;
+    }
+
+    public @Nullable EnterCallback enterCallback() {
+        return this.enterCallback;
+    }
+
+    public MouseArea exitCallback(@Nullable ExitCallback exitCallback) {
+        this.assertMutable();
         this.exitCallback = exitCallback;
+        return this;
+    }
+
+    public @Nullable ExitCallback exitCallback() {
+        return this.exitCallback;
+    }
+
+    public MouseArea dragStartCallback(@Nullable DragStartCallback dragStartCallback) {
+        this.assertMutable();
         this.dragStartCallback = dragStartCallback;
+        return this;
+    }
+
+    public @Nullable DragStartCallback dragStartCallback() {
+        return this.dragStartCallback;
+    }
+
+    public MouseArea dragCallback(@Nullable DragCallback dragCallback) {
+        this.assertMutable();
         this.dragCallback = dragCallback;
+        return this;
+    }
+
+    public @Nullable DragCallback dragCallback() {
+        return this.dragCallback;
+    }
+
+    public MouseArea dragEndCallback(@Nullable DragEndCallback dragEndCallback) {
+        this.assertMutable();
         this.dragEndCallback = dragEndCallback;
+        return this;
+    }
+
+    public @Nullable DragEndCallback dragEndCallback() {
+        return this.dragEndCallback;
+    }
+
+    public MouseArea scrollCallback(@Nullable ScrollCallback scrollCallback) {
+        this.assertMutable();
         this.scrollCallback = scrollCallback;
+        return this;
+    }
+
+    public @Nullable ScrollCallback scrollCallback() {
+        return this.scrollCallback;
+    }
+
+    public MouseArea cursorStyleSupplier(@Nullable CursorStyleSupplier cursorStyleSupplier) {
+        this.assertMutable();
         this.cursorStyleSupplier = cursorStyleSupplier;
+        return this;
+    }
+
+    public MouseArea cursorStyle(CursorStyle style) {
+        return this.cursorStyleSupplier((x, y) -> style);
+    }
+
+    public @Nullable CursorStyleSupplier cursorStyleSupplier() {
+        return this.cursorStyleSupplier;
     }
 
     @Override

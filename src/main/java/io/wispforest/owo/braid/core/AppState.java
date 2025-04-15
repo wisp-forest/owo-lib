@@ -1,6 +1,7 @@
 package io.wispforest.owo.braid.core;
 
 import com.google.common.collect.Streams;
+import com.mojang.blaze3d.platform.GlStateManager;
 import io.wispforest.owo.braid.core.cursor.CursorController;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.framework.instance.*;
@@ -9,12 +10,15 @@ import io.wispforest.owo.braid.framework.proxy.ProxyHost;
 import io.wispforest.owo.braid.framework.proxy.SingleChildInstanceWidgetProxy;
 import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.braid.widgets.basic.Tooltip;
+import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.tooltip.OrderedTextTooltipComponent;
+import net.minecraft.client.gui.tooltip.TooltipComponent;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector4f;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL;
 import org.slf4j.Logger;
 
 import java.time.Instant;
@@ -55,10 +59,22 @@ public class AppState implements InstanceHost, ProxyHost {
         this.reloadListener = BraidHotReloadCallback.register();
     }
 
+    private @Nullable TooltipState activeTooltip;
+
     public void draw(DrawContext ctx) {
         ctx.push();
         this.rootInstance().transform.transformToParent(ctx.getMatrices());
-        this.rootInstance().draw(ctx);
+
+        var owoContext = OwoUIDrawContext.of(ctx);
+
+        GlStateManager._enableScissorTest();
+        this.rootInstance().draw(owoContext);
+        GlStateManager._disableScissorTest();
+
+        if (this.activeTooltip != null) {
+            owoContext.drawTooltip(this.client.textRenderer, this.activeTooltip.x(), this.activeTooltip.y(), this.activeTooltip.components());
+        }
+
         ctx.pop();
     }
 
@@ -100,6 +116,18 @@ public class AppState implements InstanceHost, ProxyHost {
         }
 
         this.hovered = nowHovered;
+
+        var tooltipSupplier = state.firstWhere(hit -> hit.instance().widget() instanceof Tooltip);
+        if (tooltipSupplier != null) {
+            var tooltip = (Tooltip) tooltipSupplier.instance().widget();
+            var components = tooltip.tooltip == null
+                ? this.client.textRenderer.wrapLines(tooltip.tooltipText, Integer.MAX_VALUE).stream().<TooltipComponent>map(OrderedTextTooltipComponent::new).toList()
+                : tooltip.tooltip;
+
+            this.activeTooltip = new TooltipState(components, (int) mouseX, (int) mouseY);
+        } else {
+            this.activeTooltip = null;
+        }
 
         // ---
 
@@ -177,7 +205,7 @@ public class AppState implements InstanceHost, ProxyHost {
         return clicked != null || focusHit != null;
     }
 
-    public boolean dispatchMouseDragEvent(double deltaX, double deltaY) {
+    public boolean dispatchMouseDragEvent(double x, double y, double deltaX, double deltaY) {
         if (!(this.dragging instanceof WidgetInstance<?>)) return false;
 
         if (!this.dragStarted) {
@@ -186,7 +214,7 @@ public class AppState implements InstanceHost, ProxyHost {
         }
 
         var globalTransform = ((WidgetInstance<?>) this.dragging).computeGlobalTransform();
-        var coordinates = new Vector4f((float) this.client.mouse.getX(), (float) this.client.mouse.getY(), 0, 1);
+        var coordinates = new Vector4f((float) x, (float) y, 0, 1);
         globalTransform.transform(coordinates);
 
         // apply *only the rotation* of the instance's transform
@@ -368,3 +396,5 @@ class RootInstance extends SingleChildWidgetInstance<RootWidget> {
         this.sizeToChild(constraints, this.child);
     }
 }
+
+record TooltipState(List<TooltipComponent> components, int x, int y) {}

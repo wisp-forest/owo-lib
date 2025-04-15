@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.framework.instance;
 
+import com.google.common.collect.FluentIterable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -52,7 +53,7 @@ public class HitTestState {
     }
 
     public @Nullable Hit firstWhere(Predicate<Hit> predicate) {
-        return this.hits.stream().filter(predicate).findFirst().orElse(null);
+        return FluentIterable.from(this.occludedTrace()).firstMatch(predicate::test).orNull();
     }
 
     public void addHit(WidgetInstance<?> instance, double x, double y) {

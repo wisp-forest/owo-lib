@@ -1,6 +1,7 @@
 package io.wispforest.owo.braid.framework.proxy;
 
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
+import io.wispforest.owo.braid.framework.widget.Widget;
 import org.jetbrains.annotations.Nullable;
 
 public class StatelessProxy extends ComposedProxy {
@@ -15,8 +16,8 @@ public class StatelessProxy extends ComposedProxy {
     }
 
     @Override
-    public void updateSlot(@Nullable Object newSlot) {
-        super.updateSlot(newSlot);
+    public void updateWidget(Widget newWidget) {
+        super.updateWidget(newWidget);
         this.rebuild(true);
     }
 

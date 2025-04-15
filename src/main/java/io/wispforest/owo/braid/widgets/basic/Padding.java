@@ -53,7 +53,7 @@ public class Padding extends OptionalChildInstanceWidget {
             );
 
             var size = (this.child != null ? this.child.layout(childConstraints) : Size.zero()).withInsets(insets).constrained(constraints);
-            transform.setSize(size);
+            this.transform.setSize(size);
 
             if (this.child != null) {
                 this.child.transform.setX(insets.left());

@@ -1,7 +1,7 @@
 package io.wispforest.owo.braid.framework.instance;
 
 import io.wispforest.owo.braid.framework.widget.MultiChildInstanceWidget;
-import net.minecraft.client.gui.DrawContext;
+import io.wispforest.owo.ui.core.OwoUIDrawContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +15,7 @@ public abstract class MultiChildWidgetInstance<T extends MultiChildInstanceWidge
     }
 
     @Override
-    public void draw(DrawContext ctx) {
+    public void draw(OwoUIDrawContext ctx) {
         for (var child : this.children) {
             this.drawChild(ctx, child);
         }

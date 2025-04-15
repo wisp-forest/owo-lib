@@ -1,13 +1,12 @@
 package io.wispforest.owo.braid.widgets.label;
 
-import io.wispforest.owo.braid.core.Alignment;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.Size;
 import io.wispforest.owo.braid.framework.instance.LeafWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.LeafInstanceWidget;
+import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
-import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 
@@ -60,11 +59,7 @@ public class Label extends LeafInstanceWidget {
         protected void doLayout(Constraints constraints) {
             var textRenderer = this.host().client().textRenderer;
 
-            if (this.widget.softWrap && textRenderer.getWidth(this.widget.text) > constraints.maxWidth()) {
-                this.renderText = textRenderer.wrapLines(this.widget.text, (int) constraints.maxWidth());
-            } else {
-                this.renderText = List.of(this.widget.text.asOrderedText());
-            }
+            this.renderText = textRenderer.wrapLines(this.widget.text, this.widget.softWrap ? (int) constraints.maxWidth() : Integer.MAX_VALUE);
 
             var textWidth = 0;
             var textHeight = 0;
@@ -86,7 +81,7 @@ public class Label extends LeafInstanceWidget {
         }
 
         @Override
-        public void draw(DrawContext ctx) {
+        public void draw(OwoUIDrawContext ctx) {
             var textRenderer = this.host().client().textRenderer;
             var yOffset = this.widget.style.textAlignment().alignVertical(this.transform.height(), this.renderTextHeight);
 
@@ -95,7 +90,7 @@ public class Label extends LeafInstanceWidget {
                     textRenderer,
                     this.renderText.get(lineIdx),
                     (int) this.widget.style.textAlignment().alignHorizontal(this.transform.width(), this.renderTextWidths.getDouble(lineIdx)),
-                    (int) yOffset,
+                    (int) yOffset + lineIdx * textRenderer.fontHeight,
                     this.widget.style.baseColor().argb(),
                     this.widget.style.shadow()
                 );

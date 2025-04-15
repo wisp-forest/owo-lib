@@ -107,7 +107,6 @@ public abstract sealed class WidgetProxy implements BuildContext, Comparable<Wid
         this.widget.freeze();
     }
 
-
     public final void rebuild() {
         this.rebuild(false);
     }

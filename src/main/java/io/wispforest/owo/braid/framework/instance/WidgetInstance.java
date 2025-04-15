@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.Size;
 import io.wispforest.owo.braid.framework.widget.InstanceWidget;
+import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import net.minecraft.client.gui.DrawContext;
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
@@ -56,14 +57,14 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
         this.doLayout(constraints);
         this.needsLayout = false;
 
-        return transform.toSize();
+        return this.transform.toSize();
     }
 
     protected abstract void doLayout(Constraints constraints);
 
     // ---
 
-    public abstract void draw(DrawContext ctx);
+    public abstract void draw(OwoUIDrawContext ctx);
 
     public abstract void visitChildren(Visitor visitor);
 
@@ -88,7 +89,7 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
 
     // ---
 
-    protected void drawChild(DrawContext ctx, WidgetInstance<?> child) {
+    protected void drawChild(OwoUIDrawContext ctx, WidgetInstance<?> child) {
         ctx.push();
         child.transform.transformToParent(ctx.getMatrices());
         child.draw(ctx);
@@ -96,10 +97,12 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
     }
 
     protected void sizeToChild(Constraints constraints, @Nullable WidgetInstance<?> child) {
-        if (child == null) return;
-
-        var childSize = child.layout(constraints);
-        this.transform.setSize(childSize);
+        if (child == null) {
+            this.transform.setSize(constraints.minSize());
+        } else {
+            var childSize = child.layout(constraints);
+            this.transform.setSize(childSize);
+        }
     }
 
     public void clearLayoutCache(boolean recursive) {
@@ -164,11 +167,11 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
     public Matrix4f computeGlobalTransform() {
         var result = new Matrix4f();
 
-        for (var ancestor : this.ancestors().reversed()) {
+        result.mul(this.transform.toWidget());
+
+        for (var ancestor : this.ancestors()) {
             result.mul(ancestor.transform.toWidget());
         }
-
-        result.mul(transform.toWidget());
 
         return result;
     }

@@ -2,6 +2,7 @@ package io.wispforest.owo.braid.core;
 
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 public record Size(double width, double height) {
 
@@ -35,12 +36,23 @@ public record Size(double width, double height) {
         return new Size(this.width + insets.horizontal(), this.height + insets.vertical());
     }
 
+    public Size with(@Nullable Double width, @Nullable Double height) {
+        return new Size(width != null ? width : this.width, height != null ? height : this.height);
+    }
+
     public Size floor() {
         return new Size(Math.floor(this.width), Math.floor(this.height));
     }
 
     public Size ceil() {
         return new Size(Math.ceil(this.width), Math.ceil(this.height));
+    }
+
+    public double getExtent(LayoutAxis axis) {
+        return switch (axis) {
+            case HORIZONTAL -> width();
+            case VERTICAL -> height();
+        };
     }
 
     public Size constrained(Constraints constraints) {

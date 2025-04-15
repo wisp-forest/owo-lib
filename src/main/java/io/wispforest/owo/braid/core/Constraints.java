@@ -77,6 +77,22 @@ public record Constraints(double minWidth, double minHeight, double maxWidth, do
 
     // ---
 
+    public double minOnAxis(LayoutAxis axis) {
+        return switch (axis) {
+            case HORIZONTAL -> minWidth();
+            case VERTICAL -> minHeight();
+        };
+    }
+
+    public double maxOnAxis(LayoutAxis axis) {
+        return switch (axis) {
+            case HORIZONTAL -> maxWidth();
+            case VERTICAL -> maxHeight();
+        };
+    }
+
+    // ---
+
     public Constraints asLoose() {
         return this.isLoose() ? this : new Constraints(0, 0, this.maxWidth, this.maxHeight);
     }
