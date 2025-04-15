@@ -8,6 +8,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.serialization.JsonOps;
 import io.wispforest.owo.text.LanguageAccess;
+import io.wispforest.owo.text.NestedLangHandler;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.TextCodecs;
 import net.minecraft.util.Language;
@@ -15,35 +16,21 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
-
 @Mixin(Language.class)
 public class LanguageMixin {
-
     @Unique private static boolean skipNext;
 
     @WrapOperation(method = "load(Ljava/io/InputStream;Ljava/util/function/BiConsumer;)V", at = @At(value = "INVOKE", target = "Lcom/google/gson/JsonObject;entrySet()Ljava/util/Set;"))
     private static Set<Map.Entry<String, JsonElement>> deNestNestedKeys(JsonObject instance, Operation<Set<Map.Entry<String, JsonElement>>> original) {
-        return deNest("", original.call(instance));
-    }
-
-    @Unique
-    private static Set<Map.Entry<String, JsonElement>> deNest(String prefix, Set<Map.Entry<String, JsonElement>> entries) {
-        var returned = new HashSet<Map.Entry<String, JsonElement>>();
-        for (var entry : entries) {
-            var key = entry.getKey();
-            var value = entry.getValue();
-
-            if (value.isJsonObject() && key.endsWith("..")) {
-                returned.addAll(deNest(prefix + key.substring(0, key.length() - 2), value.getAsJsonObject().entrySet()));
-            } else {
-                returned.add(Map.entry(prefix + key, value));
-            }
+        var key = "owo:disable_nested_lang";
+        if (instance.has(key) && instance.get(key).getAsBoolean()) {
+            instance.remove(key);
+            return original.call(instance);
         }
-        return returned;
+        return NestedLangHandler.deNest(original.call(instance));
     }
 
     @WrapOperation(method = "load(Ljava/io/InputStream;Ljava/util/function/BiConsumer;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/JsonHelper;asString(Lcom/google/gson/JsonElement;Ljava/lang/String;)Ljava/lang/String;"))
