@@ -1,14 +1,14 @@
 package io.wispforest.owo.serialization.format.nbt;
 
 import io.wispforest.endec.*;
+import io.wispforest.endec.temp.OptionalFieldFlag;
 import io.wispforest.endec.util.RecursiveSerializer;
 import net.minecraft.nbt.*;
 import net.minecraft.network.encoding.VarInts;
 import net.minecraft.network.encoding.VarLongs;
+import org.apache.commons.lang3.mutable.MutableObject;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class NbtSerializer extends RecursiveSerializer<NbtElement> implements SelfDescribedSerializer<NbtElement> {
 
@@ -97,16 +97,25 @@ public class NbtSerializer extends RecursiveSerializer<NbtElement> implements Se
         this.consume(new NbtByteArray(bytes));
     }
 
+    private final Set<IdentityHolder<NbtElement>> encodedOptionals = Collections.newSetFromMap(new WeakHashMap<>());
+
     @Override
     public <V> void writeOptional(SerializationContext ctx, Endec<V> endec, Optional<V> optional) {
-        if (this.isWritingStructField()) {
-            optional.ifPresent(v -> endec.encode(ctx, this, v));
-        } else {
+        MutableObject<NbtElement> frameData = new MutableObject<>();
+
+        this.frame(encoded -> {
             try (var struct = this.struct()) {
                 struct.field("present", ctx, Endec.BOOLEAN, optional.isPresent());
                 optional.ifPresent(value -> struct.field("value", ctx, endec, value));
             }
-        }
+
+            var compound = encoded.require("optional representation");
+
+            encodedOptionals.add(new IdentityHolder<>(compound));
+            frameData.setValue(compound);
+        }, false);
+
+        this.consume(frameData.getValue());
     }
 
     // ---
@@ -159,12 +168,23 @@ public class NbtSerializer extends RecursiveSerializer<NbtElement> implements Se
 
         @Override
         public <F> Struct field(String name, SerializationContext ctx, Endec<F> endec, F value) {
+            boolean mayOmit = ctx.hasAttribute(OptionalFieldFlag.INSTANCE);
+
             NbtSerializer.this.frame(encoded -> {
                 endec.encode(ctx, NbtSerializer.this, value);
-                if (encoded.wasEncoded()) {
-                    this.result.put(name, encoded.get());
+
+                var element = encoded.require("struct field");
+
+                if (mayOmit && NbtSerializer.this.encodedOptionals.contains(new IdentityHolder<>(element))) {
+                    var nbtCompound = (NbtCompound) element;
+
+                    if(!nbtCompound.getBoolean("present")) return;
+
+                    element = nbtCompound.get("value");
                 }
-            }, true);
+
+                this.result.put(name, element);
+            }, false);
 
             return this;
         }
