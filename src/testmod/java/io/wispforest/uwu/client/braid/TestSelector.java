@@ -21,7 +21,7 @@ import io.wispforest.owo.braid.widgets.drag.DragArenaElement;
 import io.wispforest.owo.braid.widgets.flex.*;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
-import io.wispforest.owo.braid.widgets.slider.Slider;
+import io.wispforest.owo.braid.widgets.slider.MessageSlider;
 import io.wispforest.owo.braid.widgets.splitpane.SplitPane;
 import io.wispforest.owo.braid.widgets.textinput.TextBox;
 import io.wispforest.owo.braid.widgets.textinput.TextEditingController;
@@ -134,11 +134,7 @@ public class TestSelector extends StatefulWidget {
                     50.0,
                     null,
                     new Column(
-                        new Label(
-                            LabelStyle.DEFAULT,
-                            false,
-                            Text.literal("count: " + this.count)
-                        ),
+                        new Label(Text.literal("count: " + this.count)),
                         new Row(
                             new Flexible(
                                 new Button(
@@ -340,44 +336,45 @@ public class TestSelector extends StatefulWidget {
                     )
                 ),
                 new Padding(Insets.all(10)),
-                new SliderWithText(2.0, value -> Text.literal("value: " + BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP).toPlainString())),
+                new CoolSlider(2.0, value -> Text.literal("value: " + BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP).toPlainString())),
                 new Padding(Insets.all(10)),
-                new SliderWithText(null, value -> Text.literal("value: " + BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP).toPlainString()))
+                new CoolSlider(null, value -> Text.literal("value: " + BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP).toPlainString()))
             );
         }
     }
 
-    public static class SliderWithText extends StatefulWidget {
+    public static class CoolSlider extends StatefulWidget {
 
         public final @Nullable Double step;
         public final DoubleFunction<Text> textSupplier;
 
-        public SliderWithText(@Nullable Double step, DoubleFunction<Text> textSupplier) {
+        public CoolSlider(@Nullable Double step, DoubleFunction<Text> textSupplier) {
             this.step = step;
             this.textSupplier = textSupplier;
         }
 
         @Override
-        public WidgetState<SliderWithText> createState() {
+        public WidgetState<CoolSlider> createState() {
             return new State();
         }
 
-        public static class State extends WidgetState<SliderWithText> {
+        public static class State extends WidgetState<CoolSlider> {
 
             private double value = 16;
 
             @Override
             public Widget build(BuildContext context) {
-                return new Column(
-                    MainAxisAlignment.START,
-                    CrossAxisAlignment.CENTER,
-                    new Sized(
-                        100.0,
-                        20.0,
-                        new Slider(this.value, 0, 32, this.widget().step, newValue -> setState(() -> this.value = newValue))
-                    ),
-                    new Padding(Insets.all(5)),
-                    new Label(this.widget().textSupplier.apply(this.value))
+                return new Sized(
+                    100.0,
+                    20.0,
+                    new MessageSlider(
+                        this.value,
+                        0,
+                        32,
+                        this.widget().step,
+                        newValue -> setState(() -> this.value = newValue),
+                        this.widget().textSupplier.apply(this.value)
+                    )
                 );
             }
         }
@@ -469,7 +466,7 @@ public class TestSelector extends StatefulWidget {
                     new Transform(
                         new Matrix4f().translate(0, 0, 300),
                         new Label(
-                            new LabelStyle(Alignment.CENTER, Color.WHITE, true),
+                            LabelStyle.SHADOW,
                             true,
                             Text.literal("burning chyz")
                         )

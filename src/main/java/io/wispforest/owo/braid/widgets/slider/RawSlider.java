@@ -69,7 +69,7 @@ public class RawSlider extends StatelessWidget {
     }
 
     private void updateForMousePosition(Constraints constraints, double x, double y) {
-        var newNormalizedValue = MathHelper.clamp(x / constraints.maxWidth(), 0, 1);
+        var newNormalizedValue = MathHelper.clamp((x - (this.handleWidth / 2)) / (constraints.maxWidth() - this.handleWidth), 0, 1);
         this.onChanged.accept(this.discretize(this.min + newNormalizedValue * (this.max - this.min)));
     }
 

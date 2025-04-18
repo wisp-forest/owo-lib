@@ -30,6 +30,10 @@ public class Slider extends StatelessWidget {
         this.onChanged = onChanged;
     }
 
+    public Slider(double value, DoubleConsumer onChanged) {
+        this(value, 0, 1, null, onChanged);
+    }
+
     @Override
     public Widget build(BuildContext context) {
         return new RawSlider(
