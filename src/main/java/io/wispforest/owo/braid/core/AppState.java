@@ -39,7 +39,8 @@ public class AppState implements InstanceHost, ProxyHost {
     private @Nullable MouseListener dragging = null;
     private @Nullable CursorStyle draggingCursorStyle = null;
     private boolean dragStarted = false;
-    private @Nullable KeyboardListener focused = null;
+
+    private List<KeyboardListener> focused = new ArrayList<>();
 
     private final BraidHotReloadCallback.Listener reloadListener;
 
@@ -193,16 +194,24 @@ public class AppState implements InstanceHost, ProxyHost {
             this.dragStarted = false;
         }
 
-        var focusHit = state.firstWhere((hit) -> hit.instance() instanceof KeyboardListener);
-        var nowFocused = focusHit != null ? (KeyboardListener) focusHit.instance() : null;
+        var nowFocused = new ArrayList<KeyboardListener>();
+        Streams.stream(state.occludedTrace()).map(Hit::instance).filter(KeyboardListener.class::isInstance).map(KeyboardListener.class::cast).forEach(listener -> {
+            nowFocused.add(listener);
 
-        if (nowFocused != this.focused) {
-            if (this.focused != null) this.focused.onFocusLost();
-            this.focused = nowFocused;
-            if (this.focused != null) this.focused.onFocusGained();
+            if (this.focused.contains(listener)) {
+                this.focused.remove(listener);
+            } else {
+                listener.onFocusGained();
+            }
+        });
+
+        for (var noLongerFocused : this.focused) {
+            noLongerFocused.onFocusLost();
         }
 
-        return clicked != null || focusHit != null;
+        this.focused = nowFocused;
+
+        return true;
     }
 
     public boolean dispatchMouseDragEvent(double x, double y, double deltaX, double deltaY) {
@@ -251,24 +260,38 @@ public class AppState implements InstanceHost, ProxyHost {
     }
 
     public boolean dispatchKeyDownEvent(int keyCode, int modifiers) {
-        var consumed = false;
         if (keyCode == GLFW.GLFW_KEY_R && (modifiers & (GLFW.GLFW_MOD_SHIFT | GLFW.GLFW_MOD_ALT)) != 0) {
             this.rebuildRoot();
-            consumed = true;
+            return true;
         }
 
-        if (this.focused != null) this.focused.onKeyDown(keyCode, modifiers);
-        return this.focused != null || consumed;
+        for (var listener : this.focused) {
+            if (listener.onKeyDown(keyCode, modifiers)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public boolean dispatchKeyUpEvent(int keyCode, int modifiers) {
-        if (this.focused != null) this.focused.onKeyUp(keyCode, modifiers);
-        return this.focused != null;
+        for (var listener : this.focused) {
+            if (listener.onKeyUp(keyCode, modifiers)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public boolean dispatchCharEvent(int charCode, int modifiers) {
-        if (this.focused != null) this.focused.onChar(charCode, modifiers);
-        return this.focused != null;
+        for (var listener : this.focused) {
+            if (listener.onChar(charCode, modifiers)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // ---

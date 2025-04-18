@@ -73,7 +73,7 @@ public class KeyboardInput extends SingleChildInstanceWidget {
 
     @Override
     public SingleChildWidgetInstance<?> instantiate() {
-        return null;
+        return new Instance(this);
     }
 
     @FunctionalInterface
@@ -113,18 +113,33 @@ public class KeyboardInput extends SingleChildInstanceWidget {
         }
 
         @Override
-        public void onKeyDown(int keyCode, int modifiers) {
-            if (this.widget.keyDownCallback != null) this.widget.keyDownCallback.onKeyDown(keyCode, modifiers);
+        public boolean onKeyDown(int keyCode, int modifiers) {
+            if (this.widget.keyDownCallback != null) {
+                this.widget.keyDownCallback.onKeyDown(keyCode, modifiers);
+                return true;
+            }
+
+            return false;
         }
 
         @Override
-        public void onKeyUp(int keyCode, int modifiers) {
-            if (this.widget.keyUpCallback != null) this.widget.keyUpCallback.onKeyUp(keyCode, modifiers);
+        public boolean onKeyUp(int keyCode, int modifiers) {
+            if (this.widget.keyUpCallback != null) {
+                this.widget.keyUpCallback.onKeyUp(keyCode, modifiers);
+                return true;
+            }
+
+            return false;
         }
 
         @Override
-        public void onChar(int charCode, int modifiers) {
-            if (this.widget.charCallback != null) this.widget.charCallback.onChar(charCode, modifiers);
+        public boolean onChar(int charCode, int modifiers) {
+            if (this.widget.charCallback != null) {
+                this.widget.charCallback.onChar(charCode, modifiers);
+                return true;
+            }
+
+            return false;
         }
 
         @Override

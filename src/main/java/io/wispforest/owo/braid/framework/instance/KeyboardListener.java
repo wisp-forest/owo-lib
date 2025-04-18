@@ -1,9 +1,15 @@
 package io.wispforest.owo.braid.framework.instance;
 
 public interface KeyboardListener {
-    default void onKeyDown(int keyCode, int modifiers) {}
-    default void onKeyUp(int keyCode, int modifiers) {}
-    default void onChar(int charCode, int modifiers) {}
+    default boolean onKeyDown(int keyCode, int modifiers) {
+        return false;
+    }
+    default boolean onKeyUp(int keyCode, int modifiers) {
+        return false;
+    }
+    default boolean onChar(int charCode, int modifiers) {
+        return false;
+    }
 
     default void onFocusGained() {}
     default void onFocusLost() {}
