@@ -20,8 +20,8 @@ import net.minecraft.client.render.item.ItemRenderState;
 import net.minecraft.command.argument.ItemStringReader;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ModelTransformationMode;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
@@ -61,7 +61,8 @@ public class ItemComponent extends BaseComponent {
 
     @Override
     public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
-        this.itemModelManager.update(ITEM_RENDER_STATE, this.stack, ModelTransformationMode.GUI, false, null, null, 0);
+        ITEM_RENDER_STATE.clear();
+        this.itemModelManager.update(ITEM_RENDER_STATE, this.stack, ItemDisplayContext.GUI, null, null, 0);
 
         final boolean notSideLit = !ITEM_RENDER_STATE.isSideLit();
         if (notSideLit) {

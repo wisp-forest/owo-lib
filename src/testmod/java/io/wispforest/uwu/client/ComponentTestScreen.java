@@ -124,8 +124,8 @@ public class ComponentTestScreen extends Screen {
         rootComponent.child(Containers.verticalFlow(Sizing.content(), Sizing.content())
                 .child(Components.label(Text.literal("A profound vertical Flow Layout, as well as a leally long text to demonstrate wrapping").styled(style -> style.withFont(MinecraftClient.UNICODE_FONT_ID))
                                 .styled(style -> {
-                                    return style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, "yes"))
-                                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackContent(Items.SCULK_SHRIEKER.getDefaultStack())));
+                                    return style.withClickEvent(new ClickEvent.CopyToClipboard("yes"))
+                                            .withHoverEvent(new HoverEvent.ShowItem(Items.SCULK_SHRIEKER.getDefaultStack()));
                                 }))
                         .shadow(true)
                         .lineHeight(7)
@@ -136,7 +136,7 @@ public class ComponentTestScreen extends Screen {
 
         final var buttonPanel = Containers.horizontalFlow(Sizing.content(), Sizing.content())
                 .child(Components.label(Text.literal("AAAAAAAAAAAAAAAAAAA").append(Text.literal("Layout")
-                                .styled(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackContent(Items.SCULK_SHRIEKER.getDefaultStack())))))
+                                .styled(style -> style.withHoverEvent(new HoverEvent.ShowItem(Items.SCULK_SHRIEKER.getDefaultStack()))))
                         .append(Text.literal("\nAAAAAAAAAAAAAAA"))).margins(Insets.of(5)))
                 .child(Components.button(Text.of("⇄"), button -> this.clearAndInit()).sizing(Sizing.fixed(20)))
                 .child(Components.button(Text.of("X"), button -> this.close()).sizing(Sizing.fixed(20)))

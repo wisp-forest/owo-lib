@@ -1,10 +1,10 @@
 package io.wispforest.owo.ui.component;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.util.Identifier;
 import org.w3c.dom.Element;
 
@@ -50,13 +50,6 @@ public class TextureComponent extends BaseComponent {
 
     @Override
     public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
-        RenderSystem.enableDepthTest();
-
-        if (this.blend) {
-            RenderSystem.enableBlend();
-            RenderSystem.defaultBlendFunc();
-        }
-
         var matrices = context.getMatrices();
         matrices.push();
         matrices.translate(x, y, 0);
@@ -79,10 +72,6 @@ public class TextureComponent extends BaseComponent {
             bottomEdge - visibleArea.y(),
             this.textureWidth, this.textureHeight
         );
-
-        if (this.blend) {
-            RenderSystem.disableBlend();
-        }
 
         matrices.pop();
     }

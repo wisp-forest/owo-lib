@@ -1,6 +1,6 @@
 //file:noinspection GradlePackageVersionRange
 plugins {
-    id 'fabric-loom' version '1.7-SNAPSHOT'
+    id 'fabric-loom' version '1.10-SNAPSHOT'
     id 'maven-publish'
 }
 
@@ -122,10 +122,16 @@ loom {
 
 dependencies {
 //    modLocalRuntime("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}")
-    modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin:${project.rei_version}")
-    modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}")
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin:${project.rei_version}") {
+        exclude "group": "net.fabricmc.fabric-api"
+    }
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}") {
+        exclude "group": "net.fabricmc.fabric-api"
+    }
 
-    modCompileOnly("dev.emi:emi-fabric:${project.emi_version}")
+    modCompileOnly("dev.emi:emi-fabric:${project.emi_version}") {
+        exclude "group": "net.fabricmc.fabric-api"
+    }
 //    modLocalRuntime("dev.emi:emi-fabric:${project.emi_version}")
 
     modCompileOnly("com.terraformersmc:modmenu:${project.modmenu_version}")

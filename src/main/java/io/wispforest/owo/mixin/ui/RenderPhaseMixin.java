@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(RenderPhase.class)
 public class RenderPhaseMixin {
 
-    @ModifyExpressionValue(method = "method_62272", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;getFramebuffer()Lnet/minecraft/client/gl/Framebuffer;"))
+    @ModifyExpressionValue(method = "method_68490", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;getFramebuffer()Lnet/minecraft/client/gl/Framebuffer;"))
     private static Framebuffer injectProperRenderTarget(Framebuffer original) {
         if (RenderEffectWrapper.currentFramebuffer() != null) {
             return RenderEffectWrapper.currentFramebuffer();

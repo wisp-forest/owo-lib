@@ -30,7 +30,7 @@ public class EntityRendererMixin<T extends Entity, S extends EntityRenderState> 
         ci.cancel();
     }
 
-    @Inject(method = "renderLabelIfPresent", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/MatrixStack;multiply(Lorg/joml/Quaternionf;)V", shift = At.Shift.AFTER))
+    @Inject(method = "renderLabelIfPresent", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/MatrixStack;multiply(Lorg/joml/Quaternionfc;)V", shift = At.Shift.AFTER))
     private void adjustLabelRotation(S state, Text text, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
         if (!((OwoEntityRenderDispatcherExtension) this.dispatcher).owo$counterRotate()) return;
 

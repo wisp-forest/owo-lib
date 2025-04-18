@@ -1,6 +1,6 @@
 package io.wispforest.owo.ui.core;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.renderdoc.RenderDoc;
@@ -172,19 +172,15 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
 
             if (this.captureFrame) RenderDoc.startFrameCapture();
 
-            final var delta = MinecraftClient.getInstance().getRenderTickCounter().getLastFrameDuration();
+            final var delta = MinecraftClient.getInstance().getRenderTickCounter().getDynamicDeltaTicks();
             final var window = MinecraftClient.getInstance().getWindow();
 
             this.rootComponent.update(delta, mouseX, mouseY);
 
-            RenderSystem.enableDepthTest();
-            GlStateManager._enableScissorTest();
-
-            GlStateManager._scissorBox(0, 0, window.getFramebufferWidth(), window.getFramebufferHeight());
+            RenderSystem.enableScissor(0, 0, window.getFramebufferWidth(), window.getFramebufferHeight());
             this.rootComponent.draw(owoContext, mouseX, mouseY, partialTicks, delta);
-
-            GlStateManager._disableScissorTest();
-            RenderSystem.disableDepthTest();
+            owoContext.draw();
+            RenderSystem.disableScissor();
 
             final var hovered = this.rootComponent.childAt(mouseX, mouseY);
             if (!disposed && hovered != null) {
@@ -208,14 +204,13 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
      * Draw the current tooltip of the UI managed by this adapter. This method
      * must not be called without a previous, corresponding call to {@link #render(DrawContext, int, int, float)}
      *
-     *
      * @since 0.12.19
      */
     public void drawTooltip(DrawContext context, int mouseX, int mouseY, float partialTicks) {
         if (!(context instanceof OwoUIDrawContext)) context = OwoUIDrawContext.of(context);
         var owoContext = (OwoUIDrawContext) context;
 
-        final var delta = MinecraftClient.getInstance().getRenderTickCounter().getLastFrameDuration();
+        final var delta = MinecraftClient.getInstance().getRenderTickCounter().getDynamicDeltaTicks();
 
         this.rootComponent.drawTooltip(owoContext, mouseX, mouseY, partialTicks, delta);
     }

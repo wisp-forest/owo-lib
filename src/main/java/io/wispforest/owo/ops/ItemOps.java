@@ -1,10 +1,8 @@
 package io.wispforest.owo.ops;
 
-import io.wispforest.owo.Owo;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.Hand;
 
@@ -56,7 +54,7 @@ public final class ItemOps {
         copy.setCount(1);
         return copy;
     }
-    
+
     /**
      * Decrements the stack
      *
@@ -70,7 +68,7 @@ public final class ItemOps {
     /**
      * Decrements the stack
      *
-     * @param stack The stack to decrement
+     * @param stack  The stack to decrement
      * @param amount The amount to decrement
      * @return {@code false} if the stack is empty after the operation
      */
@@ -96,7 +94,7 @@ public final class ItemOps {
      * if the result would be an empty stack
      *
      * @param player The player to operate on
-     * @param hand The hand to affect
+     * @param hand   The hand to affect
      * @param amount The amount to decrement
      * @return {@code false} if the stack is empty after the operation
      */
@@ -131,10 +129,9 @@ public final class ItemOps {
      * @return The deserialized stack
      */
     public static ItemStack get(RegistryWrapper.WrapperLookup registries, NbtCompound nbt, String key) {
-        if (!nbt.contains(key, NbtElement.COMPOUND_TYPE)) return ItemStack.EMPTY;
-
         var stackNbt = nbt.getCompound(key);
-        return ItemStack.fromNbtOrEmpty(registries, stackNbt);
+        return stackNbt.flatMap(nbtCompound -> ItemStack.fromNbt(registries, nbtCompound)).orElse(ItemStack.EMPTY);
+
     }
 
 }

@@ -23,7 +23,7 @@ public class CcaDataCommand {
 
     private static int executeDumpAll(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         final var player = context.getSource().getPlayer();
-        final var nbt = player.writeNbt(new NbtCompound()).getCompound("cardinal_components");
+        final var nbt = player.writeNbt(new NbtCompound()).getCompound("cardinal_components").orElseGet(NbtCompound::new);
 
         context.getSource().sendFeedback(() -> TextOps.concat(Owo.PREFIX, TextOps.withFormatting("CCA Data:", Formatting.GRAY)), false);
         context.getSource().sendFeedback(() -> NbtHelper.toPrettyPrintedText(nbt), false);
@@ -35,7 +35,7 @@ public class CcaDataCommand {
         final var player = context.getSource().getPlayer();
         final var path = NbtPathArgumentType.getNbtPath(context, "path");
         final var nbt = path.get(player.writeNbt(new NbtCompound())
-                .getCompound("cardinal_components")).iterator().next();
+                .getCompound("cardinal_components").orElseGet(NbtCompound::new)).iterator().next();
 
         context.getSource().sendFeedback(() -> TextOps.concat(Owo.PREFIX, TextOps.withFormatting("CCA Data:", Formatting.GRAY)), false);
         context.getSource().sendFeedback(() -> NbtHelper.toPrettyPrintedText(nbt), false);

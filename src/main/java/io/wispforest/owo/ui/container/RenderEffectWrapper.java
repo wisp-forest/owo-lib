@@ -1,27 +1,18 @@
 package io.wispforest.owo.ui.container;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
-import io.wispforest.owo.ui.util.ScissorStack;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
-import net.minecraft.client.gl.ShaderProgramKeys;
-import net.minecraft.client.gl.SimpleFramebuffer;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.BufferRenderer;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.RotationAxis;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
-import org.lwjgl.opengl.GL30;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,55 +47,55 @@ public class RenderEffectWrapper<C extends Component> extends WrappingParentComp
 
     @Override
     public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
-        super.draw(context, mouseX, mouseY, partialTicks, delta);
-        context.draw();
-
-        try {
-            drawDepth++;
-
-            var window = MinecraftClient.getInstance().getWindow();
-            while (drawDepth > FRAMEBUFFERS.size()) {
-                FRAMEBUFFERS.add(new SimpleFramebuffer(window.getFramebufferWidth(), window.getFramebufferHeight(), true));
-            }
-
-            var previousFramebuffer = GlStateManager.getBoundFramebuffer();
-            var framebuffer = FRAMEBUFFERS.get(drawDepth - 1);
-            framebuffer.setClearColor(0, 0, 0, 0);
-            ScissorStack.drawUnclipped(framebuffer::clear);
-            framebuffer.beginWrite(false);
-
-            var lastFramebuffer = currentFramebuffer;
-            currentFramebuffer = framebuffer;
-
-            this.drawChildren(context, mouseX, mouseY, partialTicks, delta, this.childView);
-            context.draw();
-
-            GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, previousFramebuffer);
-            currentFramebuffer = lastFramebuffer;
-
-            var iter = this.effects.listIterator();
-            while (iter.hasNext()) {
-                iter.next().effect.setup(this, context, partialTicks, delta);
-            }
-
-            var buffer = RenderSystem.renderThreadTesselator().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
-            var matrix = context.getMatrices().peek().getPositionMatrix();
-
-            buffer.vertex(matrix, 0, window.getScaledHeight(), 0).texture(0, 0).color(1f, 1f, 1f, 1f);
-            buffer.vertex(matrix, window.getScaledWidth(), window.getScaledHeight(), 0).texture(1, 0).color(1f, 1f, 1f, 1f);
-            buffer.vertex(matrix, window.getScaledWidth(), 0, 0).texture(1, 1).color(1f, 1f, 1f, 1f);
-            buffer.vertex(matrix, 0, 0, 0).texture(0, 1).color(1f, 1f, 1f, 1f);
-
-            RenderSystem.setShaderTexture(0, framebuffer.getColorAttachment());
-            RenderSystem.setShader(ShaderProgramKeys.POSITION_TEX_COLOR);
-            BufferRenderer.drawWithGlobalProgram(buffer.end());
-
-            while (iter.hasPrevious()) {
-                iter.previous().effect.cleanup(this, context, partialTicks, delta);
-            }
-        } finally {
-            drawDepth--;
-        }
+//        super.draw(context, mouseX, mouseY, partialTicks, delta);
+//        context.draw();
+//
+//        try {
+//            drawDepth++;
+//
+//            var window = MinecraftClient.getInstance().getWindow();
+//            while (drawDepth > FRAMEBUFFERS.size()) {
+//                FRAMEBUFFERS.add(new SimpleFramebuffer(window.getFramebufferWidth(), window.getFramebufferHeight(), true));
+//            }
+//
+//            var previousFramebuffer = GlStateManager.getBoundFramebuffer();
+//            var framebuffer = FRAMEBUFFERS.get(drawDepth - 1);
+//            framebuffer.setClearColor(0, 0, 0, 0);
+//            ScissorStack.drawUnclipped(framebuffer::clear);
+//            framebuffer.beginWrite(false);
+//
+//            var lastFramebuffer = currentFramebuffer;
+//            currentFramebuffer = framebuffer;
+//
+//            this.drawChildren(context, mouseX, mouseY, partialTicks, delta, this.childView);
+//            context.draw();
+//
+//            GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, previousFramebuffer);
+//            currentFramebuffer = lastFramebuffer;
+//
+//            var iter = this.effects.listIterator();
+//            while (iter.hasNext()) {
+//                iter.next().effect.setup(this, context, partialTicks, delta);
+//            }
+//
+//            var buffer = RenderSystem.renderThreadTesselator().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
+//            var matrix = context.getMatrices().peek().getPositionMatrix();
+//
+//            buffer.vertex(matrix, 0, window.getScaledHeight(), 0).texture(0, 0).color(1f, 1f, 1f, 1f);
+//            buffer.vertex(matrix, window.getScaledWidth(), window.getScaledHeight(), 0).texture(1, 0).color(1f, 1f, 1f, 1f);
+//            buffer.vertex(matrix, window.getScaledWidth(), 0, 0).texture(1, 1).color(1f, 1f, 1f, 1f);
+//            buffer.vertex(matrix, 0, 0, 0).texture(0, 1).color(1f, 1f, 1f, 1f);
+//
+//            RenderSystem.setShaderTexture(0, framebuffer.getColorAttachment());
+//            RenderSystem.setShader(ShaderProgramKeys.POSITION_TEX_COLOR);
+//            BufferRenderer.drawWithGlobalProgram(buffer.end());
+//
+//            while (iter.hasPrevious()) {
+//                iter.previous().effect.cleanup(this, context, partialTicks, delta);
+//            }
+//        } finally {
+//            drawDepth--;
+//        }
     }
 
     /**
@@ -231,8 +222,8 @@ public class RenderEffectWrapper<C extends Component> extends WrappingParentComp
                     RenderSystem.setShaderColor(colors[0] * color.red(), colors[1] * color.green(), colors[2] * color.blue(), colors[3] * color.alpha());
 
                     if (color.alpha() != 1) {
-                        RenderSystem.enableBlend();
-                        RenderSystem.defaultBlendFunc();
+//                        RenderSystem.enableBlend();
+//                        RenderSystem.defaultBlendFunc();
                     }
                 }
 

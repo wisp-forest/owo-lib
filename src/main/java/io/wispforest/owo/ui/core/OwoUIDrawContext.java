@@ -6,10 +6,12 @@ import io.wispforest.owo.client.OwoClient;
 import io.wispforest.owo.mixin.ui.DrawContextInvoker;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
 import io.wispforest.owo.ui.util.NinePatchTexture;
+import io.wispforest.owo.ui.util.ScissorStack;
 import io.wispforest.owo.util.pond.OwoTessellatorExtension;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
@@ -37,7 +39,7 @@ public class OwoUIDrawContext extends DrawContext {
     public static final Identifier DARK_PANEL_NINE_PATCH_TEXTURE = Identifier.of("owo", "panel/dark");
     public static final Identifier PANEL_INSET_NINE_PATCH_TEXTURE = Identifier.of("owo", "panel/inset");
 
-    private boolean recording = false;
+    public static @Nullable ScreenRect viewportOverride = null;
 
     private OwoUIDrawContext(MinecraftClient client, VertexConsumerProvider.Immediate vertexConsumers) {
         super(client, vertexConsumers);
@@ -245,6 +247,16 @@ public class OwoUIDrawContext extends DrawContext {
         ((DrawContextInvoker) this).owo$renderTooltipFromComponents(textRenderer, components, x, y, HoveredTooltipPositioner.INSTANCE, texture);
     }
 
+    @Override
+    public void enableScissor(int x1, int y1, int x2, int y2) {
+        io.wispforest.owo.ui.util.ScissorStack.push(x1, y1, x2 - x1, y2 - y1, this);
+    }
+
+    @Override
+    public void disableScissor() {
+        io.wispforest.owo.ui.util.ScissorStack.pop(this);
+    }
+
     // --- debug rendering ---
 
     public void drawInsets(int x, int y, int width, int height, Insets insets, int color) {
@@ -290,7 +302,7 @@ public class OwoUIDrawContext extends DrawContext {
             children.add(root.childAt((int) mouseX, (int) mouseY));
         }
 
-        var renderLayer = OwoUIRenderLayers.GUI_NO_DEPTH;
+        var renderLayer = RenderLayer.getGuiOverlay();
 
         for (var child : children) {
             if (child instanceof ParentComponent parentComponent) {

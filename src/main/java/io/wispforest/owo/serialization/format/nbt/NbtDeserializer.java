@@ -79,7 +79,7 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
 
     @Override
     public String readString(SerializationContext ctx) {
-        return this.getAs(this.getValue(), NbtString.class).asString();
+        return this.getAs(this.getValue(), NbtString.class).asString().get();
     }
 
     @Override
@@ -107,7 +107,8 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
     @Override
     public <E> Deserializer.Sequence<E> sequence(SerializationContext ctx, Endec<E> elementEndec) {
         //noinspection unchecked
-        return new Sequence<>(ctx, elementEndec, this.getAs(this.getValue(), AbstractNbtList.class));
+        var list = this.getAs(this.getValue(), AbstractNbtList.class);
+        return new Sequence<E>(ctx, elementEndec, list, list.size());
     }
 
     @Override
@@ -135,10 +136,10 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
             case NbtElement.LONG_TYPE -> visitor.writeLong(ctx, ((NbtLong) value).longValue());
             case NbtElement.FLOAT_TYPE -> visitor.writeFloat(ctx, ((NbtFloat) value).floatValue());
             case NbtElement.DOUBLE_TYPE -> visitor.writeDouble(ctx, ((NbtDouble) value).doubleValue());
-            case NbtElement.STRING_TYPE -> visitor.writeString(ctx, value.asString());
+            case NbtElement.STRING_TYPE -> visitor.writeString(ctx, value.asString().get());
             case NbtElement.BYTE_ARRAY_TYPE -> visitor.writeBytes(ctx, ((NbtByteArray) value).getByteArray());
             case NbtElement.INT_ARRAY_TYPE, NbtElement.LONG_ARRAY_TYPE, NbtElement.LIST_TYPE -> {
-                var list = (AbstractNbtList<?>) value;
+                var list = (AbstractNbtList) value;
                 try (var sequence = visitor.sequence(ctx, Endec.<NbtElement>of(this::decodeValue, (ctx1, deserializer) -> null), list.size())) {
                     list.forEach(sequence::element);
                 }
@@ -165,12 +166,12 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
         private final Iterator<NbtElement> elements;
         private final int size;
 
-        private Sequence(SerializationContext ctx, Endec<V> valueEndec, List<NbtElement> elements) {
+        private Sequence(SerializationContext ctx, Endec<V> valueEndec, Iterable<NbtElement> elements, int size) {
             this.ctx = ctx;
             this.valueEndec = valueEndec;
 
             this.elements = elements.iterator();
-            this.size = elements.size();
+            this.size = size;
         }
 
         @Override

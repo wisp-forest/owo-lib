@@ -37,17 +37,7 @@ public class SpriteComponent extends BaseComponent {
     @Override
     public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
         SpriteUtilInvoker.markSpriteActive(this.sprite);
-
-        if (this.blend) {
-            RenderSystem.enableBlend();
-            RenderSystem.defaultBlendFunc();
-        }
-
         context.drawSpriteStretched(identifier -> OwoUIRenderLayers.getGuiTextured(identifier, this.blend), this.sprite, this.x, this.y, this.width, this.height);
-
-        if (this.blend) {
-            RenderSystem.disableBlend();
-        }
     }
 
     public SpriteComponent blend(boolean blend) {
