@@ -1,6 +1,5 @@
 package io.wispforest.owo.braid.widgets;
 
-import io.wispforest.owo.braid.core.Alignment;
 import io.wispforest.owo.braid.core.Insets;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.framework.BuildContext;
@@ -13,7 +12,6 @@ import io.wispforest.owo.braid.widgets.basic.Panel;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
 import io.wispforest.owo.ui.component.ButtonComponent;
-import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.util.UISounds;
 import net.minecraft.text.Text;
 
@@ -29,36 +27,36 @@ public class Button extends StatefulWidget {
 
     @Override
     public WidgetState<Button> createState() {
-        return new ButtonState();
+        return new State();
     }
-}
 
-class ButtonState extends WidgetState<Button> {
+    public static class State extends WidgetState<Button> {
 
-    private boolean hovered = false;
+        private boolean hovered = false;
 
-    @Override
-    public Widget build(BuildContext context) {
-        return new MouseArea(
-            widget -> widget
-                .clickCallback((x, y) -> {
-                    this.widget().onClick.run();
-                    UISounds.playButtonSound();
-                })
-                .enterCallback(() -> this.setState(() -> this.hovered = true))
-                .exitCallback(() -> this.setState(() -> this.hovered = false))
-                .cursorStyle(CursorStyle.HAND),
-            new Panel(
-                this.hovered ? ButtonComponent.HOVERED_TEXTURE : ButtonComponent.ACTIVE_TEXTURE,
-                new Padding(
-                    Insets.all(5),
-                    new Label(
-                        new LabelStyle(Alignment.CENTER, Color.WHITE, true),
-                        true,
-                        this.widget().text
+        @Override
+        public Widget build(BuildContext context) {
+            return new MouseArea(
+                widget -> widget
+                    .clickCallback((x, y) -> {
+                        this.widget().onClick.run();
+                        UISounds.playButtonSound();
+                    })
+                    .enterCallback(() -> this.setState(() -> this.hovered = true))
+                    .exitCallback(() -> this.setState(() -> this.hovered = false))
+                    .cursorStyle(CursorStyle.HAND),
+                new Panel(
+                    this.hovered ? ButtonComponent.HOVERED_TEXTURE : ButtonComponent.ACTIVE_TEXTURE,
+                    new Padding(
+                        Insets.all(5),
+                        new Label(
+                            new LabelStyle(null, null, null, true),
+                            true,
+                            this.widget().text
+                        )
                     )
                 )
-            )
-        );
+            );
+        }
     }
 }
