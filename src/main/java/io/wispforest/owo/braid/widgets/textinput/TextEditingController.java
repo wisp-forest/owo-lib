@@ -1,9 +1,8 @@
 package io.wispforest.owo.braid.widgets.textinput;
 
-import java.util.ArrayList;
-import java.util.List;
+import io.wispforest.owo.braid.core.Listenable;
 
-public class TextEditingController {
+public class TextEditingController extends Listenable {
     public String text = "";
     public CursorPosition cursorPosition = CursorPosition.INITIAL;
 
@@ -12,15 +11,8 @@ public class TextEditingController {
         return this.focused;
     }
 
-    private final List<Runnable> listeners = new ArrayList<>();
-    public void addListener(Runnable listener) {
-        this.listeners.add(listener);
-    }
-    public void removeListener(Runnable listener) {
-        this.listeners.remove(listener);
-    }
-
+    @Override
     protected void notifyListeners() {
-        this.listeners.forEach(Runnable::run);
+        super.notifyListeners();
     }
 }
