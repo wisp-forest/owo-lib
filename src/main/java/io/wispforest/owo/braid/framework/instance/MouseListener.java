@@ -4,7 +4,9 @@ import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import org.jetbrains.annotations.Nullable;
 
 public interface MouseListener {
-    @Nullable CursorStyle cursorStyleAt(double x, double y);
+    default @Nullable CursorStyle cursorStyleAt(double x, double y) {
+        return null;
+    }
 
     default boolean onMouseDown(double x, double y) {
         return false;

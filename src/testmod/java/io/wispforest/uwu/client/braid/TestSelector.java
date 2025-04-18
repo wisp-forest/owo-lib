@@ -1,5 +1,6 @@
 package io.wispforest.uwu.client.braid;
 
+import com.mojang.authlib.GameProfile;
 import io.wispforest.owo.braid.core.Alignment;
 import io.wispforest.owo.braid.core.Insets;
 import io.wispforest.owo.braid.core.LayoutAxis;
@@ -11,8 +12,10 @@ import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.Button;
+import io.wispforest.owo.braid.widgets.EntityWidget;
 import io.wispforest.owo.braid.widgets.ItemStackWidget;
 import io.wispforest.owo.braid.widgets.basic.*;
+import io.wispforest.owo.braid.widgets.basic.Stack;
 import io.wispforest.owo.braid.widgets.drag.DragArena;
 import io.wispforest.owo.braid.widgets.drag.DragArenaElement;
 import io.wispforest.owo.braid.widgets.flex.*;
@@ -20,27 +23,30 @@ import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
 import io.wispforest.owo.braid.widgets.slider.Slider;
 import io.wispforest.owo.braid.widgets.splitpane.SplitPane;
+import io.wispforest.owo.braid.widgets.textinput.TextBox;
+import io.wispforest.owo.braid.widgets.textinput.TextEditingController;
 import io.wispforest.owo.braid.widgets.window.Window;
 import io.wispforest.owo.braid.widgets.window.WindowController;
+import io.wispforest.owo.ui.component.EntityComponent;
 import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
+import io.wispforest.owo.ui.util.UISounds;
+import net.minecraft.entity.Entity;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.DoubleFunction;
 
 public class TestSelector extends StatefulWidget {
 
     public enum Tests {
-        COUNTER, FLEX, DRAGGING, SPLIT_PANE
+        COUNTER, FLEX, DRAGGING, SPLIT_PANE, TEXT_INPUT, BURNING_CHYZ
     }
 
     @Override
@@ -50,7 +56,18 @@ public class TestSelector extends StatefulWidget {
 
     public static class State extends WidgetState<TestSelector> {
 
-        private Tests test = Tests.COUNTER;
+        private Tests test = Tests.TEXT_INPUT;
+        private Entity chyz;
+
+        @Override
+        public void init() {
+            this.chyz = EntityComponent.createRenderablePlayer(new GameProfile(
+                UUID.fromString("09de8a6d-86bf-4c15-bb93-ce3384ce4e96"),
+                "chyzman"
+            ));
+
+            this.chyz.setOnFire(true);
+        }
 
         @Override
         public Widget build(BuildContext context) {
@@ -62,6 +79,8 @@ public class TestSelector extends StatefulWidget {
                         case FLEX -> new FunnySwitchLayout();
                         case DRAGGING -> new DragArenaTest();
                         case SPLIT_PANE -> new SplitPaneTest();
+                        case TEXT_INPUT -> new TextInputTest();
+                        case BURNING_CHYZ -> new BurningChyzTest(this.chyz);
                     }
                 ),
                 new Align(
@@ -83,7 +102,11 @@ public class TestSelector extends StatefulWidget {
                                             new Padding(Insets.all(2)),
                                             new Button(Text.literal("dragging"), () -> setState(() -> this.test = Tests.DRAGGING)),
                                             new Padding(Insets.all(2)),
-                                            new Button(Text.literal("split pane"), () -> setState(() -> this.test = Tests.SPLIT_PANE))
+                                            new Button(Text.literal("split pane"), () -> setState(() -> this.test = Tests.SPLIT_PANE)),
+                                            new Padding(Insets.all(2)),
+                                            new Button(Text.literal("text input"), () -> setState(() -> this.test = Tests.TEXT_INPUT)),
+                                            new Padding(Insets.all(2)),
+                                            new BurningChyzButton(this.chyz, () -> setState(() -> this.test = Tests.BURNING_CHYZ))
                                         )
                                     )
                                 )
@@ -357,6 +380,134 @@ public class TestSelector extends StatefulWidget {
                     new Label(this.widget().textSupplier.apply(this.value))
                 );
             }
+        }
+    }
+
+    public static class TextInputTest extends StatefulWidget {
+        @Override
+        public WidgetState<TextInputTest> createState() {
+            return new State();
+        }
+
+        public static class State extends WidgetState<TextInputTest> {
+            private final TextEditingController controller1 = new TextEditingController();
+            private final TextEditingController controller2 = new TextEditingController();
+            private final TextEditingController controller3 = new TextEditingController();
+
+            @Override
+            public Widget build(BuildContext context) {
+                return new Column(
+                    MainAxisAlignment.START,
+                    CrossAxisAlignment.CENTER,
+                    new Sized(
+                        100.0,
+                        50.0,
+                        new TextBox(
+                            this.controller1,
+                            true,
+                            true
+                        )
+                    ),
+                    new Sized(
+                        100.0,
+                        50.0,
+                        new TextBox(
+                            this.controller2,
+                            true,
+                            false
+                        )
+                    ),
+                    new Sized(
+                        100.0,
+                        20.0,
+                        new TextBox(
+                            this.controller3,
+                            false,
+                            false
+                        )
+                    )
+                );
+            }
+        }
+    }
+
+    public static class BurningChyzButton extends StatelessWidget {
+        public final Entity chyz;
+        public final Runnable clickCallback;
+
+        public BurningChyzButton(Entity chyz, Runnable clickCallback) {
+            this.chyz = chyz;
+            this.clickCallback = clickCallback;
+        }
+
+        @Override
+        public Widget build(BuildContext context) {
+            return new MouseArea(
+                widget -> widget
+                    .clickCallback((x, y) -> {
+                        this.clickCallback.run();
+                        UISounds.playButtonSound();
+                    })
+                    .cursorStyle(CursorStyle.HAND),
+                new Stack(
+                    new Center(
+                        new Sized(
+                            20.0,
+                            20.0,
+                            new Transform(
+                                new Matrix4f().rotationZ((float) Math.toRadians(90)),
+                                new EntityWidget(
+                                    3.5,
+                                    false,
+                                    true,
+                                    false,
+                                    this.chyz
+                                )
+                            )
+                        )
+                    ),
+                    new Transform(
+                        new Matrix4f().translate(0, 0, 300),
+                        new Label(
+                            new LabelStyle(Alignment.CENTER, Color.WHITE, true),
+                            true,
+                            Text.literal("burning chyz")
+                        )
+                    )
+                )
+            );
+        }
+    }
+
+    public static class BurningChyzTest extends StatelessWidget {
+
+        public final Entity chyz;
+        public BurningChyzTest(Entity chyz) {
+            this.chyz = chyz;
+        }
+
+        @Override
+        public Widget build(BuildContext context) {
+            return new Sized(
+                100.0,
+                100.0,
+                new Panel(
+                    OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
+                    new Padding(
+                        Insets.all(8),
+                        new Panel(
+                            OwoUIDrawContext.PANEL_INSET_NINE_PATCH_TEXTURE,
+                            new EntityWidget(
+                                1,
+                                false,
+                                true,
+                                true,
+                                this.chyz
+                            )
+                        )
+                    )
+                )
+            );
         }
     }
 }
