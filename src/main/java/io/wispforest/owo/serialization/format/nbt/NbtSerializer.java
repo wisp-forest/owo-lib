@@ -106,7 +106,7 @@ public class NbtSerializer extends RecursiveSerializer<NbtElement> implements Se
         this.frame(encoded -> {
             try (var struct = this.struct()) {
                 struct.field("present", ctx, Endec.BOOLEAN, optional.isPresent());
-                optional.ifPresent(value -> struct.field("value", ctx, endec, value));
+                optional.ifPresent(value -> struct.field("value", ctx.withoutAttributes(OptionalFieldFlag.INSTANCE), endec, value));
             }
 
             var compound = encoded.require("optional representation");
