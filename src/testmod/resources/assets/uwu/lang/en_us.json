@@ -26,7 +26,7 @@
     {"text": "d", "color": "#66d4ff"}
   ],
   "item.uwu.braid": [
-    {"translate":  "text.uwu.braid"},
+  {"translate":  "text.uwu.braid"},
     {"text": " (chyz tried)", "color": "#FFFFFF"}
   ],
   "block.uwu.braid_display": [
