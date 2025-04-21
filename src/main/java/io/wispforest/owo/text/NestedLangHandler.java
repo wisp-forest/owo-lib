@@ -65,12 +65,6 @@ public class NestedLangHandler {
         return returned;
     }
 
-    private static boolean test(Matcher matcher) {
-        return matcher.matches() &&
-               (!groupOrNothing(matcher, 1).isEmpty() || !groupOrNothing(matcher, 4).isEmpty()) &&
-               (groupOrNothing(matcher, 3).isEmpty() || (!groupOrNothing(matcher, 2).isEmpty() && !groupOrNothing(matcher, 5).isEmpty()));
-    }
-
     private static String groupOrNothing(Matcher matcher, int group) {
         return matcher.group(group) == null ? "" : matcher.group(group);
     }
