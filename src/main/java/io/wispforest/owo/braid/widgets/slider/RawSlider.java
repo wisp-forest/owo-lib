@@ -1,4 +1,4 @@
-package io.wispforest.owo.braid.widgets.slider.basic;
+package io.wispforest.owo.braid.widgets.slider;
 
 import io.wispforest.owo.braid.core.Alignment;
 import io.wispforest.owo.braid.core.Constraints;

@@ -1,4 +1,4 @@
-package io.wispforest.owo.braid.widgets.slider.xy;
+package io.wispforest.owo.braid.widgets.slider;
 
 import io.wispforest.owo.braid.core.*;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
