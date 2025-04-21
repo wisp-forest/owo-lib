@@ -25,7 +25,7 @@ public final class OwoUIPipelines {
     public static final RenderPipeline GUI_BLUR = RenderPipeline.builder(RenderPipelines.MATRICES_COLOR_SNIPPET)
         .withLocation(Identifier.of("owo", "pipeline/gui_blur"))
         .withVertexFormat(VertexFormats.POSITION, VertexFormat.DrawMode.QUADS)
-        .withVertexShader(Identifier.ofVanilla("core/position"))
+        .withVertexShader(Identifier.of("owo", "core/blur"))
         .withFragmentShader(Identifier.of("owo", "core/blur"))
         .withSampler("InputSampler")
         .withUniform("InputResolution", UniformType.VEC2)
