@@ -1,5 +1,7 @@
 package io.wispforest.owo.braid.core;
 
+import java.util.function.Supplier;
+
 public enum LayoutAxis {
     HORIZONTAL,
     VERTICAL;
@@ -8,6 +10,13 @@ public enum LayoutAxis {
         return switch (this) {
             case HORIZONTAL -> horizontal;
             case VERTICAL -> vertical;
+        };
+    }
+
+    public <T> T chooseCompute(Supplier<T> horizontal, Supplier<T> vertical) {
+        return switch (this) {
+            case HORIZONTAL -> horizontal.get();
+            case VERTICAL -> vertical.get();
         };
     }
 

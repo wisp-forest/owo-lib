@@ -10,7 +10,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class ListenableBuilder extends StatefulWidget {
 

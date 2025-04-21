@@ -10,6 +10,7 @@ import io.wispforest.owo.braid.framework.widget.LeafInstanceWidget;
 import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.util.ScissorStack;
+import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
@@ -45,6 +46,7 @@ public class TextInput extends LeafInstanceWidget {
         protected CursorLocation cursorLocation;
 
         protected List<Line> wrappedLines = List.of();
+        protected List<OrderedText> renderLines = List.of();
 
         public Instance(TextInput widget) {
             super(widget);
@@ -58,12 +60,14 @@ public class TextInput extends LeafInstanceWidget {
                 && this.cursorPosition == widget.controller.cursorPosition()
                 && this.widget.softWrap == widget.softWrap
                 && this.widget.allowMultipleLines == widget.allowMultipleLines)) {
+
+                this.text = widget.controller.text();
+                this.cursorPosition = widget.controller.cursorPosition();
+
                 this.markNeedsLayout();
             }
 
             super.setWidget(widget);
-            this.text = widget.controller.text();
-            this.cursorPosition = widget.controller.cursorPosition();
         }
 
         @Override
@@ -80,28 +84,39 @@ public class TextInput extends LeafInstanceWidget {
             var wrapped = new ArrayList<Line>();
 
             if (this.widget.allowMultipleLines) {
+                 var wrapWidth = this.widget.softWrap ? (int) this.transform.width() - 2 : Integer.MAX_VALUE;
                 this.host().client().textRenderer.getTextHandler().wrapLines(
                     this.text,
-                    this.widget.softWrap ? (int) this.transform.width() : Integer.MAX_VALUE,
+                    wrapWidth,
                     Style.EMPTY,
                     false,
                     (style, start, end) -> wrapped.add(new Line(start, end))
                 );
 
+                this.renderLines = new ArrayList<>(this.host().client().textRenderer.wrapLines(
+                    this.widget.controller.createTextForRendering(),
+                    wrapWidth
+                ));
+
                 if (this.text.endsWith("\n")) {
                     wrapped.add(new Line(this.text.length(), this.text.length()));
+                    this.renderLines.add(OrderedText.EMPTY);
                 }
 
                 if (wrapped.isEmpty()) {
                     wrapped.add(new Line(0, 0));
+                    this.renderLines.add(OrderedText.EMPTY);
                 }
             } else {
                 wrapped.add(new Line(0, this.text.length()));
+                this.renderLines = List.of(this.widget.controller.createTextForRendering().asOrderedText());
             }
 
             this.wrappedLines = wrapped;
 
             // compute cursor location
+
+            this.cursorLocation = null;
 
             for (int lineIdx = 0; lineIdx < this.wrappedLines.size(); lineIdx++) {
                 var line = this.wrappedLines.get(lineIdx);
@@ -114,6 +129,13 @@ public class TextInput extends LeafInstanceWidget {
                     break;
                 }
             }
+
+            if (this.cursorLocation == null) {
+                this.cursorLocation = new CursorLocation(
+                    this.wrappedLines.getLast().endIdx - this.wrappedLines.getLast().beginIdx,
+                    this.wrappedLines.size() - 1
+                );
+            }
         }
 
         @Override
@@ -123,7 +145,7 @@ public class TextInput extends LeafInstanceWidget {
             var cursorLine = this.wrappedLines.get(this.cursorLocation.row());
             var lineString = this.text.substring(cursorLine.beginIdx, cursorLine.beginIdx + this.cursorLocation.col());
 
-            var cursorX = textRenderer.getWidth(lineString);
+            var cursorX = textRenderer.getWidth(lineString) + 2;
 
             ScissorStack.push(0, 0, (int) this.transform.width(), (int) this.transform.height(), ctx);
             ctx.push();
@@ -135,14 +157,13 @@ public class TextInput extends LeafInstanceWidget {
             );
 
             for (int lineIdx = 0; lineIdx < this.wrappedLines.size(); lineIdx++) {
-                var line = this.wrappedLines.get(lineIdx);
-
                 ctx.drawText(
-                    Text.literal(this.text.substring(line.beginIdx, line.endIdx)),
+                    this.host().client().textRenderer,
+                    this.renderLines.get(lineIdx),
                     0,
                     lineIdx * textRenderer.fontHeight,
-                    1f,
-                    Color.WHITE.argb()
+                    Color.WHITE.argb(),
+                    false
                 );
             }
 
@@ -156,7 +177,10 @@ public class TextInput extends LeafInstanceWidget {
             }
 
             ctx.pop();
+            ctx.draw();
             ScissorStack.pop();
+
+            ctx.drawText(textRenderer, String.valueOf(this.cursorPosition), (int) this.transform.width() + 5, 0, 0xFFFFFF, false);
         }
 
         protected Line currentLine() {

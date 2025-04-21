@@ -1,10 +1,7 @@
 package io.wispforest.uwu.client.braid;
 
 import com.mojang.authlib.GameProfile;
-import io.wispforest.owo.braid.core.Alignment;
-import io.wispforest.owo.braid.core.Insets;
-import io.wispforest.owo.braid.core.LayoutAxis;
-import io.wispforest.owo.braid.core.Size;
+import io.wispforest.owo.braid.core.*;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
@@ -21,7 +18,10 @@ import io.wispforest.owo.braid.widgets.drag.DragArenaElement;
 import io.wispforest.owo.braid.widgets.flex.*;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
+import io.wispforest.owo.braid.widgets.scroll.ScrollController;
+import io.wispforest.owo.braid.widgets.scroll.Scrollable;
 import io.wispforest.owo.braid.widgets.slider.MessageSlider;
+import io.wispforest.owo.braid.widgets.slider.Slider;
 import io.wispforest.owo.braid.widgets.splitpane.SplitPane;
 import io.wispforest.owo.braid.widgets.textinput.TextBox;
 import io.wispforest.owo.braid.widgets.textinput.TextEditingController;
@@ -31,6 +31,7 @@ import io.wispforest.owo.ui.component.EntityComponent;
 import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.util.UISounds;
+import io.wispforest.owo.util.Wisdom;
 import net.minecraft.entity.Entity;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
@@ -46,7 +47,7 @@ import java.util.function.DoubleFunction;
 public class TestSelector extends StatefulWidget {
 
     public enum Tests {
-        COUNTER, FLEX, DRAGGING, SPLIT_PANE, TEXT_INPUT, BURNING_CHYZ
+        COUNTER, FLEX, DRAGGING, SPLIT_PANE, TEXT_INPUT, BURNING_CHYZ, SCROLLING
     }
 
     @Override
@@ -81,6 +82,7 @@ public class TestSelector extends StatefulWidget {
                         case SPLIT_PANE -> new SplitPaneTest();
                         case TEXT_INPUT -> new TextInputTest();
                         case BURNING_CHYZ -> new BurningChyzTest(this.chyz);
+                        case SCROLLING -> new ScrollTest();
                     }
                 ),
                 new Align(
@@ -106,7 +108,9 @@ public class TestSelector extends StatefulWidget {
                                             new Padding(Insets.all(2)),
                                             new Button(Text.literal("text input"), () -> setState(() -> this.test = Tests.TEXT_INPUT)),
                                             new Padding(Insets.all(2)),
-                                            new BurningChyzButton(this.chyz, () -> setState(() -> this.test = Tests.BURNING_CHYZ))
+                                            new BurningChyzButton(this.chyz, () -> setState(() -> this.test = Tests.BURNING_CHYZ)),
+                                            new Padding(Insets.all(2)),
+                                            new Button(Text.literal("scrolling"), () -> setState(() -> this.test = Tests.SCROLLING))
                                         )
                                     )
                                 )
@@ -372,6 +376,7 @@ public class TestSelector extends StatefulWidget {
                         0,
                         32,
                         this.widget().step,
+                        LayoutAxis.HORIZONTAL,
                         newValue -> setState(() -> this.value = newValue),
                         this.widget().textSupplier.apply(this.value)
                     )
@@ -486,8 +491,8 @@ public class TestSelector extends StatefulWidget {
         @Override
         public Widget build(BuildContext context) {
             return new Sized(
-                100.0,
-                100.0,
+                250.0,
+                250.0,
                 new Panel(
                     OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
                     new Padding(
@@ -505,6 +510,98 @@ public class TestSelector extends StatefulWidget {
                     )
                 )
             );
+        }
+    }
+
+    public static class ScrollTest extends StatefulWidget {
+
+        @Override
+        public WidgetState<?> createState() {
+            return new State();
+        }
+
+        public static class State extends WidgetState<ScrollTest> {
+
+            private final ScrollController horizontalController = new ScrollController();
+            private final ScrollController verticalController = new ScrollController();
+
+            @Override
+            public Widget build(BuildContext context) {
+                var text = BraidUtils.fold(
+                    Wisdom.ALL_THE_WISDOM,
+                    Text.empty(),
+                    (result, wisdom) -> {
+                        var wisdomColor = Color.ofHsv(
+                            new java.util.Random(wisdom.hashCode()).nextFloat(), .75f, 1f
+                        ).rgb();
+
+                        return result.append(
+                            Text.literal(wisdom + "\n").styled(style -> style.withColor(wisdomColor))
+                        );
+                    }
+                );
+
+                return new Sized(
+                    210.0,
+                    210.0,
+                    new Column(
+                        new Flexible(
+                            new Row(
+                                new Flexible(
+                                    new Scrollable(
+                                        true,
+                                        true,
+                                        this.horizontalController,
+                                        this.verticalController,
+                                        new Sized(
+                                            500.0,
+                                            null,
+                                            new Label(
+                                                LabelStyle.SHADOW,
+                                                true,
+                                                text
+                                            )
+                                        )
+                                    )
+                                ),
+                                new Sized(
+                                    10.0,
+                                    200.0,
+                                    new ListenableBuilder(
+                                        this.verticalController,
+                                        buildContext -> new Slider(
+                                            this.verticalController.offset(),
+                                            0,
+                                            this.verticalController.maxOffset(),
+                                            null,
+                                            LayoutAxis.VERTICAL,
+                                            this.verticalController::setOffset
+                                        )
+                                    )
+                                )
+                            )
+                        ),
+                        new Align(
+                            Alignment.LEFT,
+                            new Sized(
+                                200.0,
+                                10.0,
+                                new ListenableBuilder(
+                                    this.horizontalController,
+                                    buildContext -> new Slider(
+                                        this.horizontalController.offset(),
+                                        0,
+                                        this.horizontalController.maxOffset(),
+                                        null,
+                                        LayoutAxis.HORIZONTAL,
+                                        this.horizontalController::setOffset
+                                    )
+                                )
+                            )
+                        )
+                    )
+                );
+            }
         }
     }
 }

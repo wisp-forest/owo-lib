@@ -18,7 +18,7 @@ public interface MouseListener {
     default void onMouseDrag(double x, double y, double dx, double dy) {}
     default void onMouseDragEnd() {}
 
-    default boolean onMouseScroll(double x, double y, double vertical, double horizontal) {
+    default boolean onMouseScroll(double x, double y, double horizontal, double vertical) {
         return false;
     }
 }

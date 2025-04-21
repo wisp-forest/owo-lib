@@ -6,6 +6,8 @@ import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Duration;
+
 public abstract class WidgetState<T extends StatefulWidget> {
 
     StatefulProxy owner;
@@ -23,6 +25,10 @@ public abstract class WidgetState<T extends StatefulWidget> {
 
         fn.run();
         this.owner.markNeedsRebuild();
+    }
+
+    public final void scheduleDelayedCallback(Duration after, Runnable callback) {
+        this.owner.host().scheduleDelayedCallback(after, callback);
     }
 
     public final void scheduleAnimationCallback(ProxyHost.AnimationCallback callback) {

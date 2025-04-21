@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets.slider;
 
+import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
@@ -17,21 +18,23 @@ public class MessageSlider extends StatelessWidget {
     public final double min;
     public final double max;
     public final @Nullable Double step;
+    public final LayoutAxis axis;
 
     public final DoubleConsumer onChanged;
     public final Text message;
 
-    public MessageSlider(double value, double min, double max, @Nullable Double step, DoubleConsumer onChanged, Text message) {
+    public MessageSlider(double value, double min, double max, @Nullable Double step, LayoutAxis axis, DoubleConsumer onChanged, Text message) {
         this.value = value;
         this.min = min;
         this.max = max;
         this.step = step;
+        this.axis = axis;
         this.onChanged = onChanged;
         this.message = message;
     }
 
-    public MessageSlider(double value, DoubleConsumer onChanged, Text message) {
-        this(value, 0, 1, null, onChanged, message);
+    public MessageSlider(double value, DoubleConsumer onChanged, Text message, LayoutAxis axis) {
+        this(value, 0, 1, null, axis, onChanged, message);
     }
 
     @Override
@@ -42,6 +45,7 @@ public class MessageSlider extends StatelessWidget {
                 this.min,
                 this.max,
                 this.step,
+                this.axis,
                 this.onChanged
             ),
             new Label(

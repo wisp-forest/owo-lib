@@ -10,6 +10,7 @@ import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.RotationAxis;
+import org.apache.commons.lang3.builder.Diff;
 import org.joml.Vector3f;
 
 public class EntityWidget extends LeafInstanceWidget {
@@ -105,7 +106,7 @@ public class EntityWidget extends LeafInstanceWidget {
 
             dispatcher.setRotation(RotationAxis.POSITIVE_Y.rotationDegrees(45));
 
-            RenderSystem.setShaderLights(new Vector3f(.15f, 1, 0), new Vector3f(.15f, -1, 0));
+            DiffuseLighting.enableForLevel();
             dispatcher.setRenderShadows(false);
             dispatcher.render(this.widget.entity, 0, 0, 0, 0, ctx.getMatrices(), ctx.vertexConsumers(), LightmapTextureManager.MAX_LIGHT_COORDINATE);
             dispatcher.setRenderShadows(true);

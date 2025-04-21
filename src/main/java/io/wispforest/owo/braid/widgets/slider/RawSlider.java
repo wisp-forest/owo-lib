@@ -3,6 +3,7 @@ package io.wispforest.owo.braid.widgets.slider;
 import io.wispforest.owo.braid.core.Alignment;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.Insets;
+import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
@@ -19,21 +20,23 @@ public class RawSlider extends StatelessWidget {
     public final double min;
     public final double max;
     public final @Nullable Double step;
+    public final LayoutAxis axis;
 
     public final DoubleConsumer onChanged;
     public final Widget track;
     public final Widget handle;
-    public final double handleWidth;
+    public final double handleSize;
 
-    public RawSlider(double value, double min, double max, @Nullable Double step, DoubleConsumer onChanged, Widget track, Widget handle, double handleWidth) {
+    public RawSlider(double value, double min, double max, @Nullable Double step, LayoutAxis axis, DoubleConsumer onChanged, Widget track, Widget handle, double handleSize) {
         this.value = value;
         this.min = min;
         this.max = max;
         this.step = step;
+        this.axis = axis;
         this.onChanged = onChanged;
         this.track = track;
         this.handle = handle;
-        this.handleWidth = handleWidth;
+        this.handleSize = handleSize;
     }
 
     @Override
@@ -48,17 +51,20 @@ public class RawSlider extends StatelessWidget {
                         .dragCallback((x, y, dx, dy) -> this.updateForMousePosition(constraints, x, y))
                         .cursorStyle(CursorStyle.HAND),
                     new Stack(
-                        Alignment.LEFT,
+                        this.axis.choose(Alignment.LEFT, Alignment.TOP),
                         new Sized(
                             constraints.maxWidth(),
                             constraints.maxHeight(),
                             this.track
                         ),
                         new Padding(
-                            Insets.left(Math.floor((constraints.maxWidth() - this.handleWidth) * normalizedValue)),
+                            this.axis.chooseCompute(
+                                () -> Insets.left(Math.floor((constraints.maxWidth() - this.handleSize) * normalizedValue)),
+                                () -> Insets.top(Math.floor((constraints.maxHeight() - this.handleSize) * normalizedValue))
+                            ),
                             new Sized(
-                                this.handleWidth,
-                                constraints.maxHeight(),
+                                this.handleSize,
+                                constraints.maxOnAxis(this.axis.opposite()),
                                 this.handle
                             )
                         )
@@ -69,7 +75,7 @@ public class RawSlider extends StatelessWidget {
     }
 
     private void updateForMousePosition(Constraints constraints, double x, double y) {
-        var newNormalizedValue = MathHelper.clamp((x - (this.handleWidth / 2)) / (constraints.maxWidth() - this.handleWidth), 0, 1);
+        var newNormalizedValue = MathHelper.clamp((this.axis.choose(x, y) - (this.handleSize / 2)) / (constraints.maxOnAxis(this.axis) - this.handleSize), 0, 1);
         this.onChanged.accept(this.discretize(this.min + newNormalizedValue * (this.max - this.min)));
     }
 

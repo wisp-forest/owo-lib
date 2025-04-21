@@ -16,11 +16,13 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.OrderedTextTooltipComponent;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector4f;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -32,7 +34,8 @@ public class AppState implements InstanceHost, ProxyHost {
     public final CursorController cursorController;
 
     private final BuildScope rootBuildScope = new BuildScope();
-    private Deque<AnimationCallback> callbacks = new ArrayDeque<>();
+    private Deque<AnimationCallback> animationCallbacks = new ArrayDeque<>();
+    private PriorityQueue<ScheduledCallback> callbacks = new PriorityQueue<>();
     private final RootProxy root;
 
     private Set<MouseListener> hovered = new HashSet<>();
@@ -84,14 +87,19 @@ public class AppState implements InstanceHost, ProxyHost {
             this.rebuildRoot();
         }
 
-        if (!this.callbacks.isEmpty()) {
-            var callbacksForThisFrame = this.callbacks;
-            this.callbacks = new ArrayDeque<>();
+        if (!this.animationCallbacks.isEmpty()) {
+            var callbacksForThisFrame = this.animationCallbacks;
+            this.animationCallbacks = new ArrayDeque<>();
 
             while (!callbacksForThisFrame.isEmpty()) {
                 var callback = callbacksForThisFrame.removeFirst();
                 callback.run(frameDeltaInTicks);
             }
+        }
+
+        var now = Instant.now();
+        while (!this.callbacks.isEmpty() && this.callbacks.peek().after().isBefore(now)) {
+            this.callbacks.poll().callback().run();
         }
 
         this.rootBuildScope.rebuildDirtyProxies();
@@ -353,7 +361,22 @@ public class AppState implements InstanceHost, ProxyHost {
 
     @Override
     public void scheduleAnimationCallback(AnimationCallback callback) {
-        this.callbacks.add(callback);
+        this.animationCallbacks.add(callback);
+    }
+
+    @Override
+    public void scheduleDelayedCallback(Duration delay, Runnable callback) {
+        this.callbacks.add(new ScheduledCallback(
+            Instant.now().plus(delay),
+            callback
+        ));
+    }
+}
+
+record ScheduledCallback(Instant after, Runnable callback) implements Comparable<ScheduledCallback> {
+    @Override
+    public int compareTo(@NotNull ScheduledCallback o) {
+        return this.after.compareTo(o.after);
     }
 }
 

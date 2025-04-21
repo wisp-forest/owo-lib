@@ -52,7 +52,7 @@ public class Stack extends MultiChildInstanceWidget {
                     this.widget.alignment.alignHorizontal(maxSize.width(), child.transform.width())
                 );
                 child.transform.setY(
-                    this.widget.alignment.alignHorizontal(maxSize.height(), child.transform.height())
+                    this.widget.alignment.alignVertical(maxSize.height(), child.transform.height())
                 );
             }
 

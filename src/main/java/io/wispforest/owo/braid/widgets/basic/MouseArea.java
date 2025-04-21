@@ -210,7 +210,7 @@ public class MouseArea extends SingleChildInstanceWidget {
         }
 
         @Override
-        public boolean onMouseScroll(double x, double y, double vertical, double horizontal) {
+        public boolean onMouseScroll(double x, double y, double horizontal, double vertical) {
             if (this.widget.scrollCallback != null) {
                 this.widget.scrollCallback.onScroll(horizontal, vertical);
                 return true;

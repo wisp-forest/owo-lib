@@ -1,4 +1,97 @@
 package io.wispforest.owo.braid.widgets.scroll;
 
-public class RawScrollView {
+import io.wispforest.owo.braid.core.Constraints;
+import io.wispforest.owo.braid.core.Size;
+import io.wispforest.owo.braid.framework.instance.SingleChildWidgetInstance;
+import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
+import io.wispforest.owo.braid.framework.widget.Widget;
+import org.jetbrains.annotations.Nullable;
+
+public class RawScrollView extends SingleChildInstanceWidget {
+
+    public final ScrollController horizontalController;
+    public final ScrollController verticalController;
+
+    public RawScrollView(
+        @Nullable ScrollController horizontalController,
+        @Nullable ScrollController verticalController,
+        Widget child
+    ) {
+        super(child);
+        this.horizontalController = horizontalController;
+        this.verticalController = verticalController;
+    }
+
+    @Override
+    public SingleChildWidgetInstance<?> instantiate() {
+        return new Instance(this);
+    }
+
+    public static class Instance extends SingleChildWidgetInstance<RawScrollView> {
+
+        protected double horizontalOffset, maxHorizontalOffset;
+        protected double verticalOffset, maxVerticalOffset;
+
+        public Instance(RawScrollView widget) {
+            super(widget);
+
+            this.horizontalOffset = this.widget.horizontalController != null ? this.widget.horizontalController.offset() : 0;
+            this.maxHorizontalOffset = this.widget.horizontalController != null ? this.widget.horizontalController.maxOffset() : 0;
+            this.verticalOffset = this.widget.verticalController != null ? this.widget.verticalController.offset() : 0;
+            this.maxVerticalOffset = this.widget.verticalController != null ? this.widget.verticalController.maxOffset() : 0;
+        }
+
+        @Override
+        public void setWidget(RawScrollView widget) {
+            var horizontalOffset = this.widget.horizontalController != null ? this.widget.horizontalController.offset() : 0;
+            var maxHorizontalOffset = this.widget.horizontalController != null ? this.widget.horizontalController.maxOffset() : 0;
+            var verticalOffset = this.widget.verticalController != null ? this.widget.verticalController.offset() : 0;
+            var maxVerticalOffset = this.widget.verticalController != null ? this.widget.verticalController.maxOffset() : 0;
+
+            if (!(this.horizontalOffset == horizontalOffset
+                && this.maxHorizontalOffset == maxHorizontalOffset
+                && this.verticalOffset == verticalOffset
+                && this.maxVerticalOffset == maxVerticalOffset)) {
+
+                this.horizontalOffset = horizontalOffset;
+                this.maxHorizontalOffset = maxHorizontalOffset;
+                this.verticalOffset = verticalOffset;
+                this.maxVerticalOffset = maxVerticalOffset;
+
+                this.markNeedsLayout();
+            }
+
+            super.setWidget(widget);
+        }
+
+        @Override
+        protected void doLayout(Constraints constraints) {
+            var childSize = child.layout(
+                Constraints.of(
+                    widget.horizontalController != null ? 0 : constraints.minWidth(),
+                    widget.verticalController != null ? 0 : constraints.minHeight(),
+                    widget.horizontalController != null ? Double.POSITIVE_INFINITY : constraints.maxWidth(),
+                    widget.verticalController != null ? Double.POSITIVE_INFINITY : constraints.maxHeight()
+                )
+            );
+
+            if (this.widget.horizontalController != null) {
+                this.widget.horizontalController.setMaxOffset(Math.max(0, childSize.width() - constraints.maxWidth()));
+            }
+
+            if (this.widget.verticalController != null) {
+                this.widget.verticalController.setMaxOffset(Math.max(0, childSize.height() - constraints.maxHeight()));
+            }
+
+            this.child.transform.setX(-this.horizontalOffset);
+            this.child.transform.setY(-this.verticalOffset);
+
+            var selfSize = Size.of(
+                this.widget.horizontalController != null && constraints.hasBoundedWidth() ? constraints.maxWidth() : constraints.minWidth(),
+                this.widget.verticalController != null && constraints.hasBoundedHeight() ? constraints.maxHeight() : constraints.minHeight()
+            ).constrained(constraints);
+
+            this.transform.setSize(selfSize);
+        }
+    }
 }

@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets.slider;
 
+import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.Key;
@@ -19,19 +20,21 @@ public class Slider extends StatelessWidget {
     public final double min;
     public final double max;
     public final @Nullable Double step;
+    public final LayoutAxis axis;
 
     public final DoubleConsumer onChanged;
 
-    public Slider(double value, double min, double max, @Nullable Double step, DoubleConsumer onChanged) {
+    public Slider(double value, double min, double max, @Nullable Double step, LayoutAxis axis, DoubleConsumer onChanged) {
         this.value = value;
         this.min = min;
         this.max = max;
         this.step = step;
+        this.axis = axis;
         this.onChanged = onChanged;
     }
 
-    public Slider(double value, DoubleConsumer onChanged) {
-        this(value, 0, 1, null, onChanged);
+    public Slider(double value, DoubleConsumer onChanged, LayoutAxis axis) {
+        this(value, 0, 1, null, axis, onChanged);
     }
 
     @Override
@@ -41,6 +44,7 @@ public class Slider extends StatelessWidget {
             this.min,
             this.max,
             this.step,
+            this.axis,
             this.onChanged,
             new Panel(ButtonComponent.DISABLED_TEXTURE),
             new DefaultHandle(),

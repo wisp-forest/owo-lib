@@ -1,6 +1,7 @@
 package io.wispforest.owo.braid.widgets.textinput;
 
 import io.wispforest.owo.braid.core.Listenable;
+import net.minecraft.text.Text;
 
 public class TextEditingController extends Listenable {
 
@@ -15,10 +16,6 @@ public class TextEditingController extends Listenable {
         this("");
     }
 
-    public String text() {
-        return this.text;
-    }
-
     public void setText(String text) {
         if (this.text.equals(text)) {
             return;
@@ -28,8 +25,8 @@ public class TextEditingController extends Listenable {
         this.notifyListeners();
     }
 
-    public int cursorPosition() {
-        return this.cursorPosition;
+    public String text() {
+        return this.text;
     }
 
     public void setCursorPosition(int cursorPosition) {
@@ -39,5 +36,13 @@ public class TextEditingController extends Listenable {
 
         this.cursorPosition = cursorPosition;
         this.notifyListeners();
+    }
+
+    public int cursorPosition() {
+        return this.cursorPosition;
+    }
+
+    public Text createTextForRendering() {
+        return Text.literal(this.text);
     }
 }
