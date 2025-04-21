@@ -20,8 +20,9 @@ import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
 import io.wispforest.owo.braid.widgets.scroll.ScrollController;
 import io.wispforest.owo.braid.widgets.scroll.Scrollable;
-import io.wispforest.owo.braid.widgets.slider.MessageSlider;
-import io.wispforest.owo.braid.widgets.slider.Slider;
+import io.wispforest.owo.braid.widgets.slider.basic.MessageSlider;
+import io.wispforest.owo.braid.widgets.slider.basic.Slider;
+import io.wispforest.owo.braid.widgets.slider.xy.MessageXlyder;
 import io.wispforest.owo.braid.widgets.splitpane.SplitPane;
 import io.wispforest.owo.braid.widgets.textinput.TextBox;
 import io.wispforest.owo.braid.widgets.textinput.TextEditingController;
@@ -47,7 +48,7 @@ import java.util.function.DoubleFunction;
 public class TestSelector extends StatefulWidget {
 
     public enum Tests {
-        COUNTER, FLEX, DRAGGING, SPLIT_PANE, TEXT_INPUT, BURNING_CHYZ, SCROLLING
+        COUNTER, FLEX, DRAGGING, SPLIT_PANE, SLIDERS, TEXT_INPUT, BURNING_CHYZ, SCROLLING
     }
 
     @Override
@@ -80,6 +81,7 @@ public class TestSelector extends StatefulWidget {
                         case FLEX -> new FunnySwitchLayout();
                         case DRAGGING -> new DragArenaTest();
                         case SPLIT_PANE -> new SplitPaneTest();
+                        case SLIDERS -> new SliderTest();
                         case TEXT_INPUT -> new TextInputTest();
                         case BURNING_CHYZ -> new BurningChyzTest(this.chyz);
                         case SCROLLING -> new ScrollTest();
@@ -105,6 +107,8 @@ public class TestSelector extends StatefulWidget {
                                             new Button(Text.literal("dragging"), () -> setState(() -> this.test = Tests.DRAGGING)),
                                             new Padding(Insets.all(2)),
                                             new Button(Text.literal("split pane"), () -> setState(() -> this.test = Tests.SPLIT_PANE)),
+                                            new Padding(Insets.all(2)),
+                                            new Button(Text.literal("slidey bois"), () -> setState(() -> this.test = Tests.SLIDERS)),
                                             new Padding(Insets.all(2)),
                                             new Button(Text.literal("text input"), () -> setState(() -> this.test = Tests.TEXT_INPUT)),
                                             new Padding(Insets.all(2)),
@@ -338,13 +342,49 @@ public class TestSelector extends StatefulWidget {
                         ),
                         LayoutAxis.HORIZONTAL
                     )
-                ),
-                new Padding(Insets.all(10)),
-                new CoolSlider(2.0, value -> Text.literal("value: " + BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP).toPlainString())),
-                new Padding(Insets.all(10)),
-                new CoolSlider(null, value -> Text.literal("value: " + BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP).toPlainString()))
+                )
             );
         }
+    }
+
+    public static class SliderTest extends StatelessWidget {
+        @Override
+        public Widget build(BuildContext context) {
+            return new Column(
+                MainAxisAlignment.START,
+                CrossAxisAlignment.CENTER,
+                new Row(
+                    MainAxisAlignment.START,
+                    CrossAxisAlignment.CENTER,
+                    new Label(Text.literal("Discrete")),
+                    new Padding(Insets.all(10)),
+                    new Label(Text.literal("Smooth"))
+                ),
+                new Row(
+                    MainAxisAlignment.START,
+                    CrossAxisAlignment.CENTER,
+                    new Label(Text.literal("Basic")),
+                    new Padding(Insets.all(10)),
+                    new CoolSlider(2.0, value -> Text.literal("v: " + formatDouble(value))),
+                    new Padding(Insets.all(10)),
+                    new CoolSlider(null, value -> Text.literal("v: " + formatDouble(value)))
+                ),
+                new Padding(Insets.all(10)),
+                new Row(
+                    MainAxisAlignment.START,
+                    CrossAxisAlignment.CENTER,
+                    new Label(Text.literal("XY")),
+                    new Padding(Insets.all(10)),
+                    new CoolXlyder(2.0, 2.0, (x, y) -> Text.literal("x: " + formatDouble(x) + "\ny: " + formatDouble(y))),
+                    new Padding(Insets.all(10)),
+                    new CoolXlyder(null, null, (x, y) -> Text.literal("x: " + formatDouble(x) + "\ny: " + formatDouble(y)))
+                )
+            );
+        }
+    }
+
+    public static String formatDouble(double value) {
+        return BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP).toPlainString().replaceAll("(\\.0*|(?<=\\d)\\.0+)$", "");
     }
 
     public static class CoolSlider extends StatefulWidget {
@@ -379,6 +419,52 @@ public class TestSelector extends StatefulWidget {
                         LayoutAxis.HORIZONTAL,
                         newValue -> setState(() -> this.value = newValue),
                         this.widget().textSupplier.apply(this.value)
+                    )
+                );
+            }
+        }
+    }
+
+    public static class CoolXlyder extends StatefulWidget {
+
+        public final @Nullable Double xStep, yStep;
+        public final MessageXlyder.XlyderMessageProvider textSupplier;
+
+        public CoolXlyder(
+            @Nullable Double xStep,
+            @Nullable Double yStep,
+            MessageXlyder.XlyderMessageProvider textSupplier
+        ) {
+            this.xStep = xStep;
+            this.yStep = yStep;
+            this.textSupplier = textSupplier;
+        }
+
+        @Override
+        public WidgetState<CoolXlyder> createState() {
+            return new State();
+        }
+
+        public static class State extends WidgetState<CoolXlyder> {
+
+            private double x = 16;
+            private double y = 16;
+
+            @Override
+            public Widget build(BuildContext context) {
+                return new Sized(
+                    100.0,
+                    100.0,
+                    new MessageXlyder(
+                        this.x, this.y,
+                        0, 0,
+                        32, 32,
+                        this.widget().xStep, this.widget().yStep,
+                        (newX, newY) -> setState(() -> {
+                            this.x = newX;
+                            this.y = newY;
+                        }),
+                        this.widget().textSupplier.getMessage(this.x, this.y)
                     )
                 );
             }
@@ -484,6 +570,7 @@ public class TestSelector extends StatefulWidget {
     public static class BurningChyzTest extends StatelessWidget {
 
         public final Entity chyz;
+
         public BurningChyzTest(Entity chyz) {
             this.chyz = chyz;
         }

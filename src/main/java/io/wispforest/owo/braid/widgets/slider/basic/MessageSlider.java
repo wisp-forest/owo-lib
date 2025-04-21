@@ -1,4 +1,4 @@
-package io.wispforest.owo.braid.widgets.slider;
+package io.wispforest.owo.braid.widgets.slider.basic;
 
 import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.framework.BuildContext;

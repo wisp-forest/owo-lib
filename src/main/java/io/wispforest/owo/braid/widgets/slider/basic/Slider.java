@@ -1,14 +1,11 @@
-package io.wispforest.owo.braid.widgets.slider;
+package io.wispforest.owo.braid.widgets.slider.basic;
 
 import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.framework.BuildContext;
-import io.wispforest.owo.braid.framework.proxy.WidgetState;
-import io.wispforest.owo.braid.framework.widget.Key;
-import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import io.wispforest.owo.braid.widgets.basic.MouseArea;
 import io.wispforest.owo.braid.widgets.basic.Panel;
+import io.wispforest.owo.braid.widgets.slider.DefaultSliderHandle;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import org.jetbrains.annotations.Nullable;
 
@@ -47,30 +44,8 @@ public class Slider extends StatelessWidget {
             this.axis,
             this.onChanged,
             new Panel(ButtonComponent.DISABLED_TEXTURE),
-            new DefaultHandle(),
+            new DefaultSliderHandle(),
             8
-        );
-    }
-}
-
-class DefaultHandle extends StatefulWidget {
-    @Override
-    public WidgetState<DefaultHandle> createState() {
-        return new DefaultHandleState();
-    }
-}
-
-class DefaultHandleState extends WidgetState<DefaultHandle> {
-
-    private boolean hovered = false;
-
-    @Override
-    public Widget build(BuildContext context) {
-        return new MouseArea(
-            widget -> widget
-                .enterCallback(() -> setState(() -> this.hovered = true))
-                .exitCallback(() -> setState(() -> this.hovered = false)),
-            new Panel(this.hovered ? ButtonComponent.HOVERED_TEXTURE : ButtonComponent.ACTIVE_TEXTURE).key(Key.of("slider-handle"))
         );
     }
 }

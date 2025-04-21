@@ -130,7 +130,10 @@ public class Uwu implements ModInitializer {
                 group.addTab(Icon.of(Items.EMERALD), "tab_2", null, false);
                 group.addTab(Icon.of(Items.AMETHYST_SHARD), "tab_3", null, false);
                 group.addTab(Icon.of(Items.GOLD_INGOT), "tab_4", null, false);
-                group.addCustomTab(Icon.of(Items.IRON_INGOT), "tab_5", (context, entries) -> entries.add(UwuItems.SCREEN_SHARD), false);
+                group.addCustomTab(Icon.of(Items.IRON_INGOT), "tab_5", (context, entries) -> {
+                    entries.add(UwuItems.SCREEN_SHARD);
+                    entries.add(UwuItems.BRAID);
+                }, false);
                 group.addTab(Icon.of(Items.QUARTZ), "tab_6", null, false);
 
                 group.addButton(new ItemGroupButton(group, Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16), "owo", () -> {

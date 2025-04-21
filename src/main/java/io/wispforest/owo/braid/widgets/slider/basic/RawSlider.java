@@ -1,4 +1,4 @@
-package io.wispforest.owo.braid.widgets.slider;
+package io.wispforest.owo.braid.widgets.slider.basic;
 
 import io.wispforest.owo.braid.core.Alignment;
 import io.wispforest.owo.braid.core.Constraints;
@@ -27,7 +27,17 @@ public class RawSlider extends StatelessWidget {
     public final Widget handle;
     public final double handleSize;
 
-    public RawSlider(double value, double min, double max, @Nullable Double step, LayoutAxis axis, DoubleConsumer onChanged, Widget track, Widget handle, double handleSize) {
+    public RawSlider(
+        double value,
+        double min,
+        double max,
+        @Nullable Double step,
+        LayoutAxis axis,
+        DoubleConsumer onChanged,
+        Widget track,
+        Widget handle,
+        double handleSize
+    ) {
         this.value = value;
         this.min = min;
         this.max = max;
