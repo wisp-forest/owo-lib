@@ -15,6 +15,7 @@ public class UwuItems {
     public static final Item TEST_STICK = register("test_stick", UwuTestStickItem::new);
     public static final Item SCREEN_SHARD = register("screen_shard", UwuScreenShardItem::new);
     public static final Item COUNTER = register("counter", UwuCounterItem::new);
+    public static final Item BRAID = register("braid", UwuBraidItem::new);
 
     public static class OwoCompatItems {
         public static final Item OWO_COMPAT_ITEM = register(Identifier.of("owo", "owo_compat_item"), new Item.Settings().group(Uwu.FOUR_TAB_GROUP).tab(2));

@@ -17,6 +17,14 @@
       "color": "#3AB0FF"
     }
   ],
+  "item.uwu.braid": [
+    {"text": "B", "color": "#FF0000"},
+    {"text": "r", "color": "#FF7F00"},
+    {"text": "a", "color": "#FFFF00"},
+    {"text": "i", "color": "#00FF00"},
+    {"text": "d", "color": "#00FFFF"},
+    {"text": " (I tried)", "color": "#FFFFFF"}
+  ],
   "item.uwu.counter": "Counter",
   "text.config.uwu.title": "Test Config Screen",
   "key.uwu.hud_test": [
