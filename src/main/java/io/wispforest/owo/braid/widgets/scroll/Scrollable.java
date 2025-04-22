@@ -8,6 +8,7 @@ import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.Clip;
 import io.wispforest.owo.braid.widgets.basic.ListenableBuilder;
 import io.wispforest.owo.braid.widgets.basic.MouseArea;
+import net.minecraft.client.gui.screen.Screen;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -84,8 +85,13 @@ public class Scrollable extends StatefulWidget {
                 new MouseArea(
                     widget -> widget
                         .scrollCallback((horizontal, vertical) -> {
-                            if (this.widget().horizontal) this.horizontalController.setOffset(this.horizontalController.offset() + horizontal * -5);
-                            if (this.widget().vertical) this.verticalController.setOffset(this.verticalController.offset() + vertical * -5);
+                            if (Screen.hasShiftDown()) {
+                                if (this.widget().horizontal) this.horizontalController.setOffset(this.horizontalController.offset() + vertical * -15);
+                            } else {
+                                if (this.widget().vertical) this.verticalController.setOffset(this.verticalController.offset() + vertical * -15);
+                            }
+
+                            if (this.widget().horizontal) this.horizontalController.setOffset(this.horizontalController.offset() + horizontal * -15);
                         }),
                     new ListenableBuilder(
                         this.listenable,

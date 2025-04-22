@@ -72,10 +72,17 @@ public class RawSlider extends StatelessWidget {
                                 () -> Insets.left(Math.floor((constraints.maxWidth() - this.handleSize) * normalizedValue)),
                                 () -> Insets.top(Math.floor((constraints.maxHeight() - this.handleSize) * normalizedValue))
                             ),
-                            new Sized(
-                                this.handleSize,
-                                constraints.maxOnAxis(this.axis.opposite()),
-                                this.handle
+                            this.axis.chooseCompute(
+                                () -> new Sized(
+                                    this.handleSize,
+                                    constraints.maxHeight(),
+                                    this.handle
+                                ),
+                                () -> new Sized(
+                                    constraints.maxWidth(),
+                                    this.handleSize,
+                                    this.handle
+                                )
                             )
                         )
                     )
