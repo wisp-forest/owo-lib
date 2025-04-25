@@ -67,7 +67,7 @@ public class RawXlyder extends StatelessWidget {
                         ),
                         new Padding(
                             Insets.left(Math.floor((constraints.maxWidth() - this.handleSize.width()) * normalizedX))
-                                .withTop(Math.floor((constraints.maxHeight() - this.handleSize.height()) * (normalizedY))),
+                                .withTop(Math.floor((constraints.maxHeight() - this.handleSize.height()) * (1 - normalizedY))),
                             new Sized(
                                 this.handleSize,
                                 this.handle
@@ -81,7 +81,7 @@ public class RawXlyder extends StatelessWidget {
 
     private void updateForMousePosition(Constraints constraints, double x, double y) {
         var normalizedX = MathHelper.clamp((x - (this.handleSize.width() / 2)) / (constraints.maxWidth() - this.handleSize.width()), 0, 1);
-        var normalizedY = MathHelper.clamp((y - (this.handleSize.height() / 2)) / (constraints.maxHeight() - this.handleSize.height()), 0, 1);
+        var normalizedY = MathHelper.clamp(1 - (y - (this.handleSize.height() / 2)) / (constraints.maxHeight() - this.handleSize.height()), 0, 1);
         this.onChanged.accept(
             this.discretize(this.minX + normalizedX * (this.maxX - this.minX), this.xStep),
             this.discretize(this.minY + normalizedY * (this.maxY - this.minY), this.yStep)
