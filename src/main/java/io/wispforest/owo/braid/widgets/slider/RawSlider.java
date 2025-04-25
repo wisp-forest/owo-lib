@@ -70,7 +70,7 @@ public class RawSlider extends StatelessWidget {
                         new Padding(
                             this.axis.chooseCompute(
                                 () -> Insets.left(Math.floor((constraints.maxWidth() - this.handleSize) * normalizedValue)),
-                                () -> Insets.top(Math.floor((constraints.maxHeight() - this.handleSize) * normalizedValue))
+                                () -> Insets.top(Math.floor((constraints.maxHeight() - this.handleSize) * (1 - normalizedValue)))
                             ),
                             this.axis.chooseCompute(
                                 () -> new Sized(
@@ -93,6 +93,8 @@ public class RawSlider extends StatelessWidget {
 
     private void updateForMousePosition(Constraints constraints, double x, double y) {
         var newNormalizedValue = MathHelper.clamp((this.axis.choose(x, y) - (this.handleSize / 2)) / (constraints.maxOnAxis(this.axis) - this.handleSize), 0, 1);
+        if (this.axis == LayoutAxis.VERTICAL) newNormalizedValue = 1 - newNormalizedValue;
+
         this.onChanged.accept(this.discretize(this.min + newNormalizedValue * (this.max - this.min)));
     }
 

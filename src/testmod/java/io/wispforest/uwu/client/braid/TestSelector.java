@@ -20,15 +20,13 @@ import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
 import io.wispforest.owo.braid.widgets.scroll.ScrollController;
 import io.wispforest.owo.braid.widgets.scroll.Scrollable;
-import io.wispforest.owo.braid.widgets.slider.MessageRangeSlider;
-import io.wispforest.owo.braid.widgets.slider.MessageSlider;
-import io.wispforest.owo.braid.widgets.slider.MessageXlyder;
-import io.wispforest.owo.braid.widgets.slider.Slider;
+import io.wispforest.owo.braid.widgets.slider.*;
 import io.wispforest.owo.braid.widgets.splitpane.SplitPane;
 import io.wispforest.owo.braid.widgets.textinput.TextBox;
 import io.wispforest.owo.braid.widgets.textinput.TextEditingController;
 import io.wispforest.owo.braid.widgets.window.Window;
 import io.wispforest.owo.braid.widgets.window.WindowController;
+import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.EntityComponent;
 import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
@@ -382,12 +380,15 @@ public class TestSelector extends StatefulWidget {
             private double xSkew = 0f;
             private double ySkew = 0f;
 
+            private boolean redundant = false;
+
             @Override
             public Widget build(BuildContext context) {
                 return new Stack(
                     new Transform(
                         new Matrix4f().m01((float) Math.tan(this.xSkew)).m10((float) Math.tan(this.ySkew)),
-                        new Column(
+                        !this.redundant
+                            ? new Column(
                             MainAxisAlignment.START,
                             CrossAxisAlignment.CENTER,
                             new Padding(Insets.all(10)),
@@ -431,6 +432,14 @@ public class TestSelector extends StatefulWidget {
                                 )
                             )
                         )
+                            : new IncrediblyRedundantSlider()
+                    ),
+                    new Align(
+                        Alignment.BOTTOM,
+                        new Button(
+                            Text.literal(this.redundant ? "no more redundancy" : "we love redundancy"),
+                            () -> this.setState(() -> this.redundant = !this.redundant)
+                        )
                     ),
                     new Align(
                         Alignment.BOTTOM_RIGHT,
@@ -440,7 +449,7 @@ public class TestSelector extends StatefulWidget {
                             new MessageXlyder(
                                 this.xSkew,
                                 this.ySkew,
-                                0, 0,
+                                -.75, -.75,
                                 .75, .75,
                                 null, null,
                                 (xValue, yValue) -> this.setState(() -> {
@@ -785,8 +794,8 @@ public class TestSelector extends StatefulWidget {
                                             this.verticalController,
                                             buildContext -> new Slider(
                                                 this.verticalController.offset(),
-                                                0,
                                                 this.verticalController.maxOffset(),
+                                                0,
                                                 null,
                                                 LayoutAxis.VERTICAL,
                                                 this.verticalController::setOffset
@@ -815,6 +824,137 @@ public class TestSelector extends StatefulWidget {
                                     new Padding(Insets.all(5))
                                 )
                             )
+                        )
+                    )
+                );
+            }
+        }
+    }
+
+    public static class IncrediblyRedundantSlider extends StatefulWidget {
+        @Override
+        public WidgetState<IncrediblyRedundantSlider> createState() {
+            return new State();
+        }
+
+        public static class State extends WidgetState<IncrediblyRedundantSlider> {
+
+            private double x, y;
+
+            @Override
+            public Widget build(BuildContext context) {
+                return new Column(
+                    MainAxisAlignment.START,
+                    CrossAxisAlignment.CENTER,
+                    new Padding(
+                        Insets.all(20),
+                        new Label(Text.literal("incredibly redundant slider™"))
+                    ),
+                    new Sized(
+                        100.0,
+                        15.0,
+                        new Slider(
+                            this.x,
+                            0, 1,
+                            null,
+                            LayoutAxis.HORIZONTAL,
+                            (x) -> this.setState(() -> this.x = x)
+                        )
+                    ),
+                    new Row(
+                        new Sized(
+                            15.0,
+                            100.0,
+                            new Slider(
+                                this.y,
+                                0, 1,
+                                null,
+                                LayoutAxis.VERTICAL,
+                                (y) -> this.setState(() -> this.y = y)
+                            )
+                        ),
+                        new Sized(
+                            100.0,
+                            100.0,
+                            new RawXlyder(
+                                this.x, this.y,
+                                0, 0, 1, 1,
+                                null, null,
+                                (x, y) -> this.setState(() -> {
+                                    this.x = x;
+                                    this.y = y;
+                                }),
+                                new Panel(ButtonComponent.DISABLED_TEXTURE),
+                                new DefaultSliderHandle(),
+                                Size.square((1 - this.y) * 16 + 8)
+                            )
+                        ),
+                        new Sized(
+                            15.0,
+                            100.0,
+                            new Slider(
+                                this.y,
+                                0, 1,
+                                null,
+                                LayoutAxis.VERTICAL,
+                                (y) -> this.setState(() -> this.y = y)
+                            )
+                        )
+                    ),
+                    new Sized(
+                        100.0,
+                        15.0,
+                        new RawSlider(
+                            this.x,
+                            0, 1,
+                            null,
+                            LayoutAxis.HORIZONTAL,
+                            (x) -> this.setState(() -> this.x = x),
+                            new Panel(ButtonComponent.DISABLED_TEXTURE),
+                            new DefaultSliderHandle(),
+                            24
+                        )
+                    ),
+                    new Sized(
+                        100.0,
+                        15.0,
+                        new RawSlider(
+                            this.x,
+                            0, 1,
+                            null,
+                            LayoutAxis.HORIZONTAL,
+                            (x) -> this.setState(() -> this.x = x),
+                            new Panel(ButtonComponent.DISABLED_TEXTURE),
+                            new DefaultSliderHandle(),
+                            18
+                        )
+                    ),
+                    new Sized(
+                        100.0,
+                        15.0,
+                        new RawSlider(
+                            this.x,
+                            0, 1,
+                            null,
+                            LayoutAxis.HORIZONTAL,
+                            (x) -> this.setState(() -> this.x = x),
+                            new Panel(ButtonComponent.DISABLED_TEXTURE),
+                            new DefaultSliderHandle(),
+                            12
+                        )
+                    ),
+                    new Sized(
+                        100.0,
+                        15.0,
+                        new RawSlider(
+                            this.x,
+                            0, 1,
+                            null,
+                            LayoutAxis.HORIZONTAL,
+                            (x) -> this.setState(() -> this.x = x),
+                            new Panel(ButtonComponent.DISABLED_TEXTURE),
+                            new DefaultSliderHandle(),
+                            6
                         )
                     )
                 );

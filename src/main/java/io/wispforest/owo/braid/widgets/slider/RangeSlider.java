@@ -4,11 +4,11 @@ import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.braid.widgets.basic.Box;
 import io.wispforest.owo.braid.widgets.basic.Panel;
 import io.wispforest.owo.ui.component.ButtonComponent;
+import io.wispforest.owo.ui.core.Color;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.function.DoubleConsumer;
 
 public class RangeSlider extends StatelessWidget {
 
@@ -54,7 +54,8 @@ public class RangeSlider extends StatelessWidget {
             this.onChanged,
             new Panel(ButtonComponent.DISABLED_TEXTURE),
             new DefaultSliderHandle(),
-            8
+            8,
+            new Box(Color.ofArgb(0x7f000000))
         );
     }
 }
