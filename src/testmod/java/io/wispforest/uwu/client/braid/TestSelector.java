@@ -20,8 +20,10 @@ import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
 import io.wispforest.owo.braid.widgets.scroll.ScrollController;
 import io.wispforest.owo.braid.widgets.scroll.Scrollable;
+import io.wispforest.owo.braid.widgets.slider.MessageRangeSlider;
 import io.wispforest.owo.braid.widgets.slider.MessageSlider;
 import io.wispforest.owo.braid.widgets.slider.MessageXlyder;
+import io.wispforest.owo.braid.widgets.slider.Slider;
 import io.wispforest.owo.braid.widgets.splitpane.SplitPane;
 import io.wispforest.owo.braid.widgets.textinput.TextBox;
 import io.wispforest.owo.braid.widgets.textinput.TextEditingController;
@@ -32,6 +34,8 @@ import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.owo.util.Wisdom;
+import io.wispforest.uwu.items.UwuItems;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
@@ -334,7 +338,7 @@ public class TestSelector extends StatefulWidget {
                         ),
                         new SplitPane(
                             new Box(
-                                Color.WHITE.interpolate(Color.ofArgb(0), .5f),
+                                Color.RED.interpolate(Color.ofArgb(0), .5f),
                                 new Label(Text.literal("more text here"))
                             ),
                             new Box(
