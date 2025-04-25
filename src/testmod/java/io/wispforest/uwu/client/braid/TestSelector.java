@@ -20,6 +20,7 @@ import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
 import io.wispforest.owo.braid.widgets.scroll.ScrollController;
 import io.wispforest.owo.braid.widgets.scroll.Scrollable;
+import io.wispforest.owo.braid.widgets.slider.MessageRangeSlider;
 import io.wispforest.owo.braid.widgets.slider.MessageSlider;
 import io.wispforest.owo.braid.widgets.slider.Slider;
 import io.wispforest.owo.braid.widgets.slider.MessageXlyder;
@@ -378,6 +379,16 @@ public class TestSelector extends StatefulWidget {
                     new CoolXlyder(2.0, 2.0, (x, y) -> Text.literal("x: " + formatDouble(x) + "\ny: " + formatDouble(y))),
                     new Padding(Insets.all(10)),
                     new CoolXlyder(null, null, (x, y) -> Text.literal("x: " + formatDouble(x) + "\ny: " + formatDouble(y)))
+                ),
+                new Padding(Insets.all(10)),
+                new Row(
+                    MainAxisAlignment.START,
+                    CrossAxisAlignment.CENTER,
+                    new Label(Text.literal("Range")),
+                    new Padding(Insets.all(10)),
+                    new CoolRangeSlider(2.0, (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max))),
+                    new Padding(Insets.all(10)),
+                    new CoolRangeSlider(null, (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max)))
                 )
             );
         }
@@ -465,6 +476,49 @@ public class TestSelector extends StatefulWidget {
                             this.y = newY;
                         }),
                         this.widget().textSupplier.getMessage(this.x, this.y)
+                    )
+                );
+            }
+        }
+    }
+
+    public static class CoolRangeSlider extends StatefulWidget {
+
+        public final @Nullable Double step;
+        public final MessageRangeSlider.RangeSliderMessageProvider textSupplier;
+
+        public CoolRangeSlider(@Nullable Double step, MessageRangeSlider.RangeSliderMessageProvider textSupplier) {
+            this.step = step;
+            this.textSupplier = textSupplier;
+        }
+
+        @Override
+        public WidgetState<CoolRangeSlider> createState() {
+            return new State();
+        }
+
+        public static class State extends WidgetState<CoolRangeSlider> {
+
+            private double minValue = 10;
+            private double maxValue = 20;
+
+            @Override
+            public Widget build(BuildContext context) {
+                return new Sized(
+                    100.0,
+                    20.0,
+                    new MessageRangeSlider(
+                        this.minValue,
+                        this.maxValue,
+                        0,
+                        32,
+                        this.widget().step,
+                        LayoutAxis.HORIZONTAL,
+                        (min, max) -> setState(() -> {
+                            this.minValue = min;
+                            this.maxValue = max;
+                        }),
+                        this.widget().textSupplier.getMessage(this.minValue, this.maxValue)
                     )
                 );
             }
