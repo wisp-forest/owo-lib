@@ -20,9 +20,7 @@ import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
 import io.wispforest.owo.braid.widgets.scroll.ScrollController;
 import io.wispforest.owo.braid.widgets.scroll.Scrollable;
-import io.wispforest.owo.braid.widgets.slider.MessageRangeSlider;
 import io.wispforest.owo.braid.widgets.slider.MessageSlider;
-import io.wispforest.owo.braid.widgets.slider.Slider;
 import io.wispforest.owo.braid.widgets.slider.MessageXlyder;
 import io.wispforest.owo.braid.widgets.splitpane.SplitPane;
 import io.wispforest.owo.braid.widgets.textinput.TextBox;
@@ -59,7 +57,7 @@ public class TestSelector extends StatefulWidget {
 
     public static class State extends WidgetState<TestSelector> {
 
-        private Tests test = Tests.TEXT_INPUT;
+        private Tests test = null;
         private Entity chyz;
 
         @Override
@@ -86,6 +84,7 @@ public class TestSelector extends StatefulWidget {
                         case TEXT_INPUT -> new TextInputTest();
                         case BURNING_CHYZ -> new BurningChyzTest(this.chyz);
                         case SCROLLING -> new ScrollTest();
+                        case null -> new Center(new Label(Text.literal("select a test")));
                     }
                 ),
                 new Align(
@@ -101,21 +100,17 @@ public class TestSelector extends StatefulWidget {
                                         65.0,
                                         null,
                                         new Column(
-                                            new Button(Text.literal("counter"), () -> setState(() -> this.test = Tests.COUNTER)),
                                             new Padding(Insets.all(2)),
-                                            new Button(Text.literal("flex"), () -> setState(() -> this.test = Tests.FLEX)),
-                                            new Padding(Insets.all(2)),
-                                            new Button(Text.literal("dragging"), () -> setState(() -> this.test = Tests.DRAGGING)),
-                                            new Padding(Insets.all(2)),
-                                            new Button(Text.literal("split pane"), () -> setState(() -> this.test = Tests.SPLIT_PANE)),
-                                            new Padding(Insets.all(2)),
-                                            new Button(Text.literal("slidey bois"), () -> setState(() -> this.test = Tests.SLIDERS)),
-                                            new Padding(Insets.all(2)),
-                                            new Button(Text.literal("text input"), () -> setState(() -> this.test = Tests.TEXT_INPUT)),
-                                            new Padding(Insets.all(2)),
-                                            new BurningChyzButton(this.chyz, () -> setState(() -> this.test = Tests.BURNING_CHYZ)),
-                                            new Padding(Insets.all(2)),
-                                            new Button(Text.literal("scrolling"), () -> setState(() -> this.test = Tests.SCROLLING))
+                                            Arrays.stream(Tests.values()).map(test -> {
+                                                if (test == Tests.BURNING_CHYZ) {
+                                                    return new BurningChyzButton(this.chyz, () -> setState(() -> this.test = Tests.BURNING_CHYZ));
+                                                } else {
+                                                    return new Button(
+                                                        Text.literal(test.name().toLowerCase(Locale.ROOT).replace('_', ' ')),
+                                                        test != this.test ? () -> setState(() -> this.test = test) : null
+                                                    );
+                                                }
+                                            }).toList()
                                         )
                                     )
                                 )
@@ -330,16 +325,40 @@ public class TestSelector extends StatefulWidget {
                 MainAxisAlignment.START,
                 CrossAxisAlignment.CENTER,
                 new Sized(
-                    100.0,
-                    50.0,
+                    250.0,
+                    200.0,
                     new SplitPane(
                         new Box(
-                            Color.BLACK.interpolate(Color.ofArgb(0), .5f),
+                            Color.GREEN.interpolate(Color.ofArgb(0), .5f),
                             new Label(Text.literal("text here"))
                         ),
-                        new Box(
-                            Color.BLACK.interpolate(Color.ofArgb(0), .5f),
-                            new Label(Text.literal("more text here"))
+                        new SplitPane(
+                            new Box(
+                                Color.WHITE.interpolate(Color.ofArgb(0), .5f),
+                                new Label(Text.literal("more text here"))
+                            ),
+                            new Box(
+                                Color.BLUE.interpolate(Color.ofArgb(0), .5f),
+                                new Row(
+                                    MainAxisAlignment.START,
+                                    CrossAxisAlignment.CENTER,
+                                    new Flexible(
+                                        new Center(
+                                            new Label(Text.literal("even more text here !!"))
+                                        )
+                                    ),
+                                    new Padding(
+                                        Insets.horizontal(10),
+                                        new Column(
+                                            MainAxisAlignment.SPACE_EVENLY,
+                                            CrossAxisAlignment.CENTER,
+                                            new ItemStackWidget(UwuItems.SCREEN_SHARD.getDefaultStack(), false),
+                                            new ItemStackWidget(UwuItems.BRAID.getDefaultStack(), false)
+                                        )
+                                    )
+                                )
+                            ),
+                            LayoutAxis.VERTICAL
                         ),
                         LayoutAxis.HORIZONTAL
                     )
@@ -348,49 +367,88 @@ public class TestSelector extends StatefulWidget {
         }
     }
 
-    public static class SliderTest extends StatelessWidget {
+    public static class SliderTest extends StatefulWidget {
         @Override
-        public Widget build(BuildContext context) {
-            return new Column(
-                MainAxisAlignment.START,
-                CrossAxisAlignment.CENTER,
-                new Row(
-                    MainAxisAlignment.START,
-                    CrossAxisAlignment.CENTER,
-                    new Label(Text.literal("Discrete")),
-                    new Padding(Insets.all(10)),
-                    new Label(Text.literal("Smooth"))
-                ),
-                new Row(
-                    MainAxisAlignment.START,
-                    CrossAxisAlignment.CENTER,
-                    new Label(Text.literal("Basic")),
-                    new Padding(Insets.all(10)),
-                    new CoolSlider(2.0, value -> Text.literal("v: " + formatDouble(value))),
-                    new Padding(Insets.all(10)),
-                    new CoolSlider(null, value -> Text.literal("v: " + formatDouble(value)))
-                ),
-                new Padding(Insets.all(10)),
-                new Row(
-                    MainAxisAlignment.START,
-                    CrossAxisAlignment.CENTER,
-                    new Label(Text.literal("XY")),
-                    new Padding(Insets.all(10)),
-                    new CoolXlyder(2.0, 2.0, (x, y) -> Text.literal("x: " + formatDouble(x) + "\ny: " + formatDouble(y))),
-                    new Padding(Insets.all(10)),
-                    new CoolXlyder(null, null, (x, y) -> Text.literal("x: " + formatDouble(x) + "\ny: " + formatDouble(y)))
-                ),
-                new Padding(Insets.all(10)),
-                new Row(
-                    MainAxisAlignment.START,
-                    CrossAxisAlignment.CENTER,
-                    new Label(Text.literal("Range")),
-                    new Padding(Insets.all(10)),
-                    new CoolRangeSlider(2.0, (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max))),
-                    new Padding(Insets.all(10)),
-                    new CoolRangeSlider(null, (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max)))
-                )
-            );
+        public WidgetState<SliderTest> createState() {
+            return new State();
+        }
+
+        public static class State extends WidgetState<SliderTest> {
+
+            private double xSkew = 0f;
+            private double ySkew = 0f;
+
+            @Override
+            public Widget build(BuildContext context) {
+                return new Stack(
+                    new Transform(
+                        new Matrix4f().m01((float) Math.tan(this.xSkew)).m10((float) Math.tan(this.ySkew)),
+                        new Column(
+                            MainAxisAlignment.START,
+                            CrossAxisAlignment.CENTER,
+                            new Padding(Insets.all(10)),
+                            List.of(
+                                new Row(
+                                    MainAxisAlignment.START,
+                                    CrossAxisAlignment.CENTER,
+                                    new Label(Text.literal("Discrete")),
+                                    new Padding(Insets.all(10)),
+                                    new Label(Text.literal("Smooth"))
+                                ),
+                                new Row(
+                                    MainAxisAlignment.START,
+                                    CrossAxisAlignment.CENTER,
+                                    new Padding(Insets.all(10)),
+                                    List.of(
+                                        new Label(Text.literal("Basic")),
+                                        new CoolSlider(2.0, value -> Text.literal("v: " + formatDouble(value))),
+                                        new CoolSlider(null, value -> Text.literal("v: " + formatDouble(value)))
+                                    )
+                                ),
+                                new Row(
+                                    MainAxisAlignment.START,
+                                    CrossAxisAlignment.CENTER,
+                                    new Padding(Insets.all(10)),
+                                    List.of(
+                                        new Label(Text.literal("XY")),
+                                        new CoolXlyder(2.0, 2.0, (x, y) -> Text.literal("x: " + formatDouble(x) + "\ny: " + formatDouble(y))),
+                                        new CoolXlyder(null, null, (x, y) -> Text.literal("x: " + formatDouble(x) + "\ny: " + formatDouble(y)))
+                                    )
+                                ),
+                                new Row(
+                                    MainAxisAlignment.START,
+                                    CrossAxisAlignment.CENTER,
+                                    new Padding(Insets.all(10)),
+                                    List.of(
+                                        new Label(Text.literal("Range")),
+                                        new CoolRangeSlider(2.0, (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max))),
+                                        new CoolRangeSlider(null, (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max)))
+                                    )
+                                )
+                            )
+                        )
+                    ),
+                    new Align(
+                        Alignment.BOTTOM_RIGHT,
+                        new Sized(
+                            75.0,
+                            75.0,
+                            new MessageXlyder(
+                                this.xSkew,
+                                this.ySkew,
+                                0, 0,
+                                .75, .75,
+                                null, null,
+                                (xValue, yValue) -> this.setState(() -> {
+                                    this.xSkew = xValue;
+                                    this.ySkew = yValue;
+                                }),
+                                Text.literal("x skew: " + (formatDouble(this.xSkew)) + "\ny skew: " + (formatDouble(this.ySkew)))
+                            )
+                        )
+                    )
+                );
+            }
         }
     }
 
@@ -665,6 +723,14 @@ public class TestSelector extends StatefulWidget {
 
             private final ScrollController horizontalController = new ScrollController();
             private final ScrollController verticalController = new ScrollController();
+            private final WindowController controller = new WindowController(Size.square(200));
+
+            @Override
+            public void init() {
+                super.init();
+                this.controller.x = (MinecraftClient.getInstance().getWindow().getScaledWidth() - 200) / 2d;
+                this.controller.y = (MinecraftClient.getInstance().getWindow().getScaledHeight() - 200) / 2d;
+            }
 
             @Override
             public Widget build(BuildContext context) {
@@ -682,61 +748,67 @@ public class TestSelector extends StatefulWidget {
                     }
                 );
 
-                return new Sized(
-                    210.0,
-                    210.0,
-                    new Column(
-                        new Flexible(
-                            new Row(
-                                new Flexible(
-                                    new Scrollable(
-                                        true,
-                                        true,
-                                        this.horizontalController,
-                                        this.verticalController,
-                                        new Sized(
-                                            500.0,
-                                            null,
-                                            new Label(
-                                                LabelStyle.SHADOW,
-                                                true,
-                                                text
+                return new DragArena(
+                    new Window(
+                        false,
+                        Text.literal("wisdom, but colored!"),
+                        null,
+                        this.controller,
+                        new Column(
+                            new Flexible(
+                                new Row(
+                                    new Flexible(
+                                        new Scrollable(
+                                            true,
+                                            true,
+                                            this.horizontalController,
+                                            this.verticalController,
+                                            new Sized(
+                                                500.0,
+                                                null,
+                                                new Label(
+                                                    LabelStyle.SHADOW,
+                                                    true,
+                                                    text
+                                                )
+                                            )
+                                        )
+                                    ),
+                                    new Sized(
+                                        10.0,
+                                        200.0,
+                                        new ListenableBuilder(
+                                            this.verticalController,
+                                            buildContext -> new Slider(
+                                                this.verticalController.offset(),
+                                                0,
+                                                this.verticalController.maxOffset(),
+                                                null,
+                                                LayoutAxis.VERTICAL,
+                                                this.verticalController::setOffset
                                             )
                                         )
                                     )
-                                ),
-                                new Sized(
-                                    10.0,
-                                    200.0,
-                                    new ListenableBuilder(
-                                        this.verticalController,
-                                        buildContext -> new Slider(
-                                            this.verticalController.offset(),
-                                            0,
-                                            this.verticalController.maxOffset(),
-                                            null,
-                                            LayoutAxis.VERTICAL,
-                                            this.verticalController::setOffset
-                                        )
-                                    )
                                 )
-                            )
-                        ),
-                        new Align(
-                            Alignment.LEFT,
+                            ),
                             new Sized(
-                                200.0,
+                                null,
                                 10.0,
-                                new ListenableBuilder(
-                                    this.horizontalController,
-                                    buildContext -> new Slider(
-                                        this.horizontalController.offset(),
-                                        0,
-                                        this.horizontalController.maxOffset(),
-                                        null,
-                                        LayoutAxis.HORIZONTAL,
-                                        this.horizontalController::setOffset
-                                    )
+                                new Row(
+                                    new Flexible(
+                                        new ListenableBuilder(
+                                            this.horizontalController,
+                                            buildContext -> new Slider(
+                                                this.horizontalController.offset(),
+                                                0,
+                                                this.horizontalController.maxOffset(),
+                                                null,
+                                                LayoutAxis.HORIZONTAL,
+                                                this.horizontalController::setOffset
+                                            )
+                                        )
+                                    ),
+                                    new Padding(Insets.all(5))
                                 )
                             )
                         )

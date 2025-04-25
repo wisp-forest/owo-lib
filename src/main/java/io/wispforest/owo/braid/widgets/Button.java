@@ -12,15 +12,18 @@ import io.wispforest.owo.braid.widgets.basic.Panel;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
 import io.wispforest.owo.ui.component.ButtonComponent;
+import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.util.UISounds;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+import org.jetbrains.annotations.Nullable;
 
 public class Button extends StatefulWidget {
 
     public final Text text;
-    public final Runnable onClick;
+    public final @Nullable Runnable onClick;
 
-    public Button(Text text, Runnable onClick) {
+    public Button(Text text, @Nullable Runnable onClick) {
         this.text = text;
         this.onClick = onClick;
     }
@@ -36,21 +39,29 @@ public class Button extends StatefulWidget {
 
         @Override
         public Widget build(BuildContext context) {
+            var active = this.widget().onClick != null;
+
             return new MouseArea(
                 widget -> widget
                     .clickCallback((x, y) -> {
+                        if (!active) return;
+
                         this.widget().onClick.run();
                         UISounds.playButtonSound();
                     })
                     .enterCallback(() -> this.setState(() -> this.hovered = true))
                     .exitCallback(() -> this.setState(() -> this.hovered = false))
-                    .cursorStyle(CursorStyle.HAND),
+                    .cursorStyle(active ? CursorStyle.HAND : null),
                 new Panel(
-                    this.hovered ? ButtonComponent.HOVERED_TEXTURE : ButtonComponent.ACTIVE_TEXTURE,
+                    active
+                        ? this.hovered ? ButtonComponent.HOVERED_TEXTURE : ButtonComponent.ACTIVE_TEXTURE
+                        : ButtonComponent.DISABLED_TEXTURE,
                     new Padding(
                         Insets.all(5),
                         new Label(
-                            new LabelStyle(null, null, null, true),
+                            active
+                                ? LabelStyle.SHADOW
+                                : new LabelStyle(null, Color.ofFormatting(Formatting.GRAY), null, false),
                             true,
                             this.widget().text
                         )

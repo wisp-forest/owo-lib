@@ -104,7 +104,7 @@ public class MouseArea extends SingleChildInstanceWidget {
         return this;
     }
 
-    public MouseArea cursorStyle(CursorStyle style) {
+    public MouseArea cursorStyle(@Nullable CursorStyle style) {
         return this.cursorStyleSupplier((x, y) -> style);
     }
 

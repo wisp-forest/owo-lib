@@ -18,12 +18,12 @@
     }
   ],
   "item.uwu.braid": [
-    {"text": "B", "color": "#FF0000"},
-    {"text": "r", "color": "#FF7F00"},
-    {"text": "a", "color": "#FFFF00"},
-    {"text": "i", "color": "#00FF00"},
-    {"text": "d", "color": "#00FFFF"},
-    {"text": " (I tried)", "color": "#FFFFFF"}
+    {"text": "b", "color": "#ff7166"},
+    {"text": "r", "color": "#ffb266"},
+    {"text": "a", "color": "#ceff66"},
+    {"text": "i", "color": "#90ff66"},
+    {"text": "d", "color": "#66d4ff"},
+    {"text": " (chyz tried)", "color": "#FFFFFF"}
   ],
   "item.uwu.counter": "Counter",
   "text.config.uwu.title": "Test Config Screen",

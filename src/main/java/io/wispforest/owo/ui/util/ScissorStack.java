@@ -46,7 +46,8 @@ public final class ScissorStack {
         final var newFrame = withGlTransform(x, y, width, height, matrices);
 
         if (STACK.isEmpty()) {
-            STACK.push(newFrame);
+            var window = MinecraftClient.getInstance().getWindow();
+            STACK.push(newFrame.intersection(PositionedRectangle.of(0, 0, window.getScaledWidth(), window.getScaledHeight())));
         } else {
             var top = STACK.peek();
             STACK.push(top.intersection(newFrame));
