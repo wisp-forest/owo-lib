@@ -60,7 +60,8 @@ public final class Wisdom {
             "BasiqueEvangelist: what if... iphones",
             "Cheese Cheese Creeper, the newest release from MC Basic",
             "THIS ROOM IS SO VANILLA IT HURTS",
-            "Owo.currentServer()"
+            "Owo.currentServer()",
+            "I'm gonna become a hydra, but not with the heads you'd think"
     );
 
     public static void spread() {
