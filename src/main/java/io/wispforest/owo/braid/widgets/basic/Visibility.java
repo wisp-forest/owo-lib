@@ -19,6 +19,14 @@ public class Visibility extends SingleChildInstanceWidget {
         this.reportSize = reportSize;
     }
 
+    public Visibility(boolean visible, Widget child) {
+        this(visible, false, child);
+    }
+
+    public Visibility(Widget child) {
+        this(false, false, child);
+    }
+
     @Override
     public SingleChildWidgetInstance<?> instantiate() {
         return new Instance(this);
