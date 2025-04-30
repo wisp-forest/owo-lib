@@ -87,8 +87,12 @@ public class RawScrollView extends SingleChildInstanceWidget {
             this.child.transform.setY(-this.verticalOffset);
 
             var selfSize = Size.of(
-                this.widget.horizontalController != null && constraints.hasBoundedWidth() ? constraints.maxWidth() : constraints.minWidth(),
-                this.widget.verticalController != null && constraints.hasBoundedHeight() ? constraints.maxHeight() : constraints.minHeight()
+                this.widget.horizontalController != null
+                    ? constraints.hasBoundedWidth() ? constraints.maxWidth() : constraints.minWidth()
+                    : childSize.width(),
+                this.widget.verticalController != null
+                    ? constraints.hasBoundedHeight() ? constraints.maxHeight()
+                    : constraints.minHeight() : childSize.height()
             ).constrained(constraints);
 
             this.transform.setSize(selfSize);
