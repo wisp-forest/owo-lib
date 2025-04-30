@@ -1,0 +1,100 @@
+{
+  "item.uwu.test_stick": [
+    "",
+    {
+      "text": "Palo",
+      "color": "green"
+    },
+    {
+      "text": " de prueba",
+      "color": "red"
+    }
+  ],
+  "uwu.a": {"index": 0, "color": "#ae0000"},
+  "item.uwu.screen_shard": [
+    {
+      "text": "Fragmento de pantalla",
+      "color": "#3AB0FF"
+    }
+  ],
+  "item.uwu.counter": "Contador",
+  "text.config.uwu.title": "Pantalla de configuración de prueba",
+  "key.uwu.hud_test": [
+    {
+      "text": "Mostrar/Ocultar HUD de prueba",
+      "color": "#0096FF"
+    }
+  ],
+  "text.ui.test_slider": "Valor: %s",
+  "text.config.uwu.section.top": "Texto de arriba",
+  "text.config.uwu.option.aValue": "Un valor",
+  "text.config.uwu.option.regex": "Con regex",
+  "text.config.uwu.option.regex.tooltip": "Tooltip con regex, esto es épico",
+  "text.config.uwu.category.nestingTime": "Hora de anidar",
+  "text.config.uwu.category.nestingTime.tooltip": "Sí, es hora de anidar",
+  "text.config.uwu.option.nestingTime.togglee": "Alternador",
+  "text.config.uwu.option.nestingTime.yesThisIsAlsoNested": "Sí, esto también está anidado",
+  "text.config.uwu.option.nestingTime.nestedIntegers": "Lista anidada de enteros",
+  "text.config.uwu.option.nestingTime.nestedIntegers.tooltip": [
+    "Un tooltip de enteros anidados muy épico",
+    {
+      "text": "\ncon varias líneas",
+      "color": "#ae0000"
+    }
+  ],
+  "text.config.uwu.category.nestingTime.nestingTimeIntensifies": "Hora de anidar intensificada",
+  "text.config.uwu.option.nestingTime.nestingTimeIntensifies.wowSoNested": "Alta anidación",
+  "text.config.uwu.option.someOption": "Hola, sí, esto es un tutorial de restricción con predicados",
+  "text.config.uwu.option.floting": "Flotante",
+  "text.config.uwu.option.floting.tooltip": "¿rompe botones?",
+  "text.config.uwu.section.bottom": "Texto de abajo",
+  "text.config.uwu.section.nesting_yo?": "Alta anidación, bro",
+  "text.config.uwu.option.thisIsAStringValue": "Claramente, esto es un valor de texto",
+  "text.config.uwu.option.thereAreStringsHere": "Hay textos acá",
+  "text.config.uwu.option.broTheresAnEnum": "Amigo, ¡hay un Enum!",
+  "text.config.uwu.option.broTheresAnEnum.tooltip": "Sí, una locura",
+  "text.config.uwu.option.anEpicColor": "Un color épico",
+  "text.config.uwu.option.anEpicColorWithAlpha": "Un color épico con alpha",
+  "text.config.uwu.enum.wowValues.first": "Primero",
+  "text.config.uwu.enum.wowValues.second": "Segundo",
+  "text.config.uwu.enum.wowValues.third": "Tercero",
+  "text.config.uwu.enum.wowValues.fourth": "Cuarto",
+  "text.config.uowou.option.thisIsNotSyncable": "Opción no sincronizable",
+  "item.uowou.owo_ingot": "Lingote oωo",
+  "itemGroup.food_and_drink.button.consume": "C o m e r",
+  "itemGroup.ingredients.tab.the_logs": "Los troncos",
+  "itemGroup.ingredients.tab.extra_ores": "Minerales extra",
+  "itemGroup.uwu.four_tab_group": "uωu",
+  "itemGroup.uwu.four_tab_group.tab.tab_1": "Pestaña 1",
+  "itemGroup.uwu.four_tab_group.tab.tab_2": "Pestaña 2",
+  "itemGroup.uwu.four_tab_group.tab.tab_3": "Pestaña 3",
+  "itemGroup.uwu.four_tab_group.tab.tab_4": "Pestaña 4",
+  "itemGroup.uwu.four_tab_group.tab.tab_5": "Pestaña 5",
+  "itemGroup.uwu.four_tab_group.button.github": "oωo GitHub",
+  "itemGroup.uwu.six_tab_group": "uωu",
+  "itemGroup.uwu.six_tab_group.tab.tab_1": "Pestaña 1",
+  "itemGroup.uwu.six_tab_group.tab.tab_2": "Pestaña 2",
+  "itemGroup.uwu.six_tab_group.tab.tab_3": "Pestaña 3",
+  "itemGroup.uwu.six_tab_group.tab.tab_4": "Pestaña 4",
+  "itemGroup.uwu.six_tab_group.tab.tab_5": "Pestaña 5",
+  "itemGroup.uwu.six_tab_group.tab.tab_6": "Pestaña 6",
+  "itemGroup.uwu.six_tab_group.button.owo": "ouωuo",
+  "itemGroup.uwu.single_tab_group": "uωu",
+  "itemGroup.uwu.single_tab_group.tab.tab_1": "uωu~",
+  "itemGroup.uwu.vanilla_group": "uωu (.❛ ᴗ ❛.)",
+  "itemGroup.uwu.vanilla_group.tab.tab_0": "(´• ω •`)",
+  "itemGroup.uwu.vanilla_group.tab.tab_1": "(o˘◡˘o)",
+
+  "menu.returnToGame": {
+    "text": "Volver al juego",
+    "color": "#FF5272"
+  },
+  "menu.returnToMenu": [
+    "",
+    {"text": "Guardar", "color": "#52BDFF"},
+    {"text": " y", "color": "#52FFAA"},
+    {"text": " salir", "color": "#FFEF52"},
+    {"text": " al", "color": "#FF9052"},
+    {"text": " menú", "color": "#FF5272"}
+  ]
+}
