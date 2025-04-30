@@ -15,8 +15,8 @@ public class DefaultLabelStyle extends InheritedWidget {
     }
 
     @Override
-    public boolean mustRebuildDependents(InheritedWidget oldWidget) {
-        return !this.style.equals(((DefaultLabelStyle) oldWidget).style);
+    public boolean mustRebuildDependents(InheritedWidget newWidget) {
+        return !this.style.equals(((DefaultLabelStyle) newWidget).style);
     }
 
     public static @Nullable LabelStyle maybeOf(BuildContext context) {
