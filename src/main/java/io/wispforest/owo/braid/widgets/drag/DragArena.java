@@ -9,7 +9,7 @@ import java.util.List;
 
 public class DragArena extends MultiChildInstanceWidget {
 
-    public DragArena(List<Widget> children) {
+    public DragArena(List<? extends Widget> children) {
         super(children);
     }
 

@@ -15,12 +15,12 @@ public class Stack extends MultiChildInstanceWidget {
 
     public final Alignment alignment;
 
-    public Stack(Alignment alignment, List<Widget> children) {
+    public Stack(Alignment alignment, List<? extends Widget> children) {
         super(children);
         this.alignment = alignment;
     }
 
-    public Stack( List<Widget> children) {
+    public Stack( List<? extends Widget> children) {
         this(Alignment.CENTER, children);
     }
 

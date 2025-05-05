@@ -996,15 +996,18 @@ public class TestSelector extends StatefulWidget {
                                     new MouseArea(
                                         area -> area.cursorStyle(CursorStyle.HAND)
                                             .clickCallback((x, y, button) -> this.setState(() -> this.addToList(getMouseButtonName(button).append(" pressed at ").append(formatCoordinates(x, y)))))
-                                            .releaseCallback((x, y, button) -> this.setState(() -> this.addToList(getMouseButtonName(button).append(" released at").append(formatCoordinates(x, y)))))
+                                            .releaseCallback((x, y, button) -> this.setState(() -> this.addToList(getMouseButtonName(button).append(" released at ").append(formatCoordinates(x, y)))))
                                             .dragStartCallback((button) -> this.setState(() -> this.addToList(getMouseButtonName(button).append(" drag started"))))
-                                            .dragEndCallback(() -> this.setState(() -> this.addToList(Text.literal("drag ended"))))
-                                            .enterCallback(() -> this.setState(() -> this.addToList(Text.literal("mouse entered"))))
-                                            .exitCallback(() -> this.setState(() -> this.addToList(Text.literal("mouse exited")))),
+                                            .dragEndCallback(() -> this.setState(() -> this.addToList(Text.literal("Drag ended"))))
+                                            .enterCallback(() -> this.setState(() -> this.addToList(Text.literal("Mouse entered"))))
+                                            .exitCallback(() -> this.setState(() -> this.addToList(Text.literal("Mouse exited")))),
                                         new Panel(
                                             OwoUIDrawContext.PANEL_INSET_NINE_PATCH_TEXTURE,
                                             new VerticallyScrollable(
-                                                controller, new Label(getLabel())
+                                                controller,
+                                                new Column(
+                                                    this.inputs.stream().map(Label::new).toList()
+                                                )
                                             )
                                         )
                                     )
@@ -1018,15 +1021,6 @@ public class TestSelector extends StatefulWidget {
             private void addToList(Text text) {
                 this.inputs.add(text);
                 this.controller.setOffset(this.controller.maxOffset());
-            }
-
-            private Text getLabel() {
-                var text = Text.empty();
-                for (var input : this.inputs) {
-                    text.append(input);
-                    if (input != this.inputs.getLast()) text.append("\n");
-                }
-                return text;
             }
 
             private MutableText getMouseButtonName(int button) {
