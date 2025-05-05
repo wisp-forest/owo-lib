@@ -20,6 +20,7 @@ import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
 import io.wispforest.owo.braid.widgets.scroll.ScrollController;
 import io.wispforest.owo.braid.widgets.scroll.Scrollable;
+import io.wispforest.owo.braid.widgets.scroll.VerticallyScrollable;
 import io.wispforest.owo.braid.widgets.slider.*;
 import io.wispforest.owo.braid.widgets.splitpane.SplitPane;
 import io.wispforest.owo.braid.widgets.textinput.TextBox;
@@ -33,9 +34,13 @@ import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.owo.util.Wisdom;
 import io.wispforest.uwu.items.UwuItems;
+import it.unimi.dsi.fastutil.booleans.BooleanIntImmutablePair;
+import it.unimi.dsi.fastutil.ints.IntBooleanImmutablePair;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.registry.Registries;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.Nullable;
@@ -49,7 +54,7 @@ import java.util.function.DoubleFunction;
 public class TestSelector extends StatefulWidget {
 
     public enum Tests {
-        COUNTER, FLEX, DRAGGING, SPLIT_PANE, SLIDERS, TEXT_INPUT, BURNING_CHYZ, SCROLLING
+        COUNTER, FLEX, DRAGGING, SPLIT_PANE, SLIDERS, TEXT_INPUT, BURNING_CHYZ, SCROLLING, INPUT
     }
 
     @Override
@@ -74,6 +79,8 @@ public class TestSelector extends StatefulWidget {
 
         @Override
         public Widget build(BuildContext context) {
+            //TODO read that vvvv
+            System.out.println("This is a reminder to decide how to handle mouse buttons in, buttons, sliders, text inputs, windows etc");
             return new Stack(
                 Alignment.CENTER,
                 new Center(
@@ -86,6 +93,7 @@ public class TestSelector extends StatefulWidget {
                         case TEXT_INPUT -> new TextInputTest();
                         case BURNING_CHYZ -> new BurningChyzTest(this.chyz);
                         case SCROLLING -> new ScrollTest();
+                        case INPUT -> new InputTest();
                         case null -> new Center(new Label(Text.literal("select a test")));
                     }
                 ),
@@ -657,7 +665,7 @@ public class TestSelector extends StatefulWidget {
         public Widget build(BuildContext context) {
             return new MouseArea(
                 widget -> widget
-                    .clickCallback((x, y) -> {
+                    .clickCallback((x, y, button) -> {
                         this.clickCallback.run();
                         UISounds.playButtonSound();
                     })
@@ -958,6 +966,75 @@ public class TestSelector extends StatefulWidget {
                         )
                     )
                 );
+            }
+        }
+    }
+
+    public static class InputTest extends StatefulWidget {
+        @Override
+        public WidgetState<InputTest> createState() {
+            return new State();
+        }
+
+        public static class State extends WidgetState<InputTest> {
+            private final List<Text> inputs = new ArrayList<>();
+            private final ScrollController controller = new ScrollController();
+
+            @Override
+            public Widget build(BuildContext context) {
+                return new Sized(
+                    250.0,
+                    null,
+                    new Panel(
+                        OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
+                        new Padding(
+                            Insets.all(8),
+                            new Column(
+                                new Label(Text.literal("Click V that V with various mouse buttons")),
+                                new Sized(
+                                    null, 200,
+                                    new MouseArea(
+                                        area -> area.cursorStyle(CursorStyle.HAND)
+                                            .clickCallback((x, y, button) -> this.setState(() -> this.addToList(getMouseButtonName(button).append(" pressed at ").append(formatCoordinates(x, y)))))
+                                            .releaseCallback((x, y, button) -> this.setState(() -> this.addToList(getMouseButtonName(button).append(" released at").append(formatCoordinates(x, y)))))
+                                            .dragStartCallback((button) -> this.setState(() -> this.addToList(getMouseButtonName(button).append(" drag started"))))
+                                            .dragEndCallback(() -> this.setState(() -> this.addToList(Text.literal("drag ended"))))
+                                            .enterCallback(() -> this.setState(() -> this.addToList(Text.literal("mouse entered"))))
+                                            .exitCallback(() -> this.setState(() -> this.addToList(Text.literal("mouse exited")))),
+                                        new Panel(
+                                            OwoUIDrawContext.PANEL_INSET_NINE_PATCH_TEXTURE,
+                                            new VerticallyScrollable(
+                                                controller, new Label(getLabel())
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                );
+            }
+
+            private void addToList(Text text) {
+                this.inputs.add(text);
+                this.controller.setOffset(this.controller.maxOffset());
+            }
+
+            private Text getLabel() {
+                var text = Text.empty();
+                for (var input : this.inputs) {
+                    text.append(input);
+                    if (input != this.inputs.getLast()) text.append("\n");
+                }
+                return text;
+            }
+
+            private MutableText getMouseButtonName(int button) {
+                return Text.empty().append(InputUtil.Type.MOUSE.createFromCode(button).getLocalizedText());
+            }
+
+            private Text formatCoordinates(double x, double y) {
+                return Text.literal("(x: " + formatDouble(x) + ", y: " + formatDouble(y) + ")");
             }
         }
     }

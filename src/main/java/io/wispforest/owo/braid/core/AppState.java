@@ -41,6 +41,7 @@ public class AppState implements InstanceHost, ProxyHost {
     private Set<MouseListener> hovered = new HashSet<>();
     private @Nullable MouseListener dragging = null;
     private @Nullable CursorStyle draggingCursorStyle = null;
+    private int draggingButton = -1;
     private boolean dragStarted = false;
 
     private List<KeyboardListener> focused = new ArrayList<>();
@@ -186,20 +187,21 @@ public class AppState implements InstanceHost, ProxyHost {
 
     // ---
 
-    public boolean dispatchMouseDownEvent(double x, double y) {
+    public boolean dispatchMouseDownEvent(double x, double y, int button) {
         var state = this.hitTest(x, y);
 
         var clicked = state.firstWhere(
-            (hit) -> hit.instance() instanceof MouseListener && ((MouseListener) hit.instance()).onMouseDown(hit.x(), hit.y())
+            (hit) -> hit.instance() instanceof MouseListener && ((MouseListener) hit.instance()).onMouseDown(hit.x(), hit.y(), button)
         );
 
-        if (clicked != null) {
+        if (clicked != null && this.dragging != null) {
             this.dragging = (MouseListener) clicked.instance();
             this.draggingCursorStyle = ((MouseListener) clicked.instance()).cursorStyleAt(
                 clicked.x(),
                 clicked.y()
             );
             this.dragStarted = false;
+            this.draggingButton = button;
         }
 
         var nowFocused = new ArrayList<KeyboardListener>();
@@ -226,7 +228,7 @@ public class AppState implements InstanceHost, ProxyHost {
         if (!(this.dragging instanceof WidgetInstance<?>)) return false;
 
         if (!this.dragStarted) {
-            this.dragging.onMouseDragStart();
+            this.dragging.onMouseDragStart(draggingButton);
             this.dragStarted = true;
         }
 
@@ -243,10 +245,15 @@ public class AppState implements InstanceHost, ProxyHost {
         return true;
     }
 
-    public boolean dispatchMouseUpEvent() {
-        var consumed = false;
+    public boolean dispatchMouseUpEvent(double x, double y, int button) {
+        var state = this.hitTest(x, y);
 
-        if (this.dragStarted && this.dragging != null) {
+        var unClicked = state.firstWhere(
+            (hit) -> hit.instance() instanceof MouseListener && ((MouseListener) hit.instance()).onMouseUp(hit.x(), hit.y(), button)
+        );
+        var consumed = unClicked != null;
+
+        if (this.dragStarted && this.dragging != null && this.draggingButton == button) {
             this.dragging.onMouseDragEnd();
             consumed = true;
         }

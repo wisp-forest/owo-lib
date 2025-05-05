@@ -55,7 +55,8 @@ public class RawXlyder extends StatelessWidget {
             return new Center(
                 new MouseArea(
                     widget -> widget
-                        .clickCallback((x, y) -> this.updateForMousePosition(constraints, x, y))
+                        //TODO: decide what to do with buttons here
+                        .clickCallback((x, y, button) -> this.updateForMousePosition(constraints, x, y))
                         .dragCallback((x, y, dx, dy) -> this.updateForMousePosition(constraints, x, y))
                         .cursorStyle(CursorStyle.HAND),
                     new Stack(

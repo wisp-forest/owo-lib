@@ -43,8 +43,9 @@ public class Button extends StatefulWidget {
 
             return new MouseArea(
                 widget -> widget
-                    .clickCallback((x, y) -> {
+                    .clickCallback((x, y, button) -> {
                         if (!active) return;
+                        if (button != 0) return;
 
                         this.widget().onClick.run();
                         UISounds.playButtonSound();
