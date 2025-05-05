@@ -42,6 +42,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
@@ -977,7 +978,11 @@ public class TestSelector extends StatefulWidget {
         }
 
         public static class State extends WidgetState<InputTest> {
-            private final List<Text> inputs = new ArrayList<>();
+            private final List<Text> inputs = Util.make(() -> {
+                var list = new ArrayList<Text>();
+                list.add(Text.literal("Help idk how to make this scroll to the bottom when i add shit"));
+                return list;
+            });
             private final ScrollController controller = new ScrollController();
 
             @Override
@@ -990,23 +995,33 @@ public class TestSelector extends StatefulWidget {
                         new Padding(
                             Insets.all(8),
                             new Column(
-                                new Label(Text.literal("Click V that V with various mouse buttons")),
+                                new Label(Text.literal("Interact with V this V")),
                                 new Sized(
                                     null, 200,
                                     new MouseArea(
                                         area -> area.cursorStyle(CursorStyle.HAND)
-                                            .clickCallback((x, y, button) -> this.setState(() -> this.addToList(getMouseButtonName(button).append(" pressed at ").append(formatCoordinates(x, y)))))
-                                            .releaseCallback((x, y, button) -> this.setState(() -> this.addToList(getMouseButtonName(button).append(" released at ").append(formatCoordinates(x, y)))))
-                                            .dragStartCallback((button) -> this.setState(() -> this.addToList(getMouseButtonName(button).append(" drag started"))))
-                                            .dragEndCallback(() -> this.setState(() -> this.addToList(Text.literal("Drag ended"))))
-                                            .enterCallback(() -> this.setState(() -> this.addToList(Text.literal("Mouse entered"))))
-                                            .exitCallback(() -> this.setState(() -> this.addToList(Text.literal("Mouse exited")))),
-                                        new Panel(
-                                            OwoUIDrawContext.PANEL_INSET_NINE_PATCH_TEXTURE,
-                                            new VerticallyScrollable(
-                                                controller,
-                                                new Column(
-                                                    this.inputs.stream().map(Label::new).toList()
+                                            .clickCallback((x, y, button) -> this.addToList(getMouseButtonName(button).append(" pressed at:\n").append(formatCoordinates(x, y))))
+                                            .releaseCallback((x, y, button) -> this.addToList(getMouseButtonName(button).append(" released at:\n").append(formatCoordinates(x, y))))
+                                            .dragStartCallback((button) -> this.addToList(getMouseButtonName(button).append(" drag started")))
+                                            .dragEndCallback(() -> this.addToList(Text.literal("Drag ended")))
+                                            .enterCallback(() -> this.addToList(Text.literal("Mouse entered")))
+                                            .exitCallback(() -> this.addToList(Text.literal("Mouse exited"))),
+                                        new KeyboardInput(
+                                            input ->
+                                                input.keyDownCallback((key, modifiers) -> this.addToList(getKeyName(key).append(" pressed")))
+                                                    .keyUpCallback((key, modifiers) -> this.addToList(getKeyName(key).append(" released")))
+                                                    .focusGainedCallback(() -> this.addToList(Text.literal("Focus gained")))
+                                                    .focusLostCallback(() -> this.addToList(Text.literal("Focus lost")))
+                                                    .charCallback((charCode, modifiers) -> this.addToList(Text.literal("Character typed: \"" + charCode + "\"")))
+                                            ,
+                                            new Panel(
+                                                OwoUIDrawContext.PANEL_INSET_NINE_PATCH_TEXTURE,
+                                                new VerticallyScrollable(
+                                                    controller,
+                                                    new Column(
+                                                        new Padding(Insets.vertical(2)),
+                                                        this.inputs.stream().map(Label::new).toList()
+                                                    )
                                                 )
                                             )
                                         )
@@ -1019,8 +1034,14 @@ public class TestSelector extends StatefulWidget {
             }
 
             private void addToList(Text text) {
-                this.inputs.add(text);
-                this.controller.setOffset(this.controller.maxOffset());
+                this.setState(() -> {
+                    this.inputs.add(text);
+                    this.controller.setOffset(this.controller.maxOffset());
+                });
+            }
+
+            private MutableText getKeyName(int key) {
+                return Text.empty().append(InputUtil.Type.KEYSYM.createFromCode(key).getLocalizedText());
             }
 
             private MutableText getMouseButtonName(int button) {
@@ -1028,7 +1049,7 @@ public class TestSelector extends StatefulWidget {
             }
 
             private Text formatCoordinates(double x, double y) {
-                return Text.literal("(x: " + formatDouble(x) + ", y: " + formatDouble(y) + ")");
+                return Text.literal("[x: " + formatDouble(x) + ", y: " + formatDouble(y) + "]");
             }
         }
     }
