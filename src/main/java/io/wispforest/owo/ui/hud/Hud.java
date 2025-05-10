@@ -114,9 +114,8 @@ public class Hud {
             if (adapter == null || suppress || MinecraftClient.getInstance().options.hudHidden) return;
 
             context.push().translate(0, 0, 100);
-            adapter.render(context, -69, -69, tickDelta.getTickDelta(false));
+            adapter.render(context, -69, -69, tickDelta.getTickProgress(false));
             context.pop();
         });
     }
-
 }

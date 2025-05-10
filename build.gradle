@@ -1,6 +1,6 @@
 //file:noinspection GradlePackageVersionRange
 plugins {
-    id "dev.architectury.loom" version "1.9-SNAPSHOT"
+    id "dev.architectury.loom" version "1.10-SNAPSHOT"
     id 'maven-publish'
 }
 
@@ -153,8 +153,12 @@ dependencies {
     //modImplementation("org.sinytra.forgified-fabric-api:forgified-fabric-api:${project.fabric_version}")
 
     //modLocalRuntime("me.shedaniel:RoughlyEnoughItems-neoforge:${project.rei_version}")
-    modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin:${project.rei_version}")
-    modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-neoforge:${project.rei_version}")
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin:${project.rei_version}") {
+        exclude "group": "net.fabricmc.fabric-api"
+    }
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-neoforge:${project.rei_version}") {
+        exclude "group": "net.fabricmc.fabric-api"
+    }
 
     modCompileOnly("dev.emi:emi-neoforge:${project.emi_version}")
 

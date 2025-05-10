@@ -62,7 +62,7 @@ public final class OfflineDataLookup {
             Path savedPlayersPath = Owo.currentServer().getSavePath(WorldSavePath.PLAYERDATA);
             Path savedDataPath = savedPlayersPath.resolve(player.toString() + ".dat");
             NbtCompound rawNbt = NbtIo.readCompressed(savedDataPath, NbtSizeTracker.ofUnlimitedBytes());
-            int dataVersion = rawNbt.contains("DataVersion", 3) ? rawNbt.getInt("DataVersion") : -1;
+            int dataVersion = rawNbt.getInt("DataVersion", -1);
             return DataFixTypes.PLAYER.update(Schemas.getFixer(), rawNbt, dataVersion);
         } catch (IOException e) {
             Owo.LOGGER.error("Couldn't get player data for offline player {}", player, e);

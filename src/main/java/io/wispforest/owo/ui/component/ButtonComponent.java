@@ -103,8 +103,6 @@ public class ButtonComponent extends ButtonWidget {
     @FunctionalInterface
     public interface Renderer {
         Renderer VANILLA = (matrices, button, delta) -> {
-            RenderSystem.enableDepthTest();
-
             var texture = button.active
                     ? button.hovered ? HOVERED_TEXTURE : ACTIVE_TEXTURE
                     : DISABLED_TEXTURE;
@@ -113,8 +111,6 @@ public class ButtonComponent extends ButtonWidget {
 
         static Renderer flat(int color, int hoveredColor, int disabledColor) {
             return (context, button, delta) -> {
-                RenderSystem.enableDepthTest();
-
                 if (button.active) {
                     if (button.hovered) {
                         context.fill(button.getX(), button.getY(), button.getX() + button.width, button.getY() + button.height, hoveredColor);
@@ -136,7 +132,6 @@ public class ButtonComponent extends ButtonWidget {
                     renderV += button.height;
                 }
 
-                RenderSystem.enableDepthTest();
                 context.drawTexture(RenderLayer::getGuiTextured, texture, button.getX(), button.getY(), u, renderV, button.width, button.height, textureWidth, textureHeight);
             };
         }

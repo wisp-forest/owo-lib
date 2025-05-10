@@ -58,7 +58,7 @@ public class BlockComponent extends BaseComponent {
         if (this.entity != null) {
             var медведь = this.client.getBlockEntityRenderDispatcher().get(this.entity);
             if (медведь != null) {
-                медведь.render(entity, partialTicks, context.getMatrices(), vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV);
+                медведь.render(entity, partialTicks, context.getMatrices(), vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, this.client.gameRenderer.getCamera().getPos());
             }
         }
 

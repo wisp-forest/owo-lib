@@ -1,6 +1,5 @@
 package io.wispforest.owo.ui.util;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.PositionedRectangle;
@@ -28,11 +27,11 @@ public final class ScissorStack {
         var scale = window.getScaleFactor();
 
         push(
-                (int) (x / scale),
-                (int) (window.getScaledHeight() - (y / scale) - height / scale),
-                (int) (width / scale),
-                (int) (height / scale),
-                (MatrixStack) null
+            (int) (x / scale),
+            (int) (window.getScaledHeight() - (y / scale) - height / scale),
+            (int) (width / scale),
+            (int) (height / scale),
+            (MatrixStack) null
         );
     }
 
@@ -55,7 +54,17 @@ public final class ScissorStack {
         applyState();
     }
 
+    /// @deprecated Use [#pop(DrawContext)] instead to prevent leftover
+    /// geometry from spilling outside the current scissor state
     public static void pop() {
+        pop(null);
+    }
+
+    public static void pop(@Nullable DrawContext context) {
+        if (context != null) {
+            context.draw();
+        }
+
         if (STACK.isEmpty()) {
             throw new IllegalStateException("Cannot pop frame from empty scissor stack");
         }
@@ -66,8 +75,7 @@ public final class ScissorStack {
 
     private static void applyState() {
         if (STACK.isEmpty()) {
-            var window = MinecraftClient.getInstance().getWindow();
-            GL11.glScissor(0, 0, window.getFramebufferWidth(), window.getFramebufferHeight());
+            RenderSystem.disableScissor();
             return;
         }
 
@@ -77,20 +85,20 @@ public final class ScissorStack {
         var window = MinecraftClient.getInstance().getWindow();
         var scale = window.getScaleFactor();
 
-        GL11.glScissor(
-                Math.max(0, (int) (newFrame.x() * scale)),
-                Math.max((int) (window.getFramebufferHeight() - (newFrame.y() * scale) - newFrame.height() * scale), 0),
-                Math.min(MathHelper.clamp((int) (newFrame.width() * scale), 0, window.getFramebufferWidth()), window.getFramebufferWidth()),
-                Math.min(MathHelper.clamp((int) (newFrame.height() * scale), 0, window.getFramebufferHeight()), window.getFramebufferHeight())
+        RenderSystem.enableScissor(
+            Math.max(0, (int) (newFrame.x() * scale)),
+            Math.max((int) (window.getFramebufferHeight() - (newFrame.y() * scale) - newFrame.height() * scale), 0),
+            Math.min(MathHelper.clamp((int) (newFrame.width() * scale), 0, window.getFramebufferWidth()), window.getFramebufferWidth()),
+            Math.min(MathHelper.clamp((int) (newFrame.height() * scale), 0, window.getFramebufferHeight()), window.getFramebufferHeight())
         );
     }
 
     public static void drawUnclipped(Runnable action) {
         boolean scissorEnabled = GL11.glIsEnabled(GL11.GL_SCISSOR_TEST);
 
-        if (scissorEnabled) GlStateManager._disableScissorTest();
+        if (scissorEnabled) RenderSystem.disableScissor();
         action.run();
-        if (scissorEnabled) GlStateManager._enableScissorTest();
+        if (scissorEnabled) applyState();
     }
 
     public static void popFramesAndDraw(int maxPopFrames, Runnable action) {
@@ -112,9 +120,9 @@ public final class ScissorStack {
         if (top == null) return true;
 
         return top.intersects(
-                withGlTransform(
-                        x, y, 0, 0, matrices
-                )
+            withGlTransform(
+                x, y, 0, 0, matrices
+            )
         );
     }
 
@@ -124,13 +132,13 @@ public final class ScissorStack {
 
         var margins = component.margins().get();
         return top.intersects(
-                withGlTransform(
-                        component.x() - margins.left(),
-                        component.y() - margins.top(),
-                        component.width() + margins.right(),
-                        component.height() + margins.bottom(),
-                        matrices
-                )
+            withGlTransform(
+                component.x() - margins.left(),
+                component.y() - margins.top(),
+                component.width() + margins.right(),
+                component.height() + margins.bottom(),
+                matrices
+            )
         );
     }
 

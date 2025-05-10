@@ -7,16 +7,10 @@ import io.wispforest.owo.config.OwoConfigCommand;
 import io.wispforest.owo.config.ui.ConfigScreenProviders;
 import io.wispforest.owo.itemgroup.json.OwoItemGroupLoader;
 import io.wispforest.owo.moddata.ModDataLoader;
-import io.wispforest.owo.shader.BlurProgram;
-import io.wispforest.owo.shader.GlProgram;
+import io.wispforest.owo.ui.core.OwoUIPipelines;
 import io.wispforest.owo.ui.parsing.UIModelLoader;
 import io.wispforest.owo.ui.util.NinePatchTexture;
-import net.minecraft.client.render.VertexFormats;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.resource.SinglePreparationResourceReloader;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
-import net.minecraft.util.profiler.Profiler;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.IEventBus;
@@ -35,27 +29,24 @@ import org.jetbrains.annotations.ApiStatus;
 public class OwoClient {
 
     private static final String LINUX_RENDERDOC_WARNING = """
-
-            ========================================
-            Ignored 'owo.renderdocPath' property as this Minecraft instance is not running on Windows.
-            Please populate the LD_PRELOAD environment variable instead
-            ========================================""";
+        
+        ========================================
+        Ignored 'owo.renderdocPath' property as this Minecraft instance is not running on Windows.
+        Please populate the LD_PRELOAD environment variable instead
+        ========================================""";
 
     private static final String MAC_RENDERDOC_WARNING = """
-
-            ========================================
-            Ignored 'owo.renderdocPath' property as this Minecraft instance is not running on Windows.
-            RenderDoc is not supported on macOS
-            ========================================""";
+        
+        ========================================
+        Ignored 'owo.renderdocPath' property as this Minecraft instance is not running on Windows.
+        RenderDoc is not supported on macOS
+        ========================================""";
 
     private static final String GENERIC_RENDERDOC_WARNING = """
-
-            ========================================
-            Ignored 'owo.renderdocPath' property as this Minecraft instance is not running on Windows.
-            ========================================""";
-
-    public static final GlProgram HSV_PROGRAM = new GlProgram(Identifier.of("owo", "spectrum"), VertexFormats.POSITION_COLOR);
-    public static final BlurProgram BLUR_PROGRAM = new BlurProgram();
+        
+        ========================================
+        Ignored 'owo.renderdocPath' property as this Minecraft instance is not running on Windows.
+        ========================================""";
 
     public OwoClient(IEventBus modBus) {
         ModDataLoader.load(OwoItemGroupLoader.INSTANCE);
@@ -64,11 +55,9 @@ public class OwoClient {
         modBus.addListener((AddClientReloadListenersEvent event) -> {
             event.addListener(UIModelLoader.getFabricId(), new UIModelLoader());
             event.addListener(NinePatchTexture.MetadataLoader.getFabricId(), new NinePatchTexture.MetadataLoader());
-            event.addListener(Identifier.of("owo", "after_shader_load"), new SinglePreparationResourceReloader<Void>() {
-                @Override protected Void prepare(ResourceManager manager, Profiler profiler) { return null; }
-                @Override protected void apply(Void prepared, ResourceManager manager, Profiler profiler) { GlProgram.loadAndSetupPrograms(); }
-            });
         });
+
+        OwoUIPipelines.register();
 
         if (Owo.DEBUG) {
             final var renderdocPath = System.getProperty("owo.renderdocPath");

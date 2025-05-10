@@ -103,10 +103,7 @@ public abstract class CreativeInventoryScreenMixin extends HandledScreen<Creativ
     private void renderOwoIcon(DrawContext context, ItemGroup group, CallbackInfo ci, boolean bl, boolean bl2, int i, int j, int k) {
         if (!(group instanceof OwoItemGroup owoGroup)) return;
 
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
         owoGroup.icon().render(context, j, k, 0, 0, 0);
-        RenderSystem.disableBlend();
     }
 
     // -------------

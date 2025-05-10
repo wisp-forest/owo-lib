@@ -360,7 +360,7 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
         }
 
         if (!this.allowOverflow) {
-            ScissorStack.pop();
+            ScissorStack.pop(context);
         }
     }
 

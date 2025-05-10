@@ -180,7 +180,7 @@ public class NbtSerializer extends RecursiveSerializer<NbtElement> implements Se
                 if (mayOmit && NbtSerializer.this.encodedOptionals.contains(new IdentityHolder<>(element))) {
                     var nbtCompound = (NbtCompound) element;
 
-                    if(!nbtCompound.getBoolean("present")) return;
+                    if(!nbtCompound.getBoolean("present", false)) return;
 
                     element = nbtCompound.get("value");
                 }

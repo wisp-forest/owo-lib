@@ -95,6 +95,15 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
     }
 
     /**
+     * Draw the tooltip of this screen's component tree, invoked
+     * by {@link ScreenEvents#afterRender(Screen)} so that tooltips are
+     * properly rendered above content
+     */
+    protected void drawComponentTooltip(DrawContext drawContext, int mouseX, int mouseY, float tickDelta) {
+        if (this.uiAdapter != null) this.uiAdapter.drawTooltip(drawContext, mouseX, mouseY, tickDelta);
+    }
+
+    /**
      * Disable the slot at the given index. Note
      * that this is hard override and the slot cannot
      * re-enable itself

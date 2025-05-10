@@ -49,7 +49,7 @@ public class OwoDebugCommands {
     private static EnumArgumentType<Level> LEVEL_ARGUMENT_TYPE;
 
     private static final SuggestionProvider<ServerCommandSource> POI_TYPES =
-            (context, builder) -> CommandSource.suggestIdentifiers(Registries.POINT_OF_INTEREST_TYPE.getIds(), builder);
+        (context, builder) -> CommandSource.suggestIdentifiers(Registries.POINT_OF_INTEREST_TYPE.getIds(), builder);
 
     private static final SimpleCommandExceptionType NO_POI_TYPE = new SimpleCommandExceptionType(Text.of("Invalid POI type"));
     public static final int GENERAL_PURPLE = 0xB983FF;
@@ -76,35 +76,35 @@ public class OwoDebugCommands {
             })));
 
             dispatcher.register(literal("query-poi").then(argument("poi_type", IdentifierArgumentType.identifier()).suggests(POI_TYPES)
-                    .then(argument("radius", IntegerArgumentType.integer()).executes(context -> {
-                        var player = context.getSource().getPlayer();
-                        var poiType = Registries.POINT_OF_INTEREST_TYPE.getOptionalValue(IdentifierArgumentType.getIdentifier(context, "poi_type"))
-                                .orElseThrow(NO_POI_TYPE::create);
+                .then(argument("radius", IntegerArgumentType.integer()).executes(context -> {
+                    var player = context.getSource().getPlayer();
+                    var poiType = Registries.POINT_OF_INTEREST_TYPE.getOptionalValue(IdentifierArgumentType.getIdentifier(context, "poi_type"))
+                        .orElseThrow(NO_POI_TYPE::create);
 
-                        var entries = ((ServerWorld) player.getWorld()).getPointOfInterestStorage().getInCircle(type -> type.value() == poiType,
-                                player.getBlockPos(), IntegerArgumentType.getInteger(context, "radius"), PointOfInterestStorage.OccupationStatus.ANY).toList();
+                    var entries = ((ServerWorld) player.getWorld()).getPointOfInterestStorage().getInCircle(type -> type.value() == poiType,
+                        player.getBlockPos(), IntegerArgumentType.getInteger(context, "radius"), PointOfInterestStorage.OccupationStatus.ANY).toList();
 
-                        player.sendMessage(TextOps.concat(Owo.PREFIX, TextOps.withColor("Found §" + entries.size() + " §entr" + (entries.size() == 1 ? "y" : "ies"),
-                                TextOps.color(Formatting.GRAY), GENERAL_PURPLE, TextOps.color(Formatting.GRAY))), false);
+                    player.sendMessage(TextOps.concat(Owo.PREFIX, TextOps.withColor("Found §" + entries.size() + " §entr" + (entries.size() == 1 ? "y" : "ies"),
+                        TextOps.color(Formatting.GRAY), GENERAL_PURPLE, TextOps.color(Formatting.GRAY))), false);
 
-                        for (var entry : entries) {
+                    for (var entry : entries) {
 
-                            final var entryPos = entry.getPos();
-                            final var blockId = Registries.BLOCK.getId(player.getWorld().getBlockState(entryPos).getBlock()).toString();
-                            final var posString = "(" + entryPos.getX() + " " + entryPos.getY() + " " + entryPos.getZ() + ")";
+                        final var entryPos = entry.getPos();
+                        final var blockId = Registries.BLOCK.getId(player.getWorld().getBlockState(entryPos).getBlock()).toString();
+                        final var posString = "(" + entryPos.getX() + " " + entryPos.getY() + " " + entryPos.getZ() + ")";
 
-                            final var message = TextOps.withColor("-> §" + blockId + " §" + posString,
-                                    TextOps.color(Formatting.GRAY), KEY_BLUE, VALUE_BLUE);
+                        final var message = TextOps.withColor("-> §" + blockId + " §" + posString,
+                            TextOps.color(Formatting.GRAY), KEY_BLUE, VALUE_BLUE);
 
-                            message.styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND,
-                                            "/tp " + entryPos.getX() + " " + entryPos.getY() + " " + entryPos.getZ()))
-                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("Click to teleport"))));
+                        message.styled(style -> style.withClickEvent(new ClickEvent.SuggestCommand(
+                                "/tp " + entryPos.getX() + " " + entryPos.getY() + " " + entryPos.getZ()))
+                            .withHoverEvent(new HoverEvent.ShowText(Text.of("Click to teleport"))));
 
-                            player.sendMessage(message, false);
-                        }
+                        player.sendMessage(message, false);
+                    }
 
-                        return entries.size();
-                    }))));
+                    return entries.size();
+                }))));
 
             dispatcher.register(literal("dumpfield").then(argument("field_name", StringArgumentType.string()).executes(context -> {
                 final var targetField = StringArgumentType.getString(context, "field_name");
@@ -156,7 +156,7 @@ public class OwoDebugCommands {
     public static class Client {
 
         private static final SuggestionProvider<ServerCommandSource> LOADED_UI_MODELS =
-                (context, builder) -> CommandSource.suggestIdentifiers(UIModelLoader.allLoadedModels(), builder);
+            (context, builder) -> CommandSource.suggestIdentifiers(UIModelLoader.allLoadedModels(), builder);
 
         private static final SimpleCommandExceptionType NO_SUCH_UI_MODEL = new SimpleCommandExceptionType(Text.literal("No such UI model is loaded"));
 
@@ -166,19 +166,19 @@ public class OwoDebugCommands {
                 var registryAccess = event.getBuildContext();
 
                 dispatcher.register(literal("owo-hud-inspect")
-                        .executes(context -> {
-                            MinecraftClient.getInstance().setScreen(new HudInspectorScreen());
-                            return 0;
-                        }));
+                    .executes(context -> {
+                        MinecraftClient.getInstance().setScreen(new HudInspectorScreen());
+                        return 0;
+                    }));
 
                 dispatcher.register(literal("owo-ui-set-reload-path")
-                        .then(argument("model-id", IdentifierArgumentType.identifier()).suggests(LOADED_UI_MODELS).executes(context -> {
-                            var modelId = context.getArgument("model-id", Identifier.class);
-                            if (UIModelLoader.getPreloaded(modelId) == null) throw NO_SUCH_UI_MODEL.create();
+                    .then(argument("model-id", IdentifierArgumentType.identifier()).suggests(LOADED_UI_MODELS).executes(context -> {
+                        var modelId = context.getArgument("model-id", Identifier.class);
+                        if (UIModelLoader.getPreloaded(modelId) == null) throw NO_SUCH_UI_MODEL.create();
 
-                            MinecraftClient.getInstance().setScreen(new ConfigureHotReloadScreen(modelId, null));
-                            return 0;
-                        })));
+                        MinecraftClient.getInstance().setScreen(new ConfigureHotReloadScreen(modelId, null));
+                        return 0;
+                    })));
 
                 if (RenderDoc.isAvailable()) {
                     dispatcher.register(literal("renderdoc").executes(context -> {

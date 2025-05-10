@@ -133,7 +133,7 @@ public class Uwu {
 
     public static final UwuConfig CONFIG = UwuConfig.createAndLoad();
     public static final BruhConfig BRUHHHHH = BruhConfig.createAndLoad(builder -> {
-        builder.janksonBuilder().registerSerializer(Color.class, (color, marshaller) -> new JsonPrimitive("bruv"));
+//        builder.janksonBuilder().registerSerializer(Color.class, (color, marshaller) -> new JsonPrimitive("bruv"));
     });
 
     public Uwu(IEventBus eventBus) {
@@ -396,7 +396,7 @@ public class Uwu {
 
                             var nbtDataStack = handStack.toNbt(access);
 
-                            LOGGER.info("  Input:  " + nbtDataStack.asString().replace("\n", "\\n"));
+                            LOGGER.info("  Input:  " + nbtDataStack.asString().get().replace("\n", "\\n"));
 
                             var jsonDataStack = NbtEndec.ELEMENT.encodeFully(GsonSerializer::of, nbtDataStack);
 
@@ -404,7 +404,7 @@ public class Uwu {
 
                             var convertedNbtDataStack = NbtEndec.ELEMENT.decodeFully(GsonDeserializer::of, jsonDataStack);
 
-                            LOGGER.info("Output:  " + convertedNbtDataStack.asString().replace("\n", "\\n"));
+                            LOGGER.info("Output:  " + convertedNbtDataStack.asString().get().replace("\n", "\\n"));
 
                             LOGGER.info("---");
 
@@ -418,7 +418,7 @@ public class Uwu {
 
                             var nbtDataStack = handStack.toNbt(access);
 
-                            LOGGER.info("  Input:  " + nbtDataStack.asString().replace("\n", "\\n"));
+                            LOGGER.info("  Input:  " + nbtDataStack.asString().get().replace("\n", "\\n"));
 
                             var jsonDataStack = NbtEndec.ELEMENT.encodeFully(GsonSerializer::of, nbtDataStack);
 
@@ -426,7 +426,7 @@ public class Uwu {
 
                             var convertedNbtDataStack = GsonEndec.INSTANCE.encodeFully(NbtSerializer::of, jsonDataStack);
 
-                            LOGGER.info("Output:  " + convertedNbtDataStack.asString().replace("\n", "\\n"));
+                            LOGGER.info("Output:  " + convertedNbtDataStack.asString().get().replace("\n", "\\n"));
 
                             LOGGER.info("---");
 
@@ -455,7 +455,7 @@ public class Uwu {
                             compound.put(variable3Endec, variable3);
 
                             LOGGER.info("");
-                            LOGGER.info(compound.asString());
+                            LOGGER.info(compound.asString().get());
 
                             LOGGER.info("");
 

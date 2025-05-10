@@ -102,6 +102,15 @@ public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen im
     }
 
     /**
+     * Draw the tooltip of this screen's component tree, invoked
+     * by {@link ScreenEvents#afterRender(Screen)} so that tooltips are
+     * properly rendered above content
+     */
+    protected void drawComponentTooltip(DrawContext drawContext, int mouseX, int mouseY, float tickDelta) {
+        if (this.uiAdapter != null) this.uiAdapter.drawTooltip(drawContext, mouseX, mouseY, tickDelta);
+    }
+
+    /**
      * A convenience shorthand for querying a component from the adapter's
      * root component via {@link ParentComponent#childById(Class, String)}
      */

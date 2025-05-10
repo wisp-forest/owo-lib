@@ -220,7 +220,7 @@ public class NinePatchTexture {
             NinePatchTexture::new
     );
 
-    private record PatchSizing(@Nullable Size patchSize, @Nullable Size cornerPatchSize, @Nullable Size centerPatchSize) {
+    public record PatchSizing(@Nullable Size patchSize, @Nullable Size cornerPatchSize, @Nullable Size centerPatchSize) {
         public static final StructEndec<PatchSizing> ENDEC = StructEndecBuilder.of(
                 Size.ENDEC.nullableOf().optionalFieldOf("patch_size", PatchSizing::patchSize, () -> null),
                 Size.ENDEC.nullableOf().optionalFieldOf("corner_patch_size", PatchSizing::cornerPatchSize, () -> null),

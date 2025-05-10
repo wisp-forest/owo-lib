@@ -97,11 +97,11 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
             float yRotation = (float) Math.toDegrees(Math.atan((mouseX - this.x - this.width / 2f) / 40f));
 
             if (this.entity instanceof LivingEntity living) {
-                living.prevHeadYaw = -yRotation;
+                living.lastHeadYaw = -yRotation;
             }
 
-            this.entity.prevYaw = -yRotation;
-            this.entity.prevPitch = xRotation * .65f;
+            this.entity.lastYaw = -yRotation;
+            this.entity.lastPitch = xRotation * .65f;
 
             // We make sure the xRotation never becomes 0, as the lighting otherwise becomes very unhappy
             if (xRotation == 0) xRotation = .1f;
@@ -234,7 +234,7 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
         NbtCompound nbt = null;
         if (element.hasAttribute("nbt")) {
             try {
-                nbt = StringNbtReader.parse(element.getAttribute("nbt"));
+                nbt = StringNbtReader.readCompound(element.getAttribute("nbt"));
             } catch (CommandSyntaxException cse) {
                 throw new UIModelParsingException("Invalid NBT compound", cse);
             }

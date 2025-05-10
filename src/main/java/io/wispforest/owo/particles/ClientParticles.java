@@ -118,7 +118,7 @@ public final class ClientParticles {
             }
         }
 
-        world.addParticle(particle, location.x, location.y, location.z, velocity.x, velocity.y, velocity.z);
+        world.addParticleClient(particle, location.x, location.y, location.z, velocity.x, velocity.y, velocity.z);
     }
 
     /**
@@ -235,7 +235,7 @@ public final class ClientParticles {
 
         for (int i = 0; i < particleCount; i++) {
             location = VectorRandomUtils.getRandomOffset(world, particleVector, deviation);
-            world.addParticle(ParticleTypes.ENCHANT, destination.x, destination.y, destination.z, location.x, location.y, location.z);
+            world.addParticleClient(ParticleTypes.ENCHANT, destination.x, destination.y, destination.z, location.x, location.y, location.z);
         }
 
         clearState();

@@ -38,7 +38,7 @@ public abstract class BaseOwoToast<R extends ParentComponent> implements Toast {
 
     @Override
     public void update(ToastManager manager, long time) {
-        final var delta = MinecraftClient.getInstance().getRenderTickCounter().getLastFrameDuration();
+        final var delta = MinecraftClient.getInstance().getRenderTickCounter().getDynamicDeltaTicks();
 
         var client = manager.getClient();
         var window = client.getWindow();
@@ -60,7 +60,7 @@ public abstract class BaseOwoToast<R extends ParentComponent> implements Toast {
     public void draw(DrawContext context, TextRenderer textRenderer, long startTime) {
         var tickCounter = MinecraftClient.getInstance().getRenderTickCounter();
 
-        this.rootComponent.draw(OwoUIDrawContext.of(context), -1000, -1000, tickCounter.getTickDelta(false), tickCounter.getLastFrameDuration());
+        this.rootComponent.draw(OwoUIDrawContext.of(context), -1000, -1000, tickCounter.getTickProgress(false), tickCounter.getDynamicDeltaTicks());
     }
 
     @Override
