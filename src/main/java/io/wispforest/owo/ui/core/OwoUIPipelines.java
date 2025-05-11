@@ -46,7 +46,7 @@ public final class OwoUIPipelines {
         .build();
 
     public static final RenderPipeline GUI_TEXTURED_NO_BLEND = RenderPipeline.builder(RenderPipelines.POSITION_TEX_COLOR_SNIPPET)
-        .withLocation("pipeline/gui_textured")
+        .withLocation(Identifier.of("owo", "pipeline/gui_textured"))
         .withoutBlend()
         .build();
 

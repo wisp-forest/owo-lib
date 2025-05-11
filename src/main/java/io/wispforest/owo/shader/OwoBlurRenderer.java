@@ -14,6 +14,7 @@ import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.BufferAllocator;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.OptionalDouble;
 import java.util.OptionalInt;
 
 /// A simple utility to blur an area of the screen with configurable strength
@@ -54,7 +55,9 @@ public class OwoBlurRenderer {
                 var indexBuffer = RenderSystem.getSequentialBuffer(VertexFormat.DrawMode.QUADS).getIndexBuffer(buffer.getDrawParameters().indexCount());
                 try (var renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(
                     MinecraftClient.getInstance().getFramebuffer().getColorAttachment(),
-                    OptionalInt.empty()
+                    OptionalInt.empty(),
+                    MinecraftClient.getInstance().getFramebuffer().getDepthAttachment(),
+                    OptionalDouble.empty()
                 )) {
                     renderPass.setPipeline(OwoUIPipelines.GUI_BLUR);
                     renderPass.setVertexBuffer(0, vertexBuffer);
