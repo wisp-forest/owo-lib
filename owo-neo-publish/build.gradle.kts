@@ -119,12 +119,17 @@ publishing {
             artifactId = rootProject.property("archives_base_name").toString()
         }
     }
-    repositories {
-        maven {
-            url = uri(ENV["MAVEN_URL"]!!)
-            credentials {
-                username = ENV["MAVEN_USER"]
-                password = ENV["MAVEN_PASSWORD"]
+
+    val mavenUrl = ENV["MAVEN_URL"]
+
+    if (mavenUrl != null) {
+        repositories {
+            maven {
+                url = uri(mavenUrl)
+                credentials {
+                    username = ENV["MAVEN_USER"]
+                    password = ENV["MAVEN_PASSWORD"]
+                }
             }
         }
     }
