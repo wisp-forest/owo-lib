@@ -139,7 +139,7 @@ public class UwuTestStickItem extends Item {
 
         final var stickStack = context.getStack();
 
-        if (!stickStack.contains(TEXT_COMPONENT)) {
+        if (!stickStack.has(TEXT_COMPONENT)) {
             stickStack.set(TEXT_COMPONENT, Text.of(String.valueOf(context.getWorld().random.nextInt(1000000))));
         }
 

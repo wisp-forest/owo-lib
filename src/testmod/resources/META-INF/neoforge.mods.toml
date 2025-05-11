@@ -17,14 +17,14 @@ logoFile = "assets/owo/icon.png"
 [[mixins]]
 config = 'uwu.mixins.json'
 
-[[dependencies.accessories]]
+[[dependencies.uwu]]
 modId = "neoforge"
 required = true
 versionRange = "[21,)"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.accessories]]
+[[dependencies.uwu]]
 modId = "minecraft"
 required = true
 versionRange = "[1.21,)"

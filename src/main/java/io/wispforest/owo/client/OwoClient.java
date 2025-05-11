@@ -57,7 +57,7 @@ public class OwoClient {
             event.addListener(NinePatchTexture.MetadataLoader.getFabricId(), new NinePatchTexture.MetadataLoader());
         });
 
-        OwoUIPipelines.register();
+        modBus.addListener(OwoUIPipelines::register);
 
         if (Owo.DEBUG) {
             final var renderdocPath = System.getProperty("owo.renderdocPath");

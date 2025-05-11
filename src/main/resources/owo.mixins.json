@@ -47,7 +47,6 @@
     "neoforge.NetworkRegistryMixin"
   ],
   "client": [
-    "BufferBuilderAccessor",
     "ScreenAccessor",
     "ClientCommonNetworkHandlerAccessor",
     "ClientConfigurationNetworkHandlerMixin",
