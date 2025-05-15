@@ -28,6 +28,10 @@ public class Button extends StatefulWidget {
         this.onClick = onClick;
     }
 
+    public Button(Text text, Runnable onClick, boolean enabled) {
+        this(text, enabled ? onClick : null);
+    }
+
     @Override
     public WidgetState<Button> createState() {
         return new State();
