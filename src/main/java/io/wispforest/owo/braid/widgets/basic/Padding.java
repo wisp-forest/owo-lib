@@ -23,6 +23,28 @@ public class Padding extends OptionalChildInstanceWidget {
         this(insets, null);
     }
 
+    //These exist to ease chyz's anxiety, because, u see, I will forget they are off-center
+    //like, actually tho, idk why but it makes me very anxious
+    public Padding(@Nullable Double horizontal, @Nullable Double vertical) {
+        this(Insets.right(horizontal != null ? horizontal : 0).withBottom(vertical != null ? vertical : 0));
+    }
+
+    public Padding(@Nullable Integer horizontal, @Nullable Integer vertical) {
+        this(horizontal == null ? null : horizontal.doubleValue(), vertical == null ? null : vertical.doubleValue());
+    }
+
+    public Padding(double horizontal, double vertical) {
+        this(Insets.right(horizontal).withBottom(vertical));
+    }
+
+    public Padding(Size size) {
+        this(size.width(), size.height());
+    }
+
+    public Padding(double size) {
+        this(size, size);
+    }
+
     @Override
     public OptionalChildWidgetInstance<?> instantiate() {
         return new Instance(this);
