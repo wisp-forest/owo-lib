@@ -54,6 +54,7 @@ public class RawCyclingButton<T> extends StatelessWidget {
                 this.messageProvider.getMessage(this.value),
                 this.onChanged == null ? null : button -> {
                     if (button != 0 && button != 1) return;
+                    //TODO: check if shift is pressed
                     this.onChanged.accept(this.cycler.cycle(button == 0 ? 1 : -1));
                 }
             )
