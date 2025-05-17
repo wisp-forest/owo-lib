@@ -9,7 +9,7 @@ import io.wispforest.owo.braid.framework.widget.Widget;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class SharedState<T extends SharableState> extends StatefulWidget {
+public class SharedState<T extends ShareableState> extends StatefulWidget {
     public final Supplier<T> initState;
     public final Widget child;
 
@@ -24,7 +24,7 @@ public class SharedState<T extends SharableState> extends StatefulWidget {
     }
 
     //TODO glisco fix this at some point
-    public static <T extends SharableState> T get(BuildContext context, Class<T> clazz) {
+    public static <T extends ShareableState> T get(BuildContext context, Class<T> clazz) {
         var provider = context.dependOnAncestor(SharedStateProvider.class);
         Preconditions.checkArgument(provider != null, "attempted to read inherited state which is not provided by the current context");
 
@@ -33,7 +33,7 @@ public class SharedState<T extends SharableState> extends StatefulWidget {
     }
 
     //TODO also fix this one
-    public static <T extends SharableState> void set(BuildContext context, Class<T> clazz, Consumer<T> consumer) {
+    public static <T extends ShareableState> void set(BuildContext context, Class<T> clazz, Consumer<T> consumer) {
         var provider = context.dependOnAncestor(SharedStateProvider.class);
         Preconditions.checkArgument(provider != null, "attempted to set inherited state which is not provided by the current context");
 
@@ -45,7 +45,7 @@ public class SharedState<T extends SharableState> extends StatefulWidget {
 
     }
 
-    public static class State<T extends SharableState> extends WidgetState<SharedState<T>> {
+    public static class State<T extends ShareableState> extends WidgetState<SharedState<T>> {
         public T state;
         public int generation = 0;
 
