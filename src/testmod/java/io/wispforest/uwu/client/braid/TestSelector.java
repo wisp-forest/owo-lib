@@ -13,6 +13,9 @@ import io.wispforest.owo.braid.widgets.EntityWidget;
 import io.wispforest.owo.braid.widgets.ItemStackWidget;
 import io.wispforest.owo.braid.widgets.basic.*;
 import io.wispforest.owo.braid.widgets.basic.Stack;
+import io.wispforest.owo.braid.widgets.cycle.CyclingButton;
+import io.wispforest.owo.braid.widgets.cycle.EnumCyclingButton;
+import io.wispforest.owo.braid.widgets.cycle.RawCyclingButton;
 import io.wispforest.owo.braid.widgets.drag.DragArena;
 import io.wispforest.owo.braid.widgets.drag.DragArenaElement;
 import io.wispforest.owo.braid.widgets.flex.*;
@@ -51,11 +54,12 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
 import java.util.function.DoubleFunction;
+import java.util.stream.IntStream;
 
 public class TestSelector extends StatefulWidget {
 
     public enum Tests {
-        COUNTER, FLEX, DRAGGING, SPLIT_PANE, SLIDERS, TEXT_INPUT, BURNING_CHYZ, SCROLLING, INPUT
+        COUNTER, FLEX, DRAGGING, SPLIT_PANE, SLIDERS, TEXT_INPUT, BURNING_CHYZ, SCROLLING, INPUT, CYCLING
     }
 
     @Override
@@ -95,6 +99,7 @@ public class TestSelector extends StatefulWidget {
                         case BURNING_CHYZ -> new BurningChyzTest(this.chyz);
                         case SCROLLING -> new ScrollTest();
                         case INPUT -> new InputTest();
+                        case CYCLING -> new CyclingTest();
                         case null -> new Center(new Label(Text.literal("select a test")));
                     }
                 ),
@@ -1012,7 +1017,7 @@ public class TestSelector extends StatefulWidget {
                                                     .keyUpCallback((key, modifiers) -> this.addToList(getKeyName(key).append(" released")))
                                                     .focusGainedCallback(() -> this.addToList(Text.literal("Focus gained")))
                                                     .focusLostCallback(() -> this.addToList(Text.literal("Focus lost")))
-                                                    .charCallback((charCode, modifiers) -> this.addToList(Text.literal("Character typed: \"" + (char)charCode + "\"")))
+                                                    .charCallback((charCode, modifiers) -> this.addToList(Text.literal("Character typed: \"" + (char) charCode + "\"")))
                                             ,
                                             new Panel(
                                                 OwoUIDrawContext.PANEL_INSET_NINE_PATCH_TEXTURE,
@@ -1052,5 +1057,119 @@ public class TestSelector extends StatefulWidget {
                 return Text.literal("[x: " + formatDouble(x) + ", y: " + formatDouble(y) + "]");
             }
         }
+    }
+
+    public static class CyclingTest extends StatefulWidget {
+        private static final List<String> coolStrings = List.of(
+            "first", "second", "third", "fourth", "fifth"
+        );
+
+        @Override
+        public WidgetState<CyclingTest> createState() {
+            return new State();
+        }
+
+        public static class State extends WidgetState<CyclingTest> {
+            private CoolEnum selectedEnum = CoolEnum.FIRST;
+            private boolean selectedBoolean = false;
+            private String selectedString = "first";
+            private int selectedInt = 0;
+
+            @Override
+            public Widget build(BuildContext context) {
+                return new Column(
+                    MainAxisAlignment.START,
+                    CrossAxisAlignment.CENTER,
+                    new Padding(Insets.all(10)),
+                    List.of(
+                        new Row(
+                            MainAxisAlignment.START,
+                            CrossAxisAlignment.CENTER,
+                            new Padding(Insets.all(10)),
+                            List.of(
+                                new Label(Text.literal("Cycler")),
+                                new Label(Text.literal("Values"))
+                            )
+                        ),
+                        new Row(
+                            MainAxisAlignment.START,
+                            CrossAxisAlignment.CENTER,
+                            new Padding(Insets.all(10)),
+                            List.of(
+                                new Label(Text.literal("Enum")),
+                                new EnumCyclingButton<>(selectedEnum, value -> Text.literal("v: " + value), value -> this.setState(() -> this.selectedEnum = value)),
+                                new Column(
+                                    Arrays.stream(CoolEnum.values())
+                                        .map(coolEnum -> new Label(Text.literal(coolEnum.name())))
+                                        .toList()
+                                )
+                            )
+                        ),
+                        new Row(
+                            MainAxisAlignment.START,
+                            CrossAxisAlignment.CENTER,
+                            new Padding(Insets.all(10)),
+                            List.of(
+                                new Label(Text.literal("Boolean")),
+                                new CyclingButton<>(
+                                    selectedBoolean,
+                                    List.of(true, false),
+                                    value -> Text.literal("v: " + value),
+                                    value -> this.setState(() -> this.selectedBoolean = value)
+                                ),
+                                new Column(
+                                    List.of(
+                                        new Label(Text.literal("false")),
+                                        new Label(Text.literal("true"))
+                                    )
+                                )
+                            )
+                        ),
+                        new Row(
+                            MainAxisAlignment.START,
+                            CrossAxisAlignment.CENTER,
+                            new Padding(Insets.all(10)),
+                            List.of(
+                                new Label(Text.literal("String")),
+                                new CyclingButton<>(
+                                    selectedString,
+                                    coolStrings,
+                                    value -> Text.literal("v: " + value),
+                                    value -> this.setState(() -> this.selectedString = value)
+                                ),
+                                new Column(
+                                    coolStrings.stream()
+                                        .map(string -> new Label(Text.literal(string)))
+                                        .toList()
+                                )
+                            )
+                        ),
+                        new Row(
+                            MainAxisAlignment.START,
+                            CrossAxisAlignment.CENTER,
+                            new Padding(Insets.all(10)),
+                            List.of(
+                                new Label(Text.literal("Int")),
+                                new RawCyclingButton<>(
+                                    selectedInt,
+                                    amount -> this.selectedInt += amount,
+                                    value -> Text.literal("v: " + value),
+                                    value -> this.setState(() -> this.selectedInt = value)
+                                ),
+                                new Label(Text.literal("I'm not listing every number"))
+                            )
+                        )
+                    )
+                );
+            }
+        }
+    }
+
+    public enum CoolEnum {
+        FIRST,
+        SECOND,
+        THIRD,
+        FOURTH,
+        FIFTH
     }
 }

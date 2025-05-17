@@ -14,32 +14,32 @@ public class RawCyclingButton<T> extends StatelessWidget {
 
     public final T value;
 
-    public final MessageProvider<T> messageProvider;
-
     public final Cycler<T> cycler;
+
+    public final CyclerMessageProvider<T> messageProvider;
 
     public final @Nullable Consumer<T> onChanged;
 
     public RawCyclingButton(
         T value,
-        MessageProvider<T> messageProvider,
         Cycler<T> cycler,
+        CyclerMessageProvider<T> messageProvider,
         @Nullable Consumer<T> onChanged
     ) {
         this.value = value;
-        this.messageProvider = messageProvider;
         this.cycler = cycler;
+        this.messageProvider = messageProvider;
         this.onChanged = onChanged;
     }
 
     public RawCyclingButton(
         T value,
-        MessageProvider<T> messageProvider,
         Cycler<T> cycler,
+        CyclerMessageProvider<T> messageProvider,
         Consumer<T> onChanged,
         boolean enabled
     ) {
-        this(value, messageProvider, cycler, enabled ? onChanged : null);
+        this(value, cycler, messageProvider, enabled ? onChanged : null);
     }
 
 
@@ -47,8 +47,8 @@ public class RawCyclingButton<T> extends StatelessWidget {
     public Widget build(BuildContext context) {
         return new MouseArea(
             widget -> widget.scrollCallback((horizontal, vertical) -> {
-                if (this.onChanged == null) return;
-                this.onChanged.accept(this.cycler.cycle((int) -vertical));
+                if (this.onChanged == null || vertical == 0) return;
+                this.onChanged.accept(this.cycler.cycle(vertical < 0 ? -1 : 1));
             }),
             new RawButton(
                 this.messageProvider.getMessage(this.value),
@@ -59,11 +59,6 @@ public class RawCyclingButton<T> extends StatelessWidget {
                 }
             )
         );
-    }
-
-    @FunctionalInterface
-    public interface MessageProvider<T> {
-        Text getMessage(T value);
     }
 
     @FunctionalInterface

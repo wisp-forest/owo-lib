@@ -3,43 +3,60 @@ package io.wispforest.owo.braid.widgets.cycle;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.braid.widgets.basic.MouseArea;
+import io.wispforest.owo.braid.widgets.button.RawButton;
+import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class EnumCyclingButton<T extends Enum<T>> extends StatelessWidget {
+public class CyclingButton<T> extends StatelessWidget {
 
     public final T value;
+    public final int index;
 
     public final List<T> values;
 
-    public CyclerMessageProvider<T> messageProvider;
+    public final CyclerMessageProvider<T> messageProvider;
 
-    public @Nullable Consumer<T> onChanged;
+    public final @Nullable Consumer<T> onChanged;
 
-    public EnumCyclingButton(
+    public CyclingButton(
         T value,
+        int index,
         List<T> values,
         CyclerMessageProvider<T> messageProvider,
         @Nullable Consumer<T> onChanged
     ) {
         this.value = value;
+        this.index = index;
         this.values = values;
         this.messageProvider = messageProvider;
         this.onChanged = onChanged;
     }
 
-    public EnumCyclingButton(
+    public CyclingButton(
         T value,
+        List<T> values,
         CyclerMessageProvider<T> messageProvider,
         @Nullable Consumer<T> onChanged
     ) {
-        this(value, Arrays.asList(value.getDeclaringClass().getEnumConstants()), messageProvider, onChanged);
+        this(value, values.indexOf(value), values, messageProvider, onChanged);
     }
 
-    public EnumCyclingButton(
+    public CyclingButton(
+        T value,
+        int index,
+        List<T> values,
+        CyclerMessageProvider<T> messageProvider,
+        Consumer<T> onChanged,
+        boolean enabled
+    ) {
+        this(value, index, values, messageProvider, enabled ? onChanged : null);
+    }
+
+    public CyclingButton(
         T value,
         List<T> values,
         CyclerMessageProvider<T> messageProvider,
@@ -49,17 +66,13 @@ public class EnumCyclingButton<T extends Enum<T>> extends StatelessWidget {
         this(value, values, messageProvider, enabled ? onChanged : null);
     }
 
-    public EnumCyclingButton(
-        T value,
-        CyclerMessageProvider<T> messageProvider,
-        Consumer<T> onChanged,
-        boolean enabled
-    ) {
-        this(value, Arrays.asList(value.getDeclaringClass().getEnumConstants()), messageProvider, enabled ? onChanged : null);
-    }
-
     @Override
     public Widget build(BuildContext context) {
-        return new CyclingButton<>(this.value, this.values, this.messageProvider, this.onChanged);
+        return new RawCyclingButton<>(
+            this.value,
+            amount -> this.values.get(MathHelper.floorMod(this.index + amount, this.values.size())),
+            this.messageProvider,
+            this.onChanged
+        );
     }
 }
