@@ -1,0 +1,55 @@
+{
+  "text.owo.itemGroup.tab_template": [
+    { "index": 0 },
+    { "text": " > ", "color": "gray" },
+    { "index": 1, "color": "dark_gray" }
+  ],
+  "text.owo.itemGroup.select_hint": {"text": "Birden fazla şeçmek için Shift-tıklayın", "color": "gray"},
+  "text.owo.configure_hot_reload.title": "Hızlı Yeniden Yüklemeyi Ayarla",
+  "text.owo.configure_hot_reload.choose_file": "Dosya şeç",
+  "text.owo.configure_hot_reload.save": "Kaydet",
+  "text.owo.configure_hot_reload.model": [
+    {"text": "Model: ", "color": "yellow"},
+    {"index": 0, "color": "gray"}
+  ],
+  "text.owo.configure_hot_reload.reload_from.unset": "Ayarsız",
+  "text.owo.configure_hot_reload.reload_from": [
+    {"text": "Şurdan yeniden yükle: ", "color": "yellow"},
+    {"index": 0, "color": "gray"}
+  ],
+  "text.owo.config.search": "Ara...",
+  "text.owo.config.search.matches": "%d/%d",
+  "text.owo.config.search.no_matches": "Eşleşme yok",
+  "text.owo.config.must_restart": "Yaptığınız bazı değişiklikler yeniden başlatmanızı gerektiriyor.",
+  "text.owo.config.button.exit_minecraft": "Minecraft'tan Çık",
+  "text.owo.config.button.ignore_restart": "Sonra Yeniden Başlat",
+  "text.owo.config.button.range.edit_as_text": "Yazı olarak düzenle",
+  "text.owo.config.button.range.edit_with_slider": "Kaydırıcı ile düzenle",
+  "text.owo.config.applies_after_restart": [
+    {"text": "⏻ ", "color": "#FAEA48"},
+    {"text": "Bu ayar yeniden başlatmadan sonra uygulanır", "color": "gray"}
+  ],
+  "text.owo.config.managed_by_server": [
+    {"text": "⚑ ", "color": "#EB1D36"},
+    {"text": "Bu ayar sunucu tarafından yönetilir\n   Düzenlemek için bağlantınızı kesin", "color": "gray"}
+  ],
+  "text.owo.config.button.reload": "Yeniden Yükle",
+  "text.owo.config.button.done": "Tamam",
+  "text.owo.config.sections_tooltip": "Bölümler",
+  "text.owo.config.sections": {"text": "Bölümler", "underlined": true},
+  "text.owo.config.list.add_entry": "Girdi ekle",
+  "text.owo.config.boolean_toggle.enabled": [
+    "",
+    {"text": "[", "color": "gray"},
+    {"text": "✔", "color": "#28FFBF"},
+    {"text": "]", "color": "gray"},
+    " Açık"
+  ],
+  "text.owo.config.boolean_toggle.disabled": [
+    "",
+    {"text": "[", "color": "gray"},
+    {"text": "❌", "color": "#EB1D36"},
+    {"text": "]", "color": "gray"},
+    " Kapalı"
+  ]
+}
