@@ -19,18 +19,19 @@ import org.spongepowered.asm.mixin.injection.At;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
+
 @Mixin(Language.class)
 public class LanguageMixin {
     @Unique private static boolean skipNext;
 
     @WrapOperation(method = "load(Ljava/io/InputStream;Ljava/util/function/BiConsumer;)V", at = @At(value = "INVOKE", target = "Lcom/google/gson/JsonObject;entrySet()Ljava/util/Set;"))
     private static Set<Map.Entry<String, JsonElement>> deNestNestedKeys(JsonObject instance, Operation<Set<Map.Entry<String, JsonElement>>> original) {
-        var key = "owo:disable_nested_lang";
-        if (instance.has(key) && instance.get(key).getAsBoolean()) {
-            instance.remove(key);
-            return original.call(instance);
+        var key = "owo:nested_lang";
+        if (instance.has(key) && instance.get(key).isJsonPrimitive() && instance.get(key).getAsBoolean()) {
+            return NestedLangHandler.deNest(original.call(instance));
         }
-        return NestedLangHandler.deNest(original.call(instance));
+        instance.remove(key);
+        return original.call(instance);
     }
 
     @WrapOperation(method = "load(Ljava/io/InputStream;Ljava/util/function/BiConsumer;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/JsonHelper;asString(Lcom/google/gson/JsonElement;Ljava/lang/String;)Ljava/lang/String;"))
