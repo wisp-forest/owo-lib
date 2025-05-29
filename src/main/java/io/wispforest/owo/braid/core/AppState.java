@@ -194,7 +194,7 @@ public class AppState implements InstanceHost, ProxyHost {
             (hit) -> hit.instance() instanceof MouseListener && ((MouseListener) hit.instance()).onMouseDown(hit.x(), hit.y(), button)
         );
 
-        if (clicked != null && this.dragging != null) {
+        if (clicked != null && this.dragging == null) {
             this.dragging = (MouseListener) clicked.instance();
             this.draggingCursorStyle = ((MouseListener) clicked.instance()).cursorStyleAt(
                 clicked.x(),
