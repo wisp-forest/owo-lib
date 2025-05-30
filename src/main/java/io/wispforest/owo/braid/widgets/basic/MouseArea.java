@@ -14,6 +14,7 @@ public class MouseArea extends SingleChildInstanceWidget {
     private @Nullable ClickCallback clickCallback;
     private @Nullable ReleaseCallback releaseCallback;
     private @Nullable EnterCallback enterCallback;
+    private @Nullable MoveCallback moveCallback;
     private @Nullable ExitCallback exitCallback;
     private @Nullable DragStartCallback dragStartCallback;
     private @Nullable DragCallback dragCallback;
@@ -57,6 +58,16 @@ public class MouseArea extends SingleChildInstanceWidget {
 
     public @Nullable EnterCallback enterCallback() {
         return this.enterCallback;
+    }
+
+    public MouseArea moveCallback(@Nullable MoveCallback moveCallback) {
+        this.assertMutable();
+        this.moveCallback = moveCallback;
+        return this;
+    }
+
+    public @Nullable MoveCallback moveCallback() {
+        return this.moveCallback;
     }
 
     public MouseArea exitCallback(@Nullable ExitCallback exitCallback) {
@@ -141,6 +152,11 @@ public class MouseArea extends SingleChildInstanceWidget {
     @FunctionalInterface
     public interface EnterCallback {
         void onMouseEnter();
+    }
+
+    @FunctionalInterface
+    public interface MoveCallback {
+        void onMouseMove(double toX, double toY);
     }
 
     @FunctionalInterface

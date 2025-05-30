@@ -10,6 +10,7 @@ import io.wispforest.owo.braid.framework.proxy.ProxyHost;
 import io.wispforest.owo.braid.framework.proxy.SingleChildInstanceWidgetProxy;
 import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.braid.widgets.basic.MouseArea;
 import io.wispforest.owo.braid.widgets.basic.Tooltip;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import net.minecraft.client.MinecraftClient;
@@ -39,6 +40,7 @@ public class AppState implements InstanceHost, ProxyHost {
     private final RootProxy root;
 
     private Set<MouseListener> hovered = new HashSet<>();
+    private WeakHashMap<MouseListener, MousePosition> mousePositions = new WeakHashMap<>();
     private @Nullable MouseListener dragging = null;
     private @Nullable CursorStyle draggingCursorStyle = null;
     private int draggingButton = -1;
@@ -111,7 +113,9 @@ public class AppState implements InstanceHost, ProxyHost {
         var state = this.hitTest(mouseX, mouseY);
 
         var nowHovered = new HashSet<MouseListener>();
-        Streams.stream(state.occludedTrace()).map(Hit::instance).filter(MouseListener.class::isInstance).map(MouseListener.class::cast).forEach(listener -> {
+        Streams.stream(state.occludedTrace()).filter(hit -> hit.instance() instanceof MouseListener).forEach(hit -> {
+            var listener = (MouseListener) hit.instance();
+
             nowHovered.add(listener);
 
             if (this.hovered.contains(listener)) {
@@ -119,6 +123,13 @@ public class AppState implements InstanceHost, ProxyHost {
             } else {
                 listener.onMouseEnter();
             }
+
+            var mousePosition = this.mousePositions.getOrDefault(listener, MousePosition.ORIGIN);
+            if (mousePosition.x() != hit.x() || mousePosition.y() != hit.y()) {
+                listener.onMouseMove(hit.x(), hit.y());
+                this.mousePositions.put(listener, new MousePosition(hit.x(), hit.y()));
+            }
+
         });
 
         for (var noLongerHovered : this.hovered) {
@@ -451,3 +462,7 @@ class RootInstance extends SingleChildWidgetInstance<RootWidget> {
 }
 
 record TooltipState(List<TooltipComponent> components, int x, int y) {}
+
+record MousePosition(double x, double y) {
+    public static final MousePosition ORIGIN = new MousePosition(0, 0);
+}

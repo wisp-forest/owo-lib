@@ -16,6 +16,7 @@ public interface MouseListener {
     }
 
     default void onMouseEnter() {}
+    default void onMouseMove(double toX, double toY) {}
     default void onMouseExit() {}
     default void onMouseDragStart(int button) {}
     default void onMouseDrag(double x, double y, double dx, double dy) {}

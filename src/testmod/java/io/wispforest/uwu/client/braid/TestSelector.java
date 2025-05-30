@@ -8,14 +8,11 @@ import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import io.wispforest.owo.braid.widgets.Button;
 import io.wispforest.owo.braid.widgets.EntityWidget;
 import io.wispforest.owo.braid.widgets.ItemStackWidget;
 import io.wispforest.owo.braid.widgets.basic.*;
 import io.wispforest.owo.braid.widgets.basic.Stack;
-import io.wispforest.owo.braid.widgets.cycle.CyclingButton;
-import io.wispforest.owo.braid.widgets.cycle.EnumCyclingButton;
-import io.wispforest.owo.braid.widgets.cycle.RawCyclingButton;
+import io.wispforest.owo.braid.widgets.button.MessageButton;
 import io.wispforest.owo.braid.widgets.drag.DragArena;
 import io.wispforest.owo.braid.widgets.drag.DragArenaElement;
 import io.wispforest.owo.braid.widgets.flex.*;
@@ -25,24 +22,32 @@ import io.wispforest.owo.braid.widgets.scroll.ScrollController;
 import io.wispforest.owo.braid.widgets.scroll.Scrollable;
 import io.wispforest.owo.braid.widgets.scroll.VerticallyScrollable;
 import io.wispforest.owo.braid.widgets.slider.*;
-import io.wispforest.owo.braid.widgets.splitpane.SplitPane;
+import io.wispforest.owo.braid.widgets.splitpane.MultiSplitPane;
 import io.wispforest.owo.braid.widgets.textinput.TextBox;
 import io.wispforest.owo.braid.widgets.textinput.TextEditingController;
+import io.wispforest.owo.braid.widgets.vanilla.VanillaWidget;
 import io.wispforest.owo.braid.widgets.window.Window;
 import io.wispforest.owo.braid.widgets.window.WindowController;
+import io.wispforest.owo.ui.component.BraidComponent;
 import io.wispforest.owo.ui.component.ButtonComponent;
+import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.EntityComponent;
+import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.core.Color;
+import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
+import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.owo.util.Wisdom;
-import io.wispforest.uwu.items.UwuItems;
-import it.unimi.dsi.fastutil.booleans.BooleanIntImmutablePair;
-import it.unimi.dsi.fastutil.ints.IntBooleanImmutablePair;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.CheckboxWidget;
+import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.registry.Registries;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Util;
@@ -54,12 +59,11 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
 import java.util.function.DoubleFunction;
-import java.util.stream.IntStream;
 
 public class TestSelector extends StatefulWidget {
 
     public enum Tests {
-        COUNTER, FLEX, DRAGGING, SPLIT_PANE, SLIDERS, TEXT_INPUT, BURNING_CHYZ, SCROLLING, INPUT, CYCLING
+        COUNTER, FLEX, DRAGGING, SPLIT_PANE, SLIDERS, TEXT_INPUT, BURNING_CHYZ, SCROLLING, INPUT, CYCLING, VANILLA
     }
 
     @Override
@@ -100,6 +104,7 @@ public class TestSelector extends StatefulWidget {
                         case SCROLLING -> new ScrollTest();
                         case INPUT -> new InputTest();
                         case CYCLING -> new CyclingTest();
+                        case VANILLA -> new VanillaTest();
                         case null -> new Center(new Label(Text.literal("select a test")));
                     }
                 ),
@@ -121,7 +126,7 @@ public class TestSelector extends StatefulWidget {
                                                 if (test == Tests.BURNING_CHYZ) {
                                                     return new BurningChyzButton(this.chyz, () -> setState(() -> this.test = Tests.BURNING_CHYZ));
                                                 } else {
-                                                    return new Button(
+                                                    return new MessageButton(
                                                         Text.literal(test.name().toLowerCase(Locale.ROOT).replace('_', ' ')),
                                                         test != this.test ? () -> setState(() -> this.test = test) : null
                                                     );
@@ -157,13 +162,13 @@ public class TestSelector extends StatefulWidget {
                         new Label(Text.literal("count: " + this.count)),
                         new Row(
                             new Flexible(
-                                new Button(
+                                new MessageButton(
                                     Text.literal("+"),
                                     () -> this.setState(() -> this.count++)
                                 )
                             ),
                             new Flexible(
-                                new Button(
+                                new MessageButton(
                                     Text.literal("-"),
                                     () -> this.setState(() -> this.count--)
                                 )
@@ -190,7 +195,7 @@ public class TestSelector extends StatefulWidget {
                     this.axis,
                     MainAxisAlignment.START,
                     CrossAxisAlignment.CENTER,
-                    new Button(
+                    new MessageButton(
                         Text.literal("switch axis"),
                         () -> this.setState(() -> this.axis = this.axis.opposite())
                     ),
@@ -261,7 +266,7 @@ public class TestSelector extends StatefulWidget {
                                 Alignment.TOP_LEFT,
                                 new Column(
                                     new Label(Text.literal("a")),
-                                    new Button(Text.literal("window button :o"), () -> setState(() -> controller.expanded = !controller.expanded))
+                                    new MessageButton(Text.literal("window button :o"), () -> setState(() -> controller.expanded = !controller.expanded))
                                 )
                             ),
                             new Align(
@@ -282,7 +287,7 @@ public class TestSelector extends StatefulWidget {
                     new DragArena(elements),
                     new Align(
                         Alignment.BOTTOM,
-                        new Button(
+                        new MessageButton(
                             Text.literal("add window"),
                             () -> setState(() -> this.windows.add(new WindowController(Size.of(150, 75))))
                         )
@@ -343,40 +348,28 @@ public class TestSelector extends StatefulWidget {
                 new Sized(
                     250.0,
                     200.0,
-                    new SplitPane(
-                        new Box(
-                            Color.GREEN.interpolate(Color.ofArgb(0), .5f),
-                            new Label(Text.literal("text here"))
-                        ),
-                        new SplitPane(
+                    new MultiSplitPane(
+                        LayoutAxis.HORIZONTAL,
+                        MainAxisAlignment.START,
+                        CrossAxisAlignment.CENTER,
+                        List.of(
                             new Box(
-                                Color.RED.interpolate(Color.ofArgb(0), .5f),
-                                new Label(Text.literal("more text here"))
+                                Color.GREEN.interpolate(Color.ofArgb(0), .5f),
+                                new Label(Text.literal("text here"))
                             ),
                             new Box(
-                                Color.BLUE.interpolate(Color.ofArgb(0), .5f),
-                                new Row(
-                                    MainAxisAlignment.START,
-                                    CrossAxisAlignment.CENTER,
-                                    new Flexible(
-                                        new Center(
-                                            new Label(Text.literal("even more text here !!"))
-                                        )
-                                    ),
-                                    new Padding(
-                                        Insets.horizontal(10),
-                                        new Column(
-                                            MainAxisAlignment.SPACE_EVENLY,
-                                            CrossAxisAlignment.CENTER,
-                                            new ItemStackWidget(UwuItems.SCREEN_SHARD.getDefaultStack(), false),
-                                            new ItemStackWidget(UwuItems.BRAID.getDefaultStack(), false)
-                                        )
-                                    )
-                                )
+                                Color.GREEN.interpolate(Color.ofArgb(0), .5f),
+                                new Label(Text.literal("text here"))
                             ),
-                            LayoutAxis.VERTICAL
-                        ),
-                        LayoutAxis.HORIZONTAL
+                            new Box(
+                                Color.GREEN.interpolate(Color.ofArgb(0), .5f),
+                                new Label(Text.literal("text here"))
+                            ),
+                            new Box(
+                                Color.GREEN.interpolate(Color.ofArgb(0), .5f),
+                                new Label(Text.literal("text here"))
+                            )
+                        )
                     )
                 )
             );
@@ -450,7 +443,7 @@ public class TestSelector extends StatefulWidget {
                     ),
                     new Align(
                         Alignment.BOTTOM,
-                        new Button(
+                        new MessageButton(
                             Text.literal(this.redundant ? "no more redundancy" : "we love redundancy"),
                             () -> this.setState(() -> this.redundant = !this.redundant)
                         )
@@ -1090,74 +1083,74 @@ public class TestSelector extends StatefulWidget {
                                 new Label(Text.literal("Cycler")),
                                 new Label(Text.literal("Values"))
                             )
-                        ),
-                        new Row(
-                            MainAxisAlignment.START,
-                            CrossAxisAlignment.CENTER,
-                            new Padding(Insets.all(10)),
-                            List.of(
-                                new Label(Text.literal("Enum")),
-                                new EnumCyclingButton<>(selectedEnum, value -> Text.literal("v: " + value), value -> this.setState(() -> this.selectedEnum = value)),
-                                new Column(
-                                    Arrays.stream(CoolEnum.values())
-                                        .map(coolEnum -> new Label(Text.literal(coolEnum.name())))
-                                        .toList()
-                                )
-                            )
-                        ),
-                        new Row(
-                            MainAxisAlignment.START,
-                            CrossAxisAlignment.CENTER,
-                            new Padding(Insets.all(10)),
-                            List.of(
-                                new Label(Text.literal("Boolean")),
-                                new CyclingButton<>(
-                                    selectedBoolean,
-                                    List.of(true, false),
-                                    value -> Text.literal("v: " + value),
-                                    value -> this.setState(() -> this.selectedBoolean = value)
-                                ),
-                                new Column(
-                                    List.of(
-                                        new Label(Text.literal("false")),
-                                        new Label(Text.literal("true"))
-                                    )
-                                )
-                            )
-                        ),
-                        new Row(
-                            MainAxisAlignment.START,
-                            CrossAxisAlignment.CENTER,
-                            new Padding(Insets.all(10)),
-                            List.of(
-                                new Label(Text.literal("String")),
-                                new CyclingButton<>(
-                                    selectedString,
-                                    coolStrings,
-                                    value -> Text.literal("v: " + value),
-                                    value -> this.setState(() -> this.selectedString = value)
-                                ),
-                                new Column(
-                                    coolStrings.stream()
-                                        .map(string -> new Label(Text.literal(string)))
-                                        .toList()
-                                )
-                            )
-                        ),
-                        new Row(
-                            MainAxisAlignment.START,
-                            CrossAxisAlignment.CENTER,
-                            new Padding(Insets.all(10)),
-                            List.of(
-                                new Label(Text.literal("Int")),
-                                new RawCyclingButton<>(
-                                    selectedInt,
-                                    amount -> this.selectedInt += amount,
-                                    value -> Text.literal("v: " + value),
-                                    value -> this.setState(() -> this.selectedInt = value)
-                                ),
-                                new Label(Text.literal("I'm not listing every number"))
-                            )
+//                        ),
+//                        new Row(
+//                            MainAxisAlignment.START,
+//                            CrossAxisAlignment.CENTER,
+//                            new Padding(Insets.all(10)),
+//                            List.of(
+//                                new Label(Text.literal("Enum")),
+//                                new EnumCyclingButton<>(selectedEnum, value -> Text.literal("v: " + value), value -> this.setState(() -> this.selectedEnum = value)),
+//                                new Column(
+//                                    Arrays.stream(CoolEnum.values())
+//                                        .map(coolEnum -> new Label(Text.literal(coolEnum.name())))
+//                                        .toList()
+//                                )
+//                            )
+//                        ),
+//                        new Row(
+//                            MainAxisAlignment.START,
+//                            CrossAxisAlignment.CENTER,
+//                            new Padding(Insets.all(10)),
+//                            List.of(
+//                                new Label(Text.literal("Boolean")),
+//                                new CyclingButton<>(
+//                                    selectedBoolean,
+//                                    List.of(true, false),
+//                                    value -> Text.literal("v: " + value),
+//                                    value -> this.setState(() -> this.selectedBoolean = value)
+//                                ),
+//                                new Column(
+//                                    List.of(
+//                                        new Label(Text.literal("false")),
+//                                        new Label(Text.literal("true"))
+//                                    )
+//                                )
+//                            )
+//                        ),
+//                        new Row(
+//                            MainAxisAlignment.START,
+//                            CrossAxisAlignment.CENTER,
+//                            new Padding(Insets.all(10)),
+//                            List.of(
+//                                new Label(Text.literal("String")),
+//                                new CyclingButton<>(
+//                                    selectedString,
+//                                    coolStrings,
+//                                    value -> this.setState(() -> this.selectedString = value),
+//                                    Text.literal("v: " + selectedString)
+//                                ),
+//                                new Column(
+//                                    coolStrings.stream()
+//                                        .map(string -> new Label(Text.literal(string)))
+//                                        .toList()
+//                                )
+//                            )
+//                        ),
+//                        new Row(
+//                            MainAxisAlignment.START,
+//                            CrossAxisAlignment.CENTER,
+//                            new Padding(Insets.all(10)),
+//                            List.of(
+//                                new Label(Text.literal("Int")),
+//                                new RawCyclingButton<>(
+//                                    selectedInt,
+//                                    amount -> this.selectedInt += amount,
+//                                    value -> Text.literal("v: " + value),
+//                                    value -> this.setState(() -> this.selectedInt = value)
+//                                ),
+//                                new Label(Text.literal("I'm not listing every number"))
+//                            )
                         )
                     )
                 );
@@ -1171,5 +1164,93 @@ public class TestSelector extends StatefulWidget {
         THIRD,
         FOURTH,
         FIFTH
+    }
+
+    public static class VanillaTest extends StatefulWidget {
+        @Override
+        public WidgetState<VanillaTest> createState() {
+            return new State();
+        }
+
+        public static class State extends WidgetState<VanillaTest> {
+            @Override
+            public Widget build(BuildContext context) {
+                return new Sized(
+                    250.0,
+                    250.0,
+                    new Column(
+                        new VanillaWidget<>(
+                            Size.of(250, 20),
+                            () ->
+                                CheckboxWidget.builder(
+                                    Text.literal("Checkbox"),
+                                    MinecraftClient.getInstance().textRenderer
+                                ).build()
+                        ),
+                        new VanillaWidget<>(
+                            Size.of(250, 20),
+                            () -> {
+                                var widget = new TextFieldWidget(
+                                    MinecraftClient.getInstance().textRenderer,
+                                    0, 0, 100, 20,
+                                    Text.literal("Text Field")
+                                );
+                                widget.setPlaceholder(Text.literal("when the vanilla widget is better than the braid widget"));
+                                return widget;
+                            }
+                        ),
+                        new VanillaWidget<>(
+                            Size.of(250, 20),
+                            () -> {
+                                var adapter = OwoUIAdapter.createWithoutScreen(
+                                    0, 0, 250, 20,
+                                    Containers::verticalFlow
+                                );
+                                adapter.rootComponent.child(
+                                    ButtonWidget.builder(
+                                        Text.literal("A very very cool button"),
+                                        button -> MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.ENTITY_GENERIC_EXPLODE, Random.create().nextFloat() * 2f))
+                                    ).build()
+                                ).child(
+                                    new BraidComponent(
+                                        new Column(
+                                            new MessageButton(
+                                                Text.literal("amogus"),
+                                                () -> MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.BLOCK_ANVIL_BREAK, Random.create().nextFloat() * 2f))
+                                            ),
+                                            new MultiSplitPane(
+                                                LayoutAxis.HORIZONTAL,
+                                                MainAxisAlignment.START,
+                                                CrossAxisAlignment.CENTER,
+                                                List.of(
+                                                    new Box(
+                                                        Color.GREEN.interpolate(Color.ofArgb(0), .5f),
+                                                        new Label(Text.literal("no way is"))
+                                                    ),
+                                                    new Box(
+                                                        Color.GREEN.interpolate(Color.ofArgb(0), .5f),
+                                                        new Label(Text.literal("that braid"))
+                                                    ),
+                                                    new Box(
+                                                        Color.GREEN.interpolate(Color.ofArgb(0), .5f),
+                                                        new Label(Text.literal("inside owoui"))
+                                                    ),
+                                                    new Box(
+                                                        Color.GREEN.interpolate(Color.ofArgb(0), .5f),
+                                                        new Label(Text.literal("inside braid?"))
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    ).sizing(Sizing.fixed(100))
+                                ).allowOverflow(true);
+                                adapter.inflateAndMount();
+                                return adapter;
+                            }
+                        )
+                    )
+                );
+            }
+        }
     }
 }

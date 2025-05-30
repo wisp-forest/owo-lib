@@ -1,4 +1,4 @@
-package io.wispforest.owo.braid.widgets;
+package io.wispforest.owo.braid.widgets.button;
 
 import io.wispforest.owo.braid.core.Insets;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
@@ -14,22 +14,36 @@ import io.wispforest.owo.braid.widgets.label.LabelStyle;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.util.UISounds;
+import it.unimi.dsi.fastutil.booleans.BooleanPredicate;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.BooleanSupplier;
+import java.util.function.IntConsumer;
+import java.util.function.IntPredicate;
+
 public class Button extends StatefulWidget {
 
-    public final Text text;
-    public final @Nullable Runnable onClick;
+    public final @Nullable IntPredicate onClick;
+    public final Widget child;
 
-    public Button(Text text, @Nullable Runnable onClick) {
-        this.text = text;
+    public Button(@Nullable IntPredicate onClick, Widget child) {
         this.onClick = onClick;
+        this.child = child;
     }
 
-    public Button(Text text, Runnable onClick, boolean enabled) {
-        this(text, enabled ? onClick : null);
+    public Button(IntPredicate onClick, boolean active, Widget child) {
+        this(active ? onClick : null, child);
+    }
+
+    public Button(@Nullable BooleanSupplier onClick, Widget child) {
+        //TODO: this will need to be changed once actions exist
+        this(onClick == null ? null : (x) -> x == 0 && onClick.getAsBoolean(), child);
+    }
+
+    public Button(BooleanSupplier onClick, boolean active, Widget child) {
+        this(active ? onClick : null, child);
     }
 
     @Override
@@ -38,7 +52,6 @@ public class Button extends StatefulWidget {
     }
 
     public static class State extends WidgetState<Button> {
-
         private boolean hovered = false;
 
         @Override
@@ -47,28 +60,17 @@ public class Button extends StatefulWidget {
 
             return new MouseArea(
                 widget -> widget
-                    .clickCallback((x, y, button) -> {
-                        if (!active) return;
-                        if (button != 0) return;
-
-                        this.widget().onClick.run();
-                        UISounds.playButtonSound();
-                    })
                     .enterCallback(() -> this.setState(() -> this.hovered = true))
-                    .exitCallback(() -> this.setState(() -> this.hovered = false))
-                    .cursorStyle(active ? CursorStyle.HAND : null),
-                new Panel(
-                    active
-                        ? this.hovered ? ButtonComponent.HOVERED_TEXTURE : ButtonComponent.ACTIVE_TEXTURE
-                        : ButtonComponent.DISABLED_TEXTURE,
-                    new Padding(
-                        Insets.all(5),
-                        new Label(
-                            active
-                                ? LabelStyle.SHADOW
-                                : new LabelStyle(null, Color.ofFormatting(Formatting.GRAY), null, false),
-                            true,
-                            this.widget().text
+                    .exitCallback(() -> this.setState(() -> this.hovered = false)),
+                new RawButton(
+                    widget().onClick,
+                    new Panel(
+                        active
+                            ? this.hovered ? ButtonComponent.HOVERED_TEXTURE : ButtonComponent.ACTIVE_TEXTURE
+                            : ButtonComponent.DISABLED_TEXTURE,
+                        new Padding(
+                            Insets.all(5),
+                            widget().child
                         )
                     )
                 )
