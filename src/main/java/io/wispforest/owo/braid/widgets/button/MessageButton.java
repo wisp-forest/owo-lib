@@ -32,19 +32,8 @@ public class MessageButton extends StatelessWidget {
         this.onClick = onClick;
     }
 
-    public MessageButton(Text text, IntPredicate onClick, boolean enabled) {
-        this(text, enabled ? onClick : null);
-    }
-
     public MessageButton(Text text, @Nullable Runnable onClick) {
         this(text, onClick != null ? (x) -> {
-            onClick.run();
-            return true;
-        } : null);
-    }
-
-    public MessageButton(Text text, Runnable onClick, boolean enabled) {
-        this(text, enabled ? (x) -> {
             onClick.run();
             return true;
         } : null);
