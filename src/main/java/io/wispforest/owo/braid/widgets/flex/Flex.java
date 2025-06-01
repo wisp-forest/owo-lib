@@ -22,7 +22,7 @@ public class Flex extends MultiChildInstanceWidget {
         MainAxisAlignment mainAxisAlignment,
         CrossAxisAlignment crossAxisAlignment,
         @Nullable Widget separator,
-        List<Widget> children
+        List<? extends Widget> children
     ) {
         super(Util.make(() -> {
             if (separator == null || children.size() < 2) return children;

@@ -52,7 +52,7 @@ public class BraidScreen extends Screen implements DisposableScreen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        return this.state.dispatchMouseDownEvent(mouseX, mouseY) || super.mouseClicked(mouseX, mouseY, button);
+        return this.state.dispatchMouseDownEvent(mouseX, mouseY, button) || super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
@@ -62,7 +62,7 @@ public class BraidScreen extends Screen implements DisposableScreen {
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        return this.state.dispatchMouseUpEvent() || super.mouseReleased(mouseX, mouseY, button);
+        return this.state.dispatchMouseUpEvent(mouseX, mouseY, button) || super.mouseReleased(mouseX, mouseY, button);
     }
 
     @Override

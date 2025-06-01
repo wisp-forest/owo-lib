@@ -17,5 +17,5 @@ public abstract class InheritedWidget extends Widget {
 
     // ---
 
-    public abstract boolean mustRebuildDependents(InheritedWidget oldWidget);
+    public abstract boolean mustRebuildDependents(InheritedWidget newWidget);
 }

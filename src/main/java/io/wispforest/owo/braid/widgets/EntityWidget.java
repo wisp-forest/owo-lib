@@ -1,6 +1,5 @@
 package io.wispforest.owo.braid.widgets;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.framework.instance.LeafWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.LeafInstanceWidget;
@@ -10,8 +9,6 @@ import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.RotationAxis;
-import org.apache.commons.lang3.builder.Diff;
-import org.joml.Vector3f;
 
 public class EntityWidget extends LeafInstanceWidget {
 

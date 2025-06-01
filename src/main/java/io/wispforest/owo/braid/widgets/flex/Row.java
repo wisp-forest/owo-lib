@@ -12,7 +12,7 @@ public class Row extends Flex {
         MainAxisAlignment mainAxisAlignment,
         CrossAxisAlignment crossAxisAlignment,
         @Nullable Widget separator,
-        List<Widget> children
+        List<? extends Widget> children
     ) {
         super(LayoutAxis.HORIZONTAL, mainAxisAlignment, crossAxisAlignment, separator, children);
     }
@@ -27,13 +27,13 @@ public class Row extends Flex {
 
     public Row(
         @Nullable Widget separator,
-        List<Widget> children
+        List<? extends Widget> children
     ) {
         this(MainAxisAlignment.START, CrossAxisAlignment.START, separator, children);
     }
 
     public Row(
-        List<Widget> children
+        List<? extends Widget> children
     ) {
         this(MainAxisAlignment.START, CrossAxisAlignment.START, null, children);
     }

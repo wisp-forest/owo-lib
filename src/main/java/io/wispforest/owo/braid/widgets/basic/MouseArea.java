@@ -12,7 +12,9 @@ import org.jetbrains.annotations.Nullable;
 public class MouseArea extends SingleChildInstanceWidget {
 
     private @Nullable ClickCallback clickCallback;
+    private @Nullable ReleaseCallback releaseCallback;
     private @Nullable EnterCallback enterCallback;
+    private @Nullable MoveCallback moveCallback;
     private @Nullable ExitCallback exitCallback;
     private @Nullable DragStartCallback dragStartCallback;
     private @Nullable DragCallback dragCallback;
@@ -38,6 +40,16 @@ public class MouseArea extends SingleChildInstanceWidget {
         return this.clickCallback;
     }
 
+    public MouseArea releaseCallback(@Nullable ReleaseCallback releaseCallback) {
+        this.assertMutable();
+        this.releaseCallback = releaseCallback;
+        return this;
+    }
+
+    public @Nullable ReleaseCallback releaseCallback() {
+        return this.releaseCallback;
+    }
+
     public MouseArea enterCallback(@Nullable EnterCallback enterCallback) {
         this.assertMutable();
         this.enterCallback = enterCallback;
@@ -46,6 +58,16 @@ public class MouseArea extends SingleChildInstanceWidget {
 
     public @Nullable EnterCallback enterCallback() {
         return this.enterCallback;
+    }
+
+    public MouseArea moveCallback(@Nullable MoveCallback moveCallback) {
+        this.assertMutable();
+        this.moveCallback = moveCallback;
+        return this;
+    }
+
+    public @Nullable MoveCallback moveCallback() {
+        return this.moveCallback;
     }
 
     public MouseArea exitCallback(@Nullable ExitCallback exitCallback) {
@@ -119,12 +141,22 @@ public class MouseArea extends SingleChildInstanceWidget {
 
     @FunctionalInterface
     public interface ClickCallback {
-        void onClick(double x, double y);
+        void onClick(double x, double y, int button);
+    }
+
+    @FunctionalInterface
+    public interface ReleaseCallback {
+        void onRelease(double x, double y, int button);
     }
 
     @FunctionalInterface
     public interface EnterCallback {
         void onMouseEnter();
+    }
+
+    @FunctionalInterface
+    public interface MoveCallback {
+        void onMouseMove(double toX, double toY);
     }
 
     @FunctionalInterface
@@ -134,7 +166,7 @@ public class MouseArea extends SingleChildInstanceWidget {
 
     @FunctionalInterface
     public interface DragStartCallback {
-        void onDragStart();
+        void onDragStart(int button);
     }
 
     @FunctionalInterface
@@ -175,13 +207,23 @@ public class MouseArea extends SingleChildInstanceWidget {
         }
 
         @Override
-        public boolean onMouseDown(double x, double y) {
+        public boolean onMouseDown(double x, double y, int button) {
             if (this.widget.clickCallback != null) {
-                this.widget.clickCallback.onClick(x, y);
+                this.widget.clickCallback.onClick(x, y, button);
                 return true;
             }
 
             return this.widget.dragCallback != null;
+        }
+
+        @Override
+        public boolean onMouseUp(double x, double y, int button) {
+            if (this.widget.releaseCallback != null) {
+                this.widget.releaseCallback.onRelease(x, y, button);
+                return true;
+            }
+
+            return this.widget.dragEndCallback != null;
         }
 
         @Override
@@ -195,8 +237,8 @@ public class MouseArea extends SingleChildInstanceWidget {
         }
 
         @Override
-        public void onMouseDragStart() {
-            if (this.widget.dragStartCallback != null) this.widget.dragStartCallback.onDragStart();
+        public void onMouseDragStart(int button) {
+            if (this.widget.dragStartCallback != null) this.widget.dragStartCallback.onDragStart(button);
         }
 
         @Override

@@ -12,7 +12,7 @@ public class Column extends Flex {
         MainAxisAlignment mainAxisAlignment,
         CrossAxisAlignment crossAxisAlignment,
         @Nullable Widget separator,
-        List<Widget> children
+        List<? extends Widget> children
     ) {
         super(LayoutAxis.VERTICAL, mainAxisAlignment, crossAxisAlignment, separator, children);
     }
@@ -27,13 +27,13 @@ public class Column extends Flex {
 
     public Column(
         @Nullable Widget separator,
-        List<Widget> children
+        List<? extends Widget> children
     ) {
         this(MainAxisAlignment.START, CrossAxisAlignment.START, separator, children);
     }
 
     public Column(
-        List<Widget> children
+        List<? extends Widget> children
     ) {
         this(MainAxisAlignment.START, CrossAxisAlignment.START, null, children);
     }
@@ -44,4 +44,3 @@ public class Column extends Flex {
         this(Arrays.asList(children));
     }
 }
-

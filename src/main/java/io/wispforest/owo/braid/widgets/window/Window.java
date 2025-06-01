@@ -73,7 +73,8 @@ public class Window extends StatefulWidget {
             if (this.widget().collapsible) {
                 titleBar.add(new MouseArea(
                     widget -> widget
-                        .clickCallback((x, y) -> this.setState(() -> this.controller.expanded = !this.controller.expanded))
+                        //TODO: decide what to do with buttons here
+                        .clickCallback((x, y, button) -> this.setState(() -> this.controller.expanded = !this.controller.expanded))
                         .cursorStyle(CursorStyle.HAND),
                     new Padding(
                         Insets.of(2, 0, 0, 4),
@@ -88,7 +89,8 @@ public class Window extends StatefulWidget {
             if (this.widget().onClose != null) {
                 titleBar.add(new MouseArea(
                     widget -> widget
-                        .clickCallback((x, y) -> this.widget().onClose.run())
+                        //TODO: decide what to do with buttons here
+                        .clickCallback((x, y, button) -> this.widget().onClose.run())
                         .cursorStyle(CursorStyle.HAND),
                     new HoverStyledLabel(Text.literal("x"), Style.EMPTY.withFormatting(Formatting.RED))
                 ));
@@ -99,7 +101,8 @@ public class Window extends StatefulWidget {
                 Math.ceil(this.controller.y),
                 new MouseArea(
                     widget -> widget
-                        .clickCallback((x, y) -> this.draggingEdges = this.edgesAt(x, y))
+                        //TODO: decide what to do with buttons here
+                        .clickCallback((x, y, button) -> this.draggingEdges = this.edgesAt(x, y))
                         .dragCallback((x, y, dx, dy) -> setState(() -> this.resize(dx, dy)))
                         .dragEndCallback(() -> this.draggingEdges = null)
                         .cursorStyleSupplier((x, y) -> this.cursorStyleFor(this.edgesAt(x, y))),

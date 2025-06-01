@@ -313,7 +313,9 @@ public class TextInput extends LeafInstanceWidget {
         }
 
         @Override
-        public boolean onMouseDown(double x, double y) {
+        public boolean onMouseDown(double x, double y, int button) {
+            //TODO: decide what to do with buttons here
+            // like, should rclick clear it or something idk
             var renderer = this.host().client().textRenderer;
 
             var line = this.wrappedLines.get(Math.min((int) (y / renderer.fontHeight), this.wrappedLines.size() - 1));

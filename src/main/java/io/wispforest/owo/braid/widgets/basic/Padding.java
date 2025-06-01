@@ -23,6 +23,11 @@ public class Padding extends OptionalChildInstanceWidget {
         this(insets, null);
     }
 
+    public Padding(Size size) {
+        this(Insets.right(size.width()).withTop(size.height()), null);
+    }
+
+
     @Override
     public OptionalChildWidgetInstance<?> instantiate() {
         return new Instance(this);

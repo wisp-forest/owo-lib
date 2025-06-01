@@ -7,9 +7,9 @@ import io.wispforest.owo.braid.framework.proxy.WidgetProxy;
 import java.util.List;
 
 public abstract class MultiChildInstanceWidget extends InstanceWidget {
-    public final List<Widget> children;
+    public final List<? extends Widget> children;
 
-    protected MultiChildInstanceWidget(List<Widget> children) {
+    protected MultiChildInstanceWidget(List<? extends Widget> children) {
         this.children = children;
     }
 

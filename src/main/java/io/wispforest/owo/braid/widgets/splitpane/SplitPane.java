@@ -51,9 +51,7 @@ class SplitPaneState extends WidgetState<SplitPane> {
             var split = Math.floor(MathHelper.clamp(this.splitCoordinate, .1 * maxSize, .9 * maxSize));
 
             var firstConstraints = Constraints.tight(axis.createSize(split, constraints.maxOnAxis(axis.opposite())));
-            var secondConstraints = Constraints.tight(
-                axis.createSize(maxSize - split, constraints.maxOnAxis(axis.opposite()))
-            );
+            var secondConstraints = Constraints.tight(axis.createSize(maxSize - split, constraints.maxOnAxis(axis.opposite())));
 
             return new Flex(
                 axis,
@@ -65,6 +63,7 @@ class SplitPaneState extends WidgetState<SplitPane> {
                         widget -> widget
                             .dragCallback((x, y, dx, dy) -> setState(() -> {
                                 this.splitCoordinate = this.splitCoordinate + axis.choose(dx, dy);
+                                System.out.println("Split coordinate: " + this.splitCoordinate);
                             }))
                             .dragEndCallback(() -> {
                                 this.splitCoordinate = MathHelper.clamp(this.splitCoordinate, .1 * maxSize, .9 * maxSize);

@@ -73,7 +73,8 @@ public class RawRangeSlider extends StatefulWidget {
                 return new Center(
                     new MouseArea(
                         widget -> widget
-                            .clickCallback((x, y) -> {
+                            //TODO: decide what to do with buttons here
+                            .clickCallback((x, y, button) -> {
                                 this.grabbedHandle = this.handleAt(constraints, x, y);
                                 this.setAbsolute(constraints, x, y);
                             })
