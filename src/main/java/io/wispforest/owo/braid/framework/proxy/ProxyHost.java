@@ -10,7 +10,9 @@ public interface ProxyHost {
 
     void scheduleAnimationCallback(AnimationCallback callback);
 
-    void scheduleDelayedCallback(Duration delay, Runnable callback);
+    long scheduleDelayedCallback(Duration delay, Runnable callback);
+
+    void cancelDelayedCallback(long id);
 
     interface AnimationCallback {
         void run(float delta);

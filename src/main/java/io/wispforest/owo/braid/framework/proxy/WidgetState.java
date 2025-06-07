@@ -27,9 +27,14 @@ public abstract class WidgetState<T extends StatefulWidget> {
         this.owner.markNeedsRebuild();
     }
 
-    public final void scheduleDelayedCallback(Duration after, Runnable callback) {
-        this.owner.host().scheduleDelayedCallback(after, callback);
+    public final long scheduleDelayedCallback(Duration after, Runnable callback) {
+        return this.owner.host().scheduleDelayedCallback(after, callback);
     }
+
+    public final void cancelDelayedCallback(long id) {
+        this.owner.host().cancelDelayedCallback(id);
+    }
+
 
     public final void scheduleAnimationCallback(ProxyHost.AnimationCallback callback) {
         this.owner.host().scheduleAnimationCallback(callback);

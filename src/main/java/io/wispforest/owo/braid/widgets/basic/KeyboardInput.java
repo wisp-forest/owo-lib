@@ -1,6 +1,7 @@
 package io.wispforest.owo.braid.widgets.basic;
 
 import io.wispforest.owo.braid.core.Constraints;
+import io.wispforest.owo.braid.core.KeyModifiers;
 import io.wispforest.owo.braid.framework.instance.KeyboardListener;
 import io.wispforest.owo.braid.framework.instance.SingleChildWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
@@ -78,17 +79,17 @@ public class KeyboardInput extends SingleChildInstanceWidget {
 
     @FunctionalInterface
     public interface KeyDownCallback {
-        void onKeyDown(int keyCode, int modifiers);
+        boolean onKeyDown(int keyCode, KeyModifiers modifiers);
     }
 
     @FunctionalInterface
     public interface KeyUpCallback {
-        void onKeyUp(int keyCode, int modifiers);
+        boolean onKeyUp(int keyCode, KeyModifiers modifiers);
     }
 
     @FunctionalInterface
     public interface CharCallback {
-        void onChar(int charCode, int modifiers);
+        boolean onChar(int charCode, KeyModifiers modifiers);
     }
 
     @FunctionalInterface
@@ -113,30 +114,27 @@ public class KeyboardInput extends SingleChildInstanceWidget {
         }
 
         @Override
-        public boolean onKeyDown(int keyCode, int modifiers) {
+        public boolean onKeyDown(int keyCode, KeyModifiers modifiers) {
             if (this.widget.keyDownCallback != null) {
-                this.widget.keyDownCallback.onKeyDown(keyCode, modifiers);
-                return true;
+                return this.widget.keyDownCallback.onKeyDown(keyCode, modifiers);
             }
 
             return false;
         }
 
         @Override
-        public boolean onKeyUp(int keyCode, int modifiers) {
+        public boolean onKeyUp(int keyCode, KeyModifiers modifiers) {
             if (this.widget.keyUpCallback != null) {
-                this.widget.keyUpCallback.onKeyUp(keyCode, modifiers);
-                return true;
+                return this.widget.keyUpCallback.onKeyUp(keyCode, modifiers);
             }
 
             return false;
         }
 
         @Override
-        public boolean onChar(int charCode, int modifiers) {
+        public boolean onChar(int charCode, KeyModifiers modifiers) {
             if (this.widget.charCallback != null) {
-                this.widget.charCallback.onChar(charCode, modifiers);
-                return true;
+                return this.widget.charCallback.onChar(charCode, modifiers);
             }
 
             return false;

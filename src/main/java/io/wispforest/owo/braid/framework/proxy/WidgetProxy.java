@@ -182,7 +182,7 @@ public abstract sealed class WidgetProxy implements BuildContext, Comparable<Wid
         return this.slot;
     }
 
-    public @Nullable ProxyHost host() {
+    public ProxyHost host() {
         return this.host;
     }
 

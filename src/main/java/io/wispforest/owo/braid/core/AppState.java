@@ -159,7 +159,7 @@ public class AppState implements InstanceHost, ProxyHost {
             var cursorStyleSource = state.firstWhere(
                 (hit) ->
                     hit.instance() instanceof MouseListener &&
-                        ((MouseListener) hit.instance()).cursorStyleAt(hit.x(), hit.y()) != null
+                    ((MouseListener) hit.instance()).cursorStyleAt(hit.x(), hit.y()) != null
             );
 
             if (cursorStyleSource != null) {
@@ -276,12 +276,12 @@ public class AppState implements InstanceHost, ProxyHost {
     public boolean dispatchMouseScrollEvent(double x, double y, double xOffset, double yOffset) {
         return this.hitTest(x, y).firstWhere(
             (hit) -> hit.instance() instanceof MouseListener &&
-                ((MouseListener) hit.instance()).onMouseScroll(
-                    hit.x(),
-                    hit.y(),
-                    xOffset,
-                    yOffset
-                )
+                     ((MouseListener) hit.instance()).onMouseScroll(
+                         hit.x(),
+                         hit.y(),
+                         xOffset,
+                         yOffset
+                     )
         ) != null;
     }
 
@@ -292,7 +292,7 @@ public class AppState implements InstanceHost, ProxyHost {
         }
 
         for (var listener : this.focused) {
-            if (listener.onKeyDown(keyCode, modifiers)) {
+            if (listener.onKeyDown(keyCode, new KeyModifiers(modifiers))) {
                 return true;
             }
         }
@@ -302,7 +302,7 @@ public class AppState implements InstanceHost, ProxyHost {
 
     public boolean dispatchKeyUpEvent(int keyCode, int modifiers) {
         for (var listener : this.focused) {
-            if (listener.onKeyUp(keyCode, modifiers)) {
+            if (listener.onKeyUp(keyCode, new KeyModifiers(modifiers))) {
                 return true;
             }
         }
@@ -312,7 +312,7 @@ public class AppState implements InstanceHost, ProxyHost {
 
     public boolean dispatchCharEvent(int charCode, int modifiers) {
         for (var listener : this.focused) {
-            if (listener.onChar(charCode, modifiers)) {
+            if (listener.onChar(charCode, new KeyModifiers(modifiers))) {
                 return true;
             }
         }
@@ -383,15 +383,25 @@ public class AppState implements InstanceHost, ProxyHost {
     }
 
     @Override
-    public void scheduleDelayedCallback(Duration delay, Runnable callback) {
+    public long scheduleDelayedCallback(Duration delay, Runnable callback) {
+        var id = ScheduledCallback.nextId++;
         this.callbacks.add(new ScheduledCallback(
             Instant.now().plus(delay),
-            callback
+            callback, id
         ));
+        return id;
+    }
+
+    @Override
+    public void cancelDelayedCallback(long id) {
+        this.callbacks.removeIf(scheduledCallback -> scheduledCallback.id() == id);
     }
 }
 
-record ScheduledCallback(Instant after, Runnable callback) implements Comparable<ScheduledCallback> {
+record ScheduledCallback(Instant after, Runnable callback, long id) implements Comparable<ScheduledCallback> {
+    //"fuck you we starting at 7" -chyz
+    public static long nextId = 7;
+
     @Override
     public int compareTo(@NotNull ScheduledCallback o) {
         return this.after.compareTo(o.after);

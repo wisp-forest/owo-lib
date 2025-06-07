@@ -141,12 +141,12 @@ public class MouseArea extends SingleChildInstanceWidget {
 
     @FunctionalInterface
     public interface ClickCallback {
-        void onClick(double x, double y, int button);
+        boolean onClick(double x, double y, int button);
     }
 
     @FunctionalInterface
     public interface ReleaseCallback {
-        void onRelease(double x, double y, int button);
+        boolean onRelease(double x, double y, int button);
     }
 
     @FunctionalInterface
@@ -181,7 +181,7 @@ public class MouseArea extends SingleChildInstanceWidget {
 
     @FunctionalInterface
     public interface ScrollCallback {
-        void onScroll(double horizontal, double vertical);
+        boolean onScroll(double horizontal, double vertical);
     }
 
     @FunctionalInterface
@@ -209,8 +209,7 @@ public class MouseArea extends SingleChildInstanceWidget {
         @Override
         public boolean onMouseDown(double x, double y, int button) {
             if (this.widget.clickCallback != null) {
-                this.widget.clickCallback.onClick(x, y, button);
-                return true;
+                return this.widget.clickCallback.onClick(x, y, button);
             }
 
             return this.widget.dragCallback != null;
@@ -219,8 +218,7 @@ public class MouseArea extends SingleChildInstanceWidget {
         @Override
         public boolean onMouseUp(double x, double y, int button) {
             if (this.widget.releaseCallback != null) {
-                this.widget.releaseCallback.onRelease(x, y, button);
-                return true;
+                return this.widget.releaseCallback.onRelease(x, y, button);
             }
 
             return this.widget.dragEndCallback != null;
@@ -254,8 +252,7 @@ public class MouseArea extends SingleChildInstanceWidget {
         @Override
         public boolean onMouseScroll(double x, double y, double horizontal, double vertical) {
             if (this.widget.scrollCallback != null) {
-                this.widget.scrollCallback.onScroll(horizontal, vertical);
-                return true;
+                return this.widget.scrollCallback.onScroll(horizontal, vertical);
             }
 
             return false;
