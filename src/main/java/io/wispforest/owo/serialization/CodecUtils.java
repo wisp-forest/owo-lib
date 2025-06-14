@@ -1,6 +1,7 @@
 package io.wispforest.owo.serialization;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.mojang.datafixers.util.Either;
@@ -28,10 +29,7 @@ import io.wispforest.owo.serialization.format.nbt.NbtDeserializer;
 import io.wispforest.owo.serialization.format.nbt.NbtEndec;
 import io.wispforest.owo.serialization.format.nbt.NbtSerializer;
 import io.wispforest.owo.util.Scary;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.NbtString;
+import net.minecraft.nbt.*;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
@@ -205,7 +203,7 @@ public class CodecUtils {
             @Override
             public <D> DataResult<D> encode(T input, DynamicOps<D> ops, D prefix) {
                 return captureThrows(() -> {
-                    var serializer = serializerForOps(ops);
+                    var serializer = serializerForOps(ops, prefix);
                     var context = createContext(ops, assumedContext);
 
                     return (serializer != null)
@@ -488,9 +486,9 @@ public class CodecUtils {
 
     @Nullable
     @SuppressWarnings({"unchecked", "SuspiciousMethodCalls"})
-    private static <T> Serializer<T> serializerForOps(DynamicOps<T> dynamicOps) {
+    private static <T> Serializer<T> serializerForOps(DynamicOps<T> dynamicOps, T prefix) {
         var adapter = (CodecAdapter<T, SelfDescribedSerializer<T>, ?>) opsToAdapter.get(unpackOps(dynamicOps).getClass());
-        return adapter != null ? adapter.createSerializer() : null;
+        return adapter != null ? adapter.createSerializer(prefix) : null;
     }
 
     @Nullable
@@ -506,7 +504,7 @@ public class CodecUtils {
         var adapter = (CodecAdapter<T, SelfDescribedSerializer<T>, ?>) opsToAdapter.get(unpackOps(dynamicOps).getClass());
 
         return (adapter != null)
-            ? new Pair<>(adapter.createSerializer(), t -> adapter.addToBuilder(t, builder))
+            ? new Pair<>(adapter.createSerializer(null), t -> adapter.addToBuilder(t, builder))
             : null;
     }
 
@@ -527,7 +525,7 @@ public class CodecUtils {
     }
 
     private static <T, D extends SelfDescribedDeserializer<T>> T copyDecodedValue(CodecAdapter<T, ?, D> adapter, D deserializer) {
-        var serializer = adapter.createSerializer();
+        var serializer = adapter.createSerializer(null);
         deserializer.readAny(SerializationContext.empty(), serializer);
         return serializer.result();
     }
@@ -549,7 +547,7 @@ public class CodecUtils {
 
         // ---
 
-        S createSerializer();
+        S createSerializer(@Nullable T prefix);
         D createDeserializer(T value);
         DynamicOps<T> getOps();
 
@@ -582,8 +580,10 @@ public class CodecUtils {
             }
 
             @Override
-            public NbtSerializer createSerializer() {
-                return NbtSerializer.of();
+            public NbtSerializer createSerializer(@Nullable NbtElement prefix) {
+                if (prefix == NbtEnd.INSTANCE) prefix = null;
+
+                return NbtSerializer.of(prefix);
             }
 
             @Override
@@ -660,8 +660,10 @@ public class CodecUtils {
             }
 
             @Override
-            public GsonSerializer createSerializer() {
-                return GsonSerializer.of();
+            public GsonSerializer createSerializer(@Nullable JsonElement prefix) {
+                if (prefix == JsonNull.INSTANCE) prefix = null;
+
+                return GsonSerializer.of(prefix);
             }
 
             @Override
