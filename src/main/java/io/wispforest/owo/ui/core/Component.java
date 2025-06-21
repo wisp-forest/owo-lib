@@ -7,7 +7,10 @@ import io.wispforest.owo.ui.util.FocusHandler;
 import io.wispforest.owo.util.EventSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -637,6 +640,20 @@ public interface Component extends PositionedRectangle {
     default void moveTo(int x, int y) {
         this.updateX(x);
         this.updateY(y);
+    }
+
+    /**
+     * @return a textual representation of the component's details for use in debugging with the inspector HUD.
+     *          Default implementation contains positioning, size and margins.
+     * @see OwoUIDrawContext#drawInspector(ParentComponent, double, double, boolean)
+     */
+    default MutableText inspectorDescriptor() {
+        final var margins = this.margins().get();
+        return Text.literal(this.x() + "," + this.y() + " (" + this.width() + "," + this.height() + ")")
+                .append(
+                        Text.literal(" <" + margins.top() + "," + margins.bottom() + "," + margins.left() + "," + margins.right() + ">")
+                                .setStyle(Style.EMPTY.withColor(Formatting.YELLOW))
+                );
     }
 
     enum FocusSource {

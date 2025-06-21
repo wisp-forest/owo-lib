@@ -1,13 +1,9 @@
 package io.wispforest.owo.ui.core;
 
 import com.google.common.base.Preconditions;
-import com.mojang.blaze3d.systems.RenderSystem;
-import io.wispforest.owo.client.OwoClient;
 import io.wispforest.owo.mixin.ui.DrawContextInvoker;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
 import io.wispforest.owo.ui.util.NinePatchTexture;
-import io.wispforest.owo.ui.util.ScissorStack;
-import io.wispforest.owo.util.pond.OwoTessellatorExtension;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
@@ -318,31 +314,32 @@ public class OwoUIDrawContext extends DrawContext {
 
                 int inspectorX = child.x() + 1;
                 int inspectorY = child.y() + child.height() + child.margins().get().bottom() + 1;
-                int inspectorHeight = textRenderer.fontHeight * 2 + 4;
+
+                final var message = Text.literal(child.getClass().getSimpleName())
+                        .append(child.id() == null ? "\n" : " '" + child.id() + "'\n")
+                        .append(child.inspectorDescriptor());
+                final var wrappedMessage = textRenderer.wrapLines(message, client.getWindow().getScaledWidth() + 4);
+                int inspectorWidth = wrappedMessage.stream().mapToInt(textRenderer::getWidth).max().orElse(30);
+                int inspectorHeight = textRenderer.fontHeight * wrappedMessage.size() + 4;
 
                 if (inspectorY > client.getWindow().getScaledHeight() - inspectorHeight) {
                     inspectorY -= child.fullSize().height() + inspectorHeight + 1;
-                    if (inspectorY < 0) inspectorY = 1;
                     if (child instanceof ParentComponent parentComponent) {
                         inspectorX += parentComponent.padding().get().left();
                         inspectorY += parentComponent.padding().get().top();
                     }
                 }
+                if (inspectorY < 0) inspectorY = 1;
 
-                final var nameText = Text.of(child.getClass().getSimpleName() + (child.id() != null ? " '" + child.id() + "'" : ""));
-                final var descriptor = Text.literal(child.x() + "," + child.y() + " (" + child.width() + "," + child.height() + ")"
-                        + " <" + margins.top() + "," + margins.bottom() + "," + margins.left() + "," + margins.right() + "> ");
-                if (child instanceof ParentComponent parentComponent) {
-                    var padding = parentComponent.padding().get();
-                    descriptor.append(" >" + padding.top() + "," + padding.bottom() + "," + padding.left() + "," + padding.right() + "<");
+                if (inspectorX > client.getWindow().getScaledWidth() - inspectorWidth) {
+                    inspectorX = client.getWindow().getScaledWidth() - inspectorWidth - 2;
                 }
+                if (inspectorX < 0) inspectorX = 1;
 
-                int width = Math.max(textRenderer.getWidth(nameText), textRenderer.getWidth(descriptor));
-                this.fill(renderLayer, inspectorX, inspectorY, inspectorX + width + 3, inspectorY + inspectorHeight, 0xA7000000);
-                this.drawRectOutline(renderLayer, inspectorX, inspectorY, width + 3, inspectorHeight, 0xA7000000);
+                this.fill(renderLayer, inspectorX, inspectorY, inspectorX + inspectorWidth + 3, inspectorY + inspectorHeight, 0xA7000000);
+                this.drawRectOutline(renderLayer, inspectorX, inspectorY, inspectorWidth + 3, inspectorHeight, 0xA7000000);
 
-                this.drawText(textRenderer, nameText, inspectorX + 2, inspectorY + 2, 0xFFFFFF, false);
-                this.drawText(textRenderer, descriptor, inspectorX + 2, inspectorY + textRenderer.fontHeight + 2, 0xFFFFFF, false);
+                this.drawWrappedText(textRenderer, message, inspectorX + 2, inspectorY + 2, inspectorWidth, 0xFFFFFF, false);
             }
         }
     }
