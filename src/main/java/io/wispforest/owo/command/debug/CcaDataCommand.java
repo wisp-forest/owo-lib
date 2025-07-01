@@ -9,6 +9,8 @@ import net.minecraft.command.argument.NbtPathArgumentType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.storage.NbtWriteView;
+import net.minecraft.util.ErrorReporter;
 import net.minecraft.util.Formatting;
 
 import static net.minecraft.server.command.CommandManager.argument;
@@ -23,7 +25,10 @@ public class CcaDataCommand {
 
     private static int executeDumpAll(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         final var player = context.getSource().getPlayer();
-        final var nbt = player.writeNbt(new NbtCompound()).getCompound("cardinal_components").orElseGet(NbtCompound::new);
+        final var writeView = NbtWriteView.create(new ErrorReporter.Logging(Owo.LOGGER));
+        player.saveData(writeView);
+
+        final var nbt = writeView.getNbt().getCompound("cardinal_components").orElseGet(NbtCompound::new);
 
         context.getSource().sendFeedback(() -> TextOps.concat(Owo.PREFIX, TextOps.withFormatting("CCA Data:", Formatting.GRAY)), false);
         context.getSource().sendFeedback(() -> NbtHelper.toPrettyPrintedText(nbt), false);
@@ -34,8 +39,11 @@ public class CcaDataCommand {
     private static int executeDumpPath(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         final var player = context.getSource().getPlayer();
         final var path = NbtPathArgumentType.getNbtPath(context, "path");
-        final var nbt = path.get(player.writeNbt(new NbtCompound())
-                .getCompound("cardinal_components").orElseGet(NbtCompound::new)).iterator().next();
+
+        final var writeView = NbtWriteView.create(new ErrorReporter.Logging(Owo.LOGGER));
+        player.saveData(writeView);
+
+        final var nbt = path.get(writeView.getNbt().getCompound("cardinal_components").orElseGet(NbtCompound::new)).iterator().next();
 
         context.getSource().sendFeedback(() -> TextOps.concat(Owo.PREFIX, TextOps.withFormatting("CCA Data:", Formatting.GRAY)), false);
         context.getSource().sendFeedback(() -> NbtHelper.toPrettyPrintedText(nbt), false);

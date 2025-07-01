@@ -1,6 +1,8 @@
 package io.wispforest.owo.client.texture;
 
+import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.render.RenderLayer;
@@ -89,6 +91,6 @@ public class AnimatedTextureDrawable implements Drawable {
             frame = 0;
         }
 
-        context.drawTexture(RenderLayer::getGuiTextured, this.texture, x, y, (frame / rows) * metadata.frameWidth(), (frame % rows) * metadata.frameHeight(), width, height, metadata.width(), metadata.height());
+        context.drawTexture(RenderPipelines.GUI_TEXTURED, this.texture, x, y, (frame / rows) * metadata.frameWidth(), (frame % rows) * metadata.frameHeight(), width, height, metadata.width(), metadata.height());
     }
 }

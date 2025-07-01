@@ -9,7 +9,7 @@ public record ServerAccess(ServerPlayerEntity player) implements
 
     @Override
     public MinecraftServer runtime() {
-        return player.server;
+        return player.getServer();
     }
 
     @Override

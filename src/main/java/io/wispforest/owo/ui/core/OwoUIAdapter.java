@@ -177,10 +177,9 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
 
             this.rootComponent.update(delta, mouseX, mouseY);
 
-            RenderSystem.enableScissor(0, 0, window.getFramebufferWidth(), window.getFramebufferHeight());
+            context.enableScissor(0, 0, window.getWidth(), window.getHeight());
             this.rootComponent.draw(owoContext, mouseX, mouseY, partialTicks, delta);
-            owoContext.draw();
-            RenderSystem.disableScissor();
+            context.disableScissor();
 
             final var hovered = this.rootComponent.childAt(mouseX, mouseY);
             if (!disposed && hovered != null) {
@@ -188,9 +187,7 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
             }
 
             if (this.enableInspector) {
-                context.getMatrices().translate(0, 0, this.inspectorZOffset);
                 owoContext.drawInspector(this.rootComponent, mouseX, mouseY, !this.globalInspector);
-                context.getMatrices().translate(0, 0, -this.inspectorZOffset);
             }
 
             if (this.captureFrame) RenderDoc.endFrameCapture();

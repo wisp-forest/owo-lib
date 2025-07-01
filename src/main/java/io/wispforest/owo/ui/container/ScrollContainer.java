@@ -118,15 +118,15 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
         }
 
         // Draw, adding the fractional part of the offset via matrix translation
-        context.getMatrices().push();
+        context.getMatrices().pushMatrix();
 
         double visualOffset = -(this.currentScrollPosition % 1d);
         if (visualOffset > 9999999e-7 || visualOffset < .1e-6) visualOffset = 0;
 
-        context.getMatrices().translate(this.direction.choose(visualOffset, 0), this.direction.choose(0, visualOffset), 0);
+        context.getMatrices().translate((float) this.direction.choose(visualOffset, 0), (float) this.direction.choose(0, visualOffset));
         this.drawChildren(context, mouseX, mouseY, partialTicks, delta, this.childView);
 
-        context.getMatrices().pop();
+        context.getMatrices().popMatrix();
 
         // -----
 

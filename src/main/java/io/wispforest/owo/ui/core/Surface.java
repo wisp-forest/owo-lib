@@ -1,22 +1,24 @@
 package io.wispforest.owo.ui.core;
 
-import io.wispforest.owo.mixin.ScreenAccessor;
-import io.wispforest.owo.shader.OwoBlurRenderer;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
+import io.wispforest.owo.ui.renderstate.BlurQuadElementRenderState;
+import io.wispforest.owo.ui.renderstate.CubeMapElementRenderState;
 import io.wispforest.owo.ui.util.NinePatchTexture;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.RotatingCubeMapRenderer;
 import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.client.gui.tooltip.TooltipBackgroundRenderer;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix3x2f;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 public interface Surface {
+
+    Surface BLANK = (context, component) -> {};
 
     Surface PANEL = (context, component) -> {
         context.drawPanel(component.x(), component.y(), component.width(), component.height(), false);
@@ -37,59 +39,43 @@ public interface Surface {
         );
     };
 
-    Surface OPTIONS_BACKGROUND = Surface.panorama(ScreenAccessor.owo$ROTATING_PANORAMA_RENDERER(), false)
-        .and(Surface.blur(5, 10));
-
     Surface TOOLTIP = tooltip(null);
 
     static Surface tooltip(@Nullable Identifier texture) {
         return (context, component) -> {
-            TooltipBackgroundRenderer.render(context, component.x() + 4, component.y() + 4, component.width() - 8, component.height() - 8, 0, texture);
+            TooltipBackgroundRenderer.render(context, component.x() + 4, component.y() + 4, component.width() - 8, component.height() - 8, texture);
         };
     }
 
     static Surface blur(float quality, float size) {
         return (context, component) -> {
-            OwoBlurRenderer.drawBlur(context, component, 16, quality, size);
+            context.state.addSimpleElement(new BlurQuadElementRenderState(
+                new Matrix3x2f(context.getMatrices()),
+                new ScreenRect(component.x(), component.y(), component.width(), component.height()),
+                context.scissorStack.peekLast(),
+                16, quality, size
+            ));
         };
     }
 
+    static Surface optionsBackground() {
+        return Surface.vanillaPanorama(false).and(Surface.blur(5, 10));
+    }
+
     static Surface vanillaPanorama(boolean alwaysVisible) {
-        return panorama(new RotatingCubeMapRenderer(ScreenAccessor.owo$PANORAMA_RENDERER()), alwaysVisible);
+        return panorama(MinecraftClient.getInstance().gameRenderer.getRotatingPanoramaRenderer(), alwaysVisible);
     }
 
     static Surface panorama(RotatingCubeMapRenderer renderer, boolean alwaysVisible) {
         return (context, component) -> {
             if (!alwaysVisible && MinecraftClient.getInstance().world != null) return;
-
-            var client = MinecraftClient.getInstance();
-
-            var window = client.getWindow();
-            var scale = window.getScaleFactor();
-
-            var x = component.x();
-            var y = component.y();
-            var width = component.width();
-            var height = component.height();
-
-            OwoUIDrawContext.viewportOverride = new ScreenRect(
-                (int) (x * scale),
-                (int) (window.getFramebufferHeight() - (y * scale) - height * scale),
-                MathHelper.clamp((int) (width * scale), 0, window.getFramebufferWidth()),
-                MathHelper.clamp((int) (height * scale), 0, window.getFramebufferHeight())
-            );
-
-            try {
-                var delta = client.getRenderTickCounter().getDynamicDeltaTicks();
-                renderer.render(context, width, height, 1.0F, delta);
-                context.draw();
-            } finally {
-                OwoUIDrawContext.viewportOverride = null;
-            }
+            context.state.addSpecialElement(new CubeMapElementRenderState(
+                renderer, true,
+                new ScreenRect(component.x(), component.y(), component.width(), component.height()),
+                context.scissorStack.peekLast()
+            ));
         };
     }
-
-    Surface BLANK = (context, component) -> {};
 
     static Surface flat(int color) {
         return (context, component) -> context.fill(component.x(), component.y(), component.x() + component.width(), component.y() + component.height(), color);
@@ -101,7 +87,7 @@ public interface Surface {
 
     static Surface tiled(Identifier texture, int textureWidth, int textureHeight) {
         return (context, component) -> {
-            context.drawTexture(RenderLayer::getGuiTextured, texture, component.x(), component.y(), 0, 0, component.width(), component.height(), textureWidth, textureHeight);
+            context.drawTexture(RenderPipelines.GUI_TEXTURED, texture, component.x(), component.y(), 0, 0, component.width(), component.height(), textureWidth, textureHeight);
         };
     }
 
@@ -152,7 +138,7 @@ public interface Surface {
                     ));
                 }
                 case "panel-with-inset" -> surface.and(panelWithInset(UIParsing.parseUnsignedInt(child)));
-                case "options-background" -> surface.and(OPTIONS_BACKGROUND);
+                case "options-background" -> surface.and(optionsBackground());
                 case "vanilla-translucent" -> surface.and(VANILLA_TRANSLUCENT);
                 case "panel-inset" -> surface.and(PANEL_INSET);
                 case "tooltip" -> surface.and(TOOLTIP);

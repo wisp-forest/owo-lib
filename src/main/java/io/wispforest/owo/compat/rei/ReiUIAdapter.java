@@ -3,7 +3,6 @@ package io.wispforest.owo.compat.rei;
 import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.core.Sizing;
-import io.wispforest.owo.ui.util.ScissorStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
@@ -12,7 +11,6 @@ import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
-import net.minecraft.client.util.math.MatrixStack;
 
 import java.util.List;
 import java.util.function.BiFunction;
@@ -99,11 +97,9 @@ public class ReiUIAdapter<T extends ParentComponent> extends Widget {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float partialTicks) {
-        ScissorStack.push(this.adapter.x(), this.adapter.y(), this.adapter.width(), this.adapter.height(), context);
+        context.enableScissor(this.adapter.x(), this.adapter.y(), this.adapter.width(), this.adapter.height());
         this.adapter.render(context, mouseX, mouseY, partialTicks);
-        ScissorStack.pop();
-
-        context.draw();
+        context.disableScissor();
     }
 
     @Override

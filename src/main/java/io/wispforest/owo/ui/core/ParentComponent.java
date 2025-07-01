@@ -149,11 +149,10 @@ public interface ParentComponent extends Component {
             context.push();
             for (; i >= 0; i--) {
                 if (i > 0 && hoveredDescendants.get(i).parent() != hoveredDescendants.get(i - 1)) break;
-                context.translate(0, 0, hoveredDescendants.get(i).zIndex());
+                context.translate(0, 0);
             }
 
             current.drawTooltip(context, mouseX, mouseY, partialTicks, delta);
-            context.draw();
             context.pop();
 
             break;

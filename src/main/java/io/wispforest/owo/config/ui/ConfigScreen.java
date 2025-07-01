@@ -100,30 +100,6 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
         return new ConfigScreen(modelId, config, parent);
     }
 
-    /**
-     * @deprecated Use {@link ConfigScreenProviders#register(String, Function)} instead
-     */
-    @Deprecated(forRemoval = true)
-    public static <S extends ConfigScreen> void registerProvider(String modId, Function<Screen, S> supplier) {
-        ConfigScreenProviders.registerOwoConfigScreen(modId, supplier);
-    }
-
-    /**
-     * @deprecated Use {@link ConfigScreenProviders#get(String)} instead
-     */
-    @Deprecated(forRemoval = true)
-    public static @Nullable Function<Screen, ? extends ConfigScreen> getProvider(String modId) {
-        return ConfigScreenProviders.getOwoProvider(modId);
-    }
-
-    /**
-     * @deprecated Use {@link ConfigScreenProviders#forEach(BiConsumer)} instead
-     */
-    @Deprecated(forRemoval = true)
-    public static void forEachProvider(BiConsumer<String, Function<Screen, ? extends ConfigScreen>> action) {
-        ConfigScreenProviders.forEachOwoProvider(action);
-    }
-
     @Override
     @SuppressWarnings({"ConstantConditions", "unchecked"})
     protected void build(FlowLayout rootComponent) {
@@ -131,7 +107,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
 
         rootComponent.childById(LabelComponent.class, "title").text(Text.translatable("text.config." + this.config.name() + ".title"));
         if (this.client.world == null) {
-            rootComponent.surface(Surface.OPTIONS_BACKGROUND);
+            rootComponent.surface(Surface.optionsBackground());
         }
 
         rootComponent.childById(ButtonComponent.class, "done-button").onPress(button -> this.close());

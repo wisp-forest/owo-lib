@@ -2,6 +2,8 @@ package io.wispforest.owo.ui.util;
 
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.util.math.MatrixStack;
+import org.joml.Matrix3x2f;
+import org.joml.Matrix3x2fStack;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
@@ -10,47 +12,37 @@ import org.joml.Quaternionf;
  */
 public interface MatrixStackTransformer {
 
-    default MatrixStackTransformer translate(double x, double y, double z) {
-        this.getMatrixStack().translate(x, y, z);
+    default MatrixStackTransformer translate(double x, double y) {
+        this.getMatrixStack().translate((float) x, (float) y);
         return this;
     }
 
-    default MatrixStackTransformer translate(float x, float y, float z) {
-        this.getMatrixStack().translate(x, y, z);
+    default MatrixStackTransformer translate(float x, float y) {
+        this.getMatrixStack().translate(x, y);
         return this;
     }
 
-    default MatrixStackTransformer scale(float x, float y, float z) {
-        this.getMatrixStack().scale(x, y, z);
-        return this;
-    }
-
-    default MatrixStackTransformer multiply(Quaternionf quaternion) {
-        this.getMatrixStack().multiply(quaternion);
-        return this;
-    }
-
-    default MatrixStackTransformer multiply(Quaternionf quaternion, float originX, float originY, float originZ) {
-        this.getMatrixStack().multiply(quaternion, originX, originY, originZ);
+    default MatrixStackTransformer scale(float x, float y) {
+        this.getMatrixStack().scale(x, y);
         return this;
     }
 
     default MatrixStackTransformer push() {
-        this.getMatrixStack().push();
+        this.getMatrixStack().pushMatrix();
         return this;
     }
 
     default MatrixStackTransformer pop() {
-        this.getMatrixStack().pop();
+        this.getMatrixStack().popMatrix();
         return this;
     }
 
-    default MatrixStackTransformer multiplyPositionMatrix(Matrix4f matrix) {
-        this.getMatrixStack().multiplyPositionMatrix(matrix);
+    default MatrixStackTransformer mul(Matrix3x2f matrix) {
+        this.getMatrixStack().mul(matrix);
         return this;
     }
 
-    default MatrixStack getMatrixStack(){
+    default Matrix3x2fStack getMatrixStack(){
         throw new IllegalStateException("getMatrices() method hasn't been override leading to exception!");
     }
 }

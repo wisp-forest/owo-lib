@@ -11,6 +11,7 @@ import io.wispforest.owo.ui.util.NinePatchTexture;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.Observable;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.text.Text;
@@ -74,10 +75,10 @@ public class SlimSliderComponent extends BaseComponent {
     public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
         if (this.axis == Axis.HORIZONTAL) {
             NinePatchTexture.draw(TRACK_TEXTURE, context, this.x + 1, this.y + 3, this.width - 2, 3);
-            context.drawTexture(RenderLayer::getGuiTextured, TEXTURE, (int) (this.x + (this.width - 4) * this.value.get()), this.y + 1, 0, 3, 4, 7, 4, 7, 16, 16);
+            context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, (int) (this.x + (this.width - 4) * this.value.get()), this.y + 1, 0, 3, 4, 7, 4, 7, 16, 16);
         } else {
             NinePatchTexture.draw(TRACK_TEXTURE, context, this.x + 3, this.y + 1, 3, this.height - 2);
-            context.drawTexture(RenderLayer::getGuiTextured, TEXTURE, this.x + 1, (int) (this.y + (this.height - 4) * this.value.get()), 4, 3, 7, 4, 7, 4, 16, 16);
+            context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, this.x + 1, (int) (this.y + (this.height - 4) * this.value.get()), 4, 3, 7, 4, 7, 4, 16, 16);
         }
     }
 
