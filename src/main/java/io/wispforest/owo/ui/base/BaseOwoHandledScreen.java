@@ -92,6 +92,19 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
                 this.invalid = true;
             }
         }
+
+        ScreenEvents.afterRender(this).register((screen, drawContext, mouseX, mouseY, tickDelta) -> {
+            this.drawComponentTooltip(drawContext, mouseX, mouseY, tickDelta);
+        });
+    }
+
+    /**
+     * Draw the tooltip of this screen's component tree, invoked
+     * by {@link ScreenEvent.Render.Post} so that tooltips are
+     * properly rendered above content
+     */
+    protected void drawComponentTooltip(DrawContext drawContext, int mouseX, int mouseY, float tickDelta) {
+        if (this.uiAdapter != null) this.uiAdapter.drawTooltip(drawContext, mouseX, mouseY, tickDelta);
     }
 
     /**
@@ -400,12 +413,8 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
     static {
         NeoForge.EVENT_BUS.<ScreenEvent.Render.Post>addListener((event) -> {
             if (event.getScreen() instanceof BaseOwoHandledScreen<?, ?> screen) {
-                screen.renderTooltip(event.getGuiGraphics(), event.getMouseX(), event.getMouseY(), event.getPartialTick());
+                screen.drawComponentTooltip(event.getGuiGraphics(), event.getMouseX(), event.getMouseY(), event.getPartialTick());
             }
         });
-    }
-
-    private void renderTooltip(DrawContext drawContext, int mouseX, int mouseY, float tickDelta) {
-        if (this.uiAdapter != null) this.uiAdapter.drawTooltip(drawContext, mouseX, mouseY, tickDelta);
     }
 }
