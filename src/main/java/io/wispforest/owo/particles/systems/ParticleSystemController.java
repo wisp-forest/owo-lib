@@ -5,20 +5,18 @@ import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.network.NetworkException;
 import io.wispforest.owo.network.OwoHandshake;
 import io.wispforest.endec.Endec;
+import io.wispforest.owo.network.neoforge.NeoOwoNetworking;
 import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.ReflectionUtils;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.neoforged.api.distmarker.Dist;
@@ -26,6 +24,7 @@ import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.loading.FMLLoader;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -91,13 +90,15 @@ public class ParticleSystemController {
             (pos, instance) -> new ParticleSystemPayload(payloadId, pos, instance)
         );
 
-        PayloadTypeRegistry.playS2C().register(payloadId, CodecUtils.toPacketCodec(endec));
+        NeoOwoNetworking.registerClientCodec(payloadId, CodecUtils.toPacketCodec(endec));
 
         OwoHandshake.enable();
         OwoHandshake.requireHandshake();
 
         if (FMLLoader.getDist() == Dist.CLIENT) {
-            ClientPlayNetworking.registerGlobalReceiver(payloadId, new Client()::handler);
+            NeoOwoNetworking.registerClientPayload(payloadId, (payload, player) -> new Client().handler(payload, player.getWorld()));
+        } else {
+            NeoOwoNetworking.registerClientPayload(payloadId, NeoOwoNetworking.PayloadHandler.empty());
         }
 
         REGISTERED_CONTROLLERS.put(channelId, this);
@@ -161,8 +162,8 @@ public class ParticleSystemController {
     <T> void sendPacket(ParticleSystem<T> particleSystem, ServerWorld world, Vec3d pos, T data) {
         ParticleSystemPayload payload = new ParticleSystemPayload(payloadId, pos, new ParticleSystemInstance<>(particleSystem, data));
 
-        for (var player : PlayerLookup.tracking(world, BlockPos.ofFloored(pos))) {
-            ServerPlayNetworking.send(player, payload);
+        for (var player : Collections.unmodifiableCollection(world.getChunkManager().chunkLoadingManager.getPlayersWatchingChunk(new ChunkPos(BlockPos.ofFloored(pos)), false))) {
+            player.networkHandler.send(payload);
         }
     }
 
@@ -199,8 +200,8 @@ public class ParticleSystemController {
 
     @OnlyIn(Dist.CLIENT)
     private static class Client {
-        private void handler(ParticleSystemPayload payload, ClientPlayNetworking.Context context) {
-            payload.instance.execute(context.client().world, payload.pos);
+        private void handler(ParticleSystemPayload payload, World world) {
+            payload.instance.execute(world, payload.pos);
         }
     }
 }

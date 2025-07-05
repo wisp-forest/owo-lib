@@ -4,7 +4,6 @@
   "package": "io.wispforest.owo.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
-    "BufferBuilderAccessor",
     "CachedRegistryInfoGetterAccessor",
     "ClientConnectionMixin",
     "ComponentTypeBuilderMixin",
@@ -15,7 +14,6 @@
     "NbtCompoundMixin",
     "PacketByteBufMixin",
     "RegistryOpsAccessor",
-    "ScreenAccessor",
     "ScreenHandlerInvoker",
     "ScreenHandlerMixin",
     "ServerCommonNetworkHandlerAccessor",
@@ -45,9 +43,11 @@
     "ui.SlotAccessor",
     "ui.SlotMixin",
     "ui.access.BlockEntityAccessor",
-    "ffapi.NeoNetworkRegistrarMixin"
+    "neoforge.NetworkRegistryMixin"
   ],
   "client": [
+    "BufferBuilderAccessor",
+    "ScreenAccessor",
     "ClientCommonNetworkHandlerAccessor",
     "ClientConfigurationNetworkHandlerMixin",
     "ClientLoginNetworkHandlerAccessor",
@@ -88,7 +88,9 @@
     "ui.layers.HandledScreenAccessor",
     "ui.layers.KeyboardMixin",
     "ui.layers.MouseMixin",
-    "ui.layers.ScreenMixin"
+    "ui.layers.ScreenMixin",
+    "neoforge.NetworkRegistryMixin",
+    "neoforge.ClientConnectionDisconnectHookMixin"
   ],
   "server": [
     "MainMixin"

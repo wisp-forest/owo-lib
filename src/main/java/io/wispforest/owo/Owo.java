@@ -2,6 +2,7 @@ package io.wispforest.owo;
 
 import io.wispforest.owo.client.screens.ScreenInternals;
 import io.wispforest.owo.command.debug.OwoDebugCommands;
+import io.wispforest.owo.network.neoforge.NeoOwoNetworking;
 import io.wispforest.owo.ops.LootOps;
 import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.Wisdom;
@@ -16,6 +17,9 @@ import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
 
 import static io.wispforest.owo.ops.TextOps.withColor;
 
@@ -46,17 +50,23 @@ public class Owo {
         DEBUG = debug;
     }
 
+    @Nullable
+    private static IEventBus MOD_BUS = null;
+
     public Owo(IEventBus modBus) {
+        MOD_BUS = modBus;
+
         LootOps.registerListener();
-        ScreenInternals.init();
 
         modBus.addListener((FMLLoadCompleteEvent event) -> OwoFreezer.freeze());
 
         Wisdom.spread();
 
-        if (!DEBUG) return;
+        modBus.addListener(NeoOwoNetworking::onNetworkRegister);
 
-        OwoDebugCommands.register(modBus);
+        if (DEBUG) {
+            OwoDebugCommands.register(modBus);
+        }
     }
 
     @ApiStatus.Internal
@@ -80,4 +90,7 @@ public class Owo {
         return ServerLifecycleHooks.getCurrentServer();
     }
 
+    public static IEventBus getModBus() {
+        return Objects.requireNonNull(MOD_BUS, "Mod bus attempted to be gotten before time!");
+    }
 }
