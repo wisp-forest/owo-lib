@@ -2,12 +2,12 @@ package io.wispforest.owo.itemgroup;
 
 import io.wispforest.owo.client.texture.AnimatedTextureDrawable;
 import io.wispforest.owo.client.texture.SpriteSheetMetadata;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * An icon used for rendering on buttons in {@link OwoItemGroup}s
@@ -17,7 +17,7 @@ import net.minecraft.util.Identifier;
 @FunctionalInterface
 public interface Icon {
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     void render(DrawContext context, int x, int y, int mouseX, int mouseY, float delta);
 
     static Icon of(ItemStack stack) {

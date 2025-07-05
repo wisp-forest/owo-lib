@@ -18,6 +18,6 @@
                 <blur quality="3" size="5"/>
             </surface>
             <!-- invalid xml -->
-        </flow-layout
+        </flow-layout>
     </components>
 </owo-ui>

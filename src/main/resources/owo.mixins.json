@@ -40,13 +40,12 @@
     "registry.SimpleRegistryMixin",
     "text.LanguageMixin",
     "text.TextCodecsMixin",
-    "text.TranslatableTextContentMixin",
-    "text.stapi.SystemDelegatedLanguageFixin",
     "tweaks.EulaReaderMixin",
     "tweaks.LevelInfoMixin",
     "ui.SlotAccessor",
     "ui.SlotMixin",
-    "ui.access.BlockEntityAccessor"
+    "ui.access.BlockEntityAccessor",
+    "ffapi.NeoNetworkRegistrarMixin"
   ],
   "client": [
     "ClientCommonNetworkHandlerAccessor",

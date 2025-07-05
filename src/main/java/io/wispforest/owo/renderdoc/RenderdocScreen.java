@@ -39,6 +39,8 @@ public class RenderdocScreen extends BaseOwoScreen<FlowLayout> implements Comman
         rootComponent.child(
                         Containers.verticalFlow(Sizing.content(), Sizing.content())
                                 .child(Components.label(Text.literal("RenderDoc Controls")).shadow(true).margins(Insets.top(5).withBottom(10)))
+                                .child(Components.label(Text.literal("Such has been disabled at the request of ATM!")).shadow(true).margins(Insets.top(0).withBottom(5)))
+                                .child(Components.button(Text.literal("Close"), buttonComponent -> this.close()))
                                 .child(
                                         Containers.grid(Sizing.content(), Sizing.content(), 2, 2)
                                                 .child(overlayControl(Text.of("Enabled"), overlayState, RenderDoc.OverlayOption.ENABLED), 0, 0)

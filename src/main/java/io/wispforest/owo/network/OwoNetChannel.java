@@ -13,14 +13,11 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
@@ -33,6 +30,9 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.loading.FMLLoader;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -159,7 +159,7 @@ public class OwoNetChannel {
             serverHandlers.get(endecsByClass.get(payload.message().getClass()).serverHandlerIndex).handle(payload.message, new ServerAccess(context.player()));
         });
 
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+        if (FMLLoader.getDist() == Dist.CLIENT) {
             ClientPlayNetworking.registerGlobalReceiver(this.packetId, (payload, context) -> {
                 clientHandlers.get(endecsByClass.get(payload.message.getClass()).clientHandlerIndex).handle(payload.message, new ClientAccess(context.player().networkHandler));
             });
@@ -282,13 +282,13 @@ public class OwoNetChannel {
         }
 
         int index = this.clientHandlers.size();
-        this.createEndec(messageClass, index, EnvType.CLIENT, endec);
+        this.createEndec(messageClass, index, Dist.CLIENT, endec);
         this.clientHandlers.add((ChannelHandler<Record, ClientAccess>) handler);
     }
 
     private <R extends Record> void registerClientboundDeferred(Class<R> messageClass, Supplier<StructEndec<R>> endec) {
         int index = this.clientHandlers.size();
-        this.createEndec(messageClass, index, EnvType.CLIENT, endec);
+        this.createEndec(messageClass, index, Dist.CLIENT, endec);
         this.clientHandlers.add(null);
 
         this.deferredClientEndecs.put(messageClass, index);
@@ -297,7 +297,7 @@ public class OwoNetChannel {
     @SuppressWarnings("unchecked")
     private <R extends Record> void registerServerbound(Class<R> messageClass, ChannelHandler<R, ServerAccess> handler, Supplier<StructEndec<R>> endec) {
         int index = this.serverHandlers.size();
-        this.createEndec(messageClass, index, EnvType.SERVER, endec);
+        this.createEndec(messageClass, index, Dist.DEDICATED_SERVER, endec);
         this.serverHandlers.add((ChannelHandler<Record, ServerAccess>) handler);
     }
 
@@ -315,7 +315,7 @@ public class OwoNetChannel {
                 : ServerPlayNetworking.canSend(networkHandler, this.packetId);
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public boolean canSendToServer() {
         if (required) return true;
 
@@ -335,8 +335,8 @@ public class OwoNetChannel {
      * @return The client handle of this channel
      */
     public ClientHandle clientHandle() {
-        if (FabricLoader.getInstance().getEnvironmentType() != EnvType.CLIENT)
-            throw new NetworkException("Cannot obtain client handle in environment type '" + FabricLoader.getInstance().getEnvironmentType() + "'");
+        if (FMLLoader.getDist() != Dist.CLIENT)
+            throw new NetworkException("Cannot obtain client handle in environment type '" + FMLLoader.getDist() + "'");
 
         if (this.clientHandle == null) this.clientHandle = new ClientHandle();
         return clientHandle;
@@ -429,17 +429,17 @@ public class OwoNetChannel {
         return serverHandle;
     }
 
-    private <R extends Record> void createEndec(Class<R> messageClass, int handlerIndex, EnvType target, Supplier<StructEndec<R>> supplier) {
+    private <R extends Record> void createEndec(Class<R> messageClass, int handlerIndex, Dist target, Supplier<StructEndec<R>> supplier) {
         OwoFreezer.checkRegister("Network handlers");
 
         var endec = endecsByClass.get(messageClass);
         if (endec == null) {
             final var indexedEndec = IndexedEndec.create(messageClass, supplier.get(), handlerIndex, target);
             endecsByClass.put(messageClass, indexedEndec);
-            endecsByIndex.put(target == EnvType.CLIENT ? -handlerIndex : handlerIndex, indexedEndec);
+            endecsByIndex.put(target == Dist.CLIENT ? -handlerIndex : handlerIndex, indexedEndec);
         } else if (endec.handlerIndex(target) == -1) {
             endec.setHandlerIndex(handlerIndex, target);
-            endecsByIndex.put(target == EnvType.CLIENT ? -handlerIndex : handlerIndex, endec);
+            endecsByIndex.put(target == Dist.CLIENT ? -handlerIndex : handlerIndex, endec);
         } else {
             throw new IllegalStateException("Message class '" + messageClass.getName() + "' is already registered for target environment " + target);
         }
@@ -546,7 +546,7 @@ public class OwoNetChannel {
     }
 
     private void verify() {
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+        if (FMLLoader.getDist() == Dist.CLIENT) {
             if (!this.deferredClientEndecs.isEmpty()) {
                 throw new NetworkException("Some deferred client handlers for channel " + this.packetId + " haven't been registered: " + deferredClientEndecs.keySet().stream().map(Class::getName).collect(Collectors.joining(", ")));
             }
@@ -573,22 +573,22 @@ public class OwoNetChannel {
             this.recordClass = recordClass;
         }
 
-        public static <R extends Record> IndexedEndec<R> create(Class<R> rClass, StructEndec<R> endec, int index, EnvType target) {
+        public static <R extends Record> IndexedEndec<R> create(Class<R> rClass, StructEndec<R> endec, int index, Dist target) {
             return new IndexedEndec<>(rClass, endec).setHandlerIndex(index, target);
         }
 
-        public IndexedEndec<R> setHandlerIndex(int index, EnvType target) {
+        public IndexedEndec<R> setHandlerIndex(int index, Dist target) {
             switch (target) {
                 case CLIENT -> this.clientHandlerIndex = index;
-                case SERVER -> this.serverHandlerIndex = index;
+                case DEDICATED_SERVER -> this.serverHandlerIndex = index;
             }
             return this;
         }
 
-        public int handlerIndex(EnvType target) {
+        public int handlerIndex(Dist target) {
             return switch (target) {
                 case CLIENT -> clientHandlerIndex;
-                case SERVER -> serverHandlerIndex;
+                case DEDICATED_SERVER -> serverHandlerIndex;
             };
         }
 

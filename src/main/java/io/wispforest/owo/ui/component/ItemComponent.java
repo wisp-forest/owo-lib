@@ -9,7 +9,6 @@ import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
-import net.fabricmc.fabric.api.client.rendering.v1.TooltipComponentCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.render.DiffuseLighting;
@@ -64,7 +63,8 @@ public class ItemComponent extends BaseComponent {
 
     @Override
     public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
-        final boolean notSideLit = !this.itemRenderer.getModel(this.stack, null, null, 0).isSideLit();
+//        final boolean notSideLit = !this.itemRenderer.getModel(this.stack, null, null, 0).isSideLit();
+        final boolean notSideLit = true; // TODO: figure out why this fixes item rendering - basique
         if (notSideLit) {
             DiffuseLighting.disableGuiDepthLighting();
         }
@@ -166,12 +166,9 @@ public class ItemComponent extends BaseComponent {
                 .map(TooltipComponent::of)
                 .forEach(tooltip::add);
 
-        stack.getTooltipData().ifPresent(data -> {
-            tooltip.add(1, Objects.requireNonNullElseGet(
-                    TooltipComponentCallback.EVENT.invoker().getComponent(data),
-                    () -> TooltipComponent.of(data)
-            ));
-        });
+        try {
+            stack.getTooltipData().ifPresent(data -> tooltip.add(1, TooltipComponent.of(data)));
+        } catch (IllegalArgumentException ignore) {}
 
         return tooltip;
     }

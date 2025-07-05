@@ -11,19 +11,19 @@ import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.ReflectionUtils;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.loading.FMLLoader;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.HashMap;
@@ -96,7 +96,7 @@ public class ParticleSystemController {
         OwoHandshake.enable();
         OwoHandshake.requireHandshake();
 
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+        if (FMLLoader.getDist() == Dist.CLIENT) {
             ClientPlayNetworking.registerGlobalReceiver(payloadId, new Client()::handler);
         }
 
@@ -167,7 +167,7 @@ public class ParticleSystemController {
     }
 
     private void verify() {
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+        if (FMLLoader.getDist() == Dist.CLIENT) {
             for (ParticleSystem<?> system : systemsByIndex.values()) {
                 if (system.handler == null) {
                     throw new NetworkException("Some particle systems of " + channelId + " don't have handlers registered");
@@ -197,7 +197,7 @@ public class ParticleSystemController {
         }
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     private static class Client {
         private void handler(ParticleSystemPayload payload, ClientPlayNetworking.Context context) {
             payload.instance.execute(context.client().world, payload.pos);

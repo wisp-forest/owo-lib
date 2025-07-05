@@ -8,14 +8,17 @@ import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
 import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
 import io.wispforest.owo.moddata.ModDataConsumer;
 import io.wispforest.owo.util.pond.OwoItemExtensions;
-import net.fabricmc.fabric.api.event.registry.RegistryEntryAddedCallback;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemGroups;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
+import net.neoforged.neoforge.registries.callback.AddCallback;
+import net.neoforged.neoforge.registries.callback.RegistryCallback;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
@@ -122,7 +125,7 @@ public class OwoItemGroupLoader implements ModDataConsumer {
 
             Registries.ITEM.stream()
                     .filter(item -> ((OwoItemExtensions) item).owo$group() == targetGroup)
-                    .forEach(item -> ((OwoItemExtensions) item).owo$setGroup(wrapper));
+                    .forEach(item -> ((OwoItemExtensions) item).owo$setGroup(() -> wrapper));
         }
     }
 
@@ -131,8 +134,8 @@ public class OwoItemGroupLoader implements ModDataConsumer {
         return "item_group_tabs";
     }
 
-    static {
-        RegistryEntryAddedCallback.event(Registries.ITEM_GROUP).register((rawId, id, group) -> {
+    public static void initItemGroupCallback(){
+        Registries.ITEM_GROUP.addCallback((AddCallback<ItemGroup>) (registry, rawId, id, group) -> {
             OwoItemGroupLoader.onGroupCreated(group);
         });
     }

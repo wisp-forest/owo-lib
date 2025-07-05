@@ -11,8 +11,6 @@ import io.wispforest.endec.Endec;
 import io.wispforest.owo.serialization.RegistriesAttribute;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.util.pond.OwoScreenHandlerExtension;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -21,6 +19,8 @@ import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -130,7 +130,7 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
     }
 
     @Unique
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     private void owo$sendToServer(CustomPayload payload) {
         ClientPlayNetworking.send(payload);
     }

@@ -118,7 +118,7 @@ public final class WorldOps {
         player.addExperience(0);
 
         player.getStatusEffects().forEach(effect -> {
-            player.networkHandler.sendPacket(new EntityStatusEffectS2CPacket(player.getId(), effect, false));
+            player.networkHandler.send(new EntityStatusEffectS2CPacket(player.getId(), effect, false));
         });
     }
 

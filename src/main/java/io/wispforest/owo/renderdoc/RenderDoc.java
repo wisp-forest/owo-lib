@@ -28,38 +28,41 @@ public final class RenderDoc {
     private static final RenderdocLibrary.RenderdocApi renderdoc;
 
     static {
-        var apiPointer = new PointerByReference();
         RenderdocLibrary.RenderdocApi apiInstance = null;
+        if (Owo.DEBUG) {
+            var apiPointer = new PointerByReference();
 
-        var os = Util.getOperatingSystem();
+            var os = Util.getOperatingSystem();
 
-        if (os == Util.OperatingSystem.WINDOWS || os == Util.OperatingSystem.LINUX) {
-            try {
-                RenderdocLibrary renderdocLibrary;
-                if (os == Util.OperatingSystem.WINDOWS) {
-                    renderdocLibrary = Native.load("renderdoc", RenderdocLibrary.class);
-                } else {
-                    int flags = DynamicLinkLoader.RTLD_NOW | DynamicLinkLoader.RTLD_NOLOAD;
-                    if (DynamicLinkLoader.dlopen("librenderdoc.so", flags) == 0) {
-                        throw new UnsatisfiedLinkError();
+            if (os == Util.OperatingSystem.WINDOWS || os == Util.OperatingSystem.LINUX) {
+                try {
+                    RenderdocLibrary renderdocLibrary;
+                    if (os == Util.OperatingSystem.WINDOWS) {
+                        renderdocLibrary = Native.load("renderdoc", RenderdocLibrary.class);
+                    } else {
+                        int flags = DynamicLinkLoader.RTLD_NOW | DynamicLinkLoader.RTLD_NOLOAD;
+                        if (DynamicLinkLoader.dlopen("librenderdoc.so", flags) == 0) {
+                            throw new UnsatisfiedLinkError();
+                        }
+
+                        renderdocLibrary = Native.load("renderdoc", RenderdocLibrary.class, Map.of(Library.OPTION_OPEN_FLAGS, flags));
                     }
 
-                    renderdocLibrary = Native.load("renderdoc", RenderdocLibrary.class, Map.of(Library.OPTION_OPEN_FLAGS, flags));
-                }
+                    int initResult = renderdocLibrary.RENDERDOC_GetAPI(10500, apiPointer);
+                    if (initResult != 1) {
+                        Owo.LOGGER.error("Could not connect to RenderDoc API, return code: {}", initResult);
+                    } else {
+                        apiInstance = new RenderdocLibrary.RenderdocApi(apiPointer.getValue());
 
-                int initResult = renderdocLibrary.RENDERDOC_GetAPI(10500, apiPointer);
-                if (initResult != 1) {
-                    Owo.LOGGER.error("Could not connect to RenderDoc API, return code: {}", initResult);
-                } else {
-                    apiInstance = new RenderdocLibrary.RenderdocApi(apiPointer.getValue());
-
-                    var major = new IntByReference();
-                    var minor = new IntByReference();
-                    var patch = new IntByReference();
-                    apiInstance.GetAPIVersion.call(major, minor, patch);
-                    Owo.LOGGER.info("Connected to RenderDoc API v" + major.getValue() + "." + minor.getValue() + "." + patch.getValue());
+                        var major = new IntByReference();
+                        var minor = new IntByReference();
+                        var patch = new IntByReference();
+                        apiInstance.GetAPIVersion.call(major, minor, patch);
+                        Owo.LOGGER.info("Connected to RenderDoc API v" + major.getValue() + "." + minor.getValue() + "." + patch.getValue());
+                    }
+                } catch (UnsatisfiedLinkError ignored) {
                 }
-            } catch (UnsatisfiedLinkError ignored) {}
+            }
         }
 
         renderdoc = apiInstance;

@@ -3,13 +3,9 @@ package io.wispforest.owo.ui.util;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.PositionedRectangle;
 import io.wispforest.owo.ui.core.Size;
-import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.resource.JsonDataLoader;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
@@ -152,7 +148,7 @@ public class NinePatchTexture {
         action.accept(MetadataLoader.LOADED_TEXTURES.get(texture));
     }
 
-    public static class MetadataLoader extends JsonDataLoader implements IdentifiableResourceReloadListener {
+    public static class MetadataLoader extends JsonDataLoader {
 
         private static final Map<Identifier, NinePatchTexture> LOADED_TEXTURES = new HashMap<>();
 
@@ -160,7 +156,7 @@ public class NinePatchTexture {
             super(new Gson(), "nine_patch_textures");
         }
 
-        @Override
+//        @Override
         public Identifier getFabricId() {
             return Identifier.of("owo", "nine_patch_metadata");
         }

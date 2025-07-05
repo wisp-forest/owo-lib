@@ -11,15 +11,12 @@ import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.ServicesFrozenException;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientConfigurationConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientConfigurationNetworking;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerConfigurationConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerConfigurationNetworking;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientConfigurationNetworkHandler;
 import net.minecraft.network.codec.PacketCodec;
@@ -30,7 +27,11 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.loading.FMLLoader;
 import org.jetbrains.annotations.ApiStatus;
+import org.sinytra.fabric.networking_api.client.NeoClientConfigurationNetworking;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -78,7 +79,7 @@ public final class OwoHandshake {
         ServerConfigurationConnectionEvents.CONFIGURE.register(OwoHandshake::configureStart);
         ServerConfigurationNetworking.registerGlobalReceiver(HandshakeResponse.ID, OwoHandshake::syncServer);
 
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+        if (FMLLoader.getDist() == Dist.CLIENT) {
             if (!ENABLED) {
                 PayloadTypeRegistry.configurationS2C().register(HandshakeOff.ID, PacketCodec.unit(new HandshakeOff()));
                 ClientConfigurationNetworking.registerGlobalReceiver(HandshakeOff.ID, (payload, context) -> {});
@@ -128,7 +129,7 @@ public final class OwoHandshake {
         Owo.LOGGER.info("[Handshake] Sending channel packet");
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     private static void syncClient(HandshakeRequest request, ClientConfigurationNetworking.Context context) {
         Owo.LOGGER.info("[Handshake] Sending client channels");
         QUERY_RECEIVED = true;
@@ -159,9 +160,10 @@ public final class OwoHandshake {
         Owo.LOGGER.info("[Handshake] Handshake completed successfully");
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     private static void handleReadyClient(ClientConfigurationNetworkHandler handler, MinecraftClient client) {
-        if (ClientConfigurationNetworking.canSend(CHANNEL_ID) || !HANDSHAKE_REQUIRED || !ENABLED) return;
+        // TODO: Report issues with ClientConfigurationNetworking.canSend(CHANNEL_ID)
+        if (NeoClientConfigurationNetworking.canSend(CHANNEL_ID) || !HANDSHAKE_REQUIRED || !ENABLED) return;
 
         client.execute(() -> {
             ((ClientCommonNetworkHandlerAccessor) handler)

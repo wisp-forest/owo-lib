@@ -3,6 +3,7 @@ package io.wispforest.owo.ui.core;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.Owo;
+import io.wispforest.owo.mixin.ScreenAccessor;
 import io.wispforest.owo.renderdoc.RenderDoc;
 import io.wispforest.owo.ui.util.CursorAdapter;
 import net.minecraft.client.MinecraftClient;
@@ -70,7 +71,7 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
         var rootComponent = rootComponentMaker.apply(Sizing.fill(100), Sizing.fill(100));
 
         var adapter = new OwoUIAdapter<>(0, 0, screen.width, screen.height, rootComponent);
-        screen.addDrawableChild(adapter);
+        ((ScreenAccessor) screen).owo$addDrawableChild(adapter);
         screen.setFocused(adapter);
 
         return adapter;

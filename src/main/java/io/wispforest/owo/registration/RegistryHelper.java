@@ -1,8 +1,8 @@
 package io.wispforest.owo.registration;
 
-import net.fabricmc.fabric.api.event.registry.RegistryEntryAddedCallback;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
+import net.neoforged.neoforge.registries.callback.AddCallback;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
@@ -39,13 +39,13 @@ public final class RegistryHelper<T> {
     @ApiStatus.Internal
     public RegistryHelper(Registry<T> registry) {
         this.registry = registry;
-        RegistryEntryAddedCallback.event(registry).register((rawId, id, object) -> {
+        registry.addCallback((AddCallback<T>) (registry1, rawid, id, object) -> {
             if (actions.containsKey(id)) {
                 actions.remove(id).accept(object);
             }
 
             final var actionsToExecute = new ArrayList<Runnable>();
-            complexActions.removeIf(action -> action.update(id, actionsToExecute));
+            complexActions.removeIf(action -> action.update(id.getValue(), actionsToExecute));
             actionsToExecute.forEach(Runnable::run);
         });
     }

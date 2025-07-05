@@ -67,7 +67,7 @@ public class UwuTestStickItem extends Item {
 
     public UwuTestStickItem() {
         super(new Item.Settings()
-                .group(Uwu.SIX_TAB_GROUP).tab(3).maxCount(1)
+                .group(() -> Uwu.SIX_TAB_GROUP).tab(3).maxCount(1)
                 .trackUsageStat()
                 .stackGenerator(OwoItemGroup.DEFAULT_STACK_GENERATOR.andThen((item, stacks) -> {
                     final var stack = new ItemStack(item);
