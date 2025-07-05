@@ -5,12 +5,11 @@ import com.google.common.collect.Multimap;
 import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.util.pond.OwoScreenExtension;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
-import net.fabricmc.fabric.api.event.Event;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.Identifier;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.Collection;
 import java.util.List;
@@ -73,82 +72,86 @@ public final class Layers {
     }
 
     static {
-        ScreenEvents.AFTER_INIT.addPhaseOrdering(Event.DEFAULT_PHASE, INIT_PHASE);
-        ScreenEvents.AFTER_INIT.register(INIT_PHASE, (client, screeen, scaledWidth, scaledHeight) -> {
-            ((OwoScreenExtension) screeen).owo$updateLayers();
+        NeoForge.EVENT_BUS.<ScreenEvent.Init.Post>addListener(EventPriority.LOW, (event) -> {
+            ((OwoScreenExtension) event.getScreen()).owo$updateLayers();
+        });
 
-            ScreenEvents.remove(screeen).register(screen -> {
-                for (var instance : getInstances(screen)) {
-                    instance.adapter.dispose();
+        NeoForge.EVENT_BUS.<ScreenEvent.Closing>addListener(EventPriority.LOW, (event) -> {
+            for (var instance : getInstances(event.getScreen())) {
+                instance.adapter.dispose();
+            }
+        });
+
+        NeoForge.EVENT_BUS.<ScreenEvent.Render.Pre>addListener(EventPriority.LOW, (event) -> {
+            for (var instance : getInstances(event.getScreen())) {
+                if (instance.aggressivePositioning) instance.dispatchLayoutUpdates();
+            }
+        });
+
+        NeoForge.EVENT_BUS.<ScreenEvent.Render.Post>addListener(EventPriority.LOW, (event) -> {
+            event.getGuiGraphics().draw();
+            for (var instance : getInstances(event.getScreen())) {
+                instance.adapter.render(event.getGuiGraphics(), event.getMouseX(), event.getMouseY(), event.getPartialTick());
+            }
+
+            for (var instance : getInstances(event.getScreen())) {
+                instance.adapter.drawTooltip(event.getGuiGraphics(), event.getMouseX(), event.getMouseY(), event.getPartialTick());
+            }
+        });
+
+        NeoForge.EVENT_BUS.<ScreenEvent.MouseButtonPressed.Pre>addListener(EventPriority.LOW, (event) -> {
+            boolean handled;
+            for (var instance : getInstances(event.getScreen())) {
+                handled = instance.adapter.mouseClicked(event.getMouseX(), event.getMouseY(), event.getButton());
+                if (handled) {
+                    event.setCanceled(true);
+                    return;
                 }
-            });
+            }
+        });
 
-            ScreenEvents.beforeRender(screeen).register((screen, context, mouseX, mouseY, tickDelta) -> {
-                for (var instance : getInstances(screen)) {
-                    if (instance.aggressivePositioning) instance.dispatchLayoutUpdates();
+        NeoForge.EVENT_BUS.<ScreenEvent.MouseButtonReleased.Pre>addListener(EventPriority.LOW, (event) -> {
+            boolean handled;
+            for (var instance : getInstances(event.getScreen())) {
+                handled = instance.adapter.mouseReleased(event.getMouseX(), event.getMouseY(), event.getButton());
+                if (handled) {
+                    event.setCanceled(true);
+                    return;
                 }
-            });
+            }
+        });
 
-            ScreenEvents.afterRender(screeen).register((screen, context, mouseX, mouseY, tickDelta) -> {
-                context.draw();
-                for (var instance : getInstances(screen)) {
-                    instance.adapter.render(context, mouseX, mouseY, tickDelta);
+        NeoForge.EVENT_BUS.<ScreenEvent.MouseScrolled.Pre>addListener(EventPriority.LOW, (event) -> {
+            boolean handled;
+            for (var instance : getInstances(event.getScreen())) {
+                handled = instance.adapter.mouseScrolled(event.getMouseX(), event.getMouseY(), event.getScrollDeltaX(), event.getScrollDeltaY());
+                if (handled) {
+                    event.setCanceled(true);
+                    return;
                 }
+            }
+        });
 
-                for (var instance : getInstances(screen)) {
-                    instance.adapter.drawTooltip(context, mouseX, mouseY, tickDelta);
+        NeoForge.EVENT_BUS.<ScreenEvent.KeyPressed.Pre>addListener(EventPriority.LOW, (event) -> {
+            boolean handled;
+            for (var instance : getInstances(event.getScreen())) {
+                handled = instance.adapter.keyPressed(event.getKeyCode(), event.getScanCode(), event.getModifiers());
+                if (handled) {
+                    event.setCanceled(true);
+                    return;
                 }
-            });
+            }
+        });
 
-            ScreenMouseEvents.allowMouseClick(screeen).register((screen, mouseX, mouseY, button) -> {
-                boolean handled;
-                for (var instance : getInstances(screen)) {
-                    handled = instance.adapter.mouseClicked(mouseX, mouseY, button);
-                    if (handled) return false;
+        NeoForge.EVENT_BUS.<ScreenEvent.KeyReleased.Pre>addListener(EventPriority.LOW, (event) -> {
+            boolean handled;
+            for (var instance : getInstances(event.getScreen())) {
+                handled = instance.adapter.keyReleased(event.getKeyCode(), event.getScanCode(), event.getModifiers());
+                if (handled) {
+                    event.setCanceled(true);
+                    return;
                 }
-
-                return true;
-            });
-
-            ScreenMouseEvents.allowMouseRelease(screeen).register((screen, mouseX, mouseY, button) -> {
-                boolean handled;
-                for (var instance : getInstances(screen)) {
-                    handled = instance.adapter.mouseReleased(mouseX, mouseY, button);
-                    if (handled) return false;
-                }
-
-                return true;
-            });
-
-            ScreenMouseEvents.allowMouseScroll(screeen).register((screen, mouseX, mouseY, horizontalAmount, verticalAmount) -> {
-                boolean handled;
-                for (var instance : getInstances(screen)) {
-                    handled = instance.adapter.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
-                    if (handled) return false;
-                }
-
-                return true;
-            });
-
-            ScreenKeyboardEvents.allowKeyPress(screeen).register((screen, key, scancode, modifiers) -> {
-                boolean handled;
-                for (var instance : getInstances(screen)) {
-                    handled = instance.adapter.keyPressed(key, scancode, modifiers);
-                    if (handled) return false;
-                }
-
-                return true;
-            });
-
-            ScreenKeyboardEvents.allowKeyRelease(screeen).register((screen, key, scancode, modifiers) -> {
-                boolean handled;
-                for (var instance : getInstances(screen)) {
-                    handled = instance.adapter.keyReleased(key, scancode, modifiers);
-                    if (handled) return false;
-                }
-
-                return true;
-            });
+            }
         });
     }
 

@@ -8,7 +8,6 @@ import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.PositionedRectangle;
 import io.wispforest.owo.ui.core.Size;
-import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.resource.JsonDataLoader;
 import net.minecraft.resource.ResourceFinder;
@@ -254,7 +253,7 @@ public class NinePatchTexture {
         }
     }
 
-    public static class MetadataLoader extends JsonDataLoader<NinePatchTexture> implements IdentifiableResourceReloadListener {
+    public static class MetadataLoader extends JsonDataLoader<NinePatchTexture> {
 
         private static final Map<Identifier, NinePatchTexture> LOADED_TEXTURES = new HashMap<>();
 
@@ -262,8 +261,7 @@ public class NinePatchTexture {
             super(CodecUtils.toCodec(NinePatchTexture.ENDEC), ResourceFinder.json("nine_patch_textures"));
         }
 
-        @Override
-        public Identifier getFabricId() {
+        public static Identifier getFabricId() {
             return Identifier.of("owo", "nine_patch_metadata");
         }
 

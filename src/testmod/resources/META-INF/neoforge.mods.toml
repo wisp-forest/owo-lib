@@ -1,0 +1,32 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+#issueTrackerURL = ""
+license = "MIT"
+
+[[mods]]
+modId = "uwu"
+version = "1.0.0"
+displayName = "uwu"
+authors = "glisco, Blodhgarm"
+credits = ""
+description = '''
+oωo testmod
+'''
+logoFile = "assets/owo/icon.png"
+
+[[mixins]]
+config = 'uwu.mixins.json'
+
+[[dependencies.accessories]]
+modId = "neoforge"
+required = true
+versionRange = "[21,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.accessories]]
+modId = "minecraft"
+required = true
+versionRange = "[1.21,)"
+ordering = "NONE"
+side = "BOTH"

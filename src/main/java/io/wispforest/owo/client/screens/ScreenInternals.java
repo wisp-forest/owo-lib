@@ -6,38 +6,48 @@ import io.wispforest.endec.Endec;
 import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.util.pond.OwoScreenHandlerExtension;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
 public class ScreenInternals {
     public static final Identifier SYNC_PROPERTIES = Identifier.of("owo", "sync_screen_handler_properties");
 
-    public static void init() {
+    public static void init(PayloadRegistrar registrar) {
         var localPacketCodec = CodecUtils.toPacketCodec(LocalPacket.ENDEC);
 
-        PayloadTypeRegistry.playS2C().register(LocalPacket.ID, localPacketCodec);
-        PayloadTypeRegistry.playC2S().register(LocalPacket.ID, localPacketCodec);
-        PayloadTypeRegistry.playS2C().register(SyncPropertiesPacket.ID, CodecUtils.toPacketCodec(SyncPropertiesPacket.ENDEC));
+        registrar.playBidirectional(LocalPacket.ID, localPacketCodec, (payload, context) -> {
+            context.enqueueWork(() -> {
+                var screenHandler = context.player().currentScreenHandler;
 
-        ServerPlayNetworking.registerGlobalReceiver(LocalPacket.ID, (payload, context) -> {
-            var screenHandler = context.player().currentScreenHandler;
+                if (screenHandler == null) {
+                    Owo.LOGGER.error("Received local packet for null ScreenHandler");
+                    return;
+                }
 
-            if (screenHandler == null) {
-                Owo.LOGGER.error("Received local packet for null ScreenHandler");
-                return;
-            }
+                ((OwoScreenHandlerExtension) screenHandler).owo$handlePacket(payload, context.player().getWorld().isClient());
+            });
+        });
+        registrar.playToClient(SyncPropertiesPacket.ID, CodecUtils.toPacketCodec(SyncPropertiesPacket.ENDEC), (payload, context) -> {
+            context.enqueueWork(() -> {
+                var screenHandler = context.player().currentScreenHandler;
 
-            ((OwoScreenHandlerExtension) screenHandler).owo$handlePacket(payload, false);
+                if (screenHandler == null) {
+                    Owo.LOGGER.error("Received sync properties packet for null ScreenHandler");
+                    return;
+                }
+
+                ((OwoScreenHandlerExtension) screenHandler).owo$readPropertySync(payload);
+            });
         });
     }
 
@@ -68,34 +78,12 @@ public class ScreenInternals {
         }
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public static class Client {
         public static void init() {
-            ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
-                if (screen instanceof ScreenHandlerProvider<?> handled)
-                    ((OwoScreenHandlerExtension) handled.getScreenHandler()).owo$attachToPlayer(client.player);
-            });
-
-            ClientPlayNetworking.registerGlobalReceiver(LocalPacket.ID, (payload, context) -> {
-                var screenHandler = context.player().currentScreenHandler;
-
-                if (screenHandler == null) {
-                    Owo.LOGGER.error("Received local packet for null ScreenHandler");
-                    return;
-                }
-
-                ((OwoScreenHandlerExtension) screenHandler).owo$handlePacket(payload, true);
-            });
-
-            ClientPlayNetworking.registerGlobalReceiver(SyncPropertiesPacket.ID, (payload, context) -> {
-                var screenHandler = context.player().currentScreenHandler;
-
-                if (screenHandler == null) {
-                    Owo.LOGGER.error("Received sync properties packet for null ScreenHandler");
-                    return;
-                }
-
-                ((OwoScreenHandlerExtension) screenHandler).owo$readPropertySync(payload);
+            NeoForge.EVENT_BUS.addListener((ScreenEvent.Init.Post event) -> {
+                if (event.getScreen() instanceof ScreenHandlerProvider<?> handled)
+                    ((OwoScreenHandlerExtension) handled.getScreenHandler()).owo$attachToPlayer(MinecraftClient.getInstance().player);
             });
         }
     }

@@ -7,17 +7,18 @@ import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.UISounds;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -69,7 +70,7 @@ public class DropdownComponent extends FlowLayout {
         dropdown.positioning(Positioning.absolute(xLocation, yLocation));
 
         var dismounted = new MutableBoolean(false);
-        ScreenMouseEvents.beforeMouseClick(screen).register((screen_, mouseX_, mouseY_, button) -> {
+        componentHook.computeIfAbsent(screen, screen1 -> new ArrayList<>()).add((mouseX_, mouseY_) -> {
             if (dismounted.isTrue() || dropdown.isInBoundingBox(mouseX_, mouseY_)) return;
 
             rootComponent.removeChild(dropdown);
@@ -77,6 +78,17 @@ public class DropdownComponent extends FlowLayout {
         });
 
         return dropdown;
+    }
+
+    private static final Map<Screen, List<BiConsumer<Double, Double>>> componentHook = new HashMap<>();
+
+    static {
+        NeoForge.EVENT_BUS.<ScreenEvent.Closing>addListener((event) -> {
+            componentHook.remove(event.getScreen());
+        });
+        NeoForge.EVENT_BUS.<ScreenEvent.MouseButtonPressed.Pre>addListener((event) -> {
+            componentHook.getOrDefault(event.getScreen(), List.of()).forEach(consumer -> consumer.accept(event.getMouseX(), event.getMouseY()));
+        });
     }
 
     @Override

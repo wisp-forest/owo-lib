@@ -7,7 +7,6 @@ import io.wispforest.owo.ui.inject.GreedyInputComponent;
 import io.wispforest.owo.ui.util.DisposableScreen;
 import io.wispforest.owo.ui.util.UIErrorToast;
 import io.wispforest.owo.util.pond.OwoSlotExtension;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
@@ -17,6 +16,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -99,7 +100,7 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
 
     /**
      * Draw the tooltip of this screen's component tree, invoked
-     * by {@link ScreenEvents#afterRender(Screen)} so that tooltips are
+     * by {@link ScreenEvent.Render.Post} so that tooltips are
      * properly rendered above content
      */
     protected void drawComponentTooltip(DrawContext drawContext, int mouseX, int mouseY, float tickDelta) {
@@ -407,5 +408,13 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
             super.updateY(y);
             ((SlotAccessor) this.slot).owo$setY(y - BaseOwoHandledScreen.this.y);
         }
+    }
+
+    static {
+        NeoForge.EVENT_BUS.<ScreenEvent.Render.Post>addListener((event) -> {
+            if (event.getScreen() instanceof BaseOwoHandledScreen<?, ?> screen) {
+                screen.drawComponentTooltip(event.getGuiGraphics(), event.getMouseX(), event.getMouseY(), event.getPartialTick());
+            }
+        });
     }
 }

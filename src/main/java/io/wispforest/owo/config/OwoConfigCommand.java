@@ -12,24 +12,25 @@ import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.ui.ConfigScreen;
 import io.wispforest.owo.config.ui.ConfigScreenProviders;
 import io.wispforest.owo.ops.TextOps;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
+import net.minecraft.server.command.CommandManager;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 
+
 @ApiStatus.Internal
 public class OwoConfigCommand {
 
-    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess access) {
-        dispatcher.register(ClientCommandManager.literal("owo-config")
-                .then(ClientCommandManager.argument("config_id", new ConfigScreenArgumentType())
+    public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess access) {
+        dispatcher.register(CommandManager.literal("owo-config")
+                .then(CommandManager.argument("config_id", new ConfigScreenArgumentType())
                         .executes(context -> {
                             var screen = context.getArgument("config_id", ConfigScreen.class);
                             MinecraftClient.getInstance().send(() -> MinecraftClient.getInstance().setScreen(screen));

@@ -7,6 +7,7 @@ import net.minecraft.client.gl.*;
 import net.minecraft.client.render.RenderPhase;
 import net.minecraft.client.render.VertexFormat;
 import net.minecraft.util.Identifier;
+import net.neoforged.fml.ModLoader;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -87,6 +88,6 @@ public class GlProgram {
 
     @ApiStatus.Internal
     public static void loadAndSetupPrograms() {
-        REGISTERED_PROGRAMS.forEach(Runnable::run);
+        if (!ModLoader.hasErrors()) REGISTERED_PROGRAMS.forEach(Runnable::run);
     }
 }
