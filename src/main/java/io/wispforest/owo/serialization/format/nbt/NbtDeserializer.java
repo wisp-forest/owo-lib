@@ -1,6 +1,7 @@
 package io.wispforest.owo.serialization.format.nbt;
 
 import io.wispforest.endec.*;
+import io.wispforest.endec.temp.OptionalFieldFlag;
 import io.wispforest.endec.util.RecursiveDeserializer;
 import net.minecraft.nbt.*;
 import org.jetbrains.annotations.Nullable;
@@ -86,16 +87,19 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
         return this.getAs(this.getValue(), NbtByteArray.class).getByteArray();
     }
 
+    private final Set<IdentityHolder<NbtElement>> encodedOptionals = Collections.newSetFromMap(new WeakHashMap<>());
+
     @Override
     public <V> Optional<V> readOptional(SerializationContext ctx, Endec<V> endec) {
-        if (this.isReadingStructField()) {
+        var value = this.getValue();
+        if (this.encodedOptionals.contains(new IdentityHolder<>(value))) {
             return Optional.of(endec.decode(ctx, this));
-        } else {
-            var struct = this.struct();
-            return struct.field("present", ctx, Endec.BOOLEAN)
-                    ? Optional.of(struct.field("value", ctx, endec))
-                    : Optional.empty();
         }
+
+        var struct = this.struct();
+        return struct.field("present", ctx, Endec.BOOLEAN)
+                ? Optional.of(struct.field("value", ctx, endec))
+                : Optional.empty();
     }
 
     // ---
@@ -181,8 +185,9 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
 
         @Override
         public V next() {
+            var element = this.elements.next();
             return NbtDeserializer.this.frame(
-                    this.elements::next,
+                    () -> element,
                     () -> this.valueEndec.decode(this.ctx, NbtDeserializer.this),
                     false
             );
@@ -250,11 +255,21 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
 
         @Override
         public <F> @Nullable F field(String name, SerializationContext ctx, Endec<F> endec, @Nullable F defaultValue) {
-            if (!this.compound.contains(name)) return defaultValue;
+            boolean mayOmit = ctx.hasAttribute(OptionalFieldFlag.INSTANCE);
+
+            if (!this.compound.contains(name)) {
+                if (!mayOmit) {
+                    throw new IllegalStateException("Field '" + name + "' was missing from serialized data, but no default value was provided");
+                }
+
+                return defaultValue;
+            }
+            var element = this.compound.get(name);
+            if (mayOmit) NbtDeserializer.this.encodedOptionals.add(new IdentityHolder<>(element));
             return NbtDeserializer.this.frame(
-                    () -> this.compound.get(name),
+                    () -> element,
                     () -> endec.decode(ctx, NbtDeserializer.this),
-                    true
+                    false
             );
         }
     }
