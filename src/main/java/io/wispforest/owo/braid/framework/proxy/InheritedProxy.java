@@ -5,6 +5,7 @@ import io.wispforest.owo.braid.framework.widget.Widget;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class InheritedProxy extends ComposedProxy {
@@ -15,7 +16,7 @@ public class InheritedProxy extends ComposedProxy {
         super(widget);
     }
 
-    public void addDependent(WidgetProxy dependent) {
+    public void addDependency(WidgetProxy dependent, @Nullable Object dependency) {
         this.dependents.add(dependent);
     }
 
@@ -23,9 +24,20 @@ public class InheritedProxy extends ComposedProxy {
         this.dependents.remove(dependent);
     }
 
+    protected boolean mustRebuildDependent(WidgetProxy dependent) {
+        return true;
+    }
+
+    public void notifyDependent(WidgetProxy dependent) {
+        dependent.notifyDependenciesChanged();
+    }
+
     @Override
     public void mount(WidgetProxy parent, @Nullable Object slot) {
         super.mount(parent, slot);
+        this.inheritedProxies = this.inheritedProxies != null ? new HashMap<>(this.inheritedProxies) : new HashMap<>();
+        this.inheritedProxies.put(((InheritedWidget) this.widget()).inheritedKey(), this);
+
         this.rebuild();
     }
 
@@ -38,7 +50,8 @@ public class InheritedProxy extends ComposedProxy {
         this.rebuild(true);
         if (shouldUpdate) {
             for (var dependent : this.dependents) {
-                dependent.notifyDependenciesChanged();
+                if (!this.mustRebuildDependent(dependent)) continue;
+                this.notifyDependent(dependent);
             }
         }
     }

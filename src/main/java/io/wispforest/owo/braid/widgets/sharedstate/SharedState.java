@@ -7,6 +7,7 @@ import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class SharedState<T extends ShareableState> extends StatefulWidget {
@@ -23,26 +24,35 @@ public class SharedState<T extends ShareableState> extends StatefulWidget {
         return new State<>();
     }
 
-    //TODO glisco fix this at some point
     public static <T extends ShareableState> T get(BuildContext context, Class<T> clazz) {
-        var provider = context.dependOnAncestor(SharedStateProvider.class);
-        Preconditions.checkArgument(provider != null, "attempted to read inherited state which is not provided by the current context");
+        var provider = context.dependOnAncestor(SharedStateProvider.class, SharedStateProvider.keyOf(clazz));
+        Preconditions.checkArgument(provider != null, "attempted to read shared state which is not provided by the current context");
 
-        //TODO its right there VVVV
         return (T) provider.state.state;
     }
 
-    //TODO also fix this one
+    public static <T extends ShareableState> T getWithoutDependency(BuildContext context, Class<T> clazz) {
+        var provider = context.getAncestor(SharedStateProvider.class, SharedStateProvider.keyOf(clazz));
+        Preconditions.checkArgument(provider != null, "attempted to read shared state which is not provided by the current context");
+
+        return (T) provider.state.state;
+    }
+
+    public static <T extends ShareableState, S> S select(BuildContext context, Class<T> clazz, Function<T, S> selector) {
+        var provider = context.getAncestor(SharedStateProvider.class, SharedStateProvider.keyOf(clazz));
+        Preconditions.checkArgument(provider != null, "attempted to select from shared state which is not provided by the current context");
+
+        var capturedValue = selector.apply(((SharedStateProvider<T>) provider).state.state);
+        context.dependOnAncestor(SharedStateProvider.class, SharedStateProvider.keyOf(clazz), SharedStateProvider.dependencyOf(clazz, capturedValue, selector));
+
+        return capturedValue;
+    }
+
     public static <T extends ShareableState> void set(BuildContext context, Class<T> clazz, Consumer<T> consumer) {
-        var provider = context.dependOnAncestor(SharedStateProvider.class);
-        Preconditions.checkArgument(provider != null, "attempted to set inherited state which is not provided by the current context");
+        var provider = context.dependOnAncestor(SharedStateProvider.class, SharedStateProvider.keyOf(clazz));
+        Preconditions.checkArgument(provider != null, "attempted to set shared state which is not provided by the current context");
 
-        //TODO this one is there tho --------VVVV
-        provider.state.setState(() -> {
-            consumer.accept((T) provider.state.state);
-            provider.state.generation++;
-        });
-
+        provider.state.state.setState(() -> consumer.accept((T) provider.state.state));
     }
 
     public static class State<T extends ShareableState> extends WidgetState<SharedState<T>> {
@@ -52,12 +62,14 @@ public class SharedState<T extends ShareableState> extends StatefulWidget {
         @Override
         public void init() {
             super.init();
-            state = widget().initState.get();
+
+            this.state = widget().initState.get();
+            this.state.backingState = this;
         }
 
         @Override
         public Widget build(BuildContext context) {
-            return new SharedStateProvider<>(this, generation, widget().child);
+            return new SharedStateProvider<>(this, this.generation, this.widget().child);
         }
     }
 }

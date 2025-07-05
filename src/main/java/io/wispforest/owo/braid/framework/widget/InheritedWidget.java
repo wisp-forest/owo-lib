@@ -17,5 +17,9 @@ public abstract class InheritedWidget extends Widget {
 
     // ---
 
+    public Object inheritedKey() {
+        return this.getClass();
+    }
+
     public abstract boolean mustRebuildDependents(InheritedWidget newWidget);
 }

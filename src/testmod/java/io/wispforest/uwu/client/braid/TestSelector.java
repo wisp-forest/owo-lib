@@ -12,6 +12,7 @@ import io.wispforest.owo.braid.widgets.EntityWidget;
 import io.wispforest.owo.braid.widgets.ItemStackWidget;
 import io.wispforest.owo.braid.widgets.basic.*;
 import io.wispforest.owo.braid.widgets.basic.Stack;
+import io.wispforest.owo.braid.widgets.button.Button;
 import io.wispforest.owo.braid.widgets.button.MessageButton;
 import io.wispforest.owo.braid.widgets.drag.DragArena;
 import io.wispforest.owo.braid.widgets.drag.DragArenaElement;
@@ -21,6 +22,8 @@ import io.wispforest.owo.braid.widgets.label.LabelStyle;
 import io.wispforest.owo.braid.widgets.scroll.ScrollController;
 import io.wispforest.owo.braid.widgets.scroll.Scrollable;
 import io.wispforest.owo.braid.widgets.scroll.VerticallyScrollable;
+import io.wispforest.owo.braid.widgets.sharedstate.ShareableState;
+import io.wispforest.owo.braid.widgets.sharedstate.SharedState;
 import io.wispforest.owo.braid.widgets.slider.*;
 import io.wispforest.owo.braid.widgets.splitpane.MultiSplitPane;
 import io.wispforest.owo.braid.widgets.textinput.TextBox;
@@ -30,7 +33,6 @@ import io.wispforest.owo.braid.widgets.window.Window;
 import io.wispforest.owo.braid.widgets.window.WindowController;
 import io.wispforest.owo.ui.component.BraidComponent;
 import io.wispforest.owo.ui.component.ButtonComponent;
-import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.EntityComponent;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.core.Color;
@@ -63,7 +65,7 @@ import java.util.function.DoubleFunction;
 public class TestSelector extends StatefulWidget {
 
     public enum Tests {
-        COUNTER, FLEX, DRAGGING, SPLIT_PANE, SLIDERS, TEXT_INPUT, BURNING_CHYZ, SCROLLING, INPUT, CYCLING, VANILLA
+        COUNTER, FLEX, DRAGGING, SPLIT_PANE, SLIDERS, TEXT_INPUT, BURNING_CHYZ, SCROLLING, INPUT, CYCLING, VANILLA, SHARED_STATE
     }
 
     @Override
@@ -105,6 +107,7 @@ public class TestSelector extends StatefulWidget {
                         case INPUT -> new InputTest();
                         case CYCLING -> new CyclingTest();
                         case VANILLA -> new VanillaTest();
+                        case SHARED_STATE -> new SharedStateTest();
                         case null -> new Center(new Label(Text.literal("select a test")));
                     }
                 ),
@@ -1251,6 +1254,95 @@ public class TestSelector extends StatefulWidget {
                     )
                 );
             }
+        }
+    }
+
+    public static class SharedStateTest extends StatefulWidget {
+        @Override
+        public WidgetState<SharedStateTest> createState() {
+            return new State();
+        }
+
+        public static class State extends WidgetState<SharedStateTest> {
+            @Override
+            public Widget build(BuildContext context) {
+                return new Sized(
+                    400,
+                    250,
+                    new Column(
+                        new Flexible(new TheTest(false)),
+                        new Flexible(new TheTest(true))
+                    )
+                );
+            }
+
+            public static class TheTest extends StatelessWidget {
+
+                public final boolean nest;
+                public TheTest(boolean nest) {
+                    this.nest = nest;
+                }
+
+                @Override
+                public Widget build(BuildContext context) {
+                    return new SharedState<>(
+                        CounterState::new,
+                        new Row(
+                            new Flexible(new LeftBody()),
+                            new Flexible(new Center(new RightBody())),
+                            this.nest ? new Flexible(2, new TheTest(false)) : new Padding(Insets.none())
+                        )
+                    );
+                }
+            }
+
+            public static class LeftBody extends StatelessWidget {
+                @Override
+                public Widget build(BuildContext context) {
+                    System.out.println("panel rebuild");
+                    return new Panel(
+                        SharedState.select(context, CounterState.class, state -> state.dark)
+                            ? OwoUIDrawContext.DARK_PANEL_NINE_PATCH_TEXTURE
+                            : OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
+                        new CounterText()
+                    );
+                }
+            }
+
+            public static class RightBody extends StatelessWidget {
+                @Override
+                public Widget build(BuildContext context) {
+                    return new Column(
+                        new Button(
+                            () -> {
+                                SharedState.set(context, CounterState.class, state -> state.count += 1);
+                                return true;
+                            },
+                            new Label(Text.literal("increment"))
+                        ),
+                        new Button(
+                            () -> {
+                                SharedState.set(context, CounterState.class, state -> state.dark = !state.dark);
+                                return true;
+                            },
+                            new Label(Text.literal("toggle darkness"))
+                        )
+                    );
+                }
+            }
+
+            public static class CounterText extends StatelessWidget {
+                @Override
+                public Widget build(BuildContext context) {
+                    System.out.println("text rebuild");
+                    return new Label(Text.literal("current state: " + SharedState.select(context, CounterState.class, state -> state.count)));
+                }
+            }
+        }
+
+        public static class CounterState extends ShareableState {
+            public int count = 0;
+            public boolean dark = false;
         }
     }
 }

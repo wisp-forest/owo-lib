@@ -7,9 +7,7 @@ import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public abstract sealed class WidgetProxy implements BuildContext, Comparable<WidgetProxy> permits ComposedProxy, InstanceWidgetProxy {
 
@@ -24,7 +22,8 @@ public abstract sealed class WidgetProxy implements BuildContext, Comparable<Wid
     public Lifecycle lifecycle = Lifecycle.INITIAL;
     protected boolean needsRebuild = true;
 
-    private final Map<Class<?>, @Nullable InheritedProxy> dependencies = new HashMap<>();
+    protected Map<Object, InheritedProxy> inheritedProxies = null;
+    protected Set<InheritedProxy> dependencies = null;
 
     public WidgetProxy(Widget widget) {
         this.widget = widget;
@@ -36,6 +35,8 @@ public abstract sealed class WidgetProxy implements BuildContext, Comparable<Wid
 
         Preconditions.checkState(this.lifecycle == Lifecycle.INITIAL, "proxy must be in INITIAL lifecycle state when mount() is called");
         this.lifecycle = Lifecycle.LIVE;
+
+        this.inheritedProxies = parent.inheritedProxies;
 
         this.parent = parent;
         this.parentBuildScope = parent.buildScope();
@@ -53,8 +54,10 @@ public abstract sealed class WidgetProxy implements BuildContext, Comparable<Wid
         Preconditions.checkState(this.lifecycle == Lifecycle.LIVE, "proxy must be in LIVE lifecycle state when unmount() is called");
         this.lifecycle = Lifecycle.DEAD;
 
-        for (var dependency : this.dependencies.values()) {
-            if (dependency != null) dependency.removeDependent(this);
+        if (this.dependencies != null) {
+            for (var dependency : this.dependencies) {
+                if (dependency != null) dependency.removeDependent(this);
+            }
         }
 
         visitChildren(Visitors.UNMOUNT);
@@ -125,29 +128,36 @@ public abstract sealed class WidgetProxy implements BuildContext, Comparable<Wid
     // ---
 
     @Override
-    public <T> T dependOnAncestor(Class<T> ancestorClass) {
-        if (this.dependencies.containsKey(ancestorClass)) {
-            var ancestor = this.dependencies.get(ancestorClass);
-            if (ancestor == null) return null;
+    public <T> @Nullable T getAncestor(Class<T> ancestorClass, Object inheritedKey) {
+        var ancestor = this.inheritedProxies != null ? this.inheritedProxies.get(inheritedKey) : null;
+
+        if (ancestor != null) {
+            Preconditions.checkArgument(ancestorClass == ancestor.widget().getClass(), "attempted to look up an ancestor using an inheritedKey pointing to one of a different type");
 
             //noinspection unchecked
             return (T) ancestor.widget();
         }
 
-        var ancestor = this.parent;
-        while (ancestor != null) {
-            if (ancestor instanceof InheritedProxy inherited && inherited.widget().getClass() == ancestorClass) {
-                inherited.addDependent(this);
+        return null;
+    }
 
-                this.dependencies.put(ancestorClass, inherited);
-                //noinspection unchecked
-                return (T) inherited.widget();
+    @Override
+    public <T> @Nullable T dependOnAncestor(Class<T> ancestorClass, Object inheritedKey, @Nullable Object dependency) {
+        var ancestor = this.inheritedProxies != null ? this.inheritedProxies.get(inheritedKey) : null;
+        if (ancestor != null) {
+            Preconditions.checkArgument(ancestorClass == ancestor.widget().getClass(), "attempted to look up an ancestor using an inheritedKey pointing to one of a different type");
+
+            if (this.dependencies == null) {
+                this.dependencies = new HashSet<>();
             }
 
-            ancestor = ancestor.parent;
+            ancestor.addDependency(this, dependency);
+            this.dependencies.add(ancestor);
+
+            //noinspection unchecked
+            return (T) ancestor.widget();
         }
 
-        this.dependencies.put(ancestorClass, null);
         return null;
     }
 
