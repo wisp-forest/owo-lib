@@ -12,12 +12,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 @Mixin(Item.class)
 public class ItemMixin implements OwoItemExtensions {
 
-    @Nullable
-    protected ItemGroup owo$group = null;
+    protected @Nullable Supplier<@Nullable ? extends ItemGroup> owo$group = () -> null;
 
     @Unique
     private int owo$tab = 0;
@@ -32,7 +32,7 @@ public class ItemMixin implements OwoItemExtensions {
     private void grabTab(Item.Settings settings, CallbackInfo ci) {
         this.owo$tab = settings.tab();
         this.owo$stackGenerator = settings.stackGenerator();
-        this.owo$group = settings.group();
+        this.owo$group = settings.groupSupplier();
         this.owo$trackUsageStat = settings.shouldTrackUsageStat();
     }
 
@@ -47,13 +47,13 @@ public class ItemMixin implements OwoItemExtensions {
     }
 
     @Override
-    public void owo$setGroup(ItemGroup group) {
+    public void owo$setGroup(Supplier<ItemGroup> group) {
         this.owo$group = group;
     }
 
     @Override
     public @Nullable ItemGroup owo$group() {
-        return this.owo$group;
+        return this.owo$group != null ? this.owo$group.get() : null;
     }
 
     @Override

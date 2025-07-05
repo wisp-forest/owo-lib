@@ -1,15 +1,19 @@
 package io.wispforest.owosentinel;
 
-import net.fabricmc.loader.api.LanguageAdapter;
-import net.fabricmc.loader.api.ModContainer;
+import cpw.mods.modlauncher.api.NamedPath;
+import cpw.mods.modlauncher.serviceapi.ITransformerDiscoveryService;
 
-public class Maldenhagen implements LanguageAdapter {
+import java.nio.file.Path;
+import java.util.List;
+
+public class Maldenhagen implements ITransformerDiscoveryService {
     @Override
-    public <T> T create(ModContainer mod, String value, Class<T> type) {
-        throw new UnsupportedOperationException();
+    public List<NamedPath> candidates(Path gameDirectory) {
+        return List.of();
     }
 
-    static {
-        OwoSentinel.launch();
+    @Override
+    public void earlyInitialization(String launchTarget, String[] arguments) {
+        //OwoSentinel.launch();
     }
 }

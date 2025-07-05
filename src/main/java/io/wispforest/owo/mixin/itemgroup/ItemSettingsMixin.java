@@ -8,17 +8,18 @@ import net.minecraft.item.ItemGroup;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 @Mixin(Item.Settings.class)
 public class ItemSettingsMixin implements OwoItemSettingsExtension {
-    private OwoItemGroup owo$group = null;
+    private Supplier<OwoItemGroup> owo$group = null;
     private int owo$tab = 0;
     private BiConsumer<Item, ItemGroup.Entries> owo$stackGenerator = null;
     private boolean owo$trackUsageStat = false;
 
     @Override
     public Item.Settings group(ItemGroupReference ref) {
-        this.owo$group = ref.group();
+        this.owo$group = ref.groupSup();
         this.owo$tab = ref.tab();
 
         return (Item.Settings)(Object) this;
@@ -26,13 +27,25 @@ public class ItemSettingsMixin implements OwoItemSettingsExtension {
 
     @Override
     public Item.Settings group(OwoItemGroup group) {
-        this.owo$group = group;
+        this.owo$group = () -> group;
+
+        return (Item.Settings)(Object) this;
+    }
+
+    @Override
+    public Item.Settings group(Supplier<OwoItemGroup> groupSupplier) {
+        this.owo$group = groupSupplier;
 
         return (Item.Settings)(Object) this;
     }
 
     @Override
     public OwoItemGroup group() {
+        return owo$group != null ? owo$group.get() : null;
+    }
+
+    @Override
+    public Supplier<OwoItemGroup> groupSupplier() {
         return owo$group;
     }
 

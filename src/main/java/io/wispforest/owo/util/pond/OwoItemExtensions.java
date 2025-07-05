@@ -7,6 +7,7 @@ import net.minecraft.item.ItemGroup;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 public interface OwoItemExtensions {
 
@@ -27,7 +28,11 @@ public interface OwoItemExtensions {
      *
      * @param group The group to replace the current on with
      */
-    void owo$setGroup(ItemGroup group);
+    void owo$setGroup(Supplier<ItemGroup> group);
+
+    default void owo$setGroup(ItemGroup group) {
+        owo$setGroup(() -> group);
+    }
 
     /**
      * @return The item group this item should reside in

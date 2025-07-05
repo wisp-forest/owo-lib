@@ -1,5 +1,6 @@
 package io.wispforest.owo.mixin;
 
+import io.netty.buffer.Unpooled;
 import io.wispforest.endec.SerializationContext;
 import io.wispforest.endec.impl.ReflectiveEndecBuilder;
 import io.wispforest.owo.client.screens.OwoScreenHandler;
@@ -11,16 +12,15 @@ import io.wispforest.endec.Endec;
 import io.wispforest.owo.serialization.RegistriesAttribute;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.util.pond.OwoScreenHandlerExtension;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -109,7 +109,7 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
         }
 
         var ctx = SerializationContext.attributes(RegistriesAttribute.of(this.owo$player.getRegistryManager()));
-        var buf = PacketByteBufs.create();
+        var buf = new PacketByteBuf(Unpooled.buffer());
         buf.write(ctx, messageData.endec(), message);
 
         var packet = new ScreenInternals.LocalPacket(messageData.id(), buf);
@@ -119,7 +119,7 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
                 throw new NetworkException("Tried to send clientbound message on the server");
             }
 
-            ServerPlayNetworking.send(serverPlayer, packet);
+            serverPlayer.networkHandler.send(packet);
         } else {
             if (!this.owo$player.getWorld().isClient) {
                 throw new NetworkException("Tried to send serverbound message on the client");
@@ -130,9 +130,9 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
     }
 
     @Unique
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     private void owo$sendToServer(CustomPayload payload) {
-        ClientPlayNetworking.send(payload);
+        MinecraftClient.getInstance().getNetworkHandler().send(payload);
     }
 
     @Override
@@ -186,7 +186,7 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
 
         if (count == 0) return;
 
-        var buf = PacketByteBufs.create();
+        var buf = new PacketByteBuf(Unpooled.buffer());
         buf.writeVarInt(count);
 
         for (var prop : owo$properties) {
@@ -196,7 +196,7 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
             prop.write(buf);
         }
 
-        ServerPlayNetworking.send(player, new ScreenInternals.SyncPropertiesPacket(buf));
+        player.networkHandler.send(new ScreenInternals.SyncPropertiesPacket(buf));
     }
 
 }

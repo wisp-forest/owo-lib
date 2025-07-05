@@ -7,6 +7,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 public interface OwoItemSettingsExtension {
 
@@ -17,11 +18,21 @@ public interface OwoItemSettingsExtension {
     /**
      * @param group The item group this item should appear in
      */
+    @Deprecated
     default Item.Settings group(OwoItemGroup group) {
         throw new IllegalStateException("Implemented in mixin.");
     }
 
+    default Item.Settings group(Supplier<OwoItemGroup> groupSupplier) {
+        throw new IllegalStateException("Implemented in mixin.");
+    }
+
+    @Deprecated
     default OwoItemGroup group() {
+        throw new IllegalStateException("Implemented in mixin.");
+    }
+
+    default Supplier<OwoItemGroup> groupSupplier() {
         throw new IllegalStateException("Implemented in mixin.");
     }
 

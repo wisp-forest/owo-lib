@@ -8,11 +8,12 @@ import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.inject.GreedyInputComponent;
 import io.wispforest.owo.ui.util.DisposableScreen;
 import io.wispforest.owo.ui.util.UIErrorToast;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -98,10 +99,6 @@ public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen im
                 this.invalid = true;
             }
         }
-
-        ScreenEvents.afterRender(this).register((screen, drawContext, mouseX, mouseY, tickDelta) -> {
-            this.drawComponentTooltip(drawContext, mouseX, mouseY, tickDelta);
-        });
     }
 
     /**
@@ -178,5 +175,19 @@ public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen im
     @Override
     public void dispose() {
         if (this.uiAdapter != null) this.uiAdapter.dispose();
+    }
+
+    //--
+
+    static {
+        NeoForge.EVENT_BUS.<ScreenEvent.Render.Post>addListener((event) -> {
+            if (event.getScreen() instanceof BaseOwoScreen<?> screen) {
+                screen.renderTooltip(event.getGuiGraphics(), event.getMouseX(), event.getMouseY(), event.getPartialTick());
+            }
+        });
+    }
+
+    private void renderTooltip(DrawContext drawContext, int mouseX, int mouseY, float tickDelta) {
+        if (this.uiAdapter != null) this.uiAdapter.drawTooltip(drawContext, mouseX, mouseY, tickDelta);
     }
 }

@@ -1,9 +1,11 @@
 package io.wispforest.owo.util;
 
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.resource.SynchronousResourceReloader;
 import net.minecraft.util.Identifier;
+import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
+import net.neoforged.neoforge.resource.VanillaServerListeners;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.HashMap;
@@ -28,7 +30,8 @@ public final class RecipeRemainderStorage {
         return REMAINDERS.get(recipe);
     }
 
-    static {
-        ServerLifecycleEvents.START_DATA_PACK_RELOAD.register((server, resourceManager) -> REMAINDERS.clear());
+    public static void addReloadListener(AddServerReloadListenersEvent event) {
+        event.addListener(Identifier.of("owo", "reload_hook_recipe_remainders"), (SynchronousResourceReloader) manager -> REMAINDERS.clear());
+        event.addDependency(Identifier.of("owo", "reload_hook_recipe_remainders"), VanillaServerListeners.RECIPES);
     }
 }

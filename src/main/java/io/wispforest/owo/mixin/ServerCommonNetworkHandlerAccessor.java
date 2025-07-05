@@ -1,6 +1,7 @@
 package io.wispforest.owo.mixin;
 
 import net.minecraft.network.ClientConnection;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerCommonNetworkHandler;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import org.spongepowered.asm.mixin.Mixin;
@@ -12,4 +13,6 @@ public interface ServerCommonNetworkHandlerAccessor {
     @Accessor("connection")
     ClientConnection owo$getConnection();
 
+    @Accessor("server")
+    MinecraftServer owo$server();
 }

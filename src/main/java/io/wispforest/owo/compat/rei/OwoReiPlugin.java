@@ -19,16 +19,19 @@ import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import me.shedaniel.rei.api.client.registry.screen.OverlayDecider;
 import me.shedaniel.rei.api.client.registry.screen.OverlayRendererProvider;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import me.shedaniel.rei.forge.REIPluginClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.util.math.RotationAxis;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
+@REIPluginClient
 public class OwoReiPlugin implements REIClientPlugin {
 
     @SuppressWarnings("UnstableApiUsage")
@@ -91,30 +94,28 @@ public class OwoReiPlugin implements REIClientPlugin {
     }
 
     static {
-        ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
-            if (!(screen instanceof BaseOwoHandledScreenAccessor accessor)) return;
+        NeoForge.EVENT_BUS.<ScreenEvent.Render.Pre>addListener((event) -> {
+            if (!(event.getScreen() instanceof BaseOwoHandledScreenAccessor accessor)) return;
 
-            ScreenEvents.beforeRender(screen).register(($, context, mouseX, mouseY, tickDelta) -> {
-                var root = accessor.owo$getUIAdapter().rootComponent;
+            var root = accessor.owo$getUIAdapter().rootComponent;
 
-                CallbackSurface surface;
-                if (root.surface() instanceof CallbackSurface wrapped) {
-                    surface = wrapped;
-                } else {
-                    surface = new CallbackSurface(root.surface());
-                    root.surface(surface);
-                }
+            CallbackSurface surface;
+            if (root.surface() instanceof CallbackSurface wrapped) {
+                surface = wrapped;
+            } else {
+                surface = new CallbackSurface(root.surface());
+                root.surface(surface);
+            }
 
-                surface.callback = () -> {
-                    if (renderSink == null) return;
-                    renderOverlay($, () -> renderSink.render(context, mouseX, mouseY, tickDelta));
-                };
-            });
-
-            ScreenEvents.afterRender(screen).register(($, matrices, mouseX, mouseY, tickDelta) -> {
+            surface.callback = () -> {
                 if (renderSink == null) return;
-                renderOverlay($, () -> renderSink.lateRender(matrices, mouseX, mouseY, tickDelta));
-            });
+                renderOverlay(event.getScreen(), () -> renderSink.render(event.getGuiGraphics(), event.getMouseX(), event.getMouseY(), event.getPartialTick()));
+            };
+        });
+        NeoForge.EVENT_BUS.<ScreenEvent.Render.Post>addListener((event) -> {
+            if (!(event.getScreen() instanceof BaseOwoHandledScreenAccessor)) return;
+            if (renderSink == null) return;
+            renderOverlay(event.getScreen(), () -> renderSink.lateRender(event.getGuiGraphics(), event.getMouseX(), event.getMouseY(), event.getPartialTick()));
         });
     }
 
