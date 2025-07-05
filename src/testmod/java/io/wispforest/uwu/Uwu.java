@@ -134,7 +134,7 @@ public class Uwu {
 
     public static final UwuConfig CONFIG = UwuConfig.createAndLoad();
     public static final BruhConfig BRUHHHHH = BruhConfig.createAndLoad(builder -> {
-        builder.janksonBuilder().registerSerializer(Color.class, (color, marshaller) -> new JsonPrimitive("bruv"));
+        builder.registerSerializer(Color.class, (color, marshaller) -> new JsonPrimitive("bruv"));
     });
 
     public Uwu(IEventBus eventBus) {
@@ -197,7 +197,7 @@ public class Uwu {
             });
 
             event.register(RegistryKeys.ITEM, helper -> {
-                UwuItems.init();
+                FieldRegistrationHandler.register(UwuItems.class, "uwu", true);
             });
         });
 
