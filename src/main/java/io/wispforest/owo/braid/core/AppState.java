@@ -10,7 +10,6 @@ import io.wispforest.owo.braid.framework.proxy.ProxyHost;
 import io.wispforest.owo.braid.framework.proxy.SingleChildInstanceWidgetProxy;
 import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import io.wispforest.owo.braid.widgets.basic.MouseArea;
 import io.wispforest.owo.braid.widgets.basic.Tooltip;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import net.minecraft.client.MinecraftClient;
@@ -35,8 +34,9 @@ public class AppState implements InstanceHost, ProxyHost {
     public final CursorController cursorController;
 
     private final BuildScope rootBuildScope = new BuildScope();
-    private Deque<AnimationCallback> animationCallbacks = new ArrayDeque<>();
-    private PriorityQueue<ScheduledCallback> callbacks = new PriorityQueue<>();
+    private Deque<AnimationCallback> animationCallbacks = new LinkedList<>();
+    private final PriorityQueue<ScheduledCallback> callbacks = new PriorityQueue<>();
+    private Deque<Runnable> postLayoutCallbacks = new LinkedList<>();
     private final RootProxy root;
 
     private Set<MouseListener> hovered = new HashSet<>();
@@ -92,11 +92,10 @@ public class AppState implements InstanceHost, ProxyHost {
 
         if (!this.animationCallbacks.isEmpty()) {
             var callbacksForThisFrame = this.animationCallbacks;
-            this.animationCallbacks = new ArrayDeque<>();
+            this.animationCallbacks = new LinkedList<>();
 
             while (!callbacksForThisFrame.isEmpty()) {
-                var callback = callbacksForThisFrame.removeFirst();
-                callback.run(frameDeltaInTicks);
+                callbacksForThisFrame.poll().run(frameDeltaInTicks);
             }
         }
 
@@ -107,6 +106,15 @@ public class AppState implements InstanceHost, ProxyHost {
 
         this.rootBuildScope.rebuildDirtyProxies();
         this.flushLayoutQueue();
+
+        if (!this.postLayoutCallbacks.isEmpty()) {
+            var callbacksForThisFrame = this.postLayoutCallbacks;
+            this.postLayoutCallbacks = new LinkedList<>();
+
+            while (!callbacksForThisFrame.isEmpty()) {
+                callbacksForThisFrame.poll().run();
+            }
+        }
 
         // ---
 
@@ -379,7 +387,7 @@ public class AppState implements InstanceHost, ProxyHost {
 
     @Override
     public void scheduleAnimationCallback(AnimationCallback callback) {
-        this.animationCallbacks.add(callback);
+        this.animationCallbacks.offer(callback);
     }
 
     @Override
@@ -388,6 +396,11 @@ public class AppState implements InstanceHost, ProxyHost {
             Instant.now().plus(delay),
             callback
         ));
+    }
+
+    @Override
+    public void schedulePostLayoutCallback(Runnable callback) {
+        this.postLayoutCallbacks.offer(callback);
     }
 }
 

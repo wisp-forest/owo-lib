@@ -1036,7 +1036,9 @@ public class TestSelector extends StatefulWidget {
             private void addToList(Text text) {
                 this.setState(() -> {
                     this.inputs.add(text);
-                    this.controller.setOffset(this.controller.maxOffset());
+                    this.schedulePostLayoutCallback(() -> {
+                        this.controller.setOffset(this.controller.maxOffset());
+                    });
                 });
             }
 
