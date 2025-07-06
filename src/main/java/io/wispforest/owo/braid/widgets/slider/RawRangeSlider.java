@@ -10,6 +10,7 @@ import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.*;
+import io.wispforest.owo.braid.widgets.stack.Stack;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 

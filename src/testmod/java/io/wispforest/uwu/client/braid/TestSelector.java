@@ -11,7 +11,7 @@ import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.EntityWidget;
 import io.wispforest.owo.braid.widgets.ItemStackWidget;
 import io.wispforest.owo.braid.widgets.basic.*;
-import io.wispforest.owo.braid.widgets.basic.Stack;
+import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.braid.widgets.button.Button;
 import io.wispforest.owo.braid.widgets.button.MessageButton;
 import io.wispforest.owo.braid.widgets.drag.DragArena;
@@ -26,6 +26,7 @@ import io.wispforest.owo.braid.widgets.sharedstate.ShareableState;
 import io.wispforest.owo.braid.widgets.sharedstate.SharedState;
 import io.wispforest.owo.braid.widgets.slider.*;
 import io.wispforest.owo.braid.widgets.splitpane.MultiSplitPane;
+import io.wispforest.owo.braid.widgets.stack.StackBase;
 import io.wispforest.owo.braid.widgets.textinput.TextBox;
 import io.wispforest.owo.braid.widgets.textinput.TextEditingController;
 import io.wispforest.owo.braid.widgets.vanilla.VanillaWidget;
@@ -65,7 +66,7 @@ import java.util.function.DoubleFunction;
 public class TestSelector extends StatefulWidget {
 
     public enum Tests {
-        COUNTER, FLEX, DRAGGING, SPLIT_PANE, SLIDERS, TEXT_INPUT, BURNING_CHYZ, SCROLLING, INPUT, CYCLING, VANILLA, SHARED_STATE
+        COUNTER, FLEX, DRAGGING, SPLIT_PANE, SLIDERS, TEXT_INPUT, BURNING_CHYZ, SCROLLING, INPUT, CYCLING, VANILLA, SHARED_STATE, STACKS
     }
 
     @Override
@@ -108,6 +109,7 @@ public class TestSelector extends StatefulWidget {
                         case CYCLING -> new CyclingTest();
                         case VANILLA -> new VanillaTest();
                         case SHARED_STATE -> new SharedStateTest();
+                        case STACKS -> new StacksTest();
                         case null -> new Center(new Label(Text.literal("select a test")));
                     }
                 ),
@@ -1346,6 +1348,35 @@ public class TestSelector extends StatefulWidget {
         public static class CounterState extends ShareableState {
             public int count = 0;
             public boolean dark = false;
+        }
+    }
+
+    public static class StacksTest extends StatelessWidget {
+        @Override
+        public Widget build(BuildContext context) {
+            return new Center(
+                new Row(
+                    new Stack(
+                        new Panel(OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE),
+                        new StackBase(new Sized(100, 100, new Padding(Insets.none()))),
+                        new Label(new LabelStyle(Alignment.BOTTOM_RIGHT, null, null, null), true, Text.literal("based corner text"))
+                    ),
+                    new Padding(Insets.horizontal(20)),
+                    new Stack(
+                        new Sized(100, 100, new Panel(OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE)),
+                        new Label(new LabelStyle(Alignment.BOTTOM_RIGHT, null, null, null), true, Text.literal("failed corner text"))
+                    ),
+                    new Padding(Insets.horizontal(20)),
+                    new IntrinsicWidth(
+                        new IntrinsicHeight(
+                            new Stack(
+                                new Sized(100, 100, new Panel(OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE)),
+                                new Label(new LabelStyle(Alignment.BOTTOM_RIGHT, null, null, null), true, Text.literal("intrinsic corner text"))
+                            )
+                        )
+                    )
+                )
+            );
         }
     }
 }

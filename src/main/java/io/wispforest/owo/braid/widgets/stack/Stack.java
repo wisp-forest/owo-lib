@@ -1,5 +1,6 @@
-package io.wispforest.owo.braid.widgets.basic;
+package io.wispforest.owo.braid.widgets.stack;
 
+import com.google.common.collect.Iterables;
 import io.wispforest.owo.braid.core.Alignment;
 import io.wispforest.owo.braid.core.BraidUtils;
 import io.wispforest.owo.braid.core.Constraints;
@@ -12,7 +13,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.OptionalDouble;
 
-// TODO: port sizing base feature
 public class Stack extends MultiChildInstanceWidget {
 
     public final Alignment alignment;
@@ -46,19 +46,39 @@ public class Stack extends MultiChildInstanceWidget {
         }
 
         @Override
-        protected void doLayout(Constraints constraints) {
-            var maxSize = BraidUtils.fold(this.children, Size.zero(), (size, child) -> size = Size.max(size, child.layout(constraints)));
+        public void setWidget(Stack widget) {
+            if (this.widget.alignment == widget.alignment) return;
 
-            for (var child : children) {
+            super.setWidget(widget);
+            this.markNeedsLayout();
+        }
+
+        @Override
+        protected void doLayout(Constraints constraints) {
+            var sizingBase = this.children.stream().filter(child -> child.parentData == StackParentData.INSTANCE).findFirst().orElse(null);
+
+            Size selfSize;
+            if (sizingBase != null) {
+                selfSize = sizingBase.layout(constraints);
+
+                var childConstraints = Constraints.tight(selfSize).respecting(constraints);
+                for (var child : Iterables.filter(this.children, child -> child != sizingBase)) {
+                    child.layout(childConstraints);
+                }
+            } else {
+                selfSize = BraidUtils.fold(this.children, Size.zero(), (size, child) -> Size.max(size, child.layout(constraints)));
+            }
+
+            for (var child : this.children) {
                 child.transform.setX(
-                    this.widget.alignment.alignHorizontal(maxSize.width(), child.transform.width())
+                    this.widget.alignment.alignHorizontal(selfSize.width(), child.transform.width())
                 );
                 child.transform.setY(
-                    this.widget.alignment.alignVertical(maxSize.height(), child.transform.height())
+                    this.widget.alignment.alignVertical(selfSize.height(), child.transform.height())
                 );
             }
 
-            this.transform.setSize(maxSize);
+            this.transform.setSize(selfSize);
         }
 
         @Override
