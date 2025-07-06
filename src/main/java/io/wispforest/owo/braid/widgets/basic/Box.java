@@ -26,7 +26,7 @@ public class Box extends OptionalChildInstanceWidget {
         return new Instance(this);
     }
 
-    public static class Instance extends OptionalChildWidgetInstance<Box> {
+    public static class Instance extends OptionalChildWidgetInstance.ShrinkWrap<Box> {
 
         public Instance(Box widget) {
             super(widget);
@@ -36,11 +36,6 @@ public class Box extends OptionalChildInstanceWidget {
         public void draw(OwoUIDrawContext ctx) {
             ctx.fill(0, 0, (int) this.transform.width(), (int) this.transform.height(), this.widget.color.argb());
             super.draw(ctx);
-        }
-
-        @Override
-        protected void doLayout(Constraints constraints) {
-            this.sizeToChild(constraints, this.child);
         }
     }
 }

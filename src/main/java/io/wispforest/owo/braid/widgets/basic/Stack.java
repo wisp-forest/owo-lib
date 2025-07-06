@@ -10,7 +10,9 @@ import io.wispforest.owo.braid.framework.widget.Widget;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.OptionalDouble;
 
+// TODO: port sizing base feature
 public class Stack extends MultiChildInstanceWidget {
 
     public final Alignment alignment;
@@ -57,6 +59,29 @@ public class Stack extends MultiChildInstanceWidget {
             }
 
             this.transform.setSize(maxSize);
+        }
+
+        @Override
+        protected double measureIntrinsicWidth(double height) {
+            return BraidUtils.fold(
+                this.children,
+                0.0,
+                (width, child) -> Math.max(child.getIntrinsicWidth(height), width)
+            );
+        }
+
+        @Override
+        protected double measureIntrinsicHeight(double width) {
+            return BraidUtils.fold(
+                this.children,
+                0.0,
+                (height, child) -> Math.max(child.getIntrinsicHeight(width), height)
+            );
+        }
+
+        @Override
+        protected OptionalDouble measureBaselineOffset() {
+            return this.computeHighestBaselineOffset();
         }
     }
 }

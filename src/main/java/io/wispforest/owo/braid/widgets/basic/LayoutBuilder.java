@@ -79,7 +79,7 @@ public class LayoutBuilder extends InstanceWidget {
         }
     }
 
-    public static class Instance extends OptionalChildWidgetInstance<LayoutBuilder> {
+    public static class Instance extends OptionalChildWidgetInstance.ShrinkWrap<LayoutBuilder> {
 
         private Consumer<Constraints> callback;
 
@@ -92,7 +92,7 @@ public class LayoutBuilder extends InstanceWidget {
             this.host().notifySubtreeRebuild();
             this.callback.accept(constraints);
 
-            this.sizeToChild(constraints, this.child);
+            super.doLayout(constraints);
         }
     }
 

@@ -24,7 +24,7 @@ public class Transform extends SingleChildInstanceWidget {
         return new Instance(this);
     }
 
-    public static class Instance extends SingleChildWidgetInstance<Transform> {
+    public static class Instance extends SingleChildWidgetInstance.ShrinkWrap<Transform> {
 
         public Instance(Transform widget) {
             super(widget);
@@ -42,11 +42,6 @@ public class Transform extends SingleChildInstanceWidget {
             ((CustomWidgetTransform) this.transform).setMatrix(this.widget.matrix);
 
             this.markNeedsLayout();
-        }
-
-        @Override
-        protected void doLayout(Constraints constraints) {
-            this.sizeToChild(constraints, this.child);
         }
 
         @Override

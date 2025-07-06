@@ -1,12 +1,15 @@
 package io.wispforest.owo.braid.widgets.flex;
 
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Streams;
 import io.wispforest.owo.braid.core.BraidUtils;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.core.Size;
 import io.wispforest.owo.braid.framework.instance.MultiChildWidgetInstance;
+import io.wispforest.owo.braid.framework.instance.WidgetInstance;
 
+import java.util.OptionalDouble;
 import java.util.stream.Collectors;
 
 public class FlexInstance extends MultiChildWidgetInstance<Flex> {
@@ -113,5 +116,82 @@ public class FlexInstance extends MultiChildWidgetInstance<Flex> {
 
             mainAxisOffset += child.transform.getExtent(mainAxis) + betweenSpace;
         }
+    }
+
+    @Override
+    protected double measureIntrinsicWidth(double height) {
+        return this.widget.mainAxis == LayoutAxis.HORIZONTAL ? this.measureMainAxis(height) : this.measureCrossAxis(height);
+    }
+
+    @Override
+    protected double measureIntrinsicHeight(double width) {
+        return this.widget.mainAxis == LayoutAxis.VERTICAL ? this.measureMainAxis(width) : this.measureCrossAxis(width);
+    }
+
+    @Override
+    protected OptionalDouble measureBaselineOffset() {
+        return switch (this.widget.mainAxis) {
+            case VERTICAL -> this.computeFirstBaselineOffset();
+            case HORIZONTAL -> this.computeHighestBaselineOffset();
+        };
+    }
+
+    @SuppressWarnings("DataFlowIssue")
+    private double measureMainAxis(double crossExtent) {
+        var horizontal = this.widget.mainAxis == LayoutAxis.HORIZONTAL;
+        var nonFlexSize = this.children.stream()
+            .filter(element -> !(element.parentData instanceof FlexParentData))
+            .mapToDouble(e -> horizontal ? e.getIntrinsicWidth(crossExtent) : e.getIntrinsicHeight(crossExtent))
+            .sum();
+
+        var totalFlexFactor = 0.0;
+
+        WidgetInstance<?> largestFlexChild = null;
+        double largestFlexChildSize = 0;
+        double largestFlexChildFlexFactor = 0;
+
+        for (var flexChild : Iterables.filter(this.children, element -> element.parentData instanceof FlexParentData)) {
+            totalFlexFactor += ((FlexParentData) flexChild.parentData).flexFactor;
+
+            var size = horizontal ? flexChild.getIntrinsicWidth(crossExtent) : flexChild.getIntrinsicHeight(crossExtent);
+            if (size > largestFlexChildSize) {
+                largestFlexChild = flexChild;
+                largestFlexChildSize = size;
+                largestFlexChildFlexFactor = ((FlexParentData) flexChild.parentData).flexFactor;
+            }
+        }
+
+        var flexSize = largestFlexChild != null ? (totalFlexFactor / largestFlexChildFlexFactor) * largestFlexChildSize : 0;
+
+        return nonFlexSize + flexSize;
+    }
+
+    @SuppressWarnings("DataFlowIssue")
+    private double measureCrossAxis(double mainExtent) {
+        var horizontal = this.widget.mainAxis == LayoutAxis.HORIZONTAL;
+
+        var crossSize = 0.0;
+
+        var nonFlexSize = 0.0;
+        for (var child : Iterables.filter(this.children, element -> !(element.parentData instanceof FlexParentData))) {
+            var childSize = horizontal ? child.getIntrinsicHeight(mainExtent) : child.getIntrinsicWidth(mainExtent);
+
+            nonFlexSize += childSize;
+            crossSize = Math.max(crossSize, childSize);
+        }
+
+        var flexChildren = Iterables.filter(children, (element) -> element.parentData instanceof FlexParentData);
+        var totalFlexFactor = Streams.stream(flexChildren).mapToDouble(e -> ((FlexParentData) e.parentData).flexFactor).sum();
+
+        for (var child : flexChildren) {
+            var childSpace = (mainExtent - nonFlexSize) * (totalFlexFactor / ((FlexParentData) child.parentData).flexFactor);
+
+            crossSize = Math.max(
+                crossSize,
+                horizontal ? child.getIntrinsicHeight(childSpace) : child.getIntrinsicWidth(childSpace)
+            );
+        }
+
+        return crossSize;
     }
 }

@@ -7,6 +7,8 @@ import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.OptionalDouble;
+
 public class RawScrollView extends SingleChildInstanceWidget {
 
     public final ScrollController horizontalController;
@@ -96,6 +98,24 @@ public class RawScrollView extends SingleChildInstanceWidget {
             ).constrained(constraints);
 
             this.transform.setSize(selfSize);
+        }
+
+        @Override
+        protected double measureIntrinsicWidth(double height) {
+            return this.widget.horizontalController == null ? this.child.getIntrinsicWidth(height) : 0;
+        }
+
+        @Override
+        protected double measureIntrinsicHeight(double width) {
+            return this.widget.verticalController == null ? this.child.getIntrinsicHeight(width) : 0;
+        }
+
+        @Override
+        protected OptionalDouble measureBaselineOffset() {
+            var childBaseline = this.child != null ? this.child.getBaselineOffset() : OptionalDouble.empty();
+            if (childBaseline.isEmpty()) return OptionalDouble.empty();
+
+            return OptionalDouble.of(childBaseline.getAsDouble() + this.child.transform.y());
         }
     }
 }

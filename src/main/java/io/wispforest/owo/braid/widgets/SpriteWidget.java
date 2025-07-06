@@ -11,6 +11,8 @@ import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.util.Identifier;
 
+import java.util.OptionalDouble;
+
 public class SpriteWidget extends LeafInstanceWidget {
 
     public final SpriteIdentifier spriteIdentifier;
@@ -47,6 +49,21 @@ public class SpriteWidget extends LeafInstanceWidget {
             ).constrained(constraints);
 
             this.transform.setSize(size);
+        }
+
+        @Override
+        protected double measureIntrinsicWidth(double height) {
+            return this.sprite.getContents().getWidth();
+        }
+
+        @Override
+        protected double measureIntrinsicHeight(double width) {
+            return this.sprite.getContents().getHeight();
+        }
+
+        @Override
+        protected OptionalDouble measureBaselineOffset() {
+            return OptionalDouble.empty();
         }
 
         @Override

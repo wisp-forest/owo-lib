@@ -4,6 +4,8 @@ import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.framework.instance.MultiChildWidgetInstance;
 import io.wispforest.owo.braid.framework.instance.WidgetInstance;
 
+import java.util.OptionalDouble;
+
 public class DragArenaInstance extends MultiChildWidgetInstance<DragArena> {
 
     public DragArenaInstance(DragArena widget) {
@@ -30,5 +32,20 @@ public class DragArenaInstance extends MultiChildWidgetInstance<DragArena> {
         }
 
         this.transform.setSize(constraints.maxSize());
+    }
+
+    @Override
+    protected double measureIntrinsicWidth(double height) {
+        return 0;
+    }
+
+    @Override
+    protected double measureIntrinsicHeight(double width) {
+        return 0;
+    }
+
+    @Override
+    protected OptionalDouble measureBaselineOffset() {
+        return this.computeHighestBaselineOffset();
     }
 }

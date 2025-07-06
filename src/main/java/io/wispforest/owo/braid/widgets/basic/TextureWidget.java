@@ -1,7 +1,6 @@
 package io.wispforest.owo.braid.widgets.basic;
 
 import io.wispforest.owo.braid.core.Constraints;
-import io.wispforest.owo.braid.core.Size;
 import io.wispforest.owo.braid.framework.instance.OptionalChildWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.OptionalChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
@@ -9,6 +8,8 @@ import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.OwoUIRenderLayers;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.OptionalDouble;
 
 public class TextureWidget extends OptionalChildInstanceWidget {
 
@@ -86,6 +87,21 @@ public class TextureWidget extends OptionalChildInstanceWidget {
             } else {
                 this.sizeToChild(constraints, this.child);
             }
+        }
+
+        @Override
+        protected double measureIntrinsicWidth(double height) {
+            return this.child != null ? this.child.getIntrinsicWidth(height) : 0;
+        }
+
+        @Override
+        protected double measureIntrinsicHeight(double width) {
+            return this.child != null ? this.child.getIntrinsicHeight(width) : 0;
+        }
+
+        @Override
+        protected OptionalDouble measureBaselineOffset() {
+            return this.child != null ? this.child.getBaselineOffset() : OptionalDouble.empty();
         }
     }
 }

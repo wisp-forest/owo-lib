@@ -7,11 +7,13 @@ import io.wispforest.owo.braid.framework.widget.LeafInstanceWidget;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.OptionalDouble;
 
 public class RawLabel extends LeafInstanceWidget {
 
@@ -52,18 +54,17 @@ public class RawLabel extends LeafInstanceWidget {
             this.markNeedsLayout();
         }
 
-        @Override
-        protected void doLayout(Constraints constraints) {
-            var textRenderer = this.host().client().textRenderer;
-
+        protected List<OrderedText> wrapText(TextRenderer textRenderer, int maxWidth) {
             var styledText = this.widget.text.copy().styled(textStyle -> textStyle.withParent(this.widget.style.textStyle()));
-            this.renderText = textRenderer.wrapLines(styledText, this.widget.softWrap ? (int) constraints.maxWidth() : Integer.MAX_VALUE);
+            return textRenderer.wrapLines(styledText, this.widget.softWrap ? maxWidth : Integer.MAX_VALUE);
+        }
 
+        protected TextMetrics layoutText(TextRenderer textRenderer, List<OrderedText> lines) {
             var textWidth = 0;
             var textHeight = 0;
             var lineWidths = new DoubleArrayList();
 
-            for (var line : this.renderText) {
+            for (var line : lines) {
                 var lineWidth = textRenderer.getWidth(line);
                 lineWidths.add(lineWidth);
 
@@ -71,11 +72,38 @@ public class RawLabel extends LeafInstanceWidget {
                 textHeight += textRenderer.fontHeight;
             }
 
-            this.renderTextWidths = lineWidths;
-            this.renderTextHeight = textHeight;
+            return new TextMetrics(textWidth, textHeight, lineWidths);
+        }
 
-            var size = Size.of(textWidth, textHeight).constrained(constraints);
+        @Override
+        protected void doLayout(Constraints constraints) {
+            var textRenderer = this.host().client().textRenderer;
+            this.renderText = this.wrapText(textRenderer, (int) constraints.maxWidth());
+
+            var metrics = this.layoutText(textRenderer, this.renderText);
+
+            this.renderTextWidths = metrics.lineWidths();
+            this.renderTextHeight = metrics.height();
+
+            var size = Size.of(metrics.width, metrics.height).constrained(constraints);
             this.transform.setSize(size);
+        }
+
+        @Override
+        protected double measureIntrinsicWidth(double height) {
+            var renderer = this.host().client().textRenderer;
+            return this.layoutText(renderer, this.wrapText(renderer, Integer.MAX_VALUE)).width;
+        }
+
+        @Override
+        protected double measureIntrinsicHeight(double width) {
+            var renderer = this.host().client().textRenderer;
+            return this.layoutText(renderer, this.wrapText(renderer, (int) width)).height;
+        }
+
+        @Override
+        protected OptionalDouble measureBaselineOffset() {
+            return OptionalDouble.of(this.host().client().textRenderer.fontHeight - 2 /* TODO: bad guesswork */);
         }
 
         @Override
@@ -95,4 +123,6 @@ public class RawLabel extends LeafInstanceWidget {
             }
         }
     }
+
+    public record TextMetrics(int width, int height, DoubleList lineWidths) {}
 }

@@ -27,7 +27,7 @@ public class Panel extends OptionalChildInstanceWidget {
         return new Instance(this);
     }
 
-    public static class Instance extends OptionalChildWidgetInstance<Panel> {
+    public static class Instance extends OptionalChildWidgetInstance.ShrinkWrap<Panel> {
 
         public Instance(Panel widget) {
             super(widget);
@@ -37,11 +37,6 @@ public class Panel extends OptionalChildInstanceWidget {
         public void draw(OwoUIDrawContext ctx) {
             NinePatchTexture.draw(this.widget.texture, OwoUIDrawContext.of(ctx), 0, 0, (int) this.transform.width(), (int) this.transform.height());
             super.draw(ctx);
-        }
-
-        @Override
-        protected void doLayout(Constraints constraints) {
-            this.sizeToChild(constraints, this.child);
         }
     }
 }

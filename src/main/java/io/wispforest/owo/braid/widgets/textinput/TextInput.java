@@ -19,6 +19,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.OptionalDouble;
 
 public class TextInput extends LeafInstanceWidget {
 
@@ -136,6 +137,23 @@ public class TextInput extends LeafInstanceWidget {
                     this.wrappedLines.size() - 1
                 );
             }
+        }
+
+        // TODO: implement when text input is ported properly
+
+        @Override
+        protected double measureIntrinsicWidth(double height) {
+            return 0;
+        }
+
+        @Override
+        protected double measureIntrinsicHeight(double width) {
+            return 0;
+        }
+
+        @Override
+        protected OptionalDouble measureBaselineOffset() {
+            return OptionalDouble.empty();
         }
 
         @Override

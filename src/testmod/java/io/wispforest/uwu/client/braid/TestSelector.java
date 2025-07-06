@@ -1013,8 +1013,7 @@ public class TestSelector extends StatefulWidget {
                                                     .keyUpCallback((key, modifiers) -> this.addToList(getKeyName(key).append(" released")))
                                                     .focusGainedCallback(() -> this.addToList(Text.literal("Focus gained")))
                                                     .focusLostCallback(() -> this.addToList(Text.literal("Focus lost")))
-                                                    .charCallback((charCode, modifiers) -> this.addToList(Text.literal("Character typed: \"" + (char) charCode + "\"")))
-                                            ,
+                                                    .charCallback((charCode, modifiers) -> this.addToList(Text.literal("Character typed: \"" + (char) charCode + "\""))),
                                             new Panel(
                                                 OwoUIDrawContext.PANEL_INSET_NINE_PATCH_TEXTURE,
                                                 new VerticallyScrollable(
@@ -1312,20 +1311,22 @@ public class TestSelector extends StatefulWidget {
             public static class RightBody extends StatelessWidget {
                 @Override
                 public Widget build(BuildContext context) {
-                    return new Column(
-                        new Button(
-                            () -> {
-                                SharedState.set(context, CounterState.class, state -> state.count += 1);
-                                return true;
-                            },
-                            new Label(Text.literal("increment"))
-                        ),
-                        new Button(
-                            () -> {
-                                SharedState.set(context, CounterState.class, state -> state.dark = !state.dark);
-                                return true;
-                            },
-                            new Label(Text.literal("toggle darkness"))
+                    return new IntrinsicWidth(
+                        new Column(
+                            new Button(
+                                () -> {
+                                    SharedState.set(context, CounterState.class, state -> state.count += 1);
+                                    return true;
+                                },
+                                new Label(Text.literal("increment"))
+                            ),
+                            new Button(
+                                () -> {
+                                    SharedState.set(context, CounterState.class, state -> state.dark = !state.dark);
+                                    return true;
+                                },
+                                new Label(Text.literal("toggle darkness"))
+                            )
                         )
                     );
                 }

@@ -5,41 +5,37 @@ import io.wispforest.owo.braid.framework.instance.SingleChildWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 
-import java.util.Objects;
 import java.util.OptionalDouble;
 
-public abstract class ConstraintWidget extends SingleChildInstanceWidget {
+public class IntrinsicWidth extends SingleChildInstanceWidget {
 
-    protected ConstraintWidget(Widget child) {
+    public IntrinsicWidth(Widget child) {
         super(child);
     }
-
-    protected abstract Constraints constraints();
 
     @Override
     public SingleChildWidgetInstance<?> instantiate() {
         return new Instance(this);
     }
 
-    public static class Instance extends SingleChildWidgetInstance<ConstraintWidget> {
+    public static class Instance extends SingleChildWidgetInstance<IntrinsicWidth> {
 
-        public Instance(ConstraintWidget widget) {
+        public Instance(IntrinsicWidth widget) {
             super(widget);
         }
 
         @Override
-        public void setWidget(ConstraintWidget widget) {
-            if (Objects.equals(this.widget.constraints(), widget.constraints())) {
-                return;
-            }
-
-            super.setWidget(widget);
-            this.markNeedsLayout();
-        }
-
-        @Override
         protected void doLayout(Constraints constraints) {
-            this.sizeToChild(this.widget.constraints().respecting(constraints), this.child);
+            var childSize = this.child.getIntrinsicWidth(constraints.maxHeight());
+
+            var childConstraints = Constraints.of(
+                childSize,
+                constraints.minHeight(),
+                childSize,
+                constraints.maxHeight()
+            ).respecting(constraints);
+
+            this.transform.setSize(this.child.layout(childConstraints));
         }
 
         @Override

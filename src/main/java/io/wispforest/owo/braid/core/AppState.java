@@ -449,15 +449,10 @@ class RootProxy extends SingleChildInstanceWidgetProxy {
     }
 }
 
-class RootInstance extends SingleChildWidgetInstance<RootWidget> {
+class RootInstance extends SingleChildWidgetInstance.ShrinkWrap<RootWidget> {
 
     public RootInstance(RootWidget widget) {
         super(widget);
-    }
-
-    @Override
-    protected void doLayout(Constraints constraints) {
-        this.sizeToChild(constraints, this.child);
     }
 }
 

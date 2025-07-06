@@ -9,6 +9,7 @@ import io.wispforest.owo.braid.framework.widget.Widget;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
+import java.util.OptionalDouble;
 
 public class Padding extends OptionalChildInstanceWidget {
 
@@ -64,6 +65,26 @@ public class Padding extends OptionalChildInstanceWidget {
                 this.child.transform.setX(insets.left());
                 this.child.transform.setY(insets.top());
             }
+        }
+
+        @Override
+        protected double measureIntrinsicWidth(double height) {
+            var childWidth = this.child != null ? this.child.getIntrinsicWidth(height) : 0;
+            return childWidth + this.widget.insets.horizontal();
+        }
+
+        @Override
+        protected double measureIntrinsicHeight(double width) {
+            var childHeight = this.child != null ? this.child.getIntrinsicHeight(width) : 0;
+            return childHeight + this.widget.insets.vertical();
+        }
+
+        @Override
+        protected OptionalDouble measureBaselineOffset() {
+            var childBaseline = this.child != null ? this.child.getBaselineOffset() : OptionalDouble.empty();
+            if (childBaseline.isEmpty()) return OptionalDouble.empty();
+
+            return OptionalDouble.of(childBaseline.getAsDouble() + this.widget.insets.top());
         }
     }
 }

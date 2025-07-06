@@ -1,10 +1,7 @@
 package io.wispforest.owo.braid.widgets.basic;
 
-import io.wispforest.owo.braid.core.Constraints;
-import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.instance.SingleChildWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
-import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import net.minecraft.client.gui.tooltip.OrderedTextTooltipComponent;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
@@ -44,15 +41,9 @@ public class Tooltip extends SingleChildInstanceWidget {
         return new Instance(this);
     }
 
-    public static class Instance extends SingleChildWidgetInstance<Tooltip> {
-
+    public static class Instance extends SingleChildWidgetInstance.ShrinkWrap<Tooltip> {
         public Instance(Tooltip widget) {
             super(widget);
-        }
-
-        @Override
-        protected void doLayout(Constraints constraints) {
-            this.sizeToChild(constraints, this.child);
         }
     }
 }

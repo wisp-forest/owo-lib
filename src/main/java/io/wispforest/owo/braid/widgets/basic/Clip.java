@@ -28,7 +28,7 @@ public class Clip extends SingleChildInstanceWidget {
         return new Instance(this);
     }
 
-    public static class Instance extends SingleChildWidgetInstance<Clip> {
+    public static class Instance extends SingleChildWidgetInstance.ShrinkWrap<Clip> {
 
         public Instance(Clip widget) {
             super(widget);
@@ -54,11 +54,6 @@ public class Clip extends SingleChildInstanceWidget {
             }
 
             super.hitTest(x, y, state);
-        }
-
-        @Override
-        protected void doLayout(Constraints constraints) {
-            this.sizeToChild(constraints, this.child);
         }
     }
 }
