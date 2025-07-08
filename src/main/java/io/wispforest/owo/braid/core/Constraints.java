@@ -114,12 +114,20 @@ public record Constraints(double minWidth, double minHeight, double maxWidth, do
         return this.minHeight == 0;
     }
 
+    public boolean hasTightWidth() {
+        return this.minWidth == this.maxWidth;
+    }
+
+    public boolean hasTightHeight() {
+        return this.minHeight == this.maxHeight;
+    }
+
     public boolean isLoose() {
         return this.hasLooseWidth() && this.hasLooseHeight();
     }
 
     public boolean isTight() {
-        return this.minWidth == this.maxWidth && this.minHeight == this.maxHeight;
+        return this.hasTightWidth() && this.hasTightHeight();
     }
 
     public boolean hasBoundedWidth() {

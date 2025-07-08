@@ -10,13 +10,14 @@ import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.EntityWidget;
 import io.wispforest.owo.braid.widgets.ItemStackWidget;
+import io.wispforest.owo.braid.widgets.SpriteWidget;
 import io.wispforest.owo.braid.widgets.basic.*;
-import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.braid.widgets.button.Button;
 import io.wispforest.owo.braid.widgets.button.MessageButton;
 import io.wispforest.owo.braid.widgets.drag.DragArena;
 import io.wispforest.owo.braid.widgets.drag.DragArenaElement;
 import io.wispforest.owo.braid.widgets.flex.*;
+import io.wispforest.owo.braid.widgets.grid.Grid;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
 import io.wispforest.owo.braid.widgets.scroll.ScrollController;
@@ -26,12 +27,14 @@ import io.wispforest.owo.braid.widgets.sharedstate.ShareableState;
 import io.wispforest.owo.braid.widgets.sharedstate.SharedState;
 import io.wispforest.owo.braid.widgets.slider.*;
 import io.wispforest.owo.braid.widgets.splitpane.MultiSplitPane;
+import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.braid.widgets.stack.StackBase;
 import io.wispforest.owo.braid.widgets.textinput.TextBox;
 import io.wispforest.owo.braid.widgets.textinput.TextEditingController;
 import io.wispforest.owo.braid.widgets.vanilla.VanillaWidget;
 import io.wispforest.owo.braid.widgets.window.Window;
 import io.wispforest.owo.braid.widgets.window.WindowController;
+import io.wispforest.owo.ops.TextOps;
 import io.wispforest.owo.ui.component.BraidComponent;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.EntityComponent;
@@ -48,25 +51,31 @@ import net.minecraft.client.gui.widget.CheckboxWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.registry.Registries;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
+import org.lwjgl.glfw.GLFW;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
 import java.util.function.DoubleFunction;
+import java.util.stream.Stream;
 
 public class TestSelector extends StatefulWidget {
 
     public enum Tests {
-        COUNTER, FLEX, DRAGGING, SPLIT_PANE, SLIDERS, TEXT_INPUT, BURNING_CHYZ, SCROLLING, INPUT, CYCLING, VANILLA, SHARED_STATE, STACKS
+        COUNTER, FLEX, DRAGGING, SPLIT_PANE, SLIDERS, TEXT_INPUT, BURNING_CHYZ, SCROLLING, INPUT, CYCLING, VANILLA, SHARED_STATE, STACKS, GRIDS, CONTRIBUTORS
     }
 
     @Override
@@ -110,6 +119,8 @@ public class TestSelector extends StatefulWidget {
                         case VANILLA -> new VanillaTest();
                         case SHARED_STATE -> new SharedStateTest();
                         case STACKS -> new StacksTest();
+                        case GRIDS -> new GridsTest();
+                        case CONTRIBUTORS -> new ContributorsTest();
                         case null -> new Center(new Label(Text.literal("select a test")));
                     }
                 ),
@@ -122,9 +133,7 @@ public class TestSelector extends StatefulWidget {
                                 OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
                                 new Padding(
                                     Insets.all(8),
-                                    new Sized(
-                                        65.0,
-                                        null,
+                                    new IntrinsicWidth(
                                         new Column(
                                             new Padding(Insets.all(2)),
                                             Arrays.stream(Tests.values()).map(test -> {
@@ -147,7 +156,6 @@ public class TestSelector extends StatefulWidget {
             );
         }
     }
-
 
     public static class Counter extends StatefulWidget {
         @Override
@@ -400,49 +408,23 @@ public class TestSelector extends StatefulWidget {
                     new Transform(
                         new Matrix4f().m01((float) Math.tan(this.xSkew)).m10((float) Math.tan(this.ySkew)),
                         !this.redundant
-                            ? new Column(
-                            MainAxisAlignment.START,
-                            CrossAxisAlignment.CENTER,
-                            new Padding(Insets.all(10)),
-                            List.of(
-                                new Row(
-                                    MainAxisAlignment.START,
-                                    CrossAxisAlignment.CENTER,
-                                    new Label(Text.literal("Discrete")),
-                                    new Padding(Insets.all(10)),
-                                    new Label(Text.literal("Smooth"))
-                                ),
-                                new Row(
-                                    MainAxisAlignment.START,
-                                    CrossAxisAlignment.CENTER,
-                                    new Padding(Insets.all(10)),
-                                    List.of(
-                                        new Label(Text.literal("Basic")),
-                                        new CoolSlider(2.0, value -> Text.literal("v: " + formatDouble(value))),
-                                        new CoolSlider(null, value -> Text.literal("v: " + formatDouble(value)))
-                                    )
-                                ),
-                                new Row(
-                                    MainAxisAlignment.START,
-                                    CrossAxisAlignment.CENTER,
-                                    new Padding(Insets.all(10)),
-                                    List.of(
-                                        new Label(Text.literal("XY")),
-                                        new CoolXlyder(2.0, 2.0, (x, y) -> Text.literal("x: " + formatDouble(x) + "\ny: " + formatDouble(y))),
-                                        new CoolXlyder(null, null, (x, y) -> Text.literal("x: " + formatDouble(x) + "\ny: " + formatDouble(y)))
-                                    )
-                                ),
-                                new Row(
-                                    MainAxisAlignment.START,
-                                    CrossAxisAlignment.CENTER,
-                                    new Padding(Insets.all(10)),
-                                    List.of(
-                                        new Label(Text.literal("Range")),
-                                        new CoolRangeSlider(2.0, (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max))),
-                                        new CoolRangeSlider(null, (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max)))
-                                    )
-                                )
-                            )
+                            ? new Grid(
+                            LayoutAxis.VERTICAL,
+                            3,
+                            Grid.CellFit.tight(),
+                            widget -> new Padding(Insets.all(5), widget),
+                            new Padding(Insets.none()),
+                            new Label(Text.literal("Discrete")),
+                            new Label(Text.literal("Smooth")),
+                            new Label(Text.literal("Basic")),
+                            new CoolSlider(2.0, value -> Text.literal("v: " + formatDouble(value))),
+                            new CoolSlider(null, value -> Text.literal("v: " + formatDouble(value))),
+                            new Label(Text.literal("XY")),
+                            new CoolXlyder(2.0, 2.0, (x, y) -> Text.literal("x: " + formatDouble(x) + "\ny: " + formatDouble(y))),
+                            new CoolXlyder(null, null, (x, y) -> Text.literal("x: " + formatDouble(x) + "\ny: " + formatDouble(y))),
+                            new Label(Text.literal("Range")),
+                            new CoolRangeSlider(2.0, (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max))),
+                            new CoolRangeSlider(null, (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max)))
                         )
                             : new IncrediblyRedundantSlider()
                     ),
@@ -1377,6 +1359,258 @@ public class TestSelector extends StatefulWidget {
                     )
                 )
             );
+        }
+    }
+
+    public static class GridsTest extends StatelessWidget {
+        @Override
+        public Widget build(BuildContext context) {
+            var random = new java.util.Random(0);
+
+            return new Center(
+                new Grid(
+                    LayoutAxis.VERTICAL,
+                    2,
+                    Grid.CellFit.loose(),
+                    widget -> new Padding(Insets.all(10), widget),
+                    new Sized(
+                        90,
+                        null,
+                        new Grid(
+                            LayoutAxis.VERTICAL,
+                            3,
+                            Grid.CellFit.loose(Alignment.BOTTOM_RIGHT),
+                            new Sized(random.nextInt(15, 31), random.nextInt(15, 31), new Box(nextColor(random))),
+                            new Sized(random.nextInt(15, 31), random.nextInt(15, 31), new Box(nextColor(random))),
+                            new Sized(random.nextInt(15, 31), random.nextInt(15, 31), new Box(nextColor(random))),
+                            new Sized(random.nextInt(15, 31), random.nextInt(15, 31), new Box(nextColor(random))),
+                            new Sized(random.nextInt(15, 31), random.nextInt(15, 31), new Box(nextColor(random)))
+                        )
+                    ),
+                    new IntrinsicWidth(
+                        new Column(
+                            MainAxisAlignment.CENTER,
+                            CrossAxisAlignment.CENTER,
+                            new Grid(
+                                LayoutAxis.VERTICAL,
+                                2,
+                                Grid.CellFit.loose(),
+                                new Sized(20, 40, new Box(Color.WHITE)),
+                                new Sized(20, 20, new Box(Color.WHITE)),
+                                new Sized(20, 20, new Box(Color.WHITE)),
+                                new Sized(60, 40, new Box(Color.WHITE))
+                            ),
+                            new Button(() -> true, new Label(Text.literal("a")))
+                        )
+                    ),
+                    new IntrinsicWidth(
+                        new Column(
+                            MainAxisAlignment.CENTER,
+                            CrossAxisAlignment.CENTER,
+                            new Grid(
+                                LayoutAxis.VERTICAL,
+                                2,
+                                Grid.CellFit.loose(),
+                                new Sized(40, 40, new Box(Color.WHITE)),
+                                new Sized(20, 20, new Box(Color.WHITE)),
+                                new Sized(20, 20, new Box(Color.WHITE)),
+                                new Sized(40, 40, new Box(Color.WHITE))
+                            ),
+                            new Button(() -> true, new Label(Text.literal("a")))
+                        )
+                    )
+                )
+            );
+        }
+
+        private static Color nextColor(java.util.Random random) {
+            return Color.ofHsv(random.nextFloat(), .75f, 1f);
+        }
+    }
+
+    public static class ContributorsTest extends StatefulWidget {
+        @Override
+        public WidgetState<ContributorsTest> createState() {
+            return new State();
+        }
+
+        public static class State extends WidgetState<ContributorsTest> {
+
+            private List<Contributor> contributors = this.genContributors();
+
+            private List<Contributor> genContributors() {
+                return List.of(
+                    new Contributor(UUID.fromString("b6c2d403-bf7c-4e19-b7a2-f64c9e44e56a"), "glisco", Text.translatable("text.uwu.glisco")),
+                    new Contributor(UUID.fromString("09de8a6d-86bf-4c15-bb93-ce3384ce4e96"), "chyzman", Text.translatable("text.uwu.chyz")),
+                    new Contributor(UUID.fromString("517253c6-5ae6-4a70-8e8f-b8515321f774"), "Dragon_Seeker", TextOps.withColor("blodhgarm", 0xae0000)),
+                    new Contributor(UUID.fromString("63db48b4-723a-4323-8d67-45679507fd82"), "GreatGrayOwl", TextOps.withColor("skibediah fœtus", 0x9b57d0)),
+                    new Contributor(UUID.fromString("91a033f7-1dd3-4858-9c7b-8fb61ba6363d"), "Noaaan", Text.literal("no" + "a".repeat((int) (1 + Math.random() * 7)) + "n"))
+                );
+            }
+
+            @Override
+            public Widget build(BuildContext context) {
+                return new Grid(
+                    LayoutAxis.VERTICAL,
+                    3,
+                    Grid.CellFit.loose(),
+                    Stream.concat(
+                            this.contributors.stream()
+                                .map(contributor -> {
+                                    return new Padding(
+                                        Insets.all(8),
+                                        new Panel(
+                                            OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
+                                            new Padding(
+                                                Insets.all(8),
+                                                new Column(
+                                                    MainAxisAlignment.CENTER,
+                                                    CrossAxisAlignment.CENTER,
+                                                    new Padding(Insets.top(4)),
+                                                    List.of(
+                                                        new FirePlayer(new GameProfile(contributor.uuid, contributor.name)),
+                                                        new Label(LabelStyle.SHADOW, true, contributor.displayName),
+                                                        new RatingBar()
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    );
+                                }),
+                            Stream.of(
+                                new Sized(
+                                    20,
+                                    20,
+                                    new Button(
+                                        () -> {
+                                            setState(() -> this.contributors = this.genContributors());
+                                            return true;
+                                        },
+                                        new Label(LabelStyle.SHADOW, true, Text.literal("☠"))
+                                    )
+                                )
+                            )
+                        )
+                        .toList()
+                );
+            }
+
+            public record Contributor(UUID uuid, String name, Text displayName) {}
+
+            public static class FirePlayer extends StatefulWidget {
+
+                public final GameProfile profile;
+                public FirePlayer(GameProfile profile) {this.profile = profile;}
+
+                @Override
+                public WidgetState<FirePlayer> createState() {
+                    return new FirePlayerState();
+                }
+
+                public static class FirePlayerState extends WidgetState<FirePlayer> {
+
+                    private LivingEntity displayEntity;
+
+                    private boolean dead = false;
+
+                    @Override
+                    public void init() {
+                        this.displayEntity = EntityComponent.createRenderablePlayer(this.widget().profile);
+                    }
+
+                    @Override
+                    public Widget build(BuildContext context) {
+                        return new MouseArea(
+                            widget -> widget
+                                .clickCallback((x, y, button) -> {
+                                    this.setState(() -> {
+                                        this.dead = true;
+                                    });
+
+                                    this.displayEntity.setOnFire(false);
+                                    this.displayEntity.setHealth(0f);
+                                    this.displayEntity.deathTime = 20;
+
+                                    MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.ENTITY_PLAYER_DEATH, 1));
+                                })
+                                .enterCallback(!this.dead ? () -> this.displayEntity.setOnFire(true) : null)
+                                .exitCallback(!this.dead ? () -> this.displayEntity.setOnFire(false) : null)
+                                .cursorStyle(!this.dead ? CursorStyle.CROSSHAIR : null),
+                            new Panel(
+                                Identifier.of("uwu", "contributors_panel"),
+                                new Padding(
+                                    Insets.bottom(8),
+                                    new Sized(
+                                        96,
+                                        96,
+                                        new EntityWidget(1.35, false, true, false, this.displayEntity)
+                                    )
+                                )
+                            )
+                        );
+                    }
+                }
+            }
+
+            public static class RatingBar extends StatefulWidget {
+                @Override
+                public WidgetState<RatingBar> createState() {
+                    return new RatingBarState();
+                }
+
+                public static class RatingBarState extends WidgetState<RatingBar> {
+
+                    private int selectedStarCount = 0;
+                    private int hoverStarCount = 0;
+
+                    @Override
+                    public Widget build(BuildContext context) {
+                        return new MouseArea(
+                            widget -> widget
+                                .exitCallback(() -> setState(() -> this.hoverStarCount = 0))
+                                .cursorStyle(CursorStyle.HAND),
+                            new Row(
+                                this.star(0),
+                                this.star(1),
+                                this.star(2),
+                                this.star(3),
+                                this.star(4)
+                            )
+                        );
+                    }
+
+                    private Widget star(int idx) {
+                        return new MouseArea(
+                            widget -> widget
+                                .clickCallback((x, y, button) -> {
+                                    if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+                                        setState(() -> this.selectedStarCount = idx + 1);
+                                    } else if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
+                                        setState(() -> this.selectedStarCount = 0);
+                                    }
+                                })
+                                .enterCallback(() -> setState(() -> this.hoverStarCount = idx + 1)),
+                            new Stack(
+                                new SpriteWidget(
+                                    new SpriteIdentifier(
+                                        Identifier.of("textures/atlas/gui.png"),
+                                        Identifier.of("uwu", (idx + 1) <= this.selectedStarCount ? "favorite_icon_selected" : "favorite_icon")
+                                    ),
+                                    false
+                                ),
+                                (idx + 1) <= this.hoverStarCount
+                                    ? new SpriteWidget(
+                                    new SpriteIdentifier(
+                                        Identifier.of("textures/atlas/gui.png"),
+                                        Identifier.of("uwu", "favorite_icon_hover")
+                                    ),
+                                    true
+                                ) : new Padding(Insets.none())
+                            )
+                        );
+                    }
+                }
+            }
         }
     }
 }

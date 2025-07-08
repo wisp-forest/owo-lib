@@ -22,7 +22,7 @@ public class Stack extends MultiChildInstanceWidget {
         this.alignment = alignment;
     }
 
-    public Stack( List<? extends Widget> children) {
+    public Stack(List<? extends Widget> children) {
         this(Alignment.CENTER, children);
     }
 

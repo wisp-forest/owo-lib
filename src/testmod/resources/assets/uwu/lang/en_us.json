@@ -25,6 +25,20 @@
     {"text": "d", "color": "#66d4ff"},
     {"text": " (chyz tried)", "color": "#FFFFFF"}
   ],
+  "text.uwu.glisco": [
+    {"text": "g", "color": "#ff7166"},
+    {"text": "l", "color": "#ffb266"},
+    {"text": "i", "color": "#ceff66"},
+    {"text": "s", "color": "#90ff66"},
+    {"text": "c", "color": "#66d4ff"},
+    {"text": "o", "color": "#c366ff"}
+  ],
+  "text.uwu.chyz": [
+    {"text": "c", "color": "#fdf433"},
+    {"text": "h", "color": "#fffdff"},
+    {"text": "y", "color": "#9b57d0"},
+    {"text": "z", "color": "#2f2f2f"}
+  ],
   "item.uwu.counter": "Counter",
   "text.config.uwu.title": "Test Config Screen",
   "key.uwu.hud_test": [
