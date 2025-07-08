@@ -38,6 +38,14 @@ public class SpriteWidget extends LeafInstanceWidget {
         }
 
         @Override
+        public void setWidget(SpriteWidget widget) {
+            if (this.widget.spriteIdentifier.equals(widget.spriteIdentifier)) return;
+
+            super.setWidget(widget);
+            this.markNeedsLayout();
+        }
+
+        @Override
         protected void doLayout(Constraints constraints) {
             this.sprite = this.widget.spriteIdentifier.getAtlasId().equals(SPRITE_ATLAS_ID)
                 ? this.host().client().getGuiAtlasManager().getSprite(this.widget.spriteIdentifier.getTextureId())
