@@ -5,7 +5,7 @@
     { "index": 1, "color": "dark_gray" }
   ],
   "text.owo.itemGroup.select_hint": {"text": "Shift + clic para seleccionar varios", "color": "gray"},
-  "text.owo.configure_hot_reload.title": "Configurar recarga en caliente",
+  "text.owo.configure_hot_reload.title": "Configurar Hot Reload",
   "text.owo.configure_hot_reload.choose_file": "Elegir archivo",
   "text.owo.configure_hot_reload.save": "Guardar",
   "text.owo.configure_hot_reload.model": [
