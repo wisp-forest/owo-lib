@@ -14,6 +14,9 @@ import io.wispforest.owo.braid.widgets.SpriteWidget;
 import io.wispforest.owo.braid.widgets.basic.*;
 import io.wispforest.owo.braid.widgets.button.Button;
 import io.wispforest.owo.braid.widgets.button.MessageButton;
+import io.wispforest.owo.braid.widgets.checkbox.BraidCheckbox;
+import io.wispforest.owo.braid.widgets.checkbox.Checkbox;
+import io.wispforest.owo.braid.widgets.checkbox.RawCheckbox;
 import io.wispforest.owo.braid.widgets.drag.DragArena;
 import io.wispforest.owo.braid.widgets.drag.DragArenaElement;
 import io.wispforest.owo.braid.widgets.flex.*;
@@ -603,43 +606,145 @@ public class TestSelector extends StatefulWidget {
 
             @Override
             public Widget build(BuildContext context) {
-                return new Column(
-                    MainAxisAlignment.START,
+                return new Row(
+                    MainAxisAlignment.CENTER,
                     CrossAxisAlignment.CENTER,
-                    new Sized(
-                        100.0,
-                        50.0,
-                        new TextBox(
-                            this.controller1,
-                            true,
-                            false,
-                            true,
-                            Style.EMPTY
-                        )
-                    ),
-                    new Sized(
-                        100.0,
-                        50.0,
-                        new TextBox(
-                            this.controller2,
-                            false,
-                            true,
-                            true,
-                            Style.EMPTY
-                        )
-                    ),
-                    new Sized(
-                        100.0,
-                        20.0,
-                        new TextBox(
-                            this.controller3,
-                            false,
-                            false,
-                            false,
-                            Style.EMPTY
-                        )
+                    new Padding(Insets.horizontal(10)),
+                    List.of(
+                        new Column(
+                            MainAxisAlignment.START,
+                            CrossAxisAlignment.CENTER,
+                            new Sized(
+                                100.0,
+                                50.0,
+                                new TextBox(
+                                    this.controller1,
+                                    true,
+                                    false,
+                                    true,
+                                    Style.EMPTY
+                                )
+                            ),
+                            new Sized(
+                                100.0,
+                                50.0,
+                                new TextBox(
+                                    this.controller2,
+                                    false,
+                                    true,
+                                    true,
+                                    Style.EMPTY
+                                )
+                            ),
+                            new Sized(
+                                100.0,
+                                20.0,
+                                new TextBox(
+                                    this.controller3,
+                                    false,
+                                    false,
+                                    false,
+                                    Style.EMPTY
+                                )
+                            )
+                        ),
+                        new ToggleFest()
                     )
                 );
+            }
+        }
+
+        public static class ToggleFest extends StatefulWidget {
+            @Override
+            public WidgetState<ToggleFest> createState() {
+                return new State();
+            }
+
+            public static class State extends WidgetState<ToggleFest> {
+
+                private final Entity chyz = EntityComponent.createRenderablePlayer(new GameProfile(
+                    UUID.fromString("09de8a6d-86bf-4c15-bb93-ce3384ce4e96"),
+                    "chyzman"
+                ));
+
+                private boolean checked = false;
+
+                @Override
+                public Widget build(BuildContext context) {
+                    return new Column(
+                        MainAxisAlignment.CENTER,
+                        CrossAxisAlignment.START,
+                        new Padding(Insets.vertical(5)),
+                        List.of(
+                            new LabelBox(
+                                new RawCheckbox(
+                                    this.checked,
+                                    this::onUpdate,
+                                    new Sized(
+                                        20,
+                                        20,
+                                        new EntityWidget(1.5d, false, true, false, this.chyz)
+                                    ),
+                                    new Padding(Insets.none())
+                                ),
+                                "chyzbox"
+                            ),
+                            new LabelBox(
+                                new RawCheckbox(
+                                    this.checked,
+                                    this::onUpdate,
+                                    new SpriteWidget(Checkbox.TEXTURE, false),
+                                    new SpriteWidget(new SpriteIdentifier(SpriteWidget.GUI_ATLAS_ID, Identifier.of("uwu", "czechbox")), false)
+                                ),
+                                this.checked ? "czechbox" : "checkbox"
+                            ),
+                            new LabelBox(
+                                new Checkbox(this.checked, this::onUpdate),
+                                "checkbox"
+                            ),
+                            new LabelBox(
+                                new BraidCheckbox(this.checked, this::onUpdate),
+                                "smolbox"
+                            )
+                        )
+                    );
+                }
+
+                private void onUpdate(Boolean newState) {
+                    this.setState(() -> {
+                        this.checked = newState;
+                        this.chyz.setOnFire(this.checked);
+                    });
+                }
+            }
+
+            public static class LabelBox extends StatelessWidget {
+                public final Widget widget;
+                public final String label;
+
+                public LabelBox(Widget widget, String label) {
+                    this.widget = widget;
+                    this.label = label;
+                }
+
+                @Override
+                public Widget build(BuildContext context) {
+                    return new Row(
+                        MainAxisAlignment.START,
+                        CrossAxisAlignment.CENTER,
+                        new Padding(Insets.horizontal(4)),
+                        List.of(
+                            new Sized(
+                                20,
+                                20,
+                                new Center(
+                                    this.widget
+                                )
+                            ),
+                            new Label(Text.literal(this.label))
+                        )
+                    );
+                }
             }
         }
     }
@@ -971,7 +1076,7 @@ public class TestSelector extends StatefulWidget {
         public static class State extends WidgetState<InputTest> {
             private final List<Text> inputs = Util.make(() -> {
                 var list = new ArrayList<Text>();
-                list.add(Text.literal("Help idk how to make this scroll to the bottom when i add shit"));
+                list.add(Text.literal("Help idk how to make this scroll to the bottom when i add shit (everyone laugh at this user)"));
                 return list;
             });
             private final ScrollController controller = new ScrollController();

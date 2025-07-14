@@ -131,21 +131,29 @@ public class TextInput extends LeafInstanceWidget {
             this.cursorLocation = new CursorLocation(newLineIdx, this.selection.end() - this.metrics.lineMetrics().get(newLineIdx).beginIdx());
         }
 
-        // TODO: implement when text input is ported properly
-
         @Override
         protected double measureIntrinsicWidth(double height) {
-            return 0;
+            return TextLayout.measure(
+                this.host().client().textRenderer,
+                this.text,
+                this.widget.baseStyle,
+                Integer.MAX_VALUE
+            ).width();
         }
 
         @Override
         protected double measureIntrinsicHeight(double width) {
-            return 0;
+            return TextLayout.measure(
+                this.host().client().textRenderer,
+                this.text,
+                this.widget.baseStyle,
+                this.widget.softWrap ? (int) width : Integer.MAX_VALUE
+            ).height();
         }
 
         @Override
         protected OptionalDouble measureBaselineOffset() {
-            return OptionalDouble.of(this.host().client().textRenderer.fontHeight);
+            return OptionalDouble.of(this.host().client().textRenderer.fontHeight - 2);
         }
 
         private void drawSelection(OwoUIDrawContext ctx, int startRune, int endRune) {

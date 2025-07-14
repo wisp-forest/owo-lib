@@ -98,12 +98,12 @@ public class RawLabel extends LeafInstanceWidget {
         @Override
         protected double measureIntrinsicHeight(double width) {
             var renderer = this.host().client().textRenderer;
-            return this.layoutText(renderer, this.wrapText(renderer, (int) width)).height;
+            return this.layoutText(renderer, this.wrapText(renderer, this.widget.softWrap ? (int) width : Integer.MAX_VALUE)).height;
         }
 
         @Override
         protected OptionalDouble measureBaselineOffset() {
-            return OptionalDouble.of(this.host().client().textRenderer.fontHeight - 2 /* TODO: bad guesswork */);
+            return OptionalDouble.of(this.host().client().textRenderer.fontHeight - 2);
         }
 
         @Override

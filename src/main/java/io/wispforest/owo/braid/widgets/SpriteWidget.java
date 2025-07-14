@@ -15,6 +15,8 @@ import java.util.OptionalDouble;
 
 public class SpriteWidget extends LeafInstanceWidget {
 
+    public static final Identifier GUI_ATLAS_ID = Identifier.of("textures/atlas/gui.png");
+
     public final SpriteIdentifier spriteIdentifier;
     public final boolean blend;
 
@@ -30,7 +32,6 @@ public class SpriteWidget extends LeafInstanceWidget {
 
     public static class Instance extends LeafWidgetInstance<SpriteWidget> {
 
-        protected static final Identifier SPRITE_ATLAS_ID = Identifier.of("textures/atlas/gui.png");
         protected Sprite sprite;
 
         public Instance(SpriteWidget widget) {
@@ -47,7 +48,7 @@ public class SpriteWidget extends LeafInstanceWidget {
 
         @Override
         protected void doLayout(Constraints constraints) {
-            this.sprite = this.widget.spriteIdentifier.getAtlasId().equals(SPRITE_ATLAS_ID)
+            this.sprite = this.widget.spriteIdentifier.getAtlasId().equals(GUI_ATLAS_ID)
                 ? this.host().client().getGuiAtlasManager().getSprite(this.widget.spriteIdentifier.getTextureId())
                 : this.widget.spriteIdentifier.getSprite();
 
