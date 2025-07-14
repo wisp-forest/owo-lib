@@ -9,6 +9,7 @@ import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.HoverStyledLabel;
 import io.wispforest.owo.braid.widgets.basic.*;
+import io.wispforest.owo.braid.widgets.basic.action.Actions;
 import io.wispforest.owo.braid.widgets.drag.DragArenaElement;
 import io.wispforest.owo.braid.widgets.flex.Column;
 import io.wispforest.owo.braid.widgets.flex.Flexible;
@@ -71,11 +72,9 @@ public class Window extends StatefulWidget {
         public Widget build(BuildContext context) {
             var titleBar = new ArrayList<Widget>();
             if (this.widget().collapsible) {
-                titleBar.add(new MouseArea(
-                    widget -> widget
-                        //TODO: decide what to do with buttons here
-                        .clickCallback((x, y, button) -> this.setState(() -> this.controller.expanded = !this.controller.expanded))
-                        .cursorStyle(CursorStyle.HAND),
+                titleBar.add(Actions.click(
+                    widget -> widget.cursorStyle(CursorStyle.HAND),
+                    () -> this.setState(() -> this.controller.expanded = !this.controller.expanded),
                     new Padding(
                         Insets.of(2, 0, 0, 4),
                         new Label(Text.literal(this.controller.expanded ? "⏷" : "⏶"))
@@ -87,11 +86,9 @@ public class Window extends StatefulWidget {
             titleBar.add(new Flexible(new Padding(Insets.none())));
 
             if (this.widget().onClose != null) {
-                titleBar.add(new MouseArea(
-                    widget -> widget
-                        //TODO: decide what to do with buttons here
-                        .clickCallback((x, y, button) -> this.widget().onClose.run())
-                        .cursorStyle(CursorStyle.HAND),
+                titleBar.add(Actions.click(
+                    widget -> widget.cursorStyle(CursorStyle.HAND),
+                    () -> this.widget().onClose.run(),
                     new HoverStyledLabel(Text.literal("x"), Style.EMPTY.withFormatting(Formatting.RED))
                 ));
             }
@@ -102,7 +99,11 @@ public class Window extends StatefulWidget {
                 new MouseArea(
                     widget -> widget
                         //TODO: decide what to do with buttons here
-                        .clickCallback((x, y, button) -> this.draggingEdges = this.edgesAt(x, y))
+                        .clickCallback((x, y, button) -> {
+                            if (button != 0) return false;
+                            this.draggingEdges = this.edgesAt(x, y);
+                            return true;
+                        })
                         .dragCallback((x, y, dx, dy) -> setState(() -> this.resize(dx, dy)))
                         .dragEndCallback(() -> this.draggingEdges = null)
                         .cursorStyleSupplier((x, y) -> this.cursorStyleFor(this.edgesAt(x, y))),

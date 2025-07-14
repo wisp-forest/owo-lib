@@ -1,6 +1,7 @@
 package io.wispforest.owo.braid.widgets.vanilla;
 
 import io.wispforest.owo.braid.core.Constraints;
+import io.wispforest.owo.braid.core.KeyModifiers;
 import io.wispforest.owo.braid.framework.instance.KeyboardListener;
 import io.wispforest.owo.braid.framework.instance.LeafWidgetInstance;
 import io.wispforest.owo.braid.framework.instance.MouseListener;
@@ -57,18 +58,18 @@ public class VanillaWidgetWrapper<T extends Drawable & Element> extends LeafInst
         }
 
         @Override
-        public boolean onKeyDown(int keyCode, int modifiers) {
-            return widget.wrapped.keyPressed(keyCode, 0, modifiers);
+        public boolean onKeyDown(int keyCode, KeyModifiers modifiers) {
+            return widget.wrapped.keyPressed(keyCode, 0, modifiers.bitMask());
         }
 
         @Override
-        public boolean onKeyUp(int keyCode, int modifiers) {
-            return widget.wrapped.keyReleased(keyCode, 0, modifiers);
+        public boolean onKeyUp(int keyCode, KeyModifiers modifiers) {
+            return widget.wrapped.keyReleased(keyCode, 0, modifiers.bitMask());
         }
 
         @Override
-        public boolean onChar(int charCode, int modifiers) {
-            return widget.wrapped.charTyped((char) charCode, modifiers);
+        public boolean onChar(int charCode, KeyModifiers modifiers) {
+            return widget.wrapped.charTyped((char) charCode, modifiers.bitMask());
         }
 
         @Override

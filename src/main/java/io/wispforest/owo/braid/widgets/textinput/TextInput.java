@@ -1,6 +1,7 @@
 package io.wispforest.owo.braid.widgets.textinput;
 
 import io.wispforest.owo.braid.core.Constraints;
+import io.wispforest.owo.braid.core.KeyModifiers;
 import io.wispforest.owo.braid.core.Size;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.framework.instance.KeyboardListener;
@@ -222,8 +223,8 @@ public class TextInput extends LeafInstanceWidget {
         }
 
         @Override
-        public boolean onKeyDown(int keyCode, int modifiers) {
-            var hasCtrl = modifiers == GLFW.GLFW_MOD_CONTROL;
+        public boolean onKeyDown(int keyCode, KeyModifiers modifiers) {
+            var hasCtrl = modifiers.ctrl();
 
             if (keyCode == GLFW.GLFW_KEY_BACKSPACE) {
                 if (this.cursorPosition > 0) {
@@ -354,7 +355,7 @@ public class TextInput extends LeafInstanceWidget {
         }
 
         @Override
-        public boolean onChar(int charCode, int modifiers) {
+        public boolean onChar(int charCode, KeyModifiers modifiers) {
             this.insert(Character.toString(charCode));
             return true;
         }

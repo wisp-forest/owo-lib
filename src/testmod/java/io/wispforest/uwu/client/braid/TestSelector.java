@@ -12,7 +12,9 @@ import io.wispforest.owo.braid.widgets.EntityWidget;
 import io.wispforest.owo.braid.widgets.ItemStackWidget;
 import io.wispforest.owo.braid.widgets.basic.*;
 import io.wispforest.owo.braid.widgets.basic.Stack;
+import io.wispforest.owo.braid.widgets.basic.action.Actions;
 import io.wispforest.owo.braid.widgets.button.MessageButton;
+import io.wispforest.owo.braid.widgets.button.RawButton;
 import io.wispforest.owo.braid.widgets.drag.DragArena;
 import io.wispforest.owo.braid.widgets.drag.DragArenaElement;
 import io.wispforest.owo.braid.widgets.flex.*;
@@ -662,13 +664,8 @@ public class TestSelector extends StatefulWidget {
 
         @Override
         public Widget build(BuildContext context) {
-            return new MouseArea(
-                widget -> widget
-                    .clickCallback((x, y, button) -> {
-                        this.clickCallback.run();
-                        UISounds.playButtonSound();
-                    })
-                    .cursorStyle(CursorStyle.HAND),
+            return new RawButton(
+                this.clickCallback,
                 new Stack(
                     new Center(
                         new Sized(
@@ -1010,8 +1007,7 @@ public class TestSelector extends StatefulWidget {
                                                     .keyUpCallback((key, modifiers) -> this.addToList(getKeyName(key).append(" released")))
                                                     .focusGainedCallback(() -> this.addToList(Text.literal("Focus gained")))
                                                     .focusLostCallback(() -> this.addToList(Text.literal("Focus lost")))
-                                                    .charCallback((charCode, modifiers) -> this.addToList(Text.literal("Character typed: \"" + (char) charCode + "\"")))
-                                            ,
+                                                    .charCallback((charCode, modifiers) -> this.addToList(Text.literal("Character typed: \"" + (char) charCode + "\""))),
                                             new Panel(
                                                 OwoUIDrawContext.PANEL_INSET_NINE_PATCH_TEXTURE,
                                                 new VerticallyScrollable(
@@ -1031,11 +1027,12 @@ public class TestSelector extends StatefulWidget {
                 );
             }
 
-            private void addToList(Text text) {
+            private boolean addToList(Text text) {
                 this.setState(() -> {
                     this.inputs.add(text);
                     this.controller.setOffset(this.controller.maxOffset());
                 });
+                return false; // return false to allow other shit to happen:tm:
             }
 
             private MutableText getKeyName(int key) {
