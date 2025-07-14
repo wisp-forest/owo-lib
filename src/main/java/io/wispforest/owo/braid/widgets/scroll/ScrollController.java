@@ -21,15 +21,21 @@ public class ScrollController extends Listenable {
         return this.offset;
     }
 
-    void setMaxOffset(double maxOffset) {
+    boolean setMaxOffset(double maxOffset) {
         if (this.maxOffset == maxOffset) {
-            return;
+            return false;
         }
 
         this.maxOffset = maxOffset;
         this.offset = MathHelper.clamp(this.offset, 0, this.maxOffset);
 
+        return true;
+    }
+
+    boolean maxOffsetNotificationScheduled = false;
+    void sendMaxOffsetNotification() {
         this.notifyListeners();
+        this.maxOffsetNotificationScheduled = false;
     }
 
     public double maxOffset() {
