@@ -57,8 +57,8 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.registry.Registries;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.random.Random;
@@ -101,7 +101,7 @@ public class TestSelector extends StatefulWidget {
         @Override
         public Widget build(BuildContext context) {
             //TODO read that vvvv
-            System.out.println("This is a reminder to decide how to handle mouse buttons in, buttons, sliders, text inputs, windows etc");
+            System.out.println("reminder to decide how to handle mouse buttons in, buttons, sliders, text inputs, windows etc");
             return new Stack(
                 Alignment.CENTER,
                 new Center(
@@ -612,7 +612,9 @@ public class TestSelector extends StatefulWidget {
                         new TextBox(
                             this.controller1,
                             true,
-                            true
+                            false,
+                            true,
+                            Style.EMPTY
                         )
                     ),
                     new Sized(
@@ -620,8 +622,10 @@ public class TestSelector extends StatefulWidget {
                         50.0,
                         new TextBox(
                             this.controller2,
+                            false,
                             true,
-                            false
+                            true,
+                            Style.EMPTY
                         )
                     ),
                     new Sized(
@@ -630,7 +634,9 @@ public class TestSelector extends StatefulWidget {
                         new TextBox(
                             this.controller3,
                             false,
-                            false
+                            false,
+                            false,
+                            Style.EMPTY
                         )
                     )
                 );

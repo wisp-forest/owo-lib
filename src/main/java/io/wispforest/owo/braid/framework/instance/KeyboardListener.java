@@ -13,4 +13,27 @@ public interface KeyboardListener {
 
     default void onFocusGained() {}
     default void onFocusLost() {}
+
+    default void requestFocus() {
+        WidgetInstance<?> thisInstance;
+
+        try {
+            thisInstance = (WidgetInstance<?>) this;
+        } catch (ClassCastException e) {
+            throw new ThisOneIsDefinitelyOnYou(e);
+        }
+
+        var host = thisInstance.host();
+        if (host != null) {
+            host.moveFocusTo(this);
+        } else {
+            WidgetInstance.addPostAttachCallback(thisInstance, () -> thisInstance.host().moveFocusTo(this));
+        }
+    }
+}
+
+class ThisOneIsDefinitelyOnYou extends RuntimeException {
+    public ThisOneIsDefinitelyOnYou(Throwable cause) {
+        super(cause);
+    }
 }

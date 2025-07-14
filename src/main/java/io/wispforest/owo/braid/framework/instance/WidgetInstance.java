@@ -8,18 +8,13 @@ import io.wispforest.owo.braid.framework.widget.InstanceWidget;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
-import net.minecraft.client.gui.DrawContext;
-import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.OptionalDouble;
+import java.util.*;
 
 public abstract class WidgetInstance<T extends InstanceWidget> implements Comparable<WidgetInstance<?>> {
     public static final int FLAG_HIT_TEST_BOUNDARY = 0b1;
@@ -99,6 +94,10 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
 
     public void attachHost(InstanceHost host) {
         this.host = host;
+
+        var callback = POST_ATTACH_CALLBACKS.remove(this);
+        if (callback != null) callback.run();
+
         this.visitChildren(child -> child.attachHost(host));
     }
 
@@ -248,6 +247,13 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
 
     public T widget() {
         return this.widget;
+    }
+
+    // ---
+
+    private static final WeakHashMap<WidgetInstance<?>, Runnable> POST_ATTACH_CALLBACKS = new WeakHashMap<>();
+    public static void addPostAttachCallback(WidgetInstance<?> instance, Runnable callback) {
+        POST_ATTACH_CALLBACKS.put(instance, callback);
     }
 
     // ---

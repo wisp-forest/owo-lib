@@ -7,22 +7,24 @@ import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.Box;
 import io.wispforest.owo.braid.widgets.basic.KeyboardInput;
-import io.wispforest.owo.braid.widgets.basic.ListenableBuilder;
 import io.wispforest.owo.braid.widgets.basic.Padding;
 import io.wispforest.owo.ui.core.Color;
-
-import java.time.Duration;
+import net.minecraft.text.Style;
 
 public class TextBox extends StatefulWidget {
 
     public final TextEditingController controller;
-    public final boolean allowMultipleLines;
     public final boolean softWrap;
+    public final boolean autoFocus;
+    public final boolean allowMultipleLines;
+    public final Style baseStyle;
 
-    public TextBox(TextEditingController controller, boolean allowMultipleLines, boolean softWrap) {
+    public TextBox(TextEditingController controller, boolean softWrap, boolean autoFocus, boolean allowMultipleLines, Style baseStyle) {
         this.controller = controller;
-        this.allowMultipleLines = allowMultipleLines;
         this.softWrap = softWrap;
+        this.autoFocus = autoFocus;
+        this.allowMultipleLines = allowMultipleLines;
+        this.baseStyle = baseStyle;
     }
 
     @Override
@@ -33,14 +35,6 @@ public class TextBox extends StatefulWidget {
     public static class State extends WidgetState<TextBox> {
 
         private boolean focused = false;
-        private boolean showCursor = false;
-
-        protected void updateCursor() {
-            if (!this.focused) return;
-
-            this.setState(() -> this.showCursor = !this.showCursor);
-            this.scheduleDelayedCallback(Duration.ofMillis(500), this::updateCursor);
-        }
 
         @Override
         public Widget build(BuildContext context) {
@@ -48,30 +42,20 @@ public class TextBox extends StatefulWidget {
                 this.focused ? Color.WHITE : Color.ofRgb(0x8f8f8f),
                 new KeyboardInput(
                     widget -> widget
-                        .focusGainedCallback(() -> {
-                            this.setState(() -> this.focused = true);
-                            this.updateCursor();
-                        })
-                        .focusLostCallback(() -> {
-                            this.setState(() -> {
-                                this.focused = false;
-                                this.showCursor = false;
-                            });
-                        }),
+                        .focusGainedCallback(() -> this.setState(() -> this.focused = true))
+                        .focusLostCallback(() -> this.setState(() -> this.focused = false)),
                     new Padding(
                         Insets.all(1),
                         new Box(
                             Color.BLACK,
                             new Padding(
                                 Insets.all(2),
-                                new ListenableBuilder(
+                                new EditableText(
                                     this.widget().controller,
-                                    innerContext -> new TextInput(
-                                        this.widget().controller,
-                                        this.showCursor,
-                                        this.widget().softWrap,
-                                        this.widget().allowMultipleLines
-                                    )
+                                    this.widget().softWrap,
+                                    this.widget().autoFocus,
+                                    this.widget().allowMultipleLines,
+                                    this.widget().baseStyle
                                 )
                             )
                         )

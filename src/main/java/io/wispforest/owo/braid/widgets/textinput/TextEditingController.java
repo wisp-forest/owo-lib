@@ -1,15 +1,21 @@
 package io.wispforest.owo.braid.widgets.textinput;
 
 import io.wispforest.owo.braid.core.Listenable;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 
 public class TextEditingController extends Listenable {
 
     protected String text;
-    protected int cursorPosition;
+    protected TextSelection selection;
+
+    public TextEditingController(String text, TextSelection selection) {
+        this.text = text;
+        this.selection = selection;
+    }
 
     public TextEditingController(String text) {
-        this.text = text;
+        this(text, TextSelection.collapsed(text.length()));
     }
 
     public TextEditingController() {
@@ -29,20 +35,20 @@ public class TextEditingController extends Listenable {
         return this.text;
     }
 
-    public void setCursorPosition(int cursorPosition) {
-        if (this.cursorPosition == cursorPosition) {
+    public void setSelection(TextSelection selection) {
+        if (this.selection.equals(selection)) {
             return;
         }
 
-        this.cursorPosition = cursorPosition;
+        this.selection = selection;
         this.notifyListeners();
     }
 
-    public int cursorPosition() {
-        return this.cursorPosition;
+    public TextSelection selection() {
+        return this.selection;
     }
 
-    public Text createTextForRendering() {
-        return Text.literal(this.text);
+    public Text createTextForRendering(Style baseStyle) {
+        return Text.literal(this.text).styled(style -> baseStyle.withParent(baseStyle));
     }
 }

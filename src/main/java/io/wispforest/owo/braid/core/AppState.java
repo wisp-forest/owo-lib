@@ -26,6 +26,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class AppState implements InstanceHost, ProxyHost {
 
@@ -209,6 +211,15 @@ public class AppState implements InstanceHost, ProxyHost {
     public boolean dispatchMouseDownEvent(double x, double y, int button) {
         var state = this.hitTest(x, y);
 
+        this.updateFocus(
+            Streams.stream(state.occludedTrace())
+                .map(Hit::instance)
+                .filter(KeyboardListener.class::isInstance)
+                .map(KeyboardListener.class::cast)
+                .findFirst()
+                .orElse(null)
+        );
+
         var clicked = state.firstWhere(
             (hit) -> hit.instance() instanceof MouseListener && ((MouseListener) hit.instance()).onMouseDown(hit.x(), hit.y(), button)
         );
@@ -223,24 +234,27 @@ public class AppState implements InstanceHost, ProxyHost {
             this.draggingButton = button;
         }
 
-        var nowFocused = new ArrayList<KeyboardListener>();
-        Streams.stream(state.occludedTrace()).map(Hit::instance).filter(KeyboardListener.class::isInstance).map(KeyboardListener.class::cast).forEach(listener -> {
-            nowFocused.add(listener);
+        return true;
+    }
 
+    private void updateFocus(@Nullable KeyboardListener focusTarget) {
+        var nowFocused = focusTarget != null
+            ? Stream.concat(Stream.of(focusTarget), ((WidgetInstance<?>) focusTarget).ancestors().stream().filter(KeyboardListener.class::isInstance).map(KeyboardListener.class::cast)).collect(Collectors.toList())
+            : List.<KeyboardListener>of();
+
+        for (var listener : nowFocused) {
             if (this.focused.contains(listener)) {
                 this.focused.remove(listener);
             } else {
                 listener.onFocusGained();
             }
-        });
+        }
 
         for (var noLongerFocused : this.focused) {
             noLongerFocused.onFocusLost();
         }
 
         this.focused = nowFocused;
-
-        return true;
     }
 
     public boolean dispatchMouseDragEvent(double x, double y, double deltaX, double deltaY) {
@@ -383,6 +397,11 @@ public class AppState implements InstanceHost, ProxyHost {
     @Override
     public void notifySubtreeRebuild() {
         this.mergeToLayoutQueue = true;
+    }
+
+    @Override
+    public void moveFocusTo(KeyboardListener focusTarget) {
+        this.updateFocus(focusTarget);
     }
 
     @Override
