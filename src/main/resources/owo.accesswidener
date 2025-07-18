@@ -18,3 +18,5 @@ accessible method net/minecraft/client/gui/widget/EditBoxWidget <init> (Lnet/min
 extendable method net/minecraft/client/gui/screen/ingame/HandledScreen drawSlotHighlightBack (Lnet/minecraft/client/gui/DrawContext;)V
 extendable method net/minecraft/client/gui/screen/ingame/HandledScreen drawSlotHighlightFront (Lnet/minecraft/client/gui/DrawContext;)V
 extendable method net/minecraft/client/gui/screen/ingame/HandledScreen drawItem (Lnet/minecraft/client/gui/DrawContext;Lnet/minecraft/item/ItemStack;IILjava/lang/String;)V
+
+accessible class net/minecraft/component/ComponentMap$Builder$SimpleComponentMap
