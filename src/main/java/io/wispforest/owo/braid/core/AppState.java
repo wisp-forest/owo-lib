@@ -21,6 +21,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.OrderedTextTooltipComponent;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
@@ -385,6 +386,7 @@ public class AppState implements InstanceHost, ProxyHost {
         return this.hitTest(this.cursorPosition.x, this.cursorPosition.y);
     }
 
+    @ApiStatus.Internal
     public HitTestState hitTest(double x, double y) {
         var state = new HitTestState();
         this.rootInstance().hitTest(x, y, state);

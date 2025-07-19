@@ -2,6 +2,9 @@ package io.wispforest.owo.compat.rei;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import dev.architectury.event.CompoundEventResult;
+import io.wispforest.owo.braid.core.BraidScreen;
+import io.wispforest.owo.braid.widgets.recipeviewer.RecipeViewerStack;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.mixin.itemgroup.CreativeInventoryScreenAccessor;
 import io.wispforest.owo.mixin.ui.access.BaseOwoHandledScreenAccessor;
@@ -14,10 +17,8 @@ import io.wispforest.owo.util.pond.OwoCreativeInventoryScreenExtensions;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
-import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
-import me.shedaniel.rei.api.client.registry.screen.OverlayDecider;
-import me.shedaniel.rei.api.client.registry.screen.OverlayRendererProvider;
-import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
+import me.shedaniel.rei.api.client.registry.screen.*;
+import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
@@ -86,6 +87,19 @@ public class OwoReiPlugin implements REIClientPlugin {
                     }
                 };
             }
+        });
+
+        registry.registerFocusedStack((screen, mouse) -> {
+            if (!(screen instanceof BraidScreen braid)) return CompoundEventResult.pass();
+
+            var hit = braid.state().hitTest(mouse.x, mouse.y)
+                .firstWhere(x -> x.instance() instanceof RecipeViewerStack.Instance);
+
+            if (hit == null) return CompoundEventResult.pass();
+
+            var instance = (RecipeViewerStack.Instance) hit.instance();
+
+            return CompoundEventResult.interruptTrue(EntryStacks.of(instance.widget().stackProvider().get()));
         });
     }
 

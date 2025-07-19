@@ -2,7 +2,11 @@ package io.wispforest.owo.compat.emi;
 
 import dev.emi.emi.api.EmiPlugin;
 import dev.emi.emi.api.EmiRegistry;
+import dev.emi.emi.api.stack.EmiStack;
+import dev.emi.emi.api.stack.EmiStackInteraction;
 import dev.emi.emi.api.widget.Bounds;
+import io.wispforest.owo.braid.core.BraidScreen;
+import io.wispforest.owo.braid.widgets.recipeviewer.RecipeViewerStack;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.mixin.itemgroup.CreativeInventoryScreenAccessor;
 import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
@@ -36,6 +40,19 @@ public class OwoEmiPlugin implements EmiPlugin {
             owoHandledScreen.componentsForExclusionAreas()
                 .map(component -> new Bounds(component.x(), component.y(), component.width(), component.height()))
                 .forEach(consumer);
+        });
+
+        registry.addGenericStackProvider((screen, x, y) -> {
+            if (!(screen instanceof BraidScreen braid)) return EmiStackInteraction.EMPTY;
+
+            var hit = braid.state().hitTest(x, y)
+                .firstWhere(i -> i.instance() instanceof RecipeViewerStack.Instance);
+
+            if (hit == null) return EmiStackInteraction.EMPTY;
+
+            var instance = (RecipeViewerStack.Instance) hit.instance();
+
+            return new EmiStackInteraction(EmiStack.of(instance.widget().stackProvider().get()));
         });
     }
 }

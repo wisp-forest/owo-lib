@@ -27,6 +27,7 @@ import io.wispforest.owo.braid.widgets.flex.*;
 import io.wispforest.owo.braid.widgets.grid.Grid;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
+import io.wispforest.owo.braid.widgets.recipeviewer.RecipeViewerStack;
 import io.wispforest.owo.braid.widgets.scroll.ScrollController;
 import io.wispforest.owo.braid.widgets.scroll.Scrollable;
 import io.wispforest.owo.braid.widgets.scroll.VerticallyScrollable;
@@ -60,6 +61,8 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.MutableText;
@@ -868,12 +871,15 @@ public class TestSelector extends StatefulWidget {
                         Insets.all(8),
                         new Panel(
                             OwoUIDrawContext.PANEL_INSET_NINE_PATCH_TEXTURE,
-                            new EntityWidget(
-                                1,
-                                false,
-                                true,
-                                true,
-                                this.chyz
+                            new RecipeViewerStack(
+                                () -> new ItemStack(Items.GOLD_BLOCK),
+                                new EntityWidget(
+                                    1,
+                                    false,
+                                    true,
+                                    true,
+                                    this.chyz
+                                )
                             )
                         )
                     )
