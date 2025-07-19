@@ -10,3 +10,5 @@ transitive-extendable method net/minecraft/client/gui/widget/CheckboxWidget <ini
 accessible class net/minecraft/registry/RegistryOps$CachedRegistryInfoGetter
 
 accessible class net/minecraft/server/world/ServerChunkLoadingManager$EntityTracker
+
+accessible class net/minecraft/component/ComponentMap$Builder$SimpleComponentMap
