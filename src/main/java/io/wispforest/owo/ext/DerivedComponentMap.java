@@ -49,17 +49,15 @@ public class DerivedComponentMap implements ComponentMap {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-
-        if (o instanceof DerivedComponentMap thatDerived) {
+        if (this == o) {
+            return true;
+        } else if (o instanceof DerivedComponentMap thatDerived) {
             return Objects.equals(base, thatDerived.base);
         } else if (o instanceof ComponentMap.Builder.SimpleComponentMap simpleComponentMap) {
             return Objects.equals(base, simpleComponentMap);
-        } else if (o == EMPTY && this.base == EMPTY) {
-            return true;
         }
 
-        return false;
+        return o == EMPTY && this.base == EMPTY;
     }
 
     @Override
