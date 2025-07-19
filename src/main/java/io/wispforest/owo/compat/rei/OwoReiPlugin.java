@@ -4,7 +4,9 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.architectury.event.CompoundEventResult;
 import io.wispforest.owo.braid.core.BraidScreen;
+import io.wispforest.owo.braid.framework.instance.WidgetInstance;
 import io.wispforest.owo.braid.widgets.recipeviewer.RecipeViewerStack;
+import io.wispforest.owo.braid.widgets.recipeviewer.StackDropArea;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.mixin.itemgroup.CreativeInventoryScreenAccessor;
 import io.wispforest.owo.mixin.ui.access.BaseOwoHandledScreenAccessor;
@@ -16,9 +18,12 @@ import io.wispforest.owo.ui.util.ScissorStack;
 import io.wispforest.owo.util.pond.OwoCreativeInventoryScreenExtensions;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
+import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitor;
+import me.shedaniel.rei.api.client.gui.drag.DraggedAcceptorResult;
+import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.screen.*;
-import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
@@ -28,6 +33,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
 
 public class OwoReiPlugin implements REIClientPlugin {
 
@@ -99,7 +106,60 @@ public class OwoReiPlugin implements REIClientPlugin {
 
             var instance = (RecipeViewerStack.Instance) hit.instance();
 
-            return CompoundEventResult.interruptTrue(EntryStacks.of(instance.widget().stackProvider().get()));
+            return CompoundEventResult.interruptTrue(ReiStackUtil.toRei(instance.widget().stackProvider().get()));
+        });
+
+        registry.registerDraggableStackVisitor(new DraggableStackVisitor<Screen>() {
+            @Override
+            public <R extends Screen> boolean isHandingScreen(R screen) {
+                return screen instanceof BraidScreen;
+            }
+
+            @Override
+            public Stream<BoundsProvider> getDraggableAcceptingBounds(DraggingContext<Screen> context, DraggableStack stack) {
+                if (!(context.getScreen() instanceof BraidScreen braid)) return Stream.empty();
+
+                List<BoundsProvider> allBounds = new ArrayList<>();
+
+                var converted = ReiStackUtil.fromRei(stack.getStack());
+
+                var visitor = new WidgetInstance.Visitor() {
+                    @Override
+                    public void visit(WidgetInstance<?> child) {
+                        if (child instanceof StackDropArea.Instance area && area.widget().stackPredicate().test(converted)) {
+                            var bounds = area.computeGlobalBounds();
+
+                            allBounds.add(BoundsProvider.ofRectangle(new Rectangle(bounds.minX, bounds.minY, bounds.maxX - bounds.minX, bounds.maxY - bounds.minY)));
+                        }
+
+                        child.visitChildren(this);
+                    }
+                };
+
+                braid.state().rootInstance().visitChildren(visitor);
+
+                return allBounds.stream();
+            }
+
+            @Override
+            public DraggedAcceptorResult acceptDraggedStack(DraggingContext<Screen> context, DraggableStack stack) {
+                if (!(context.getScreen() instanceof BraidScreen braid)) return DraggedAcceptorResult.PASS;
+
+                var hit = braid.state().hitTest(context.getCurrentPosition().x, context.getCurrentPosition().y)
+                    .firstWhere(x -> x.instance() instanceof StackDropArea.Instance);
+
+                if (hit == null) return DraggedAcceptorResult.PASS;
+
+                var instance = (StackDropArea.Instance) hit.instance();
+
+                var converted = ReiStackUtil.fromRei(stack.getStack());
+
+                if (!instance.widget().stackPredicate().test(converted)) return DraggedAcceptorResult.PASS;
+
+                instance.widget().stackAcceptor().accept(converted);
+
+                return DraggedAcceptorResult.ACCEPTED;
+            }
         });
     }
 
