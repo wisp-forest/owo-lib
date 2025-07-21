@@ -12,9 +12,9 @@ import io.wispforest.owo.braid.widgets.EntityWidget;
 import io.wispforest.owo.braid.widgets.ItemStackWidget;
 import io.wispforest.owo.braid.widgets.SpriteWidget;
 import io.wispforest.owo.braid.widgets.basic.*;
-import io.wispforest.owo.braid.widgets.button.Button;
-import io.wispforest.owo.braid.widgets.basic.Stack;
+import io.wispforest.owo.braid.widgets.basic.action.ActionTrigger;
 import io.wispforest.owo.braid.widgets.basic.action.Actions;
+import io.wispforest.owo.braid.widgets.button.Button;
 import io.wispforest.owo.braid.widgets.button.MessageButton;
 import io.wispforest.owo.braid.widgets.checkbox.BraidCheckbox;
 import io.wispforest.owo.braid.widgets.checkbox.Checkbox;
@@ -49,7 +49,6 @@ import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.Sizing;
-import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.owo.util.Wisdom;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -74,6 +73,8 @@ import org.lwjgl.glfw.GLFW;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+
+
 import java.util.*;
 import java.util.function.DoubleFunction;
 import java.util.stream.Stream;
@@ -134,24 +135,26 @@ public class TestSelector extends StatefulWidget {
                     Alignment.LEFT,
                     new HitTestTrap(
                         new Padding(
-                            Insets.left(5),
+                            Insets.vertical(50).withLeft(5),
                             new Panel(
                                 OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
                                 new Padding(
                                     Insets.all(8),
-                                    new IntrinsicWidth(
-                                        new Column(
-                                            new Padding(Insets.all(2)),
-                                            Arrays.stream(Tests.values()).map(test -> {
-                                                if (test == Tests.BURNING_CHYZ) {
-                                                    return new BurningChyzButton(this.chyz, () -> setState(() -> this.test = Tests.BURNING_CHYZ));
-                                                } else {
-                                                    return new MessageButton(
-                                                        Text.literal(test.name().toLowerCase(Locale.ROOT).replace('_', ' ')),
-                                                        test != this.test ? () -> setState(() -> this.test = test) : null
-                                                    );
-                                                }
-                                            }).toList()
+                                    new VerticallyScrollable(
+                                        new IntrinsicWidth(
+                                            new Column(
+                                                new Padding(Insets.all(2)),
+                                                Arrays.stream(Tests.values()).map(test -> {
+                                                    if (test == Tests.BURNING_CHYZ) {
+                                                        return new BurningChyzButton(this.chyz, () -> setState(() -> this.test = Tests.BURNING_CHYZ));
+                                                    } else {
+                                                        return new MessageButton(
+                                                            Text.literal(test.name().toLowerCase(Locale.ROOT).replace('_', ' ')),
+                                                            test != this.test ? () -> setState(() -> this.test = test) : null
+                                                        );
+                                                    }
+                                                }).toList()
+                                            )
                                         )
                                     )
                                 )
@@ -1374,6 +1377,7 @@ public class TestSelector extends StatefulWidget {
             public static class TheTest extends StatelessWidget {
 
                 public final boolean nest;
+
                 public TheTest(boolean nest) {
                     this.nest = nest;
                 }
@@ -1410,17 +1414,11 @@ public class TestSelector extends StatefulWidget {
                     return new IntrinsicWidth(
                         new Column(
                             new Button(
-                                () -> {
-                                    SharedState.set(context, CounterState.class, state -> state.count += 1);
-                                    return true;
-                                },
+                                () -> SharedState.set(context, CounterState.class, state -> state.count += 1),
                                 new Label(Text.literal("increment"))
                             ),
                             new Button(
-                                () -> {
-                                    SharedState.set(context, CounterState.class, state -> state.dark = !state.dark);
-                                    return true;
-                                },
+                                () -> SharedState.set(context, CounterState.class, state -> state.dark = !state.dark),
                                 new Label(Text.literal("toggle darkness"))
                             )
                         )
@@ -1510,7 +1508,7 @@ public class TestSelector extends StatefulWidget {
                                 new Sized(20, 20, new Box(Color.WHITE)),
                                 new Sized(60, 40, new Box(Color.WHITE))
                             ),
-                            new Button(() -> true, new Label(Text.literal("a")))
+                            new Button(() -> {}, new Label(Text.literal("a")))
                         )
                     ),
                     new IntrinsicWidth(
@@ -1526,7 +1524,7 @@ public class TestSelector extends StatefulWidget {
                                 new Sized(20, 20, new Box(Color.WHITE)),
                                 new Sized(40, 40, new Box(Color.WHITE))
                             ),
-                            new Button(() -> true, new Label(Text.literal("a")))
+                            new Button(() -> {}, new Label(Text.literal("a")))
                         )
                     )
                 )
@@ -1592,10 +1590,7 @@ public class TestSelector extends StatefulWidget {
                                     20,
                                     20,
                                     new Button(
-                                        () -> {
-                                            setState(() -> this.contributors = this.genContributors());
-                                            return true;
-                                        },
+                                        () -> setState(() -> this.contributors = this.genContributors()),
                                         new Label(LabelStyle.SHADOW, true, Text.literal("☠"))
                                     )
                                 )
@@ -1610,6 +1605,7 @@ public class TestSelector extends StatefulWidget {
             public static class FirePlayer extends StatefulWidget {
 
                 public final GameProfile profile;
+
                 public FirePlayer(GameProfile profile) {this.profile = profile;}
 
                 @Override
@@ -1630,22 +1626,20 @@ public class TestSelector extends StatefulWidget {
 
                     @Override
                     public Widget build(BuildContext context) {
-                        return new MouseArea(
+                        return Actions.click(
                             widget -> widget
-                                .clickCallback((x, y, button) -> {
-                                    this.setState(() -> {
-                                        this.dead = true;
-                                    });
-
-                                    this.displayEntity.setOnFire(false);
-                                    this.displayEntity.setHealth(0f);
-                                    this.displayEntity.deathTime = 20;
-
-                                    MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.ENTITY_PLAYER_DEATH, 1));
-                                })
                                 .enterCallback(!this.dead ? () -> this.displayEntity.setOnFire(true) : null)
                                 .exitCallback(!this.dead ? () -> this.displayEntity.setOnFire(false) : null)
                                 .cursorStyle(!this.dead ? CursorStyle.CROSSHAIR : null),
+                            this.dead ? null : () -> {
+                                this.setState(() -> this.dead = true);
+
+                                this.displayEntity.setOnFire(false);
+                                this.displayEntity.setHealth(0f);
+                                this.displayEntity.deathTime = 20;
+
+                                MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.ENTITY_PLAYER_DEATH, 1));
+                            },
                             new Panel(
                                 Identifier.of("uwu", "contributors_panel"),
                                 new Padding(
@@ -1690,15 +1684,10 @@ public class TestSelector extends StatefulWidget {
                     }
 
                     private Widget star(int idx) {
-                        return new MouseArea(
+                        return new Actions(
                             widget -> widget
-                                .clickCallback((x, y, button) -> {
-                                    if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
-                                        setState(() -> this.selectedStarCount = idx + 1);
-                                    } else if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
-                                        setState(() -> this.selectedStarCount = 0);
-                                    }
-                                })
+                                .addAction(ActionTrigger.CLICK, () -> setState(() -> this.selectedStarCount = idx + 1))
+                                .addAction(ActionTrigger.SECONDARY_CLICK, () -> setState(() -> this.selectedStarCount = 0))
                                 .enterCallback(() -> setState(() -> this.hoverStarCount = idx + 1)),
                             new Stack(
                                 new SpriteWidget(

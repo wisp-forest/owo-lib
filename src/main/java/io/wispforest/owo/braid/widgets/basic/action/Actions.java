@@ -115,6 +115,10 @@ public class Actions extends StatefulWidget {
         return this;
     }
 
+    public Actions addAction(ActionTrigger trigger, Runnable action) {
+        return this.addAction(List.of(trigger), action);
+    }
+
     public Map<List<ActionTrigger>, Runnable> actions() {
         return this.actions;
     }

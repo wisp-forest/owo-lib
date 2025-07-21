@@ -327,14 +327,13 @@ public class TextInput extends LeafInstanceWidget {
         }
 
         @Override
-        public boolean onChar(int charCode, int modifiers) {
+        public boolean onChar(int charCode, KeyModifiers modifiers) {
             this.insert(Character.toString(charCode));
             return true;
         }
 
         @Override
-        public boolean onKeyDown(int keyCode, int mods) {
-            var modifiers = new KeyModifiers(mods);
+        public boolean onKeyDown(int keyCode, KeyModifiers modifiers) {
             var cursorPosition = this.selection.end();
 
             if (keyCode == GLFW.GLFW_KEY_BACKSPACE) {
