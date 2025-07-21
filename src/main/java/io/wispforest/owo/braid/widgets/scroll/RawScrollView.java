@@ -7,6 +7,8 @@ import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.OptionalDouble;
+
 public class RawScrollView extends SingleChildInstanceWidget {
 
     public final ScrollController horizontalController;
@@ -75,13 +77,8 @@ public class RawScrollView extends SingleChildInstanceWidget {
                 )
             );
 
-            if (this.widget.horizontalController != null) {
-                this.widget.horizontalController.setMaxOffset(Math.max(0, childSize.width() - constraints.maxWidth()));
-            }
-
-            if (this.widget.verticalController != null) {
-                this.widget.verticalController.setMaxOffset(Math.max(0, childSize.height() - constraints.maxHeight()));
-            }
+            this.updateMaxOffset(this.widget.horizontalController, Math.max(0, childSize.width() - constraints.maxWidth()));
+            this.updateMaxOffset(this.widget.verticalController, Math.max(0, childSize.height() - constraints.maxHeight()));
 
             this.child.transform.setX(-this.horizontalOffset);
             this.child.transform.setY(-this.verticalOffset);
@@ -96,6 +93,48 @@ public class RawScrollView extends SingleChildInstanceWidget {
             ).constrained(constraints);
 
             this.transform.setSize(selfSize);
+        }
+
+        /// Delay the actual invocation of scroll controller listeners until
+        /// after the current layout cycle.
+        ///
+        /// This is important, because for one nobody could react to it anyways
+        /// (since we are in the layout phase, the build phase for this frame
+        /// is over) but *also* it actually breaks instances which descend from
+        /// a layout builder. This happens because such a descendant would now
+        /// mark itself dirty during the layout phase, but before the layout builder
+        /// instance is marked clean. Thus, the `markNeedsLayout()` invocation on
+        /// that layout builder instance gets swallowed and the widget is now stuck
+        /// in improperly-rebuilt limbo until the layout builder happens to re-layout
+        /// for other reasons. That is especially problematic because there is
+        /// potential for this effect to mask legitimate rebuilds said descendant
+        /// requires - it won't mark itself as needing a rebuild again because it
+        /// is still dutifully waiting for such a rebuild to occur.
+        private void updateMaxOffset(@Nullable ScrollController controller, double offset) {
+            if (controller == null) return;
+
+            if (controller.setMaxOffset(offset) && !controller.maxOffsetNotificationScheduled) {
+                controller.maxOffsetNotificationScheduled = true;
+                this.host().schedulePostLayoutCallback(controller::sendMaxOffsetNotification);
+            }
+        }
+
+        @Override
+        protected double measureIntrinsicWidth(double height) {
+            return this.widget.horizontalController == null ? this.child.getIntrinsicWidth(height) : 0;
+        }
+
+        @Override
+        protected double measureIntrinsicHeight(double width) {
+            return this.widget.verticalController == null ? this.child.getIntrinsicHeight(width) : 0;
+        }
+
+        @Override
+        protected OptionalDouble measureBaselineOffset() {
+            var childBaseline = this.child != null ? this.child.getBaselineOffset() : OptionalDouble.empty();
+            if (childBaseline.isEmpty()) return OptionalDouble.empty();
+
+            return OptionalDouble.of(childBaseline.getAsDouble() + this.child.transform.y());
         }
     }
 }

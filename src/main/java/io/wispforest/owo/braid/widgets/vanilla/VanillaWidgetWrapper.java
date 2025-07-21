@@ -12,6 +12,8 @@ import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.Widget;
 
+import java.util.OptionalDouble;
+
 public class VanillaWidgetWrapper<T extends Drawable & Element> extends LeafInstanceWidget {
 
     public final T wrapped;
@@ -50,6 +52,21 @@ public class VanillaWidgetWrapper<T extends Drawable & Element> extends LeafInst
             }
 
             this.transform.setSize(size);
+        }
+
+        @Override
+        protected double measureIntrinsicWidth(double height) {
+            return 0;
+        }
+
+        @Override
+        protected double measureIntrinsicHeight(double width) {
+            return 0;
+        }
+
+        @Override
+        protected OptionalDouble measureBaselineOffset() {
+            return OptionalDouble.empty();
         }
 
         @Override

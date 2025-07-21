@@ -10,7 +10,6 @@ import io.wispforest.owo.braid.framework.proxy.ProxyHost;
 import io.wispforest.owo.braid.framework.proxy.SingleChildInstanceWidgetProxy;
 import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import io.wispforest.owo.braid.widgets.basic.MouseArea;
 import io.wispforest.owo.braid.widgets.basic.Tooltip;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import net.minecraft.client.MinecraftClient;
@@ -27,6 +26,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class AppState implements InstanceHost, ProxyHost {
 
@@ -35,8 +36,9 @@ public class AppState implements InstanceHost, ProxyHost {
     public final CursorController cursorController;
 
     private final BuildScope rootBuildScope = new BuildScope();
-    private Deque<AnimationCallback> animationCallbacks = new ArrayDeque<>();
-    private PriorityQueue<ScheduledCallback> callbacks = new PriorityQueue<>();
+    private Deque<AnimationCallback> animationCallbacks = new LinkedList<>();
+    private final PriorityQueue<ScheduledCallback> callbacks = new PriorityQueue<>();
+    private Deque<Runnable> postLayoutCallbacks = new LinkedList<>();
     private final RootProxy root;
 
     private Set<MouseListener> hovered = new HashSet<>();
@@ -92,11 +94,10 @@ public class AppState implements InstanceHost, ProxyHost {
 
         if (!this.animationCallbacks.isEmpty()) {
             var callbacksForThisFrame = this.animationCallbacks;
-            this.animationCallbacks = new ArrayDeque<>();
+            this.animationCallbacks = new LinkedList<>();
 
             while (!callbacksForThisFrame.isEmpty()) {
-                var callback = callbacksForThisFrame.removeFirst();
-                callback.run(frameDeltaInTicks);
+                callbacksForThisFrame.poll().run(frameDeltaInTicks);
             }
         }
 
@@ -107,6 +108,15 @@ public class AppState implements InstanceHost, ProxyHost {
 
         this.rootBuildScope.rebuildDirtyProxies();
         this.flushLayoutQueue();
+
+        if (!this.postLayoutCallbacks.isEmpty()) {
+            var callbacksForThisFrame = this.postLayoutCallbacks;
+            this.postLayoutCallbacks = new LinkedList<>();
+
+            while (!callbacksForThisFrame.isEmpty()) {
+                callbacksForThisFrame.poll().run();
+            }
+        }
 
         // ---
 
@@ -201,6 +211,15 @@ public class AppState implements InstanceHost, ProxyHost {
     public boolean dispatchMouseDownEvent(double x, double y, int button) {
         var state = this.hitTest(x, y);
 
+        this.updateFocus(
+            Streams.stream(state.occludedTrace())
+                .map(Hit::instance)
+                .filter(KeyboardListener.class::isInstance)
+                .map(KeyboardListener.class::cast)
+                .findFirst()
+                .orElse(null)
+        );
+
         var clicked = state.firstWhere(
             (hit) -> hit.instance() instanceof MouseListener && ((MouseListener) hit.instance()).onMouseDown(hit.x(), hit.y(), button)
         );
@@ -215,24 +234,27 @@ public class AppState implements InstanceHost, ProxyHost {
             this.draggingButton = button;
         }
 
-        var nowFocused = new ArrayList<KeyboardListener>();
-        Streams.stream(state.occludedTrace()).map(Hit::instance).filter(KeyboardListener.class::isInstance).map(KeyboardListener.class::cast).forEach(listener -> {
-            nowFocused.add(listener);
+        return true;
+    }
 
+    private void updateFocus(@Nullable KeyboardListener focusTarget) {
+        var nowFocused = focusTarget != null
+            ? Stream.concat(Stream.of(focusTarget), ((WidgetInstance<?>) focusTarget).ancestors().stream().filter(KeyboardListener.class::isInstance).map(KeyboardListener.class::cast)).collect(Collectors.toList())
+            : List.<KeyboardListener>of();
+
+        for (var listener : nowFocused) {
             if (this.focused.contains(listener)) {
                 this.focused.remove(listener);
             } else {
                 listener.onFocusGained();
             }
-        });
+        }
 
         for (var noLongerFocused : this.focused) {
             noLongerFocused.onFocusLost();
         }
 
         this.focused = nowFocused;
-
-        return true;
     }
 
     public boolean dispatchMouseDragEvent(double x, double y, double deltaX, double deltaY) {
@@ -378,8 +400,13 @@ public class AppState implements InstanceHost, ProxyHost {
     }
 
     @Override
+    public void moveFocusTo(KeyboardListener focusTarget) {
+        this.updateFocus(focusTarget);
+    }
+
+    @Override
     public void scheduleAnimationCallback(AnimationCallback callback) {
-        this.animationCallbacks.add(callback);
+        this.animationCallbacks.offer(callback);
     }
 
     @Override
@@ -395,6 +422,11 @@ public class AppState implements InstanceHost, ProxyHost {
     @Override
     public void cancelDelayedCallback(long id) {
         this.callbacks.removeIf(scheduledCallback -> scheduledCallback.id() == id);
+    }
+
+    @Override
+    public void schedulePostLayoutCallback(Runnable callback) {
+        this.postLayoutCallbacks.offer(callback);
     }
 }
 
@@ -459,15 +491,10 @@ class RootProxy extends SingleChildInstanceWidgetProxy {
     }
 }
 
-class RootInstance extends SingleChildWidgetInstance<RootWidget> {
+class RootInstance extends SingleChildWidgetInstance.ShrinkWrap<RootWidget> {
 
     public RootInstance(RootWidget widget) {
         super(widget);
-    }
-
-    @Override
-    protected void doLayout(Constraints constraints) {
-        this.sizeToChild(constraints, this.child);
     }
 }
 

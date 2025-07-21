@@ -8,6 +8,8 @@ import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 
+import java.util.OptionalDouble;
+
 public class Visibility extends SingleChildInstanceWidget {
 
     public final boolean visible;
@@ -53,6 +55,21 @@ public class Visibility extends SingleChildInstanceWidget {
             } else {
                 this.transform.setSize(Size.zero());
             }
+        }
+
+        @Override
+        protected double measureIntrinsicWidth(double height) {
+            return this.widget.visible || this.widget.reportSize ? this.child.getIntrinsicWidth(height) : 0;
+        }
+
+        @Override
+        protected double measureIntrinsicHeight(double width) {
+            return this.widget.visible || this.widget.reportSize ? this.child.getIntrinsicHeight(width) : 0;
+        }
+
+        @Override
+        protected OptionalDouble measureBaselineOffset() {
+            return this.widget.visible || this.widget.reportSize ? this.child.getBaselineOffset() : OptionalDouble.empty();
         }
 
         @Override

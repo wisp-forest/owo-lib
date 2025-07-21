@@ -3,6 +3,7 @@ package io.wispforest.owo.braid.widgets.textinput;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.KeyModifiers;
 import io.wispforest.owo.braid.core.Size;
+import io.wispforest.owo.braid.core.TextLayout;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.framework.instance.KeyboardListener;
 import io.wispforest.owo.braid.framework.instance.LeafWidgetInstance;
@@ -10,29 +11,41 @@ import io.wispforest.owo.braid.framework.instance.MouseListener;
 import io.wispforest.owo.braid.framework.widget.LeafInstanceWidget;
 import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
-import io.wispforest.owo.ui.util.ScissorStack;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
-import net.minecraft.text.Text;
+import net.minecraft.util.Colors;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector2d;
 import org.lwjgl.glfw.GLFW;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
+import java.util.regex.Pattern;
 
 public class TextInput extends LeafInstanceWidget {
 
     public final TextEditingController controller;
     public final boolean showCursor;
     public final boolean softWrap;
+    public final boolean autoFocus;
     public final boolean allowMultipleLines;
+    public final Style baseStyle;
 
-    public TextInput(TextEditingController controller, boolean showCursor, boolean softWrap, boolean allowMultipleLines) {
+    public TextInput(TextEditingController controller, boolean showCursor, boolean softWrap, boolean autoFocus, boolean allowMultipleLines, Style baseStyle) {
         this.controller = controller;
         this.showCursor = showCursor;
         this.softWrap = softWrap;
+        this.autoFocus = autoFocus;
         this.allowMultipleLines = allowMultipleLines;
+        this.baseStyle = baseStyle;
     }
 
     @Override
@@ -42,28 +55,47 @@ public class TextInput extends LeafInstanceWidget {
 
     public static class Instance extends LeafWidgetInstance<TextInput> implements MouseListener, KeyboardListener {
 
+        protected static final Pattern LINE_BREAKS = Pattern.compile("[\r\n]");
+
         protected String text;
-        protected int cursorPosition;
+        protected TextSelection selection;
+
+        protected String layoutText;
+        protected TextSelection layoutSelection;
+
         protected CursorLocation cursorLocation;
 
-        protected List<Line> wrappedLines = List.of();
+        protected TextLayout.EditMetrics metrics = null;
         protected List<OrderedText> renderLines = List.of();
 
         public Instance(TextInput widget) {
             super(widget);
-            this.text = widget.controller.text();
-            this.cursorPosition = widget.controller.cursorPosition();
+            this.layoutText = this.text = widget.controller.text();
+            this.layoutSelection = this.selection = widget.controller.selection;
+
+            if (this.widget().autoFocus) {
+                this.requestFocus();
+            }
+        }
+
+        public Vector2d cursorPosition() {
+            return this.coordinatesAtCharIdx(this.selection.end());
+        }
+
+        public TextLayout.LineMetrics currentLine() {
+            return this.metrics.lineMetrics().get(this.cursorLocation.line);
         }
 
         @Override
         public void setWidget(TextInput widget) {
-            if (!(this.text.equals(widget.controller.text())
-                && this.cursorPosition == widget.controller.cursorPosition()
+            if (!(this.layoutText.equals(widget.controller.text())
+                && this.layoutSelection.equals(widget.controller.selection())
                 && this.widget.softWrap == widget.softWrap
-                && this.widget.allowMultipleLines == widget.allowMultipleLines)) {
+                && this.widget.allowMultipleLines == widget.allowMultipleLines
+                && this.widget.baseStyle.equals(widget.baseStyle))) {
 
-                this.text = widget.controller.text();
-                this.cursorPosition = widget.controller.cursorPosition();
+                this.layoutText = this.text = widget.controller.text();
+                this.layoutSelection = this.selection = widget.controller.selection();
 
                 this.markNeedsLayout();
             }
@@ -73,91 +105,78 @@ public class TextInput extends LeafInstanceWidget {
 
         @Override
         protected void doLayout(Constraints constraints) {
-            var size = Size.of(
-                constraints.hasBoundedWidth() ? constraints.maxWidth() : constraints.minWidth(),
-                constraints.hasBoundedHeight() ? constraints.maxHeight() : constraints.minHeight()
+            var maxWidth = (int) (constraints.hasBoundedWidth() ? constraints.maxWidth() : constraints.minWidth());
+            var wrapWidth = this.widget.softWrap ? maxWidth - 2 : Integer.MAX_VALUE;
+
+            this.metrics = TextLayout.measure(
+                this.host().client().textRenderer,
+                this.text,
+                this.widget.baseStyle,
+                wrapWidth
             );
+
+            this.renderLines = new ArrayList<>(this.host().client().textRenderer.wrapLines(
+                this.widget.controller.createTextForRendering(this.widget.baseStyle),
+                wrapWidth
+            ));
+
+            var size = Size.of(
+                this.metrics.width() + 1,
+                this.metrics.height()
+            ).constrained(constraints);
 
             this.transform.setSize(size);
 
-            // wrap lines
+            var newLineIdx = this.lineIdxAtCharIdx(this.selection.end());
+            this.cursorLocation = new CursorLocation(newLineIdx, this.selection.end() - this.metrics.lineMetrics().get(newLineIdx).beginIdx());
+        }
 
-            var wrapped = new ArrayList<Line>();
+        @Override
+        protected double measureIntrinsicWidth(double height) {
+            return TextLayout.measure(
+                this.host().client().textRenderer,
+                this.text,
+                this.widget.baseStyle,
+                Integer.MAX_VALUE
+            ).width();
+        }
 
-            if (this.widget.allowMultipleLines) {
-                 var wrapWidth = this.widget.softWrap ? (int) this.transform.width() - 2 : Integer.MAX_VALUE;
-                this.host().client().textRenderer.getTextHandler().wrapLines(
-                    this.text,
-                    wrapWidth,
-                    Style.EMPTY,
-                    false,
-                    (style, start, end) -> wrapped.add(new Line(start, end))
-                );
+        @Override
+        protected double measureIntrinsicHeight(double width) {
+            return TextLayout.measure(
+                this.host().client().textRenderer,
+                this.text,
+                this.widget.baseStyle,
+                this.widget.softWrap ? (int) width : Integer.MAX_VALUE
+            ).height();
+        }
 
-                this.renderLines = new ArrayList<>(this.host().client().textRenderer.wrapLines(
-                    this.widget.controller.createTextForRendering(),
-                    wrapWidth
-                ));
+        @Override
+        protected OptionalDouble measureBaselineOffset() {
+            return OptionalDouble.of(this.host().client().textRenderer.fontHeight - 2);
+        }
 
-                if (this.text.endsWith("\n")) {
-                    wrapped.add(new Line(this.text.length(), this.text.length()));
-                    this.renderLines.add(OrderedText.EMPTY);
-                }
+        private void drawSelection(OwoUIDrawContext ctx, int startRune, int endRune) {
+            var startX = this.coordinatesAtCharIdx(startRune).x;
+            var endPos = this.coordinatesAtCharIdx(endRune);
 
-                if (wrapped.isEmpty()) {
-                    wrapped.add(new Line(0, 0));
-                    this.renderLines.add(OrderedText.EMPTY);
-                }
-            } else {
-                wrapped.add(new Line(0, this.text.length()));
-                this.renderLines = List.of(this.widget.controller.createTextForRendering().asOrderedText());
-            }
+            var height = this.host().client().textRenderer.fontHeight;
 
-            this.wrappedLines = wrapped;
+            ctx.push();
+            ctx.translate(startX, endPos.y - height - 1, 0d);
 
-            // compute cursor location
+            var width = endPos.x - startX;
+            if (startRune == endRune) width = 2;
 
-            this.cursorLocation = null;
-
-            for (int lineIdx = 0; lineIdx < this.wrappedLines.size(); lineIdx++) {
-                var line = this.wrappedLines.get(lineIdx);
-                if (this.cursorPosition >= line.beginIdx && this.cursorPosition <= line.endIdx) {
-                    this.cursorLocation = new CursorLocation(
-                        this.cursorPosition - line.beginIdx,
-                        lineIdx
-                    );
-
-                    break;
-                }
-            }
-
-            if (this.cursorLocation == null) {
-                this.cursorLocation = new CursorLocation(
-                    this.wrappedLines.getLast().endIdx - this.wrappedLines.getLast().beginIdx,
-                    this.wrappedLines.size() - 1
-                );
-            }
+            ctx.fill(RenderLayer.getGuiTextHighlight(), 0, 0, (int) width, height, Colors.BLUE);
+            ctx.pop();
         }
 
         @Override
         public void draw(OwoUIDrawContext ctx) {
             var textRenderer = this.host().client().textRenderer;
 
-            var cursorLine = this.wrappedLines.get(this.cursorLocation.row());
-            var lineString = this.text.substring(cursorLine.beginIdx, cursorLine.beginIdx + this.cursorLocation.col());
-
-            var cursorX = textRenderer.getWidth(lineString) + 2;
-
-            ScissorStack.push(0, 0, (int) this.transform.width(), (int) this.transform.height(), ctx);
-            ctx.push();
-
-            ctx.translate(
-                -Math.max(0, cursorX - this.transform.width()),
-                !this.widget.allowMultipleLines ? Math.round((this.transform.height() - textRenderer.fontHeight) / 2) : 0,
-                0
-            );
-
-            for (int lineIdx = 0; lineIdx < this.wrappedLines.size(); lineIdx++) {
+            for (int lineIdx = 0; lineIdx < this.renderLines.size(); lineIdx++) {
                 ctx.drawText(
                     this.host().client().textRenderer,
                     this.renderLines.get(lineIdx),
@@ -168,107 +187,227 @@ public class TextInput extends LeafInstanceWidget {
                 );
             }
 
+            // ---
+
+            if (!this.selection.collapsed()) {
+                var startLine = this.lineIdxAtCharIdx(this.selection.lower());
+                var endLine = this.lineIdxAtCharIdx(this.selection.upper());
+
+                if (startLine == endLine) {
+                    drawSelection(ctx, this.selection.lower(), this.selection.upper());
+                } else {
+                    drawSelection(ctx, this.selection.lower(), this.metrics.lineMetrics().get(startLine).endIdx());
+                    for (var lineIdx = startLine + 1; lineIdx < endLine; lineIdx++) {
+                        var line = this.metrics.lineMetrics().get(lineIdx);
+                        drawSelection(ctx, line.beginIdx(), line.endIdx());
+                    }
+                    drawSelection(ctx, this.metrics.lineMetrics().get(startLine).beginIdx(), this.selection.upper());
+                }
+            }
+
+            // ---
+
             if (this.widget.showCursor) {
+                var cursorPos = this.coordinatesAtCharIdx(this.selection.end());
+
                 ctx.drawVerticalLine(
-                    textRenderer.getWidth(lineString),
-                    this.cursorLocation.row() * textRenderer.fontHeight - 2,
-                    (this.cursorLocation.row() + 1) * textRenderer.fontHeight,
+                    (int) cursorPos.x,
+                    (int) (cursorPos.y - textRenderer.fontHeight - 2),
+                    (int) (cursorPos.y),
                     0xaad0d0d0
                 );
             }
-
-            ctx.pop();
-            ctx.draw();
-            ScissorStack.pop();
-
-            ctx.drawText(textRenderer, String.valueOf(this.cursorPosition), (int) this.transform.width() + 5, 0, 0xFFFFFF, false);
         }
 
-        protected Line currentLine() {
-            return this.wrappedLines.get(this.cursorLocation.row());
+        private int lineIdxAtCharIdx(int charIdx) {
+            var matchedLineIdx = -1;
+            var lines = this.metrics.lineMetrics();
+
+            for (var lineIdx = 0; lineIdx < lines.size(); lineIdx++) {
+                var line = lines.get(lineIdx);
+                if (charIdx >= line.beginIdx() && charIdx <= line.endIdx()) {
+                    matchedLineIdx = lineIdx;
+
+                    break;
+                }
+            }
+
+            return matchedLineIdx != -1 ? matchedLineIdx : lines.size() - 1;
         }
 
-        protected int nextWordBoundary(boolean forwards) {
+        private Vector2d coordinatesAtCharIdx(int charIdx) {
+            var lineIdx = this.lineIdxAtCharIdx(charIdx);
+            var line = this.metrics.lineMetrics().get(lineIdx);
+
+            final var textRenderer = this.host().client().textRenderer;
+            var x = textRenderer.getWidth(this.text.substring(line.beginIdx(), charIdx));
+            var y = (lineIdx + 1) * textRenderer.fontHeight;
+
+            return new Vector2d(x, y);
+        }
+
+        private void insert(String insertion) {
+            if (!this.widget.allowMultipleLines) {
+                insertion = LINE_BREAKS.matcher(insertion).replaceAll("");
+            }
+
+            var chars = new StringBuilder(this.text);
+            chars.replace(this.selection.lower(), this.selection.upper(), insertion);
+
+            this.widget.controller.setText(this.text = chars.toString());
+            this.widget.controller.setSelection(this.selection = TextSelection.collapsed(this.selection.lower() + insertion.length()));
+        }
+
+        private void deleteSelection() {
+            this.insert("");
+        }
+
+        private void moveCursorVertically(int byLines, boolean selecting) {
+            var newLineIdx = MathHelper.clamp(this.cursorLocation.line + byLines, 0, this.metrics.lineMetrics().size() - 1);
+            var currentX = this.cursorPosition().x;
+
+            var newLine = this.metrics.lineMetrics().get(newLineIdx);
+            var newLocalRune = 0;
+
+            while (newLocalRune < (newLine.endIdx() - newLine.beginIdx())) {
+                var glyphX = this.host().client().textRenderer.getWidth(this.text.substring(newLine.beginIdx(), newLine.beginIdx() + newLocalRune));
+
+                if (glyphX >= currentX) {
+                    var previousGlyphX = this.host().client().textRenderer.getWidth(this.text.substring(newLine.beginIdx(), newLine.beginIdx() + Math.max(0, newLocalRune - 1)));
+
+                    if (Math.abs(currentX - previousGlyphX) < Math.abs(currentX - glyphX)) {
+                        newLocalRune--;
+                    }
+
+                    break;
+                }
+
+                newLocalRune++;
+            }
+
+            this.moveCursor(newLine.beginIdx() + newLocalRune, selecting);
+        }
+
+        private int charIdxAt(double x, double y) {
+            var textRenderer = this.host().client().textRenderer;
+
+            var clickedLine = this.metrics.lineMetrics().get(MathHelper.clamp((int) (y / textRenderer.fontHeight), 0, this.metrics.lineMetrics().size() - 1));
+            var lineText = this.text.substring(clickedLine.beginIdx(), clickedLine.endIdx());
+
+            return clickedLine.beginIdx() + textRenderer.trimToWidth(lineText, (int) x + 1).length();
+        }
+
+        private void moveCursor(int toRune, boolean selecting) {
+            if (selecting) {
+                widget.controller.setSelection(this.selection = new TextSelection(this.selection.start(), toRune));
+            } else {
+                widget.controller.setSelection(this.selection = TextSelection.collapsed(toRune));
+            }
+        }
+
+        private int nextWordBoundary(boolean forwards, OptionalInt fromChar) {
+            var fromCharIdx = fromChar.orElse(this.selection.end());
+
             var direction = forwards ? 1 : -1;
             var lookAhead = forwards ? 0 : -1;
             var bound = forwards ? this.text.length() + 1 : -1;
 
-            var startingClass = SkipClass.of(this.safeCharAt(this.cursorPosition));
-            var idx = this.cursorPosition + direction;
+            var startingClass = SkipClass.of(this.safeCharAt(fromCharIdx + lookAhead));
+            var idx = fromCharIdx + direction;
 
-            if (startingClass != SkipClass.LineBreakClass.INSTANCE) {
-                startingClass = SkipClass.of(this.safeCharAt(idx + lookAhead));
+            while (idx != bound && startingClass.shouldSkip(this.safeCharAt(idx + lookAhead))) {
+                idx += direction;
             }
-
-            while (idx != bound && startingClass.shouldSkip(this.safeCharAt(idx + lookAhead))) idx += direction;
 
             return idx;
         }
 
-        protected char safeCharAt(int idx) {
-            return idx >= 0 && idx < this.text.length() ? this.text.charAt(idx) : ' ';
-        }
-
-        protected void moveCursorVertically(int byLines) {
-            var newRow = MathHelper.clamp(this.cursorLocation.row() + byLines, 0, this.wrappedLines.size() - 1);
-
-            var renderer = this.host().client().textRenderer;
-            var currentWidth = renderer.getWidth(this.text.substring(this.currentLine().beginIdx, this.cursorPosition)) + 2;
-
-            var newLine = this.wrappedLines.get(newRow);
-            var newCol = renderer.trimToWidth(newLine.substring(this.text), currentWidth).length();
-            var newIdx = newLine.beginIdx + newCol;
-
-            this.widget.controller.setCursorPosition(newIdx);
+        private char safeCharAt(int charIdx) {
+            return this.text.charAt(MathHelper.clamp(charIdx, 0, this.text.length() - 1));
         }
 
         @Override
-        public boolean onKeyDown(int keyCode, KeyModifiers modifiers) {
-            var hasCtrl = modifiers.ctrl();
+        public boolean onChar(int charCode, int modifiers) {
+            this.insert(Character.toString(charCode));
+            return true;
+        }
+
+        @Override
+        public boolean onKeyDown(int keyCode, int mods) {
+            var modifiers = new KeyModifiers(mods);
+            var cursorPosition = this.selection.end();
 
             if (keyCode == GLFW.GLFW_KEY_BACKSPACE) {
-                if (this.cursorPosition > 0) {
-                    this.erase(hasCtrl ? this.cursorPosition - this.nextWordBoundary(false) : 1);
+                if (!this.selection.collapsed()) {
+                    this.deleteSelection();
+                } else if (cursorPosition > 0) {
+                    var chars = new StringBuilder(this.text);
+                    chars.deleteCharAt(cursorPosition - 1);
+
+                    this.widget.controller.setSelection(this.selection = TextSelection.collapsed(cursorPosition - 1));
+                    this.widget.controller.setText(this.text = chars.toString());
                 }
 
                 return true;
-            }
+            } else if (keyCode == GLFW.GLFW_KEY_DELETE) {
+                if (!this.selection.collapsed()) {
+                    this.deleteSelection();
+                } else if (cursorPosition < this.text.length()) {
+                    var chars = new StringBuilder(this.text);
+                    chars.deleteCharAt(cursorPosition);
 
-            if (keyCode == GLFW.GLFW_KEY_DELETE) {
-                if (this.cursorPosition < this.text.length()) {
-                    this.erase(hasCtrl ? this.cursorPosition - this.nextWordBoundary(true) : -1);
+                    this.widget.controller.setText(this.text = chars.toString());
                 }
 
                 return true;
-            }
+            } else if (keyCode == GLFW.GLFW_KEY_V && modifiers.ctrl()) {
+                this.insert(MinecraftClient.getInstance().keyboard.getClipboard());
 
-            if (keyCode == GLFW.GLFW_KEY_LEFT) {
-                if (hasCtrl) {
-                    this.widget.controller.setCursorPosition(this.nextWordBoundary(false));
-                } else if (this.cursorPosition > 0) {
-                    this.widget.controller.setCursorPosition(this.cursorPosition - 1);
+                return true;
+            } else if ((keyCode == GLFW.GLFW_KEY_C || keyCode == GLFW.GLFW_KEY_X) && modifiers.ctrl()) {
+                MinecraftClient.getInstance().keyboard.setClipboard(this.text.substring(this.selection.lower(), this.selection.upper()));
+
+                if (keyCode == GLFW.GLFW_KEY_X) {
+                    this.deleteSelection();
                 }
 
                 return true;
-            }
-
-            if (keyCode == GLFW.GLFW_KEY_RIGHT) {
-                if (hasCtrl) {
-                    this.widget.controller.setCursorPosition(this.nextWordBoundary(true));
-                } else if (this.cursorPosition < this.text.length()) {
-                    this.widget.controller.setCursorPosition(this.cursorPosition + 1);
-                }
-
+            } else if (keyCode == GLFW.GLFW_KEY_A && modifiers.ctrl()) {
+                this.widget.controller.setSelection(this.selection = new TextSelection(0, this.text.length()));
                 return true;
-            }
-
-            if (keyCode == GLFW.GLFW_KEY_HOME) {
-                this.widget.controller.setCursorPosition(this.currentLine().beginIdx);
+            } else if (keyCode == GLFW.GLFW_KEY_LEFT) {
+                var endingSelection = !this.selection.collapsed() && !modifiers.shift();
+                this.moveCursor(
+                    Math.max(
+                        0,
+                        endingSelection
+                            ? this.selection.lower()
+                            : modifiers.ctrl()
+                            ? this.nextWordBoundary(false, java.util.OptionalInt.empty())
+                            : cursorPosition - 1
+                    ),
+                    modifiers.shift()
+                );
                 return true;
-            }
-
-            if (keyCode == GLFW.GLFW_KEY_END) {
-                this.widget.controller.setCursorPosition(this.currentLine().endIdx);
+            } else if (keyCode == GLFW.GLFW_KEY_RIGHT) {
+                var endingSelection = !this.selection.collapsed() && !modifiers.shift();
+                this.moveCursor(
+                    Math.min(
+                        this.text.length(),
+                        endingSelection
+                            ? this.selection.upper()
+                            : modifiers.ctrl()
+                            ? this.nextWordBoundary(true, java.util.OptionalInt.empty())
+                            : cursorPosition + 1
+                    ),
+                    modifiers.shift()
+                );
+                return true;
+            } else if (keyCode == GLFW.GLFW_KEY_HOME) {
+                this.moveCursor(this.currentLine().beginIdx(), modifiers.shift());
+                return true;
+            } else if (keyCode == GLFW.GLFW_KEY_END) {
+                this.moveCursor(this.currentLine().endIdx(), modifiers.shift());
                 return true;
             }
 
@@ -276,33 +415,13 @@ public class TextInput extends LeafInstanceWidget {
                 if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
                     this.insert("\n");
                     return true;
-                }
-
-                if (keyCode == GLFW.GLFW_KEY_UP) {
-                    if (cursorLocation.row() > 0) {
-                        this.moveCursorVertically(-1);
-                    }
-
+                } else if (keyCode == GLFW.GLFW_KEY_UP) {
+                    this.moveCursorVertically(-1, modifiers.shift());
+                    return true;
+                } else if (keyCode == GLFW.GLFW_KEY_DOWN) {
+                    this.moveCursorVertically(1, modifiers.shift());
                     return true;
                 }
-
-                if (keyCode == GLFW.GLFW_KEY_DOWN) {
-                    if (cursorLocation.row() < this.wrappedLines.size() - 1) {
-                        this.moveCursorVertically(1);
-                    }
-
-                    return true;
-                }
-            }
-
-            if (keyCode == GLFW.GLFW_KEY_V && hasCtrl) {
-                var clipboard = GLFW.glfwGetClipboardString(this.host().client().getWindow().getHandle());
-
-                if (clipboard != null) {
-                    this.insert(clipboard);
-                }
-
-                return true;
             }
 
             return false;
@@ -313,57 +432,29 @@ public class TextInput extends LeafInstanceWidget {
             return CursorStyle.TEXT;
         }
 
+        private static final Duration MAX_DOUBLE_CLICK_DELAY = Duration.ofMillis(250);
+        private Instant lastClickTime = Instant.EPOCH;
+
         @Override
         public boolean onMouseDown(double x, double y, int button) {
-            //TODO: decide what to do with buttons here
-            // like, should rclick clear it or something idk
-            var renderer = this.host().client().textRenderer;
+            var clickedIdx = this.charIdxAt(x, y);
 
-            var line = this.wrappedLines.get(Math.min((int) (y / renderer.fontHeight), this.wrappedLines.size() - 1));
-            var lineText = this.text.substring(line.beginIdx, line.endIdx);
-            var clickIdx = renderer.trimToWidth(lineText, (int) x + 1).length();
+            if (Duration.between(this.lastClickTime, Instant.now()).compareTo(MAX_DOUBLE_CLICK_DELAY) < 0) {
+                var start = this.nextWordBoundary(false, OptionalInt.of(clickedIdx));
+                var end = this.nextWordBoundary(true, OptionalInt.of(clickedIdx));
 
-            this.widget.controller.setCursorPosition(line.beginIdx + clickIdx);
+                widget.controller.setSelection(new TextSelection(Math.max(0, start), end));
+            } else {
+                this.lastClickTime = Instant.now();
+                this.moveCursor(clickedIdx, Screen.hasShiftDown());
+            }
 
             return true;
-        }
-
-        protected void erase(int count) {
-            this.widget.controller.setText(
-                count >= 0
-                    ? this.text.substring(0, Math.max(0, this.cursorPosition - count))
-                    + this.text.substring(this.cursorPosition)
-                    : this.text.substring(0, this.cursorPosition)
-                    + this.text.substring(Math.min(this.cursorPosition - count, this.text.length()))
-            );
-
-            this.widget.controller.setCursorPosition(
-                this.cursorPosition - Math.max(count, 0)
-            );
-        }
-
-        protected void insert(String insertion) {
-            this.widget.controller.setText(
-                this.text.substring(0, this.cursorPosition)
-                    + insertion
-                    + this.text.substring(this.cursorPosition)
-            );
-
-            this.widget.controller.setCursorPosition(
-                this.cursorPosition + insertion.length()
-            );
         }
 
         @Override
-        public boolean onChar(int charCode, KeyModifiers modifiers) {
-            this.insert(Character.toString(charCode));
-            return true;
-        }
-
-        protected record Line(int beginIdx, int endIdx) {
-            public String substring(String fullContent) {
-                return fullContent.substring(this.beginIdx, this.endIdx);
-            }
+        public void onMouseDrag(double x, double y, double dx, double dy) {
+            this.moveCursor(this.charIdxAt(x, y), true);
         }
 
         protected interface SkipClass {
@@ -412,6 +503,6 @@ public class TextInput extends LeafInstanceWidget {
             }
         }
 
-        protected record CursorLocation(int col, int row) {}
+        protected record CursorLocation(int line, int charIdx) {}
     }
 }

@@ -11,7 +11,11 @@ import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.util.Identifier;
 
+import java.util.OptionalDouble;
+
 public class SpriteWidget extends LeafInstanceWidget {
+
+    public static final Identifier GUI_ATLAS_ID = Identifier.of("textures/atlas/gui.png");
 
     public final SpriteIdentifier spriteIdentifier;
     public final boolean blend;
@@ -28,7 +32,6 @@ public class SpriteWidget extends LeafInstanceWidget {
 
     public static class Instance extends LeafWidgetInstance<SpriteWidget> {
 
-        protected static final Identifier SPRITE_ATLAS_ID = Identifier.of("textures/atlas/gui.png");
         protected Sprite sprite;
 
         public Instance(SpriteWidget widget) {
@@ -36,8 +39,16 @@ public class SpriteWidget extends LeafInstanceWidget {
         }
 
         @Override
+        public void setWidget(SpriteWidget widget) {
+            if (this.widget.spriteIdentifier.equals(widget.spriteIdentifier)) return;
+
+            super.setWidget(widget);
+            this.markNeedsLayout();
+        }
+
+        @Override
         protected void doLayout(Constraints constraints) {
-            this.sprite = this.widget.spriteIdentifier.getAtlasId().equals(SPRITE_ATLAS_ID)
+            this.sprite = this.widget.spriteIdentifier.getAtlasId().equals(GUI_ATLAS_ID)
                 ? this.host().client().getGuiAtlasManager().getSprite(this.widget.spriteIdentifier.getTextureId())
                 : this.widget.spriteIdentifier.getSprite();
 
@@ -47,6 +58,21 @@ public class SpriteWidget extends LeafInstanceWidget {
             ).constrained(constraints);
 
             this.transform.setSize(size);
+        }
+
+        @Override
+        protected double measureIntrinsicWidth(double height) {
+            return this.sprite.getContents().getWidth();
+        }
+
+        @Override
+        protected double measureIntrinsicHeight(double width) {
+            return this.sprite.getContents().getHeight();
+        }
+
+        @Override
+        protected OptionalDouble measureBaselineOffset() {
+            return OptionalDouble.empty();
         }
 
         @Override

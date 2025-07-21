@@ -1,9 +1,12 @@
 package io.wispforest.owo.braid.framework.instance;
 
 import com.google.common.base.Preconditions;
+import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.framework.widget.InstanceWidget;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.OptionalDouble;
 
 public abstract class OptionalChildWidgetInstance<T extends InstanceWidget> extends WidgetInstance<T> {
 
@@ -37,5 +40,32 @@ public abstract class OptionalChildWidgetInstance<T extends InstanceWidget> exte
 
         this.child = this.adopt(value);
         this.markNeedsLayout();
+    }
+
+    public static abstract class ShrinkWrap<T extends InstanceWidget> extends OptionalChildWidgetInstance<T> {
+
+        public ShrinkWrap(T widget) {
+            super(widget);
+        }
+
+        @Override
+        protected void doLayout(Constraints constraints) {
+            this.sizeToChild(constraints, this.child);
+        }
+
+        @Override
+        protected double measureIntrinsicWidth(double height) {
+            return this.child != null ? this.child.measureIntrinsicWidth(height) : 0;
+        }
+
+        @Override
+        protected double measureIntrinsicHeight(double width) {
+            return this.child != null ? this.child.measureIntrinsicHeight(width) : 0;
+        }
+
+        @Override
+        protected OptionalDouble measureBaselineOffset() {
+            return this.child != null ? this.child.measureBaselineOffset() : OptionalDouble.empty();
+        }
     }
 }

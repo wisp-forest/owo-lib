@@ -10,18 +10,23 @@ public record KeyModifiers(int bitMask) {
     public boolean shift() {
         return (this.bitMask & GLFW_MOD_SHIFT) != 0;
     }
+
     public boolean ctrl() {
         return (this.bitMask & GLFW_MOD_CONTROL) != 0;
     }
+
     public boolean alt() {
         return (this.bitMask & GLFW_MOD_ALT) != 0;
     }
+
     public boolean meta() {
         return (this.bitMask & GLFW_MOD_SUPER) != 0;
     }
+
     public boolean capsLock() {
         return (this.bitMask & GLFW_MOD_CAPS_LOCK) != 0;
     }
+
     public boolean numLock() {
         return (this.bitMask & GLFW_MOD_NUM_LOCK) != 0;
     }

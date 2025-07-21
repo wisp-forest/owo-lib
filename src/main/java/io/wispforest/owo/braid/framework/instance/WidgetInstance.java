@@ -2,19 +2,19 @@ package io.wispforest.owo.braid.framework.instance;
 
 import com.google.common.base.Preconditions;
 import io.wispforest.owo.braid.core.Constraints;
+import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.core.Size;
 import io.wispforest.owo.braid.framework.widget.InstanceWidget;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
-import net.minecraft.client.gui.DrawContext;
+import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
+import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public abstract class WidgetInstance<T extends InstanceWidget> implements Comparable<WidgetInstance<?>> {
     public static final int FLAG_HIT_TEST_BOUNDARY = 0b1;
@@ -62,6 +62,28 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
 
     protected abstract void doLayout(Constraints constraints);
 
+    protected abstract double measureIntrinsicWidth(double height);
+    protected abstract double measureIntrinsicHeight(double width);
+
+    private final Object2DoubleMap<IntrinsicCacheKey> intrinsicSizeCache = new Object2DoubleOpenHashMap<>();
+
+    public double getIntrinsicWidth(double height) {
+        return this.intrinsicSizeCache.computeIfAbsent(new IntrinsicCacheKey(LayoutAxis.HORIZONTAL, height), ($) -> this.measureIntrinsicWidth(height));
+    }
+
+    public double getIntrinsicHeight(double width) {
+        return this.intrinsicSizeCache.computeIfAbsent(new IntrinsicCacheKey(LayoutAxis.VERTICAL, width), ($) -> this.measureIntrinsicHeight(width));
+    }
+
+    protected abstract OptionalDouble measureBaselineOffset();
+
+    private @Nullable OptionalDouble baselineOffsetCache;
+    public OptionalDouble getBaselineOffset() {
+        //noinspection OptionalAssignedToNull
+        if (this.baselineOffsetCache != null) return this.baselineOffsetCache;
+        return this.baselineOffsetCache = this.measureBaselineOffset();
+    }
+
     // ---
 
     public abstract void draw(OwoUIDrawContext ctx);
@@ -72,6 +94,10 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
 
     public void attachHost(InstanceHost host) {
         this.host = host;
+
+        var callback = POST_ATTACH_CALLBACKS.remove(this);
+        if (callback != null) callback.run();
+
         this.visitChildren(child -> child.attachHost(host));
     }
 
@@ -115,6 +141,8 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
 
     public void markNeedsLayout() {
         this.needsLayout = true;
+        this.intrinsicSizeCache.clear();
+        this.baselineOffsetCache = null;
 
         if (this.isRelayoutBoundary()) {
             if (this.host != null) this.host.scheduleLayout(this);
@@ -223,6 +251,13 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
 
     // ---
 
+    private static final WeakHashMap<WidgetInstance<?>, Runnable> POST_ATTACH_CALLBACKS = new WeakHashMap<>();
+    public static void addPostAttachCallback(WidgetInstance<?> instance, Runnable callback) {
+        POST_ATTACH_CALLBACKS.put(instance, callback);
+    }
+
+    // ---
+
     @Override
     public int compareTo(@NotNull WidgetInstance<?> o) {
         return Integer.compare(this.depth, o.depth);
@@ -235,6 +270,8 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
         void visit(WidgetInstance<?> child);
     }
 }
+
+record IntrinsicCacheKey(LayoutAxis axis, double crossExtent) {}
 
 //enum Visitors implements WidgetInstance.Visitor {
 //    MARK_NEEDS_LAYOUT(WidgetInstance::markNeedsLayout);

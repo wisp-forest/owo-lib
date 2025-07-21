@@ -10,6 +10,8 @@ import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.RotationAxis;
 
+import java.util.OptionalDouble;
+
 public class EntityWidget extends LeafInstanceWidget {
 
     public final double scale;
@@ -58,6 +60,21 @@ public class EntityWidget extends LeafInstanceWidget {
                     .5f / this.widget.entity.getHeight()
                 );
             }
+        }
+
+        @Override
+        protected double measureIntrinsicWidth(double height) {
+            return 32;
+        }
+
+        @Override
+        protected double measureIntrinsicHeight(double width) {
+            return 32;
+        }
+
+        @Override
+        protected OptionalDouble measureBaselineOffset() {
+            return OptionalDouble.empty();
         }
 
         @Override

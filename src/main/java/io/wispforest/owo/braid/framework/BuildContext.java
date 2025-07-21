@@ -1,5 +1,21 @@
 package io.wispforest.owo.braid.framework;
 
+import org.jetbrains.annotations.Nullable;
+
 public interface BuildContext {
-    <T> T dependOnAncestor(Class<T> ancestorClass);
+    <T> @Nullable T getAncestor(Class<T> ancestorClass, Object inheritedKey);
+
+    default <T> @Nullable T getAncestor(Class<T> ancestorClass) {
+        return this.getAncestor(ancestorClass, ancestorClass);
+    }
+
+    <T> @Nullable T dependOnAncestor(Class<T> ancestorClass, Object inheritedKey, @Nullable Object dependency);
+
+    default <T> @Nullable T dependOnAncestor(Class<T> ancestorClass, Object inheritedKey) {
+        return this.dependOnAncestor(ancestorClass, inheritedKey, null);
+    }
+
+    default <T> @Nullable T dependOnAncestor(Class<T> ancestorClass) {
+        return this.dependOnAncestor(ancestorClass, ancestorClass);
+    }
 }

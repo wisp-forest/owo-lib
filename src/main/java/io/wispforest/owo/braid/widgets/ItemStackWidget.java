@@ -13,6 +13,8 @@ import net.minecraft.client.render.item.ItemRenderState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ModelTransformationMode;
 
+import java.util.OptionalDouble;
+
 public class ItemStackWidget extends LeafInstanceWidget {
 
     public final ItemStack stack;
@@ -41,6 +43,21 @@ public class ItemStackWidget extends LeafInstanceWidget {
         protected void doLayout(Constraints constraints) {
             var size = DEFAULT_SIZE.constrained(constraints);
             this.transform.setSize(size);
+        }
+
+        @Override
+        protected double measureIntrinsicWidth(double height) {
+            return 16;
+        }
+
+        @Override
+        protected double measureIntrinsicHeight(double width) {
+            return 16;
+        }
+
+        @Override
+        protected OptionalDouble measureBaselineOffset() {
+            return OptionalDouble.empty();
         }
 
         @Override

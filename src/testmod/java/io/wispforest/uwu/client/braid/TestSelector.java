@@ -10,29 +10,39 @@ import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.EntityWidget;
 import io.wispforest.owo.braid.widgets.ItemStackWidget;
+import io.wispforest.owo.braid.widgets.SpriteWidget;
 import io.wispforest.owo.braid.widgets.basic.*;
+import io.wispforest.owo.braid.widgets.button.Button;
 import io.wispforest.owo.braid.widgets.basic.Stack;
 import io.wispforest.owo.braid.widgets.basic.action.Actions;
 import io.wispforest.owo.braid.widgets.button.MessageButton;
+import io.wispforest.owo.braid.widgets.checkbox.BraidCheckbox;
+import io.wispforest.owo.braid.widgets.checkbox.Checkbox;
+import io.wispforest.owo.braid.widgets.checkbox.RawCheckbox;
 import io.wispforest.owo.braid.widgets.button.RawButton;
 import io.wispforest.owo.braid.widgets.drag.DragArena;
 import io.wispforest.owo.braid.widgets.drag.DragArenaElement;
 import io.wispforest.owo.braid.widgets.flex.*;
+import io.wispforest.owo.braid.widgets.grid.Grid;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
 import io.wispforest.owo.braid.widgets.scroll.ScrollController;
 import io.wispforest.owo.braid.widgets.scroll.Scrollable;
 import io.wispforest.owo.braid.widgets.scroll.VerticallyScrollable;
+import io.wispforest.owo.braid.widgets.sharedstate.ShareableState;
+import io.wispforest.owo.braid.widgets.sharedstate.SharedState;
 import io.wispforest.owo.braid.widgets.slider.*;
 import io.wispforest.owo.braid.widgets.splitpane.MultiSplitPane;
+import io.wispforest.owo.braid.widgets.stack.Stack;
+import io.wispforest.owo.braid.widgets.stack.StackBase;
 import io.wispforest.owo.braid.widgets.textinput.TextBox;
 import io.wispforest.owo.braid.widgets.textinput.TextEditingController;
 import io.wispforest.owo.braid.widgets.vanilla.VanillaWidget;
 import io.wispforest.owo.braid.widgets.window.Window;
 import io.wispforest.owo.braid.widgets.window.WindowController;
+import io.wispforest.owo.ops.TextOps;
 import io.wispforest.owo.ui.component.BraidComponent;
 import io.wispforest.owo.ui.component.ButtonComponent;
-import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.EntityComponent;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.core.Color;
@@ -47,25 +57,31 @@ import net.minecraft.client.gui.widget.CheckboxWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.registry.Registries;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
+import org.lwjgl.glfw.GLFW;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
 import java.util.function.DoubleFunction;
+import java.util.stream.Stream;
 
 public class TestSelector extends StatefulWidget {
 
     public enum Tests {
-        COUNTER, FLEX, DRAGGING, SPLIT_PANE, SLIDERS, TEXT_INPUT, BURNING_CHYZ, SCROLLING, INPUT, CYCLING, VANILLA
+        COUNTER, FLEX, DRAGGING, SPLIT_PANE, SLIDERS, TEXT_INPUT, BURNING_CHYZ, SCROLLING, INPUT, CYCLING, VANILLA, SHARED_STATE, STACKS, GRIDS, CONTRIBUTORS
     }
 
     @Override
@@ -91,7 +107,7 @@ public class TestSelector extends StatefulWidget {
         @Override
         public Widget build(BuildContext context) {
             //TODO read that vvvv
-            System.out.println("This is a reminder to decide how to handle mouse buttons in, buttons, sliders, text inputs, windows etc");
+            System.out.println("reminder to decide how to handle mouse buttons in, buttons, sliders, text inputs, windows etc");
             return new Stack(
                 Alignment.CENTER,
                 new Center(
@@ -107,6 +123,10 @@ public class TestSelector extends StatefulWidget {
                         case INPUT -> new InputTest();
                         case CYCLING -> new CyclingTest();
                         case VANILLA -> new VanillaTest();
+                        case SHARED_STATE -> new SharedStateTest();
+                        case STACKS -> new StacksTest();
+                        case GRIDS -> new GridsTest();
+                        case CONTRIBUTORS -> new ContributorsTest();
                         case null -> new Center(new Label(Text.literal("select a test")));
                     }
                 ),
@@ -119,9 +139,7 @@ public class TestSelector extends StatefulWidget {
                                 OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
                                 new Padding(
                                     Insets.all(8),
-                                    new Sized(
-                                        65.0,
-                                        null,
+                                    new IntrinsicWidth(
                                         new Column(
                                             new Padding(Insets.all(2)),
                                             Arrays.stream(Tests.values()).map(test -> {
@@ -144,7 +162,6 @@ public class TestSelector extends StatefulWidget {
             );
         }
     }
-
 
     public static class Counter extends StatefulWidget {
         @Override
@@ -397,49 +414,23 @@ public class TestSelector extends StatefulWidget {
                     new Transform(
                         new Matrix4f().m01((float) Math.tan(this.xSkew)).m10((float) Math.tan(this.ySkew)),
                         !this.redundant
-                            ? new Column(
-                            MainAxisAlignment.START,
-                            CrossAxisAlignment.CENTER,
-                            new Padding(Insets.all(10)),
-                            List.of(
-                                new Row(
-                                    MainAxisAlignment.START,
-                                    CrossAxisAlignment.CENTER,
-                                    new Label(Text.literal("Discrete")),
-                                    new Padding(Insets.all(10)),
-                                    new Label(Text.literal("Smooth"))
-                                ),
-                                new Row(
-                                    MainAxisAlignment.START,
-                                    CrossAxisAlignment.CENTER,
-                                    new Padding(Insets.all(10)),
-                                    List.of(
-                                        new Label(Text.literal("Basic")),
-                                        new CoolSlider(2.0, value -> Text.literal("v: " + formatDouble(value))),
-                                        new CoolSlider(null, value -> Text.literal("v: " + formatDouble(value)))
-                                    )
-                                ),
-                                new Row(
-                                    MainAxisAlignment.START,
-                                    CrossAxisAlignment.CENTER,
-                                    new Padding(Insets.all(10)),
-                                    List.of(
-                                        new Label(Text.literal("XY")),
-                                        new CoolXlyder(2.0, 2.0, (x, y) -> Text.literal("x: " + formatDouble(x) + "\ny: " + formatDouble(y))),
-                                        new CoolXlyder(null, null, (x, y) -> Text.literal("x: " + formatDouble(x) + "\ny: " + formatDouble(y)))
-                                    )
-                                ),
-                                new Row(
-                                    MainAxisAlignment.START,
-                                    CrossAxisAlignment.CENTER,
-                                    new Padding(Insets.all(10)),
-                                    List.of(
-                                        new Label(Text.literal("Range")),
-                                        new CoolRangeSlider(2.0, (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max))),
-                                        new CoolRangeSlider(null, (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max)))
-                                    )
-                                )
-                            )
+                            ? new Grid(
+                            LayoutAxis.VERTICAL,
+                            3,
+                            Grid.CellFit.tight(),
+                            widget -> new Padding(Insets.all(5), widget),
+                            new Padding(Insets.none()),
+                            new Label(Text.literal("Discrete")),
+                            new Label(Text.literal("Smooth")),
+                            new Label(Text.literal("Basic")),
+                            new CoolSlider(2.0, value -> Text.literal("v: " + formatDouble(value))),
+                            new CoolSlider(null, value -> Text.literal("v: " + formatDouble(value))),
+                            new Label(Text.literal("XY")),
+                            new CoolXlyder(2.0, 2.0, (x, y) -> Text.literal("x: " + formatDouble(x) + "\ny: " + formatDouble(y))),
+                            new CoolXlyder(null, null, (x, y) -> Text.literal("x: " + formatDouble(x) + "\ny: " + formatDouble(y))),
+                            new Label(Text.literal("Range")),
+                            new CoolRangeSlider(2.0, (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max))),
+                            new CoolRangeSlider(null, (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max)))
                         )
                             : new IncrediblyRedundantSlider()
                     ),
@@ -618,37 +609,145 @@ public class TestSelector extends StatefulWidget {
 
             @Override
             public Widget build(BuildContext context) {
-                return new Column(
-                    MainAxisAlignment.START,
+                return new Row(
+                    MainAxisAlignment.CENTER,
                     CrossAxisAlignment.CENTER,
-                    new Sized(
-                        100.0,
-                        50.0,
-                        new TextBox(
-                            this.controller1,
-                            true,
-                            true
-                        )
-                    ),
-                    new Sized(
-                        100.0,
-                        50.0,
-                        new TextBox(
-                            this.controller2,
-                            true,
-                            false
-                        )
-                    ),
-                    new Sized(
-                        100.0,
-                        20.0,
-                        new TextBox(
-                            this.controller3,
-                            false,
-                            false
-                        )
+                    new Padding(Insets.horizontal(10)),
+                    List.of(
+                        new Column(
+                            MainAxisAlignment.START,
+                            CrossAxisAlignment.CENTER,
+                            new Sized(
+                                100.0,
+                                50.0,
+                                new TextBox(
+                                    this.controller1,
+                                    true,
+                                    false,
+                                    true,
+                                    Style.EMPTY
+                                )
+                            ),
+                            new Sized(
+                                100.0,
+                                50.0,
+                                new TextBox(
+                                    this.controller2,
+                                    false,
+                                    true,
+                                    true,
+                                    Style.EMPTY
+                                )
+                            ),
+                            new Sized(
+                                100.0,
+                                20.0,
+                                new TextBox(
+                                    this.controller3,
+                                    false,
+                                    false,
+                                    false,
+                                    Style.EMPTY
+                                )
+                            )
+                        ),
+                        new ToggleFest()
                     )
                 );
+            }
+        }
+
+        public static class ToggleFest extends StatefulWidget {
+            @Override
+            public WidgetState<ToggleFest> createState() {
+                return new State();
+            }
+
+            public static class State extends WidgetState<ToggleFest> {
+
+                private final Entity chyz = EntityComponent.createRenderablePlayer(new GameProfile(
+                    UUID.fromString("09de8a6d-86bf-4c15-bb93-ce3384ce4e96"),
+                    "chyzman"
+                ));
+
+                private boolean checked = false;
+
+                @Override
+                public Widget build(BuildContext context) {
+                    return new Column(
+                        MainAxisAlignment.CENTER,
+                        CrossAxisAlignment.START,
+                        new Padding(Insets.vertical(5)),
+                        List.of(
+                            new LabelBox(
+                                new RawCheckbox(
+                                    this.checked,
+                                    this::onUpdate,
+                                    new Sized(
+                                        20,
+                                        20,
+                                        new EntityWidget(1.5d, false, true, false, this.chyz)
+                                    ),
+                                    new Padding(Insets.none())
+                                ),
+                                "chyzbox"
+                            ),
+                            new LabelBox(
+                                new RawCheckbox(
+                                    this.checked,
+                                    this::onUpdate,
+                                    new SpriteWidget(Checkbox.TEXTURE, false),
+                                    new SpriteWidget(new SpriteIdentifier(SpriteWidget.GUI_ATLAS_ID, Identifier.of("uwu", "czechbox")), false)
+                                ),
+                                this.checked ? "czechbox" : "checkbox"
+                            ),
+                            new LabelBox(
+                                new Checkbox(this.checked, this::onUpdate),
+                                "checkbox"
+                            ),
+                            new LabelBox(
+                                new BraidCheckbox(this.checked, this::onUpdate),
+                                "smolbox"
+                            )
+                        )
+                    );
+                }
+
+                private void onUpdate(Boolean newState) {
+                    this.setState(() -> {
+                        this.checked = newState;
+                        this.chyz.setOnFire(this.checked);
+                    });
+                }
+            }
+
+            public static class LabelBox extends StatelessWidget {
+                public final Widget widget;
+                public final String label;
+
+                public LabelBox(Widget widget, String label) {
+                    this.widget = widget;
+                    this.label = label;
+                }
+
+                @Override
+                public Widget build(BuildContext context) {
+                    return new Row(
+                        MainAxisAlignment.START,
+                        CrossAxisAlignment.CENTER,
+                        new Padding(Insets.horizontal(4)),
+                        List.of(
+                            new Sized(
+                                20,
+                                20,
+                                new Center(
+                                    this.widget
+                                )
+                            ),
+                            new Label(Text.literal(this.label))
+                        )
+                    );
+                }
             }
         }
     }
@@ -975,7 +1074,7 @@ public class TestSelector extends StatefulWidget {
         public static class State extends WidgetState<InputTest> {
             private final List<Text> inputs = Util.make(() -> {
                 var list = new ArrayList<Text>();
-                list.add(Text.literal("Help idk how to make this scroll to the bottom when i add shit"));
+                list.add(Text.literal("Help idk how to make this scroll to the bottom when i add shit (everyone laugh at this user)"));
                 return list;
             });
             private final ScrollController controller = new ScrollController();
@@ -1030,7 +1129,9 @@ public class TestSelector extends StatefulWidget {
             private boolean addToList(Text text) {
                 this.setState(() -> {
                     this.inputs.add(text);
-                    this.controller.setOffset(this.controller.maxOffset());
+                    this.schedulePostLayoutCallback(() -> {
+                        this.controller.setOffset(this.controller.maxOffset());
+                    });
                 });
                 return false; // return false to allow other shit to happen:tm:
             }
@@ -1247,6 +1348,378 @@ public class TestSelector extends StatefulWidget {
                         )
                     )
                 );
+            }
+        }
+    }
+
+    public static class SharedStateTest extends StatefulWidget {
+        @Override
+        public WidgetState<SharedStateTest> createState() {
+            return new State();
+        }
+
+        public static class State extends WidgetState<SharedStateTest> {
+            @Override
+            public Widget build(BuildContext context) {
+                return new Sized(
+                    400,
+                    250,
+                    new Column(
+                        new Flexible(new TheTest(false)),
+                        new Flexible(new TheTest(true))
+                    )
+                );
+            }
+
+            public static class TheTest extends StatelessWidget {
+
+                public final boolean nest;
+                public TheTest(boolean nest) {
+                    this.nest = nest;
+                }
+
+                @Override
+                public Widget build(BuildContext context) {
+                    return new SharedState<>(
+                        CounterState::new,
+                        new Row(
+                            new Flexible(new LeftBody()),
+                            new Flexible(new Center(new RightBody())),
+                            this.nest ? new Flexible(2, new TheTest(false)) : new Padding(Insets.none())
+                        )
+                    );
+                }
+            }
+
+            public static class LeftBody extends StatelessWidget {
+                @Override
+                public Widget build(BuildContext context) {
+                    System.out.println("panel rebuild");
+                    return new Panel(
+                        SharedState.select(context, CounterState.class, state -> state.dark)
+                            ? OwoUIDrawContext.DARK_PANEL_NINE_PATCH_TEXTURE
+                            : OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
+                        new CounterText()
+                    );
+                }
+            }
+
+            public static class RightBody extends StatelessWidget {
+                @Override
+                public Widget build(BuildContext context) {
+                    return new IntrinsicWidth(
+                        new Column(
+                            new Button(
+                                () -> {
+                                    SharedState.set(context, CounterState.class, state -> state.count += 1);
+                                    return true;
+                                },
+                                new Label(Text.literal("increment"))
+                            ),
+                            new Button(
+                                () -> {
+                                    SharedState.set(context, CounterState.class, state -> state.dark = !state.dark);
+                                    return true;
+                                },
+                                new Label(Text.literal("toggle darkness"))
+                            )
+                        )
+                    );
+                }
+            }
+
+            public static class CounterText extends StatelessWidget {
+                @Override
+                public Widget build(BuildContext context) {
+                    System.out.println("text rebuild");
+                    return new Label(Text.literal("current state: " + SharedState.select(context, CounterState.class, state -> state.count)));
+                }
+            }
+        }
+
+        public static class CounterState extends ShareableState {
+            public int count = 0;
+            public boolean dark = false;
+        }
+    }
+
+    public static class StacksTest extends StatelessWidget {
+        @Override
+        public Widget build(BuildContext context) {
+            return new Center(
+                new Row(
+                    new Stack(
+                        new Panel(OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE),
+                        new StackBase(new Sized(100, 100, new Padding(Insets.none()))),
+                        new Label(new LabelStyle(Alignment.BOTTOM_RIGHT, null, null, null), true, Text.literal("based corner text"))
+                    ),
+                    new Padding(Insets.horizontal(20)),
+                    new Stack(
+                        new Sized(100, 100, new Panel(OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE)),
+                        new Label(new LabelStyle(Alignment.BOTTOM_RIGHT, null, null, null), true, Text.literal("failed corner text"))
+                    ),
+                    new Padding(Insets.horizontal(20)),
+                    new IntrinsicWidth(
+                        new IntrinsicHeight(
+                            new Stack(
+                                new Sized(100, 100, new Panel(OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE)),
+                                new Label(new LabelStyle(Alignment.BOTTOM_RIGHT, null, null, null), true, Text.literal("intrinsic corner text"))
+                            )
+                        )
+                    )
+                )
+            );
+        }
+    }
+
+    public static class GridsTest extends StatelessWidget {
+        @Override
+        public Widget build(BuildContext context) {
+            var random = new java.util.Random(0);
+
+            return new Center(
+                new Grid(
+                    LayoutAxis.VERTICAL,
+                    2,
+                    Grid.CellFit.loose(),
+                    widget -> new Padding(Insets.all(10), widget),
+                    new Sized(
+                        90,
+                        null,
+                        new Grid(
+                            LayoutAxis.VERTICAL,
+                            3,
+                            Grid.CellFit.loose(Alignment.BOTTOM_RIGHT),
+                            new Sized(random.nextInt(15, 31), random.nextInt(15, 31), new Box(nextColor(random))),
+                            new Sized(random.nextInt(15, 31), random.nextInt(15, 31), new Box(nextColor(random))),
+                            new Sized(random.nextInt(15, 31), random.nextInt(15, 31), new Box(nextColor(random))),
+                            new Sized(random.nextInt(15, 31), random.nextInt(15, 31), new Box(nextColor(random))),
+                            new Sized(random.nextInt(15, 31), random.nextInt(15, 31), new Box(nextColor(random)))
+                        )
+                    ),
+                    new IntrinsicWidth(
+                        new Column(
+                            MainAxisAlignment.CENTER,
+                            CrossAxisAlignment.CENTER,
+                            new Grid(
+                                LayoutAxis.VERTICAL,
+                                2,
+                                Grid.CellFit.loose(),
+                                new Sized(20, 40, new Box(Color.WHITE)),
+                                new Sized(20, 20, new Box(Color.WHITE)),
+                                new Sized(20, 20, new Box(Color.WHITE)),
+                                new Sized(60, 40, new Box(Color.WHITE))
+                            ),
+                            new Button(() -> true, new Label(Text.literal("a")))
+                        )
+                    ),
+                    new IntrinsicWidth(
+                        new Column(
+                            MainAxisAlignment.CENTER,
+                            CrossAxisAlignment.CENTER,
+                            new Grid(
+                                LayoutAxis.VERTICAL,
+                                2,
+                                Grid.CellFit.loose(),
+                                new Sized(40, 40, new Box(Color.WHITE)),
+                                new Sized(20, 20, new Box(Color.WHITE)),
+                                new Sized(20, 20, new Box(Color.WHITE)),
+                                new Sized(40, 40, new Box(Color.WHITE))
+                            ),
+                            new Button(() -> true, new Label(Text.literal("a")))
+                        )
+                    )
+                )
+            );
+        }
+
+        private static Color nextColor(java.util.Random random) {
+            return Color.ofHsv(random.nextFloat(), .75f, 1f);
+        }
+    }
+
+    public static class ContributorsTest extends StatefulWidget {
+        @Override
+        public WidgetState<ContributorsTest> createState() {
+            return new State();
+        }
+
+        public static class State extends WidgetState<ContributorsTest> {
+
+            private List<Contributor> contributors = this.genContributors();
+
+            private List<Contributor> genContributors() {
+                return List.of(
+                    new Contributor(UUID.fromString("b6c2d403-bf7c-4e19-b7a2-f64c9e44e56a"), "glisco", Text.translatable("text.uwu.glisco")),
+                    new Contributor(UUID.fromString("09de8a6d-86bf-4c15-bb93-ce3384ce4e96"), "chyzman", Text.translatable("text.uwu.chyz")),
+                    new Contributor(UUID.fromString("517253c6-5ae6-4a70-8e8f-b8515321f774"), "Dragon_Seeker", TextOps.withColor("blodhgarm", 0xae0000)),
+                    new Contributor(UUID.fromString("63db48b4-723a-4323-8d67-45679507fd82"), "GreatGrayOwl", TextOps.withColor("skibediah fœtus", 0x9b57d0)),
+                    new Contributor(UUID.fromString("91a033f7-1dd3-4858-9c7b-8fb61ba6363d"), "Noaaan", Text.literal("no" + "a".repeat((int) (1 + Math.random() * 7)) + "n"))
+                );
+            }
+
+            @Override
+            public Widget build(BuildContext context) {
+                return new Grid(
+                    LayoutAxis.VERTICAL,
+                    3,
+                    Grid.CellFit.loose(),
+                    Stream.concat(
+                            this.contributors.stream()
+                                .map(contributor -> {
+                                    return new Padding(
+                                        Insets.all(8),
+                                        new Panel(
+                                            OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
+                                            new Padding(
+                                                Insets.all(8),
+                                                new Column(
+                                                    MainAxisAlignment.CENTER,
+                                                    CrossAxisAlignment.CENTER,
+                                                    new Padding(Insets.top(4)),
+                                                    List.of(
+                                                        new FirePlayer(new GameProfile(contributor.uuid, contributor.name)),
+                                                        new Label(LabelStyle.SHADOW, true, contributor.displayName),
+                                                        new RatingBar()
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    );
+                                }),
+                            Stream.of(
+                                new Sized(
+                                    20,
+                                    20,
+                                    new Button(
+                                        () -> {
+                                            setState(() -> this.contributors = this.genContributors());
+                                            return true;
+                                        },
+                                        new Label(LabelStyle.SHADOW, true, Text.literal("☠"))
+                                    )
+                                )
+                            )
+                        )
+                        .toList()
+                );
+            }
+
+            public record Contributor(UUID uuid, String name, Text displayName) {}
+
+            public static class FirePlayer extends StatefulWidget {
+
+                public final GameProfile profile;
+                public FirePlayer(GameProfile profile) {this.profile = profile;}
+
+                @Override
+                public WidgetState<FirePlayer> createState() {
+                    return new FirePlayerState();
+                }
+
+                public static class FirePlayerState extends WidgetState<FirePlayer> {
+
+                    private LivingEntity displayEntity;
+
+                    private boolean dead = false;
+
+                    @Override
+                    public void init() {
+                        this.displayEntity = EntityComponent.createRenderablePlayer(this.widget().profile);
+                    }
+
+                    @Override
+                    public Widget build(BuildContext context) {
+                        return new MouseArea(
+                            widget -> widget
+                                .clickCallback((x, y, button) -> {
+                                    this.setState(() -> {
+                                        this.dead = true;
+                                    });
+
+                                    this.displayEntity.setOnFire(false);
+                                    this.displayEntity.setHealth(0f);
+                                    this.displayEntity.deathTime = 20;
+
+                                    MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.ENTITY_PLAYER_DEATH, 1));
+                                })
+                                .enterCallback(!this.dead ? () -> this.displayEntity.setOnFire(true) : null)
+                                .exitCallback(!this.dead ? () -> this.displayEntity.setOnFire(false) : null)
+                                .cursorStyle(!this.dead ? CursorStyle.CROSSHAIR : null),
+                            new Panel(
+                                Identifier.of("uwu", "contributors_panel"),
+                                new Padding(
+                                    Insets.bottom(8),
+                                    new Sized(
+                                        96,
+                                        96,
+                                        new EntityWidget(1.35, false, true, false, this.displayEntity)
+                                    )
+                                )
+                            )
+                        );
+                    }
+                }
+            }
+
+            public static class RatingBar extends StatefulWidget {
+                @Override
+                public WidgetState<RatingBar> createState() {
+                    return new RatingBarState();
+                }
+
+                public static class RatingBarState extends WidgetState<RatingBar> {
+
+                    private int selectedStarCount = 0;
+                    private int hoverStarCount = 0;
+
+                    @Override
+                    public Widget build(BuildContext context) {
+                        return new MouseArea(
+                            widget -> widget
+                                .exitCallback(() -> setState(() -> this.hoverStarCount = 0))
+                                .cursorStyle(CursorStyle.HAND),
+                            new Row(
+                                this.star(0),
+                                this.star(1),
+                                this.star(2),
+                                this.star(3),
+                                this.star(4)
+                            )
+                        );
+                    }
+
+                    private Widget star(int idx) {
+                        return new MouseArea(
+                            widget -> widget
+                                .clickCallback((x, y, button) -> {
+                                    if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+                                        setState(() -> this.selectedStarCount = idx + 1);
+                                    } else if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
+                                        setState(() -> this.selectedStarCount = 0);
+                                    }
+                                })
+                                .enterCallback(() -> setState(() -> this.hoverStarCount = idx + 1)),
+                            new Stack(
+                                new SpriteWidget(
+                                    new SpriteIdentifier(
+                                        Identifier.of("textures/atlas/gui.png"),
+                                        Identifier.of("uwu", (idx + 1) <= this.selectedStarCount ? "favorite_icon_selected" : "favorite_icon")
+                                    ),
+                                    false
+                                ),
+                                (idx + 1) <= this.hoverStarCount
+                                    ? new SpriteWidget(
+                                    new SpriteIdentifier(
+                                        Identifier.of("textures/atlas/gui.png"),
+                                        Identifier.of("uwu", "favorite_icon_hover")
+                                    ),
+                                    true
+                                ) : new Padding(Insets.none())
+                            )
+                        );
+                    }
+                }
             }
         }
     }

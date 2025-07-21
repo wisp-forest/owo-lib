@@ -189,15 +189,10 @@ public class MouseArea extends SingleChildInstanceWidget {
         @Nullable CursorStyle getCursorStyle(double x, double y);
     }
 
-    public static class Instance extends SingleChildWidgetInstance<MouseArea> implements MouseListener {
+    public static class Instance extends SingleChildWidgetInstance.ShrinkWrap<MouseArea> implements MouseListener {
 
         public Instance(MouseArea widget) {
             super(widget);
-        }
-
-        @Override
-        protected void doLayout(Constraints constraints) {
-            this.sizeToChild(constraints, this.child);
         }
 
         @Override

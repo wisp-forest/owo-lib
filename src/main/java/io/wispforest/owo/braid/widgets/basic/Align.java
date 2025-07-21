@@ -67,10 +67,25 @@ public class Align extends SingleChildInstanceWidget {
 
             var childX = alignment.alignHorizontal(selfSize.width(), childSize.width());
             var childY = alignment.alignVertical(selfSize.height(), childSize.height());
-            child.transform.setX(childX);
-            child.transform.setY(childY);
+            this.child.transform.setX(childX);
+            this.child.transform.setY(childY);
 
-            transform.setSize(selfSize);
+            this.transform.setSize(selfSize);
+        }
+
+        @Override
+        protected double measureIntrinsicWidth(double height) {
+            return this.child.getIntrinsicWidth(height) * (this.widget.widthFactor.orElse(1));
+        }
+
+        @Override
+        protected double measureIntrinsicHeight(double width) {
+            return this.child.getIntrinsicHeight(width) * (this.widget.heightFactor.orElse(1));
+        }
+
+        @Override
+        protected OptionalDouble measureBaselineOffset() {
+            return this.child.getBaselineOffset().stream().map(operand -> operand + this.child.transform.y()).findAny();
         }
     }
 }

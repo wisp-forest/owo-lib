@@ -1,8 +1,11 @@
 package io.wispforest.owo.braid.framework.instance;
 
 import com.google.common.base.Preconditions;
+import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.framework.widget.InstanceWidget;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
+
+import java.util.OptionalDouble;
 
 public abstract class SingleChildWidgetInstance<T extends InstanceWidget> extends WidgetInstance<T> {
 
@@ -32,5 +35,32 @@ public abstract class SingleChildWidgetInstance<T extends InstanceWidget> extend
 
         this.child = this.adopt(value);
         this.markNeedsLayout();
+    }
+
+    public static abstract class ShrinkWrap<T extends InstanceWidget> extends SingleChildWidgetInstance<T> {
+
+        public ShrinkWrap(T widget) {
+            super(widget);
+        }
+
+        @Override
+        protected void doLayout(Constraints constraints) {
+            this.sizeToChild(constraints, this.child);
+        }
+
+        @Override
+        protected double measureIntrinsicWidth(double height) {
+            return this.child.getIntrinsicWidth(height);
+        }
+
+        @Override
+        protected double measureIntrinsicHeight(double width) {
+            return this.child.getIntrinsicHeight(width);
+        }
+
+        @Override
+        protected OptionalDouble measureBaselineOffset() {
+            return this.child.getBaselineOffset();
+        }
     }
 }

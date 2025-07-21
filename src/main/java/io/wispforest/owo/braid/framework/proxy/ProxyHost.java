@@ -14,6 +14,8 @@ public interface ProxyHost {
 
     void cancelDelayedCallback(long id);
 
+    void schedulePostLayoutCallback(Runnable callback);
+
     interface AnimationCallback {
         void run(float delta);
     }
