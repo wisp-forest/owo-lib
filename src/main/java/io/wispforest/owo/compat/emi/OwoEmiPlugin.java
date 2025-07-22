@@ -8,6 +8,7 @@ import dev.emi.emi.api.stack.EmiStackInteraction;
 import dev.emi.emi.api.widget.Bounds;
 import io.wispforest.owo.braid.core.BraidScreen;
 import io.wispforest.owo.braid.framework.instance.WidgetInstance;
+import io.wispforest.owo.braid.widgets.recipeviewer.RecipeViewerExclusionZone;
 import io.wispforest.owo.braid.widgets.recipeviewer.RecipeViewerStack;
 import io.wispforest.owo.braid.widgets.recipeviewer.StackDropArea;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
@@ -49,6 +50,25 @@ public class OwoEmiPlugin implements EmiPlugin {
             owoHandledScreen.componentsForExclusionAreas()
                 .map(component -> new Bounds(component.x(), component.y(), component.width(), component.height()))
                 .forEach(consumer);
+        });
+
+        registry.addGenericExclusionArea((screen, consumer) -> {
+            if (!(screen instanceof BraidScreen braid)) return;
+
+            var visitor = new WidgetInstance.Visitor() {
+                @Override
+                public void visit(WidgetInstance<?> child) {
+                    if (child instanceof RecipeViewerExclusionZone.Instance area) {
+                        var bounds = area.computeGlobalBounds();
+
+                        consumer.accept(new Bounds((int) bounds.minX, (int) bounds.minY, (int) (bounds.maxX - bounds.minX), (int) (bounds.maxY - bounds.minY)));
+                    }
+
+                    child.visitChildren(this);
+                }
+            };
+
+            braid.state().rootInstance().visitChildren(visitor);
         });
 
         registry.addGenericStackProvider((screen, x, y) -> {

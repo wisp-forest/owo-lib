@@ -27,6 +27,7 @@ import io.wispforest.owo.braid.widgets.flex.*;
 import io.wispforest.owo.braid.widgets.grid.Grid;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
+import io.wispforest.owo.braid.widgets.recipeviewer.RecipeViewerExclusionZone;
 import io.wispforest.owo.braid.widgets.recipeviewer.RecipeViewerStack;
 import io.wispforest.owo.braid.widgets.recipeviewer.StackDropArea;
 import io.wispforest.owo.braid.widgets.scroll.ScrollController;
@@ -877,12 +878,14 @@ public class TestSelector extends StatefulWidget {
                                 new StackDropArea(
                                     stack -> stack instanceof ViewerStack.OfItem,
                                     stack -> System.out.println("chyz: mmm i ate a " + ((ViewerStack.OfItem) stack).asStack()),
-                                    new EntityWidget(
-                                        1,
-                                        false,
-                                        true,
-                                        true,
-                                        this.chyz
+                                    new RecipeViewerExclusionZone(
+                                        new EntityWidget(
+                                            1,
+                                            false,
+                                            true,
+                                            true,
+                                            this.chyz
+                                        )
                                     )
                                 )
                             )

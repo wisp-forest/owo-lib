@@ -5,6 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import dev.architectury.event.CompoundEventResult;
 import io.wispforest.owo.braid.core.BraidScreen;
 import io.wispforest.owo.braid.framework.instance.WidgetInstance;
+import io.wispforest.owo.braid.widgets.recipeviewer.RecipeViewerExclusionZone;
 import io.wispforest.owo.braid.widgets.recipeviewer.RecipeViewerStack;
 import io.wispforest.owo.braid.widgets.recipeviewer.StackDropArea;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
@@ -68,6 +69,27 @@ public class OwoReiPlugin implements REIClientPlugin {
             return ((BaseOwoHandledScreen<?, ?>) screen).componentsForExclusionAreas()
                     .map(rect -> new Rectangle(rect.x(), rect.y(), rect.width(), rect.height()))
                     .toList();
+        });
+
+        zones.register(BraidScreen.class, screen -> {
+            List<Rectangle> rectangles = new ArrayList<>();
+
+            var visitor = new WidgetInstance.Visitor() {
+                @Override
+                public void visit(WidgetInstance<?> child) {
+                    if (child instanceof RecipeViewerExclusionZone.Instance area) {
+                        var bounds = area.computeGlobalBounds();
+
+                        rectangles.add(new Rectangle(bounds.minX, bounds.minY, bounds.maxX - bounds.minX, bounds.maxY - bounds.minY));
+                    }
+
+                    child.visitChildren(this);
+                }
+            };
+
+            screen.state().rootInstance().visitChildren(visitor);
+
+            return rectangles;
         });
     }
 
