@@ -16,6 +16,12 @@ public interface ClientRenderCallback {
         }
     });
 
+    Event<ClientRenderCallback> BEFORE_SWAP = EventFactory.createArrayBacked(ClientRenderCallback.class, callbacks -> (client) -> {
+        for (var callback : callbacks) {
+            callback.onRender(client);
+        }
+    });
+
     /**
      * Called just after the client has finished rendering and drawing the
      * current frame and swapped buffers

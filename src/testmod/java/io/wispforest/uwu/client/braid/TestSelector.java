@@ -73,6 +73,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
 import java.util.function.DoubleFunction;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class TestSelector extends StatefulWidget {
@@ -105,6 +106,33 @@ public class TestSelector extends StatefulWidget {
         public Widget build(BuildContext context) {
             //TODO read that vvvv
             System.out.println("reminder to decide how to handle mouse buttons in, buttons, sliders, text inputs, windows etc");
+
+            var buttons = Arrays.stream(Tests.values()).map(test -> {
+                if (test == Tests.BURNING_CHYZ) {
+                    return new BurningChyzButton(this.chyz, () -> setState(() -> this.test = Tests.BURNING_CHYZ));
+                } else {
+                    return (Widget) new MessageButton(
+                        Text.literal(test.name().toLowerCase(Locale.ROOT).replace('_', ' ')),
+                        test != this.test ? () -> setState(() -> this.test = test) : null
+                    );
+                }
+            }).collect(Collectors.toList());
+
+            buttons.add(
+                new MessageButton(
+                    Text.literal("window"),
+                    () -> BraidWindow.open(
+                        "window moment??",
+                        1200,
+                        800,
+                        new Box(
+                            Color.ofRgb(0x1d2026),
+                            new TestSelector()
+                        )
+                    )
+                )
+            );
+
             return new Stack(
                 Alignment.CENTER,
                 new Center(
@@ -139,16 +167,7 @@ public class TestSelector extends StatefulWidget {
                                     new IntrinsicWidth(
                                         new Column(
                                             new Padding(Insets.all(2)),
-                                            Arrays.stream(Tests.values()).map(test -> {
-                                                if (test == Tests.BURNING_CHYZ) {
-                                                    return new BurningChyzButton(this.chyz, () -> setState(() -> this.test = Tests.BURNING_CHYZ));
-                                                } else {
-                                                    return new MessageButton(
-                                                        Text.literal(test.name().toLowerCase(Locale.ROOT).replace('_', ' ')),
-                                                        test != this.test ? () -> setState(() -> this.test = test) : null
-                                                    );
-                                                }
-                                            }).toList()
+                                            buttons
                                         )
                                     )
                                 )

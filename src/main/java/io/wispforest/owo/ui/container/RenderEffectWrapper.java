@@ -8,6 +8,7 @@ import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
 import io.wispforest.owo.ui.util.ScissorStack;
+import io.wispforest.owo.util.FramebufferOverride;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.gl.ShaderProgramKeys;
@@ -19,7 +20,6 @@ import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.RotationAxis;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL30;
 
@@ -41,8 +41,6 @@ import java.util.function.Consumer;
  */
 @ApiStatus.Experimental
 public class RenderEffectWrapper<C extends Component> extends WrappingParentComponent<C> {
-
-    private static @Nullable Framebuffer currentFramebuffer = null;
 
     protected static final List<Framebuffer> FRAMEBUFFERS = new ArrayList<>();
     protected static int drawDepth = 0;
@@ -73,14 +71,13 @@ public class RenderEffectWrapper<C extends Component> extends WrappingParentComp
             ScissorStack.drawUnclipped(framebuffer::clear);
             framebuffer.beginWrite(false);
 
-            var lastFramebuffer = currentFramebuffer;
-            currentFramebuffer = framebuffer;
+            FramebufferOverride.push(framebuffer);
 
             this.drawChildren(context, mouseX, mouseY, partialTicks, delta, this.childView);
             context.draw();
 
             GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, previousFramebuffer);
-            currentFramebuffer = lastFramebuffer;
+            FramebufferOverride.pop();
 
             var iter = this.effects.listIterator();
             while (iter.hasNext()) {
@@ -128,11 +125,6 @@ public class RenderEffectWrapper<C extends Component> extends WrappingParentComp
      */
     public void clearEffects() {
         this.effects.clear();
-    }
-
-    @ApiStatus.Internal
-    public static @Nullable Framebuffer currentFramebuffer() {
-        return currentFramebuffer;
     }
 
     static {

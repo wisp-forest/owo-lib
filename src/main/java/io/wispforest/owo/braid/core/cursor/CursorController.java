@@ -17,6 +17,10 @@ public class CursorController {
         this.windowHandle = windowHandle;
     }
 
+    public CursorStyle currentStyle() {
+        return this.lastCursorStyle;
+    }
+
     public void setStyle(CursorStyle style) {
         if (this.disposed || this.lastCursorStyle == style) return;
 
