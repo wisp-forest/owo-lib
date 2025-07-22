@@ -8,7 +8,7 @@ public final class StackTraceSupplier implements Supplier<String> {
     private final Throwable throwable;
     private final @Nullable Supplier<String> message;
 
-    private StackTraceSupplier(@Nullable Throwable throwable, @Nullable Supplier<String> message) {
+    private StackTraceSupplier(Throwable throwable, @Nullable Supplier<String> message) {
         this.throwable = throwable;
         this.message = message;
     }
@@ -22,7 +22,10 @@ public final class StackTraceSupplier implements Supplier<String> {
     }
 
     public static StackTraceSupplier of(String message) {
-        return new StackTraceSupplier(new IllegalStateException(message), null);
+        var error = new IllegalStateException(message)
+            .initCause(null);
+
+        return new StackTraceSupplier(error, null);
     }
 
     @Override
@@ -34,6 +37,9 @@ public final class StackTraceSupplier implements Supplier<String> {
         var innerThrowable = throwable();
         while (innerThrowable.getCause() != null) {
             innerThrowable = throwable().getCause();
+
+            // Prevent possible infinite loops where the cause is itself the cause as it is not setup or chain of exceptions
+            if (innerThrowable == throwable()) break;
         }
         return innerThrowable.getStackTrace();
     }
