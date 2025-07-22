@@ -2,6 +2,7 @@ package io.wispforest.owo.braid.framework.proxy;
 
 import com.google.common.base.Preconditions;
 import io.wispforest.owo.braid.framework.BuildContext;
+import io.wispforest.owo.braid.framework.instance.WidgetInstance;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
@@ -168,6 +169,11 @@ public abstract sealed class WidgetProxy implements BuildContext, Comparable<Wid
     // ---
 
     public abstract void visitChildren(Visitor visitor);
+
+    @Override
+    public abstract @Nullable WidgetInstance<?> instance();
+
+    public abstract void notifyDescendantInstance(@Nullable WidgetInstance<?> instance, @Nullable Object slot);
 
     // ---
 

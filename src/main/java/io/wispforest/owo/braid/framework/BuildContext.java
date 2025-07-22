@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.framework;
 
+import io.wispforest.owo.braid.framework.instance.WidgetInstance;
 import org.jetbrains.annotations.Nullable;
 
 public interface BuildContext {
@@ -18,4 +19,6 @@ public interface BuildContext {
     default <T> @Nullable T dependOnAncestor(Class<T> ancestorClass) {
         return this.dependOnAncestor(ancestorClass, ancestorClass);
     }
+
+    @Nullable WidgetInstance<?> instance();
 }

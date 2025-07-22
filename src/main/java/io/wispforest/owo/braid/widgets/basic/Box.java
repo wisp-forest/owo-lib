@@ -1,6 +1,5 @@
 package io.wispforest.owo.braid.widgets.basic;
 
-import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.framework.instance.OptionalChildWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.OptionalChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
@@ -12,6 +11,7 @@ public class Box extends OptionalChildInstanceWidget {
 
     public final Color color;
 
+    // TODO: outline
     public Box(Color color, @Nullable Widget child) {
         super(child);
         this.color = color;

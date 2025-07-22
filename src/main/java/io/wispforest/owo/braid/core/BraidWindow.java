@@ -214,7 +214,7 @@ public class BraidWindow implements Surface {
         return new BraidWindow(handleOut.longValue());
     }
 
-    public static void open(String title, int width, int height, Widget widget) {
+    public static OpenResult open(String title, int width, int height, Widget widget) {
         var window = create(title, width, height);
         var app = new AppState(
             Owo.LOGGER,
@@ -225,6 +225,7 @@ public class BraidWindow implements Surface {
         );
 
         BraidWindowScheduler.add(window, app);
+        return new OpenResult(app, window);
     }
 
     // ---
@@ -345,4 +346,8 @@ public class BraidWindow implements Surface {
             GLFW.glfwMakeContextCurrent(activeContext);
         }
     }
+
+    // ---
+
+    public record OpenResult(AppState state, BraidWindow window) {}
 }

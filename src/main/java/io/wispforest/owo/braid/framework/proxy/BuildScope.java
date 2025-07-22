@@ -31,7 +31,9 @@ public class BuildScope {
         }
     }
 
-    public void rebuildDirtyProxies() {
+    public boolean rebuildDirtyProxies() {
+        if (this.dirtyProxies.isEmpty()) return false;
+
         this.dirtyProxies.sort(Comparator.naturalOrder());
 
         for (var idx = 0; idx < this.dirtyProxies.size(); idx = this.nextDirtyIndex(idx)) {
@@ -39,6 +41,7 @@ public class BuildScope {
         }
 
         this.dirtyProxies.clear();
+        return true;
     }
 
     private int nextDirtyIndex(int idx) {
