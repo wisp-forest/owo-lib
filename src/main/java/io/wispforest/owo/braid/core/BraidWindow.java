@@ -1,0 +1,345 @@
+package io.wispforest.owo.braid.core;
+
+import com.mojang.blaze3d.systems.ProjectionType;
+import com.mojang.blaze3d.systems.RenderSystem;
+import io.wispforest.owo.Owo;
+import io.wispforest.owo.braid.core.cursor.CursorController;
+import io.wispforest.owo.braid.core.cursor.CursorStyle;
+import io.wispforest.owo.braid.core.events.*;
+import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.util.EventSource;
+import io.wispforest.owo.util.EventStream;
+import io.wispforest.owo.util.FramebufferOverride;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gl.GlDebug;
+import net.minecraft.client.gl.SimpleFramebuffer;
+import net.minecraft.client.render.DiffuseLighting;
+import org.apache.commons.lang3.mutable.MutableLong;
+import org.joml.Matrix4f;
+import org.joml.Vector2i;
+import org.lwjgl.glfw.*;
+import org.lwjgl.opengl.GL32;
+import org.lwjgl.system.NativeResource;
+
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+
+public class BraidWindow implements Surface {
+
+    public final EventBuffer eventBuffer = new EventBuffer();
+
+    public final long handle;
+    private final List<NativeResource> resources = new ArrayList<>();
+
+    private final EventStream<ResizeCallback> onResize = ResizeCallback.newStream();
+    private SimpleFramebuffer remoteFramebuffer;
+    private int localFbo;
+
+    private final CursorController cursorController;
+    private final Vector2i cursorPos = new Vector2i();
+
+    private int framebufferWidth;
+    private int framebufferHeight;
+
+    private int scaledWidth;
+    private int scaledHeight;
+    private int scaleFactor;
+
+    public BraidWindow(long handle) {
+        this.handle = handle;
+        this.cursorController = new CursorController(this.handle);
+
+        var framebufferWidthOut = new int[1];
+        var framebufferHeightOut = new int[1];
+        GLFW.glfwGetFramebufferSize(this.handle, framebufferWidthOut, framebufferHeightOut);
+
+        this.framebufferWidth = framebufferWidthOut[0];
+        this.framebufferHeight = framebufferHeightOut[0];
+        this.remoteFramebuffer = new SimpleFramebuffer(this.framebufferWidth, this.framebufferHeight, true);
+        this.recreateLocalFbo();
+
+        GLFW.glfwSetWindowCloseCallback(this.handle, this.storeNativeResource(GLFWWindowCloseCallback.create(window -> {
+            this.eventBuffer.add(CloseEvent.INSTANCE);
+        })));
+
+        GLFW.glfwSetFramebufferSizeCallback(this.handle, this.storeNativeResource(GLFWFramebufferSizeCallback.create((window, width, height) -> {
+            this.framebufferWidth = width;
+            this.framebufferHeight = height;
+
+            withContext(MinecraftClient.getInstance().getWindow().getHandle(), () -> {
+                this.remoteFramebuffer.delete();
+                this.remoteFramebuffer = new SimpleFramebuffer(this.framebufferWidth, this.framebufferHeight, true);
+            });
+
+            this.recreateLocalFbo();
+
+            this.onResize.sink().onResize(this.scaledWidth, this.scaledHeight);
+        })));
+
+        GLFW.glfwSetMouseButtonCallback(this.handle, this.storeNativeResource(GLFWMouseButtonCallback.create((window, button, action, mods) -> {
+            this.eventBuffer.add(switch (action) {
+                case GLFW.GLFW_PRESS -> new MouseButtonPressEvent(button);
+                case GLFW.GLFW_RELEASE -> new MouseButtonReleaseEvent(button);
+                default -> throw new UnsupportedOperationException("incompatible glfw event type");
+            });
+        })));
+
+        GLFW.glfwSetCursorPosCallback(this.handle, this.storeNativeResource(GLFWCursorPosCallback.create((window, mouseX, mouseY) -> {
+            var deltaX = mouseX - this.cursorPos.x;
+            var deltaY = mouseY - this.cursorPos.y;
+
+            this.cursorPos.x = (int) mouseX;
+            this.cursorPos.y = (int) mouseY;
+
+            if (deltaX != 0 || deltaY != 0) {
+                this.eventBuffer.add(new MouseMoveEvent(
+                    (double) this.cursorPos.x / this.scaleFactor,
+                    (double) this.cursorPos.y / this.scaleFactor,
+                    deltaX / this.scaleFactor,
+                    deltaY / this.scaleFactor
+                ));
+            }
+        })));
+
+        GLFW.glfwSetScrollCallback(this.handle, this.storeNativeResource(GLFWScrollCallback.create((window, xOffset, yOffset) -> {
+            this.eventBuffer.add(new MouseScrollEvent(xOffset, yOffset));
+        })));
+
+        GLFW.glfwSetKeyCallback(this.handle, this.storeNativeResource(GLFWKeyCallback.create((window, key, scancode, action, mods) -> {
+            this.eventBuffer.add(switch (action) {
+                case GLFW.GLFW_PRESS, GLFW.GLFW_REPEAT -> new KeyPressEvent(key, scancode, new KeyModifiers(mods));
+                case GLFW.GLFW_RELEASE -> new KeyReleaseEvent(key, scancode, new KeyModifiers(mods));
+                default -> throw new UnsupportedOperationException("incompatible glfw event type");
+            });
+        })));
+
+        GLFW.glfwSetCharModsCallback(this.handle, this.storeNativeResource(GLFWCharModsCallback.create((window, codepoint, mods) -> {
+            this.eventBuffer.add(new CharInputEvent((char) codepoint, new KeyModifiers(mods)));
+        })));
+
+        GLFW.glfwSetDropCallback(this.handle, this.storeNativeResource(GLFWDropCallback.create((window, count, names) -> {
+            var paths = new ArrayList<Path>(count);
+
+            for (int pathIdx = 0; pathIdx < count; pathIdx++) {
+                var pathString = GLFWDropCallback.getName(names, pathIdx);
+
+                try {
+                    paths.add(Paths.get(pathString));
+                } catch (InvalidPathException e) {
+                    Owo.LOGGER.error("Failed to parse path '{}'", pathString, e);
+                }
+            }
+
+            if (!paths.isEmpty()) {
+                this.eventBuffer.add(new FilesDroppedEvent(paths));
+            }
+        })));
+    }
+
+    private void recreateLocalFbo() {
+        withContext(this.handle, () -> {
+            if (this.localFbo != 0) {
+                GL32.glDeleteFramebuffers(this.localFbo);
+            }
+
+            this.localFbo = GL32.glGenFramebuffers();
+            GL32.glBindFramebuffer(GL32.GL_FRAMEBUFFER, this.localFbo);
+            GL32.glFramebufferTexture2D(GL32.GL_FRAMEBUFFER, GL32.GL_COLOR_ATTACHMENT0, GL32.GL_TEXTURE_2D, this.remoteFramebuffer.getColorAttachment(), 0);
+
+            if (GL32.glCheckFramebufferStatus(GL32.GL_FRAMEBUFFER) != GL32.GL_FRAMEBUFFER_COMPLETE) {
+                throw new UnsupportedOperationException("Failed to initialize local FBO");
+            }
+        });
+
+        this.recalculateScale();
+    }
+
+    private void recalculateScale() {
+        var guiScale = MinecraftClient.getInstance().options.getGuiScale().getValue();
+        var forceUnicodeFont = MinecraftClient.getInstance().options.getForceUnicodeFont().getValue();
+
+        var factor = 1;
+
+        while (
+            factor != guiScale
+                && factor < this.framebufferWidth
+                && factor < this.framebufferHeight
+                && this.framebufferWidth / (factor + 1) >= 320
+                && this.framebufferHeight / (factor + 1) >= 240
+        ) {
+            ++factor;
+        }
+
+        if (forceUnicodeFont && factor % 2 != 0) {
+            ++factor;
+        }
+
+        this.scaleFactor = factor;
+
+        var scaledWidth = (int) ((double) this.framebufferWidth / this.scaleFactor);
+        this.scaledWidth = (double) this.framebufferWidth / this.scaleFactor > (double) scaledWidth ? scaledWidth + 1 : scaledWidth;
+
+        var scaledHeight = (int) ((double) this.framebufferHeight / this.scaleFactor);
+        this.scaledHeight = (double) this.framebufferHeight / this.scaleFactor > (double) scaledHeight ? scaledHeight + 1 : scaledHeight;
+    }
+
+    public static BraidWindow create(String title, int width, int height) {
+        var handleOut = new MutableLong();
+        withContext(0, () -> {
+            GLFW.glfwWindowHint(GLFW.GLFW_CLIENT_API, GLFW.GLFW_OPENGL_API);
+            GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_CREATION_API, GLFW.GLFW_NATIVE_CONTEXT_API);
+            GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 3);
+            GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 2);
+            GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_PROFILE, GLFW.GLFW_OPENGL_CORE_PROFILE);
+            GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_FORWARD_COMPAT, 1);
+
+            var handle = GLFW.glfwCreateWindow(width, height, title, 0, MinecraftClient.getInstance().getWindow().getHandle());
+
+            if (handle == 0) {
+                throw new UnsupportedOperationException("Failed to create a GLFW window");
+            }
+
+            GLFW.glfwMakeContextCurrent(handle);
+            GLFW.glfwSwapInterval(0);
+
+            GlDebug.enableDebug(MinecraftClient.getInstance().options.glDebugVerbosity, true);
+
+            handleOut.setValue(handle);
+        });
+
+        return new BraidWindow(handleOut.longValue());
+    }
+
+    public static void open(String title, int width, int height, Widget widget) {
+        var window = create(title, width, height);
+        var app = new AppState(
+            Owo.LOGGER,
+            MinecraftClient.getInstance(),
+            window,
+            window.eventBuffer,
+            widget
+        );
+
+        BraidWindowScheduler.add(window, app);
+    }
+
+    // ---
+
+    @Override
+    public void dispose() {
+        GLFW.glfwDestroyWindow(this.handle);
+        this.cursorController.dispose();
+
+        for (var resource : this.resources) {
+            resource.free();
+        }
+    }
+
+    // ---
+
+    @Override
+    public int width() {
+        return this.scaledWidth;
+    }
+
+    @Override
+    public int height() {
+        return this.scaledHeight;
+    }
+
+    @Override
+    public double scaleFactor() {
+        return this.scaleFactor;
+    }
+
+    @Override
+    public EventSource<ResizeCallback> onResize() {
+        return this.onResize.source();
+    }
+
+    @Override
+    public CursorStyle currentCursorStyle() {
+        return this.cursorController.currentStyle();
+    }
+
+    @Override
+    public void setCursorStyle(CursorStyle style) {
+        this.cursorController.setStyle(style);
+    }
+
+    // ---
+
+    private Matrix4f projectionBackup;
+    private ProjectionType projectionTypeBackup;
+
+    @Override
+    public void beginRendering() {
+        this.remoteFramebuffer.beginWrite(true);
+        FramebufferOverride.push(this.remoteFramebuffer);
+
+        RenderSystem.clearColor(0f, 0f, 0f, 1f);
+        RenderSystem.clear(GL32.GL_COLOR_BUFFER_BIT | GL32.GL_DEPTH_BUFFER_BIT);
+
+        this.projectionBackup = new Matrix4f(RenderSystem.getProjectionMatrix());
+        this.projectionTypeBackup = RenderSystem.getProjectionType();
+
+        var projection = new Matrix4f().setOrtho(0, (float) this.framebufferWidth / this.scaleFactor, (float) this.framebufferHeight / this.scaleFactor, 0, 1000, 21000);
+        RenderSystem.setProjectionMatrix(projection, ProjectionType.ORTHOGRAPHIC);
+
+        var modelViewStack = RenderSystem.getModelViewStack();
+        modelViewStack.pushMatrix();
+        modelViewStack.identity();
+        modelViewStack.translate(0, 0, -11000);
+
+        DiffuseLighting.enableGuiDepthLighting();
+    }
+
+    @Override
+    public void endRendering() {
+        FramebufferOverride.pop();
+
+        RenderSystem.getModelViewStack().popMatrix();
+
+        RenderSystem.setProjectionMatrix(this.projectionBackup, this.projectionTypeBackup);
+        this.projectionBackup = null;
+
+        // ---
+
+        withContext(this.handle, () -> {
+            GL32.glBindFramebuffer(GL32.GL_READ_FRAMEBUFFER, this.remoteFramebuffer.fbo);
+            GL32.glBindFramebuffer(GL32.GL_DRAW_FRAMEBUFFER, 0);
+
+            GL32.glBlitFramebuffer(
+                0, 0, this.framebufferWidth, this.framebufferHeight,
+                0, 0, this.framebufferWidth, this.framebufferHeight,
+                GL32.GL_COLOR_BUFFER_BIT,
+                GL32.GL_NEAREST
+            );
+        });
+
+        // ---
+
+        GLFW.glfwSwapBuffers(this.handle);
+    }
+
+    // ---
+
+    private <R extends NativeResource> R storeNativeResource(R resource) {
+        this.resources.add(resource);
+        return resource;
+    }
+
+    public static void withContext(long contextHandle, Runnable fn) {
+        var activeContext = GLFW.glfwGetCurrentContext();
+
+        try {
+            GLFW.glfwMakeContextCurrent(contextHandle);
+            fn.run();
+        } finally {
+            GLFW.glfwMakeContextCurrent(activeContext);
+        }
+    }
+}

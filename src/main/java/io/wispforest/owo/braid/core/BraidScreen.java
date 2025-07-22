@@ -1,12 +1,18 @@
 package io.wispforest.owo.braid.core;
 
+import io.wispforest.owo.braid.core.events.*;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.ui.util.DisposableScreen;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
+import org.joml.Vector2i;
 
 public class BraidScreen extends Screen implements DisposableScreen {
+
+    protected final EventBuffer eventBuffer = new EventBuffer();
+    protected final Surface.Default surface = new Surface.Default();
+    protected final Vector2i cursorPos = new Vector2i();
 
     protected final Widget rootWidget;
     protected AppState state;
@@ -24,10 +30,10 @@ public class BraidScreen extends Screen implements DisposableScreen {
             this.state = new AppState(
                 null,
                 this.client,
+                this.surface,
+                this.eventBuffer,
                 this.rootWidget
             );
-        } else {
-            this.state.rootInstance().markNeedsLayout();
         }
     }
 
@@ -35,9 +41,17 @@ public class BraidScreen extends Screen implements DisposableScreen {
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
 
+        var deltaX = mouseX - this.cursorPos.x;
+        var deltaY = mouseY - this.cursorPos.y;
+
+        this.cursorPos.x = mouseX;
+        this.cursorPos.y = mouseY;
+
+        if (deltaX != 0 || deltaY != 0) {
+            this.eventBuffer.add(new MouseMoveEvent(this.cursorPos.x, this.cursorPos.y, mouseX, mouseY));
+        }
+
         this.state.updateWidgetsAndInteractions(
-            mouseX,
-            mouseY,
             this.client.getRenderTickCounter().getTickDelta(false),
             this.client.getRenderTickCounter().getLastFrameDuration()
         );
@@ -52,36 +66,37 @@ public class BraidScreen extends Screen implements DisposableScreen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        return this.state.dispatchMouseDownEvent(mouseX, mouseY, button) || super.mouseClicked(mouseX, mouseY, button);
-    }
-
-    @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        return this.state.dispatchMouseDragEvent(mouseX, mouseY, deltaX, deltaY) || super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        this.eventBuffer.add(new MouseButtonPressEvent(button));
+        return true;
     }
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        return this.state.dispatchMouseUpEvent(mouseX, mouseY, button) || super.mouseReleased(mouseX, mouseY, button);
+        this.eventBuffer.add(new MouseButtonReleaseEvent(button));
+        return true;
     }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        return this.state.dispatchMouseScrollEvent(mouseX, mouseY, horizontalAmount, verticalAmount) || super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+        this.eventBuffer.add(new MouseScrollEvent(horizontalAmount, verticalAmount));
+        return true;
     }
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        return this.state.dispatchKeyDownEvent(keyCode, modifiers) || super.keyPressed(keyCode, scanCode, modifiers);
+        this.eventBuffer.add(new KeyPressEvent(keyCode, scanCode, new KeyModifiers(modifiers)));
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-        return this.state.dispatchKeyUpEvent(keyCode, modifiers) || super.keyReleased(keyCode, scanCode, modifiers);
+        this.eventBuffer.add(new KeyReleaseEvent(keyCode, scanCode, new KeyModifiers(modifiers)));
+        return true;
     }
 
     @Override
     public boolean charTyped(char chr, int modifiers) {
-        return this.state.dispatchCharEvent(chr, modifiers) || super.charTyped(chr, modifiers);
+        this.eventBuffer.add(new CharInputEvent(chr, new KeyModifiers(modifiers)));
+        return true;
     }
 }
