@@ -36,7 +36,7 @@ public final class StackTraceSupplier implements Supplier<String> {
     public StackTraceElement[] getFullStackTrace() {
         var innerThrowable = throwable();
         while (innerThrowable.getCause() != null) {
-            innerThrowable = throwable().getCause();
+            innerThrowable = innerThrowable.getCause();
 
             // Prevent possible infinite loops where the cause is itself the cause as it is not setup or chain of exceptions
             if (innerThrowable == throwable()) break;
