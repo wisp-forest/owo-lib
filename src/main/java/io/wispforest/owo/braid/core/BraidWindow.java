@@ -7,6 +7,7 @@ import io.wispforest.owo.braid.core.cursor.CursorController;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.core.events.*;
 import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.ui.util.ScissorStack;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.FramebufferOverride;
@@ -279,6 +280,7 @@ public class BraidWindow implements Surface {
     public void beginRendering() {
         this.remoteFramebuffer.beginWrite(true);
         FramebufferOverride.push(this.remoteFramebuffer);
+        ScissorStack.pushWindowDimensions(() -> new ScissorStack.WindowDimensions(this.scaleFactor, this.scaledWidth, this.scaledHeight, this.framebufferWidth, this.framebufferHeight));
 
         RenderSystem.clearColor(0f, 0f, 0f, 1f);
         RenderSystem.clear(GL32.GL_COLOR_BUFFER_BIT | GL32.GL_DEPTH_BUFFER_BIT);
@@ -299,6 +301,7 @@ public class BraidWindow implements Surface {
 
     @Override
     public void endRendering() {
+        ScissorStack.popWindowDimensions();
         FramebufferOverride.pop();
 
         RenderSystem.getModelViewStack().popMatrix();

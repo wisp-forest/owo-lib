@@ -15,24 +15,54 @@ import org.lwjgl.opengl.GL11;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.function.Supplier;
 
 public final class ScissorStack {
 
     private static final MatrixStack EMPTY_STACK = new MatrixStack();
     private static final Deque<PositionedRectangle> STACK = new ArrayDeque<>();
 
+    // TODO: this is a horrible klduge. braid needs to start supplying a custom draw context
+    // that also includes a surface-aware scissor stack
+    private static final Deque<Supplier<WindowDimensions>> WINDOW_DIMENSIONS_SUPPLIERS = new ArrayDeque<>();
+
+    static {
+        WINDOW_DIMENSIONS_SUPPLIERS.push(() -> {
+            var window = MinecraftClient.getInstance().getWindow();
+            return new WindowDimensions(
+                window.getScaleFactor(),
+                window.getScaledWidth(),
+                window.getScaledHeight(),
+                window.getFramebufferWidth(),
+                window.getFramebufferHeight()
+            );
+        });
+    }
+
     private ScissorStack() {}
+
+    public static void pushWindowDimensions(Supplier<WindowDimensions> supplier) {
+        WINDOW_DIMENSIONS_SUPPLIERS.push(supplier);
+    }
+
+    public static void popWindowDimensions() {
+        WINDOW_DIMENSIONS_SUPPLIERS.pop();
+    }
+
+    private static WindowDimensions currentDimensions() {
+        return WINDOW_DIMENSIONS_SUPPLIERS.getFirst().get();
+    }
 
     public static void pushDirect(int x, int y, int width, int height) {
         var window = MinecraftClient.getInstance().getWindow();
         var scale = window.getScaleFactor();
 
         push(
-                (int) (x / scale),
-                (int) (window.getScaledHeight() - (y / scale) - height / scale),
-                (int) (width / scale),
-                (int) (height / scale),
-                (MatrixStack) null
+            (int) (x / scale),
+            (int) (window.getScaledHeight() - (y / scale) - height / scale),
+            (int) (width / scale),
+            (int) (height / scale),
+            (MatrixStack) null
         );
     }
 
@@ -46,8 +76,8 @@ public final class ScissorStack {
         final var newFrame = withGlTransform(x, y, width, height, matrices);
 
         if (STACK.isEmpty()) {
-            var window = MinecraftClient.getInstance().getWindow();
-            STACK.push(newFrame.intersection(PositionedRectangle.of(0, 0, window.getScaledWidth(), window.getScaledHeight())));
+            var dimensions = currentDimensions();
+            STACK.push(newFrame.intersection(PositionedRectangle.of(0, 0, dimensions.scaledWidth(), dimensions.scaledHeight())));
         } else {
             var top = STACK.peek();
             STACK.push(top.intersection(newFrame));
@@ -67,22 +97,22 @@ public final class ScissorStack {
 
     private static void applyState() {
         if (STACK.isEmpty()) {
-            var window = MinecraftClient.getInstance().getWindow();
-            GL11.glScissor(0, 0, window.getFramebufferWidth(), window.getFramebufferHeight());
+            var dimensions = currentDimensions();
+            GL11.glScissor(0, 0, dimensions.framebufferWidth(), dimensions.framebufferHeight());
             return;
         }
 
         if (!GL11.glIsEnabled(GL11.GL_SCISSOR_TEST)) return;
 
         var newFrame = STACK.peek();
-        var window = MinecraftClient.getInstance().getWindow();
-        var scale = window.getScaleFactor();
+        var dimensions = currentDimensions();
+        var scale = dimensions.scaleFactor;
 
         GL11.glScissor(
-                Math.max(0, (int) (newFrame.x() * scale)),
-                Math.max((int) (window.getFramebufferHeight() - (newFrame.y() * scale) - newFrame.height() * scale), 0),
-                Math.min(MathHelper.clamp((int) (newFrame.width() * scale), 0, window.getFramebufferWidth()), window.getFramebufferWidth()),
-                Math.min(MathHelper.clamp((int) (newFrame.height() * scale), 0, window.getFramebufferHeight()), window.getFramebufferHeight())
+            Math.max(0, (int) (newFrame.x() * scale)),
+            Math.max((int) (dimensions.framebufferHeight() - (newFrame.y() * scale) - newFrame.height() * scale), 0),
+            Math.min(MathHelper.clamp((int) (newFrame.width() * scale), 0, dimensions.framebufferWidth()), dimensions.framebufferWidth()),
+            Math.min(MathHelper.clamp((int) (newFrame.height() * scale), 0, dimensions.framebufferHeight()), dimensions.framebufferHeight())
         );
     }
 
@@ -113,9 +143,9 @@ public final class ScissorStack {
         if (top == null) return true;
 
         return top.intersects(
-                withGlTransform(
-                        x, y, 0, 0, matrices
-                )
+            withGlTransform(
+                x, y, 0, 0, matrices
+            )
         );
     }
 
@@ -125,13 +155,13 @@ public final class ScissorStack {
 
         var margins = component.margins().get();
         return top.intersects(
-                withGlTransform(
-                        component.x() - margins.left(),
-                        component.y() - margins.top(),
-                        component.width() + margins.right(),
-                        component.height() + margins.bottom(),
-                        matrices
-                )
+            withGlTransform(
+                component.x() - margins.left(),
+                component.y() - margins.top(),
+                component.width() + margins.right(),
+                component.height() + margins.bottom(),
+                matrices
+            )
         );
     }
 
@@ -157,4 +187,6 @@ public final class ScissorStack {
 
         return PositionedRectangle.of(x, y, width, height);
     }
+
+    public record WindowDimensions(double scaleFactor, int scaledWidth, int scaledHeight, int framebufferWidth, int framebufferHeight) {}
 }
