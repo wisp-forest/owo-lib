@@ -22,7 +22,7 @@ public interface Surface {
     void beginRendering();
     void endRendering();
 
-    default void dispose() {}
+    void dispose();
 
     class Default implements Surface {
 
@@ -79,6 +79,11 @@ public interface Surface {
 
         @Override
         public void endRendering() {}
+
+        @Override
+        public void dispose() {
+            this.cursorController.dispose();
+        }
     }
 
     interface ResizeCallback {
