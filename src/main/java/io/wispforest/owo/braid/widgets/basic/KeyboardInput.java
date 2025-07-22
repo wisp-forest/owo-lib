@@ -78,17 +78,17 @@ public class KeyboardInput extends SingleChildInstanceWidget {
 
     @FunctionalInterface
     public interface KeyDownCallback {
-        void onKeyDown(int keyCode, KeyModifiers modifiers);
+        boolean onKeyDown(int keyCode, KeyModifiers modifiers);
     }
 
     @FunctionalInterface
     public interface KeyUpCallback {
-        void onKeyUp(int keyCode, KeyModifiers modifiers);
+        boolean onKeyUp(int keyCode, KeyModifiers modifiers);
     }
 
     @FunctionalInterface
     public interface CharCallback {
-        void onChar(int charCode, KeyModifiers modifiers);
+        boolean onChar(int charCode, KeyModifiers modifiers);
     }
 
     @FunctionalInterface
@@ -110,8 +110,7 @@ public class KeyboardInput extends SingleChildInstanceWidget {
         @Override
         public boolean onKeyDown(int keyCode, KeyModifiers modifiers) {
             if (this.widget.keyDownCallback != null) {
-                this.widget.keyDownCallback.onKeyDown(keyCode, modifiers);
-                return true;
+                return this.widget.keyDownCallback.onKeyDown(keyCode, modifiers);
             }
 
             return false;
@@ -120,8 +119,7 @@ public class KeyboardInput extends SingleChildInstanceWidget {
         @Override
         public boolean onKeyUp(int keyCode, KeyModifiers modifiers) {
             if (this.widget.keyUpCallback != null) {
-                this.widget.keyUpCallback.onKeyUp(keyCode, modifiers);
-                return true;
+                return this.widget.keyUpCallback.onKeyUp(keyCode, modifiers);
             }
 
             return false;
@@ -130,8 +128,7 @@ public class KeyboardInput extends SingleChildInstanceWidget {
         @Override
         public boolean onChar(int charCode, KeyModifiers modifiers) {
             if (this.widget.charCallback != null) {
-                this.widget.charCallback.onChar(charCode, modifiers);
-                return true;
+                return this.widget.charCallback.onChar(charCode, modifiers);
             }
 
             return false;

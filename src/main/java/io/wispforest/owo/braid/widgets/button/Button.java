@@ -25,24 +25,15 @@ import java.util.function.IntPredicate;
 
 public class Button extends StatefulWidget {
 
-    public final @Nullable IntPredicate onClick;
+    public final @Nullable Runnable onClick;
     public final Widget child;
 
-    public Button(@Nullable IntPredicate onClick, Widget child) {
+    public Button(@Nullable Runnable onClick, Widget child) {
         this.onClick = onClick;
         this.child = child;
     }
 
-    public Button(IntPredicate onClick, boolean active, Widget child) {
-        this(active ? onClick : null, child);
-    }
-
-    public Button(@Nullable BooleanSupplier onClick, Widget child) {
-        //TODO: this will need to be changed once actions exist
-        this(onClick == null ? null : (x) -> x == 0 && onClick.getAsBoolean(), child);
-    }
-
-    public Button(BooleanSupplier onClick, boolean active, Widget child) {
+    public Button(Runnable onClick, boolean active, Widget child) {
         this(active ? onClick : null, child);
     }
 

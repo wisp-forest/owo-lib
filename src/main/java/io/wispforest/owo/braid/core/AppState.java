@@ -163,7 +163,7 @@ public class AppState implements InstanceHost, ProxyHost {
             var cursorStyleSource = state.firstWhere(
                 (hit) ->
                     hit.instance() instanceof MouseListener &&
-                        ((MouseListener) hit.instance()).cursorStyleAt(hit.x(), hit.y()) != null
+                    ((MouseListener) hit.instance()).cursorStyleAt(hit.x(), hit.y()) != null
             );
 
             if (cursorStyleSource != null) {
@@ -278,14 +278,14 @@ public class AppState implements InstanceHost, ProxyHost {
                 }
                 case MouseScrollEvent(double xOffset, double yOffset) -> {
                     this.hitTest().firstWhere(
-                        (hit) -> hit.instance() instanceof MouseListener &&
-                            ((MouseListener) hit.instance()).onMouseScroll(
-                                hit.x(),
-                                hit.y(),
-                                xOffset,
-                                yOffset
-                            )
-                    );
+            (hit) -> hit.instance() instanceof MouseListener &&
+                     ((MouseListener) hit.instance()).onMouseScroll(
+                         hit.x(),
+                         hit.y(),
+                         xOffset,
+                         yOffset
+                     )
+        ) ;
                 }
                 case KeyPressEvent(int keyCode, int scancode, KeyModifiers modifiers) -> {
                     if (keyCode == GLFW.GLFW_KEY_R && modifiers.shift() && modifiers.alt()) {
@@ -439,11 +439,18 @@ public class AppState implements InstanceHost, ProxyHost {
     }
 
     @Override
-    public void scheduleDelayedCallback(Duration delay, Runnable callback) {
+    public long scheduleDelayedCallback(Duration delay, Runnable callback) {
+        var id = ScheduledCallback.nextId++;
         this.callbacks.add(new ScheduledCallback(
             Instant.now().plus(delay),
-            callback
+            callback, id
         ));
+        return id;
+    }
+
+    @Override
+    public void cancelDelayedCallback(long id) {
+        this.callbacks.removeIf(scheduledCallback -> scheduledCallback.id() == id);
     }
 
     @Override
@@ -452,7 +459,10 @@ public class AppState implements InstanceHost, ProxyHost {
     }
 }
 
-record ScheduledCallback(Instant after, Runnable callback) implements Comparable<ScheduledCallback> {
+record ScheduledCallback(Instant after, Runnable callback, long id) implements Comparable<ScheduledCallback> {
+    //"fuck you we starting at 7" -chyz
+    public static long nextId = 7;
+
     @Override
     public int compareTo(@NotNull ScheduledCallback o) {
         return this.after.compareTo(o.after);

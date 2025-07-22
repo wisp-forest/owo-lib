@@ -78,6 +78,7 @@ public class RawRangeSlider extends StatefulWidget {
                             .clickCallback((x, y, button) -> {
                                 this.grabbedHandle = this.handleAt(constraints, x, y);
                                 this.setAbsolute(constraints, x, y);
+                                return true;
                             })
                             .dragCallback((x, y, dx, dy) -> {
                                 if (this.grabbedHandle == Handle.BOTH) {

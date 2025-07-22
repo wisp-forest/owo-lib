@@ -92,6 +92,7 @@ public class Scrollable extends StatefulWidget {
                             }
 
                             if (this.widget().horizontal) this.horizontalController.setOffset(this.horizontalController.offset() + horizontal * -15);
+                            return true;
                         }),
                     new ListenableBuilder(
                         this.listenable,
