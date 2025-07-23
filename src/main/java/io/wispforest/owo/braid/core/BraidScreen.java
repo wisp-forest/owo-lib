@@ -48,7 +48,7 @@ public class BraidScreen extends Screen implements DisposableScreen {
         this.cursorPos.y = mouseY;
 
         if (deltaX != 0 || deltaY != 0) {
-            this.eventBuffer.add(new MouseMoveEvent(this.cursorPos.x, this.cursorPos.y, mouseX, mouseY));
+            this.eventBuffer.add(new MouseMoveEvent(this.cursorPos.x, this.cursorPos.y, deltaX, deltaY));
         }
 
         this.state.updateWidgetsAndInteractions(
