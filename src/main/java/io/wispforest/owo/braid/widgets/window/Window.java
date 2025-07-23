@@ -99,7 +99,7 @@ public class Window extends StatefulWidget {
                 new MouseArea(
                     widget -> widget
                         //TODO: decide what to do with buttons here
-                        .clickCallback((x, y, button) -> {
+                        .clickCallback((x, y, button, modifiers) -> {
                             if (button != 0) return false;
                             this.draggingEdges = this.edgesAt(x, y);
                             return true;

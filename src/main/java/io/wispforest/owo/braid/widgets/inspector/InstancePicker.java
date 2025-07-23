@@ -73,7 +73,7 @@ public class InstancePicker extends StatefulWidget {
                             this.pickedInstance = hitTest.anyHit() ? hitTest.firstHit().instance() : null;
                             if (this.pickedInstance != null) this.pickedInstance.debugHighlighted = true;
                         })
-                        .clickCallback((x, y, button) -> {
+                        .clickCallback((x, y, button, modifiers) -> {
                             if(button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
                                 if (this.pickedInstance != null) {
                                     this.pickedInstance.debugHighlighted = false;

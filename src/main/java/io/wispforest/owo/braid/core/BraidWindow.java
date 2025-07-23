@@ -82,8 +82,8 @@ public class BraidWindow implements Surface {
 
         GLFW.glfwSetMouseButtonCallback(this.handle, this.storeNativeResource(GLFWMouseButtonCallback.create((window, button, action, mods) -> {
             this.eventBuffer.add(switch (action) {
-                case GLFW.GLFW_PRESS -> new MouseButtonPressEvent(button);
-                case GLFW.GLFW_RELEASE -> new MouseButtonReleaseEvent(button);
+                case GLFW.GLFW_PRESS -> new MouseButtonPressEvent(button, new KeyModifiers(mods));
+                case GLFW.GLFW_RELEASE -> new MouseButtonReleaseEvent(button, new KeyModifiers(mods));
                 default -> throw new UnsupportedOperationException("incompatible glfw event type");
             });
         })));

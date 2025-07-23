@@ -51,8 +51,8 @@ public class CollapsibleEntry extends StatefulWidget {
         public Widget build(BuildContext context) {
             return new Actions(
                 widget -> widget
-                    .addAction(EXPAND_TRIGGER, () -> this.setState(() -> this.collapsed = false))
-                    .addAction(COLLAPSE_TRIGGER, () -> this.setState(() -> this.collapsed = true)),
+                    .addAction(ActionTrigger.RIGHT, () -> this.setState(() -> this.collapsed = false))
+                    .addAction(ActionTrigger.LEFT, () -> this.setState(() -> this.collapsed = true)),
                 new LazyCollapsible(
                     true,
                     this.collapsed,
@@ -63,9 +63,4 @@ public class CollapsibleEntry extends StatefulWidget {
             );
         }
     }
-
-    // ---
-
-    private static final ActionTrigger EXPAND_TRIGGER = new ActionTrigger(null, IntSet.of(GLFW.GLFW_KEY_RIGHT), null);
-    private static final ActionTrigger COLLAPSE_TRIGGER = new ActionTrigger(null, IntSet.of(GLFW.GLFW_KEY_LEFT), null);
 }

@@ -14,6 +14,10 @@ public class Hoverable extends StatefulWidget {
         this.hovered = hovered;
     }
 
+    public Hoverable(HoverableBuilder builder) {
+        this(builder.build(false), builder.build(true));
+    }
+
     @Override
     public WidgetState<Hoverable> createState() {
         return new State();
@@ -32,5 +36,10 @@ public class Hoverable extends StatefulWidget {
                 this.hovered ? this.widget().hovered : this.widget().notHovered
             );
         }
+    }
+
+    @FunctionalInterface
+    public interface HoverableBuilder {
+        Widget build(boolean hovered);
     }
 }

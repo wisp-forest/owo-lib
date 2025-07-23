@@ -89,10 +89,10 @@ public class TextInput extends LeafInstanceWidget {
         @Override
         public void setWidget(TextInput widget) {
             if (!(this.layoutText.equals(widget.controller.text())
-                && this.layoutSelection.equals(widget.controller.selection())
-                && this.widget.softWrap == widget.softWrap
-                && this.widget.allowMultipleLines == widget.allowMultipleLines
-                && this.widget.baseStyle.equals(widget.baseStyle))) {
+                  && this.layoutSelection.equals(widget.controller.selection())
+                  && this.widget.softWrap == widget.softWrap
+                  && this.widget.allowMultipleLines == widget.allowMultipleLines
+                  && this.widget.baseStyle.equals(widget.baseStyle))) {
 
                 this.layoutText = this.text = widget.controller.text();
                 this.layoutSelection = this.selection = widget.controller.selection();
@@ -339,11 +339,17 @@ public class TextInput extends LeafInstanceWidget {
             if (keyCode == GLFW.GLFW_KEY_BACKSPACE) {
                 if (!this.selection.collapsed()) {
                     this.deleteSelection();
-                } else if (cursorPosition > 0) {
+                } else {
                     var chars = new StringBuilder(this.text);
-                    chars.deleteCharAt(cursorPosition - 1);
+                    var start = Math.max(
+                        0,
+                        modifiers.ctrl()
+                            ? this.nextWordBoundary(false, OptionalInt.empty())
+                            : cursorPosition - 1
+                    );
+                    chars.delete(start, cursorPosition);
 
-                    this.widget.controller.setSelection(this.selection = TextSelection.collapsed(cursorPosition - 1));
+                    this.widget.controller.setSelection(this.selection = TextSelection.collapsed(start));
                     this.widget.controller.setText(this.text = chars.toString());
                 }
 
@@ -351,10 +357,26 @@ public class TextInput extends LeafInstanceWidget {
             } else if (keyCode == GLFW.GLFW_KEY_DELETE) {
                 if (!this.selection.collapsed()) {
                     this.deleteSelection();
-                } else if (cursorPosition < this.text.length()) {
+                } else {
                     var chars = new StringBuilder(this.text);
-                    chars.deleteCharAt(cursorPosition);
+                    var start = Math.max(
+                        0,
+                        modifiers.shift() && !modifiers.ctrl()
+                            ? this.currentLine().beginIdx() - 1
+                            : cursorPosition
+                    );
+                    var end = Math.min(
+                        this.text.length(),
+                        modifiers.ctrl()
+                            ? this.nextWordBoundary(true, OptionalInt.empty())
+                            : modifiers.shift()
+                                ? this.currentLine().endIdx()
+                                : cursorPosition + 1
+                    );
 
+                    chars.delete(start, end);
+
+                    this.widget.controller.setSelection(this.selection = TextSelection.collapsed(start));
                     this.widget.controller.setText(this.text = chars.toString());
                 }
 
@@ -382,8 +404,8 @@ public class TextInput extends LeafInstanceWidget {
                         endingSelection
                             ? this.selection.lower()
                             : modifiers.ctrl()
-                            ? this.nextWordBoundary(false, java.util.OptionalInt.empty())
-                            : cursorPosition - 1
+                                ? this.nextWordBoundary(false, OptionalInt.empty())
+                                : cursorPosition - 1
                     ),
                     modifiers.shift()
                 );
@@ -396,8 +418,8 @@ public class TextInput extends LeafInstanceWidget {
                         endingSelection
                             ? this.selection.upper()
                             : modifiers.ctrl()
-                            ? this.nextWordBoundary(true, java.util.OptionalInt.empty())
-                            : cursorPosition + 1
+                                ? this.nextWordBoundary(true, OptionalInt.empty())
+                                : cursorPosition + 1
                     ),
                     modifiers.shift()
                 );
@@ -435,7 +457,7 @@ public class TextInput extends LeafInstanceWidget {
         private Instant lastClickTime = Instant.EPOCH;
 
         @Override
-        public boolean onMouseDown(double x, double y, int button) {
+        public boolean onMouseDown(double x, double y, int button, KeyModifiers modifiers) {
             var clickedIdx = this.charIdxAt(x, y);
 
             if (Duration.between(this.lastClickTime, Instant.now()).compareTo(MAX_DOUBLE_CLICK_DELAY) < 0) {

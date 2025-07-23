@@ -48,7 +48,7 @@ public class Actions extends StatefulWidget {
     ) {
         return new Actions(
             widget -> {
-                if (onClick != null) widget.addAction(List.of(ActionTrigger.CLICK), onClick);
+                if (onClick != null) widget.addAction(ActionTrigger.CLICK, onClick);
                 setupCallback.setup(widget);
             },
             child
@@ -152,7 +152,7 @@ public class Actions extends StatefulWidget {
                     .enterCallback(this.widget().enterCallback())
                     .exitCallback(this.widget().exitCallback())
                     .cursorStyleSupplier(this.widget().cursorStyleSupplier())
-                    .clickCallback((x, y, button) -> stepActions(trigger -> trigger.isTriggeredByMouseButton(button)
+                    .clickCallback((x, y, button, modifiers) -> stepActions(trigger -> trigger.isTriggeredByMouseButton(button, modifiers)
                         ? ActionTriggerResult.ACTIVATED
                         : ActionTriggerResult.NOT_ACTIVATED)),
                 new KeyboardInput(

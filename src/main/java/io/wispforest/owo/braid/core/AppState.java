@@ -57,6 +57,7 @@ public class AppState implements InstanceHost, ProxyHost {
     private @Nullable MouseListener dragging = null;
     private @Nullable CursorStyle draggingCursorStyle = null;
     private int draggingButton = -1;
+    private KeyModifiers draggingModifiers = null;
     private boolean dragStarted = false;
 
     private List<KeyboardListener> focused = new ArrayList<>();
@@ -248,7 +249,7 @@ public class AppState implements InstanceHost, ProxyHost {
 
         for (var event : events) {
             switch (event) {
-                case MouseButtonPressEvent(int button) -> {
+                case MouseButtonPressEvent(int button, KeyModifiers modifiers) -> {
                     var state = this.hitTest();
 
                     this.updateFocus(
@@ -261,7 +262,7 @@ public class AppState implements InstanceHost, ProxyHost {
                     );
 
                     var clicked = state.firstWhere(
-                        (hit) -> hit.instance() instanceof MouseListener && ((MouseListener) hit.instance()).onMouseDown(hit.x(), hit.y(), button)
+                        (hit) -> hit.instance() instanceof MouseListener && ((MouseListener) hit.instance()).onMouseDown(hit.x(), hit.y(), button, modifiers)
                     );
 
                     if (clicked != null && this.dragging == null) {
@@ -272,6 +273,7 @@ public class AppState implements InstanceHost, ProxyHost {
                         );
                         this.dragStarted = false;
                         this.draggingButton = button;
+                        this.draggingModifiers = modifiers;
                     }
                 }
                 case MouseMoveEvent(double x, double y, double deltaX, double deltaY) -> {
@@ -281,7 +283,7 @@ public class AppState implements InstanceHost, ProxyHost {
                     if (!(this.dragging instanceof WidgetInstance<?>)) break;
 
                     if (!this.dragStarted) {
-                        this.dragging.onMouseDragStart(draggingButton);
+                        this.dragging.onMouseDragStart(draggingButton, draggingModifiers);
                         this.dragStarted = true;
                     }
 
@@ -296,10 +298,10 @@ public class AppState implements InstanceHost, ProxyHost {
 
                     this.dragging.onMouseDrag(coordinates.x, coordinates.y, delta.x, delta.y);
                 }
-                case MouseButtonReleaseEvent(int button) -> {
+                case MouseButtonReleaseEvent(int button, KeyModifiers modifiers) -> {
                     var state = this.hitTest();
                     state.firstWhere(
-                        (hit) -> hit.instance() instanceof MouseListener && ((MouseListener) hit.instance()).onMouseUp(hit.x(), hit.y(), button)
+                        (hit) -> hit.instance() instanceof MouseListener && ((MouseListener) hit.instance()).onMouseUp(hit.x(), hit.y(), button, modifiers)
                     );
 
                     if (this.draggingButton == button) {

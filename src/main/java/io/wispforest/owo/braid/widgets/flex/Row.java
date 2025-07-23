@@ -20,6 +20,14 @@ public class Row extends Flex {
     public Row(
         MainAxisAlignment mainAxisAlignment,
         CrossAxisAlignment crossAxisAlignment,
+        List<? extends Widget> children
+    ) {
+        this(mainAxisAlignment, crossAxisAlignment, null, children);
+    }
+
+    public Row(
+        MainAxisAlignment mainAxisAlignment,
+        CrossAxisAlignment crossAxisAlignment,
         Widget... children
     ) {
         this(mainAxisAlignment, crossAxisAlignment, null, Arrays.asList(children));
