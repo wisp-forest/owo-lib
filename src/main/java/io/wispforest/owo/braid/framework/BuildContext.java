@@ -20,5 +20,9 @@ public interface BuildContext {
         return this.dependOnAncestor(ancestorClass, ancestorClass);
     }
 
-    @Nullable WidgetInstance<?> instance();
+    /// To prevent excessive IDE warnings, the return type of this
+    /// getter is not annotated `@Nullable` even though if it is called
+    /// before this context has been laid out, it will (correctly)
+    /// return null
+    WidgetInstance<?> instance();
 }

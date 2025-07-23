@@ -1,6 +1,5 @@
 package io.wispforest.owo.braid.widgets.basic;
 
-import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.framework.instance.OptionalChildWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.OptionalChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
@@ -11,9 +10,9 @@ import org.jetbrains.annotations.Nullable;
 
 public class Panel extends OptionalChildInstanceWidget {
 
-    public final Identifier texture;
+    public final @Nullable Identifier texture;
 
-    public Panel(Identifier texture, @Nullable Widget child) {
+    public Panel(@Nullable Identifier texture, @Nullable Widget child) {
         super(child);
         this.texture = texture;
     }
@@ -35,7 +34,10 @@ public class Panel extends OptionalChildInstanceWidget {
 
         @Override
         public void draw(OwoUIDrawContext ctx) {
-            NinePatchTexture.draw(this.widget.texture, OwoUIDrawContext.of(ctx), 0, 0, (int) this.transform.width(), (int) this.transform.height());
+            if (this.widget.texture != null) {
+                NinePatchTexture.draw(this.widget.texture, OwoUIDrawContext.of(ctx), 0, 0, (int) this.transform.width(), (int) this.transform.height());
+            }
+
             super.draw(ctx);
         }
     }

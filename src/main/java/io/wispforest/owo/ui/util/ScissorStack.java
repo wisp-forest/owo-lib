@@ -43,10 +43,12 @@ public final class ScissorStack {
 
     public static void pushWindowDimensions(Supplier<WindowDimensions> supplier) {
         WINDOW_DIMENSIONS_SUPPLIERS.push(supplier);
+        applyState();
     }
 
     public static void popWindowDimensions() {
         WINDOW_DIMENSIONS_SUPPLIERS.pop();
+        applyState();
     }
 
     private static WindowDimensions currentDimensions() {

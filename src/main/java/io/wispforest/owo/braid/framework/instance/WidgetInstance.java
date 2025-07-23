@@ -5,7 +5,6 @@ import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.core.Size;
 import io.wispforest.owo.braid.framework.widget.InstanceWidget;
-import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
@@ -174,10 +173,9 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
 
     // ---
 
-    @SuppressWarnings("rawtypes")
     public List<WidgetInstance<?>> ancestors() {
         var result = new ArrayList<WidgetInstance<?>>();
-        WidgetInstance ancestor = this;
+        var ancestor = this.parent;
 
         while (ancestor != null) {
             result.add(ancestor);
@@ -206,12 +204,17 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
     }
 
     public Matrix4f computeGlobalTransform() {
+        return this.computeTransformFrom(null);
+    }
+
+    public Matrix4f computeTransformFrom(@Nullable WidgetInstance<?> ancestor) {
         var result = new Matrix4f();
 
         result.mul(this.transform.toWidget());
 
-        for (var ancestor : this.ancestors()) {
-            result.mul(ancestor.transform.toWidget());
+        for (var step : this.ancestors()) {
+            if (step == ancestor) break;
+            result.mul(step.transform.toWidget());
         }
 
         return result;

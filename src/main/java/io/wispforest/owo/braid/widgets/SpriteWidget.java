@@ -25,6 +25,11 @@ public class SpriteWidget extends LeafInstanceWidget {
         this.blend = blend;
     }
 
+    public SpriteWidget(Identifier spriteIdentifier, boolean blend) {
+        this.spriteIdentifier = new SpriteIdentifier(GUI_ATLAS_ID, spriteIdentifier);
+        this.blend = blend;
+    }
+
     @Override
     public LeafWidgetInstance<SpriteWidget> instantiate() {
         return new Instance(this);

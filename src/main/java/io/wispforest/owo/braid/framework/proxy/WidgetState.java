@@ -15,6 +15,10 @@ public abstract class WidgetState<T extends StatefulWidget> {
 
     public abstract Widget build(BuildContext context);
 
+    public BuildContext context() {
+        return this.owner;
+    }
+
     public void init() {}
     public void dispose() {}
 

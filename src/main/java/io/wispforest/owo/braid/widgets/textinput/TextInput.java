@@ -240,7 +240,7 @@ public class TextInput extends LeafInstanceWidget {
             var line = this.metrics.lineMetrics().get(lineIdx);
 
             final var textRenderer = this.host().client().textRenderer;
-            var x = textRenderer.getWidth(this.text.substring(line.beginIdx(), charIdx));
+            var x = textRenderer.getWidth(this.text.substring(line.beginIdx(), Math.min(this.text.length(), charIdx)));
             var y = (lineIdx + 1) * textRenderer.fontHeight;
 
             return new Vector2d(x, y);
@@ -323,7 +323,7 @@ public class TextInput extends LeafInstanceWidget {
         }
 
         private char safeCharAt(int charIdx) {
-            return this.text.charAt(MathHelper.clamp(charIdx, 0, this.text.length() - 1));
+            return !this.text.isEmpty() ? this.text.charAt(MathHelper.clamp(charIdx, 0, this.text.length() - 1)) : ' ';
         }
 
         @Override
