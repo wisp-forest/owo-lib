@@ -25,6 +25,22 @@ public record ActionTrigger(Set<Trigger> triggers) {
         Trigger.ofKey(GLFW_KEY_KP_ENTER, new KeyModifiers(GLFW_MOD_SHIFT))
     );
 
+    public static final ActionTrigger UP = new ActionTrigger(
+        Trigger.ofKey(GLFW_KEY_UP)
+    );
+
+    public static final ActionTrigger DOWN = new ActionTrigger(
+        Trigger.ofKey(GLFW_KEY_DOWN)
+    );
+
+    public static final ActionTrigger LEFT = new ActionTrigger(
+        Trigger.ofKey(GLFW_KEY_LEFT)
+    );
+
+    public static final ActionTrigger RIGHT = new ActionTrigger(
+        Trigger.ofKey(GLFW_KEY_RIGHT)
+    );
+
     public static ActionTrigger of(ActionTrigger... triggers) {
         return new ActionTrigger(Arrays.stream(triggers).flatMap(actionTrigger -> actionTrigger.triggers.stream()).collect(Collectors.toSet()));
     }
@@ -43,11 +59,11 @@ public record ActionTrigger(Set<Trigger> triggers) {
         this(Set.of(triggers));
     }
 
-    public boolean isTriggeredByMouseButton(int button, @Nullable KeyModifiers modifiers) {
+    public boolean isTriggeredByMouseButton(int button, KeyModifiers modifiers) {
         return this.triggers.stream().anyMatch(trigger -> trigger instanceof Trigger.Mouse mouseTrigger && mouseTrigger.isTriggered(button, modifiers));
     }
 
-    public boolean isTriggeredByKeyCode(int keyCode, @Nullable KeyModifiers modifiers) {
+    public boolean isTriggeredByKeyCode(int keyCode, KeyModifiers modifiers) {
         return this.triggers.stream().anyMatch(trigger -> trigger instanceof Trigger.Key keyTrigger && keyTrigger.isTriggered(keyCode, modifiers));
     }
 }

@@ -66,6 +66,6 @@ public class CollapsibleEntry extends StatefulWidget {
 
     // ---
 
-    private static final ActionTrigger EXPAND_TRIGGER = new ActionTrigger(null, IntSet.of(GLFW.GLFW_KEY_RIGHT), null);
-    private static final ActionTrigger COLLAPSE_TRIGGER = new ActionTrigger(null, IntSet.of(GLFW.GLFW_KEY_LEFT), null);
+    private static final ActionTrigger EXPAND_TRIGGER = ActionTrigger.RIGHT;
+    private static final ActionTrigger COLLAPSE_TRIGGER = ActionTrigger.LEFT;
 }

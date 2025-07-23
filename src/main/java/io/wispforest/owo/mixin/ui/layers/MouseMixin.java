@@ -30,13 +30,13 @@ public class MouseMixin {
     }
 
     @WrapOperation(method = "onMouseButton", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;mouseClicked(DDI)Z"))
-    private boolean passModifiersToBraid$mouseClicked(Screen screen, double mouseX, double mouseY, int button, Operation<Boolean> original, @Local(argsOnly = true, ordinal = 1) int modifiers) {
+    private boolean passModifiersToBraid$mouseClicked(Screen screen, double mouseX, double mouseY, int button, Operation<Boolean> original, @Local(argsOnly = true, ordinal = 2) int modifiers) {
         if (screen instanceof BraidScreen braidScreen) return braidScreen.mouseClicked(mouseX, mouseY, button, modifiers);
         return original.call(screen, mouseX, mouseY, button);
     }
 
     @WrapOperation(method = "onMouseButton", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;mouseReleased(DDI)Z"))
-    private boolean passModifiersToBraid$mouseReleased(Screen screen, double mouseX, double mouseY, int button, Operation<Boolean> original, @Local(argsOnly = true, ordinal = 1) int modifiers) {
+    private boolean passModifiersToBraid$mouseReleased(Screen screen, double mouseX, double mouseY, int button, Operation<Boolean> original, @Local(argsOnly = true, ordinal = 2) int modifiers) {
         if (screen instanceof BraidScreen braidScreen) return braidScreen.mouseReleased(mouseX, mouseY, button, modifiers);
         return original.call(screen, mouseX, mouseY, button);
     }

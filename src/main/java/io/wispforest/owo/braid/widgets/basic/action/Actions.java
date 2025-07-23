@@ -48,7 +48,7 @@ public class Actions extends StatefulWidget {
     ) {
         return new Actions(
             widget -> {
-                if (onClick != null) widget.addAction(List.of(ActionTrigger.CLICK), onClick);
+                if (onClick != null) widget.addAction(ActionTrigger.CLICK, onClick);
                 setupCallback.setup(widget);
             },
             child
