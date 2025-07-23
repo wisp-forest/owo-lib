@@ -46,8 +46,8 @@ public record ActionTrigger(Set<Trigger> triggers) {
     }
 
     public static ActionTrigger of(ActionTrigger actionTrigger, Trigger... triggers) {
-        var combinedTriggers = new HashSet<>(Set.copyOf(actionTrigger.triggers));
-        combinedTriggers.addAll(List.of(triggers));
+        var combinedTriggers = new HashSet<>(actionTrigger.triggers);
+        combinedTriggers.addAll(Arrays.asList(triggers));
         return new ActionTrigger(combinedTriggers);
     }
 
