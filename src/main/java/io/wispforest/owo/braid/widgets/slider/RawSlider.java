@@ -6,7 +6,8 @@ import io.wispforest.owo.braid.core.Insets;
 import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.framework.BuildContext;
-import io.wispforest.owo.braid.framework.widget.StatelessWidget;
+import io.wispforest.owo.braid.framework.proxy.WidgetState;
+import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.*;
 import io.wispforest.owo.braid.widgets.stack.Stack;
@@ -15,16 +16,17 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.DoubleConsumer;
 
-public class RawSlider extends StatelessWidget {
+public class RawSlider extends StatefulWidget {
 
     public final double value;
     public final double min;
     public final double max;
     public final @Nullable Double step;
+    public final double normalizedValue;
     public final LayoutAxis axis;
 
-    public final DoubleConsumer onChanged;
-    public final Widget track;
+    public final @Nullable DoubleConsumer onChanged;
+    public final @Nullable Widget track;
     public final Widget handle;
     public final double handleSize;
 
@@ -35,7 +37,7 @@ public class RawSlider extends StatelessWidget {
         @Nullable Double step,
         LayoutAxis axis,
         DoubleConsumer onChanged,
-        Widget track,
+        @Nullable Widget track,
         Widget handle,
         double handleSize
     ) {
@@ -43,6 +45,7 @@ public class RawSlider extends StatelessWidget {
         this.min = min;
         this.max = max;
         this.step = step;
+        this.normalizedValue = MathHelper.clamp((value - min) / (max - min), 0, 1);
         this.axis = axis;
         this.onChanged = onChanged;
         this.track = track;
@@ -51,61 +54,99 @@ public class RawSlider extends StatelessWidget {
     }
 
     @Override
-    public Widget build(BuildContext context) {
-        return new LayoutBuilder((innerContext, constraints) -> {
-            var normalizedValue = (this.discretize(this.value) - this.min) / (this.max - this.min);
+    public WidgetState<?> createState() {
+        return new State();
+    }
 
-            return new Center(
-                new MouseArea(
-                    widget -> widget
-                        //TODO: decide what to do with buttons here
-                        .clickCallback((x, y, button, modifiers) -> {
-                            if (button != 0) return false;
-                            this.updateForMousePosition(constraints, x, y);
-                            return true;
-                        })
-                        .dragCallback((x, y, dx, dy) -> this.updateForMousePosition(constraints, x, y))
-                        .cursorStyle(CursorStyle.HAND),
-                    new Stack(
-                        this.axis.choose(Alignment.LEFT, Alignment.TOP),
-                        new Sized(
-                            constraints.maxWidth(),
-                            constraints.maxHeight(),
-                            this.track
-                        ),
-                        new Padding(
-                            this.axis.chooseCompute(
-                                () -> Insets.left(Math.floor((constraints.maxWidth() - this.handleSize) * normalizedValue)),
-                                () -> Insets.top(Math.floor((constraints.maxHeight() - this.handleSize) * (1 - normalizedValue)))
+    public static class State extends WidgetState<RawSlider> {
+
+        protected double dragValue = 0;
+
+        @Override
+        public Widget build(BuildContext context) {
+            return new LayoutBuilder((innerContext, constraints) -> {
+                var widget = this.widget();
+
+                return new Center(
+                    new MouseArea(
+                        mouseArea -> mouseArea
+                            //TODO: decide what to do with buttons here
+                            .clickCallback((x, y, button) -> {
+                                if (button != 0) return false;
+
+                                y = widget.axis == LayoutAxis.VERTICAL ? constraints.maxOnAxis(widget.axis) - y : y;
+                                if (!this.isInHandle(constraints, x, y)) {
+                                    this.setAbsolute(constraints, x, y);
+                                }
+
+                                return true;
+                            })
+                            .dragCallback((x, y, dx, dy) -> this.move(constraints, dx, widget.axis == LayoutAxis.VERTICAL ? -dy : dy))
+                            .dragStartCallback(button -> this.dragValue = widget.normalizedValue)
+                            .cursorStyle(CursorStyle.HAND),
+                        new Stack(
+                            widget.axis.choose(Alignment.LEFT, Alignment.TOP),
+                            new Sized(
+                                constraints.maxWidth(),
+                                constraints.maxHeight(),
+                                widget.track
                             ),
-                            this.axis.chooseCompute(
-                                () -> new Sized(
-                                    this.handleSize,
-                                    constraints.maxHeight(),
-                                    this.handle
+                            new Padding(
+                                widget.axis.chooseCompute(
+                                    () -> Insets.left(Math.floor((constraints.maxWidth() - widget.handleSize) * widget.normalizedValue)),
+                                    () -> Insets.top(Math.floor((constraints.maxHeight() - widget.handleSize) * (1 - widget.normalizedValue)))
                                 ),
-                                () -> new Sized(
-                                    constraints.maxWidth(),
-                                    this.handleSize,
-                                    this.handle
+                                widget.axis.chooseCompute(
+                                    () -> new Sized(
+                                        widget.handleSize,
+                                        constraints.maxHeight(),
+                                        widget.handle
+                                    ),
+                                    () -> new Sized(
+                                        constraints.maxWidth(),
+                                        widget.handleSize,
+                                        widget.handle
+                                    )
                                 )
                             )
                         )
                     )
-                )
-            );
-        });
-    }
+                );
+            });
+        }
 
-    private void updateForMousePosition(Constraints constraints, double x, double y) {
-        var newNormalizedValue = MathHelper.clamp((this.axis.choose(x, y) - (this.handleSize / 2)) / (constraints.maxOnAxis(this.axis) - this.handleSize), 0, 1);
-        if (this.axis == LayoutAxis.VERTICAL) newNormalizedValue = 1 - newNormalizedValue;
+        protected boolean isInHandle(Constraints constraints, double x, double y) {
+            var axis = this.widget().axis;
 
-        this.onChanged.accept(this.discretize(this.min + newNormalizedValue * (this.max - this.min)));
-    }
+            var trackLength = constraints.maxOnAxis(axis) - this.widget().handleSize;
+            var handleMin = this.widget().normalizedValue * trackLength;
+            var handleMax = handleMin + this.widget().handleSize;
 
-    private double discretize(double value) {
-        if (this.step == null) return value;
-        return Math.round(value / this.step) * this.step;
+            var coordinate = axis.choose(x, y);
+            return coordinate >= handleMin && coordinate <= handleMax;
+        }
+
+        protected void move(Constraints constraints, double dx, double dy) {
+            this.dragValue += this.widget().axis.choose(dx, dy) / (constraints.maxOnAxis(this.widget().axis) - this.widget().handleSize);
+
+            this.applyValue(MathHelper.clamp(this.dragValue, 0, 1));
+        }
+
+        void setAbsolute(Constraints constraints, double x, double y) {
+            if (this.widget().onChanged == null) return;
+
+            var axis = this.widget().axis;
+            var handleSize = this.widget().handleSize;
+
+            var newNormalizedValue = MathHelper.clamp((axis.choose(x, y) - handleSize / 2) / (constraints.maxOnAxis(axis) - handleSize), 0, 1);
+
+            applyValue(newNormalizedValue);
+        }
+
+        void applyValue(double newNormalizedValue) {
+            var step = this.widget().step;
+            var newValue = this.widget().min + newNormalizedValue * (this.widget().max - this.widget().min);
+            this.widget().onChanged.accept(step != null ? Math.round(newValue / step) * step : newValue);
+        }
     }
 }
