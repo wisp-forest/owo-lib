@@ -1,15 +1,20 @@
 package io.wispforest.owo.braid.widgets.scroll;
 
+import com.google.common.base.Preconditions;
 import io.wispforest.owo.braid.core.CompoundListenable;
+import io.wispforest.owo.braid.core.Insets;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
+import io.wispforest.owo.braid.framework.widget.InheritedWidget;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.Clip;
 import io.wispforest.owo.braid.widgets.basic.ListenableBuilder;
 import io.wispforest.owo.braid.widgets.basic.MouseArea;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.util.math.Box;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector4f;
 
 import java.util.Objects;
 
@@ -34,12 +39,89 @@ public class Scrollable extends StatefulWidget {
         return new State();
     }
 
+    // ---
+
+    public static void reveal(BuildContext context) {
+        reveal(context, Insets.none());
+    }
+
+    public static void reveal(BuildContext context, Insets padding) {
+        of(context).reveal(context, padding);
+    }
+
+    public static void revealAabb(BuildContext context, Box box) {
+        of(context).revealAabb(context, box);
+    }
+
+    public static @Nullable State maybeOf(BuildContext context) {
+        var provider = context.getAncestor(ScrollableProvider.class);
+        return provider != null ? provider.state : null;
+    }
+
+    public static State of(BuildContext context) {
+        var state = maybeOf(context);
+        Preconditions.checkNotNull(state, "attempted to look up the enclosing scrollable state without one being present");
+
+        return state;
+    }
+
+    // ---
+
     public static class State extends WidgetState<Scrollable> {
 
         protected final CompoundListenable listenable = new CompoundListenable();
 
         protected ScrollController horizontalController;
         protected ScrollController verticalController;
+
+        private void reveal(BuildContext context, Insets padding) {
+            var box = context.instance().transform.aabb();
+            box = new Box(
+                box.minX - padding.left(),
+                box.minY - padding.top(),
+                box.minZ,
+                box.maxX + padding.right(),
+                box.maxY + padding.bottom(),
+                box.maxZ
+            );
+
+            revealAabb(context, box);
+        }
+
+        private void revealAabb(BuildContext context, Box box) {
+            var scrollInstance = this.context().instance();
+            var revealInstance = context.instance();
+
+            var transform = revealInstance.computeTransformFrom(scrollInstance).invert().translate(
+                this.horizontalController != null ? (float) this.horizontalController.offset : 0,
+                this.verticalController != null ? (float) this.verticalController.offset : 0, 0
+            );
+
+            var min = new Vector4f((float) box.minX, (float) box.minY, (float) box.minZ, 1f).mul(transform);
+            var max = new Vector4f((float) box.maxX, (float) box.maxY, (float) box.maxZ, 1f).mul(transform);
+
+            var revealBox = new Box(min.x, min.y, min.z, max.x, max.y, max.z);
+
+            if (this.horizontalController != null) {
+                if (revealBox.minX < this.horizontalController.offset) {
+                    this.horizontalController.offset = revealBox.minX;
+                }
+
+                if (revealBox.maxX > scrollInstance.transform.width() + this.horizontalController.offset) {
+                    this.horizontalController.offset = revealBox.maxX - scrollInstance.transform.width();
+                }
+            }
+
+            if (this.verticalController != null) {
+                if (revealBox.minY < this.verticalController.offset) {
+                    this.verticalController.offset = revealBox.minY;
+                }
+
+                if (revealBox.maxY > scrollInstance.transform.height() + this.verticalController.offset) {
+                    this.verticalController.offset = revealBox.maxY - scrollInstance.transform.height();
+                }
+            }
+        }
 
         @Override
         public void init() {
@@ -99,12 +181,27 @@ public class Scrollable extends StatefulWidget {
                         (innerContext, child) -> new RawScrollView(
                             this.horizontalController,
                             this.verticalController,
-                            child
+                            new ScrollableProvider(this, child)
                         ),
                         this.widget().child
                     )
                 )
             );
         }
+    }
+}
+
+class ScrollableProvider extends InheritedWidget {
+
+    public final Scrollable.State state;
+
+    public ScrollableProvider(Scrollable.State state, Widget child) {
+        super(child);
+        this.state = state;
+    }
+
+    @Override
+    public boolean mustRebuildDependents(InheritedWidget newWidget) {
+        return false;
     }
 }
