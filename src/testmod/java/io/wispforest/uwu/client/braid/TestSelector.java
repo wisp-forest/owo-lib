@@ -20,9 +20,7 @@ import io.wispforest.owo.braid.widgets.checkbox.BraidCheckbox;
 import io.wispforest.owo.braid.widgets.checkbox.Checkbox;
 import io.wispforest.owo.braid.widgets.checkbox.RawCheckbox;
 import io.wispforest.owo.braid.widgets.button.RawButton;
-import io.wispforest.owo.braid.widgets.cycle.CyclingButton;
 import io.wispforest.owo.braid.widgets.cycle.MessageCyclingButton;
-import io.wispforest.owo.braid.widgets.cycle.RawCyclingButton;
 import io.wispforest.owo.braid.widgets.drag.DragArena;
 import io.wispforest.owo.braid.widgets.drag.DragArenaElement;
 import io.wispforest.owo.braid.widgets.flex.*;
@@ -68,13 +66,11 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Colors;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
-import org.lwjgl.glfw.GLFW;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -99,6 +95,11 @@ public class TestSelector extends StatefulWidget {
     }
 
     public static class State extends WidgetState<TestSelector> {
+
+        private double xSkew = 0f;
+        private double ySkew = 0f;
+
+        private double rotat = 0f;
 
         private Tests test = null;
         private Entity chyz;
@@ -146,25 +147,28 @@ public class TestSelector extends StatefulWidget {
 
             return new Stack(
                 Alignment.CENTER,
-                new Center(
-                    switch (this.test) {
-                        case COUNTER -> new Counter();
-                        case FLEX -> new FunnySwitchLayout();
-                        case DRAGGING -> new DragArenaTest();
-                        case SPLIT_PANE -> new SplitPaneTest();
-                        case SLIDERS -> new SliderTest();
-                        case TEXT_INPUT -> new TextInputTest();
-                        case BURNING_CHYZ -> new BurningChyzTest(this.chyz);
-                        case SCROLLING -> new ScrollTest();
-                        case INPUT -> new InputTest();
-                        case CYCLING -> new CyclingTest();
-                        case VANILLA -> new VanillaTest();
-                        case SHARED_STATE -> new SharedStateTest();
-                        case STACKS -> new StacksTest();
-                        case GRIDS -> new GridsTest();
-                        case CONTRIBUTORS -> new ContributorsTest();
-                        case null -> new Center(new Label(Text.literal("select a test")));
-                    }
+                new Transform(
+                    new Matrix4f().m01((float) Math.tan(this.xSkew)).m10((float) Math.tan(this.ySkew)).rotateZ((float) Math.toRadians(this.rotat)),
+                    new Center(
+                        switch (this.test) {
+                            case COUNTER -> new Counter();
+                            case FLEX -> new FunnySwitchLayout();
+                            case DRAGGING -> new DragArenaTest();
+                            case SPLIT_PANE -> new SplitPaneTest();
+                            case SLIDERS -> new SliderTest();
+                            case TEXT_INPUT -> new TextInputTest();
+                            case BURNING_CHYZ -> new BurningChyzTest(this.chyz);
+                            case SCROLLING -> new ScrollTest();
+                            case INPUT -> new InputTest();
+                            case CYCLING -> new CyclingTest();
+                            case VANILLA -> new VanillaTest();
+                            case SHARED_STATE -> new SharedStateTest();
+                            case STACKS -> new StacksTest();
+                            case GRIDS -> new GridsTest();
+                            case CONTRIBUTORS -> new ContributorsTest();
+                            case null -> new Center(new Label(Text.literal("select a test")));
+                        }
+                    )
                 ),
                 new Align(
                     Alignment.LEFT,
@@ -183,6 +187,52 @@ public class TestSelector extends StatefulWidget {
                                             )
                                         )
                                     )
+                                )
+                            )
+                        )
+                    )
+                ),
+                new Align(
+                    Alignment.BOTTOM_RIGHT,
+                    new Sized(
+                        75, null,
+                        new Column(
+                            new Sized(
+                                75, 20,
+                                new MessageButton(
+                                    Text.literal("reset"),
+                                    () -> this.setState(() -> {
+                                        this.xSkew = 0f;
+                                        this.ySkew = 0f;
+                                        this.rotat = 0f;
+                                    })
+                                )
+                            ),
+                            new Sized(
+                                75, 20,
+                                new MessageSlider(
+                                    rotat,
+                                    0d, 360d,
+                                    null,
+                                    LayoutAxis.HORIZONTAL,
+                                    value -> this.setState(() -> this.rotat = value),
+                                    Text.literal("rotat: " + formatDouble(this.rotat))
+                                )
+                            ),
+                            new Sized(
+                                75.0,
+                                75.0,
+                                new MessageXlyder(
+                                    this.xSkew,
+                                    this.ySkew,
+                                    -.75, -.75,
+                                    .75, .75,
+                                    null, null,
+                                    (xValue, yValue) -> this.setState(() -> {
+                                        this.xSkew = xValue;
+                                        this.ySkew = yValue;
+                                    }),
+                                    Text.literal("x skew: " + (formatDouble(this.xSkew)) + "\ny skew: " + (formatDouble(this.ySkew)))
                                 )
                             )
                         )
@@ -432,61 +482,36 @@ public class TestSelector extends StatefulWidget {
 
         public static class State extends WidgetState<SliderTest> {
 
-            private double xSkew = 0f;
-            private double ySkew = 0f;
-
             private boolean redundant = false;
 
             @Override
             public Widget build(BuildContext context) {
                 return new Stack(
-                    new Transform(
-                        new Matrix4f().m01((float) Math.tan(this.xSkew)).m10((float) Math.tan(this.ySkew)),
-                        !this.redundant
-                            ? new Grid(
-                            LayoutAxis.VERTICAL,
-                            3,
-                            Grid.CellFit.tight(),
-                            widget -> new Padding(Insets.all(5), widget),
-                            null,
-                            new Label(Text.literal("Discrete")),
-                            new Label(Text.literal("Smooth")),
-                            new Label(Text.literal("Basic")),
-                            new CoolSlider(2.0, value -> Text.literal("v: " + formatDouble(value))),
-                            new CoolSlider(null, value -> Text.literal("v: " + formatDouble(value))),
-                            new Label(Text.literal("XY")),
-                            new CoolXlyder(2.0, 2.0, (x, y) -> Text.literal("x: " + formatDouble(x) + "\ny: " + formatDouble(y))),
-                            new CoolXlyder(null, null, (x, y) -> Text.literal("x: " + formatDouble(x) + "\ny: " + formatDouble(y))),
-                            new Label(Text.literal("Range")),
-                            new CoolRangeSlider(2.0, (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max))),
-                            new CoolRangeSlider(null, (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max)))
-                        )
-                            : new IncrediblyRedundantSlider()
-                    ),
+                    !this.redundant
+                        ? new Grid(
+                        LayoutAxis.VERTICAL,
+                        3,
+                        Grid.CellFit.tight(),
+                        widget -> new Padding(Insets.all(5), widget),
+                        null,
+                        new Label(Text.literal("Discrete")),
+                        new Label(Text.literal("Smooth")),
+                        new Label(Text.literal("Basic")),
+                        new CoolSlider(2.0, value -> Text.literal("v: " + formatDouble(value))),
+                        new CoolSlider(null, value -> Text.literal("v: " + formatDouble(value))),
+                        new Label(Text.literal("XY")),
+                        new CoolXlyder(2.0, 2.0, (x, y) -> Text.literal("x: " + formatDouble(x) + "\ny: " + formatDouble(y))),
+                        new CoolXlyder(null, null, (x, y) -> Text.literal("x: " + formatDouble(x) + "\ny: " + formatDouble(y))),
+                        new Label(Text.literal("Range")),
+                        new CoolRangeSlider(2.0, (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max))),
+                        new CoolRangeSlider(null, (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max)))
+                    )
+                        : new IncrediblyRedundantSlider(),
                     new Align(
                         Alignment.BOTTOM,
                         new MessageButton(
                             Text.literal(this.redundant ? "no more redundancy" : "we love redundancy"),
                             () -> this.setState(() -> this.redundant = !this.redundant)
-                        )
-                    ),
-                    new Align(
-                        Alignment.BOTTOM_RIGHT,
-                        new Sized(
-                            75.0,
-                            75.0,
-                            new MessageXlyder(
-                                this.xSkew,
-                                this.ySkew,
-                                -.75, -.75,
-                                .75, .75,
-                                null, null,
-                                (xValue, yValue) -> this.setState(() -> {
-                                    this.xSkew = xValue;
-                                    this.ySkew = yValue;
-                                }),
-                                Text.literal("x skew: " + (formatDouble(this.xSkew)) + "\ny skew: " + (formatDouble(this.ySkew)))
-                            )
                         )
                     )
                 );
@@ -1266,8 +1291,8 @@ public class TestSelector extends StatefulWidget {
                     ),
                     new Label(
                         Text.literal(coolNumbers.stream()
-                        .map(String::valueOf)
-                        .collect(Collectors.joining(", ")))
+                                         .map(String::valueOf)
+                                         .collect(Collectors.joining(", ")))
                     )
                 );
             }
