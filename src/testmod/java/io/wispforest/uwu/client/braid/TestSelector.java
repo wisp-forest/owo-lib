@@ -20,6 +20,9 @@ import io.wispforest.owo.braid.widgets.checkbox.BraidCheckbox;
 import io.wispforest.owo.braid.widgets.checkbox.Checkbox;
 import io.wispforest.owo.braid.widgets.checkbox.RawCheckbox;
 import io.wispforest.owo.braid.widgets.button.RawButton;
+import io.wispforest.owo.braid.widgets.cycle.CyclingButton;
+import io.wispforest.owo.braid.widgets.cycle.MessageCyclingButton;
+import io.wispforest.owo.braid.widgets.cycle.RawCyclingButton;
 import io.wispforest.owo.braid.widgets.drag.DragArena;
 import io.wispforest.owo.braid.widgets.drag.DragArenaElement;
 import io.wispforest.owo.braid.widgets.flex.*;
@@ -64,6 +67,8 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.Colors;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.random.Random;
@@ -72,9 +77,11 @@ import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 
 
+import java.time.Duration;
 import java.util.*;
 import java.util.function.DoubleFunction;
 import java.util.stream.Collectors;
@@ -441,7 +448,7 @@ public class TestSelector extends StatefulWidget {
                             3,
                             Grid.CellFit.tight(),
                             widget -> new Padding(Insets.all(5), widget),
-                            new Padding(Insets.none()),
+                            null,
                             new Label(Text.literal("Discrete")),
                             new Label(Text.literal("Smooth")),
                             new Label(Text.literal("Basic")),
@@ -1116,9 +1123,9 @@ public class TestSelector extends StatefulWidget {
                                     null, 200,
                                     new MouseArea(
                                         area -> area.cursorStyle(CursorStyle.HAND)
-                                            .clickCallback((x, y, button) -> this.addToList(getMouseButtonName(button).append(" pressed at:\n").append(formatCoordinates(x, y))))
-                                            .releaseCallback((x, y, button) -> this.addToList(getMouseButtonName(button).append(" released at:\n").append(formatCoordinates(x, y))))
-                                            .dragStartCallback((button) -> this.addToList(getMouseButtonName(button).append(" drag started")))
+                                            .clickCallback((x, y, button, modifiers) -> this.addToList(getMouseButtonName(button).append(" pressed at:\n").append(formatCoordinates(x, y))))
+                                            .releaseCallback((x, y, button, modifiers) -> this.addToList(getMouseButtonName(button).append(" released at:\n").append(formatCoordinates(x, y))))
+                                            .dragStartCallback((button, modifiers) -> this.addToList(getMouseButtonName(button).append(" drag started")))
                                             .dragEndCallback(() -> this.addToList(Text.literal("Drag ended")))
                                             .enterCallback(() -> this.addToList(Text.literal("Mouse entered")))
                                             .exitCallback(() -> this.addToList(Text.literal("Mouse exited"))),
@@ -1177,6 +1184,10 @@ public class TestSelector extends StatefulWidget {
             "first", "second", "third", "fourth", "fifth"
         );
 
+        private static final List<Integer> coolNumbers = List.of(
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+        );
+
         @Override
         public WidgetState<CyclingTest> createState() {
             return new State();
@@ -1184,94 +1195,79 @@ public class TestSelector extends StatefulWidget {
 
         public static class State extends WidgetState<CyclingTest> {
             private CoolEnum selectedEnum = CoolEnum.FIRST;
+            private CoolEnum selectedEnumNoWrap = CoolEnum.FIRST;
             private boolean selectedBoolean = false;
-            private String selectedString = "first";
+            private boolean selectedBooleanNoWrap = false;
+            private String selectedString = coolStrings.get(0);
+            private String selectedStringNoWrap = coolStrings.get(0);
             private int selectedInt = 0;
+            private int selectedIntNoWrap = 0;
 
             @Override
             public Widget build(BuildContext context) {
-                return new Column(
-                    MainAxisAlignment.START,
-                    CrossAxisAlignment.CENTER,
-                    new Padding(Insets.all(10)),
-                    List.of(
-                        new Row(
-                            MainAxisAlignment.START,
-                            CrossAxisAlignment.CENTER,
-                            new Padding(Insets.all(10)),
-                            List.of(
-                                new Label(Text.literal("Cycler")),
-                                new Label(Text.literal("Values"))
-                            )
-//                        ),
-//                        new Row(
-//                            MainAxisAlignment.START,
-//                            CrossAxisAlignment.CENTER,
-//                            new Padding(Insets.all(10)),
-//                            List.of(
-//                                new Label(Text.literal("Enum")),
-//                                new EnumCyclingButton<>(selectedEnum, value -> Text.literal("v: " + value), value -> this.setState(() -> this.selectedEnum = value)),
-//                                new Column(
-//                                    Arrays.stream(CoolEnum.values())
-//                                        .map(coolEnum -> new Label(Text.literal(coolEnum.name())))
-//                                        .toList()
-//                                )
-//                            )
-//                        ),
-//                        new Row(
-//                            MainAxisAlignment.START,
-//                            CrossAxisAlignment.CENTER,
-//                            new Padding(Insets.all(10)),
-//                            List.of(
-//                                new Label(Text.literal("Boolean")),
-//                                new CyclingButton<>(
-//                                    selectedBoolean,
-//                                    List.of(true, false),
-//                                    value -> Text.literal("v: " + value),
-//                                    value -> this.setState(() -> this.selectedBoolean = value)
-//                                ),
-//                                new Column(
-//                                    List.of(
-//                                        new Label(Text.literal("false")),
-//                                        new Label(Text.literal("true"))
-//                                    )
-//                                )
-//                            )
-//                        ),
-//                        new Row(
-//                            MainAxisAlignment.START,
-//                            CrossAxisAlignment.CENTER,
-//                            new Padding(Insets.all(10)),
-//                            List.of(
-//                                new Label(Text.literal("String")),
-//                                new CyclingButton<>(
-//                                    selectedString,
-//                                    coolStrings,
-//                                    value -> this.setState(() -> this.selectedString = value),
-//                                    Text.literal("v: " + selectedString)
-//                                ),
-//                                new Column(
-//                                    coolStrings.stream()
-//                                        .map(string -> new Label(Text.literal(string)))
-//                                        .toList()
-//                                )
-//                            )
-//                        ),
-//                        new Row(
-//                            MainAxisAlignment.START,
-//                            CrossAxisAlignment.CENTER,
-//                            new Padding(Insets.all(10)),
-//                            List.of(
-//                                new Label(Text.literal("Int")),
-//                                new RawCyclingButton<>(
-//                                    selectedInt,
-//                                    amount -> this.selectedInt += amount,
-//                                    value -> Text.literal("v: " + value),
-//                                    value -> this.setState(() -> this.selectedInt = value)
-//                                ),
-//                                new Label(Text.literal("I'm not listing every number"))
-//                            )
-                        )
+                return new Grid(
+                    LayoutAxis.VERTICAL,
+                    4,
+                    Grid.CellFit.tight(),
+                    widget -> new Padding(Insets.all(5), widget),
+                    null,
+                    new Label(Text.literal("Cycler")),
+                    new Label(Text.literal("No Wrap")),
+                    new Label(Text.literal("Values")),
+                    new Label(Text.literal("Enum")),
+                    MessageCyclingButton.forEnum(
+                        this.selectedEnum,
+                        Text.literal(selectedEnum.name()),
+                        (value, index) -> this.setState(() -> this.selectedEnum = value)
+                    ),
+                    MessageCyclingButton.forEnum(
+                        this.selectedEnumNoWrap,
+                        false,
+                        Text.literal(selectedEnumNoWrap.name()),
+                        (value, index) -> this.setState(() -> this.selectedEnumNoWrap = value)
+                    ),
+                    new Label(Text.literal(String.join(", ", Arrays.stream(CoolEnum.values()).map(Enum::name).collect(Collectors.toList())))),
+                    new Label(Text.literal("Boolean")),
+                    MessageCyclingButton.forBoolean(
+                        this.selectedBoolean,
+                        Text.literal(this.selectedBoolean ? "true" : "false"),
+                        (value, index) -> this.setState(() -> this.selectedBoolean = value)
+                    ),
+                    null,
+                    new Label(Text.literal("false, true")),
+                    new Label(Text.literal("String")),
+                    new MessageCyclingButton<>(
+                        coolStrings,
+                        coolStrings.indexOf(this.selectedString),
+                        Text.literal(this.selectedString),
+                        (value, index) -> this.setState(() -> this.selectedString = value)
+                    ),
+                    new MessageCyclingButton<>(
+                        coolStrings,
+                        coolStrings.indexOf(this.selectedStringNoWrap),
+                        false,
+                        Text.literal(this.selectedStringNoWrap),
+                        (value, index) -> this.setState(() -> this.selectedStringNoWrap = value)
+                    ),
+                    new Label(Text.literal(String.join(", ", coolStrings))),
+                    new Label(Text.literal("Int")),
+                    new MessageCyclingButton<>(
+                        coolNumbers,
+                        this.selectedInt,
+                        Text.literal(coolNumbers.get(this.selectedInt).toString()),
+                        (value, index) -> this.setState(() -> this.selectedInt = index)
+                    ),
+                    new MessageCyclingButton<>(
+                        coolNumbers,
+                        this.selectedIntNoWrap,
+                        false,
+                        Text.literal(coolNumbers.get(this.selectedIntNoWrap).toString()),
+                        (value, index) -> this.setState(() -> this.selectedIntNoWrap = index)
+                    ),
+                    new Label(
+                        Text.literal(coolNumbers.stream()
+                        .map(String::valueOf)
+                        .collect(Collectors.joining(", ")))
                     )
                 );
             }
@@ -1315,7 +1311,7 @@ public class TestSelector extends StatefulWidget {
                                     0, 0, 100, 20,
                                     Text.literal("Text Field")
                                 );
-                                widget.setPlaceholder(Text.literal("when the vanilla widget is better than the braid widget"));
+                                widget.setPlaceholder(Text.literal("when the vanilla widget is no longer better than the braid widget"));
                                 return widget;
                             }
                         ),
@@ -1576,47 +1572,63 @@ public class TestSelector extends StatefulWidget {
             }
 
             @Override
-            public Widget build(BuildContext context) {
-                return new Grid(
-                    LayoutAxis.VERTICAL,
-                    3,
-                    Grid.CellFit.loose(),
-                    Stream.concat(
-                            this.contributors.stream()
-                                .map(contributor -> {
-                                    return new Padding(
-                                        Insets.all(8),
-                                        new Panel(
-                                            OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
-                                            new Padding(
-                                                Insets.all(8),
-                                                new Column(
-                                                    MainAxisAlignment.CENTER,
-                                                    CrossAxisAlignment.CENTER,
-                                                    new Padding(Insets.top(4)),
-                                                    List.of(
-                                                        new FirePlayer(new GameProfile(contributor.uuid, contributor.name)),
-                                                        new Label(LabelStyle.SHADOW, true, contributor.displayName),
-                                                        new RatingBar()
+            public Widget build(BuildContext notContext) {
+                return new SharedState<>(
+                    MurderState::new,
+                    new Builder(context -> {
+                        var murders = SharedState.get(context, MurderState.class).murders;
+                        return new Column(
+                            MainAxisAlignment.CENTER,
+                            CrossAxisAlignment.CENTER,
+                            new Padding(Insets.all(10)),
+                            new Label(murders.compareTo(BigInteger.ZERO) > 0 ? Text.literal("You have committed " + murders + " act" + (murders.compareTo(BigInteger.ONE) > 0 ? "s" : "") + " of " + Text.stringifiedTranslatable("uwu.homicide").getString() + " against the owo contributors!" + (murders.compareTo(BigInteger.valueOf(1000)) > 0 ? "... wtf bro" : "")).withColor(Colors.RED) : Text.literal("OWO Contributors")),
+                            new Grid(
+                                LayoutAxis.VERTICAL,
+                                3,
+                                Grid.CellFit.loose(),
+                                Stream.concat(
+                                        this.contributors.stream()
+                                            .map(contributor -> {
+                                                return new Padding(
+                                                    Insets.all(8),
+                                                    new Panel(
+                                                        OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
+                                                        new Padding(
+                                                            Insets.all(8),
+                                                            new Column(
+                                                                MainAxisAlignment.CENTER,
+                                                                CrossAxisAlignment.CENTER,
+                                                                new Padding(Insets.top(4)),
+                                                                List.of(
+                                                                    new FirePlayer(new GameProfile(contributor.uuid, contributor.name)),
+                                                                    new Label(LabelStyle.SHADOW, true, contributor.displayName),
+                                                                    new RatingBar()
+                                                                )
+                                                            )
+                                                        )
                                                     )
+                                                );
+                                            }),
+                                        Stream.of(
+                                            new Sized(
+                                                20,
+                                                20,
+                                                new Button(
+                                                    () -> setState(() -> this.contributors = this.genContributors()),
+                                                    new Label(LabelStyle.SHADOW, true, Text.literal("☠"))
                                                 )
                                             )
                                         )
-                                    );
-                                }),
-                            Stream.of(
-                                new Sized(
-                                    20,
-                                    20,
-                                    new Button(
-                                        () -> setState(() -> this.contributors = this.genContributors()),
-                                        new Label(LabelStyle.SHADOW, true, Text.literal("☠"))
                                     )
-                                )
+                                    .toList()
                             )
-                        )
-                        .toList()
+                        );
+                    })
                 );
+            }
+
+            public static class MurderState extends ShareableState {
+                public BigInteger murders = BigInteger.ZERO;
             }
 
             public record Contributor(UUID uuid, String name, Text displayName) {}
@@ -1645,6 +1657,9 @@ public class TestSelector extends StatefulWidget {
 
                     @Override
                     public Widget build(BuildContext context) {
+                        if (this.dead) this.displayEntity.setOnFire(false);
+                        this.displayEntity.setHealth(dead ? 0 : 20);
+                        this.displayEntity.deathTime = dead ? 20 : 0;
                         return Actions.click(
                             widget -> widget
                                 .enterCallback(!this.dead ? () -> this.displayEntity.setOnFire(true) : null)
@@ -1652,12 +1667,12 @@ public class TestSelector extends StatefulWidget {
                                 .cursorStyle(!this.dead ? CursorStyle.CROSSHAIR : null),
                             this.dead ? null : () -> {
                                 this.setState(() -> this.dead = true);
-
-                                this.displayEntity.setOnFire(false);
-                                this.displayEntity.setHealth(0f);
-                                this.displayEntity.deathTime = 20;
-
                                 MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.ENTITY_PLAYER_DEATH, 1));
+                                SharedState.set(context, MurderState.class, state -> state.murders = state.murders.add(BigInteger.ONE));
+                                scheduleDelayedCallback(Duration.ofSeconds(displayEntity.getUuid().equals(UUID.fromString("09de8a6d-86bf-4c15-bb93-ce3384ce4e96")) ? 1 : 3), () -> this.setState(() -> {
+                                    this.dead = false;
+                                    MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.ITEM_TOTEM_USE, 1));
+                                }));
                             },
                             new Panel(
                                 Identifier.of("uwu", "contributors_panel"),

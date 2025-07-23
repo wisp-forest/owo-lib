@@ -1,13 +1,11 @@
 package io.wispforest.owo.braid.widgets.grid;
 
-import io.wispforest.owo.braid.core.Alignment;
-import io.wispforest.owo.braid.core.Constraints;
-import io.wispforest.owo.braid.core.LayoutAxis;
-import io.wispforest.owo.braid.core.Size;
+import io.wispforest.owo.braid.core.*;
 import io.wispforest.owo.braid.framework.instance.MultiChildWidgetInstance;
 import io.wispforest.owo.braid.framework.instance.WidgetInstance;
 import io.wispforest.owo.braid.framework.widget.MultiChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.braid.widgets.basic.Padding;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
@@ -25,22 +23,22 @@ public class Grid extends MultiChildInstanceWidget {
     public final int crossAxisCells;
     public final CellFit cellFit;
 
-    public Grid(LayoutAxis mainAxis, int crossAxisCells, CellFit cellFit, List<? extends Widget> children) {
-        super(children);
+    public Grid(LayoutAxis mainAxis, int crossAxisCells, CellFit cellFit, List<? extends @Nullable Widget> children) {
+        super(children.stream().map(widget -> widget == null ? new Padding(Insets.none()) : widget).toList());
         this.mainAxis = mainAxis;
         this.cellFit = cellFit;
         this.crossAxisCells = crossAxisCells;
     }
 
-    public Grid(LayoutAxis mainAxis, int crossAxisCells, CellFit cellFit, Widget... children) {
+    public Grid(LayoutAxis mainAxis, int crossAxisCells, CellFit cellFit, @Nullable Widget... children) {
         this(mainAxis, crossAxisCells, cellFit, Arrays.asList(children));
     }
 
-    public Grid(LayoutAxis mainAxis, int crossAxisCells, CellFit cellFit, Function<Widget, Widget> cellWrapper, List<? extends Widget> children) {
+    public Grid(LayoutAxis mainAxis, int crossAxisCells, CellFit cellFit, Function<Widget, Widget> cellWrapper, List<? extends @Nullable Widget> children) {
         this(mainAxis, crossAxisCells, cellFit, children.stream().map(cellWrapper).toList());
     }
 
-    public Grid(LayoutAxis mainAxis, int crossAxisCells, CellFit cellFit, Function<Widget, Widget> cellWrapper, Widget... children) {
+    public Grid(LayoutAxis mainAxis, int crossAxisCells, CellFit cellFit, Function<Widget, Widget> cellWrapper, @Nullable Widget... children) {
         this(mainAxis, crossAxisCells, cellFit, cellWrapper, Arrays.asList(children));
     }
 

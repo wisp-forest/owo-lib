@@ -64,16 +64,24 @@ public class BraidScreen extends Screen implements DisposableScreen {
         this.state.dispose();
     }
 
+    public boolean mouseClicked(double mouseX, double mouseY, int button, int modifiers) {
+        this.eventBuffer.add(new MouseButtonPressEvent(button, new KeyModifiers(modifiers)));
+        return true;
+    }
+
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        this.eventBuffer.add(new MouseButtonPressEvent(button));
+        return this.mouseClicked(mouseX, mouseY, button, 0);
+    }
+
+    public boolean mouseReleased(double mouseX, double mouseY, int button, int modifiers) {
+        this.eventBuffer.add(new MouseButtonReleaseEvent(button, new KeyModifiers(modifiers)));
         return true;
     }
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        this.eventBuffer.add(new MouseButtonReleaseEvent(button));
-        return true;
+        return this.mouseReleased(mouseX, mouseY, button, 0);
     }
 
     @Override

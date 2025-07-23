@@ -1,6 +1,7 @@
 package io.wispforest.owo.braid.widgets.basic;
 
 import io.wispforest.owo.braid.core.Constraints;
+import io.wispforest.owo.braid.core.KeyModifiers;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.framework.instance.MouseListener;
 import io.wispforest.owo.braid.framework.instance.SingleChildWidgetInstance;
@@ -141,12 +142,12 @@ public class MouseArea extends SingleChildInstanceWidget {
 
     @FunctionalInterface
     public interface ClickCallback {
-        boolean onClick(double x, double y, int button);
+        boolean onClick(double x, double y, int button, KeyModifiers modifiers);
     }
 
     @FunctionalInterface
     public interface ReleaseCallback {
-        boolean onRelease(double x, double y, int button);
+        boolean onRelease(double x, double y, int button, KeyModifiers modifiers);
     }
 
     @FunctionalInterface
@@ -166,7 +167,7 @@ public class MouseArea extends SingleChildInstanceWidget {
 
     @FunctionalInterface
     public interface DragStartCallback {
-        void onDragStart(int button);
+        void onDragStart(int button, KeyModifiers modifiers);
     }
 
     @FunctionalInterface
@@ -202,18 +203,18 @@ public class MouseArea extends SingleChildInstanceWidget {
         }
 
         @Override
-        public boolean onMouseDown(double x, double y, int button) {
+        public boolean onMouseDown(double x, double y, int button, KeyModifiers modifiers) {
             if (this.widget.clickCallback != null) {
-                return this.widget.clickCallback.onClick(x, y, button);
+                return this.widget.clickCallback.onClick(x, y, button, modifiers);
             }
 
             return this.widget.dragCallback != null;
         }
 
         @Override
-        public boolean onMouseUp(double x, double y, int button) {
+        public boolean onMouseUp(double x, double y, int button, KeyModifiers modifiers) {
             if (this.widget.releaseCallback != null) {
-                return this.widget.releaseCallback.onRelease(x, y, button);
+                return this.widget.releaseCallback.onRelease(x, y, button, modifiers);
             }
 
             return this.widget.dragEndCallback != null;
@@ -230,8 +231,8 @@ public class MouseArea extends SingleChildInstanceWidget {
         }
 
         @Override
-        public void onMouseDragStart(int button) {
-            if (this.widget.dragStartCallback != null) this.widget.dragStartCallback.onDragStart(button);
+        public void onMouseDragStart(int button, KeyModifiers modifiers) {
+            if (this.widget.dragStartCallback != null) this.widget.dragStartCallback.onDragStart(button, modifiers);
         }
 
         @Override

@@ -435,7 +435,7 @@ public class TextInput extends LeafInstanceWidget {
         private Instant lastClickTime = Instant.EPOCH;
 
         @Override
-        public boolean onMouseDown(double x, double y, int button) {
+        public boolean onMouseDown(double x, double y, int button, KeyModifiers modifiers) {
             var clickedIdx = this.charIdxAt(x, y);
 
             if (Duration.between(this.lastClickTime, Instant.now()).compareTo(MAX_DOUBLE_CLICK_DELAY) < 0) {

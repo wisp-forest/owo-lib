@@ -100,12 +100,12 @@ public class VanillaWidgetWrapper<T extends Drawable & Element> extends LeafInst
         }
 
         @Override
-        public boolean onMouseDown(double x, double y, int button) {
+        public boolean onMouseDown(double x, double y, int button, KeyModifiers modifiers) {
             return widget.wrapped.mouseClicked(x, y, button);
         }
 
         @Override
-        public boolean onMouseUp(double x, double y, int button) {
+        public boolean onMouseUp(double x, double y, int button, KeyModifiers modifiers) {
             return widget.wrapped.mouseReleased(x, y, button);
         }
 
@@ -116,7 +116,7 @@ public class VanillaWidgetWrapper<T extends Drawable & Element> extends LeafInst
         }
 
         @Override
-        public void onMouseDragStart(int button) {
+        public void onMouseDragStart(int button, KeyModifiers modifiers) {
             draggingMouseButton = button;
         }
 

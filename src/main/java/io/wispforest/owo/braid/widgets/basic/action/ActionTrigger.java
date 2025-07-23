@@ -1,35 +1,53 @@
 package io.wispforest.owo.braid.widgets.basic.action;
 
 import io.wispforest.owo.braid.core.KeyModifiers;
-import it.unimi.dsi.fastutil.ints.IntSet;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.lwjgl.glfw.GLFW.*;
 
-public record ActionTrigger(
-    @Nullable IntSet mouseButtons,
-    @Nullable IntSet keyCodes,
-    @Nullable KeyModifiers modifiers
-) {
+public record ActionTrigger(Set<Trigger> triggers) {
 
     public static final ActionTrigger CLICK = new ActionTrigger(
-        IntSet.of(GLFW_MOUSE_BUTTON_LEFT),
-        IntSet.of(GLFW_KEY_SPACE, GLFW_KEY_ENTER, GLFW_KEY_KP_ENTER),
-        null
+        Trigger.ofMouse(GLFW_MOUSE_BUTTON_LEFT),
+        Trigger.ofKey(GLFW_KEY_SPACE),
+        Trigger.ofKey(GLFW_KEY_ENTER),
+        Trigger.ofKey(GLFW_KEY_KP_ENTER)
     );
 
     public static final ActionTrigger SECONDARY_CLICK = new ActionTrigger(
-        IntSet.of(GLFW_MOUSE_BUTTON_RIGHT),
-        IntSet.of(GLFW_KEY_SPACE, GLFW_KEY_ENTER, GLFW_KEY_KP_ENTER),
-        new KeyModifiers(GLFW_MOD_SHIFT)
+        Trigger.ofMouse(GLFW_MOUSE_BUTTON_RIGHT),
+        Trigger.ofMouse(GLFW_MOUSE_BUTTON_LEFT, new KeyModifiers(GLFW_MOD_SHIFT)),
+        Trigger.ofKey(GLFW_KEY_SPACE, new KeyModifiers(GLFW_MOD_SHIFT)),
+        Trigger.ofKey(GLFW_KEY_ENTER, new KeyModifiers(GLFW_MOD_SHIFT)),
+        Trigger.ofKey(GLFW_KEY_KP_ENTER, new KeyModifiers(GLFW_MOD_SHIFT))
     );
 
-    public boolean isTriggeredByMouseButton(int button) {
-        return this.mouseButtons != null && this.mouseButtons.contains(button);
+    public static ActionTrigger of(ActionTrigger... triggers) {
+        return new ActionTrigger(Arrays.stream(triggers).flatMap(actionTrigger -> actionTrigger.triggers.stream()).collect(Collectors.toSet()));
     }
 
-    public boolean isTriggeredByKeyCode(int keyCode, KeyModifiers modifiers) {
-        return this.keyCodes != null && this.keyCodes.contains(keyCode) &&
-               (this.modifiers == null || this.modifiers.equals(modifiers));
+    public static ActionTrigger of(ActionTrigger actionTrigger, Trigger... triggers) {
+        var combinedTriggers = new HashSet<>(Set.copyOf(actionTrigger.triggers));
+        combinedTriggers.addAll(List.of(triggers));
+        return new ActionTrigger(combinedTriggers);
+    }
+
+    public ActionTrigger(Collection<Trigger> triggers) {
+        this(Set.copyOf(triggers));
+    }
+
+    public ActionTrigger(Trigger... triggers) {
+        this(Set.of(triggers));
+    }
+
+    public boolean isTriggeredByMouseButton(int button, @Nullable KeyModifiers modifiers) {
+        return this.triggers.stream().anyMatch(trigger -> trigger instanceof Trigger.Mouse mouseTrigger && mouseTrigger.isTriggered(button, modifiers));
+    }
+
+    public boolean isTriggeredByKeyCode(int keyCode, @Nullable KeyModifiers modifiers) {
+        return this.triggers.stream().anyMatch(trigger -> trigger instanceof Trigger.Key keyTrigger && keyTrigger.isTriggered(keyCode, modifiers));
     }
 }

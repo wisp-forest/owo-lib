@@ -10,6 +10,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Map;
 import java.util.function.IntPredicate;
 
 public class MessageButton extends StatelessWidget {
@@ -22,17 +23,16 @@ public class MessageButton extends StatelessWidget {
         this.onClick = onClick;
     }
 
-    public MessageButton(Text text, boolean active, @Nullable Runnable onClick) {
+    public MessageButton(Text text, boolean active, Runnable onClick) {
         this(text, active ? onClick : null);
     }
 
     @Override
     public Widget build(BuildContext context) {
-        var active = this.onClick != null;
         return new Button(
             this.onClick,
             new Label(
-                active
+                this.onClick != null
                     ? LabelStyle.SHADOW
                     : new LabelStyle(null, Color.ofFormatting(Formatting.GRAY), null, false),
                 true,
