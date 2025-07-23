@@ -2,7 +2,6 @@ package io.wispforest.owo.braid.widgets.basic;
 
 import io.wispforest.owo.braid.framework.instance.WidgetInstance;
 import io.wispforest.owo.braid.framework.proxy.ComposedProxy;
-import io.wispforest.owo.braid.framework.proxy.InstanceListenerProxy;
 import io.wispforest.owo.braid.framework.proxy.WidgetProxy;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import org.jetbrains.annotations.Nullable;
@@ -17,7 +16,7 @@ public abstract class VisitorWidget extends Widget {
     @Override
     public abstract Proxy<?> proxy();
 
-    public static class Proxy<T extends VisitorWidget> extends ComposedProxy implements InstanceListenerProxy {
+    public static class Proxy<T extends VisitorWidget> extends ComposedProxy {
 
         public final VisitorWidget.Visitor<T> visitor;
 

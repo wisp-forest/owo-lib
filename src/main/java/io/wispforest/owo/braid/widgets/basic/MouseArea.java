@@ -1,8 +1,7 @@
 package io.wispforest.owo.braid.widgets.basic;
 
-import io.wispforest.owo.braid.core.Constraints;
-import io.wispforest.owo.braid.core.KeyModifiers;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
+import io.wispforest.owo.braid.core.KeyModifiers;
 import io.wispforest.owo.braid.framework.instance.MouseListener;
 import io.wispforest.owo.braid.framework.instance.SingleChildWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
@@ -223,6 +222,11 @@ public class MouseArea extends SingleChildInstanceWidget {
         @Override
         public void onMouseEnter() {
             if (this.widget.enterCallback != null) this.widget.enterCallback.onMouseEnter();
+        }
+
+        @Override
+        public void onMouseMove(double toX, double toY) {
+            if (this.widget.moveCallback != null) this.widget.moveCallback.onMouseMove(toX, toY);
         }
 
         @Override

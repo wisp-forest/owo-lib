@@ -5,6 +5,7 @@ import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.core.Size;
 import io.wispforest.owo.braid.framework.widget.InstanceWidget;
+import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
@@ -29,6 +30,10 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
     private WidgetInstance<?> parent;
 
     protected T widget;
+
+    // ---
+
+    public boolean debugHighlighted = false;
 
     // ---
 
@@ -119,6 +124,14 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
         ctx.push();
         child.transform.transformToParent(ctx.getMatrices());
         child.draw(ctx);
+
+        if (child.debugHighlighted) {
+            ctx.fill(
+                0, 0, (int) child.transform.width(), (int) child.transform.height(),
+                0x7FFFD63A
+            );
+        }
+
         ctx.pop();
     }
 

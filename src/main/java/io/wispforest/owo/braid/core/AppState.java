@@ -8,9 +8,13 @@ import io.wispforest.owo.braid.framework.instance.*;
 import io.wispforest.owo.braid.framework.proxy.BuildScope;
 import io.wispforest.owo.braid.framework.proxy.ProxyHost;
 import io.wispforest.owo.braid.framework.proxy.SingleChildInstanceWidgetProxy;
+import io.wispforest.owo.braid.framework.proxy.WidgetProxy;
 import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.Tooltip;
+import io.wispforest.owo.braid.widgets.basic.VisitorWidget;
+import io.wispforest.owo.braid.widgets.inspector.BraidInspector;
+import io.wispforest.owo.braid.widgets.inspector.InstancePicker;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.util.EventSource;
 import net.minecraft.client.MinecraftClient;
@@ -28,6 +32,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -59,7 +64,10 @@ public class AppState implements InstanceHost, ProxyHost {
 
     private final BraidHotReloadCallback.Listener reloadListener;
     private final EventSource<?>.Subscription resizeSubscription;
+    private final List<Runnable> onTerminate = new ArrayList<>();
     private boolean running = true;
+
+    private final BraidInspector inspector = new BraidInspector();
 
     public AppState(
         @Nullable Logger logger,
@@ -74,7 +82,18 @@ public class AppState implements InstanceHost, ProxyHost {
         this.surface = surface;
         this.eventBuffer = eventBuffer;
 
-        this.root = new RootWidget(root, this.rootBuildScope).proxy();
+        this.root = new RootWidget(
+            new InstancePicker(
+                this.inspector.onPick(),
+                this.inspector::revealInstance,
+                new UserRoot(
+                    widgetProxy -> inspector.rootProxy = widgetProxy,
+                    widgetInstance -> inspector.rootInstance = widgetInstance,
+                    root
+                )
+            ),
+            this.rootBuildScope
+        ).proxy();
         this.root.bootstrap(this, this);
         this.scheduleLayout(this.rootInstance());
 
@@ -86,6 +105,15 @@ public class AppState implements InstanceHost, ProxyHost {
 
     public boolean running() {
         return this.running;
+    }
+
+    public void onTerminate(Runnable callback) {
+        this.onTerminate.add(callback);
+    }
+
+    public void scheduleShutdown() {
+        this.running = false;
+        this.onTerminate.forEach(Runnable::run);
     }
 
     private @Nullable TooltipState activeTooltip;
@@ -164,7 +192,7 @@ public class AppState implements InstanceHost, ProxyHost {
             var cursorStyleSource = state.firstWhere(
                 (hit) ->
                     hit.instance() instanceof MouseListener &&
-                    ((MouseListener) hit.instance()).cursorStyleAt(hit.x(), hit.y()) != null
+                        ((MouseListener) hit.instance()).cursorStyleAt(hit.x(), hit.y()) != null
             );
 
             if (cursorStyleSource != null) {
@@ -197,8 +225,14 @@ public class AppState implements InstanceHost, ProxyHost {
             this.callbacks.poll().callback().run();
         }
 
-        this.rootBuildScope.rebuildDirtyProxies();
-        this.flushLayoutQueue();
+        var anyTreeMutations = false;
+
+        anyTreeMutations |= this.rootBuildScope.rebuildDirtyProxies();
+        anyTreeMutations |= this.flushLayoutQueue();
+
+        if (anyTreeMutations) {
+            this.inspector.refresh();
+        }
 
         if (!this.postLayoutCallbacks.isEmpty()) {
             var callbacksForThisFrame = this.postLayoutCallbacks;
@@ -278,18 +312,25 @@ public class AppState implements InstanceHost, ProxyHost {
                         this.dragging = null;
                     }
                 }
-                case MouseScrollEvent(double xOffset, double yOffset) -> this.hitTest().firstWhere(
-                    (hit) -> hit.instance() instanceof MouseListener &&
-                             ((MouseListener) hit.instance()).onMouseScroll(
-                                 hit.x(),
-                                 hit.y(),
-                                 xOffset,
-                                 yOffset
-                             )
-                );
+                case MouseScrollEvent(double xOffset, double yOffset) -> {
+                    this.hitTest().firstWhere(
+                        (hit) -> hit.instance() instanceof MouseListener &&
+                            ((MouseListener) hit.instance()).onMouseScroll(
+                                hit.x(),
+                                hit.y(),
+                                xOffset,
+                                yOffset
+                            )
+                    );
+                }
                 case KeyPressEvent(int keyCode, int scancode, KeyModifiers modifiers) -> {
                     if (keyCode == GLFW.GLFW_KEY_R && modifiers.shift() && modifiers.alt()) {
                         this.rebuildRoot();
+                        break;
+                    }
+
+                    if (keyCode == GLFW.GLFW_KEY_I && modifiers.ctrl() && modifiers.shift()) {
+                        this.inspector.activate();
                         break;
                     }
 
@@ -314,7 +355,9 @@ public class AppState implements InstanceHost, ProxyHost {
                     }
                 }
                 case FilesDroppedEvent filesDroppedEvent -> {}
-                case CloseEvent ignored -> this.running = false;
+                case CloseEvent ignored -> {
+                    this.scheduleShutdown();
+                }
             }
         }
     }
@@ -329,6 +372,8 @@ public class AppState implements InstanceHost, ProxyHost {
     }
 
     public void dispose() {
+        this.inspector.close();
+
         this.reloadListener.unregister();
         this.resizeSubscription.cancel();
 
@@ -385,7 +430,9 @@ public class AppState implements InstanceHost, ProxyHost {
     private List<WidgetInstance<?>> layoutQueue = new ArrayList<>();
     private boolean mergeToLayoutQueue = false;
 
-    private void flushLayoutQueue() {
+    private boolean flushLayoutQueue() {
+        if (this.layoutQueue.isEmpty()) return false;
+
         while (!this.layoutQueue.isEmpty()) {
             var queue = this.layoutQueue;
             this.layoutQueue = new ArrayList<>();
@@ -414,6 +461,8 @@ public class AppState implements InstanceHost, ProxyHost {
 
             this.mergeToLayoutQueue = false;
         }
+
+        return true;
     }
 
     @Override
@@ -522,6 +571,30 @@ class RootInstance extends SingleChildWidgetInstance.ShrinkWrap<RootWidget> {
 
     public RootInstance(RootWidget widget) {
         super(widget);
+    }
+}
+
+class UserRoot extends VisitorWidget {
+
+    public final Consumer<WidgetProxy> proxyCallback;
+    public final Consumer<WidgetInstance<?>> instanceCallback;
+
+    public UserRoot(Consumer<WidgetProxy> proxyCallback, Consumer<WidgetInstance<?>> instanceCallback, Widget child) {
+        super(child);
+        this.proxyCallback = proxyCallback;
+        this.instanceCallback = instanceCallback;
+    }
+
+    private static final Visitor<UserRoot> VISITOR = (widget, instance) -> {
+        widget.instanceCallback.accept(instance);
+    };
+
+    @Override
+    public Proxy<?> proxy() {
+        var proxy = new Proxy<>(this, VISITOR);
+        this.proxyCallback.accept(proxy);
+
+        return proxy;
     }
 }
 
