@@ -14,7 +14,7 @@ public class Cycler<T> extends StatelessWidget {
     public final List<T> values;
     public final int index;
 
-    public boolean wrap;
+    public final boolean wrap;
     public final CyclerCallback<T> onChanged;
 
     public final CyclingWidgetBuilder<T> builder;
@@ -75,12 +75,6 @@ public class Cycler<T> extends StatelessWidget {
     @FunctionalInterface
     public interface CycleFunction {
         boolean cycle(int amount);
-
-        //TODO: probably trash this
-        default boolean forMouseButton(int button) {
-            if (button != 0 && button != 1) return false;
-            return this.cycle(button == 0 ? 1 : -1);
-        }
 
         default boolean forScroll(double amount) {
             if (amount == 0) return false;
