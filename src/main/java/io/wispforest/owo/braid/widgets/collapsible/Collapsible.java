@@ -7,18 +7,17 @@ import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.braid.widgets.SpriteWidget;
 import io.wispforest.owo.braid.widgets.basic.*;
 import io.wispforest.owo.braid.widgets.basic.action.Actions;
 import io.wispforest.owo.braid.widgets.flex.Column;
 import io.wispforest.owo.braid.widgets.flex.CrossAxisAlignment;
 import io.wispforest.owo.braid.widgets.flex.MainAxisAlignment;
 import io.wispforest.owo.braid.widgets.flex.Row;
-import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.braid.widgets.stack.StackBase;
 import io.wispforest.owo.ui.core.Color;
-import net.minecraft.text.Text;
-import org.joml.Matrix4f;
+import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
@@ -58,12 +57,12 @@ public class Collapsible extends StatefulWidget {
                 body.add(new Align(
                     Alignment.LEFT,
                     new Padding(
-                        Insets.left(5),
+                        Insets.left(6),
                         new Sized(
                             1,
                             Double.POSITIVE_INFINITY,
                             new Box(
-                                this.hovered ? Color.WHITE : Color.WHITE.interpolate(Color.BLACK, .9f)
+                                this.hovered ? Color.WHITE : Color.WHITE.interpolate(Color.BLACK, .5f)
                             )
                         )
                     )
@@ -83,17 +82,13 @@ public class Collapsible extends StatefulWidget {
                         MainAxisAlignment.START,
                         CrossAxisAlignment.CENTER,
                         new Sized(
-                            10,
+                            12,
                             12,
                             Actions.click(
                                 widget -> widget.cursorStyle(CursorStyle.HAND),
                                 () -> this.widget().onToggled.accept(!this.widget().collapsed),
-                                new Align(
-                                    Alignment.LEFT,
-                                    new Transform(
-                                        new Matrix4f().rotateZ(this.widget().collapsed ? 0 : (float) Math.toRadians(90)),
-                                        new Label(Text.literal(">"))
-                                    )
+                                new Center(
+                                    new SpriteWidget(Identifier.of("owo",  this.widget().collapsed ? "braid_collapsible_closed" : "braid_collapsible_open"), false)
                                 )
                             )
                         ),
