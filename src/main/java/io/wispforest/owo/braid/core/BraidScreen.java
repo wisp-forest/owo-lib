@@ -1,11 +1,14 @@
 package io.wispforest.owo.braid.core;
 
 import io.wispforest.owo.braid.core.events.*;
+import io.wispforest.owo.braid.framework.BuildContext;
+import io.wispforest.owo.braid.framework.widget.InheritedWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.ui.util.DisposableScreen;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
 
 public class BraidScreen extends Screen implements DisposableScreen {
@@ -32,7 +35,7 @@ public class BraidScreen extends Screen implements DisposableScreen {
                 this.client,
                 this.surface,
                 this.eventBuffer,
-                this.rootWidget
+                new BraidScreenProvider(this, this.rootWidget)
             );
         }
     }
@@ -98,5 +101,27 @@ public class BraidScreen extends Screen implements DisposableScreen {
     public boolean charTyped(char chr, int modifiers) {
         this.eventBuffer.add(new CharInputEvent(chr, new KeyModifiers(modifiers)));
         return true;
+    }
+
+    // ---
+
+    public static @Nullable BraidScreen maybeOf(BuildContext context) {
+        var provider = context.getAncestor(BraidScreenProvider.class);
+        return provider != null ? provider.screen : null;
+    }
+}
+
+class BraidScreenProvider extends InheritedWidget {
+
+    public final BraidScreen screen;
+
+    public BraidScreenProvider(BraidScreen screen, Widget child) {
+        super(child);
+        this.screen = screen;
+    }
+
+    @Override
+    public boolean mustRebuildDependents(InheritedWidget newWidget) {
+        return false;
     }
 }
