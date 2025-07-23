@@ -386,7 +386,6 @@ public class AppState implements InstanceHost, ProxyHost {
         return this.hitTest(this.cursorPosition.x, this.cursorPosition.y);
     }
 
-    @ApiStatus.Internal
     public HitTestState hitTest(double x, double y) {
         var state = new HitTestState();
         this.rootInstance().hitTest(x, y, state);
