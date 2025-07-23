@@ -19,8 +19,8 @@ public class BraidInspector {
     private final BraidEventStream<RevealInstanceEvent> revealEvents = new BraidEventStream<>();
 
     private boolean active = false;
-    private @Nullable AppState currentApp;
-    private @Nullable BraidWindow currentWindow;
+    @Nullable AppState currentApp;
+    @Nullable BraidWindow currentWindow;
 
     public EventSource<BraidEventStream.Listener<Unit>> onPick() {
         return this.pickEvents.source();
@@ -53,10 +53,12 @@ public class BraidInspector {
 
         var result = BraidWindow.open(
             "braid inspector",
-            800,
-            500,
+            900,
+            550,
             new InspectorWidget(this.rootProxy, this.rootInstance, this)
         );
+
+        GLFW.glfwSetWindowAttrib(result.window().handle, GLFW.GLFW_FLOATING, GLFW.GLFW_TRUE);
 
         this.currentApp = result.state();
         this.currentWindow = result.window();

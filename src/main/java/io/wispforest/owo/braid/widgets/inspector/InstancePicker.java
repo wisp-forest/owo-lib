@@ -7,9 +7,11 @@ import io.wispforest.owo.braid.framework.instance.WidgetInstance;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.braid.widgets.basic.Align;
 import io.wispforest.owo.braid.widgets.basic.Builder;
 import io.wispforest.owo.braid.widgets.basic.MouseArea;
 import io.wispforest.owo.braid.widgets.basic.Padding;
+import io.wispforest.owo.braid.widgets.drag.DragArenaInstance;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.braid.widgets.stack.StackBase;
 import io.wispforest.owo.util.EventSource;
@@ -70,11 +72,13 @@ public class InstancePicker extends StatefulWidget {
 
                             if (this.pickedInstance != null) this.pickedInstance.debugHighlighted = false;
 
-                            this.pickedInstance = hitTest.anyHit() ? hitTest.firstHit().instance() : null;
+                            var pickHit = hitTest.firstWhere(hit -> !(hit.instance() instanceof Align.Instance || hit.instance() instanceof DragArenaInstance));
+                            this.pickedInstance = pickHit != null ? pickHit.instance() : null;
+
                             if (this.pickedInstance != null) this.pickedInstance.debugHighlighted = true;
                         })
                         .clickCallback((x, y, button, modifiers) -> {
-                            if(button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+                            if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
                                 if (this.pickedInstance != null) {
                                     this.pickedInstance.debugHighlighted = false;
                                     this.widget().pickCallback.onPick(this.pickedInstance);

@@ -1,20 +1,23 @@
 package io.wispforest.owo.braid.widgets.inspector;
 
+import io.wispforest.owo.braid.core.Insets;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.instance.WidgetInstance;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.braid.widgets.SpriteWidget;
 import io.wispforest.owo.braid.widgets.basic.Box;
+import io.wispforest.owo.braid.widgets.basic.Sized;
 import io.wispforest.owo.braid.widgets.flex.Column;
 import io.wispforest.owo.braid.widgets.flex.CrossAxisAlignment;
 import io.wispforest.owo.braid.widgets.flex.MainAxisAlignment;
 import io.wispforest.owo.braid.widgets.flex.Row;
-import io.wispforest.owo.braid.widgets.label.Label;
+import io.wispforest.owo.braid.widgets.scroll.Scrollable;
 import io.wispforest.owo.braid.widgets.sharedstate.SharedState;
 import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.util.EventSource;
-import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.Unit;
 
 import java.util.ArrayList;
@@ -43,7 +46,7 @@ public class InstanceTreeView extends StatefulWidget {
 
         private void reveal() {
             this.schedulePostLayoutCallback(() -> {
-//                throw new RuntimeException("implement Scrollable.reveal()");
+                Scrollable.reveal(this.context(), Insets.all(20));
             });
         }
 
@@ -111,12 +114,16 @@ public class InstanceTreeView extends StatefulWidget {
                         )
                     )
                     :
-                    new Row(
-                        MainAxisAlignment.START,
-                        CrossAxisAlignment.CENTER,
-                        new Label(Text.literal("o")),
-                        title
-                    )
+                        new Row(
+                            MainAxisAlignment.START,
+                            CrossAxisAlignment.CENTER,
+                            new Sized(
+                                12,
+                                12,
+                                new SpriteWidget(Identifier.of("owo", "braid_inspector_leaf"), false)
+                            ),
+                            title
+                        )
             );
         }
     }
