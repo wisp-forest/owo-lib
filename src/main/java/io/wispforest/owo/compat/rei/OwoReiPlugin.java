@@ -87,7 +87,7 @@ public class OwoReiPlugin implements REIClientPlugin {
                 }
             };
 
-            screen.state().rootInstance().visitChildren(visitor);
+            screen.state.rootInstance().visitChildren(visitor);
 
             return rectangles;
         });
@@ -121,14 +121,14 @@ public class OwoReiPlugin implements REIClientPlugin {
         registry.registerFocusedStack((screen, mouse) -> {
             if (!(screen instanceof BraidScreen braid)) return CompoundEventResult.pass();
 
-            var hit = braid.state().hitTest(mouse.x, mouse.y)
+            var hit = braid.state.hitTest(mouse.x, mouse.y)
                 .firstWhere(x -> x.instance() instanceof RecipeViewerStack.Instance);
 
             if (hit == null) return CompoundEventResult.pass();
 
             var instance = (RecipeViewerStack.Instance) hit.instance();
 
-            return CompoundEventResult.interruptTrue(ReiStackUtil.toRei(instance.widget().stackProvider().get()));
+            return CompoundEventResult.interruptTrue(ReiStackUtil.toRei(instance.widget().stackProvider.get()));
         });
 
         registry.registerDraggableStackVisitor(new DraggableStackVisitor<Screen>() {
@@ -148,7 +148,7 @@ public class OwoReiPlugin implements REIClientPlugin {
                 var visitor = new WidgetInstance.Visitor() {
                     @Override
                     public void visit(WidgetInstance<?> child) {
-                        if (child instanceof StackDropArea.Instance area && area.widget().stackPredicate().test(converted)) {
+                        if (child instanceof StackDropArea.Instance area && area.widget().stackPredicate.test(converted)) {
                             var bounds = area.computeGlobalBounds();
 
                             allBounds.add(BoundsProvider.ofRectangle(new Rectangle(bounds.minX, bounds.minY, bounds.maxX - bounds.minX, bounds.maxY - bounds.minY)));
@@ -158,7 +158,7 @@ public class OwoReiPlugin implements REIClientPlugin {
                     }
                 };
 
-                braid.state().rootInstance().visitChildren(visitor);
+                braid.state.rootInstance().visitChildren(visitor);
 
                 return allBounds.stream();
             }
@@ -167,7 +167,7 @@ public class OwoReiPlugin implements REIClientPlugin {
             public DraggedAcceptorResult acceptDraggedStack(DraggingContext<Screen> context, DraggableStack stack) {
                 if (!(context.getScreen() instanceof BraidScreen braid)) return DraggedAcceptorResult.PASS;
 
-                var hit = braid.state().hitTest(context.getCurrentPosition().x, context.getCurrentPosition().y)
+                var hit = braid.state.hitTest(context.getCurrentPosition().x, context.getCurrentPosition().y)
                     .firstWhere(x -> x.instance() instanceof StackDropArea.Instance);
 
                 if (hit == null) return DraggedAcceptorResult.PASS;
@@ -176,9 +176,9 @@ public class OwoReiPlugin implements REIClientPlugin {
 
                 var converted = ReiStackUtil.fromRei(stack.getStack());
 
-                if (!instance.widget().stackPredicate().test(converted)) return DraggedAcceptorResult.PASS;
+                if (!instance.widget().stackPredicate.test(converted)) return DraggedAcceptorResult.PASS;
 
-                instance.widget().stackAcceptor().accept(converted);
+                instance.widget().stackAcceptor.accept(converted);
 
                 return DraggedAcceptorResult.ACCEPTED;
             }

@@ -68,20 +68,20 @@ public class OwoEmiPlugin implements EmiPlugin {
                 }
             };
 
-            braid.state().rootInstance().visitChildren(visitor);
+            braid.state.rootInstance().visitChildren(visitor);
         });
 
         registry.addGenericStackProvider((screen, x, y) -> {
             if (!(screen instanceof BraidScreen braid)) return EmiStackInteraction.EMPTY;
 
-            var hit = braid.state().hitTest(x, y)
+            var hit = braid.state.hitTest(x, y)
                 .firstWhere(i -> i.instance() instanceof RecipeViewerStack.Instance);
 
             if (hit == null) return EmiStackInteraction.EMPTY;
 
             var instance = (RecipeViewerStack.Instance) hit.instance();
 
-            return new EmiStackInteraction(EmiStackUtil.toEmi(instance.widget().stackProvider().get()));
+            return new EmiStackInteraction(EmiStackUtil.toEmi(instance.widget().stackProvider.get()));
         });
 
         registry.addGenericDragDropHandler(new EmiDragDropHandler<>() {
@@ -89,7 +89,7 @@ public class OwoEmiPlugin implements EmiPlugin {
             public boolean dropStack(Screen screen, EmiIngredient stack, int x, int y) {
                 if (!(screen instanceof BraidScreen braid)) return false;
 
-                var hit = braid.state().hitTest(x, y)
+                var hit = braid.state.hitTest(x, y)
                     .firstWhere(i -> i.instance() instanceof StackDropArea.Instance);
 
                 if (hit == null) return false;
@@ -98,9 +98,9 @@ public class OwoEmiPlugin implements EmiPlugin {
 
                 var converted = EmiStackUtil.fromEmi(stack.getEmiStacks().get(0));
 
-                if (!instance.widget().stackPredicate().test(converted)) return false;
+                if (!instance.widget().stackPredicate.test(converted)) return false;
 
-                instance.widget().stackAcceptor().accept(converted);
+                instance.widget().stackAcceptor.accept(converted);
 
                 return true;
             }
@@ -116,7 +116,7 @@ public class OwoEmiPlugin implements EmiPlugin {
                 var visitor = new WidgetInstance.Visitor() {
                     @Override
                     public void visit(WidgetInstance<?> child) {
-                        if (child instanceof StackDropArea.Instance area && area.widget().stackPredicate().test(converted)) {
+                        if (child instanceof StackDropArea.Instance area && area.widget().stackPredicate.test(converted)) {
                             allBounds.add(area.computeGlobalBounds());
                         }
 
@@ -124,7 +124,7 @@ public class OwoEmiPlugin implements EmiPlugin {
                     }
                 };
 
-                braid.state().rootInstance().visitChildren(visitor);
+                braid.state.rootInstance().visitChildren(visitor);
 
                 for (Box b : allBounds) {
                     draw.fill((int) b.minX, (int) b.minY, (int) b.maxX, (int) b.maxY, 0x8822BB33);

@@ -10,7 +10,6 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
-import org.jetbrains.annotations.ApiStatus;
 
 public class BraidScreen extends Screen implements DisposableScreen {
 
@@ -19,16 +18,11 @@ public class BraidScreen extends Screen implements DisposableScreen {
     protected final Vector2i cursorPos = new Vector2i();
 
     protected final Widget rootWidget;
-    protected AppState state;
+    public AppState state;
 
     public BraidScreen(Widget rootWidget) {
         super(Text.empty());
         this.rootWidget = rootWidget;
-    }
-
-    @ApiStatus.Internal
-    public AppState state() {
-        return state;
     }
 
     @Override
