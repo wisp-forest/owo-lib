@@ -6,27 +6,12 @@ import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.MouseArea;
 import io.wispforest.owo.braid.widgets.basic.action.ActionTrigger;
 import io.wispforest.owo.braid.widgets.basic.action.Actions;
-import io.wispforest.owo.braid.widgets.basic.action.Trigger;
 import io.wispforest.owo.ui.util.UISounds;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-import static org.lwjgl.glfw.GLFW.*;
-
 public class RawCyclingButton<T> extends StatelessWidget {
-
-    public static final ActionTrigger INCREMENT = ActionTrigger.of(
-        ActionTrigger.CLICK,
-        Trigger.ofKey(GLFW_KEY_RIGHT),
-        Trigger.ofKey(GLFW_KEY_UP)
-    );
-
-    public static final ActionTrigger DECREMENT = ActionTrigger.of(
-        ActionTrigger.SECONDARY_CLICK,
-        Trigger.ofKey(GLFW_KEY_LEFT),
-        Trigger.ofKey(GLFW_KEY_DOWN)
-    );
 
     public final List<T> values;
     public final int index;
@@ -94,8 +79,8 @@ public class RawCyclingButton<T> extends StatelessWidget {
                     new Actions(
                         widget ->
                             widget
-                                .addAction(INCREMENT, () -> {if (cycle.cycle(1)) UISounds.playButtonSound();})
-                                .addAction(DECREMENT, () -> {if (cycle.cycle(-1)) UISounds.playButtonSound();}),
+                                .addAction(ActionTrigger.INCREMENT, () -> {if (cycle.cycle(1)) UISounds.playButtonSound();})
+                                .addAction(ActionTrigger.DECREMENT, () -> {if (cycle.cycle(-1)) UISounds.playButtonSound();}),
                         child
                     )
                 )

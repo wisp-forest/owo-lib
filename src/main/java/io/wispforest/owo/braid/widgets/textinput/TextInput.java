@@ -361,7 +361,7 @@ public class TextInput extends LeafInstanceWidget {
                     var chars = new StringBuilder(this.text);
                     var start = Math.max(
                         0,
-                        modifiers.shift()
+                        modifiers.shift() && !modifiers.ctrl()
                             ? this.currentLine().beginIdx() - 1
                             : cursorPosition
                     );

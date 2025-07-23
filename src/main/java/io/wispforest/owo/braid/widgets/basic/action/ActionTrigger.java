@@ -33,12 +33,24 @@ public record ActionTrigger(Set<Trigger> triggers) {
         Trigger.ofKey(GLFW_KEY_DOWN)
     );
 
+    public static final ActionTrigger RIGHT = new ActionTrigger(
+        Trigger.ofKey(GLFW_KEY_RIGHT)
+    );
+
     public static final ActionTrigger LEFT = new ActionTrigger(
         Trigger.ofKey(GLFW_KEY_LEFT)
     );
 
-    public static final ActionTrigger RIGHT = new ActionTrigger(
-        Trigger.ofKey(GLFW_KEY_RIGHT)
+    public static final ActionTrigger INCREMENT = ActionTrigger.of(
+        ActionTrigger.CLICK,
+        ActionTrigger.UP,
+        ActionTrigger.RIGHT
+    );
+
+    public static final ActionTrigger DECREMENT = ActionTrigger.of(
+        ActionTrigger.SECONDARY_CLICK,
+        ActionTrigger.DOWN,
+        ActionTrigger.LEFT
     );
 
     public static ActionTrigger of(ActionTrigger... triggers) {
