@@ -8,6 +8,7 @@ import io.wispforest.owo.braid.framework.widget.InstanceWidget;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
+import net.minecraft.util.math.Box;
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -218,6 +219,15 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
         }
 
         return result;
+    }
+
+    public Box computeGlobalBounds() {
+        var global = computeGlobalTransform().invert();
+
+        var min = new Vector3f().mulPosition(global);
+        var max = new Vector3f((float) this.transform.width, (float) this.transform.height, 0).mulPosition(global);
+
+        return new Box(min.x, min.y, min.z, max.x, max.y, max.z);
     }
 
     // ---
