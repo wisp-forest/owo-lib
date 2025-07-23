@@ -71,7 +71,7 @@ public class RawSlider extends StatefulWidget {
                     new MouseArea(
                         mouseArea -> mouseArea
                             //TODO: decide what to do with buttons here
-                            .clickCallback((x, y, button) -> {
+                            .clickCallback((x, y, button, modifiers) -> {
                                 if (button != 0) return false;
 
                                 y = widget.axis == LayoutAxis.VERTICAL ? constraints.maxOnAxis(widget.axis) - y : y;
@@ -82,7 +82,7 @@ public class RawSlider extends StatefulWidget {
                                 return true;
                             })
                             .dragCallback((x, y, dx, dy) -> this.move(constraints, dx, widget.axis == LayoutAxis.VERTICAL ? -dy : dy))
-                            .dragStartCallback(button -> this.dragValue = widget.normalizedValue)
+                            .dragStartCallback((button, modifiers) -> this.dragValue = widget.normalizedValue)
                             .cursorStyle(CursorStyle.HAND),
                         new Stack(
                             widget.axis.choose(Alignment.LEFT, Alignment.TOP),
