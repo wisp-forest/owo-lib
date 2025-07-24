@@ -27,6 +27,9 @@ import io.wispforest.owo.braid.widgets.flex.*;
 import io.wispforest.owo.braid.widgets.grid.Grid;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
+import io.wispforest.owo.braid.widgets.recipeviewer.RecipeViewerExclusionZone;
+import io.wispforest.owo.braid.widgets.recipeviewer.RecipeViewerStack;
+import io.wispforest.owo.braid.widgets.recipeviewer.StackDropArea;
 import io.wispforest.owo.braid.widgets.scroll.ScrollController;
 import io.wispforest.owo.braid.widgets.scroll.Scrollable;
 import io.wispforest.owo.braid.widgets.scroll.VerticallyScrollable;
@@ -50,6 +53,7 @@ import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.Sizing;
+import io.wispforest.owo.util.ViewerStack;
 import io.wispforest.owo.util.Wisdom;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -60,6 +64,7 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.MutableText;
@@ -868,12 +873,21 @@ public class TestSelector extends StatefulWidget {
                         Insets.all(8),
                         new Panel(
                             OwoUIDrawContext.PANEL_INSET_NINE_PATCH_TEXTURE,
-                            new EntityWidget(
-                                1,
-                                false,
-                                true,
-                                true,
-                                this.chyz
+                            new RecipeViewerStack(
+                                () -> ViewerStack.OfItem.of(Items.GOLD_BLOCK),
+                                new StackDropArea(
+                                    stack -> stack instanceof ViewerStack.OfItem,
+                                    stack -> System.out.println("chyz: mmm i ate a " + ((ViewerStack.OfItem) stack).asStack()),
+                                    new RecipeViewerExclusionZone(
+                                        new EntityWidget(
+                                            1,
+                                            false,
+                                            true,
+                                            true,
+                                            this.chyz
+                                        )
+                                    )
+                                )
                             )
                         )
                     )

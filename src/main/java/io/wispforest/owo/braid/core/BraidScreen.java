@@ -18,7 +18,7 @@ public class BraidScreen extends Screen implements DisposableScreen {
     protected final Vector2i cursorPos = new Vector2i();
 
     protected final Widget rootWidget;
-    protected AppState state;
+    public AppState state;
 
     public BraidScreen(Widget rootWidget) {
         super(Text.empty());
