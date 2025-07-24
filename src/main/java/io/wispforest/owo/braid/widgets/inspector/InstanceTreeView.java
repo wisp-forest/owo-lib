@@ -7,7 +7,7 @@ import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.SpriteWidget;
-import io.wispforest.owo.braid.widgets.basic.Box;
+import io.wispforest.owo.braid.widgets.animated.AnimatedBox;
 import io.wispforest.owo.braid.widgets.basic.Sized;
 import io.wispforest.owo.braid.widgets.flex.Column;
 import io.wispforest.owo.braid.widgets.flex.CrossAxisAlignment;
@@ -16,10 +16,12 @@ import io.wispforest.owo.braid.widgets.flex.Row;
 import io.wispforest.owo.braid.widgets.scroll.Scrollable;
 import io.wispforest.owo.braid.widgets.sharedstate.SharedState;
 import io.wispforest.owo.ui.core.Color;
+import io.wispforest.owo.ui.core.Easing;
 import io.wispforest.owo.util.EventSource;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Unit;
 
+import java.time.Duration;
 import java.util.ArrayList;
 
 public class InstanceTreeView extends StatefulWidget {
@@ -98,9 +100,11 @@ public class InstanceTreeView extends StatefulWidget {
                 startCollapsed = lastRevealEvent == null || !lastRevealEvent.fullPath.contains(this.widget().viewInstance);
             }
 
-            // TODO: animated box
-            return new Box(
+            return new AnimatedBox(
+                this.highlight ? Duration.ZERO : Duration.ofMillis(1250),
+                Easing.SINE,
                 this.highlight ? Color.ofHsv((this.widget().viewInstance.depth() % 15) / 15f, .75f, 1, .5f) : Color.ofArgb(0),
+                true,
                 !children.isEmpty()
                     ?
                     new CollapsibleEntry(

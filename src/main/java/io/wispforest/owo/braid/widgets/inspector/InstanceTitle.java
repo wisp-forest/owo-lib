@@ -7,10 +7,10 @@ import io.wispforest.owo.braid.framework.instance.WidgetInstance;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import io.wispforest.owo.braid.widgets.basic.KeyboardInput;
-import io.wispforest.owo.braid.widgets.basic.MouseArea;
-import io.wispforest.owo.braid.widgets.basic.Padding;
-import io.wispforest.owo.braid.widgets.basic.Panel;
+import io.wispforest.owo.braid.widgets.SpriteWidget;
+import io.wispforest.owo.braid.widgets.basic.*;
+import io.wispforest.owo.braid.widgets.flex.CrossAxisAlignment;
+import io.wispforest.owo.braid.widgets.flex.MainAxisAlignment;
 import io.wispforest.owo.braid.widgets.flex.Row;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.sharedstate.SharedState;
@@ -50,8 +50,29 @@ public class InstanceTitle extends StatefulWidget {
                 new Padding(
                     Insets.all(2),
                     new Row(
-                        new Label(Text.literal(instanceName).styled(style -> style.withBold(this.hovered)))
-                        // TODO: relayout boundary icon
+                        MainAxisAlignment.START,
+                        CrossAxisAlignment.CENTER,
+                        new Label(Text.literal(instanceName).styled(style -> style.withBold(this.hovered))),
+                        new Padding(
+                            Insets.left(2),
+                            new Visibility(
+                                this.widget().instance.isRelayoutBoundary(),
+                                new Tooltip(
+                                    Text.literal("Relayout Boundary"),
+                                    new SpriteWidget(Identifier.of("owo", "braid_inspector_relayout_boundary"), false)
+                                )
+                            )
+                        ),
+                        new Padding(
+                            Insets.left(2),
+                            new Visibility(
+                                (this.widget().instance.flags & WidgetInstance.FLAG_HIT_TEST_BOUNDARY) != 0,
+                                new Tooltip(
+                                    Text.literal("Hit Test Boundary"),
+                                    new SpriteWidget(Identifier.of("owo", "braid_inspector_hit_test_boundary"), false)
+                                )
+                            )
+                        )
                     )
                 )
             );

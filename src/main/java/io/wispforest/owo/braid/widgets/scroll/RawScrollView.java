@@ -1,7 +1,6 @@
 package io.wispforest.owo.braid.widgets.scroll;
 
 import io.wispforest.owo.braid.core.Constraints;
-import io.wispforest.owo.braid.core.Size;
 import io.wispforest.owo.braid.framework.instance.SingleChildWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
@@ -68,29 +67,22 @@ public class RawScrollView extends SingleChildInstanceWidget {
 
         @Override
         protected void doLayout(Constraints constraints) {
-            var childSize = child.layout(
+            var childSize = this.child.layout(
                 Constraints.of(
-                    widget.horizontalController != null ? 0 : constraints.minWidth(),
-                    widget.verticalController != null ? 0 : constraints.minHeight(),
-                    widget.horizontalController != null ? Double.POSITIVE_INFINITY : constraints.maxWidth(),
-                    widget.verticalController != null ? Double.POSITIVE_INFINITY : constraints.maxHeight()
+                    constraints.minWidth(),
+                    constraints.minHeight(),
+                    this.widget.horizontalController != null ? Double.POSITIVE_INFINITY : constraints.maxWidth(),
+                    this.widget.verticalController != null ? Double.POSITIVE_INFINITY : constraints.maxHeight()
                 )
             );
 
-            this.updateMaxOffset(this.widget.horizontalController, Math.max(0, childSize.width() - constraints.maxWidth()));
-            this.updateMaxOffset(this.widget.verticalController, Math.max(0, childSize.height() - constraints.maxHeight()));
+            var selfSize = childSize.constrained(constraints);
+
+            this.updateMaxOffset(this.widget.horizontalController, Math.max(0, childSize.width() - selfSize.width()));
+            this.updateMaxOffset(this.widget.verticalController, Math.max(0, childSize.height() - selfSize.height()));
 
             this.child.transform.setX(-this.horizontalOffset);
             this.child.transform.setY(-this.verticalOffset);
-
-            var selfSize = Size.of(
-                this.widget.horizontalController != null
-                    ? constraints.hasBoundedWidth() ? constraints.maxWidth() : constraints.minWidth()
-                    : childSize.width(),
-                this.widget.verticalController != null
-                    ? constraints.hasBoundedHeight() ? constraints.maxHeight()
-                    : constraints.minHeight() : childSize.height()
-            ).constrained(constraints);
 
             this.transform.setSize(selfSize);
         }

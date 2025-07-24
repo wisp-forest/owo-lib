@@ -23,7 +23,7 @@ public final class ScissorStack {
     private static final Deque<PositionedRectangle> STACK = new ArrayDeque<>();
 
     // TODO: this is a horrible klduge. braid needs to start supplying a custom draw context
-    // that also includes a surface-aware scissor stack
+    //  that also includes a surface-aware scissor stack
     private static final Deque<Supplier<WindowDimensions>> WINDOW_DIMENSIONS_SUPPLIERS = new ArrayDeque<>();
 
     static {
