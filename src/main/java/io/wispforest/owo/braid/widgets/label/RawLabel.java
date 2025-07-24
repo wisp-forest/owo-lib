@@ -1,19 +1,28 @@
 package io.wispforest.owo.braid.widgets.label;
 
 import io.wispforest.owo.braid.core.Constraints;
+import io.wispforest.owo.braid.core.KeyModifiers;
 import io.wispforest.owo.braid.core.Size;
+import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.framework.instance.LeafWidgetInstance;
+import io.wispforest.owo.braid.framework.instance.MouseListener;
+import io.wispforest.owo.braid.framework.instance.TooltipProvider;
 import io.wispforest.owo.braid.framework.widget.LeafInstanceWidget;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.tooltip.TooltipComponent;
+import net.minecraft.text.HoverEvent;
 import net.minecraft.text.OrderedText;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.OptionalDouble;
+import java.util.function.Function;
 
 public class RawLabel extends LeafInstanceWidget {
 
@@ -32,11 +41,16 @@ public class RawLabel extends LeafInstanceWidget {
         return new Instance(this);
     }
 
-    public static class Instance extends LeafWidgetInstance<RawLabel> {
+    public static class Instance extends LeafWidgetInstance<RawLabel> implements TooltipProvider, MouseListener {
 
         private List<OrderedText> renderText = List.of();
         private DoubleList renderTextWidths = new DoubleArrayList();
         private int renderTextHeight = 0;
+
+        protected Function<Style, Boolean> textClickHandler = style -> {
+            OwoUIDrawContext.utilityScreen().captureLinkSource();
+            return OwoUIDrawContext.utilityScreen().handleTextClick(style);
+        };
 
         public Instance(RawLabel widget) {
             super(widget);
@@ -121,6 +135,34 @@ public class RawLabel extends LeafInstanceWidget {
                     this.widget.style.shadow()
                 );
             }
+        }
+
+        @Override
+        @Nullable
+        public List<TooltipComponent> getTooltipComponentsAt(double x, double y) {
+            return null;
+        }
+
+        @Override
+        @Nullable
+        public Style getStyleAt(double x, double y) {
+            if (this.renderText.isEmpty()) return null;
+            var renderer = this.host().client().textRenderer;
+            return renderer.getTextHandler().getStyleAt(this.renderText.get(Math.min((int) y / renderer.fontHeight, this.renderText.size() - 1)), (int) x);
+        }
+
+        @Override
+        public boolean onMouseDown(double x, double y, int button, KeyModifiers modifiers) {
+            if (button != 0) return MouseListener.super.onMouseDown(x, y, button, modifiers);
+            return this.textClickHandler.apply(this.getStyleAt(x, y));
+        }
+
+        @Override
+        public @Nullable CursorStyle cursorStyleAt(double x, double y) {
+            var style = this.getStyleAt(x, y);
+            if (style == null) return null;
+            if (style.getClickEvent() != null) return CursorStyle.HAND;
+            return MouseListener.super.cursorStyleAt(x, y);
         }
     }
 

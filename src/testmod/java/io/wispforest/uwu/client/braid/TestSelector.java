@@ -63,13 +63,12 @@ import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
+import net.minecraft.text.*;
 import net.minecraft.util.Colors;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
@@ -368,7 +367,7 @@ public class TestSelector extends StatefulWidget {
                             new Align(
                                 Alignment.TOP_LEFT,
                                 new Column(
-                                    new Label(Text.literal("a")),
+                                    new Label(Text.literal("a").setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://chyz.xyz/box")))),
                                     new MessageButton(Text.literal("window button :o"), () -> setState(() -> controller.expanded = !controller.expanded))
                                 )
                             ),
@@ -1640,7 +1639,11 @@ public class TestSelector extends StatefulWidget {
                                                                 new Padding(Insets.top(4)),
                                                                 List.of(
                                                                     new FirePlayer(new GameProfile(contributor.uuid, contributor.name)),
-                                                                    new Label(LabelStyle.SHADOW, true, contributor.displayName),
+                                                                    new Label(
+                                                                        LabelStyle.SHADOW,
+                                                                        true,
+                                                                        contributor.displayName().copy().setStyle(contributor.displayName.copy().getStyle().withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY, new HoverEvent.EntityContent(EntityType.PLAYER, contributor.uuid, contributor.displayName))))
+                                                                    ),
                                                                     new RatingBar()
                                                                 )
                                                             )
