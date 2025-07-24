@@ -10,15 +10,24 @@ import org.jetbrains.annotations.Nullable;
 public class Box extends OptionalChildInstanceWidget {
 
     public final Color color;
+    public final boolean outline;
 
-    // TODO: outline
-    public Box(Color color, @Nullable Widget child) {
+    public Box(Color color, boolean outline, @Nullable Widget child) {
         super(child);
         this.color = color;
+        this.outline = outline;
+    }
+
+    public Box(Color color, @Nullable Widget child) {
+        this(color, false, child);
+    }
+
+    public Box(Color color, boolean outline) {
+        this(color, outline, null);
     }
 
     public Box(Color color) {
-        this(color, null);
+        this(color, false);
     }
 
     @Override
@@ -34,7 +43,12 @@ public class Box extends OptionalChildInstanceWidget {
 
         @Override
         public void draw(OwoUIDrawContext ctx) {
-            ctx.fill(0, 0, (int) this.transform.width(), (int) this.transform.height(), this.widget.color.argb());
+            if (this.widget.outline) {
+                ctx.drawRectOutline(0, 0, (int) this.transform.width(), (int) this.transform.height(), this.widget.color.argb());
+            } else {
+                ctx.fill(0, 0, (int) this.transform.width(), (int) this.transform.height(), this.widget.color.argb());
+            }
+
             super.draw(ctx);
         }
     }
