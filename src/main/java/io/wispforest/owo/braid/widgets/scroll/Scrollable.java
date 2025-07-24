@@ -104,21 +104,21 @@ public class Scrollable extends StatefulWidget {
 
             if (this.horizontalController != null) {
                 if (revealBox.minX < this.horizontalController.offset) {
-                    this.horizontalController.offset = revealBox.minX;
+                    this.horizontalController.setOffset(revealBox.minX);
                 }
 
                 if (revealBox.maxX > scrollInstance.transform.width() + this.horizontalController.offset) {
-                    this.horizontalController.offset = revealBox.maxX - scrollInstance.transform.width();
+                    this.horizontalController.setOffset(revealBox.maxX - scrollInstance.transform.width());
                 }
             }
 
             if (this.verticalController != null) {
                 if (revealBox.minY < this.verticalController.offset) {
-                    this.verticalController.offset = revealBox.minY;
+                    this.verticalController.setOffset(revealBox.minY);
                 }
 
                 if (revealBox.maxY > scrollInstance.transform.height() + this.verticalController.offset) {
-                    this.verticalController.offset = revealBox.maxY - scrollInstance.transform.height();
+                    this.verticalController.setOffset(revealBox.maxY - scrollInstance.transform.height());
                 }
             }
         }
