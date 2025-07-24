@@ -10,6 +10,8 @@ import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.*;
+import io.wispforest.owo.braid.widgets.basic.action.ActionTrigger;
+import io.wispforest.owo.braid.widgets.basic.action.Actions;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
@@ -36,7 +38,7 @@ public class RawSlider extends StatefulWidget {
         double max,
         @Nullable Double step,
         LayoutAxis axis,
-        DoubleConsumer onChanged,
+        @Nullable DoubleConsumer onChanged,
         @Nullable Widget track,
         Widget handle,
         double handleSize
@@ -68,44 +70,53 @@ public class RawSlider extends StatefulWidget {
                 var widget = this.widget();
 
                 return new Center(
-                    new MouseArea(
-                        mouseArea -> mouseArea
-                            //TODO: decide what to do with buttons here
-                            .clickCallback((x, y, button, modifiers) -> {
-                                if (button != 0) return false;
+                    new Actions(
+                        actions -> {
+                            if (widget.onChanged != null) {
+                                var step = widget.step != null ? widget.step : (widget.max - widget().min) / 100;
+                                actions.addAction(ActionTrigger.POSITIVE_DIRECTIONS, () -> widget.onChanged.accept(Math.min(widget.value + step, widget.max)));
+                                actions.addAction(ActionTrigger.NEGATIVE_DIRECTIONS, () -> widget.onChanged.accept(Math.max(widget.value - step, widget.min)));
+                            }
+                        },
+                        new MouseArea(
+                            mouseArea -> mouseArea
+                                //TODO: decide what to do with buttons here
+                                .clickCallback((x, y, button, modifiers) -> {
+                                    if (button != 0 && button != 1) return false;
 
-                                y = widget.axis == LayoutAxis.VERTICAL ? constraints.maxOnAxis(widget.axis) - y : y;
-                                if (!this.isInHandle(constraints, x, y)) {
-                                    this.setAbsolute(constraints, x, y);
-                                }
+                                    y = widget.axis == LayoutAxis.VERTICAL ? constraints.maxOnAxis(widget.axis) - y : y;
+                                    if (button == 0 && !this.isInHandle(constraints, x, y)) {
+                                        this.setAbsolute(constraints, x, y);
+                                    }
 
-                                return true;
-                            })
-                            .dragCallback((x, y, dx, dy) -> this.move(constraints, dx, widget.axis == LayoutAxis.VERTICAL ? -dy : dy))
-                            .dragStartCallback((button, modifiers) -> this.dragValue = widget.normalizedValue)
-                            .cursorStyle(CursorStyle.HAND),
-                        new Stack(
-                            widget.axis.choose(Alignment.LEFT, Alignment.TOP),
-                            new Sized(
-                                constraints.maxWidth(),
-                                constraints.maxHeight(),
-                                widget.track
-                            ),
-                            new Padding(
-                                widget.axis.chooseCompute(
-                                    () -> Insets.left(Math.floor((constraints.maxWidth() - widget.handleSize) * widget.normalizedValue)),
-                                    () -> Insets.top(Math.floor((constraints.maxHeight() - widget.handleSize) * (1 - widget.normalizedValue)))
+                                    return true;
+                                })
+                                .dragCallback((x, y, dx, dy) -> this.move(constraints, dx, widget.axis == LayoutAxis.VERTICAL ? -dy : dy))
+                                .dragStartCallback((button, modifiers) -> this.dragValue = widget.normalizedValue)
+                                .cursorStyle(CursorStyle.HAND),
+                            new Stack(
+                                widget.axis.choose(Alignment.LEFT, Alignment.TOP),
+                                new Sized(
+                                    constraints.maxWidth(),
+                                    constraints.maxHeight(),
+                                    widget.track
                                 ),
-                                widget.axis.chooseCompute(
-                                    () -> new Sized(
-                                        widget.handleSize,
-                                        constraints.maxHeight(),
-                                        widget.handle
+                                new Padding(
+                                    widget.axis.chooseCompute(
+                                        () -> Insets.left(Math.floor((constraints.maxWidth() - widget.handleSize) * widget.normalizedValue)),
+                                        () -> Insets.top(Math.floor((constraints.maxHeight() - widget.handleSize) * (1 - widget.normalizedValue)))
                                     ),
-                                    () -> new Sized(
-                                        constraints.maxWidth(),
-                                        widget.handleSize,
-                                        widget.handle
+                                    widget.axis.chooseCompute(
+                                        () -> new Sized(
+                                            widget.handleSize,
+                                            constraints.maxHeight(),
+                                            widget.handle
+                                        ),
+                                        () -> new Sized(
+                                            constraints.maxWidth(),
+                                            widget.handleSize,
+                                            widget.handle
+                                        )
                                     )
                                 )
                             )
