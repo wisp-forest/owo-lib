@@ -33,7 +33,7 @@ public class InstanceDetails extends StatelessWidget {
 
         List<Widget> children;
         if (selected instanceof WidgetInstance<?> instance) {
-            var instanceTransform = instance.computeGlobalTransform();
+            var instanceTransform = instance.computeGlobalTransform().invert();
             var absPos = new Vector4f((float) instance.transform.x(), (float) instance.transform.y(), 0f, 1f).mul(instanceTransform);
 
             var instanceClassName = instance.getClass().getName();
@@ -99,7 +99,7 @@ public class InstanceDetails extends StatelessWidget {
             if (mainAxisIdx % 2 == 0) {
                 result.add(widget);
             } else {
-                result.add(new Box(alternateColor, widget));
+                result.add(new Box(alternateColor, false, widget));
             }
 
             if (++crossAxisIdx == crossAxisCells) {
