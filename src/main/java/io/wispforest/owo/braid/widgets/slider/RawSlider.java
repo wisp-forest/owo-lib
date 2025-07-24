@@ -82,10 +82,10 @@ public class RawSlider extends StatefulWidget {
                             mouseArea -> mouseArea
                                 //TODO: decide what to do with buttons here
                                 .clickCallback((x, y, button, modifiers) -> {
-                                    if (button != 0 && button != 1) return false;
+                                    if (button != 0) return false;
 
                                     y = widget.axis == LayoutAxis.VERTICAL ? constraints.maxOnAxis(widget.axis) - y : y;
-                                    if (button == 0 && !this.isInHandle(constraints, x, y)) {
+                                    if (!this.isInHandle(constraints, x, y)) {
                                         this.setAbsolute(constraints, x, y);
                                     }
 
