@@ -216,7 +216,7 @@ public class AppState implements InstanceHost, ProxyHost {
             this.animationCallbacks = new LinkedList<>();
 
             while (!callbacksForThisFrame.isEmpty()) {
-                callbacksForThisFrame.poll().run(frameDeltaInTicks);
+                callbacksForThisFrame.poll().run(Duration.ofMillis((long) (frameDeltaInTicks * 50)));
             }
         }
 

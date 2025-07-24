@@ -87,7 +87,10 @@ public class InspectorWidget extends StatefulWidget {
                                                 null,
                                                 3,
                                                 (axis, controller) -> new FlatScrollbar(axis, controller, Color.ofRgb(0xabb0bf), Color.ofRgb(0xabb0bf)),
-                                                new InstanceTreeView(this.widget().inspector.onReveal(), this.widget().rootInstance)
+                                                new Align(
+                                                    Alignment.TOP_LEFT,
+                                                    new InstanceTreeView(this.widget().inspector.onReveal(), this.widget().rootInstance)
+                                                )
                                             ),
                                             new Align(
                                                 Alignment.BOTTOM_RIGHT,

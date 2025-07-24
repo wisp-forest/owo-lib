@@ -2,6 +2,8 @@ package io.wispforest.uwu.client.braid;
 
 import com.mojang.authlib.GameProfile;
 import io.wispforest.owo.braid.core.*;
+import io.wispforest.owo.braid.core.Insets;
+import io.wispforest.owo.braid.core.Size;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
@@ -11,15 +13,18 @@ import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.EntityWidget;
 import io.wispforest.owo.braid.widgets.ItemStackWidget;
 import io.wispforest.owo.braid.widgets.SpriteWidget;
+import io.wispforest.owo.braid.widgets.animated.AnimatedAlign;
+import io.wispforest.owo.braid.widgets.animated.AnimatedBox;
+import io.wispforest.owo.braid.widgets.animated.AnimatedPadding;
 import io.wispforest.owo.braid.widgets.basic.*;
 import io.wispforest.owo.braid.widgets.basic.action.ActionTrigger;
 import io.wispforest.owo.braid.widgets.basic.action.Actions;
 import io.wispforest.owo.braid.widgets.button.Button;
 import io.wispforest.owo.braid.widgets.button.MessageButton;
+import io.wispforest.owo.braid.widgets.button.RawButton;
 import io.wispforest.owo.braid.widgets.checkbox.BraidCheckbox;
 import io.wispforest.owo.braid.widgets.checkbox.Checkbox;
 import io.wispforest.owo.braid.widgets.checkbox.RawCheckbox;
-import io.wispforest.owo.braid.widgets.button.RawButton;
 import io.wispforest.owo.braid.widgets.cycle.MessageCyclingButton;
 import io.wispforest.owo.braid.widgets.drag.DragArena;
 import io.wispforest.owo.braid.widgets.drag.DragArenaElement;
@@ -49,10 +54,7 @@ import io.wispforest.owo.ui.component.BraidComponent;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.EntityComponent;
 import io.wispforest.owo.ui.container.Containers;
-import io.wispforest.owo.ui.core.Color;
-import io.wispforest.owo.ui.core.OwoUIAdapter;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
-import io.wispforest.owo.ui.core.Sizing;
+import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.util.ViewerStack;
 import io.wispforest.owo.util.Wisdom;
 import net.minecraft.client.MinecraftClient;
@@ -80,8 +82,6 @@ import org.joml.Matrix4f;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
-
-
 import java.time.Duration;
 import java.util.*;
 import java.util.function.DoubleFunction;
@@ -91,7 +91,7 @@ import java.util.stream.Stream;
 public class TestSelector extends StatefulWidget {
 
     public enum Tests {
-        COUNTER, FLEX, DRAGGING, SPLIT_PANE, SLIDERS, TEXT_INPUT, BURNING_CHYZ, SCROLLING, INPUT, CYCLING, VANILLA, SHARED_STATE, STACKS, GRIDS, CONTRIBUTORS
+        COUNTER, FLEX, DRAGGING, SPLIT_PANE, SLIDERS, TEXT_INPUT, BURNING_CHYZ, SCROLLING, INPUT, CYCLING, VANILLA, SHARED_STATE, STACKS, GRIDS, CONTRIBUTORS, ANIMATIONS
     }
 
     @Override
@@ -171,15 +171,16 @@ public class TestSelector extends StatefulWidget {
                             case STACKS -> new StacksTest();
                             case GRIDS -> new GridsTest();
                             case CONTRIBUTORS -> new ContributorsTest();
+                            case ANIMATIONS -> new AnimationsTest();
                             case null -> new Center(new Label(Text.literal("select a test")));
                         }
                     )
                 ),
                 new Align(
                     Alignment.LEFT,
-                    new HitTestTrap(
-                        new Padding(
-                            Insets.vertical(50).withLeft(5),
+                    new Padding(
+                        Insets.vertical(50).withLeft(5),
+                        new HitTestTrap(
                             new Panel(
                                 OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
                                 new Padding(
@@ -1305,8 +1306,8 @@ public class TestSelector extends StatefulWidget {
                     ),
                     new Label(
                         Text.literal(coolNumbers.stream()
-                                         .map(String::valueOf)
-                                         .collect(Collectors.joining(", ")))
+                            .map(String::valueOf)
+                            .collect(Collectors.joining(", ")))
                     )
                 );
             }
@@ -1782,6 +1783,54 @@ public class TestSelector extends StatefulWidget {
                         );
                     }
                 }
+            }
+        }
+    }
+
+    public static class AnimationsTest extends StatefulWidget {
+        @Override
+        public WidgetState<AnimationsTest> createState() {
+            return new State();
+        }
+
+        public static class State extends WidgetState<AnimationsTest> {
+
+            private boolean end = false;
+
+            @Override
+            public Widget build(BuildContext context) {
+                return new Sized(
+                    250,
+                    250,
+                    new Align(
+                        Alignment.TOP,
+                        new Column(
+                            new AnimatedAlign(
+                                Duration.ofMillis(250),
+                                Easing.EXPO,
+                                this.end ? Alignment.RIGHT : Alignment.CENTER,
+                                new MessageButton(Text.literal("toggle"), () -> this.setState(() -> this.end = !this.end))
+                            ),
+                            new Box(
+                                Color.WHITE,
+                                new AnimatedPadding(
+                                    Duration.ofMillis(500),
+                                    Easing.EXPO,
+                                    this.end ? Insets.of(0, 50, 50, 50) : Insets.none(),
+                                    new Sized(
+                                        30,
+                                        30,
+                                        new AnimatedBox(
+                                            Duration.ofMillis(500),
+                                            Easing.QUADRATIC,
+                                            this.end ? Color.RED : Color.GREEN
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                );
             }
         }
     }
