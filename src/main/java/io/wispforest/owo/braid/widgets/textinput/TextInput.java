@@ -39,16 +39,16 @@ public class TextInput extends LeafInstanceWidget {
     public final boolean autoFocus;
     public final boolean allowMultipleLines;
     public final Style baseStyle;
-    public final Text placeholder;
+    public final Text suggestion;
 
-    public TextInput(TextEditingController controller, boolean showCursor, boolean softWrap, boolean autoFocus, boolean allowMultipleLines, Style baseStyle, @Nullable Text placeholder) {
+    public TextInput(TextEditingController controller, boolean showCursor, boolean softWrap, boolean autoFocus, boolean allowMultipleLines, Style baseStyle, @Nullable Text suggestion) {
         this.controller = controller;
         this.showCursor = showCursor;
         this.softWrap = softWrap;
         this.autoFocus = autoFocus;
         this.allowMultipleLines = allowMultipleLines;
         this.baseStyle = baseStyle;
-        this.placeholder = placeholder == null ? Text.empty() : placeholder.copy().styled(style -> style.withColor(-8355712));
+        this.suggestion = suggestion == null ? Text.empty() : suggestion.copy().styled(style -> style.withColor(-8355712));
     }
 
     @Override
@@ -119,7 +119,7 @@ public class TextInput extends LeafInstanceWidget {
             );
 
             this.renderLines = new ArrayList<>(this.host().client().textRenderer.wrapLines(
-                this.widget.controller.createTextForRendering(this.widget.baseStyle).copy().append(this.widget.placeholder),
+                this.widget.controller.createTextForRendering(this.widget.baseStyle).copy().append(this.widget.suggestion),
                 wrapWidth
             ));
 

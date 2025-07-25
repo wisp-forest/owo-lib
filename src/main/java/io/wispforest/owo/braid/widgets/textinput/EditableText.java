@@ -1,6 +1,5 @@
 package io.wispforest.owo.braid.widgets.textinput;
 
-import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.instance.WidgetInstance;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
@@ -24,15 +23,15 @@ public class EditableText extends StatefulWidget {
     public final boolean autoFocus;
     public final boolean allowMultipleLines;
     public final Style baseStyle;
-    public final Text placeholder;
+    public final Text suggestion;
 
-    public EditableText(TextEditingController controller, boolean softWrap, boolean autoFocus, boolean allowMultipleLines, Style baseStyle, @Nullable Text placeholder) {
+    public EditableText(TextEditingController controller, boolean softWrap, boolean autoFocus, boolean allowMultipleLines, Style baseStyle, @Nullable Text suggestion) {
         this.controller = controller;
         this.softWrap = softWrap;
         this.autoFocus = autoFocus;
         this.allowMultipleLines = allowMultipleLines;
         this.baseStyle = baseStyle;
-        this.placeholder = placeholder == null ? Text.empty() : placeholder;
+        this.suggestion = suggestion == null ? Text.empty() : suggestion;
     }
 
     public EditableText(TextEditingController controller, boolean softWrap, boolean autoFocus, boolean allowMultipleLines, Style baseStyle) {
@@ -141,7 +140,7 @@ public class EditableText extends StatefulWidget {
                             this.widget().autoFocus,
                             this.widget().allowMultipleLines,
                             this.widget().baseStyle,
-                            this.widget().placeholder
+                            this.widget().suggestion
                         );
                     })
                 )

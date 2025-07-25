@@ -20,15 +20,15 @@ public class TextBox extends StatefulWidget {
     public final boolean autoFocus;
     public final boolean allowMultipleLines;
     public final Style baseStyle;
-    public final Text placeholder;
+    public final Text suggestion;
 
-    public TextBox(TextEditingController controller, boolean softWrap, boolean autoFocus, boolean allowMultipleLines, Style baseStyle, @Nullable Text placeholder) {
+    public TextBox(TextEditingController controller, boolean softWrap, boolean autoFocus, boolean allowMultipleLines, Style baseStyle, @Nullable Text suggestion) {
         this.controller = controller;
         this.softWrap = softWrap;
         this.autoFocus = autoFocus;
         this.allowMultipleLines = allowMultipleLines;
         this.baseStyle = baseStyle;
-        this.placeholder = placeholder == null ? Text.empty() : placeholder;
+        this.suggestion = suggestion == null ? Text.empty() : suggestion;
     }
 
     @Override
@@ -60,7 +60,7 @@ public class TextBox extends StatefulWidget {
                                     this.widget().autoFocus,
                                     this.widget().allowMultipleLines,
                                     this.widget().baseStyle,
-                                    this.widget().placeholder
+                                    this.widget().suggestion
                                 )
                             )
                         )
