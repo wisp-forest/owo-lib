@@ -1,17 +1,18 @@
 package io.wispforest.owo.braid.widgets.textinput;
 
+import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.instance.WidgetInstance;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import io.wispforest.owo.braid.widgets.basic.Builder;
-import io.wispforest.owo.braid.widgets.basic.KeyboardInput;
-import io.wispforest.owo.braid.widgets.basic.VisitorWidget;
+import io.wispforest.owo.braid.widgets.basic.*;
 import io.wispforest.owo.braid.widgets.scroll.ScrollController;
 import io.wispforest.owo.braid.widgets.scroll.Scrollable;
 import net.minecraft.text.Style;
 import net.minecraft.util.math.Box;
+import net.minecraft.text.Text;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
 import java.util.function.Consumer;
@@ -23,13 +24,19 @@ public class EditableText extends StatefulWidget {
     public final boolean autoFocus;
     public final boolean allowMultipleLines;
     public final Style baseStyle;
+    public final Text placeholder;
 
-    public EditableText(TextEditingController controller, boolean softWrap, boolean autoFocus, boolean allowMultipleLines, Style baseStyle) {
+    public EditableText(TextEditingController controller, boolean softWrap, boolean autoFocus, boolean allowMultipleLines, Style baseStyle, @Nullable Text placeholder) {
         this.controller = controller;
         this.softWrap = softWrap;
         this.autoFocus = autoFocus;
         this.allowMultipleLines = allowMultipleLines;
         this.baseStyle = baseStyle;
+        this.placeholder = placeholder == null ? Text.empty() : placeholder;
+    }
+
+    public EditableText(TextEditingController controller, boolean softWrap, boolean autoFocus, boolean allowMultipleLines, Style baseStyle) {
+        this(controller, softWrap, autoFocus, allowMultipleLines, baseStyle, null);
     }
 
     @Override
@@ -133,7 +140,8 @@ public class EditableText extends StatefulWidget {
                             this.widget().softWrap,
                             this.widget().autoFocus,
                             this.widget().allowMultipleLines,
-                            this.widget().baseStyle
+                            this.widget().baseStyle,
+                            this.widget().placeholder
                         );
                     })
                 )

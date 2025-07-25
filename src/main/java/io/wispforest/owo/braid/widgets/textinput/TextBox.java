@@ -10,6 +10,8 @@ import io.wispforest.owo.braid.widgets.basic.KeyboardInput;
 import io.wispforest.owo.braid.widgets.basic.Padding;
 import io.wispforest.owo.ui.core.Color;
 import net.minecraft.text.Style;
+import net.minecraft.text.Text;
+import org.jetbrains.annotations.Nullable;
 
 public class TextBox extends StatefulWidget {
 
@@ -18,13 +20,15 @@ public class TextBox extends StatefulWidget {
     public final boolean autoFocus;
     public final boolean allowMultipleLines;
     public final Style baseStyle;
+    public final Text placeholder;
 
-    public TextBox(TextEditingController controller, boolean softWrap, boolean autoFocus, boolean allowMultipleLines, Style baseStyle) {
+    public TextBox(TextEditingController controller, boolean softWrap, boolean autoFocus, boolean allowMultipleLines, Style baseStyle, @Nullable Text placeholder) {
         this.controller = controller;
         this.softWrap = softWrap;
         this.autoFocus = autoFocus;
         this.allowMultipleLines = allowMultipleLines;
         this.baseStyle = baseStyle;
+        this.placeholder = placeholder == null ? Text.empty() : placeholder;
     }
 
     @Override
@@ -55,7 +59,8 @@ public class TextBox extends StatefulWidget {
                                     this.widget().softWrap,
                                     this.widget().autoFocus,
                                     this.widget().allowMultipleLines,
-                                    this.widget().baseStyle
+                                    this.widget().baseStyle,
+                                    this.widget().placeholder
                                 )
                             )
                         )

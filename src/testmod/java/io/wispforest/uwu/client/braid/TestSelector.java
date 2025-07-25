@@ -684,7 +684,8 @@ public class TestSelector extends StatefulWidget {
                                     true,
                                     false,
                                     true,
-                                    Style.EMPTY
+                                    Style.EMPTY,
+                                    this.controller1.text().isEmpty() ? Text.literal("Soft Wrapping Moment") : null
                                 )
                             ),
                             new Sized(
@@ -695,7 +696,8 @@ public class TestSelector extends StatefulWidget {
                                     false,
                                     true,
                                     true,
-                                    Style.EMPTY
+                                    Style.EMPTY,
+                                    this.controller2.text().isEmpty() ? Text.literal("No Soft Wrapping Moment (also auto focused)") : null
                                 )
                             ),
                             new Sized(
@@ -706,7 +708,8 @@ public class TestSelector extends StatefulWidget {
                                     false,
                                     false,
                                     false,
-                                    Style.EMPTY
+                                    Style.EMPTY,
+                                    this.controller3.text().isEmpty() ? Text.literal("Single Line Moment") : null
                                 )
                             )
                         ),

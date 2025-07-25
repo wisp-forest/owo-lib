@@ -16,6 +16,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
+import net.minecraft.text.Text;
 import net.minecraft.util.Colors;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
@@ -38,14 +39,16 @@ public class TextInput extends LeafInstanceWidget {
     public final boolean autoFocus;
     public final boolean allowMultipleLines;
     public final Style baseStyle;
+    public final Text placeholder;
 
-    public TextInput(TextEditingController controller, boolean showCursor, boolean softWrap, boolean autoFocus, boolean allowMultipleLines, Style baseStyle) {
+    public TextInput(TextEditingController controller, boolean showCursor, boolean softWrap, boolean autoFocus, boolean allowMultipleLines, Style baseStyle, @Nullable Text placeholder) {
         this.controller = controller;
         this.showCursor = showCursor;
         this.softWrap = softWrap;
         this.autoFocus = autoFocus;
         this.allowMultipleLines = allowMultipleLines;
         this.baseStyle = baseStyle;
+        this.placeholder = placeholder == null ? Text.empty() : placeholder.copy().styled(style -> style.withColor(-8355712));
     }
 
     @Override
@@ -116,7 +119,7 @@ public class TextInput extends LeafInstanceWidget {
             );
 
             this.renderLines = new ArrayList<>(this.host().client().textRenderer.wrapLines(
-                this.widget.controller.createTextForRendering(this.widget.baseStyle),
+                this.widget.controller.createTextForRendering(this.widget.baseStyle).copy().append(this.widget.placeholder),
                 wrapWidth
             ));
 
