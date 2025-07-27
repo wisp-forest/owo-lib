@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import io.wispforest.owo.braid.core.*;
 import io.wispforest.owo.braid.core.Insets;
 import io.wispforest.owo.braid.core.Size;
+import io.wispforest.owo.braid.core.Surface;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
@@ -55,6 +56,7 @@ import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.EntityComponent;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.core.*;
+import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.ViewerStack;
 import io.wispforest.owo.util.Wisdom;
 import net.minecraft.client.MinecraftClient;
@@ -200,51 +202,101 @@ public class TestSelector extends StatefulWidget {
                 ),
                 new Align(
                     Alignment.BOTTOM_RIGHT,
-                    new Sized(
-                        75, null,
-                        new Column(
-                            new Sized(
-                                75, 20,
-                                new MessageButton(
-                                    Text.literal("reset"),
-                                    () -> this.setState(() -> {
-                                        this.xSkew = 0f;
-                                        this.ySkew = 0f;
-                                        this.rotat = 0f;
-                                    })
-                                )
-                            ),
-                            new Sized(
-                                75, 20,
-                                new MessageSlider(
-                                    rotat,
-                                    0d, 360d,
-                                    null,
-                                    LayoutAxis.HORIZONTAL,
-                                    value -> this.setState(() -> this.rotat = value),
-                                    Text.literal("rotat: " + formatDouble(this.rotat))
-                                )
-                            ),
-                            new Sized(
-                                75.0,
-                                75.0,
-                                new MessageXlyder(
-                                    this.xSkew,
-                                    this.ySkew,
-                                    -.75, -.75,
-                                    .75, .75,
-                                    null, null,
-                                    (xValue, yValue) -> this.setState(() -> {
-                                        this.xSkew = xValue;
-                                        this.ySkew = yValue;
-                                    }),
-                                    Text.literal("x skew: " + (formatDouble(this.xSkew)) + "\ny skew: " + (formatDouble(this.ySkew)))
+                    new Row(
+                        MainAxisAlignment.START,
+                        CrossAxisAlignment.CENTER,
+                        new Padding(
+                            Insets.all(5),
+                            new SurfaceDimensions()
+                        ),
+                        new Sized(
+                            75, null,
+                            new Column(
+                                new Sized(
+                                    75, 20,
+                                    new MessageButton(
+                                        Text.literal("reset"),
+                                        () -> this.setState(() -> {
+                                            this.xSkew = 0f;
+                                            this.ySkew = 0f;
+                                            this.rotat = 0f;
+                                        })
+                                    )
+                                ),
+                                new Sized(
+                                    75, 20,
+                                    new MessageSlider(
+                                        rotat,
+                                        0d, 360d,
+                                        null,
+                                        LayoutAxis.HORIZONTAL,
+                                        value -> this.setState(() -> this.rotat = value),
+                                        Text.literal("rotat: " + formatDouble(this.rotat))
+                                    )
+                                ),
+                                new Sized(
+                                    75.0,
+                                    75.0,
+                                    new MessageXlyder(
+                                        this.xSkew,
+                                        this.ySkew,
+                                        -.75, -.75,
+                                        .75, .75,
+                                        null, null,
+                                        (xValue, yValue) -> this.setState(() -> {
+                                            this.xSkew = xValue;
+                                            this.ySkew = yValue;
+                                        }),
+                                        Text.literal("x skew: " + (formatDouble(this.xSkew)) + "\ny skew: " + (formatDouble(this.ySkew)))
+                                    )
                                 )
                             )
                         )
                     )
                 )
             );
+        }
+    }
+
+    public static class SurfaceDimensions extends StatefulWidget {
+        @Override
+        public WidgetState<SurfaceDimensions> createState() {
+            return new State();
+        }
+
+        public static class State extends WidgetState<SurfaceDimensions> {
+
+            private EventSource<Surface.ResizeCallback>.Subscription listener;
+
+            private int width, height;
+
+            @Override
+            public void init() {
+                var surface = AppState.of(this.context()).surface;
+                this.width = surface.width();
+                this.height = surface.height();
+
+                this.listener = surface.onResize().subscribe((newWidth, newHeight) -> this.setState(() -> {
+                    this.width = newWidth;
+                    this.height = newHeight;
+                }));
+            }
+
+            @Override
+            public void dispose() {
+                this.listener.cancel();
+            }
+
+            @Override
+            public Widget build(BuildContext context) {
+                return new Label(
+                    LabelStyle.SHADOW,
+                    true,
+                    Text.literal(
+                        "surface dimensions:\n" + this.width + ", " + this.height
+                    )
+                );
+            }
         }
     }
 
