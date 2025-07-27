@@ -1,10 +1,10 @@
 package io.wispforest.owo.braid.widgets.basic;
 
+import io.wispforest.owo.braid.core.BraidDrawContext;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.framework.instance.OptionalChildWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.OptionalChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.OwoUIRenderLayers;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
@@ -76,7 +76,7 @@ public class TextureWidget extends OptionalChildInstanceWidget {
         }
 
         @Override
-        public void draw(OwoUIDrawContext ctx) {
+        public void draw(BraidDrawContext ctx) {
             var matrices = ctx.getMatrices();
 
             if (widget.stretch) {

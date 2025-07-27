@@ -1,9 +1,6 @@
 package io.wispforest.owo.braid.widgets.textinput;
 
-import io.wispforest.owo.braid.core.Constraints;
-import io.wispforest.owo.braid.core.KeyModifiers;
-import io.wispforest.owo.braid.core.Size;
-import io.wispforest.owo.braid.core.TextLayout;
+import io.wispforest.owo.braid.core.*;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.framework.instance.KeyboardListener;
 import io.wispforest.owo.braid.framework.instance.LeafWidgetInstance;
@@ -173,7 +170,7 @@ public class TextInput extends LeafInstanceWidget {
         }
 
         @Override
-        public void draw(OwoUIDrawContext ctx) {
+        public void draw(BraidDrawContext ctx) {
             var textRenderer = this.host().client().textRenderer;
 
             for (int lineIdx = 0; lineIdx < this.renderLines.size(); lineIdx++) {

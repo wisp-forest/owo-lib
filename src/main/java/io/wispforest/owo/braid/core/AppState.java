@@ -67,7 +67,7 @@ public class AppState implements InstanceHost, ProxyHost {
     private final List<Runnable> onTerminate = new ArrayList<>();
     private boolean running = true;
 
-    private final BraidInspector inspector = new BraidInspector();
+    private final BraidInspector inspector = new BraidInspector(this);
 
     public AppState(
         @Nullable Logger logger,
@@ -124,14 +124,14 @@ public class AppState implements InstanceHost, ProxyHost {
         ctx.push();
         this.rootInstance().transform.transformToParent(ctx.getMatrices());
 
-        var owoContext = OwoUIDrawContext.of(ctx);
+        var braidContext = BraidDrawContext.create(ctx, this.surface);
 
         GlStateManager._enableScissorTest();
-        this.rootInstance().draw(owoContext);
+        this.rootInstance().draw(braidContext);
         GlStateManager._disableScissorTest();
 
         if (this.activeTooltip != null) {
-            owoContext.drawTooltip(this.client.textRenderer, this.activeTooltip.x(), this.activeTooltip.y(), this.activeTooltip.components());
+            braidContext.drawTooltip(this.client.textRenderer, this.activeTooltip.x(), this.activeTooltip.y(), this.activeTooltip.components());
         }
 
         ctx.pop();

@@ -1,12 +1,12 @@
 package io.wispforest.owo.braid.widgets.basic;
 
+import io.wispforest.owo.braid.core.BraidDrawContext;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.Size;
 import io.wispforest.owo.braid.framework.instance.HitTestState;
 import io.wispforest.owo.braid.framework.instance.SingleChildWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
 
 import java.util.OptionalDouble;
 
@@ -73,7 +73,7 @@ public class Visibility extends SingleChildInstanceWidget {
         }
 
         @Override
-        public void draw(OwoUIDrawContext ctx) {
+        public void draw(BraidDrawContext ctx) {
             if (!this.widget.visible) return;
             super.draw(ctx);
         }

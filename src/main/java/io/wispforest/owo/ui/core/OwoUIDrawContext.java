@@ -39,7 +39,7 @@ public class OwoUIDrawContext extends DrawContext {
 
     private boolean recording = false;
 
-    private OwoUIDrawContext(MinecraftClient client, VertexConsumerProvider.Immediate vertexConsumers) {
+    protected OwoUIDrawContext(MinecraftClient client, VertexConsumerProvider.Immediate vertexConsumers) {
         super(client, vertexConsumers);
     }
 

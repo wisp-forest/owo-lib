@@ -6,7 +6,6 @@ import io.wispforest.owo.braid.framework.instance.WidgetInstance;
 import io.wispforest.owo.braid.framework.widget.MultiChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.Padding;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 
@@ -168,7 +167,7 @@ public class Grid extends MultiChildInstanceWidget {
         }
 
         @Override
-        public void draw(OwoUIDrawContext ctx) {
+        public void draw(BraidDrawContext ctx) {
             super.draw(ctx);
 
 //            if (this.debugCrossAxisSizes != null && this.debugMainAxisSizes != null) {

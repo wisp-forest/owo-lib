@@ -11,6 +11,7 @@ import org.lwjgl.glfw.GLFW;
 
 public class BraidInspector {
 
+    public final AppState subject;
     public WidgetProxy rootProxy;
     public WidgetInstance<?> rootInstance;
 
@@ -21,6 +22,10 @@ public class BraidInspector {
     private boolean active = false;
     @Nullable AppState currentApp;
     @Nullable BraidWindow currentWindow;
+
+    public BraidInspector(AppState subject) {
+        this.subject = subject;
+    }
 
     public EventSource<BraidEventStream.Listener<Unit>> onPick() {
         return this.pickEvents.source();

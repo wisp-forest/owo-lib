@@ -1,11 +1,11 @@
 package io.wispforest.owo.braid.framework.instance;
 
 import com.google.common.base.Preconditions;
+import io.wispforest.owo.braid.core.BraidDrawContext;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.core.Size;
 import io.wispforest.owo.braid.framework.widget.InstanceWidget;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 import net.minecraft.util.math.Box;
@@ -91,7 +91,7 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
 
     // ---
 
-    public abstract void draw(OwoUIDrawContext ctx);
+    public abstract void draw(BraidDrawContext ctx);
 
     public abstract void visitChildren(Visitor visitor);
 
@@ -120,7 +120,7 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
 
     // ---
 
-    protected void drawChild(OwoUIDrawContext ctx, WidgetInstance<?> child) {
+    protected void drawChild(BraidDrawContext ctx, WidgetInstance<?> child) {
         ctx.push();
         child.transform.transformToParent(ctx.getMatrices());
         child.draw(ctx);

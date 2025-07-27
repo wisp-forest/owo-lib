@@ -1,10 +1,10 @@
 package io.wispforest.owo.braid.widgets.label;
 
+import io.wispforest.owo.braid.core.BraidDrawContext;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.Size;
 import io.wispforest.owo.braid.framework.instance.LeafWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.LeafInstanceWidget;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import net.minecraft.client.font.TextRenderer;
@@ -107,7 +107,7 @@ public class RawLabel extends LeafInstanceWidget {
         }
 
         @Override
-        public void draw(OwoUIDrawContext ctx) {
+        public void draw(BraidDrawContext ctx) {
             var textRenderer = this.host().client().textRenderer;
             var yOffset = this.widget.style.textAlignment().alignVertical(this.transform.height(), this.renderTextHeight);
 

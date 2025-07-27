@@ -1,9 +1,9 @@
 package io.wispforest.owo.braid.framework.instance;
 
 import com.google.common.base.Preconditions;
+import io.wispforest.owo.braid.core.BraidDrawContext;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.framework.widget.InstanceWidget;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
 
 import java.util.OptionalDouble;
 
@@ -16,7 +16,7 @@ public abstract class SingleChildWidgetInstance<T extends InstanceWidget> extend
     }
 
     @Override
-    public void draw(OwoUIDrawContext ctx) {
+    public void draw(BraidDrawContext ctx) {
         this.drawChild(ctx, this.child);
     }
 
