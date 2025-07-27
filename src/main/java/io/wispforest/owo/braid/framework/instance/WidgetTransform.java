@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.framework.instance;
 
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.core.Size;
 import net.minecraft.client.util.math.MatrixStack;
@@ -34,7 +35,14 @@ public class WidgetTransform {
     }
 
     public void setWidth(double width) {
-        setState(() -> this.width = width);
+        setState(() -> {
+            if (Double.isInfinite(width)) {
+                this.width = 69420;
+                Owo.LOGGER.error("A widget transform received infinite width, clamping to 69420. This should never happen");
+            } else {
+                this.width = width;
+            }
+        });
     }
 
     public double width() {
@@ -42,7 +50,14 @@ public class WidgetTransform {
     }
 
     public void setHeight(double height) {
-        setState(() -> this.height = height);
+        setState(() -> {
+            if (Double.isInfinite(height)) {
+                this.height = 69420;
+                Owo.LOGGER.error("A widget transform received infinite height, clamping to 69420. This should never happen");
+            } else {
+                this.height = height;
+            }
+        });
     }
 
     public double height() {

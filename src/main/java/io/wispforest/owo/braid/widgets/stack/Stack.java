@@ -61,7 +61,7 @@ public class Stack extends MultiChildInstanceWidget {
             if (sizingBase != null) {
                 selfSize = sizingBase.layout(constraints);
 
-                var childConstraints = Constraints.tight(selfSize).respecting(constraints);
+                var childConstraints = Constraints.tight(selfSize);
                 for (var child : Iterables.filter(this.children, child -> child != sizingBase)) {
                     child.layout(childConstraints);
                 }

@@ -52,6 +52,30 @@ public class TextureWidget extends OptionalChildInstanceWidget {
         }
 
         @Override
+        protected void doLayout(Constraints constraints) {
+            if (this.child == null) {
+                this.transform.setSize(constraints.maxFiniteOrMinSize());
+            } else {
+                this.sizeToChild(constraints, this.child);
+            }
+        }
+
+        @Override
+        protected double measureIntrinsicWidth(double height) {
+            return this.child != null ? this.child.getIntrinsicWidth(height) : 0;
+        }
+
+        @Override
+        protected double measureIntrinsicHeight(double width) {
+            return this.child != null ? this.child.getIntrinsicHeight(width) : 0;
+        }
+
+        @Override
+        protected OptionalDouble measureBaselineOffset() {
+            return this.child != null ? this.child.getBaselineOffset() : OptionalDouble.empty();
+        }
+
+        @Override
         public void draw(OwoUIDrawContext ctx) {
             var matrices = ctx.getMatrices();
 
@@ -78,30 +102,6 @@ public class TextureWidget extends OptionalChildInstanceWidget {
             if (widget.stretch) matrices.pop();
 
             super.draw(ctx);
-        }
-
-        @Override
-        protected void doLayout(Constraints constraints) {
-            if (this.child == null) {
-                this.transform.setSize(constraints.maxSize());
-            } else {
-                this.sizeToChild(constraints, this.child);
-            }
-        }
-
-        @Override
-        protected double measureIntrinsicWidth(double height) {
-            return this.child != null ? this.child.getIntrinsicWidth(height) : 0;
-        }
-
-        @Override
-        protected double measureIntrinsicHeight(double width) {
-            return this.child != null ? this.child.getIntrinsicHeight(width) : 0;
-        }
-
-        @Override
-        protected OptionalDouble measureBaselineOffset() {
-            return this.child != null ? this.child.getBaselineOffset() : OptionalDouble.empty();
         }
     }
 }
