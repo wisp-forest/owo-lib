@@ -97,7 +97,10 @@ public class Grid extends MultiChildInstanceWidget {
                     ? dynamicMainAxisCellSizes[mainAxisIdx]
                     : fixedMainAxisCellSize;
 
-                for (var childIdx = mainAxisIdx * this.widget.crossAxisCells; childIdx < this.children.size(); childIdx++) {
+                var firstChildIdx = mainAxisIdx * this.widget.crossAxisCells;
+                var lastChildIdx = firstChildIdx + (this.widget.crossAxisCells - 1);
+
+                for (var childIdx = firstChildIdx; childIdx <= lastChildIdx; childIdx++) {
                     var child = this.children.get(childIdx);
 
                     var maxCrossAxisChildSize = mustMeasureCrossAxis
