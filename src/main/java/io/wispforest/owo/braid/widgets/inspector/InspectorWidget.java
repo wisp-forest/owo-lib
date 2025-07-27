@@ -121,9 +121,23 @@ public class InspectorWidget extends StatefulWidget {
                                                             new Sized(
                                                                 20,
                                                                 20,
-                                                                new Button(
-                                                                    () -> this.widget().inspector.pick(),
-                                                                    new SpriteWidget(Identifier.of("owo", "braid_inspector_pick"), false)
+                                                                new Tooltip(
+                                                                    Text.literal("reassemble app"),
+                                                                    new Button(
+                                                                        () -> this.widget().inspector.subject.rebuildRoot(),
+                                                                        new SpriteWidget(Identifier.of("owo", "braid_inspector_reassemble"), false)
+                                                                    )
+                                                                )
+                                                            ),
+                                                            new Sized(
+                                                                20,
+                                                                20,
+                                                                new Tooltip(
+                                                                    Text.literal("pick widget"),
+                                                                    new Button(
+                                                                        () -> this.widget().inspector.pick(),
+                                                                        new SpriteWidget(Identifier.of("owo", "braid_inspector_pick"), false)
+                                                                    )
                                                                 )
                                                             )
                                                         )
