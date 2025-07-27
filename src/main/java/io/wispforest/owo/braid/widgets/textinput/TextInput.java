@@ -14,6 +14,7 @@ import net.minecraft.client.render.RenderLayer;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
 import net.minecraft.util.Colors;
+import net.minecraft.util.StringHelper;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
@@ -51,8 +52,6 @@ public class TextInput extends LeafInstanceWidget {
     }
 
     public static class Instance extends LeafWidgetInstance<TextInput> implements MouseListener, KeyboardListener {
-
-        protected static final Pattern LINE_BREAKS = Pattern.compile("[\r\n]");
 
         protected String text;
         protected TextSelection selection;
@@ -244,9 +243,7 @@ public class TextInput extends LeafInstanceWidget {
         }
 
         private void insert(String insertion) {
-            if (!this.widget.allowMultipleLines) {
-                insertion = LINE_BREAKS.matcher(insertion).replaceAll("");
-            }
+            insertion = StringHelper.stripInvalidChars(insertion, this.widget.allowMultipleLines);
 
             var chars = new StringBuilder(this.text);
             chars.replace(this.selection.lower(), this.selection.upper(), insertion);
