@@ -171,7 +171,7 @@ public record Constraints(double minWidth, double minHeight, double maxWidth, do
     public Size maxFiniteOrMinSize() {
         return Size.of(
             this.maxFiniteOrMinWidth(),
-            this.maxFiniteOrMinWidth()
+            this.maxFiniteOrMinHeight()
         );
     }
 }

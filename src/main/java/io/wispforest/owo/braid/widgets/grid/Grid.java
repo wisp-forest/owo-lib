@@ -98,7 +98,7 @@ public class Grid extends MultiChildInstanceWidget {
                     : fixedMainAxisCellSize;
 
                 var firstChildIdx = mainAxisIdx * this.widget.crossAxisCells;
-                var lastChildIdx = firstChildIdx + (this.widget.crossAxisCells - 1);
+                var lastChildIdx = Math.min(this.children.size(), firstChildIdx + this.widget.crossAxisCells) - 1;
 
                 for (var childIdx = firstChildIdx; childIdx <= lastChildIdx; childIdx++) {
                     var child = this.children.get(childIdx);
