@@ -15,6 +15,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(EntityRenderer.class)
@@ -29,7 +30,13 @@ public class EntityRendererMixin<T extends Entity, S extends EntityRenderState> 
         if (!((OwoEntityRenderDispatcherExtension) this.dispatcher).owo$counterRotate()) return;
 
         matrices.multiply(new Quaternionf(this.dispatcher.getRotation()).invert());
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180));
+//        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180));
+    }
+
+    @Redirect(method = "updateRenderState", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/EntityRenderDispatcher;getSquaredDistanceToCamera(Lnet/minecraft/entity/Entity;)D"))
+    private double alwaysRenderNametag(EntityRenderDispatcher instance, Entity entity) {
+        if (!((OwoEntityRenderDispatcherExtension) this.dispatcher).owo$showNametag()) return this.dispatcher.getSquaredDistanceToCamera(entity);
+        return 0.0;
     }
 
 }

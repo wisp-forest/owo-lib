@@ -124,7 +124,8 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
             entityState,
             matrix,
             new ScreenRect(this.x, this.y, this.width, this.height),
-            context.scissorStack.peekLast()
+            context.scissorStack.peekLast(),
+            this.showNametag
         ));
     }
 

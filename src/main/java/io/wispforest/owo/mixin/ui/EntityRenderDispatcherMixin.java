@@ -21,6 +21,9 @@ public class EntityRenderDispatcherMixin implements OwoEntityRenderDispatcherExt
     @Unique
     private boolean counterRotate = false;
 
+    @Unique
+    private boolean showNametag = false;
+
     @Override
     public void owo$setCounterRotate(boolean counterRotate) {
         this.counterRotate = counterRotate;
@@ -29,6 +32,16 @@ public class EntityRenderDispatcherMixin implements OwoEntityRenderDispatcherExt
     @Override
     public boolean owo$counterRotate() {
         return this.counterRotate;
+    }
+
+    @Override
+    public void owo$setShowNametag(boolean showNametag) {
+        this.showNametag = showNametag;
+    }
+
+    @Override
+    public boolean owo$showNametag() {
+        return showNametag;
     }
 
     @Shadow public Camera camera;

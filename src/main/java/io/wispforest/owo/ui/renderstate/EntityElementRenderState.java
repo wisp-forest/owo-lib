@@ -17,7 +17,8 @@ public record EntityElementRenderState(
     EntityRenderState entityState,
     Matrix4f transform,
     ScreenRect bounds,
-    ScreenRect scissorArea
+    ScreenRect scissorArea,
+    boolean showNametag
 ) implements OwoSpecialElementRenderState<EntityElementRenderState> {
 
     @Override
@@ -79,6 +80,7 @@ public record EntityElementRenderState(
 
             var dispatcher = (OwoEntityRenderDispatcherExtension) this.dispatcher;
             dispatcher.owo$setCounterRotate(true);
+            dispatcher.owo$setShowNametag(state.showNametag);
 
             matrices.multiplyPositionMatrix(state.transform);
 
@@ -87,6 +89,7 @@ public record EntityElementRenderState(
             this.dispatcher.setRenderShadows(true);
 
             dispatcher.owo$setCounterRotate(false);
+            dispatcher.owo$setShowNametag(true);
         }
 
         @Override
