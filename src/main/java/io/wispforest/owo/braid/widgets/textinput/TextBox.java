@@ -22,7 +22,7 @@ public class TextBox extends StatefulWidget {
     private int maxLines = -1;
     private int maxCharacters = -1;
     private Style baseStyle = Style.EMPTY;
-    private @Nullable TextInput.SuggestionProvider suggestionProvider;
+    private Text suggestion = Text.empty();
 
     public TextBox(
         TextEditingController controller,
@@ -82,18 +82,18 @@ public class TextBox extends StatefulWidget {
         return this.baseStyle;
     }
 
-    public TextBox suggests(@Nullable TextInput.SuggestionProvider suggestionProvider) {
+    public TextBox suggestion(Text suggestion) {
         this.assertMutable();
-        this.suggestionProvider = suggestionProvider;
+        this.suggestion = suggestion;
         return this;
     }
 
-    public TextInput.SuggestionProvider suggestionProvider() {
-        return this.suggestionProvider;
+    public Text suggestion() {
+        return this.suggestion;
     }
 
     public TextBox placeholder(Text placeholder) {
-        return this.suggests((input, selection) -> input.isEmpty() ? placeholder : Text.empty());
+        return this.suggestion(this.controller.text.isEmpty() ? placeholder : Text.empty());
     }
 
     public TextBox singleLine() {
@@ -133,7 +133,7 @@ public class TextBox extends StatefulWidget {
                                         .maxLines(this.widget().maxLines)
                                         .maxCharacters(this.widget().maxCharacters)
                                         .baseStyle(this.widget().baseStyle)
-                                        .suggests(this.widget().suggestionProvider)
+                                        .suggestion(this.widget().suggestion)
                                 )
                             )
                         )

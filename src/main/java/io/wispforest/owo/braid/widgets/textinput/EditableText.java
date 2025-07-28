@@ -1,7 +1,6 @@
 package io.wispforest.owo.braid.widgets.textinput;
 
 import io.wispforest.owo.braid.framework.BuildContext;
-import io.wispforest.owo.braid.framework.instance.WidgetInstance;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
@@ -12,10 +11,8 @@ import io.wispforest.owo.braid.widgets.scroll.Scrollable;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Box;
-import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
-import java.util.function.Consumer;
 
 public class EditableText extends StatefulWidget {
 
@@ -25,7 +22,8 @@ public class EditableText extends StatefulWidget {
     private int maxLines = -1;
     private int maxCharacters = -1;
     private Style baseStyle = Style.EMPTY;
-    private @Nullable TextInput.SuggestionProvider suggestionProvider;
+    private Text suggestion = Text.empty();
+    private boolean suggestionIsPlaceholder = false;
 
     public EditableText(
         TextEditingController controller,
@@ -85,18 +83,20 @@ public class EditableText extends StatefulWidget {
         return this.baseStyle;
     }
 
-    public EditableText suggests(@Nullable TextInput.SuggestionProvider suggestionProvider) {
+    public EditableText suggestion(Text suggestion) {
         this.assertMutable();
-        this.suggestionProvider = suggestionProvider;
+        this.suggestion = suggestion;
         return this;
     }
 
-    public TextInput.SuggestionProvider suggestionProvider() {
-        return this.suggestionProvider;
+    public Text suggestion() {
+        return this.suggestion;
     }
 
     public EditableText placeholder(Text placeholder) {
-        return this.suggests((input, selection) -> input.isEmpty() ? placeholder : Text.empty());
+        this.assertMutable();
+        this.suggestionIsPlaceholder = true;
+        return this.suggestion(controller.text.isEmpty() ? placeholder : Text.empty());
     }
 
     public EditableText singleLine() {
@@ -104,7 +104,6 @@ public class EditableText extends StatefulWidget {
             .softWrap(false)
             .maxLines(1);
     }
-
 
     @Override
     public WidgetState<EditableText> createState() {
@@ -209,30 +208,15 @@ public class EditableText extends StatefulWidget {
                             this.widget().maxLines,
                             this.widget().maxCharacters,
                             this.widget().baseStyle,
-                            this.widget().suggestionProvider
+                            this.widget().suggestionIsPlaceholder
+                                ? this.widget().controller.text.isEmpty()
+                                    ? this.widget().suggestion
+                                    : Text.empty()
+                                : this.widget().suggestion
                         );
                     })
                 )
             );
         }
-    }
-}
-
-class InstanceLocator extends VisitorWidget {
-
-    public final Consumer<WidgetInstance<?>> callback;
-
-    public InstanceLocator(Consumer<WidgetInstance<?>> callback, Widget child) {
-        super(child);
-        this.callback = callback;
-    }
-
-    public static final Visitor<InstanceLocator> VISITOR = (widget, instance) -> {
-        widget.callback.accept(instance);
-    };
-
-    @Override
-    public Proxy<?> proxy() {
-        return new Proxy<>(this, VISITOR);
     }
 }

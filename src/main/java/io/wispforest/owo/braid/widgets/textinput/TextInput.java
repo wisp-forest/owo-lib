@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
-import java.util.regex.Pattern;
 
 public class TextInput extends LeafInstanceWidget {
 
@@ -38,10 +37,9 @@ public class TextInput extends LeafInstanceWidget {
     public final int maxLines;
     public final int maxCharacters;
     public final Style baseStyle;
-    @Nullable
-    public final SuggestionProvider suggestionProvider;
+    public final Text suggestion;
 
-    public TextInput(TextEditingController controller, boolean showCursor, boolean softWrap, boolean autoFocus, int maxLines, int maxCharacters, Style baseStyle, @Nullable SuggestionProvider suggestionProvider) {
+    public TextInput(TextEditingController controller, boolean showCursor, boolean softWrap, boolean autoFocus, int maxLines, int maxCharacters, Style baseStyle, @Nullable Text suggestion) {
         this.controller = controller;
         this.showCursor = showCursor;
         this.softWrap = softWrap;
@@ -49,7 +47,7 @@ public class TextInput extends LeafInstanceWidget {
         this.maxLines = maxLines;
         this.maxCharacters = maxCharacters;
         this.baseStyle = baseStyle;
-        this.suggestionProvider = suggestionProvider;
+        this.suggestion = suggestion == null ? Text.empty() : suggestion.copy().styled(style -> style.withColor(-8355712));
     }
 
     @Override
@@ -118,16 +116,10 @@ public class TextInput extends LeafInstanceWidget {
                 wrapWidth
             );
 
-            var renderText = this.widget.controller.createTextForRendering(this.widget.baseStyle);
-
-            if (this.widget.suggestionProvider != null) {
-                var suggestion = this.widget.suggestionProvider.getSuggestion(this.text, this.selection);
-                if (suggestion != null && !suggestion.getString().isEmpty()) {
-                    renderText = renderText.copy().append(suggestion.copy().withColor(-8355712));
-                }
-            }
-
-            this.renderLines = new ArrayList<>(this.host().client().textRenderer.wrapLines(renderText, wrapWidth));
+            this.renderLines = new ArrayList<>(this.host().client().textRenderer.wrapLines(
+                this.widget.controller.createTextForRendering(this.widget.baseStyle).copy().append(this.widget.suggestion),
+                wrapWidth
+            ));
 
             var size = Size.of(
                 this.metrics.width() + 1,
@@ -535,10 +527,5 @@ public class TextInput extends LeafInstanceWidget {
         }
 
         protected record CursorLocation(int line, int charIdx) {}
-    }
-
-    @FunctionalInterface
-    public interface SuggestionProvider {
-        @Nullable Text getSuggestion(String currentText, TextSelection selection);
     }
 }
