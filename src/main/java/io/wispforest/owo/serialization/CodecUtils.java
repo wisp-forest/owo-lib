@@ -360,6 +360,8 @@ public class CodecUtils {
                     ? SerializationContext.attributes(RegistriesAttribute.of(registryByteBuf.getRegistryManager()))
                     : SerializationContext.empty();
 
+                ctx = ctx.withAttributes(MinecraftSerializationAttributes.NETWORK);
+
                 return endec.decode(ctx, ByteBufDeserializer.of(buf));
             }
 
@@ -368,6 +370,8 @@ public class CodecUtils {
                 var ctx = buf instanceof RegistryByteBuf registryByteBuf
                     ? SerializationContext.attributes(RegistriesAttribute.of(registryByteBuf.getRegistryManager()))
                     : SerializationContext.empty();
+
+                ctx = ctx.withAttributes(MinecraftSerializationAttributes.NETWORK);
 
                 endec.encode(ctx, ByteBufSerializer.of(buf), value);
             }
