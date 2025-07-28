@@ -118,14 +118,17 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
         }
 
         var entityState = this.dispatcher.getRenderer(this.entity).createRenderState();
+
+        var dispatcher = (OwoEntityRenderDispatcherExtension) this.dispatcher;
+        dispatcher.owo$setShowNametag(this.showNametag);
         ((EntityRenderer)this.dispatcher.getRenderer(this.entity)).updateRenderState(this.entity, entityState, partialTicks);
+        dispatcher.owo$setShowNametag(false);
 
         context.state.addSpecialElement(new EntityElementRenderState(
             entityState,
             matrix,
             new ScreenRect(this.x, this.y, this.width, this.height),
-            context.scissorStack.peekLast(),
-            this.showNametag
+            context.scissorStack.peekLast()
         ));
     }
 
