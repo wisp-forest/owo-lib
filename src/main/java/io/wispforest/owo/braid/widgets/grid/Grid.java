@@ -6,7 +6,6 @@ import io.wispforest.owo.braid.framework.instance.WidgetInstance;
 import io.wispforest.owo.braid.framework.widget.MultiChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.Padding;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 
@@ -97,7 +96,10 @@ public class Grid extends MultiChildInstanceWidget {
                     ? dynamicMainAxisCellSizes[mainAxisIdx]
                     : fixedMainAxisCellSize;
 
-                for (var childIdx = mainAxisIdx * this.widget.crossAxisCells; childIdx < this.children.size(); childIdx++) {
+                var firstChildIdx = mainAxisIdx * this.widget.crossAxisCells;
+                var lastChildIdx = Math.min(this.children.size(), firstChildIdx + this.widget.crossAxisCells) - 1;
+
+                for (var childIdx = firstChildIdx; childIdx <= lastChildIdx; childIdx++) {
                     var child = this.children.get(childIdx);
 
                     var maxCrossAxisChildSize = mustMeasureCrossAxis
@@ -165,7 +167,7 @@ public class Grid extends MultiChildInstanceWidget {
         }
 
         @Override
-        public void draw(OwoUIDrawContext ctx) {
+        public void draw(BraidDrawContext ctx) {
             super.draw(ctx);
 
 //            if (this.debugCrossAxisSizes != null && this.debugMainAxisSizes != null) {

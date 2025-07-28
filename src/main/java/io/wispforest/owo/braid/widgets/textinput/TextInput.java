@@ -1,9 +1,6 @@
 package io.wispforest.owo.braid.widgets.textinput;
 
-import io.wispforest.owo.braid.core.Constraints;
-import io.wispforest.owo.braid.core.KeyModifiers;
-import io.wispforest.owo.braid.core.Size;
-import io.wispforest.owo.braid.core.TextLayout;
+import io.wispforest.owo.braid.core.*;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.framework.instance.KeyboardListener;
 import io.wispforest.owo.braid.framework.instance.LeafWidgetInstance;
@@ -18,6 +15,7 @@ import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Colors;
+import net.minecraft.util.StringHelper;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
@@ -60,8 +58,6 @@ public class TextInput extends LeafInstanceWidget {
     }
 
     public static class Instance extends LeafWidgetInstance<TextInput> implements MouseListener, KeyboardListener {
-
-        protected static final Pattern LINE_BREAKS = Pattern.compile("[\r\n]");
 
         protected String text;
         protected TextSelection selection;
@@ -186,7 +182,7 @@ public class TextInput extends LeafInstanceWidget {
         }
 
         @Override
-        public void draw(OwoUIDrawContext ctx) {
+        public void draw(BraidDrawContext ctx) {
             var textRenderer = this.host().client().textRenderer;
 
             for (int lineIdx = 0; lineIdx < this.renderLines.size(); lineIdx++) {
@@ -260,9 +256,7 @@ public class TextInput extends LeafInstanceWidget {
         }
 
         private void insert(String insertion) {
-            if (this.widget.maxLines == 1) {
-                insertion = LINE_BREAKS.matcher(insertion).replaceAll("");
-            }
+            insertion = StringHelper.stripInvalidChars(insertion, this.widget.maxLines == 1);
 
             var chars = new StringBuilder(this.text);
             chars.replace(this.selection.lower(), this.selection.upper(), insertion);

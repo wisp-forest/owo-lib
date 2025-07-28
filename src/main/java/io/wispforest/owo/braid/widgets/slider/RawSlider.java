@@ -68,6 +68,7 @@ public class RawSlider extends StatefulWidget {
         public Widget build(BuildContext context) {
             return new LayoutBuilder((innerContext, constraints) -> {
                 var widget = this.widget();
+                var size = constraints.maxFiniteOrMinSize();
 
                 return new Center(
                     new Actions(
@@ -84,7 +85,7 @@ public class RawSlider extends StatefulWidget {
                                 .clickCallback((x, y, button, modifiers) -> {
                                     if (button != 0) return false;
 
-                                    y = widget.axis == LayoutAxis.VERTICAL ? constraints.maxOnAxis(widget.axis) - y : y;
+                                    y = widget.axis == LayoutAxis.VERTICAL ? constraints.maxFiniteOrMinOnAxis(widget.axis) - y : y;
                                     if (!this.isInHandle(constraints, x, y)) {
                                         this.setAbsolute(constraints, x, y);
                                     }
@@ -97,23 +98,23 @@ public class RawSlider extends StatefulWidget {
                             new Stack(
                                 widget.axis.choose(Alignment.LEFT, Alignment.TOP),
                                 new Sized(
-                                    constraints.maxWidth(),
-                                    constraints.maxHeight(),
+                                    size.width(),
+                                    size.height(),
                                     widget.track
                                 ),
                                 new Padding(
                                     widget.axis.chooseCompute(
-                                        () -> Insets.left(Math.floor((constraints.maxWidth() - widget.handleSize) * widget.normalizedValue)),
-                                        () -> Insets.top(Math.floor((constraints.maxHeight() - widget.handleSize) * (1 - widget.normalizedValue)))
+                                        () -> Insets.left(Math.floor((size.width() - widget.handleSize) * widget.normalizedValue)),
+                                        () -> Insets.top(Math.floor((size.height() - widget.handleSize) * (1 - widget.normalizedValue)))
                                     ),
                                     widget.axis.chooseCompute(
                                         () -> new Sized(
                                             widget.handleSize,
-                                            constraints.maxHeight(),
+                                            size.height(),
                                             widget.handle
                                         ),
                                         () -> new Sized(
-                                            constraints.maxWidth(),
+                                            size.width(),
                                             widget.handleSize,
                                             widget.handle
                                         )
@@ -129,7 +130,7 @@ public class RawSlider extends StatefulWidget {
         protected boolean isInHandle(Constraints constraints, double x, double y) {
             var axis = this.widget().axis;
 
-            var trackLength = constraints.maxOnAxis(axis) - this.widget().handleSize;
+            var trackLength = constraints.maxFiniteOrMinOnAxis(axis) - this.widget().handleSize;
             var handleMin = this.widget().normalizedValue * trackLength;
             var handleMax = handleMin + this.widget().handleSize;
 
@@ -138,7 +139,7 @@ public class RawSlider extends StatefulWidget {
         }
 
         protected void move(Constraints constraints, double dx, double dy) {
-            this.dragValue += this.widget().axis.choose(dx, dy) / (constraints.maxOnAxis(this.widget().axis) - this.widget().handleSize);
+            this.dragValue += this.widget().axis.choose(dx, dy) / (constraints.maxFiniteOrMinOnAxis(this.widget().axis) - this.widget().handleSize);
 
             this.applyValue(MathHelper.clamp(this.dragValue, 0, 1));
         }
@@ -149,7 +150,7 @@ public class RawSlider extends StatefulWidget {
             var axis = this.widget().axis;
             var handleSize = this.widget().handleSize;
 
-            var newNormalizedValue = MathHelper.clamp((axis.choose(x, y) - handleSize / 2) / (constraints.maxOnAxis(axis) - handleSize), 0, 1);
+            var newNormalizedValue = MathHelper.clamp((axis.choose(x, y) - handleSize / 2) / (constraints.maxFiniteOrMinOnAxis(axis) - handleSize), 0, 1);
 
             applyValue(newNormalizedValue);
         }

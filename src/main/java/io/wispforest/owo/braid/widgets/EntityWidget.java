@@ -1,9 +1,9 @@
 package io.wispforest.owo.braid.widgets;
 
+import io.wispforest.owo.braid.core.BraidDrawContext;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.framework.instance.LeafWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.LeafInstanceWidget;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.util.pond.OwoEntityRenderDispatcherExtension;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.LightmapTextureManager;
@@ -78,7 +78,7 @@ public class EntityWidget extends LeafInstanceWidget {
         }
 
         @Override
-        public void draw(OwoUIDrawContext ctx) {
+        public void draw(BraidDrawContext ctx) {
             ctx.push();
 
             var scale = this.widget.scale * this.baseScale;

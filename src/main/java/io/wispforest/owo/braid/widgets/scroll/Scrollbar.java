@@ -35,9 +35,9 @@ public class Scrollbar extends StatelessWidget {
                         var currentOffset = this.controller.offset;
                         var maxOffset = this.controller.maxOffset;
 
-                        var selfSize = constraints.maxOnAxis(this.axis);
-                        var childSize = selfSize + maxOffset;
-                        var scrollbarLength = Math.min((selfSize / childSize) * selfSize, selfSize);
+                        var containerSize = constraints.maxOnAxis(this.axis);
+                        var childSize = containerSize + maxOffset;
+                        var scrollbarLength = Math.min((containerSize / childSize) * containerSize, containerSize);
 
                         return maxOffset != 0 ? new RawSlider(
                             currentOffset,

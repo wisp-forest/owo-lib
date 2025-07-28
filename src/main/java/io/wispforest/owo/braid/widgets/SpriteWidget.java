@@ -1,11 +1,11 @@
 package io.wispforest.owo.braid.widgets;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import io.wispforest.owo.braid.core.BraidDrawContext;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.Size;
 import io.wispforest.owo.braid.framework.instance.LeafWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.LeafInstanceWidget;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.OwoUIRenderLayers;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.SpriteIdentifier;
@@ -81,7 +81,7 @@ public class SpriteWidget extends LeafInstanceWidget {
         }
 
         @Override
-        public void draw(OwoUIDrawContext ctx) {
+        public void draw(BraidDrawContext ctx) {
             if (this.widget.blend) {
                 RenderSystem.enableBlend();
                 RenderSystem.defaultBlendFunc();

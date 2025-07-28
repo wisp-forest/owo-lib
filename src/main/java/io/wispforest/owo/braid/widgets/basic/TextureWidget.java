@@ -1,10 +1,10 @@
 package io.wispforest.owo.braid.widgets.basic;
 
+import io.wispforest.owo.braid.core.BraidDrawContext;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.framework.instance.OptionalChildWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.OptionalChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.OwoUIRenderLayers;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
@@ -52,7 +52,31 @@ public class TextureWidget extends OptionalChildInstanceWidget {
         }
 
         @Override
-        public void draw(OwoUIDrawContext ctx) {
+        protected void doLayout(Constraints constraints) {
+            if (this.child == null) {
+                this.transform.setSize(constraints.maxFiniteOrMinSize());
+            } else {
+                this.sizeToChild(constraints, this.child);
+            }
+        }
+
+        @Override
+        protected double measureIntrinsicWidth(double height) {
+            return this.child != null ? this.child.getIntrinsicWidth(height) : 0;
+        }
+
+        @Override
+        protected double measureIntrinsicHeight(double width) {
+            return this.child != null ? this.child.getIntrinsicHeight(width) : 0;
+        }
+
+        @Override
+        protected OptionalDouble measureBaselineOffset() {
+            return this.child != null ? this.child.getBaselineOffset() : OptionalDouble.empty();
+        }
+
+        @Override
+        public void draw(BraidDrawContext ctx) {
             var matrices = ctx.getMatrices();
 
             if (widget.stretch) {
@@ -78,30 +102,6 @@ public class TextureWidget extends OptionalChildInstanceWidget {
             if (widget.stretch) matrices.pop();
 
             super.draw(ctx);
-        }
-
-        @Override
-        protected void doLayout(Constraints constraints) {
-            if (this.child == null) {
-                this.transform.setSize(constraints.maxSize());
-            } else {
-                this.sizeToChild(constraints, this.child);
-            }
-        }
-
-        @Override
-        protected double measureIntrinsicWidth(double height) {
-            return this.child != null ? this.child.getIntrinsicWidth(height) : 0;
-        }
-
-        @Override
-        protected double measureIntrinsicHeight(double width) {
-            return this.child != null ? this.child.getIntrinsicHeight(width) : 0;
-        }
-
-        @Override
-        protected OptionalDouble measureBaselineOffset() {
-            return this.child != null ? this.child.getBaselineOffset() : OptionalDouble.empty();
         }
     }
 }

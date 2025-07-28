@@ -79,16 +79,31 @@ public record Constraints(double minWidth, double minHeight, double maxWidth, do
 
     public double minOnAxis(LayoutAxis axis) {
         return switch (axis) {
-            case HORIZONTAL -> minWidth();
-            case VERTICAL -> minHeight();
+            case HORIZONTAL -> this.minWidth();
+            case VERTICAL -> this.minHeight();
         };
     }
 
     public double maxOnAxis(LayoutAxis axis) {
         return switch (axis) {
-            case HORIZONTAL -> maxWidth();
-            case VERTICAL -> maxHeight();
+            case HORIZONTAL -> this.maxWidth();
+            case VERTICAL -> this.maxHeight();
         };
+    }
+
+    public double maxFiniteOrMinOnAxis(LayoutAxis axis) {
+        return switch (axis) {
+            case HORIZONTAL -> this.maxFiniteOrMinWidth();
+            case VERTICAL -> this.maxFiniteOrMinHeight();
+        };
+    }
+
+    public double maxFiniteOrMinWidth() {
+        return this.hasBoundedWidth() ? this.maxWidth() : this.minWidth();
+    }
+
+    public double maxFiniteOrMinHeight() {
+        return this.hasBoundedHeight() ? this.maxHeight() : this.minHeight();
     }
 
     // ---
@@ -98,6 +113,13 @@ public record Constraints(double minWidth, double minHeight, double maxWidth, do
     }
 
     public Constraints respecting(Constraints other) {
+        if (this.minWidth >= other.minWidth && this.minWidth <= other.maxWidth
+            && this.maxWidth >= other.minWidth && this.maxWidth <= other.maxWidth
+            && this.minHeight >= other.minHeight && this.minHeight <= other.maxHeight
+            && this.maxHeight >= other.minHeight && this.maxHeight <= other.maxHeight) {
+            return this;
+        }
+
         return new Constraints(
             MathHelper.clamp(this.minWidth, other.minWidth, other.maxWidth),
             MathHelper.clamp(this.minHeight, other.minHeight, other.maxHeight),
@@ -144,5 +166,12 @@ public record Constraints(double minWidth, double minHeight, double maxWidth, do
 
     public Size maxSize() {
         return Size.of(this.maxWidth, this.maxHeight);
+    }
+
+    public Size maxFiniteOrMinSize() {
+        return Size.of(
+            this.maxFiniteOrMinWidth(),
+            this.maxFiniteOrMinHeight()
+        );
     }
 }

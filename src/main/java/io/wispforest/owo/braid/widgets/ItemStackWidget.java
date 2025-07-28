@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets;
 
+import io.wispforest.owo.braid.core.BraidDrawContext;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.Size;
 import io.wispforest.owo.braid.framework.instance.LeafWidgetInstance;
@@ -61,7 +62,7 @@ public class ItemStackWidget extends LeafInstanceWidget {
         }
 
         @Override
-        public void draw(OwoUIDrawContext ctx) {
+        public void draw(BraidDrawContext ctx) {
             this.host().client().getItemModelManager().update(ITEM_RENDER_STATE, this.widget.stack, ModelTransformationMode.GUI, false, null, null, 0);
 
             final boolean notSideLit = !ITEM_RENDER_STATE.isSideLit();

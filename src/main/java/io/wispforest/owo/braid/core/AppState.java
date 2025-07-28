@@ -4,22 +4,22 @@ import com.google.common.collect.Streams;
 import com.mojang.blaze3d.platform.GlStateManager;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.core.events.*;
+import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.instance.*;
 import io.wispforest.owo.braid.framework.proxy.BuildScope;
 import io.wispforest.owo.braid.framework.proxy.ProxyHost;
 import io.wispforest.owo.braid.framework.proxy.SingleChildInstanceWidgetProxy;
 import io.wispforest.owo.braid.framework.proxy.WidgetProxy;
+import io.wispforest.owo.braid.framework.widget.InheritedWidget;
 import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.VisitorWidget;
 import io.wispforest.owo.braid.widgets.inspector.BraidInspector;
 import io.wispforest.owo.braid.widgets.inspector.InstancePicker;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.util.EventSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Style;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -67,7 +67,7 @@ public class AppState implements InstanceHost, ProxyHost {
     private final List<Runnable> onTerminate = new ArrayList<>();
     private boolean running = true;
 
-    private final BraidInspector inspector = new BraidInspector();
+    private final BraidInspector inspector = new BraidInspector(this);
 
     public AppState(
         @Nullable Logger logger,
@@ -83,13 +83,16 @@ public class AppState implements InstanceHost, ProxyHost {
         this.eventBuffer = eventBuffer;
 
         this.root = new RootWidget(
-            new InstancePicker(
-                this.inspector.onPick(),
-                this.inspector::revealInstance,
-                new UserRoot(
-                    widgetProxy -> inspector.rootProxy = widgetProxy,
-                    widgetInstance -> inspector.rootInstance = widgetInstance,
-                    root
+            new AppWidget(
+                this,
+                new InstancePicker(
+                    this.inspector.onPick(),
+                    this.inspector::revealInstance,
+                    new UserRoot(
+                        widgetProxy -> inspector.rootProxy = widgetProxy,
+                        widgetInstance -> inspector.rootInstance = widgetInstance,
+                        root
+                    )
                 )
             ),
             this.rootBuildScope
@@ -124,14 +127,14 @@ public class AppState implements InstanceHost, ProxyHost {
         ctx.push();
         this.rootInstance().transform.transformToParent(ctx.getMatrices());
 
-        var owoContext = OwoUIDrawContext.of(ctx);
+        var braidContext = BraidDrawContext.create(ctx, this.surface);
 
         GlStateManager._enableScissorTest();
-        this.rootInstance().draw(owoContext);
+        this.rootInstance().draw(braidContext);
         GlStateManager._disableScissorTest();
 
         if (this.activeTooltip != null) {
-            if (this.activeTooltip.components() != null) owoContext.drawTooltip(this.client.textRenderer, this.activeTooltip.x(), this.activeTooltip.y(), this.activeTooltip.components());
+            if (this.activeTooltip.components() != null) braidContext.drawTooltip(this.client.textRenderer, this.activeTooltip.x(), this.activeTooltip.y(), this.activeTooltip.components());
             if (this.activeTooltip.style() != null) ctx.drawHoverEvent(this.client.textRenderer, this.activeTooltip.style(), this.activeTooltip.x(), this.activeTooltip.y());
         }
 
@@ -503,6 +506,13 @@ public class AppState implements InstanceHost, ProxyHost {
     public void schedulePostLayoutCallback(Runnable callback) {
         this.postLayoutCallbacks.offer(callback);
     }
+
+    // ---
+
+    public static AppState of(BuildContext context) {
+        //noinspection DataFlowIssue
+        return context.getAncestor(AppWidget.class).app;
+    }
 }
 
 record ScheduledCallback(Instant after, Runnable callback, long id) implements Comparable<ScheduledCallback> {
@@ -594,6 +604,25 @@ class UserRoot extends VisitorWidget {
         this.proxyCallback.accept(proxy);
 
         return proxy;
+    }
+}
+
+class AppWidget extends InheritedWidget {
+
+    public final AppState app;
+
+    protected AppWidget(AppState app, Widget child) {
+        super(child);
+        this.app = app;
+    }
+
+    @Override
+    public boolean mustRebuildDependents(InheritedWidget newWidget) {
+        if (((AppWidget) newWidget).app != this.app) {
+            throw new UnsupportedOperationException("changing the AppState of a widget tree is not supported");
+        }
+
+        return false;
     }
 }
 

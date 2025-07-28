@@ -1,12 +1,12 @@
 package io.wispforest.owo.braid.widgets.vanilla;
 
+import io.wispforest.owo.braid.core.BraidDrawContext;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.KeyModifiers;
 import io.wispforest.owo.braid.framework.instance.KeyboardListener;
 import io.wispforest.owo.braid.framework.instance.LeafWidgetInstance;
 import io.wispforest.owo.braid.framework.instance.MouseListener;
 import io.wispforest.owo.braid.framework.widget.LeafInstanceWidget;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.widget.ClickableWidget;
@@ -70,7 +70,7 @@ public class VanillaWidgetWrapper<T extends Drawable & Element> extends LeafInst
         }
 
         @Override
-        public void draw(OwoUIDrawContext ctx) {
+        public void draw(BraidDrawContext ctx) {
             widget.wrapped.render(ctx, (int) x, (int) y, host().client().getRenderTickCounter().getTickDelta(false));
         }
 
