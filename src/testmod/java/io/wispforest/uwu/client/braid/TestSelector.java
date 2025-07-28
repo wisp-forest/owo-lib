@@ -665,6 +665,8 @@ public class TestSelector extends StatefulWidget {
             private final TextEditingController controller1 = new TextEditingController();
             private final TextEditingController controller2 = new TextEditingController();
             private final TextEditingController controller3 = new TextEditingController();
+            private final TextEditingController controller4 = new TextEditingController();
+            private final TextEditingController controller5 = new TextEditingController();
 
             @Override
             public Widget build(BuildContext context) {
@@ -681,11 +683,8 @@ public class TestSelector extends StatefulWidget {
                                 50.0,
                                 new TextBox(
                                     this.controller1,
-                                    true,
-                                    false,
-                                    true,
-                                    Style.EMPTY,
-                                    this.controller1.text().isEmpty() ? Text.literal("Soft Wrapping Moment") : null
+                                    widget -> widget
+                                        .placeholder(Text.literal("Soft Wrapping Moment"))
                                 )
                             ),
                             new Sized(
@@ -693,23 +692,41 @@ public class TestSelector extends StatefulWidget {
                                 50.0,
                                 new TextBox(
                                     this.controller2,
-                                    false,
-                                    true,
-                                    true,
-                                    Style.EMPTY,
-                                    this.controller2.text().isEmpty() ? Text.literal("No Soft Wrapping Moment (also auto focused)") : null
+                                    widget -> widget
+                                        .softWrap(false)
+                                        .autoFocus(true)
+                                        .placeholder(Text.literal("No Soft Wrapping Moment (also auto focused)"))
+                                )
+                            ),
+                            new Sized(
+                                100.0,
+                                30,
+                                new TextBox(
+                                    this.controller3,
+                                    widget -> widget
+                                        .maxLines(2)
+                                        .placeholder(Text.literal("2 lines, TILI"))
                                 )
                             ),
                             new Sized(
                                 100.0,
                                 20.0,
                                 new TextBox(
-                                    this.controller3,
-                                    false,
-                                    false,
-                                    false,
-                                    Style.EMPTY,
-                                    this.controller3.text().isEmpty() ? Text.literal("Single Line Moment") : null
+                                    this.controller4,
+                                    widget -> widget
+                                        .singleLine()
+                                        .placeholder(Text.literal("Single Line Moment"))
+                                )
+                            ),
+                            new Sized(
+                                100.0,
+                                20.0,
+                                new TextBox(
+                                    this.controller5,
+                                    widget -> widget
+                                        .singleLine()
+                                        .maxCharacters(3)
+                                        .placeholder(Text.literal("3 chars, TILI"))
                                 )
                             )
                         ),
@@ -1308,8 +1325,8 @@ public class TestSelector extends StatefulWidget {
                     ),
                     new Label(
                         Text.literal(coolNumbers.stream()
-                            .map(String::valueOf)
-                            .collect(Collectors.joining(", ")))
+                                         .map(String::valueOf)
+                                         .collect(Collectors.joining(", ")))
                     )
                 );
             }

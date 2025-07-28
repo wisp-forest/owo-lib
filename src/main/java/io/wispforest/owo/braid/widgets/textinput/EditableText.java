@@ -5,12 +5,13 @@ import io.wispforest.owo.braid.framework.instance.WidgetInstance;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
 import io.wispforest.owo.braid.widgets.basic.*;
 import io.wispforest.owo.braid.widgets.scroll.ScrollController;
 import io.wispforest.owo.braid.widgets.scroll.Scrollable;
 import net.minecraft.text.Style;
-import net.minecraft.util.math.Box;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.Box;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
@@ -19,24 +20,91 @@ import java.util.function.Consumer;
 public class EditableText extends StatefulWidget {
 
     public final TextEditingController controller;
-    public final boolean softWrap;
-    public final boolean autoFocus;
-    public final boolean allowMultipleLines;
-    public final Style baseStyle;
-    public final Text suggestion;
+    private boolean softWrap = true;
+    private boolean autoFocus = false;
+    private int maxLines = -1;
+    private int maxCharacters = -1;
+    private Style baseStyle = Style.EMPTY;
+    private @Nullable TextInput.SuggestionProvider suggestionProvider;
 
-    public EditableText(TextEditingController controller, boolean softWrap, boolean autoFocus, boolean allowMultipleLines, Style baseStyle, @Nullable Text suggestion) {
+    public EditableText(
+        TextEditingController controller,
+        WidgetSetupCallback<EditableText> setupCallback
+    ) {
         this.controller = controller;
-        this.softWrap = softWrap;
-        this.autoFocus = autoFocus;
-        this.allowMultipleLines = allowMultipleLines;
-        this.baseStyle = baseStyle;
-        this.suggestion = suggestion == null ? Text.empty() : suggestion;
+        setupCallback.setup(this);
     }
 
-    public EditableText(TextEditingController controller, boolean softWrap, boolean autoFocus, boolean allowMultipleLines, Style baseStyle) {
-        this(controller, softWrap, autoFocus, allowMultipleLines, baseStyle, null);
+    public EditableText softWrap(boolean softWrap) {
+        this.assertMutable();
+        this.softWrap = softWrap;
+        return this;
     }
+
+    public boolean softWrap() {
+        return this.softWrap;
+    }
+
+    public EditableText autoFocus(boolean autoFocus) {
+        this.assertMutable();
+        this.autoFocus = autoFocus;
+        return this;
+    }
+
+    public boolean autoFocus() {
+        return this.autoFocus;
+    }
+
+    public EditableText maxLines(int maxLines) {
+        this.assertMutable();
+        this.maxLines = maxLines;
+        return this;
+    }
+
+    public int maxLines() {
+        return this.maxLines;
+    }
+
+    public EditableText maxCharacters(int maxCharacters) {
+        this.assertMutable();
+        this.maxCharacters = maxCharacters;
+        return this;
+    }
+
+    public int maxCharacters() {
+        return this.maxCharacters;
+    }
+
+    public EditableText baseStyle(Style baseStyle) {
+        this.assertMutable();
+        this.baseStyle = baseStyle;
+        return this;
+    }
+
+    public Style baseStyle() {
+        return this.baseStyle;
+    }
+
+    public EditableText suggests(@Nullable TextInput.SuggestionProvider suggestionProvider) {
+        this.assertMutable();
+        this.suggestionProvider = suggestionProvider;
+        return this;
+    }
+
+    public TextInput.SuggestionProvider suggestionProvider() {
+        return this.suggestionProvider;
+    }
+
+    public EditableText placeholder(Text placeholder) {
+        return this.suggests((input, selection) -> input.isEmpty() ? placeholder : Text.empty());
+    }
+
+    public EditableText singleLine() {
+        return this
+            .softWrap(false)
+            .maxLines(1);
+    }
+
 
     @Override
     public WidgetState<EditableText> createState() {
@@ -138,9 +206,10 @@ public class EditableText extends StatefulWidget {
                             this.showCursor,
                             this.widget().softWrap,
                             this.widget().autoFocus,
-                            this.widget().allowMultipleLines,
+                            this.widget().maxLines,
+                            this.widget().maxCharacters,
                             this.widget().baseStyle,
-                            this.widget().suggestion
+                            this.widget().suggestionProvider
                         );
                     })
                 )

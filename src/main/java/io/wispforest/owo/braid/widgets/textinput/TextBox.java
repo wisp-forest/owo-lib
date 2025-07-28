@@ -5,6 +5,7 @@ import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
 import io.wispforest.owo.braid.widgets.basic.Box;
 import io.wispforest.owo.braid.widgets.basic.KeyboardInput;
 import io.wispforest.owo.braid.widgets.basic.Padding;
@@ -16,19 +17,89 @@ import org.jetbrains.annotations.Nullable;
 public class TextBox extends StatefulWidget {
 
     public final TextEditingController controller;
-    public final boolean softWrap;
-    public final boolean autoFocus;
-    public final boolean allowMultipleLines;
-    public final Style baseStyle;
-    public final Text suggestion;
+    private boolean softWrap = true;
+    private boolean autoFocus = false;
+    private int maxLines = -1;
+    private int maxCharacters = -1;
+    private Style baseStyle = Style.EMPTY;
+    private @Nullable TextInput.SuggestionProvider suggestionProvider;
 
-    public TextBox(TextEditingController controller, boolean softWrap, boolean autoFocus, boolean allowMultipleLines, Style baseStyle, @Nullable Text suggestion) {
+    public TextBox(
+        TextEditingController controller,
+        WidgetSetupCallback<TextBox> setupCallback
+    ) {
         this.controller = controller;
+        setupCallback.setup(this);
+    }
+
+    public TextBox softWrap(boolean softWrap) {
+        this.assertMutable();
         this.softWrap = softWrap;
+        return this;
+    }
+
+    public boolean softWrap() {
+        return this.softWrap;
+    }
+
+    public TextBox autoFocus(boolean autoFocus) {
+        this.assertMutable();
         this.autoFocus = autoFocus;
-        this.allowMultipleLines = allowMultipleLines;
+        return this;
+    }
+
+    public boolean autoFocus() {
+        return this.autoFocus;
+    }
+
+    public TextBox maxLines(int maxLines) {
+        this.assertMutable();
+        this.maxLines = maxLines;
+        return this;
+    }
+
+    public int maxLines() {
+        return this.maxLines;
+    }
+
+    public TextBox maxCharacters(int maxCharacters) {
+        this.assertMutable();
+        this.maxCharacters = maxCharacters;
+        return this;
+    }
+
+    public int maxCharacters() {
+        return this.maxCharacters;
+    }
+
+    public TextBox baseStyle(Style baseStyle) {
+        this.assertMutable();
         this.baseStyle = baseStyle;
-        this.suggestion = suggestion == null ? Text.empty() : suggestion;
+        return this;
+    }
+
+    public Style baseStyle() {
+        return this.baseStyle;
+    }
+
+    public TextBox suggests(@Nullable TextInput.SuggestionProvider suggestionProvider) {
+        this.assertMutable();
+        this.suggestionProvider = suggestionProvider;
+        return this;
+    }
+
+    public TextInput.SuggestionProvider suggestionProvider() {
+        return this.suggestionProvider;
+    }
+
+    public TextBox placeholder(Text placeholder) {
+        return this.suggests((input, selection) -> input.isEmpty() ? placeholder : Text.empty());
+    }
+
+    public TextBox singleLine() {
+        return this
+            .softWrap(false)
+            .maxLines(1);
     }
 
     @Override
@@ -56,11 +127,13 @@ public class TextBox extends StatefulWidget {
                                 Insets.all(2),
                                 new EditableText(
                                     this.widget().controller,
-                                    this.widget().softWrap,
-                                    this.widget().autoFocus,
-                                    this.widget().allowMultipleLines,
-                                    this.widget().baseStyle,
-                                    this.widget().suggestion
+                                    widget -> widget
+                                        .softWrap(this.widget().softWrap)
+                                        .autoFocus(this.widget().autoFocus)
+                                        .maxLines(this.widget().maxLines)
+                                        .maxCharacters(this.widget().maxCharacters)
+                                        .baseStyle(this.widget().baseStyle)
+                                        .suggests(this.widget().suggestionProvider)
                                 )
                             )
                         )

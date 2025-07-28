@@ -37,18 +37,21 @@ public class TextInput extends LeafInstanceWidget {
     public final boolean showCursor;
     public final boolean softWrap;
     public final boolean autoFocus;
-    public final boolean allowMultipleLines;
+    public final int maxLines;
+    public final int maxCharacters;
     public final Style baseStyle;
-    public final Text suggestion;
+    @Nullable
+    public final SuggestionProvider suggestionProvider;
 
-    public TextInput(TextEditingController controller, boolean showCursor, boolean softWrap, boolean autoFocus, boolean allowMultipleLines, Style baseStyle, @Nullable Text suggestion) {
+    public TextInput(TextEditingController controller, boolean showCursor, boolean softWrap, boolean autoFocus, int maxLines, int maxCharacters, Style baseStyle, @Nullable SuggestionProvider suggestionProvider) {
         this.controller = controller;
         this.showCursor = showCursor;
         this.softWrap = softWrap;
         this.autoFocus = autoFocus;
-        this.allowMultipleLines = allowMultipleLines;
+        this.maxLines = maxLines;
+        this.maxCharacters = maxCharacters;
         this.baseStyle = baseStyle;
-        this.suggestion = suggestion == null ? Text.empty() : suggestion.copy().styled(style -> style.withColor(-8355712));
+        this.suggestionProvider = suggestionProvider;
     }
 
     @Override
@@ -94,7 +97,8 @@ public class TextInput extends LeafInstanceWidget {
             if (!(this.layoutText.equals(widget.controller.text())
                   && this.layoutSelection.equals(widget.controller.selection())
                   && this.widget.softWrap == widget.softWrap
-                  && this.widget.allowMultipleLines == widget.allowMultipleLines
+                  && this.widget.maxLines == widget.maxLines
+                  && this.widget.maxCharacters == widget.maxCharacters
                   && this.widget.baseStyle.equals(widget.baseStyle))) {
 
                 this.layoutText = this.text = widget.controller.text();
@@ -118,10 +122,16 @@ public class TextInput extends LeafInstanceWidget {
                 wrapWidth
             );
 
-            this.renderLines = new ArrayList<>(this.host().client().textRenderer.wrapLines(
-                this.widget.controller.createTextForRendering(this.widget.baseStyle).copy().append(this.widget.suggestion),
-                wrapWidth
-            ));
+            var renderText = this.widget.controller.createTextForRendering(this.widget.baseStyle);
+
+            if (this.widget.suggestionProvider != null) {
+                var suggestion = this.widget.suggestionProvider.getSuggestion(this.text, this.selection);
+                if (suggestion != null && !suggestion.getString().isEmpty()) {
+                    renderText = renderText.copy().append(suggestion.copy().withColor(-8355712));
+                }
+            }
+
+            this.renderLines = new ArrayList<>(this.host().client().textRenderer.wrapLines(renderText, wrapWidth));
 
             var size = Size.of(
                 this.metrics.width() + 1,
@@ -250,15 +260,18 @@ public class TextInput extends LeafInstanceWidget {
         }
 
         private void insert(String insertion) {
-            if (!this.widget.allowMultipleLines) {
+            if (this.widget.maxLines == 1) {
                 insertion = LINE_BREAKS.matcher(insertion).replaceAll("");
             }
 
             var chars = new StringBuilder(this.text);
             chars.replace(this.selection.lower(), this.selection.upper(), insertion);
 
-            this.widget.controller.setText(this.text = chars.toString());
-            this.widget.controller.setSelection(this.selection = TextSelection.collapsed(this.selection.lower() + insertion.length()));
+            var stripped = chars.toString();
+            if (this.widget.maxCharacters > 0) stripped = stripped.substring(0, Math.min(stripped.length(), this.widget.maxCharacters));
+
+            this.widget.controller.setText(this.text = stripped);
+            this.widget.controller.setSelection(this.selection = TextSelection.collapsed(Math.min(this.selection.lower() + insertion.length(), stripped.length())));
         }
 
         private void deleteSelection() {
@@ -435,7 +448,7 @@ public class TextInput extends LeafInstanceWidget {
                 return true;
             }
 
-            if (this.widget.allowMultipleLines) {
+            if (this.widget.maxLines < 0 || this.widget.maxLines > this.metrics.lineMetrics().size()) {
                 if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
                     this.insert("\n");
                     return true;
@@ -528,5 +541,10 @@ public class TextInput extends LeafInstanceWidget {
         }
 
         protected record CursorLocation(int line, int charIdx) {}
+    }
+
+    @FunctionalInterface
+    public interface SuggestionProvider {
+        @Nullable Text getSuggestion(String currentText, TextSelection selection);
     }
 }
