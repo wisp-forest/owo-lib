@@ -235,6 +235,8 @@ public class BraidWindow implements Surface {
         GLFW.glfwDestroyWindow(this.handle);
         this.cursorController.dispose();
 
+        this.remoteFramebuffer.delete();
+
         for (var resource : this.resources) {
             resource.free();
         }
@@ -281,7 +283,7 @@ public class BraidWindow implements Surface {
     public void beginRendering() {
         this.remoteFramebuffer.beginWrite(true);
         FramebufferOverride.push(this.remoteFramebuffer);
-        ScissorStack.pushWindowDimensions(() -> new ScissorStack.WindowDimensions(this.scaleFactor, this.scaledWidth, this.scaledHeight, this.framebufferWidth, this.framebufferHeight));
+        ScissorStack.pushViewportDimensions(() -> new ScissorStack.ViewportDimensions(this.scaleFactor, this.scaledWidth, this.scaledHeight, this.framebufferWidth, this.framebufferHeight));
 
         RenderSystem.clearColor(0f, 0f, 0f, 1f);
         RenderSystem.clear(GL32.GL_COLOR_BUFFER_BIT | GL32.GL_DEPTH_BUFFER_BIT);
@@ -302,8 +304,15 @@ public class BraidWindow implements Surface {
 
     @Override
     public void endRendering() {
-        ScissorStack.popWindowDimensions();
+        ScissorStack.popViewportDimensions();
         FramebufferOverride.pop();
+
+        var activeFramebuffer = FramebufferOverride.top();
+        if (activeFramebuffer == null) {
+            activeFramebuffer = MinecraftClient.getInstance().getFramebuffer();
+        }
+
+        activeFramebuffer.beginWrite(true);
 
         RenderSystem.getModelViewStack().popMatrix();
 

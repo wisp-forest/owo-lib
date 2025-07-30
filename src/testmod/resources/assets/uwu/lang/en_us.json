@@ -25,6 +25,10 @@
     {"text": "d", "color": "#66d4ff"},
     {"text": " (chyz tried)", "color": "#FFFFFF"}
   ],
+  "block.uwu.braid_display": [
+    {"translate": "item.uwu.braid"},
+    " display"
+  ],
   "text.uwu.glisco": [
     {"text": "g", "color": "#ff7166"},
     {"text": "l", "color": "#ffb266"},

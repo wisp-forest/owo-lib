@@ -82,6 +82,7 @@
     "ui.access.ClickableWidgetAccessor",
     "ui.access.EditBoxAccessor",
     "ui.access.EditBoxWidgetAccessor",
+    "ui.access.RenderSystemAccessor",
     "ui.access.TextBoxComponentAccessor",
     "ui.access.TextFieldWidgetAccessor",
     "ui.layers.HandledScreenAccessor",

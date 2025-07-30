@@ -1,0 +1,23 @@
+{
+	"credit": "Made with Blockbench",
+	"parent": "block/block",
+	"textures": {
+		"0": "uwu:block/braid_display",
+		"particle": "uwu:block/braid_display"
+	},
+	"elements": [
+		{
+			"from": [0, 0, 0],
+			"to": [16, 1, 16],
+			"rotation": {"angle": 0, "axis": "y", "origin": [7, 0, 7]},
+			"faces": {
+				"north": {"uv": [0, 0, 16, 1], "rotation": 180, "texture": "#0"},
+				"east": {"uv": [0, 0, 16, 1], "texture": "#0"},
+				"south": {"uv": [0, 0, 1, 16], "rotation": 90, "texture": "#0"},
+				"west": {"uv": [0, 0, 16, 1], "texture": "#0"},
+				"up": {"uv": [0, 0, 16, 16], "texture": "#0"},
+				"down": {"uv": [0, 0, 16, 16], "texture": "#0"}
+			}
+		}
+	]
+}

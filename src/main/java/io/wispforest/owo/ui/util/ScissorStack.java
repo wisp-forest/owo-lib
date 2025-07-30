@@ -24,12 +24,12 @@ public final class ScissorStack {
 
     // TODO: this is a horrible klduge. braid needs to start supplying a custom draw context
     //  that also includes a surface-aware scissor stack
-    private static final Deque<Supplier<WindowDimensions>> WINDOW_DIMENSIONS_SUPPLIERS = new ArrayDeque<>();
+    private static final Deque<Supplier<ViewportDimensions>> VIEWPORT_DIMENSIONS_SUPPLIERS = new ArrayDeque<>();
 
     static {
-        WINDOW_DIMENSIONS_SUPPLIERS.push(() -> {
+        VIEWPORT_DIMENSIONS_SUPPLIERS.push(() -> {
             var window = MinecraftClient.getInstance().getWindow();
-            return new WindowDimensions(
+            return new ViewportDimensions(
                 window.getScaleFactor(),
                 window.getScaledWidth(),
                 window.getScaledHeight(),
@@ -41,18 +41,18 @@ public final class ScissorStack {
 
     private ScissorStack() {}
 
-    public static void pushWindowDimensions(Supplier<WindowDimensions> supplier) {
-        WINDOW_DIMENSIONS_SUPPLIERS.push(supplier);
+    public static void pushViewportDimensions(Supplier<ViewportDimensions> supplier) {
+        VIEWPORT_DIMENSIONS_SUPPLIERS.push(supplier);
         applyState();
     }
 
-    public static void popWindowDimensions() {
-        WINDOW_DIMENSIONS_SUPPLIERS.pop();
+    public static void popViewportDimensions() {
+        VIEWPORT_DIMENSIONS_SUPPLIERS.pop();
         applyState();
     }
 
-    private static WindowDimensions currentDimensions() {
-        return WINDOW_DIMENSIONS_SUPPLIERS.getFirst().get();
+    private static ViewportDimensions currentDimensions() {
+        return VIEWPORT_DIMENSIONS_SUPPLIERS.getFirst().get();
     }
 
     public static void pushDirect(int x, int y, int width, int height) {
@@ -190,5 +190,5 @@ public final class ScissorStack {
         return PositionedRectangle.of(x, y, width, height);
     }
 
-    public record WindowDimensions(double scaleFactor, int scaledWidth, int scaledHeight, int framebufferWidth, int framebufferHeight) {}
+    public record ViewportDimensions(double scaleFactor, int scaledWidth, int scaledHeight, int framebufferWidth, int framebufferHeight) {}
 }

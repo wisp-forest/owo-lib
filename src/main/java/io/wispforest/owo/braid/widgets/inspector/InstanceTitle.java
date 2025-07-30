@@ -53,20 +53,20 @@ public class InstanceTitle extends StatefulWidget {
                         MainAxisAlignment.START,
                         CrossAxisAlignment.CENTER,
                         new Label(Text.literal(instanceName).styled(style -> style.withBold(this.hovered))),
-                        new Padding(
-                            Insets.left(2),
-                            new Visibility(
-                                this.widget().instance.isRelayoutBoundary(),
+                        new Visibility(
+                            this.widget().instance.isRelayoutBoundary(),
+                            new Padding(
+                                Insets.left(2),
                                 new Tooltip(
                                     Text.literal("Relayout Boundary"),
                                     new SpriteWidget(Identifier.of("owo", "braid_inspector_relayout_boundary"), false)
                                 )
                             )
                         ),
-                        new Padding(
-                            Insets.left(2),
-                            new Visibility(
-                                (this.widget().instance.flags & WidgetInstance.FLAG_HIT_TEST_BOUNDARY) != 0,
+                        new Visibility(
+                            (this.widget().instance.flags & WidgetInstance.FLAG_HIT_TEST_BOUNDARY) != 0,
+                            new Padding(
+                                Insets.left(2),
                                 new Tooltip(
                                     Text.literal("Hit Test Boundary"),
                                     new SpriteWidget(Identifier.of("owo", "braid_inspector_hit_test_boundary"), false)
