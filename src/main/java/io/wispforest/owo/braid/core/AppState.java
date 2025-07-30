@@ -149,34 +149,7 @@ public class AppState implements InstanceHost, ProxyHost {
 
         var state = this.hitTest();
 
-        var nowHovered = new HashSet<MouseListener>();
-        Streams.stream(state.occludedTrace()).filter(hit -> hit.instance() instanceof MouseListener).forEach(hit -> {
-            var listener = (MouseListener) hit.instance();
-
-            nowHovered.add(listener);
-
-            if (this.hovered.contains(listener)) {
-                this.hovered.remove(listener);
-            } else {
-                listener.onMouseEnter();
-            }
-
-            var mousePosition = this.mousePositions.getOrDefault(listener, MousePosition.ORIGIN);
-            if (mousePosition.x() != hit.x() || mousePosition.y() != hit.y()) {
-                listener.onMouseMove(hit.x(), hit.y());
-                this.mousePositions.put(listener, new MousePosition(hit.x(), hit.y()));
-            }
-
-        });
-
-        for (var noLongerHovered : this.hovered) {
-            noLongerHovered.onMouseExit();
-        }
-
-        this.hovered = nowHovered;
-
-        this.activeTooltip = null;
-        var tooltipSupplier = state.firstWhere(hit -> hit.instance() instanceof TooltipProvider);
+        var tooltipSupplier = state.firstWhere(hit -> hit.instance().widget() instanceof Tooltip);
         if (tooltipSupplier != null) {
             var tooltip = (TooltipProvider) tooltipSupplier.instance();
             var components = tooltip.getTooltipComponentsAt(tooltipSupplier.x(), tooltipSupplier.y());
@@ -281,6 +254,35 @@ public class AppState implements InstanceHost, ProxyHost {
                 case MouseMoveEvent(double x, double y, double deltaX, double deltaY) -> {
                     this.cursorPosition.x = x;
                     this.cursorPosition.y = y;
+
+                    var state = this.hitTest();
+
+                    var nowHovered = new HashSet<MouseListener>();
+                    Streams.stream(state.occludedTrace()).filter(hit -> hit.instance() instanceof MouseListener).forEach(hit -> {
+                        var listener = (MouseListener) hit.instance();
+
+                        nowHovered.add(listener);
+
+                        if (this.hovered.contains(listener)) {
+                            this.hovered.remove(listener);
+                        } else {
+                            listener.onMouseEnter();
+                        }
+
+                        var mousePosition = this.mousePositions.getOrDefault(listener, MousePosition.ORIGIN);
+                        if (mousePosition.x() != hit.x() || mousePosition.y() != hit.y()) {
+                            listener.onMouseMove(hit.x(), hit.y());
+                            this.mousePositions.put(listener, new MousePosition(hit.x(), hit.y()));
+                        }
+                    });
+
+                    for (var noLongerHovered : this.hovered) {
+                        noLongerHovered.onMouseExit();
+                    }
+
+                    this.hovered = nowHovered;
+
+                    // ---
 
                     if (!(this.dragging instanceof WidgetInstance<?>)) break;
 

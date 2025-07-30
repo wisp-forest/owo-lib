@@ -1,0 +1,128 @@
+package io.wispforest.owo.braid.core;
+
+import com.mojang.blaze3d.systems.ProjectionType;
+import com.mojang.blaze3d.systems.RenderSystem;
+import io.wispforest.owo.braid.core.cursor.CursorStyle;
+import io.wispforest.owo.mixin.ui.access.RenderSystemAccessor;
+import io.wispforest.owo.ui.util.ScissorStack;
+import io.wispforest.owo.util.EventSource;
+import io.wispforest.owo.util.EventStream;
+import io.wispforest.owo.util.FramebufferOverride;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gl.SimpleFramebuffer;
+import net.minecraft.client.render.DiffuseLighting;
+import net.minecraft.client.render.Fog;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.lwjgl.opengl.GL32;
+
+public class TextureSurface implements Surface {
+
+    private final SimpleFramebuffer framebuffer;
+    private final EventStream<ResizeCallback> resizeEvents = ResizeCallback.newStream();
+
+    public TextureSurface(int width, int height) {
+        this.framebuffer = new SimpleFramebuffer(width, height, true);
+    }
+
+    public void resize(int width, int height) {
+        this.framebuffer.resize(width, height);
+        this.resizeEvents.sink().onResize(width, height);
+    }
+
+    public int texture() {
+        return this.framebuffer.getColorAttachment();
+    }
+
+    @Override
+    public int width() {
+        return this.framebuffer.textureWidth;
+    }
+
+    @Override
+    public int height() {
+        return this.framebuffer.textureHeight;
+    }
+
+    @Override
+    public double scaleFactor() {
+        return 1;
+    }
+
+    @Override
+    public EventSource<ResizeCallback> onResize() {
+        return this.resizeEvents.source();
+    }
+
+    @Override
+    public CursorStyle currentCursorStyle() {
+        return CursorStyle.NONE;
+    }
+
+    @Override
+    public void setCursorStyle(CursorStyle style) {
+        // it doesn't support to style the cursor when
+        // rendering to a texture
+    }
+
+    // ---
+
+    private Matrix4f projectionBackup;
+    private ProjectionType projectionTypeBackup;
+    private Fog fogBackup;
+    private Vector3f[] lightingBackup = new Vector3f[2];
+
+    @Override
+    public void beginRendering() {
+        this.framebuffer.beginWrite(true);
+        FramebufferOverride.push(this.framebuffer);
+        ScissorStack.pushViewportDimensions(() -> new ScissorStack.ViewportDimensions(1, this.width(), this.height(), this.width(), this.height()));
+
+        RenderSystem.clearColor(0f, 0f, 0f, 0f);
+        RenderSystem.clear(GL32.GL_COLOR_BUFFER_BIT | GL32.GL_DEPTH_BUFFER_BIT);
+
+        this.projectionBackup = new Matrix4f(RenderSystem.getProjectionMatrix());
+        this.projectionTypeBackup = RenderSystem.getProjectionType();
+
+        var projection = new Matrix4f().setOrtho(0, this.width(), this.height(), 0, 1000, 21000);
+        RenderSystem.setProjectionMatrix(projection, ProjectionType.ORTHOGRAPHIC);
+
+        var modelViewStack = RenderSystem.getModelViewStack();
+        modelViewStack.pushMatrix();
+        modelViewStack.identity();
+        modelViewStack.translate(0, 0, -11000);
+
+        this.fogBackup = RenderSystem.getShaderFog();
+        RenderSystem.setShaderFog(Fog.DUMMY);
+
+        this.lightingBackup[0] = new Vector3f(RenderSystemAccessor.owo$getShaderLightDirections()[0]);
+        this.lightingBackup[1] = new Vector3f(RenderSystemAccessor.owo$getShaderLightDirections()[1]);
+        DiffuseLighting.enableGuiDepthLighting();
+    }
+
+    @Override
+    public void endRendering() {
+        RenderSystem.setShaderLights(this.lightingBackup[0], this.lightingBackup[1]);
+        RenderSystem.setShaderFog(fogBackup);
+
+        ScissorStack.popViewportDimensions();
+        FramebufferOverride.pop();
+
+        var activeFramebuffer = FramebufferOverride.top();
+        if (activeFramebuffer == null) {
+            activeFramebuffer = MinecraftClient.getInstance().getFramebuffer();
+        }
+
+        activeFramebuffer.beginWrite(true);
+
+        RenderSystem.getModelViewStack().popMatrix();
+
+        RenderSystem.setProjectionMatrix(this.projectionBackup, this.projectionTypeBackup);
+        this.projectionBackup = null;
+    }
+
+    @Override
+    public void dispose() {
+        this.framebuffer.delete();
+    }
+}

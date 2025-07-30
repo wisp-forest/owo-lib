@@ -89,11 +89,11 @@ public class TextInput extends LeafInstanceWidget {
         @Override
         public void setWidget(TextInput widget) {
             if (!(this.layoutText.equals(widget.controller.text())
-                  && this.layoutSelection.equals(widget.controller.selection())
-                  && this.widget.softWrap == widget.softWrap
-                  && this.widget.maxLines == widget.maxLines
+                && this.layoutSelection.equals(widget.controller.selection())
+                && this.widget.softWrap == widget.softWrap
+                && this.widget.maxLines == widget.maxLines
                   && this.widget.maxCharacters == widget.maxCharacters
-                  && this.widget.baseStyle.equals(widget.baseStyle))) {
+                && this.widget.baseStyle.equals(widget.baseStyle))) {
 
                 this.layoutText = this.text = widget.controller.text();
                 this.layoutSelection = this.selection = widget.controller.selection();
@@ -157,19 +157,15 @@ public class TextInput extends LeafInstanceWidget {
             return OptionalDouble.of(this.host().client().textRenderer.fontHeight - 2);
         }
 
-        private void drawSelection(OwoUIDrawContext ctx, int startRune, int endRune) {
-            var startX = this.coordinatesAtCharIdx(startRune).x;
-            var endPos = this.coordinatesAtCharIdx(endRune);
-
+        private void drawSelection(OwoUIDrawContext ctx, double startX, double endX, double lineBaseY) {
             var height = this.host().client().textRenderer.fontHeight;
 
             ctx.push();
-            ctx.translate(startX, endPos.y - height - 1, 0d);
+            ctx.translate(startX, lineBaseY - height - 1, 0d);
 
-            var width = endPos.x - startX;
-            if (startRune == endRune) width = 2;
-
+            var width = endX - startX;
             ctx.fill(RenderLayer.getGuiTextHighlight(), 0, 0, (int) width, height, Colors.BLUE);
+
             ctx.pop();
         }
 
@@ -179,7 +175,7 @@ public class TextInput extends LeafInstanceWidget {
 
             for (int lineIdx = 0; lineIdx < this.renderLines.size(); lineIdx++) {
                 ctx.drawText(
-                    this.host().client().textRenderer,
+                    textRenderer,
                     this.renderLines.get(lineIdx),
                     0,
                     lineIdx * textRenderer.fontHeight,
@@ -195,14 +191,23 @@ public class TextInput extends LeafInstanceWidget {
                 var endLine = this.lineIdxAtCharIdx(this.selection.upper());
 
                 if (startLine == endLine) {
-                    drawSelection(ctx, this.selection.lower(), this.selection.upper());
+                    var startPos = this.coordinatesAtCharIdx(this.selection.lower());
+                    var endPos = this.coordinatesAtCharIdx(this.selection.upper());
+
+                    this.drawSelection(ctx, startPos.x, endPos.x, endPos.y);
                 } else {
-                    drawSelection(ctx, this.selection.lower(), this.metrics.lineMetrics().get(startLine).endIdx());
+                    var startPos = this.coordinatesAtCharIdx(this.selection.lower());
+                    this.drawSelection(ctx, startPos.x, this.metrics.lineMetrics().get(startLine).width(), startPos.y);
+
                     for (var lineIdx = startLine + 1; lineIdx < endLine; lineIdx++) {
                         var line = this.metrics.lineMetrics().get(lineIdx);
-                        drawSelection(ctx, line.beginIdx(), line.endIdx());
+                        var width = line.beginIdx() != line.endIdx() ? line.width() : 2;
+
+                        this.drawSelection(ctx, 0, width, (lineIdx + 1) * textRenderer.fontHeight);
                     }
-                    drawSelection(ctx, this.metrics.lineMetrics().get(startLine).beginIdx(), this.selection.upper());
+
+                    var endPos = this.coordinatesAtCharIdx(this.selection.upper());
+                    drawSelection(ctx, 0, endPos.x, endPos.y);
                 }
             }
 
