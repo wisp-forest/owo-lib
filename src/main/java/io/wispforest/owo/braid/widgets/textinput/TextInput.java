@@ -47,7 +47,7 @@ public class TextInput extends LeafInstanceWidget {
         this.maxLines = maxLines;
         this.maxCharacters = maxCharacters;
         this.baseStyle = baseStyle;
-        this.suggestion = suggestion == null ? Text.empty() : suggestion.copy().styled(style -> style.withColor(-8355712));
+        this.suggestion = suggestion == null ? Text.empty() : suggestion;
     }
 
     @Override

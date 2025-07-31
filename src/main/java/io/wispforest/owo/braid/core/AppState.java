@@ -13,6 +13,7 @@ import io.wispforest.owo.braid.framework.proxy.WidgetProxy;
 import io.wispforest.owo.braid.framework.widget.InheritedWidget;
 import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.braid.widgets.basic.Tooltip;
 import io.wispforest.owo.braid.widgets.basic.VisitorWidget;
 import io.wispforest.owo.braid.widgets.inspector.BraidInspector;
 import io.wispforest.owo.braid.widgets.inspector.InstancePicker;
@@ -156,6 +157,8 @@ public class AppState implements InstanceHost, ProxyHost {
             var style = tooltip.getStyleAt(tooltipSupplier.x(), tooltipSupplier.y());
 
             if (components != null || style != null) this.activeTooltip = new TooltipState(components, style, (int) this.cursorPosition.x, (int) this.cursorPosition.y);
+        } else {
+            this.activeTooltip = null;
         }
 
         // ---

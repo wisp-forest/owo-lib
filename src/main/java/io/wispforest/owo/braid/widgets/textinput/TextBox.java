@@ -10,96 +10,24 @@ import io.wispforest.owo.braid.widgets.basic.Box;
 import io.wispforest.owo.braid.widgets.basic.KeyboardInput;
 import io.wispforest.owo.braid.widgets.basic.Padding;
 import io.wispforest.owo.ui.core.Color;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import org.jetbrains.annotations.Nullable;
 
 public class TextBox extends StatefulWidget {
 
     public final TextEditingController controller;
-    private boolean softWrap = true;
-    private boolean autoFocus = false;
-    private int maxLines = -1;
-    private int maxCharacters = -1;
-    private Style baseStyle = Style.EMPTY;
-    private Text suggestion = Text.empty();
+    private final EditableText editableText;
 
     public TextBox(
         TextEditingController controller,
-        WidgetSetupCallback<TextBox> setupCallback
+        WidgetSetupCallback<EditableText> setupCallback
     ) {
         this.controller = controller;
-        setupCallback.setup(this);
-    }
-
-    public TextBox softWrap(boolean softWrap) {
-        this.assertMutable();
-        this.softWrap = softWrap;
-        return this;
-    }
-
-    public boolean softWrap() {
-        return this.softWrap;
-    }
-
-    public TextBox autoFocus(boolean autoFocus) {
-        this.assertMutable();
-        this.autoFocus = autoFocus;
-        return this;
-    }
-
-    public boolean autoFocus() {
-        return this.autoFocus;
-    }
-
-    public TextBox maxLines(int maxLines) {
-        this.assertMutable();
-        this.maxLines = maxLines;
-        return this;
-    }
-
-    public int maxLines() {
-        return this.maxLines;
-    }
-
-    public TextBox maxCharacters(int maxCharacters) {
-        this.assertMutable();
-        this.maxCharacters = maxCharacters;
-        return this;
-    }
-
-    public int maxCharacters() {
-        return this.maxCharacters;
-    }
-
-    public TextBox baseStyle(Style baseStyle) {
-        this.assertMutable();
-        this.baseStyle = baseStyle;
-        return this;
-    }
-
-    public Style baseStyle() {
-        return this.baseStyle;
-    }
-
-    public TextBox suggestion(Text suggestion) {
-        this.assertMutable();
-        this.suggestion = suggestion;
-        return this;
-    }
-
-    public Text suggestion() {
-        return this.suggestion;
-    }
-
-    public TextBox placeholder(Text placeholder) {
-        return this.suggestion(this.controller.text.isEmpty() ? placeholder : Text.empty());
-    }
-
-    public TextBox singleLine() {
-        return this
-            .softWrap(false)
-            .maxLines(1);
+        this.editableText = new EditableText(
+            controller,
+            widget -> {
+                setupCallback.setup(widget);
+                widget.suggestion(widget.suggestion().copy().withColor(-8355712));
+            }
+        );
     }
 
     @Override
@@ -125,16 +53,7 @@ public class TextBox extends StatefulWidget {
                             Color.BLACK,
                             new Padding(
                                 Insets.all(2),
-                                new EditableText(
-                                    this.widget().controller,
-                                    widget -> widget
-                                        .softWrap(this.widget().softWrap)
-                                        .autoFocus(this.widget().autoFocus)
-                                        .maxLines(this.widget().maxLines)
-                                        .maxCharacters(this.widget().maxCharacters)
-                                        .baseStyle(this.widget().baseStyle)
-                                        .suggestion(this.widget().suggestion)
-                                )
+                                this.widget().editableText
                             )
                         )
                     )
