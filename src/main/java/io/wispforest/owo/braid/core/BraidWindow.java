@@ -331,11 +331,10 @@ public class BraidWindow implements Surface {
                 GL32.GL_COLOR_BUFFER_BIT,
                 GL32.GL_NEAREST
             );
+
+            GLFW.glfwSwapBuffers(this.handle);
         });
 
-        // ---
-
-        GLFW.glfwSwapBuffers(this.handle);
     }
 
     // ---

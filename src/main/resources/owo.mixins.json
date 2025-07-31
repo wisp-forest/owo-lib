@@ -85,6 +85,8 @@
     "ui.access.RenderSystemAccessor",
     "ui.access.TextBoxComponentAccessor",
     "ui.access.TextFieldWidgetAccessor",
+    "ui.display.GameRendererMixin",
+    "ui.display.MinecraftClientMixin",
     "ui.layers.HandledScreenAccessor",
     "ui.layers.KeyboardMixin",
     "ui.layers.MouseMixin",

@@ -1,25 +1,30 @@
 package io.wispforest.uwu.block;
 
-import io.wispforest.owo.braid.core.AppState;
 import io.wispforest.owo.braid.core.Insets;
 import io.wispforest.owo.braid.core.LayoutAxis;
+import io.wispforest.owo.braid.display.BraidDisplay;
+import io.wispforest.owo.braid.display.BraidDisplayBinding;
+import io.wispforest.owo.braid.display.DisplayQuad;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.InheritedWidget;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.braid.widgets.ItemStackWidget;
 import io.wispforest.owo.braid.widgets.basic.Center;
 import io.wispforest.owo.braid.widgets.basic.Padding;
 import io.wispforest.owo.braid.widgets.basic.Panel;
 import io.wispforest.owo.braid.widgets.basic.Sized;
+import io.wispforest.owo.braid.widgets.button.Button;
 import io.wispforest.owo.braid.widgets.button.MessageButton;
 import io.wispforest.owo.braid.widgets.flex.Column;
 import io.wispforest.owo.braid.widgets.flex.CrossAxisAlignment;
 import io.wispforest.owo.braid.widgets.flex.MainAxisAlignment;
+import io.wispforest.owo.braid.widgets.flex.Row;
 import io.wispforest.owo.braid.widgets.label.Label;
+import io.wispforest.owo.braid.widgets.label.LabelStyle;
 import io.wispforest.owo.braid.widgets.slider.MessageSlider;
-import io.wispforest.owo.braid.widgets.slider.Slider;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.uwu.Uwu;
 import io.wispforest.uwu.items.UwuItems;
@@ -28,24 +33,23 @@ import net.fabricmc.api.Environment;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.server.ServerTask;
 import net.minecraft.text.Text;
-import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 
 import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class BraidDisplayBlockEntity extends BlockEntity {
 
     @Environment(EnvType.CLIENT)
-    public AppState app;
-
+    public BraidDisplay display;
     @Environment(EnvType.CLIENT)
-    public double cursorX, cursorY;
+    public AtomicBoolean disposed;
 
     // ---
 
@@ -57,6 +61,18 @@ public class BraidDisplayBlockEntity extends BlockEntity {
         return Objects.requireNonNull(context.getAncestor(Provider.class)).display.get();
     }
 
+    @Override
+    @Environment(EnvType.CLIENT)
+    public void markRemoved() {
+        super.markRemoved();
+
+        if (this.disposed != null) {
+            if (!this.disposed.compareAndSet(false, true)) return;
+            this.display.app.dispose();
+            BraidDisplayBinding.deactivate(this.display);
+        }
+    }
+
     // ---
 
     public static class App extends StatelessWidget {
@@ -66,23 +82,37 @@ public class BraidDisplayBlockEntity extends BlockEntity {
                 new Column(
                     MainAxisAlignment.START,
                     CrossAxisAlignment.CENTER,
-                    new Padding(Insets.vertical(2)),
+                    new Padding(Insets.vertical(4)),
                     List.of(
-                        new Panel(
-                            OwoUIDrawContext.DARK_PANEL_NINE_PATCH_TEXTURE,
-                            new Padding(
-                                Insets.all(10),
-                                new Label(Text.literal("braid on block real??"))
-                            )
-                        ),
-                        new MessageButton(
-                            Text.literal("block button"),
-                            () -> MinecraftClient.getInstance().player.dropCreativeStack(UwuItems.BRAID.getDefaultStack())
-                        ),
                         new Sized(
                             112,
                             20,
                             new BlockSlider()
+                        ),
+                        new Panel(
+                            OwoUIDrawContext.DARK_PANEL_NINE_PATCH_TEXTURE,
+                            new Padding(
+                                Insets.all(10),
+                                new Label(Text.translatable("text.uwu.braid").append(Text.literal(" on block real??")))
+                            )
+                        ),
+                        new Button(
+                            () -> MinecraftClient.getInstance().player.dropCreativeStack(UwuItems.BRAID.getDefaultStack()),
+                            new Row(
+                                MainAxisAlignment.START,
+                                CrossAxisAlignment.CENTER,
+                                new Sized(
+                                    16,
+                                    16,
+                                    new ItemStackWidget(UwuItems.BRAID.getDefaultStack(), false)
+                                ),
+                                new Padding(Insets.horizontal(2)),
+                                new Label(
+                                    LabelStyle.SHADOW,
+                                    true,
+                                    Text.translatable("text.uwu.braid").append(Text.literal(" button"))
+                                )
+                            )
                         )
                     )
                 )
@@ -97,15 +127,31 @@ public class BraidDisplayBlockEntity extends BlockEntity {
 
             public static class State extends WidgetState<BlockSlider> {
 
-                private double value;
+                private double value = 1;
 
                 @Override
                 public Widget build(BuildContext context) {
                     return new MessageSlider(
                         this.value,
-                        (newValue) -> this.setState(() -> this.value = newValue),
-                        Text.literal("do be sliding doe: " + BigDecimal.valueOf(this.value).setScale(2, RoundingMode.HALF_UP).toPlainString()),
-                        LayoutAxis.HORIZONTAL
+                        1,
+                        3,
+                        null,
+                        LayoutAxis.HORIZONTAL,
+                        (newValue) -> {
+                            this.setState(() -> this.value = newValue);
+
+                            var display =BraidDisplayBlockEntity.of(context).display;
+
+
+                            display.quad = new DisplayQuad(
+                                display.quad.pos,
+                                new Vec3d(0, 0, -14 / 16d),
+                                new Vec3d(14 / 16d + (this.value - 1), 0, 0)
+                            );
+
+                            display.surface.resize(128, (int) (146.29 * display.quad.left.x));
+                        },
+                        Text.literal("size: " + BigDecimal.valueOf(this.value).setScale(2, RoundingMode.HALF_UP).toPlainString())
                     );
                 }
             }
