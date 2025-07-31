@@ -99,7 +99,7 @@ public abstract class ConfigWrapper<C> {
 
         if (KNOWN_CONFIG_CLASSES.put(this.name, this.getClass()) != null) {
             throw new IllegalStateException("Config name '" + this.name + "'"
-                    + " is already taken an by instance of class '" + KNOWN_CONFIG_CLASSES.get(this.name).getName() + "'");
+                    + " is already taken by an instance of class '" + KNOWN_CONFIG_CLASSES.get(this.name).getName() + "'");
         }
 
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT && clazz.isAnnotationPresent(Modmenu.class)) {
