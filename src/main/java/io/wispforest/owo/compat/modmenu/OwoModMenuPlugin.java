@@ -8,6 +8,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +31,12 @@ public class OwoModMenuPlugin implements ModMenuApi {
             );
         }
     };
+
+    @Override
+    @Nullable
+    public ConfigScreenFactory<?> getModConfigScreenFactory() {
+        return null;
+    }
 
     @Override
     public Map<String, ConfigScreenFactory<?>> getProvidedConfigScreenFactories() {
