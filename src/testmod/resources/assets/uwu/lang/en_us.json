@@ -17,16 +17,19 @@
       "color": "#3AB0FF"
     }
   ],
-  "item.uwu.braid": [
+  "text.uwu.braid": [
     {"text": "b", "color": "#ff7166"},
     {"text": "r", "color": "#ffb266"},
     {"text": "a", "color": "#ceff66"},
     {"text": "i", "color": "#90ff66"},
-    {"text": "d", "color": "#66d4ff"},
+    {"text": "d", "color": "#66d4ff"}
+  ],
+  "item.uwu.braid": [
+    {"translate":  "text.uwu.braid"},
     {"text": " (chyz tried)", "color": "#FFFFFF"}
   ],
   "block.uwu.braid_display": [
-    {"translate": "item.uwu.braid"},
+    {"translate": "text.uwu.braid"},
     " display"
   ],
   "text.uwu.glisco": [
