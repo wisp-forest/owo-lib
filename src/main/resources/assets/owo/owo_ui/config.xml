@@ -198,6 +198,17 @@
                                 </texture>
                             </value-renderer>
                         </toggle-button>
+
+                        <button id="dump-all-translations">
+                            <margins>
+                                <left>5</left>
+                            </margins>
+                            <text translate="true">text.owo.config.button.dump_all_translations</text>
+                            <tooltip-text translate="true">text.owo.config.button.dump_all_translations.tooltip</tooltip-text>
+                            <sizing>
+                                <horizontal method="fill">4</horizontal>
+                            </sizing>
+                        </button>
                     </children>
 
                     <horizontal-alignment>right</horizontal-alignment>

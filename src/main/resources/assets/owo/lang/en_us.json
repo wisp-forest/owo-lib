@@ -104,5 +104,7 @@
     {"text": "]", "color": "gray"},
     " Disabled"
   ],
-  "text.owo.config_selection": "Configs from %d"
+  "text.owo.config_selection": "Configs from %d",
+  "text.owo.config.button.dump_all_translations": "\uD83D\uDCCB",
+  "text.owo.config.button.dump_all_translations.tooltip": "Copy all translation keys for the given Config to console"
 }

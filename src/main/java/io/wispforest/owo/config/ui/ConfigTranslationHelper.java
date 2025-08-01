@@ -4,8 +4,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.Strictness;
+import io.wispforest.endec.format.gson.GsonSerializer;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.base.Key;
+import io.wispforest.owo.serialization.endec.MinecraftEndecs;
+import io.wispforest.owo.text.TextLanguage;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.resource.language.TranslationStorage;
@@ -26,30 +29,20 @@ import java.util.function.Consumer;
 public class ConfigTranslationHelper  {
     public static final String BASE_SECTION = "_base_section_name";
 
-    private static final Deque<ConfigTranslationHelper> storages = new ArrayDeque<>();
+    private static final Deque<TranslationsStorage> storages = new ArrayDeque<>();
 
-    private final Map<Key, SequencedCollection<String>> parentKeyToSection = new LinkedHashMap<>();
-
-    private final Map<Key, Map<String, SequencedCollection<Key>>> sectionToOptionKeys = new LinkedHashMap<>();
-
-    private final Map<Key, SequencedCollection<String>> optionKeyToTranslations = new LinkedHashMap<>();
-
-    private final Identifier configId;
-
-    private ConfigTranslationHelper(Identifier configId) {
-        this.configId = configId;
-    }
+    private ConfigTranslationHelper() {}
 
     //--
 
     @Nullable
     private static Key trackingOptionKey = Key.ROOT;
 
-    public static void pushConfigId(Identifier configId) {
-        storages.push(new ConfigTranslationHelper(configId));
+    static void pushConfigId(Identifier configId) {
+        storages.push(new TranslationsStorage(configId));
     }
 
-    private static ConfigTranslationHelper peekStorage() {
+    private static TranslationsStorage peekStorage() {
         var storage = storages.peek();
 
         Objects.requireNonNull(storage, "Unable to peek current translation storage as it was found to be null");
@@ -57,9 +50,8 @@ public class ConfigTranslationHelper  {
         return storage;
     }
 
-    public static void popConfigId() {
-        dumpData();
-        storages.pop();
+    static TranslationsStorage popConfigId() {
+        return storages.pop();
     }
 
     @Nullable
@@ -217,26 +209,35 @@ public class ConfigTranslationHelper  {
         .setPrettyPrinting()
         .create();
 
-    // TODO: DUMP THE DATA INTO JSON FORM TO ALLOW FOR RICH TEXT TRANSLATIONS AND STUFF
-    public static void dumpData() {
+    public static void dumpData(TranslationsStorage storage, String languageKey, Consumer<String> consumer) {
         var json = new JsonObject();
-
-        var storage = peekStorage();
 
         json.addProperty(createConfigTitleTranslation(storage.configId), "");
 
-        var language = TranslationStorage.load(MinecraftClient.getInstance().getResourceManager(), List.of(Language.DEFAULT_LANGUAGE), false);
+        var language = TranslationStorage.load(MinecraftClient.getInstance().getResourceManager(), List.of(languageKey), false);
 
-        addTranslationFromKey(s -> json.addProperty(s, language.hasTranslation(s) ? language.get(s) : ""), storage, Key.ROOT);
+        addTranslationFromKey(s -> {
+            if (language instanceof TextLanguage textLanguage) {
+                var text = textLanguage.getText(s);
+
+                if (text != null) {
+                    json.add(s, MinecraftEndecs.TEXT.encodeFully(GsonSerializer::of, text));
+
+                    return;
+                }
+            }
+
+            json.addProperty(s, language.hasTranslation(s) ? language.get(s) : "");
+        }, storage, Key.ROOT);
 
         for (String translation : storage.optionKeyToTranslations.getOrDefault(Key.ROOT, List.of())) {
             json.addProperty(translation, "");
         }
 
-        Owo.LOGGER.info(GSON.toJson(json));
+        consumer.accept(GSON.toJson(json));
     }
 
-    private static void addTranslationFromKey(Consumer<String> addCallback, ConfigTranslationHelper storage, Key parentKey) {
+    private static void addTranslationFromKey(Consumer<String> addCallback, TranslationsStorage storage, Key parentKey) {
         var currentId = storage.configId;
         for (String section : storage.parentKeyToSection.getOrDefault(parentKey, List.of(BASE_SECTION))) {
             if (!section.equals(BASE_SECTION)) {
@@ -256,6 +257,20 @@ public class ConfigTranslationHelper  {
 
                 addTranslationFromKey(addCallback, storage, optionKey);
             }
+        }
+    }
+
+    public static class TranslationsStorage {
+        final Map<Key, SequencedCollection<String>> parentKeyToSection = new LinkedHashMap<>();
+
+        final Map<Key, Map<String, SequencedCollection<Key>>> sectionToOptionKeys = new LinkedHashMap<>();
+
+        final Map<Key, SequencedCollection<String>> optionKeyToTranslations = new LinkedHashMap<>();
+
+        final Identifier configId;
+
+        TranslationsStorage(Identifier configId){
+            this.configId = configId;
         }
     }
 }

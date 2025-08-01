@@ -26,6 +26,7 @@ import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Language;
 import org.apache.logging.log4j.util.TriConsumer;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -153,6 +154,9 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
 
         void registerPredicate(Predicate<FieldOption<?>> predicate, OptionComponentFactory<?> factory);
     }
+
+    @Nullable
+    private ConfigTranslationHelper.TranslationsStorage translationStorage = null;
 
     @Override
     @SuppressWarnings({"ConstantConditions", "unchecked"})
@@ -325,8 +329,21 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
             this.uiAdapter = null;
             this.clearAndInit();
 
-            // TODO check if any options changed and warn
+            // TODO: check if any options changed and warn
         });
+
+        var dumpBtn = rootComponent.childById(ButtonComponent.class, "dump-all-translations");
+
+        if (Owo.DEBUG) {
+            dumpBtn.onPress(button -> {
+                if (this.translationStorage != null) {
+                    ConfigTranslationHelper.dumpData(this.translationStorage, Language.DEFAULT_LANGUAGE, Owo.LOGGER::info);
+                }
+            });
+        } else {
+            rootComponent.childById(ParentComponent.class, "button-config-controls")
+                .removeChild(dumpBtn);
+        }
 
         var optionPanel = rootComponent.childById(FlowLayout.class, "option-panel");
         var sections = new LinkedHashMap<Component, String>();
@@ -568,7 +585,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
             rootComponent.childById(FlowLayout.class, "main-panel-stack").child(overlay);
         }
 
-        ConfigTranslationHelper.popConfigId();
+        this.translationStorage = ConfigTranslationHelper.popConfigId();
     }
 
     private static class SectionPanelState {

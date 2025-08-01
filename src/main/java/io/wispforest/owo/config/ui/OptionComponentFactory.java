@@ -149,6 +149,10 @@ public interface OptionComponentFactory<T> {
 
     record Result<B extends Component, P extends OptionValueProvider>(B baseComponent, P optionProvider) {}
 
+    ///
+    /// Wraps the given factory with an option label which is recommended depending on the
+    /// given factories function as highlighted by such not being used [STRUCT][#STRUCT] factory.
+    ///
     static <T> OptionComponentFactory<T> withOptionLabel(OptionComponentFactory<T> factory) {
         return (model, option) -> attachOptionLabel(factory, model, option);
     }
