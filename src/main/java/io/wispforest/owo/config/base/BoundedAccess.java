@@ -1,12 +1,15 @@
 package io.wispforest.owo.config.base;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.RecordComponent;
 import java.lang.reflect.Type;
 import java.util.function.Function;
 
-public interface BoundedAccess<T> {
+public interface BoundedAccess<T> extends AnnotatedElement {
 
     String name();
 
@@ -15,8 +18,6 @@ public interface BoundedAccess<T> {
     Class<?> type();
 
     Type genericType();
-
-    boolean hasAnnotation(Class<? extends Annotation> annotationClass);
 
     <A extends Annotation> A getAnnotation(Class<A> annotationClass);
 
@@ -45,12 +46,20 @@ public interface BoundedAccess<T> {
             return this.component.getGenericType();
         }
 
-        public boolean hasAnnotation(Class<? extends Annotation> annotationClass) {
-            return this.component.isAnnotationPresent(annotationClass);
-        }
-
         public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
             return this.component.getAnnotation(annotationClass);
+        }
+
+        @Override
+        @NotNull
+        public Annotation[] getAnnotations() {
+            return this.component.getAnnotations();
+        }
+
+        @Override
+        @NotNull
+        public Annotation[] getDeclaredAnnotations() {
+            return this.component.getDeclaredAnnotations();
         }
 
         public T getValue() {
@@ -86,12 +95,20 @@ public interface BoundedAccess<T> {
             return this.field.getName();
         }
 
-        public boolean hasAnnotation(Class<? extends Annotation> annotationClass) {
-            return this.field.isAnnotationPresent(annotationClass);
-        }
-
         public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
             return this.field.getAnnotation(annotationClass);
+        }
+
+        @Override
+        @NotNull
+        public Annotation[] getAnnotations() {
+            return this.field.getAnnotations();
+        }
+
+        @Override
+        @NotNull
+        public Annotation[] getDeclaredAnnotations() {
+            return this.field.getDeclaredAnnotations();
         }
 
         public T getValue() {

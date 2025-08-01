@@ -1,5 +1,6 @@
 package io.wispforest.owo.config.ui.component;
 
+import io.wispforest.owo.config.ConfigPredicates;
 import io.wispforest.owo.ui.component.TextBoxComponent;
 import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.Sizing;
@@ -35,30 +36,22 @@ public class ConfigTextBox extends TextBoxComponent implements OptionValueProvid
         final boolean floatingPoint = NumberReflection.isFloatingPointType(fieldType);
         final double min = minNumber.doubleValue(), max = maxNumber.doubleValue();
 
-        this.valueParser = s -> {
-            try {
-                return NumberReflection.convert(floatingPoint ? Double.parseDouble(s) : Long.parseLong(s), fieldType);
-            } catch (NumberFormatException nfe) {
-                return NumberReflection.convert(0L, fieldType);
-            }
-        };
-
-        this.inputPredicate(floatingPoint ? s -> s.matches("-?\\d*\\.?\\d*") : s -> s.matches("-?\\d*"));
-        this.applyPredicate(s -> {
-            try {
-                var value = Double.parseDouble(s);
-                return value >= min && value <= max;
-            } catch (NumberFormatException nfe) {
-                return false;
-            }
-        });
+        this.inputPredicate(ConfigPredicates.numberInput(floatingPoint))
+            .applyPredicate(ConfigPredicates.numberApply(min, max))
+            .valueParser(s -> {
+                try {
+                    return NumberReflection.convert(floatingPoint ? Double.parseDouble(s) : Long.parseLong(s), fieldType);
+                } catch (NumberFormatException nfe) {
+                    return NumberReflection.convert(0L, fieldType);
+                }
+            });
 
         return this;
     }
 
     public ConfigTextBox configureForIdentifier() {
-        this.inputPredicate(s -> s.matches("[a-z0-9_.:\\-]*"))
-                .applyPredicate(s -> Identifier.tryParse(s) != null)
+        this.inputPredicate(ConfigPredicates.IDENTIFIER_INPUT)
+                .applyPredicate(ConfigPredicates.IDENTIFIER_APPLY)
                 .valueParser(Identifier::of);
 
         return this;

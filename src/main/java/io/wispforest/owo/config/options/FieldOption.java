@@ -41,7 +41,7 @@ public final class FieldOption<T> extends OptionBase<T> implements ReflectiveOpt
     private boolean detached = false;
 
     /**
-     * @param configName   The name of the config this option is contained in
+     * @param configId     The {@link Identifier} of the config this option is contained in
      * @param key          The key of this option
      * @param defaultValue The default value of this option
      * @param mirror       A mirror of the value of this option, used for
@@ -143,7 +143,7 @@ public final class FieldOption<T> extends OptionBase<T> implements ReflectiveOpt
     public T read(PacketByteBuf buf) {
         final var newValue = buf.read(this.endec);
 
-        if (!Objects.equals(newValue, this.value()) && this.backingField.hasAnnotation(RestartRequired.class)) {
+        if (!Objects.equals(newValue, this.value()) && this.backingField.isAnnotationPresent(RestartRequired.class)) {
             return newValue;
         }
 

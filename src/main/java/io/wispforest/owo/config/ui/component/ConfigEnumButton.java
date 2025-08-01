@@ -1,17 +1,15 @@
 package io.wispforest.owo.config.ui.component;
 
 import io.wispforest.owo.config.options.OptionControlSpec;
+import io.wispforest.owo.config.ui.ConfigTranslationHelper;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.core.Sizing;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.Text;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
-
-import java.util.Locale;
 
 @ApiStatus.Internal
 public class ConfigEnumButton extends ButtonComponent implements OptionValueProvider {
@@ -58,24 +56,15 @@ public class ConfigEnumButton extends ButtonComponent implements OptionValueProv
         if (this.backingOption == null) return;
 
         var enumName = StringUtils.uncapitalize(this.backingValues.getClass().componentType().getSimpleName());
-        var valueName = this.backingValues[this.selectedIndex].name().toLowerCase(Locale.ROOT);
 
-        var optionValueKey = this.backingOption.translationKey() + ".value." + valueName;
-
-        this.setMessage(I18n.hasTranslation(optionValueKey)
-                ? Text.translatable(optionValueKey)
-                : Text.translatable("text.config." + this.backingOption.configName() + ".enum." + enumName + "." + valueName)
-        );
+        this.setMessage(Text.translatable(ConfigTranslationHelper.createEnumTranslation(this.backingOption.key(), this.backingValues, this.selectedIndex)));
     }
 
     public ConfigEnumButton init(OptionControlSpec<? extends Enum<?>> option, int selectedIndex) {
         this.backingOption = option;
         this.backingValues = option.clazz().getEnumConstants();
-        this.selectedIndex = selectedIndex;
 
-        this.updateMessage();
-
-        return this;
+        return select(selectedIndex);
     }
 
     public ConfigEnumButton select(int index) {

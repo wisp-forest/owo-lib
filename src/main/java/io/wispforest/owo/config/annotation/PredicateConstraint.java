@@ -12,5 +12,13 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface PredicateConstraint {
-    String value();
+    /**
+     * The name of the method used to validate users input
+     */
+    String inputMethodName() default "";
+
+    /**
+     * The name of the method used to validate value being submitted
+     */
+    String applyMethodName();
 }

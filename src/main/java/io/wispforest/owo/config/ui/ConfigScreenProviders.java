@@ -55,6 +55,11 @@ public class ConfigScreenProviders {
         if (!rebuildSortedProviders) rebuildSortedProviders = true;
     }
 
+    public static void register(ConfigWrapper<?> wrapper, int order, Identifier modelId) {
+        ConfigScreenProviders.<Screen, ConfigWrapper<?>>register(
+                wrapper.id(), order, (Class<ConfigWrapper<?>>) wrapper.getClass(), (screen, wrapper1) -> ConfigScreen.createWithCustomModel(modelId, wrapper1, screen));
+    }
+
     /**
      * Get the config screen provider associated with
      * the given mod id
@@ -136,7 +141,10 @@ public class ConfigScreenProviders {
 
         if (screen == null) return false;
 
-        MinecraftClient.getInstance().setScreen(screen);
+        // THIS IS REQUIRED FOR COMMANDS AS CLIENT COMMANDS WILL CLOSE THE SCREEN AS WE CLOSE CHAT AND ITS A PAIN!!!
+        MinecraftClient.getInstance().send(() -> {
+            MinecraftClient.getInstance().setScreen(screen);
+        });
 
         return true;
     }
@@ -157,16 +165,18 @@ public class ConfigScreenProviders {
             Screen screen = providerData.provider().openScreenSafely(parent, wrapper);
 
             if (screen instanceof ConfigScreen configScreen) {
-                if (providerData != null) {
-                    configScreen.addRemovedHook((config, restartRequired) -> {
-                        OwoPackets.MAIN.clientHandle().send(new AdjustServerConfig(config.id(), config.saveToObject(), restartRequired));
-                    });
-                }
+                configScreen.addRemovedHook((config, shouldRestart, shouldReload) -> {
+                    if (!config.isServerConfig()) return;
+
+                    OwoPackets.MAIN.clientHandle().send(new AdjustServerConfig(config.id(), config.saveToObject(), shouldRestart, shouldReload));
+                });
 
                 configScreen.setServerConfigData(configData);
-            } else if (providerData != null){
+            } else {
                 ScreenEvents.remove(screen).register(screen1 -> {
-                    OwoPackets.MAIN.clientHandle().send(new AdjustServerConfig(wrapper.id(), wrapper.saveToObject(), false));
+                    if (!wrapper.isServerConfig()) return;
+
+                    OwoPackets.MAIN.clientHandle().send(new AdjustServerConfig(wrapper.id(), wrapper.saveToObject(), false, false));
                 });
             }
 

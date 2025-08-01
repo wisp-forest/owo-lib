@@ -42,7 +42,7 @@ public abstract class OrderedOptionContainer<C, T> extends CollapsibleContainer 
     public OrderedOptionContainer(UIModel uiModel, OptionControlSpec<C> option, boolean expanded, boolean isDetached) {
         super(
                 Sizing.fill(100), Sizing.content(),
-                Text.translatable(createTitleTranslation(option)),
+                Text.translatable(option.translationKey()),
                 expanded
         );
 
@@ -62,7 +62,7 @@ public abstract class OrderedOptionContainer<C, T> extends CollapsibleContainer 
                 .horizontalSizing(Sizing.fill(100))
                 .verticalSizing(Sizing.fixed(30));
 
-        OptionComponentFactory.addEasyCopyLabel(this.titleLayout, createTitleTranslation(option));
+        OptionComponentFactory.addEasyCopyLabel(this.titleLayout, option.translationKey());
 
         if (!this.isDetached) {
             var addLabel = uiModel.expandTemplate(LabelComponent.class, "collection-add-label", Map.of()).<LabelComponent>configure(label -> {
@@ -116,13 +116,9 @@ public abstract class OrderedOptionContainer<C, T> extends CollapsibleContainer 
         this.titleLayout.child(new SearchAnchorComponent(
                 this.titleLayout,
                 option.key(),
-                () -> I18n.translate(createTitleTranslation(option)),
+                () -> I18n.translate(option.translationKey()),
                 () -> this.backingList.stream().map(Objects::toString).collect(Collectors.joining())
         ));
-    }
-
-    private static String createTitleTranslation(OptionControlSpec<?> option) {
-        return "text.config." + option.configName() + ".option." + option.key().asString();
     }
 
     protected boolean tickAtTop() {

@@ -37,7 +37,7 @@ public class ConfigReflectionUtils {
 
         double min = NumberReflection.minValue(clazz).doubleValue(), max = NumberReflection.maxValue(clazz).doubleValue();
 
-        if (access != null && access.hasAnnotation(RangeConstraint.class)) {
+        if (access != null && access.isAnnotationPresent(RangeConstraint.class)) {
             var constraintData = access.getAnnotation(RangeConstraint.class);
 
             useSlider = constraintData.useSlider();
@@ -57,7 +57,7 @@ public class ConfigReflectionUtils {
 
         ConfigWrapper.Constraint constraint = null;
 
-        if (boundField.hasAnnotation(RangeConstraint.class)) {
+        if (boundField.isAnnotationPresent(RangeConstraint.class)) {
             var annotation = boundField.getAnnotation(RangeConstraint.class);
 
             if (NumberReflection.isNumberType(fieldType)) {
@@ -68,40 +68,88 @@ public class ConfigReflectionUtils {
                     predicate = o -> o != null && ((Number) o).doubleValue() >= annotation.min() && ((Number) o).doubleValue() <= annotation.max();
                 }
 
-                constraint = new ConfigWrapper.Constraint("Range from " + annotation.min() + " to " + annotation.max(), predicate);
+                constraint = new ConfigWrapper.Constraint(
+                    "Range from " + annotation.min() + " to " + annotation.max(),
+                    predicate,
+                    predicate
+                );
             } else {
                 throw new IllegalStateException("@RangeConstraint can only be applied to numeric fields");
             }
         }
 
-        if (boundField.hasAnnotation(RegexConstraint.class)) {
+        if (boundField.isAnnotationPresent(RegexConstraint.class)) {
             var annotation = boundField.getAnnotation(RegexConstraint.class);
 
             if (CharSequence.class.isAssignableFrom(fieldType)) {
-                var pattern = Pattern.compile(annotation.value());
-                constraint = new ConfigWrapper.Constraint("Regex " + annotation.value(), o -> o != null && pattern.matcher((CharSequence) o).matches());
+                var applyStr = annotation.applyValue();
+                var applyPattern = Pattern.compile(applyStr);
+                Predicate applyPrediacate = o -> o != null && applyPattern.matcher((CharSequence) o).matches();
+
+                var inputStr = annotation.inputValue();
+                Predicate inputPredicate;
+
+                var format = "Regex [Apply: " + applyStr;
+
+                if (!inputStr.isEmpty()) {
+                    var inputPattern = Pattern.compile(inputStr);
+
+                    format += ", Input: " + inputStr;
+
+                    inputPredicate = o -> o != null && inputPattern.matcher((CharSequence) o).matches();
+                } else {
+                    inputPredicate = s -> true;
+                }
+
+                format += "]";
+
+                constraint = new ConfigWrapper.Constraint(format, inputPredicate, applyPrediacate);
             } else {
                 throw new IllegalStateException("@RegexConstraint can only be applied to fields with a string representation");
             }
         }
 
-        if (boundField.hasAnnotation(PredicateConstraint.class)) {
+        if (boundField.isAnnotationPresent(PredicateConstraint.class)) {
             var annotation = boundField.getAnnotation(PredicateConstraint.class);
-            var method = boundField.owner().getClass().getMethod(annotation.value(), fieldType);
 
-            if (method.getReturnType() != boolean.class) {
-                throw new NoSuchMethodException("Return type of predicate implementation '" + annotation.value() + "' must be 'boolean'");
+            var applyMethodName = annotation.applyMethodName();
+            Predicate applyPrediacate = getPredicate(boundField.owner().getClass(), applyMethodName, fieldType);
+
+            var inputMethodName = annotation.inputMethodName();
+            Predicate inputPredicate;
+
+            var format = "Predicate method [Apply: " + applyMethodName;
+
+            if (!inputMethodName.isEmpty()) {
+                format += ", Input: " + inputMethodName;
+
+                inputPredicate = getPredicate(boundField.owner().getClass(), inputMethodName, fieldType);
+            } else {
+                inputPredicate = s -> true;
             }
 
-            if (!Modifier.isStatic(method.getModifiers())) {
-                throw new IllegalStateException("Predicate implementation '" + annotation.value() + "' must be static");
-            }
+            format += "]";
 
-            var handle = MethodHandles.publicLookup().unreflect(method);
-            constraint = new ConfigWrapper.Constraint("Predicate method " + annotation.value(), o -> invokePredicate(handle, o));
+            constraint = new ConfigWrapper.Constraint(format, inputPredicate, applyPrediacate);
         }
 
         return constraint;
+    }
+
+    private static Predicate getPredicate(Class<?> ownerClass, String methodName, Class<?> fieldType) throws IllegalAccessException, NoSuchMethodException {
+        var method = ownerClass.getMethod(methodName, fieldType);
+
+        if (method.getReturnType() != boolean.class) {
+            throw new NoSuchMethodException("Return type of predicate implementation '" + methodName + "' must be 'boolean'");
+        }
+
+        if (!Modifier.isStatic(method.getModifiers())) {
+            throw new IllegalStateException("Predicate implementation '" + methodName + "' must be static");
+        }
+
+        var handle = MethodHandles.publicLookup().unreflect(method);
+
+        return o -> invokePredicate(handle, o);
     }
 
     private static boolean invokePredicate(MethodHandle predicate, Object value) {

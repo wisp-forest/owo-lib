@@ -3,11 +3,7 @@ package io.wispforest.owo.config.ui;
 import blue.endless.jankson.JsonObject;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.*;
-import io.wispforest.owo.config.annotation.ExcludeFromScreen;
-import io.wispforest.owo.config.annotation.Expanded;
-import io.wispforest.owo.config.annotation.RestartRequired;
-import io.wispforest.owo.config.annotation.SectionHeader;
-import io.wispforest.owo.config.base.BoundedAccess;
+import io.wispforest.owo.config.annotation.*;
 import io.wispforest.owo.config.base.Key;
 import io.wispforest.owo.config.options.FieldOption;
 import io.wispforest.owo.config.ui.component.*;
@@ -33,13 +29,12 @@ import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
-import org.apache.commons.lang3.mutable.MutableBoolean;
+import org.apache.logging.log4j.util.TriConsumer;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
-import java.lang.reflect.Field;
+import java.lang.reflect.AnnotatedElement;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
 /**
@@ -67,7 +62,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
      */
     protected final Map<Predicate<FieldOption<?>>, OptionComponentFactory<?>> extraFactories = new LinkedHashMap<>();
 
-    protected final Screen parent;
+    public final Screen parent;
     protected final ConfigWrapper<?> config;
     @SuppressWarnings("rawtypes") protected final Map<FieldOption, OptionValueProvider> options = new HashMap<>();
 
@@ -212,7 +207,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                 .get(config.id().getNamespace());
 
         if (modProviders.isEmpty()) {
-            var titleKey = "text.config." + this.config.name() + ".title";
+            var titleKey = ConfigTranslationHelper.createConfigTitleTranslation(this.config.id());
 
             var titleHolder = this.model.expandTemplate(FlowLayout.class, "current-config-selection", Map.of("title-translation-key", titleKey));
 
@@ -222,10 +217,8 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
         } else {
             var titleScroll = topHolder.childById(ScrollContainer.class, "titles-scroll");
 
-            Component selectedComponent = null;
-
             for (var configName : modProviders) {
-                var titleKey = "text.config." + configName + ".title";
+                var titleKey = ConfigTranslationHelper.createConfigTitleTranslation(this.config.id().withPath(configName));
 
                 ParentComponent titleHolder;
 
@@ -235,8 +228,6 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                     OptionComponentFactory.addEasyCopyLabel((FlowLayout) titleHolder, titleKey);
 
                     titles.child(titleHolder);
-
-                    selectedComponent = titleHolder;
                 } else {
                     titleHolder = this.model.expandTemplate(SelectableContainer.class, "alternative-config-selection", Map.of("title-translation-key", titleKey));
 
@@ -413,8 +404,10 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
             });
         });
 
+        ConfigTranslationHelper.pushConfigId(this.config.id());
+
         this.config.forEachOption(option -> {
-            if (option.backingAccess().hasAnnotation(ExcludeFromScreen.class)) return;
+            if (option.isAnnotationPresent(ExcludeFromScreen.class)) return;
 
             var parentKey = option.key().parent();
             if (!parentKey.isRoot() && this.config.fieldForKey(parentKey).isAnnotationPresent(ExcludeFromScreen.class))
@@ -426,48 +419,57 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                 return;
             }
 
-            var result = factory.make(this.model, option);
-            this.options.put(option, result.optionProvider());
-
-            var expanded = !parentKey.isRoot() && this.config.fieldForKey(parentKey).isAnnotationPresent(Expanded.class);
-            var nestedClassKey = "text.config." + this.config.name() + ".category." + parentKey.asString();
-
             var container = containers.computeIfAbsent(
-                    parentKey,
-                    key -> {
-                        var collapsibleContainer = Containers.collapsible(
-                                Sizing.fill(100), Sizing.content(),
-                                Text.translatable(nestedClassKey),
-                                expanded
-                        ).<CollapsibleContainer>configure(nestedContainer -> {
-                            final var categoryKey = nestedClassKey;
-                            if (I18n.hasTranslation(categoryKey + ".tooltip")) {
-                                nestedContainer.titleLayout().tooltip(Text.translatable(categoryKey + ".tooltip"));
-                            }
+                parentKey,
+                key -> {
+                    var parentContainerPresent = containers.containsKey(parentKey.parent());
 
-                            nestedContainer.titleLayout().child(new SearchAnchorComponent(
-                                    nestedContainer.titleLayout(),
-                                    option.key(),
-                                    () -> I18n.translate(categoryKey)
-                            ).highlightConfigurator(highlight ->
-                                    highlight.positioning(Positioning.absolute(-5, -5))
-                                            .verticalSizing(Sizing.fixed(19))
-                            ));
-                        });
+                    // Must go before container due to how it's required to setup translation dumper util
+                    if (parentContainerPresent) {
+                        if (this.config.fieldForKey(parentKey).isAnnotationPresent(SectionHeader.class)) {
+                            this.appendSection(sections, parentKey, this.config.fieldForKey(parentKey), containers.get(parentKey.parent()));
+                        }
+                    }
 
-                        OptionComponentFactory.addEasyCopyLabel(collapsibleContainer.titleLayout(), nestedClassKey);
+                    var expanded = !parentKey.isRoot() && this.config.fieldForKey(parentKey).isAnnotationPresent(Expanded.class);
+                    var categoryTranslation = ConfigTranslationHelper.createConfigCategoryTranslation(parentKey);
 
-                        if (containers.containsKey(parentKey.parent())) {
-                            if (this.config.fieldForKey(parentKey).isAnnotationPresent(SectionHeader.class)) {
-                                this.appendSection(sections, this.config.fieldForKey(parentKey), containers.get(parentKey.parent()));
-                            }
-
-                            containers.get(parentKey.parent()).child(collapsibleContainer);
+                    var collapsibleContainer = Containers.collapsible(
+                        Sizing.fill(100), Sizing.content(),
+                        Text.translatable(categoryTranslation),
+                        expanded
+                    ).<CollapsibleContainer>configure(nestedContainer -> {
+                        var tooltipText = ConfigTranslationHelper.createConfigCategoryTranslation(parentKey, true);
+                        if (I18n.hasTranslation(tooltipText)) {
+                            nestedContainer.titleLayout().tooltip(Text.translatable(tooltipText));
                         }
 
-                        return collapsibleContainer;
+                        nestedContainer.titleLayout().child(new SearchAnchorComponent(
+                            nestedContainer.titleLayout(),
+                            option.key(),
+                            () -> I18n.translate(categoryTranslation)
+                        ).highlightConfigurator(highlight ->
+                            highlight.positioning(Positioning.absolute(-5, -5))
+                                .verticalSizing(Sizing.fixed(19))
+                        ));
+                    });
+
+                    OptionComponentFactory.addEasyCopyLabel(collapsibleContainer.titleLayout(), categoryTranslation);
+
+                    if (parentContainerPresent) {
+                        containers.get(parentKey.parent()).child(collapsibleContainer);
                     }
+
+                    return collapsibleContainer;
+                }
             );
+
+            if (option.isAnnotationPresent(SectionHeader.class)) {
+                this.appendSection(sections, option.key().parent(), option, container);
+            }
+
+            var result = factory.make(this.model, option);
+            this.options.put(option, result.optionProvider());
 
             if (option.detached()) {
                 result.baseComponent().tooltip(
@@ -476,14 +478,18 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                 );
             } else {
                 var tooltipText = new ArrayList<OrderedText>();
-                var tooltipTranslationKey = option.translationKey() + ".tooltip";
+                var tooltipTranslationKey = option.translationTooltipKey();
 
                 if (I18n.hasTranslation(tooltipTranslationKey)) {
                     tooltipText.addAll(this.client.textRenderer.wrapLines(Text.translatable(tooltipTranslationKey), Integer.MAX_VALUE));
                 }
 
-                if (option.backingAccess().hasAnnotation(RestartRequired.class)) {
+                if (option.isAnnotationPresent(RestartRequired.class)) {
                     tooltipText.add(Text.translatable("text.owo.config.applies_after_restart").asOrderedText());
+                }
+
+                if (option.isAnnotationPresent(ReloadRequired.class)) {
+                    tooltipText.add(Text.translatable("text.owo.config.applies_after_reload").asOrderedText());
                 }
 
                 if (!tooltipText.isEmpty()) {
@@ -491,11 +497,9 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                 }
             }
 
-            if (option.backingAccess().hasAnnotation(SectionHeader.class)) {
-                this.appendSection(sections, option.backingAccess(), container);
-            }
-
             container.child(result.baseComponent());
+
+            ConfigTranslationHelper.popOptionKey();
         });
 
         if (!sections.isEmpty()) {
@@ -556,6 +560,8 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
 
             rootComponent.childById(FlowLayout.class, "main-panel-stack").child(overlay);
         }
+
+        ConfigTranslationHelper.popConfigId();
     }
 
     private static class SectionPanelState {
@@ -608,16 +614,12 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
         }
     }
 
-    protected void appendSection(Map<Component, String> sections, Field field, FlowLayout container) {
-        appendSection(sections, field.getAnnotation(SectionHeader.class), container);
+    protected void appendSection(Map<Component, String> sections, Key parentKey, AnnotatedElement element, FlowLayout container) {
+        appendSection(sections, parentKey, element.getAnnotation(SectionHeader.class), container);
     }
 
-    protected void appendSection(Map<Component, String> sections, BoundedAccess<?> access, FlowLayout container) {
-        appendSection(sections, access.getAnnotation(SectionHeader.class), container);
-    }
-
-    protected void appendSection(Map<Component, String> sections, SectionHeader annotation, FlowLayout container) {
-        var translationKey = "text.config." + this.config.name() + ".section." + annotation.value();
+    protected void appendSection(Map<Component, String> sections, Key parentKey, SectionHeader annotation, FlowLayout container) {
+        var translationKey = ConfigTranslationHelper.createSectionTranslation(parentKey, annotation.value());
 
         final var header = this.model.expandTemplate(FlowLayout.class, "section-header", Map.of("section-name", translationKey));
         header.childById(LabelComponent.class, "header").<LabelComponent>configure(label -> {
@@ -625,6 +627,12 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
         });
 
         OptionComponentFactory.addEasyCopyLabel(header.childById(FlowLayout.class, "label-holder"), translationKey);
+
+        var tooltipText = ConfigTranslationHelper.createSectionTranslation(parentKey, annotation.value(), true);
+
+        if (I18n.hasTranslation(tooltipText)) {
+            header.tooltip(Text.translatable(tooltipText));
+        }
 
         sections.put(header, translationKey);
 

@@ -15,7 +15,7 @@ public class AdditionalConfig4Model {
     @RangeConstraint(min = 0, max = 56)
     public int aValue = 56;
 
-    @RegexConstraint("[A-Za-z]{1,3}")
+    @RegexConstraint(inputValue = "[A-Za-z]{1,3}", applyValue = "[A-Za-z]{1,3}")
     public String regex = "yes";
 
     @Nest
@@ -23,7 +23,7 @@ public class AdditionalConfig4Model {
     @SectionHeader("nesting_yo?")
     public Nested nestingTime = new Nested();
 
-    @PredicateConstraint("predicateFunction")
+    @PredicateConstraint(applyMethodName = "predicateApplyFunction", inputMethodName = "predicateInputFunction")
     public List<String> someOption = new ArrayList<>(List.of("1", "2", "3", "4", "5"));
 
     @RangeConstraint(min = 0, max = 10, decimalPlaces = 1)
@@ -66,10 +66,17 @@ public class AdditionalConfig4Model {
     }
 
     // so we declare a predicate method
-    public static boolean predicateFunction(List<String> list) {
+    public static boolean predicateApplyFunction(List<String> list) {
         // and do the check in here
         // this could be arbitrarily complex code, but
         // we'll keep it simple for this demonstration
         return list.size() == 5;
+    }
+
+    public static boolean predicateInputFunction(List<String> list) {
+        // and do the check in here
+        // this could be arbitrarily complex code, but
+        // we'll keep it simple for this demonstration
+        return list.size() <= 5;
     }
 }

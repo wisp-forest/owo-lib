@@ -21,15 +21,13 @@ import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.owo.util.NumberReflection;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.resource.language.I18n;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * A function which creates an instance of {@link OptionValueProvider}
@@ -41,9 +39,7 @@ import java.util.*;
  */
 public interface OptionComponentFactory<T> {
 
-    OptionComponentFactory<? extends Number> NUMBER = (model, option) -> {
-        var access = option.backingAccess();
-
+    OptionComponentFactory<? extends Number> NUMBER = withOptionLabel((model, option) -> {
         var floatingPointType = NumberReflection.isFloatingPointType(option.clazz());
 
         var useSlider = false;
@@ -52,8 +48,8 @@ public interface OptionComponentFactory<T> {
 
         Double min = NumberReflection.minValue(option.clazz()).doubleValue(), max = NumberReflection.maxValue(option.clazz()).doubleValue();
 
-        if (access.hasAnnotation(RangeConstraint.class)) {
-            var constraintData = access.getAnnotation(RangeConstraint.class);
+        if (option.isAnnotationPresent(RangeConstraint.class)) {
+            var constraintData = option.getAnnotation(RangeConstraint.class);
 
             useSlider = constraintData.useSlider();
 
@@ -63,47 +59,36 @@ public interface OptionComponentFactory<T> {
             max = constraintData.max();
         }
 
-        return attachOptionLabel(OptionComponents.createNumberComponent(model, option, decimalPlaces, min, max, useSlider, option.detached()), model, option);
-    };
+        return OptionComponents.createNumberComponent(model, option, decimalPlaces, min, max, useSlider, option.detached());
+    });
 
-    OptionComponentFactory<? extends CharSequence> STRING = (model, option) -> {
-        return attachOptionLabel(OptionComponents.createStringComponent(model, option, option.detached()), model, option);
-    };
+    OptionComponentFactory<? extends CharSequence> STRING = withOptionLabel((model, option) -> OptionComponents.createStringComponent(model, option, option.detached()));
 
-    OptionComponentFactory<Identifier> IDENTIFIER = (model, option) -> {
-        return attachOptionLabel(OptionComponents.createIdentifierComponent(model, option, option.detached()), model, option);
-    };
+    OptionComponentFactory<Identifier> IDENTIFIER = withOptionLabel((model, option) -> OptionComponents.createIdentifierComponent(model, option, option.detached()));
 
-    OptionComponentFactory<Color> COLOR = (model, option) -> {
-        boolean withAlpha = option.backingAccess().hasAnnotation(WithAlpha.class);
-        return attachOptionLabel(OptionComponents.createColorComponent(model, option, withAlpha, option.detached()), model, option);
-    };
+    OptionComponentFactory<Color> COLOR = withOptionLabel((model, option) -> OptionComponents.createColorComponent(model, option, option.isAnnotationPresent(WithAlpha.class), option.detached()));
 
-    OptionComponentFactory<Boolean> BOOLEAN = (model, option) -> {
-        return attachOptionLabel(OptionComponents.createToggleButton(model, option, option.detached()), model, option);
-    };
+    OptionComponentFactory<Boolean> BOOLEAN = withOptionLabel((model, option) -> OptionComponents.createToggleButton(model, option, option.detached()));
 
-    OptionComponentFactory<? extends Enum<?>> ENUM = (model, option) -> {
-        return attachOptionLabel(OptionComponents.createEnumButton(model, option, option.detached()), model, option);
-    };
+    OptionComponentFactory<? extends Enum<?>> ENUM = withOptionLabel((model, option) -> OptionComponents.createEnumButton(model, option, option.detached()));
 
     @SuppressWarnings({"unchecked"})
     OptionComponentFactory<List<?>> LIST = (model, option) -> {
-        var expanded = option.backingAccess().hasAnnotation(Expanded.class);
+        var expanded = option.isAnnotationPresent(Expanded.class);
         var layout = new ListOptionContainer<>(model, (OptionControlSpec) option, ArrayList::new, expanded, option.detached());
         return new Result<>(layout, layout);
     };
 
     @SuppressWarnings({"unchecked"})
     OptionComponentFactory<Set<?>> SET = (model, option) -> {
-        var expanded = option.backingAccess().hasAnnotation(Expanded.class);
+        var expanded = option.isAnnotationPresent(Expanded.class);
         var layout = new ListOptionContainer<>(model, (OptionControlSpec) option, LinkedHashSet::new, expanded, option.detached());
         return new Result<>(layout, layout);
     };
 
     @SuppressWarnings({"unchecked"})
     OptionComponentFactory<Map<?, ?>> SIMPLE_MAP = (model, option) -> {
-        var expanded = option.backingAccess().hasAnnotation(Expanded.class);
+        var expanded = option.isAnnotationPresent(Expanded.class);
         var layout = new MapOptionContainer<>(model, (OptionControlSpec) option, expanded, option.detached());
         return new Result<>(layout, layout);
     };
@@ -112,7 +97,7 @@ public interface OptionComponentFactory<T> {
     OptionComponentFactory<Object> STRUCT = (model, option) -> {
         var key = option.key();
 
-        var expanded = !key.isRoot() && option.backingAccess().hasAnnotation(Expanded.class);
+        var expanded = !key.isRoot() && option.isAnnotationPresent(Expanded.class);
 
         AbstractStructOptionContainer<?> layout;
 
@@ -122,15 +107,15 @@ public interface OptionComponentFactory<T> {
             layout = StructOptionContainer.of(model, option);
         }
 
-        var titleKey = "text.config." + option.configName() + ".option." + key.asString();
+        var titleKey = option.translationKey();
 
         var container = Containers.collapsible(
                 Sizing.fill(100), Sizing.content(),
                 Text.translatable(titleKey),
                 expanded
         ).<CollapsibleContainer>configure(nestedContainer -> {
-            if (I18n.hasTranslation(titleKey + ".tooltip")) {
-                nestedContainer.titleLayout().tooltip(Text.translatable(titleKey + ".tooltip"));
+            if (I18n.hasTranslation(option.translationTooltipKey())) {
+                nestedContainer.titleLayout().tooltip(Text.translatable(option.translationTooltipKey()));
             }
 
             nestedContainer.titleLayout().child(new SearchAnchorComponent(
@@ -164,7 +149,11 @@ public interface OptionComponentFactory<T> {
 
     record Result<B extends Component, P extends OptionValueProvider>(B baseComponent, P optionProvider) {}
 
-    static Result<? extends Component, ? extends OptionValueProvider> attachOptionLabel(Result<? extends Component, ? extends OptionValueProvider> result, UIModel model, OptionControlSpec<?> option) {
+    static <T> OptionComponentFactory<T> withOptionLabel(OptionComponentFactory<T> factory) {
+        return (model, option) -> attachOptionLabel(factory, model, option);
+    }
+
+    static <T> Result<? extends Component, ? extends OptionValueProvider> attachOptionLabel(OptionComponentFactory<T> factory, UIModel model, OptionControlSpec<?> option) {
         var baseComponent = model.expandTemplate(FlowLayout.class,
                 "config-option-base",
                 Map.of("config-option-name", option.translationKey())
@@ -173,6 +162,8 @@ public interface OptionComponentFactory<T> {
         var optionNameHolder = baseComponent.childById(FlowLayout.class, "option-name-holder");
 
         addEasyCopyLabel(optionNameHolder, option.translationKey());
+
+        var result = factory.make(model, (ReflectiveOption<T>) option);
 
         if (result.baseComponent() instanceof ParentComponent parentComponent) {
             var deque = new ArrayDeque<>(List.of(parentComponent));

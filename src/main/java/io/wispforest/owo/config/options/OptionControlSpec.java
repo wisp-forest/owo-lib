@@ -46,6 +46,8 @@ public sealed interface OptionControlSpec<T> permits OptionBase, ReflectiveOptio
      */
     String translationKey();
 
+    String translationTooltipKey();
+
     /**
      * @return The id of the config this option is contained in
      */

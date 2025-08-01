@@ -13,6 +13,13 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface RegexConstraint {
 
-    String value();
+    /**
+     * Regex used when validating the user input
+     */
+    String inputValue() default "";
 
+    /**
+     * Regex used when validating the value when submitting the value
+     */
+    String applyValue();
 }

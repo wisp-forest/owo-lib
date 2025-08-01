@@ -26,7 +26,9 @@ public class OptionComponents {
     public static Result<FlowLayout, ConfigTextBox> createStringComponent(UIModel model, OptionControlSpec<CharSequence> option, boolean isDetached) {
         return OptionComponents.createTextBox(model, option, configTextBox -> {
             if (option.constraint() != null) {
-                configTextBox.applyPredicate(option.constraint()::test);
+                configTextBox
+                    .inputPredicate(option.constraint()::testInput)
+                    .applyPredicate(option.constraint()::testApply);
             }
         }, isDetached);
     }

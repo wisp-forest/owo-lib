@@ -390,9 +390,12 @@ public abstract class ConfigWrapper<C> {
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public record Constraint(String formatted, Predicate predicate) {
-        public boolean test(Object value) {
-            return this.predicate.test(value);
+    public record Constraint(String formatted, Predicate inputPredicate, Predicate applyPredicate) {
+        public boolean testInput(Object value) {
+            return this.inputPredicate.test(value);
+        }
+        public boolean testApply(Object value) {
+            return this.inputPredicate.test(value);
         }
     }
 

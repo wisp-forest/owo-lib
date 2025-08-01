@@ -3,6 +3,7 @@ package io.wispforest.owo.config.options;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.ConfigWrapper;
 import io.wispforest.owo.config.base.Key;
+import io.wispforest.owo.config.ui.ConfigTranslationHelper;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,7 +13,6 @@ public sealed abstract class OptionBase<T> implements OptionControlSpec<T> permi
 
     private final Identifier configId;
     private final Key key;
-    private final String translationKey;
 
     private final T defaultValue;
 
@@ -40,7 +40,6 @@ public sealed abstract class OptionBase<T> implements OptionControlSpec<T> permi
     ) {
         this.configId = configId;
         this.key = key;
-        this.translationKey = "text.config." + this.configId.getPath() + ".option." + this.key.asString();
 
         this.defaultValue = defaultValue;
 
@@ -75,7 +74,7 @@ public sealed abstract class OptionBase<T> implements OptionControlSpec<T> permi
     public boolean verifyConstraint(T value) {
         if (this.constraint == null) return true;
 
-        final var matched = this.constraint.test(value);
+        final var matched = this.constraint.testApply(value);
         if (!matched) {
             Owo.LOGGER.warn(
                     "Option {} in config '{}' could not be updated, as the given value '{}' does not match its constraint: {}",
@@ -88,7 +87,12 @@ public sealed abstract class OptionBase<T> implements OptionControlSpec<T> permi
 
     @Override
     public String translationKey() {
-        return this.translationKey;
+        return ConfigTranslationHelper.createOptionTranslation(this.configId, this.key);
+    }
+
+    @Override
+    public String translationTooltipKey() {
+        return ConfigTranslationHelper.createOptionTranslation(this.configId, this.key, true);
     }
 
     @Override
