@@ -366,6 +366,8 @@ public class UIParsing {
         registerFactory("slim-slider", SlimSliderComponent::parse);
         registerFactory("small-checkbox", element -> new SmallCheckboxComponent());
         registerFactory("spacer", SpacerComponent::parse);
+
+        registerFactory("toggle-button", element -> new ToggleButton(Text.empty(), (ButtonComponent button) -> {}));
     }
 
 }

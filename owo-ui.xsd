@@ -44,6 +44,7 @@
             <xs:element name="text-box" type="owo-ui-text-field-component"/>
             <xs:element name="entity" type="owo-ui-entity-component"/>
             <xs:element name="button" type="owo-ui-button-component"/>
+            <xs:element name="toggle-button" type="owo-ui-toggle-button-component"/>
             <xs:element name="slider" type="owo-ui-slider-component"/>
             <xs:element name="discrete-slider" type="owo-ui-discrete-slider-component"/>
             <xs:element name="checkbox" type="owo-ui-checkbox-component"/>
@@ -335,6 +336,16 @@
                     </xs:restriction>
                 </xs:simpleType>
             </xs:element>
+            <xs:element name="scissor" maxOccurs="1">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="x" type="xs:unsignedInt"/>
+                        <xs:element name="y" type="xs:unsignedInt"/>
+                        <xs:element name="width" type="xs:unsignedInt"/>
+                        <xs:element name="height" type="xs:unsignedInt"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
         </xs:choice>
     </xs:complexType>
 
@@ -463,12 +474,10 @@
                     </xs:documentation>
                 </xs:annotation>
                 <xs:complexType>
-                    <xs:complexContent>
-                        <xs:sequence>
-                            <xs:element name="surface" type="owo-ui-surface"/>
-                            <xs:element name="transforms" type="transforms"/>
-                        </xs:sequence>
-                    </xs:complexContent>
+                    <xs:sequence>
+                        <xs:element name="surface" type="owo-ui-surface"/>
+                        <xs:element name="transforms" type="transforms"/>
+                    </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element type="owo-ui-color" name="flat">
@@ -538,6 +547,29 @@
                     <xs:attribute type="xs:unsignedInt" name="v" use="required"/>
                     <xs:attribute type="xs:unsignedInt" name="texture-width" use="required"/>
                     <xs:attribute type="xs:unsignedInt" name="texture-height" use="required"/>
+                </xs:complexType>
+            </xs:element>
+        </xs:choice>
+    </xs:complexType>
+
+    <xs:complexType name="owo-ui-button-value-renderer">
+        <xs:choice>
+            <xs:element name="texture" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:attribute type="xs:integer" name="value" use="required"/>
+                    <xs:attribute name="texture" type="minecraft-identifier" use="required"/>
+                    <xs:attribute name="width" type="xs:integer" use="required"/>
+                    <xs:attribute name="height" type="xs:integer" use="required"/>
+                    <xs:attribute name="u" type="xs:integer"/>
+                    <xs:attribute name="v" type="xs:integer"/>
+                    <xs:attribute name="region-width" type="xs:integer"/>
+                    <xs:attribute name="region-height" type="xs:integer"/>
+                    <xs:attribute name="texture-width" type="xs:integer"/>
+                    <xs:attribute name="texture-height" type="xs:integer"/>
+                    <xs:attribute name="blend" type="xs:boolean"/>
+                    <xs:sequence>
+                        <xs:element type="transforms" name="transforms" minOccurs="0"/>
+                    </xs:sequence>
                 </xs:complexType>
             </xs:element>
         </xs:choice>
@@ -683,13 +715,42 @@
         </xs:complexContent>
     </xs:complexType>
 
+    <xs:group name="buttonComponentProp">
+        <xs:choice>
+            <xs:group ref="vanillaWidgetProps"/>
+            <xs:element type="owo-ui-text" name="text" minOccurs="0"/>
+            <xs:element type="owo-ui-button-renderer" name="renderer" minOccurs="0"/>
+        </xs:choice>
+    </xs:group>
+
     <xs:complexType name="owo-ui-button-component">
         <xs:complexContent>
             <xs:extension base="componentType">
                 <xs:choice maxOccurs="unbounded">
-                    <xs:group ref="vanillaWidgetProps"/>
-                    <xs:element type="owo-ui-text" name="text" minOccurs="0"/>
-                    <xs:element type="owo-ui-button-renderer" name="renderer" minOccurs="0"/>
+                    <xs:group ref="buttonComponentProp"/>
+                </xs:choice>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="owo-ui-increment-button-component">
+        <xs:complexContent>
+            <xs:extension base="owo-ui-button-component">
+                <xs:choice maxOccurs="unbounded">
+                    <xs:group ref="buttonComponentProp"/>
+                    <xs:element type="owo-ui-button-value-renderer" name="value-renderer" minOccurs="0" maxOccurs="unbounded"/>
+                </xs:choice>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="owo-ui-toggle-button-component">
+        <xs:complexContent>
+            <xs:extension base="owo-ui-increment-button-component">
+                <xs:choice maxOccurs="unbounded">
+                    <xs:group ref="buttonComponentProp"/>
+                    <xs:element type="owo-ui-text" name="enabled-text" minOccurs="0"/>
+                    <xs:element type="owo-ui-text" name="disabled-text" minOccurs="0"/>
                 </xs:choice>
             </xs:extension>
         </xs:complexContent>

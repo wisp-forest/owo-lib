@@ -265,41 +265,9 @@ public interface Surface {
                 case "transformed" -> {
                     var innerChildren = UIParsing.childElements(child);
 
-                    UIParsing.expectChildren(child, innerChildren, "transforms", "surface");
+                    var stack = WrappedMatrixStack.parseStack(child, innerChildren);
 
-                    var transforms = UIParsing.<Element>allChildrenOfType(innerChildren.get("transforms"), Node.ELEMENT_NODE);
-                    var stack = new WrappedMatrixStack();
-
-                    for (var transform : transforms) {
-                        switch (transform.getNodeName()) {
-                            case "translate" -> stack.translate(UIParsing.parseVector3f(transform));
-                            case "scale" -> stack.scale(UIParsing.parseVector3f(transform));
-                            case "multiply" -> {
-                                var quaternion = UIParsing.parseQuaternionf(transform);
-                                var origin = UIParsing.get(UIParsing.childElements(transform), "origin", UIParsing::parseVector3f);
-
-                                if (origin.isEmpty()) {
-                                    stack.multiply(quaternion);
-                                } else {
-                                    stack.multiply(quaternion, origin.get());
-                                }
-                            }
-                            case "matrix" -> {
-                                var list = Arrays.stream(transform.getTextContent().split(" "))
-                                        .map(Float::parseFloat)
-                                        .toList();
-
-                                var array = new float[list.size()];
-
-                                for (int i = 0; i < list.size(); i++) array[i] = list.get(i);
-
-                                var matrix = new Matrix4f().set(array);
-
-                                stack.multiplyPositionMatrix(matrix);
-                            }
-                            default -> throw new UIModelParsingException("Unknown transform type '" + child.getNodeName() + "'");
-                        }
-                    }
+                    UIParsing.expectChildren(child, innerChildren, "surface");
 
                     var transformedSurface = Surface.parse(innerChildren.get("surface"));
 

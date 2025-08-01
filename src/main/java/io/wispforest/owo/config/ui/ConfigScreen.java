@@ -71,7 +71,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
     protected int currentMatchIndex = 0;
 
     @Nullable
-    protected ConfigWrapper<?> alternativeConfig = null;
+    protected ConfigWrapper<?> serverConfig = null;
 
     protected ConfigScreen(Identifier modelId, ConfigWrapper<?> config, @Nullable Screen parent) {
         super(FlowLayout.class, DataSource.asset(modelId));
@@ -162,41 +162,51 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
     protected void build(FlowLayout rootComponent) {
         this.options.clear();
 
-        var isServer = new MutableBoolean(config.isServerConfig());
+        var btn = rootComponent.childById(ToggleButton.class, "environment-type");
 
-        var btn = rootComponent.childById(ButtonComponent.class, "environment-type");
+        var minecraft = MinecraftClient.getInstance();
 
-        if (MinecraftClient.getInstance().getServer() != null || MinecraftClient.getInstance().world == null) {
+        if ((minecraft.getServer() != null || minecraft.world == null) || !minecraft.player.hasPermissionLevel(3)) {
             rootComponent.childById(ParentComponent.class, "button-config-controls")
                     .removeChild(btn);
         } else {
-            btn.onPress(buttonComponent -> {
-                if (this.config.isServerConfig()) {
-                    this.alternativeConfig = ConfigWrapper.getConfig(this.config.id());
+            // True -> Server
+            // False -> Client
+            btn.enabled(this.config.isServerConfig());
+
+            btn.onPress((toggleBtn, isServerConfig) -> {
+                if (!minecraft.player.hasPermissionLevel(3)) {
+                    toggleBtn.rollbackPress();
+
+                    return;
                 }
 
-                if (this.alternativeConfig == null) {
-                    if (!this.config.isServerConfig()) {
-                        OwoPackets.MAIN.clientHandle().send(new AskToOpenServerConfig(this.config.id()));
+                var configId = this.config.id();
 
-                        return;
-                    } else {
-                        var envType = this.config.isServerConfig() ? "client" : "server";
-
-                        throw new IllegalStateException("Unable to transfer to the desired environment [" + envType + "] for the given config: " + this.config.id());
-                    }
+                if (isServerConfig && this.serverConfig == null) {
+                    OwoPackets.MAIN.clientHandle().send(new AskToOpenServerConfig(configId));
+                    return;
                 }
 
-                var newScreen = ConfigScreenProviders.get(config.id()).openScreenSafely(this.parent, alternativeConfig);
+                var configWrapper = isServerConfig ? this.serverConfig : ConfigWrapper.getConfig(configId);
+
+                if (configWrapper == null) {
+                    throw new IllegalStateException("Unable to transfer to the desired environment [" + (isServerConfig ? "Server" : "Client") + "] for the given config: " + configId);
+                }
+
+                var newScreen = ConfigScreenProviders.get(configId).openScreenSafely(this.parent, configWrapper);
 
                 if (newScreen instanceof ConfigScreen configScreen) {
-                    configScreen.alternativeConfig = this.config;
+                    configScreen.serverConfig = this.serverConfig;
                 }
 
-                MinecraftClient.getInstance().setScreen(newScreen);
+                minecraft.setScreen(newScreen);
             });
 
-            btn.setMessage(Text.translatable("text.owo.config.label.environment." + (isServer.getValue() ? "server" : "client")));
+            btn.tooltip(
+                    Text.translatable("text.owo.config.label.selected.environment")
+                            .append(Text.translatable("text.owo.config.label.environment." + (!config.isServerConfig() ? "server" : "client")))
+            );
         }
 
         var topHolder = rootComponent.childById(FlowLayout.class, "titles-and-option-holder");

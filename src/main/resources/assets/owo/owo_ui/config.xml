@@ -149,16 +149,6 @@
                             <positioning type="relative">0,50</positioning>
                         </flow-layout>
 
-                        <button id="environment-type">
-                            <text translate="true">text.owo.config.label.environment.client</text>
-                            <sizing>
-                                <horizontal method="fill">12</horizontal>
-                            </sizing>
-                            <margins>
-                                <right>10</right>
-                            </margins>
-                        </button>
-
                         <button id="reload-button">
                             <text translate="true">text.owo.config.button.reload</text>
                             <sizing>
@@ -175,6 +165,39 @@
                                 <horizontal method="fill">12</horizontal>
                             </sizing>
                         </button>
+
+                        <toggle-button id="environment-type">
+                            <sizing>
+                                <vertical method="fixed">20</vertical>
+                                <horizontal method="fixed">20</horizontal>
+                            </sizing>
+                            <margins>
+                                <left>5</left>
+                            </margins>
+                            <renderer>
+                                <vanilla/>
+                            </renderer>
+                            <value-renderer>
+                                <texture value="0" texture="owo:textures/gui/owo_config_icons.png"
+                                        width="16" height="16"
+                                        u="16" v="0"
+                                        region-width="16" region-height="16"
+                                        texture-width="32" texture-height="32">
+                                    <transforms>
+                                        <translate x="2" y="2" z="0"/>
+                                    </transforms>
+                                </texture>
+                                <texture value="1" texture="owo:textures/gui/owo_config_icons.png"
+                                        width="16" height="16"
+                                        u="0" v="0"
+                                        region-width="16" region-height="16"
+                                        texture-width="32" texture-height="32">
+                                    <transforms>
+                                        <translate x="2" y="2" z="0"/>
+                                    </transforms>
+                                </texture>
+                            </value-renderer>
+                        </toggle-button>
                     </children>
 
                     <horizontal-alignment>right</horizontal-alignment>
@@ -185,7 +208,8 @@
                     </margins>
 
                     <padding>
-                        <horizontal>50</horizontal>
+                        <left>30</left>
+                        <right>30</right>
                     </padding>
 
                     <sizing>

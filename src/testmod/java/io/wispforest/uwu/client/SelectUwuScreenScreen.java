@@ -31,33 +31,33 @@ public class SelectUwuScreenScreen extends BaseOwoScreen<FlowLayout> {
     @Override
     protected void build(FlowLayout rootComponent) {
         rootComponent
-                .child(
-                        Components.label(Text.literal("Available screens"))
-                                .shadow(true)
-                                .margins(Insets.of(3, 5, 0, 0))
-                )
-                .surface(Surface.flat(0x77000000))
-                .verticalAlignment(VerticalAlignment.CENTER)
-                .horizontalAlignment(HorizontalAlignment.CENTER);
+            .child(
+                Components.label(Text.literal("Available screens"))
+                    .shadow(true)
+                    .margins(Insets.of(3, 5, 0, 0))
+            )
+            .surface(Surface.flat(0x77000000))
+            .verticalAlignment(VerticalAlignment.CENTER)
+            .horizontalAlignment(HorizontalAlignment.CENTER);
 
         var panel = Containers.verticalFlow(Sizing.content(), Sizing.content()).<FlowLayout>configure(layout -> {
             layout.gap(3)
-                    .horizontalAlignment(HorizontalAlignment.CENTER);
+                .horizontalAlignment(HorizontalAlignment.CENTER);
         });
 
         SCREEN_SELECTION.forEach((text, setScreenCall) -> {
             panel.child(
-                    Components.button(Text.literal(text), btn -> setScreenCall.run())
-                            .horizontalSizing(Sizing.fill(100))
-                            .verticalSizing(Sizing.fixed(16))
+                Components.button(Text.literal(text), btn -> setScreenCall.run())
+                    .horizontalSizing(Sizing.fill(100))
+                    .verticalSizing(Sizing.fixed(16))
             );
         });
 
         rootComponent.child(
-                Containers.verticalScroll(Sizing.fixed(150), Sizing.expand(100), panel)
-                        .padding(Insets.of(5))
-                        .surface(Surface.PANEL)
-                        .margins(Insets.bottom(10))
+            Containers.verticalScroll(Sizing.fixed(150), Sizing.expand(100), panel)
+                .padding(Insets.of(5))
+                .surface(Surface.PANEL)
+                .margins(Insets.bottom(10))
         );
     }
 

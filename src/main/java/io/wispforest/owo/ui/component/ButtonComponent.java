@@ -44,6 +44,14 @@ public class ButtonComponent extends ButtonWidget {
     public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
         this.renderer.draw((OwoUIDrawContext) context, this, delta);
 
+        renderText(context, mouseX, mouseY, delta);
+
+        var tooltip = ((ClickableWidgetAccessor) this).owo$getTooltip();
+        if (this.hovered && tooltip.getTooltip() != null)
+            context.drawTooltip(MinecraftClient.getInstance().textRenderer, tooltip.getTooltip().getLines(MinecraftClient.getInstance()), HoveredTooltipPositioner.INSTANCE, mouseX, mouseY);
+    }
+
+    protected void renderText(DrawContext context, int mouseX, int mouseY, float delta) {
         var textRenderer = MinecraftClient.getInstance().textRenderer;
         int color = this.active ? 0xffffffff : 0xffa0a0a0;
 
@@ -90,10 +98,16 @@ public class ButtonComponent extends ButtonWidget {
         return this.active;
     }
 
+    protected ButtonComponent setText(Text message) {
+        this.setMessage(message);
+
+        return this;
+    }
+
     @Override
     public void parseProperties(UIModel model, Element element, Map<String, Element> children) {
         super.parseProperties(model, element, children);
-        UIParsing.apply(children, "text", UIParsing::parseText, this::setMessage);
+        UIParsing.apply(children, "text", UIParsing::parseText, this::setText);
         UIParsing.apply(children, "text-shadow", UIParsing::parseBool, this::textShadow);
         UIParsing.apply(children, "renderer", Renderer::parse, this::renderer);
     }

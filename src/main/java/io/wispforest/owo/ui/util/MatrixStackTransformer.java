@@ -1,5 +1,6 @@
 package io.wispforest.owo.ui.util;
 
+import io.wispforest.owo.ui.core.PositionedRectangle;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.util.math.MatrixStack;
 import org.joml.Matrix3x2f;
@@ -26,6 +27,10 @@ public interface MatrixStackTransformer<T extends MatrixStackTransformer<T>> {
         popScissor();
 
         return t;
+    }
+
+    default T pushScissor(PositionedRectangle rectangle) {
+        return pushScissor(rectangle.x(), rectangle.y(), rectangle.width(), rectangle.height());
     }
 
     default T pushScissor(int x, int y, int width, int height) {
