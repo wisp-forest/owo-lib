@@ -11,10 +11,7 @@ import io.wispforest.owo.packets.OwoPackets;
 import io.wispforest.owo.packets.c2s.AskToOpenServerConfig;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.base.BaseUIModelScreen;
-import io.wispforest.owo.ui.component.ButtonComponent;
-import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.component.LabelComponent;
-import io.wispforest.owo.ui.component.TextBoxComponent;
+import io.wispforest.owo.ui.component.*;
 import io.wispforest.owo.ui.container.*;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIParsing;
@@ -681,41 +678,97 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
         }
     }
 
-    private BiConsumer<ConfigWrapper<?>, Boolean> onConfigChanges = (configWrapper, bl) -> {};
+    private TriConsumer<ConfigWrapper<?>, Boolean, Boolean> onConfigChanges = (configWrapper, shouldRestart, shouldReload) -> {};
 
-    void addRemovedHook(BiConsumer<ConfigWrapper<?>, Boolean> value) {
+    void addRemovedHook(TriConsumer<ConfigWrapper<?>, Boolean, Boolean> value) {
         onConfigChanges = value;
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public void close() {
-        var shouldRestart = new MutableBoolean();
-        this.options.forEach((option, component) -> {
-            if (!option.backingAccess().hasAnnotation(RestartRequired.class)) return;
-            if (Objects.equals(option.value(), component.parsedValue())) return;
+        boolean shouldRestart = false;
+        boolean shouldReload = false;
 
-            shouldRestart.setTrue();
-        });
+        for (var entry : this.options.entrySet()) {
+            var option = entry.getKey();
+            var component = entry.getValue();
 
-        this.client.setScreen(shouldRestart.booleanValue() ? new RestartRequiredScreen(this.parent) : this.parent);
+            if (Objects.equals(option.value(), component.parsedValue())) continue;
+
+            if (option.isAnnotationPresent(RestartRequired.class)) {
+                shouldRestart = true;
+            } else if (option.isAnnotationPresent(ReloadRequired.class)) {
+                shouldReload = true;
+            }
+        }
+
+        this.client.setScreen(
+            tryClosingInfoScreen(shouldRestart, shouldReload)
+        );
+    }
+
+    private Screen tryClosingInfoScreen(boolean shouldRestart, boolean shouldReload) {
+        if (!shouldRestart && !shouldReload) return this.parent;
+
+        Map<String, Runnable> buttonAdditions;
+        String titleKey;
+        String messageKey;
+
+        if (shouldRestart) {
+            if (!this.config.isServerConfig()) {
+                buttonAdditions = Map.of(
+                    "text.owo.config.button.exit_minecraft", () -> MinecraftClient.getInstance().scheduleStop(),
+                    "text.owo.config.button.restart_later", () -> MinecraftClient.getInstance().currentScreen.close()
+                );
+            } else {
+                buttonAdditions = Map.of(
+                    "text.owo.config.button.restart_later", () -> MinecraftClient.getInstance().currentScreen.close()
+                );
+            }
+
+            titleKey = "text.owo.config.restart_prompt.title";
+            messageKey = "text.owo.config.restart_prompt.message";
+        } else {
+            buttonAdditions = Map.of(
+                "text.owo.config.button.reload_server", () -> {
+                    MinecraftClient.getInstance().player.networkHandler.sendCommand("reload");
+                    MinecraftClient.getInstance().currentScreen.close();
+                },
+                "text.owo.config.button.reload_later", () -> MinecraftClient.getInstance().currentScreen.close()
+            );
+
+            titleKey = "text.owo.config.reload_prompt.title";
+            messageKey = "text.owo.config.reload_prompt.message";
+        }
+
+        return new SimpleButtonScreen(titleKey, messageKey, buttonAdditions){
+            @Override
+            public void close() {
+                this.client.setScreen(ConfigScreen.this.parent);
+            }
+        };
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public void removed() {
         boolean hasOptionsChanged = false;
-        boolean restartRequired = false;
+        boolean shouldRestart = false;
+        boolean shouldReload = false;
 
         for (var entry : this.options.entrySet()) {
             var option = entry.getKey();
             var component = entry.getValue();
 
-            if (!component.isValid()) return;
+            if (!component.isValid()) continue;
 
-            if (Objects.equals(option.value(), component.parsedValue())) return;
-            if (option.backingAccess().hasAnnotation(RestartRequired.class)) {
-                restartRequired = true;
+            if (Objects.equals(option.value(), component.parsedValue())) continue;
+            if (option.isAnnotationPresent(RestartRequired.class)) {
+                shouldRestart = true;
+            }
+            if (option.isAnnotationPresent(ReloadRequired.class)) {
+                shouldReload = true;
             }
 
             hasOptionsChanged = true;
@@ -724,7 +777,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
         }
 
         if (hasOptionsChanged) {
-            onConfigChanges.accept(this.config, restartRequired);
+            onConfigChanges.accept(this.config, shouldRestart, shouldReload);
         }
 
         super.removed();

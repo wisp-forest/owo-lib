@@ -1,4 +1,9 @@
 {
+  "text.owo": [
+    {"text": "o", "color": "#3955e5"},
+    {"text": "ω", "color": "#13a6f0"},
+    {"text": "o", "color": "#3955e5"}
+  ],
   "text.owo.itemGroup.tab_template": [
     { "index": 0 },
     { "text": " > ", "color": "gray" },
@@ -20,15 +25,38 @@
   "text.owo.config.search": "Search...",
   "text.owo.config.search.matches": "%d of %d",
   "text.owo.config.search.no_matches": "No matches",
-  "text.owo.config.must_restart": "Some changes you made require a restart to apply",
   "text.owo.config.button.exit_minecraft": "Exit Minecraft",
-  "text.owo.config.button.ignore_restart": "Restart later",
+  "text.owo.config.button.restart_later": "Restart later",
+  "text.owo.config.button.reload_server": "Reload Now",
+  "text.owo.config.button.reload_later": "Reload later",
   "text.owo.config.button.range.edit_as_text": "Edit as text",
   "text.owo.config.button.range.edit_with_slider": "Edit with slider",
   "text.owo.config.applies_after_restart": [
     {"text": "⏻ ", "color": "#FAEA48"},
     {"text": "This option applies after a restart", "color": "gray"}
   ],
+  "text.owo.config.applies_after_reload": [
+    {"text": "⚠ ", "color": "#b5f948"},
+    {"text": "This option applies after a reload", "color": "gray"}
+  ],
+  "text.owo.config.server_config.invalid_permissions": "Unable to adjust config as player is missing proper Admin Perms (Level 3).",
+  "text.owo.config.server_config.invalid_config": "Unable to adjust config as such dose not exist on the server! [Id: %s]",
+  "text.owo.config.server_config.restart_recommendation": "Config has been saved but a restart is required to have the given changes take effect.",
+  "text.owo.config.server_config.reload_recommendation": "Config has been saved but a reload is required to have the given changes take effect.",
+  "text.owo.config.restart_prompt.title": [
+    "[",
+    {"translate": "text.owo"},
+    "]",
+    " Restart Required"
+  ],
+  "text.owo.config.restart_prompt.message": "Some changes you made require a restart to apply.",
+  "text.owo.config.reload_prompt.title": [
+    "[",
+    {"translate": "text.owo"},
+    "]",
+    " Reload Required"
+  ],
+  "text.owo.config.reload_prompt.message": "Some changes you made require a reload to apply.",
   "text.owo.config.managed_by_server": [
     {"text": "⚑ ", "color": "#EB1D36"},
     {"text": "This option is being managed by the server\n   Disconnect to edit it", "color": "gray"}
@@ -55,6 +83,9 @@
     "",
     {"text" : "Server", "color": "#4287f5"},
     ""
+  ],
+  "text.owo.config.label.selected.environment": [
+    "Switch to "
   ],
   "text.owo.config.sections_tooltip": "Sections",
   "text.owo.config.sections": {"text": "Sections", "underlined": true},
