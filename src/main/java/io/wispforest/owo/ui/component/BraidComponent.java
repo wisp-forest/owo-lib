@@ -156,6 +156,11 @@ public class BraidComponent extends BaseComponent {
         };
     }
 
+    @Override
+    public boolean canFocus(FocusSource source) {
+        return true;
+    }
+
     public class EmbedSurface extends Surface.Default {
         @Override
         public CursorStyle currentCursorStyle() {

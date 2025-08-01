@@ -1424,26 +1424,31 @@ public class TestSelector extends StatefulWidget {
                                                 Text.literal("amogus"),
                                                 () -> MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.BLOCK_ANVIL_BREAK, Random.create().nextFloat() * 2f))
                                             ),
-                                            new MultiSplitPane(
-                                                LayoutAxis.HORIZONTAL,
-                                                MainAxisAlignment.START,
-                                                CrossAxisAlignment.CENTER,
-                                                List.of(
-                                                    new Box(
-                                                        Color.GREEN.interpolate(Color.ofArgb(0), .5f),
-                                                        new Label(Text.literal("no way is"))
-                                                    ),
-                                                    new Box(
-                                                        Color.GREEN.interpolate(Color.ofArgb(0), .5f),
-                                                        new Label(Text.literal("that braid"))
-                                                    ),
-                                                    new Box(
-                                                        Color.GREEN.interpolate(Color.ofArgb(0), .5f),
-                                                        new Label(Text.literal("inside owoui"))
-                                                    ),
-                                                    new Box(
-                                                        Color.GREEN.interpolate(Color.ofArgb(0), .5f),
-                                                        new Label(Text.literal("inside braid?"))
+                                            // idk why this needs to be here but if it's not the split pane becomes
+                                            // infinity sized
+                                            new Sized(
+                                                180, 180,
+                                                new MultiSplitPane(
+                                                    LayoutAxis.HORIZONTAL,
+                                                    MainAxisAlignment.START,
+                                                    CrossAxisAlignment.CENTER,
+                                                    List.of(
+                                                        new Box(
+                                                            Color.GREEN.interpolate(Color.ofArgb(0), .5f),
+                                                            new Label(Text.literal("no way is"))
+                                                        ),
+                                                        new Box(
+                                                            Color.GREEN.interpolate(Color.ofArgb(0), .5f),
+                                                            new Label(Text.literal("that braid"))
+                                                        ),
+                                                        new Box(
+                                                            Color.GREEN.interpolate(Color.ofArgb(0), .5f),
+                                                            new Label(Text.literal("inside owoui"))
+                                                        ),
+                                                        new Box(
+                                                            Color.GREEN.interpolate(Color.ofArgb(0), .5f),
+                                                            new Label(Text.literal("inside braid?"))
+                                                        )
                                                     )
                                                 )
                                             )
