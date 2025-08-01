@@ -454,6 +454,12 @@ public class OwoNetChannel {
          * @see #send(Record[])
          */
         public <R extends Record> void send(R message) {
+            var messageClass = message.getClass();
+
+            if (!OwoNetChannel.this.endecsByClass.containsKey(messageClass)) {
+                throw new IllegalStateException("Message class '" + messageClass.getName() + "' is unable to be sent as such is not registered for target environment " + EnvType.CLIENT);
+            }
+
             ClientPlayNetworking.send(new MessagePayload(packetId, message));
         }
 
@@ -481,7 +487,7 @@ public class OwoNetChannel {
          * @see #send(Record[])
          */
         public <R extends Record> void send(R message) {
-            this.targets.forEach(player -> ServerPlayNetworking.send(player, new MessagePayload(packetId, message)));
+            this.targets.forEach(player -> sendMessage(player, message));
             this.targets = null;
         }
 
@@ -496,10 +502,20 @@ public class OwoNetChannel {
         public final <R extends Record> void send(R... messages) {
             this.targets.forEach(player -> {
                 for (R message : messages) {
-                    ServerPlayNetworking.send(player, new MessagePayload(packetId, message));
+                    sendMessage(player, message);
                 }
             });
             this.targets = null;
+        }
+
+        private <R extends Record> void sendMessage(ServerPlayerEntity player, R message) {
+            var messageClass = message.getClass();
+
+            if (!OwoNetChannel.this.endecsByClass.containsKey(messageClass)) {
+                throw new IllegalStateException("Message class '" + messageClass.getName() + "' is unable to be sent as such is not registered for target environment " + EnvType.SERVER);
+            }
+
+            ServerPlayNetworking.send(player, new MessagePayload(packetId, message));
         }
     }
 
