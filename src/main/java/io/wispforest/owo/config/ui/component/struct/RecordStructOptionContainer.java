@@ -95,7 +95,7 @@ public class RecordStructOptionContainer<T extends Record> extends AbstractStruc
 
                 options.put(innerOption.key(), innerOption);
 
-                this.addOptionComponent(clazz, innerOption);
+                this.addOptionComponent(innerOption);
             } catch (IllegalAccessException | NoSuchMethodException e) {
                 throw new RuntimeException("Failed to initialize Struct Layout for config [" + this.configId + "] due to an error with field [" + component.getName() + "]", e);
             }

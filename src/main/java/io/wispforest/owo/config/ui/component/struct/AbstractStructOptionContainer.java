@@ -1,5 +1,8 @@
 package io.wispforest.owo.config.ui.component.struct;
 
+import io.wispforest.owo.Owo;
+import io.wispforest.owo.config.ConfigReflectionUtils;
+import io.wispforest.owo.config.annotation.Expanded;
 import io.wispforest.owo.config.options.FieldOption;
 import io.wispforest.owo.config.options.ReflectiveOption;
 import io.wispforest.owo.config.base.Key;
@@ -11,6 +14,7 @@ import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.util.NumberReflection;
+import io.wispforest.owo.util.ReflectionUtils;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,8 +43,6 @@ public abstract class AbstractStructOptionContainer<O extends ReflectiveOption> 
         this.optionKey = option.key();
 
         this.horizontalAlignment(HorizontalAlignment.LEFT);
-
-//        this.padding(Insets.vertical(4));
     }
 
     @Nullable
@@ -61,88 +63,87 @@ public abstract class AbstractStructOptionContainer<O extends ReflectiveOption> 
     @Nullable
     private FlowLayout currentRow = null;
 
-    private void addToRow(Component component, boolean resetRow) {
-        if (this.currentRow == null || resetRow) {
+    private void addToRow(Component component) {
+        if (this.currentRow == null || componentIndex % 2 == 0 || !sideBySideFormat) {
             this.currentRow = Containers.horizontalFlow(Sizing.content(), Sizing.content());
             this.child(currentRow);
         }
 
         this.currentRow.child(component);
+
+        componentIndex++;
     }
 
     private int componentIndex = 0;
 
-    protected final void addOptionComponent(Class<?> clazz, O option) {
+    protected final void addOptionComponent(O option) {
         var optionClazz = (Class<?>) option.clazz();
 
-        OptionComponentFactory.Result<? extends Component, ? extends OptionValueProvider> result;
-
-        boolean unpackResult = false;
+        OptionComponentFactory.Result<? extends Component, ? extends OptionValueProvider> result = null;
 
         // TODO: DEHARDCODE?
         if (NumberReflection.isNumberType(option.clazz())) {
-            result = attachOptionLabel(OptionComponentFactory.NUMBER.make(model, option), sideBySideFormat, true);
+            result = adjustOptionLabel(OptionComponentFactory.NUMBER.make(model, option), sideBySideFormat, true);
         } else if (optionClazz == String.class) {
-            result = attachOptionLabel(OptionComponentFactory.STRING.make(model, option), sideBySideFormat, true);
+            result = adjustOptionLabel(OptionComponentFactory.STRING.make(model, option), sideBySideFormat, true);
         } else if (optionClazz == Boolean.class || optionClazz == boolean.class){
-            result = attachOptionLabel(OptionComponentFactory.BOOLEAN.make(model, option), sideBySideFormat, true);
+            result = adjustOptionLabel(OptionComponentFactory.BOOLEAN.make(model, option), sideBySideFormat, true);
         } else if (optionClazz == Identifier.class) {
-            result = attachOptionLabel(OptionComponentFactory.IDENTIFIER.make(model, option), sideBySideFormat, true);
+            result = adjustOptionLabel(OptionComponentFactory.IDENTIFIER.make(model, option), sideBySideFormat, true);
         } else if (optionClazz == Color.class) {
-            result = attachOptionLabel(OptionComponentFactory.COLOR.make(model, option), sideBySideFormat, true);
+            result = adjustOptionLabel(OptionComponentFactory.COLOR.make(model, option), sideBySideFormat, true);
+        }  else if (optionClazz.isEnum()) {
+            result = adjustOptionLabel(OptionComponentFactory.ENUM.make(model, option), sideBySideFormat, true);
         } else if (optionClazz == List.class) {
-            var layout = new ListOptionContainer<>(model, (FieldOption<List<Object>>) option, ArrayList::new, false, false);
-            layout.horizontalSizing(Sizing.fill(50));
-            result = new OptionComponentFactory.Result(layout, layout);
-            //sideBySideFormat = false;
+            result = adjustOptionLabel(OptionComponentFactory.LIST.make(model, option), true, false);
         } else if (optionClazz == Set.class) {
-            var layout = new ListOptionContainer<>(model, (FieldOption<Set<Object>>) option, LinkedHashSet::new, false, false);
-            layout.horizontalSizing(Sizing.fill(50));
-            result = new OptionComponentFactory.Result(layout, layout);
-            //sideBySideFormat = false;
-        } else if (optionClazz.isEnum()) {
-            result = attachOptionLabel(OptionComponentFactory.ENUM.make(model, option), sideBySideFormat, true);
+            result = adjustOptionLabel(OptionComponentFactory.SET.make(model, option), true, false);
+        } else if (option.clazz() == Map.class) {
+            if (ConfigReflectionUtils.getMapType(option.getGenericType()) == ConfigReflectionUtils.CollectionType.SIMPLE) {
+                result = adjustOptionLabel(OptionComponentFactory.SIMPLE_MAP.make(model, option), true, false);
+            }
         } else if (optionClazz.isRecord()) {
             var layout = RecordStructOptionContainer.of(model, option);
             result = new OptionComponentFactory.Result<>(layout, layout);
-            unpackResult = true;
-        } else {
-            var layout = StructOptionContainer.of(model, option);
-            result = new OptionComponentFactory.Result<>(layout, layout);
-            unpackResult = true;
+        } else if (option.clazz() != Map.class) {
+            try {
+                ReflectionUtils.getNoArgsConstructor(option.clazz());
+
+                var layout = StructOptionContainer.of(model, option);
+                result = new OptionComponentFactory.Result<>(layout, layout);
+            } catch (IllegalStateException ignored) {}
         }
 
-        if(unpackResult) {
-            var layout = (AbstractStructOptionContainer<FieldOption>) result.baseComponent();
+        if (result != null) {
+            List<Component> components = result.baseComponent() instanceof AbstractStructOptionContainer container
+                ? container.unpackInnerOptions()
+                : List.of(result.baseComponent());
 
-            var components = layout.children.stream().flatMap(component -> {
-                if (component instanceof ParentComponent parentComponent) {
-                    return parentComponent.children().stream();
-                }
+            for (var child : components) this.addToRow(child);
 
-                return Stream.of(component);
-            }).toList();
-
-            for (var child : components) {
-                this.addToRow(child, componentIndex % 2 == 0 || !sideBySideFormat);
-
-                componentIndex++;
-            }
+            this.optionsProviders.put(option, result.optionProvider());
         } else {
-            this.addToRow(result.baseComponent(), componentIndex % 2 == 0 || !sideBySideFormat);
-
-            componentIndex++;
+            Owo.LOGGER.warn("Could not create UI component for config option within a StructOptionContainer {}", option);
         }
-
-        this.optionsProviders.put(option, result.optionProvider());
     }
 
-    private static OptionComponentFactory.Result<? extends Component, ? extends OptionValueProvider> attachOptionLabel(OptionComponentFactory.Result<? extends Component, ? extends OptionValueProvider> labeledResult, boolean sideBySideFormat, boolean reducedPadding) {
+    protected List<Component> unpackInnerOptions() {
+        return this.children.stream().flatMap(component -> {
+            return (component instanceof ParentComponent parentComponent)
+                ? parentComponent.children().stream()
+                : Stream.of(component);
+        }).toList();
+    }
+
+    private static OptionComponentFactory.Result<? extends Component, ? extends OptionValueProvider> adjustOptionLabel(
+        OptionComponentFactory.Result<? extends Component, ? extends OptionValueProvider> labeledResult,
+        boolean sideBySideFormat,
+        boolean adjustParentPadding) {
         var optionComponent = labeledResult.baseComponent();
 
-        if (sideBySideFormat) optionComponent.horizontalSizing(Sizing.fill(50)); // Difference 1
+        if (sideBySideFormat) optionComponent.horizontalSizing(Sizing.fill(50));
 
-        if (reducedPadding && optionComponent instanceof ParentComponent parentComponent) {
+        if (adjustParentPadding && optionComponent instanceof ParentComponent parentComponent) {
             var currentPadding = parentComponent.padding().get();
 
             parentComponent.padding(Insets.of(currentPadding.top() - 5, currentPadding.bottom() - 5, currentPadding.left(), currentPadding.right()));

@@ -82,7 +82,7 @@ public class StructOptionContainer<T> extends AbstractStructOptionContainer<Fiel
 
                 options.put(option.key(), option);
 
-                this.addOptionComponent(clazz, option);
+                this.addOptionComponent(option);
             } catch (IllegalAccessException | NoSuchMethodException e) {
                 throw new RuntimeException("Failed to initialize Struct Layout for config [" + this.configId + "] due to an error with the given class [" + clazz.getSimpleName() + "] field [" + field.getName() + "]", e);
             }
