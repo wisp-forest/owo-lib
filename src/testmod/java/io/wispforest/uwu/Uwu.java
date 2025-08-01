@@ -14,7 +14,9 @@ import io.wispforest.endec.format.gson.GsonEndec;
 import io.wispforest.endec.format.gson.GsonSerializer;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.Owo;
+import io.wispforest.owo.config.ConfigIdentifierArgumentType;
 import io.wispforest.owo.config.ConfigSynchronizer;
+import io.wispforest.owo.config.ConfigWrapper;
 import io.wispforest.owo.config.base.Key;
 import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
@@ -35,7 +37,6 @@ import io.wispforest.owo.serialization.format.nbt.NbtSerializer;
 import io.wispforest.owo.text.CustomTextRegistry;
 import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.util.TagInjector;
-import io.wispforest.uwu.config.*;
 import io.wispforest.uwu.config.AdditionalConfig1;
 import io.wispforest.uwu.config.AdditionalConfig2;
 import io.wispforest.uwu.config.AdditionalConfig3;
@@ -245,14 +246,18 @@ public class Uwu implements ModInitializer {
         CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> {
 
             dispatcher.register(literal("get_option")
-                    .then(argument("config", StringArgumentType.string())
+                    .then(argument("config_id", ConfigIdentifierArgumentType.INSTANCE)
                             .then(argument("option", StringArgumentType.string()).executes(context -> {
-                                var value = ConfigSynchronizer.getClientOptions(
-                                        context.getSource().getPlayer(),
-                                        StringArgumentType.getString(context, "config")
-                                ).get(new Key(StringArgumentType.getString(context, "option")));
+                                var clientValues = ConfigSynchronizer.getClientOptions(
+                                        context.getSource().getPlayerOrThrow(),
+                                        context.getArgument("config_id", Identifier.class)
+                                );
 
-                                context.getSource().sendFeedback(() -> Text.literal(String.valueOf(value)), false);
+                                if (clientValues != null) {
+                                    var value = clientValues.get(new Key(StringArgumentType.getString(context, "option")));
+
+                                    context.getSource().sendFeedback(() -> Text.literal(String.valueOf(value)), false);
+                                }
 
                                 return 0;
                             }))));
