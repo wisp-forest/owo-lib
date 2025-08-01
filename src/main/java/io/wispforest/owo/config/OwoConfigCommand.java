@@ -55,7 +55,7 @@ public class OwoConfigCommand {
                 .then(ClientCommandManager.literal("open")
                         .then(ClientCommandManager.argument("config_id", ConfigIdentifierArgumentType.INSTANCE)
                                 .executes(context -> {
-                                    if (!ConfigScreenProviders.safelyOpenConfigScreen(context.getArgument("config_id", Identifier.class), MinecraftClient.getInstance().currentScreen, Map.of())) {
+                                    if (!ConfigScreenProviders.safelyOpenConfigScreen(context.getArgument("config_id", Identifier.class), null, Map.of())) {
                                         throw NO_SUCH_CONFIG_SCREEN.create();
                                     }
 
@@ -77,11 +77,12 @@ public class OwoConfigCommand {
     public static void register() {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             dispatcher.register(CommandManager.literal("owo-config-server")
+                    .requires(source -> source.hasPermissionLevel(3))
                     .then(CommandManager.literal("reload")
                             .then(CommandManager.argument("config_id", ConfigIdentifierArgumentType.INSTANCE)
                                     .executes(context -> {
-                                        var configWrapper = context.getArgument("config_id", ConfigWrapper.class);
-                                        configWrapper.loadFile();
+                                        var wrapper = ConfigWrapper.getKnownConfigInstances().get(context.getArgument("config_id", Identifier.class));
+                                        wrapper.loadFile();
                                         return 0;
                                     }))
                     )
@@ -135,31 +136,6 @@ public class OwoConfigCommand {
                 ConfigurableModArgumentType.class,
                 RecordArgumentTypeInfo.of(commandRegistryAccess -> new ConfigurableModArgumentType())
         );
-    }
-
-    private static class ConfigIdentifierArgumentType implements ArgumentType<Identifier> {
-
-        public static final ConfigIdentifierArgumentType INSTANCE = new ConfigIdentifierArgumentType();
-
-        private static final SimpleCommandExceptionType NO_SUCH_CONFIG_SCREEN = new SimpleCommandExceptionType(
-                TextOps.concat(Owo.PREFIX, Text.literal("no config with that id"))
-        );
-
-        @Override
-        public Identifier parse(StringReader reader) throws CommandSyntaxException {
-            var id = Identifier.fromCommandInput(reader);
-            var wrapper = ConfigWrapper.getKnownConfigInstances().get(id);
-            if (wrapper == null) throw NO_SUCH_CONFIG_SCREEN.create();
-
-            return id;
-        }
-
-        @Override
-        public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-            var configNames = new ArrayList<String>();
-            ConfigWrapper.getKnownConfigInstances().keySet().forEach(s -> configNames.add(s.toString()));
-            return CommandSource.suggestMatching(configNames, builder);
-        }
     }
 
     private static class ConfigurableModArgumentType implements ArgumentType<String> {
