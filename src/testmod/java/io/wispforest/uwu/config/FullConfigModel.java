@@ -62,16 +62,6 @@ public class FullConfigModel {
 
     public Map<String, String> mapStringToString = Map.of("test", "wooo");
 
-    public Map<String, StructTestObj1> mapStringToStruct1 = Map.of("obj1", new StructTestObj1());
-
-    public Map<String, StructTestObj2> mapStringToStruct2 = Map.of("obj2", new StructTestObj2());
-
-    public Map<String, RecordTestObj> mapStringToStruct3 = Map.of("record", new RecordTestObj());
-
-    public Map<String, List<String>> mapStringToList = Map.of("obj1", List.of("test"));
-
-    public Map<String, Set<String>> mapStringToSet = Map.of("obj1", Set.of("test"));
-
     //--
 
     @SectionHeader("int_map_objects")
@@ -79,13 +69,4 @@ public class FullConfigModel {
 
     public Map<Integer, String> mapNumberToString = Map.of(3, "weee");
 
-    public Map<Integer, StructTestObj1> mapNumberToStruct1 = Map.of(5, new StructTestObj1());
-
-    public Map<Integer, StructTestObj2> mapNumberToStruct2 = Map.of(6, new StructTestObj2());
-
-    public Map<Integer, RecordTestObj> mapNumberToStruct3 = Map.of(7, new RecordTestObj());
-
-    public Map<Integer, List<String>> mapNumberToList = Map.of(8, List.of("test"));
-
-    public Map<Integer, Set<String>> mapNumberToSet = Map.of(9, Set.of("test"));
 }

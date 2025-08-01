@@ -39,6 +39,9 @@ public class UwuConfigModel {
     @RestartRequired
     public WowValues broTheresAnEnum = WowValues.FIRST;
 
+    @ReloadRequired
+    public String coolReloadableString = "woooooooooooooooooooooooo";
+
     public Color anEpicColor = Color.BLUE;
 
     @WithAlpha
