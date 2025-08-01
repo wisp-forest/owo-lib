@@ -15,7 +15,6 @@ import io.wispforest.owo.config.base.BoundedAccess;
 import io.wispforest.owo.config.base.Key;
 import io.wispforest.owo.config.base.SyncMode;
 import io.wispforest.owo.config.options.FieldOption;
-import io.wispforest.owo.config.ui.ConfigScreen;
 import io.wispforest.owo.config.ui.ConfigScreenProviders;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.ui.core.Color;
@@ -24,7 +23,7 @@ import io.wispforest.owo.util.ReflectionUtils;
 import it.unimi.dsi.fastutil.Pair;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -82,12 +81,8 @@ public abstract class ConfigWrapper<C> {
 
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT && clazz.isAnnotationPresent(Modmenu.class)) {
             var modmenuAnnotation = clazz.getAnnotation(Modmenu.class);
-            ConfigScreenProviders.<Screen, ConfigWrapper<?>>register(
-                    this.id,
-                    modmenuAnnotation.priorityOrder(),
-                    (Class<ConfigWrapper<?>>) this.getClass(),
-                    (screen, wrapper) -> ConfigScreen.createWithCustomModel(Identifier.of(modmenuAnnotation.uiModelId()), wrapper, screen)
-            );
+
+            ConfigScreenProviders.register(this, modmenuAnnotation.priorityOrder(), Identifier.of(modmenuAnnotation.uiModelId()));
         }
     }
 
@@ -105,12 +100,22 @@ public abstract class ConfigWrapper<C> {
             this.initializeOptions(configAnnotation.saveOnModification());
 
             if (setupConfigSyncing) {
+                boolean shouldRegisterForSync = false;
+
                 for (var option : this.options.values()) {
                     if (option.syncMode().isNone()) continue;
 
-                    ConfigSynchronizer.register(this);
-                    break;
+                    shouldRegisterForSync = true;
+
+                    if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER) break;
+
+                    if (option.syncMode() == SyncMode.INFORM_SERVER) {
+                        // TODO: FIND A BETTER WAY FOR IF MULTIPLE VALUES ARE CHANGED AT ONCE IT DOSE NOT TRY TO SYNC EACH TIME?
+                        option.observe(object -> ConfigSynchronizer.sendChangedConfigValues(this.id()));
+                    }
                 }
+
+                if (shouldRegisterForSync) ConfigSynchronizer.register(this);
             }
         } catch (IllegalAccessException | NoSuchMethodException e) {
             throw new RuntimeException("Failed to initialize config " + this.id, e);
@@ -235,12 +240,10 @@ public abstract class ConfigWrapper<C> {
                 option.set(newValue == null ? option.defaultValue() : newValue);
             }
 
-            var server = Owo.currentServer();
 
-            if (server != null && allowServerSync) {
-                for (var player : server.getPlayerManager().getPlayerList()) {
-                    ConfigSynchronizer.sendLoadedServerConfig(player.networkHandler::sendPacket, this.id);
-                }
+
+            if (allowServerSync) {
+                ConfigSynchronizer.sendLoadedServerConfig(this.id);
             }
 
             return true;
@@ -343,6 +346,7 @@ public abstract class ConfigWrapper<C> {
             final var defaultValue = boundField.getValue();
 
             final var observable = Observable.of(defaultValue);
+            // TODO: FIND A BETTER WAY FOR IF MULTIPLE VALUES ARE CHANGED AT ONCE IT DOSE NOT TRY TO SAVE EACH TIME?
             if (hookSave) observable.observe(o -> this.saveToFile());
 
             var syncMode = instanceSyncMode;

@@ -1,6 +1,8 @@
 package io.wispforest.owo.packets;
 
+import io.wispforest.owo.config.ConfigSynchronizer;
 import io.wispforest.owo.network.OwoNetChannel;
+import io.wispforest.owo.packets.c2s.AdjustServerConfig;
 import io.wispforest.owo.packets.c2s.AskToOpenServerConfig;
 import io.wispforest.owo.packets.s2c.OpenServerConfig;
 import io.wispforest.owo.packets.s2c.OpenServerConfigSelection;
@@ -14,14 +16,19 @@ public class OwoPackets {
 
     public static void initNetworking() {
         MAIN.registerServerbound(AskToOpenServerConfig.class, AskToOpenServerConfig::handle);
+        MAIN.registerServerbound(AdjustServerConfig.class, AdjustServerConfig.ENDEC, AdjustServerConfig::handle);
 
         MAIN.registerClientboundDeferred(OpenServerConfig.class, OpenServerConfig.ENDEC);
         MAIN.registerClientboundDeferred(OpenServerConfigSelection.class, OpenServerConfigSelection.ENDEC);
+
+        ConfigSynchronizer.initNetworking();
     }
 
     @Environment(EnvType.CLIENT)
     public static void initClientNetworking () {
         MAIN.registerClientbound(OpenServerConfig.class, OpenServerConfig.ENDEC, OpenServerConfig::handle);
         MAIN.registerClientbound(OpenServerConfigSelection.class, OpenServerConfigSelection.ENDEC, OpenServerConfigSelection::handle);
+
+        ConfigSynchronizer.initClientNetworking();
     }
 }

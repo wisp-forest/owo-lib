@@ -1,14 +1,19 @@
 package io.wispforest.owo.config;
 
 import com.google.common.collect.HashMultimap;
+import io.wispforest.endec.StructEndec;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.base.Key;
 import io.wispforest.owo.config.base.SyncMode;
 import io.wispforest.owo.config.options.FieldOption;
 import io.wispforest.owo.mixin.ServerCommonNetworkHandlerAccessor;
+import io.wispforest.owo.network.ClientAccess;
+import io.wispforest.owo.network.OwoNetChannel;
+import io.wispforest.owo.network.ServerAccess;
 import io.wispforest.owo.ops.TextOps;
 import io.wispforest.endec.Endec;
+import io.wispforest.owo.packets.OwoPackets;
 import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import net.fabricmc.api.EnvType;
@@ -23,7 +28,6 @@ import net.minecraft.network.ClientConnection;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.network.packet.Packet;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -39,9 +43,10 @@ import java.util.WeakHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+// TODO: ADD API HOOK FOR WHEN A CLIENT VALUE HAS BEEN UPDATED AND SENT TO THE SERVER
 public class ConfigSynchronizer {
 
-    private static final Map<ClientConnection, Map<String, Map<Key, Object>>> CLIENT_OPTION_STORAGE = new WeakHashMap<>();
+    private static final Map<ClientConnection, Map<Identifier, Map<Key, Object>>> CLIENT_OPTION_STORAGE = new WeakHashMap<>();
 
     private static final Map<Identifier, ConfigWrapper<?>> KNOWN_CONFIGS = new HashMap<>();
     private static final MutableText PREFIX = TextOps.concat(Owo.PREFIX, Text.of("§cunrecoverable config mismatch\n\n"));
@@ -55,25 +60,25 @@ public class ConfigSynchronizer {
      * sent to the server during config synchronization
      *
      * @param player     The player for which to retrieve the client values
-     * @param configName The name of the config for which to retrieve values
+     * @param configId The name of the config for which to retrieve values
      * @return The player's client's values of the given config options,
      * or {@code null} if no config with the given name was synced
      */
-    public static @Nullable Map<Key, ?> getClientOptions(ServerPlayerEntity player, String configName) {
+    public static @Nullable Map<Key, ?> getClientOptions(ServerPlayerEntity player, Identifier configId) {
         var storage = CLIENT_OPTION_STORAGE.get(((ServerCommonNetworkHandlerAccessor) player.networkHandler).owo$getConnection());
         if (storage == null) return null;
 
-        return storage.get(configName);
+        return storage.get(configId);
     }
 
     /**
-     * Safer, more clear version of {@link #getClientOptions(ServerPlayerEntity, String)} to
+     * Safer, more clear version of {@link #getClientOptions(ServerPlayerEntity, Identifier)} to
      * be used when the actual config wrapper is available
      *
-     * @see #getClientOptions(ServerPlayerEntity, String)
+     * @see #getClientOptions(ServerPlayerEntity, Identifier)
      */
     public static @Nullable Map<Key, ?> getClientOptions(ServerPlayerEntity player, ConfigWrapper<?> config) {
-        return getClientOptions(player, config.name());
+        return getClientOptions(player, config.id());
     }
 
     private static ConfigSyncPacket toPacket(Identifier configId, SyncMode targetMode) {
@@ -143,11 +148,13 @@ public class ConfigSynchronizer {
     }
 
     @Environment(EnvType.CLIENT)
-    private static void applyClient(Map<Identifier, ConfigEntry> configs, ClientPlayNetworking.Context context) {
+    private static void applyOverridesAndSendOptions(ConfigSyncPacket packet, ClientAccess access) {
         Owo.LOGGER.info("Applying server overrides");
         var mismatchedOptions = new HashMap<FieldOption<?>, Object>();
 
-        if (!(context.client().isIntegratedServerRunning() && context.client().getServer().isSingleplayer())) {
+        var configs = packet.configs();
+
+        if (!(access.runtime().isIntegratedServerRunning() && access.runtime().getServer().isSingleplayer())) {
             read(configs, (option, packetByteBuf) -> {
                 var mismatchedValue = option.read(packetByteBuf);
                 if (mismatchedValue != null) mismatchedOptions.put(option, mismatchedValue);
@@ -179,55 +186,35 @@ public class ConfigSynchronizer {
                 errorMessage.append(TextOps.withFormatting("they require your client to be restarted\n", Formatting.GRAY));
                 errorMessage.append(TextOps.withFormatting("change them manually and restart if you want to join this server", Formatting.GRAY));
 
-                context.player().networkHandler.getConnection().disconnect(TextOps.concat(PREFIX, errorMessage));
+                access.player().networkHandler.getConnection().disconnect(TextOps.concat(PREFIX, errorMessage));
                 return;
             }
         }
 
         Owo.LOGGER.info("Responding with client values");
 
-        var packet = configs.size() == 1
+        var syncPacket = configs.size() == 1
                 ? toPacket(List.copyOf(configs.keySet()).getFirst(), SyncMode.INFORM_SERVER)
                 : toPacket(SyncMode.INFORM_SERVER);
 
-        context.responseSender().sendPacket(packet);
+        OwoPackets.MAIN.clientHandle().send(syncPacket);
     }
 
-    private static void applyServer(Map<Identifier, ConfigEntry> configs, ServerPlayNetworking.Context context) {
+    private static void handleClientConfigs(ConfigSyncPacket packet, ServerAccess access) {
         Owo.LOGGER.info("Receiving client config");
-        var connection = ((ServerCommonNetworkHandlerAccessor) context.player().networkHandler).owo$getConnection();
+        var connection = ((ServerCommonNetworkHandlerAccessor) access.player().networkHandler).owo$getConnection();
 
-        read(configs, (option, optionBuf) -> {
-            var config = CLIENT_OPTION_STORAGE.computeIfAbsent(connection, $ -> new HashMap<>()).computeIfAbsent(option.configName(), s -> new HashMap<>());
+        read(packet.configs(), (option, optionBuf) -> {
+            var config = CLIENT_OPTION_STORAGE.computeIfAbsent(connection, $ -> new HashMap<>()).computeIfAbsent(option.configId(), s -> new HashMap<>());
             config.put(option.key(), optionBuf.read(option.endec()));
         });
     }
 
-    private record ConfigSyncPacket(Map<Identifier, ConfigEntry> configs) implements CustomPayload {
-        public static final Id<ConfigSyncPacket> ID = new Id<>(Identifier.of("owo", "config_sync"));
-        public static final Endec<ConfigSyncPacket> ENDEC = StructEndecBuilder.of(
+    private record ConfigSyncPacket(Map<Identifier, ConfigEntry> configs) {
+        public static final StructEndec<ConfigSyncPacket> ENDEC = StructEndecBuilder.of(
                 Endec.map(Identifier::toString, Identifier::of, ConfigEntry.ENDEC).fieldOf("configs", ConfigSyncPacket::configs),
                 ConfigSyncPacket::new
         );
-
-        @Override
-        public Id<? extends CustomPayload> getId() {
-            return ID;
-        }
-    }
-
-    private record ConfigEntrySyncPacket(Identifier configId, ConfigEntry entry) implements CustomPayload {
-        public static final Id<ConfigEntrySyncPacket> ID = new Id<>(Identifier.of("owo", "config_entry_sync"));
-        public static final Endec<ConfigEntrySyncPacket> ENDEC = StructEndecBuilder.of(
-                MinecraftEndecs.IDENTIFIER.fieldOf("config_id", ConfigEntrySyncPacket::configId),
-                ConfigEntry.ENDEC.fieldOf("entry", ConfigEntrySyncPacket::entry),
-                ConfigEntrySyncPacket::new
-        );
-
-        @Override
-        public Id<? extends CustomPayload> getId() {
-            return ID;
-        }
     }
 
     private record ConfigEntry(Map<String, PacketByteBuf> options) {
@@ -237,64 +224,47 @@ public class ConfigSynchronizer {
         );
     }
 
-    public static void sendLoadedServerConfig(Consumer<Packet<?>> packetSender, Identifier configId) {
+    public static void sendLoadedServerConfig(Identifier configId) {
+        var server = Owo.currentServer();
+
+        if (server == null) return;
+
         if (!KNOWN_CONFIGS.containsKey(configId)) return;
 
         Owo.LOGGER.info("Resending server config values to client");
 
-        packetSender.accept(ServerPlayNetworking.createS2CPacket(toPacket(configId, SyncMode.OVERRIDE_CLIENT)));
+        OwoPackets.MAIN.serverHandle(server).send(toPacket(configId, SyncMode.OVERRIDE_CLIENT));
     }
 
     @Environment(EnvType.CLIENT)
-    public static void sendChangedConfigValues(Consumer<Packet<?>> packetSender, Identifier configId) {
-        if (!KNOWN_CONFIGS.containsKey(configId)) return;
+    public static void sendChangedConfigValues(Identifier configId) {
+        var player = MinecraftClient.getInstance().player;
+
+        if (player == null || !KNOWN_CONFIGS.containsKey(configId)) return;
 
         Owo.LOGGER.info("Sending client config values to server");
 
-        packetSender.accept(ClientPlayNetworking.createC2SPacket(toPacket(configId, SyncMode.INFORM_SERVER)));
+        OwoPackets.MAIN.clientHandle().send(toPacket(configId, SyncMode.INFORM_SERVER));
     }
 
-    static {
-        var configSyncCodec = CodecUtils.toPacketCodec(ConfigSyncPacket.ENDEC);
-
-        PayloadTypeRegistry.playS2C().register(ConfigSyncPacket.ID, configSyncCodec);
-        PayloadTypeRegistry.playC2S().register(ConfigSyncPacket.ID, configSyncCodec);
-
-        var configEntrySyncCodec = CodecUtils.toPacketCodec(ConfigEntrySyncPacket.ENDEC);
-
-        PayloadTypeRegistry.playS2C().register(ConfigEntrySyncPacket.ID, configEntrySyncCodec);
-        PayloadTypeRegistry.playC2S().register(ConfigEntrySyncPacket.ID, configEntrySyncCodec);
+    public static void initNetworking() {
+        OwoPackets.MAIN.registerServerbound(ConfigSyncPacket.class, ConfigSyncPacket.ENDEC, ConfigSynchronizer::handleClientConfigs);
+        OwoPackets.MAIN.registerClientboundDeferred(ConfigSyncPacket.class, ConfigSyncPacket.ENDEC);
 
         var earlyPhase = Identifier.of("owo", "early");
         ServerPlayConnectionEvents.JOIN.addPhaseOrdering(earlyPhase, Event.DEFAULT_PHASE);
         ServerPlayConnectionEvents.JOIN.register(earlyPhase, (handler, sender, server) -> {
             Owo.LOGGER.info("Sending server config values to client");
 
-            sender.sendPacket(toPacket(SyncMode.OVERRIDE_CLIENT));
+            OwoPackets.MAIN.serverHandle(handler.getPlayer()).send(toPacket(SyncMode.OVERRIDE_CLIENT));
         });
+    }
 
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            ClientPlayNetworking.registerGlobalReceiver(ConfigSyncPacket.ID, (payload, context) -> ConfigSynchronizer.applyClient(payload.configs(), context));
+    public static void initClientNetworking() {
+        OwoPackets.MAIN.registerClientbound(ConfigSyncPacket.class, ConfigSyncPacket.ENDEC, ConfigSynchronizer::applyOverridesAndSendOptions);
 
-            ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
-                KNOWN_CONFIGS.forEach((name, config) -> config.forEachOption(FieldOption::reattach));
-            });
-
-            KNOWN_CONFIGS.values().forEach(wrapper -> {
-                wrapper.forEachOption(option -> {
-                    if (option.syncMode() == SyncMode.INFORM_SERVER) {
-                        option.observe(object -> {
-                            var player = MinecraftClient.getInstance().player;
-
-                            if (player == null) return;
-
-                            sendChangedConfigValues(player.networkHandler::sendPacket, wrapper.id());
-                        });
-                    }
-                });
-            });
-        }
-
-        ServerPlayNetworking.registerGlobalReceiver(ConfigSyncPacket.ID, (payload, context) -> ConfigSynchronizer.applyServer(payload.configs(), context));
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            KNOWN_CONFIGS.forEach((name, config) -> config.forEachOption(FieldOption::reattach));
+        });
     }
 }
