@@ -126,12 +126,14 @@ public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen im
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        var error = uiAdapter.currentError();
+        if (uiAdapter != null) {
+            var error = uiAdapter.currentError();
 
-        if (error != null) {
-            Owo.LOGGER.warn("Could not render owo screen", uiAdapter.currentError());
-            UIErrorToast.report(error);
-            this.invalid = true;
+            if (error != null) {
+                Owo.LOGGER.warn("Could not render owo screen", uiAdapter.currentError());
+                UIErrorToast.report(error);
+                this.invalid = true;
+            }
         }
 
         if (!this.invalid) {
