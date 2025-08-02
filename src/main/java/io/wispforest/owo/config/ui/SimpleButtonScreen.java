@@ -79,7 +79,7 @@ public class SimpleButtonScreen extends BaseOwoScreen<FlowLayout> {
         );
 
         rootComponent
-            .surface(Surface.OPTIONS_BACKGROUND)
+            .surface(Surface.optionsBackground())
             .verticalAlignment(VerticalAlignment.CENTER)
             .horizontalAlignment(HorizontalAlignment.CENTER);
     }

@@ -1,45 +1,10 @@
 package io.wispforest.owo.ui.util;
 
 import io.wispforest.owo.ui.core.PositionedRectangle;
-import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.util.math.MatrixStack;
-import org.joml.Matrix3x2f;
-import org.joml.Matrix3x2fStack;
-import org.joml.Matrix4f;
-import org.joml.Quaternionf;
-import org.joml.Vector3d;
-import org.joml.Vector3f;
+import org.joml.*;
 
-import java.util.function.Consumer;
-
-/**
- * Helper interface implemented on top of the {@link DrawContext} to allow for easier matrix stack transformations
- */
 public interface MatrixStackTransformer<T extends MatrixStackTransformer<T>> {
-
-    default T drawWithScissor(int x, int y, int width, int height, Consumer<T> consumer) {
-        pushScissor(x, y, width, height);
-
-        var t = this.owo$cast();
-
-        consumer.accept(t);
-
-        popScissor();
-
-        return t;
-    }
-
-    default T pushScissor(PositionedRectangle rectangle) {
-        return pushScissor(rectangle.x(), rectangle.y(), rectangle.width(), rectangle.height());
-    }
-
-    default T pushScissor(int x, int y, int width, int height) {
-        throw new IllegalStateException("pushScissor() method hasn't been override leading to exception!");
-    }
-
-    default T popScissor() {
-        throw new IllegalStateException("popScissor() method hasn't been override leading to exception!");
-    }
 
     default T translate(Vector3f vec) {
         return translate(vec.x(), vec.y(), vec.z());
@@ -79,16 +44,16 @@ public interface MatrixStackTransformer<T extends MatrixStackTransformer<T>> {
     }
 
     default T push() {
-        this.getMatrixStack().pushMatrix();
+        this.getMatrixStack().push();
         return owo$cast();
     }
 
     default T pop() {
-        this.getMatrixStack().popMatrix();
+        this.getMatrixStack().pop();
         return owo$cast();
     }
 
-    default T multiplyPositionMatrix(Matrix4f matrix) {
+    default T multiplyPositionMatrix(Matrix4fc matrix) {
         this.getMatrixStack().multiplyPositionMatrix(matrix);
         return owo$cast();
     }
@@ -114,7 +79,7 @@ public interface MatrixStackTransformer<T extends MatrixStackTransformer<T>> {
         return (T) this;
     }
 
-    default Matrix3x2fStack getMatrixStack(){
+    default MatrixStack getMatrixStack(){
         throw new IllegalStateException("getMatrices() method hasn't been override leading to exception!");
     }
 }

@@ -5,7 +5,6 @@ import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.event.MouseEnter;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
-import io.wispforest.owo.ui.util.ScissorStack;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.Observable;
 import net.minecraft.client.MinecraftClient;
@@ -305,8 +304,6 @@ public class LabelComponent extends BaseComponent {
 
             context.drawText(this.textRenderer, renderText, renderX, renderY, color.argb(), this.shadow);
         }
-
-        context.draw();
     }
 
     public LabelComponent copyScrollData(LabelComponent component) {

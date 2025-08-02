@@ -4,6 +4,10 @@ import com.google.common.collect.ForwardingMap;
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
 import io.wispforest.owo.config.ui.ConfigScreenProviders;
+import io.wispforest.owo.config.ui.SimpleButtonScreen;
+import io.wispforest.owo.ui.component.ButtonComponent;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.ApiStatus;
@@ -35,7 +39,16 @@ public class OwoModMenuPlugin implements ModMenuApi {
     @Override
     @Nullable
     public ConfigScreenFactory<?> getModConfigScreenFactory() {
-        return null;
+        return parent -> new SimpleButtonScreen(
+            Text.of("The Confurration Screen"),
+            Text.of("This screen exists due to Mod Menu issue that has not been resolved so are you a... a furry?"),
+            Map.of(
+                Text.of("Totally a Furry"),
+                (btn) -> MinecraftClient.getInstance().currentScreen.close(),
+                Text.of("Not a Furry"),
+                (btn) -> MinecraftClient.getInstance().currentScreen.close()
+            )
+        );
     }
 
     @Override

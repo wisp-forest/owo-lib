@@ -44,8 +44,6 @@
     "ui.access.BlockEntityAccessor"
   ],
   "client": [
-    "BufferBuilderAccessor",
-    "ScreenAccessor",
     "ClientCommonNetworkHandlerAccessor",
     "ClientConfigurationNetworkHandlerMixin",
     "ClientLoginNetworkHandlerAccessor",

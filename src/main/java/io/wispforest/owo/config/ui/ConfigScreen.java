@@ -749,7 +749,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
         } else {
             buttonAdditions = Map.of(
                 "text.owo.config.button.reload_server", () -> {
-                    MinecraftClient.getInstance().player.networkHandler.sendCommand("reload");
+                    MinecraftClient.getInstance().player.networkHandler.sendChatCommand("reload");
                     MinecraftClient.getInstance().currentScreen.close();
                 },
                 "text.owo.config.button.reload_later", () -> MinecraftClient.getInstance().currentScreen.close()

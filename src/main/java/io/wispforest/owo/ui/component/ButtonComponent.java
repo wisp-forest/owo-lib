@@ -48,7 +48,7 @@ public class ButtonComponent extends ButtonWidget {
 
         var tooltip = ((ClickableWidgetAccessor) this).owo$getTooltip();
         if (this.hovered && tooltip.getTooltip() != null)
-            context.drawTooltip(MinecraftClient.getInstance().textRenderer, tooltip.getTooltip().getLines(MinecraftClient.getInstance()), HoveredTooltipPositioner.INSTANCE, mouseX, mouseY);
+            context.drawTooltip(tooltip.getTooltip().getLines(MinecraftClient.getInstance()), mouseX, mouseY);
     }
 
     protected void renderText(DrawContext context, int mouseX, int mouseY, float delta) {

@@ -11,6 +11,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.InvalidIdentifierException;
 import org.jetbrains.annotations.ApiStatus;
 import org.joml.Quaternionf;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.w3c.dom.Attr;
@@ -227,6 +228,14 @@ public class UIParsing {
             throw new UIModelParsingException("No such constant " + name + " in enum " + enumClass.getSimpleName());
         };
     }
+
+    public static Vector2f parseVector2f(Element element) {
+        return new Vector2f(
+            parseOptionalAttribute(element, "x", 0f, UIParsing::parseFloat),
+            parseOptionalAttribute(element, "y", 0f, UIParsing::parseFloat)
+        );
+    }
+
 
     public static Vector3f parseVector3f(Element element) {
         return new Vector3f(

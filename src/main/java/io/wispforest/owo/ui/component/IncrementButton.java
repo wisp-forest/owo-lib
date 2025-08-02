@@ -1,13 +1,13 @@
 package io.wispforest.owo.ui.component;
 
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
-import io.wispforest.owo.ui.core.OwoUIRenderLayers;
-import io.wispforest.owo.ui.core.PositionedRectangle;
+import io.wispforest.owo.ui.core.OwoUIPipelines;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
-import io.wispforest.owo.ui.util.WrappedMatrixStack;
+import io.wispforest.owo.ui.util.WrappedMatrix2fStack;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.PlainTextContent;
@@ -177,12 +177,12 @@ public abstract class IncrementButton extends ButtonComponent {
             };
         }
 
-        record TextureValueRenderer(Identifier texture, int width, int height, int u, int v, int regionWidth, int regionHeight, int textureWidth, int textureHeight, boolean blend, @Nullable WrappedMatrixStack stack) implements ValueRenderer<IncrementButton> {
+        record TextureValueRenderer(Identifier texture, int width, int height, int u, int v, int regionWidth, int regionHeight, int textureWidth, int textureHeight, boolean blend, @Nullable WrappedMatrix2fStack stack) implements ValueRenderer<IncrementButton> {
 
             @Override
             public void draw(OwoUIDrawContext context, IncrementButton button, float delta) {
                 Runnable drawCall = () -> {
-                    context.drawTexture(identifier -> OwoUIRenderLayers.getGuiTextured(identifier, this.blend),
+                    context.drawTexture(this.blend ? RenderPipelines.GUI_TEXTURED : OwoUIPipelines.GUI_TEXTURED_NO_BLEND,
                             this.texture,
                             button.x(),
                             button.y(),
@@ -249,7 +249,7 @@ public abstract class IncrementButton extends ButtonComponent {
 
                 var children = UIParsing.childElements(element);
 
-                var matrixStack = children.containsKey("transforms") ? WrappedMatrixStack.parseStack(element, children) : null;
+                var matrixStack = children.containsKey("transforms") ? WrappedMatrix2fStack.parseStack(element, children) : null;
 
                 return new TextureValueRenderer(textureId, width, height, u, v, regionWidth, regionHeight, textureWidth, textureHeight, blend, matrixStack);
             }

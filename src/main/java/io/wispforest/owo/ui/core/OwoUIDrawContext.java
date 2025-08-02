@@ -4,7 +4,6 @@ import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import io.wispforest.owo.mixin.ui.access.DrawContextAccessor;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
-import io.wispforest.owo.ui.util.MatrixStackTransformer;
 import io.wispforest.owo.ui.renderstate.CircleElementRenderState;
 import io.wispforest.owo.ui.renderstate.GradientQuadElementRenderState;
 import io.wispforest.owo.ui.renderstate.LineElementRenderState;
@@ -30,7 +29,6 @@ import org.joml.Matrix3x2f;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 import java.util.function.Consumer;
 
 public class OwoUIDrawContext extends DrawContext {
@@ -169,18 +167,10 @@ public class OwoUIDrawContext extends DrawContext {
     }
 
     public void drawLine(int x1, int y1, int x2, int y2, double thiccness, Color color) {
-        drawLine(x1, y1, x2, y2, thiccness, color.argb());
-    }
-
-    public void drawLine(int x1, int y1, int x2, int y2, double thiccness, int color) {
         drawLine(RenderPipelines.GUI, x1, y1, x2, y2, thiccness, color);
     }
 
     public void drawLine(RenderPipeline pipeline, int x1, int y1, int x2, int y2, double thiccness, Color color) {
-        drawLine(pipeline, x1, y1, x2, y2, thiccness, color.argb());
-    }
-
-    public void drawLine(RenderPipeline pipeline, int x1, int y1, int x2, int y2, double thiccness, int color) {
         this.state.addSimpleElement(new LineElementRenderState(
             pipeline,
             new Matrix3x2f(this.getMatrices()),

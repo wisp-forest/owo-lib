@@ -5,7 +5,7 @@ import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.renderstate.BlurQuadElementRenderState;
 import io.wispforest.owo.ui.renderstate.CubeMapElementRenderState;
 import io.wispforest.owo.ui.util.NinePatchTexture;
-import io.wispforest.owo.ui.util.WrappedMatrixStack;
+import io.wispforest.owo.ui.util.WrappedMatrix2fStack;
 import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.RenderPipelines;
@@ -52,13 +52,6 @@ public interface Surface {
         );
     };
 
-    Surface OPTIONS_BACKGROUND = Surface.panorama(ScreenAccessor.owo$ROTATING_PANORAMA_RENDERER(), false)
-            .and(Surface.blur(5, 10))
-            .and((context, component) -> {
-                var texture = MinecraftClient.getInstance().world == null ? Screen.MENU_BACKGROUND_TEXTURE : Identifier.ofVanilla("textures/gui/inworld_menu_background.png");
-                context.drawTexture(RenderLayer::getGuiTextured, texture, component.x(), component.y(), 0.0F, 0.0F, component.width(), component.height(), 32, 32);
-            });
-
     Surface TOOLTIP = tooltip(null);
 
     static Surface tooltip(@Nullable Identifier texture) {
@@ -79,7 +72,12 @@ public interface Surface {
     }
 
     static Surface optionsBackground() {
-        return Surface.vanillaPanorama(false).and(Surface.blur(5, 10));
+        return Surface.vanillaPanorama(false)
+            .and(Surface.blur(5, 10))
+            .and((context, component) -> {
+                var texture = MinecraftClient.getInstance().world == null ? Screen.MENU_BACKGROUND_TEXTURE : Identifier.ofVanilla("textures/gui/inworld_menu_background.png");
+                context.drawTexture(RenderPipelines.GUI_TEXTURED, texture, component.x(), component.y(), 0.0F, 0.0F, component.width(), component.height(), 32, 32);
+            });
     }
 
     static Surface vanillaPanorama(boolean alwaysVisible) {
@@ -265,7 +263,7 @@ public interface Surface {
                 case "transformed" -> {
                     var innerChildren = UIParsing.childElements(child);
 
-                    var stack = WrappedMatrixStack.parseStack(child, innerChildren);
+                    var stack = WrappedMatrix2fStack.parseStack(child, innerChildren);
 
                     UIParsing.expectChildren(child, innerChildren, "surface");
 
