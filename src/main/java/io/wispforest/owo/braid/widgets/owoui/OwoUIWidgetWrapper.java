@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets.owoui;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import io.wispforest.owo.braid.core.BraidDrawContext;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.KeyModifiers;
@@ -165,6 +166,9 @@ public class OwoUIWidgetWrapper extends LeafInstanceWidget {
             );
 
             // TODO: tooltips.
+
+            // this mitigates the vanilla scissor stack disabling the scissor stack if it's empty
+            GlStateManager._enableScissorTest();
         }
     }
 }

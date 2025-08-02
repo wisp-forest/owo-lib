@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets.vanilla;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import io.wispforest.owo.braid.core.BraidDrawContext;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.KeyModifiers;
@@ -72,6 +73,8 @@ public class VanillaWidgetWrapper<T extends Drawable & Element> extends LeafInst
         @Override
         public void draw(BraidDrawContext ctx) {
             widget.wrapped.render(ctx, (int) x, (int) y, host().client().getRenderTickCounter().getTickDelta(false));
+
+            GlStateManager._enableScissorTest();
         }
 
         @Override
