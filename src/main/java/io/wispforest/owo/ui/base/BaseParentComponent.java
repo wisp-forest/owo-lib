@@ -346,7 +346,7 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
         for (int i = 0; i < children.size(); i++) {
             final var child = children.get(i);
 
-            if (!(context.scissorContains(child.x(), child.y()) || context.scissorContains(child.x() + child.width(), child.y() + child.height()))) continue;
+            if (!context.intersectsScissor(child)) continue;
 
             child.draw(context, mouseX, mouseY, partialTicks, delta);
             if (focusHandler.lastFocusSource() == FocusSource.KEYBOARD_CYCLE && focusHandler.focused() == child) {

@@ -61,6 +61,19 @@ public class OwoUIDrawContext extends DrawContext {
         return UtilityScreen.get();
     }
 
+    public boolean intersectsScissor(PositionedRectangle other) {
+        var rect = this.scissorStack.peekLast();
+
+        if (rect == null) return true;
+
+        var pos = rect.position();
+
+        return other.x() < pos.x() + rect.width()
+            && other.x() + other.width() >= pos.x()
+            && other.y() < pos.y() + rect.height()
+            && other.y() + other.height() >= pos.y();
+    }
+
     public void drawRectOutline(int x, int y, int width, int height, int color) {
         drawRectOutline(RenderPipelines.GUI, x, y, width, height, color);
     }

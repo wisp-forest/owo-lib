@@ -177,7 +177,7 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
 
             this.rootComponent.update(delta, mouseX, mouseY);
 
-            context.enableScissor(0, 0, window.getWidth(), window.getHeight());
+            context.enableScissor(0, 0, window.getFramebufferWidth(), window.getFramebufferHeight());
             this.rootComponent.draw(owoContext, mouseX, mouseY, partialTicks, delta);
             context.disableScissor();
 
