@@ -22,11 +22,15 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;
 
+import java.lang.ref.Cleaner;
+import java.lang.ref.WeakReference;
 import java.util.function.Consumer;
 
 import static org.lwjgl.glfw.GLFW.*;
 
 public class BraidComponent extends BaseComponent {
+
+    private static final Cleaner APP_CLEANER = Cleaner.create();
 
     private final AppState appState;
     private final EventBuffer eventBuffer = new EventBuffer();
@@ -42,13 +46,15 @@ public class BraidComponent extends BaseComponent {
         this.appState = new AppState(
             null,
             MinecraftClient.getInstance(),
-            new EmbedSurface(),
+            new EmbedSurface(this),
             eventBuffer,
             new BraidWidget(
                 state -> braidWidgetState = state,
                 braidWidget
             )
         );
+
+        APP_CLEANER.register(this, new AppCleanCallback(appState));
     }
 
     @Override
@@ -161,21 +167,37 @@ public class BraidComponent extends BaseComponent {
         return true;
     }
 
-    public class EmbedSurface extends Surface.Default {
+    private record AppCleanCallback(AppState app) implements Runnable {
+        @Override
+        public void run() {
+            this.app.dispose();
+        }
+    }
+
+    public static class EmbedSurface extends Surface.Default {
+        // this is a weak reference so that the AppState can get properly collected
+        private final WeakReference<BraidComponent> parent;
+
+        public EmbedSurface(BraidComponent parent) {
+            this.parent = new WeakReference<>(parent);
+        }
+
         @Override
         public CursorStyle currentCursorStyle() {
-            return BraidComponent.this.cursorStyle;
+            //noinspection DataFlowIssue
+            return parent.get().cursorStyle;
         }
 
         @Override
         public void setCursorStyle(CursorStyle style) {
-            BraidComponent.this.cursorStyle = style;
+            //noinspection DataFlowIssue
+            parent.get().cursorStyle = style;
         }
     }
 
     public static class BraidWidget extends StatefulWidget {
 
-        public final Consumer<State> stateConsumer;
+        public Consumer<State> stateConsumer;
 
         public final Widget child;
 
@@ -187,7 +209,10 @@ public class BraidComponent extends BaseComponent {
         @Override
         public WidgetState<BraidWidget> createState() {
             var state = new State();
+
             this.stateConsumer.accept(state);
+            this.stateConsumer = null;
+
             return state;
         }
 
