@@ -1,13 +1,14 @@
 package io.wispforest.uwu.client;
 
 import com.mojang.authlib.GameProfile;
+import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.component.*;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
-import io.wispforest.owo.ui.container.RenderEffectWrapper;
 import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.core.*;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.FurnaceBlock;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
@@ -21,7 +22,6 @@ import net.minecraft.component.type.BundleContentsComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
@@ -44,7 +44,7 @@ import java.util.stream.IntStream;
 public class ComponentTestScreen extends Screen {
 
     private OwoUIAdapter<FlowLayout> uiAdapter = null;
-    private RenderEffectWrapper<?>.RenderEffectSlot fadeSlot = null;
+//    private RenderEffectWrapper<?>.RenderEffectSlot fadeSlot = null;
 
     public ComponentTestScreen() {
         super(Text.empty());
@@ -59,7 +59,7 @@ public class ComponentTestScreen extends Screen {
                 Containers.verticalFlow(Sizing.content(), Sizing.content())
                         .child(Components.button(Text.of("Dark Background"), button -> rootComponent.surface(Surface.flat(0x77000000))).horizontalSizing(Sizing.fixed(95)))
                         .child(Components.button(Text.of("No Background"), button -> rootComponent.surface(Surface.BLANK)).margins(Insets.vertical(5)).horizontalSizing(Sizing.fixed(95)))
-                        .child(Components.button(Text.of("Dirt Background"), button -> rootComponent.surface(Surface.OPTIONS_BACKGROUND)).horizontalSizing(Sizing.fixed(95)))
+                        .child(Components.button(Text.of("Dirt Background"), button -> rootComponent.surface(Surface.optionsBackground())).horizontalSizing(Sizing.fixed(95)))
                         .child(Components.checkbox(Text.of("bruh")).onChanged(aBoolean -> this.client.player.sendMessage(Text.of("bruh: " + aBoolean), false)).margins(Insets.top(5)))
                         .padding(Insets.of(10))
                         .surface(Surface.vanillaPanorama(true))
@@ -200,23 +200,23 @@ public class ComponentTestScreen extends Screen {
         }).margins(Insets.horizontal(8));
         dropdown.mouseLeave().subscribe(() -> dropdown.closeWhenNotHovered(true));
 
-        rootComponent.child(
-                Containers.renderEffect(
-                        Containers.verticalFlow(Sizing.content(), Sizing.content())
-                                .child(Containers.renderEffect(
-                                        Components.sprite(new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, Identifier.of("block/stone"))).margins(Insets.of(5))
-                                ).<RenderEffectWrapper<?>>configure(wrapper -> {
-                                    wrapper.effect(RenderEffectWrapper.RenderEffect.rotate(RotationAxis.POSITIVE_Z, -45));
-                                    wrapper.effect(RenderEffectWrapper.RenderEffect.color(Color.ofHsv(.5f, 1f, 1f)));
-                                }))
-                                .child(dropdownButton)
-                ).<RenderEffectWrapper<?>>configure(wrapper -> {
-                    wrapper.effect(RenderEffectWrapper.RenderEffect.transform(matrices -> matrices.translate(0, 25, 0)));
-
-                    wrapper.effect(RenderEffectWrapper.RenderEffect.rotate(90f));
-                    this.fadeSlot = wrapper.effect(RenderEffectWrapper.RenderEffect.color(Color.WHITE));
-                })
-        );
+//        rootComponent.child(
+//                Containers.renderEffect(
+//                        Containers.verticalFlow(Sizing.content(), Sizing.content())
+//                                .child(Containers.renderEffect(
+//                                        Components.sprite(new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, Identifier.of("block/stone"))).margins(Insets.of(5))
+//                                ).<RenderEffectWrapper<?>>configure(wrapper -> {
+//                                    wrapper.effect(RenderEffectWrapper.RenderEffect.rotate(RotationAxis.POSITIVE_Z, -45));
+//                                    wrapper.effect(RenderEffectWrapper.RenderEffect.color(Color.ofHsv(.5f, 1f, 1f)));
+//                                }))
+//                                .child(dropdownButton)
+//                ).<RenderEffectWrapper<?>>configure(wrapper -> {
+//                    wrapper.effect(RenderEffectWrapper.RenderEffect.transform(matrices -> matrices.translate(0, 25, 0)));
+//
+//                    wrapper.effect(RenderEffectWrapper.RenderEffect.rotate(90f));
+//                    this.fadeSlot = wrapper.effect(RenderEffectWrapper.RenderEffect.color(Color.WHITE));
+//                })
+//        );
 
         rootComponent.mouseDown().subscribe((mouseX, mouseY, button) -> {
             if (button != GLFW.GLFW_MOUSE_BUTTON_RIGHT) return false;
@@ -229,12 +229,11 @@ public class ComponentTestScreen extends Screen {
             return true;
         });
 
-        rootComponent.child(
+//        rootComponent.child(
 //                new BaseComponent() {
 //                    @Override
-//                    public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
-//                        Drawer.drawCircle(
-//                                matrices,
+//                    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+//                        context.drawCircle(
 //                                this.x + this.width / 2,
 //                                this.y + this.height / 2,
 //                                75,
@@ -242,8 +241,7 @@ public class ComponentTestScreen extends Screen {
 //                                Color.ofArgb(0x99000000)
 //                        );
 //
-//                        Drawer.drawRing(
-//                                matrices,
+//                        context.drawRing(
 //                                this.x + this.width / 2,
 //                                this.y + this.height / 2,
 //                                75,
@@ -254,8 +252,7 @@ public class ComponentTestScreen extends Screen {
 //                        );
 //
 //                        var time = (System.currentTimeMillis() / 1000d) % (Math.PI * 2);
-//                        Drawer.drawLine(
-//                                matrices,
+//                        context.drawLine(
 //                                (int) (this.x + this.width / 2 + Math.cos(time) * this.width / 2),
 //                                (int) (this.y + this.height / 2 + Math.sin(time) * this.height / 2),
 //                                (int) (this.x + this.width / 2 + Math.sin(time) * this.width / 2),
@@ -264,9 +261,10 @@ public class ComponentTestScreen extends Screen {
 //                                Color.BLUE
 //                        );
 //
-//                        Drawer.drawSpectrum(matrices, this.x, this.y, this.width, (int) (this.height * (Math.sin(time) * .5 + .5)), true);
+//                        context.drawSpectrum(this.x, this.y, this.width, (int) (this.height * (Math.sin(time) * .5 + .5)), true);
 //                    }
-//                }.positioning(Positioning.relative(50, 50)).sizing(Sizing.fixed(350))
+//                }.positioning(Positioning.relative(50, 50)).sizing(Sizing.fixed(350)));
+        rootComponent.child(
                 Components.button(Text.of("overlay"), button -> {
                     rootComponent.child(Containers.overlay(
                             Containers.verticalFlow(Sizing.content(), Sizing.content())
@@ -292,7 +290,7 @@ public class ComponentTestScreen extends Screen {
         );
 
         rootComponent.child(
-                Components.block(Blocks.FURNACE.getDefaultState(), (NbtCompound) null).sizing(Sizing.fixed(100))
+                Components.block(Blocks.FURNACE.getDefaultState().with(FurnaceBlock.LIT, true), (NbtCompound) null).sizing(Sizing.fixed(100))
         );
 
         var bundle = Items.BUNDLE.getDefaultStack();
@@ -400,10 +398,10 @@ public class ComponentTestScreen extends Screen {
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
-        this.fadeSlot.update(RenderEffectWrapper.RenderEffect.color(new Color(
-                1f, 1f, 1f,
-                (float) (Math.sin(System.currentTimeMillis() / 1000d) * .5 + .5)
-        )));
+//        this.fadeSlot.update(RenderEffectWrapper.RenderEffect.color(new Color(
+//                1f, 1f, 1f,
+//                (float) (Math.sin(System.currentTimeMillis() / 1000d) * .5 + .5)
+//        )));
     }
 
     @Override

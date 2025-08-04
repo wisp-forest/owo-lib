@@ -238,11 +238,6 @@ public class CodecUtils {
         };
     }
 
-    @Deprecated
-    public static <T> Codec<T> ofEndec(Endec<T> endec) {
-        return toCodec(endec);
-    }
-
     public static <T> Codec<T> toCodec(Endec<T> endec) {
         return toCodec(endec, SerializationContext.empty());
     }

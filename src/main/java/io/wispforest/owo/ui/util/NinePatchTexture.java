@@ -1,5 +1,6 @@
 package io.wispforest.owo.ui.util;
 
+import com.mojang.blaze3d.pipeline.RenderPipeline;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.StructEndec;
 import io.wispforest.endec.impl.StructEndecBuilder;
@@ -8,6 +9,7 @@ import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.PositionedRectangle;
 import io.wispforest.owo.ui.core.Size;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.resource.JsonDataLoader;
 import net.minecraft.resource.ResourceFinder;
@@ -60,26 +62,26 @@ public class NinePatchTexture {
     }
 
     public void draw(OwoUIDrawContext context, int x, int y, int width, int height) {
-        draw(context, RenderLayer::getGuiTextured, x, y, width, height);
+        draw(context, RenderPipelines.GUI_TEXTURED, x, y, width, height);
     }
 
-    public void draw(OwoUIDrawContext context, Function<Identifier, RenderLayer> renderLayers, int x, int y, int width, int height) {
+    public void draw(OwoUIDrawContext context, RenderPipeline pipeline, int x, int y, int width, int height) {
         int rightEdge = this.cornerPatchSize().width() + this.centerPatchSize().width();
         int bottomEdge = this.cornerPatchSize().height() + this.centerPatchSize().height();
 
-        context.drawTexture(renderLayers, this.texture, x, y, this.u, this.v, this.cornerPatchSize().width(), this.cornerPatchSize().height(), this.textureSize.width(), this.textureSize.height());
-        context.drawTexture(renderLayers, this.texture, x + width - this.cornerPatchSize().width(), y, this.u + rightEdge, this.v, this.cornerPatchSize().width(), this.cornerPatchSize().height(), this.textureSize.width(), this.textureSize.height());
-        context.drawTexture(renderLayers, this.texture, x, y + height - this.cornerPatchSize().height(), this.u, this.v + bottomEdge, this.cornerPatchSize().width(), this.cornerPatchSize().height(), this.textureSize.width(), this.textureSize.height());
-        context.drawTexture(renderLayers, this.texture, x + width - this.cornerPatchSize().width(), y + height - this.cornerPatchSize().height(), this.u + rightEdge, this.v + bottomEdge, this.cornerPatchSize().width(), this.cornerPatchSize().height(), this.textureSize.width(), this.textureSize.height());
+        context.drawTexture(pipeline, this.texture, x, y, this.u, this.v, this.cornerPatchSize().width(), this.cornerPatchSize().height(), this.textureSize.width(), this.textureSize.height());
+        context.drawTexture(pipeline, this.texture, x + width - this.cornerPatchSize().width(), y, this.u + rightEdge, this.v, this.cornerPatchSize().width(), this.cornerPatchSize().height(), this.textureSize.width(), this.textureSize.height());
+        context.drawTexture(pipeline, this.texture, x, y + height - this.cornerPatchSize().height(), this.u, this.v + bottomEdge, this.cornerPatchSize().width(), this.cornerPatchSize().height(), this.textureSize.width(), this.textureSize.height());
+        context.drawTexture(pipeline, this.texture, x + width - this.cornerPatchSize().width(), y + height - this.cornerPatchSize().height(), this.u + rightEdge, this.v + bottomEdge, this.cornerPatchSize().width(), this.cornerPatchSize().height(), this.textureSize.width(), this.textureSize.height());
 
         if (this.repeat) {
-            this.drawRepeated(context, renderLayers, x, y, width, height);
+            this.drawRepeated(context, pipeline, x, y, width, height);
         } else {
-            this.drawStretched(context, renderLayers, x, y, width, height);
+            this.drawStretched(context, pipeline, x, y, width, height);
         }
     }
 
-    protected void drawStretched(OwoUIDrawContext context, Function<Identifier, RenderLayer> renderLayers, int x, int y, int width, int height) {
+    protected void drawStretched(OwoUIDrawContext context, RenderPipeline pipeline, int x, int y, int width, int height) {
         int doubleCornerHeight = this.cornerPatchSize().height() * 2;
         int doubleCornerWidth = this.cornerPatchSize().width() * 2;
 
@@ -87,7 +89,7 @@ public class NinePatchTexture {
         int bottomEdge = this.cornerPatchSize().height() + this.centerPatchSize().height();
 
         if (width > doubleCornerWidth && height > doubleCornerHeight) {
-            context.drawTexture(renderLayers, this.texture, x + this.cornerPatchSize().width(), y + this.cornerPatchSize().height(),
+            context.drawTexture(pipeline, this.texture, x + this.cornerPatchSize().width(), y + this.cornerPatchSize().height(),
                     this.u + this.cornerPatchSize().width(), this.v + this.cornerPatchSize().height(),
                     width - doubleCornerWidth, height - doubleCornerHeight,
                     this.centerPatchSize().width(), this.centerPatchSize().height(),
@@ -95,12 +97,12 @@ public class NinePatchTexture {
         }
 
         if (width > doubleCornerWidth) {
-            context.drawTexture(renderLayers, this.texture, x + this.cornerPatchSize().width(), y,
+            context.drawTexture(pipeline, this.texture, x + this.cornerPatchSize().width(), y,
                     this.u + this.cornerPatchSize().width(), this.v,
                     width - doubleCornerWidth, this.cornerPatchSize().height(),
                     this.centerPatchSize().width(), this.cornerPatchSize().height(),
                     this.textureSize.width(), this.textureSize.height());
-            context.drawTexture(renderLayers, this.texture, x + this.cornerPatchSize().width(), y + height - this.cornerPatchSize().height(),
+            context.drawTexture(pipeline, this.texture, x + this.cornerPatchSize().width(), y + height - this.cornerPatchSize().height(),
                     this.u + this.cornerPatchSize().width(), this.v + bottomEdge,
                     width - doubleCornerWidth, this.cornerPatchSize().height(),
                     this.centerPatchSize().width(), this.cornerPatchSize().height(),
@@ -108,12 +110,12 @@ public class NinePatchTexture {
         }
 
         if (height > doubleCornerHeight) {
-            context.drawTexture(renderLayers, this.texture, x, y + this.cornerPatchSize().height(),
+            context.drawTexture(pipeline, this.texture, x, y + this.cornerPatchSize().height(),
                     this.u, this.v + this.cornerPatchSize().height(),
                     this.cornerPatchSize().width(), height - doubleCornerHeight,
                     this.cornerPatchSize().width(), this.centerPatchSize().height(),
                     this.textureSize.width(), this.textureSize.height());
-            context.drawTexture(renderLayers, this.texture, x + width - this.cornerPatchSize().width(), y + this.cornerPatchSize().height(),
+            context.drawTexture(pipeline, this.texture, x + width - this.cornerPatchSize().width(), y + this.cornerPatchSize().height(),
                     this.u + rightEdge, this.v + this.cornerPatchSize().height(),
                     this.cornerPatchSize().width(), height - doubleCornerHeight,
                     this.cornerPatchSize().width(), this.centerPatchSize().height(),
@@ -121,7 +123,7 @@ public class NinePatchTexture {
         }
     }
 
-    protected void drawRepeated(OwoUIDrawContext context, Function<Identifier, RenderLayer> renderLayers, int x, int y, int width, int height) {
+    protected void drawRepeated(OwoUIDrawContext context, RenderPipeline pipeline, int x, int y, int width, int height) {
         int doubleCornerHeight = this.cornerPatchSize().height() * 2;
         int doubleCornerWidth = this.cornerPatchSize().width() * 2;
 
@@ -136,7 +138,7 @@ public class NinePatchTexture {
                 int leftoverWidth = width - doubleCornerWidth;
                 while (leftoverWidth > 0) {
                     int drawWidth = Math.min(this.centerPatchSize().width(), leftoverWidth);
-                    context.drawTexture(renderLayers, this.texture,
+                    context.drawTexture(pipeline, this.texture,
                             x + this.cornerPatchSize().width() + leftoverWidth - drawWidth, y + this.cornerPatchSize().height() + leftoverHeight - drawHeight,
                             this.u + this.cornerPatchSize().width() + this.centerPatchSize().width() - drawWidth, this.v + this.cornerPatchSize().height() + this.centerPatchSize().height() - drawHeight,
                             drawWidth, drawHeight,
@@ -154,12 +156,12 @@ public class NinePatchTexture {
             while (leftoverWidth > 0) {
                 int drawWidth = Math.min(this.centerPatchSize().width(), leftoverWidth);
 
-                context.drawTexture(renderLayers, this.texture, x + this.cornerPatchSize().width() + leftoverWidth - drawWidth, y,
+                context.drawTexture(pipeline, this.texture, x + this.cornerPatchSize().width() + leftoverWidth - drawWidth, y,
                         this.u + this.cornerPatchSize().width() + this.centerPatchSize().width() - drawWidth, this.v,
                         drawWidth, this.cornerPatchSize().height(),
                         drawWidth, this.cornerPatchSize().height(),
                         this.textureSize.width(), this.textureSize.height());
-                context.drawTexture(renderLayers, this.texture, x + this.cornerPatchSize().width() + leftoverWidth - drawWidth, y + height - this.cornerPatchSize().height(),
+                context.drawTexture(pipeline, this.texture, x + this.cornerPatchSize().width() + leftoverWidth - drawWidth, y + height - this.cornerPatchSize().height(),
                         this.u + this.cornerPatchSize().width() + this.centerPatchSize().width() - drawWidth, this.v + bottomEdge,
                         drawWidth, this.cornerPatchSize().height(),
                         drawWidth, this.cornerPatchSize().height(),
@@ -173,12 +175,12 @@ public class NinePatchTexture {
             int leftoverHeight = height - doubleCornerHeight;
             while (leftoverHeight > 0) {
                 int drawHeight = Math.min(this.centerPatchSize().height(), leftoverHeight);
-                context.drawTexture(renderLayers, this.texture, x, y + this.cornerPatchSize().height() + leftoverHeight - drawHeight,
+                context.drawTexture(pipeline, this.texture, x, y + this.cornerPatchSize().height() + leftoverHeight - drawHeight,
                         this.u, this.v + this.cornerPatchSize().height() + this.centerPatchSize().height() - drawHeight,
                         this.cornerPatchSize().width(), drawHeight,
                         this.cornerPatchSize().width(), drawHeight,
                         this.textureSize.width(), this.textureSize.height());
-                context.drawTexture(renderLayers, this.texture, x + width - this.cornerPatchSize().width(), y + this.cornerPatchSize().height() + leftoverHeight - drawHeight,
+                context.drawTexture(pipeline, this.texture, x + width - this.cornerPatchSize().width(), y + this.cornerPatchSize().height() + leftoverHeight - drawHeight,
                         this.u + rightEdge, this.v + this.cornerPatchSize().height() + this.centerPatchSize().height() - drawHeight,
                         this.cornerPatchSize().width(), drawHeight,
                         this.cornerPatchSize().width(), drawHeight,
@@ -190,11 +192,11 @@ public class NinePatchTexture {
     }
 
     public static void draw(Identifier texture, OwoUIDrawContext context, int x, int y, int width, int height) {
-        draw(texture, context, RenderLayer::getGuiTextured, x, y, width, height);
+        draw(texture, context, RenderPipelines.GUI_TEXTURED, x, y, width, height);
     }
 
-    public static void draw(Identifier texture, OwoUIDrawContext context, Function<Identifier, RenderLayer> renderLayers, int x, int y, int width, int height) {
-        ifPresent(texture, ninePatchTexture -> ninePatchTexture.draw(context, renderLayers, x, y, width, height));
+    public static void draw(Identifier texture, OwoUIDrawContext context, RenderPipeline pipeline, int x, int y, int width, int height) {
+        ifPresent(texture, ninePatchTexture -> ninePatchTexture.draw(context, pipeline, x, y, width, height));
     }
 
     public static void draw(Identifier texture, OwoUIDrawContext context, PositionedRectangle rectangle) {

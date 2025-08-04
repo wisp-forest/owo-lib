@@ -206,8 +206,6 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
             super.render(context, mouseX, mouseY, delta);
 
             if (this.uiAdapter.enableInspector) {
-                context.getMatrices().translate(0, 0, 500);
-
                 for (int i = 0; i < this.handler.slots.size(); i++) {
                     var slot = this.handler.slots.get(i);
                     if (!slot.isEnabled()) continue;
@@ -221,8 +219,6 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
                         OwoUIDrawContext.TextAnchor.BOTTOM_RIGHT
                     );
                 }
-
-                context.getMatrices().translate(0, 0, -500);
             }
 
             this.drawMouseoverTooltip(context, mouseX, mouseY);
@@ -283,63 +279,6 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
 
     @Override
     protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {}
-
-    @Override
-    protected void drawSlotHighlightBack(DrawContext context) {
-        context.push().translate(0, 0, this.getLayerZOffset(HandledScreenLayer.SLOT));
-        super.drawSlotHighlightBack(context);
-    }
-
-    @Override
-    protected void drawSlotHighlightFront(DrawContext context) {
-        super.drawSlotHighlightFront(context);
-        context.pop();
-    }
-
-    @Override
-    protected void drawItem(DrawContext context, ItemStack stack, int x, int y, @Nullable String amountText) {
-        context.push().translate(0, 0, this.getLayerZOffset(HandledScreenLayer.CURSOR_ITEM));
-        super.drawItem(context, stack, x, y, amountText);
-        context.pop();
-    }
-
-    @Override
-    protected void drawMouseoverTooltip(DrawContext context, int x, int y) {
-        context.push().translate(0, 0, this.getLayerZOffset(HandledScreenLayer.ITEM_TOOLTIP));
-        super.drawMouseoverTooltip(context, x, y);
-        context.pop();
-    }
-
-    /**
-     * Return the z-offset to apply to rendering the given {@code layer}
-     */
-    protected int getLayerZOffset(HandledScreenLayer layer) {
-        return 300;
-    }
-
-    /**
-     * Different layers of handled screen rendering, the z-offset
-     * of which can be adjusted in an owo screen using {@link #getLayerZOffset(HandledScreenLayer)}
-     */
-    protected enum HandledScreenLayer {
-        /**
-         * The items in all slots, along with the highlight
-         * of the hovered slot
-         */
-        SLOT,
-
-        /**
-         * The item currently held by the cursor. More specifically, any item
-         * rendered through the {@link #drawItem(DrawContext, ItemStack, int, int, String)} method
-         */
-        CURSOR_ITEM,
-
-        /**
-         * The tooltip of an item in a slot. More specifically, any tooltip
-         * rendered through {@link #drawMouseoverTooltip(DrawContext, int, int)}
-         */
-        ITEM_TOOLTIP
-    }
 
     public class SlotComponent extends BaseComponent {
 

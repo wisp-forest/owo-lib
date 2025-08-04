@@ -105,7 +105,7 @@ public abstract class ConfigWrapper<C> {
 
         if (FMLLoader.getDist() == Dist.CLIENT && clazz.isAnnotationPresent(Modmenu.class)) {
             var modmenuAnnotation = clazz.getAnnotation(Modmenu.class);
-            ConfigScreenProviders.registerOwoConfigScreen(
+            ConfigScreenProviders.register(
                     modmenuAnnotation.modId(),
                     screen -> ConfigScreen.createWithCustomModel(Identifier.of(modmenuAnnotation.uiModelId()), this, screen)
             );

@@ -7,8 +7,6 @@ import io.wispforest.owo.ui.event.ClientRenderCallback;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.Identifier;
-import net.neoforged.neoforge.client.event.RenderGuiEvent;
-import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -107,15 +105,9 @@ public class Hud {
             }
         });
 
-        NeoForge.EVENT_BUS.addListener((RenderGuiEvent.Post event) -> {
-            var context = event.getGuiGraphics();
-            var tickDelta = event.getPartialTick();
-
+        HudElementRegistry.addLast(Identifier.of("owo", "owo_ui_hud"), (context, tickCounter) -> {
             if (adapter == null || suppress || MinecraftClient.getInstance().options.hudHidden) return;
-
-            context.push().translate(0, 0, 100);
-            adapter.render(context, -69, -69, tickDelta.getTickProgress(false));
-            context.pop();
+            adapter.render(context, -69, -69, tickCounter.getTickProgress(false));
         });
     }
 }

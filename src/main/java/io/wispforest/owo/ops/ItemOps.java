@@ -105,33 +105,4 @@ public final class ItemOps {
         }
         return !stack.isEmpty();
     }
-
-    /**
-     * Stores the given ItemStack with the specified key
-     * into the given nbt compound
-     *
-     * @param stack The stack to store
-     * @param nbt   The nbt compound to write to
-     * @param key   The key to prefix the stack with
-     */
-    public static void store(RegistryWrapper.WrapperLookup registries, ItemStack stack, NbtCompound nbt, String key) {
-        if (stack.isEmpty()) return;
-
-        nbt.put(key, stack.toNbt(registries));
-    }
-
-    /**
-     * Loads the ItemStack stored at the specified key
-     * in the given nbt compound
-     *
-     * @param nbt The nbt compound to read from
-     * @param key The key to load from
-     * @return The deserialized stack
-     */
-    public static ItemStack get(RegistryWrapper.WrapperLookup registries, NbtCompound nbt, String key) {
-        var stackNbt = nbt.getCompound(key);
-        return stackNbt.flatMap(nbtCompound -> ItemStack.fromNbt(registries, nbtCompound)).orElse(ItemStack.EMPTY);
-
-    }
-
 }

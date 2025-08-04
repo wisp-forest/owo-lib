@@ -55,6 +55,8 @@ allprojects {
         if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
             it.options.release = targetJavaVersion
         }
+
+        options.compilerArgs << "-Xmaxerrs" << "69420"
     }
 
     java {
