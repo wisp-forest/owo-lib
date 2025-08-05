@@ -86,14 +86,15 @@ public class RawSlider extends StatefulWidget {
                                     if (button != 0) return false;
 
                                     y = widget.axis == LayoutAxis.VERTICAL ? constraints.maxFiniteOrMinOnAxis(widget.axis) - y : y;
-                                    if (!this.isInHandle(constraints, x, y)) {
-                                        this.setAbsolute(constraints, x, y);
+    var initialDragValue = widget.normalizedValue;                                if (!this.isInHandle(constraints, x, y)) {
+                                        initialDragValue =this.setAbsolute(constraints, x, y);
                                     }
 
-                                    return true;
+                                    this.dragValue = initialDragValue;return true;
                                 })
-                                .dragCallback((x, y, dx, dy) -> this.move(constraints, dx, widget.axis == LayoutAxis.VERTICAL ? -dy : dy))
-                                .dragStartCallback((button, modifiers) -> this.dragValue = widget.normalizedValue)
+                                .dragCallback((x, y, dx, dy) -> {
+                                this.move(constraints, dx, widget.axis == LayoutAxis.VERTICAL ? -dy : dy);
+                                })
                                 .scrollCallback((horizontal, vertical) -> {
                                     if (widget.onChanged == null) return false;
                                     //Singleton usage spotted :alarm: :alarm:
@@ -153,18 +154,19 @@ public class RawSlider extends StatefulWidget {
             this.applyValue(MathHelper.clamp(this.dragValue, 0, 1));
         }
 
-        void setAbsolute(Constraints constraints, double x, double y) {
-            if (this.widget().onChanged == null) return;
+        protected double setAbsolute(Constraints constraints, double x, double y) {
+            if (this.widget().onChanged == null) return this.widget().normalizedValue;
 
             var axis = this.widget().axis;
             var handleSize = this.widget().handleSize;
 
             var newNormalizedValue = MathHelper.clamp((axis.choose(x, y) - handleSize / 2) / (constraints.maxFiniteOrMinOnAxis(axis) - handleSize), 0, 1);
 
-            applyValue(newNormalizedValue);
+            this.applyValue(newNormalizedValue);
+            return newNormalizedValue;
         }
 
-        void applyValue(double newNormalizedValue) {
+        protected void applyValue(double newNormalizedValue) {
             var step = this.widget().step;
             var newValue = this.widget().min + newNormalizedValue * (this.widget().max - this.widget().min);
             this.widget().onChanged.accept(step != null ? Math.round(newValue / step) * step : newValue);
