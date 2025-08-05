@@ -6,6 +6,7 @@ import io.wispforest.owo.braid.display.DisplayQuad;
 import io.wispforest.owo.braid.widgets.basic.Panel;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.uwu.block.BraidDisplayBlockEntity;
+import io.wispforest.uwu.client.braid.TestSelector;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
@@ -30,13 +31,14 @@ public class BraidDisplayBlockEntityRenderer implements BlockEntityRenderer<Brai
                     new Vec3d(0, 0, -14 / 16d),
                     new Vec3d(14 / 16d, 0, 0)
                 ),
-                128, 128,
+                600, 600,
                 new BraidDisplayBlockEntity.Provider(
                     entity,
-                    new Panel(
-                        OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
-                        new BraidDisplayBlockEntity.App()
-                    )
+                    new TestSelector()
+//                    new Panel(
+//                        OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
+//                        new BraidDisplayBlockEntity.App()
+//                    )
                 )
             );
 

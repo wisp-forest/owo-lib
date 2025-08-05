@@ -24,12 +24,12 @@ public class MinecraftClientMixin {
 
     @Inject(method = "doItemUse", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isRiding()Z"), cancellable = true)
     public void dispatchSecondaryPressEvent(CallbackInfo ci) {
-        if (BraidDisplayBinding.targetDisplay == null || BraidDisplayBinding.targetDisplay.display().secondaryPressed) return;
+        if (BraidDisplayBinding.targetDisplay == null || BraidDisplayBinding.targetDisplay.display().primaryPressed) return;
 
         var eventBuffer = BraidDisplayBinding.targetDisplay.display().app.eventBuffer;
-        eventBuffer.add(new MouseButtonPressEvent(GLFW.GLFW_MOUSE_BUTTON_RIGHT, KeyModifiers.NONE));
+        eventBuffer.add(new MouseButtonPressEvent(GLFW.GLFW_MOUSE_BUTTON_LEFT, KeyModifiers.NONE));
 
-        BraidDisplayBinding.targetDisplay.display().secondaryPressed = true;
+        BraidDisplayBinding.targetDisplay.display().primaryPressed = true;
         this.player.swingHand(Hand.MAIN_HAND);
 
         ci.cancel();
@@ -37,12 +37,12 @@ public class MinecraftClientMixin {
 
     @Inject(method = "doAttack", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;getStackInHand(Lnet/minecraft/util/Hand;)Lnet/minecraft/item/ItemStack;"), cancellable = true)
     public void dispatchPrimaryPressEvent(CallbackInfoReturnable<Boolean> cir) {
-        if (BraidDisplayBinding.targetDisplay == null || BraidDisplayBinding.targetDisplay.display().primaryPressed) return;
+        if (BraidDisplayBinding.targetDisplay == null || BraidDisplayBinding.targetDisplay.display().secondaryPressed) return;
 
         var eventBuffer = BraidDisplayBinding.targetDisplay.display().app.eventBuffer;
-        eventBuffer.add(new MouseButtonPressEvent(GLFW.GLFW_MOUSE_BUTTON_LEFT, KeyModifiers.NONE));
+        eventBuffer.add(new MouseButtonPressEvent(GLFW.GLFW_MOUSE_BUTTON_RIGHT, KeyModifiers.NONE));
 
-        BraidDisplayBinding.targetDisplay.display().primaryPressed = true;
+        BraidDisplayBinding.targetDisplay.display().secondaryPressed = true;
         this.player.swingHand(Hand.MAIN_HAND);
 
         cir.setReturnValue(true);

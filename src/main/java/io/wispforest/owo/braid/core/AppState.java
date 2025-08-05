@@ -61,6 +61,9 @@ public class AppState implements InstanceHost, ProxyHost {
     private KeyModifiers draggingModifiers = null;
     private boolean dragStarted = false;
 
+    private @Nullable HitTestState scrollHit = null;
+    private long lastScrollTime = 0;
+
     private List<KeyboardListener> focused = new ArrayList<>();
 
     private final BraidHotReloadCallback.Listener reloadListener;
@@ -320,7 +323,10 @@ public class AppState implements InstanceHost, ProxyHost {
                     }
                 }
                 case MouseScrollEvent(double xOffset, double yOffset) -> {
-                    this.hitTest().firstWhere(
+                    var now = System.currentTimeMillis();
+                    if (this.scrollHit == null || now - this.lastScrollTime > 200) this.scrollHit = this.hitTest();
+                    this.lastScrollTime = now;
+                    this.scrollHit.firstWhere(
                         (hit) -> hit.instance() instanceof MouseListener &&
                             ((MouseListener) hit.instance()).onMouseScroll(
                                 hit.x(),

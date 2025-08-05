@@ -13,6 +13,7 @@ import io.wispforest.owo.braid.widgets.basic.*;
 import io.wispforest.owo.braid.widgets.basic.action.ActionTrigger;
 import io.wispforest.owo.braid.widgets.basic.action.Actions;
 import io.wispforest.owo.braid.widgets.stack.Stack;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 
@@ -69,12 +70,11 @@ public class RawSlider extends StatefulWidget {
             return new LayoutBuilder((innerContext, constraints) -> {
                 var widget = this.widget();
                 var size = constraints.maxFiniteOrMinSize();
-
+                var step = widget.step != null ? widget.step : (widget.max - widget().min) / 100;
                 return new Center(
                     new Actions(
                         actions -> {
                             if (widget.onChanged != null) {
-                                var step = widget.step != null ? widget.step : (widget.max - widget().min) / 100;
                                 actions.addAction(ActionTrigger.POSITIVE_DIRECTIONS, () -> widget.onChanged.accept(Math.min(widget.value + step, widget.max)));
                                 actions.addAction(ActionTrigger.NEGATIVE_DIRECTIONS, () -> widget.onChanged.accept(Math.max(widget.value - step, widget.min)));
                             }
@@ -94,6 +94,15 @@ public class RawSlider extends StatefulWidget {
                                 })
                                 .dragCallback((x, y, dx, dy) -> this.move(constraints, dx, widget.axis == LayoutAxis.VERTICAL ? -dy : dy))
                                 .dragStartCallback((button, modifiers) -> this.dragValue = widget.normalizedValue)
+                                .scrollCallback((horizontal, vertical) -> {
+                                    if (widget.onChanged == null) return false;
+                                    //Singleton usage spotted :alarm: :alarm:
+                                    var offset = (Screen.hasShiftDown() ? widget.axis.opposite() : widget.axis).choose(-horizontal, vertical) * step;
+                                    var newValue = MathHelper.clamp(widget.value + offset, widget.min, widget.max);
+                                    if (widget.value == newValue) return false;
+                                    widget.onChanged.accept(newValue);
+                                    return true;
+                                })
                                 .cursorStyle(CursorStyle.HAND),
                             new Stack(
                                 widget.axis.choose(Alignment.LEFT, Alignment.TOP),

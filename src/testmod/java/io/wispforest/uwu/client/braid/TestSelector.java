@@ -26,6 +26,8 @@ import io.wispforest.owo.braid.widgets.button.RawButton;
 import io.wispforest.owo.braid.widgets.checkbox.BraidCheckbox;
 import io.wispforest.owo.braid.widgets.checkbox.Checkbox;
 import io.wispforest.owo.braid.widgets.checkbox.RawCheckbox;
+import io.wispforest.owo.braid.widgets.color.ColorController;
+import io.wispforest.owo.braid.widgets.color.ColorPicker;
 import io.wispforest.owo.braid.widgets.cycle.MessageCyclingButton;
 import io.wispforest.owo.braid.widgets.drag.DragArena;
 import io.wispforest.owo.braid.widgets.drag.DragArenaElement;
@@ -36,9 +38,7 @@ import io.wispforest.owo.braid.widgets.label.LabelStyle;
 import io.wispforest.owo.braid.widgets.recipeviewer.RecipeViewerExclusionZone;
 import io.wispforest.owo.braid.widgets.recipeviewer.RecipeViewerStack;
 import io.wispforest.owo.braid.widgets.recipeviewer.StackDropArea;
-import io.wispforest.owo.braid.widgets.scroll.ScrollController;
-import io.wispforest.owo.braid.widgets.scroll.Scrollable;
-import io.wispforest.owo.braid.widgets.scroll.VerticallyScrollable;
+import io.wispforest.owo.braid.widgets.scroll.*;
 import io.wispforest.owo.braid.widgets.sharedstate.ShareableState;
 import io.wispforest.owo.braid.widgets.sharedstate.SharedState;
 import io.wispforest.owo.braid.widgets.slider.*;
@@ -92,7 +92,7 @@ import java.util.stream.Stream;
 public class TestSelector extends StatefulWidget {
 
     public enum Tests {
-        COUNTER, FLEX, DRAGGING, SPLIT_PANE, SLIDERS, TEXT_INPUT, BURNING_CHYZ, SCROLLING, INPUT, CYCLING, VANILLA, SHARED_STATE, STACKS, GRIDS, CONTRIBUTORS, ANIMATIONS
+        COUNTER, FLEX, DRAGGING, SPLIT_PANE, SLIDERS, TEXT_INPUT, BURNING_CHYZ, SCROLLING, INPUT, CYCLING, COLOR, VANILLA, SHARED_STATE, STACKS, GRIDS, CONTRIBUTORS, ANIMATIONS
     }
 
     @Override
@@ -167,6 +167,7 @@ public class TestSelector extends StatefulWidget {
                             case SCROLLING -> new ScrollTest();
                             case INPUT -> new InputTest();
                             case CYCLING -> new CyclingTest();
+                            case COLOR -> new ColorTest();
                             case VANILLA -> new VanillaTest();
                             case SHARED_STATE -> new SharedStateTest();
                             case STACKS -> new StacksTest();
@@ -981,6 +982,11 @@ public class TestSelector extends StatefulWidget {
             private final ScrollController verticalController = new ScrollController();
             private final WindowController controller = new WindowController(Size.square(200));
 
+            private final ScrollController horizontalNestedScrollController = new ScrollController();
+            private final ScrollController verticalNestedScrollController = new ScrollController();
+            private final WindowController nestedScrollController = new WindowController(Size.square(200));
+            private double nestedSliderValue = 0.5;
+
             @Override
             public void init() {
                 super.init();
@@ -1065,6 +1071,52 @@ public class TestSelector extends StatefulWidget {
                                         )
                                     ),
                                     new Padding(Insets.all(5))
+                                )
+                            )
+                        )
+                    ),
+                    new Window(
+                        false,
+                        Text.literal("Scrollception"),
+                        null,
+                        this.nestedScrollController,
+                        new Column(
+                            Label.literal("Damn bro, you can scroll this?"),
+                            new Flexible(
+                                new ScrollableWithBars(
+                                    horizontalNestedScrollController,
+                                    verticalNestedScrollController,
+                                    10,
+                                    ButtonScrollbar::new,
+                                    new Sized(
+                                        500, 500,
+                                        new Center(
+                                            new Column(
+                                                MainAxisAlignment.CENTER,
+                                                CrossAxisAlignment.CENTER,
+                                                new Sized(
+                                                    100, 20,
+                                                    new Slider(
+                                                        this.nestedSliderValue,
+                                                        0, 1,
+                                                        null,
+                                                        LayoutAxis.HORIZONTAL,
+                                                        value -> this.setState(() -> this.nestedSliderValue = value)
+                                                    )
+                                                ),
+                                                new Sized(
+                                                    20, 100,
+                                                    new Slider(
+                                                        this.nestedSliderValue,
+                                                        0, 1,
+                                                        null,
+                                                        LayoutAxis.VERTICAL,
+                                                        value -> this.setState(() -> this.nestedSliderValue = value)
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    )
                                 )
                             )
                         )
@@ -1391,6 +1443,33 @@ public class TestSelector extends StatefulWidget {
         THIRD,
         FOURTH,
         FIFTH
+    }
+
+    public static class ColorTest extends StatefulWidget {
+
+        @Override
+        public WidgetState<ColorTest> createState() {
+            return new State();
+        }
+
+        public static class State extends WidgetState<ColorTest> {
+            private ColorController controller = new ColorController(Color.ofArgb(-256));
+
+            @Override
+            public Widget build(BuildContext context) {
+                return new Column(
+                    new Padding(Size.of(0, 5)),
+                    List.of(
+                        new Label(Text.literal("Color Picker Test")),
+                        new Label(Text.literal("Selected Color: " + controller.getColor().asHexString(false))),
+                        new Sized(
+                            250, 300,
+                            new ColorPicker(this.controller)
+                        )
+                    )
+                );
+            }
+        }
     }
 
     public static class VanillaTest extends StatefulWidget {
