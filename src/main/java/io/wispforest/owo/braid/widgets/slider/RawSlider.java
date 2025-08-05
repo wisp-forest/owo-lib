@@ -71,68 +71,67 @@ public class RawSlider extends StatefulWidget {
                 var widget = this.widget();
                 var size = constraints.maxFiniteOrMinSize();
                 var step = widget.step != null ? widget.step : (widget.max - widget().min) / 100;
-                return new Center(
-                    new Actions(
-                        actions -> {
-                            if (widget.onChanged != null) {
-                                actions.addAction(ActionTrigger.POSITIVE_DIRECTIONS, () -> widget.onChanged.accept(Math.min(widget.value + step, widget.max)));
-                                actions.addAction(ActionTrigger.NEGATIVE_DIRECTIONS, () -> widget.onChanged.accept(Math.max(widget.value - step, widget.min)));
-                            }
-                        },
-                        new MouseArea(
-                            mouseArea -> mouseArea
-                                //TODO: decide what to do with buttons here
-                                .clickCallback((x, y, button, modifiers) -> {
-                                    if (button != 0) return false;
-
-                                    y = widget.axis == LayoutAxis.VERTICAL ? constraints.maxFiniteOrMinOnAxis(widget.axis) - y : y;
-    var initialDragValue = widget.normalizedValue;                                if (!this.isInHandle(constraints, x, y)) {
-                                        initialDragValue =this.setAbsolute(constraints, x, y);
-                                    }
-
-                                    this.dragValue = initialDragValue;return true;
-                                })
-                                .dragCallback((x, y, dx, dy) -> {
-                                this.move(constraints, dx, widget.axis == LayoutAxis.VERTICAL ? -dy : dy);
-                                })
-                                .scrollCallback((horizontal, vertical) -> {
-                                    if (widget.onChanged == null) return false;
-                                    //Singleton usage spotted :alarm: :alarm:
-                                    var offset = (Screen.hasShiftDown() ? widget.axis.opposite() : widget.axis).choose(-horizontal, vertical) * step;
-                                    var newValue = MathHelper.clamp(widget.value + offset, widget.min, widget.max);
-                                    if (widget.value == newValue) return false;
-                                    widget.onChanged.accept(newValue);
-                                    return true;
-                                })
-                                .cursorStyle(CursorStyle.HAND),
-                            new Stack(
-                                widget.axis.choose(Alignment.LEFT, Alignment.TOP),
-                                new Sized(
-                                    size.width(),
-                                    size.height(),
-                                    widget.track
-                                ),
-                                new Padding(
-                                    widget.axis.chooseCompute(
-                                        () -> Insets.left(Math.floor((size.width() - widget.handleSize) * widget.normalizedValue)),
-                                        () -> Insets.top(Math.floor((size.height() - widget.handleSize) * (1 - widget.normalizedValue)))
-                                    ),
-                                    widget.axis.chooseCompute(
-                                        () -> new Sized(
-                                            widget.handleSize,
-                                            size.height(),
-                                            widget.handle
-                                        ),
-                                        () -> new Sized(
-                                            size.width(),
-                                            widget.handleSize,
-                                            widget.handle
-                                        )
-                                    )
-                                )
+                var content = new Stack(
+                    widget.axis.choose(Alignment.LEFT, Alignment.TOP),
+                    new Sized(
+                        size.width(),
+                        size.height(),
+                        widget.track
+                    ),
+                    new Padding(
+                        widget.axis.chooseCompute(
+                            () -> Insets.left(Math.floor((size.width() - widget.handleSize) * widget.normalizedValue)),
+                            () -> Insets.top(Math.floor((size.height() - widget.handleSize) * (1 - widget.normalizedValue)))
+                        ),
+                        widget.axis.chooseCompute(
+                            () -> new Sized(
+                                widget.handleSize,
+                                size.height(),
+                                widget.handle
+                            ),
+                            () -> new Sized(
+                                size.width(),
+                                widget.handleSize,
+                                widget.handle
                             )
                         )
                     )
+                );
+                return new Center(
+                    widget.onChanged == null
+                        ? content
+                        : new Actions(
+                            actions -> {
+                                actions.addAction(ActionTrigger.POSITIVE_DIRECTIONS, () -> widget.onChanged.accept(Math.min(widget.value + step, widget.max)));
+                                actions.addAction(ActionTrigger.NEGATIVE_DIRECTIONS, () -> widget.onChanged.accept(Math.max(widget.value - step, widget.min)));
+                            },
+                            new MouseArea(
+                                mouseArea -> mouseArea
+                                    //TODO: decide what to do with buttons here
+                                    .clickCallback((x, y, button, modifiers) -> {
+                                        if (button != 0) return false;
+
+                                        y = widget.axis == LayoutAxis.VERTICAL ? constraints.maxFiniteOrMinOnAxis(widget.axis) - y : y;
+                                        var initialDragValue = widget.normalizedValue;
+                                        if (!this.isInHandle(constraints, x, y)) initialDragValue = this.setAbsolute(constraints, x, y);
+
+                                        this.dragValue = initialDragValue;
+                                        return true;
+                                    })
+                                    .dragCallback((x, y, dx, dy) -> this.move(constraints, dx, widget.axis == LayoutAxis.VERTICAL ? -dy : dy))
+                                    .scrollCallback((horizontal, vertical) -> {
+                                        //TODO: move shift logic to appstate
+                                        // Singleton usage spotted :alarm: :alarm:
+                                        var offset = (Screen.hasShiftDown() ? widget.axis.opposite() : widget.axis).choose(-horizontal, vertical) * step;
+                                        var newValue = MathHelper.clamp(widget.value + offset, widget.min, widget.max);
+                                        if (widget.value == newValue) return false;
+                                        widget.onChanged.accept(newValue);
+                                        return true;
+                                    })
+                                    .cursorStyle(CursorStyle.HAND),
+                                content
+                            )
+                        )
                 );
             });
         }

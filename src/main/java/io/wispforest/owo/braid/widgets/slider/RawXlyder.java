@@ -11,8 +11,10 @@ import io.wispforest.owo.braid.widgets.basic.*;
 import io.wispforest.owo.braid.widgets.basic.action.ActionTrigger;
 import io.wispforest.owo.braid.widgets.basic.action.Actions;
 import io.wispforest.owo.braid.widgets.stack.Stack;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector2d;
 
 public class RawXlyder extends StatefulWidget {
 
@@ -67,55 +69,67 @@ public class RawXlyder extends StatefulWidget {
         public Widget build(BuildContext context) {
             return new LayoutBuilder((innerContext, constraints) -> {
                 var widget = this.widget();
+                var xStep = widget.xStep != null ? widget.xStep : (widget.maxX - widget.minX) / 100;
+                var yStep = widget.yStep != null ? widget.yStep : (widget.maxY - widget.minY) / 100;
+
+                var content = new Stack(
+                    Alignment.TOP_LEFT,
+                    new Sized(
+                        constraints.maxWidth(),
+                        constraints.maxHeight(),
+                        widget.track
+                    ),
+                    new Padding(
+                        Insets.left(Math.floor((constraints.maxWidth() - widget.handleSize.width()) * widget.normalizedXValue))
+                            .withTop(Math.floor((constraints.maxHeight() - widget.handleSize.height()) * (1 - widget.normalizedYValue))),
+                        new Sized(
+                            widget.handleSize,
+                            widget.handle
+                        )
+                    )
+                );
                 return new Center(
-                    new Actions(
-                        actions -> {
-                            if (widget.onChanged != null) {
-                                var xStep = widget.xStep != null ? widget.xStep : (widget.maxX - widget.minX) / 100;
-                                var yStep = widget.yStep != null ? widget.yStep : (widget.maxY - widget.minY) / 100;
+                    widget.onChanged == null
+                        ? content
+                        : new Actions(
+                            actions -> {
                                 actions.addAction(ActionTrigger.UP, () -> widget.onChanged.accept(widget.xValue, Math.min(widget.yValue + yStep, widget.maxY)));
                                 actions.addAction(ActionTrigger.DOWN, () -> widget.onChanged.accept(widget.xValue, Math.max(widget.yValue - yStep, widget.minY)));
                                 actions.addAction(ActionTrigger.RIGHT, () -> widget.onChanged.accept(Math.min(widget.xValue + xStep, widget.maxX), widget.yValue));
                                 actions.addAction(ActionTrigger.LEFT, () -> widget.onChanged.accept(Math.max(widget.xValue - xStep, widget.minX), widget.yValue));
-                            }
-                        },
-                        new MouseArea(
-                            mouseArea -> mouseArea
-                                //TODO: decide what to do with buttons here
-                                .clickCallback((x, y, button, modifiers) -> {
-                                    if (button != 0) return false;
+                            },
+                            new MouseArea(
+                                mouseArea -> mouseArea
+                                    //TODO: decide what to do with buttons here
+                                    .clickCallback((x, y, button, modifiers) -> {
+                                        if (button != 0) return false;
 
-                                    y = constraints.maxHeight() - y;
-                                    if (!this.isInHandle(constraints, x, y)) {
-                                        this.setAbsolute(constraints, x, y);
-                                    }
+                                        y = constraints.maxHeight() - y;
+                                        var initialDragValue = new Vector2d(widget.normalizedXValue, widget.normalizedYValue);
+                                        if (!this.isInHandle(constraints, x, y)) {
+                                            initialDragValue = this.setAbsolute(constraints, x, y);
+                                        }
 
-                                    return true;
-                                })
-                                .dragCallback((x, y, dx, dy) -> this.move(constraints, dx, -dy))
-                                .dragStartCallback((button, modifiers) -> {
-                                    this.dragValueX = widget.normalizedXValue;
-                                    this.dragValueY = widget.normalizedYValue;
-                                })
-                                .cursorStyle(CursorStyle.HAND),
-                            new Stack(
-                                Alignment.TOP_LEFT,
-                                new Sized(
-                                    constraints.maxWidth(),
-                                    constraints.maxHeight(),
-                                    widget.track
-                                ),
-                                new Padding(
-                                    Insets.left(Math.floor((constraints.maxWidth() - widget.handleSize.width()) * widget.normalizedXValue))
-                                        .withTop(Math.floor((constraints.maxHeight() - widget.handleSize.height()) * (1 - widget.normalizedYValue))),
-                                    new Sized(
-                                        widget.handleSize,
-                                        widget.handle
-                                    )
-                                )
+                                        this.dragValueX = initialDragValue.x;
+                                        this.dragValueY = initialDragValue.y;
+                                        return true;
+                                    })
+                                    .dragCallback((x, y, dx, dy) -> this.move(constraints, dx, -dy))
+                                    .scrollCallback((horizontal, vertical) -> {
+                                        //TODO: move shift logic to appstate
+                                        // Singleton usage spotted :alarm: :alarm:
+                                        var offsetX = (Screen.hasShiftDown() ? vertical : -horizontal) * xStep;
+                                        var offsetY = (Screen.hasShiftDown() ? -horizontal : vertical) * yStep;
+                                        var newX = MathHelper.clamp(widget.xValue + offsetX, widget.minX, widget.maxX);
+                                        var newY = MathHelper.clamp(widget.yValue + offsetY, widget.minY, widget.maxY);
+                                        if (widget.xValue == newX && widget.yValue == newY) return false;
+                                        widget.onChanged.accept(newX, newY);
+                                        return true;
+                                    })
+                                    .cursorStyle(CursorStyle.HAND),
+                                content
                             )
                         )
-                    )
                 );
             });
         }
@@ -142,8 +156,8 @@ public class RawXlyder extends StatefulWidget {
             );
         }
 
-        void setAbsolute(Constraints constraints, double x, double y) {
-            if (this.widget().onChanged == null) return;
+        Vector2d setAbsolute(Constraints constraints, double x, double y) {
+            if (this.widget().onChanged == null) return new Vector2d(this.widget().normalizedXValue, this.widget().normalizedYValue);
 
             var handleWidth = this.widget().handleSize.width();
             var handleHeight = this.widget().handleSize.height();
@@ -152,6 +166,7 @@ public class RawXlyder extends StatefulWidget {
             var newNormalizedY = MathHelper.clamp((y - (handleHeight / 2)) / (constraints.maxHeight() - handleHeight), 0, 1);
 
             this.applyValue(newNormalizedX, newNormalizedY);
+            return new Vector2d(newNormalizedX, newNormalizedY);
         }
 
         void applyValue(double newNormalizedX, double newNormalizedY) {
