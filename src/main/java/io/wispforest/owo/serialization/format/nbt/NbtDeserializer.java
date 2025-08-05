@@ -1,5 +1,6 @@
 package io.wispforest.owo.serialization.format.nbt;
 
+import com.google.common.collect.MapMaker;
 import io.wispforest.endec.*;
 import io.wispforest.endec.util.RecursiveDeserializer;
 import net.minecraft.nbt.*;
@@ -87,12 +88,12 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
         return this.getAs(this.getValue(), NbtByteArray.class).getByteArray();
     }
 
-    private final Set<IdentityHolder<NbtElement>> encodedOptionals = Collections.newSetFromMap(new WeakHashMap<>());
+    private final Set<NbtElement> encodedOptionals = Collections.newSetFromMap(new MapMaker().weakKeys().makeMap());
 
     @Override
     public <V> Optional<V> readOptional(SerializationContext ctx, Endec<V> endec) {
         var value = this.getValue();
-        if (this.encodedOptionals.contains(new IdentityHolder<>(value))) {
+        if (this.encodedOptionals.contains(value)) {
             return Optional.of(endec.decode(ctx, this));
         }
 
@@ -248,7 +249,7 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
                 return defaultValueFactory.get();
             }
             var element = this.compound.get(name);
-            if (defaultValueFactory != null) NbtDeserializer.this.encodedOptionals.add(new IdentityHolder<>(element));
+            if (defaultValueFactory != null) NbtDeserializer.this.encodedOptionals.add(element);
             return NbtDeserializer.this.frame(
                     () -> element,
                     () -> endec.decode(ctx, NbtDeserializer.this)
