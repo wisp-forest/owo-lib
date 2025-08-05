@@ -52,11 +52,19 @@ public class EpicHandledScreen extends BaseOwoHandledScreen<FlowLayout, EpicScre
                                 .child(Components.entity(Sizing.fixed(100), EntityType.FROG, frogeNbt).scale(.75f).allowMouseRotation(true).tooltip(Text.literal(":)")))
                                 .child(Containers.horizontalFlow(Sizing.fixed(100), Sizing.content())
                                         .child(Components.button(Text.of("✔"), (ButtonComponent button) -> {
-                                            this.enableSlot(Integer.parseInt(selectBox.getText()));
+                                            var text = selectBox.getText();
+                                            if (text.isBlank()) return;
+                                            try {
+                                                this.enableSlot(Integer.parseInt(text));
+                                            } catch (Exception e) {}
                                         }).tooltip(Text.literal("Enable")))
                                         .child(selectBox.margins(Insets.horizontal(3)).tooltip(Text.literal("Slot Index")))
                                         .child(Components.button(Text.of("❌"), (ButtonComponent button) -> {
-                                            this.disableSlot(Integer.parseInt(selectBox.getText()));
+                                            var text = selectBox.getText();
+                                            if (text.isBlank()) return;
+                                            try {
+                                                this.disableSlot(Integer.parseInt(text));
+                                            } catch (Exception e) {}
                                         }).tooltip(Text.literal("Disable"))).verticalAlignment(VerticalAlignment.CENTER).horizontalAlignment(HorizontalAlignment.CENTER))
                                 .allowOverflow(true)
                 ).surface(Surface.DARK_PANEL).padding(Insets.of(5)).allowOverflow(true).zIndex(500).positioning(Positioning.absolute(100, 100))
