@@ -9,6 +9,7 @@ import io.wispforest.owo.itemgroup.json.OwoItemGroupLoader;
 import io.wispforest.owo.moddata.ModDataLoader;
 import io.wispforest.owo.ui.core.OwoUIPipelines;
 import io.wispforest.owo.ui.parsing.UIModelLoader;
+import io.wispforest.owo.ui.renderstate.OwoSpecialGuiElementRenderers;
 import io.wispforest.owo.ui.util.NinePatchTexture;
 import net.minecraft.util.Util;
 import net.neoforged.api.distmarker.Dist;
@@ -83,6 +84,8 @@ public class OwoClient {
         if (Owo.DEBUG) {
             OwoDebugCommands.Client.register();
         }
+
+        OwoSpecialGuiElementRenderers.init();
 
         modBus.addListener(FMLClientSetupEvent.class, event -> {
             ConfigScreenProviders.forEach((modId, screenFactory) -> {

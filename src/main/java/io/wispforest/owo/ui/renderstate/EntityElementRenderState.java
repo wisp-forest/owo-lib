@@ -4,6 +4,7 @@ import io.wispforest.owo.util.pond.OwoEntityRenderDispatcherExtension;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.client.gui.render.SpecialGuiElementRenderer;
+import net.minecraft.client.gui.render.state.special.SpecialGuiElementRenderState;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -18,12 +19,7 @@ public record EntityElementRenderState(
     Matrix4f transform,
     ScreenRect bounds,
     ScreenRect scissorArea
-) implements OwoSpecialElementRenderState<EntityElementRenderState> {
-
-    @Override
-    public SpecialGuiElementRenderer<EntityElementRenderState> createRenderer(VertexConsumerProvider.Immediate vertexConsumers) {
-        return new Renderer(vertexConsumers);
-    }
+) implements SpecialGuiElementRenderState {
 
     @Override
     public int x1() {

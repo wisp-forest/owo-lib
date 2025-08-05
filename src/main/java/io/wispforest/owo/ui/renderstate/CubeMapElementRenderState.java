@@ -8,6 +8,7 @@ import net.minecraft.client.gui.RotatingCubeMapRenderer;
 import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.client.gui.render.SpecialGuiElementRenderer;
 import net.minecraft.client.gui.render.state.GuiRenderState;
+import net.minecraft.client.gui.render.state.special.SpecialGuiElementRenderState;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.Nullable;
@@ -17,14 +18,9 @@ public record CubeMapElementRenderState(
     boolean rotate,
     ScreenRect bounds,
     ScreenRect scissorArea
-) implements OwoSpecialElementRenderState<CubeMapElementRenderState> {
+) implements SpecialGuiElementRenderState {
 
     public static OutputOverride outputOverride = null;
-
-    @Override
-    public SpecialGuiElementRenderer<CubeMapElementRenderState> createRenderer(VertexConsumerProvider.Immediate vertexConsumers) {
-        return new Renderer(vertexConsumers);
-    }
 
     @Override
     public int x1() {
