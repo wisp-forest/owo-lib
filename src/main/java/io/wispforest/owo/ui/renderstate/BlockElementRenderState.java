@@ -6,6 +6,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.client.gui.render.SpecialGuiElementRenderer;
+import net.minecraft.client.gui.render.state.special.SpecialGuiElementRenderState;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.OverlayTexture;
@@ -19,12 +20,7 @@ public record BlockElementRenderState(
     @Nullable BlockEntity entity,
     ScreenRect bounds,
     ScreenRect scissorArea
-) implements OwoSpecialElementRenderState<BlockElementRenderState> {
-
-    @Override
-    public SpecialGuiElementRenderer<BlockElementRenderState> createRenderer(VertexConsumerProvider.Immediate vertexConsumers) {
-        return new Renderer(vertexConsumers);
-    }
+) implements SpecialGuiElementRenderState {
 
     @Override
     public int x1() {
