@@ -1,5 +1,6 @@
 package io.wispforest.owo.ui.renderstate;
 
+import com.google.common.collect.MapMaker;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.buffers.Std140Builder;
 import com.mojang.blaze3d.buffers.Std140SizeCalculator;
@@ -25,7 +26,7 @@ import org.joml.Matrix3x2f;
 import org.joml.Vector2i;
 
 import java.nio.ByteBuffer;
-import java.util.WeakHashMap;
+import java.util.Map;
 
 public record BlurQuadElementRenderState(
     RenderPipeline pipeline,
@@ -61,7 +62,7 @@ public record BlurQuadElementRenderState(
         });
     }
 
-    @Deprecated
+    @ApiStatus.Internal
     public BlurQuadElementRenderState {}
 
     public BlurQuadElementRenderState(Matrix3x2f pose, ScreenRect bounds, ScreenRect scissorArea, int directions, float quality, float size) {
@@ -98,7 +99,11 @@ public record BlurQuadElementRenderState(
 
     // ---
 
-    private static final WeakHashMap<TextureSetup, BlurSetup> blurSetups = new WeakHashMap<>();
+    private static final Map<TextureSetup, BlurSetup> blurSetups = new MapMaker().weakKeys().makeMap();
+
+    public static boolean hasBlurSetupFor(TextureSetup textureSetup) {
+        return blurSetups.containsKey(textureSetup);
+    }
 
     public static @Nullable BlurSetup getBlurSetupOf(TextureSetup textureSetup) {
         return blurSetups.get(textureSetup);

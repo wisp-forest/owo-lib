@@ -1,5 +1,6 @@
 package io.wispforest.owo.mixin.ui;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
@@ -13,12 +14,13 @@ import io.wispforest.owo.ui.renderstate.OwoSpecialRendererAllocator;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.render.GuiRenderer;
 import net.minecraft.client.gui.render.SpecialGuiElementRenderer;
+import net.minecraft.client.gui.render.state.SimpleGuiElementRenderState;
 import net.minecraft.client.gui.render.state.special.SpecialGuiElementRenderState;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.texture.TextureSetup;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArgs;
@@ -36,6 +38,11 @@ public class GuiRendererMixin {
     @Final
     private VertexConsumerProvider.Immediate vertexConsumers;
 
+    @Shadow
+    @Nullable
+    private TextureSetup textureSetup;
+
+    @Unique
     private final Map<Class<? extends OwoSpecialElementRenderState<?>>, OwoSpecialRendererAllocator> allocators = new HashMap<>();
 
     @ModifyVariable(method = "prepareSpecialElement", at = @At("STORE"))
@@ -94,5 +101,10 @@ public class GuiRendererMixin {
 
         pass.setUniform("BlurSettings", uniforms);
         pass.bindSampler("InputSampler", BlurQuadElementRenderState.inputView);
+    }
+
+    @ModifyExpressionValue(method = "prepareSimpleElement", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/texture/TextureSetup;equals(Ljava/lang/Object;)Z"))
+    private boolean adjustCheckForBlurElements(boolean original, @Local(argsOnly = true) SimpleGuiElementRenderState state) {
+        return original && !(state instanceof BlurQuadElementRenderState || BlurQuadElementRenderState.hasBlurSetupFor(textureSetup));
     }
 }
