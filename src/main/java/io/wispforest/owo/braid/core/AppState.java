@@ -236,6 +236,7 @@ public class AppState implements InstanceHost, ProxyHost {
         for (var event : events) {
             switch (event) {
                 case MouseButtonPressEvent(int button, KeyModifiers modifiers) -> {
+                    this.scrollHit = null;
                     var state = this.hitTest();
 
                     this.updateFocus(
@@ -315,6 +316,7 @@ public class AppState implements InstanceHost, ProxyHost {
                     this.dragging.onMouseDrag(coordinates.x, coordinates.y, delta.x, delta.y);
                 }
                 case MouseButtonReleaseEvent(int button, KeyModifiers modifiers) -> {
+                    this.scrollHit = null;
                     var state = this.hitTest();
                     state.firstWhere(
                         (hit) -> hit.instance() instanceof MouseListener && ((MouseListener) hit.instance()).onMouseUp(hit.x(), hit.y(), button, modifiers)
