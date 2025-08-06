@@ -85,7 +85,9 @@
     "ui.layers.MouseMixin",
     "ui.layers.ScreenMixin",
     "neoforge.NetworkRegistryMixin",
-    "neoforge.ClientConnectionDisconnectHookMixin"
+    "neoforge.ClientConnectionDisconnectHookMixin",
+    "neoforge.ValidationCommandEncoderAccessor",
+    "neoforge.ClientAccessMixin"
   ],
   "server": [
     "MainMixin"

@@ -6,6 +6,7 @@ import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import io.wispforest.owo.mixin.neoforge.ValidationCommandEncoderAccessor;
 import io.wispforest.owo.mixin.ui.access.GlCommandEncoderAccessor;
 import io.wispforest.owo.ui.renderstate.BlurQuadElementRenderState;
 import net.minecraft.client.MinecraftClient;
@@ -55,8 +56,13 @@ public class GuiRendererMixin {
         var inputSize = new Vector2i(mainBuffer.textureWidth, mainBuffer.textureHeight);
 
         var encoder = RenderSystem.getDevice().createCommandEncoder();
+        var baseEncoder = encoder;
 
-        ((GlCommandEncoderAccessor)encoder).owo$setRenderPassOpen(false);
+        if (baseEncoder instanceof ValidationCommandEncoderAccessor accessor) {
+            baseEncoder = accessor.owo$getRealCommandEncoder();
+        }
+
+        ((GlCommandEncoderAccessor) baseEncoder).owo$setRenderPassOpen(false);
         encoder.copyTextureToTexture(
             MinecraftClient.getInstance().getFramebuffer().getColorAttachment(),
             BlurQuadElementRenderState.input.getColorAttachment(),
@@ -64,7 +70,7 @@ public class GuiRendererMixin {
         );
 
         var uniforms = BlurQuadElementRenderState.uniforms.write(inputSize, blurSetup.directions(), blurSetup.quality(), blurSetup.size());
-        ((GlCommandEncoderAccessor)encoder).owo$setRenderPassOpen(true);
+        ((GlCommandEncoderAccessor) baseEncoder).owo$setRenderPassOpen(true);
 
         pass.setUniform("BlurSettings", uniforms);
         pass.bindSampler("InputSampler", BlurQuadElementRenderState.inputView);

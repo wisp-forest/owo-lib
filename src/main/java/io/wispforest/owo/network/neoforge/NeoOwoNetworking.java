@@ -8,6 +8,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.handling.IPayloadHandler;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 import java.util.HashMap;
@@ -55,17 +56,19 @@ public class NeoOwoNetworking {
                 throw new IllegalStateException("Unable to get the required Payload Handler as its missing for the Client! Id: " + id);
             }
 
-            registrar.playBidirectional(id, entry.getValue(), (arg, iPayloadContext) -> {
+            IPayloadHandler<MessagePayload> biDiHandler = (arg, iPayloadContext) -> {
                 iPayloadContext.enqueueWork(() -> {
                     var player = iPayloadContext.player();
 
                     var handler = (!player.getWorld().isClient())
-                            ? PAYLOAD_ID_TO_SERVER_PAYLOAD_HANDLER.get(id)
-                            : PAYLOAD_ID_TO_CLIENT_PAYLOAD_HANDLER.get(id);
+                        ? PAYLOAD_ID_TO_SERVER_PAYLOAD_HANDLER.get(id)
+                        : PAYLOAD_ID_TO_CLIENT_PAYLOAD_HANDLER.get(id);
 
                     handler.accept(arg, iPayloadContext.player());
                 });
-            });
+            };
+
+            registrar.playBidirectional(id, entry.getValue(), biDiHandler, biDiHandler);
         }
     }
 
@@ -105,7 +108,9 @@ public class NeoOwoNetworking {
                     registrar.playToServer(id, codec, (arg, context) -> context.enqueueWork(() -> castedHandler.accept(arg, context.player())));
                 }
             }, () -> {
-                registrar.playBidirectional(id, codec, (arg, context) -> context.enqueueWork(() -> castedHandler.accept(arg, context.player())));
+                IPayloadHandler<T> biDiHandler = (arg, context) -> context.enqueueWork(() -> castedHandler.accept(arg, context.player()));
+
+                registrar.playBidirectional(id, codec, biDiHandler, biDiHandler);
             });
         }
     }

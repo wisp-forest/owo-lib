@@ -8,7 +8,7 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.Set;
 
 @ApiStatus.Internal
-@OnlyIn(Dist.CLIENT)
+//@OnlyIn(Dist.CLIENT)
 public class QueuedChannelSet {
     public static Set<Identifier> channels;
 }

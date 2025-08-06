@@ -10,8 +10,6 @@ import com.mojang.blaze3d.textures.GpuTextureView;
 import io.wispforest.owo.ui.core.OwoUIPipelines;
 import io.wispforest.owo.ui.event.ClientRenderCallback;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.DynamicUniformStorage;
 import net.minecraft.client.gl.Framebuffer;
@@ -20,6 +18,8 @@ import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.client.gui.render.state.SimpleGuiElementRenderState;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.texture.TextureSetup;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2f;
@@ -131,7 +131,7 @@ public record BlurQuadElementRenderState(
             return this.storage.write(new Value(inputResolution, directions, quality, size));
         }
 
-        @Environment(EnvType.CLIENT)
+        //@OnlyIn(Dist.CLIENT)
         public record Value(Vector2i inputResolution, int directions, float quality, float size) implements DynamicUniformStorage.Uploadable {
             @Override
             public void write(ByteBuffer buffer) {

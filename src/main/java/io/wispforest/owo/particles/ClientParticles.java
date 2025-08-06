@@ -11,12 +11,13 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.loading.FMLLoader;
 
 /**
  * A wrapper for vanilla's terrible particle system that allows for easier
  * and more complex multi-particle operations
  */
-@OnlyIn(Dist.CLIENT)
+//@OnlyIn(Dist.CLIENT)
 public final class ClientParticles {
 
     private static int particleCount = 1;
@@ -250,6 +251,7 @@ public final class ClientParticles {
      */
     @SuppressWarnings("ConstantConditions")
     public static <T extends ParticleEffect> void spawnWithMaxAge(T particleType, Vec3d pos, int maxAge) {
+        if (!FMLLoader.getDist().isClient()) throw new IllegalStateException("Unable to execute spawnWithMaxAge as currently its not a CLIENT Dist!");
         var particle = MinecraftClient.getInstance().particleManager.addParticle(particleType, pos.x, pos.y, pos.z, velocity.x, velocity.y, velocity.z);
         if (particle == null) {
             return;

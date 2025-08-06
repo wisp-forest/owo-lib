@@ -15,6 +15,7 @@ import io.wispforest.owo.ui.layers.Layers;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.uwu.Uwu;
+import io.wispforest.uwu.items.UwuItems;
 import io.wispforest.uwu.network.UwuNetworkExample;
 import io.wispforest.uwu.network.UwuOptionalNetExample;
 import net.minecraft.client.MinecraftClient;
@@ -30,6 +31,7 @@ import net.minecraft.item.Items;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableTextContent;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -38,6 +40,8 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.nio.file.Path;
@@ -157,6 +161,13 @@ public class UwuClient {
 
             instance.alignComponentToHandledScreenCoordinates(button, 125, 65);
         }, InventoryScreen.class);
+
+        NeoForge.EVENT_BUS.addListener(PlayerInteractEvent.RightClickItem.class, event -> {
+            if (event.getEntity().isSneaking() && event.getEntity().getStackInHand(event.getHand()).isOf(UwuItems.SCREEN_SHARD)) {
+                MinecraftClient.getInstance().setScreen(new SelectUwuScreenScreen());
+                event.setCancellationResult(ActionResult.PASS);
+            }
+        });
     }
 
     public record WeirdMessage(int e) {}

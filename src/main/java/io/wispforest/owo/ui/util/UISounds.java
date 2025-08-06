@@ -7,6 +7,7 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.loading.FMLLoader;
 
 public final class UISounds {
 
@@ -14,13 +15,15 @@ public final class UISounds {
 
     private UISounds() {}
 
-    @OnlyIn(Dist.CLIENT)
+    //@OnlyIn(Dist.CLIENT)
     public static void playButtonSound() {
+        if (!FMLLoader.getDist().isClient()) throw new IllegalStateException("Unable to execute playButtonSound as currently its not a CLIENT Dist!");
         MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1));
     }
 
-    @OnlyIn(Dist.CLIENT)
+    //@OnlyIn(Dist.CLIENT)
     public static void playInteractionSound() {
+        if (!FMLLoader.getDist().isClient()) throw new IllegalStateException("Unable to execute playInteractionSound as currently its not a CLIENT Dist!");
         MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(UI_INTERACTION, 1));
     }
 

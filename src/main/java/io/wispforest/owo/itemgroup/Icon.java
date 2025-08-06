@@ -20,7 +20,7 @@ import net.neoforged.api.distmarker.OnlyIn;
 @FunctionalInterface
 public interface Icon {
 
-    @OnlyIn(Dist.CLIENT)
+    //@OnlyIn(Dist.CLIENT)
     void render(DrawContext context, int x, int y, int mouseX, int mouseY, float delta);
 
     static Icon of(ItemStack stack) {
