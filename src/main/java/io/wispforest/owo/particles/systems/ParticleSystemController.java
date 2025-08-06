@@ -198,7 +198,7 @@ public class ParticleSystemController {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
+    //@OnlyIn(Dist.CLIENT)
     private static class Client {
         private void handler(ParticleSystemPayload payload, World world) {
             payload.instance.execute(world, payload.pos);

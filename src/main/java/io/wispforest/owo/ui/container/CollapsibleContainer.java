@@ -204,13 +204,13 @@ public class CollapsibleContainer extends FlowLayout {
         public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
             var matrices = context.getMatrices();
 
-            matrices.push();
-            matrices.translate(this.x + this.width / 2f - 1, this.y + this.height / 2f - 1, 0);
-            matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(this.rotation));
-            matrices.translate(-(this.x + this.width / 2f - 1), -(this.y + this.height / 2f - 1), 0);
+            matrices.pushMatrix();
+            matrices.translate(this.x + this.width / 2f - 1, this.y + this.height / 2f - 1);
+            matrices.rotate((float) Math.toRadians(this.rotation));
+            matrices.translate(-(this.x + this.width / 2f - 1), -(this.y + this.height / 2f - 1));
 
             super.draw(context, mouseX, mouseY, partialTicks, delta);
-            matrices.pop();
+            matrices.popMatrix();
         }
     }
 }

@@ -15,6 +15,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.network.handling.IPayloadHandler;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -25,7 +26,7 @@ public class ScreenInternals {
     public static void init(PayloadRegistrar registrar) {
         var localPacketCodec = CodecUtils.toPacketCodec(LocalPacket.ENDEC);
 
-        registrar.playBidirectional(LocalPacket.ID, localPacketCodec, (payload, context) -> {
+        IPayloadHandler<LocalPacket> handler = (payload, context) -> {
             context.enqueueWork(() -> {
                 var screenHandler = context.player().currentScreenHandler;
 
@@ -36,7 +37,9 @@ public class ScreenInternals {
 
                 ((OwoScreenHandlerExtension) screenHandler).owo$handlePacket(payload, context.player().getWorld().isClient());
             });
-        });
+        };
+
+        registrar.playBidirectional(LocalPacket.ID, localPacketCodec, handler, handler);
         registrar.playToClient(SyncPropertiesPacket.ID, CodecUtils.toPacketCodec(SyncPropertiesPacket.ENDEC), (payload, context) -> {
             context.enqueueWork(() -> {
                 var screenHandler = context.player().currentScreenHandler;
@@ -75,16 +78,6 @@ public class ScreenInternals {
         @Override
         public Id<? extends CustomPayload> getId() {
             return ID;
-        }
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    public static class Client {
-        public static void init() {
-            NeoForge.EVENT_BUS.addListener((ScreenEvent.Init.Post event) -> {
-                if (event.getScreen() instanceof ScreenHandlerProvider<?> handled)
-                    ((OwoScreenHandlerExtension) handled.getScreenHandler()).owo$attachToPlayer(MinecraftClient.getInstance().player);
-            });
         }
     }
 }

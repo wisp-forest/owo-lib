@@ -12,6 +12,7 @@ import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.Observable;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -48,9 +49,9 @@ public class SmallCheckboxComponent extends BaseComponent {
             context.drawText(MinecraftClient.getInstance().textRenderer, this.label.get(), this.x + 13 + 2, this.y + 3, Color.WHITE.argb(), this.labelShadow);
         }
 
-        context.drawTexture(RenderLayer::getGuiTextured, TEXTURE, this.x, this.y, 0, 0, 13, 13, 13, 13, 32, 16);
+        context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, this.x, this.y, 0, 0, 13, 13, 13, 13, 32, 16);
         if (this.checked) {
-            context.drawTexture(RenderLayer::getGuiTextured, TEXTURE, this.x, this.y, 16, 0, 13, 13, 13, 13, 32, 16);
+            context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, this.x, this.y, 16, 0, 13, 13, 13, 13, 32, 16);
         }
     }
 

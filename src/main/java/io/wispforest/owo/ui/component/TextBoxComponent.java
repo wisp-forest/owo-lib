@@ -10,9 +10,7 @@ import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.Observable;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 import org.w3c.dom.Element;
@@ -60,6 +58,18 @@ public class TextBoxComponent extends TextFieldWidget {
         } else {
             return result;
         }
+    }
+
+    @Override
+    public void updateX(int x) {
+        super.updateX(x);
+        ((TextFieldWidgetAccessor) this).owo$updateTextPosition();
+    }
+
+    @Override
+    public void updateY(int y) {
+        super.updateY(y);
+        ((TextFieldWidgetAccessor) this).owo$updateTextPosition();
     }
 
     @Override

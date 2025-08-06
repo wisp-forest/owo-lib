@@ -17,7 +17,8 @@ import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,7 +34,7 @@ public class Owo {
      * To override that behavior, add the {@code -Dowo.debug=false} java argument
      */
     public static final boolean DEBUG;
-    public static final Logger LOGGER = LogManager.getLogger("owo");
+    public static final Logger LOGGER = LoggerFactory.getLogger("owo");
 
     public static final Text PREFIX = Text.empty().formatted(Formatting.GRAY)
             .append(withColor("o", 0x3955e5))

@@ -90,24 +90,9 @@ public class DraggableContainer<C extends Component> extends WrappingParentCompo
         return this.foreheadSize;
     }
 
-    /**
-     * @deprecated This method merely sets the z-index of this component
-     * to 500/0. Simply use {@link #zIndex(int)} with an appropriate value instead
-     */
-    @Deprecated(forRemoval = true)
-    public DraggableContainer<C> alwaysOnTop(boolean alwaysOnTop) {
-        this.zIndex(alwaysOnTop ? 500 : 0);
-        return this;
-    }
-
-    public boolean alwaysOnTop() {
-        return false;
-    }
-
     @Override
     public void parseProperties(UIModel model, Element element, Map<String, Element> children) {
         super.parseProperties(model, element, children);
         UIParsing.apply(children, "forehead-size", UIParsing::parseUnsignedInt, this::foreheadSize);
-        UIParsing.apply(children, "always-on-top", UIParsing::parseBool, this::alwaysOnTop);
     }
 }

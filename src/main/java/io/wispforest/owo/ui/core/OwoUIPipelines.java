@@ -12,8 +12,8 @@ import org.jetbrains.annotations.ApiStatus;
 
 public final class OwoUIPipelines {
 
-    public static final RenderPipeline.Snippet HSV_SNIPPET = RenderPipeline.builder(RenderPipelines.MATRICES_COLOR_SNIPPET)
-        .withVertexShader(Identifier.ofVanilla("core/position_color"))
+    public static final RenderPipeline.Snippet HSV_SNIPPET = RenderPipeline.builder(RenderPipelines.TRANSFORMS_AND_PROJECTION_SNIPPET)
+        .withVertexShader(Identifier.ofVanilla("core/gui"))
         .withFragmentShader(Identifier.of("owo", "core/spectrum"))
         .withVertexFormat(VertexFormats.POSITION_COLOR, VertexFormat.DrawMode.QUADS)
         .withBlend(BlendFunction.TRANSLUCENT)
@@ -23,16 +23,13 @@ public final class OwoUIPipelines {
         .withLocation(Identifier.of("owo", "pipeline/gui_hsv"))
         .build();
 
-    public static final RenderPipeline GUI_BLUR = RenderPipeline.builder(RenderPipelines.MATRICES_COLOR_SNIPPET)
+    public static final RenderPipeline GUI_BLUR = RenderPipeline.builder(RenderPipelines.TRANSFORMS_AND_PROJECTION_SNIPPET)
         .withLocation(Identifier.of("owo", "pipeline/gui_blur"))
         .withVertexFormat(VertexFormats.POSITION, VertexFormat.DrawMode.QUADS)
         .withVertexShader(Identifier.of("owo", "core/blur"))
         .withFragmentShader(Identifier.of("owo", "core/blur"))
         .withSampler("InputSampler")
-        .withUniform("InputResolution", UniformType.VEC2)
-        .withUniform("Directions", UniformType.FLOAT)
-        .withUniform("Quality", UniformType.FLOAT)
-        .withUniform("Size", UniformType.FLOAT)
+        .withUniform("BlurSettings", UniformType.UNIFORM_BUFFER)
         .build();
 
     public static final RenderPipeline GUI_TRIANGLE_FAN = RenderPipeline.builder(RenderPipelines.GUI_SNIPPET)

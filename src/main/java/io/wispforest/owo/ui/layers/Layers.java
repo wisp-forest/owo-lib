@@ -89,7 +89,6 @@ public final class Layers {
         });
 
         NeoForge.EVENT_BUS.<ScreenEvent.Render.Post>addListener(EventPriority.LOW, (event) -> {
-            event.getGuiGraphics().draw();
             for (var instance : getInstances(event.getScreen())) {
                 instance.adapter.render(event.getGuiGraphics(), event.getMouseX(), event.getMouseY(), event.getPartialTick());
             }

@@ -28,6 +28,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadHandler;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import org.jetbrains.annotations.Nullable;
 
@@ -118,8 +119,9 @@ public class ConfigSynchronizer {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
+    //@OnlyIn(Dist.CLIENT)
     private static void applyClient(ConfigSyncPacket payload, IPayloadContext context) {
+        if (!FMLLoader.getDist().isClient()) throw new IllegalStateException("Unable to execute applyClient as currently its not a CLIENT Dist!");
         var client = MinecraftClient.getInstance();
 
         Owo.LOGGER.info("Applying server overrides");
@@ -199,7 +201,7 @@ public class ConfigSynchronizer {
     public static void register(PayloadRegistrar registrar) {
         var packetCodec = CodecUtils.toPacketCodec(ConfigSyncPacket.ENDEC);
 
-        registrar.playBidirectional(ConfigSyncPacket.ID, packetCodec, (payload, context) -> {
+        IPayloadHandler<ConfigSyncPacket> handler = (payload, context) -> {
             context.enqueueWork(() -> {
                 if (context.player().getWorld().isClient()) {
                     ConfigSynchronizer.applyClient(payload, context);
@@ -207,7 +209,9 @@ public class ConfigSynchronizer {
                     ConfigSynchronizer.applyServer(payload, context);
                 }
             });
-        });
+        };
+
+        registrar.playBidirectional(ConfigSyncPacket.ID, packetCodec, handler);
 
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, (OnDatapackSyncEvent event) -> {
             if (event.getPlayer() != null) {

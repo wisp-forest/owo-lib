@@ -30,6 +30,7 @@ import net.minecraft.util.math.ChunkPos;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.neoforge.client.internal.NeoForgeClientProxy;
 import net.neoforged.neoforge.network.registration.NetworkRegistry;
 
 import java.util.*;
@@ -314,8 +315,9 @@ public class OwoNetChannel {
                 : NetworkRegistry.hasChannel(networkHandler, this.packetId.id());
     }
 
-    @OnlyIn(Dist.CLIENT)
+    //@OnlyIn(Dist.CLIENT)
     public boolean canSendToServer() {
+        if (!FMLLoader.getDist().isClient()) throw new IllegalStateException("Unable to execute canSendToServer as currently its not a CLIENT Dist!");
         if (required) return true;
 
         return OwoHandshake.isValidClient() ?

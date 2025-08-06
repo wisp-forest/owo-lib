@@ -66,7 +66,7 @@ public abstract class CreativeInventoryScreenMixin extends HandledScreen<Creativ
     // Background
     // ----------
 
-    @ModifyArg(method = "drawBackground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawTexture(Ljava/util/function/Function;Lnet/minecraft/util/Identifier;IIFFIIII)V", ordinal = 0))
+    @ModifyArg(method = "drawBackground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawTexture(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/util/Identifier;IIFFIIII)V", ordinal = 0))
     private Identifier injectCustomGroupTexture(Identifier original) {
         if (!(selectedTab instanceof OwoItemGroup owoGroup) || owoGroup.getBackgroundTexture() == null) return original;
         return owoGroup.getBackgroundTexture();
@@ -76,7 +76,7 @@ public abstract class CreativeInventoryScreenMixin extends HandledScreen<Creativ
     // Scrollbar slider
     // ----------------
 
-    @ModifyArg(method = "drawBackground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Ljava/util/function/Function;Lnet/minecraft/util/Identifier;IIII)V"))
+    @ModifyArg(method = "drawBackground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/util/Identifier;IIII)V"))
     private Identifier injectCustomScrollbarTexture(Identifier texture) {
         if (!(selectedTab instanceof OwoItemGroup owoGroup) || owoGroup.getScrollerTextures() == null) return texture;
 
@@ -89,7 +89,7 @@ public abstract class CreativeInventoryScreenMixin extends HandledScreen<Creativ
     // Group headers
     // -------------
 
-    @ModifyArg(method = "renderTabIcon", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Ljava/util/function/Function;Lnet/minecraft/util/Identifier;IIII)V"))
+    @ModifyArg(method = "renderTabIcon", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/util/Identifier;IIII)V"))
     private Identifier injectCustomTabTexture(Identifier texture, @Local(argsOnly = true) ItemGroup group) {
         if(!(group instanceof OwoItemGroup contextGroup) || contextGroup.getTabTextures() == null) return texture;
 
@@ -99,8 +99,8 @@ public abstract class CreativeInventoryScreenMixin extends HandledScreen<Creativ
                 : selectedTab == contextGroup ? contextGroup.getColumn() == 0 ? textures.bottomSelectedFirstColumn() : textures.bottomSelected() : textures.bottomUnselected();
     }
 
-    @Inject(method = "renderTabIcon", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemGroup;getIcon()Lnet/minecraft/item/ItemStack;"), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void renderOwoIcon(DrawContext context, ItemGroup group, CallbackInfo ci, boolean bl, boolean bl2, int i, int j, int k) {
+    @Inject(method = "renderTabIcon", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemGroup;getIcon()Lnet/minecraft/item/ItemStack;"))
+    private void renderOwoIcon(DrawContext context, ItemGroup group, CallbackInfo ci, @Local(ordinal = 3) int j, @Local(ordinal = 4) int k) {
         if (!(group instanceof OwoItemGroup owoGroup)) return;
 
         owoGroup.icon().render(context, j, k, 0, 0, 0);
@@ -110,7 +110,7 @@ public abstract class CreativeInventoryScreenMixin extends HandledScreen<Creativ
     // oωo tab title
     // -------------
 
-    @ModifyArg(method = "drawForeground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawText(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/text/Text;IIIZ)I"))
+    @ModifyArg(method = "drawForeground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawText(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/text/Text;IIIZ)V"))
     private Text injectTabNameAsTitle(Text original) {
         if (!(selectedTab instanceof OwoItemGroup owoGroup) || !owoGroup.hasDynamicTitle() || owoGroup.selectedTabs().size() != 1) {
             return original;

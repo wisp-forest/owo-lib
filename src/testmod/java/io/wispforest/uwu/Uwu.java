@@ -20,8 +20,6 @@ import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
 import io.wispforest.owo.network.OwoNetChannel;
-import io.wispforest.owo.offline.OfflineAdvancementLookup;
-import io.wispforest.owo.offline.OfflineDataLookup;
 import io.wispforest.owo.particles.ClientParticles;
 import io.wispforest.owo.particles.systems.ParticleSystem;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
@@ -249,40 +247,6 @@ public class Uwu {
             var access = commandEvent.getBuildContext();
             var environment = commandEvent.getCommandSelection();
 
-            dispatcher.register(
-                    literal("show_nbt")
-                            .then(argument("player", GameProfileArgumentType.gameProfile())
-                                    .executes(context -> {
-                                        GameProfile profile = GameProfileArgumentType.getProfileArgument(context, "player").iterator().next();
-                                        NbtCompound tag = OfflineDataLookup.get(profile.getId());
-                                        context.getSource().sendFeedback(() -> NbtHelper.toPrettyPrintedText(tag), false);
-                                        return 0;
-                                    })));
-
-            dispatcher.register(
-                    literal("test_advancement_cache")
-                            .then(literal("read")
-                                    .then(argument("player", GameProfileArgumentType.gameProfile())
-                                            .executes(context -> {
-                                                GameProfile profile = GameProfileArgumentType.getProfileArgument(context, "player").iterator().next();
-                                                Map<Identifier, AdvancementProgress> map = OfflineAdvancementLookup.get(profile.getId());
-                                                context.getSource().sendFeedback(() -> Text.literal(map.toString()), false);
-                                                System.out.println(map);
-                                                return 0;
-                                            })))
-                            .then(literal("write")
-                                    .then(argument("player", GameProfileArgumentType.gameProfile())
-                                            .executes(context -> {
-                                                MinecraftServer server = context.getSource().getServer();
-                                                GameProfile profile = GameProfileArgumentType.getProfileArgument(context, "player").iterator().next();
-
-                                                OfflineAdvancementLookup.edit(profile.getId(), handle -> {
-                                                    handle.grant(server.getAdvancementLoader().get(Identifier.of("story/iron_tools")));
-                                                });
-
-                                                return 0;
-                                            }))));
-
             dispatcher.register(literal("get_option")
                     .then(argument("config", StringArgumentType.string())
                             .then(argument("option", StringArgumentType.string()).executes(context -> {
@@ -391,47 +355,48 @@ public class Uwu {
 
                         //--
 
-                        {
-                            LOGGER.info("--- Format Based Endec Test");
-
-                            var nbtDataStack = handStack.toNbt(access);
-
-                            LOGGER.info("  Input:  " + nbtDataStack.asString().get().replace("\n", "\\n"));
-
-                            var jsonDataStack = NbtEndec.ELEMENT.encodeFully(GsonSerializer::of, nbtDataStack);
-
-                            LOGGER.info("  Json:  " + jsonDataStack);
-
-                            var convertedNbtDataStack = NbtEndec.ELEMENT.decodeFully(GsonDeserializer::of, jsonDataStack);
-
-                            LOGGER.info("Output:  " + convertedNbtDataStack.asString().get().replace("\n", "\\n"));
-
-                            LOGGER.info("---");
-
-                            LOGGER.info("");
-                        }
-
-                        //--
-
-                        {
-                            LOGGER.info("--- Transpose Format Based Endec Test");
-
-                            var nbtDataStack = handStack.toNbt(access);
-
-                            LOGGER.info("  Input:  " + nbtDataStack.asString().get().replace("\n", "\\n"));
-
-                            var jsonDataStack = NbtEndec.ELEMENT.encodeFully(GsonSerializer::of, nbtDataStack);
-
-                            LOGGER.info("  Json:  " + jsonDataStack);
-
-                            var convertedNbtDataStack = GsonEndec.INSTANCE.encodeFully(NbtSerializer::of, jsonDataStack);
-
-                            LOGGER.info("Output:  " + convertedNbtDataStack.asString().get().replace("\n", "\\n"));
-
-                            LOGGER.info("---");
-
-                            LOGGER.info("");
-                        }
+                        // TODO: kodeck test
+//                        {
+//                            LOGGER.info("--- Format Based Endec Test");
+//
+//                            var nbtDataStack = handStack.toNbt(access);
+//
+//                            LOGGER.info("  Input:  " + nbtDataStack.asString().get().replace("\n", "\\n"));
+//
+//                            var jsonDataStack = NbtEndec.ELEMENT.encodeFully(GsonSerializer::of, nbtDataStack);
+//
+//                            LOGGER.info("  Json:  " + jsonDataStack);
+//
+//                            var convertedNbtDataStack = NbtEndec.ELEMENT.decodeFully(GsonDeserializer::of, jsonDataStack);
+//
+//                            LOGGER.info("Output:  " + convertedNbtDataStack.asString().get().replace("\n", "\\n"));
+//
+//                            LOGGER.info("---");
+//
+//                            LOGGER.info("");
+//                        }
+//
+//                        //--
+//
+//                        {
+//                            LOGGER.info("--- Transpose Format Based Endec Test");
+//
+//                            var nbtDataStack = handStack.toNbt(access);
+//
+//                            LOGGER.info("  Input:  " + nbtDataStack.asString().get().replace("\n", "\\n"));
+//
+//                            var jsonDataStack = NbtEndec.ELEMENT.encodeFully(GsonSerializer::of, nbtDataStack);
+//
+//                            LOGGER.info("  Json:  " + jsonDataStack);
+//
+//                            var convertedNbtDataStack = GsonEndec.INSTANCE.encodeFully(NbtSerializer::of, jsonDataStack);
+//
+//                            LOGGER.info("Output:  " + convertedNbtDataStack.asString().get().replace("\n", "\\n"));
+//
+//                            LOGGER.info("---");
+//
+//                            LOGGER.info("");
+//                        }
 
                         //--
 

@@ -25,10 +25,9 @@ public class UwuScreenShardItem extends Item {
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
     public ActionResult use(World world, PlayerEntity user, Hand hand) {
         if (user.isSneaking()) {
-            if (world.isClient) MinecraftClient.getInstance().setScreen(new SelectUwuScreenScreen());
+            //if (world.isClient) MinecraftClient.getInstance().setScreen(new SelectUwuScreenScreen());
         } else if (!world.isClient) {
             user.openHandledScreen(new NamedScreenHandlerFactory() {
                 @Override

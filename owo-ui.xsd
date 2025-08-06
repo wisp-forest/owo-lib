@@ -818,7 +818,6 @@
                     <xs:choice maxOccurs="unbounded">
                         <xs:group ref="parentComponentProps"/>
                         <xs:element type="xs:unsignedInt" name="forehead-size" minOccurs="0"/>
-                        <xs:element type="xs:boolean" name="always-on-top" minOccurs="0"/>
                     </xs:choice>
                 </xs:sequence>
             </xs:extension>

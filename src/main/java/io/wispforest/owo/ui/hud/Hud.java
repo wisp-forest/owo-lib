@@ -1,5 +1,7 @@
 package io.wispforest.owo.ui.hud;
 
+import io.wispforest.owo.Owo;
+import io.wispforest.owo.client.OwoClient;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.OwoUIAdapter;
@@ -7,8 +9,9 @@ import io.wispforest.owo.ui.event.ClientRenderCallback;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.Identifier;
-import net.neoforged.neoforge.client.event.RenderGuiEvent;
-import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.bus.api.Event;
+import net.neoforged.neoforge.client.gui.GuiLayer;
+import net.neoforged.neoforge.client.gui.GuiLayerManager;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -106,16 +109,10 @@ public class Hud {
                 pendingActions.clear();
             }
         });
-
-        NeoForge.EVENT_BUS.addListener((RenderGuiEvent.Post event) -> {
-            var context = event.getGuiGraphics();
-            var tickDelta = event.getPartialTick();
-
-            if (adapter == null || suppress || MinecraftClient.getInstance().options.hudHidden) return;
-
-            context.push().translate(0, 0, 100);
-            adapter.render(context, -69, -69, tickDelta.getTickProgress(false));
-            context.pop();
-        });
     }
+
+    public static final GuiLayerManager.NamedLayer HUD_LAYER = new GuiLayerManager.NamedLayer(Identifier.of("owo", "owo_ui_hud"), (context, tickCounter) -> {
+        if (adapter == null || suppress || MinecraftClient.getInstance().options.hudHidden) return;
+        adapter.render(context, -69, -69, tickCounter.getTickProgress(false));
+    });
 }

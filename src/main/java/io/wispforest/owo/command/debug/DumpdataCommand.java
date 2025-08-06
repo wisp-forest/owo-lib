@@ -18,7 +18,9 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.storage.NbtWriteView;
 import net.minecraft.text.Text;
+import net.minecraft.util.ErrorReporter;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -103,8 +105,11 @@ public class DumpdataCommand {
         informationHeader(source, "Entity");
         sendIdentifier(source, entity.getType(), Registries.ENTITY_TYPE);
 
+        var writeView = NbtWriteView.create(new ErrorReporter.Logging(Owo.LOGGER));
+        entity.saveData(writeView);
+
         feedback(source, TextOps.withFormatting("NBT" + formatPath(path) + ": ", Formatting.GRAY)
-                .append(NbtHelper.toPrettyPrintedText(getPath(entity.writeNbt(new NbtCompound()), path))));
+                .append(NbtHelper.toPrettyPrintedText(getPath(writeView.getNbt(), path))));
 
         feedback(source, TextOps.withFormatting("-----------------------", Formatting.GRAY));
 

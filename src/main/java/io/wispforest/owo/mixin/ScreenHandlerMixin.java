@@ -21,6 +21,7 @@ import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.loading.FMLLoader;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -130,8 +131,9 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
     }
 
     @Unique
-    @OnlyIn(Dist.CLIENT)
+    //@OnlyIn(Dist.CLIENT)
     private void owo$sendToServer(CustomPayload payload) {
+        if (!FMLLoader.getDist().isClient()) throw new IllegalStateException("Unable to execute owo$sendToServer as currently its not a CLIENT Dist!");
         MinecraftClient.getInstance().getNetworkHandler().send(payload);
     }
 
