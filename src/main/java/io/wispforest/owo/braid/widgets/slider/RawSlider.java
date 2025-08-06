@@ -120,10 +120,9 @@ public class RawSlider extends StatefulWidget {
                                     })
                                     .dragCallback((x, y, dx, dy) -> this.move(constraints, dx, widget.axis == LayoutAxis.VERTICAL ? -dy : dy))
                                     .scrollCallback((horizontal, vertical) -> {
-                                        //TODO: move shift logic to appstate
-                                        // Singleton usage spotted :alarm: :alarm:
-                                        var offset = (Screen.hasShiftDown() ? widget.axis.opposite() : widget.axis).choose(-horizontal, vertical) * step;
-                                        var newValue = MathHelper.clamp(widget.value + offset, widget.min, widget.max);
+                                        //TODO: Singleton usage spotted :alarm: :alarm:
+                                        var offset = Math.abs(vertical) > Math.abs(horizontal) ? vertical : -horizontal;
+                                        var newValue = MathHelper.clamp(widget.value + offset * step, widget.min, widget.max);
                                         if (widget.value == newValue) return false;
                                         widget.onChanged.accept(newValue);
                                         return true;

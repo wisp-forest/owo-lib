@@ -61,7 +61,12 @@ public class AppState implements InstanceHost, ProxyHost {
     private KeyModifiers draggingModifiers = null;
     private boolean dragStarted = false;
 
+    private static final int MIN_GRACE_PERIOD = 200;
+    private static final int MAX_GRACE_PERIOD = 500;
+    private static final int SCROLL_MOVEMENT_THRESHOLD = 5;
+
     private @Nullable HitTestState scrollHit = null;
+    private Vector2d scrollPos = new Vector2d();
     private long lastScrollTime = 0;
 
     private List<KeyboardListener> focused = new ArrayList<>();
@@ -260,6 +265,7 @@ public class AppState implements InstanceHost, ProxyHost {
                 case MouseMoveEvent(double x, double y, double deltaX, double deltaY) -> {
                     this.cursorPosition.x = x;
                     this.cursorPosition.y = y;
+                    if (cursorPosition.distance(scrollPos) > SCROLL_MOVEMENT_THRESHOLD) this.scrollHit = null;
 
                     var state = this.hitTest();
 
@@ -324,8 +330,10 @@ public class AppState implements InstanceHost, ProxyHost {
                 }
                 case MouseScrollEvent(double xOffset, double yOffset) -> {
                     var now = System.currentTimeMillis();
-                    if (this.scrollHit == null || now - this.lastScrollTime > 200) this.scrollHit = this.hitTest();
+                    var grace = this.cursorPosition.distance(this.scrollPos) > SCROLL_MOVEMENT_THRESHOLD ? MIN_GRACE_PERIOD : MAX_GRACE_PERIOD;
+                    if (this.scrollHit == null || now - this.lastScrollTime > grace) this.scrollHit = this.hitTest();
                     this.lastScrollTime = now;
+                    this.scrollPos = new Vector2d(this.cursorPosition);
                     this.scrollHit.firstWhere(
                         (hit) -> hit.instance() instanceof MouseListener &&
                             ((MouseListener) hit.instance()).onMouseScroll(
