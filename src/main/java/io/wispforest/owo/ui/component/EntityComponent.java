@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.wispforest.owo.Owo;
+import io.wispforest.owo.mixin.ui.access.EntityRendererAccessor;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.Sizing;
@@ -25,10 +26,7 @@ import net.minecraft.client.session.telemetry.WorldSession;
 import net.minecraft.client.util.DefaultSkinHelper;
 import net.minecraft.client.util.SkinTextures;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.*;
 import net.minecraft.entity.player.PlayerModelPart;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.StringNbtReader;
@@ -118,7 +116,18 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
         }
 
         var entityState = this.dispatcher.getRenderer(this.entity).createRenderState();
-        ((EntityRenderer)this.dispatcher.getRenderer(this.entity)).updateRenderState(this.entity, entityState, partialTicks);
+
+        var renderer = (EntityRenderer)this.dispatcher.getRenderer(this.entity);
+
+        renderer.updateRenderState(this.entity, entityState, partialTicks);
+
+        if (showNametag) {
+            entityState.displayName = ((EntityRendererAccessor) renderer).owo$getDisplayName(entity);
+            entityState.nameLabelPos = entity.getAttachments().getPointNullable(EntityAttachmentType.NAME_TAG, 0, entity.getLerpedYaw(partialTicks));
+        } else {
+            entityState.displayName = null;
+            entityState.nameLabelPos = null;
+        }
 
         context.state.addSpecialElement(new EntityElementRenderState(
             entityState,
