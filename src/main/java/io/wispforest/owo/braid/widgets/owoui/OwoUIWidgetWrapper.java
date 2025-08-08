@@ -52,14 +52,24 @@ public class OwoUIWidgetWrapper extends LeafInstanceWidget {
 
         @Override
         protected double measureIntrinsicWidth(double height) {
-            // TODO: deal with this not being pure.
+            // the focus handler is created on mount, therefore it's null only if the
+            // component wasn't mounted.
+            if (widget.rootComponent.focusHandler() != null) {
+                throw new IllegalStateException("Tried to measure intrinsic width of mounted owo-ui component");
+            }
+
             widget.rootComponent.inflate(io.wispforest.owo.ui.core.Size.of(Integer.MAX_VALUE, (int) height));
             return widget.rootComponent.width();
         }
 
         @Override
         protected double measureIntrinsicHeight(double width) {
-            // TODO: deal with this not being pure.
+            // the focus handler is created on mount, therefore it's null only if the
+            // component wasn't mounted.
+            if (widget.rootComponent.focusHandler() != null) {
+                throw new IllegalStateException("Tried to measure intrinsic height of mounted owo-ui component");
+            }
+
             widget.rootComponent.inflate(io.wispforest.owo.ui.core.Size.of((int) width, Integer.MAX_VALUE));
             return widget.rootComponent.height();
         }
