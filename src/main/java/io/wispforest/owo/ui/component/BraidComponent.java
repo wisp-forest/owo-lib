@@ -4,6 +4,8 @@ import io.wispforest.owo.braid.core.AppState;
 import io.wispforest.owo.braid.core.EventBuffer;
 import io.wispforest.owo.braid.core.KeyModifiers;
 import io.wispforest.owo.braid.core.Surface;
+import io.wispforest.owo.braid.core.cursor.CursorStyle;
+import io.wispforest.owo.braid.core.cursor.SystemCursorStyle;
 import io.wispforest.owo.braid.core.events.*;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
@@ -20,28 +22,39 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;
 
+import java.lang.ref.Cleaner;
+import java.lang.ref.WeakReference;
 import java.util.function.Consumer;
 
 import static org.lwjgl.glfw.GLFW.*;
 
 public class BraidComponent extends BaseComponent {
 
+    private static final Cleaner APP_CLEANER = Cleaner.create();
+
     private final AppState appState;
     private final EventBuffer eventBuffer = new EventBuffer();
 
     private BraidWidget.State braidWidgetState;
 
+    private int prevMouseX = -1;
+    private int prevMouseY = -1;
+
+    private CursorStyle cursorStyle = CursorStyle.NONE;
+
     public BraidComponent(Widget braidWidget) {
         this.appState = new AppState(
             null,
             MinecraftClient.getInstance(),
-            new Surface.Default(),
+            new EmbedSurface(this),
             eventBuffer,
             new BraidWidget(
                 state -> braidWidgetState = state,
                 braidWidget
             )
         );
+
+        APP_CLEANER.register(this, new AppCleanCallback(appState));
     }
 
     @Override
@@ -68,6 +81,14 @@ public class BraidComponent extends BaseComponent {
     @Override
     public void update(float delta, int mouseX, int mouseY) {
         super.update(delta, mouseX, mouseY);
+
+        if (prevMouseX != mouseX || prevMouseY != mouseY) {
+            eventBuffer.add(new MouseMoveEvent(mouseX, mouseY, mouseX - prevMouseX, mouseY - prevMouseY));
+
+            prevMouseX = mouseX;
+            prevMouseY = mouseY;
+        }
+
         appState.updateWidgetsAndInteractions(
             MinecraftClient.getInstance().getRenderTickCounter().getTickDelta(false),
             delta
@@ -121,9 +142,62 @@ public class BraidComponent extends BaseComponent {
         return true;
     }
 
+    @Override
+    public io.wispforest.owo.ui.core.CursorStyle cursorStyle() {
+        if (!(cursorStyle instanceof SystemCursorStyle system)) return io.wispforest.owo.ui.core.CursorStyle.NONE;
+
+        return switch (system.glfwId) {
+            case GLFW.GLFW_ARROW_CURSOR -> io.wispforest.owo.ui.core.CursorStyle.POINTER;
+            case GLFW.GLFW_IBEAM_CURSOR -> io.wispforest.owo.ui.core.CursorStyle.TEXT;
+            case GLFW.GLFW_HAND_CURSOR -> io.wispforest.owo.ui.core.CursorStyle.HAND;
+            case GLFW.GLFW_RESIZE_ALL_CURSOR -> io.wispforest.owo.ui.core.CursorStyle.MOVE;
+            case GLFW.GLFW_CROSSHAIR_CURSOR -> io.wispforest.owo.ui.core.CursorStyle.CROSSHAIR;
+            case GLFW.GLFW_HRESIZE_CURSOR -> io.wispforest.owo.ui.core.CursorStyle.HORIZONTAL_RESIZE;
+            case GLFW.GLFW_VRESIZE_CURSOR -> io.wispforest.owo.ui.core.CursorStyle.VERTICAL_RESIZE;
+            case GLFW.GLFW_RESIZE_NWSE_CURSOR -> io.wispforest.owo.ui.core.CursorStyle.NWSE_RESIZE;
+            case GLFW.GLFW_RESIZE_NESW_CURSOR -> io.wispforest.owo.ui.core.CursorStyle.NESW_RESIZE;
+            case GLFW.GLFW_NOT_ALLOWED_CURSOR -> io.wispforest.owo.ui.core.CursorStyle.NOT_ALLOWED;
+
+            default -> io.wispforest.owo.ui.core.CursorStyle.NONE;
+        };
+    }
+
+    @Override
+    public boolean canFocus(FocusSource source) {
+        return true;
+    }
+
+    private record AppCleanCallback(AppState app) implements Runnable {
+        @Override
+        public void run() {
+            this.app.dispose();
+        }
+    }
+
+    public static class EmbedSurface extends Surface.Default {
+        // this is a weak reference so that the AppState can get properly collected
+        private final WeakReference<BraidComponent> parent;
+
+        public EmbedSurface(BraidComponent parent) {
+            this.parent = new WeakReference<>(parent);
+        }
+
+        @Override
+        public CursorStyle currentCursorStyle() {
+            //noinspection DataFlowIssue
+            return parent.get().cursorStyle;
+        }
+
+        @Override
+        public void setCursorStyle(CursorStyle style) {
+            //noinspection DataFlowIssue
+            parent.get().cursorStyle = style;
+        }
+    }
+
     public static class BraidWidget extends StatefulWidget {
 
-        public final Consumer<State> stateConsumer;
+        public Consumer<State> stateConsumer;
 
         public final Widget child;
 
@@ -135,7 +209,10 @@ public class BraidComponent extends BaseComponent {
         @Override
         public WidgetState<BraidWidget> createState() {
             var state = new State();
+
             this.stateConsumer.accept(state);
+            this.stateConsumer = null;
+
             return state;
         }
 
