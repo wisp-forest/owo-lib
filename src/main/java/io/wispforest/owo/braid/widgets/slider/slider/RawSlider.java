@@ -1,4 +1,4 @@
-package io.wispforest.owo.braid.widgets.slider;
+package io.wispforest.owo.braid.widgets.slider.slider;
 
 import io.wispforest.owo.braid.core.Alignment;
 import io.wispforest.owo.braid.core.Constraints;
@@ -13,7 +13,6 @@ import io.wispforest.owo.braid.widgets.basic.*;
 import io.wispforest.owo.braid.widgets.basic.action.ActionTrigger;
 import io.wispforest.owo.braid.widgets.basic.action.Actions;
 import io.wispforest.owo.braid.widgets.stack.Stack;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 
@@ -73,11 +72,7 @@ public class RawSlider extends StatefulWidget {
                 var step = widget.step != null ? widget.step : (widget.max - widget().min) / 100;
                 var content = new Stack(
                     widget.axis.choose(Alignment.LEFT, Alignment.TOP),
-                    new Sized(
-                        size.width(),
-                        size.height(),
-                        widget.track
-                    ),
+                    new Sized(size, widget.track),
                     new Padding(
                         widget.axis.chooseCompute(
                             () -> Insets.left(Math.floor((size.width() - widget.handleSize) * widget.normalizedValue)),
@@ -120,7 +115,7 @@ public class RawSlider extends StatefulWidget {
                                     })
                                     .dragCallback((x, y, dx, dy) -> this.move(constraints, dx, widget.axis == LayoutAxis.VERTICAL ? -dy : dy))
                                     .scrollCallback((horizontal, vertical) -> {
-                                        //TODO: Singleton usage spotted :alarm: :alarm:
+                                        //TODO: negate horizontal scrolling in appstate?
                                         var offset = Math.abs(vertical) > Math.abs(horizontal) ? vertical : -horizontal;
                                         var newValue = MathHelper.clamp(widget.value + offset * step, widget.min, widget.max);
                                         if (widget.value == newValue) return false;

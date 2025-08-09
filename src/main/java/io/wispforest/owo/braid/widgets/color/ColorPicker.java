@@ -9,8 +9,8 @@ import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.Padding;
 import io.wispforest.owo.braid.widgets.basic.Sized;
 import io.wispforest.owo.braid.widgets.flex.Column;
-import io.wispforest.owo.braid.widgets.slider.Slider;
-import io.wispforest.owo.braid.widgets.slider.Xlyder;
+import io.wispforest.owo.braid.widgets.slider.slider.Slider;
+import io.wispforest.owo.braid.widgets.slider.xlyder.Xlyder;
 
 public class ColorPicker extends StatefulWidget {
     public final ColorController controller;

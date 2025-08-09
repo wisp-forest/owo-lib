@@ -43,6 +43,13 @@ import io.wispforest.owo.braid.widgets.scroll.*;
 import io.wispforest.owo.braid.widgets.sharedstate.ShareableState;
 import io.wispforest.owo.braid.widgets.sharedstate.SharedState;
 import io.wispforest.owo.braid.widgets.slider.*;
+import io.wispforest.owo.braid.widgets.slider.drag.MessageDrag;
+import io.wispforest.owo.braid.widgets.slider.range.MessageRangeSlider;
+import io.wispforest.owo.braid.widgets.slider.slider.MessageSlider;
+import io.wispforest.owo.braid.widgets.slider.slider.RawSlider;
+import io.wispforest.owo.braid.widgets.slider.slider.Slider;
+import io.wispforest.owo.braid.widgets.slider.xlyder.MessageXlyder;
+import io.wispforest.owo.braid.widgets.slider.xlyder.RawXlyder;
 import io.wispforest.owo.braid.widgets.splitpane.MultiSplitPane;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.braid.widgets.stack.StackBase;
@@ -62,7 +69,6 @@ import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.ViewerStack;
 import io.wispforest.owo.util.Wisdom;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CheckboxWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.sound.PositionedSoundInstance;
@@ -564,7 +570,13 @@ public class TestSelector extends StatefulWidget {
                         new CoolXlyder(null, null, (x, y) -> Text.literal("x: " + formatDouble(x) + "\ny: " + formatDouble(y))),
                         new Label(Text.literal("Range")),
                         new CoolRangeSlider(2.0, (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max))),
-                        new CoolRangeSlider(null, (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max)))
+                        new CoolRangeSlider(null, (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max))),
+                        new Label(Text.literal("Drag")),
+                        new CoolDrag(2.0, false, value -> Text.literal("v: " + formatDouble(value))),
+                        new CoolDrag(null, false, value -> Text.literal("v: " + formatDouble(value))),
+                        new Label(Text.literal("Drag (with wrap)")),
+                        new CoolDrag(2.0, true, value -> Text.literal("v: " + formatDouble(value))),
+                        new CoolDrag(null, true, value -> Text.literal("v: " + formatDouble(value)))
                     )
                         : new IncrediblyRedundantSlider(),
                     new Align(
@@ -704,6 +716,46 @@ public class TestSelector extends StatefulWidget {
                             this.maxValue = max;
                         }),
                         this.widget().textSupplier.getMessage(this.minValue, this.maxValue)
+                    )
+                );
+            }
+        }
+    }
+
+    public static class CoolDrag extends StatefulWidget {
+
+        public final @Nullable Double step;
+        public final boolean wrap;
+        public final DoubleFunction<Text> textSupplier;
+
+        public CoolDrag(@Nullable Double step, boolean wrap, DoubleFunction<Text> textSupplier) {
+            this.step = step;
+            this.wrap = wrap;
+            this.textSupplier = textSupplier;
+        }
+
+        @Override
+        public WidgetState<CoolDrag> createState() {
+            return new State();
+        }
+
+        public static class State extends WidgetState<CoolDrag> {
+
+            private double value = 16;
+
+            @Override
+            public Widget build(BuildContext context) {
+                return new Sized(
+                    100.0,
+                    20.0,
+                    new MessageDrag(
+                        this.value,
+                        widget -> widget
+                            .clamp(0, 32)
+                            .step(this.widget().step)
+                            .wrap(this.widget().wrap)
+                            .onChanged(newValue -> setState(() -> this.value = newValue)),
+                        widget().textSupplier.apply(this.value)
                     )
                 );
             }

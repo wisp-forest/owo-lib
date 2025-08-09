@@ -15,6 +15,7 @@ import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.Tooltip;
 import io.wispforest.owo.braid.widgets.basic.VisitorWidget;
+import io.wispforest.owo.braid.widgets.ifdragissocoolthenwheresdrag2.DragSourceOLD;
 import io.wispforest.owo.braid.widgets.inspector.BraidInspector;
 import io.wispforest.owo.braid.widgets.inspector.InstancePicker;
 import io.wispforest.owo.util.EventSource;
@@ -60,6 +61,8 @@ public class AppState implements InstanceHost, ProxyHost {
     private int draggingButton = -1;
     private KeyModifiers draggingModifiers = null;
     private boolean dragStarted = false;
+
+    private @Nullable DragSourceOLD<?> activeDragSource = null;
 
     private static final int MIN_GRACE_PERIOD = 200;
     private static final int MAX_GRACE_PERIOD = 500;

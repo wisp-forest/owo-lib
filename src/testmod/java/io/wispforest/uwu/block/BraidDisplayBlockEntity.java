@@ -17,14 +17,13 @@ import io.wispforest.owo.braid.widgets.basic.Padding;
 import io.wispforest.owo.braid.widgets.basic.Panel;
 import io.wispforest.owo.braid.widgets.basic.Sized;
 import io.wispforest.owo.braid.widgets.button.Button;
-import io.wispforest.owo.braid.widgets.button.MessageButton;
 import io.wispforest.owo.braid.widgets.flex.Column;
 import io.wispforest.owo.braid.widgets.flex.CrossAxisAlignment;
 import io.wispforest.owo.braid.widgets.flex.MainAxisAlignment;
 import io.wispforest.owo.braid.widgets.flex.Row;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
-import io.wispforest.owo.braid.widgets.slider.MessageSlider;
+import io.wispforest.owo.braid.widgets.slider.slider.MessageSlider;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.uwu.Uwu;
 import io.wispforest.uwu.items.UwuItems;
@@ -173,4 +172,3 @@ public class BraidDisplayBlockEntity extends BlockEntity {
         }
     }
 }
-

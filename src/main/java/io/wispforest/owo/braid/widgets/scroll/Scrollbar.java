@@ -8,7 +8,7 @@ import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.LayoutBuilder;
 import io.wispforest.owo.braid.widgets.basic.ListenableBuilder;
 import io.wispforest.owo.braid.widgets.basic.Padding;
-import io.wispforest.owo.braid.widgets.slider.RawSlider;
+import io.wispforest.owo.braid.widgets.slider.slider.RawSlider;
 import org.jetbrains.annotations.Nullable;
 
 public class Scrollbar extends StatelessWidget {
