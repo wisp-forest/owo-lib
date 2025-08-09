@@ -35,6 +35,7 @@ import io.wispforest.owo.braid.widgets.flex.*;
 import io.wispforest.owo.braid.widgets.grid.Grid;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
+import io.wispforest.owo.braid.widgets.owoui.OwoUIWidget;
 import io.wispforest.owo.braid.widgets.recipeviewer.RecipeViewerExclusionZone;
 import io.wispforest.owo.braid.widgets.recipeviewer.RecipeViewerStack;
 import io.wispforest.owo.braid.widgets.recipeviewer.StackDropArea;
@@ -53,6 +54,7 @@ import io.wispforest.owo.braid.widgets.window.WindowController;
 import io.wispforest.owo.ops.TextOps;
 import io.wispforest.owo.ui.component.BraidComponent;
 import io.wispforest.owo.ui.component.ButtonComponent;
+import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.EntityComponent;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.core.*;
@@ -1505,18 +1507,14 @@ public class TestSelector extends StatefulWidget {
                                 return widget;
                             }
                         ),
-                        new VanillaWidget<>(
-                            Size.of(250, 20),
+                        new OwoUIWidget(
                             () -> {
-                                var adapter = OwoUIAdapter.createWithoutScreen(
-                                    0, 0, 250, 20,
-                                    Containers::verticalFlow
-                                );
-                                adapter.rootComponent.child(
-                                    ButtonWidget.builder(
+                                var root = Containers.verticalFlow(Sizing.content(), Sizing.content());
+                                root.child(
+                                    Components.button(
                                         Text.literal("A very very cool button"),
                                         button -> MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.ENTITY_GENERIC_EXPLODE, Random.create().nextFloat() * 2f))
-                                    ).build()
+                                    )
                                 ).child(
                                     new BraidComponent(
                                         new Column(
@@ -1524,34 +1522,38 @@ public class TestSelector extends StatefulWidget {
                                                 Text.literal("amogus"),
                                                 () -> MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.BLOCK_ANVIL_BREAK, Random.create().nextFloat() * 2f))
                                             ),
-                                            new MultiSplitPane(
-                                                LayoutAxis.HORIZONTAL,
-                                                MainAxisAlignment.START,
-                                                CrossAxisAlignment.CENTER,
-                                                List.of(
-                                                    new Box(
-                                                        Color.GREEN.interpolate(Color.ofArgb(0), .5f),
-                                                        new Label(Text.literal("no way is"))
-                                                    ),
-                                                    new Box(
-                                                        Color.GREEN.interpolate(Color.ofArgb(0), .5f),
-                                                        new Label(Text.literal("that braid"))
-                                                    ),
-                                                    new Box(
-                                                        Color.GREEN.interpolate(Color.ofArgb(0), .5f),
-                                                        new Label(Text.literal("inside owoui"))
-                                                    ),
-                                                    new Box(
-                                                        Color.GREEN.interpolate(Color.ofArgb(0), .5f),
-                                                        new Label(Text.literal("inside braid?"))
+                                            // idk why this needs to be here but if it's not the split pane becomes
+                                            // infinity sized
+                                            new Sized(
+                                                180, 180,
+                                                new MultiSplitPane(
+                                                    LayoutAxis.HORIZONTAL,
+                                                    MainAxisAlignment.START,
+                                                    CrossAxisAlignment.CENTER,
+                                                    List.of(
+                                                        new Box(
+                                                            Color.GREEN.interpolate(Color.ofArgb(0), .5f),
+                                                            new Label(Text.literal("no way is"))
+                                                        ),
+                                                        new Box(
+                                                            Color.GREEN.interpolate(Color.ofArgb(0), .5f),
+                                                            new Label(Text.literal("that braid"))
+                                                        ),
+                                                        new Box(
+                                                            Color.GREEN.interpolate(Color.ofArgb(0), .5f),
+                                                            new Label(Text.literal("inside owoui"))
+                                                        ),
+                                                        new Box(
+                                                            Color.GREEN.interpolate(Color.ofArgb(0), .5f),
+                                                            new Label(Text.literal("inside braid?"))
+                                                        )
                                                     )
                                                 )
                                             )
                                         )
-                                    ).sizing(Sizing.fixed(100))
+                                    ).sizing(Sizing.fixed(200))
                                 ).allowOverflow(true);
-                                adapter.inflateAndMount();
-                                return adapter;
+                                return root;
                             }
                         )
                     )

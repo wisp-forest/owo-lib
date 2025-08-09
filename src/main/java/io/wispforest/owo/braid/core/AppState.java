@@ -128,6 +128,10 @@ public class AppState implements InstanceHost, ProxyHost {
         this.onTerminate.forEach(Runnable::run);
     }
 
+    public void activateInspector() {
+        this.inspector.activate();
+    }
+
     private @Nullable TooltipState activeTooltip;
 
     public void draw(DrawContext ctx) {
