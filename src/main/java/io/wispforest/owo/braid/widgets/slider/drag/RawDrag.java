@@ -1,6 +1,5 @@
 package io.wispforest.owo.braid.widgets.slider.drag;
 
-import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.framework.BuildContext;
@@ -24,17 +23,24 @@ import java.util.function.DoubleConsumer;
 /// @author chyzman
 public class RawDrag extends StatefulWidget {
 
-    /// The initial value of the drag.
+    /// The current value of this drag.
     public final double value;
     private final double normalizedValue;
+    /// The minimum value for this drag. If null, there is no minimum.
     private @Nullable Double min = 0d;
+    /// The maximum value for this drag. If null, there is no maximum.
     private @Nullable Double max = 1d;
+    /// The step size for this drag. If null, the drag is continuous.
     private @Nullable Double step = null;
+    /// Whether the value should wrap around when exceeding the min or max.
     private boolean wrap = false;
 
+    /// The axis along which the drag is draggable.
     private LayoutAxis axis = LayoutAxis.HORIZONTAL;
 
+    /// A callback that is invoked when this drag's value changes.
     private @Nullable DoubleConsumer onChanged = null;
+    /// The child widget to display inside this drag.
     public final @Nullable Widget child;
 
 
@@ -64,42 +70,66 @@ public class RawDrag extends StatefulWidget {
 
     //region Setters and Getters
 
-    /// Sets the minimum value for the drag.
+    /// Sets the minimum value for this Drag.
     ///
-    /// @param min The minimum value, or {@code null} to remove the minimum constraint.
+    /// @param min The minimum value, or {@code null} to remove it.
+    /// @see #max(Double)
+    /// @see #clamp(Double, Double)
     public RawDrag min(@Nullable Double min) {
         this.assertMutable();
         this.min = min;
         return this;
     }
 
+    /// Sets the minimum value for this Drag.
+    ///
+    /// @param min The minimum value.
+    /// @see #min(Double)
     public RawDrag min(double min) {
         this.assertMutable();
         this.min = min;
         return this;
     }
 
-
+    /// @return The minimum value for this Drag, or {@code null} if there is none.
+    /// @see #min(Double)
     public @Nullable Double min() {
         return this.min;
     }
 
+    /// Sets the maximum value for this Drag.
+    ///
+    /// @param max The maximum value, or {@code null} to remove it.
+    /// @see #min(Double)
+    /// @see #clamp(Double, Double)
     public RawDrag max(@Nullable Double max) {
         this.assertMutable();
         this.max = max;
         return this;
     }
 
+    /// Sets the maximum value for this Drag.
+    ///
+    /// @param max The maximum value.
+    /// @see #max(Double)
     public RawDrag max(double max) {
         this.assertMutable();
         this.max = max;
         return this;
     }
 
+    /// @return The maximum value for this Drag, or {@code null} if there is none.
+    /// @see #max(Double)
     public @Nullable Double max() {
         return this.max;
     }
 
+    /// Sets both the minimum and maximum values of the Drag.
+    ///
+    /// @param min The minimum value, or {@code null} to remove it.
+    /// @param max The maximum value, or {@code null} to remove it.
+    /// @see #min(Double)
+    /// @see #max(Double)
     public RawDrag clamp(@Nullable Double min, @Nullable Double max) {
         this.assertMutable();
         this.min = min;
@@ -107,6 +137,11 @@ public class RawDrag extends StatefulWidget {
         return this;
     }
 
+    /// Sets both the minimum and maximum values for this Drag.
+    ///
+    /// @param min The minimum value.
+    /// @param max The maximum value.
+    /// @see #clamp(Double, Double)
     public RawDrag clamp(double min, double max) {
         this.assertMutable();
         this.min = min;
@@ -114,42 +149,62 @@ public class RawDrag extends StatefulWidget {
         return this;
     }
 
+    /// Sets the step size for this Drag.
+    ///
+    /// @param step The step size, or {@code null} for a continuous drag.
     public RawDrag step(@Nullable Double step) {
         this.assertMutable();
         this.step = step;
         return this;
     }
 
+    /// @return The step size of this Drag, or {@code null} if it is continuous.
+    /// @see #step(Double)
     public @Nullable Double step() {
         return this.step;
     }
 
+    /// Sets whether the drag's value wraps around when exceeding the min or max.
+    ///
+    /// @param wrap Whether to wrap this drag's value.
     public RawDrag wrap(boolean wrap) {
         this.assertMutable();
         this.wrap = wrap;
         return this;
     }
 
+    /// @return {@code true} if the value wraps around, {@code false} otherwise
+    /// @see #wrap(boolean)
     public boolean wrap() {
         return this.wrap;
     }
 
+    /// Sets the callback to be invoked when this drag's value changes.
+    ///
+    /// @param onChanged The callback, or {@code null} to deactivate this Drag.
     public RawDrag onChanged(@Nullable DoubleConsumer onChanged) {
         this.assertMutable();
         this.onChanged = onChanged;
         return this;
     }
 
+    /// @return The callback invoked on value changes, or {@code null} if this Drag is inactive.
+    /// @see #onChanged(DoubleConsumer)
     public @Nullable DoubleConsumer onChanged() {
         return this.onChanged;
     }
 
+    /// Sets the axis along which this drag is draggable.
+    ///
+    /// @param axis The drag axis.
     public RawDrag axis(LayoutAxis axis) {
         this.assertMutable();
         this.axis = axis;
         return this;
     }
 
+    /// @return The axis along which this drag is draggable.
+    /// @see #axis(LayoutAxis)
     public LayoutAxis axis() {
         return this.axis;
     }
