@@ -10,6 +10,7 @@ import io.wispforest.owo.ops.TextOps;
 import net.minecraft.command.argument.NbtPathArgumentType;
 import net.minecraft.component.ComponentChanges;
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -41,7 +42,9 @@ public class DumpdataCommand {
                 .then(literal("block").executes(withRootPath(DumpdataCommand::executeBlock))
                         .then(argument("nbt_path", NbtPathArgumentType.nbtPath()).executes(withPathArg(DumpdataCommand::executeBlock))))
                 .then(literal("entity").executes(withRootPath(DumpdataCommand::executeEntity))
-                        .then(argument("nbt_path", NbtPathArgumentType.nbtPath()).executes(withPathArg(DumpdataCommand::executeEntity)))));
+                          .then(argument("nbt_path", NbtPathArgumentType.nbtPath()).executes(withPathArg(DumpdataCommand::executeEntity))))
+                .then(literal("me").executes(withRootPath(DumpdataCommand::executeMe))
+                          .then(argument("nbt_path", NbtPathArgumentType.nbtPath()).executes(withPathArg(DumpdataCommand::executeMe)))));
     }
 
     private static Command<ServerCommandSource> withRootPath(DataDumper dumper) {
@@ -83,7 +86,7 @@ public class DumpdataCommand {
 
     private static int executeEntity(CommandContext<ServerCommandSource> context, NbtPathArgumentType.NbtPath path) throws CommandSyntaxException {
         final var source = context.getSource();
-        final var player = source.getPlayer();
+        final var player = source.getPlayerOrThrow();
 
         final var target = ProjectileUtil.raycast(
                 player,
@@ -100,11 +103,22 @@ public class DumpdataCommand {
 
         final var entity = target.getEntity();
 
+        return dumpEntity(source, path, entity);
+    }
+
+    private static int executeMe(CommandContext<ServerCommandSource> context, NbtPathArgumentType.NbtPath path) throws CommandSyntaxException {
+        final var source = context.getSource();
+        final var player = source.getPlayerOrThrow();
+
+        return dumpEntity(source, path, player);
+    }
+
+    private static int dumpEntity(ServerCommandSource source, NbtPathArgumentType.NbtPath path, Entity entity) throws CommandSyntaxException {
         informationHeader(source, "Entity");
         sendIdentifier(source, entity.getType(), Registries.ENTITY_TYPE);
 
         feedback(source, TextOps.withFormatting("NBT" + formatPath(path) + ": ", Formatting.GRAY)
-                .append(NbtHelper.toPrettyPrintedText(getPath(entity.writeNbt(new NbtCompound()), path))));
+            .append(NbtHelper.toPrettyPrintedText(getPath(entity.writeNbt(new NbtCompound()), path))));
 
         feedback(source, TextOps.withFormatting("-----------------------", Formatting.GRAY));
 
