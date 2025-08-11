@@ -5,7 +5,6 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import org.joml.Vector3f;
-import org.joml.Vector3i;
 
 import java.util.List;
 

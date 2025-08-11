@@ -1,6 +1,5 @@
 package io.wispforest.owo.itemgroup;
 
-import io.wispforest.owo.Owo;
 import net.fabricmc.fabric.api.item.v1.CustomDamageHandler;
 import net.fabricmc.fabric.api.item.v1.EquipmentSlotProvider;
 import net.minecraft.entity.player.PlayerEntity;

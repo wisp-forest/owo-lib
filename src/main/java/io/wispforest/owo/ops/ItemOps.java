@@ -1,6 +1,5 @@
 package io.wispforest.owo.ops;
 
-import io.wispforest.owo.Owo;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -56,7 +55,7 @@ public final class ItemOps {
         copy.setCount(1);
         return copy;
     }
-    
+
     /**
      * Decrements the stack
      *

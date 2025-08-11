@@ -1,9 +1,9 @@
 package io.wispforest.owo.config;
 
+import io.wispforest.endec.Endec;
 import io.wispforest.endec.impl.ReflectiveEndecBuilder;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.annotation.RestartRequired;
-import io.wispforest.endec.Endec;
 import io.wispforest.owo.util.Observable;
 import net.minecraft.network.PacketByteBuf;
 import org.jetbrains.annotations.Nullable;

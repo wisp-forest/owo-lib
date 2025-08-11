@@ -2,7 +2,10 @@ package io.wispforest.owo.braid.widgets.basic.action;
 
 import io.wispforest.owo.braid.core.KeyModifiers;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.lwjgl.glfw.GLFW.*;

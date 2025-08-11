@@ -10,9 +10,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Map;
-import java.util.function.IntPredicate;
-
 public class MessageButton extends StatelessWidget {
 
     public final Text text;

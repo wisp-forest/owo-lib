@@ -1,6 +1,5 @@
 package io.wispforest.owo.offline;
 
-import net.minecraft.advancement.Advancement;
 import net.minecraft.advancement.AdvancementEntry;
 import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.util.Identifier;

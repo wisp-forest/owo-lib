@@ -2,8 +2,8 @@ package io.wispforest.owo.ext;
 
 import net.minecraft.component.ComponentChanges;
 import net.minecraft.component.ComponentMap;
-import net.minecraft.component.MergedComponentMap;
 import net.minecraft.component.ComponentType;
+import net.minecraft.component.MergedComponentMap;
 import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;

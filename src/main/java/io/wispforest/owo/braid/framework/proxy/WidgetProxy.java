@@ -8,7 +8,10 @@ import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 public abstract sealed class WidgetProxy implements BuildContext, Comparable<WidgetProxy> permits ComposedProxy, InstanceWidgetProxy {
 

@@ -5,7 +5,6 @@ import io.wispforest.owo.ui.core.Easing;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 
 public class Animation {
 

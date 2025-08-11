@@ -3,15 +3,12 @@ package io.wispforest.owo.braid.widgets.vanilla;
 import io.wispforest.owo.braid.core.Size;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
-import io.wispforest.owo.braid.framework.widget.Key;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import io.wispforest.owo.braid.widgets.basic.Align;
 import io.wispforest.owo.braid.widgets.basic.Center;
 import io.wispforest.owo.braid.widgets.basic.Sized;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.widget.ClickableWidget;
 
 import java.util.function.Supplier;
 

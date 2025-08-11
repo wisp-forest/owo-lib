@@ -6,7 +6,6 @@ import org.w3c.dom.Element;
 
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Random;
 import java.util.function.Function;
 
 public class Sizing implements Animatable<Sizing> {

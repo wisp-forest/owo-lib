@@ -1,10 +1,9 @@
 package io.wispforest.uwu.network;
 
-import io.wispforest.endec.impl.RecordEndec;
-import io.wispforest.endec.impl.ReflectiveEndecBuilder;
-import io.wispforest.owo.network.OwoNetChannel;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.StructEndec;
+import io.wispforest.endec.impl.RecordEndec;
+import io.wispforest.owo.network.OwoNetChannel;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;

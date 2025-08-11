@@ -6,7 +6,6 @@ import io.wispforest.owo.text.CustomTextRegistry;
 import net.minecraft.text.TextCodecs;
 import net.minecraft.text.TextContent;
 import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.dynamic.Codecs;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -73,4 +72,3 @@ public abstract class TextCodecsMixin {
     }
 
 }
-

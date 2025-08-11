@@ -46,8 +46,8 @@ public class RawDrag extends StatefulWidget {
 
     /// Constructs a new `RawDrag` widget.
     ///
-    /// @param value         The initial value of the drag.
-    /// @param setupCallback A callback used to configure this widget's properties, including:
+    /// @param value         The initial value for this Drag.
+    /// @param setupCallback A callback used to configure this Drag's properties, including:
     ///                      <ul>
     ///                      <li>{@link #min(Double)}: Minimum value</li>
     ///                      <li>{@link #max(Double)}: Maximum value</li>
@@ -56,7 +56,7 @@ public class RawDrag extends StatefulWidget {
     ///                      <li>{@link #onChanged(DoubleConsumer)}: Callback for value changes</li>
     ///                      <li>{@link #axis(LayoutAxis)}: Drag axis</li>
     ///                      </ul>
-    /// @param child         this widget's child
+    /// @param child         this Drag's child
     public RawDrag(
         double value,
         WidgetSetupCallback<RawDrag> setupCallback,
@@ -68,11 +68,10 @@ public class RawDrag extends StatefulWidget {
         this.normalizedValue = normalizeValue(value, this.min, this.max, this.wrap);
     }
 
-    //region Setters and Getters
-
     /// Sets the minimum value for this Drag.
     ///
-    /// @param min The minimum value, or {@code null} to remove it.
+    /// @param min The minimum value, or `null` to remove it.
+    /// @apiNote Providing a higher min than maximum can be used to invert the drag's direction.
     /// @see #max(Double)
     /// @see #clamp(Double, Double)
     public RawDrag min(@Nullable Double min) {
@@ -84,6 +83,7 @@ public class RawDrag extends StatefulWidget {
     /// Sets the minimum value for this Drag.
     ///
     /// @param min The minimum value.
+    /// @apiNote Providing a higher min than maximum can be used to invert the drag's direction.
     /// @see #min(Double)
     public RawDrag min(double min) {
         this.assertMutable();
@@ -91,7 +91,7 @@ public class RawDrag extends StatefulWidget {
         return this;
     }
 
-    /// @return The minimum value for this Drag, or {@code null} if there is none.
+    /// @return The minimum value for this Drag, or `null` if there is none.
     /// @see #min(Double)
     public @Nullable Double min() {
         return this.min;
@@ -99,7 +99,8 @@ public class RawDrag extends StatefulWidget {
 
     /// Sets the maximum value for this Drag.
     ///
-    /// @param max The maximum value, or {@code null} to remove it.
+    /// @param max The maximum value, or `null` to remove it.
+    /// @apiNote Providing a lower maximum than minimum can be used to invert the drag's direction.
     /// @see #min(Double)
     /// @see #clamp(Double, Double)
     public RawDrag max(@Nullable Double max) {
@@ -111,6 +112,7 @@ public class RawDrag extends StatefulWidget {
     /// Sets the maximum value for this Drag.
     ///
     /// @param max The maximum value.
+    /// @apiNote Providing a lower maximum than minimum can be used to invert the drag's direction.
     /// @see #max(Double)
     public RawDrag max(double max) {
         this.assertMutable();
@@ -118,7 +120,7 @@ public class RawDrag extends StatefulWidget {
         return this;
     }
 
-    /// @return The maximum value for this Drag, or {@code null} if there is none.
+    /// @return The maximum value for this Drag, or `null` if there is none.
     /// @see #max(Double)
     public @Nullable Double max() {
         return this.max;
@@ -126,8 +128,9 @@ public class RawDrag extends StatefulWidget {
 
     /// Sets both the minimum and maximum values of the Drag.
     ///
-    /// @param min The minimum value, or {@code null} to remove it.
-    /// @param max The maximum value, or {@code null} to remove it.
+    /// @param min The minimum value, or `null` to remove it.
+    /// @param max The maximum value, or `null` to remove it.
+    /// @apiNote Providing a lower maximum than minimum can be used to invert the drag's direction.
     /// @see #min(Double)
     /// @see #max(Double)
     public RawDrag clamp(@Nullable Double min, @Nullable Double max) {
@@ -141,6 +144,7 @@ public class RawDrag extends StatefulWidget {
     ///
     /// @param min The minimum value.
     /// @param max The maximum value.
+    /// @apiNote Providing a lower maximum than minimum can be used to invert the drag's direction.
     /// @see #clamp(Double, Double)
     public RawDrag clamp(double min, double max) {
         this.assertMutable();
@@ -151,14 +155,14 @@ public class RawDrag extends StatefulWidget {
 
     /// Sets the step size for this Drag.
     ///
-    /// @param step The step size, or {@code null} for a continuous drag.
+    /// @param step The step size, or `null` for a continuous drag.
     public RawDrag step(@Nullable Double step) {
         this.assertMutable();
         this.step = step;
         return this;
     }
 
-    /// @return The step size of this Drag, or {@code null} if it is continuous.
+    /// @return The step size of this Drag, or `null` if it is continuous.
     /// @see #step(Double)
     public @Nullable Double step() {
         return this.step;
@@ -173,7 +177,7 @@ public class RawDrag extends StatefulWidget {
         return this;
     }
 
-    /// @return {@code true} if the value wraps around, {@code false} otherwise
+    /// @return `true` if the value wraps around,`false` otherwise
     /// @see #wrap(boolean)
     public boolean wrap() {
         return this.wrap;
@@ -181,14 +185,14 @@ public class RawDrag extends StatefulWidget {
 
     /// Sets the callback to be invoked when this drag's value changes.
     ///
-    /// @param onChanged The callback, or {@code null} to deactivate this Drag.
+    /// @param onChanged The callback, or `null` to deactivate this Drag.
     public RawDrag onChanged(@Nullable DoubleConsumer onChanged) {
         this.assertMutable();
         this.onChanged = onChanged;
         return this;
     }
 
-    /// @return The callback invoked on value changes, or {@code null} if this Drag is inactive.
+    /// @return The callback invoked on value changes, or `null` if this Drag is inactive.
     /// @see #onChanged(DoubleConsumer)
     public @Nullable DoubleConsumer onChanged() {
         return this.onChanged;
@@ -208,9 +212,6 @@ public class RawDrag extends StatefulWidget {
     public LayoutAxis axis() {
         return this.axis;
     }
-
-    //endregion
-
 
     @Override
     public WidgetState<RawDrag> createState() {

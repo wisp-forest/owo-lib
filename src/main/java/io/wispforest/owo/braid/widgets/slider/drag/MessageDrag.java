@@ -6,10 +6,7 @@ import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
-import io.wispforest.owo.braid.widgets.slider.DefaultSliderHandle;
-import io.wispforest.owo.braid.widgets.stack.Stack;
 import net.minecraft.text.Text;
-import org.jetbrains.annotations.Nullable;
 
 public class MessageDrag extends StatelessWidget {
 

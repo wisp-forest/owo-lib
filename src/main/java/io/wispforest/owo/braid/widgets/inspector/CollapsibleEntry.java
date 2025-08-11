@@ -8,9 +8,7 @@ import io.wispforest.owo.braid.widgets.basic.action.ActionTrigger;
 import io.wispforest.owo.braid.widgets.basic.action.Actions;
 import io.wispforest.owo.braid.widgets.collapsible.LazyCollapsible;
 import io.wispforest.owo.util.EventSource;
-import it.unimi.dsi.fastutil.ints.IntSet;
 import net.minecraft.util.Unit;
-import org.lwjgl.glfw.GLFW;
 
 public class CollapsibleEntry extends StatefulWidget {
 

@@ -1,19 +1,5 @@
 package io.wispforest.owo.registration.reflect;
 
-import io.wispforest.owo.registration.annotations.AssignedName;
-import net.minecraft.block.Block;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.util.Identifier;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.lang.reflect.Field;
-
 /**
  * Due to changes within 1.21.2 makes {@link AutoRegistryContainer} impossible due to requiring
  * the {@link net.minecraft.registry.RegistryKey} leading to the need to supplier the key before

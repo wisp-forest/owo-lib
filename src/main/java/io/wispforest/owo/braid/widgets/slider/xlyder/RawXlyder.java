@@ -1,6 +1,9 @@
 package io.wispforest.owo.braid.widgets.slider.xlyder;
 
-import io.wispforest.owo.braid.core.*;
+import io.wispforest.owo.braid.core.Alignment;
+import io.wispforest.owo.braid.core.Constraints;
+import io.wispforest.owo.braid.core.Insets;
+import io.wispforest.owo.braid.core.Size;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;

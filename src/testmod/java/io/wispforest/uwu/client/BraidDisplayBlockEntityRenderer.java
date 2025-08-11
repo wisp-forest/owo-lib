@@ -3,8 +3,6 @@ package io.wispforest.uwu.client;
 import io.wispforest.owo.braid.display.BraidDisplay;
 import io.wispforest.owo.braid.display.BraidDisplayBinding;
 import io.wispforest.owo.braid.display.DisplayQuad;
-import io.wispforest.owo.braid.widgets.basic.Panel;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.uwu.block.BraidDisplayBlockEntity;
 import io.wispforest.uwu.client.braid.TestSelector;
 import net.minecraft.client.MinecraftClient;

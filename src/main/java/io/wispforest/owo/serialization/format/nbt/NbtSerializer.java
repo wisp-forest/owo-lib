@@ -1,14 +1,15 @@
 package io.wispforest.owo.serialization.format.nbt;
 
-import io.wispforest.endec.*;
+import io.wispforest.endec.Endec;
+import io.wispforest.endec.SelfDescribedSerializer;
+import io.wispforest.endec.SerializationContext;
+import io.wispforest.endec.Serializer;
 import io.wispforest.endec.util.RecursiveSerializer;
 import net.minecraft.nbt.*;
 import net.minecraft.network.encoding.VarInts;
 import net.minecraft.network.encoding.VarLongs;
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.spongepowered.asm.mixin.Mutable;
 
-import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;

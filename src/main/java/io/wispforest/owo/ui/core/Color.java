@@ -5,7 +5,6 @@ import io.wispforest.endec.Endec;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Node;

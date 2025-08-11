@@ -8,7 +8,6 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URL;
 import java.util.concurrent.CompletableFuture;
 
 @Mixin(value = Util.OperatingSystem.class)
