@@ -10,9 +10,18 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 
+/// A [Button] with a [Label] as its child
+/// @see Button
+/// @see Label
+/// @author glisco
+/// @author chyzman
 public class MessageButton extends StatelessWidget {
 
+    /// The [Text] displayed on this [MessageButton]
     public final Text text;
+    /// The Runnable called when this [MessageButton] is clicked
+    ///
+    /// If `null`, disables this [MessageButton]
     public final @Nullable Runnable onClick;
 
     public MessageButton(Text text, @Nullable Runnable onClick) {
