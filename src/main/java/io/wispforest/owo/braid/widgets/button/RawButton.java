@@ -8,28 +8,24 @@ import io.wispforest.owo.braid.widgets.basic.action.Actions;
 import io.wispforest.owo.ui.util.UISounds;
 import org.jetbrains.annotations.Nullable;
 
-/// A [Widget] that allows its child to be clicked
+/// A low-level [Widget] that allows [#child] to be focused and clicked.<br>
+/// When active and hovered, the cursor uses [CursorStyle#HAND].
 ///
-/// @author glico
-/// @author chyzman
+/// If no [#onClick] is provided, this widget is inactive
+/// and falls through to its child
 public class RawButton extends StatelessWidget {
-
-    /// The Runnable Called when this [RawButton] is clicked
-    ///
-    /// If `null`, disables this [RawButton]
+    /// The callback to invoke when this widget is clicked.<br>
+    /// `null` indicates this widget is inactive
     public final @Nullable Runnable onClick;
-    /// This [Widget]'s child
     public final Widget child;
 
-    /// Create a new [RawButton]
-    ///
-    /// If [#onClick] is `null`, this [RawButton] will be disabled
+
     public RawButton(@Nullable Runnable onClick, Widget child) {
         this.onClick = onClick;
         this.child = child;
     }
 
-    /// Create a new [RawButton] with an explicit active state
+    /// Create a `RawButton` with an explicit active state
     public RawButton(Runnable onClick, boolean active, Widget child) {
         this(active ? onClick : null, child);
     }
