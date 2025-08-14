@@ -25,13 +25,13 @@ public class RawDrag extends StatefulWidget {
 
     /// The current value of this drag.
     public final double value;
-    private final double normalizedValue;
+    public final double normalizedValue;
     /// The minimum value for this drag. If null, there is no minimum.
     private @Nullable Double min = 0d;
     /// The maximum value for this drag. If null, there is no maximum.
     private @Nullable Double max = 1d;
     /// The step size for this drag. If null, the drag is continuous.
-    private @Nullable Double step = null;
+    private @Nullable Double step;
     /// Whether the value should wrap around when exceeding the min or max.
     private boolean wrap = false;
 
@@ -39,7 +39,7 @@ public class RawDrag extends StatefulWidget {
     private LayoutAxis axis = LayoutAxis.HORIZONTAL;
 
     /// A callback that is invoked when this drag's value changes.
-    private @Nullable DoubleConsumer onChanged = null;
+    private @Nullable DoubleConsumer onChanged;
     /// The child widget to display inside this drag.
     public final @Nullable Widget child;
 
@@ -73,7 +73,7 @@ public class RawDrag extends StatefulWidget {
     /// @param min The minimum value, or `null` to remove it.
     /// @apiNote Providing a higher min than maximum can be used to invert the drag's direction.
     /// @see #max(Double)
-    /// @see #clamp(Double, Double)
+    /// @see #range(Double, Double)
     public RawDrag min(@Nullable Double min) {
         this.assertMutable();
         this.min = min;
@@ -102,7 +102,7 @@ public class RawDrag extends StatefulWidget {
     /// @param max The maximum value, or `null` to remove it.
     /// @apiNote Providing a lower maximum than minimum can be used to invert the drag's direction.
     /// @see #min(Double)
-    /// @see #clamp(Double, Double)
+    /// @see #range(Double, Double)
     public RawDrag max(@Nullable Double max) {
         this.assertMutable();
         this.max = max;
@@ -133,7 +133,7 @@ public class RawDrag extends StatefulWidget {
     /// @apiNote Providing a lower maximum than minimum can be used to invert the drag's direction.
     /// @see #min(Double)
     /// @see #max(Double)
-    public RawDrag clamp(@Nullable Double min, @Nullable Double max) {
+    public RawDrag range(@Nullable Double min, @Nullable Double max) {
         this.assertMutable();
         this.min = min;
         this.max = max;
@@ -145,8 +145,8 @@ public class RawDrag extends StatefulWidget {
     /// @param min The minimum value.
     /// @param max The maximum value.
     /// @apiNote Providing a lower maximum than minimum can be used to invert the drag's direction.
-    /// @see #clamp(Double, Double)
-    public RawDrag clamp(double min, double max) {
+    /// @see #range(Double, Double)
+    public RawDrag range(double min, double max) {
         this.assertMutable();
         this.min = min;
         this.max = max;

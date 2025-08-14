@@ -39,16 +39,28 @@ public class Scrollbar extends StatelessWidget {
                         var childSize = containerSize + maxOffset;
                         var scrollbarLength = Math.min((containerSize / childSize) * containerSize, containerSize);
 
+//                        return maxOffset != 0 ? new RawSlider(
+//                            currentOffset,
+//                            this.axis.choose(0, maxOffset).doubleValue(),
+//                            this.axis.choose(maxOffset, 0).doubleValue(),
+//                            null,
+//                            this.axis,
+//                            this.controller::setOffset,
+//                            this.track,
+//                            this.handle,
+//                            Math.max(5, scrollbarLength)
+//                        ) : new Padding(Insets.none());
+
                         return maxOffset != 0 ? new RawSlider(
                             currentOffset,
-                            this.axis.choose(0, maxOffset).doubleValue(),
-                            this.axis.choose(maxOffset, 0).doubleValue(),
-                            null,
-                            this.axis,
-                            this.controller::setOffset,
-                            this.track,
                             this.handle,
-                            Math.max(5, scrollbarLength)
+                            widget -> widget
+                                .min(this.axis.choose(0, maxOffset).doubleValue())
+                                .max(this.axis.choose(maxOffset, 0).doubleValue())
+                                .axis(this.axis)
+                                .onChanged(this.controller::setOffset)
+                                .track(this.track)
+                                .handleSize(Math.max(5, scrollbarLength))
                         ) : new Padding(Insets.none());
                     }
                 );

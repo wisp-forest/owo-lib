@@ -4,6 +4,7 @@ import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
 import io.wispforest.owo.braid.widgets.stack.Stack;
@@ -15,26 +16,17 @@ import java.util.function.DoubleConsumer;
 public class MessageSlider extends StatelessWidget {
 
     public final double value;
-    public final double min;
-    public final double max;
-    public final @Nullable Double step;
-    public final LayoutAxis axis;
-
-    public final DoubleConsumer onChanged;
     public final Text message;
+    public final WidgetSetupCallback<RawSlider> setupCallback;
 
-    public MessageSlider(double value, double min, double max, @Nullable Double step, LayoutAxis axis, DoubleConsumer onChanged, Text message) {
+    public MessageSlider(
+        double value,
+        Text message,
+        WidgetSetupCallback<RawSlider> setupCallback
+    ) {
         this.value = value;
-        this.min = min;
-        this.max = max;
-        this.step = step;
-        this.axis = axis;
-        this.onChanged = onChanged;
         this.message = message;
-    }
-
-    public MessageSlider(double value, DoubleConsumer onChanged, Text message, LayoutAxis axis) {
-        this(value, 0, 1, null, axis, onChanged, message);
+        this.setupCallback = setupCallback;
     }
 
     @Override
@@ -42,11 +34,7 @@ public class MessageSlider extends StatelessWidget {
         return new Stack(
             new Slider(
                 this.value,
-                this.min,
-                this.max,
-                this.step,
-                this.axis,
-                this.onChanged
+                setupCallback
             ),
             new Label(
                 LabelStyle.SHADOW,

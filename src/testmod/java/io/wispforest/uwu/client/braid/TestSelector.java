@@ -235,11 +235,11 @@ public class TestSelector extends StatefulWidget {
                                     75, 20,
                                     new MessageSlider(
                                         rotat,
-                                        0d, 360d,
-                                        null,
-                                        LayoutAxis.HORIZONTAL,
-                                        value -> this.setState(() -> this.rotat = value),
-                                        Text.literal("rotat: " + formatDouble(this.rotat))
+                                        Text.literal("rotat: " + formatDouble(this.rotat)),
+                                        widget -> widget
+                                            .min(0)
+                                            .max(360)
+                                            .onChanged(value -> this.setState(() -> this.rotat = value))
                                     )
                                 ),
                                 new Sized(
@@ -621,12 +621,11 @@ public class TestSelector extends StatefulWidget {
                     20.0,
                     new MessageSlider(
                         this.value,
-                        0,
-                        32,
-                        this.widget().step,
-                        LayoutAxis.HORIZONTAL,
-                        newValue -> setState(() -> this.value = newValue),
-                        this.widget().textSupplier.apply(this.value)
+                        this.widget().textSupplier.apply(this.value),
+                        widget -> widget
+                            .range(0, 32)
+                            .step(this.widget().step)
+                            .onChanged(newValue -> setState(() -> this.value = newValue))
                     )
                 );
             }
@@ -751,7 +750,7 @@ public class TestSelector extends StatefulWidget {
                     new MessageDrag(
                         this.value,
                         widget -> widget
-                            .clamp(0, 32)
+                            .range(0, 32)
                             .step(this.widget().step)
                             .wrap(this.widget().wrap)
                             .onChanged(newValue -> setState(() -> this.value = newValue)),
@@ -1097,11 +1096,10 @@ public class TestSelector extends StatefulWidget {
                                             this.verticalController,
                                             buildContext -> new Slider(
                                                 this.verticalController.offset(),
-                                                this.verticalController.maxOffset(),
-                                                0,
-                                                null,
-                                                LayoutAxis.VERTICAL,
-                                                this.verticalController::setOffset
+                                                widget -> widget
+                                                    .range(this.verticalController.maxOffset(), 0)
+                                                    .axis(LayoutAxis.VERTICAL)
+                                                    .onChanged(this.verticalController::setOffset)
                                             )
                                         )
                                     )
@@ -1116,11 +1114,9 @@ public class TestSelector extends StatefulWidget {
                                             this.horizontalController,
                                             buildContext -> new Slider(
                                                 this.horizontalController.offset(),
-                                                0,
-                                                this.horizontalController.maxOffset(),
-                                                null,
-                                                LayoutAxis.HORIZONTAL,
-                                                this.horizontalController::setOffset
+                                                widget -> widget
+                                                    .range(0, this.horizontalController.maxOffset())
+                                                    .onChanged(this.horizontalController::setOffset)
                                             )
                                         )
                                     ),
@@ -1152,20 +1148,17 @@ public class TestSelector extends StatefulWidget {
                                                     100, 20,
                                                     new Slider(
                                                         this.nestedSliderValue,
-                                                        0, 1,
-                                                        null,
-                                                        LayoutAxis.HORIZONTAL,
-                                                        value -> this.setState(() -> this.nestedSliderValue = value)
+                                                        widget -> widget
+                                                            .onChanged(value -> this.setState(() -> this.nestedSliderValue = value))
                                                     )
                                                 ),
                                                 new Sized(
                                                     20, 100,
                                                     new Slider(
                                                         this.nestedSliderValue,
-                                                        0, 1,
-                                                        null,
-                                                        LayoutAxis.VERTICAL,
-                                                        value -> this.setState(() -> this.nestedSliderValue = value)
+                                                        widget -> widget
+                                                            .axis(LayoutAxis.VERTICAL)
+                                                            .onChanged(value -> this.setState(() -> this.nestedSliderValue = value))
                                                     )
                                                 )
                                             )
@@ -1204,10 +1197,8 @@ public class TestSelector extends StatefulWidget {
                         15.0,
                         new Slider(
                             this.x,
-                            0, 1,
-                            null,
-                            LayoutAxis.HORIZONTAL,
-                            (x) -> this.setState(() -> this.x = x)
+                            widget -> widget
+                                .onChanged(x -> this.setState(() -> this.x = x))
                         )
                     ),
                     new Row(
@@ -1216,10 +1207,9 @@ public class TestSelector extends StatefulWidget {
                             100.0,
                             new Slider(
                                 this.y,
-                                0, 1,
-                                null,
-                                LayoutAxis.VERTICAL,
-                                (y) -> this.setState(() -> this.y = y)
+                                widget -> widget
+                                    .axis(LayoutAxis.VERTICAL)
+                                    .onChanged(y -> this.setState(() -> this.y = y))
                             )
                         ),
                         new Sized(
@@ -1243,67 +1233,50 @@ public class TestSelector extends StatefulWidget {
                             100.0,
                             new Slider(
                                 this.y,
-                                0, 1,
-                                null,
-                                LayoutAxis.VERTICAL,
-                                (y) -> this.setState(() -> this.y = y)
+                                widget -> widget
+                                    .axis(LayoutAxis.VERTICAL)
+                                    .onChanged(y -> this.setState(() -> this.y = y))
                             )
                         )
                     ),
                     new Sized(
                         100.0,
                         15.0,
-                        new RawSlider(
+                        new Slider(
                             this.x,
-                            0, 1,
-                            null,
-                            LayoutAxis.HORIZONTAL,
-                            (x) -> this.setState(() -> this.x = x),
-                            new Panel(ButtonComponent.DISABLED_TEXTURE),
-                            new DefaultSliderHandle(),
-                            24
+                            widget -> widget
+                                .handleSize(24)
+                                .onChanged(x -> this.setState(() -> this.x = x))
                         )
                     ),
                     new Sized(
                         100.0,
                         15.0,
-                        new RawSlider(
+                        new Slider(
                             this.x,
-                            0, 1,
-                            null,
-                            LayoutAxis.HORIZONTAL,
-                            (x) -> this.setState(() -> this.x = x),
-                            new Panel(ButtonComponent.DISABLED_TEXTURE),
-                            new DefaultSliderHandle(),
-                            18
+                            widget -> widget
+                                .handleSize(18)
+                                .onChanged(x -> this.setState(() -> this.x = x))
                         )
                     ),
                     new Sized(
                         100.0,
                         15.0,
-                        new RawSlider(
+                        new Slider(
                             this.x,
-                            0, 1,
-                            null,
-                            LayoutAxis.HORIZONTAL,
-                            (x) -> this.setState(() -> this.x = x),
-                            new Panel(ButtonComponent.DISABLED_TEXTURE),
-                            new DefaultSliderHandle(),
-                            12
+                            widget -> widget
+                                .handleSize(12)
+                                .onChanged(x -> this.setState(() -> this.x = x))
                         )
                     ),
                     new Sized(
                         100.0,
                         15.0,
-                        new RawSlider(
+                        new Slider(
                             this.x,
-                            0, 1,
-                            null,
-                            LayoutAxis.HORIZONTAL,
-                            (x) -> this.setState(() -> this.x = x),
-                            new Panel(ButtonComponent.DISABLED_TEXTURE),
-                            new DefaultSliderHandle(),
-                            6
+                            widget -> widget
+                                .handleSize(6)
+                                .onChanged(x -> this.setState(() -> this.x = x))
                         )
                     )
                 );

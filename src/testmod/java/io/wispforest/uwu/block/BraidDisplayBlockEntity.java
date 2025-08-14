@@ -132,25 +132,24 @@ public class BraidDisplayBlockEntity extends BlockEntity {
                 public Widget build(BuildContext context) {
                     return new MessageSlider(
                         this.value,
-                        1,
-                        3,
-                        null,
-                        LayoutAxis.HORIZONTAL,
-                        (newValue) -> {
-                            this.setState(() -> this.value = newValue);
+                        Text.literal("size: " + BigDecimal.valueOf(this.value).setScale(2, RoundingMode.HALF_UP).toPlainString()),
+                        widget -> widget
+                            .min(1)
+                            .max(3)
+                            .onChanged((newValue) -> {
+                                this.setState(() -> this.value = newValue);
 
-                            var display =BraidDisplayBlockEntity.of(context).display;
+                                var display = BraidDisplayBlockEntity.of(context).display;
 
 
-                            display.quad = new DisplayQuad(
-                                display.quad.pos,
-                                new Vec3d(0, 0, -14 / 16d),
-                                new Vec3d(14 / 16d + (this.value - 1), 0, 0)
-                            );
+                                display.quad = new DisplayQuad(
+                                    display.quad.pos,
+                                    new Vec3d(0, 0, -14 / 16d),
+                                    new Vec3d(14 / 16d + (this.value - 1), 0, 0)
+                                );
 
-                            display.surface.resize(128, (int) (146.29 * display.quad.left.x));
-                        },
-                        Text.literal("size: " + BigDecimal.valueOf(this.value).setScale(2, RoundingMode.HALF_UP).toPlainString())
+                                display.surface.resize(128, (int) (146.29 * display.quad.left.x));
+                            })
                     );
                 }
             }

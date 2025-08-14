@@ -43,8 +43,8 @@ public class ColorPicker extends StatefulWidget {
                     50, 20,
                     new Slider(
                         controller.value,
-                        v -> this.setState(() -> controller.set(null, null, (float) v, null)),
-                        LayoutAxis.HORIZONTAL
+                        slider -> slider
+                            .onChanged(v -> this.setState(() -> controller.set(null, null, (float) v, null)))
                     )
                 )
             );
