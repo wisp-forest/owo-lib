@@ -93,7 +93,7 @@ public class RawSlider extends StatefulWidget {
                     )
                 );
                 return new Center(
-                    widget.onChanged == null
+                    widget.onChanged == null || ControlsOverride.controlsDisabled(context)
                         ? content
                         : new Actions(
                             actions -> {
