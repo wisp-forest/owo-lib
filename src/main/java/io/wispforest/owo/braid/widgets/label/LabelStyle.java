@@ -5,6 +5,7 @@ import io.wispforest.owo.ui.core.Color;
 import net.minecraft.text.Style;
 import org.jetbrains.annotations.Nullable;
 
+/// I don't understand why [#baseColor] and [#textStyle] exist?
 public record LabelStyle(@Nullable Alignment textAlignment, @Nullable Color baseColor, @Nullable Style textStyle, @Nullable Boolean shadow) {
     public static final LabelStyle EMPTY = new LabelStyle(null, null, null, null);
     public static final LabelStyle SHADOW = new LabelStyle(null, null, null, true);

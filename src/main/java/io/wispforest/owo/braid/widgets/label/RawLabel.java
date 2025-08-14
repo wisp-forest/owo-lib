@@ -24,8 +24,13 @@ import java.util.Objects;
 import java.util.OptionalDouble;
 import java.util.function.Function;
 
+/// A low-level widget that displays a [Text].<br>
+/// Supports all functionality of [Style], including hover and click events.<br>
+/// Displayed text can be soft-wrapped and given additional styling via [#style].
 public class RawLabel extends LeafInstanceWidget {
 
+    /// The LabelStyle to apply to this label.<br>
+    /// Not to be confused with the [Style] of the [#text] itself.
     public final LabelStyle style;
     public final boolean softWrap;
     public final Text text;

@@ -4,19 +4,30 @@ import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.SpriteWidget;
+import io.wispforest.owo.braid.widgets.checkbox.RawCheckbox.CheckboxCallback;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 
+/// The braid equivalent of [net.minecraft.client.gui.widget.CheckboxWidget]
+/// @see RawCheckbox
 public class Checkbox extends StatelessWidget {
 
     public final boolean checked;
-    public final Consumer<Boolean> onUpdate;
+    /// The callback to invoke when this widget is toggled.<br>
+    /// `null` indicates this widget is inactive
+    public final @Nullable CheckboxCallback onUpdate;
 
-    public Checkbox(boolean checked, Consumer<Boolean> onUpdate) {
+    public Checkbox(boolean checked, @Nullable CheckboxCallback onUpdate) {
         this.checked = checked;
         this.onUpdate = onUpdate;
+    }
+
+    /// Create a `Checkbox` with an explicit active state
+    public Checkbox(boolean checked, CheckboxCallback onUpdate, boolean active) {
+        this(checked, active ? onUpdate : null);
     }
 
     @Override

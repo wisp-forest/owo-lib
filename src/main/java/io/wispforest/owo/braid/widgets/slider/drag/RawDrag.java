@@ -7,10 +7,7 @@ import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
-import io.wispforest.owo.braid.widgets.basic.Center;
-import io.wispforest.owo.braid.widgets.basic.LayoutBuilder;
-import io.wispforest.owo.braid.widgets.basic.MouseArea;
-import io.wispforest.owo.braid.widgets.basic.Sized;
+import io.wispforest.owo.braid.widgets.basic.*;
 import io.wispforest.owo.braid.widgets.basic.action.ActionTrigger;
 import io.wispforest.owo.braid.widgets.basic.action.Actions;
 import net.minecraft.util.math.MathHelper;
@@ -227,15 +224,12 @@ public class RawDrag extends StatefulWidget {
             return new LayoutBuilder((innerContext, constraints) -> {
                 var widget = this.widget();
                 var size = constraints.maxFiniteOrMinSize();
-                var step = widget.step != null
-                    ? widget.step
-                    : (widget.max != null && widget.min != null)
-                        ? (widget.max - widget.min) / 100
-                        : 1;
                 var content = new Sized(size, widget.child);
+                var step = widget.step != null ? widget.step
+                    : (widget.max != null && widget.min != null) ? (widget.max - widget.min) / 100
+                        : 1;
                 return new Center(
-                    widget.onChanged == null
-                        ? content
+                    widget.onChanged == null || ControlsOverride.controlsDisabled(context) ? content
                         : new Actions(
                             actions -> {
                                 actions.addAction(ActionTrigger.POSITIVE_DIRECTIONS, () -> applyValue(widget.value + step));

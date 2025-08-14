@@ -10,9 +10,15 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 
+/// The braid equivalent of [net.minecraft.client.gui.widget.ButtonWidget]
+///
+/// @see Button
+/// @see Label
 public class MessageButton extends StatelessWidget {
 
     public final Text text;
+    /// The callback to invoke when this widget is clicked.<br>
+    /// `null` indicates this widget is inactive
     public final @Nullable Runnable onClick;
 
     public MessageButton(Text text, @Nullable Runnable onClick) {
@@ -20,7 +26,8 @@ public class MessageButton extends StatelessWidget {
         this.onClick = onClick;
     }
 
-    public MessageButton(Text text, boolean active, Runnable onClick) {
+    /// Create a `MessageButton` with an explicit active state
+    public MessageButton(Text text, Runnable onClick, boolean active) {
         this(text, active ? onClick : null);
     }
 
