@@ -187,8 +187,10 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
 
         @Override
         public V next() {
+            var value = this.elements.next();
+
             return NbtDeserializer.this.frame(
-                    this.elements::next,
+                    () -> value,
                     () -> this.valueEndec.decode(this.ctx, NbtDeserializer.this)
             );
         }
