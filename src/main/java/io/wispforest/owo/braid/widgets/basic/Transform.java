@@ -9,6 +9,11 @@ import org.joml.Matrix4f;
 
 import java.util.Objects;
 
+/// A [Widget] that applies a [Matrix4f] transformation to [#child].<br>
+/// The transformation will apply to all rendering and hit-testing for the child.<br>
+/// **Notes:**
+/// - The transform will **NOT** effect this widget's size or position
+/// - As of writing this, transforms tend to make [Clip]s behave unexpectedly
 public class Transform extends SingleChildInstanceWidget {
 
     public final Matrix4f matrix;

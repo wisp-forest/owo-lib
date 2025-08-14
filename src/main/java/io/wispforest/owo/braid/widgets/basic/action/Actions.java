@@ -20,7 +20,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+// TODO: forgor this gonna be changed once intents exist so imma not document it till then -chyz
 
+/// An abstraction around [MouseArea] and [KeyboardInput] that allows defining
+/// actions that are triggered by specific input sequences.
 public class Actions extends StatefulWidget {
     private @Nullable MouseArea.EnterCallback enterCallback;
     private @Nullable MouseArea.ExitCallback exitCallback;
