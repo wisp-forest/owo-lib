@@ -78,7 +78,7 @@ public class RawCheckbox extends StatelessWidget {
         );
     }
 
-    /// A specialized [Consumer] for checkbox state changes
+    /// A [Consumer] used for checkbox state changes
     ///
     /// @apiNote This exists purely to get IDEs to autofill the lambda parameter name
     @FunctionalInterface

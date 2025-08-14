@@ -5,6 +5,7 @@ import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 
+/// A Hoverable widget that displays [#hovered] when hovered, and [#notHovered] when not
 public class Hoverable extends StatefulWidget {
     public final Widget notHovered;
     public final Widget hovered;
@@ -14,6 +15,8 @@ public class Hoverable extends StatefulWidget {
         this.hovered = hovered;
     }
 
+    /// Create a Hoverable widget using a [HoverableBuilder] to create both the hovered and not-hovered states.<br>
+    /// Useful for creating `Hoverable`s that have similar structure in both states
     public Hoverable(HoverableBuilder builder) {
         this(builder.build(false), builder.build(true));
     }
@@ -38,6 +41,8 @@ public class Hoverable extends StatefulWidget {
         }
     }
 
+    /// Builder interface for creating Hoverable widgets.<br>
+    /// The [#build] method is called twice, once with `hovered` set to `false`, and once with it set to `true`
     @FunctionalInterface
     public interface HoverableBuilder {
         Widget build(boolean hovered);
