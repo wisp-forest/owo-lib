@@ -29,6 +29,7 @@ public class Hoverable extends StatefulWidget {
 
         @Override
         public Widget build(BuildContext context) {
+            if (ControlsOverride.controlsDisabled(context)) return this.widget().notHovered;
             return new MouseArea(
                 widget -> widget
                     .enterCallback(() -> this.setState(() -> this.hovered = true))
