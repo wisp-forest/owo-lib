@@ -34,23 +34,19 @@ public record ActionTrigger(Set<Trigger> triggers) {
     );
 
     public static final ActionTrigger UP = new ActionTrigger(
-        Trigger.ofKey(GLFW_KEY_UP),
-        Trigger.ofKey(GLFW_KEY_W)
+        Trigger.ofKey(GLFW_KEY_UP)
     );
 
     public static final ActionTrigger DOWN = new ActionTrigger(
-        Trigger.ofKey(GLFW_KEY_DOWN),
-        Trigger.ofKey(GLFW_KEY_S)
+        Trigger.ofKey(GLFW_KEY_DOWN)
     );
 
     public static final ActionTrigger RIGHT = new ActionTrigger(
-        Trigger.ofKey(GLFW_KEY_RIGHT),
-        Trigger.ofKey(GLFW_KEY_D)
+        Trigger.ofKey(GLFW_KEY_RIGHT)
     );
 
     public static final ActionTrigger LEFT = new ActionTrigger(
-        Trigger.ofKey(GLFW_KEY_LEFT),
-        Trigger.ofKey(GLFW_KEY_A)
+        Trigger.ofKey(GLFW_KEY_LEFT)
     );
 
     /// An action trigger that includes both positive directions ([#UP] and [#RIGHT]).<br>
