@@ -3,6 +3,7 @@ package io.wispforest.owo.braid.widgets.cycle;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.braid.widgets.basic.ControlsOverride;
 import io.wispforest.owo.braid.widgets.button.ButtonPanel;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,7 +13,6 @@ public class CyclingButton<T> extends StatelessWidget {
 
     public final List<T> values;
     public final int index;
-
     public final boolean wrap;
     public final @Nullable Cycler.CyclerCallback<T> onChanged;
     public final Widget child;
@@ -63,13 +63,9 @@ public class CyclingButton<T> extends StatelessWidget {
 
     @Override
     public Widget build(BuildContext context) {
-        return new RawCyclingButton<>(
-            this.values,
-            this.index,
-            this.wrap,
-            this.onChanged,
-            new ButtonPanel(this.onChanged != null, this.child)
-        );
+        var disabled = this.onChanged == null || ControlsOverride.controlsDisabled(context);
+        var content = new ButtonPanel(!disabled, this.child);
+        if (disabled) return content;
+        return new RawCyclingButton<>(this.values, this.index, this.wrap, this.onChanged, content);
     }
-
 }
