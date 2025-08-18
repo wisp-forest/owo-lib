@@ -10,9 +10,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Map;
-import java.util.function.IntPredicate;
-
 public class MessageButton extends StatelessWidget {
 
     public final Text text;
@@ -31,6 +28,7 @@ public class MessageButton extends StatelessWidget {
     public Widget build(BuildContext context) {
         return new Button(
             this.onClick,
+            //TODO: abstract away the million places where a ternary operator is used to determine the label style for a possibly disabled button
             new Label(
                 this.onClick != null
                     ? LabelStyle.SHADOW
