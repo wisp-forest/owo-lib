@@ -3,6 +3,7 @@ package io.wispforest.owo.braid.widgets.button;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.braid.widgets.cycle.RawCyclingButton;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
 import io.wispforest.owo.ui.core.Color;
@@ -10,7 +11,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 
-/// The braid equivalent of [net.minecraft.client.gui.widget.ButtonWidget]
+/// A Vanilla-styled [RawCyclingButton] that displays a message.<br>
+/// This is the braid equivalent of [net.minecraft.client.gui.widget.ButtonWidget]
 ///
 /// @see Button
 /// @see Label
@@ -35,6 +37,7 @@ public class MessageButton extends StatelessWidget {
     public Widget build(BuildContext context) {
         return new Button(
             this.onClick,
+            //TODO: abstract away the million places where a ternary operator is used to determine the label style for a possibly disabled button
             new Label(
                 this.onClick != null
                     ? LabelStyle.SHADOW

@@ -83,15 +83,9 @@ public class CyclingButton<T> extends StatelessWidget {
 
     @Override
     public Widget build(BuildContext context) {
-        var active = this.onChanged != null && !ControlsOverride.controlsDisabled(context);
-        var content = new ButtonPanel(active, this.child);
-        if (!active) return content;
-        return new RawCyclingButton<>(
-            this.values,
-            this.index,
-            this.wrap,
-            this.onChanged,
-            content
-        );
+        var disabled = this.onChanged == null || ControlsOverride.controlsDisabled(context);
+        var content = new ButtonPanel(!disabled, this.child);
+        if (disabled) return content;
+        return new RawCyclingButton<>(this.values, this.index, this.wrap, this.onChanged, content);
     }
 }
