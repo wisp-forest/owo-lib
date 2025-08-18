@@ -41,47 +41,47 @@ public class MessageCyclingButton<T> extends StatelessWidget {
         this.onChanged = onChanged;
     }
 
-    /// Create a [MessageCyclingButton] with an explicit active state
+    /// Create a `MessageCyclingButton` with an explicit active state
     public MessageCyclingButton(List<T> values, int index, boolean wrap, Text text, Cycler.CyclerCallback<T> onChanged, boolean active) {
         this(values, index, wrap, text, active ? onChanged : null);
     }
 
-    /// Create a wrapping [MessageCyclingButton]
+    /// Create a wrapping `MessageCyclingButton`
     public MessageCyclingButton(List<T> values, int index, Text text, @Nullable Cycler.CyclerCallback<T> onChanged) {
         this(values, index, true, text, onChanged);
     }
 
-    /// Create a wrapping [MessageCyclingButton] with an explicit active state
+    /// Create a wrapping `MessageCyclingButton` with an explicit active state
     public MessageCyclingButton(List<T> values, int index, Text text, Cycler.CyclerCallback<T> onChanged, boolean active) {
         this(values, index, true, text, onChanged, active);
     }
 
-    /// Create a [MessageCyclingButton] for a `boolean`
+    /// Create a `MessageCyclingButton` for a `boolean`
     public static MessageCyclingButton<Boolean> forBoolean(boolean value, Text text, @Nullable Cycler.CyclerCallback<Boolean> onChanged) {
         return new MessageCyclingButton<>(List.of(false, true), value ? 1 : 0, true, text, onChanged);
     }
 
-    /// Create a [MessageCyclingButton] for a `boolean` with an explicit active state
+    /// Create a `MessageCyclingButton` for a `boolean` with an explicit active state
     public static MessageCyclingButton<Boolean> forBoolean(boolean value, Text text, Cycler.CyclerCallback<Boolean> onChanged, boolean active) {
         return MessageCyclingButton.forBoolean(value, text, active ? onChanged : null);
     }
 
-    /// Create a [MessageCyclingButton] for an [Enum]
+    /// Create a `MessageCyclingButton` for an [Enum]
     public static <T extends Enum<T>> MessageCyclingButton<T> forEnum(T value, boolean wrap, Text text, @Nullable Cycler.CyclerCallback<T> onChanged) {
         return new MessageCyclingButton<>(List.of(value.getDeclaringClass().getEnumConstants()), value.ordinal(), wrap, text, onChanged);
     }
 
-    /// Create a [MessageCyclingButton] for an [Enum] with an explicit active state
+    /// Create a `MessageCyclingButton` for an [Enum] with an explicit active state
     public static <T extends Enum<T>> MessageCyclingButton<T> forEnum(T value, boolean wrap, Text text, Cycler.CyclerCallback<T> onChanged, boolean active) {
         return MessageCyclingButton.forEnum(value, wrap, text, active ? onChanged : null);
     }
 
-    /// Create a wrapping [MessageCyclingButton] for an [Enum]
+    /// Create a wrapping `MessageCyclingButton` for an [Enum]
     public static <T extends Enum<T>> MessageCyclingButton<T> forEnum(T value, Text text, @Nullable Cycler.CyclerCallback<T> onChanged) {
         return MessageCyclingButton.forEnum(value, true, text, onChanged);
     }
 
-    /// Create a wrapping [MessageCyclingButton] for an [Enum] with an explicit active state
+    /// Create a wrapping `MessageCyclingButton` for an [Enum] with an explicit active state
     public static <T extends Enum<T>> MessageCyclingButton<T> forEnum(T value, Text text, Cycler.CyclerCallback<T> onChanged, boolean active) {
         return MessageCyclingButton.forEnum(value, true, text, active ? onChanged : null);
     }

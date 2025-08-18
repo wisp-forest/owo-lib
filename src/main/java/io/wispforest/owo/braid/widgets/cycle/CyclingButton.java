@@ -36,47 +36,47 @@ public class CyclingButton<T> extends StatelessWidget {
         this.child = child;
     }
 
-    /// Create a [CyclingButton] with an explicit active state
+    /// Create a `CyclingButton` with an explicit active state
     public CyclingButton(List<T> values, int index, boolean wrap, Cycler.CyclerCallback<T> onChanged, boolean active, Widget child) {
         this(values, index, wrap, active ? onChanged : null, child);
     }
 
-    /// Create a wrapping [CyclingButton]
+    /// Create a wrapping `CyclingButton`
     public CyclingButton(List<T> values, int index, @Nullable Cycler.CyclerCallback<T> onChanged, Widget child) {
         this(values, index, true, onChanged, child);
     }
 
-    /// Create a wrapping [CyclingButton] with an explicit active state
+    /// Create a wrapping `CyclingButton` with an explicit active state
     public CyclingButton(List<T> values, int index, Cycler.CyclerCallback<T> onChanged, boolean active, Widget child) {
         this(values, index, true, active ? onChanged : null, child);
     }
 
-    /// Create a [CyclingButton] for a `boolean`
+    /// Create a `CyclingButton` for a `boolean`
     public static CyclingButton<Boolean> forBoolean(boolean value, @Nullable Cycler.CyclerCallback<Boolean> onChanged, Widget child) {
         return new CyclingButton<>(List.of(false, true), value ? 1 : 0, true, onChanged, child);
     }
 
-    /// Create a [CyclingButton] for a `boolean` with an explicit active state
+    /// Create a `CyclingButton` for a `boolean` with an explicit active state
     public static CyclingButton<Boolean> forBoolean(boolean value, Cycler.CyclerCallback<Boolean> onChanged, boolean active, Widget child) {
         return CyclingButton.forBoolean(value, active ? onChanged : null, child);
     }
 
-    /// Create a [CyclingButton] for an [Enum]
+    /// Create a `CyclingButton` for an [Enum]
     public static <T extends Enum<T>> CyclingButton<T> forEnum(T value, boolean wrap, @Nullable Cycler.CyclerCallback<T> onChanged, Widget child) {
         return new CyclingButton<>(List.of(value.getDeclaringClass().getEnumConstants()), value.ordinal(), wrap, onChanged, child);
     }
 
-    /// Create a [CyclingButton] for an [Enum] with an explicit active state
+    /// Create a `CyclingButton` for an [Enum] with an explicit active state
     public static <T extends Enum<T>> CyclingButton<T> forEnum(T value, boolean wrap, Cycler.CyclerCallback<T> onChanged, boolean active, Widget child) {
         return CyclingButton.forEnum(value, wrap, active ? onChanged : null, child);
     }
 
-    /// Create a wrapping [CyclingButton] for an [Enum]
+    /// Create a wrapping `CyclingButton` for an [Enum]
     public static <T extends Enum<T>> CyclingButton<T> forEnum(T value, @Nullable Cycler.CyclerCallback<T> onChanged, Widget child) {
         return CyclingButton.forEnum(value, true, onChanged, child);
     }
 
-    /// Create a wrapping [CyclingButton] for an [Enum] with an explicit active state
+    /// Create a wrapping `CyclingButton` for an [Enum] with an explicit active state
     public static <T extends Enum<T>> CyclingButton<T> forEnum(T value, Cycler.CyclerCallback<T> onChanged, boolean active, Widget child) {
         return CyclingButton.forEnum(value, true, onChanged, active, child);
     }
