@@ -13,27 +13,27 @@ import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
 import io.wispforest.owo.braid.widgets.basic.*;
 import io.wispforest.owo.braid.widgets.basic.action.ActionTrigger;
 import io.wispforest.owo.braid.widgets.basic.action.Actions;
+import io.wispforest.owo.braid.widgets.slider.SliderCallback;
 import io.wispforest.owo.braid.widgets.slider.ValueMapper;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.DoubleConsumer;
-
 public class RawSlider extends StatefulWidget {
 
     public final double value;
-    //    public final double normalizedValue;
     private double min = 0;
     private double max = 1;
     private @Nullable Double step;
     private LayoutAxis axis = LayoutAxis.HORIZONTAL;
-    private ValueMapper valueMapper = ValueMapper.LOGARITHMIC;
-
-    private @Nullable DoubleConsumer onChanged;
+    private ValueMapper valueMapper = ValueMapper.LINEAR;
+    private @Nullable SliderCallback onChanged;
     private @Nullable Widget track;
     public final Widget handle;
     private double handleSize = 8;
+
+    private final double normalizedValue;
+    private Double incrementStep = null;
 
     public RawSlider(
         double value,
@@ -43,10 +43,11 @@ public class RawSlider extends StatefulWidget {
         this.value = value;
         this.handle = handle;
         setupCallback.setup(this);
-//        this.normalizedValue = this.valueMapper.toNormalized(value, this.min, this.max);
+        this.normalizedValue = this.valueMapper.toNormalized(value, this.min, this.max);
+        if (incrementStep == null) this.incrementStep = this.step != null ? this.step : (this.max - this.min) / 100;
     }
 
-    //region getters/setters
+    //region setters/getters
 
     public RawSlider min(double min) {
         this.assertMutable();
@@ -105,13 +106,13 @@ public class RawSlider extends StatefulWidget {
         return this.valueMapper;
     }
 
-    public RawSlider onChanged(@Nullable DoubleConsumer onChanged) {
+    public RawSlider onChanged(@Nullable SliderCallback onChanged) {
         this.assertMutable();
         this.onChanged = onChanged;
         return this;
     }
 
-    public @Nullable DoubleConsumer onChanged() {
+    public @Nullable SliderCallback onChanged() {
         return this.onChanged;
     }
 
@@ -135,6 +136,8 @@ public class RawSlider extends StatefulWidget {
         return this.handleSize;
     }
 
+    //endregion
+
     @Override
     public WidgetState<?> createState() {
         return new State();
@@ -149,14 +152,13 @@ public class RawSlider extends StatefulWidget {
             var widget = this.widget();
             return new LayoutBuilder((innerContext, constraints) -> {
                 var size = constraints.maxFiniteOrMinSize();
-                var step = widget.step != null ? widget.step : (widget.max - widget().min) / 100;
                 var content = new Stack(
                     widget.axis.choose(Alignment.LEFT, Alignment.TOP),
                     new Sized(size, widget.track),
                     new Padding(
                         widget.axis.chooseCompute(
-                            () -> Insets.left(Math.floor((size.width() - widget.handleSize) * normalizedValue())),
-                            () -> Insets.top(Math.floor((size.height() - widget.handleSize) * (1 - normalizedValue())))
+                            () -> Insets.left(Math.floor((size.width() - widget.handleSize) * widget.normalizedValue)),
+                            () -> Insets.top(Math.floor((size.height() - widget.handleSize) * (1 - widget.normalizedValue)))
                         ),
                         widget.axis.chooseCompute(
                             () -> new Sized(
@@ -177,8 +179,8 @@ public class RawSlider extends StatefulWidget {
                         ? content
                         : new Actions(
                             actions -> actions
-                                .addAction(ActionTrigger.POSITIVE_DIRECTIONS, () -> applyValue(widget.value + step))
-                                .addAction(ActionTrigger.NEGATIVE_DIRECTIONS, () -> applyValue(widget.value - step)),
+                                .addAction(ActionTrigger.POSITIVE_DIRECTIONS, () -> applyValue(widget.value + widget.incrementStep))
+                                .addAction(ActionTrigger.NEGATIVE_DIRECTIONS, () -> applyValue(widget.value - widget.incrementStep)),
                             new MouseArea(
                                 mouseArea -> mouseArea
                                     //TODO: decide what to do with buttons here
@@ -186,7 +188,7 @@ public class RawSlider extends StatefulWidget {
                                         if (button != 0) return false;
 
                                         y = widget.axis == LayoutAxis.VERTICAL ? constraints.maxFiniteOrMinOnAxis(widget.axis) - y : y;
-                                        var initialDragValue = normalizedValue();
+                                        var initialDragValue = widget.normalizedValue;
                                         if (!this.isInHandle(constraints, x, y))
                                             initialDragValue = this.setAbsolute(constraints, x, y);
 
@@ -197,7 +199,7 @@ public class RawSlider extends StatefulWidget {
                                     .scrollCallback((horizontal, vertical) -> {
                                         //TODO: negate horizontal scrolling in appstate?
                                         var offset = Math.abs(vertical) > Math.abs(horizontal) ? vertical : -horizontal;
-                                        return applyValue(widget.value + offset * step);
+                                        return applyValue(widget.value + offset * widget.incrementStep);
                                     })
                                     .cursorStyle(CursorStyle.HAND),
                                 content
@@ -208,11 +210,12 @@ public class RawSlider extends StatefulWidget {
         }
 
         protected boolean isInHandle(Constraints constraints, double x, double y) {
-            var axis = this.widget().axis;
+            var widget = this.widget();
+            var axis = widget.axis;
 
-            var trackLength = constraints.maxFiniteOrMinOnAxis(axis) - this.widget().handleSize;
-            var handleMin = normalizedValue() * trackLength;
-            var handleMax = handleMin + this.widget().handleSize;
+            var trackLength = constraints.maxFiniteOrMinOnAxis(axis) - widget.handleSize;
+            var handleMin = widget.normalizedValue * trackLength;
+            var handleMax = handleMin + widget.handleSize;
 
             var coordinate = axis.choose(x, y);
             return coordinate >= handleMin && coordinate <= handleMax;
@@ -225,10 +228,11 @@ public class RawSlider extends StatefulWidget {
         }
 
         protected double setAbsolute(Constraints constraints, double x, double y) {
-            if (this.widget().onChanged == null) return normalizedValue();
+            var widget = this.widget();
+            if (widget.onChanged == null) return widget.normalizedValue;
 
-            var axis = this.widget().axis;
-            var handleSize = this.widget().handleSize;
+            var axis = widget.axis;
+            var handleSize = widget.handleSize;
 
             var newNormalizedValue = MathHelper.clamp((axis.choose(x, y) - handleSize / 2) / (constraints.maxFiniteOrMinOnAxis(axis) - handleSize), 0, 1);
 
@@ -236,18 +240,14 @@ public class RawSlider extends StatefulWidget {
             return newNormalizedValue;
         }
 
-        protected boolean applyValue(double value) {
+        protected boolean applyValue(double newValue) {
             var widget = this.widget();
             if (widget.onChanged == null) return false;
-            if (widget.step != null) value = Math.round(value / widget.step) * widget.step;
-            value = MathHelper.clamp(value, widget.min, widget.max);
-            if (value == widget.value) return false;
-            widget.onChanged.accept(value);
+            if (widget.step != null) newValue = Math.round(newValue / widget.step) * widget.step;
+            newValue = MathHelper.clamp(newValue, widget.min, widget.max);
+            if (newValue == widget.value) return false;
+            widget.onChanged.accept(newValue);
             return true;
-        }
-
-        protected double normalizedValue() {
-            return this.widget().valueMapper.toNormalized(this.widget().value, this.widget().min, this.widget().max);
         }
     }
 }

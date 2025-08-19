@@ -50,6 +50,7 @@ import io.wispforest.owo.braid.widgets.slider.xlyder.RawXlyder;
 import io.wispforest.owo.braid.widgets.splitpane.MultiSplitPane;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.braid.widgets.stack.StackBase;
+import io.wispforest.owo.braid.widgets.temporal.DatePicker;
 import io.wispforest.owo.braid.widgets.textinput.TextBox;
 import io.wispforest.owo.braid.widgets.textinput.TextEditingController;
 import io.wispforest.owo.braid.widgets.vanilla.VanillaWidget;
@@ -92,6 +93,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.function.DoubleFunction;
 import java.util.stream.Collectors;
@@ -100,7 +102,7 @@ import java.util.stream.Stream;
 public class TestSelector extends StatefulWidget {
 
     public enum Tests {
-        COUNTER, FLEX, DRAGGING, SPLIT_PANE, SLIDERS, TEXT_INPUT, BURNING_CHYZ, SCROLLING, INPUT, CYCLING, COLOR, VANILLA, SHARED_STATE, STACKS, GRIDS, CONTRIBUTORS, ANIMATIONS
+        COUNTER, FLEX, DRAGGING, SPLIT_PANE, SLIDERS, TEXT_INPUT, BURNING_CHYZ, SCROLLING, INPUT, CYCLING, COLOR, VANILLA, SHARED_STATE, STACKS, GRIDS, CONTRIBUTORS, ANIMATIONS, TEMPORAL
     }
 
     @Override
@@ -182,6 +184,7 @@ public class TestSelector extends StatefulWidget {
                             case GRIDS -> new GridsTest();
                             case CONTRIBUTORS -> new ContributorsTest();
                             case ANIMATIONS -> new AnimationsTest();
+                            case TEMPORAL -> new TemporalTest();
                             case null -> new Center(new Label(Text.literal("select a test")));
                         }
                     )
@@ -210,53 +213,46 @@ public class TestSelector extends StatefulWidget {
                 ),
                 new Align(
                     Alignment.BOTTOM_RIGHT,
-                    new Row(
-                        MainAxisAlignment.START,
-                        CrossAxisAlignment.CENTER,
-                        new Padding(
-                            Insets.all(5),
-                            new SurfaceDimensions()
-                        ),
-                        new Sized(
-                            75, null,
-                            new Column(
-                                new Sized(
-                                    75, 20,
-                                    new MessageButton(
-                                        Text.literal("reset"),
-                                        () -> this.setState(() -> {
-                                            this.xSkew = 0f;
-                                            this.ySkew = 0f;
-                                            this.rotat = 0f;
-                                        })
-                                    )
-                                ),
-                                new Sized(
-                                    75, 20,
-                                    new MessageSlider(
-                                        rotat,
-                                        Text.literal("rotat: " + formatDouble(this.rotat)),
-                                        widget -> widget
-                                            .min(0)
-                                            .max(360)
-                                            .onChanged(value -> this.setState(() -> this.rotat = value))
-                                    )
-                                ),
-                                new Sized(
-                                    75.0,
-                                    75.0,
-                                    new MessageXlyder(
-                                        this.xSkew,
-                                        this.ySkew,
-                                        -.75, -.75,
-                                        .75, .75,
-                                        null, null,
-                                        (xValue, yValue) -> this.setState(() -> {
-                                            this.xSkew = xValue;
-                                            this.ySkew = yValue;
-                                        }),
-                                        Text.literal("x skew: " + (formatDouble(this.xSkew)) + "\ny skew: " + (formatDouble(this.ySkew)))
-                                    )
+                    new Sized(
+                        75, null,
+                        new Column(
+                            new SurfaceDimensions(),
+                            new Sized(
+                                75, 20,
+                                new MessageButton(
+                                    Text.literal("reset"),
+                                    () -> this.setState(() -> {
+                                        this.xSkew = 0f;
+                                        this.ySkew = 0f;
+                                        this.rotat = 0f;
+                                    })
+                                )
+                            ),
+                            new Sized(
+                                75, 20,
+                                new MessageSlider(
+                                    rotat,
+                                    Text.literal("rotat: " + formatDouble(this.rotat)),
+                                    widget -> widget
+                                        .min(0)
+                                        .max(360)
+                                        .onChanged(value -> this.setState(() -> this.rotat = value))
+                                )
+                            ),
+                            new Sized(
+                                75.0,
+                                75.0,
+                                new MessageXlyder(
+                                    this.xSkew,
+                                    this.ySkew,
+                                    -.75, -.75,
+                                    .75, .75,
+                                    null, null,
+                                    (xValue, yValue) -> this.setState(() -> {
+                                        this.xSkew = xValue;
+                                        this.ySkew = yValue;
+                                    }),
+                                    Text.literal("x skew: " + (formatDouble(this.xSkew)) + "\ny skew: " + (formatDouble(this.ySkew)))
                                 )
                             )
                         )
@@ -1284,6 +1280,29 @@ public class TestSelector extends StatefulWidget {
         }
     }
 
+//    public static class SliderTest2 extends StatefulWidget {
+//        @Override
+//        public WidgetState<IncrediblyRedundantSlider> createState() {
+//            return new State();
+//        }
+//
+//        public static class State extends WidgetState<IncrediblyRedundantSlider> {
+//
+//            private double x, y;
+//
+//            @Override
+//            public Widget build(BuildContext context) {
+//                var min = 0;
+//                var max = 100;
+//                new Grid(
+//                    LayoutAxis.HORIZONTAL, 3, Grid.CellFit.tight(),
+//                    widget -> new Padding(Insets.all(5), widget),
+//                    new MessageXlyder()
+//                )
+//            }
+//        }
+//    }
+
     public static class InputTest extends StatefulWidget {
         @Override
         public WidgetState<InputTest> createState() {
@@ -1890,10 +1909,12 @@ public class TestSelector extends StatefulWidget {
                                 this.setState(() -> this.dead = true);
                                 MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.ENTITY_PLAYER_DEATH, 1));
                                 SharedState.set(context, MurderState.class, state -> state.murders = state.murders.add(BigInteger.ONE));
-                                scheduleDelayedCallback(Duration.ofSeconds(displayEntity.getUuid().equals(UUID.fromString("09de8a6d-86bf-4c15-bb93-ce3384ce4e96")) ? 1 : 3), () -> this.setState(() -> {
-                                    this.dead = false;
-                                    MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.ITEM_TOTEM_USE, 1));
-                                }));
+                                scheduleDelayedCallback(
+                                    Duration.ofSeconds(displayEntity.getUuid().equals(UUID.fromString("09de8a6d-86bf-4c15-bb93-ce3384ce4e96")) ? 1 : 3), () -> this.setState(() -> {
+                                        this.dead = false;
+                                        MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.ITEM_TOTEM_USE, 1));
+                                    })
+                                );
                             },
                             new Panel(
                                 Identifier.of("uwu", "contributors_panel"),
@@ -2009,6 +2030,32 @@ public class TestSelector extends StatefulWidget {
                                     )
                                 )
                             )
+                        )
+                    )
+                );
+            }
+        }
+    }
+
+    public static class TemporalTest extends StatefulWidget {
+        @Override
+        public WidgetState<TemporalTest> createState() {
+            return new State();
+        }
+
+        public static class State extends WidgetState<TemporalTest> {
+
+            private LocalDate cooldate = LocalDate.now();
+
+            @Override
+            public Widget build(BuildContext context) {
+                return new Sized(
+                    250,
+                    250,
+                    new Center(
+                        new DatePicker(
+                            this.cooldate,
+                            newDate -> this.setState(() -> this.cooldate = newDate)
                         )
                     )
                 );

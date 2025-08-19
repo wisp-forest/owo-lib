@@ -12,7 +12,6 @@ public class MessageDrag extends StatelessWidget {
 
     public final double value;
     public final WidgetSetupCallback<RawDrag> setupCallback;
-
     public final Text message;
 
     public MessageDrag(
