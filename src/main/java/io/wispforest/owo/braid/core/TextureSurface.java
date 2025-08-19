@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.core;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.ProjectionType;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
@@ -22,7 +23,21 @@ public class TextureSurface implements Surface {
     private final EventStream<ResizeCallback> resizeEvents = ResizeCallback.newStream();
 
     public TextureSurface(int width, int height) {
+        // TODO: consider where this makes sense to have here.
+        //       it probably makes more sense to "enforce" surface
+        //       happens when it's safe to do so (i.e. at the
+        //       start/end of a frame) or on-demand during drawing
+        var framebuffer = GlStateManager.getBoundFramebuffer();
+
+        var viewportX = GlStateManager.Viewport.getX();
+        var viewportY = GlStateManager.Viewport.getY();
+        var viewportWidth = GlStateManager.Viewport.getWidth();
+        var viewportHeight = GlStateManager.Viewport.getHeight();
+
         this.framebuffer = new SimpleFramebuffer(width, height, true);
+
+        GlStateManager._glBindFramebuffer(GL32.GL_FRAMEBUFFER, framebuffer);
+        GlStateManager._viewport(viewportX, viewportY, viewportWidth, viewportHeight);
     }
 
     public void resize(int width, int height) {
@@ -61,8 +76,8 @@ public class TextureSurface implements Surface {
 
     @Override
     public void setCursorStyle(CursorStyle style) {
-        // it doesn't support to style the cursor when
-        // rendering to a texture
+        // it doesn't make sense to style the cursor
+        // when rendering to a texture
     }
 
     // ---

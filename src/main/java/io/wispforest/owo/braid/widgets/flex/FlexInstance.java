@@ -109,7 +109,7 @@ public class FlexInstance extends MultiChildWidgetInstance<Flex> {
 
             child.transform.setCoordinate(
                 crossAxis,
-                this.widget.crossAxisAlignment._computeChildOffset(
+                this.widget.crossAxisAlignment.computeChildOffset(
                     size.getExtent(crossAxis) - child.transform.getExtent(crossAxis)
                 )
             );
