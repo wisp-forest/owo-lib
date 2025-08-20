@@ -2,9 +2,6 @@ package io.wispforest.uwu.client.braid;
 
 import com.mojang.authlib.GameProfile;
 import io.wispforest.owo.braid.core.*;
-import io.wispforest.owo.braid.core.Insets;
-import io.wispforest.owo.braid.core.Size;
-import io.wispforest.owo.braid.core.Surface;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
@@ -57,12 +54,14 @@ import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.EntityComponent;
 import io.wispforest.owo.ui.container.Containers;
-import io.wispforest.owo.ui.core.*;
+import io.wispforest.owo.ui.core.Color;
+import io.wispforest.owo.ui.core.Easing;
+import io.wispforest.owo.ui.core.OwoUIDrawContext;
+import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.ViewerStack;
 import io.wispforest.owo.util.Wisdom;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CheckboxWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.sound.PositionedSoundInstance;
@@ -420,6 +419,15 @@ public class TestSelector extends StatefulWidget {
                         () -> setState(() -> this.windows.remove(controller)),
                         controller,
                         new Stack(
+                            new Center(
+                                new AspectRatio(
+                                    16d / 9d,
+                                    new Box(
+                                        new Color(1f, 1f, 1f, .5f),
+                                        new Label(Text.literal("16:9 aspect ratio"))
+                                    )
+                                )
+                            ),
                             new Align(
                                 Alignment.TOP_LEFT,
                                 new Column(
@@ -919,32 +927,44 @@ public class TestSelector extends StatefulWidget {
 
         @Override
         public Widget build(BuildContext context) {
-            return new Sized(
-                250.0,
-                250.0,
-                new Panel(
-                    OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
-                    new Padding(
-                        Insets.all(8),
+            return new Row(
+                MainAxisAlignment.START,
+                CrossAxisAlignment.CENTER,
+                new Padding(Insets.horizontal(10)),
+                List.of(
+                    new Sized(
+                        250.0,
+                        250.0,
                         new Panel(
-                            OwoUIDrawContext.PANEL_INSET_NINE_PATCH_TEXTURE,
-                            new RecipeViewerStack(
-                                () -> ViewerStack.OfItem.of(Items.GOLD_BLOCK),
-                                new StackDropArea(
-                                    stack -> stack instanceof ViewerStack.OfItem,
-                                    stack -> System.out.println("chyz: mmm i ate a " + ((ViewerStack.OfItem) stack).asStack()),
-                                    new RecipeViewerExclusionZone(
-                                        new EntityWidget(
-                                            1,
-                                            false,
-                                            true,
-                                            true,
-                                            this.chyz
+                            OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
+                            new Padding(
+                                Insets.all(8),
+                                new Panel(
+                                    OwoUIDrawContext.PANEL_INSET_NINE_PATCH_TEXTURE,
+                                    new RecipeViewerStack(
+                                        () -> ViewerStack.OfItem.of(Items.GOLD_BLOCK),
+                                        new StackDropArea(
+                                            stack -> stack instanceof ViewerStack.OfItem,
+                                            stack -> System.out.println("chyz: mmm i ate a " + ((ViewerStack.OfItem) stack).asStack()),
+                                            new RecipeViewerExclusionZone(
+                                                new EntityWidget(
+                                                    1,
+                                                    false,
+                                                    true,
+                                                    true,
+                                                    this.chyz
+                                                )
+                                            )
                                         )
                                     )
                                 )
                             )
                         )
+                    ),
+                    new Amogus(
+                        new Box(Color.RED),
+                        new Box(Color.WHITE),
+                        16
                     )
                 )
             );
@@ -1886,6 +1906,48 @@ public class TestSelector extends StatefulWidget {
                     )
                 );
             }
+        }
+    }
+
+    public static class Amogus extends StatelessWidget {
+
+        public final Widget bodyPixel;
+        public final Widget visorPixel;
+        public final double pixelSize;
+
+        public Amogus(Widget bodyPixel, Widget visorPixel, double pixelSize) {
+            this.bodyPixel = bodyPixel;
+            this.visorPixel = visorPixel;
+            this.pixelSize = pixelSize;
+        }
+
+        @Override
+        public Widget build(BuildContext context) {
+            return new Sized(
+                this.pixelSize * 4,
+                this.pixelSize * 4,
+                new Grid(
+                    LayoutAxis.VERTICAL,
+                    4,
+                    Grid.CellFit.tight(),
+                    (Widget) null,
+                    this.bodyPixel,
+                    this.bodyPixel,
+                    this.bodyPixel,
+                    this.bodyPixel,
+                    this.bodyPixel,
+                    this.visorPixel,
+                    this.visorPixel,
+                    this.bodyPixel,
+                    this.bodyPixel,
+                    this.bodyPixel,
+                    this.bodyPixel,
+                    null,
+                    this.bodyPixel,
+                    null,
+                    this.bodyPixel
+                )
+            );
         }
     }
 
