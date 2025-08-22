@@ -222,10 +222,10 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
     }
 
     public Box computeGlobalBounds() {
-        var global = computeGlobalTransform().invert();
+        var global = this.parent != null ? this.parent.computeGlobalTransform().invert() : new Matrix4f();
 
-        var min = new Vector3f().mulPosition(global);
-        var max = new Vector3f((float) this.transform.width, (float) this.transform.height, 0).mulPosition(global);
+        var min = new Vector3f((float) this.transform.x, (float) this.transform.y, 0).mulPosition(global);
+        var max = new Vector3f((float) (this.transform.x + this.transform.width), (float) (this.transform.y + this.transform.height), 0).mulPosition(global);
 
         return new Box(min.x, min.y, min.z, max.x, max.y, max.z);
     }
