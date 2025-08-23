@@ -1,12 +1,12 @@
 package io.wispforest.owo.braid.widgets.animated;
 
 import io.wispforest.owo.braid.animation.AutomaticallyAnimatedWidget;
+import io.wispforest.owo.braid.animation.Easing;
 import io.wispforest.owo.braid.animation.InsetsLerp;
 import io.wispforest.owo.braid.core.Insets;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.Padding;
-import io.wispforest.owo.ui.core.Easing;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;

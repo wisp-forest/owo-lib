@@ -2,11 +2,11 @@ package io.wispforest.owo.braid.widgets.animated;
 
 import io.wispforest.owo.braid.animation.AlignmentLerp;
 import io.wispforest.owo.braid.animation.AutomaticallyAnimatedWidget;
+import io.wispforest.owo.braid.animation.Easing;
 import io.wispforest.owo.braid.core.Alignment;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.Align;
-import io.wispforest.owo.ui.core.Easing;
 
 import java.time.Duration;
 
