@@ -13,6 +13,8 @@ import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
+import org.joml.Vector2d;
+import org.joml.Vector3d;
 import org.joml.Vector3f;
 
 import java.util.*;
@@ -228,6 +230,13 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
         var max = new Vector3f((float) (this.transform.x + this.transform.width), (float) (this.transform.y + this.transform.height), 0).mulPosition(global);
 
         return new Box(min.x, min.y, min.z, max.x, max.y, max.z);
+    }
+
+    public Vector2d computeGlobalPosition() {
+        var global = this.parent != null ? this.parent.computeGlobalTransform().invert() : new Matrix4f();
+
+        var pos = new Vector3d(this.transform.x, this.transform.y, 0).mulPosition(global);
+        return new Vector2d(pos.x, pos.y);
     }
 
     // ---
