@@ -109,6 +109,7 @@ public class TestSelector extends StatefulWidget {
         private double ySkew = 0f;
 
         private double rotat = 0f;
+        private int fliptat = 0;
 
         private Tests test = null;
         private Entity chyz;
@@ -156,45 +157,51 @@ public class TestSelector extends StatefulWidget {
 
             return new Stack(
                 Alignment.CENTER,
-                new Transform(
-                    new Matrix4f().m01((float) Math.tan(this.xSkew)).m10((float) Math.tan(this.ySkew)).rotateZ((float) Math.toRadians(this.rotat)),
-                    new Center(
-                        switch (this.test) {
-                            case COUNTER -> new Counter();
-                            case FLEX -> new FunnySwitchLayout();
-                            case DRAGGING -> new DragArenaTest();
-                            case SPLIT_PANE -> new SplitPaneTest();
-                            case SLIDERS -> new SliderTest();
-                            case TEXT_INPUT -> new TextInputTest();
-                            case BURNING_CHYZ -> new BurningChyzTest(this.chyz);
-                            case SCROLLING -> new ScrollTest();
-                            case INPUT -> new InputTest();
-                            case CYCLING -> new CyclingTest();
-                            case VANILLA -> new VanillaTest();
-                            case SHARED_STATE -> new SharedStateTest();
-                            case STACKS -> new StacksTest();
-                            case GRIDS -> new GridsTest();
-                            case CONTRIBUTORS -> new ContributorsTest();
-                            case ANIMATIONS -> new AnimationsTest();
-                            case NAVIGATOR -> new NavigatorTest();
-                            case null -> new Center(new Label(Text.literal("select a test")));
-                        }
-                    )
-                ),
-                new Align(
-                    Alignment.LEFT,
-                    new Padding(
-                        Insets.vertical(50).withLeft(5),
-                        new HitTestTrap(
-                            new Panel(
-                                OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
-                                new Padding(
-                                    Insets.all(8),
-                                    new VerticallyScrollable(
-                                        new IntrinsicWidth(
-                                            new Column(
-                                                new Padding(Insets.all(2)),
-                                                buttons
+                new RotatedLayout(
+                    this.fliptat,
+                    new Stack(
+                        Alignment.CENTER,
+                        new Transform(
+                            new Matrix4f().m01((float) Math.tan(this.xSkew)).m10((float) Math.tan(this.ySkew)).rotateZ((float) Math.toRadians(this.rotat)),
+                            new Center(
+                                switch (this.test) {
+                                    case COUNTER -> new Counter();
+                                    case FLEX -> new FunnySwitchLayout();
+                                    case DRAGGING -> new DragArenaTest();
+                                    case SPLIT_PANE -> new SplitPaneTest();
+                                    case SLIDERS -> new SliderTest();
+                                    case TEXT_INPUT -> new TextInputTest();
+                                    case BURNING_CHYZ -> new BurningChyzTest(this.chyz);
+                                    case SCROLLING -> new ScrollTest();
+                                    case INPUT -> new InputTest();
+                                    case CYCLING -> new CyclingTest();
+                                    case VANILLA -> new VanillaTest();
+                                    case SHARED_STATE -> new SharedStateTest();
+                                    case STACKS -> new StacksTest();
+                                    case GRIDS -> new GridsTest();
+                                    case CONTRIBUTORS -> new ContributorsTest();
+                                    case ANIMATIONS -> new AnimationsTest();
+                                    case NAVIGATOR -> new NavigatorTest();
+                                    case null -> new Center(new Label(Text.literal("select a test")));
+                                }
+                            )
+                        ),
+                        new Align(
+                            Alignment.LEFT,
+                            new Padding(
+                                Insets.vertical(50).withLeft(5),
+                                new HitTestTrap(
+                                    new Panel(
+                                        OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
+                                        new Padding(
+                                            Insets.all(8),
+                                            new VerticallyScrollable(
+                                                new IntrinsicWidth(
+                                                    new Column(
+                                                        new Padding(Insets.all(2)),
+                                                        buttons
+                                                    )
+                                                )
                                             )
                                         )
                                     )
@@ -223,7 +230,31 @@ public class TestSelector extends StatefulWidget {
                                             this.xSkew = 0f;
                                             this.ySkew = 0f;
                                             this.rotat = 0f;
+                                            this.fliptat = 0;
                                         })
+                                    )
+                                ),
+                                new Sized(
+                                    75,
+                                    null,
+                                    new Column(
+                                        new Padding(
+                                            Insets.top(5),
+                                            new Label(Text.literal("fliptat:"))
+                                        ),
+                                        new Row(
+                                            MainAxisAlignment.START,
+                                            CrossAxisAlignment.CENTER,
+                                            new Flexible(
+                                                new MessageButton(Text.literal("-"), () -> this.setState(() -> this.fliptat -= 1))
+                                            ),
+                                            new Flexible(
+                                                new Label(Text.literal(String.valueOf(this.fliptat)))
+                                            ),
+                                            new Flexible(
+                                                new MessageButton(Text.literal("+"), () -> this.setState(() -> this.fliptat += 1))
+                                            )
+                                        )
                                     )
                                 ),
                                 new Sized(
