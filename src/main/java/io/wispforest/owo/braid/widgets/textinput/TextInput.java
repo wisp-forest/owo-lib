@@ -253,7 +253,7 @@ public class TextInput extends LeafInstanceWidget {
         }
 
         private void insert(String insertion) {
-            insertion = StringHelper.stripInvalidChars(insertion, this.widget.maxLines == 1);
+            insertion = StringHelper.stripInvalidChars(insertion, this.widget.maxLines < 0 || this.widget.maxLines > 1);
 
             var chars = new StringBuilder(this.text);
             chars.replace(this.selection.lower(), this.selection.upper(), insertion);
@@ -439,8 +439,8 @@ public class TextInput extends LeafInstanceWidget {
                 return true;
             }
 
-            if (this.widget.maxLines < 0 || this.widget.maxLines > this.metrics.lineMetrics().size()) {
-                if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
+            if (this.widget.maxLines < 0 || this.widget.maxLines > 1) {
+                if (this.widget.maxLines > this.metrics.lineMetrics().size() && keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
                     this.insert("\n");
                     return true;
                 } else if (keyCode == GLFW.GLFW_KEY_UP) {

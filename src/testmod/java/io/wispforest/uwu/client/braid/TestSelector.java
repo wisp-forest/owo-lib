@@ -31,6 +31,8 @@ import io.wispforest.owo.braid.widgets.flex.*;
 import io.wispforest.owo.braid.widgets.grid.Grid;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
+import io.wispforest.owo.braid.widgets.overlay.Overlay;
+import io.wispforest.owo.braid.widgets.overlay.OverlayEntryBuilder;
 import io.wispforest.owo.braid.widgets.owoui.OwoUIWidget;
 import io.wispforest.owo.braid.widgets.recipeviewer.RecipeViewerExclusionZone;
 import io.wispforest.owo.braid.widgets.recipeviewer.RecipeViewerStack;
@@ -92,7 +94,7 @@ import java.util.stream.Stream;
 public class TestSelector extends StatefulWidget {
 
     public enum Tests {
-        COUNTER, FLEX, DRAGGING, SPLIT_PANE, SLIDERS, TEXT_INPUT, BURNING_CHYZ, SCROLLING, INPUT, CYCLING, VANILLA, SHARED_STATE, STACKS, GRIDS, CONTRIBUTORS, ANIMATIONS, NAVIGATOR
+        COUNTER, FLEX, DRAGGING, SPLIT_PANE, SLIDERS, TEXT_INPUT, BURNING_CHYZ, SCROLLING, INPUT, CYCLING, VANILLA, SHARED_STATE, STACKS, GRIDS, CONTRIBUTORS, ANIMATIONS, NAVIGATOR, OVERLAY
     }
 
     @Override
@@ -179,6 +181,7 @@ public class TestSelector extends StatefulWidget {
                                     case CONTRIBUTORS -> new ContributorsTest();
                                     case ANIMATIONS -> new AnimationsTest();
                                     case NAVIGATOR -> new NavigatorTest();
+                                    case OVERLAY -> new OverlayTest();
                                     case null -> new Center(new Label(Text.literal("select a test")));
                                 }
                             )
@@ -1482,8 +1485,8 @@ public class TestSelector extends StatefulWidget {
                     ),
                     new Label(
                         Text.literal(coolNumbers.stream()
-                                         .map(String::valueOf)
-                                         .collect(Collectors.joining(", ")))
+                            .map(String::valueOf)
+                            .collect(Collectors.joining(", ")))
                     )
                 );
             }
@@ -2211,6 +2214,52 @@ public class TestSelector extends StatefulWidget {
                         Insets.top(10),
                         new MessageButton(Text.literal("go back"), () -> Navigator.pop(context))
                     )
+                );
+            }
+        }
+    }
+
+    public static class OverlayTest extends StatefulWidget {
+        @Override
+        public WidgetState<OverlayTest> createState() {
+            return new State();
+        }
+
+        public static class State extends WidgetState<OverlayTest> {
+
+            private void spawn(BuildContext context, double x, double y) {
+                Overlay.of(context).add(
+                    new OverlayEntryBuilder(
+                        new Amogus(
+                            new Box(Color.random()),
+                            new Box(Color.WHITE),
+                            8
+                        ),
+                        new RelativePosition(context, x - 12, y - 12)
+                    )
+                );
+            }
+
+            @Override
+            public Widget build(BuildContext context) {
+                return new Overlay(
+                    new Builder(innerContext -> {
+                        return new Sized(
+                            Double.POSITIVE_INFINITY,
+                            Double.POSITIVE_INFINITY,
+                            new MouseArea(
+                                widget -> widget
+                                    .clickCallback((x, y, button, modifiers) -> {
+                                        this.spawn(innerContext, x, y);
+                                        return true;
+                                    })
+                                    .dragCallback((x, y, dx, dy) -> {
+                                        this.spawn(innerContext, x, y);
+                                    }),
+                                EmptyWidget.INSTANCE
+                            )
+                        );
+                    })
                 );
             }
         }
