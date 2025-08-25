@@ -1,5 +1,6 @@
 package io.wispforest.owo.config.ui;
 
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.base.BaseUIModelScreen;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
@@ -15,7 +16,7 @@ public class RestartRequiredScreen extends BaseUIModelScreen<FlowLayout> {
     protected final Screen parent;
 
     public RestartRequiredScreen(Screen parent) {
-        super(FlowLayout.class, DataSource.asset(Identifier.of("owo", "restart_required")));
+        super(FlowLayout.class, DataSource.asset(Owo.id("restart_required")));
         this.parent = parent;
     }
 

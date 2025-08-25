@@ -1,5 +1,6 @@
 package io.wispforest.owo.ui.parsing;
 
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.base.BaseUIModelScreen;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.LabelComponent;
@@ -26,7 +27,7 @@ public class ConfigureHotReloadScreen extends BaseUIModelScreen<FlowLayout> impl
     private LabelComponent fileNameLabel;
 
     public ConfigureHotReloadScreen(Identifier modelId, @Nullable Screen parent) {
-        super(FlowLayout.class, DataSource.asset(Identifier.of("owo", "configure_hot_reload")));
+        super(FlowLayout.class, DataSource.asset(Owo.id("configure_hot_reload")));
         this.parent = parent;
 
         this.modelId = modelId;

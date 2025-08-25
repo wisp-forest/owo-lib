@@ -1,5 +1,6 @@
 package io.wispforest.owo.ui.component;
 
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.CursorStyle;
@@ -23,7 +24,7 @@ import java.util.Map;
 
 public class SmallCheckboxComponent extends BaseComponent {
 
-    public static final Identifier TEXTURE = Identifier.of("owo", "textures/gui/smol_checkbox.png");
+    public static final Identifier TEXTURE = Owo.id("textures/gui/smol_checkbox.png");
 
     protected final EventStream<OnChanged> checkedEvents = OnChanged.newStream();
 

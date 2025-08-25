@@ -1,5 +1,6 @@
 package io.wispforest.owo.mixin;
 
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.util.TagInjector;
 import net.minecraft.registry.tag.TagGroupLoader;
 import net.minecraft.resource.ResourceManager;
@@ -30,7 +31,7 @@ public class TagGroupLoaderMixin {
             if (!this.dataType.equals(location.type())) return;
 
             var list = map.computeIfAbsent(location.tagId(), id -> new ArrayList<>());
-            entries.forEach(addition -> list.add(new TagGroupLoader.TrackedEntry(addition, "owo")));
+            entries.forEach(addition -> list.add(new TagGroupLoader.TrackedEntry(addition, Owo.MOD_ID)));
         });
     }
 

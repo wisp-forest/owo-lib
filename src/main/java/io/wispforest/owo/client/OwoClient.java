@@ -47,7 +47,7 @@ public class OwoClient implements ClientModInitializer {
             Ignored 'owo.renderdocPath' property as this Minecraft instance is not running on Windows.
             ========================================""";
 
-    public static final GlProgram HSV_PROGRAM = new GlProgram(Identifier.of("owo", "spectrum"), VertexFormats.POSITION_COLOR);
+    public static final GlProgram HSV_PROGRAM = new GlProgram(Owo.id( "spectrum"), VertexFormats.POSITION_COLOR);
     public static final BlurProgram BLUR_PROGRAM = new BlurProgram();
 
     @Override
@@ -57,7 +57,7 @@ public class OwoClient implements ClientModInitializer {
         ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new UIModelLoader());
         ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new NinePatchTexture.MetadataLoader());
         ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
-            @Override public Identifier getFabricId() { return Identifier.of("owo", "after_shader_load"); }
+            @Override public Identifier getFabricId() { return Owo.id( "after_shader_load"); }
             @Override public void reload(ResourceManager manager) { GlProgram.loadAndSetupPrograms(); }
         });
 

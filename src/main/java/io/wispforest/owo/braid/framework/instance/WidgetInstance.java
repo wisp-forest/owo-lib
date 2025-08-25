@@ -276,6 +276,10 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
         return this.parent != null;
     }
 
+    public @Nullable WidgetInstance<?> parent() {
+        return this.parent;
+    }
+
     public void setWidget(T widget) {
         this.widget = widget;
     }

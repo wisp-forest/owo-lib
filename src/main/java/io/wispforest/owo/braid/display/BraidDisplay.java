@@ -1,6 +1,7 @@
 package io.wispforest.owo.braid.display;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.core.AppState;
 import io.wispforest.owo.braid.core.EventBuffer;
 import io.wispforest.owo.braid.core.TextureSurface;
@@ -74,7 +75,7 @@ public class BraidDisplay {
     // ---
 
     private static final Function<TextureSurface, RenderLayer> RENDER_TYPE = surface -> RenderLayer.of(
-        "owo:braid_display",
+        Owo.id("braid_display").toString(),
         VertexFormats.POSITION_COLOR_TEXTURE_LIGHT_NORMAL,
         VertexFormat.DrawMode.QUADS,
         16384,

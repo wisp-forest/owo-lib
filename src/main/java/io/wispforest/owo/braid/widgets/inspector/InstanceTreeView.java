@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets.inspector;
 
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.animation.Easing;
 import io.wispforest.owo.braid.core.Insets;
 import io.wispforest.owo.braid.framework.BuildContext;
@@ -88,7 +89,7 @@ public class InstanceTreeView extends StatefulWidget {
                 this.schedulePostLayoutCallback(() -> this.setState(() -> this.highlight = false));
             }
 
-            var startCollapsed = true;
+            var startExpanded = false;
             if (!this.builtOnce) {
                 this.builtOnce = true;
 
@@ -97,7 +98,7 @@ public class InstanceTreeView extends StatefulWidget {
                     this.reveal();
                 }
 
-                startCollapsed = lastRevealEvent == null || !lastRevealEvent.fullPath.contains(this.widget().viewInstance);
+                startExpanded = lastRevealEvent != null && lastRevealEvent.fullPath.contains(this.widget().viewInstance);
             }
 
             return new AnimatedBox(
@@ -109,7 +110,7 @@ public class InstanceTreeView extends StatefulWidget {
                     ?
                     new CollapsibleEntry(
                         this.expandEvents.source(),
-                        startCollapsed,
+                        startExpanded,
                         title,
                         new Column(
                             children.stream()
@@ -124,7 +125,7 @@ public class InstanceTreeView extends StatefulWidget {
                             new Sized(
                                 12,
                                 12,
-                                new SpriteWidget(Identifier.of("owo", "braid_inspector_leaf"), false)
+                                new SpriteWidget(Owo.id("braid_inspector_leaf"), false)
                             ),
                             title
                         )

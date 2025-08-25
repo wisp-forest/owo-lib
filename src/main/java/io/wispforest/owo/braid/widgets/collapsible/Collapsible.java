@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets.collapsible;
 
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.core.Alignment;
 import io.wispforest.owo.braid.core.Insets;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
@@ -20,19 +21,18 @@ import io.wispforest.owo.ui.core.Color;
 import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
-import java.util.function.Consumer;
 
 public class Collapsible extends StatefulWidget {
 
     public final boolean showVerticalRule;
 
     public final boolean collapsed;
-    public final Consumer<Boolean> onToggled;
+    public final CollapsibleCallback onToggled;
 
     public final Widget title;
     public final Widget content;
 
-    public Collapsible(boolean showVerticalRule, boolean collapsed, Consumer<Boolean> onToggled, Widget title, Widget content) {
+    public Collapsible(boolean showVerticalRule, boolean collapsed, CollapsibleCallback onToggled, Widget title, Widget content) {
         this.showVerticalRule = showVerticalRule;
         this.collapsed = collapsed;
         this.onToggled = onToggled;
@@ -86,9 +86,9 @@ public class Collapsible extends StatefulWidget {
                             12,
                             Actions.click(
                                 widget -> widget.cursorStyle(CursorStyle.HAND),
-                                () -> this.widget().onToggled.accept(!this.widget().collapsed),
+                                () -> this.widget().onToggled.onToggled(!this.widget().collapsed),
                                 new Center(
-                                    new SpriteWidget(Identifier.of("owo",  this.widget().collapsed ? "braid_collapsible_closed" : "braid_collapsible_open"), false)
+                                    new SpriteWidget(Owo.id( this.widget().collapsed ? "braid_collapsible_closed" : "braid_collapsible_open"), false)
                                 )
                             )
                         ),

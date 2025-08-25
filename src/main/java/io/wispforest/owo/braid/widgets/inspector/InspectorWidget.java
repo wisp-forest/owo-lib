@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets.inspector;
 
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.core.Alignment;
 import io.wispforest.owo.braid.core.Insets;
 import io.wispforest.owo.braid.framework.BuildContext;
@@ -111,8 +112,8 @@ public class InspectorWidget extends StatefulWidget {
                                                                         }),
                                                                         new SpriteWidget(
                                                                             this.alwaysOnTop
-                                                                                ? Identifier.of("owo", "braid_inspector_always_on_top")
-                                                                                : Identifier.of("owo", "braid_inspector_not_always_on_top"),
+                                                                                ? Owo.id("braid_inspector_always_on_top")
+                                                                                : Owo.id( "braid_inspector_not_always_on_top"),
                                                                             false
                                                                         )
                                                                     )
@@ -125,7 +126,7 @@ public class InspectorWidget extends StatefulWidget {
                                                                     Text.literal("reassemble app"),
                                                                     new Button(
                                                                         () -> this.widget().inspector.subject.rebuildRoot(),
-                                                                        new SpriteWidget(Identifier.of("owo", "braid_inspector_reassemble"), false)
+                                                                        new SpriteWidget(Owo.id( "braid_inspector_reassemble"), false)
                                                                     )
                                                                 )
                                                             ),
@@ -136,7 +137,7 @@ public class InspectorWidget extends StatefulWidget {
                                                                     Text.literal("pick widget"),
                                                                     new Button(
                                                                         () -> this.widget().inspector.pick(),
-                                                                        new SpriteWidget(Identifier.of("owo", "braid_inspector_pick"), false)
+                                                                        new SpriteWidget(Owo.id( "braid_inspector_pick"), false)
                                                                     )
                                                                 )
                                                             )

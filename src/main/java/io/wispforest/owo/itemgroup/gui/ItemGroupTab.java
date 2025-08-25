@@ -1,5 +1,6 @@
 package io.wispforest.owo.itemgroup.gui;
 
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.OwoItemSettingsExtension;
@@ -20,7 +21,7 @@ public record ItemGroupTab(
         boolean primary
 ) implements OwoItemGroup.ButtonDefinition {
 
-    public static final Identifier DEFAULT_TEXTURE = Identifier.of("owo", "textures/gui/tabs.png");
+    public static final Identifier DEFAULT_TEXTURE = Owo.id("textures/gui/tabs.png");
 
     @Override
     public Text tooltip() {

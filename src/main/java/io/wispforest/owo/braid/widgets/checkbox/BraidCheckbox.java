@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets.checkbox;
 
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
@@ -33,11 +34,11 @@ public class BraidCheckbox extends StatelessWidget {
 
     public static final SpriteIdentifier BACKGROUND_TEXTURE = new SpriteIdentifier(
         SpriteWidget.GUI_ATLAS_ID,
-        Identifier.of("owo", "braid_checkbox")
+        Owo.id("braid_checkbox")
     );
 
     public static final SpriteIdentifier CHECKMARK_TEXTURE = new SpriteIdentifier(
         SpriteWidget.GUI_ATLAS_ID,
-        Identifier.of("owo", "braid_checkmark")
+        Owo.id( "braid_checkmark")
     );
 }
