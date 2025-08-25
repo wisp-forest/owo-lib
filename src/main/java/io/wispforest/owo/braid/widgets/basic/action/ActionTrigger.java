@@ -43,9 +43,6 @@ public record ActionTrigger(Set<Trigger> triggers) {
     public static final ActionTrigger POSITIVE_DIRECTIONS = ActionTrigger.of(UP, RIGHT);
     public static final ActionTrigger NEGATIVE_DIRECTIONS = ActionTrigger.of(DOWN, LEFT);
 
-    public static final ActionTrigger VERTICAL_DIRECTIONS = ActionTrigger.of(UP, DOWN);
-    public static final ActionTrigger HORIZONTAL_DIRECTIONS = ActionTrigger.of(RIGHT, LEFT);
-
     public static final ActionTrigger INCREMENT = ActionTrigger.of(CLICK, POSITIVE_DIRECTIONS);
     public static final ActionTrigger DECREMENT = ActionTrigger.of(SECONDARY_CLICK, NEGATIVE_DIRECTIONS);
 
