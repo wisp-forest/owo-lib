@@ -163,7 +163,7 @@ public class RawLabel extends LeafInstanceWidget {
             var style = this.getStyleAt(x, y);
             if (style == null) return null;
             if (style.getClickEvent() != null) return CursorStyle.HAND;
-            return MouseListener.super.cursorStyleAt(x, y);
+            return null;
         }
     }
 

@@ -25,7 +25,7 @@ public class TextBox extends StatefulWidget {
             controller,
             widget -> {
                 setupCallback.setup(widget);
-                widget.suggestion(widget.suggestion().copy().withColor(-8355712));
+                widget.suggestion(widget.suggestion().copy().withColor(0xFF808080));
             }
         );
     }
