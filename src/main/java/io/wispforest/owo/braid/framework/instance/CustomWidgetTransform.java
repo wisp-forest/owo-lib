@@ -6,6 +6,8 @@ import org.joml.Matrix4fc;
 import org.joml.Vector3f;
 
 public class CustomWidgetTransform extends WidgetTransform {
+
+    private boolean applyAtCenter = true;
     private Matrix4f matrix = new Matrix4f();
 
     public void setMatrix(Matrix4f matrix) {
@@ -16,13 +18,25 @@ public class CustomWidgetTransform extends WidgetTransform {
         return this.matrix;
     }
 
+    public void setApplyAtCenter(boolean applyToCenter) {
+        this.setState(() -> this.applyAtCenter = applyToCenter);
+    }
+
+    public boolean applyAtCenter() {
+        return this.applyAtCenter;
+    }
+
     @Override
     public Matrix4fc toParent() {
         if (this.toParent == null) {
-            this.toParent = new Matrix4f()
-                .translate((float) (this.x + this.width / 2), (float) (this.y + this.height / 2), 0)
-                .mul(this.matrix)
-                .translate((float) (-this.width / 2), (float) (-this.height / 2), 0);
+            if (this.applyAtCenter) {
+                this.toParent = new Matrix4f()
+                    .translate((float) (this.x + this.width / 2), (float) (this.y + this.height / 2), 0)
+                    .mul(this.matrix)
+                    .translate((float) (-this.width / 2), (float) (-this.height / 2), 0);
+            } else {
+                this.toParent = new Matrix4f(this.matrix);
+            }
         }
 
         return this.toParent;

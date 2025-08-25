@@ -7,6 +7,8 @@ import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.ui.util.ScissorStack;
 
+// TODO: stencil clip
+//  also warn in docs about transforms which aren't pure translations
 public class Clip extends SingleChildInstanceWidget {
 
     public final boolean clipHitTest;

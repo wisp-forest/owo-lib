@@ -173,21 +173,19 @@ public final class ScissorStack {
         matrices.push();
         matrices.multiplyPositionMatrix(RenderSystem.getModelViewMatrix());
 
-        var root = new Vector4f(x, y, 0, 1);
-        var end = new Vector4f(x + width, y + height, 0, 1);
+        var tl = new Vector4f(x, y, 0, 1).mul(matrices.peek().getPositionMatrix());
+        var tr = new Vector4f(x + width, y, 0, 1).mul(matrices.peek().getPositionMatrix());
+        var bl = new Vector4f(x, y + height, 0, 1).mul(matrices.peek().getPositionMatrix());
+        var br = new Vector4f(x + width, y + height, 0, 1).mul(matrices.peek().getPositionMatrix());
 
-        root.mul(matrices.peek().getPositionMatrix());
-        end.mul(matrices.peek().getPositionMatrix());
-
-        x = (int) root.x;
-        y = (int) root.y;
-
-        width = (int) Math.ceil(end.x - root.x);
-        height = (int) Math.ceil(end.y - root.y);
+        var x1 = Math.min(tl.x, Math.min(tr.x, Math.min(bl.x, br.x)));
+        var x2 = Math.max(tl.x, Math.max(tr.x, Math.max(bl.x, br.x)));
+        var y1 = Math.min(tl.y, Math.min(tr.y, Math.min(bl.y, br.y)));
+        var y2 = Math.max(tl.y, Math.max(tr.y, Math.max(bl.y, br.y)));
 
         matrices.pop();
 
-        return PositionedRectangle.of(x, y, width, height);
+        return PositionedRectangle.of((int) x1, (int) y1, (int) (x2 - x1), (int) (y2 - y1));
     }
 
     public record ViewportDimensions(double scaleFactor, int scaledWidth, int scaledHeight, int framebufferWidth, int framebufferHeight) {}

@@ -1,11 +1,10 @@
 package io.wispforest.owo.braid.animation;
 
 import io.wispforest.owo.braid.framework.proxy.ProxyHost;
-import io.wispforest.owo.ui.core.Easing;
+import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 
 public class Animation {
 
@@ -15,7 +14,6 @@ public class Animation {
     public Easing easing;
     public Duration duration;
 
-    private Duration elapsedTime = Duration.ZERO;
     private double progress;
     private @Nullable Target target;
 
@@ -28,7 +26,7 @@ public class Animation {
     }
 
     public double progress() {
-        return this.progress;
+        return this.easing.apply((float) this.progress);
     }
 
     public void towards(Target target) {
@@ -38,7 +36,6 @@ public class Animation {
     public void towards(Target target, boolean restart) {
         if (restart) {
             this.progress = 1 - target.targetProgress;
-            this.elapsedTime = Duration.ZERO;
         }
 
         if (this.target == null) {
@@ -66,8 +63,11 @@ public class Animation {
     private void callback(Duration delta) {
         if (this.target == null) return;
 
-        this.elapsedTime = this.elapsedTime.plus(delta.multipliedBy(this.target.direction));
-        this.progress = this.easing.apply((float) (this.elapsedTime.toNanos() / (double) this.duration.toNanos()));
+        this.progress = MathHelper.clamp(
+            this.progress + this.target.direction * delta.toNanos() / (double) this.duration.toNanos(),
+            0,
+            1
+        );
 
         if (Math.abs(this.progress - this.target.targetProgress) > EPSILON) {
             this.scheduler.schedule(this::callback);
@@ -76,7 +76,7 @@ public class Animation {
             this.target = null;
         }
 
-        this.listener.onUpdate(this.progress);
+        this.listener.onUpdate(this.easing.apply((float) this.progress));
     }
 
     // ---
