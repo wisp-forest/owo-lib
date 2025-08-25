@@ -89,11 +89,11 @@ public class TextInput extends LeafInstanceWidget {
         @Override
         public void setWidget(TextInput widget) {
             if (!(this.layoutText.equals(widget.controller.text())
-                && this.layoutSelection.equals(widget.controller.selection())
-                && this.widget.softWrap == widget.softWrap
-                && this.widget.maxLines == widget.maxLines
+                  && this.layoutSelection.equals(widget.controller.selection())
+                  && this.widget.softWrap == widget.softWrap
+                  && this.widget.maxLines == widget.maxLines
                   && this.widget.maxCharacters == widget.maxCharacters
-                && this.widget.baseStyle.equals(widget.baseStyle))) {
+                  && this.widget.baseStyle.equals(widget.baseStyle))) {
 
                 this.layoutText = this.text = widget.controller.text();
                 this.layoutSelection = this.selection = widget.controller.selection();
