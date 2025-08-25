@@ -2,11 +2,11 @@ package io.wispforest.owo.braid.widgets.animated;
 
 import io.wispforest.owo.braid.animation.AutomaticallyAnimatedWidget;
 import io.wispforest.owo.braid.animation.ColorLerp;
+import io.wispforest.owo.braid.animation.Easing;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.Box;
 import io.wispforest.owo.ui.core.Color;
-import io.wispforest.owo.ui.core.Easing;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;

@@ -2,7 +2,6 @@ package io.wispforest.owo.braid.animation;
 
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
-import io.wispforest.owo.ui.core.Easing;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;

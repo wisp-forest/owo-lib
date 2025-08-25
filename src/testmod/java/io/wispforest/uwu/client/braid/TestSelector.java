@@ -1,19 +1,17 @@
 package io.wispforest.uwu.client.braid;
 
 import com.mojang.authlib.GameProfile;
+import io.wispforest.owo.braid.animation.AlignmentLerp;
+import io.wispforest.owo.braid.animation.Animation;
+import io.wispforest.owo.braid.animation.Easing;
 import io.wispforest.owo.braid.core.*;
-import io.wispforest.owo.braid.core.Insets;
-import io.wispforest.owo.braid.core.Size;
-import io.wispforest.owo.braid.core.Surface;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import io.wispforest.owo.braid.widgets.EntityWidget;
-import io.wispforest.owo.braid.widgets.ItemStackWidget;
-import io.wispforest.owo.braid.widgets.SpriteWidget;
+import io.wispforest.owo.braid.widgets.*;
 import io.wispforest.owo.braid.widgets.animated.AnimatedAlign;
 import io.wispforest.owo.braid.widgets.animated.AnimatedBox;
 import io.wispforest.owo.braid.widgets.animated.AnimatedPadding;
@@ -26,8 +24,6 @@ import io.wispforest.owo.braid.widgets.button.RawButton;
 import io.wispforest.owo.braid.widgets.checkbox.BraidCheckbox;
 import io.wispforest.owo.braid.widgets.checkbox.Checkbox;
 import io.wispforest.owo.braid.widgets.checkbox.RawCheckbox;
-import io.wispforest.owo.braid.widgets.color.ColorController;
-import io.wispforest.owo.braid.widgets.color.ColorPicker;
 import io.wispforest.owo.braid.widgets.cycle.MessageCyclingButton;
 import io.wispforest.owo.braid.widgets.drag.DragArena;
 import io.wispforest.owo.braid.widgets.drag.DragArenaElement;
@@ -57,12 +53,14 @@ import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.EntityComponent;
 import io.wispforest.owo.ui.container.Containers;
-import io.wispforest.owo.ui.core.*;
+import io.wispforest.owo.ui.core.Color;
+import io.wispforest.owo.ui.core.OwoUIDrawContext;
+import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.ViewerStack;
 import io.wispforest.owo.util.Wisdom;
+import io.wispforest.uwu.client.Bikeshed;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CheckboxWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.sound.PositionedSoundInstance;
@@ -94,7 +92,7 @@ import java.util.stream.Stream;
 public class TestSelector extends StatefulWidget {
 
     public enum Tests {
-        COUNTER, FLEX, DRAGGING, SPLIT_PANE, SLIDERS, TEXT_INPUT, BURNING_CHYZ, SCROLLING, INPUT, CYCLING, COLOR, VANILLA, SHARED_STATE, STACKS, GRIDS, CONTRIBUTORS, ANIMATIONS
+        COUNTER, FLEX, DRAGGING, SPLIT_PANE, SLIDERS, TEXT_INPUT, BURNING_CHYZ, SCROLLING, INPUT, CYCLING, VANILLA, SHARED_STATE, STACKS, GRIDS, CONTRIBUTORS, ANIMATIONS, NAVIGATOR
     }
 
     @Override
@@ -108,6 +106,7 @@ public class TestSelector extends StatefulWidget {
         private double ySkew = 0f;
 
         private double rotat = 0f;
+        private int fliptat = 0;
 
         private Tests test = null;
         private Entity chyz;
@@ -155,45 +154,51 @@ public class TestSelector extends StatefulWidget {
 
             return new Stack(
                 Alignment.CENTER,
-                new Transform(
-                    new Matrix4f().m01((float) Math.tan(this.xSkew)).m10((float) Math.tan(this.ySkew)).rotateZ((float) Math.toRadians(this.rotat)),
-                    new Center(
-                        switch (this.test) {
-                            case COUNTER -> new Counter();
-                            case FLEX -> new FunnySwitchLayout();
-                            case DRAGGING -> new DragArenaTest();
-                            case SPLIT_PANE -> new SplitPaneTest();
-                            case SLIDERS -> new SliderTest();
-                            case TEXT_INPUT -> new TextInputTest();
-                            case BURNING_CHYZ -> new BurningChyzTest(this.chyz);
-                            case SCROLLING -> new ScrollTest();
-                            case INPUT -> new InputTest();
-                            case CYCLING -> new CyclingTest();
-                            case COLOR -> new ColorTest();
-                            case VANILLA -> new VanillaTest();
-                            case SHARED_STATE -> new SharedStateTest();
-                            case STACKS -> new StacksTest();
-                            case GRIDS -> new GridsTest();
-                            case CONTRIBUTORS -> new ContributorsTest();
-                            case ANIMATIONS -> new AnimationsTest();
-                            case null -> new Center(new Label(Text.literal("select a test")));
-                        }
-                    )
-                ),
-                new Align(
-                    Alignment.LEFT,
-                    new Padding(
-                        Insets.vertical(50).withLeft(5),
-                        new HitTestTrap(
-                            new Panel(
-                                OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
-                                new Padding(
-                                    Insets.all(8),
-                                    new VerticallyScrollable(
-                                        new IntrinsicWidth(
-                                            new Column(
-                                                new Padding(Insets.all(2)),
-                                                buttons
+                new RotatedLayout(
+                    this.fliptat,
+                    new Stack(
+                        Alignment.CENTER,
+                        new Transform(
+                            new Matrix4f().m01((float) Math.tan(this.xSkew)).m10((float) Math.tan(this.ySkew)).rotateZ((float) Math.toRadians(this.rotat)),
+                            new Center(
+                                switch (this.test) {
+                                    case COUNTER -> new Counter();
+                                    case FLEX -> new FunnySwitchLayout();
+                                    case DRAGGING -> new DragArenaTest();
+                                    case SPLIT_PANE -> new SplitPaneTest();
+                                    case SLIDERS -> new SliderTest();
+                                    case TEXT_INPUT -> new TextInputTest();
+                                    case BURNING_CHYZ -> new BurningChyzTest(this.chyz);
+                                    case SCROLLING -> new ScrollTest();
+                                    case INPUT -> new InputTest();
+                                    case CYCLING -> new CyclingTest();
+                                    case VANILLA -> new VanillaTest();
+                                    case SHARED_STATE -> new SharedStateTest();
+                                    case STACKS -> new StacksTest();
+                                    case GRIDS -> new GridsTest();
+                                    case CONTRIBUTORS -> new ContributorsTest();
+                                    case ANIMATIONS -> new AnimationsTest();
+                                    case NAVIGATOR -> new NavigatorTest();
+                                    case null -> new Center(new Label(Text.literal("select a test")));
+                                }
+                            )
+                        ),
+                        new Align(
+                            Alignment.LEFT,
+                            new Padding(
+                                Insets.vertical(50).withLeft(5),
+                                new HitTestTrap(
+                                    new Panel(
+                                        OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
+                                        new Padding(
+                                            Insets.all(8),
+                                            new VerticallyScrollable(
+                                                new IntrinsicWidth(
+                                                    new Column(
+                                                        new Padding(Insets.all(2)),
+                                                        buttons
+                                                    )
+                                                )
                                             )
                                         )
                                     )
@@ -222,7 +227,31 @@ public class TestSelector extends StatefulWidget {
                                             this.xSkew = 0f;
                                             this.ySkew = 0f;
                                             this.rotat = 0f;
+                                            this.fliptat = 0;
                                         })
+                                    )
+                                ),
+                                new Sized(
+                                    75,
+                                    null,
+                                    new Column(
+                                        new Padding(
+                                            Insets.top(5),
+                                            new Label(Text.literal("fliptat:"))
+                                        ),
+                                        new Row(
+                                            MainAxisAlignment.START,
+                                            CrossAxisAlignment.CENTER,
+                                            new Flexible(
+                                                new MessageButton(Text.literal("-"), () -> this.setState(() -> this.fliptat -= 1))
+                                            ),
+                                            new Flexible(
+                                                new Label(Text.literal(String.valueOf(this.fliptat)))
+                                            ),
+                                            new Flexible(
+                                                new MessageButton(Text.literal("+"), () -> this.setState(() -> this.fliptat += 1))
+                                            )
+                                        )
                                     )
                                 ),
                                 new Sized(
@@ -420,6 +449,15 @@ public class TestSelector extends StatefulWidget {
                         () -> setState(() -> this.windows.remove(controller)),
                         controller,
                         new Stack(
+                            new Center(
+                                new AspectRatio(
+                                    16d / 9d,
+                                    new Box(
+                                        new Color(1f, 1f, 1f, .5f),
+                                        new Label(Text.literal("16:9 aspect ratio"))
+                                    )
+                                )
+                            ),
                             new Align(
                                 Alignment.TOP_LEFT,
                                 new Column(
@@ -939,33 +977,46 @@ public class TestSelector extends StatefulWidget {
 
         @Override
         public Widget build(BuildContext context) {
-            return new Sized(
-                250.0,
-                250.0,
-                new Panel(
-                    OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
-                    new Padding(
-                        Insets.all(8),
+            return new Row(
+                MainAxisAlignment.START,
+                CrossAxisAlignment.CENTER,
+                new Padding(Insets.horizontal(10)),
+                List.of(
+                    new Sized(
+                        250.0,
+                        250.0,
                         new Panel(
-                            OwoUIDrawContext.PANEL_INSET_NINE_PATCH_TEXTURE,
-                            new RecipeViewerStack(
-                                () -> ViewerStack.OfItem.of(Items.GOLD_BLOCK),
-                                new StackDropArea(
-                                    stack -> stack instanceof ViewerStack.OfItem,
-                                    stack -> System.out.println("chyz: mmm i ate a " + ((ViewerStack.OfItem) stack).asStack()),
-                                    new RecipeViewerExclusionZone(
-                                        new EntityWidget(
-                                            1,
-                                            false,
-                                            true,
-                                            true,
-                                            this.chyz
+                            OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
+                            new Padding(
+                                Insets.all(8),
+                                new Panel(
+                                    OwoUIDrawContext.PANEL_INSET_NINE_PATCH_TEXTURE,
+                                    new RecipeViewerStack(
+                                        () -> ViewerStack.OfItem.of(Items.GOLD_BLOCK),
+                                        new StackDropArea(
+                                            stack -> stack instanceof ViewerStack.OfItem,
+                                            stack -> System.out.println("chyz: mmm i ate a " + ((ViewerStack.OfItem) stack).asStack()),
+                                            new RecipeViewerExclusionZone(
+                                                new EntityWidget(
+                                                    1,
+                                                    false,
+                                                    true,
+                                                    true,
+                                                    this.chyz
+                                                )
+                                            )
                                         )
                                     )
                                 )
                             )
                         )
-                    )
+                    ),
+                    new Amogus(
+                        new Box(Color.RED),
+                        new Box(Color.WHITE),
+                        16
+                    ),
+                    new Bikeshed()
                 )
             );
         }
@@ -1445,33 +1496,6 @@ public class TestSelector extends StatefulWidget {
         THIRD,
         FOURTH,
         FIFTH
-    }
-
-    public static class ColorTest extends StatefulWidget {
-
-        @Override
-        public WidgetState<ColorTest> createState() {
-            return new State();
-        }
-
-        public static class State extends WidgetState<ColorTest> {
-            private ColorController controller = new ColorController(Color.ofArgb(-256));
-
-            @Override
-            public Widget build(BuildContext context) {
-                return new Column(
-                    new Padding(Size.of(0, 5)),
-                    List.of(
-                        new Label(Text.literal("Color Picker Test")),
-                        new Label(Text.literal("Selected Color: " + controller.getColor().asHexString(false))),
-                        new Sized(
-                            250, 300,
-                            new ColorPicker(this.controller)
-                        )
-                    )
-                );
-            }
-        }
     }
 
     public static class VanillaTest extends StatefulWidget {
@@ -1955,36 +1979,237 @@ public class TestSelector extends StatefulWidget {
 
             @Override
             public Widget build(BuildContext context) {
-                return new Sized(
-                    250,
-                    250,
-                    new Align(
-                        Alignment.TOP,
-                        new Column(
-                            new AnimatedAlign(
-                                Duration.ofMillis(250),
-                                Easing.EXPO,
-                                this.end ? Alignment.RIGHT : Alignment.CENTER,
-                                new MessageButton(Text.literal("toggle"), () -> this.setState(() -> this.end = !this.end))
-                            ),
-                            new Box(
-                                Color.WHITE,
-                                new AnimatedPadding(
-                                    Duration.ofMillis(500),
-                                    Easing.EXPO,
-                                    this.end ? Insets.of(0, 50, 50, 50) : Insets.none(),
-                                    new Sized(
-                                        30,
-                                        30,
-                                        new AnimatedBox(
-                                            Duration.ofMillis(500),
-                                            Easing.QUADRATIC,
-                                            this.end ? Color.RED : Color.GREEN
+                return new Row(
+                    MainAxisAlignment.START,
+                    CrossAxisAlignment.CENTER,
+                    new Sized(
+                        250,
+                        250,
+                        new Align(
+                            Alignment.TOP,
+                            new Column(
+                                new AnimatedAlign(
+                                    Duration.ofMillis(250),
+                                    Easing.IN_OUT_EXPO,
+                                    this.end ? Alignment.RIGHT : Alignment.CENTER,
+                                    new MessageButton(Text.literal("toggle"), () -> this.setState(() -> this.end = !this.end))
+                                ),
+                                new Box(
+                                    Color.WHITE,
+                                    new AnimatedPadding(
+                                        Duration.ofMillis(500),
+                                        Easing.IN_OUT_EXPO,
+                                        this.end ? Insets.of(0, 50, 50, 50) : Insets.none(),
+                                        new Sized(
+                                            30,
+                                            30,
+                                            new AnimatedBox(
+                                                Duration.ofMillis(500),
+                                                Easing.IN_OUT_QUAD,
+                                                this.end ? Color.RED : Color.GREEN
+                                            )
                                         )
                                     )
                                 )
                             )
                         )
+                    ),
+                    new ManualAnimation(
+                        new Amogus(
+                            new Box(Color.BLUE),
+                            new Box(Color.WHITE),
+                            8
+                        )
+                    )
+                );
+            }
+        }
+
+        public static class ManualAnimation extends StatefulWidget {
+
+            public final Widget child;
+
+            public ManualAnimation(Widget child) {
+                this.child = child;
+            }
+
+            @Override
+            public WidgetState<ManualAnimation> createState() {
+                return new State();
+            }
+
+            public static class State extends WidgetState<ManualAnimation> {
+
+                private static final AlignmentLerp ALIGNMENT_LERP = new AlignmentLerp(Alignment.LEFT, Alignment.RIGHT);
+
+                private Animation.Target currentTarget;
+                private Animation animation;
+                private Alignment alignment;
+
+                @Override
+                public void init() {
+                    this.currentTarget = Animation.Target.START;
+                    this.animation = new Animation(
+                        Easing.IN_OUT_EXPO,
+                        Duration.ofMillis(500),
+                        this::scheduleAnimationCallback,
+                        this::onAnimationTick,
+                        this.currentTarget
+                    );
+
+                    this.onAnimationTick(this.animation.progress());
+                }
+
+                private void onAnimationTick(double progress) {
+                    this.setState(() -> this.alignment = ALIGNMENT_LERP.compute(progress));
+                }
+
+                @Override
+                public Widget build(BuildContext context) {
+                    return new Column(
+                        MainAxisAlignment.START,
+                        CrossAxisAlignment.CENTER,
+                        new Sized(
+                            128,
+                            null,
+                            new Box(
+                                new Color(1, 1, 1, .5f),
+                                true,
+                                new Padding(
+                                    Insets.all(1),
+                                    new Align(
+                                        this.alignment,
+                                        this.widget().child
+                                    )
+                                )
+                            )
+                        ),
+                        new Padding(Insets.vertical(5)),
+                        new MessageButton(
+                            Text.literal("toggle"),
+                            () -> {
+                                var next = this.currentTarget == Animation.Target.START ? Animation.Target.END : Animation.Target.START;
+                                this.currentTarget = next;
+
+                                this.animation.towards(next, false);
+                            }
+                        )
+                    );
+                }
+            }
+        }
+    }
+
+    public static class Amogus extends StatelessWidget {
+
+        public final Widget bodyPixel;
+        public final Widget visorPixel;
+        public final double pixelSize;
+
+        public Amogus(Widget bodyPixel, Widget visorPixel, double pixelSize) {
+            this.bodyPixel = bodyPixel;
+            this.visorPixel = visorPixel;
+            this.pixelSize = pixelSize;
+        }
+
+        @Override
+        public Widget build(BuildContext context) {
+            return new Sized(
+                this.pixelSize * 4,
+                this.pixelSize * 4,
+                new Grid(
+                    LayoutAxis.VERTICAL,
+                    4,
+                    Grid.CellFit.tight(),
+                    (Widget) null,
+                    this.bodyPixel,
+                    this.bodyPixel,
+                    this.bodyPixel,
+                    this.bodyPixel,
+                    this.bodyPixel,
+                    this.visorPixel,
+                    this.visorPixel,
+                    this.bodyPixel,
+                    this.bodyPixel,
+                    this.bodyPixel,
+                    this.bodyPixel,
+                    null,
+                    this.bodyPixel,
+                    null,
+                    this.bodyPixel
+                )
+            );
+        }
+    }
+
+    public static class NavigatorTest extends StatelessWidget {
+        @Override
+        public Widget build(BuildContext context) {
+            return new Center(
+                new Sized(
+                    150, 150,
+                    new Box(
+                        Color.BLACK, true,
+                        new Padding(
+                            Insets.all(1),
+                            new Center(new Navigator(new Page1()))
+                        )
+                    )
+                )
+            );
+        }
+
+        public static class Page1 extends StatelessWidget {
+            @Override
+            public Widget build(BuildContext context) {
+                return new Column(
+                    new MessageButton(
+                        Text.literal("page 1"),
+                        () -> Navigator.push(context, new BasePage(new Label(Text.literal("page 1"))))
+                    ),
+                    new MessageButton(
+                        Text.literal("page 2"),
+                        () -> Navigator.push(context, new BasePage(
+                            new Column(
+                                new Label(Text.literal("page 2")),
+                                new MessageButton(
+                                    Text.literal("popup"),
+                                    () -> Navigator.pushOverlay(context, new Dialog(
+                                        new Panel(
+                                            OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
+                                            new Padding(
+                                                Insets.all(5),
+                                                new Sized(
+                                                    Size.square(64),
+                                                    new Bikeshed()
+                                                )
+                                            )
+                                        )
+                                    ))
+                                )
+                            )
+                        ))
+                    )
+                );
+            }
+        }
+
+        public static class BasePage extends StatelessWidget {
+
+            public final Widget content;
+            public BasePage(Widget content) {
+                this.content = content;
+            }
+
+            @Override
+            public Widget build(BuildContext context) {
+                return new Column(
+                    MainAxisAlignment.START,
+                    CrossAxisAlignment.CENTER,
+                    this.content,
+                    new Padding(
+                        Insets.top(10),
+                        new MessageButton(Text.literal("go back"), () -> Navigator.pop(context))
                     )
                 );
             }

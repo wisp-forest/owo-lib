@@ -17,12 +17,18 @@ public class BraidScreen extends Screen implements DisposableScreen {
     protected final Surface.Default surface = new Surface.Default();
     protected final Vector2i cursorPos = new Vector2i();
 
+    protected final Settings settings;
     protected final Widget rootWidget;
     public AppState state;
 
-    public BraidScreen(Widget rootWidget) {
+    public BraidScreen(Settings settings, Widget rootWidget) {
         super(Text.empty());
+        this.settings = settings;
         this.rootWidget = rootWidget;
+    }
+
+    public BraidScreen(Widget rootWidget) {
+        this(new Settings(), rootWidget);
     }
 
     @Override
@@ -65,6 +71,11 @@ public class BraidScreen extends Screen implements DisposableScreen {
     @Override
     public void dispose() {
         this.state.dispose();
+    }
+
+    @Override
+    public boolean shouldPause() {
+        return this.settings.shouldPause;
     }
 
     public boolean mouseClicked(double mouseX, double mouseY, int button, int modifiers) {
@@ -116,6 +127,10 @@ public class BraidScreen extends Screen implements DisposableScreen {
     public static @Nullable BraidScreen maybeOf(BuildContext context) {
         var provider = context.getAncestor(BraidScreenProvider.class);
         return provider != null ? provider.screen : null;
+    }
+
+    public static class Settings {
+        public boolean shouldPause = true;
     }
 }
 
