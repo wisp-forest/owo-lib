@@ -10,6 +10,7 @@ import io.wispforest.owo.braid.widgets.basic.Box;
 import io.wispforest.owo.braid.widgets.basic.KeyboardInput;
 import io.wispforest.owo.braid.widgets.basic.Padding;
 import io.wispforest.owo.ui.core.Color;
+import net.minecraft.util.Colors;
 
 public class TextBox extends StatefulWidget {
 
@@ -25,7 +26,7 @@ public class TextBox extends StatefulWidget {
             controller,
             widget -> {
                 setupCallback.setup(widget);
-                widget.suggestion(widget.suggestion().copy().withColor(-8355712));
+                widget.suggestion(widget.suggestion().copy().withColor(Colors.GRAY));
             }
         );
     }
@@ -42,7 +43,8 @@ public class TextBox extends StatefulWidget {
         @Override
         public Widget build(BuildContext context) {
             return new Box(
-                this.focused ? Color.WHITE : Color.ofRgb(0x8f8f8f),
+                //TODO: use panel instead of box here
+                this.focused ? Color.WHITE : Color.ofRgb(Colors.LIGHT_GRAY),
                 new KeyboardInput(
                     widget -> widget
                         .focusGainedCallback(() -> this.setState(() -> this.focused = true))

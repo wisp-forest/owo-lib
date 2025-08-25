@@ -1,11 +1,8 @@
 package io.wispforest.owo.braid.core;
 
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import org.apache.commons.lang3.mutable.MutableInt;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,26 +58,4 @@ public class TextLayout {
             return Text.literal(fullContent.substring(this.beginIdx, this.endIdx)).setStyle(this.style);
         }
     }
-
-    public static SuggestionMetrics measureSuggestion(TextRenderer textRenderer, StringVisitable suggestion, int maxWidth) {
-        List<StringVisitable> lines = new ArrayList<>();
-        textRenderer.getTextHandler().wrapLines(
-            suggestion,
-            maxWidth,
-            Style.EMPTY,
-            (visitable, bool) -> lines.add(visitable)
-        );
-
-        var width = 0;
-        var height = 0;
-
-        for (StringVisitable line : lines) {
-            width = Math.max(width, textRenderer.getWidth(line));
-            height += textRenderer.fontHeight;
-        }
-
-        return new SuggestionMetrics(width, height, lines);
-    }
-
-    public record SuggestionMetrics(int width, int height, List<StringVisitable> lines) {}
 }

@@ -24,8 +24,6 @@ import io.wispforest.owo.braid.widgets.button.RawButton;
 import io.wispforest.owo.braid.widgets.checkbox.BraidCheckbox;
 import io.wispforest.owo.braid.widgets.checkbox.Checkbox;
 import io.wispforest.owo.braid.widgets.checkbox.RawCheckbox;
-import io.wispforest.owo.braid.widgets.color.ColorController;
-import io.wispforest.owo.braid.widgets.color.ColorPicker;
 import io.wispforest.owo.braid.widgets.cycle.MessageCyclingButton;
 import io.wispforest.owo.braid.widgets.drag.DragArena;
 import io.wispforest.owo.braid.widgets.drag.DragArenaElement;
@@ -94,7 +92,7 @@ import java.util.stream.Stream;
 public class TestSelector extends StatefulWidget {
 
     public enum Tests {
-        COUNTER, FLEX, DRAGGING, SPLIT_PANE, SLIDERS, TEXT_INPUT, BURNING_CHYZ, SCROLLING, INPUT, CYCLING, COLOR, VANILLA, SHARED_STATE, STACKS, GRIDS, CONTRIBUTORS, ANIMATIONS, NAVIGATOR
+        COUNTER, FLEX, DRAGGING, SPLIT_PANE, SLIDERS, TEXT_INPUT, BURNING_CHYZ, SCROLLING, INPUT, CYCLING, VANILLA, SHARED_STATE, STACKS, GRIDS, CONTRIBUTORS, ANIMATIONS, NAVIGATOR
     }
 
     @Override
@@ -174,8 +172,7 @@ public class TestSelector extends StatefulWidget {
                                     case SCROLLING -> new ScrollTest();
                                     case INPUT -> new InputTest();
                                     case CYCLING -> new CyclingTest();
-                                    case COLOR -> new ColorTest();
-                            case VANILLA -> new VanillaTest();
+                                    case VANILLA -> new VanillaTest();
                                     case SHARED_STATE -> new SharedStateTest();
                                     case STACKS -> new StacksTest();
                                     case GRIDS -> new GridsTest();
@@ -1499,33 +1496,6 @@ public class TestSelector extends StatefulWidget {
         THIRD,
         FOURTH,
         FIFTH
-    }
-
-    public static class ColorTest extends StatefulWidget {
-
-        @Override
-        public WidgetState<ColorTest> createState() {
-            return new State();
-        }
-
-        public static class State extends WidgetState<ColorTest> {
-            private ColorController controller = new ColorController(Color.ofArgb(-256));
-
-            @Override
-            public Widget build(BuildContext context) {
-                return new Column(
-                    new Padding(Size.of(0, 5)),
-                    List.of(
-                        new Label(Text.literal("Color Picker Test")),
-                        new Label(Text.literal("Selected Color: " + controller.getColor().asHexString(false))),
-                        new Sized(
-                            250, 300,
-                            new ColorPicker(this.controller)
-                        )
-                    )
-                );
-            }
-        }
     }
 
     public static class VanillaTest extends StatefulWidget {
