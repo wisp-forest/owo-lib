@@ -167,6 +167,7 @@ public class Scrollable extends StatefulWidget {
                 new MouseArea(
                     widget -> widget
                         .scrollCallback((horizontal, vertical) -> {
+                            //Singleton usage spotted :alarm: :alarm:
                             if (Screen.hasShiftDown()) {
                                 if (this.widget().horizontal) this.horizontalController.setOffset(this.horizontalController.offset() + vertical * -15);
                             } else {

@@ -5,26 +5,30 @@ import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
 import io.wispforest.owo.braid.widgets.basic.Box;
 import io.wispforest.owo.braid.widgets.basic.KeyboardInput;
 import io.wispforest.owo.braid.widgets.basic.Padding;
 import io.wispforest.owo.ui.core.Color;
-import net.minecraft.text.Style;
+import net.minecraft.util.Colors;
 
 public class TextBox extends StatefulWidget {
 
     public final TextEditingController controller;
-    public final boolean softWrap;
-    public final boolean autoFocus;
-    public final boolean allowMultipleLines;
-    public final Style baseStyle;
+    private final EditableText editableText;
 
-    public TextBox(TextEditingController controller, boolean softWrap, boolean autoFocus, boolean allowMultipleLines, Style baseStyle) {
+    public TextBox(
+        TextEditingController controller,
+        WidgetSetupCallback<EditableText> setupCallback
+    ) {
         this.controller = controller;
-        this.softWrap = softWrap;
-        this.autoFocus = autoFocus;
-        this.allowMultipleLines = allowMultipleLines;
-        this.baseStyle = baseStyle;
+        this.editableText = new EditableText(
+            controller,
+            widget -> {
+                setupCallback.setup(widget);
+                widget.suggestion(widget.suggestion().copy().withColor(Colors.GRAY));
+            }
+        );
     }
 
     @Override
@@ -39,7 +43,8 @@ public class TextBox extends StatefulWidget {
         @Override
         public Widget build(BuildContext context) {
             return new Box(
-                this.focused ? Color.WHITE : Color.ofRgb(0x8f8f8f),
+                //TODO: use panel instead of box here
+                this.focused ? Color.WHITE : Color.ofRgb(Colors.LIGHT_GRAY),
                 new KeyboardInput(
                     widget -> widget
                         .focusGainedCallback(() -> this.setState(() -> this.focused = true))
@@ -50,13 +55,7 @@ public class TextBox extends StatefulWidget {
                             Color.BLACK,
                             new Padding(
                                 Insets.all(2),
-                                new EditableText(
-                                    this.widget().controller,
-                                    this.widget().softWrap,
-                                    this.widget().autoFocus,
-                                    this.widget().allowMultipleLines,
-                                    this.widget().baseStyle
-                                )
+                                this.widget().editableText
                             )
                         )
                     )

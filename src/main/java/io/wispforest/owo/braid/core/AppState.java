@@ -20,8 +20,8 @@ import io.wispforest.owo.braid.widgets.inspector.InstancePicker;
 import io.wispforest.owo.util.EventSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.tooltip.OrderedTextTooltipComponent;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
+import net.minecraft.text.Style;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
@@ -60,6 +60,14 @@ public class AppState implements InstanceHost, ProxyHost {
     private int draggingButton = -1;
     private KeyModifiers draggingModifiers = null;
     private boolean dragStarted = false;
+
+    private static final Duration MIN_GRACE_PERIOD = Duration.ofMillis(200);
+    private static final Duration MAX_GRACE_PERIOD = Duration.ofMillis(500);
+    private static final int SCROLL_MOVEMENT_THRESHOLD = 5;
+
+    private @Nullable HitTestState scrollHit = null;
+    private Vector2d scrollPos = new Vector2d();
+    private Instant lastScrollTime = Instant.EPOCH;
 
     private List<KeyboardListener> focused = new ArrayList<>();
 
@@ -139,7 +147,8 @@ public class AppState implements InstanceHost, ProxyHost {
         GlStateManager._disableScissorTest();
 
         if (this.activeTooltip != null) {
-            braidContext.drawTooltip(this.client.textRenderer, this.activeTooltip.x(), this.activeTooltip.y(), this.activeTooltip.components());
+            if (this.activeTooltip.components() != null) braidContext.drawTooltip(this.client.textRenderer, this.activeTooltip.x(), this.activeTooltip.y(), this.activeTooltip.components());
+            if (this.activeTooltip.style() != null) ctx.drawHoverEvent(this.client.textRenderer, this.activeTooltip.style(), this.activeTooltip.x(), this.activeTooltip.y());
         }
 
         ctx.pop();
@@ -155,12 +164,11 @@ public class AppState implements InstanceHost, ProxyHost {
 
         var tooltipSupplier = state.firstWhere(hit -> hit.instance().widget() instanceof Tooltip);
         if (tooltipSupplier != null) {
-            var tooltip = (Tooltip) tooltipSupplier.instance().widget();
-            var components = tooltip.tooltip == null
-                ? this.client.textRenderer.wrapLines(tooltip.tooltipText, Integer.MAX_VALUE).stream().<TooltipComponent>map(OrderedTextTooltipComponent::new).toList()
-                : tooltip.tooltip;
+            var tooltip = (TooltipProvider) tooltipSupplier.instance();
+            var components = tooltip.getTooltipComponentsAt(tooltipSupplier.x(), tooltipSupplier.y());
+            var style = tooltip.getStyleAt(tooltipSupplier.x(), tooltipSupplier.y());
 
-            this.activeTooltip = new TooltipState(components, (int) this.cursorPosition.x, (int) this.cursorPosition.y);
+            if (components != null || style != null) this.activeTooltip = new TooltipState(components, style, (int) this.cursorPosition.x, (int) this.cursorPosition.y);
         } else {
             this.activeTooltip = null;
         }
@@ -232,6 +240,7 @@ public class AppState implements InstanceHost, ProxyHost {
         for (var event : events) {
             switch (event) {
                 case MouseButtonPressEvent(int button, KeyModifiers modifiers) -> {
+                    this.scrollHit = null;
                     var state = this.hitTest();
 
                     this.updateFocus(
@@ -261,6 +270,7 @@ public class AppState implements InstanceHost, ProxyHost {
                 case MouseMoveEvent(double x, double y, double deltaX, double deltaY) -> {
                     this.cursorPosition.x = x;
                     this.cursorPosition.y = y;
+                    if (cursorPosition.distance(scrollPos) > SCROLL_MOVEMENT_THRESHOLD) this.scrollHit = null;
 
                     var state = this.hitTest();
 
@@ -310,6 +320,7 @@ public class AppState implements InstanceHost, ProxyHost {
                     this.dragging.onMouseDrag(coordinates.x, coordinates.y, delta.x, delta.y);
                 }
                 case MouseButtonReleaseEvent(int button, KeyModifiers modifiers) -> {
+                    this.scrollHit = null;
                     var state = this.hitTest();
                     state.firstWhere(
                         (hit) -> hit.instance() instanceof MouseListener && ((MouseListener) hit.instance()).onMouseUp(hit.x(), hit.y(), button, modifiers)
@@ -324,7 +335,12 @@ public class AppState implements InstanceHost, ProxyHost {
                     }
                 }
                 case MouseScrollEvent(double xOffset, double yOffset) -> {
-                    this.hitTest().firstWhere(
+                    var now = Instant.now();
+                    var grace = this.cursorPosition.distance(this.scrollPos) > SCROLL_MOVEMENT_THRESHOLD ? MIN_GRACE_PERIOD : MAX_GRACE_PERIOD;
+                    if (this.scrollHit == null || now.minus(grace).isAfter(this.lastScrollTime) ) this.scrollHit = this.hitTest();
+                    this.lastScrollTime = now;
+                    this.scrollPos = new Vector2d(this.cursorPosition);
+                    this.scrollHit.firstWhere(
                         (hit) -> hit.instance() instanceof MouseListener &&
                             ((MouseListener) hit.instance()).onMouseScroll(
                                 hit.x(),
@@ -635,7 +651,7 @@ class AppWidget extends InheritedWidget {
     }
 }
 
-record TooltipState(List<TooltipComponent> components, int x, int y) {}
+record TooltipState(@Nullable List<TooltipComponent> components, @Nullable Style style, int x, int y) {}
 
 record MousePosition(double x, double y) {
     public static final MousePosition ORIGIN = new MousePosition(0, 0);

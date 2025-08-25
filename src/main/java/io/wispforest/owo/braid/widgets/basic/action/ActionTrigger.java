@@ -1,7 +1,6 @@
 package io.wispforest.owo.braid.widgets.basic.action;
 
 import io.wispforest.owo.braid.core.KeyModifiers;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -41,17 +40,11 @@ public record ActionTrigger(Set<Trigger> triggers) {
         Trigger.ofKey(GLFW_KEY_LEFT)
     );
 
-    public static final ActionTrigger INCREMENT = ActionTrigger.of(
-        ActionTrigger.CLICK,
-        ActionTrigger.UP,
-        ActionTrigger.RIGHT
-    );
+    public static final ActionTrigger POSITIVE_DIRECTIONS = ActionTrigger.of(UP, RIGHT);
+    public static final ActionTrigger NEGATIVE_DIRECTIONS = ActionTrigger.of(DOWN, LEFT);
 
-    public static final ActionTrigger DECREMENT = ActionTrigger.of(
-        ActionTrigger.SECONDARY_CLICK,
-        ActionTrigger.DOWN,
-        ActionTrigger.LEFT
-    );
+    public static final ActionTrigger INCREMENT = ActionTrigger.of(CLICK, POSITIVE_DIRECTIONS);
+    public static final ActionTrigger DECREMENT = ActionTrigger.of(SECONDARY_CLICK, NEGATIVE_DIRECTIONS);
 
     public static ActionTrigger of(ActionTrigger... triggers) {
         return new ActionTrigger(Arrays.stream(triggers).flatMap(actionTrigger -> actionTrigger.triggers.stream()).collect(Collectors.toSet()));

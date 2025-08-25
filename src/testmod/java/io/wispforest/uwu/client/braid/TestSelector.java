@@ -35,9 +35,7 @@ import io.wispforest.owo.braid.widgets.owoui.OwoUIWidget;
 import io.wispforest.owo.braid.widgets.recipeviewer.RecipeViewerExclusionZone;
 import io.wispforest.owo.braid.widgets.recipeviewer.RecipeViewerStack;
 import io.wispforest.owo.braid.widgets.recipeviewer.StackDropArea;
-import io.wispforest.owo.braid.widgets.scroll.ScrollController;
-import io.wispforest.owo.braid.widgets.scroll.Scrollable;
-import io.wispforest.owo.braid.widgets.scroll.VerticallyScrollable;
+import io.wispforest.owo.braid.widgets.scroll.*;
 import io.wispforest.owo.braid.widgets.sharedstate.ShareableState;
 import io.wispforest.owo.braid.widgets.sharedstate.SharedState;
 import io.wispforest.owo.braid.widgets.slider.*;
@@ -69,13 +67,12 @@ import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
+import net.minecraft.text.*;
 import net.minecraft.util.Colors;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
@@ -464,7 +461,7 @@ public class TestSelector extends StatefulWidget {
                             new Align(
                                 Alignment.TOP_LEFT,
                                 new Column(
-                                    new Label(Text.literal("a")),
+                                    new Label(Text.literal("a").setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://chyz.xyz/box")))),
                                     new MessageButton(Text.literal("window button :o"), () -> setState(() -> controller.expanded = !controller.expanded))
                                 )
                             ),
@@ -761,6 +758,8 @@ public class TestSelector extends StatefulWidget {
             private final TextEditingController controller1 = new TextEditingController();
             private final TextEditingController controller2 = new TextEditingController();
             private final TextEditingController controller3 = new TextEditingController();
+            private final TextEditingController controller4 = new TextEditingController();
+            private final TextEditingController controller5 = new TextEditingController();
 
             @Override
             public Widget build(BuildContext context) {
@@ -777,10 +776,8 @@ public class TestSelector extends StatefulWidget {
                                 50.0,
                                 new TextBox(
                                     this.controller1,
-                                    true,
-                                    false,
-                                    true,
-                                    Style.EMPTY
+                                    widget -> widget
+                                        .placeholder(Text.literal("Soft Wrapping Moment"))
                                 )
                             ),
                             new Sized(
@@ -788,21 +785,41 @@ public class TestSelector extends StatefulWidget {
                                 50.0,
                                 new TextBox(
                                     this.controller2,
-                                    false,
-                                    true,
-                                    true,
-                                    Style.EMPTY
+                                    widget -> widget
+                                        .softWrap(false)
+                                        .autoFocus(true)
+                                        .placeholder(Text.literal("No Soft Wrapping Moment (also auto focused)"))
+                                )
+                            ),
+                            new Sized(
+                                100.0,
+                                30,
+                                new TextBox(
+                                    this.controller3,
+                                    widget -> widget
+                                        .maxLines(2)
+                                        .placeholder(Text.literal("2 lines, TILI"))
                                 )
                             ),
                             new Sized(
                                 100.0,
                                 20.0,
                                 new TextBox(
-                                    this.controller3,
-                                    false,
-                                    false,
-                                    false,
-                                    Style.EMPTY
+                                    this.controller4,
+                                    widget -> widget
+                                        .singleLine()
+                                        .placeholder(Text.literal("Single Line Moment"))
+                                )
+                            ),
+                            new Sized(
+                                100.0,
+                                20.0,
+                                new TextBox(
+                                    this.controller5,
+                                    widget -> widget
+                                        .singleLine()
+                                        .maxCharacters(3)
+                                        .placeholder(Text.literal("3 chars, TILI"))
                                 )
                             )
                         ),
@@ -1018,6 +1035,11 @@ public class TestSelector extends StatefulWidget {
             private final ScrollController verticalController = new ScrollController();
             private final WindowController controller = new WindowController(Size.square(200));
 
+            private final ScrollController horizontalNestedScrollController = new ScrollController();
+            private final ScrollController verticalNestedScrollController = new ScrollController();
+            private final WindowController nestedScrollController = new WindowController(Size.square(200));
+            private double nestedSliderValue = 0.5;
+
             @Override
             public void init() {
                 super.init();
@@ -1102,6 +1124,52 @@ public class TestSelector extends StatefulWidget {
                                         )
                                     ),
                                     new Padding(Insets.all(5))
+                                )
+                            )
+                        )
+                    ),
+                    new Window(
+                        false,
+                        Text.literal("Scrollception"),
+                        null,
+                        this.nestedScrollController,
+                        new Column(
+                            Label.literal("Damn bro, you can scroll this?"),
+                            new Flexible(
+                                new ScrollableWithBars(
+                                    horizontalNestedScrollController,
+                                    verticalNestedScrollController,
+                                    10,
+                                    ButtonScrollbar::new,
+                                    new Sized(
+                                        500, 500,
+                                        new Center(
+                                            new Column(
+                                                MainAxisAlignment.CENTER,
+                                                CrossAxisAlignment.CENTER,
+                                                new Sized(
+                                                    100, 20,
+                                                    new Slider(
+                                                        this.nestedSliderValue,
+                                                        0, 1,
+                                                        null,
+                                                        LayoutAxis.HORIZONTAL,
+                                                        value -> this.setState(() -> this.nestedSliderValue = value)
+                                                    )
+                                                ),
+                                                new Sized(
+                                                    20, 100,
+                                                    new Slider(
+                                                        this.nestedSliderValue,
+                                                        0, 1,
+                                                        null,
+                                                        LayoutAxis.VERTICAL,
+                                                        value -> this.setState(() -> this.nestedSliderValue = value)
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    )
                                 )
                             )
                         )
@@ -1414,8 +1482,8 @@ public class TestSelector extends StatefulWidget {
                     ),
                     new Label(
                         Text.literal(coolNumbers.stream()
-                            .map(String::valueOf)
-                            .collect(Collectors.joining(", ")))
+                                         .map(String::valueOf)
+                                         .collect(Collectors.joining(", ")))
                     )
                 );
             }
@@ -1749,7 +1817,11 @@ public class TestSelector extends StatefulWidget {
                                                                 new Padding(Insets.top(4)),
                                                                 List.of(
                                                                     new FirePlayer(new GameProfile(contributor.uuid, contributor.name)),
-                                                                    new Label(LabelStyle.SHADOW, true, contributor.displayName),
+                                                                    new Label(
+                                                                        LabelStyle.SHADOW,
+                                                                        true,
+                                                                        contributor.displayName().copy().setStyle(contributor.displayName.copy().getStyle().withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY, new HoverEvent.EntityContent(EntityType.PLAYER, contributor.uuid, contributor.displayName))))
+                                                                    ),
                                                                     new RatingBar()
                                                                 )
                                                             )

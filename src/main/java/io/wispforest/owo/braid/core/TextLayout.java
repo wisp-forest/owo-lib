@@ -1,7 +1,6 @@
 package io.wispforest.owo.braid.core;
 
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 
