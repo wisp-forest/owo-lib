@@ -13,12 +13,12 @@ public class LazyCollapsible extends StatefulWidget {
     public final boolean showVerticalRule;
 
     public final boolean collapsed;
-    public final Consumer<Boolean> onToggled;
+    public final CollapsibleCallback onToggled;
 
     public final Widget title;
     public final Widget content;
 
-    public LazyCollapsible(boolean showVerticalRule, boolean collapsed, Consumer<Boolean> onToggled, Widget title, Widget content) {
+    public LazyCollapsible(boolean showVerticalRule, boolean collapsed, CollapsibleCallback onToggled, Widget title, Widget content) {
         this.showVerticalRule = showVerticalRule;
         this.collapsed = collapsed;
         this.onToggled = onToggled;

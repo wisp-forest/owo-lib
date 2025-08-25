@@ -19,7 +19,6 @@ import io.wispforest.owo.braid.widgets.scroll.Scrollable;
 import io.wispforest.owo.braid.widgets.sharedstate.SharedState;
 import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.util.EventSource;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.Unit;
 
 import java.time.Duration;
@@ -89,7 +88,7 @@ public class InstanceTreeView extends StatefulWidget {
                 this.schedulePostLayoutCallback(() -> this.setState(() -> this.highlight = false));
             }
 
-            var startExpanded = false;
+            var startCollapsed = true;
             if (!this.builtOnce) {
                 this.builtOnce = true;
 
@@ -98,7 +97,7 @@ public class InstanceTreeView extends StatefulWidget {
                     this.reveal();
                 }
 
-                startExpanded = lastRevealEvent != null && lastRevealEvent.fullPath.contains(this.widget().viewInstance);
+                startCollapsed = lastRevealEvent == null || !lastRevealEvent.fullPath.contains(this.widget().viewInstance);
             }
 
             return new AnimatedBox(
@@ -110,7 +109,7 @@ public class InstanceTreeView extends StatefulWidget {
                     ?
                     new CollapsibleEntry(
                         this.expandEvents.source(),
-                        startExpanded,
+                        startCollapsed,
                         title,
                         new Column(
                             children.stream()
