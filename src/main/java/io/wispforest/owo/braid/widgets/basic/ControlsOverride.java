@@ -6,8 +6,11 @@ import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
 import org.jetbrains.annotations.Nullable;
 
-/// A widget that descendants can check to disable interactive controls, such as buttons or text fields.<br>
-/// This is useful for deactivating larger sections of a UI without having to manually disable each individual widget.
+/// A widget that descendants can check to disable interactive controls,
+/// such as buttons or text fields.
+///
+/// This is useful for deactivating larger sections of a UI
+/// without having to manually disable each individual widget.
 public class ControlsOverride extends InheritedWidget {
 
     public final boolean disableControls;
