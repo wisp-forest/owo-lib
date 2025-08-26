@@ -1,4 +1,4 @@
-package io.wispforest.owo.braid.widgets.slider;
+package io.wispforest.owo.braid.widgets.slider.range;
 
 import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.framework.BuildContext;
@@ -6,6 +6,7 @@ import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.Box;
 import io.wispforest.owo.braid.widgets.basic.Panel;
+import io.wispforest.owo.braid.widgets.slider.DefaultSliderHandle;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.core.Color;
 import org.jetbrains.annotations.Nullable;
