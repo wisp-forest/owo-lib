@@ -30,12 +30,8 @@ public class RawCheckbox extends StatelessWidget {
     public Widget build(BuildContext context) {
         var content = this.checked ? new Stack(this.background, this.checkmark) : this.background;
         var disabled = this.onUpdate == null || ControlsOverride.controlsDisabled(context);
-        if (disabled) return content;
         //TODO: should disabled be passed to background and checkmark?
-        return new RawButton(
-            () -> this.onUpdate.accept(!this.checked),
-            content
-        );
+        return !disabled ? new RawButton(() -> this.onUpdate.accept(!this.checked), content) : content;
     }
 
     @FunctionalInterface
