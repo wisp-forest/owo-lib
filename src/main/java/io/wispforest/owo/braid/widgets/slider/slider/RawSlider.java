@@ -13,10 +13,12 @@ import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
 import io.wispforest.owo.braid.widgets.basic.*;
 import io.wispforest.owo.braid.widgets.basic.action.ActionTrigger;
 import io.wispforest.owo.braid.widgets.basic.action.Actions;
+import io.wispforest.owo.braid.widgets.slider.Incrementor;
 import io.wispforest.owo.braid.widgets.slider.ValueMapper;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Quaternionf;
 
 public class RawSlider extends StatefulWidget {
 
@@ -37,7 +39,7 @@ public class RawSlider extends StatefulWidget {
 
     public RawSlider(
         double value,
-        WidgetSetupCallback<RawSlider> setupCallback,
+        @Nullable WidgetSetupCallback<RawSlider> setupCallback,
         @Nullable SliderCallback onChanged,
         @Nullable Widget track,
         Widget handle
@@ -46,9 +48,9 @@ public class RawSlider extends StatefulWidget {
         this.onChanged = onChanged;
         this.track = track;
         this.handle = handle;
-        setupCallback.setup(this);
+        if (setupCallback != null) setupCallback.setup(this);
 
-        this.normalizedValue = MathHelper.clamp(this.valueMapper.normalize(value, this.min, this.max), 0, 1);
+        this.normalizedValue = MathHelper.clamp(this.valueMapper.normalize(this.value, this.min, this.max), 0, 1);
         if (this.incrementStep == null) incrementStep = step != null ? step : (max - min) / 100;
     }
 
@@ -88,7 +90,9 @@ public class RawSlider extends StatefulWidget {
     }
 
     public RawSlider step(double step) {
-        return this.step((Double) step);
+        this.assertMutable();
+        this.step = step;
+        return this;
     }
 
     public @Nullable Double step() {
@@ -111,6 +115,14 @@ public class RawSlider extends StatefulWidget {
         return this;
     }
 
+    public RawSlider horizontal() {
+        return this.axis(LayoutAxis.HORIZONTAL);
+    }
+
+    public RawSlider vertical() {
+        return this.axis(LayoutAxis.VERTICAL);
+    }
+
     public LayoutAxis axis() {
         return this.axis;
     }
@@ -125,6 +137,16 @@ public class RawSlider extends StatefulWidget {
         return this.handleSize;
     }
 
+    public RawSlider incrementStep(double incrementStep) {
+        this.assertMutable();
+        this.incrementStep = incrementStep;
+        return this;
+    }
+
+    public double incrementStep() {
+        return this.incrementStep;
+    }
+
     //endregion
 
     @Override
@@ -135,6 +157,7 @@ public class RawSlider extends StatefulWidget {
     public static class State extends WidgetState<RawSlider> {
 
         protected double dragValue = 0;
+        protected boolean dragging = false;
 
         @Override
         public Widget build(BuildContext context) {
@@ -166,11 +189,8 @@ public class RawSlider extends StatefulWidget {
                 return new Center(
                     widget.onChanged == null || ControlsOverride.controlsDisabled(context)
                         ? content
-                        : new Actions(
-                            actions -> {
-                                actions.addAction(ActionTrigger.POSITIVE_DIRECTIONS, () -> widget.onChanged.accept(Math.min(widget.value + step, widget.max)));
-                                actions.addAction(ActionTrigger.NEGATIVE_DIRECTIONS, () -> widget.onChanged.accept(Math.max(widget.value - step, widget.min)));
-                            },
+                        : new Incrementor(
+                            increment -> widget.onChanged.accept(Math.clamp(widget.value + (widget.incrementStep * increment), widget.min, widget.max)),
                             new MouseArea(
                                 mouseArea -> mouseArea
                                     //TODO: decide what to do with buttons here
@@ -182,18 +202,15 @@ public class RawSlider extends StatefulWidget {
                                         if (!this.isInHandle(constraints, x, y)) initialDragValue = this.setAbsolute(constraints, x, y);
 
                                         this.dragValue = initialDragValue;
+                                        this.dragging = true;
                                         return true;
                                     })
                                     .dragCallback((x, y, dx, dy) -> this.move(constraints, dx, widget.axis == LayoutAxis.VERTICAL ? -dy : dy))
-                                    .scrollCallback((horizontal, vertical) -> {
-                                        //TODO: Singleton usage spotted :alarm: :alarm:
-                                        var offset = Math.abs(vertical) > Math.abs(horizontal) ? vertical : -horizontal;
-                                        var newValue = MathHelper.clamp(widget.value + offset * step, widget.min, widget.max);
-                                        if (widget.value == newValue) return false;
-                                        widget.onChanged.accept(newValue);
-                                        return true;
-                                    })
-                                    .cursorStyle(CursorStyle.HAND),
+                                    .releaseCallback((x, y, button, modifiers) -> dragging = false)
+                                    .cursorStyleSupplier((x, y) -> {
+                                        if (!isInHandle(constraints, x, y) && !dragging) return CursorStyle.HAND;
+                                        return CursorStyle.forDraggingAlong(widget.axis, context.instance().computeGlobalTransform());
+                                    }),
                                 content
                             )
                         )

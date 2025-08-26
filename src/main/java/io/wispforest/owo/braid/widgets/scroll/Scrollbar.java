@@ -41,14 +41,14 @@ public class Scrollbar extends StatelessWidget {
 
                         return maxOffset != 0 ? new RawSlider(
                             currentOffset,
-                            this.axis.choose(0, maxOffset).doubleValue(),
-                            this.axis.choose(maxOffset, 0).doubleValue(),
-                            null,
-                            this.axis,
+                            widget -> widget
+                                .min(this.axis.choose(0d, maxOffset))
+                                .max(this.axis.choose(maxOffset, 0d))
+                                .axis(this.axis)
+                                .handleSize(Math.max(5, scrollbarLength)),
                             this.controller::setOffset,
                             this.track,
-                            this.handle,
-                            Math.max(5, scrollbarLength)
+                            this.handle
                         ) : new Padding(Insets.none());
                     }
                 );

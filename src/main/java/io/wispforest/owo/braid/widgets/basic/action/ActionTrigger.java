@@ -40,6 +40,22 @@ public record ActionTrigger(Set<Trigger> triggers) {
         Trigger.ofKey(GLFW_KEY_LEFT)
     );
 
+    public static final ActionTrigger PAGE_UP = new ActionTrigger(
+        Trigger.ofKey(GLFW_KEY_PAGE_UP)
+    );
+
+    public static final ActionTrigger PAGE_DOWN = new ActionTrigger(
+        Trigger.ofKey(GLFW_KEY_PAGE_DOWN)
+    );
+
+    public static final ActionTrigger HOME = new ActionTrigger(
+        Trigger.ofKey(GLFW_KEY_HOME)
+    );
+
+    public static final ActionTrigger END = new ActionTrigger(
+        Trigger.ofKey(GLFW_KEY_END)
+    );
+
     public static final ActionTrigger POSITIVE_DIRECTIONS = ActionTrigger.of(UP, RIGHT);
     public static final ActionTrigger NEGATIVE_DIRECTIONS = ActionTrigger.of(DOWN, LEFT);
 
