@@ -74,6 +74,7 @@ public class MessageCyclingButton<T> extends StatelessWidget {
             this.index,
             this.wrap,
             this.onChanged,
+            //TODO: abstract away the million places where a ternary operator is used to determine the label style for a possibly disabled button
             new Label(
                 this.onChanged != null
                     ? LabelStyle.SHADOW

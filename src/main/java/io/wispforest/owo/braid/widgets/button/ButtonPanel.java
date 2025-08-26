@@ -24,7 +24,9 @@ public class ButtonPanel extends StatelessWidget {
             hovered ->
                 new Panel(
                     this.active
-                        ? hovered ? ButtonComponent.HOVERED_TEXTURE : ButtonComponent.ACTIVE_TEXTURE
+                        ? hovered
+                        ? ButtonComponent.HOVERED_TEXTURE
+                        : ButtonComponent.ACTIVE_TEXTURE
                         : ButtonComponent.DISABLED_TEXTURE,
                     new Padding(
                         Insets.all(5),
