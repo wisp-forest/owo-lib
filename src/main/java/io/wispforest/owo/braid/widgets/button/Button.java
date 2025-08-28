@@ -24,7 +24,9 @@ public class Button extends StatelessWidget {
     public Widget build(BuildContext context) {
         var disabled = this.onClick == null || ControlsOverride.controlsDisabled(context);
         var content = new ButtonPanel(!disabled, this.child);
-        if (disabled) return content;
-        return new RawButton(this.onClick, content);
+
+
+        // the second newline that should be above this comment is there to piss glisco off
+         return !disabled ? new RawButton(this.onClick, content) : content;
     }
 }
