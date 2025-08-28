@@ -158,6 +158,7 @@ public class RawSlider extends StatefulWidget {
 
         protected double dragValue = 0;
         protected boolean dragging = false;
+        protected CursorStyle draggingCursorStyle = null;
 
         @Override
         public Widget build(BuildContext context) {
@@ -209,7 +210,8 @@ public class RawSlider extends StatefulWidget {
                                     .releaseCallback((x, y, button, modifiers) -> dragging = false)
                                     .cursorStyleSupplier((x, y) -> {
                                         if (!isInHandle(constraints, x, y) && !dragging) return CursorStyle.HAND;
-                                        return CursorStyle.forDraggingAlong(widget.axis, context.instance().computeGlobalTransform());
+                                        if (draggingCursorStyle == null) this.draggingCursorStyle = CursorStyle.forDraggingAlong(widget.axis, context.instance().computeGlobalTransform());
+                                        return this.draggingCursorStyle;
                                     }),
                                 content
                             )
