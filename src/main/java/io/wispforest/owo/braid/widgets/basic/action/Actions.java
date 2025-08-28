@@ -15,10 +15,7 @@ import net.minecraft.util.Pair;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 public class Actions extends StatefulWidget {
@@ -29,7 +26,7 @@ public class Actions extends StatefulWidget {
     private @Nullable KeyboardInput.FocusGainedCallback focusGainedCallback;
     private @Nullable KeyboardInput.FocusLostCallback focusLostCallback;
 
-    private final Map<List<ActionTrigger>, Runnable> actions = new HashMap<>();
+    private final Map<List<ActionTrigger>, Runnable> actions = new LinkedHashMap<>();
 
     private final Widget child;
 
@@ -205,8 +202,8 @@ public class Actions extends StatefulWidget {
                 (Pair<ActionSequence, ActionSequenceStep>) null,
                 (acc, element) -> {
                     if (acc == null) return element;
-                    if (element.getLeft().isSingular && !acc.getLeft().isSingular) return acc;
-                    return element;
+                    if (!element.getLeft().isSingular && acc.getLeft().isSingular) return element;
+                    return acc;
                 }
             );
             //(I personally think this should've used stream.reduce but glisco said it was "not ideal" so here we are) -chyz
