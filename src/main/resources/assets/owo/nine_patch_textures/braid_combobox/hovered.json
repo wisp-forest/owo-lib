@@ -1,0 +1,15 @@
+{
+  "texture": "owo:textures/gui/braid_combobox.png",
+  "texture_width": 64,
+  "texture_height": 192,
+  "v": 64,
+  "repeat": true,
+  "corner_patch_size": {
+    "width": 18,
+    "height": 4
+  },
+  "center_patch_size": {
+    "width": 28,
+    "height": 56
+  }
+}

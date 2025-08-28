@@ -10,6 +10,7 @@ import io.wispforest.owo.braid.widgets.basic.EmptyWidget;
 import io.wispforest.owo.braid.widgets.basic.HitTestTrap;
 import io.wispforest.owo.braid.widgets.basic.MouseArea;
 import io.wispforest.owo.braid.widgets.stack.Stack;
+import io.wispforest.owo.braid.widgets.stack.StackBase;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -97,10 +98,12 @@ public class Overlay extends StatefulWidget {
                             EmptyWidget.INSTANCE
                         )
                     ),
-                    new RawOverlay(
-                        this.entries.stream()
-                            .map(entry -> new RawOverlayElement(entry.x, entry.y, entry.widget))
-                            .toList()
+                    new StackBase(
+                        new RawOverlay(
+                            this.entries.stream()
+                                .map(entry -> new RawOverlayElement(entry.x, entry.y, entry.widget))
+                                .toList()
+                        )
                     )
                 )
             );

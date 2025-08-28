@@ -37,9 +37,10 @@ public class TextInput extends LeafInstanceWidget {
     public final int maxLines;
     public final int maxCharacters;
     public final Style baseStyle;
+    public final boolean textShadow;
     public final Text suggestion;
 
-    public TextInput(TextEditingController controller, boolean showCursor, boolean softWrap, boolean autoFocus, int maxLines, int maxCharacters, Style baseStyle, @Nullable Text suggestion) {
+    public TextInput(TextEditingController controller, boolean showCursor, boolean softWrap, boolean autoFocus, int maxLines, int maxCharacters, Style baseStyle, boolean textShadow, @Nullable Text suggestion) {
         this.controller = controller;
         this.showCursor = showCursor;
         this.softWrap = softWrap;
@@ -47,6 +48,7 @@ public class TextInput extends LeafInstanceWidget {
         this.maxLines = maxLines;
         this.maxCharacters = maxCharacters;
         this.baseStyle = baseStyle;
+        this.textShadow = textShadow;
         this.suggestion = suggestion == null ? Text.empty() : suggestion;
     }
 
@@ -161,7 +163,7 @@ public class TextInput extends LeafInstanceWidget {
             var height = this.host().client().textRenderer.fontHeight;
 
             ctx.push();
-            ctx.translate(startX, lineBaseY - height - 1, 0d);
+            ctx.translate(startX, lineBaseY - height, 0d);
 
             var width = endX - startX;
             ctx.fill(RenderLayer.getGuiTextHighlight(), 0, 0, (int) width, height, Colors.BLUE);
@@ -180,7 +182,7 @@ public class TextInput extends LeafInstanceWidget {
                     0,
                     lineIdx * textRenderer.fontHeight,
                     Color.WHITE.argb(),
-                    false
+                    this.widget.textShadow
                 );
             }
 

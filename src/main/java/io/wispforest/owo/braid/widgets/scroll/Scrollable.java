@@ -92,7 +92,7 @@ public class Scrollable extends StatefulWidget {
             var scrollInstance = this.context().instance();
             var revealInstance = context.instance();
 
-            var transform = revealInstance.computeTransformFrom(scrollInstance).invert().translate(
+            var transform = revealInstance.parent().computeTransformFrom(scrollInstance).invert().translate(
                 this.horizontalController != null ? (float) this.horizontalController.offset : 0,
                 this.verticalController != null ? (float) this.verticalController.offset : 0, 0
             );

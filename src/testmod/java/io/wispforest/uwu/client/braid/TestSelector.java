@@ -24,6 +24,7 @@ import io.wispforest.owo.braid.widgets.button.RawButton;
 import io.wispforest.owo.braid.widgets.checkbox.BraidCheckbox;
 import io.wispforest.owo.braid.widgets.checkbox.Checkbox;
 import io.wispforest.owo.braid.widgets.checkbox.RawCheckbox;
+import io.wispforest.owo.braid.widgets.combobox.ComboBox;
 import io.wispforest.owo.braid.widgets.cycle.MessageCyclingButton;
 import io.wispforest.owo.braid.widgets.drag.DragArena;
 import io.wispforest.owo.braid.widgets.drag.DragArenaElement;
@@ -2188,6 +2189,8 @@ public class TestSelector extends StatefulWidget {
 
         public static class State extends WidgetState<OverlayTest> {
 
+            private @Nullable Tests selectedOption = null;
+
             private void spawn(BuildContext context, double x, double y) {
                 Overlay.of(context).add(
                     new OverlayEntryBuilder(
@@ -2217,7 +2220,24 @@ public class TestSelector extends StatefulWidget {
                                     .dragCallback((x, y, dx, dy) -> {
                                         this.spawn(innerContext, x, y);
                                     }),
-                                EmptyWidget.INSTANCE
+                                new Center(
+                                    new Panel(
+                                        OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
+                                        new Padding(
+                                            Insets.all(10),
+                                            new Sized(
+                                                120,
+                                                null,
+                                                new ComboBox<>(
+                                                    test -> Text.literal(test.name().toLowerCase(Locale.ROOT).replace('_', ' ')),
+                                                    Arrays.asList(Tests.values()),
+                                                    this.selectedOption,
+                                                    option -> this.setState(() -> this.selectedOption = option)
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
                             )
                         );
                     })

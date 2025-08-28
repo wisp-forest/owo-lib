@@ -23,6 +23,7 @@ public class EditableText extends StatefulWidget {
     private int maxCharacters = -1;
     private Style baseStyle = Style.EMPTY;
     private Text suggestion = Text.empty();
+    private boolean textShadow = false;
     private boolean suggestionIsPlaceholder = false;
 
     public EditableText(
@@ -99,6 +100,16 @@ public class EditableText extends StatefulWidget {
         return this.suggestion(controller.text.isEmpty() ? placeholder : Text.empty());
     }
 
+    public EditableText textShadow(boolean shadow) {
+        this.assertMutable();
+        this.textShadow = shadow;
+        return this;
+    }
+
+    public boolean textShadow() {
+        return this.textShadow;
+    }
+
     public EditableText singleLine() {
         return this
             .softWrap(false)
@@ -116,6 +127,7 @@ public class EditableText extends StatefulWidget {
 
         private static final Duration CURSOR_BLINK_INTERVAL = Duration.ofMillis(300);
         private boolean showCursor = false;
+        private boolean focused = false;
 
         private long blinkCallbackId = -1;
 
@@ -160,7 +172,9 @@ public class EditableText extends StatefulWidget {
                 );
             });
 
-            this.restartBlinking();
+            if (this.focused) {
+                this.restartBlinking();
+            }
         }
 
         private void restartBlinking() {
@@ -192,10 +206,16 @@ public class EditableText extends StatefulWidget {
         public Widget build(BuildContext context) {
             return new KeyboardInput(
                 widget -> widget
-                    .focusGainedCallback(this::restartBlinking)
-                    .focusLostCallback(this::stopBlinking),
+                    .focusGainedCallback(() -> {
+                        this.focused = true;
+                        this.restartBlinking();
+                    })
+                    .focusLostCallback(() -> {
+                        this.focused = false;
+                        this.stopBlinking();
+                    }),
                 new Scrollable(
-                    true, true,
+                    true, this.widget().maxLines != 1,
                     this.horizontalController,
                     this.verticalController,
                     new Builder(inputContext -> {
@@ -208,6 +228,7 @@ public class EditableText extends StatefulWidget {
                             this.widget().maxLines,
                             this.widget().maxCharacters,
                             this.widget().baseStyle,
+                            this.widget().textShadow,
                             this.widget().suggestionIsPlaceholder
                                 ? this.widget().controller.text.isEmpty()
                                     ? this.widget().suggestion
