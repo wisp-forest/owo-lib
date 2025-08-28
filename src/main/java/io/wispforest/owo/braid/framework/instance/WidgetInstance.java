@@ -203,7 +203,7 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
     }
 
     protected boolean hitTestSelf(double x, double y) {
-        return x >= 0 && x <= this.transform.width && y >= 0 && y <= this.transform.height;
+        return x >= 0 && x < this.transform.width && y >= 0 && y < this.transform.height;
     }
 
     public Matrix4f computeGlobalTransform() {
@@ -282,6 +282,10 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
 
     public T widget() {
         return this.widget;
+    }
+
+    public WidgetInstance<?> parent() {
+        return this.parent;
     }
 
     // ---
