@@ -1,11 +1,12 @@
 package io.wispforest.owo.braid.core.cursor;
 
 import io.wispforest.owo.braid.core.LayoutAxis;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import org.joml.Matrix4f;
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
+import org.joml.*;
 import org.lwjgl.glfw.GLFW;
+
+import java.lang.Math;
 
 public sealed interface CursorStyle permits SystemCursorStyle {
     CursorStyle NONE = new SystemCursorStyle(0);
@@ -23,23 +24,23 @@ public sealed interface CursorStyle permits SystemCursorStyle {
     long allocate();
 
     static CursorStyle forDraggingAlong(LayoutAxis axis, Matrix4f transform) {
-        var rotation = transform.getUnnormalizedRotation(new Quaternionf());
+        // Extract the Z rotation from the transform
+        var rotation = transform
+            .getUnnormalizedRotation(new Quaterniond())
+            .getEulerAnglesXYZ(new Vector3d()).z;
 
-        var transformedAxis = rotation.transform(
-            new Vector3f(axis.choose(1, 0), axis.choose(0, 1), 0),
-            new Vector3f()
-        );
+        // Convert to degrees
+        rotation = Math.toDegrees(rotation);
+        // apply axis adjustment
+        if (axis == LayoutAxis.VERTICAL) rotation += 90;
+        // Normalize to [0, 180) (because the cursors are symmetric)
+        rotation = MathHelper.floorMod(rotation, 180);
+        // Map to [0, 8)
+        rotation /= 22.5;
 
-        var angle = (Math.toDegrees(Math.atan2(transformedAxis.y, transformedAxis.x)) + 360) % 360;
-
-        if ((angle >= 337.5 || angle < 22.5) || (angle >= 157.5 && angle < 202.5)) {
-            return HORIZONTAL_RESIZE;
-        } else if ((angle >= 67.5 && angle < 112.5) || (angle >= 247.5 && angle < 292.5)) {
-            return VERTICAL_RESIZE;
-        } else if ((angle >= 22.5 && angle < 67.5) || (angle >= 202.5 && angle < 247.5)) {
-            return NESW_RESIZE;
-        } else {
-            return NWSE_RESIZE;
-        }
+        if (rotation < 1 || rotation >= 7) return HORIZONTAL_RESIZE;
+        else if (rotation >= 3 && rotation < 5) return VERTICAL_RESIZE;
+        else if (rotation >= 1 && rotation < 3) return NESW_RESIZE;
+        else return NWSE_RESIZE;
     }
 }
