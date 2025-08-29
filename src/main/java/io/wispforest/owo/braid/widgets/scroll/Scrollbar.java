@@ -44,10 +44,10 @@ public class Scrollbar extends StatelessWidget {
                             widget -> widget
                                 .min(this.axis.choose(0d, maxOffset))
                                 .max(this.axis.choose(maxOffset, 0d))
-                                .axis(this.axis)
-                                .handleSize(Math.max(5, scrollbarLength)),
+                                .axis(this.axis),
                             this.controller::setOffset,
                             this.track,
+                            Math.max(5, scrollbarLength),
                             this.handle
                         ) : new Padding(Insets.none());
                     }

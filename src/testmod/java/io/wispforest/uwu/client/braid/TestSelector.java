@@ -94,7 +94,6 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.time.Duration;
 import java.util.*;
-import java.util.function.DoubleFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -175,7 +174,7 @@ public class TestSelector extends StatefulWidget {
                                     case FLEX -> new FunnySwitchLayout();
                                     case DRAGGING -> new DragArenaTest();
                                     case SPLIT_PANE -> new SplitPaneTest();
-                                    case SLIDERS -> new SliderTest();
+                                    case SLIDERS -> new SliderTests();
                                     case TEXT_INPUT -> new TextInputTest();
                                     case BURNING_CHYZ -> new BurningChyzTest(this.chyz);
                                     case SCROLLING -> new ScrollTest();
@@ -580,65 +579,58 @@ public class TestSelector extends StatefulWidget {
         }
     }
 
-    public static class SliderTest extends StatefulWidget {
+    public static class SliderTests extends StatefulWidget {
+
+        public enum SliderTest {
+            BASIC, DIRECTION, REDUNDANT
+        }
+
         @Override
-        public WidgetState<SliderTest> createState() {
+        public WidgetState<SliderTests> createState() {
             return new State();
         }
 
-        public static class State extends WidgetState<SliderTest> {
+        public static class State extends WidgetState<SliderTests> {
 
-            private boolean redundant = false;
-
-            private double discreteX = 16;
-            private double discreteY = 16;
-            private double smoothX = 16;
-            private double smoothY = 16;
+            private SliderTest test = SliderTest.BASIC;
 
             @Override
             public Widget build(BuildContext context) {
                 return new Stack(
-                    !this.redundant
-                        ? new Grid(
-                        LayoutAxis.VERTICAL,
-                        3,
-                        Grid.CellFit.tight(),
-                        widget -> new Padding(Insets.all(5), widget),
-                        null,
-                        new Label(Text.literal("Discrete")),
-                        new Label(Text.literal("Smooth")),
-                        new Label(Text.literal("Basic")),
-                        new Sized(
-                            100, 20,
-                            new MessageSlider(
-                                discreteX,
-                                widget -> widget.range(0, 32).step(2),
-                                newValue -> this.setState(() -> this.discreteX = newValue),
-                                Text.literal("v: " + formatDouble(discreteX))
-                            )
-                        ),
-                        new Sized(
-                            100, 20,
-                            new MessageSlider(
-                                smoothX,
-                                widget -> widget.range(0, 32),
-                                newValue -> this.setState(() -> this.smoothX = newValue),
-                                Text.literal("v: " + formatDouble(smoothX))
-                            )
-                        ),
-                        new Label(Text.literal("XY")),
-                        new CoolXlyder(2.0, 2.0, (x, y) -> Text.literal("x: " + formatDouble(x) + "\ny: " + formatDouble(y))),
-                        new CoolXlyder(null, null, (x, y) -> Text.literal("x: " + formatDouble(x) + "\ny: " + formatDouble(y))),
-                        new Label(Text.literal("Range")),
-                        new CoolRangeSlider(2.0, (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max))),
-                        new CoolRangeSlider(null, (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max)))
-                    )
-                        : new IncrediblyRedundantSlider(),
+                    Alignment.CENTER,
+                    switch (this.test) {
+                        case BASIC -> new BasicSliderTest();
+                        case DIRECTION -> new SliderDirectionTest();
+                        case REDUNDANT -> new IncrediblyRedundantSlider();
+                    },
                     new Align(
-                        Alignment.BOTTOM,
-                        new MessageButton(
-                            Text.literal(this.redundant ? "no more redundancy" : "we love redundancy"),
-                            () -> this.setState(() -> this.redundant = !this.redundant)
+                        Alignment.TOP_RIGHT,
+                        new HitTestTrap(
+                            new Padding(
+                                Insets.all(5),
+                                new Panel(
+                                    OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
+                                    new Padding(
+                                        Insets.all(5),
+                                        new Sized(
+                                            null, 66,
+                                            new VerticallyScrollable(
+                                                new IntrinsicWidth(
+                                                    new Column(
+                                                        MainAxisAlignment.START,
+                                                        CrossAxisAlignment.CENTER,
+                                                        new Padding(Insets.all(2)),
+                                                        Stream.of(SliderTest.values()).map(test -> new MessageButton(
+                                                            Text.literal(test.name().toLowerCase(Locale.ROOT).replace('_', ' ')),
+                                                            test != this.test ? () -> this.setState(() -> this.test = test) : null
+                                                        )).collect(Collectors.toList())
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            )
                         )
                     )
                 );
@@ -646,8 +638,234 @@ public class TestSelector extends StatefulWidget {
         }
     }
 
+    public static class BasicSliderTest extends StatefulWidget {
+
+        @Override
+        public WidgetState<BasicSliderTest> createState() {
+            return new State();
+        }
+
+        public static class State extends WidgetState<BasicSliderTest> {
+            private double discreteX = 16;
+            private double discreteY = 16;
+            private double smoothX = 16;
+            private double smoothY = 16;
+
+            @Override
+            public Widget build(BuildContext context) {
+                return new Grid(
+                    LayoutAxis.VERTICAL,
+                    3,
+                    Grid.CellFit.tight(),
+                    widget -> new Padding(Insets.all(5), widget),
+                    null,
+                    new Label(Text.literal("Discrete")),
+                    new Label(Text.literal("Smooth")),
+                    new Label(Text.literal("Basic")),
+                    new Sized(
+                        100, 20,
+                        new MessageSlider(
+                            discreteX,
+                            widget -> widget.range(0, 32).step(2),
+                            newValue -> this.setState(() -> this.discreteX = newValue),
+                            Text.literal("v: " + formatDouble(discreteX))
+                        )
+                    ),
+                    new Sized(
+                        100, 20,
+                        new MessageSlider(
+                            smoothX,
+                            widget -> widget.range(0, 32),
+                            newValue -> this.setState(() -> this.smoothX = newValue),
+                            Text.literal("v: " + formatDouble(smoothX))
+                        )
+                    ),
+                    new Label(Text.literal("XY")),
+                    new CoolXlyder(2.0, 2.0, (x, y) -> Text.literal("x: " + formatDouble(x) + "\ny: " + formatDouble(y))),
+                    new CoolXlyder(null, null, (x, y) -> Text.literal("x: " + formatDouble(x) + "\ny: " + formatDouble(y))),
+                    new Label(Text.literal("Range")),
+                    new CoolRangeSlider(2.0, (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max))),
+                    new CoolRangeSlider(null, (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max)))
+                );
+            }
+        }
+    }
+
     public static String formatDouble(double value) {
         return BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP).toPlainString().replaceAll("(\\.0*|(?<=\\d)\\.0+)$", "");
+    }
+
+    public static class SliderDirectionTest extends StatefulWidget {
+        @Override
+        public WidgetState<SliderDirectionTest> createState() {
+            return new State();
+        }
+
+        public static class State extends WidgetState<SliderDirectionTest> {
+
+            private static final double min = 0, max = 32;
+
+            private double x = 16;
+            private double y = 16;
+
+            @Override
+            public Widget build(BuildContext context) {
+                return new Grid(
+                    LayoutAxis.VERTICAL,
+                    3,
+                    Grid.CellFit.tight(),
+                    widget -> new Padding(Insets.all(5), widget),
+                    null,
+                    new Sized(
+                        20, 100,
+                        new Slider(
+                            y,
+                            slider -> slider.range(min, max).vertical(),
+                            newValue -> this.setState(() -> this.y = newValue)
+                        )
+                    ),
+                    null,
+                    new Sized(
+                        100, 20,
+                        new Slider(
+                            x,
+                            slider -> slider.range(max, min),
+                            newValue -> this.setState(() -> this.x = newValue)
+                        )
+                    ),
+                    new Sized(
+                        20, 20,
+                        new Label(
+                            false,
+                            Text.literal(formatDouble(x) + "\n" + formatDouble(y))
+                        )
+                    ),
+                    new Sized(
+                        100, 20,
+                        new Slider(
+                            x,
+                            slider -> slider.range(min, max),
+                            newValue -> this.setState(() -> this.x = newValue)
+                        )
+                    ),
+                    null,
+                    new Sized(
+                        20, 100,
+                        new Slider(
+                            y,
+                            slider -> slider.range(max, min).vertical(),
+                            newValue -> this.setState(() -> this.y = newValue)
+                        )
+                    ),
+                    null
+                );
+            }
+        }
+    }
+
+    public static class IncrediblyRedundantSlider extends StatefulWidget {
+        @Override
+        public WidgetState<IncrediblyRedundantSlider> createState() {
+            return new State();
+        }
+
+        public static class State extends WidgetState<IncrediblyRedundantSlider> {
+
+            private double x, y;
+
+            @Override
+            public Widget build(BuildContext context) {
+                return new Column(
+                    MainAxisAlignment.START,
+                    CrossAxisAlignment.CENTER,
+                    new Padding(
+                        Insets.all(20),
+                        new Label(Text.literal("incredibly redundant slider™"))
+                    ),
+                    new Sized(
+                        100.0,
+                        15.0,
+                        new Slider(
+                            this.x,
+                            null,
+                            (x) -> this.setState(() -> this.x = x)
+                        )
+                    ),
+                    new Row(
+                        new Sized(
+                            15.0,
+                            100.0,
+                            new Slider(
+                                this.y,
+                                RawSlider::vertical,
+                                (y) -> this.setState(() -> this.y = y)
+                            )
+                        ),
+                        new Sized(
+                            100.0,
+                            100.0,
+                            new RawXlyder(
+                                this.x, this.y,
+                                0, 0, 1, 1,
+                                null, null,
+                                (x, y) -> this.setState(() -> {
+                                    this.x = x;
+                                    this.y = y;
+                                }),
+                                new Panel(ButtonComponent.DISABLED_TEXTURE),
+                                new DefaultSliderHandle(),
+                                Size.square((1 - this.y) * 16 + 8)
+                            )
+                        ),
+                        new Sized(
+                            15.0,
+                            100.0,
+                            new Slider(
+                                this.y,
+                                RawSlider::vertical,
+                                y -> this.setState(() -> this.y = y)
+                            )
+                        )
+                    ),
+                    new Sized(
+                        100.0,
+                        15.0,
+                        new Slider(
+                            this.x,
+                            widget -> widget.handleSize(24),
+                            x -> this.setState(() -> this.x = x)
+                        )
+                    ),
+                    new Sized(
+                        100.0,
+                        15.0,
+                        new Slider(
+                            this.x,
+                            widget -> widget.handleSize(18),
+                            x -> this.setState(() -> this.x = x)
+                        )
+                    ),
+                    new Sized(
+                        100.0,
+                        15.0,
+                        new Slider(
+                            this.x,
+                            widget -> widget.handleSize(12),
+                            x -> this.setState(() -> this.x = x)
+                        )
+                    ),
+                    new Sized(
+                        100.0,
+                        15.0,
+                        new Slider(
+                            this.x,
+                            widget -> widget.handleSize(6),
+                            (x) -> this.setState(() -> this.x = x)
+                        )
+                    )
+                );
+            }
+        }
     }
 
     public static class CoolXlyder extends StatefulWidget {
@@ -1163,111 +1381,6 @@ public class TestSelector extends StatefulWidget {
         }
     }
 
-    public static class IncrediblyRedundantSlider extends StatefulWidget {
-        @Override
-        public WidgetState<IncrediblyRedundantSlider> createState() {
-            return new State();
-        }
-
-        public static class State extends WidgetState<IncrediblyRedundantSlider> {
-
-            private double x, y;
-
-            @Override
-            public Widget build(BuildContext context) {
-                return new Column(
-                    MainAxisAlignment.START,
-                    CrossAxisAlignment.CENTER,
-                    new Padding(
-                        Insets.all(20),
-                        new Label(Text.literal("incredibly redundant slider™"))
-                    ),
-                    new Sized(
-                        100.0,
-                        15.0,
-                        new Slider(
-                            this.x,
-                            null,
-                            (x) -> this.setState(() -> this.x = x)
-                        )
-                    ),
-                    new Row(
-                        new Sized(
-                            15.0,
-                            100.0,
-                            new Slider(
-                                this.y,
-                                RawSlider::vertical,
-                                (y) -> this.setState(() -> this.y = y)
-                            )
-                        ),
-                        new Sized(
-                            100.0,
-                            100.0,
-                            new RawXlyder(
-                                this.x, this.y,
-                                0, 0, 1, 1,
-                                null, null,
-                                (x, y) -> this.setState(() -> {
-                                    this.x = x;
-                                    this.y = y;
-                                }),
-                                new Panel(ButtonComponent.DISABLED_TEXTURE),
-                                new DefaultSliderHandle(),
-                                Size.square((1 - this.y) * 16 + 8)
-                            )
-                        ),
-                        new Sized(
-                            15.0,
-                            100.0,
-                            new Slider(
-                                this.y,
-                                RawSlider::vertical,
-                                y -> this.setState(() -> this.y = y)
-                            )
-                        )
-                    ),
-                    new Sized(
-                        100.0,
-                        15.0,
-                        new Slider(
-                            this.x,
-                            widget -> widget.handleSize(24),
-                            x -> this.setState(() -> this.x = x)
-                        )
-                    ),
-                    new Sized(
-                        100.0,
-                        15.0,
-                        new Slider(
-                            this.x,
-                            widget -> widget.handleSize(18),
-                            x -> this.setState(() -> this.x = x)
-                        )
-                    ),
-                    new Sized(
-                        100.0,
-                        15.0,
-                        new Slider(
-                            this.x,
-                            widget -> widget.handleSize(12),
-                            x -> this.setState(() -> this.x = x)
-                        )
-                    ),
-                    new Sized(
-                        100.0,
-                        15.0,
-                        new Slider(
-                            this.x,
-                            widget -> widget.handleSize(6),
-                            (x) -> this.setState(() -> this.x = x)
-                        )
-                    )
-                );
-            }
-        }
-    }
-
     public static class InputTest extends StatefulWidget {
         @Override
         public WidgetState<InputTest> createState() {
@@ -1440,8 +1553,8 @@ public class TestSelector extends StatefulWidget {
                     ),
                     new Label(
                         Text.literal(coolNumbers.stream()
-                            .map(String::valueOf)
-                            .collect(Collectors.joining(", ")))
+                                         .map(String::valueOf)
+                                         .collect(Collectors.joining(", ")))
                     )
                 );
             }

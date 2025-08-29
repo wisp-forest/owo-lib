@@ -20,7 +20,7 @@ public class BraidCheckbox extends StatelessWidget {
         this.onUpdate = onUpdate;
     }
 
-    public BraidCheckbox(boolean checked, CheckboxCallback onUpdate, boolean active) {
+    public BraidCheckbox(boolean checked, boolean active, CheckboxCallback onUpdate) {
         this(checked, active ? onUpdate : null);
     }
 

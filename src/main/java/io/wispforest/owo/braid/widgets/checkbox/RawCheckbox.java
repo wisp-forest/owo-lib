@@ -22,7 +22,7 @@ public class RawCheckbox extends StatelessWidget {
         this.checkmark = checkmark;
     }
 
-    public RawCheckbox(boolean checked, CheckboxCallback onUpdate, boolean active, Widget background, Widget checkmark) {
+    public RawCheckbox(boolean checked, boolean active, CheckboxCallback onUpdate, Widget background, Widget checkmark) {
         this(checked, active ? onUpdate : null, background, checkmark);
     }
 
