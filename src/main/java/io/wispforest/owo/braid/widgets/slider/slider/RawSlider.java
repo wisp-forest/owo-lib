@@ -200,7 +200,8 @@ public class RawSlider extends StatefulWidget {
                                     .dragCallback((x, y, dx, dy) -> this.move(constraints, dx, widget.axis == LayoutAxis.VERTICAL ? -dy : dy))
                                     .releaseCallback((x, y, button, modifiers) -> dragging = false)
                                     .cursorStyleSupplier((x, y) -> {
-                                        if (!isInHandle(constraints, x, y) && !dragging) return CursorStyle.HAND;
+                                        //TODO: invert the y passed in here cuz its cringe atm
+                                        if (!isInHandle(constraints, x, constraints.maxHeight() - y) && !dragging) return CursorStyle.HAND;
                                         if (draggingCursorStyle == null) this.draggingCursorStyle = CursorStyle.forDraggingAlong(widget.axis, context.instance().computeGlobalTransform());
                                         return this.draggingCursorStyle;
                                     }),
@@ -243,7 +244,7 @@ public class RawSlider extends StatefulWidget {
         protected void applyValue(double newNormalizedValue) {
             var widget = this.widget();
             var step = widget.step;
-            var newValue = widget.valueMapper.discretize(newNormalizedValue, widget.min, widget.max);
+            var newValue = widget.valueMapper.deNormalize(newNormalizedValue, widget.min, widget.max);
             this.widget().onChanged.accept(step != null ? Math.round(newValue / step) * step : newValue);
         }
 

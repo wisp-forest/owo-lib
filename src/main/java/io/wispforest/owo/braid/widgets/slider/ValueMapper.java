@@ -7,7 +7,7 @@ import static net.minecraft.util.math.MathHelper.EPSILON;
 public interface ValueMapper {
     double normalize(double value, double min, double max);
 
-    double discretize(double normalizedValue, double min, double max);
+    double deNormalize(double normalizedValue, double min, double max);
 
     ValueMapper LINEAR = new ValueMapper() {
         @Override
@@ -16,7 +16,7 @@ public interface ValueMapper {
         }
 
         @Override
-        public double discretize(double normalizedValue, double min, double max) {
+        public double deNormalize(double normalizedValue, double min, double max) {
             return min + normalizedValue * (max - min);
         }
     };
@@ -50,7 +50,7 @@ public interface ValueMapper {
         }
 
         @Override
-        public double discretize(double normalizedValue, double min, double max) {
+        public double deNormalize(double normalizedValue, double min, double max) {
             var inverted = min > max;
             var effectiveMin = inverted ? max : min;
             var effectiveMax = inverted ? min : max;

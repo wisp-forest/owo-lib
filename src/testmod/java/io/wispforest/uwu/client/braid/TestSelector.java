@@ -48,6 +48,7 @@ import io.wispforest.owo.braid.widgets.slider.slider.RawSlider;
 import io.wispforest.owo.braid.widgets.slider.slider.Slider;
 import io.wispforest.owo.braid.widgets.slider.xlyder.MessageXlyder;
 import io.wispforest.owo.braid.widgets.slider.xlyder.RawXlyder;
+import io.wispforest.owo.braid.widgets.slider.xlyder.Xlyder;
 import io.wispforest.owo.braid.widgets.splitpane.MultiSplitPane;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.braid.widgets.stack.StackBase;
@@ -276,11 +277,9 @@ public class TestSelector extends StatefulWidget {
                                     75.0,
                                     75.0,
                                     new MessageXlyder(
-                                        this.xSkew,
-                                        this.ySkew,
-                                        -.75, -.75,
-                                        .75, .75,
-                                        null, null,
+                                        this.xSkew, this.ySkew,
+                                        xlyder -> xlyder.range(-.75, .75),
+
                                         (xValue, yValue) -> this.setState(() -> {
                                             this.xSkew = xValue;
                                             this.ySkew = yValue;
@@ -681,8 +680,30 @@ public class TestSelector extends StatefulWidget {
                         )
                     ),
                     new Label(Text.literal("XY")),
-                    new CoolXlyder(2.0, 2.0, (x, y) -> Text.literal("x: " + formatDouble(x) + "\ny: " + formatDouble(y))),
-                    new CoolXlyder(null, null, (x, y) -> Text.literal("x: " + formatDouble(x) + "\ny: " + formatDouble(y))),
+                    new Sized(
+                        100, 100,
+                        new MessageXlyder(
+                            discreteX, discreteY,
+                            xlyder -> xlyder.range(0, 32).step(2),
+                            (x, y) -> this.setState(() -> {
+                                this.discreteX = x;
+                                this.discreteY = y;
+                            }),
+                            Text.literal("x: " + formatDouble(discreteX) + "\ny: " + formatDouble(discreteY))
+                        )
+                    ),
+                    new Sized(
+                        100, 100,
+                        new MessageXlyder(
+                            smoothX, smoothY,
+                            xlyder -> xlyder.range(0, 32),
+                            (x, y) -> this.setState(() -> {
+                                this.smoothX = x;
+                                this.smoothY = y;
+                            }),
+                            Text.literal("x: " + formatDouble(smoothX) + "\ny: " + formatDouble(smoothY))
+                        )
+                    ),
                     new Label(Text.literal("Range")),
                     new CoolRangeSlider(2.0, (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max))),
                     new CoolRangeSlider(null, (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max)))
@@ -714,50 +735,92 @@ public class TestSelector extends StatefulWidget {
                     LayoutAxis.VERTICAL,
                     3,
                     Grid.CellFit.tight(),
-                    widget -> new Padding(Insets.all(5), widget),
-                    null,
+                    new Sized(
+                        100, 100,
+                        new Xlyder(
+                            x, y,
+                            xlyder -> xlyder.rangeX(max, min).rangeY(min, max).incrementStep(1),
+                            (x, y) -> this.setState(() -> {
+                                this.x = x;
+                                this.y = y;
+                            })
+                        )
+                    ),
                     new Sized(
                         20, 100,
                         new Slider(
                             y,
-                            slider -> slider.range(min, max).vertical(),
+                            slider -> slider.range(min, max).vertical().incrementStep(1),
                             newValue -> this.setState(() -> this.y = newValue)
                         )
                     ),
-                    null,
+                    new Sized(
+                        100, 100,
+                        new Xlyder(
+                            x, y,
+                            xlyder -> xlyder.range(min, max).incrementStep(1),
+                            (x, y) -> this.setState(() -> {
+                                this.x = x;
+                                this.y = y;
+                            })
+                        )
+                    ),
                     new Sized(
                         100, 20,
                         new Slider(
                             x,
-                            slider -> slider.range(max, min),
+                            slider -> slider.range(max, min).incrementStep(1),
                             newValue -> this.setState(() -> this.x = newValue)
                         )
                     ),
                     new Sized(
                         20, 20,
-                        new Label(
-                            false,
-                            Text.literal(formatDouble(x) + "\n" + formatDouble(y))
+                        new Transform(
+                            new Matrix4f().scale(0.5f),
+                            new Label(
+                                false,
+                                Text.literal(formatDouble(x) + "\n" + formatDouble(y))
+                            )
                         )
                     ),
                     new Sized(
                         100, 20,
                         new Slider(
                             x,
-                            slider -> slider.range(min, max),
+                            slider -> slider.range(min, max).incrementStep(1),
                             newValue -> this.setState(() -> this.x = newValue)
                         )
                     ),
-                    null,
+                    new Sized(
+                        100, 100,
+                        new Xlyder(
+                            x, y,
+                            xlyder -> xlyder.range(max, min).incrementStep(1),
+                            (x, y) -> this.setState(() -> {
+                                this.x = x;
+                                this.y = y;
+                            })
+                        )
+                    ),
                     new Sized(
                         20, 100,
                         new Slider(
                             y,
-                            slider -> slider.range(max, min).vertical(),
+                            slider -> slider.range(max, min).vertical().incrementStep(1),
                             newValue -> this.setState(() -> this.y = newValue)
                         )
                     ),
-                    null
+                    new Sized(
+                        100, 100,
+                        new Xlyder(
+                            x, y,
+                            xlyder -> xlyder.rangeX(min, max).rangeY(max, min).incrementStep(1),
+                            (x, y) -> this.setState(() -> {
+                                this.x = x;
+                                this.y = y;
+                            })
+                        )
+                    )
                 );
             }
         }
@@ -804,17 +867,13 @@ public class TestSelector extends StatefulWidget {
                         new Sized(
                             100.0,
                             100.0,
-                            new RawXlyder(
+                            new Xlyder(
                                 this.x, this.y,
-                                0, 0, 1, 1,
-                                null, null,
+                                xlyder -> xlyder.handleSize(Size.square((1 - this.y) * 16 + 8)),
                                 (x, y) -> this.setState(() -> {
                                     this.x = x;
                                     this.y = y;
-                                }),
-                                new Panel(ButtonComponent.DISABLED_TEXTURE),
-                                new DefaultSliderHandle(),
-                                Size.square((1 - this.y) * 16 + 8)
+                                })
                             )
                         ),
                         new Sized(
@@ -832,7 +891,7 @@ public class TestSelector extends StatefulWidget {
                         15.0,
                         new Slider(
                             this.x,
-                            widget -> widget.handleSize(24),
+                            slider -> slider.handleSize(24),
                             x -> this.setState(() -> this.x = x)
                         )
                     ),
@@ -841,7 +900,7 @@ public class TestSelector extends StatefulWidget {
                         15.0,
                         new Slider(
                             this.x,
-                            widget -> widget.handleSize(18),
+                            slider -> slider.handleSize(18),
                             x -> this.setState(() -> this.x = x)
                         )
                     ),
@@ -850,7 +909,7 @@ public class TestSelector extends StatefulWidget {
                         15.0,
                         new Slider(
                             this.x,
-                            widget -> widget.handleSize(12),
+                            slider -> slider.handleSize(12),
                             x -> this.setState(() -> this.x = x)
                         )
                     ),
@@ -859,55 +918,9 @@ public class TestSelector extends StatefulWidget {
                         15.0,
                         new Slider(
                             this.x,
-                            widget -> widget.handleSize(6),
+                            slider -> slider.handleSize(6),
                             (x) -> this.setState(() -> this.x = x)
                         )
-                    )
-                );
-            }
-        }
-    }
-
-    public static class CoolXlyder extends StatefulWidget {
-
-        public final @Nullable Double xStep, yStep;
-        public final MessageXlyder.XlyderMessageProvider textSupplier;
-
-        public CoolXlyder(
-            @Nullable Double xStep,
-            @Nullable Double yStep,
-            MessageXlyder.XlyderMessageProvider textSupplier
-        ) {
-            this.xStep = xStep;
-            this.yStep = yStep;
-            this.textSupplier = textSupplier;
-        }
-
-        @Override
-        public WidgetState<CoolXlyder> createState() {
-            return new State();
-        }
-
-        public static class State extends WidgetState<CoolXlyder> {
-
-            private double x = 16;
-            private double y = 16;
-
-            @Override
-            public Widget build(BuildContext context) {
-                return new Sized(
-                    100.0,
-                    100.0,
-                    new MessageXlyder(
-                        this.x, this.y,
-                        0, 0,
-                        32, 32,
-                        this.widget().xStep, this.widget().yStep,
-                        (newX, newY) -> setState(() -> {
-                            this.x = newX;
-                            this.y = newY;
-                        }),
-                        this.widget().textSupplier.getMessage(this.x, this.y)
                     )
                 );
             }
