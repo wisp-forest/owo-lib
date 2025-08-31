@@ -5,9 +5,16 @@ import io.wispforest.owo.config.base.Key;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.RecordComponent;
 import java.lang.reflect.Type;
 
+///
+/// An implementation of [OptionBase] useful when dealing with runtime based
+/// options that are not directly created from a [Field] i.e. [RecordOption]
+///
 public sealed class MemoryOption<T> extends OptionBase<T> permits RecordOption {
+
     private T currentValue;
 
     public MemoryOption(Identifier configId, Key key, T defaultValue, Class<T> clazz, Type genericType, @Nullable ConfigWrapper.Constraint constraint, T currentValue) {

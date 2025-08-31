@@ -10,11 +10,13 @@ import io.wispforest.owo.ui.core.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.function.Consumer;
 
+@ApiStatus.Internal
 public class SimpleButtonScreen extends BaseOwoScreen<FlowLayout> {
 
     private final Consumer<FlowLayout> buttonAdditions;

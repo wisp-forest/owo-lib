@@ -6,6 +6,10 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 
+///
+/// An extension of [OptionControlSpec] useful to gain access to any
+/// [BoundedAccess] or [Annotation] information bound to the given option.
+///
 public sealed interface ReflectiveOption<T> extends OptionControlSpec<T>, AnnotatedElement permits FieldOption, RecordOption {
 
     BoundedAccess<T> backingAccess();

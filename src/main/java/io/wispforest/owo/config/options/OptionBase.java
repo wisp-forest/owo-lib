@@ -9,6 +9,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
 
+
+///
+/// Base Option implementation declaring common code for the three core types of [OptionControlSpec] such
+/// being [FieldOption], [RecordOption], and [MemoryOption].
+///
 public sealed abstract class OptionBase<T> implements OptionControlSpec<T> permits FieldOption, MemoryOption {
 
     private final Identifier configId;

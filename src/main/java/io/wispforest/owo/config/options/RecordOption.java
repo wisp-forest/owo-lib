@@ -8,6 +8,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
 
+///
+/// Describes a single option for a field found on a given [Record] object
+/// as an inner type for a field found on a [ConfigWrapper].
+///
 public final class RecordOption<T> extends MemoryOption<T> implements ReflectiveOption<T> {
 
     private final BoundedAccess.BoundRecordComponent<T> backingComponent;

@@ -15,15 +15,16 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-/**
- * Describes a single option in a config. Instances
- * of this class keep a reference to the field in
- * the model class which stores the value used for serialization.
- * <p>
- * An option may enter the so-called "detached" state, which means
- * its value is being overridden by the server. In this state, the option
- * is completely immutable and can only be changed again afterwards
- */
+///
+/// Describes a single option for a field found on a given [Class] object
+/// within a config weather such be part of the [ConfigWrapper] or as another
+/// inner types for a field found on a wrapper.
+///
+/// A unique thing to [FieldOption]s is that they may enter the
+/// so-called "detached" state, which means its value is being overridden
+/// by the server. In this state, the option is completely immutable and
+/// can only be changed again afterwards.
+///
 public final class FieldOption<T> extends OptionBase<T> implements ReflectiveOption<T> {
 
     private final BoundedAccess.BoundField<T> backingField;

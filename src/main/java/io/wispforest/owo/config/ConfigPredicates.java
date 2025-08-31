@@ -1,9 +1,11 @@
 package io.wispforest.owo.config;
 
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.function.Predicate;
 
+@ApiStatus.Internal
 public class ConfigPredicates {
 
     public static final Predicate<String> IDENTIFIER_INPUT = s -> s.matches("[a-z0-9_.:\\-]*");

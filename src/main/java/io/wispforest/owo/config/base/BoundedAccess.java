@@ -1,6 +1,8 @@
 package io.wispforest.owo.config.base;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -9,18 +11,38 @@ import java.lang.reflect.RecordComponent;
 import java.lang.reflect.Type;
 import java.util.function.Function;
 
+///
+/// An interface used to give access to either an [Object]/[Record] field as
+/// an abstraction around either a [Field] or [RecordComponent]
+///
 public interface BoundedAccess<T> extends AnnotatedElement {
 
+    ///
+    /// The name of the field for a given object
+    ///
     String name();
 
+    ///
+    /// The owner object to which the field is accessed
+    ///
     Object owner();
 
+    ///
+    /// The [Class<?>] of the given field without any generics
+    ///
     Class<?> type();
 
+    ///
+    /// The [Type] of the given field with any generics
+    ///
     Type genericType();
 
+    @Nullable
     <A extends Annotation> A getAnnotation(Class<A> annotationClass);
 
+    ///
+    /// Get the current [T] entry from [owner][#owner()]
+    ///
     T getValue();
 
     /**
@@ -70,6 +92,7 @@ public interface BoundedAccess<T> extends AnnotatedElement {
             }
         }
 
+        @ApiStatus.Internal
         public BoundRecordComponent<T> withOwner(Record owner) {
             return new BoundRecordComponent<>(owner, this.component(), this.getter());
         }
@@ -127,6 +150,7 @@ public interface BoundedAccess<T> extends AnnotatedElement {
             }
         }
 
+        @ApiStatus.Internal
         public BoundField<T> withOwner(Object owner) {
             return new BoundField<>(owner, this.field(), this.type(), this.genericType());
         }

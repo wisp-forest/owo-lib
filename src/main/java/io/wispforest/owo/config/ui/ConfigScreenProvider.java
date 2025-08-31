@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiFunction;
 
+@FunctionalInterface
 public interface ConfigScreenProvider<W extends ConfigWrapper<?>> {
 
     static <W extends ConfigWrapper<?>, S extends Screen> ConfigScreenProvider<W> of(Class<W> wrapperClass, BiFunction<@Nullable Screen, W, S> supplier) {
