@@ -53,16 +53,6 @@ public sealed interface OptionControlSpec<T> permits OptionBase, ReflectiveOptio
      */
     Identifier configId();
 
-    /**
-     * @return The name of the config this option is contained in
-     */
-    default String configName() {
-        return this.configId().getPath();
-    }
-
-    /**
-     * @return The key of this option
-     */
     Key key();
 
     /**

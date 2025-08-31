@@ -164,15 +164,15 @@ public class ConfigSynchronizer {
                 Owo.LOGGER.error("Aborting connection, non-syncable config values were mismatched");
                 mismatchedOptions.forEach((option, serverValue) -> {
                     Owo.LOGGER.error("- Option {} in config '{}' has value '{}' but server requires '{}'",
-                            option.key().asString(), option.configName(), option.value(), serverValue);
+                            option.key().asString(), option.configId(), option.value(), serverValue);
                 });
 
                 var errorMessage = Text.empty();
-                var optionsByConfig = HashMultimap.<String, Pair<FieldOption<?>, Object>>create();
+                var optionsByConfig = HashMultimap.<Identifier, Pair<FieldOption<?>, Object>>create();
 
-                mismatchedOptions.forEach((option, serverValue) -> optionsByConfig.put(option.configName(), new Pair<>(option, serverValue)));
+                mismatchedOptions.forEach((option, serverValue) -> optionsByConfig.put(option.configId(), new Pair<>(option, serverValue)));
                 for (var configName : optionsByConfig.keys()) {
-                    errorMessage.append(TextOps.withFormatting("in config ", Formatting.GRAY)).append(configName).append("\n");
+                    errorMessage.append(TextOps.withFormatting("in config ", Formatting.GRAY)).append(configName.toString()).append("\n");
                     for (var option : optionsByConfig.get(configName)) {
                         errorMessage.append(Text.translatable(option.getLeft().translationKey()).formatted(Formatting.YELLOW)).append(" -> ");
                         errorMessage.append(option.getLeft().value().toString()).append(TextOps.withFormatting(" (client)", Formatting.GRAY));
