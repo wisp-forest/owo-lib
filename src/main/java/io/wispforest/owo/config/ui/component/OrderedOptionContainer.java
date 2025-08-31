@@ -2,9 +2,7 @@ package io.wispforest.owo.config.ui.component;
 
 import io.wispforest.owo.config.options.OptionControlSpec;
 import io.wispforest.owo.config.ui.OptionComponentFactory;
-import io.wispforest.owo.ops.TextOps;
 import io.wispforest.owo.ui.component.ButtonComponent;
-import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.CollapsibleContainer;
 import io.wispforest.owo.ui.container.Containers;
@@ -15,7 +13,6 @@ import io.wispforest.owo.ui.util.UISounds;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
@@ -42,7 +39,7 @@ public abstract class OrderedOptionContainer<C, T> extends CollapsibleContainer 
     public OrderedOptionContainer(UIModel uiModel, OptionControlSpec<C> option, boolean expanded, boolean isDetached) {
         super(
                 Sizing.fill(100), Sizing.content(),
-                Text.translatable(option.translationKey()),
+                Text.translatable(option.labelTranslationKey()),
                 expanded
         );
 
@@ -62,7 +59,7 @@ public abstract class OrderedOptionContainer<C, T> extends CollapsibleContainer 
                 .horizontalSizing(Sizing.fill(100))
                 .verticalSizing(Sizing.fixed(30));
 
-        OptionComponentFactory.addEasyCopyLabel(this.titleLayout, option.translationKey());
+        OptionComponentFactory.addEasyCopyLabel(this.titleLayout, option.labelTranslationKey());
 
         if (!this.isDetached) {
             var addLabel = uiModel.expandTemplate(LabelComponent.class, "collection-add-label", Map.of()).<LabelComponent>configure(label -> {
@@ -116,7 +113,7 @@ public abstract class OrderedOptionContainer<C, T> extends CollapsibleContainer 
         this.titleLayout.child(new SearchAnchorComponent(
                 this.titleLayout,
                 option.key(),
-                () -> I18n.translate(option.translationKey()),
+                () -> I18n.translate(option.labelTranslationKey()),
                 () -> this.backingList.stream().map(Objects::toString).collect(Collectors.joining())
         ));
     }

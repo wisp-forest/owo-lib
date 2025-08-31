@@ -9,25 +9,19 @@ import io.wispforest.owo.config.base.SyncMode;
 import io.wispforest.owo.config.options.FieldOption;
 import io.wispforest.owo.mixin.ServerCommonNetworkHandlerAccessor;
 import io.wispforest.owo.network.ClientAccess;
-import io.wispforest.owo.network.OwoNetChannel;
 import io.wispforest.owo.network.ServerAccess;
 import io.wispforest.owo.ops.TextOps;
 import io.wispforest.endec.Endec;
 import io.wispforest.owo.packets.OwoPackets;
-import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.networking.v1.*;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.network.packet.Packet;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -41,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 // TODO: ADD API HOOK FOR WHEN A CLIENT VALUE HAS BEEN UPDATED AND SENT TO THE SERVER
 public class ConfigSynchronizer {
@@ -174,7 +167,7 @@ public class ConfigSynchronizer {
                 for (var configName : optionsByConfig.keys()) {
                     errorMessage.append(TextOps.withFormatting("in config ", Formatting.GRAY)).append(configName.toString()).append("\n");
                     for (var option : optionsByConfig.get(configName)) {
-                        errorMessage.append(Text.translatable(option.getLeft().translationKey()).formatted(Formatting.YELLOW)).append(" -> ");
+                        errorMessage.append(Text.translatable(option.getLeft().labelTranslationKey()).formatted(Formatting.YELLOW)).append(" -> ");
                         errorMessage.append(option.getLeft().value().toString()).append(TextOps.withFormatting(" (client)", Formatting.GRAY));
                         errorMessage.append(TextOps.withFormatting(" / ", Formatting.DARK_GRAY));
                         errorMessage.append(option.getRight().toString()).append(TextOps.withFormatting(" (server)", Formatting.GRAY)).append("\n");

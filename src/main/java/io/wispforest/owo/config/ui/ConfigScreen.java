@@ -502,7 +502,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                 );
             } else {
                 var tooltipText = new ArrayList<OrderedText>();
-                var tooltipTranslationKey = option.translationTooltipKey();
+                var tooltipTranslationKey = option.tooltipTranslationKey();
 
                 if (I18n.hasTranslation(tooltipTranslationKey)) {
                     tooltipText.addAll(this.client.textRenderer.wrapLines(Text.translatable(tooltipTranslationKey), Integer.MAX_VALUE));

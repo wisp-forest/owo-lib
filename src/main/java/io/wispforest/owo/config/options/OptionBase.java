@@ -86,12 +86,12 @@ public sealed abstract class OptionBase<T> implements OptionControlSpec<T> permi
     }
 
     @Override
-    public String translationKey() {
+    public String labelTranslationKey() {
         return ConfigTranslationHelper.createOptionTranslation(this.configId, this.key);
     }
 
     @Override
-    public String translationTooltipKey() {
+    public String tooltipTranslationKey() {
         return ConfigTranslationHelper.createOptionTranslation(this.configId, this.key, true);
     }
 

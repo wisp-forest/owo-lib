@@ -27,7 +27,6 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.function.Supplier;
 
 /**
  * A function which creates an instance of {@link OptionValueProvider}
@@ -107,15 +106,15 @@ public interface OptionComponentFactory<T> {
             layout = StructOptionContainer.of(model, option);
         }
 
-        var titleKey = option.translationKey();
+        var titleKey = option.labelTranslationKey();
 
         var container = Containers.collapsible(
                 Sizing.fill(100), Sizing.content(),
                 Text.translatable(titleKey),
                 expanded
         ).<CollapsibleContainer>configure(nestedContainer -> {
-            if (I18n.hasTranslation(option.translationTooltipKey())) {
-                nestedContainer.titleLayout().tooltip(Text.translatable(option.translationTooltipKey()));
+            if (I18n.hasTranslation(option.tooltipTranslationKey())) {
+                nestedContainer.titleLayout().tooltip(Text.translatable(option.tooltipTranslationKey()));
             }
 
             nestedContainer.titleLayout().child(new SearchAnchorComponent(
@@ -160,12 +159,12 @@ public interface OptionComponentFactory<T> {
     static <T> Result<? extends Component, ? extends OptionValueProvider> attachOptionLabel(OptionComponentFactory<T> factory, UIModel model, OptionControlSpec<?> option) {
         var baseComponent = model.expandTemplate(FlowLayout.class,
                 "config-option-base",
-                Map.of("config-option-name", option.translationKey())
+                Map.of("config-option-name", option.labelTranslationKey())
         );
 
         var optionNameHolder = baseComponent.childById(FlowLayout.class, "option-name-holder");
 
-        addEasyCopyLabel(optionNameHolder, option.translationKey());
+        addEasyCopyLabel(optionNameHolder, option.labelTranslationKey());
 
         var result = factory.make(model, (ReflectiveOption<T>) option);
 
