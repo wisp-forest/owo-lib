@@ -77,67 +77,64 @@ public class InspectorWidget extends StatefulWidget {
                         Color.ofRgb(0x1d2026),
                         new DefaultLabelStyle(
                             new LabelStyle(null, null, Style.EMPTY.withFont(MinecraftClient.UNICODE_FONT_ID), null),
-                            new Padding(
-                                Insets.all(2),
-                                new Row(
-                                    new Flexible(
-                                        new Stack(
-                                            new ScrollableWithBars(
-                                                null,
-                                                null,
-                                                3,
-                                                (axis, controller) -> new FlatScrollbar(axis, controller, Color.ofRgb(0xabb0bf), Color.ofRgb(0xabb0bf)),
-                                                new Align(
-                                                    Alignment.TOP_LEFT,
-                                                    new InstanceTreeView(this.widget().inspector.onReveal(), this.widget().rootInstance)
-                                                )
-                                            ),
+                            new Row(
+                                new Flexible(
+                                    new Stack(
+                                        new ScrollableWithBars(
+                                            null,
+                                            null,
+                                            3,
+                                            (axis, controller) -> new FlatScrollbar(axis, controller, Color.ofRgb(0xabb0bf), Color.ofRgb(0xabb0bf)),
                                             new Align(
-                                                Alignment.BOTTOM_RIGHT,
-                                                new Padding(
-                                                    Insets.all(5),
-                                                    new Row(
-                                                        new Padding(Insets.horizontal(1)),
-                                                        List.of(
-                                                            new Sized(
-                                                                20,
-                                                                20,
-                                                                new Tooltip(
-                                                                    Text.literal(this.alwaysOnTop ? "window behavior:\nalways on top" : "window behavior:\nnormal"),
-                                                                    new Button(
-                                                                        () -> this.setState(() -> {
-                                                                            this.alwaysOnTop = !this.alwaysOnTop;
-                                                                            GLFW.glfwSetWindowAttrib(this.widget().inspector.currentWindow.handle, GLFW.GLFW_FLOATING, this.alwaysOnTop ? GLFW.GLFW_TRUE : GLFW.GLFW_FALSE);
-                                                                        }),
-                                                                        new SpriteWidget(
-                                                                            this.alwaysOnTop
-                                                                                ? Identifier.of("owo", "braid_inspector_always_on_top")
-                                                                                : Identifier.of("owo", "braid_inspector_not_always_on_top"),
-                                                                            false
-                                                                        )
+                                                Alignment.TOP_LEFT,
+                                                new InstanceTreeView(this.widget().inspector.onReveal(), this.widget().rootInstance)
+                                            )
+                                        ),
+                                        new Align(
+                                            Alignment.BOTTOM_RIGHT,
+                                            new Padding(
+                                                Insets.all(5),
+                                                new Row(
+                                                    new Padding(Insets.horizontal(1)),
+                                                    List.of(
+                                                        new Sized(
+                                                            20,
+                                                            20,
+                                                            new Tooltip(
+                                                                Text.literal(this.alwaysOnTop ? "window behavior:\nalways on top" : "window behavior:\nnormal"),
+                                                                new Button(
+                                                                    () -> this.setState(() -> {
+                                                                        this.alwaysOnTop = !this.alwaysOnTop;
+                                                                        GLFW.glfwSetWindowAttrib(this.widget().inspector.currentWindow.handle, GLFW.GLFW_FLOATING, this.alwaysOnTop ? GLFW.GLFW_TRUE : GLFW.GLFW_FALSE);
+                                                                    }),
+                                                                    new SpriteWidget(
+                                                                        this.alwaysOnTop
+                                                                            ? Identifier.of("owo", "braid_inspector_always_on_top")
+                                                                            : Identifier.of("owo", "braid_inspector_not_always_on_top"),
+                                                                        false
                                                                     )
                                                                 )
-                                                            ),
-                                                            new Sized(
-                                                                20,
-                                                                20,
-                                                                new Tooltip(
-                                                                    Text.literal("reassemble app"),
-                                                                    new Button(
-                                                                        () -> this.widget().inspector.subject.rebuildRoot(),
-                                                                        new SpriteWidget(Identifier.of("owo", "braid_inspector_reassemble"), false)
-                                                                    )
+                                                            )
+                                                        ),
+                                                        new Sized(
+                                                            20,
+                                                            20,
+                                                            new Tooltip(
+                                                                Text.literal("reassemble app"),
+                                                                new Button(
+                                                                    () -> this.widget().inspector.subject.rebuildRoot(),
+                                                                    new SpriteWidget(Identifier.of("owo", "braid_inspector_reassemble"), false)
                                                                 )
-                                                            ),
-                                                            new Sized(
-                                                                20,
-                                                                20,
-                                                                new Tooltip(
-                                                                    Text.literal("pick widget"),
-                                                                    new Button(
-                                                                        () -> this.widget().inspector.pick(),
-                                                                        new SpriteWidget(Identifier.of("owo", "braid_inspector_pick"), false)
-                                                                    )
+                                                            )
+                                                        ),
+                                                        new Sized(
+                                                            20,
+                                                            20,
+                                                            new Tooltip(
+                                                                Text.literal("pick widget"),
+                                                                new Button(
+                                                                    () -> this.widget().inspector.pick(),
+                                                                    new SpriteWidget(Identifier.of("owo", "braid_inspector_pick"), false)
                                                                 )
                                                             )
                                                         )
@@ -145,9 +142,9 @@ public class InspectorWidget extends StatefulWidget {
                                                 )
                                             )
                                         )
-                                    ),
-                                    new InstanceDetails()
-                                )
+                                    )
+                                ),
+                                new InstanceDetails()
                             )
                         )
                     );
