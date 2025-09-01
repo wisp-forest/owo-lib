@@ -51,11 +51,15 @@ public class SpriteWidget extends LeafInstanceWidget {
             this.markNeedsLayout();
         }
 
-        @Override
-        protected void doLayout(Constraints constraints) {
-            this.sprite = this.widget.spriteIdentifier.getAtlasId().equals(GUI_ATLAS_ID)
+        protected Sprite findSprite() {
+            return this.sprite = this.widget.spriteIdentifier.getAtlasId().equals(GUI_ATLAS_ID)
                 ? this.host().client().getGuiAtlasManager().getSprite(this.widget.spriteIdentifier.getTextureId())
                 : this.widget.spriteIdentifier.getSprite();
+        }
+
+        @Override
+        protected void doLayout(Constraints constraints) {
+            this.sprite = this.findSprite();
 
             var size = Size.of(
                 this.sprite.getContents().getWidth(),
@@ -67,12 +71,12 @@ public class SpriteWidget extends LeafInstanceWidget {
 
         @Override
         protected double measureIntrinsicWidth(double height) {
-            return this.sprite.getContents().getWidth();
+            return this.findSprite().getContents().getWidth();
         }
 
         @Override
         protected double measureIntrinsicHeight(double width) {
-            return this.sprite.getContents().getHeight();
+            return this.findSprite().getContents().getHeight();
         }
 
         @Override

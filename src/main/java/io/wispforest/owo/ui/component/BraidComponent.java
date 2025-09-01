@@ -45,6 +45,7 @@ public class BraidComponent extends BaseComponent {
     public BraidComponent(Widget braidWidget) {
         this.appState = new AppState(
             null,
+            AppState.formatName("BraidComponent", braidWidget),
             MinecraftClient.getInstance(),
             new EmbedSurface(this),
             eventBuffer,

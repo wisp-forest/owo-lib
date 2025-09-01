@@ -218,6 +218,7 @@ public class BraidWindow implements Surface {
         var window = create(title, width, height);
         var app = new AppState(
             Owo.LOGGER,
+            AppState.formatName("BraidWindow", widget, title),
             MinecraftClient.getInstance(),
             window,
             window.eventBuffer,

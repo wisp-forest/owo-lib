@@ -2,6 +2,7 @@ package io.wispforest.owo.braid.widgets.collapsible;
 
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.core.Alignment;
+import io.wispforest.owo.braid.core.Color;
 import io.wispforest.owo.braid.core.Insets;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.framework.BuildContext;
@@ -17,7 +18,6 @@ import io.wispforest.owo.braid.widgets.flex.MainAxisAlignment;
 import io.wispforest.owo.braid.widgets.flex.Row;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.braid.widgets.stack.StackBase;
-import io.wispforest.owo.ui.core.Color;
 import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
@@ -62,7 +62,7 @@ public class Collapsible extends StatefulWidget {
                             1,
                             Double.POSITIVE_INFINITY,
                             new Box(
-                                this.hovered ? Color.WHITE : Color.WHITE.interpolate(Color.BLACK, .5f)
+                                this.hovered ? Color.WHITE : Color.mix(.5f, Color.WHITE, Color.BLACK)
                             )
                         )
                     )

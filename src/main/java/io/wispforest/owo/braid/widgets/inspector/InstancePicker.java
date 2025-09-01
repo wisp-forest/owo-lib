@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets.inspector;
 
+import com.google.common.collect.Streams;
 import io.wispforest.owo.braid.core.Insets;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.instance.HitTestState;
@@ -7,11 +8,9 @@ import io.wispforest.owo.braid.framework.instance.WidgetInstance;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import io.wispforest.owo.braid.widgets.basic.Align;
 import io.wispforest.owo.braid.widgets.basic.Builder;
 import io.wispforest.owo.braid.widgets.basic.MouseArea;
 import io.wispforest.owo.braid.widgets.basic.Padding;
-import io.wispforest.owo.braid.widgets.drag.DragArenaInstance;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.braid.widgets.stack.StackBase;
 import io.wispforest.owo.util.EventSource;
@@ -20,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
 public class InstancePicker extends StatefulWidget {
 
@@ -72,7 +72,10 @@ public class InstancePicker extends StatefulWidget {
 
                             if (this.pickedInstance != null) this.pickedInstance.debugHighlighted = false;
 
-                            var pickHit = hitTest.firstWhere(hit -> !(hit.instance() instanceof Align.Instance || hit.instance() instanceof DragArenaInstance));
+                            var pickHit = Streams.stream(hitTest.occludedTrace())
+                                .min(Comparator.comparingDouble(value -> value.instance().transform.width() * value.instance().transform.height()))
+                                .orElse(null);
+
                             this.pickedInstance = pickHit != null ? pickHit.instance() : null;
 
                             if (this.pickedInstance != null) this.pickedInstance.debugHighlighted = true;

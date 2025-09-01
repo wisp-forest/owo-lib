@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets.cycle;
 
+import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
@@ -75,7 +76,8 @@ public class RawCyclingButton<T> extends StatelessWidget {
             (currentValue, currentIndex, cycle) ->
                 new MouseArea(
                     widget ->
-                        widget.scrollCallback((horizontal, vertical) -> cycle.forScroll(vertical)),
+                        widget.scrollCallback((horizontal, vertical) -> cycle.forScroll(vertical))
+                            .cursorStyle(CursorStyle.HAND),
                     new Actions(
                         widget ->
                             widget

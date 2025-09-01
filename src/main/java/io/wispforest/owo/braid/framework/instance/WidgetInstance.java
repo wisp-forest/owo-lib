@@ -6,8 +6,11 @@ import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.core.Size;
 import io.wispforest.owo.braid.framework.widget.InstanceWidget;
+import io.wispforest.owo.ui.core.Color;
+import io.wispforest.owo.ui.util.NinePatchTexture;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Box;
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
@@ -36,6 +39,7 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
     // ---
 
     public boolean debugHighlighted = false;
+    public boolean debugDrawVisualizers = false;
 
     // ---
 
@@ -111,7 +115,7 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
     protected <W extends @Nullable WidgetInstance<?>> W adopt(W child) {
         if (child == null || ((WidgetInstance<?>) child).parent == this) return child;
 
-        ((WidgetInstance<?>) child).depth = this.depth + 1;
+        child.setDepth(this.depth + 1);
         ((WidgetInstance<?>) child).parent = this;
         if (this.host != null) {
             child.attachHost(this.host);
@@ -122,15 +126,33 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
 
     // ---
 
+    public List<InspectorProperty> debugListInspectorProperties() {
+        return List.of();
+    }
+
+    public boolean debugHasVisualizers() {
+        return false;
+    }
+
+    protected void debugDrawVisualizers(BraidDrawContext ctx) {}
+
+    // ---
+
     protected void drawChild(BraidDrawContext ctx, WidgetInstance<?> child) {
         ctx.push();
         child.transform.transformToParent(ctx.getMatrices());
         child.draw(ctx);
 
+        if (child.debugHasVisualizers() && child.debugDrawVisualizers) {
+            child.debugDrawVisualizers(ctx);
+        }
+
         if (child.debugHighlighted) {
-            ctx.fill(
+            NinePatchTexture.draw(
+                Identifier.of("owo", "braid_debug_highlighted"),
+                ctx,
                 0, 0, (int) child.transform.width(), (int) child.transform.height(),
-                0x7FFFD63A
+                Color.ofRgb(0x00FFD1)
             );
         }
 
@@ -172,6 +194,8 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
     public void dispose() {
         Preconditions.checkState(!this.debugDisposed, "tried to dispose a widget instance twice");
         this.debugDisposed = true;
+
+        this.parent = null;
     }
 
     // ---
@@ -203,7 +227,7 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
     }
 
     protected boolean hitTestSelf(double x, double y) {
-        return x >= 0 && x <= this.transform.width && y >= 0 && y <= this.transform.height;
+        return x >= 0 && x < this.transform.width && y >= 0 && y < this.transform.height;
     }
 
     public Matrix4f computeGlobalTransform() {
@@ -213,11 +237,11 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
     public Matrix4f computeTransformFrom(@Nullable WidgetInstance<?> ancestor) {
         var result = new Matrix4f();
 
-        result.mul(this.transform.toWidget());
+        this.transform.transformToWidget(result);
 
         for (var step : this.ancestors()) {
             if (step == ancestor) break;
-            result.mul(step.transform.toWidget());
+            step.transform.transformToWidget(result);
         }
 
         return result;
@@ -286,6 +310,10 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
 
     public T widget() {
         return this.widget;
+    }
+
+    public WidgetInstance<?> parent() {
+        return this.parent;
     }
 
     // ---

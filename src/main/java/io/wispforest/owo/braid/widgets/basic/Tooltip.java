@@ -1,6 +1,8 @@
 package io.wispforest.owo.braid.widgets.basic;
 
+import io.wispforest.owo.braid.framework.instance.InstanceHost;
 import io.wispforest.owo.braid.framework.instance.SingleChildWidgetInstance;
+import io.wispforest.owo.braid.framework.instance.TooltipProvider;
 import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import net.minecraft.client.gui.tooltip.OrderedTextTooltipComponent;
@@ -41,9 +43,38 @@ public class Tooltip extends SingleChildInstanceWidget {
         return new Instance(this);
     }
 
-    public static class Instance extends SingleChildWidgetInstance.ShrinkWrap<Tooltip> {
+    public static class Instance extends SingleChildWidgetInstance.ShrinkWrap<Tooltip> implements TooltipProvider {
+        private @Nullable List<TooltipComponent> tooltip;
+
         public Instance(Tooltip widget) {
             super(widget);
+        }
+
+        @Override
+        public void attachHost(InstanceHost host) {
+            super.attachHost(host);
+            this.setup();
+        }
+
+        @Override
+        public void setWidget(Tooltip widget) {
+            super.setWidget(widget);
+            this.setup();
+        }
+
+        private void setup() {
+            this.tooltip = widget.tooltipText != null
+                ? this.host().client().textRenderer
+                .wrapLines(widget.tooltipText, Integer.MAX_VALUE)
+                .stream()
+                .<TooltipComponent>map(OrderedTextTooltipComponent::new)
+                .toList()
+                : widget.tooltip;
+        }
+
+        @Override
+        public @Nullable List<TooltipComponent> getTooltipComponentsAt(double x, double y) {
+            return tooltip;
         }
     }
 }

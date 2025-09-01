@@ -26,6 +26,10 @@ public class Label extends StatelessWidget {
         this(null, true, text);
     }
 
+    public static Label literal(String text) {
+        return new Label(Text.literal(text));
+    }
+
     @Override
     public Widget build(BuildContext context) {
         var effectiveStyle = this.style != null ? this.style : LabelStyle.EMPTY;

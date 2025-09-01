@@ -68,12 +68,12 @@ public class GameRendererMixin {
 
             var display = BraidDisplayBinding.targetDisplay.display();
 
-            if (display.primaryPressed && !MinecraftClient.getInstance().options.attackKey.isPressed()) {
+            if (display.primaryPressed && !MinecraftClient.getInstance().options.useKey.isPressed()) {
                 display.app.eventBuffer.add(new MouseButtonReleaseEvent(GLFW.GLFW_MOUSE_BUTTON_LEFT, KeyModifiers.NONE));
                 display.primaryPressed = false;
             }
 
-            if (display.secondaryPressed && !MinecraftClient.getInstance().options.useKey.isPressed()) {
+            if (display.secondaryPressed && !MinecraftClient.getInstance().options.attackKey.isPressed()) {
                 display.app.eventBuffer.add(new MouseButtonReleaseEvent(GLFW.GLFW_MOUSE_BUTTON_RIGHT, KeyModifiers.NONE));
                 display.secondaryPressed = false;
             }

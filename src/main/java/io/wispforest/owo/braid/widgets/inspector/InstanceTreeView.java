@@ -2,6 +2,7 @@ package io.wispforest.owo.braid.widgets.inspector;
 
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.animation.Easing;
+import io.wispforest.owo.braid.core.Color;
 import io.wispforest.owo.braid.core.Insets;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.instance.WidgetInstance;
@@ -17,7 +18,6 @@ import io.wispforest.owo.braid.widgets.flex.MainAxisAlignment;
 import io.wispforest.owo.braid.widgets.flex.Row;
 import io.wispforest.owo.braid.widgets.scroll.Scrollable;
 import io.wispforest.owo.braid.widgets.sharedstate.SharedState;
-import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.util.EventSource;
 import net.minecraft.util.Unit;
 
@@ -103,7 +103,7 @@ public class InstanceTreeView extends StatefulWidget {
             return new AnimatedBox(
                 this.highlight ? Duration.ZERO : Duration.ofMillis(1250),
                 Easing.IN_OUT_SINE,
-                this.highlight ? Color.ofHsv((this.widget().viewInstance.depth() % 15) / 15f, .75f, 1, .5f) : Color.ofArgb(0),
+                this.highlight ? Color.hsv((this.widget().viewInstance.depth() % 15) / 15d, .75, 1, .5) : new Color(0),
                 true,
                 !children.isEmpty()
                     ?

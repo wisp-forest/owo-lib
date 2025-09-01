@@ -24,6 +24,7 @@ import io.wispforest.owo.braid.widgets.button.RawButton;
 import io.wispforest.owo.braid.widgets.checkbox.BraidCheckbox;
 import io.wispforest.owo.braid.widgets.checkbox.Checkbox;
 import io.wispforest.owo.braid.widgets.checkbox.RawCheckbox;
+import io.wispforest.owo.braid.widgets.combobox.ComboBox;
 import io.wispforest.owo.braid.widgets.cycle.MessageCyclingButton;
 import io.wispforest.owo.braid.widgets.drag.DragArena;
 import io.wispforest.owo.braid.widgets.drag.DragArenaElement;
@@ -31,13 +32,13 @@ import io.wispforest.owo.braid.widgets.flex.*;
 import io.wispforest.owo.braid.widgets.grid.Grid;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
+import io.wispforest.owo.braid.widgets.overlay.Overlay;
+import io.wispforest.owo.braid.widgets.overlay.OverlayEntryBuilder;
 import io.wispforest.owo.braid.widgets.owoui.OwoUIWidget;
 import io.wispforest.owo.braid.widgets.recipeviewer.RecipeViewerExclusionZone;
 import io.wispforest.owo.braid.widgets.recipeviewer.RecipeViewerStack;
 import io.wispforest.owo.braid.widgets.recipeviewer.StackDropArea;
-import io.wispforest.owo.braid.widgets.scroll.ScrollController;
-import io.wispforest.owo.braid.widgets.scroll.Scrollable;
-import io.wispforest.owo.braid.widgets.scroll.VerticallyScrollable;
+import io.wispforest.owo.braid.widgets.scroll.*;
 import io.wispforest.owo.braid.widgets.sharedstate.ShareableState;
 import io.wispforest.owo.braid.widgets.sharedstate.SharedState;
 import io.wispforest.owo.braid.widgets.slider.*;
@@ -55,7 +56,6 @@ import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.EntityComponent;
 import io.wispforest.owo.ui.container.Containers;
-import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.util.EventSource;
@@ -69,13 +69,12 @@ import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
+import net.minecraft.text.*;
 import net.minecraft.util.Colors;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
@@ -95,7 +94,7 @@ import java.util.stream.Stream;
 public class TestSelector extends StatefulWidget {
 
     public enum Tests {
-        COUNTER, FLEX, DRAGGING, SPLIT_PANE, SLIDERS, TEXT_INPUT, BURNING_CHYZ, SCROLLING, INPUT, CYCLING, VANILLA, SHARED_STATE, STACKS, GRIDS, CONTRIBUTORS, ANIMATIONS, NAVIGATOR
+        COUNTER, FLEX, DRAGGING, SPLIT_PANE, SLIDERS, TEXT_INPUT, BURNING_CHYZ, SCROLLING, INPUT, CYCLING, VANILLA, SHARED_STATE, STACKS, GRIDS, CONTRIBUTORS, ANIMATIONS, NAVIGATOR, OVERLAY
     }
 
     @Override
@@ -135,7 +134,7 @@ public class TestSelector extends StatefulWidget {
                 } else {
                     return (Widget) new MessageButton(
                         Text.literal(test.name().toLowerCase(Locale.ROOT).replace('_', ' ')),
-                        test != this.test ? () -> setState(() -> this.test = test) : null
+                        () -> setState(() -> this.test = test)
                     );
                 }
             }).collect(Collectors.toList());
@@ -148,7 +147,7 @@ public class TestSelector extends StatefulWidget {
                         1200,
                         800,
                         new Box(
-                            Color.ofRgb(0x1d2026),
+                            Color.rgb(0x1d2026),
                             new TestSelector()
                         )
                     )
@@ -182,6 +181,7 @@ public class TestSelector extends StatefulWidget {
                                     case CONTRIBUTORS -> new ContributorsTest();
                                     case ANIMATIONS -> new AnimationsTest();
                                     case NAVIGATOR -> new NavigatorTest();
+                                    case OVERLAY -> new OverlayTest();
                                     case null -> new Center(new Label(Text.literal("select a test")));
                                 }
                             )
@@ -456,7 +456,7 @@ public class TestSelector extends StatefulWidget {
                                 new AspectRatio(
                                     16d / 9d,
                                     new Box(
-                                        new Color(1f, 1f, 1f, .5f),
+                                        Color.WHITE.withA(.5),
                                         new Label(Text.literal("16:9 aspect ratio"))
                                     )
                                 )
@@ -464,7 +464,7 @@ public class TestSelector extends StatefulWidget {
                             new Align(
                                 Alignment.TOP_LEFT,
                                 new Column(
-                                    new Label(Text.literal("a")),
+                                    new Label(Text.literal("a").setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://chyz.xyz/box")))),
                                     new MessageButton(Text.literal("window button :o"), () -> setState(() -> controller.expanded = !controller.expanded))
                                 )
                             ),
@@ -553,19 +553,19 @@ public class TestSelector extends StatefulWidget {
                         CrossAxisAlignment.CENTER,
                         List.of(
                             new Box(
-                                Color.GREEN.interpolate(Color.ofArgb(0), .5f),
+                                Color.mix(.5, Color.GREEN, new Color(0)),
                                 new Label(Text.literal("text here"))
                             ),
                             new Box(
-                                Color.GREEN.interpolate(Color.ofArgb(0), .5f),
+                                Color.mix(.5, Color.GREEN, new Color(0)),
                                 new Label(Text.literal("text here"))
                             ),
                             new Box(
-                                Color.GREEN.interpolate(Color.ofArgb(0), .5f),
+                                Color.mix(.5, Color.GREEN, new Color(0)),
                                 new Label(Text.literal("text here"))
                             ),
                             new Box(
-                                Color.GREEN.interpolate(Color.ofArgb(0), .5f),
+                                Color.mix(.5, Color.GREEN, new Color(0)),
                                 new Label(Text.literal("text here"))
                             )
                         )
@@ -761,6 +761,8 @@ public class TestSelector extends StatefulWidget {
             private final TextEditingController controller1 = new TextEditingController();
             private final TextEditingController controller2 = new TextEditingController();
             private final TextEditingController controller3 = new TextEditingController();
+            private final TextEditingController controller4 = new TextEditingController();
+            private final TextEditingController controller5 = new TextEditingController();
 
             @Override
             public Widget build(BuildContext context) {
@@ -777,10 +779,8 @@ public class TestSelector extends StatefulWidget {
                                 50.0,
                                 new TextBox(
                                     this.controller1,
-                                    true,
-                                    false,
-                                    true,
-                                    Style.EMPTY
+                                    widget -> widget
+                                        .placeholder(Text.literal("Soft Wrapping Moment"))
                                 )
                             ),
                             new Sized(
@@ -788,21 +788,41 @@ public class TestSelector extends StatefulWidget {
                                 50.0,
                                 new TextBox(
                                     this.controller2,
-                                    false,
-                                    true,
-                                    true,
-                                    Style.EMPTY
+                                    widget -> widget
+                                        .softWrap(false)
+                                        .autoFocus(true)
+                                        .placeholder(Text.literal("No Soft Wrapping Moment (also auto focused)"))
+                                )
+                            ),
+                            new Sized(
+                                100.0,
+                                30,
+                                new TextBox(
+                                    this.controller3,
+                                    widget -> widget
+                                        .maxLines(2)
+                                        .placeholder(Text.literal("2 lines, TILI"))
                                 )
                             ),
                             new Sized(
                                 100.0,
                                 20.0,
                                 new TextBox(
-                                    this.controller3,
-                                    false,
-                                    false,
-                                    false,
-                                    Style.EMPTY
+                                    this.controller4,
+                                    widget -> widget
+                                        .singleLine()
+                                        .placeholder(Text.literal("Single Line Moment"))
+                                )
+                            ),
+                            new Sized(
+                                100.0,
+                                20.0,
+                                new TextBox(
+                                    this.controller5,
+                                    widget -> widget
+                                        .singleLine()
+                                        .maxCharacters(3)
+                                        .placeholder(Text.literal("3 chars, TILI"))
                                 )
                             )
                         ),
@@ -1018,6 +1038,11 @@ public class TestSelector extends StatefulWidget {
             private final ScrollController verticalController = new ScrollController();
             private final WindowController controller = new WindowController(Size.square(200));
 
+            private final ScrollController horizontalNestedScrollController = new ScrollController();
+            private final ScrollController verticalNestedScrollController = new ScrollController();
+            private final WindowController nestedScrollController = new WindowController(Size.square(200));
+            private double nestedSliderValue = 0.5;
+
             @Override
             public void init() {
                 super.init();
@@ -1031,7 +1056,7 @@ public class TestSelector extends StatefulWidget {
                     Wisdom.ALL_THE_WISDOM,
                     Text.empty(),
                     (result, wisdom) -> {
-                        var wisdomColor = Color.ofHsv(
+                        var wisdomColor = Color.hsv(
                             new java.util.Random(wisdom.hashCode()).nextFloat(), .75f, 1f
                         ).rgb();
 
@@ -1102,6 +1127,52 @@ public class TestSelector extends StatefulWidget {
                                         )
                                     ),
                                     new Padding(Insets.all(5))
+                                )
+                            )
+                        )
+                    ),
+                    new Window(
+                        false,
+                        Text.literal("Scrollception"),
+                        null,
+                        this.nestedScrollController,
+                        new Column(
+                            Label.literal("Damn bro, you can scroll this?"),
+                            new Flexible(
+                                new ScrollableWithBars(
+                                    horizontalNestedScrollController,
+                                    verticalNestedScrollController,
+                                    10,
+                                    ButtonScrollbar::new,
+                                    new Sized(
+                                        500, 500,
+                                        new Center(
+                                            new Column(
+                                                MainAxisAlignment.CENTER,
+                                                CrossAxisAlignment.CENTER,
+                                                new Sized(
+                                                    100, 20,
+                                                    new Slider(
+                                                        this.nestedSliderValue,
+                                                        0, 1,
+                                                        null,
+                                                        LayoutAxis.HORIZONTAL,
+                                                        value -> this.setState(() -> this.nestedSliderValue = value)
+                                                    )
+                                                ),
+                                                new Sized(
+                                                    20, 100,
+                                                    new Slider(
+                                                        this.nestedSliderValue,
+                                                        0, 1,
+                                                        null,
+                                                        LayoutAxis.VERTICAL,
+                                                        value -> this.setState(() -> this.nestedSliderValue = value)
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    )
                                 )
                             )
                         )
@@ -1488,19 +1559,19 @@ public class TestSelector extends StatefulWidget {
                                                     CrossAxisAlignment.CENTER,
                                                     List.of(
                                                         new Box(
-                                                            Color.GREEN.interpolate(Color.ofArgb(0), .5f),
+                                                            Color.mix(.5, Color.GREEN, new Color(0)),
                                                             new Label(Text.literal("no way is"))
                                                         ),
                                                         new Box(
-                                                            Color.GREEN.interpolate(Color.ofArgb(0), .5f),
+                                                            Color.mix(.5, Color.GREEN, new Color(0)),
                                                             new Label(Text.literal("that braid"))
                                                         ),
                                                         new Box(
-                                                            Color.GREEN.interpolate(Color.ofArgb(0), .5f),
+                                                            Color.mix(.5, Color.GREEN, new Color(0)),
                                                             new Label(Text.literal("inside owoui"))
                                                         ),
                                                         new Box(
-                                                            Color.GREEN.interpolate(Color.ofArgb(0), .5f),
+                                                            Color.mix(.5, Color.GREEN, new Color(0)),
                                                             new Label(Text.literal("inside braid?"))
                                                         )
                                                     )
@@ -1695,7 +1766,7 @@ public class TestSelector extends StatefulWidget {
         }
 
         private static Color nextColor(java.util.Random random) {
-            return Color.ofHsv(random.nextFloat(), .75f, 1f);
+            return Color.hsv(random.nextFloat(), .75f, 1f);
         }
     }
 
@@ -1749,7 +1820,11 @@ public class TestSelector extends StatefulWidget {
                                                                 new Padding(Insets.top(4)),
                                                                 List.of(
                                                                     new FirePlayer(new GameProfile(contributor.uuid, contributor.name)),
-                                                                    new Label(LabelStyle.SHADOW, true, contributor.displayName),
+                                                                    new Label(
+                                                                        LabelStyle.SHADOW,
+                                                                        true,
+                                                                        contributor.displayName().copy().setStyle(contributor.displayName.copy().getStyle().withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY, new HoverEvent.EntityContent(EntityType.PLAYER, contributor.uuid, contributor.displayName))))
+                                                                    ),
                                                                     new RatingBar()
                                                                 )
                                                             )
@@ -2001,7 +2076,7 @@ public class TestSelector extends StatefulWidget {
                             128,
                             null,
                             new Box(
-                                new Color(1, 1, 1, .5f),
+                                Color.WHITE.withA(.5),
                                 true,
                                 new Padding(
                                     Insets.all(1),
@@ -2139,6 +2214,71 @@ public class TestSelector extends StatefulWidget {
                         Insets.top(10),
                         new MessageButton(Text.literal("go back"), () -> Navigator.pop(context))
                     )
+                );
+            }
+        }
+    }
+
+    public static class OverlayTest extends StatefulWidget {
+        @Override
+        public WidgetState<OverlayTest> createState() {
+            return new State();
+        }
+
+        public static class State extends WidgetState<OverlayTest> {
+
+            private @Nullable Tests selectedOption = null;
+
+            private void spawn(BuildContext context, double x, double y) {
+                Overlay.of(context).add(
+                    new OverlayEntryBuilder(
+                        new Amogus(
+                            new Box(Color.randomHue()),
+                            new Box(Color.WHITE),
+                            8
+                        ),
+                        new RelativePosition(context, x - 12, y - 12)
+                    )
+                );
+            }
+
+            @Override
+            public Widget build(BuildContext context) {
+                return new Overlay(
+                    new Builder(innerContext -> {
+                        return new Sized(
+                            Double.POSITIVE_INFINITY,
+                            Double.POSITIVE_INFINITY,
+                            new MouseArea(
+                                widget -> widget
+                                    .clickCallback((x, y, button, modifiers) -> {
+                                        this.spawn(innerContext, x, y);
+                                        return true;
+                                    })
+                                    .dragCallback((x, y, dx, dy) -> {
+                                        this.spawn(innerContext, x, y);
+                                    }),
+                                new Center(
+                                    new Panel(
+                                        OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
+                                        new Padding(
+                                            Insets.all(10),
+                                            new Sized(
+                                                120,
+                                                null,
+                                                new ComboBox<>(
+                                                    test -> Text.literal(test.name().toLowerCase(Locale.ROOT).replace('_', ' ')),
+                                                    Arrays.asList(Tests.values()),
+                                                    this.selectedOption,
+                                                    option -> this.setState(() -> this.selectedOption = option)
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        );
+                    })
                 );
             }
         }

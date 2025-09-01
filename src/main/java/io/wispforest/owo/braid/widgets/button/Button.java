@@ -3,6 +3,7 @@ package io.wispforest.owo.braid.widgets.button;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.braid.widgets.basic.ControlsOverride;
 import org.jetbrains.annotations.Nullable;
 
 public class Button extends StatelessWidget {
@@ -21,6 +22,9 @@ public class Button extends StatelessWidget {
 
     @Override
     public Widget build(BuildContext context) {
-        return new RawButton(this.onClick, new ButtonPanel(this.onClick != null, this.child));
+        var disabled = this.onClick == null || ControlsOverride.controlsDisabled(context);
+        var content = new ButtonPanel(!disabled, this.child);
+
+        return !disabled ? new RawButton(this.onClick, content) : content;
     }
 }

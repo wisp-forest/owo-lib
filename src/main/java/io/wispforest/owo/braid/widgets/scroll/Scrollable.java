@@ -14,6 +14,7 @@ import io.wispforest.owo.braid.widgets.basic.MouseArea;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.math.Box;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import java.util.Objects;
@@ -75,17 +76,22 @@ public class Scrollable extends StatefulWidget {
         protected ScrollController verticalController;
 
         private void reveal(BuildContext context, Insets padding) {
-            var box = context.instance().transform.aabb();
-            box = new Box(
-                box.minX - padding.left(),
-                box.minY - padding.top(),
-                box.minZ,
-                box.maxX + padding.right(),
-                box.maxY + padding.bottom(),
-                box.maxZ
-            );
+            var transform = context.instance().transform;
 
-            revealAabb(context, box);
+            var box = transform.aabb();
+            var min = new Vector3f((float) (box.minX - padding.left()), (float) (box.minY - padding.top()), (float) box.minZ);
+            var max = new Vector3f((float) (box.maxX + padding.right()), (float) (box.maxY + padding.bottom()), (float) box.maxZ);
+
+            transform.toWidgetCoordinates(min);
+            transform.toWidgetCoordinates(max);
+
+            revealAabb(
+                context,
+                new Box(
+                    min.x, min.y, min.z,
+                    max.x, max.y, max.z
+                )
+            );
         }
 
         private void revealAabb(BuildContext context, Box box) {
@@ -167,6 +173,7 @@ public class Scrollable extends StatefulWidget {
                 new MouseArea(
                     widget -> widget
                         .scrollCallback((horizontal, vertical) -> {
+                            //Singleton usage spotted :alarm: :alarm:
                             if (Screen.hasShiftDown()) {
                                 if (this.widget().horizontal) this.horizontalController.setOffset(this.horizontalController.offset() + vertical * -15);
                             } else {

@@ -13,6 +13,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
+import net.minecraft.text.Text;
 import net.minecraft.util.Colors;
 import net.minecraft.util.StringHelper;
 import net.minecraft.util.math.MathHelper;
@@ -33,16 +34,22 @@ public class TextInput extends LeafInstanceWidget {
     public final boolean showCursor;
     public final boolean softWrap;
     public final boolean autoFocus;
-    public final boolean allowMultipleLines;
+    public final int maxLines;
+    public final int maxCharacters;
     public final Style baseStyle;
+    public final boolean textShadow;
+    public final Text suggestion;
 
-    public TextInput(TextEditingController controller, boolean showCursor, boolean softWrap, boolean autoFocus, boolean allowMultipleLines, Style baseStyle) {
+    public TextInput(TextEditingController controller, boolean showCursor, boolean softWrap, boolean autoFocus, int maxLines, int maxCharacters, Style baseStyle, boolean textShadow, @Nullable Text suggestion) {
         this.controller = controller;
         this.showCursor = showCursor;
         this.softWrap = softWrap;
         this.autoFocus = autoFocus;
-        this.allowMultipleLines = allowMultipleLines;
+        this.maxLines = maxLines;
+        this.maxCharacters = maxCharacters;
         this.baseStyle = baseStyle;
+        this.textShadow = textShadow;
+        this.suggestion = suggestion == null ? Text.empty() : suggestion;
     }
 
     @Override
@@ -84,10 +91,11 @@ public class TextInput extends LeafInstanceWidget {
         @Override
         public void setWidget(TextInput widget) {
             if (!(this.layoutText.equals(widget.controller.text())
-                && this.layoutSelection.equals(widget.controller.selection())
-                && this.widget.softWrap == widget.softWrap
-                && this.widget.allowMultipleLines == widget.allowMultipleLines
-                && this.widget.baseStyle.equals(widget.baseStyle))) {
+                  && this.layoutSelection.equals(widget.controller.selection())
+                  && this.widget.softWrap == widget.softWrap
+                  && this.widget.maxLines == widget.maxLines
+                  && this.widget.maxCharacters == widget.maxCharacters
+                  && this.widget.baseStyle.equals(widget.baseStyle))) {
 
                 this.layoutText = this.text = widget.controller.text();
                 this.layoutSelection = this.selection = widget.controller.selection();
@@ -111,7 +119,7 @@ public class TextInput extends LeafInstanceWidget {
             );
 
             this.renderLines = new ArrayList<>(this.host().client().textRenderer.wrapLines(
-                this.widget.controller.createTextForRendering(this.widget.baseStyle),
+                this.widget.controller.createTextForRendering(this.widget.baseStyle).copy().append(this.widget.suggestion),
                 wrapWidth
             ));
 
@@ -155,7 +163,7 @@ public class TextInput extends LeafInstanceWidget {
             var height = this.host().client().textRenderer.fontHeight;
 
             ctx.push();
-            ctx.translate(startX, lineBaseY - height - 1, 0d);
+            ctx.translate(startX, lineBaseY - height, 0d);
 
             var width = endX - startX;
             ctx.fill(RenderLayer.getGuiTextHighlight(), 0, 0, (int) width, height, Colors.BLUE);
@@ -174,7 +182,7 @@ public class TextInput extends LeafInstanceWidget {
                     0,
                     lineIdx * textRenderer.fontHeight,
                     Color.WHITE.argb(),
-                    false
+                    this.widget.textShadow
                 );
             }
 
@@ -247,13 +255,16 @@ public class TextInput extends LeafInstanceWidget {
         }
 
         private void insert(String insertion) {
-            insertion = StringHelper.stripInvalidChars(insertion, this.widget.allowMultipleLines);
+            insertion = StringHelper.stripInvalidChars(insertion, this.widget.maxLines < 0 || this.widget.maxLines > 1);
 
             var chars = new StringBuilder(this.text);
             chars.replace(this.selection.lower(), this.selection.upper(), insertion);
 
-            this.widget.controller.setText(this.text = chars.toString());
-            this.widget.controller.setSelection(this.selection = TextSelection.collapsed(this.selection.lower() + insertion.length()));
+            var stripped = chars.toString();
+            if (this.widget.maxCharacters > 0) stripped = stripped.substring(0, Math.min(stripped.length(), this.widget.maxCharacters));
+
+            this.widget.controller.setText(this.text = stripped);
+            this.widget.controller.setSelection(this.selection = TextSelection.collapsed(Math.min(this.selection.lower() + insertion.length(), stripped.length())));
         }
 
         private void deleteSelection() {
@@ -430,8 +441,8 @@ public class TextInput extends LeafInstanceWidget {
                 return true;
             }
 
-            if (this.widget.allowMultipleLines) {
-                if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
+            if (this.widget.maxLines < 0 || this.widget.maxLines > 1) {
+                if (this.widget.maxLines > this.metrics.lineMetrics().size() && keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
                     this.insert("\n");
                     return true;
                 } else if (keyCode == GLFW.GLFW_KEY_UP) {

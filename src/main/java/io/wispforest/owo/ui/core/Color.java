@@ -137,6 +137,10 @@ public record Color(float red, float green, float blue, float alpha) implements 
                 : String.format("#%06X", this.rgb());
     }
 
+    public io.wispforest.owo.braid.core.Color toBraid() {
+        return io.wispforest.owo.braid.core.Color.values(this.red, this.green, this.blue, this.alpha);
+    }
+
     @Override
     public Color interpolate(Color next, float delta) {
         return new Color(

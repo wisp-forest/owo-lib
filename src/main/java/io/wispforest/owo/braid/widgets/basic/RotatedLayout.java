@@ -29,7 +29,7 @@ public class RotatedLayout extends SingleChildInstanceWidget {
 
         public Instance(RotatedLayout widget) {
             super(widget);
-            this.visualIncrements = this.toVisualIncrements(widget.increments);
+            this.visualIncrements = Math.floorMod(widget.increments, 4);
         }
 
         @Override
@@ -46,22 +46,15 @@ public class RotatedLayout extends SingleChildInstanceWidget {
             return this.visualIncrements % 2 == 1;
         }
 
-        private int toVisualIncrements(int increments) {
-            var visualIncrements = increments % 4;
-            if (visualIncrements < 0) visualIncrements += 4;
-
-            return visualIncrements;
-        }
-
         @Override
         public void setWidget(RotatedLayout widget) {
-            if (this.visualIncrements == this.toVisualIncrements(widget.increments)) {
+            if (this.visualIncrements == Math.floorMod(widget.increments, 4)) {
                 return;
             }
 
             super.setWidget(widget);
 
-            this.visualIncrements = this.toVisualIncrements(widget.increments);
+            this.visualIncrements = Math.floorMod(widget.increments, 4);
             this.markNeedsLayout();
         }
 

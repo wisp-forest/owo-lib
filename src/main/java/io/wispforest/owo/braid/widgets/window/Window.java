@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets.window;
 
+import io.wispforest.owo.braid.core.Color;
 import io.wispforest.owo.braid.core.Insets;
 import io.wispforest.owo.braid.core.Size;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
@@ -15,7 +16,6 @@ import io.wispforest.owo.braid.widgets.flex.Column;
 import io.wispforest.owo.braid.widgets.flex.Flexible;
 import io.wispforest.owo.braid.widgets.flex.Row;
 import io.wispforest.owo.braid.widgets.label.Label;
-import io.wispforest.owo.ui.core.Color;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -121,7 +121,7 @@ public class Window extends StatefulWidget {
                                         Math.floor(this.controller.size.width()),
                                         15.0,
                                         new Box(
-                                            Color.BLACK.interpolate(Color.ofArgb(0), .25f),
+                                            Color.BLACK.withA(.25),
                                             new Padding(
                                                 Insets.horizontal(4),
                                                 new Row(titleBar)
@@ -132,7 +132,7 @@ public class Window extends StatefulWidget {
                                         this.controller.expanded,
                                         false,
                                         new Box(
-                                            Color.BLACK.interpolate(Color.ofArgb(0), .35f),
+                                            Color.BLACK.withA(.35),
                                             new Sized(
                                                 Math.floor(this.controller.size.width()),
                                                 Math.floor(this.controller.size.height()),

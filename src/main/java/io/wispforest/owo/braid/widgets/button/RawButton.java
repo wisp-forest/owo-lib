@@ -4,6 +4,7 @@ import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.braid.widgets.basic.ControlsOverride;
 import io.wispforest.owo.braid.widgets.basic.action.Actions;
 import io.wispforest.owo.ui.util.UISounds;
 import org.jetbrains.annotations.Nullable;
@@ -24,7 +25,7 @@ public class RawButton extends StatelessWidget {
 
     @Override
     public Widget build(BuildContext context) {
-        if (this.onClick == null) return this.child;
+        if (this.onClick == null || ControlsOverride.controlsDisabled(context)) return this.child;
         return Actions.click(
             widget -> widget.cursorStyle(CursorStyle.HAND),
             () -> {
