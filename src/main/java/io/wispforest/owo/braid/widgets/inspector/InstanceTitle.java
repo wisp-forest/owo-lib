@@ -47,7 +47,7 @@ public class InstanceTitle extends StatefulWidget {
             }
 
             var title = new Panel(
-                selected ? Owo.id( "braid_inspector_selected") : null,
+                selected ? Owo.id("braid_inspector_selected") : null,
                 new Padding(
                     Insets.all(2),
                     new Row(
@@ -70,7 +70,7 @@ public class InstanceTitle extends StatefulWidget {
                                 Insets.left(2),
                                 new Tooltip(
                                     Text.literal("Hit Test Boundary"),
-                                    new SpriteWidget(Owo.id( "braid_inspector_hit_test_boundary"), false)
+                                    new SpriteWidget(Owo.id("braid_inspector_hit_test_boundary"), false)
                                 )
                             )
                         )

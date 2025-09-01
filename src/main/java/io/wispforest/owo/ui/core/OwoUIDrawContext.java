@@ -28,14 +28,14 @@ import java.util.List;
 public class OwoUIDrawContext extends DrawContext {
 
     @Deprecated
-    public static final Identifier PANEL_TEXTURE = Owo.id( "textures/gui/panel.png");
+    public static final Identifier PANEL_TEXTURE = Owo.id("textures/gui/panel.png");
     @Deprecated
-    public static final Identifier DARK_PANEL_TEXTURE = Owo.id( "textures/gui/dark_panel.png");
+    public static final Identifier DARK_PANEL_TEXTURE = Owo.id("textures/gui/dark_panel.png");
     @Deprecated
-    public static final Identifier PANEL_INSET_TEXTURE = Owo.id( "textures/gui/panel_inset.png");
+    public static final Identifier PANEL_INSET_TEXTURE = Owo.id("textures/gui/panel_inset.png");
 
-    public static final Identifier PANEL_NINE_PATCH_TEXTURE = Owo.id( "panel/default");
-    public static final Identifier DARK_PANEL_NINE_PATCH_TEXTURE = Owo.id( "panel/dark");
+    public static final Identifier PANEL_NINE_PATCH_TEXTURE = Owo.id("panel/default");
+    public static final Identifier DARK_PANEL_NINE_PATCH_TEXTURE = Owo.id("panel/dark");
     public static final Identifier PANEL_INSET_NINE_PATCH_TEXTURE = Owo.id("panel/inset");
 
     private boolean recording = false;

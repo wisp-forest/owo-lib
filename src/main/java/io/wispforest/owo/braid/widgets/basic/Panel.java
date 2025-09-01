@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets.basic;
 
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.core.BraidDrawContext;
 import io.wispforest.owo.braid.framework.instance.OptionalChildWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.OptionalChildInstanceWidget;
@@ -10,6 +11,12 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 public class Panel extends OptionalChildInstanceWidget {
+
+    public static final Identifier VANILLA_LIGHT = Owo.id("panel/default");
+    public static final Identifier VANILLA_DARK = Owo.id("panel/dark");
+    public static final Identifier VANILLA_INSET = Owo.id("panel/inset");
+
+    // ---
 
     public final @Nullable Identifier texture;
 

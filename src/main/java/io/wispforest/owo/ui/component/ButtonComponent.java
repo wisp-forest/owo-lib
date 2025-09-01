@@ -27,8 +27,8 @@ import java.util.function.Consumer;
 
 public class ButtonComponent extends ButtonWidget {
 
-    public static final Identifier ACTIVE_TEXTURE = Owo.id( "button/active");
-    public static final Identifier HOVERED_TEXTURE = Owo.id( "button/hovered");
+    public static final Identifier ACTIVE_TEXTURE = Owo.id("button/active");
+    public static final Identifier HOVERED_TEXTURE = Owo.id("button/hovered");
     public static final Identifier DISABLED_TEXTURE = Owo.id("button/disabled");
 
     protected Renderer renderer = Renderer.VANILLA;

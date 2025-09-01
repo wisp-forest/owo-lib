@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets.combobox;
 
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.core.Insets;
 import io.wispforest.owo.braid.core.ListenableValue;
 import io.wispforest.owo.braid.core.RelativePosition;
@@ -9,7 +10,6 @@ import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.SpriteWidget;
-import io.wispforest.owo.braid.widgets.basic.Box;
 import io.wispforest.owo.braid.widgets.basic.HoverableBuilder;
 import io.wispforest.owo.braid.widgets.basic.Padding;
 import io.wispforest.owo.braid.widgets.basic.Panel;
@@ -26,7 +26,6 @@ import io.wispforest.owo.braid.widgets.overlay.OverlayEntryBuilder;
 import io.wispforest.owo.braid.widgets.textinput.EditableText;
 import io.wispforest.owo.braid.widgets.textinput.TextEditingController;
 import io.wispforest.owo.braid.widgets.textinput.TextSelection;
-import io.wispforest.owo.ui.core.Color;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
@@ -39,9 +38,9 @@ import java.util.function.Function;
 
 public class ComboBox<T> extends StatefulWidget {
 
-    public static final Identifier ACTIVE_TEXTURE = Identifier.of("owo", "braid_combobox/active");
-    public static final Identifier HOVERED_TEXTURE = Identifier.of("owo", "braid_combobox/hovered");
-    public static final Identifier DISABLED_TEXTURE = Identifier.of("owo", "braid_combobox/disabled");
+    public static final Identifier ACTIVE_TEXTURE = Owo.id("braid_combobox/active");
+    public static final Identifier HOVERED_TEXTURE = Owo.id("braid_combobox/hovered");
+    public static final Identifier DISABLED_TEXTURE = Owo.id("braid_combobox/disabled");
 
     // ---
 
@@ -221,6 +220,7 @@ public class ComboBox<T> extends StatefulWidget {
 
             return new Actions(
                 widget -> widget
+                    .canBeSelected(false)
                     .focusLostCallback(this::resetTextInput)
                     .cursorStyle(CursorStyle.HAND)
                     .addAction(PREVIOUS_OPTION_TRIGGER, () -> this.cycle(-1))
@@ -254,7 +254,7 @@ public class ComboBox<T> extends StatefulWidget {
                             ),
                             new Padding(
                                 Insets.horizontal(3),
-                                new SpriteWidget(Identifier.of("owo", "braid_combo_box_arrow"), false)
+                                new SpriteWidget(Owo.id("braid_combo_box_arrow"), false)
                             )
                         )
                     )

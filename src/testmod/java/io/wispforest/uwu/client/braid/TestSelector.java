@@ -192,7 +192,7 @@ public class TestSelector extends StatefulWidget {
                                 Insets.vertical(50).withLeft(5),
                                 new HitTestTrap(
                                     new Panel(
-                                        OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
+                                        Panel.VANILLA_LIGHT,
                                         new Padding(
                                             Insets.all(8),
                                             new VerticallyScrollable(
@@ -391,7 +391,7 @@ public class TestSelector extends StatefulWidget {
                     ),
                     new Padding(Insets.all(5)),
                     new Panel(
-                        OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
+                        Panel.VANILLA_LIGHT,
                         new Padding(
                             Insets.all(10),
                             new Column(
@@ -408,7 +408,7 @@ public class TestSelector extends StatefulWidget {
                     ),
                     new Padding(Insets.all(5)),
                     new Panel(
-                        OwoUIDrawContext.DARK_PANEL_NINE_PATCH_TEXTURE,
+                        Panel.VANILLA_DARK,
                         new Padding(
                             Insets.all(10),
                             new Column(
@@ -526,7 +526,7 @@ public class TestSelector extends StatefulWidget {
                             }))
                             .cursorStyle(CursorStyle.HAND),
                         new Panel(
-                            OwoUIDrawContext.DARK_PANEL_NINE_PATCH_TEXTURE,
+                            Panel.VANILLA_DARK,
                             new Padding(
                                 Insets.all(5),
                                 new Label(this.widget().text)
@@ -989,11 +989,11 @@ public class TestSelector extends StatefulWidget {
                         250.0,
                         250.0,
                         new Panel(
-                            OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
+                            Panel.VANILLA_LIGHT,
                             new Padding(
                                 Insets.all(8),
                                 new Panel(
-                                    OwoUIDrawContext.PANEL_INSET_NINE_PATCH_TEXTURE,
+                                    Panel.VANILLA_INSET,
                                     new RecipeViewerStack(
                                         () -> ViewerStack.OfItem.of(Items.GOLD_BLOCK),
                                         new StackDropArea(
@@ -1333,7 +1333,7 @@ public class TestSelector extends StatefulWidget {
                     250.0,
                     null,
                     new Panel(
-                        OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
+                        Panel.VANILLA_LIGHT,
                         new Padding(
                             Insets.all(8),
                             new Column(
@@ -1356,7 +1356,7 @@ public class TestSelector extends StatefulWidget {
                                                     .focusLostCallback(() -> this.addToList(Text.literal("Focus lost")))
                                                     .charCallback((charCode, modifiers) -> this.addToList(Text.literal("Character typed: \"" + (char) charCode + "\""))),
                                             new Panel(
-                                                OwoUIDrawContext.PANEL_INSET_NINE_PATCH_TEXTURE,
+                                                Panel.VANILLA_INSET,
                                                 new VerticallyScrollable(
                                                     controller,
                                                     new Column(
@@ -1635,8 +1635,8 @@ public class TestSelector extends StatefulWidget {
                     System.out.println("panel rebuild");
                     return new Panel(
                         SharedState.select(context, CounterState.class, state -> state.dark)
-                            ? OwoUIDrawContext.DARK_PANEL_NINE_PATCH_TEXTURE
-                            : OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
+                            ? Panel.VANILLA_DARK
+                            : Panel.VANILLA_LIGHT,
                         new CounterText()
                     );
                 }
@@ -1681,20 +1681,20 @@ public class TestSelector extends StatefulWidget {
             return new Center(
                 new Row(
                     new Stack(
-                        new Panel(OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE),
+                        new Panel(Panel.VANILLA_LIGHT),
                         new StackBase(new Sized(100, 100, new Padding(Insets.none()))),
                         new Label(new LabelStyle(Alignment.BOTTOM_RIGHT, null, null, null), true, Text.literal("based corner text"))
                     ),
                     new Padding(Insets.horizontal(20)),
                     new Stack(
-                        new Sized(100, 100, new Panel(OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE)),
+                        new Sized(100, 100, new Panel(Panel.VANILLA_LIGHT)),
                         new Label(new LabelStyle(Alignment.BOTTOM_RIGHT, null, null, null), true, Text.literal("failed corner text"))
                     ),
                     new Padding(Insets.horizontal(20)),
                     new IntrinsicWidth(
                         new IntrinsicHeight(
                             new Stack(
-                                new Sized(100, 100, new Panel(OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE)),
+                                new Sized(100, 100, new Panel(Panel.VANILLA_LIGHT)),
                                 new Label(new LabelStyle(Alignment.BOTTOM_RIGHT, null, null, null), true, Text.literal("intrinsic corner text"))
                             )
                         )
@@ -1811,7 +1811,7 @@ public class TestSelector extends StatefulWidget {
                                                 return new Padding(
                                                     Insets.all(8),
                                                     new Panel(
-                                                        OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
+                                                        Panel.VANILLA_LIGHT,
                                                         new Padding(
                                                             Insets.all(8),
                                                             new Column(
@@ -2179,7 +2179,7 @@ public class TestSelector extends StatefulWidget {
                                     Text.literal("popup"),
                                     () -> Navigator.pushOverlay(context, new Dialog(
                                         new Panel(
-                                            OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
+                                            Panel.VANILLA_LIGHT,
                                             new Padding(
                                                 Insets.all(5),
                                                 new Sized(
@@ -2260,7 +2260,7 @@ public class TestSelector extends StatefulWidget {
                                     }),
                                 new Center(
                                     new Panel(
-                                        OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
+                                        Panel.VANILLA_LIGHT,
                                         new Padding(
                                             Insets.all(10),
                                             new Sized(

@@ -88,7 +88,7 @@ public class Collapsible extends StatefulWidget {
                                 widget -> widget.cursorStyle(CursorStyle.HAND),
                                 () -> this.widget().onToggled.onToggled(!this.widget().collapsed),
                                 new Center(
-                                    new SpriteWidget(Owo.id( this.widget().collapsed ? "braid_collapsible_closed" : "braid_collapsible_open"), false)
+                                    new SpriteWidget(Owo.id(this.widget().collapsed ? "braid_collapsible_closed" : "braid_collapsible_open"), false)
                                 )
                             )
                         ),

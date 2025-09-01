@@ -45,6 +45,6 @@ public class BraidCheckbox extends StatelessWidget {
 
     public static final SpriteIdentifier CHECKMARK_TEXTURE = new SpriteIdentifier(
         SpriteWidget.GUI_ATLAS_ID,
-        Owo.id( "braid_checkmark")
+        Owo.id("braid_checkmark")
     );
 }

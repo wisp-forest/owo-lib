@@ -20,7 +20,7 @@ import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
 public class ScreenInternals {
-    public static final Identifier SYNC_PROPERTIES = Owo.id( "sync_screen_handler_properties");
+    public static final Identifier SYNC_PROPERTIES = Owo.id("sync_screen_handler_properties");
 
     public static void init() {
         var localPacketCodec = CodecUtils.toPacketCodec(LocalPacket.ENDEC);
@@ -42,7 +42,7 @@ public class ScreenInternals {
     }
 
     public record LocalPacket(int packetId, PacketByteBuf payload) implements CustomPayload {
-        public static final Id<LocalPacket> ID = new Id<>(Owo.id( "local_packet"));
+        public static final Id<LocalPacket> ID = new Id<>(Owo.id("local_packet"));
         public static final Endec<LocalPacket> ENDEC = StructEndecBuilder.of(
             Endec.VAR_INT.fieldOf("packetId", LocalPacket::packetId),
             MinecraftEndecs.PACKET_BYTE_BUF.fieldOf("payload", LocalPacket::payload),
