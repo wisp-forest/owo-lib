@@ -55,6 +55,7 @@
     "ClientLoginNetworkHandlerAccessor",
     "DrawContextMixin",
     "MinecraftClientMixin",
+    "braid.ToastManagerMixin",
     "itemgroup.CreativeInventoryScreenAccessor",
     "itemgroup.CreativeInventoryScreenMixin",
     "itemgroup.MixinCreativeInventoryScreenMixin",

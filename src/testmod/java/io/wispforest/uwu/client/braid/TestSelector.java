@@ -11,6 +11,7 @@ import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.braid.util.BraidToast;
 import io.wispforest.owo.braid.widgets.*;
 import io.wispforest.owo.braid.widgets.animated.AnimatedAlign;
 import io.wispforest.owo.braid.widgets.animated.AnimatedBox;
@@ -222,6 +223,23 @@ public class TestSelector extends StatefulWidget {
                         new Sized(
                             75, null,
                             new Column(
+                                new Sized(
+                                    75, 20,
+                                    new MessageButton(
+                                        Text.literal("yum"),
+                                        () -> BraidToast.show(
+                                            Duration.ofSeconds(5),
+                                            null,
+                                            new Row(
+                                                Stream.generate(() -> new Amogus(
+                                                    new Box(Color.randomHue()),
+                                                    new Box(Color.WHITE),
+                                                    8
+                                                )).limit(100).toList()
+                                            )
+                                        )
+                                    )
+                                ),
                                 new Sized(
                                     75, 20,
                                     new MessageButton(

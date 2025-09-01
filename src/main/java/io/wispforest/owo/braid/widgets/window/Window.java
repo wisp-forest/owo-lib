@@ -121,7 +121,7 @@ public class Window extends StatefulWidget {
                                         Math.floor(this.controller.size.width()),
                                         15.0,
                                         new Box(
-                                            Color.BLACK.withA(.25),
+                                            Color.BLACK.withA(.75),
                                             new Padding(
                                                 Insets.horizontal(4),
                                                 new Row(titleBar)
@@ -132,7 +132,7 @@ public class Window extends StatefulWidget {
                                         this.controller.expanded,
                                         false,
                                         new Box(
-                                            Color.BLACK.withA(.35),
+                                            Color.BLACK.withA(.65),
                                             new Sized(
                                                 Math.floor(this.controller.size.width()),
                                                 Math.floor(this.controller.size.height()),
