@@ -23,21 +23,7 @@ public class TextureSurface implements Surface {
     private final EventStream<ResizeCallback> resizeEvents = ResizeCallback.newStream();
 
     public TextureSurface(int width, int height) {
-        // TODO: consider where this makes sense to have here.
-        //       it probably makes more sense to "enforce" surface
-        //       happens when it's safe to do so (i.e. at the
-        //       start/end of a frame) or on-demand during drawing
-        var framebuffer = GlStateManager.getBoundFramebuffer();
-
-        var viewportX = GlStateManager.Viewport.getX();
-        var viewportY = GlStateManager.Viewport.getY();
-        var viewportWidth = GlStateManager.Viewport.getWidth();
-        var viewportHeight = GlStateManager.Viewport.getHeight();
-
-        this.framebuffer = new SimpleFramebuffer(width, height, true);
-
-        GlStateManager._glBindFramebuffer(GL32.GL_FRAMEBUFFER, framebuffer);
-        GlStateManager._viewport(viewportX, viewportY, viewportWidth, viewportHeight);
+        this.framebuffer = createFramebufferAndRestoreState(width, height, true);
     }
 
     public void resize(int width, int height) {
@@ -78,6 +64,28 @@ public class TextureSurface implements Surface {
     public void setCursorStyle(CursorStyle style) {
         // it doesn't make sense to style the cursor
         // when rendering to a texture
+    }
+
+    // ---
+
+    public static SimpleFramebuffer createFramebufferAndRestoreState(int width, int height, boolean useDepth) {
+        // TODO: consider where this makes sense to have here.
+        //       it probably makes more sense to "enforce" surface
+        //       happens when it's safe to do so (i.e. at the
+        //       start/end of a frame) or on-demand during drawing
+        var previousFramebuffer = GlStateManager.getBoundFramebuffer();
+
+        var viewportX = GlStateManager.Viewport.getX();
+        var viewportY = GlStateManager.Viewport.getY();
+        var viewportWidth = GlStateManager.Viewport.getWidth();
+        var viewportHeight = GlStateManager.Viewport.getHeight();
+
+        var framebuffer = new SimpleFramebuffer(width, height, true);
+
+        GlStateManager._glBindFramebuffer(GL32.GL_FRAMEBUFFER, previousFramebuffer);
+        GlStateManager._viewport(viewportX, viewportY, viewportWidth, viewportHeight);
+
+        return framebuffer;
     }
 
     // ---
