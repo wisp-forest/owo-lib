@@ -38,6 +38,7 @@ public class BraidScreen extends Screen implements DisposableScreen {
         if (this.state == null) {
             this.state = new AppState(
                 null,
+                AppState.formatName("BraidScreen", this.rootWidget),
                 this.client,
                 this.surface,
                 this.eventBuffer,

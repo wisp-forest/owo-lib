@@ -12,6 +12,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,12 +21,13 @@ import static io.wispforest.owo.ops.TextOps.withColor;
 
 public class Owo implements ModInitializer {
 
+    public static final String MOD_ID = "owo";
     /**
      * Whether oωo debug is enabled, this defaults to {@code true} in a development environment.
      * To override that behavior, add the {@code -Dowo.debug=false} java argument
      */
     public static final boolean DEBUG;
-    public static final Logger LOGGER = LoggerFactory.getLogger("owo");
+    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     private static MinecraftServer SERVER;
 
     public static final Text PREFIX = Text.empty().formatted(Formatting.GRAY)
@@ -83,4 +85,10 @@ public class Owo implements ModInitializer {
         return SERVER;
     }
 
+
+    // "eh it's only like 10-15 of them what's the big deal" - glisco, while writing the 52nd hardcoded Identifier.of("owo", ...)
+    @ApiStatus.Internal
+    public static Identifier id(String path) {
+        return Identifier.of(MOD_ID, path);
+    }
 }

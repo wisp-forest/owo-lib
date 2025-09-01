@@ -8,6 +8,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.serialization.JsonOps;
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.util.RecipeRemainderStorage;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -29,10 +30,10 @@ public abstract class JsonDataLoaderMixin {
         var element = original.call(jsonReader);
 
         if (ServerRecipeManagerAccessor.owo$getFinder() == finder && element instanceof JsonObject json) {
-            if (json.has("owo:remainders")) {
+            if (json.has(Owo.id("remainders").toString())) {
                 var remainders = new HashMap<Item, ItemStack>();
 
-                for (var remainderEntry : json.getAsJsonObject("owo:remainders").entrySet()) {
+                for (var remainderEntry : json.getAsJsonObject(Owo.id("remainders").toString()).entrySet()) {
                     var item = JsonHelper.asItem(new JsonPrimitive(remainderEntry.getKey()), remainderEntry.getKey());
 
                     if (remainderEntry.getValue().isJsonObject()) {

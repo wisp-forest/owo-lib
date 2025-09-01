@@ -1,5 +1,6 @@
 package io.wispforest.uwu.rei;
 
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.compat.rei.ReiUIAdapter;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.Components;
@@ -29,7 +30,7 @@ import java.util.Optional;
 
 public class UiCategory implements DisplayCategory<Display> {
 
-    public static CategoryIdentifier<UiDisplay> ID = CategoryIdentifier.of(Identifier.of("owo", "ui"));
+    public static CategoryIdentifier<UiDisplay> ID = CategoryIdentifier.of(Owo.id("ui"));
 
     @Override
     public List<Widget> setupDisplay(Display display, Rectangle bounds) {

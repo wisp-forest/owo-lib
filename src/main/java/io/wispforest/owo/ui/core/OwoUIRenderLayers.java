@@ -1,5 +1,6 @@
 package io.wispforest.owo.ui.core;
 
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.client.OwoClient;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.RenderPhase;
@@ -16,15 +17,15 @@ import static net.minecraft.client.render.RenderPhase.*;
 public class OwoUIRenderLayers {
 
     public static final RenderLayer.MultiPhase GUI_TRIANGLE_FAN = RenderLayer.of(
-            "owo:gui_triangle_fan_default_blend",
-            VertexFormats.POSITION_COLOR,
-            VertexFormat.DrawMode.TRIANGLE_FAN,
-            786432,
-            RenderLayer.MultiPhaseParameters.builder().program(GUI_PROGRAM).transparency(TRANSLUCENT_TRANSPARENCY).depthTest(LEQUAL_DEPTH_TEST).build(false)
+        Owo.id("gui_triangle_fan_default_blend").toString(),
+        VertexFormats.POSITION_COLOR,
+        VertexFormat.DrawMode.TRIANGLE_FAN,
+        786432,
+        RenderLayer.MultiPhaseParameters.builder().program(GUI_PROGRAM).transparency(TRANSLUCENT_TRANSPARENCY).depthTest(LEQUAL_DEPTH_TEST).build(false)
     );
 
     public static final RenderLayer.MultiPhase GUI_TRIANGLE_STRIP = RenderLayer.of(
-            "owo:gui_triangle_strip_default_blend",
+            Owo.id("gui_triangle_strip_default_blend").toString(),
             VertexFormats.POSITION_COLOR,
             VertexFormat.DrawMode.TRIANGLE_FAN,
             786432,
@@ -32,7 +33,7 @@ public class OwoUIRenderLayers {
     );
 
     public static final RenderLayer.MultiPhase GUI_SPECTRUM = RenderLayer.of(
-            "owo:gui_spectrum",
+            Owo.id("gui_spectrum").toString(),
             VertexFormats.POSITION_COLOR,
             VertexFormat.DrawMode.QUADS,
             786432,
@@ -40,7 +41,7 @@ public class OwoUIRenderLayers {
     );
 
     public static final RenderLayer.MultiPhase GUI_NO_DEPTH = RenderLayer.of(
-            "owo:gui_no_depth",
+            Owo.id("gui_no_depth").toString(),
             VertexFormats.POSITION_COLOR,
             VertexFormat.DrawMode.QUADS,
             786432,

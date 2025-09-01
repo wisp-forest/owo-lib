@@ -101,7 +101,7 @@ public class UIModelLoader implements SynchronousResourceReloader, IdentifiableR
 
     @Override
     public Identifier getFabricId() {
-        return Identifier.of("owo", "ui-model-loader");
+        return Owo.id( "ui-model-loader");
     }
 
     @Override

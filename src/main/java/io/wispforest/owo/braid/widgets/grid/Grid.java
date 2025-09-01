@@ -1,11 +1,17 @@
 package io.wispforest.owo.braid.widgets.grid;
 
 import io.wispforest.owo.braid.core.*;
+import io.wispforest.owo.braid.framework.instance.InspectorProperty;
 import io.wispforest.owo.braid.framework.instance.MultiChildWidgetInstance;
 import io.wispforest.owo.braid.framework.instance.WidgetInstance;
 import io.wispforest.owo.braid.framework.widget.MultiChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.Padding;
+import io.wispforest.owo.ui.core.Color;
+import io.wispforest.owo.ui.core.OwoUIDrawContext;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 
@@ -167,26 +173,72 @@ public class Grid extends MultiChildInstanceWidget {
         }
 
         @Override
-        public void draw(BraidDrawContext ctx) {
-            super.draw(ctx);
+        public List<InspectorProperty> debugListInspectorProperties() {
+            return List.of(
+                new InspectorProperty(
+                    Text.literal("Main Axis"),
+                    Text.literal(this.widget.mainAxis.toString())
+                )
+            );
+        }
 
-//            if (this.debugCrossAxisSizes != null && this.debugMainAxisSizes != null) {
-//                var mainAxisPos = 0d;
-//                for (double debugMainAxisSize : this.debugMainAxisSizes) {
-//                    var crossAxisPos = 0d;
-//
-//                    for (double debugCrossAxisSize : this.debugCrossAxisSizes) {
-//                        if (this.widget.mainAxis == LayoutAxis.VERTICAL) {
-//                            ctx.drawRectOutline((int) crossAxisPos, (int) mainAxisPos, (int) debugCrossAxisSize, (int) debugMainAxisSize, 0xffff0000);
-//                        } else {
-//                            ctx.drawRectOutline((int) mainAxisPos, (int) crossAxisPos, (int) debugMainAxisSize, (int) debugCrossAxisSize, 0xffff0000);
-//                        }
-//                        crossAxisPos += debugCrossAxisSize;
-//                    }
-//
-//                    mainAxisPos += debugMainAxisSize;
-//                }
-//            }
+        @Override
+        public boolean debugHasVisualizers() {
+            return true;
+        }
+
+        @Override
+        protected void debugDrawVisualizers(BraidDrawContext ctx) {
+            var frameColor = Color.ofRgb(0xFFD65A);
+            ctx.drawRectOutline(
+                0, 0, (int) this.transform.width(), (int) this.transform.height(), frameColor.argb()
+            );
+
+            var verticalSizes = this.widget.mainAxis == LayoutAxis.VERTICAL
+                ? this.debugMainAxisSizes
+                : this.debugCrossAxisSizes;
+
+            var horizontalSizes = this.widget.mainAxis == LayoutAxis.VERTICAL
+                ? this.debugCrossAxisSizes
+                : this.debugMainAxisSizes;
+
+            var verticalPos = 0.0;
+            for (int i = 0; i < verticalSizes.length; i++) {
+                if (i > 0) {
+                    ctx.drawDashedLine(
+                        RenderLayer.getGui(),
+                        0, verticalPos, this.transform.width(), verticalPos,
+                        1, 2, frameColor
+                    );
+                }
+
+                ctx.drawText(
+                    Text.literal(verticalSizes[i] + "px").styled(style -> style.withFont(MinecraftClient.UNICODE_FONT_ID)),
+                    0, (float) verticalPos, 1f, Color.WHITE.argb(),
+                    OwoUIDrawContext.TextAnchor.TOP_RIGHT
+                );
+
+                verticalPos += verticalSizes[i];
+            }
+
+            var horizontalPos = 0.0;
+            for (int i = 0; i < horizontalSizes.length; i++) {
+                if (i > 0) {
+                    ctx.drawDashedLine(
+                        RenderLayer.getGui(),
+                        horizontalPos, 0, horizontalPos, this.transform.height(),
+                        1, 2, frameColor
+                    );
+                }
+
+                ctx.drawText(
+                    Text.literal(horizontalSizes[i] + "px").styled(style -> style.withFont(MinecraftClient.UNICODE_FONT_ID)),
+                    (float) horizontalPos, 0, 1f, Color.WHITE.argb(),
+                    OwoUIDrawContext.TextAnchor.BOTTOM_LEFT
+                );
+
+                horizontalPos += horizontalSizes[i];
+            }
         }
 
         @Override

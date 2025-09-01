@@ -49,6 +49,7 @@ public class AppState implements InstanceHost, ProxyHost {
     private Deque<AnimationCallback> animationCallbacks = new LinkedList<>();
     private final PriorityQueue<ScheduledCallback> callbacks = new PriorityQueue<>();
     private Deque<Runnable> postLayoutCallbacks = new LinkedList<>();
+    private final String name;
     private final RootProxy root;
 
     private final Vector2d cursorPosition = new Vector2d();
@@ -80,6 +81,7 @@ public class AppState implements InstanceHost, ProxyHost {
 
     public AppState(
         @Nullable Logger logger,
+        @Nullable String name,
         MinecraftClient client,
         Surface surface,
         EventBuffer eventBuffer,
@@ -91,6 +93,7 @@ public class AppState implements InstanceHost, ProxyHost {
         this.surface = surface;
         this.eventBuffer = eventBuffer;
 
+        this.name = name != null ? name : root.getClass().getName();
         this.root = new RootWidget(
             new AppWidget(
                 this,
@@ -532,7 +535,22 @@ public class AppState implements InstanceHost, ProxyHost {
         this.postLayoutCallbacks.offer(callback);
     }
 
+    @Override
+    public String toString() {
+        return String.format("%s (AppState@%s)", this.name, Integer.toHexString(hashCode()));
+    }
+
     // ---
+
+    public static String formatName(String category, Widget userRoot) {
+        var classPath = userRoot.getClass().getName().split("\\.");
+        return String.format("%s[%s]", category, classPath[classPath.length - 1]);
+    }
+
+    public static String formatName(String category, Widget userRoot, String... attributes) {
+        var classPath = userRoot.getClass().getName().split("\\.");
+        return String.format("%s[%s, %s]", category, String.join(", ", attributes), classPath[classPath.length - 1]);
+    }
 
     public static AppState of(BuildContext context) {
         //noinspection DataFlowIssue

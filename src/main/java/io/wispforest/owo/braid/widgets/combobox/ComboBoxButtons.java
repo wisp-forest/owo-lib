@@ -1,9 +1,6 @@
 package io.wispforest.owo.braid.widgets.combobox;
 
-import io.wispforest.owo.braid.core.Alignment;
-import io.wispforest.owo.braid.core.Constraints;
-import io.wispforest.owo.braid.core.Insets;
-import io.wispforest.owo.braid.core.ListenableValue;
+import io.wispforest.owo.braid.core.*;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
@@ -17,7 +14,6 @@ import io.wispforest.owo.braid.widgets.label.LabelStyle;
 import io.wispforest.owo.braid.widgets.scroll.FlatScrollbar;
 import io.wispforest.owo.braid.widgets.scroll.Scrollable;
 import io.wispforest.owo.braid.widgets.scroll.ScrollableWithBars;
-import io.wispforest.owo.ui.core.Color;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
@@ -54,7 +50,7 @@ class ComboBoxButtons<T> extends StatelessWidget {
                         10,
                         false,
                         new Box(
-                            new Color(0, 0, 0, .6f),
+                            Color.BLACK.withA(.6),
                             new ListenableBuilder(
                                 this.state,
                                 (listenableContext) -> {
@@ -128,12 +124,12 @@ class ComboBoxButtons<T> extends StatelessWidget {
                             var highlighted = hovered || this.widget().highlighted;
 
                             return new Box(
-                                highlighted ? new Color(1, 1, 1, .1f) : Color.ofArgb(0),
+                                highlighted ? Color.WHITE.withA(.1f): new Color(0),
                                 new Padding(
                                     Insets.all(2).withLeft(3),
                                     new Label(
                                         new LabelStyle(Alignment.LEFT, highlighted
-                                            ? Color.ofRgb(Formatting.YELLOW.getColorValue()) : null, null, highlighted),
+                                            ? Color.rgb(Formatting.YELLOW.getColorValue()) : null, null, highlighted),
                                         true,
                                         this.widget().optionToName.apply(this.widget().option)
                                     )

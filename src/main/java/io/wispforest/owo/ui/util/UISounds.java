@@ -1,5 +1,6 @@
 package io.wispforest.owo.ui.util;
 
+import io.wispforest.owo.Owo;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
@@ -10,7 +11,7 @@ import net.minecraft.util.Identifier;
 
 public final class UISounds {
 
-    public static final SoundEvent UI_INTERACTION = SoundEvent.of(Identifier.of("owo", "ui.owo.interaction"));
+    public static final SoundEvent UI_INTERACTION = SoundEvent.of(Owo.id("ui.owo.interaction"));
 
     private UISounds() {}
 

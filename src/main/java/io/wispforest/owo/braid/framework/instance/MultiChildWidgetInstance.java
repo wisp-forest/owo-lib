@@ -37,7 +37,6 @@ public abstract class MultiChildWidgetInstance<T extends MultiChildInstanceWidge
 
     // ---
 
-
     protected OptionalDouble computeFirstBaselineOffset() {
         for (var child : this.children) {
             var childBaseline = child.getBaselineOffset();

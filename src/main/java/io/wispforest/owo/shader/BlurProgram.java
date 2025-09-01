@@ -1,5 +1,6 @@
 package io.wispforest.owo.shader;
 
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.core.Surface;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
 import net.minecraft.client.MinecraftClient;
@@ -24,7 +25,7 @@ public class BlurProgram extends GlProgram {
     private Framebuffer input;
 
     public BlurProgram() {
-        super(Identifier.of("owo", "blur"), VertexFormats.POSITION);
+        super(Owo.id("blur"), VertexFormats.POSITION);
 
         WindowResizeCallback.EVENT.register((client, window) -> {
             if (this.input == null) return;

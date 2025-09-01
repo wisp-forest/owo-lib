@@ -2,6 +2,7 @@ package io.wispforest.owo.ui.core;
 
 import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.systems.RenderSystem;
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.client.OwoClient;
 import io.wispforest.owo.mixin.ui.DrawContextInvoker;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
@@ -27,15 +28,15 @@ import java.util.List;
 public class OwoUIDrawContext extends DrawContext {
 
     @Deprecated
-    public static final Identifier PANEL_TEXTURE = Identifier.of("owo", "textures/gui/panel.png");
+    public static final Identifier PANEL_TEXTURE = Owo.id( "textures/gui/panel.png");
     @Deprecated
-    public static final Identifier DARK_PANEL_TEXTURE = Identifier.of("owo", "textures/gui/dark_panel.png");
+    public static final Identifier DARK_PANEL_TEXTURE = Owo.id( "textures/gui/dark_panel.png");
     @Deprecated
-    public static final Identifier PANEL_INSET_TEXTURE = Identifier.of("owo", "textures/gui/panel_inset.png");
+    public static final Identifier PANEL_INSET_TEXTURE = Owo.id( "textures/gui/panel_inset.png");
 
-    public static final Identifier PANEL_NINE_PATCH_TEXTURE = Identifier.of("owo", "panel/default");
-    public static final Identifier DARK_PANEL_NINE_PATCH_TEXTURE = Identifier.of("owo", "panel/dark");
-    public static final Identifier PANEL_INSET_NINE_PATCH_TEXTURE = Identifier.of("owo", "panel/inset");
+    public static final Identifier PANEL_NINE_PATCH_TEXTURE = Owo.id( "panel/default");
+    public static final Identifier DARK_PANEL_NINE_PATCH_TEXTURE = Owo.id( "panel/dark");
+    public static final Identifier PANEL_INSET_NINE_PATCH_TEXTURE = Owo.id("panel/inset");
 
     private boolean recording = false;
 

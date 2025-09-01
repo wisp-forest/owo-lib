@@ -2,6 +2,7 @@ package io.wispforest.owo.ui.layers;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.util.pond.OwoScreenExtension;
@@ -35,7 +36,7 @@ public final class Layers {
      * The event phase during which owo-ui layer instances are created and
      * initialized. This runs after the default phase
      */
-    public static final Identifier INIT_PHASE = Identifier.of("owo", "init-layers");
+    public static final Identifier INIT_PHASE = Owo.id("init-layers");
 
     private static final Multimap<Class<? extends Screen>, Layer<?, ?>> LAYERS = HashMultimap.create();
 

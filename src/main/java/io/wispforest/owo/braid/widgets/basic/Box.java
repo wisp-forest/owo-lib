@@ -1,10 +1,10 @@
 package io.wispforest.owo.braid.widgets.basic;
 
 import io.wispforest.owo.braid.core.BraidDrawContext;
+import io.wispforest.owo.braid.core.Color;
 import io.wispforest.owo.braid.framework.instance.OptionalChildWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.OptionalChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import io.wispforest.owo.ui.core.Color;
 import org.jetbrains.annotations.Nullable;
 
 public class Box extends OptionalChildInstanceWidget {

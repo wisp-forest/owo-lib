@@ -37,12 +37,14 @@ public class Blur extends SingleChildInstanceWidget {
         @Override
         public void draw(BraidDrawContext ctx) {
             if (!this.widget.blurChild) {
+                ctx.draw();
                 this.drawBlur(ctx);
             }
 
             super.draw(ctx);
 
             if (this.widget.blurChild) {
+                ctx.draw();
                 this.drawBlur(ctx);
             }
         }

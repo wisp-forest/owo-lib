@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets.textinput;
 
+import io.wispforest.owo.braid.core.Color;
 import io.wispforest.owo.braid.core.Insets;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
@@ -9,7 +10,6 @@ import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
 import io.wispforest.owo.braid.widgets.basic.Box;
 import io.wispforest.owo.braid.widgets.basic.KeyboardInput;
 import io.wispforest.owo.braid.widgets.basic.Padding;
-import io.wispforest.owo.ui.core.Color;
 import net.minecraft.util.Colors;
 
 public class TextBox extends StatefulWidget {
@@ -44,9 +44,10 @@ public class TextBox extends StatefulWidget {
         public Widget build(BuildContext context) {
             return new Box(
                 //TODO: use panel instead of box here
-                this.focused ? Color.WHITE : Color.ofRgb(Colors.LIGHT_GRAY),
+                this.focused ? Color.WHITE : new Color(Colors.LIGHT_GRAY),
                 new KeyboardInput(
                     widget -> widget
+                        .canBeSelected(false)
                         .focusGainedCallback(() -> this.setState(() -> this.focused = true))
                         .focusLostCallback(() -> this.setState(() -> this.focused = false)),
                     new Padding(
