@@ -56,7 +56,6 @@ import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.EntityComponent;
 import io.wispforest.owo.ui.container.Containers;
-import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.util.EventSource;
@@ -135,7 +134,7 @@ public class TestSelector extends StatefulWidget {
                 } else {
                     return (Widget) new MessageButton(
                         Text.literal(test.name().toLowerCase(Locale.ROOT).replace('_', ' ')),
-                        test != this.test ? () -> setState(() -> this.test = test) : null
+                        () -> setState(() -> this.test = test)
                     );
                 }
             }).collect(Collectors.toList());
@@ -148,7 +147,7 @@ public class TestSelector extends StatefulWidget {
                         1200,
                         800,
                         new Box(
-                            Color.ofRgb(0x1d2026),
+                            Color.rgb(0x1d2026),
                             new TestSelector()
                         )
                     )
@@ -457,7 +456,7 @@ public class TestSelector extends StatefulWidget {
                                 new AspectRatio(
                                     16d / 9d,
                                     new Box(
-                                        new Color(1f, 1f, 1f, .5f),
+                                        Color.WHITE.withA(.5),
                                         new Label(Text.literal("16:9 aspect ratio"))
                                     )
                                 )
@@ -554,19 +553,19 @@ public class TestSelector extends StatefulWidget {
                         CrossAxisAlignment.CENTER,
                         List.of(
                             new Box(
-                                Color.GREEN.interpolate(Color.ofArgb(0), .5f),
+                                Color.mix(.5, Color.GREEN, new Color(0)),
                                 new Label(Text.literal("text here"))
                             ),
                             new Box(
-                                Color.GREEN.interpolate(Color.ofArgb(0), .5f),
+                                Color.mix(.5, Color.GREEN, new Color(0)),
                                 new Label(Text.literal("text here"))
                             ),
                             new Box(
-                                Color.GREEN.interpolate(Color.ofArgb(0), .5f),
+                                Color.mix(.5, Color.GREEN, new Color(0)),
                                 new Label(Text.literal("text here"))
                             ),
                             new Box(
-                                Color.GREEN.interpolate(Color.ofArgb(0), .5f),
+                                Color.mix(.5, Color.GREEN, new Color(0)),
                                 new Label(Text.literal("text here"))
                             )
                         )
@@ -1057,7 +1056,7 @@ public class TestSelector extends StatefulWidget {
                     Wisdom.ALL_THE_WISDOM,
                     Text.empty(),
                     (result, wisdom) -> {
-                        var wisdomColor = Color.ofHsv(
+                        var wisdomColor = Color.hsv(
                             new java.util.Random(wisdom.hashCode()).nextFloat(), .75f, 1f
                         ).rgb();
 
@@ -1560,19 +1559,19 @@ public class TestSelector extends StatefulWidget {
                                                     CrossAxisAlignment.CENTER,
                                                     List.of(
                                                         new Box(
-                                                            Color.GREEN.interpolate(Color.ofArgb(0), .5f),
+                                                            Color.mix(.5, Color.GREEN, new Color(0)),
                                                             new Label(Text.literal("no way is"))
                                                         ),
                                                         new Box(
-                                                            Color.GREEN.interpolate(Color.ofArgb(0), .5f),
+                                                            Color.mix(.5, Color.GREEN, new Color(0)),
                                                             new Label(Text.literal("that braid"))
                                                         ),
                                                         new Box(
-                                                            Color.GREEN.interpolate(Color.ofArgb(0), .5f),
+                                                            Color.mix(.5, Color.GREEN, new Color(0)),
                                                             new Label(Text.literal("inside owoui"))
                                                         ),
                                                         new Box(
-                                                            Color.GREEN.interpolate(Color.ofArgb(0), .5f),
+                                                            Color.mix(.5, Color.GREEN, new Color(0)),
                                                             new Label(Text.literal("inside braid?"))
                                                         )
                                                     )
@@ -1767,7 +1766,7 @@ public class TestSelector extends StatefulWidget {
         }
 
         private static Color nextColor(java.util.Random random) {
-            return Color.ofHsv(random.nextFloat(), .75f, 1f);
+            return Color.hsv(random.nextFloat(), .75f, 1f);
         }
     }
 
@@ -2077,7 +2076,7 @@ public class TestSelector extends StatefulWidget {
                             128,
                             null,
                             new Box(
-                                new Color(1, 1, 1, .5f),
+                                Color.WHITE.withA(.5),
                                 true,
                                 new Padding(
                                     Insets.all(1),
@@ -2234,7 +2233,7 @@ public class TestSelector extends StatefulWidget {
                 Overlay.of(context).add(
                     new OverlayEntryBuilder(
                         new Amogus(
-                            new Box(Color.random()),
+                            new Box(Color.randomHue()),
                             new Box(Color.WHITE),
                             8
                         ),

@@ -1,11 +1,11 @@
 package io.wispforest.owo.braid.widgets.cycle;
 
+import io.wispforest.owo.braid.core.Color;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
-import io.wispforest.owo.ui.core.Color;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
@@ -78,7 +78,7 @@ public class MessageCyclingButton<T> extends StatelessWidget {
             new Label(
                 this.onChanged != null
                     ? LabelStyle.SHADOW
-                    : new LabelStyle(null, Color.ofFormatting(Formatting.GRAY), null, false),
+                    : new LabelStyle(null, Color.formatting(Formatting.GRAY), null, false),
                 true,
                 this.text
             )

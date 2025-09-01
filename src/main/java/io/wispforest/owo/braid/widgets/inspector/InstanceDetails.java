@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets.inspector;
 
+import io.wispforest.owo.braid.core.Color;
 import io.wispforest.owo.braid.core.Insets;
 import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.framework.BuildContext;
@@ -16,7 +17,6 @@ import io.wispforest.owo.braid.widgets.flex.*;
 import io.wispforest.owo.braid.widgets.grid.Grid;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.sharedstate.SharedState;
-import io.wispforest.owo.ui.core.Color;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.joml.Vector4f;
@@ -50,7 +50,7 @@ public class InstanceDetails extends StatefulWidget {
                     2,
                     Grid.CellFit.tight(),
                     colorRows(
-                        Color.ofRgb(0x111319),
+                        Color.rgb(0x111319),
                         2,
                         gatherProperties(instance).stream().<Widget>map(Label::new).toList()
                     )

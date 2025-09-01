@@ -1,6 +1,7 @@
 package io.wispforest.owo.braid.widgets.inspector;
 
 import io.wispforest.owo.braid.core.Alignment;
+import io.wispforest.owo.braid.core.Color;
 import io.wispforest.owo.braid.core.Insets;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.instance.WidgetInstance;
@@ -19,7 +20,6 @@ import io.wispforest.owo.braid.widgets.scroll.FlatScrollbar;
 import io.wispforest.owo.braid.widgets.scroll.ScrollableWithBars;
 import io.wispforest.owo.braid.widgets.sharedstate.SharedState;
 import io.wispforest.owo.braid.widgets.stack.Stack;
-import io.wispforest.owo.ui.core.Color;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -74,7 +74,7 @@ public class InspectorWidget extends StatefulWidget {
                     this.inspectorState = SharedState.getWithoutDependency(stateContext, InspectorState.class);
 
                     return new Box(
-                        Color.ofRgb(0x1d2026),
+                        Color.rgb(0x1d2026),
                         new DefaultLabelStyle(
                             new LabelStyle(null, null, Style.EMPTY.withFont(MinecraftClient.UNICODE_FONT_ID), null),
                             new Row(
@@ -84,7 +84,7 @@ public class InspectorWidget extends StatefulWidget {
                                             null,
                                             null,
                                             3,
-                                            (axis, controller) -> new FlatScrollbar(axis, controller, Color.ofRgb(0xabb0bf), Color.ofRgb(0xabb0bf)),
+                                            (axis, controller) -> new FlatScrollbar(axis, controller, Color.rgb(0xabb0bf), Color.rgb(0xabb0bf)),
                                             new Align(
                                                 Alignment.TOP_LEFT,
                                                 new InstanceTreeView(this.widget().inspector.onReveal(), this.widget().rootInstance)

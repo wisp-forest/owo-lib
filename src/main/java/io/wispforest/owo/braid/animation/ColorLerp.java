@@ -1,6 +1,6 @@
 package io.wispforest.owo.braid.animation;
 
-import io.wispforest.owo.ui.core.Color;
+import io.wispforest.owo.braid.core.Color;
 
 public class ColorLerp extends Lerp<Color> {
 
@@ -10,6 +10,6 @@ public class ColorLerp extends Lerp<Color> {
 
     @Override
     protected Color at(double t) {
-        return this.start.interpolate(this.end, (float) t);
+        return Color.mix(t, this.start, this.end);
     }
 }
