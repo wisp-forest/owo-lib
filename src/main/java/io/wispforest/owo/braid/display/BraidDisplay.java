@@ -34,6 +34,7 @@ public class BraidDisplay {
         this.surface = new TextureSurface(surfaceWidth, surfaceHeight);
         this.app = new AppState(
             null,
+            AppState.formatName("BraidDisplay", widget),
             MinecraftClient.getInstance(),
             this.surface,
             new EventBuffer(),
