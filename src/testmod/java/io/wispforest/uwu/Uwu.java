@@ -143,7 +143,7 @@ public class Uwu implements ModInitializer {
             }, false);
             group.addTab(Icon.of(Items.QUARTZ), "tab_6", null, false);
 
-            group.addButton(new ItemGroupButton(group, Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16), "owo", () -> {
+            group.addButton(new ItemGroupButton(group, Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16), Owo.MOD_ID, () -> {
                 MinecraftClient.getInstance().player.sendMessage(Text.of("oωo button pressed!"), false);
             }));
         })

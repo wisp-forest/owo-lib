@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets.inspector;
 
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.core.Insets;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.framework.BuildContext;
@@ -46,7 +47,7 @@ public class InstanceTitle extends StatefulWidget {
             }
 
             var title = new Panel(
-                selected ? Identifier.of("owo", "braid_inspector_selected") : null,
+                selected ? Owo.id( "braid_inspector_selected") : null,
                 new Padding(
                     Insets.all(2),
                     new Row(
@@ -59,7 +60,7 @@ public class InstanceTitle extends StatefulWidget {
                                 Insets.left(2),
                                 new Tooltip(
                                     Text.literal("Relayout Boundary"),
-                                    new SpriteWidget(Identifier.of("owo", "braid_inspector_relayout_boundary"), false)
+                                    new SpriteWidget(Owo.id("braid_inspector_relayout_boundary"), false)
                                 )
                             )
                         ),
@@ -69,7 +70,7 @@ public class InstanceTitle extends StatefulWidget {
                                 Insets.left(2),
                                 new Tooltip(
                                     Text.literal("Hit Test Boundary"),
-                                    new SpriteWidget(Identifier.of("owo", "braid_inspector_hit_test_boundary"), false)
+                                    new SpriteWidget(Owo.id( "braid_inspector_hit_test_boundary"), false)
                                 )
                             )
                         )

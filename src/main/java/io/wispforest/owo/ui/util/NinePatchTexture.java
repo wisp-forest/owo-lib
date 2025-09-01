@@ -3,6 +3,7 @@ package io.wispforest.owo.ui.util;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.StructEndec;
 import io.wispforest.endec.impl.StructEndecBuilder;
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.ui.core.Color;
@@ -289,7 +290,7 @@ public class NinePatchTexture {
 
         @Override
         public Identifier getFabricId() {
-            return Identifier.of("owo", "nine_patch_metadata");
+            return Owo.id("nine_patch_metadata");
         }
 
         protected void apply(Map<Identifier, NinePatchTexture> prepared, ResourceManager manager, Profiler profiler) {

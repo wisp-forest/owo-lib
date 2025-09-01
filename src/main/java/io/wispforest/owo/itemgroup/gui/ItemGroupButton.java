@@ -1,5 +1,6 @@
 package io.wispforest.owo.itemgroup.gui;
 
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import net.minecraft.client.MinecraftClient;
@@ -15,7 +16,7 @@ import net.minecraft.util.Util;
  */
 public final class ItemGroupButton implements OwoItemGroup.ButtonDefinition {
 
-    public static final Identifier ICONS_TEXTURE = Identifier.of("owo", "textures/gui/icons.png");
+    public static final Identifier ICONS_TEXTURE = Owo.id("textures/gui/icons.png");
 
     private final Icon icon;
     private final Text tooltip;

@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets.inspector;
 
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.animation.Easing;
 import io.wispforest.owo.braid.core.Color;
 import io.wispforest.owo.braid.core.Insets;
@@ -18,7 +19,6 @@ import io.wispforest.owo.braid.widgets.flex.Row;
 import io.wispforest.owo.braid.widgets.scroll.Scrollable;
 import io.wispforest.owo.braid.widgets.sharedstate.SharedState;
 import io.wispforest.owo.util.EventSource;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.Unit;
 
 import java.time.Duration;
@@ -124,7 +124,7 @@ public class InstanceTreeView extends StatefulWidget {
                             new Sized(
                                 12,
                                 12,
-                                new SpriteWidget(Identifier.of("owo", "braid_inspector_leaf"), false)
+                                new SpriteWidget(Owo.id("braid_inspector_leaf"), false)
                             ),
                             title
                         )

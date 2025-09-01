@@ -1,6 +1,7 @@
 package io.wispforest.owo.ui.component;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.mixin.ui.access.ButtonWidgetAccessor;
 import io.wispforest.owo.mixin.ui.access.ClickableWidgetAccessor;
 import io.wispforest.owo.ui.core.Color;
@@ -26,9 +27,9 @@ import java.util.function.Consumer;
 
 public class ButtonComponent extends ButtonWidget {
 
-    public static final Identifier ACTIVE_TEXTURE = Identifier.of("owo", "button/active");
-    public static final Identifier HOVERED_TEXTURE = Identifier.of("owo", "button/hovered");
-    public static final Identifier DISABLED_TEXTURE = Identifier.of("owo", "button/disabled");
+    public static final Identifier ACTIVE_TEXTURE = Owo.id( "button/active");
+    public static final Identifier HOVERED_TEXTURE = Owo.id( "button/hovered");
+    public static final Identifier DISABLED_TEXTURE = Owo.id("button/disabled");
 
     protected Renderer renderer = Renderer.VANILLA;
     protected boolean textShadow = true;
