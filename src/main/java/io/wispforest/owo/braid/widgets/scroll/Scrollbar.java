@@ -45,7 +45,7 @@ public class Scrollbar extends StatelessWidget {
                             this.axis.choose(maxOffset, 0).doubleValue(),
                             null,
                             this.axis,
-                            this.controller::setOffset,
+                            this.controller::jumpTo,
                             this.track,
                             this.handle,
                             Math.max(5, scrollbarLength)

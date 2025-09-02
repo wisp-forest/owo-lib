@@ -1049,18 +1049,17 @@ public class TestSelector extends StatefulWidget {
 
         public static class State extends WidgetState<ScrollTest> {
 
-            private final ScrollController horizontalController = new ScrollController();
-            private final ScrollController verticalController = new ScrollController();
+            private final ScrollController horizontalController = new ScrollController(this);
+            private final ScrollController verticalController = new ScrollController(this);
             private final WindowController controller = new WindowController(Size.square(200));
 
-            private final ScrollController horizontalNestedScrollController = new ScrollController();
-            private final ScrollController verticalNestedScrollController = new ScrollController();
+            private final ScrollController horizontalNestedScrollController = new ScrollController(this);
+            private final ScrollController verticalNestedScrollController = new ScrollController(this);
             private final WindowController nestedScrollController = new WindowController(Size.square(200));
             private double nestedSliderValue = 0.5;
 
             @Override
             public void init() {
-                super.init();
                 this.controller.x = (MinecraftClient.getInstance().getWindow().getScaledWidth() - 200) / 2d;
                 this.controller.y = (MinecraftClient.getInstance().getWindow().getScaledHeight() - 200) / 2d;
             }
@@ -1096,6 +1095,7 @@ public class TestSelector extends StatefulWidget {
                                             true,
                                             this.horizontalController,
                                             this.verticalController,
+                                            new ScrollAnimationSettings(Duration.ofMillis(2000), Easing.OUT_QUART),
                                             new Sized(
                                                 500.0,
                                                 null,
@@ -1118,7 +1118,7 @@ public class TestSelector extends StatefulWidget {
                                                 0,
                                                 null,
                                                 LayoutAxis.VERTICAL,
-                                                this.verticalController::setOffset
+                                                this.verticalController::jumpTo
                                             )
                                         )
                                     )
@@ -1137,7 +1137,7 @@ public class TestSelector extends StatefulWidget {
                                                 this.horizontalController.maxOffset(),
                                                 null,
                                                 LayoutAxis.HORIZONTAL,
-                                                this.horizontalController::setOffset
+                                                this.horizontalController::jumpTo
                                             )
                                         )
                                     ),
@@ -1157,6 +1157,7 @@ public class TestSelector extends StatefulWidget {
                                 new ScrollableWithBars(
                                     horizontalNestedScrollController,
                                     verticalNestedScrollController,
+                                    ScrollAnimationSettings.DEFAULT,
                                     10,
                                     ButtonScrollbar::new,
                                     new Sized(
@@ -1340,7 +1341,7 @@ public class TestSelector extends StatefulWidget {
                 list.add(Text.literal("Help idk how to make this scroll to the bottom when i add shit (everyone laugh at this user)"));
                 return list;
             });
-            private final ScrollController controller = new ScrollController();
+            private final ScrollController controller = new ScrollController(this);
 
             @Override
             public Widget build(BuildContext context) {
@@ -1374,6 +1375,7 @@ public class TestSelector extends StatefulWidget {
                                                 Panel.VANILLA_INSET,
                                                 new VerticallyScrollable(
                                                     controller,
+                                                    null,
                                                     new Column(
                                                         new Padding(Insets.vertical(2)),
                                                         this.inputs.stream().map(Label::new).toList()
@@ -1393,7 +1395,7 @@ public class TestSelector extends StatefulWidget {
                 this.setState(() -> {
                     this.inputs.add(text);
                     this.schedulePostLayoutCallback(() -> {
-                        this.controller.setOffset(this.controller.maxOffset());
+                        this.controller.jumpTo(this.controller.maxOffset());
                     });
                 });
                 return false; // return false to allow other shit to happen:tm:

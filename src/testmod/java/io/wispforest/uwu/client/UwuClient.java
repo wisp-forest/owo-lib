@@ -89,7 +89,7 @@ public class UwuClient implements ClientModInitializer {
 
         TooltipComponentCallback.EVENT.register(data -> {
             if (data instanceof UwuBraidItem.Tooltip tooltip) {
-                var random = new Random(69);
+                var random = new Random(System.currentTimeMillis() / 450);
                 return new BraidTooltipComponent(new Sized(
                     32 * 5, 32 * 5, new Clip(
                         true, true,

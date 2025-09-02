@@ -1,6 +1,7 @@
 package io.wispforest.owo.braid.framework.proxy;
 
 import com.google.common.base.Preconditions;
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
@@ -16,6 +17,10 @@ public abstract class WidgetState<T extends StatefulWidget> {
     public abstract Widget build(BuildContext context);
 
     public BuildContext context() {
+        if (Owo.DEBUG) {
+            Preconditions.checkNotNull(this.owner, "cannot access this.context() on a WidgetState before init() is called");
+        }
+
         return this.owner;
     }
 
@@ -38,7 +43,6 @@ public abstract class WidgetState<T extends StatefulWidget> {
     public final void cancelDelayedCallback(long id) {
         this.owner.host().cancelDelayedCallback(id);
     }
-
 
     public final void scheduleAnimationCallback(ProxyHost.AnimationCallback callback) {
         this.owner.host().scheduleAnimationCallback(callback);

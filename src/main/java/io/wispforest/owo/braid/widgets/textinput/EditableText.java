@@ -6,6 +6,7 @@ import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
 import io.wispforest.owo.braid.widgets.basic.*;
+import io.wispforest.owo.braid.widgets.scroll.ScrollAnimationSettings;
 import io.wispforest.owo.braid.widgets.scroll.ScrollController;
 import io.wispforest.owo.braid.widgets.scroll.Scrollable;
 import net.minecraft.text.Style;
@@ -131,8 +132,8 @@ public class EditableText extends StatefulWidget {
 
         private long blinkCallbackId = -1;
 
-        private final ScrollController horizontalController = new ScrollController();
-        private final ScrollController verticalController = new ScrollController();
+        private final ScrollController horizontalController = new ScrollController(this);
+        private final ScrollController verticalController = new ScrollController(this);
         private BuildContext inputContext;
 
         @Override
@@ -218,6 +219,7 @@ public class EditableText extends StatefulWidget {
                     true, this.widget().maxLines != 1,
                     this.horizontalController,
                     this.verticalController,
+                    ScrollAnimationSettings.NO_ANIMATION,
                     new Builder(inputContext -> {
                         this.inputContext = inputContext;
                         return new TextInput(
