@@ -1,5 +1,13 @@
 package io.wispforest.uwu.client;
 
+import io.wispforest.owo.braid.core.LayoutAxis;
+import io.wispforest.owo.braid.util.BraidTooltipComponent;
+import io.wispforest.owo.braid.widgets.basic.Box;
+import io.wispforest.owo.braid.widgets.basic.Clip;
+import io.wispforest.owo.braid.widgets.basic.Sized;
+import io.wispforest.owo.braid.widgets.basic.Transform;
+import io.wispforest.owo.braid.widgets.flex.Row;
+import io.wispforest.owo.braid.widgets.grid.Grid;
 import io.wispforest.owo.network.OwoNetChannel;
 import io.wispforest.owo.particles.ClientParticles;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
@@ -15,11 +23,14 @@ import io.wispforest.owo.ui.layers.Layers;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.uwu.Uwu;
+import io.wispforest.uwu.client.braid.TestSelector;
+import io.wispforest.uwu.items.UwuBraidItem;
 import io.wispforest.uwu.network.UwuNetworkExample;
 import io.wispforest.uwu.network.UwuOptionalNetExample;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.rendering.v1.TooltipComponentCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
@@ -35,11 +46,14 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableTextContent;
 import net.minecraft.util.Identifier;
+import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Random;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class UwuClient implements ClientModInitializer {
 
@@ -59,19 +73,48 @@ public class UwuClient implements ClientModInitializer {
 
         final var hudComponentId = Identifier.of("uwu", "test_element");
         final Supplier<Component> hudComponent = () ->
-                Containers.verticalFlow(Sizing.content(), Sizing.content())
-                        .child(Components.item(Items.DIAMOND.getDefaultStack()).margins(Insets.of(3)))
-                        .child(Components.label(Text.literal("epic stuff in hud")))
-                        .child(Components.entity(Sizing.fixed(50), EntityType.ALLAY, null))
-                        .alignment(HorizontalAlignment.CENTER, VerticalAlignment.CENTER)
-                        .padding(Insets.of(5))
-                        .surface(Surface.PANEL)
-                        .margins(Insets.of(5))
-                        .positioning(Positioning.relative(100, 25));
+            Containers.verticalFlow(Sizing.content(), Sizing.content())
+                .child(Components.item(Items.DIAMOND.getDefaultStack()).margins(Insets.of(3)))
+                .child(Components.label(Text.literal("epic stuff in hud")))
+                .child(Components.entity(Sizing.fixed(50), EntityType.ALLAY, null))
+                .alignment(HorizontalAlignment.CENTER, VerticalAlignment.CENTER)
+                .padding(Insets.of(5))
+                .surface(Surface.PANEL)
+                .margins(Insets.of(5))
+                .positioning(Positioning.relative(100, 25));
 
         final var coolerComponentId = Identifier.of("uwu", "test_element_two");
         final Supplier<Component> coolerComponent = () -> UIModel.load(Path.of("../src/testmod/resources/assets/uwu/owo_ui/test_element_two.xml")).expandTemplate(FlowLayout.class, "hud-element", Map.of());
         Hud.add(coolerComponentId, coolerComponent);
+
+        TooltipComponentCallback.EVENT.register(data -> {
+            if (data instanceof UwuBraidItem.Tooltip tooltip) {
+                var random = new Random(69);
+                return new BraidTooltipComponent(new Sized(
+                    32 * 5, 32 * 5, new Clip(
+                        true, true,
+                    new Row(
+                        new Transform(
+                            new Matrix4f().translation(((float) (System.currentTimeMillis() / 450d - Math.floor(System.currentTimeMillis() / 450d))) * -32, 0, 0),
+                            new Grid(
+                                LayoutAxis.VERTICAL,
+                                6,
+                                Grid.CellFit.loose(),
+                                Stream.generate(() -> new TestSelector.Amogus(
+                                        new Box(io.wispforest.owo.braid.core.Color.hsv(random.nextDouble(), .75, 1)),
+                                        new Box(Color.WHITE.toBraid()),
+                                        8
+                                    ))
+                                    .limit(6 * 5).toList()
+                            )
+                        )
+                    )
+                )
+                ));
+            }
+
+            return null;
+        });
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (binding.wasPressed()) {
@@ -117,35 +160,35 @@ public class UwuClient implements ClientModInitializer {
             if (MinecraftClient.getInstance().world == null) return;
 
             instance.adapter.rootComponent.child(
-                    Containers.horizontalFlow(Sizing.content(), Sizing.content())
-                            .child(Components.entity(Sizing.fixed(20), EntityType.ALLAY, null).<EntityComponent<AllayEntity>>configure(component -> {
-                                component.allowMouseRotation(true)
-                                        .scale(.75f);
+                Containers.horizontalFlow(Sizing.content(), Sizing.content())
+                    .child(Components.entity(Sizing.fixed(20), EntityType.ALLAY, null).<EntityComponent<AllayEntity>>configure(component -> {
+                        component.allowMouseRotation(true)
+                            .scale(.75f);
 
-                                component.mouseDown().subscribe((mouseX, mouseY, button) -> {
-                                    UISounds.playInteractionSound();
-                                    return true;
-                                });
-                            })).child(Components.textBox(Sizing.fixed(100), "allay text").<TextFieldWidget>configure(textBox -> {
-                                textBox.verticalSizing(Sizing.fixed(9));
-                                textBox.setDrawsBackground(false);
-                            })).<FlowLayout>configure(layout -> {
-                                layout.gap(5).margins(Insets.left(4)).verticalAlignment(VerticalAlignment.CENTER);
+                        component.mouseDown().subscribe((mouseX, mouseY, button) -> {
+                            UISounds.playInteractionSound();
+                            return true;
+                        });
+                    })).child(Components.textBox(Sizing.fixed(100), "allay text").<TextFieldWidget>configure(textBox -> {
+                        textBox.verticalSizing(Sizing.fixed(9));
+                        textBox.setDrawsBackground(false);
+                    })).<FlowLayout>configure(layout -> {
+                        layout.gap(5).margins(Insets.left(4)).verticalAlignment(VerticalAlignment.CENTER);
 
-                                instance.alignComponentToWidget(widget -> {
-                                    if (!(widget instanceof ButtonWidget button)) return false;
-                                    return button.getMessage().getContent() instanceof TranslatableTextContent translatable && translatable.getKey().equals("gui.stats");
-                                }, Layer.Instance.AnchorSide.RIGHT, 0, layout);
-                            })
+                        instance.alignComponentToWidget(widget -> {
+                            if (!(widget instanceof ButtonWidget button)) return false;
+                            return button.getMessage().getContent() instanceof TranslatableTextContent translatable && translatable.getKey().equals("gui.stats");
+                        }, Layer.Instance.AnchorSide.RIGHT, 0, layout);
+                    })
             );
         }, GameMenuScreen.class);
 
         Layers.add(Containers::verticalFlow, instance -> {
             ButtonComponent button;
             instance.adapter.rootComponent.child(
-                    (button = Components.button(Text.literal(":)"), buttonComponent -> {
-                        MinecraftClient.getInstance().player.sendMessage(Text.literal("handled screen moment"), false);
-                    })).verticalSizing(Sizing.fixed(12))
+                (button = Components.button(Text.literal(":)"), buttonComponent -> {
+                    MinecraftClient.getInstance().player.sendMessage(Text.literal("handled screen moment"), false);
+                })).verticalSizing(Sizing.fixed(12))
             );
 
             instance.alignComponentToHandledScreenCoordinates(button, 125, 65);

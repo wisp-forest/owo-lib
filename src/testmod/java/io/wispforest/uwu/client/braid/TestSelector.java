@@ -126,9 +126,6 @@ public class TestSelector extends StatefulWidget {
 
         @Override
         public Widget build(BuildContext context) {
-            //TODO read that vvvv
-            System.out.println("reminder to decide how to handle mouse buttons in, buttons, sliders, text inputs, windows etc");
-
             var buttons = Arrays.stream(Tests.values()).map(test -> {
                 if (test == Tests.BURNING_CHYZ) {
                     return new BurningChyzButton(this.chyz, () -> setState(() -> this.test = Tests.BURNING_CHYZ));
