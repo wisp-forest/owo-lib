@@ -3,6 +3,7 @@ package io.wispforest.owo.braid.widgets.slider.xlyder;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
 import io.wispforest.owo.braid.widgets.slider.slider.RawSlider;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.braid.widgets.label.Label;
@@ -15,14 +16,14 @@ import org.joml.Vector2dc;
 public class MessageXlyder extends StatelessWidget {
 
     public final Vector2dc value;
-    public final @Nullable RawXlyder.XlyderSetupCallback<Xlyder> setupCallback;
+    public final @Nullable WidgetSetupCallback<Xlyder> setupCallback;
     public final @Nullable XlyderCallback onChanged;
 
     public final Text message;
 
     public MessageXlyder(
         Vector2dc value,
-        @Nullable RawXlyder.XlyderSetupCallback<Xlyder> setupCallback,
+        @Nullable WidgetSetupCallback<Xlyder> setupCallback,
         @Nullable XlyderCallback onChanged,
         Text message
     ) {
@@ -34,7 +35,7 @@ public class MessageXlyder extends StatelessWidget {
 
     public MessageXlyder(
         Vector2dc value,
-        @Nullable RawXlyder.XlyderSetupCallback<Xlyder> setupCallback,
+        @Nullable WidgetSetupCallback<Xlyder> setupCallback,
         boolean active,
         XlyderCallback onChanged,
         Text message
@@ -44,7 +45,7 @@ public class MessageXlyder extends StatelessWidget {
 
     public MessageXlyder(
         double x, double y,
-        @Nullable RawXlyder.XlyderSetupCallback<Xlyder> setupCallback,
+        @Nullable WidgetSetupCallback<Xlyder> setupCallback,
         @Nullable XlyderCallback onChanged,
         Text message
     ) {
@@ -53,7 +54,7 @@ public class MessageXlyder extends StatelessWidget {
 
     public MessageXlyder(
         double x, double y,
-        @Nullable RawXlyder.XlyderSetupCallback<Xlyder> setupCallback,
+        @Nullable WidgetSetupCallback<Xlyder> setupCallback,
         boolean active,
         XlyderCallback onChanged,
         Text message

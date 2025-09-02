@@ -722,8 +722,32 @@ public class TestSelector extends StatefulWidget {
                         )
                     ),
                     new Label(Text.literal("Range")),
-                    new CoolRangeSlider(2.0, (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max))),
-                    new CoolRangeSlider(null, (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max)))
+                    new Sized(
+                        100, 20,
+                        new MessageRangeSlider(
+                            discreteX, discreteY,
+                            slider -> slider.range(0, 32).step(2),
+                            (min, max) -> this.setState(() -> {
+                                this.discreteX = min;
+                                this.discreteY = max;
+                            }),
+                            Text.literal("v: " + formatDouble(discreteX) + "-" + formatDouble(discreteY)
+                            )
+                        )
+                    ),
+                    new Sized(
+                        100, 20,
+                        new MessageRangeSlider(
+                            smoothX, smoothY,
+                            slider -> slider.range(0, 32),
+                            (min, max) -> this.setState(() -> {
+                                this.smoothX = min;
+                                this.smoothY = max;
+                            }),
+                            Text.literal("v: " + formatDouble(smoothX) + "-" + formatDouble(smoothY)
+                            )
+                        )
+                    )
                 );
             }
         }
@@ -938,49 +962,6 @@ public class TestSelector extends StatefulWidget {
                             slider -> slider.handleSize(6),
                             (x) -> this.setState(() -> this.x = x)
                         )
-                    )
-                );
-            }
-        }
-    }
-
-    public static class CoolRangeSlider extends StatefulWidget {
-
-        public final @Nullable Double step;
-        public final MessageRangeSlider.RangeSliderMessageProvider textSupplier;
-
-        public CoolRangeSlider(@Nullable Double step, MessageRangeSlider.RangeSliderMessageProvider textSupplier) {
-            this.step = step;
-            this.textSupplier = textSupplier;
-        }
-
-        @Override
-        public WidgetState<CoolRangeSlider> createState() {
-            return new State();
-        }
-
-        public static class State extends WidgetState<CoolRangeSlider> {
-
-            private double minValue = 10;
-            private double maxValue = 20;
-
-            @Override
-            public Widget build(BuildContext context) {
-                return new Sized(
-                    100.0,
-                    20.0,
-                    new MessageRangeSlider(
-                        this.minValue,
-                        this.maxValue,
-                        0,
-                        32,
-                        this.widget().step,
-                        LayoutAxis.HORIZONTAL,
-                        (min, max) -> setState(() -> {
-                            this.minValue = min;
-                            this.maxValue = max;
-                        }),
-                        this.widget().textSupplier.getMessage(this.minValue, this.maxValue)
                     )
                 );
             }

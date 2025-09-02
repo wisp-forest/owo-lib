@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets.slider;
 
+import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
@@ -28,6 +29,14 @@ public class Incrementor extends StatelessWidget {
 
     public Incrementor(@Nullable DoubleConsumer callback, Widget child) {
         this(callback, callback, child);
+    }
+
+    public Incrementor(LayoutAxis axis, @Nullable DoubleConsumer callback, Widget child) {
+        this(
+            axis.choose(callback, null),
+            axis.choose(null, callback),
+            child
+        );
     }
 
     @Override

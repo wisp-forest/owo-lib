@@ -1,12 +1,10 @@
 package io.wispforest.owo.braid.widgets.slider.xlyder;
 
 import io.wispforest.owo.braid.core.Size;
-import io.wispforest.owo.braid.framework.BuildContext;
-import io.wispforest.owo.braid.framework.widget.StatelessWidget;
-import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
 import io.wispforest.owo.braid.widgets.basic.Panel;
 import io.wispforest.owo.braid.widgets.slider.DefaultSliderHandle;
-import io.wispforest.owo.braid.widgets.slider.ValueMapper;
+import io.wispforest.owo.braid.widgets.slider.slider.SliderFunction;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
@@ -16,7 +14,7 @@ public class Xlyder extends RawXlyder {
 
     public Xlyder(
         Vector2dc value,
-        @Nullable XlyderSetupCallback<Xlyder> setupCallback,
+        @Nullable WidgetSetupCallback<Xlyder> setupCallback,
         @Nullable XlyderCallback onChanged
     ) {
         super(
@@ -32,7 +30,7 @@ public class Xlyder extends RawXlyder {
 
     public Xlyder(
         Vector2dc value,
-        @Nullable XlyderSetupCallback<Xlyder> setupCallback,
+        @Nullable WidgetSetupCallback<Xlyder> setupCallback,
         boolean active,
         XlyderCallback onChanged
     ) {
@@ -41,7 +39,7 @@ public class Xlyder extends RawXlyder {
 
     public Xlyder(
         double x, double y,
-        @Nullable XlyderSetupCallback<Xlyder> setupCallback,
+        @Nullable WidgetSetupCallback<Xlyder> setupCallback,
         @Nullable XlyderCallback onChanged
     ) {
         this(new Vector2d(x, y), setupCallback, onChanged);
@@ -49,7 +47,7 @@ public class Xlyder extends RawXlyder {
 
     public Xlyder(
         double x, double y,
-        @Nullable XlyderSetupCallback<Xlyder> setupCallback,
+        @Nullable WidgetSetupCallback<Xlyder> setupCallback,
         boolean active,
         XlyderCallback onChanged
     ) {
@@ -164,18 +162,18 @@ public class Xlyder extends RawXlyder {
     }
 
     @Override
-    public Xlyder valueMapper(ValueMapper valueMapper) {
-        return (Xlyder) super.valueMapper(valueMapper);
+    public Xlyder sliderFunction(SliderFunction sliderFunction) {
+        return (Xlyder) super.sliderFunction(sliderFunction);
     }
 
     @Override
-    public Xlyder valueMapperX(ValueMapper xValueMapper) {
-        return (Xlyder) super.valueMapperX(xValueMapper);
+    public Xlyder sliderFunctionX(SliderFunction xSliderFunction) {
+        return (Xlyder) super.sliderFunctionX(xSliderFunction);
     }
 
     @Override
-    public Xlyder valueMapperY(ValueMapper yValueMapper) {
-        return (Xlyder) super.valueMapperY(yValueMapper);
+    public Xlyder sliderFunctionY(SliderFunction ySliderFunction) {
+        return (Xlyder) super.sliderFunctionY(ySliderFunction);
     }
 
     @Override

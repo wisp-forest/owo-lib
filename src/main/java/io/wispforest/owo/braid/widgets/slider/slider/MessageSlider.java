@@ -3,6 +3,7 @@ package io.wispforest.owo.braid.widgets.slider.slider;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
@@ -12,14 +13,14 @@ import org.jetbrains.annotations.Nullable;
 public class MessageSlider extends StatelessWidget {
 
     public final double value;
-    public final @Nullable RawSlider.SliderSetupCallback<Slider> setupCallback;
+    public final @Nullable WidgetSetupCallback<Slider> setupCallback;
     public final @Nullable SliderCallback onChanged;
 
     public final Text message;
 
     public MessageSlider(
         double value,
-        @Nullable RawSlider.SliderSetupCallback<Slider> setupCallback,
+        @Nullable WidgetSetupCallback<Slider> setupCallback,
         @Nullable SliderCallback onChanged,
         Text message
     ) {
@@ -31,7 +32,7 @@ public class MessageSlider extends StatelessWidget {
 
     public MessageSlider(
         double value,
-        @Nullable RawSlider.SliderSetupCallback<Slider> setupCallback,
+        @Nullable WidgetSetupCallback<Slider> setupCallback,
         boolean active,
         SliderCallback onChanged,
         Text message

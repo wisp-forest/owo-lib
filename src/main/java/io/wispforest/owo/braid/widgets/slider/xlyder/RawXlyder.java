@@ -8,12 +8,9 @@ import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
 import io.wispforest.owo.braid.widgets.basic.*;
-import io.wispforest.owo.braid.widgets.basic.action.ActionTrigger;
-import io.wispforest.owo.braid.widgets.basic.action.Actions;
 import io.wispforest.owo.braid.widgets.slider.Incrementor;
-import io.wispforest.owo.braid.widgets.slider.ValueMapper;
+import io.wispforest.owo.braid.widgets.slider.slider.SliderFunction;
 import io.wispforest.owo.braid.widgets.stack.Stack;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
@@ -26,8 +23,8 @@ public class RawXlyder extends StatefulWidget {
     protected final Vector2d max = new Vector2d(1);
     protected @Nullable Double xStep;
     protected @Nullable Double yStep;
-    protected ValueMapper xValueMapper = ValueMapper.LINEAR;
-    protected ValueMapper yValueMapper = ValueMapper.LINEAR;
+    protected SliderFunction xSliderFunction = SliderFunction.LINEAR;
+    protected SliderFunction ySliderFunction = SliderFunction.LINEAR;
     protected Size handleSize;
 
     public final @Nullable XlyderCallback onChanged;
@@ -39,7 +36,7 @@ public class RawXlyder extends StatefulWidget {
 
     public RawXlyder(
         Vector2dc value,
-        @Nullable XlyderSetupCallback<RawXlyder> setupCallback,
+        @Nullable WidgetSetupCallback<RawXlyder> setupCallback,
         @Nullable XlyderCallback onChanged,
         @Nullable Widget track,
         Size handleSize,
@@ -55,7 +52,7 @@ public class RawXlyder extends StatefulWidget {
 
     public RawXlyder(
         Vector2dc value,
-        @Nullable XlyderSetupCallback<RawXlyder> setupCallback,
+        @Nullable WidgetSetupCallback<RawXlyder> setupCallback,
         boolean active,
         XlyderCallback onChanged,
         @Nullable Widget track,
@@ -67,7 +64,7 @@ public class RawXlyder extends StatefulWidget {
 
     public RawXlyder(
         double x, double y,
-        @Nullable XlyderSetupCallback<RawXlyder> setupCallback,
+        @Nullable WidgetSetupCallback<RawXlyder> setupCallback,
         @Nullable XlyderCallback onChanged,
         @Nullable Widget track,
         Size handleSize,
@@ -78,7 +75,7 @@ public class RawXlyder extends StatefulWidget {
 
     public RawXlyder(
         double x, double y,
-        @Nullable XlyderSetupCallback<RawXlyder> setupCallback,
+        @Nullable WidgetSetupCallback<RawXlyder> setupCallback,
         boolean active,
         XlyderCallback onChanged,
         @Nullable Widget track,
@@ -87,8 +84,6 @@ public class RawXlyder extends StatefulWidget {
     ) {
         this(new Vector2d(x, y), setupCallback, active ? onChanged : null, track, handleSize, handle);
     }
-
-
 
     //region Setup Methods
 
@@ -257,31 +252,31 @@ public class RawXlyder extends StatefulWidget {
         return this.yStep;
     }
 
-    public RawXlyder valueMapper(ValueMapper valueMapper) {
+    public RawXlyder sliderFunction(SliderFunction sliderFunction) {
         this.assertMutable();
-        this.xValueMapper = valueMapper;
-        this.yValueMapper = valueMapper;
+        this.xSliderFunction = sliderFunction;
+        this.ySliderFunction = sliderFunction;
         return this;
     }
 
-    public RawXlyder valueMapperX(ValueMapper xValueMapper) {
+    public RawXlyder sliderFunctionX(SliderFunction xSliderFunction) {
         this.assertMutable();
-        this.xValueMapper = xValueMapper;
+        this.xSliderFunction = xSliderFunction;
         return this;
     }
 
-    public ValueMapper valueMapperX() {
-        return this.xValueMapper;
+    public SliderFunction sliderFunctionX() {
+        return this.xSliderFunction;
     }
 
-    public RawXlyder valueMapperY(ValueMapper yValueMapper) {
+    public RawXlyder sliderFunctionY(SliderFunction ySliderFunction) {
         this.assertMutable();
-        this.yValueMapper = yValueMapper;
+        this.ySliderFunction = ySliderFunction;
         return this;
     }
 
-    public ValueMapper valueMapperY() {
-        return this.yValueMapper;
+    public SliderFunction sliderFunctionY() {
+        return this.ySliderFunction;
     }
 
     public RawXlyder incrementStep(@Nullable Double incrementStep) {
@@ -346,31 +341,29 @@ public class RawXlyder extends StatefulWidget {
         protected Vector2dc incrementStep;
 
         @Override
+        public void init() {
+            var widget = this.widget();
+            this.incrementStep = new Vector2d(
+                widget.xIncrementStep != null ? widget.xSliderFunction.normalize(widget.xIncrementStep, widget.min.x, widget.max.x) : widget.xStep != null ? widget.xSliderFunction.normalize(widget.xStep, widget.min.x, widget.max.x) : 0.01,
+                widget.yIncrementStep != null ? widget.ySliderFunction.normalize(widget.yIncrementStep, widget.min.y, widget.max.y) : widget.yStep != null ? widget.ySliderFunction.normalize(widget.yStep, widget.min.y, widget.max.y) : 0.01
+            );
+        }
+
+        @Override
         public Widget build(BuildContext context) {
             var widget = this.widget();
             this.normalizedValue = new Vector2d(
-                widget.xValueMapper.normalize(widget.value.x(), widget.min.x, widget.max.x),
-                widget.yValueMapper.normalize(widget.value.y(), widget.min.y, widget.max.y)
-            );
-            this.incrementStep = new Vector2d(
-                widget.xIncrementStep != null ? widget.xValueMapper.normalize(widget.xIncrementStep, widget.min.x, widget.max.x) : widget.xStep != null ? widget.xValueMapper.normalize(widget.xStep, widget.min.x, widget.max.x) : 0.01,
-                widget.yIncrementStep != null ? widget.yValueMapper.normalize(widget.yIncrementStep, widget.min.y, widget.max.y) : widget.yStep != null ? widget.yValueMapper.normalize(widget.yStep, widget.min.y, widget.max.y) : 0.01
+                widget.xSliderFunction.normalize(widget.value.x(), widget.min.x, widget.max.x),
+                widget.ySliderFunction.normalize(widget.value.y(), widget.min.y, widget.max.y)
             );
             return new LayoutBuilder((innerContext, constraints) -> {
                 var content = new Stack(
                     Alignment.TOP_LEFT,
-                    new Sized(
-                        constraints.maxWidth(),
-                        constraints.maxHeight(),
-                        widget.track
-                    ),
+                    new Sized(constraints.maxWidth(), constraints.maxHeight(), widget.track),
                     new Padding(
                         Insets.left(Math.floor((constraints.maxWidth() - widget.handleSize.width()) * normalizedValue.x()))
                             .withTop(Math.floor((constraints.maxHeight() - widget.handleSize.height()) * (1 - normalizedValue.y()))),
-                        new Sized(
-                            widget.handleSize,
-                            widget.handle
-                        )
+                        new Sized(widget.handleSize, widget.handle)
                     )
                 );
                 return new Center(
@@ -394,7 +387,7 @@ public class RawXlyder extends StatefulWidget {
                                         return true;
                                     })
                                     .dragCallback((x, y, dx, dy) -> this.move(constraints, dx, -dy))
-                                    .releaseCallback((x, y, button, modifiers) -> this.dragging = false)
+                                    .dragEndCallback(() -> dragging = false)
                                     //TODO: invert the y passed here cuz it cringe atm
                                     .cursorStyleSupplier((x, y) -> (!isInHandle(constraints, x, constraints.maxHeight() - y) && !dragging) ? CursorStyle.HAND : CursorStyle.MOVE),
                                 content
@@ -445,15 +438,9 @@ public class RawXlyder extends StatefulWidget {
             var widget = this.widget();
             double newX = widget.value.x();
             double newY = widget.value.y();
-            if (newNormalizedX != null) newX = widget.xValueMapper.deNormalize(newNormalizedX, widget.min.x, widget.max.x);
-            if (newNormalizedY != null) newY = widget.yValueMapper.deNormalize(newNormalizedY, widget.min.y, widget.max.y);
+            if (newNormalizedX != null) newX = widget.xSliderFunction.deNormalize(newNormalizedX, widget.min.x, widget.max.x);
+            if (newNormalizedY != null) newY = widget.ySliderFunction.deNormalize(newNormalizedY, widget.min.y, widget.max.y);
             widget.onChanged.accept(newX, newY);
         }
-    }
-
-    @FunctionalInterface
-    public interface XlyderSetupCallback<T extends RawXlyder> extends WidgetSetupCallback<T> {
-        @Override
-        void setup(T xlyder);
     }
 }

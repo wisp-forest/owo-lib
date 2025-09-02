@@ -2,61 +2,87 @@ package io.wispforest.owo.braid.widgets.slider.range;
 
 import io.wispforest.owo.braid.core.Color;
 import io.wispforest.owo.braid.core.LayoutAxis;
-import io.wispforest.owo.braid.framework.BuildContext;
-import io.wispforest.owo.braid.framework.widget.StatelessWidget;
-import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
 import io.wispforest.owo.braid.widgets.basic.Box;
 import io.wispforest.owo.braid.widgets.basic.Panel;
 import io.wispforest.owo.braid.widgets.slider.DefaultSliderHandle;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import org.jetbrains.annotations.Nullable;
 
-public class RangeSlider extends StatelessWidget {
-
-    public final double minValue, maxValue;
-    public final double min;
-    public final double max;
-    public final @Nullable Double step;
-    public final LayoutAxis axis;
-
-    public final RawRangeSlider.RangeSliderCallback onChanged;
+public class RangeSlider extends RawRangeSlider {
 
     public RangeSlider(
         double minValue,
         double maxValue,
-        double min,
-        double max,
-        @Nullable Double step,
-        LayoutAxis axis,
-        RawRangeSlider.RangeSliderCallback onChanged
+        @Nullable WidgetSetupCallback<RangeSlider> setupCallback,
+        @Nullable RangeSliderCallback onChanged
     ) {
-        this.minValue = minValue;
-        this.maxValue = maxValue;
-        this.min = min;
-        this.max = max;
-        this.step = step;
-        this.axis = axis;
-        this.onChanged = onChanged;
-    }
-
-    public RangeSlider(double minValue, double maxValue, RawRangeSlider.RangeSliderCallback onChanged, LayoutAxis axis) {
-        this(minValue, maxValue, 0, 1, null, axis, onChanged);
-    }
-
-    @Override
-    public Widget build(BuildContext context) {
-        return new RawRangeSlider(
-            this.minValue,
-            this.maxValue,
-            this.min,
-            this.max,
-            this.step,
-            this.axis,
-            this.onChanged,
+        super(
+            minValue,
+            maxValue,
+            null,
+            onChanged,
             new Panel(ButtonComponent.DISABLED_TEXTURE),
-            new DefaultSliderHandle(),
-            8,
+            8, new DefaultSliderHandle(),
+            8, new DefaultSliderHandle(),
             new Box(new Color(0x7f000000))
         );
+        if (setupCallback != null) setupCallback.setup(this);
     }
+
+    public RangeSlider(
+        double minValue,
+        double maxValue,
+        @Nullable WidgetSetupCallback<RangeSlider> setupCallback,
+        boolean active,
+        RangeSliderCallback onChanged
+    ) {
+        this(minValue, maxValue, setupCallback, active ? onChanged : null);
+    }
+
+    //region Setup Methods
+
+    @Override
+    public RangeSlider min(double min) { return (RangeSlider) super.min(min); }
+
+    @Override
+    public RangeSlider max(double max) { return (RangeSlider) super.max(max); }
+
+    @Override
+    public RangeSlider range(double min, double max) { return (RangeSlider) super.range(min, max); }
+
+    @Override
+    public RangeSlider minRange(double minRange) { return (RangeSlider) super.minRange(minRange); }
+
+    @Override
+    public RangeSlider maxRange(double maxRange) { return (RangeSlider) super.maxRange(maxRange); }
+
+    @Override
+    public RangeSlider clampRange(double minRange, double maxRange) { return (RangeSlider) super.clampRange(minRange, maxRange); }
+
+    @Override
+    public RangeSlider step(@Nullable Double step) { return (RangeSlider) super.step(step); }
+
+    @Override
+    public RangeSlider step(double step) { return (RangeSlider) super.step(step); }
+
+    @Override
+    public RangeSlider sliderFunction(io.wispforest.owo.braid.widgets.slider.slider.SliderFunction function) { return (RangeSlider) super.sliderFunction(function); }
+
+    @Override
+    public RangeSlider axis(LayoutAxis axis) { return (RangeSlider) super.axis(axis); }
+
+    @Override
+    public RangeSlider vertical() { return (RangeSlider) super.vertical(); }
+
+    @Override
+    public RawRangeSlider incrementStep(double incrementStep) { return super.incrementStep(incrementStep); }
+
+    public RangeSlider minHandleSize(double size) { this.assertMutable(); this.minHandleSize = size; return this; }
+    public double minHandleSize() { return this.minHandleSize; }
+
+    public RangeSlider maxHandleSize(double size) { this.assertMutable(); this.maxHandleSize = size; return this; }
+    public double maxHandleSize() { return this.maxHandleSize; }
+
+    //endregion
 }

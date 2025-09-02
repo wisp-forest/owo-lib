@@ -1,15 +1,15 @@
-package io.wispforest.owo.braid.widgets.slider;
+package io.wispforest.owo.braid.widgets.slider.slider;
 
 import net.minecraft.util.math.MathHelper;
 
 import static net.minecraft.util.math.MathHelper.EPSILON;
 
-public interface ValueMapper {
+public interface SliderFunction {
     double normalize(double value, double min, double max);
 
     double deNormalize(double normalizedValue, double min, double max);
 
-    ValueMapper LINEAR = new ValueMapper() {
+    SliderFunction LINEAR = new SliderFunction() {
         @Override
         public double normalize(double value, double min, double max) {
             return (value - min) / (max - min);
@@ -21,7 +21,7 @@ public interface ValueMapper {
         }
     };
 
-    ValueMapper LOGARITHMIC = new ValueMapper() {
+    SliderFunction LOGARITHMIC = new SliderFunction() {
 
         @Override
         public double normalize(double value, double min, double max) {

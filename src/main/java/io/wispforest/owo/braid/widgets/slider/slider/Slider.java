@@ -1,9 +1,9 @@
 package io.wispforest.owo.braid.widgets.slider.slider;
 
 import io.wispforest.owo.braid.core.LayoutAxis;
+import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
 import io.wispforest.owo.braid.widgets.basic.Panel;
 import io.wispforest.owo.braid.widgets.slider.DefaultSliderHandle;
-import io.wispforest.owo.braid.widgets.slider.ValueMapper;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,7 +11,7 @@ public class Slider extends RawSlider {
 
     public Slider(
         double value,
-        @Nullable SliderSetupCallback<Slider> setupCallback,
+        @Nullable WidgetSetupCallback<Slider> setupCallback,
         @Nullable SliderCallback onChanged
     ) {
         super(
@@ -27,7 +27,7 @@ public class Slider extends RawSlider {
 
     public Slider(
         double value,
-        @Nullable SliderSetupCallback<Slider> setupCallback,
+        @Nullable WidgetSetupCallback<Slider> setupCallback,
         SliderCallback onChanged,
         boolean active
     ) {
@@ -62,18 +62,13 @@ public class Slider extends RawSlider {
     }
 
     @Override
-    public Slider valueMapper(ValueMapper valueMapper) {
-        return (Slider) super.valueMapper(valueMapper);
+    public Slider sliderFunction(SliderFunction sliderFunction) {
+        return (Slider) super.sliderFunction(sliderFunction);
     }
 
     @Override
     public Slider axis(LayoutAxis axis) {
         return (Slider) super.axis(axis);
-    }
-
-    @Override
-    public Slider horizontal() {
-        return (Slider) super.horizontal();
     }
 
     @Override
