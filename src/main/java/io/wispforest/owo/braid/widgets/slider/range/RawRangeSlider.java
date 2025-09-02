@@ -247,6 +247,7 @@ public class RawRangeSlider extends StatefulWidget {
 
         protected double dragValue = 0;
         protected @Nullable Handle grabbedHandle = null;
+        protected boolean dragging = false;
 
         protected double normalizedMin;
         protected double normalizedMax;
@@ -272,7 +273,6 @@ public class RawRangeSlider extends StatefulWidget {
             this.draggingCursorStyle = null;
             return new LayoutBuilder((innerContext, constraints) -> {
                 var combinedHandleSize = widget.minHandleSize + widget.maxHandleSize;
-                var trackLength = constraints.maxOnAxis(widget.axis) - combinedHandleSize;
                 var rangeExtent = Math.ceil((constraints.maxOnAxis(widget.axis) - combinedHandleSize) * (normalizedMax - normalizedMin));
 
                 var content = new Stack(
@@ -337,12 +337,13 @@ public class RawRangeSlider extends StatefulWidget {
 
                                         this.dragWidth = this.normalizedMax - this.normalizedMin;
                                         this.dragValue = initialDragValue;
+                                        this.dragging = true;
                                         return true;
                                     })
                                     .dragCallback((x, y, dx, dy) -> this.move(constraints, dx, widget.axis == LayoutAxis.VERTICAL ? -dy : dy))
-                                    .dragEndCallback(() -> this.grabbedHandle = null)
+                                    .dragEndCallback(() -> this.dragging = false)
                                     .cursorStyleSupplier((x, y) -> {
-                                        if (!isInHandle(constraints, x, constraints.maxHeight() - y) && !isInRange(constraints, x, constraints.maxHeight() - y) && grabbedHandle == null) return CursorStyle.HAND;
+                                        if (!isInHandle(constraints, x, constraints.maxHeight() - y) && !isInRange(constraints, x, constraints.maxHeight() - y) && !dragging) return CursorStyle.HAND;
                                         if (this.isInRange(constraints, x, y)) return CursorStyle.MOVE;
                                         if (this.draggingCursorStyle == null) this.draggingCursorStyle = CursorStyle.forDraggingAlong(widget.axis, context.instance().computeGlobalTransform());
                                         return this.draggingCursorStyle;
