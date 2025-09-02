@@ -90,7 +90,7 @@ public class BraidDisplayBlockEntity extends BlockEntity {
                             new BlockSlider()
                         ),
                         new Panel(
-                            OwoUIDrawContext.DARK_PANEL_NINE_PATCH_TEXTURE,
+                            Panel.VANILLA_DARK,
                             new Padding(
                                 Insets.all(10),
                                 new Label(Text.translatable("text.uwu.braid").append(Text.literal(" on block real??")))

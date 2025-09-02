@@ -34,7 +34,7 @@ public class BraidDisplayBlockEntityRenderer implements BlockEntityRenderer<Brai
                 new BraidDisplayBlockEntity.Provider(
                     entity,
                     new Panel(
-                        OwoUIDrawContext.PANEL_NINE_PATCH_TEXTURE,
+                        Panel.VANILLA_LIGHT,
                         new BraidDisplayBlockEntity.App()
                     )
                 )

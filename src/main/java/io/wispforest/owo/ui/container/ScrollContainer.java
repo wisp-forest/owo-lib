@@ -22,11 +22,11 @@ import java.util.function.Function;
 public class ScrollContainer<C extends Component> extends WrappingParentComponent<C> {
 
     public static final Identifier VERTICAL_VANILLA_SCROLLBAR_TEXTURE = Owo.id("scrollbar/vanilla_vertical");
-    public static final Identifier DISABLED_VERTICAL_VANILLA_SCROLLBAR_TEXTURE = Owo.id( "scrollbar/vanilla_vertical_disabled");
-    public static final Identifier HORIZONTAL_VANILLA_SCROLLBAR_TEXTURE = Owo.id( "scrollbar/vanilla_horizontal_disabled");
-    public static final Identifier DISABLED_HORIZONTAL_VANILLA_SCROLLBAR_TEXTURE = Owo.id( "scrollbar/vanilla_horizontal_disabled");
-    public static final Identifier VANILLA_SCROLLBAR_TRACK_TEXTURE = Owo.id( "scrollbar/track");
-    public static final Identifier FLAT_VANILLA_SCROLLBAR_TEXTURE = Owo.id( "scrollbar/vanilla_flat");
+    public static final Identifier DISABLED_VERTICAL_VANILLA_SCROLLBAR_TEXTURE = Owo.id("scrollbar/vanilla_vertical_disabled");
+    public static final Identifier HORIZONTAL_VANILLA_SCROLLBAR_TEXTURE = Owo.id("scrollbar/vanilla_horizontal_disabled");
+    public static final Identifier DISABLED_HORIZONTAL_VANILLA_SCROLLBAR_TEXTURE = Owo.id("scrollbar/vanilla_horizontal_disabled");
+    public static final Identifier VANILLA_SCROLLBAR_TRACK_TEXTURE = Owo.id("scrollbar/track");
+    public static final Identifier FLAT_VANILLA_SCROLLBAR_TEXTURE = Owo.id("scrollbar/vanilla_flat");
 
     protected double scrollOffset = 0;
     protected double currentScrollPosition = 0;

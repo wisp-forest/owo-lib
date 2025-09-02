@@ -1,6 +1,7 @@
 package io.wispforest.owo.braid.framework.instance;
 
 import com.google.common.base.Preconditions;
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.core.BraidDrawContext;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.LayoutAxis;
@@ -10,7 +11,6 @@ import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.util.NinePatchTexture;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Box;
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
@@ -149,7 +149,7 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
 
         if (child.debugHighlighted) {
             NinePatchTexture.draw(
-                Identifier.of("owo", "braid_debug_highlighted"),
+                Owo.id("braid_debug_highlighted"),
                 ctx,
                 0, 0, (int) child.transform.width(), (int) child.transform.height(),
                 Color.ofRgb(0x00FFD1)
@@ -298,10 +298,6 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
 
     public boolean hasParent() {
         return this.parent != null;
-    }
-
-    public @Nullable WidgetInstance<?> parent() {
-        return this.parent;
     }
 
     public void setWidget(T widget) {

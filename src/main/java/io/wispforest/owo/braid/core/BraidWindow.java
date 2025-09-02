@@ -59,7 +59,7 @@ public class BraidWindow implements Surface {
 
         this.framebufferWidth = framebufferWidthOut[0];
         this.framebufferHeight = framebufferHeightOut[0];
-        this.remoteFramebuffer = new SimpleFramebuffer(this.framebufferWidth, this.framebufferHeight, true);
+        this.remoteFramebuffer = TextureSurface.createFramebufferAndRestoreState(this.framebufferWidth, this.framebufferHeight, true);
         this.recreateLocalFbo();
 
         GLFW.glfwSetWindowCloseCallback(this.handle, this.storeNativeResource(GLFWWindowCloseCallback.create(window -> {

@@ -110,7 +110,7 @@ public class InspectorWidget extends StatefulWidget {
                                                                     new SpriteWidget(
                                                                         this.alwaysOnTop
                                                                             ? Owo.id("braid_inspector_always_on_top")
-                                                                            : Owo.id( "braid_inspector_not_always_on_top"),
+                                                                            : Owo.id("braid_inspector_not_always_on_top"),
                                                                         false
                                                                     )
                                                                 )
@@ -123,7 +123,7 @@ public class InspectorWidget extends StatefulWidget {
                                                                 Text.literal("reassemble app"),
                                                                 new Button(
                                                                     () -> this.widget().inspector.subject.rebuildRoot(),
-                                                                    new SpriteWidget(Owo.id( "braid_inspector_reassemble"), false)
+                                                                    new SpriteWidget(Owo.id("braid_inspector_reassemble"), false)
                                                                 )
                                                             )
                                                         ),
@@ -134,7 +134,7 @@ public class InspectorWidget extends StatefulWidget {
                                                                 Text.literal("pick widget"),
                                                                 new Button(
                                                                     () -> this.widget().inspector.pick(),
-                                                                    new SpriteWidget(Owo.id( "braid_inspector_pick"), false)
+                                                                    new SpriteWidget(Owo.id("braid_inspector_pick"), false)
                                                                 )
                                                             )
                                                         )
