@@ -47,7 +47,6 @@ public class TextBox extends StatefulWidget {
                 this.focused ? Color.WHITE : new Color(Colors.LIGHT_GRAY),
                 new KeyboardInput(
                     widget -> widget
-                        .canBeSelected(false)
                         .focusGainedCallback(() -> this.setState(() -> this.focused = true))
                         .focusLostCallback(() -> this.setState(() -> this.focused = false)),
                     new Padding(

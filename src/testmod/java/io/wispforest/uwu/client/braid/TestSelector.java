@@ -132,7 +132,7 @@ public class TestSelector extends StatefulWidget {
                 } else {
                     return (Widget) new MessageButton(
                         Text.literal(test.name().toLowerCase(Locale.ROOT).replace('_', ' ')),
-                        () -> setState(() -> this.test = test)
+                        this.test != test ? () -> setState(() -> this.test = test) : null
                     );
                 }
             }).collect(Collectors.toList());

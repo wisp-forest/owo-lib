@@ -220,7 +220,6 @@ public class ComboBox<T> extends StatefulWidget {
 
             return new Actions(
                 widget -> widget
-                    .canBeSelected(false)
                     .focusLostCallback(this::resetTextInput)
                     .cursorStyle(CursorStyle.HAND)
                     .addAction(PREVIOUS_OPTION_TRIGGER, () -> this.cycle(-1))
