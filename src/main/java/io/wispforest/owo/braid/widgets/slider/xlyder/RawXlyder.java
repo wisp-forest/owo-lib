@@ -361,8 +361,8 @@ public class RawXlyder extends StatefulWidget {
                     Alignment.TOP_LEFT,
                     new Sized(constraints.maxWidth(), constraints.maxHeight(), widget.track),
                     new Padding(
-                        Insets.left(Math.floor((constraints.maxWidth() - widget.handleSize.width()) * normalizedValue.x()))
-                            .withTop(Math.floor((constraints.maxHeight() - widget.handleSize.height()) * (1 - normalizedValue.y()))),
+                        Insets.left(Math.floor((constraints.maxWidth() - widget.handleSize.width()) * this.normalizedValue.x()))
+                            .withTop(Math.floor((constraints.maxHeight() - widget.handleSize.height()) * (1 - this.normalizedValue.y()))),
                         new Sized(widget.handleSize, widget.handle)
                     )
                 );
@@ -370,8 +370,8 @@ public class RawXlyder extends StatefulWidget {
                     widget.onChanged == null || ControlsOverride.controlsDisabled(context)
                         ? content
                         : new Incrementor(
-                            xIncrement -> applyValue(MathHelper.clamp(normalizedValue.x() + incrementStep.x() * xIncrement, 0, 1), null),
-                            yIncrement -> applyValue(null, MathHelper.clamp(normalizedValue.y() + incrementStep.y() * yIncrement, 0, 1)),
+                            xIncrement -> this.applyValue(MathHelper.clamp(this.normalizedValue.x() + this.incrementStep.x() * xIncrement, 0, 1), null),
+                            yIncrement -> this.applyValue(null, MathHelper.clamp(this.normalizedValue.y() + this.incrementStep.y() * yIncrement, 0, 1)),
                             new MouseArea(
                                 mouseArea -> mouseArea
                                     //TODO: decide what to do with buttons here
@@ -379,7 +379,7 @@ public class RawXlyder extends StatefulWidget {
                                         if (button != 0) return false;
 
                                         y = constraints.maxHeight() - y;
-                                        Vector2dc initialDragValue = new Vector2d(normalizedValue);
+                                        Vector2dc initialDragValue = new Vector2d(this.normalizedValue);
                                         if (!this.isInHandle(constraints, x, y)) initialDragValue = this.setAbsolute(constraints, x, y);
 
                                         this.dragValue.set(initialDragValue);
@@ -387,9 +387,9 @@ public class RawXlyder extends StatefulWidget {
                                         return true;
                                     })
                                     .dragCallback((x, y, dx, dy) -> this.move(constraints, dx, -dy))
-                                    .dragEndCallback(() -> dragging = false)
+                                    .dragEndCallback(() -> this.dragging = false)
                                     //TODO: invert the y passed here cuz it cringe atm
-                                    .cursorStyleSupplier((x, y) -> (!isInHandle(constraints, x, constraints.maxHeight() - y) && !dragging) ? CursorStyle.HAND : CursorStyle.MOVE),
+                                    .cursorStyleSupplier((x, y) -> (!this.isInHandle(constraints, x, constraints.maxHeight() - y) && !this.dragging) ? CursorStyle.HAND : CursorStyle.MOVE),
                                 content
                             )
                         )
@@ -401,8 +401,8 @@ public class RawXlyder extends StatefulWidget {
             var trackWidth = constraints.maxWidth() - this.widget().handleSize.width();
             var trackHeight = constraints.maxHeight() - this.widget().handleSize.height();
 
-            var handleMinX = normalizedValue.x() * trackWidth;
-            var handleMinY = normalizedValue.y() * trackHeight;
+            var handleMinX = this.normalizedValue.x() * trackWidth;
+            var handleMinY = this.normalizedValue.y() * trackHeight;
             var handleMaxX = handleMinX + this.widget().handleSize.width();
             var handleMaxY = handleMinY + this.widget().handleSize.height();
 
@@ -440,7 +440,10 @@ public class RawXlyder extends StatefulWidget {
             double newY = widget.value.y();
             if (newNormalizedX != null) newX = widget.xSliderFunction.deNormalize(newNormalizedX, widget.min.x, widget.max.x);
             if (newNormalizedY != null) newY = widget.ySliderFunction.deNormalize(newNormalizedY, widget.min.y, widget.max.y);
-            widget.onChanged.accept(newX, newY);
+            widget.onChanged.accept(
+                widget.xStep != null ? Math.round(newX / widget.xStep) * widget.xStep : newX,
+                widget.yStep != null ? Math.round(newY / widget.yStep) * widget.yStep : newY
+            );
         }
     }
 }

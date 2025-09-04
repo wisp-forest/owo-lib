@@ -22,7 +22,7 @@ public class RawSlider extends StatefulWidget {
     protected double min = 0;
     protected double max = 1;
     protected @Nullable Double step;
-    protected SliderFunction sliderFunction = SliderFunction.LINEAR;
+    protected SliderFunction function = SliderFunction.LINEAR;
     protected LayoutAxis axis = LayoutAxis.HORIZONTAL;
     protected double handleSize;
 
@@ -93,14 +93,14 @@ public class RawSlider extends StatefulWidget {
         return this.step;
     }
 
-    public RawSlider sliderFunction(SliderFunction sliderFunction) {
+    public RawSlider function(SliderFunction sliderFunction) {
         this.assertMutable();
-        this.sliderFunction = sliderFunction;
+        this.function = sliderFunction;
         return this;
     }
 
-    public SliderFunction sliderFunction() {
-        return this.sliderFunction;
+    public SliderFunction function() {
+        return this.function;
     }
 
     public RawSlider axis(LayoutAxis axis) {
@@ -144,15 +144,14 @@ public class RawSlider extends StatefulWidget {
         protected CursorStyle draggingCursorStyle = null;
 
         @Override
-        public void init() {
-            var widget = this.widget();
-            this.incrementStep = widget.incrementStep != null ? widget.sliderFunction.normalize(widget.incrementStep, widget.min, widget.max) : widget.step != null ? widget.sliderFunction.normalize(widget.step, widget.min, widget.max) : 0.01;
-        }
-
-        @Override
         public Widget build(BuildContext context) {
             var widget = this.widget();
-            this.normalizedValue = widget.sliderFunction.normalize(widget.value, widget.min, widget.max);
+            this.normalizedValue = widget.function.normalize(widget.value, widget.min, widget.max);
+            this.incrementStep = widget.incrementStep != null
+                ? widget.function.normalize(widget.incrementStep, widget.min, widget.max)
+                : widget.step != null
+                    ? widget.function.normalize(widget.step, widget.min, widget.max)
+                    : 0.01;
             this.draggingCursorStyle = null;
             return new LayoutBuilder((innerContext, constraints) -> {
                 var size = constraints.maxFiniteOrMinSize();
@@ -161,8 +160,8 @@ public class RawSlider extends StatefulWidget {
                     new Sized(size, widget.track),
                     new Padding(
                         widget.axis.chooseCompute(
-                            () -> Insets.left(Math.floor((size.width() - widget.handleSize) * normalizedValue)),
-                            () -> Insets.top(Math.floor((size.height() - widget.handleSize) * (1 - normalizedValue)))
+                            () -> Insets.left(Math.floor((size.width() - widget.handleSize) * this.normalizedValue)),
+                            () -> Insets.top(Math.floor((size.height() - widget.handleSize) * (1 - this.normalizedValue)))
                         ),
                         widget.axis.chooseCompute(
                             () -> new Sized(widget.handleSize, size.height(), widget.handle),
@@ -175,7 +174,7 @@ public class RawSlider extends StatefulWidget {
                         ? content
                         : new Incrementor(
                             widget.axis,
-                            increment -> applyValue(MathHelper.clamp(normalizedValue + incrementStep * increment, 0, 1)),
+                            increment -> this.applyValue(MathHelper.clamp(this.normalizedValue + this.incrementStep * increment, 0, 1)),
                             new MouseArea(
                                 mouseArea -> mouseArea
                                     //TODO: decide what to do with buttons here
@@ -183,19 +182,19 @@ public class RawSlider extends StatefulWidget {
                                         if (button != 0) return false;
 
                                         if (widget.axis == LayoutAxis.VERTICAL) y = constraints.maxFiniteOrMinOnAxis(widget.axis) - y;
-                                        var initialDragValue = normalizedValue;
-                                        if (!isInHandle(constraints, x, y)) initialDragValue = this.setAbsolute(constraints, x, y);
+                                        var initialDragValue = this.normalizedValue;
+                                        if (!this.isInHandle(constraints, x, y)) initialDragValue = this.setAbsolute(constraints, x, y);
 
                                         this.dragValue = initialDragValue;
                                         this.dragging = true;
                                         return true;
                                     })
                                     .dragCallback((x, y, dx, dy) -> this.move(constraints, dx, widget.axis == LayoutAxis.VERTICAL ? -dy : dy))
-                                    .dragEndCallback(() -> dragging = false)
+                                    .dragEndCallback(() -> this.dragging = false)
                                     .cursorStyleSupplier((x, y) -> {
                                         //TODO: invert the y passed in here cuz its cringe atm
-                                        if (!isInHandle(constraints, x, constraints.maxHeight() - y) && !dragging) return CursorStyle.HAND;
-                                        if (draggingCursorStyle == null) this.draggingCursorStyle = CursorStyle.forDraggingAlong(widget.axis, context.instance().computeGlobalTransform());
+                                        if (!this.isInHandle(constraints, x, constraints.maxHeight() - y) && !this.dragging) return CursorStyle.HAND;
+                                        if (this.draggingCursorStyle == null) this.draggingCursorStyle = CursorStyle.forDraggingAlong(widget.axis, context.instance().computeGlobalTransform());
                                         return this.draggingCursorStyle;
                                     }),
                                 content
@@ -209,7 +208,7 @@ public class RawSlider extends StatefulWidget {
             var axis = this.widget().axis;
 
             var trackLength = constraints.maxFiniteOrMinOnAxis(axis) - this.widget().handleSize;
-            var handleMin = normalizedValue * trackLength;
+            var handleMin = this.normalizedValue * trackLength;
             var handleMax = handleMin + this.widget().handleSize;
 
             var coordinate = axis.choose(x, y);
@@ -223,7 +222,7 @@ public class RawSlider extends StatefulWidget {
         }
 
         protected double setAbsolute(Constraints constraints, double x, double y) {
-            if (this.widget().onChanged == null) return normalizedValue;
+            if (this.widget().onChanged == null) return this.normalizedValue;
 
             var axis = this.widget().axis;
             var handleSize = this.widget().handleSize;
@@ -237,7 +236,7 @@ public class RawSlider extends StatefulWidget {
         protected void applyValue(double newNormalizedValue) {
             var widget = this.widget();
             var step = widget.step;
-            var newValue = widget.sliderFunction.deNormalize(newNormalizedValue, widget.min, widget.max);
+            var newValue = widget.function.deNormalize(newNormalizedValue, widget.min, widget.max);
             this.widget().onChanged.accept(step != null ? Math.round(newValue / step) * step : newValue);
         }
     }

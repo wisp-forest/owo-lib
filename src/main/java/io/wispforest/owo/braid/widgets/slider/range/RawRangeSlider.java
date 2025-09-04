@@ -273,15 +273,15 @@ public class RawRangeSlider extends StatefulWidget {
             this.draggingCursorStyle = null;
             return new LayoutBuilder((innerContext, constraints) -> {
                 var combinedHandleSize = widget.minHandleSize + widget.maxHandleSize;
-                var rangeExtent = Math.ceil((constraints.maxOnAxis(widget.axis) - combinedHandleSize) * (normalizedMax - normalizedMin));
+                var rangeExtent = Math.ceil((constraints.maxOnAxis(widget.axis) - combinedHandleSize) * (this.normalizedMax - this.normalizedMin));
 
                 var content = new Stack(
                     widget.axis.choose(Alignment.LEFT, Alignment.TOP),
                     new Sized(constraints.maxWidth(), constraints.maxHeight(), widget.track),
                     new Padding(
                         widget.axis.chooseCompute(
-                            () -> Insets.left(widget.minHandleSize + Math.floor((constraints.maxWidth() - widget.minHandleSize * 2) * normalizedMin) - 1),
-                            () -> Insets.top(widget.minHandleSize + Math.floor((constraints.maxHeight() - widget.minHandleSize * 2) * normalizedMin) - 1)
+                            () -> Insets.left(widget.minHandleSize + Math.floor((constraints.maxWidth() - widget.minHandleSize * 2) * this.normalizedMin) - 1),
+                            () -> Insets.top(widget.minHandleSize + Math.floor((constraints.maxHeight() - widget.minHandleSize * 2) * this.normalizedMin) - 1)
                         ),
                         new Center(
                             1.0, null,
@@ -293,8 +293,8 @@ public class RawRangeSlider extends StatefulWidget {
                     ),
                     new Padding(
                         widget.axis.chooseCompute(
-                            () -> Insets.left(Math.floor((constraints.maxWidth() - widget.minHandleSize * 2) * normalizedMin)),
-                            () -> Insets.top(Math.floor((constraints.maxHeight() - widget.minHandleSize * 2) * normalizedMin))
+                            () -> Insets.left(Math.floor((constraints.maxWidth() - widget.minHandleSize * 2) * this.normalizedMin)),
+                            () -> Insets.top(Math.floor((constraints.maxHeight() - widget.minHandleSize * 2) * this.normalizedMin))
                         ),
                         widget.axis.chooseCompute(
                             () -> new Sized(widget.minHandleSize, constraints.maxHeight(), widget.minHandle),
@@ -303,8 +303,8 @@ public class RawRangeSlider extends StatefulWidget {
                     ),
                     new Padding(
                         widget.axis.chooseCompute(
-                            () -> Insets.left(widget.maxHandleSize + Math.floor((constraints.maxWidth() - widget.maxHandleSize * 2) * normalizedMax)),
-                            () -> Insets.top(widget.maxHandleSize + Math.floor((constraints.maxHeight() - widget.maxHandleSize * 2) * normalizedMax))
+                            () -> Insets.left(widget.maxHandleSize + Math.floor((constraints.maxWidth() - widget.maxHandleSize * 2) * this.normalizedMax)),
+                            () -> Insets.top(widget.maxHandleSize + Math.floor((constraints.maxHeight() - widget.maxHandleSize * 2) * this.normalizedMax))
                         ),
                         widget.axis.chooseCompute(
                             () -> new Sized(widget.maxHandleSize, constraints.maxHeight(), widget.maxHandle),

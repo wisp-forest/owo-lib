@@ -25,53 +25,39 @@ public interface SliderFunction {
 
         @Override
         public double normalize(double value, double min, double max) {
-            var inverted = min > max;
-            var effectiveMin = inverted ? max : min;
-            var effectiveMax = inverted ? min : max;
-            var effectiveValue = value;
-
-            if (effectiveMin <= 0) {
-                var offset = EPSILON - effectiveMin;
-                effectiveMin += offset;
-                effectiveMax += offset;
-                effectiveValue += offset;
+            if (min <= 0) {
+                var offset = EPSILON - min;
+                min += offset;
+                max += offset;
+                value += offset;
             }
 
-            effectiveValue = MathHelper.clamp(effectiveValue, effectiveMin, effectiveMax);
+            value = MathHelper.clamp(value, min, max);
 
-            var logMin = Math.log(effectiveMin);
-            var logMax = Math.log(effectiveMax);
+            var logMin = Math.log(min);
+            var logMax = Math.log(max);
 
-            if (logMin >= logMax) return (effectiveValue - effectiveMin) / (effectiveMax - effectiveMin);
+            if (logMin >= logMax) return (value - min) / (max - min);
 
-            var normalized = (Math.log(effectiveValue) - logMin) / (logMax - logMin);
-
-            return inverted ? 1.0 - normalized : normalized;
+            return (Math.log(value) - logMin) / (logMax - logMin);
         }
 
         @Override
         public double deNormalize(double normalizedValue, double min, double max) {
-            var inverted = min > max;
-            var effectiveMin = inverted ? max : min;
-            var effectiveMax = inverted ? min : max;
-
-            if (effectiveMin <= 0) {
-                var offset = EPSILON - effectiveMin;
-                effectiveMin += offset;
-                effectiveMax += offset;
+            if (min <= 0) {
+                var offset = EPSILON - min;
+                min += offset;
+                max += offset;
             }
 
-            normalizedValue = MathHelper.clamp(normalizedValue, 0.0, 1.0);
-            if (inverted) normalizedValue = 1.0 - normalizedValue;
-
-            var logMin = Math.log(effectiveMin);
-            var logMax = Math.log(effectiveMax);
+            var logMin = Math.log(min);
+            var logMax = Math.log(max);
 
             var expValue = Math.exp(logMin + normalizedValue * (logMax - logMin));
 
             if (min <= 0 && max > min) expValue -= (EPSILON - min);
 
-            return MathHelper.clamp(expValue, min, max);
+            return expValue;
         }
     };
 }

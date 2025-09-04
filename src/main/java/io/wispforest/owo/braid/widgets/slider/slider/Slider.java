@@ -62,8 +62,8 @@ public class Slider extends RawSlider {
     }
 
     @Override
-    public Slider sliderFunction(SliderFunction sliderFunction) {
-        return (Slider) super.sliderFunction(sliderFunction);
+    public Slider function(SliderFunction sliderFunction) {
+        return (Slider) super.function(sliderFunction);
     }
 
     @Override

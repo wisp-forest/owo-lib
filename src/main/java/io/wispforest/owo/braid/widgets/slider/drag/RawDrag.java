@@ -9,64 +9,45 @@ import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
 import io.wispforest.owo.braid.widgets.basic.Center;
+import io.wispforest.owo.braid.widgets.basic.ControlsOverride;
 import io.wispforest.owo.braid.widgets.basic.LayoutBuilder;
 import io.wispforest.owo.braid.widgets.basic.MouseArea;
 import io.wispforest.owo.braid.widgets.basic.Sized;
-import io.wispforest.owo.braid.widgets.basic.action.ActionTrigger;
-import io.wispforest.owo.braid.widgets.basic.action.Actions;
+import io.wispforest.owo.braid.widgets.slider.Incrementor;
+import io.wispforest.owo.braid.widgets.slider.slider.SliderCallback;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.DoubleConsumer;
-
-/// A widget that allows dragging a value along a specified axis.
-///
-/// @author chyzman
 public class RawDrag extends StatefulWidget {
 
-    /// The initial value of the drag.
     public final double value;
-    private final double normalizedValue;
-    private @Nullable Double min = 0d;
-    private @Nullable Double max = 1d;
-    private @Nullable Double step = null;
-    private boolean wrap = false;
+    protected @Nullable Double min = 0d;
+    protected @Nullable Double max = 1d;
+    protected @Nullable Double step;
+    protected DragFunction dragFunction = DragFunction.LINEAR;
+    protected double dragMultiplier = 1;
+    protected LayoutAxis axis = LayoutAxis.HORIZONTAL;
+    protected boolean wrap = false;
 
-    private LayoutAxis axis = LayoutAxis.HORIZONTAL;
-
-    private @Nullable DoubleConsumer onChanged = null;
+    public final @Nullable SliderCallback onChanged;
     public final @Nullable Widget child;
 
+    protected @Nullable Double incrementStep = null;
 
-    /// Constructs a new `RawDrag` widget.
-    ///
-    /// @param value         The initial value of the drag.
-    /// @param setupCallback A callback used to configure this widget's properties, including:
-    ///                      <ul>
-    ///                      <li>{@link #min(Double)}: Minimum value</li>
-    ///                      <li>{@link #max(Double)}: Maximum value</li>
-    ///                      <li>{@link #step(Double)}: Step size</li>
-    ///                      <li>{@link #wrap(boolean)}: Whether to wrap the value around when it exceeds the bounds</li>
-    ///                      <li>{@link #onChanged(DoubleConsumer)}: Callback for value changes</li>
-    ///                      <li>{@link #axis(LayoutAxis)}: Drag axis</li>
-    ///                      </ul>
-    /// @param child         this widget's child
     public RawDrag(
         double value,
-        WidgetSetupCallback<RawDrag> setupCallback,
+        @Nullable WidgetSetupCallback<RawDrag> setupCallback,
+        @Nullable SliderCallback onChanged,
         @Nullable Widget child
     ) {
         this.value = value;
+        this.onChanged = onChanged;
         this.child = child;
-        setupCallback.setup(this);
-        this.normalizedValue = normalizeValue(value, this.min, this.max, this.wrap);
+        if (setupCallback != null) setupCallback.setup(this);
     }
 
-    //region Setters and Getters
+    //region Setup Methods
 
-    /// Sets the minimum value for the drag.
-    ///
-    /// @param min The minimum value, or {@code null} to remove the minimum constraint.
     public RawDrag min(@Nullable Double min) {
         this.assertMutable();
         this.min = min;
@@ -78,7 +59,6 @@ public class RawDrag extends StatefulWidget {
         this.min = min;
         return this;
     }
-
 
     public @Nullable Double min() {
         return this.min;
@@ -100,14 +80,14 @@ public class RawDrag extends StatefulWidget {
         return this.max;
     }
 
-    public RawDrag clamp(@Nullable Double min, @Nullable Double max) {
+    public RawDrag range(@Nullable Double min, @Nullable Double max) {
         this.assertMutable();
         this.min = min;
         this.max = max;
         return this;
     }
 
-    public RawDrag clamp(double min, double max) {
+    public RawDrag range(double min, double max) {
         this.assertMutable();
         this.min = min;
         this.max = max;
@@ -120,8 +100,38 @@ public class RawDrag extends StatefulWidget {
         return this;
     }
 
+    public RawDrag step(double step) {
+        this.assertMutable();
+        this.step = step;
+        return this;
+    }
+
     public @Nullable Double step() {
         return this.step;
+    }
+
+    public RawDrag dragFunction(DragFunction dragFunction) {
+        this.assertMutable();
+        this.dragFunction = dragFunction;
+        return this;
+    }
+
+    public DragFunction dragFunction() {
+        return this.dragFunction;
+    }
+
+    public RawDrag axis(LayoutAxis axis) {
+        this.assertMutable();
+        this.axis = axis;
+        return this;
+    }
+
+    public RawDrag vertical() {
+        return this.axis(LayoutAxis.VERTICAL);
+    }
+
+    public LayoutAxis axis() {
+        return this.axis;
     }
 
     public RawDrag wrap(boolean wrap) {
@@ -134,24 +144,24 @@ public class RawDrag extends StatefulWidget {
         return this.wrap;
     }
 
-    public RawDrag onChanged(@Nullable DoubleConsumer onChanged) {
+    public RawDrag dragMultiplier(double dragMultiplier) {
         this.assertMutable();
-        this.onChanged = onChanged;
+        this.dragMultiplier = dragMultiplier;
         return this;
     }
 
-    public @Nullable DoubleConsumer onChanged() {
-        return this.onChanged;
+    public double dragMultiplier() {
+        return this.dragMultiplier;
     }
 
-    public RawDrag axis(LayoutAxis axis) {
+    public RawDrag incrementStep(double incrementStep) {
         this.assertMutable();
-        this.axis = axis;
+        this.incrementStep = incrementStep;
         return this;
     }
 
-    public LayoutAxis axis() {
-        return this.axis;
+    public @Nullable Double incrementStep() {
+        return this.incrementStep;
     }
 
     //endregion
@@ -165,39 +175,59 @@ public class RawDrag extends StatefulWidget {
     public static class State extends WidgetState<RawDrag> {
 
         protected double dragValue = 0;
+        protected boolean dragging = false;
+
+        protected double normalizedValue;
+        protected double incrementStep;
+        protected CursorStyle draggingCursorStyle = null;
+
+        @Override
+        public void init() {
+            var widget = this.widget();
+            // incrementStep in drag: when bounded, treat increment as fraction of range; when unbounded, as raw value units
+            if (widget.min != null && widget.max != null) {
+                var range = widget.max - widget.min;
+                var inc = widget.incrementStep != null ? widget.incrementStep : (widget.step != null ? widget.step : range * 0.01);
+                this.incrementStep = inc / (range == 0 ? 1 : range);
+            } else {
+                this.incrementStep = widget.incrementStep != null ? widget.incrementStep : (widget.step != null ? widget.step : 1.0);
+            }
+        }
 
         @Override
         public Widget build(BuildContext context) {
+            var widget = this.widget();
+            this.normalizedValue = (widget.min != null && widget.max != null)? (widget.value - widget.min) / (widget.max - widget.min) : 0;
+            this.draggingCursorStyle = null;
             return new LayoutBuilder((innerContext, constraints) -> {
-                var widget = this.widget();
                 var size = constraints.maxFiniteOrMinSize();
-                var step = widget.step != null
-                    ? widget.step
-                    : (widget.max != null && widget.min != null)
-                        ? (widget.max - widget.min) / 100
-                        : 1;
                 var content = new Sized(size, widget.child);
                 return new Center(
-                    widget.onChanged == null
+                    widget.onChanged == null || ControlsOverride.controlsDisabled(context)
                         ? content
-                        : new Actions(
-                            actions -> {
-                                actions.addAction(ActionTrigger.POSITIVE_DIRECTIONS, () -> applyValue(widget.value + step));
-                                actions.addAction(ActionTrigger.NEGATIVE_DIRECTIONS, () -> applyValue(widget.value - step));
-                            },
+                        : new Incrementor(
+                            widget.axis,
+                            increment -> this.increment(constraints, increment),
                             new MouseArea(
                                 mouseArea -> mouseArea
-                                    .dragCallback((x, y, dx, dy) -> {
-                                        if (widget.axis == LayoutAxis.VERTICAL) dy = -dy;
-                                        this.dragValue += this.widget().axis.choose(dx, dy) /*/ (constraints.maxFiniteOrMinOnAxis(this.widget().axis))*/;
-                                        this.applyValue(this.dragValue);
+                                    .clickCallback((x, y, button, modifiers) -> {
+                                        if (button != 0) return false;
+                                        this.dragValue = this.normalizedValue;
+                                        this.dragging = true;
+                                        return true;
                                     })
-                                    .scrollCallback(((horizontal, vertical) -> {
-                                        //TODO: negate horizontal scrolling in appstate?
-                                        var offset = Math.abs(vertical) > Math.abs(horizontal) ? vertical : -horizontal;
-                                        return applyValue(widget.value + offset * step);
-                                    }))
-                                    .cursorStyle(widget.axis.choose(CursorStyle.HORIZONTAL_RESIZE, CursorStyle.VERTICAL_RESIZE)),
+                                    .dragCallback((x, y, dx, dy) -> {
+                                        var delta = widget.axis.choose(dx, widget.axis == LayoutAxis.VERTICAL ? -dy : dy);
+                                        this.move(constraints, delta);
+                                    })
+                                    .dragEndCallback(() -> dragging = false)
+                                    .cursorStyleSupplier((x, y) -> {
+                                        if (dragging) {
+                                            if (draggingCursorStyle == null) this.draggingCursorStyle = CursorStyle.forDraggingAlong(widget.axis, context.instance().computeGlobalTransform());
+                                            return this.draggingCursorStyle;
+                                        }
+                                        return CursorStyle.HAND;
+                                    }),
                                 content
                             )
                         )
@@ -205,38 +235,68 @@ public class RawDrag extends StatefulWidget {
             });
         }
 
-        protected boolean applyValue(double value) {
+        protected void move(Constraints constraints, double deltaAlongAxis) {
             var widget = this.widget();
-            var normalized = normalizeValue(value, widget.min, widget.max, widget.wrap);
-            if (normalized == widget.normalizedValue) return false;
-            var trueMin = widget.min != null ? widget.min : Double.NEGATIVE_INFINITY;
-            var trueMax = widget.max != null ? widget.max : Double.POSITIVE_INFINITY;
-            var newValue = trueMin + normalized * (trueMax - trueMin);
+            if (widget.min != null && widget.max != null) {
+                var track = Math.max(1, constraints.maxFiniteOrMinOnAxis(widget.axis));
+                var cursorNorm = (deltaAlongAxis / track) * widget.dragMultiplier;
+                var valueDelta = widget.dragFunction.deltaValue(widget.value, widget.min, widget.max, cursorNorm);
+                var newValue = widget.value + valueDelta;
+                this.applyValueBounded(newValue);
+            } else {
+                var track = Math.max(1, constraints.maxFiniteOrMinOnAxis(widget.axis));
+                var cursorNorm = (deltaAlongAxis / track) * widget.dragMultiplier;
+                var valueDelta = widget.dragFunction.deltaValue(widget.value, null, null, cursorNorm);
+                this.applyValueUnbounded(widget.value + valueDelta);
+            }
+        }
+
+        protected void increment(Constraints constraints, double increment) {
+            var widget = this.widget();
+            if (widget.min != null && widget.max != null) {
+                var range = widget.max - widget.min;
+                var valueDelta = incrementStep * increment * range;
+                this.applyValueBounded(widget.value + valueDelta);
+            } else {
+                var unit = widget.incrementStep != null ? widget.incrementStep : (widget.step != null ? widget.step : 1.0);
+                this.applyValueUnbounded(widget.value + unit * increment);
+            }
+        }
+
+        protected void applyValueBounded(double newValue) {
+            var widget = this.widget();
+            var min = widget.min == null ? Double.NEGATIVE_INFINITY : widget.min;
+            var max = widget.max == null ? Double.POSITIVE_INFINITY : widget.max;
+            if (widget.wrap && widget.min != null && widget.max != null) {
+                var range = max - min;
+                if (range != 0) {
+                    var offset = (newValue - min) % range;
+                    if (offset < 0) offset += range;
+                    newValue = min + offset;
+                }
+            } else {
+                newValue = MathHelper.clamp(newValue, min, max);
+            }
             var step = widget.step;
-            if (step != null) newValue = Math.round(newValue / step) * step;
-            if (widget.value == newValue) return false;
+            newValue = step != null ? Math.round(newValue / step) * step : newValue;
+            if (widget.wrap && widget.min != null && widget.max != null) {
+                var range = max - min;
+                if (range != 0) {
+                    var offset = (newValue - min) % range;
+                    if (offset < 0) offset += range;
+                    newValue = min + offset;
+                }
+            } else {
+                newValue = MathHelper.clamp(newValue, min, max);
+            }
             widget.onChanged.accept(newValue);
-            return true;
+        }
+
+        protected void applyValueUnbounded(double newValue) {
+            var widget = this.widget();
+            var step = widget.step;
+            widget.onChanged.accept(step != null ? Math.round(newValue / step) * step : newValue);
         }
     }
 
-    protected static double normalizeValue(
-        double value,
-        @Nullable Double min,
-        @Nullable Double max,
-        boolean wrap
-    ) {
-        double trueMin = min != null ? min : Double.NEGATIVE_INFINITY;
-        double trueMax = max != null ? max : Double.POSITIVE_INFINITY;
-
-        var normalized = (value - trueMin) / (trueMax - trueMin);
-        if (Double.isNaN(normalized)) normalized = 0;
-
-        if (wrap && min != null && max != null) {
-            normalized = normalized - Math.floor(normalized);
-        } else {
-            normalized = MathHelper.clamp(normalized, 0, 1);
-        }
-        return normalized;
-    }
 }
