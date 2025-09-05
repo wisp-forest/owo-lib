@@ -25,6 +25,7 @@ import net.minecraft.text.Style;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
+import org.joml.Vector2dc;
 import org.joml.Vector4f;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
@@ -533,6 +534,11 @@ public class AppState implements InstanceHost, ProxyHost {
     @Override
     public void schedulePostLayoutCallback(Runnable callback) {
         this.postLayoutCallbacks.offer(callback);
+    }
+
+    @Override
+    public Vector2dc cursorPosition() {
+        return this.cursorPosition;
     }
 
     @Override
