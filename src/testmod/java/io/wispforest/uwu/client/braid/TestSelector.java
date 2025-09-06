@@ -876,7 +876,7 @@ public class TestSelector extends StatefulWidget {
                                     new Sized(
                                         20,
                                         20,
-                                        new EntityWidget(1.5d, this.chyz, widget -> widget.lookAtCursor(true))
+                                        new EntityWidget(1.5d, this.chyz, widget -> widget.displayMode(EntityWidget.DisplayMode.CURSOR))
                                     ),
                                     new Padding(Insets.none())
                                 ),
@@ -965,7 +965,7 @@ public class TestSelector extends StatefulWidget {
                                 new EntityWidget(
                                     3.5,
                                     this.chyz,
-                                    widget -> widget.lookAtCursor(true)
+                                    widget -> widget.displayMode(EntityWidget.DisplayMode.CURSOR)
                                 )
                             )
                         )
@@ -1016,7 +1016,7 @@ public class TestSelector extends StatefulWidget {
                                                 new EntityWidget(
                                                     1,
                                                     this.chyz,
-                                                    widget -> widget.lookAtCursor(true)
+                                                    widget -> widget.displayMode(EntityWidget.DisplayMode.CURSOR)
                                                 )
                                             )
                                         )
@@ -1919,7 +1919,7 @@ public class TestSelector extends StatefulWidget {
                                     new Sized(
                                         96,
                                         96,
-                                        new EntityWidget(1.35, this.displayEntity, widget -> widget.lookAtCursor(true))
+                                        new EntityWidget(1.35, this.displayEntity, widget -> widget.displayMode(EntityWidget.DisplayMode.CURSOR))
                                     )
                                 )
                             )

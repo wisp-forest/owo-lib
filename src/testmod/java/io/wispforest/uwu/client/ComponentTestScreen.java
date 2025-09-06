@@ -289,6 +289,7 @@ public class ComponentTestScreen extends Screen {
                         .allowMouseRotation(true)
                         .scaleToFit(true)
                         .showNametag(true)
+                    .lookAtCursor(true)
         );
 
         rootComponent.child(
