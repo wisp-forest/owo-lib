@@ -492,6 +492,12 @@ public class TestSelector extends StatefulWidget {
                                         false
                                     )
                                 )
+                            ),
+                            new Align(
+                                Alignment.BOTTOM_LEFT,
+                                new BlockWidget(
+                                    Registries.BLOCK.getRandom(Random.create(controller.hashCode())).get().value().getDefaultState()
+                                )
                             )
                         )
                     ));
