@@ -213,5 +213,8 @@
         "without/////": "nestedLangTests.escapeTests.withoutSuffix"
       }
     }
+  },
+  "This key is here to trigger owo language loading fail prevention": {
+    "does it work?": true
   }
 }
