@@ -6,6 +6,7 @@ import com.google.gson.JsonParseException;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.serialization.JsonOps;
 import io.wispforest.owo.text.LanguageAccess;
 import io.wispforest.owo.text.NestedLangHandler;
@@ -15,7 +16,10 @@ import net.minecraft.util.Language;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.io.InputStream;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -28,9 +32,9 @@ public class LanguageMixin {
     private static Set<Map.Entry<String, JsonElement>> deNestNestedKeys(JsonObject instance, Operation<Set<Map.Entry<String, JsonElement>>> original) {
         var key = "owo:nested_lang";
         if (instance.has(key) && instance.get(key).isJsonPrimitive() && instance.get(key).getAsBoolean()) {
+            instance.remove(key);
             return NestedLangHandler.deNest(original.call(instance));
         }
-        instance.remove(key);
         return original.call(instance);
     }
 

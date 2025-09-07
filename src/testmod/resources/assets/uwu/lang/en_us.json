@@ -1,48 +1,30 @@
 {
   "owo:nested_lang": true,
-  "item.uwu.test_stick": [
-      "",
-      {"text": "Test", "color": "green"},
-      {"text": " Stick", "color": "red"}
+
+  "text.uwu...": {
+    "chyz": [
+      {"text": "c", "color": "#fdf433"},
+      {"text": "h", "color": "#fffdff"},
+      {"text": "y", "color": "#9b57d0"},
+      {"text": "z", "color": "#2f2f2f"}
     ],
-    "uwu.a": {"index": 0, "color": "#ae0000"},
-  "item.uwu.screen_shard": [
-      {"text": "Screen Shard", "color": "#3AB0FF"}
+    "glisco": [
+      {"text": "g", "color": "#ff7166"},
+      {"text": "l", "color": "#ffb266"},
+      {"text": "i", "color": "#ceff66"},
+      {"text": "s", "color": "#90ff66"},
+      {"text": "c", "color": "#66d4ff"},
+      {"text": "o", "color": "#c366ff"}
     ],
-    "text.uwu.braid": [
-    {"text": "b", "color": "#ff7166"},
-    {"text": "r", "color": "#ffb266"},
-    {"text": "a", "color": "#ceff66"},
-    {"text": "i", "color": "#90ff66"},
-    {"text": "d", "color": "#66d4ff"}
-  ],
-  "item.uwu.braid": [
-  {"translate":  "text.uwu.braid"},
-    {"text": " (chyz tried)", "color": "#FFFFFF"}
-  ],
-  "block.uwu.braid_display": [
-    {"translate": "text.uwu.braid"},
-    " display"
-  ],
-  "text.uwu.glisco": [
-    {"text": "g", "color": "#ff7166"},
-    {"text": "l", "color": "#ffb266"},
-    {"text": "i", "color": "#ceff66"},
-    {"text": "s", "color": "#90ff66"},
-    {"text": "c", "color": "#66d4ff"},
-    {"text": "o", "color": "#c366ff"}
-  ],
-  "text.uwu.chyz": [
-    {"text": "c", "color": "#fdf433"},
-    {"text": "h", "color": "#fffdff"},
-    {"text": "y", "color": "#9b57d0"},
-    {"text": "z", "color": "#2f2f2f"}
-  ],
-  "item.uwu.counter": "Counter",
-  "text.config.uwu.title": "Test Config Screen",
-  "key.uwu.hud_test": [
-    {"text": "Toggle Test HUD", "color": "#0096FF"}
-  ],
+    "braid": [
+      {"text": "b", "color": "#ff7166"},
+      {"text": "r", "color": "#ffb266"},
+      {"text": "a", "color": "#ceff66"},
+      {"text": "i", "color": "#90ff66"},
+      {"text": "d", "color": "#66d4ff"}
+    ]
+  },
+
   "text.config.uwu...": {
     "title": "Test Config Screen",
     "section...": {
@@ -76,18 +58,18 @@
         "nestingTimeIntensifies.wowSoNested": "Wow so nested"
       },
       "someOption": "Hello, yes, this is the predicate constraint tutorial",
-      "floting": {
+      "floting...": {
         "/": "Floting",
         "tooltip": "messes with button?"
       },
       "thisIsAStringValue": "Clearly, this is a string value",
       "thereAreStringsHere": "There are Strings here",
-      "brotheresAnEnum": {
+      "brotheresAnEnum...": {
         "/": "Bro, there's an Enum!",
         "tooltip": "Yeah, it's crazy"
       },
-      "anEpicColor..": {
-        "": "An epic color",
+      "anEpicColor...": {
+        "/": "An epic color",
         "WithAlpha": "An epic color with alpha"
       }
     },
@@ -100,7 +82,15 @@
   },
   "text.config.uowou.option.thisIsNotSyncable": "Unsyncable Option",
 
-  "uwu.homicide": "homicide",
+  "uwu...": {
+    "a": {"index": 0, "color": "#ae0000"},
+    "homicide": "homicide"
+  },
+
+  "key.uwu.hud_test": [
+    {"text": "Toggle Test HUD", "color": "#0096FF"}
+  ],
+
   "text.ui.test_slider": "Value: %s",
   "itemGroup...": {
     "food_and_drink.button.consume": "C o n s u m e",
@@ -159,6 +149,27 @@
       {"text": " Title", "color": "#FF5272"}
     ]
   },
+
+  "item.uwu...": {
+    "counter": "Counter",
+    "test_stick": [
+      "",
+      {"text": "Test", "color": "green"},
+      {"text": " Stick", "color": "red"}
+    ],
+    "screen_shard": [
+      {"text": "Screen Shard", "color": "#3AB0FF"}
+    ],
+    "braid": [
+      {"translate":  "text.uwu.braid"},
+      {"text": " (chyz tried)", "color": "#FFFFFF"}
+    ]
+  },
+  "block.uwu.braid_display": [
+    {"translate": "text.uwu.braid"},
+    " display"
+  ],
+
   "nestedLangTests...": {
     "prefixTest...": {
       "prefixTestKey": "nestedLangTests.prefixTest.prefixTestKey"
@@ -202,6 +213,5 @@
         "without/////": "nestedLangTests.escapeTests.withoutSuffix"
       }
     }
-  },
-  "pauseHereBro": true
+  }
 }
