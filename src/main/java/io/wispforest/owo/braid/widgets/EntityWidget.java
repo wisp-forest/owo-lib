@@ -163,6 +163,7 @@ public class EntityWidget extends LeafInstanceWidget {
                 globalTransform.transform(localCursor);
 //                localTransform.invert().transform(localCursor);
 
+                //TODO: DIE DIE DIE DIE DIE DIE DIE DIE DIE DIE DIE DIE DIE DIE DIE DIE DIE DIE DIE DIE DIE DIE DIE DIE DIE DIE DIE DIE
                 var center = new Vector4f((float) this.transform.width() / 2f, (float) this.transform.height() / 2f, 0, 1);
                 localTransform.transform(center);
 
