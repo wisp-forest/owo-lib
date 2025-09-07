@@ -70,6 +70,7 @@ public class LanguageMixin {
         @Share("owo_language_key_loading_error") LocalBooleanRef failed
     ) {
         try {
+            failed.set(false);
             return original.call(element, name);
         } catch (Exception e) {
             failed.set(true);

@@ -17,8 +17,11 @@ public class NestedLangHandler {
     private static final Pattern NESTED_OBJECT_PATTERN = Pattern.compile("^((?:(.*?)\\.\\.)?)( ?)((?:\\.\\.(.*?))?)$");
     private static final Pattern NESTED_LIST_PATTERN = Pattern.compile("^((?:(.*?)\\.\\.)?)((?:-?[0-9]*| )?)((?:\\.\\.(.*?))?)$");
     private static final Pattern AFFIX_ESCAPE_PATTERN = Pattern.compile("^(/*)([^/]*)(/*)$");
+    private static final Pattern EMPTY_STRIP_PATTERN = Pattern.compile("[^a-zA-Z0-9]+$");
 
     public static Set<Map.Entry<String, JsonElement>> deNest(Set<Map.Entry<String, JsonElement>> entries) {
+        var denested = deNest("", entries, "");
+        denested.forEach(entry -> System.out.println(entry.getKey() + " = " + entry.getValue()));
         return deNest("", entries, "");
     }
 
@@ -78,6 +81,7 @@ public class NestedLangHandler {
     ) {
         var snipperMatcher = AFFIX_ESCAPE_PATTERN.matcher(key);
         if (!snipperMatcher.matches()) return prefix + key + suffix;
+        if (key.isEmpty())  return prefix.replaceAll(EMPTY_STRIP_PATTERN.pattern(), "") + suffix;
         var leadingSnip = Math.min(snipperMatcher.group(1).length(), prefix.length());
         var trailingSnip = Math.min(snipperMatcher.group(3).length(), suffix.length());
         return prefix.substring(0, prefix.length() - leadingSnip) +

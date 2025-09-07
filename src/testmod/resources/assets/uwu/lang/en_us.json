@@ -34,7 +34,7 @@
     },
     "category...": {
       "nestingTime...": {
-        "/": "Nesting Time",
+        "": "Nesting Time",
         "tooltip": "Yep, it's nesting Time",
         "nestingTimeIntensifies": "Nesting Time Intensifies"
       }
@@ -42,14 +42,14 @@
     "option...": {
       "aValue": "A Value",
       "regex...": {
-        "/": "Regex'd",
+        "": "Regex'd",
         "tooltip": "Regex tooltip, this is epic"
       },
       "nestingTime...": {
         "togglee": "Togglee",
         "yesThisIsAlsoNested": "Yes this is also nested",
         "nestedIntegers...": {
-          "/": "A nested List of Integers",
+          "": "A nested List of Integers",
           "tooltip": [
             "A very epic nested Integers tooltip",
             {"text": "\nwith multiple lines", "color": "#ae0000"}
@@ -59,17 +59,17 @@
       },
       "someOption": "Hello, yes, this is the predicate constraint tutorial",
       "floting...": {
-        "/": "Floting",
+        "": "Floting",
         "tooltip": "messes with button?"
       },
       "thisIsAStringValue": "Clearly, this is a string value",
       "thereAreStringsHere": "There are Strings here",
       "brotheresAnEnum...": {
-        "/": "Bro, there's an Enum!",
+        "": "Bro, there's an Enum!",
         "tooltip": "Yeah, it's crazy"
       },
       "anEpicColor...": {
-        "/": "An epic color",
+        "": "An epic color",
         "WithAlpha": "An epic color with alpha"
       }
     },
@@ -100,7 +100,7 @@
     },
     "uwu...": {
       "four_tab_group...": {
-        "/": "uωu",
+        "": "uωu",
         "tab.tab_..": [
           "Tab 1",
           "Tab 2",
@@ -111,7 +111,7 @@
         "button.github": "oωo GitHub"
       },
       "six_tab_group...": {
-        "/": "uωu",
+        "": "uωu",
         "tab.tab_..": [
           "Tab 1",
           "Tab 2",
@@ -123,11 +123,11 @@
         "button.owo": "ouωuo"
       },
       "single_tab_group...": {
-        "/": "uωu",
+        "": "uωu",
         "tab.tab_1": "uωu~"
       },
       "vanilla_group...": {
-        "/": "uωu (.❛ ᴗ ❛.)",
+        "": "uωu (.❛ ᴗ ❛.)",
         "tab.tab_..0": [
           "(´• ω •`)",
           "(o˘◡˘o)"
