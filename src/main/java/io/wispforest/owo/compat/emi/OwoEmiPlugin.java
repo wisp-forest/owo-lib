@@ -3,7 +3,7 @@ package io.wispforest.owo.compat.emi;
 import dev.emi.emi.api.EmiPlugin;
 import dev.emi.emi.api.EmiRegistry;
 import dev.emi.emi.api.widget.Bounds;
-import io.wispforest.owo.itemgroup.OwoItemGroup;
+import io.wispforest.owo.itemgroup.base.OwoItemGroupState;
 import io.wispforest.owo.mixin.itemgroup.CreativeInventoryScreenAccessor;
 import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
 import io.wispforest.owo.util.pond.OwoCreativeInventoryScreenExtensions;
@@ -13,21 +13,13 @@ public class OwoEmiPlugin implements EmiPlugin {
     @Override
     public void register(EmiRegistry registry) {
         registry.addExclusionArea(CreativeInventoryScreen.class, (screen, consumer) -> {
-            var group = CreativeInventoryScreenAccessor.owo$getSelectedTab();
-            if (!(group instanceof OwoItemGroup owoGroup)) return;
-            if (owoGroup.getButtons().isEmpty()) return;
+            var state = OwoItemGroupState.getState(CreativeInventoryScreenAccessor.owo$getSelectedTab());
+            if (state == null) return;
 
             int x = ((OwoCreativeInventoryScreenExtensions) screen).owo$getRootX();
             int y = ((OwoCreativeInventoryScreenExtensions) screen).owo$getRootY();
 
-            int stackHeight = owoGroup.getButtonStackHeight();
-            y -= 13 * (stackHeight - 4);
-
-            for (int i = 0; i < owoGroup.getButtons().size(); i++) {
-                int xOffset = x + 198 + (i / stackHeight) * 26;
-                int yOffset = y + 10 + (i % stackHeight) * 30;
-                consumer.accept(new Bounds(xOffset, yOffset, 24, 24));
-            }
+            state.getExclusionZones(x, y).forEach(rect -> consumer.accept(new Bounds(rect.position().x(), rect.position().y(), rect.width(), rect.height())));
         });
 
         registry.addGenericExclusionArea((screen, consumer) -> {

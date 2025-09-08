@@ -1,9 +1,9 @@
-package io.wispforest.owo.itemgroup.gui;
+package io.wispforest.owo.itemgroup.core;
 
-import io.wispforest.owo.itemgroup.Icon;
-import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.OwoItemSettingsExtension;
-import net.minecraft.item.ItemGroup;
+import io.wispforest.owo.itemgroup.base.ButtonDefinition;
+import io.wispforest.owo.itemgroup.base.Icon;
+import io.wispforest.owo.itemgroup.base.OwoItemGroup;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
@@ -13,22 +13,12 @@ import net.minecraft.util.Identifier;
  * define the contents, use {@code null} as the tag
  */
 public record ItemGroupTab(
+        String name,
         Icon icon,
-        Text name,
+        Text tooltip,
         ContentSupplier contentSupplier,
         Identifier texture,
         boolean primary
-) implements OwoItemGroup.ButtonDefinition {
-
+) implements ButtonDefinition {
     public static final Identifier DEFAULT_TEXTURE = Identifier.of("owo", "textures/gui/tabs.png");
-
-    @Override
-    public Text tooltip() {
-        return this.name;
-    }
-
-    @FunctionalInterface
-    public interface ContentSupplier {
-        void addItems(ItemGroup.DisplayContext context, ItemGroup.Entries entries);
-    }
 }

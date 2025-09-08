@@ -1,17 +1,17 @@
 package io.wispforest.owo.mixin.itemgroup;
 
-import io.wispforest.owo.itemgroup.ItemGroupReference;
-import io.wispforest.owo.itemgroup.OwoItemGroup;
+import io.wispforest.owo.itemgroup.core.ItemGroupReference;
 import io.wispforest.owo.itemgroup.OwoItemSettingsExtension;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.registry.RegistryKey;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.function.BiConsumer;
 
 @Mixin(Item.Settings.class)
-public class ItemSettingsMixin implements OwoItemSettingsExtension {
-    private OwoItemGroup owo$group = null;
+public abstract class ItemSettingsMixin implements OwoItemSettingsExtension {
+    private RegistryKey<ItemGroup> owo$group = null;
     private int owo$tab = 0;
     private BiConsumer<Item, ItemGroup.Entries> owo$stackGenerator = null;
     private boolean owo$trackUsageStat = false;
@@ -25,14 +25,14 @@ public class ItemSettingsMixin implements OwoItemSettingsExtension {
     }
 
     @Override
-    public Item.Settings group(OwoItemGroup group) {
+    public Item.Settings group(RegistryKey<ItemGroup> group) {
         this.owo$group = group;
 
         return (Item.Settings)(Object) this;
     }
 
     @Override
-    public OwoItemGroup group() {
+    public RegistryKey<ItemGroup> group() {
         return owo$group;
     }
 

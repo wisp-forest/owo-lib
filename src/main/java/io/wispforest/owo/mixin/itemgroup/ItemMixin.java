@@ -1,9 +1,10 @@
 package io.wispforest.owo.mixin.itemgroup;
 
-import io.wispforest.owo.itemgroup.OwoItemGroup;
+import io.wispforest.owo.itemgroup.base.OwoItemGroup;
 import io.wispforest.owo.util.pond.OwoItemExtensions;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.registry.RegistryKey;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -14,10 +15,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.function.BiConsumer;
 
 @Mixin(Item.class)
-public class ItemMixin implements OwoItemExtensions {
+public abstract class ItemMixin implements OwoItemExtensions {
 
     @Nullable
-    protected ItemGroup owo$group = null;
+    protected RegistryKey<ItemGroup> owo$group = null;
 
     @Unique
     private int owo$tab = 0;
@@ -47,12 +48,12 @@ public class ItemMixin implements OwoItemExtensions {
     }
 
     @Override
-    public void owo$setGroup(ItemGroup group) {
+    public void owo$setGroup(RegistryKey<ItemGroup> group) {
         this.owo$group = group;
     }
 
     @Override
-    public @Nullable ItemGroup owo$group() {
+    public @Nullable RegistryKey<ItemGroup> owo$group() {
         return this.owo$group;
     }
 

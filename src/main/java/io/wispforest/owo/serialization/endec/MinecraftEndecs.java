@@ -133,4 +133,14 @@ public final class MinecraftEndecs {
                 vector -> List.of(xGetter.apply(vector), yGetter.apply(vector), zGetter.apply(vector))
         );
     }
+
+    public static Endec<Identifier> identifierEndec(String defaultNamespace) {
+        return Endec.STRING.xmap(s -> {
+            var parts = s.split(":");
+
+            return (parts.length > 1)
+                ? Identifier.of(s)
+                : Identifier.of(defaultNamespace, s);
+        }, Identifier::toString);
+    }
 }

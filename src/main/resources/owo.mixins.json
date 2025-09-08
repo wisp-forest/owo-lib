@@ -28,6 +28,8 @@
     "itemgroup.ItemGroupAccessor",
     "itemgroup.ItemMixin",
     "itemgroup.ItemSettingsMixin",
+    "itemgroup.ItemGroupMixin",
+    "itemgroup.OwoItemGroupBuilderAccessor",
     "recipe_remainders.CraftingResultSlotMixin",
     "recipe_remainders.JsonDataLoaderMixin",
     "recipe_remainders.ServerRecipeManagerAccessor",

@@ -4,7 +4,7 @@ import io.wispforest.owo.Owo;
 import io.wispforest.owo.client.screens.ScreenInternals;
 import io.wispforest.owo.command.debug.OwoDebugCommands;
 import io.wispforest.owo.config.OwoConfigCommand;
-import io.wispforest.owo.itemgroup.json.OwoItemGroupLoader;
+import io.wispforest.owo.itemgroup.OwoItemGroupLoader;
 import io.wispforest.owo.moddata.ModDataLoader;
 import io.wispforest.owo.ui.core.OwoUIPipelines;
 import io.wispforest.owo.ui.parsing.UIModelLoader;
@@ -45,8 +45,6 @@ public class OwoClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        ModDataLoader.load(OwoItemGroupLoader.INSTANCE);
-
         ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new UIModelLoader());
         ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new NinePatchTexture.MetadataLoader());
 

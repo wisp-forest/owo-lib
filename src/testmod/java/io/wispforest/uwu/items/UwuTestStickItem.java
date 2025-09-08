@@ -6,7 +6,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import io.wispforest.endec.impl.KeyedEndec;
 import io.wispforest.endec.impl.StructEndecBuilder;
-import io.wispforest.owo.itemgroup.OwoItemGroup;
+import io.wispforest.owo.itemgroup.base.OwoItemGroup;
 import io.wispforest.owo.ops.WorldOps;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.SerializationContext;
