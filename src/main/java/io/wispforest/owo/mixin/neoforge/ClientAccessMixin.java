@@ -5,6 +5,7 @@ import io.wispforest.owo.network.OwoNetChannel;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,8 +24,8 @@ public abstract class ClientAccessMixin implements OwoNetChannel.EnvironmentAcce
     private final MinecraftClient instance = MinecraftClient.getInstance();
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void owo$setNetHandler(ClientPlayNetworkHandler netHandler, CallbackInfo ci) {
-        this.netHandler = netHandler;
+    private void owo$setNetHandler(PlayerEntity player, CallbackInfo ci) {
+        this.netHandler = ((ClientPlayerEntity) player).networkHandler;
     }
 
     @Override

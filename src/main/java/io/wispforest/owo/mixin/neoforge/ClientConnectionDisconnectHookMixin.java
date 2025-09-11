@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ClientConnection.class)
-public class ClientConnectionDisconnectHookMixin {
+public abstract class ClientConnectionDisconnectHookMixin {
 
     @Shadow
     private PacketListener packetListener;
