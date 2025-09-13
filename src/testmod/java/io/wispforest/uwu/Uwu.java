@@ -15,6 +15,7 @@ import io.wispforest.owo.config.ConfigSynchronizer;
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.itemgroup.OwoItemGroupBuilder;
 import io.wispforest.owo.itemgroup.base.Icon;
+import io.wispforest.owo.itemgroup.core.CondensedEntries;
 import io.wispforest.owo.itemgroup.gui.ScrollerTextures;
 import io.wispforest.owo.itemgroup.gui.TabTextures;
 import io.wispforest.owo.itemgroup.core.ItemGroupButton;
@@ -45,10 +46,7 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.item.*;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryByteBuf;
@@ -135,6 +133,27 @@ public class Uwu implements ModInitializer {
             entries.add(Items.EGG);
         }, true));
     });
+
+    public static final RegistryKey<ItemGroup> CONDENSED_ENTRIES_GROUP = OwoItemGroupBuilder.createItemGroup(Identifier.of("uwu", "condensed_entries_group"), () -> Icon.of(Items.BEDROCK.getDefaultStack()), builder -> {
+        builder.initializer(group -> {
+            group.addCustomTab(Icon.of(Items.SPONGE), "tab_1", (context, entries) -> {
+                entries
+                    .add(Items.DIAMOND)
+                    .addEntry(ItemTags.LOGS)
+                    .add(Items.EMERALD)
+                    .addEntry(ItemTags.BEDS)
+                    .add(Items.GOLD_INGOT);
+            }, true);
+        });
+    });
+
+    static {
+        CondensedEntries.registerFor(ItemGroups.COLORED_BLOCKS)
+            .addEntry(Identifier.of("uwu", "wool"), ItemTags.WOOL)
+            .addEntry(Identifier.of("uwu", "carpets"), ItemTags.WOOL_CARPETS)
+            .addEntry(Identifier.of("uwu", "concrete_powders"), BlockTags.CONCRETE_POWDER)
+            .addEntry(Identifier.of("uwu", "shulkers"), BlockTags.SHULKER_BOXES);
+    }
 
     public static final ItemGroup VANILLA_GROUP = Registry.register(Registries.ITEM_GROUP, Identifier.of("uwu", "vanilla_group"), FabricItemGroup.builder()
             .displayName(Text.literal("who did this"))

@@ -1,8 +1,8 @@
 package io.wispforest.owo.itemgroup.core;
 
+import io.wispforest.owo.itemgroup.base.OwoItemGroupEntries;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
-import net.minecraft.registry.Registries;
 import net.minecraft.registry.tag.TagKey;
 
 @FunctionalInterface
@@ -10,12 +10,8 @@ public interface ContentSupplier {
     ContentSupplier EMPTY = (context, entries) -> {};
 
     static ContentSupplier fromTag(TagKey<Item> tag) {
-        return (context, entries) -> {
-            Registries.ITEM.streamEntries()
-                .filter(entry -> entry.isIn(tag))
-                .forEach(ref -> entries.add(ref.value()));
-        };
+        return (context, entries) -> entries.addAll(tag);
     }
 
-    void addItems(ItemGroup.DisplayContext context, ItemGroup.Entries entries);
+    void addItems(ItemGroup.DisplayContext context, OwoItemGroupEntries entries);
 }

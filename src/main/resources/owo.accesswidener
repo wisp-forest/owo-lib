@@ -20,3 +20,7 @@ extendable method net/minecraft/client/gui/screen/ingame/HandledScreen drawSlotH
 extendable method net/minecraft/client/gui/screen/ingame/HandledScreen drawItem (Lnet/minecraft/client/gui/DrawContext;Lnet/minecraft/item/ItemStack;IILjava/lang/String;)V
 
 accessible class net/minecraft/component/ComponentMap$Builder$SimpleComponentMap
+
+accessible class net/minecraft/client/gui/screen/ingame/CreativeInventoryScreen$LockableSlot
+
+transitive-extendable method net/minecraft/resource/JsonDataLoader <init> (Lcom/mojang/serialization/DynamicOps;Lcom/mojang/serialization/Codec;Lnet/minecraft/resource/ResourceFinder;)V

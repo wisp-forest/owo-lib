@@ -1,13 +1,17 @@
 package io.wispforest.owo.mixin.itemgroup;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import io.wispforest.owo.itemgroup.base.OwoItemGroup;
 import io.wispforest.owo.itemgroup.base.OwoItemGroupState;
+import io.wispforest.owo.itemgroup.impl.CondensedEntryStates;
 import io.wispforest.owo.itemgroup.gui.IconRenderRegistry;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButtonWidget;
 import io.wispforest.owo.ui.core.CursorStyle;
 import io.wispforest.owo.ui.util.CursorAdapter;
 import io.wispforest.owo.util.pond.OwoCreativeInventoryScreenExtensions;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
@@ -16,9 +20,14 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemStack;
+import net.minecraft.registry.Registries;
 import net.minecraft.resource.featuretoggle.FeatureSet;
+import net.minecraft.screen.slot.Slot;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.collection.DefaultedList;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -29,6 +38,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -46,6 +56,8 @@ public abstract class CreativeInventoryScreenMixin extends HandledScreen<Creativ
 
     @Shadow
     protected abstract boolean hasScrollbar();
+
+    @Shadow protected abstract void refreshSelectedTab(Collection<ItemStack> displayStacks);
 
     @Unique
     private final List<ItemGroupButtonWidget> owoButtons = new ArrayList<>();
@@ -247,5 +259,35 @@ public abstract class CreativeInventoryScreenMixin extends HandledScreen<Creativ
 
     public CreativeInventoryScreenMixin(CreativeInventoryScreen.CreativeScreenHandler screenHandler, PlayerInventory playerInventory, Text text) {
         super(screenHandler, playerInventory, text);
+    }
+
+    //--
+
+    @WrapOperation(method = "setSelectedTab", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/collection/DefaultedList;addAll(Ljava/util/Collection;)Z", ordinal = 1))
+    private boolean adjustStacksIfCondensedEntries(DefaultedList instance, Collection<ItemStack> collection, Operation<Boolean> original, @Local(argsOnly = true) ItemGroup group) {
+        var list = new ArrayList<>(collection);
+
+        var tabIndex = (currentState != null) ? currentState.selectedTabs() : IntSet.of(0);
+
+        CondensedEntryStates.handleCondensedEntries(group, tabIndex, list);
+
+        return original.call(instance, list);
+    }
+
+    @Inject(method = "onMouseClick", at = @At(value = "HEAD"), cancellable = true)
+    private void attemptEntryHandling(Slot slot, int slotId, int button, SlotActionType actionType, CallbackInfo ci) {
+        if (!(slot instanceof CreativeInventoryScreen.LockableSlot)) return;
+
+        var state = CondensedEntryStates.getState(slot.getStack());
+
+        if (state == null || !state.isParent()) return;
+
+        var list = new ArrayList<>(handler.itemList);
+
+        state.state().toggleChildren(list);
+
+        this.refreshSelectedTab(list);
+
+        ci.cancel();
     }
 }

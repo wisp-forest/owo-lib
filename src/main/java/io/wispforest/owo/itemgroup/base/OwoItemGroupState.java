@@ -1,5 +1,6 @@
 package io.wispforest.owo.itemgroup.base;
 
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.itemgroup.impl.OwoItemGroupStateImpl;
 import io.wispforest.owo.mixin.itemgroup.CreativeInventoryScreenAccessor;
 import it.unimi.dsi.fastutil.ints.IntSet;
@@ -20,7 +21,18 @@ public interface OwoItemGroupState extends ItemGroup.EntryCollector {
     }
 
     static OwoItemGroupState getState(ItemGroup group, @Nullable ItemGroup.DisplayContext context) {
-        return OwoItemGroupStateImpl.getState(group, context);
+        var isClientSide = true;
+
+        if (context != null) {
+            var server = Owo.currentServer();
+
+            isClientSide = server == null || server.getRegistryManager() != context.lookup();
+        }
+
+        return getState(group, isClientSide);
+    }
+    static OwoItemGroupState getState(ItemGroup group, boolean isClientSide) {
+        return OwoItemGroupStateImpl.getState(group, isClientSide);
     }
 
     OwoItemGroup getExtension();

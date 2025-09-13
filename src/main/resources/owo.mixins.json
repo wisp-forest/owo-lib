@@ -30,6 +30,7 @@
     "itemgroup.ItemSettingsMixin",
     "itemgroup.ItemGroupMixin",
     "itemgroup.OwoItemGroupBuilderAccessor",
+    "itemgroup.HandledScreenMixin",
     "recipe_remainders.CraftingResultSlotMixin",
     "recipe_remainders.JsonDataLoaderMixin",
     "recipe_remainders.ServerRecipeManagerAccessor",

@@ -1,13 +1,10 @@
 package io.wispforest.owo.itemgroup;
 
 import io.wispforest.owo.itemgroup.base.OwoItemGroup;
-import io.wispforest.owo.itemgroup.base.OwoItemGroupState;
 import io.wispforest.owo.itemgroup.base.Icon;
 import io.wispforest.owo.itemgroup.gui.ScrollerTextures;
 import io.wispforest.owo.itemgroup.gui.TabTextures;
 import io.wispforest.owo.itemgroup.impl.OwoItemGroupImpl;
-import io.wispforest.owo.itemgroup.impl.OwoItemGroupStateImpl;
-import io.wispforest.owo.mixin.itemgroup.ItemGroupAccessor;
 import io.wispforest.owo.util.pond.OwoItemGroupExtension;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
@@ -19,7 +16,6 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,7 +31,7 @@ public class OwoItemGroupBuilder {
         });
 
     private final RegistryKey<ItemGroup> id;
-    private Supplier<Icon> iconSupplier = () -> Icon.EMPTY_INSTANCE;
+    private Supplier<Icon> iconSupplier = () -> Icon.NONE;
     private int tabStackHeight = 4;
     private int buttonStackHeight = 4;
     private @Nullable Identifier backgroundTexture = null;

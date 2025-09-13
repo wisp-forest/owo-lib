@@ -51,5 +51,32 @@
     {"text": "❌", "color": "#EB1D36"},
     {"text": "]", "color": "gray"},
     " Disabled"
-  ]
+  ],
+  "text.owo.condensed_entries.tag_key": [
+    "",
+    {"text": "Tag", "color": "#3955e5"},
+    ": ",
+    {"text": "#", "color": "#13a6f0"},
+    { "index": 0 }
+  ],
+  "text.owo.condensed_entries.entry_id": [
+    "",
+    {"text": "Entry", "color": "#3955e5"},
+    ": ",
+    { "index": 0 }
+  ],
+  "text.config.owo.title": [
+    {"text": "[", "color": "dark_gray"},
+    {"text": "o", "color": "#3955e5"},
+    {"text": "ω", "color": "#13a6f0"},
+    {"text": "o", "color": "#3955e5"},
+    {"text": "]", "color": "dark_gray"},
+    {"text": " Configuration", "color": "white"}
+  ],
+  "text.config.owo.section.condensed_entries": "Condensed Entry Options",
+  "text.config.owo.option.expandedCondensedEntries": "Expanded All Entries",
+  "text.config.owo.option.expandedCondensedEntries.tooltip": "Will force all Condensed Entries to always be expanded",
+  "text.config.owo.option.showBackgroundColor": "Show Background Color",
+  "text.config.owo.option.showBorderColor": "Show Border Color",
+  "text.config.owo.option.borderColor": "Border Color"
 }
