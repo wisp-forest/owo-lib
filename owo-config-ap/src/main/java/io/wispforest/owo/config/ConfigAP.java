@@ -126,7 +126,7 @@ public class ConfigAP extends AbstractProcessor {
                 try {
                     var file = this.processingEnv.getFiler().createSourceFile(wrapperName);
                     try (var writer = new PrintWriter(file.openWriter())) {
-                        writer.println(makeWrapper(wrapperName, className, this.collectFields(Option.Key.ROOT, clazz, clazz.getAnnotation(Config.class).defaultHook())));
+                        writer.println(makeWrapper(wrapperName, className, this.collectFields(Key.ROOT, clazz, clazz.getAnnotation(Config.class).defaultHook())));
                     }
                 } catch (IOException e) {
                     throw new RuntimeException("Failed to generate config wrapper", e);
@@ -137,7 +137,7 @@ public class ConfigAP extends AbstractProcessor {
         return true;
     }
 
-    private List<ConfigField> collectFields(Option.Key parent, TypeElement clazz, boolean defaultHook) {
+    private List<ConfigField> collectFields(Key parent, TypeElement clazz, boolean defaultHook) {
         var messager = this.processingEnv.getMessager();
         var list = new ArrayList<ConfigField>();
 
@@ -209,28 +209,28 @@ public class ConfigAP extends AbstractProcessor {
                 .replace("{accessors}\n", accessorMethods.finish());
     }
 
-    private String makeGetAccessor(String fieldName, Option.Key fieldKey, TypeMirror fieldType) {
+    private String makeGetAccessor(String fieldName, Key fieldKey, TypeMirror fieldType) {
         return GET_ACCESSOR_TEMPLATE
                 .replace("{option_instance}", constantNameOf(fieldKey))
                 .replace("{field_name}", fieldName)
                 .replace("{field_type}", fieldType.toString());
     }
 
-    private String makeSetAccessor(String fieldName, Option.Key fieldKey, TypeMirror fieldType) {
+    private String makeSetAccessor(String fieldName, Key fieldKey, TypeMirror fieldType) {
         return SET_ACCESSOR_TEMPLATE
                 .replace("{option_instance}", constantNameOf(fieldKey))
                 .replace("{field_name}", fieldName)
                 .replace("{field_type}", fieldType.toString());
     }
 
-    private String makeSubscribe(String fieldName, Option.Key fieldKey, TypeMirror fieldType) {
+    private String makeSubscribe(String fieldName, Key fieldKey, TypeMirror fieldType) {
         return SUBSCRIBE_TEMPLATE
                 .replace("{option_instance}", constantNameOf(fieldKey))
                 .replace("{field_name}", fieldName)
                 .replace("{field_type}", this.primitivesToWrappers.getOrDefault(fieldType, fieldType).toString());
     }
 
-    private String constantNameOf(Option.Key key) {
+    private String constantNameOf(Key key) {
         return key.asString().replace(".", "_");
     }
 
@@ -240,11 +240,11 @@ public class ConfigAP extends AbstractProcessor {
 
     private final class ValueField implements ConfigField {
         private final String name;
-        private final Option.Key key;
+        private final Key key;
         private final TypeMirror type;
         private final boolean makeSubscribe;
 
-        private ValueField(String name, Option.Key key, TypeMirror type, boolean makeSubscribe) {
+        private ValueField(String name, Key key, TypeMirror type, boolean makeSubscribe) {
             this.name = name;
             this.key = key;
             this.type = type;
@@ -355,6 +355,88 @@ public class ConfigAP extends AbstractProcessor {
         @Override
         public @NotNull String toString() {
             return this.builder.toString();
+        }
+    }
+
+    private record Key(String[] path) {
+
+        public static final Key ROOT = new Key(new String[0]);
+
+        public Key(List<String> path) {
+            this(path.toArray(String[]::new));
+        }
+
+        public Key(String key) {
+            this(key.split("\\."));
+        }
+
+        /**
+         * @return The immediate parent of this key,
+         * or {@link #ROOT} if the parent is the root key
+         */
+        public Key parent() {
+            if (this.path.length <= 1) return ROOT;
+
+            var newPath = new String[this.path.length - 1];
+            System.arraycopy(this.path, 0, newPath, 0, this.path.length - 1);
+            return new Key(newPath);
+        }
+
+        /**
+         * Create the key for a child of this key
+         *
+         * @param childName The name of the child
+         */
+        public Key child(String childName) {
+            var newPath = new String[this.path.length + 1];
+            System.arraycopy(this.path, 0, newPath, 0, this.path.length);
+            newPath[this.path.length] = childName;
+            return new Key(newPath);
+        }
+
+        /**
+         * @return The segments of this key joined with {@code .}
+         */
+        public String asString() {
+            return String.join(".", this.path);
+        }
+
+        /**
+         * @return The name of the element this key describes,
+         * without any of its parents
+         */
+        public String name() {
+            if (this.path.length < 1) return "";
+            return this.path[this.path.length - 1];
+        }
+
+        /**
+         * @return {@code true} if and only if this
+         * key is reference-equal to {@link #ROOT}
+         */
+        public boolean isRoot() {
+            return this == ROOT;
+        }
+
+        // Records don't play nicely with arrays, thus need to manually
+        // declare all the record autogenerated stuff here
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Key key = (Key) o;
+            return Arrays.equals(path, key.path);
+        }
+
+        @Override
+        public int hashCode() {
+            return Arrays.hashCode(path);
+        }
+
+        @Override
+        public String toString() {
+            return "Key{" + "path=" + Arrays.toString(path) + '}';
         }
     }
 }

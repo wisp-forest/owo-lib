@@ -63,19 +63,23 @@ allprojects {
         }
     }
 
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                from components.java
-            }
-        }
+    var validPublishProjects = ["owo-lib", "owo-sentinel"];
 
-        repositories {
-            maven {
-                url ENV.MAVEN_URL
-                credentials {
-                    username ENV.MAVEN_USER
-                    password ENV.MAVEN_PASSWORD
+    if (validPublishProjects.contains(project.archives_base_name)) {
+        publishing {
+            publications {
+                mavenJava(MavenPublication) {
+                    from components.java
+                }
+            }
+
+            repositories {
+                maven {
+                    url ENV.MAVEN_URL
+                    credentials {
+                        username ENV.MAVEN_USER
+                        password ENV.MAVEN_PASSWORD
+                    }
                 }
             }
         }
@@ -102,6 +106,46 @@ sourceSets {
         compileClasspath += main.compileClasspath
     }
 }
+
+//-- Used to pull in the given AP files to be shipped under owolib as single jar
+
+configurations {
+    owoConfigAPJava { canBeResolved = true }
+    owoConfigAPResources { canBeResolved = true }
+}
+
+tasks.named('compileJava', JavaCompile) {
+    dependsOn(configurations.owoConfigAPJava)
+    source(configurations.owoConfigAPJava)
+}
+
+processResources {
+    dependsOn(configurations.owoConfigAPResources)
+    from(configurations.owoConfigAPResources)
+}
+
+tasks.named('javadoc', Javadoc).configure {
+    dependsOn(configurations.owoConfigAPJava)
+    source(configurations.owoConfigAPJava)
+}
+
+tasks.named('sourcesJar', Jar) {
+    dependsOn(configurations.owoConfigAPJava)
+    dependsOn(configurations.owoConfigAPResources)
+    from(configurations.owoConfigAPJava)
+    from(configurations.owoConfigAPResources)
+}
+
+dependencies {
+    compileOnly(annotationProcessor(project(':owo-config-ap')))
+
+    owoConfigAPJava project(path: ':owo-config-ap', configuration: 'owoConfigAPJava')
+    owoConfigAPResources project(path: ':owo-config-ap', configuration: 'owoConfigAPResources')
+
+    //testmodImplementation(testmodAnnotationProcessor(project(':owo-config-ap')))
+}
+
+//--
 
 loom {
     runs {
@@ -148,8 +192,7 @@ dependencies {
 
     modCompileOnly("xyz.nucleoid:server-translations-api:${project.stapi_version}")
 
-    testmodImplementation sourceSets.main.output
-    testmodAnnotationProcessor sourceSets.main.output
+    testmodImplementation(testmodAnnotationProcessor(sourceSets.main.output))
 }
 
 javadoc {
