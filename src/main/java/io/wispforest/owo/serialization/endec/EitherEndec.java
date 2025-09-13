@@ -38,16 +38,22 @@ public final class EitherEndec<L, R> implements Endec<Either<L, R>> {
 
         if (selfDescribing) {
             Either<L, R> leftResult = null;
+            Exception leftException = null;
             try {
                 leftResult = Either.left(deserializer.tryRead(deserializer1 -> this.leftEndec.decode(ctx, deserializer1)));
-            } catch (Exception ignore) {}
+            } catch (Exception e) {
+                leftException = e;
+            }
 
             if (!this.exclusive && leftResult != null) return leftResult;
 
             Either<L, R> rightResult = null;
+            Exception rightException = null;
             try {
                 rightResult = Either.right(deserializer.tryRead(deserializer1 -> this.rightEndec.decode(ctx, deserializer1)));
-            } catch (Exception ignore) {}
+            } catch (Exception e) {
+                rightException = e;
+            }
 
             if (this.exclusive && leftResult != null && rightResult != null) {
                 throw new IllegalStateException("Both alternatives read successfully, can not pick the correct one; first: " + leftResult + " second: " + rightResult);
@@ -56,7 +62,12 @@ public final class EitherEndec<L, R> implements Endec<Either<L, R>> {
             if (leftResult != null) return leftResult;
             if (rightResult != null) return rightResult;
 
-            throw new IllegalStateException("Neither alternative read successfully");
+            var e = new IllegalStateException("Neither read was successfully with EitherEndec, the given possible errors were made:");
+
+            e.addSuppressed(leftException);
+            e.addSuppressed(rightException);
+
+            throw e;
         } else {
             var struct = deserializer.struct();
 
