@@ -1,7 +1,7 @@
 package io.wispforest.owo.util.pond;
 
 import io.wispforest.owo.itemgroup.base.OwoItemGroup;
-import io.wispforest.owo.itemgroup.OwoItemGroupLoader;
+import io.wispforest.owo.itemgroup.data.OwoItemGroupLoader;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.registry.RegistryKey;

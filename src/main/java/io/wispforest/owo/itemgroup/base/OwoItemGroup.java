@@ -135,7 +135,7 @@ public interface OwoItemGroup {
 
     ///
     /// @return A replacement for [ItemGroup#getIcon()] with higher capabilities for rendering
-    /// or [Icon#EMPTY_INSTANCE] if not used
+    /// or [Icon#NONE] if not used
     ///
     Icon icon();
 

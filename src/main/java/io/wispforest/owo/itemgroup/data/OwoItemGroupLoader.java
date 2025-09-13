@@ -1,4 +1,4 @@
-package io.wispforest.owo.itemgroup;
+package io.wispforest.owo.itemgroup.data;
 
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Either;
@@ -6,6 +6,7 @@ import io.wispforest.endec.Endec;
 import io.wispforest.endec.StructEndec;
 import io.wispforest.endec.format.gson.GsonDeserializer;
 import io.wispforest.endec.impl.StructEndecBuilder;
+import io.wispforest.owo.itemgroup.OwoItemGroupBuilder;
 import io.wispforest.owo.itemgroup.base.ButtonDefinition;
 import io.wispforest.owo.itemgroup.base.Icon;
 import io.wispforest.owo.itemgroup.core.*;
@@ -90,11 +91,13 @@ public class OwoItemGroupLoader implements ModDataConsumer {
         final ItemGroupTab baseGroupTab;
 
         if (data.extend()) {
+            var collector = ((ItemGroupAccessor) targetGroup).owo$getEntryCollector();
+
             baseGroupTab = new ItemGroupTab(
                 EXTENDED_TAB_NAME,
                 Icon.of(targetGroup.getIcon()),
                 targetGroup.getDisplayName(),
-                ((ItemGroupAccessor) targetGroup).owo$getEntryCollector()::accept,
+                (context, entries) -> collector.accept(context, entries::add),
                 ItemGroupTab.DEFAULT_TEXTURE,
                 true
             );
@@ -121,58 +124,57 @@ public class OwoItemGroupLoader implements ModDataConsumer {
             OwoItemGroupLoader.onGroupCreated(group);
         });
     }
-}
 
-
-record Tab(String name, Icon icon, TagKey<Item> tag, Identifier texture) {
-    public static final StructEndec<Tab> ENDEC = StructEndecBuilder.of(
-        Endec.STRING.fieldOf("name", Tab::name),
-        IconEndec.ENDEC.fieldOf("icon", Tab::icon),
-        MinecraftEndecs.unprefixedTagKey(RegistryKeys.ITEM).fieldOf("tag", Tab::tag),
-        MinecraftEndecs.IDENTIFIER.optionalFieldOf("texture", Tab::texture, ItemGroupTab.DEFAULT_TEXTURE),
-        Tab::new
-    );
-}
-
-record Button(String name, String url, Icon icon) {
-    public static final StructEndec<Button> ENDEC = StructEndecBuilder.of(
-        Endec.STRING.fieldOf("name", Button::name),
-        Endec.STRING.fieldOf("link", Button::url),
-        CodecUtils.eitherEndec(Endec.STRING, IconEndec.ENDEC)
-            .xmap(either -> Either.unwrap(either.mapLeft(ItemGroupButton::iconFromType)), Either::right)
-            .fieldOf("icon", Button::icon),
-        Button::new
-    );
-}
-
-record Data(Identifier targetGroup, boolean extend, List<Tab> tabs, List<Button> buttons) {
-    public static final StructEndec<Data> ENDEC = StructEndecBuilder.of(
-        MinecraftEndecs.IDENTIFIER.fieldOf("target_group", Data::targetGroup),
-        Endec.BOOLEAN.optionalFieldOf("extend", Data::extend, false),
-        Tab.ENDEC.listOf().optionalFieldOf("tabs", Data::tabs, List::of),
-        Button.ENDEC.listOf().optionalFieldOf("buttons", Data::buttons, List::of),
-        Data::new
-    );
-
-    public List<ItemGroupTab> createTabs() {
-        var targetGroup = targetGroupKey();
-
-        return tabs.stream()
-            .map(tab -> new ItemGroupTab(tab.name(), tab.icon(),
-                ButtonDefinition.tooltipFor(targetGroup, "tab", tab.name()), ContentSupplier.fromTag(tab.tag()), tab.texture(),
-                false
-            )).toList();
+    private record Tab(String name, Icon icon, TagKey<Item> tag, Identifier texture) {
+        public static final StructEndec<Tab> ENDEC = StructEndecBuilder.of(
+            Endec.STRING.fieldOf("name", Tab::name),
+            Icon.ENDEC.fieldOf("icon", Tab::icon),
+            MinecraftEndecs.unprefixedTagKey(RegistryKeys.ITEM).fieldOf("tag", Tab::tag),
+            MinecraftEndecs.IDENTIFIER.optionalFieldOf("texture", Tab::texture, ItemGroupTab.DEFAULT_TEXTURE),
+            Tab::new
+        );
     }
 
-    public List<ItemGroupButton> createButtons() {
-        var targetGroup = targetGroupKey();
-
-        return buttons.stream()
-            .map(button -> ItemGroupButton.link(targetGroup, button.icon(), button.name(), button.url()))
-            .toList();
+    private record Button(String name, String url, Icon icon) {
+        public static final StructEndec<Button> ENDEC = StructEndecBuilder.of(
+            Endec.STRING.fieldOf("name", Button::name),
+            Endec.STRING.fieldOf("link", Button::url),
+            CodecUtils.eitherEndec(Endec.STRING, Icon.ENDEC)
+                .xmap(either -> Either.unwrap(either.mapLeft(ItemGroupButton::iconFromType)), Either::right)
+                .fieldOf("icon", Button::icon),
+            Button::new
+        );
     }
 
-    public RegistryKey<ItemGroup> targetGroupKey() {
-        return RegistryKey.of(RegistryKeys.ITEM_GROUP, targetGroup());
+    private record Data(Identifier targetGroup, boolean extend, List<Tab> tabs, List<Button> buttons) {
+        public static final StructEndec<Data> ENDEC = StructEndecBuilder.of(
+            MinecraftEndecs.IDENTIFIER.fieldOf("target_group", Data::targetGroup),
+            Endec.BOOLEAN.optionalFieldOf("extend", Data::extend, false),
+            Tab.ENDEC.listOf().optionalFieldOf("tabs", Data::tabs, List::of),
+            Button.ENDEC.listOf().optionalFieldOf("buttons", Data::buttons, List::of),
+            Data::new
+        );
+
+        public List<ItemGroupTab> createTabs() {
+            var targetGroup = targetGroupKey();
+
+            return tabs.stream()
+                .map(tab -> new ItemGroupTab(tab.name(), tab.icon(),
+                    ButtonDefinition.tooltipFor(targetGroup, "tab", tab.name()), ContentSupplier.fromTag(tab.tag()), tab.texture(),
+                    false
+                )).toList();
+        }
+
+        public List<ItemGroupButton> createButtons() {
+            var targetGroup = targetGroupKey();
+
+            return buttons.stream()
+                .map(button -> ItemGroupButton.link(targetGroup, button.icon(), button.name(), button.url()))
+                .toList();
+        }
+
+        public RegistryKey<ItemGroup> targetGroupKey() {
+            return RegistryKey.of(RegistryKeys.ITEM_GROUP, targetGroup());
+        }
     }
 }

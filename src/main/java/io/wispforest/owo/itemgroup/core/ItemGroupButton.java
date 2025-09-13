@@ -43,7 +43,7 @@ public class ItemGroupButton implements ButtonDefinition {
             case "curseforge" -> Icon.of(ICONS_TEXTURE, 32, 0, 64, 64);
             case "github" -> Icon.of(ICONS_TEXTURE, 0, 0, 64, 64);
             case "discord" -> Icon.of(ICONS_TEXTURE, 48, 0, 64, 64);
-            default -> Icon.EMPTY_INSTANCE;
+            default -> Icon.NONE;
         };
     }
 
