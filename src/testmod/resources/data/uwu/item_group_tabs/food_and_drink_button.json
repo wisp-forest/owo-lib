@@ -6,7 +6,6 @@
       "name": "consume",
       "link": "https://www.powerthesaurus.org/consume/synonyms",
       "icon": {
-        "type": "texture",
         "texture": "minecraft:textures/block/sculk_catalyst_top.png",
         "u": 0,
         "v": 0,

@@ -25,8 +25,12 @@ public interface Icon extends IdentifiedData {
     @ApiStatus.Internal
     Icon NONE = () -> DispatchedEndec.EMPTY_ID;
 
-    DispatchedEndec<Icon> ENDEC = DispatchedEndec.of(MinecraftEndecs.identifierEndec("owo"), () -> NONE)
-        .loadClasses(ItemIcon.class, TextureIcon.class, AnimatedTextureIcon.class);
+    DispatchedEndec<Icon> ENDEC = DispatchedEndec.<Icon>of()
+        .idEndec(MinecraftEndecs.identifierEndec("owo"))
+        .emptyValue(() -> NONE)
+        .allowTypelessData()
+        .baseClasses(ItemIcon.class, TextureIcon.class, AnimatedTextureIcon.class)
+        .create();
 
     static Icon of(ItemStack stack) {
         return new ItemIcon(stack);

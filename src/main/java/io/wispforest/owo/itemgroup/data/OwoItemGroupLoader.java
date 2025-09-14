@@ -9,6 +9,7 @@ import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.itemgroup.OwoItemGroupBuilder;
 import io.wispforest.owo.itemgroup.base.ButtonDefinition;
 import io.wispforest.owo.itemgroup.base.Icon;
+import io.wispforest.owo.itemgroup.base.ItemStacksSupplier;
 import io.wispforest.owo.itemgroup.core.*;
 import io.wispforest.owo.itemgroup.impl.OwoItemGroupImpl;
 import io.wispforest.owo.mixin.itemgroup.ItemGroupAccessor;
@@ -19,17 +20,20 @@ import net.fabricmc.fabric.api.event.registry.RegistryEntryAddedCallback;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemGroups;
+import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.TagKey;
 import net.minecraft.resource.JsonDataLoader;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SequencedCollection;
+import java.util.function.Function;
 
 /**
  * Manages loading and adding JSON-based tabs to preexisting {@code ItemGroup}s
@@ -125,14 +129,70 @@ public class OwoItemGroupLoader implements ModDataConsumer {
         });
     }
 
-    private record Tab(String name, Icon icon, TagKey<Item> tag, Identifier texture) {
+    /*
+     * {
+     *  "entries": [
+     *    "minecraft:air",
+     *    {
+     *      "item": "minecraft:air"
+     *    },
+     *    {
+     *      "items": [
+     *          ...
+     *      ]
+     *    },
+     *    {
+     *      "tag": "minecraft:wools"
+     *    },
+     *    {
+     *      "registry": "block"
+     *      "entry": "minecraft:shulker_block"
+     *    }
+     *  ]
+     * }
+     */
+    private record Tab(String name, Icon icon, List<RawItemStacksSupplier> suppliers, Identifier texture, boolean areTagsCondensable) {
         public static final StructEndec<Tab> ENDEC = StructEndecBuilder.of(
             Endec.STRING.fieldOf("name", Tab::name),
             Icon.ENDEC.fieldOf("icon", Tab::icon),
-            MinecraftEndecs.unprefixedTagKey(RegistryKeys.ITEM).fieldOf("tag", Tab::tag),
+            CodecUtils.eitherStructEndec(RawItemStacksSupplier.LIST_ENDEC.structOf("entries"), ItemStacksSupplier.ENDEC)
+                .xmap(
+                    either -> mapAndUnwrap(either, supplier -> List.of(new RawItemStacksSupplier(supplier))),
+                    Either::left
+                ).flatFieldOf(Tab::suppliers),
             MinecraftEndecs.IDENTIFIER.optionalFieldOf("texture", Tab::texture, ItemGroupTab.DEFAULT_TEXTURE),
+            Endec.BOOLEAN.optionalFieldOf("are_tags_condensable", Tab::areTagsCondensable, false),
             Tab::new
         );
+
+        private record RawItemStacksSupplier(ItemStacksSupplier stackSupplier, @Nullable Identifier condensedId) {
+            private RawItemStacksSupplier(ItemStacksSupplier stackSupplier) {
+                this(stackSupplier, null);
+            }
+
+            public static final Endec<ItemStack> CONDENSED_ITEM_STACK = CodecUtils.eitherEndec(MinecraftEndecs.ITEM_STACK, MinecraftEndecs.ofRegistry(Registries.ITEM))
+                .xmap(
+                    either -> mapAndUnwrap(either, Item::getDefaultStack),
+                    stack -> (stack.getCount() > 1 || !stack.getComponentChanges().isEmpty()) ? Either.left(stack) : Either.right(stack.getItem()));
+
+            private static final Endec<ItemStacksSupplier> SUPPLIER_ENDEC = CodecUtils.eitherEndec(
+                CONDENSED_ITEM_STACK.xmap(stack -> ItemStacksSupplier.of(List.of(stack)), supplier1 -> supplier1.get().getFirst()),
+                ItemStacksSupplier.ENDEC
+            ).xmap(
+                Either::unwrap,
+                supplier1 -> (supplier1 instanceof ItemStacksSupplier.StackCollection(var stacks) && stacks.size() == 1) ? Either.left(supplier1) : Either.right(supplier1));
+
+            public static final StructEndec<RawItemStacksSupplier> BASE_ENDEC = StructEndecBuilder.of(
+                ItemStacksSupplier.ENDEC.flatFieldOf(RawItemStacksSupplier::stackSupplier),
+                MinecraftEndecs.IDENTIFIER.optionalFieldOf("condensed_id", RawItemStacksSupplier::condensedId, () -> null),
+                RawItemStacksSupplier::new);
+
+            public static final Endec<RawItemStacksSupplier> ENDEC = CodecUtils.eitherEndec(BASE_ENDEC, SUPPLIER_ENDEC)
+                .xmap(either -> mapAndUnwrap(either, RawItemStacksSupplier::new), Either::left);
+
+            public static final Endec<List<RawItemStacksSupplier>> LIST_ENDEC = CodecUtils.eitherEndec(RawItemStacksSupplier.ENDEC.listOf(), RawItemStacksSupplier.ENDEC)
+                .xmap(either -> mapAndUnwrap(either, List::of), list -> list.size() == 1 ? Either.right(list.getFirst()) : Either.left(list));
+        }
     }
 
     private record Button(String name, String url, Icon icon) {
@@ -159,10 +219,32 @@ public class OwoItemGroupLoader implements ModDataConsumer {
             var targetGroup = targetGroupKey();
 
             return tabs.stream()
-                .map(tab -> new ItemGroupTab(tab.name(), tab.icon(),
-                    ButtonDefinition.tooltipFor(targetGroup, "tab", tab.name()), ContentSupplier.fromTag(tab.tag()), tab.texture(),
-                    false
-                )).toList();
+                .map(tab -> {
+                    var rawSuppliers = tab.suppliers();
+
+                    return new ItemGroupTab(
+                        tab.name(),
+                        tab.icon(),
+                        ButtonDefinition.tooltipFor(targetGroup, "tab", tab.name()),
+                        (context, entries) -> {
+                            for (var rawSupplier : rawSuppliers) {
+                                if (rawSupplier.condensedId() != null) {
+                                    entries.addEntry(rawSupplier.condensedId(), rawSupplier.stackSupplier());
+                                } else {
+                                    var supplier = rawSupplier.stackSupplier();
+
+                                    if (tab.areTagsCondensable() && supplier instanceof ItemStacksSupplier.RegistryTag(var tagKey)) {
+                                        entries.addEntry(tagKey);
+                                    } else {
+                                        entries.addAll(supplier.get());
+                                    }
+                                }
+                            }
+                        },
+                        tab.texture(),
+                        false
+                    );
+                }).toList();
         }
 
         public List<ItemGroupButton> createButtons() {
@@ -176,5 +258,9 @@ public class OwoItemGroupLoader implements ModDataConsumer {
         public RegistryKey<ItemGroup> targetGroupKey() {
             return RegistryKey.of(RegistryKeys.ITEM_GROUP, targetGroup());
         }
+    }
+
+    private static <T, V> T mapAndUnwrap(Either<T, V> either, Function<V, T> mapFunc) {
+        return Either.unwrap(either.mapRight(mapFunc));
     }
 }

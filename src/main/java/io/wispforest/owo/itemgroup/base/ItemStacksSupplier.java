@@ -8,7 +8,6 @@ import io.wispforest.owo.serialization.DispatchedEndec;
 import io.wispforest.owo.serialization.IdentifiedData;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import net.minecraft.block.Block;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
@@ -24,10 +23,16 @@ import java.util.function.Supplier;
 
 public interface ItemStacksSupplier extends Supplier<SequencedCollection<ItemStack>> {
 
-    DispatchedEndec<ItemStacksSupplier> ENDEC = DispatchedEndec.<ItemStacksSupplier>of(IdentifiedData.optionalIDGetter())
-        .loadClasses(StackCollection.class, RegistryTag.class, ItemClass.class);
+    DispatchedEndec<ItemStacksSupplier> ENDEC = DispatchedEndec.<ItemStacksSupplier>ofOptionalIdentifiedData()
+        .baseClasses(StackCollection.class, RegistryTag.class, Item.class)
+        .allowTypelessData()
+        .create();
 
-    static ItemStacksSupplier of(SequencedCollection<ItemStack> stacks) {
+    static ItemStacksSupplier compound(SequencedCollection<ItemStacksSupplier> suppliers) {
+        return new SupplierCollection(suppliers);
+    }
+
+    static ItemStacksSupplier of(SequencedCollection<net.minecraft.item.ItemStack> stacks) {
         return new StackCollection(stacks);
     }
 
@@ -35,42 +40,47 @@ public interface ItemStacksSupplier extends Supplier<SequencedCollection<ItemSta
         return new RegistryTag(tagKey);
     }
 
-    static ItemStacksSupplier of(Predicate<Item> predicate) {
+    static ItemStacksSupplier of(Predicate<net.minecraft.item.Item> predicate) {
         return new ItemPredicate(predicate);
     }
 
     static ItemStacksSupplier of(ItemConvertible item) {
-        return new ItemClass(item, false);
+        return new Item(item, false);
     }
 
     static ItemStacksSupplier of(ItemConvertible item, boolean overrideClassSupplier) {
-        return new ItemClass(item, overrideClassSupplier);
+        return new Item(item, overrideClassSupplier);
     }
 
     static ItemStacksSupplier of(ItemStacksSupplier supplier) {
         return (supplier instanceof ItemConvertible convertible)
-            ? new ItemClass(convertible, false)
+            ? new Item(convertible, false)
             : supplier;
     }
 
-    record StackCollection(SequencedCollection<ItemStack> stacks) implements ItemStacksSupplier {
+    record StackCollection(SequencedCollection<net.minecraft.item.ItemStack> stacks) implements ItemStacksSupplier, IdentifiedData {
         public static final Identifier ID = Identifier.of("owo", "itemstacks");
 
         public static final StructEndec<StackCollection> ENDEC = ItemStacksSupplier.ENDEC.registerEndec(ID,
             StructEndecBuilder.of(
                 MinecraftEndecs.ITEM_STACK.listOf().fieldOf("stacks", s -> {
-                    return (s.stacks() instanceof List<ItemStack> list) ? list : List.copyOf(s.stacks());
+                    return (s.stacks() instanceof List<net.minecraft.item.ItemStack> list) ? list : List.copyOf(s.stacks());
                 }),
                 StackCollection::new
             ));
 
         @Override
-        public SequencedCollection<ItemStack> get() {
+        public SequencedCollection<net.minecraft.item.ItemStack> get() {
             return stacks;
+        }
+
+        @Override
+        public Identifier getTypeId() {
+            return ID;
         }
     }
 
-    record RegistryTag(TagKey<? extends ItemConvertible> tagKey) implements ItemStacksSupplier {
+    record RegistryTag(TagKey<? extends ItemConvertible> tagKey) implements ItemStacksSupplier, IdentifiedData {
 
         public RegistryTag {
             var registryKey = tagKey.registryRef();
@@ -94,49 +104,81 @@ public interface ItemStacksSupplier extends Supplier<SequencedCollection<ItemSta
             ));
 
         @Override
-        public SequencedCollection<ItemStack> get() {
+        public SequencedCollection<net.minecraft.item.ItemStack> get() {
             return ItemStackUtils.getStacks(tagKey());
+        }
+
+        @Override
+        public Identifier getTypeId() {
+            return ID;
         }
     }
 
     // TODO: CHANGE TO ItemConvertible?
-    record ItemPredicate(Predicate<Item> predicate) implements ItemStacksSupplier {
+    record ItemPredicate(Predicate<net.minecraft.item.Item> predicate) implements ItemStacksSupplier {
         @Override
-        public SequencedCollection<ItemStack> get() {
+        public SequencedCollection<net.minecraft.item.ItemStack> get() {
             return Registries.ITEM.stream()
                 .filter(predicate)
-                .map(Item::getDefaultStack)
+                .map(net.minecraft.item.Item::getDefaultStack)
                 .toList();
         }
     }
 
-    record ItemClass(ItemConvertible item, boolean overrideClassSupplier) implements ItemStacksSupplier {
-        public ItemClass {
-            if (!(item instanceof Item || item instanceof Block)) {
+    record Item(ItemConvertible item, boolean overrideClassSupplier) implements ItemStacksSupplier, IdentifiedData {
+        public Item {
+            if (!(item instanceof net.minecraft.item.Item || item instanceof Block)) {
                 throw new IllegalStateException("Unable to handle the given registry type for a ItemConvertible ItemStackSupplier: " + item);
             }
         }
 
         public static final Identifier ID = Identifier.of("owo", "item");
 
-        public static final StructEndec<ItemClass> ENDEC = ItemStacksSupplier.ENDEC.registerEndec(ID,
+        public static final StructEndec<Item> ENDEC = ItemStacksSupplier.ENDEC.registerEndec(ID,
             StructEndecBuilder.of(
                 MinecraftEndecs.IDENTIFIER.optionalFieldOf("registry", s -> (s.item instanceof Block) ? RegistryKeys.BLOCK.getValue() : RegistryKeys.ITEM.getValue(), RegistryKeys.ITEM.getValue()),
-                MinecraftEndecs.IDENTIFIER.fieldOf("value", s -> (s.item instanceof Block block) ? Registries.BLOCK.getId(block) : Registries.ITEM.getId(s.item.asItem())),
-                Endec.BOOLEAN.optionalFieldOf("override_class_supplier", ItemClass::overrideClassSupplier, false),
-                (registry, entryId, overrideClassSupplier) -> new ItemClass((registry == RegistryKeys.BLOCK.getValue()) ? Registries.BLOCK.get(entryId) : Registries.ITEM.get(entryId), overrideClassSupplier)
+                MinecraftEndecs.IDENTIFIER.fieldOf("entry", s -> (s.item instanceof Block block) ? Registries.BLOCK.getId(block) : Registries.ITEM.getId(s.item.asItem())),
+                Endec.BOOLEAN.optionalFieldOf("override_class_supplier", Item::overrideClassSupplier, false),
+                (registry, entryId, overrideClassSupplier) -> new Item((registry == RegistryKeys.BLOCK.getValue()) ? Registries.BLOCK.get(entryId) : Registries.ITEM.get(entryId), overrideClassSupplier)
             ));
 
         @Override
-        public SequencedCollection<ItemStack> get() {
+        public SequencedCollection<net.minecraft.item.ItemStack> get() {
             if (!overrideClassSupplier && item instanceof ItemStacksSupplier supplier) return supplier.get();
 
             var itemClazz = item.getClass();
 
             return Registries.ITEM.stream()
                 .filter(itemClazz::isInstance)
-                .map(Item::getDefaultStack)
+                .map(net.minecraft.item.Item::getDefaultStack)
                 .toList();
+        }
+
+        @Override
+        public Identifier getTypeId() {
+            return ID;
+        }
+    }
+
+    record SupplierCollection(SequencedCollection<ItemStacksSupplier> suppliers) implements ItemStacksSupplier, IdentifiedData {
+        public static final Identifier ID = Identifier.of("owo", "compound");
+
+        public static final StructEndec<SupplierCollection> ENDEC = ItemStacksSupplier.ENDEC.registerEndec(ID,
+            StructEndecBuilder.of(
+                ItemStacksSupplier.ENDEC.listOf().fieldOf("suppliers", s -> {
+                    return (s.suppliers() instanceof List<ItemStacksSupplier> list) ? list : List.copyOf(s.suppliers());
+                }),
+                SupplierCollection::new
+            ));
+
+        @Override
+        public Identifier getTypeId() {
+            return ID;
+        }
+
+        @Override
+        public SequencedCollection<net.minecraft.item.ItemStack> get() {
+            return suppliers.stream().flatMap(supplier -> supplier.get().stream()).toList();
         }
     }
 }

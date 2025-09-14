@@ -1,5 +1,6 @@
 package io.wispforest.owo.itemgroup.core;
 
+import io.wispforest.endec.Endec;
 import io.wispforest.owo.itemgroup.base.OwoItemGroupEntries;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;

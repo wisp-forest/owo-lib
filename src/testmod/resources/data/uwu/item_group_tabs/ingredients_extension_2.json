@@ -6,7 +6,6 @@
       "tag": "minecraft:logs",
       "name": "the_logs",
       "icon": {
-        "type": "itemstack",
         "stack": "minecraft:stripped_oak_log"
       }
     }
