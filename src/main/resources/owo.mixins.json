@@ -80,6 +80,7 @@
     "ui.access.GlCommandEncoderAccessor",
     "ui.access.TextBoxComponentAccessor",
     "ui.access.TextFieldWidgetAccessor",
+    "ui.access.EntityRendererAccessor",
     "ui.layers.HandledScreenAccessor",
     "ui.layers.KeyboardMixin",
     "ui.layers.MouseMixin",
@@ -87,7 +88,9 @@
     "neoforge.NetworkRegistryMixin",
     "neoforge.ClientConnectionDisconnectHookMixin",
     "neoforge.ValidationCommandEncoderAccessor",
-    "neoforge.ClientAccessMixin"
+    "neoforge.ClientAccessMixin",
+    "neoforge.ScreenHandlerClientMixin",
+    "neoforge.OwoNetChannelClientMixin"
   ],
   "server": [
     "MainMixin"

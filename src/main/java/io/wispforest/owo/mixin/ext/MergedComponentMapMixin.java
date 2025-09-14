@@ -16,7 +16,10 @@ public class MergedComponentMapMixin {
         return DerivedComponentMap.reWrapIfNeeded(original);
     }
 
-    @WrapOperation(method = "equals", at = @At(value = "INVOKE", target = "Lnet/minecraft/component/ComponentMap;equals(Ljava/lang/Object;)Z"))
+    @WrapOperation(method = "equals", at = {
+        @At(value = "INVOKE", target = "Lnet/minecraft/component/ComponentMap;equals(Ljava/lang/Object;)Z"),
+        @At(value = "INVOKE", target = "Lnet/minecraft/core/component/DataComponentMap;equals(Ljava/lang/Object;)Z")
+    }, allow = 1, require = 1, expect = 1)
     private boolean prioritiseDerivedMap(ComponentMap instance, Object object, Operation<Boolean> original) {
         return (object instanceof DerivedComponentMap derivedComponentMap)
             ? original.call(derivedComponentMap, instance)

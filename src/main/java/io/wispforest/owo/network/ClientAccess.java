@@ -4,6 +4,7 @@ import io.wispforest.owo.mixin.neoforge.ClientAccessMixin;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
@@ -16,7 +17,7 @@ public class ClientAccess implements OwoNetChannel.EnvironmentAccess<ClientPlaye
     //@OnlyIn(Dist.CLIENT) private final ClientPlayNetworkHandler netHandler;
     //@OnlyIn(Dist.CLIENT) private final MinecraftClient instance = MinecraftClient.getInstance();
 
-    public ClientAccess(ClientPlayNetworkHandler netHandler) {
+    public ClientAccess(PlayerEntity player) {
         //this.netHandler = netHandler;
     }
 

@@ -159,7 +159,7 @@ public class OwoNetChannel {
 
         if (FMLLoader.getDist() == Dist.CLIENT) {
             NeoOwoNetworking.registerClientMessageHandler(this.packetId, (payload, player) -> {
-                clientHandlers.get(endecsByClass.get(payload.message.getClass()).clientHandlerIndex).handle(payload.message, new ClientAccess(((ClientPlayerEntity) player).networkHandler));
+                clientHandlers.get(endecsByClass.get(payload.message.getClass()).clientHandlerIndex).handle(payload.message, new ClientAccess(player));
             });
         } else {
             NeoOwoNetworking.registerClientMessageHandler(this.packetId, NeoOwoNetworking.PayloadHandler.empty());
@@ -317,12 +317,14 @@ public class OwoNetChannel {
 
     //@OnlyIn(Dist.CLIENT)
     public boolean canSendToServer() {
-        if (!FMLLoader.getDist().isClient()) throw new IllegalStateException("Unable to execute canSendToServer as currently its not a CLIENT Dist!");
-        if (required) return true;
+        // Do note that a mixin will prevent this exception on the client
+        throw new IllegalStateException("Unable to execute canSendToServer as currently its not a CLIENT Dist!");
 
-        return OwoHandshake.isValidClient() ?
-                getChannelSet(MinecraftClient.getInstance().getNetworkHandler().getConnection()).contains(this.packetId.id())
-                : NetworkRegistry.hasChannel(MinecraftClient.getInstance().getNetworkHandler(), this.packetId.id());
+        //if (required) return true;
+
+        //return OwoHandshake.isValidClient() ?
+        //        getChannelSet(MinecraftClient.getInstance().getNetworkHandler().getConnection()).contains(this.packetId.id())
+        //        : NetworkRegistry.hasChannel(MinecraftClient.getInstance().getNetworkHandler(), this.packetId.id());
     }
 
     private static Set<Identifier> getChannelSet(ClientConnection connection) {

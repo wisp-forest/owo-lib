@@ -130,12 +130,12 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
         }
     }
 
-    @Unique
+    //@Unique
     //@OnlyIn(Dist.CLIENT)
-    private void owo$sendToServer(CustomPayload payload) {
-        if (!FMLLoader.getDist().isClient()) throw new IllegalStateException("Unable to execute owo$sendToServer as currently its not a CLIENT Dist!");
-        MinecraftClient.getInstance().getNetworkHandler().send(payload);
-    }
+    //private void owo$sendToServer(CustomPayload payload) {
+    //    if (!FMLLoader.getDist().isClient()) throw new IllegalStateException("Unable to execute owo$sendToServer as currently its not a CLIENT Dist!");
+    //    MinecraftClient.getInstance().getNetworkHandler().send(payload);
+    //}
 
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
