@@ -62,6 +62,8 @@ public class OwoUIDrawContext extends DrawContext {
     }
 
     public boolean intersectsScissor(PositionedRectangle other) {
+        other = other.transform(getMatrixStack());
+
         var rect = this.scissorStack.peekLast();
 
         if (rect == null) return true;
