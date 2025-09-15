@@ -7,16 +7,20 @@ import io.wispforest.owo.itemgroup.base.OwoItemGroup;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
-/**
- * Represents a tab inside an {@link OwoItemGroup} that contains all items in the
- * passed {@code contentTag}. If you want to use {@link OwoItemSettingsExtension#tab(int)} to
- * define the contents, use {@code null} as the tag
- */
+
+///
+/// Represents a tab inside a given {@link OwoItemGroup} with
+/// its entries being gathered in the tabs [OwoEntryCollector].
+///
+/// When adding the tabs for your [OwoItemGroup] and
+/// If you want to use {@link OwoItemSettingsExtension#tab(int)} to
+/// define the contents, use {@code null} as the tag
+///
 public record ItemGroupTab(
         String name,
         Icon icon,
         Text tooltip,
-        ContentSupplier contentSupplier,
+        OwoEntryCollector contentSupplier,
         Identifier texture,
         boolean primary
 ) implements ButtonDefinition {

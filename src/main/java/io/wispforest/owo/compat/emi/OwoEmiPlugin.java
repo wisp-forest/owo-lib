@@ -13,7 +13,7 @@ public class OwoEmiPlugin implements EmiPlugin {
     @Override
     public void register(EmiRegistry registry) {
         registry.addExclusionArea(CreativeInventoryScreen.class, (screen, consumer) -> {
-            var state = OwoItemGroupState.getState(CreativeInventoryScreenAccessor.owo$getSelectedTab());
+            var state = OwoItemGroupState.get(CreativeInventoryScreenAccessor.owo$getSelectedTab());
             if (state == null) return;
 
             int x = ((OwoCreativeInventoryScreenExtensions) screen).owo$getRootX();

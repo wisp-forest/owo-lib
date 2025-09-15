@@ -1,6 +1,6 @@
 package io.wispforest.owo.itemgroup.base;
 
-import io.wispforest.owo.itemgroup.core.ContentSupplier;
+import io.wispforest.owo.itemgroup.core.OwoEntryCollector;
 import io.wispforest.owo.itemgroup.gui.ScrollerTextures;
 import io.wispforest.owo.itemgroup.gui.TabTextures;
 import io.wispforest.owo.itemgroup.core.ItemGroupButton;
@@ -19,14 +19,16 @@ import java.util.List;
 import java.util.function.BiConsumer;
 
 ///
-/// An interface for the base for owos extension on top of [ItemGroup]
+/// The bases for the owo's extension on top of [ItemGroup] storing static data
+/// where as [OwoItemGroupState] holds state of active tabs used to gather entries
+/// for the group
 ///
 public interface OwoItemGroup {
 
     BiConsumer<Item, ItemGroup.Entries> DEFAULT_STACK_GENERATOR = (item, stacks) -> stacks.add(item.getDefaultStack());
 
     @Nullable
-    static OwoItemGroup getExtension(ItemGroup group) {
+    static OwoItemGroup get(ItemGroup group) {
         return ((OwoItemGroupExtension) group).owo$getExtension();
     }
 
@@ -73,7 +75,7 @@ public interface OwoItemGroup {
      * @param texture         The texture to use for drawing the button
      * @see Icon#of(ItemConvertible)
      */
-    void addCustomTab(Icon icon, String name, ContentSupplier contentSupplier, Identifier texture, boolean primary);
+    void addCustomTab(Icon icon, String name, OwoEntryCollector contentSupplier, Identifier texture, boolean primary);
 
     /**
      * Adds a new tab to this group
@@ -83,7 +85,7 @@ public interface OwoItemGroup {
      * @param contentSupplier The function used for filling this tab
      * @see Icon#of(ItemConvertible)
      */
-    void addCustomTab(Icon icon, String name, ContentSupplier contentSupplier, boolean primary);
+    void addCustomTab(Icon icon, String name, OwoEntryCollector contentSupplier, boolean primary);
 
     void addTabs(Collection<ItemGroupTab> tabs);
 

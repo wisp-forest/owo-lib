@@ -15,11 +15,10 @@ import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 
-/**
- * An icon used for rendering on buttons in {@link OwoItemGroup}s
- * <p>
- * Default implementations provided for textures and item stacks
- */
+///
+/// An icon used for rendering on buttons in {@link OwoItemGroup} with
+/// default implementations for [ItemStack], textures, and animated textures
+///
 public interface Icon extends IdentifiedData {
 
     @ApiStatus.Internal

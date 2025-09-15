@@ -15,7 +15,7 @@ public abstract class StatusEffectsDisplayMixin {
             ordinal = 2)
     private int shiftStatusEffects(int x) {
         if ((Object) this instanceof CreativeInventoryScreen) {
-            var extension = OwoItemGroup.getExtension(CreativeInventoryScreenAccessor.owo$getSelectedTab());
+            var extension = OwoItemGroup.get(CreativeInventoryScreenAccessor.owo$getSelectedTab());
 
             if (extension != null && !extension.getButtons().isEmpty()) {
                 x += 28;

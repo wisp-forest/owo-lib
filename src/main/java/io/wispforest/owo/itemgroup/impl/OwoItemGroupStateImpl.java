@@ -98,6 +98,8 @@ public class OwoItemGroupStateImpl implements OwoItemGroupState {
         var key = this.extension.itemGroupId();
 
         activeTabs.forEach(tabIdx -> {
+            this.collectItemsFromRegistry(entries, tabIdx);
+
             var callback = new CondensedEntries.RegistrationCallback() {
                 @Override
                 public CondensedEntries.RegistrationCallback addEntry(CondensedEntry entry) {
@@ -109,8 +111,6 @@ public class OwoItemGroupStateImpl implements OwoItemGroupState {
             };
 
             tabs.get(tabIdx).contentSupplier().addItems(context, new OwoItemGroupEntriesImpl(entries, key, tabIdx, callback));
-
-            this.collectItemsFromRegistry(entries, tabIdx);
         });
     }
 

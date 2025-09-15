@@ -2,7 +2,7 @@ package io.wispforest.owo.itemgroup.base;
 
 import io.wispforest.owo.itemgroup.core.CondensedEntries;
 import io.wispforest.owo.itemgroup.core.CondensedEntry;
-import io.wispforest.owo.itemgroup.util.ItemStackUtils;
+import io.wispforest.owo.itemgroup.util.ItemStackOps;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemGroup;
@@ -13,6 +13,7 @@ import net.minecraft.util.Identifier;
 import java.util.SequencedCollection;
 import java.util.function.Predicate;
 
+// TODO [ItemGroupPR]: DOCUMENT?
 public interface OwoItemGroupEntries extends CondensedEntries.RegistrationCallback {
 
     default OwoItemGroupEntries addAll(TagKey<? extends ItemConvertible> tagKey) {
@@ -20,7 +21,7 @@ public interface OwoItemGroupEntries extends CondensedEntries.RegistrationCallba
     }
 
     default OwoItemGroupEntries addAll(TagKey<? extends ItemConvertible> tagKey, ItemGroup.StackVisibility visibility) {
-        return addAll(ItemStackUtils.getStacks(tagKey), visibility);
+        return addAll(ItemStackOps.getStacks(tagKey), visibility);
     }
 
     default OwoItemGroupEntries add(ItemStack stack) {
@@ -51,25 +52,29 @@ public interface OwoItemGroupEntries extends CondensedEntries.RegistrationCallba
 
     //--
 
+    @Override
     default OwoItemGroupEntries addEntry(Identifier identifier, Predicate<Item> predicate) {
         return addEntry(identifier, ItemStacksSupplier.of(predicate));
     }
 
     @Override
     default CondensedEntries.RegistrationCallback addEntry(Identifier identifier, ItemConvertible item) {
-        return addEntry(identifier, ItemStacksSupplier.of(item));
+        return addEntry(identifier, ItemStacksSupplier.itemVariants(item));
     }
 
     OwoItemGroupEntries addEntry(TagKey<? extends ItemConvertible> tagKey);
 
+    @Override
     default OwoItemGroupEntries addEntry(Identifier identifier, TagKey<? extends ItemConvertible> tagKey) {
-        return addEntry(identifier, ItemStacksSupplier.of(tagKey));
+        return addEntry(identifier, ItemStacksSupplier.tag(tagKey));
     }
 
+    @Override
     default OwoItemGroupEntries addEntry(Identifier identifier, SequencedCollection<ItemStack> stacks) {
-        return addEntry(identifier, ItemStacksSupplier.of(stacks));
+        return addEntry(identifier, ItemStacksSupplier.stacks(stacks));
     }
 
+    @Override
     default OwoItemGroupEntries addEntry(Identifier identifier, ItemStacksSupplier supplier) {
         return addEntry(new CondensedEntry(identifier, supplier, false));
     }

@@ -3,6 +3,7 @@ package io.wispforest.owo.itemgroup.impl;
 import io.wispforest.owo.itemgroup.core.CondensedEntries;
 import io.wispforest.owo.itemgroup.core.CondensedEntry;
 import it.unimi.dsi.fastutil.ints.IntSet;
+import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
@@ -13,6 +14,10 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
+///
+/// Handles current state of all condensed entries when inside the [CreativeInventoryScreen] after
+/// locating them via [CondensedEntries#getEntriesFor]
+///
 @ApiStatus.Internal
 public class CondensedEntryStates {
 

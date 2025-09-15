@@ -10,20 +10,25 @@ import io.wispforest.owo.ui.core.PositionedRectangle;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.util.Identifier;
 
 import java.util.HashMap;
 import java.util.Map;
 
+///
+/// Handles rendering of all [Icon] objects by allowing users to register
+/// a given [IconRenderer] for such based on its [Identifier]
+///
 public class IconRenderRegistry {
 
-    private static final Map<Class<?>, IconRenderer<?>> TYPE_TO_RENDERER = new HashMap<>();
+    private static final Map<Identifier, IconRenderer<?>> TYPE_TO_RENDERER = new HashMap<>();
 
-    public static <T extends Icon> void addRenderer(Class<T> clazz, IconRenderer<T> renderer) {
-        if (TYPE_TO_RENDERER.containsKey(clazz)) {
-            throw new IllegalStateException("Unable to add renderer for the given icon type [" + clazz + "] due to it already being registered!");
+    public static <T extends Icon> void addRenderer(Identifier id, IconRenderer<T> renderer) {
+        if (TYPE_TO_RENDERER.containsKey(id)) {
+            throw new IllegalStateException("Unable to add renderer for the given icon type [" + id + "] due to it already being registered!");
         }
 
-        TYPE_TO_RENDERER.put(clazz, renderer);
+        TYPE_TO_RENDERER.put(id, renderer);
     }
 
     public static <T extends Icon> boolean renderIcon(T icon, DrawContext context, int x, int y, int mouseX, int mouseY, float partialTicks) {
@@ -41,20 +46,26 @@ public class IconRenderRegistry {
     }
 
     static {
-        addRenderer(Icon.ItemIcon.class, (icon, context, x, y, mouseX, mouseY, partialTicks) -> {
-            context.drawItemWithoutEntity(icon.stack(), x, y);
-        });
+        IconRenderRegistry.<Icon.ItemIcon>addRenderer(Icon.ItemIcon.ID,
+            (icon, context, x, y, mouseX, mouseY, partialTicks) -> {
+                context.drawItemWithoutEntity(icon.stack(), x, y);
+            });
 
-        addRenderer(Icon.TextureIcon.class, (icon, context, x, y, mouseX, mouseY, partialTicks) -> {
-            context.drawTexture(RenderPipelines.GUI_TEXTURED, icon.texture(), x, y, icon.u(), icon.v(), 16, 16, icon.textureWidth(), icon.textureHeight());
-        });
+        IconRenderRegistry.<Icon.TextureIcon>addRenderer(Icon.TextureIcon.ID,
+            (icon, context, x, y, mouseX, mouseY, partialTicks) -> {
+                context.drawTexture(RenderPipelines.GUI_TEXTURED, icon.texture(), x, y, icon.u(), icon.v(), 16, 16, icon.textureWidth(), icon.textureHeight());
+            });
 
-        Map<Icon.AnimatedTextureIcon, AnimatedTextureState> cachedWidgets = new MapMaker().weakKeys().makeMap();
+        IconRenderRegistry.addRenderer(Icon.AnimatedTextureIcon.ID,
+            new IconRenderer<Icon.AnimatedTextureIcon>() {
+                private final Map<Icon.AnimatedTextureIcon, AnimatedTextureState> cachedWidgets = new MapMaker().weakKeys().makeMap();
 
-        addRenderer(Icon.AnimatedTextureIcon.class, (icon, context, x, y, mouseX, mouseY, partialTicks) -> {
-            cachedWidgets.computeIfAbsent(icon, AnimatedTextureState::new)
-                .renderAndUpdate(context, x, y);
-        });
+                @Override
+                public void renderIcon(Icon.AnimatedTextureIcon icon, DrawContext context, int x, int y, int mouseX, int mouseY, float partialTicks) {
+                    cachedWidgets.computeIfAbsent(icon, AnimatedTextureState::new)
+                        .renderAndUpdate(context, x, y);
+                }
+            });
     }
 
     private static class AnimatedTextureState {

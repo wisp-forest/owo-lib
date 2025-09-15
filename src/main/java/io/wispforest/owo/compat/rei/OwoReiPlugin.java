@@ -24,7 +24,7 @@ public class OwoReiPlugin implements REIClientPlugin {
     @Override
     public void registerExclusionZones(ExclusionZones zones) {
         zones.register(CreativeInventoryScreen.class, screen -> {
-            var state = OwoItemGroupState.getState(CreativeInventoryScreenAccessor.owo$getSelectedTab());
+            var state = OwoItemGroupState.get(CreativeInventoryScreenAccessor.owo$getSelectedTab());
             if (state == null) return Collections.emptySet();
 
             int x = ((OwoCreativeInventoryScreenExtensions) screen).owo$getRootX();

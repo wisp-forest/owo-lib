@@ -32,7 +32,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.SequencedCollection;
 import java.util.function.Function;
 
 /**
@@ -176,7 +175,7 @@ public class OwoItemGroupLoader implements ModDataConsumer {
                     stack -> (stack.getCount() > 1 || !stack.getComponentChanges().isEmpty()) ? Either.left(stack) : Either.right(stack.getItem()));
 
             private static final Endec<ItemStacksSupplier> SUPPLIER_ENDEC = CodecUtils.eitherEndec(
-                CONDENSED_ITEM_STACK.xmap(stack -> ItemStacksSupplier.of(List.of(stack)), supplier1 -> supplier1.get().getFirst()),
+                CONDENSED_ITEM_STACK.xmap(stack -> ItemStacksSupplier.stacks(List.of(stack)), supplier1 -> supplier1.get().getFirst()),
                 ItemStacksSupplier.ENDEC
             ).xmap(
                 Either::unwrap,

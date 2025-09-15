@@ -9,7 +9,6 @@ import io.wispforest.owo.itemgroup.gui.ScrollerTextures;
 import io.wispforest.owo.itemgroup.gui.TabTextures;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
-import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.Identifier;
@@ -58,7 +57,7 @@ public class OwoItemGroupImpl implements OwoItemGroup {
 
     public static ItemGroup.EntryCollector createCollector(ItemGroup group) {
         return (context, entries) -> {
-            var state = OwoItemGroupState.getState(group, context);
+            var state = OwoItemGroupState.get(group, context);
 
             if (state != null) state.accept(context, entries);
         };
@@ -75,7 +74,7 @@ public class OwoItemGroupImpl implements OwoItemGroup {
             name,
             icon,
             ButtonDefinition.tooltipFor(this.itemGroupId(), "tab", name),
-            contentTag == null ? ContentSupplier.EMPTY : ContentSupplier.fromTag(contentTag),
+            contentTag == null ? OwoEntryCollector.EMPTY : OwoEntryCollector.fromTag(contentTag),
             texture,
             primary
         ));
@@ -85,7 +84,7 @@ public class OwoItemGroupImpl implements OwoItemGroup {
         addTab(icon, name, contentTag, ItemGroupTab.DEFAULT_TEXTURE, primary);
     }
 
-    public void addCustomTab(Icon icon, String name, ContentSupplier contentSupplier, Identifier texture, boolean primary) {
+    public void addCustomTab(Icon icon, String name, OwoEntryCollector contentSupplier, Identifier texture, boolean primary) {
         this.tabs.add(new ItemGroupTab(
             name,
             icon,
@@ -96,7 +95,7 @@ public class OwoItemGroupImpl implements OwoItemGroup {
         ));
     }
 
-    public void addCustomTab(Icon icon, String name, ContentSupplier contentSupplier, boolean primary) {
+    public void addCustomTab(Icon icon, String name, OwoEntryCollector contentSupplier, boolean primary) {
         this.addCustomTab(icon, name, contentSupplier, ItemGroupTab.DEFAULT_TEXTURE, primary);
     }
 

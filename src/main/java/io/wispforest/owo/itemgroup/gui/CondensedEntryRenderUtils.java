@@ -13,6 +13,10 @@ import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 
+///
+/// Handles the various rendering parts that the [CondensedEntry]
+/// may need like the parent icon, entry background, and the entry outline
+///
 @ApiStatus.Internal
 public class CondensedEntryRenderUtils {
 
@@ -42,11 +46,10 @@ public class CondensedEntryRenderUtils {
             if (!isSlotAboveFromEntry(slot, state)) {
                 var sideOffset = 1;
 
-                //if  {
-                    var isPrevSlotPartOf = isSlotAboveFromEntry(new Slot(slot.inventory, slot.getIndex() + 1, 0, 0), state);
-
-                    if (isPrevSlotPartOf) sideOffset = 2;
-                //}
+                // Handles inner corner edge cases making the entire outline a seamless connection
+                if (isSlotAboveFromEntry(new Slot(slot.inventory, slot.getIndex() + 1, 0, 0), state)) {
+                    sideOffset = 2;
+                }
 
                 context.fill(minX - ((slot.getIndex() % 9 != 0) ? sideOffset : 1), minY - 1, maxX + sideOffset, maxY - 16, outlineColor.argb());
             }
@@ -54,10 +57,9 @@ public class CondensedEntryRenderUtils {
             if (!isSlotBelowFromEntry(slot, state)) {
                 var sideOffset = 1;
 
-                if (slot.getIndex() % 9 != 0) {
-                    var isPrevSlotPartOf = isSlotBelowFromEntry(new Slot(slot.inventory, slot.getIndex() - 1, 0, 0), state);
-
-                    if (isPrevSlotPartOf) sideOffset = 2;
+                // Handles inner corner edge cases making the entire outline a seamless connection
+                if (slot.getIndex() % 9 != 0 && isSlotBelowFromEntry(new Slot(slot.inventory, slot.getIndex() - 1, 0, 0), state)) {
+                    sideOffset = 2;
                 }
 
                 context.fill(minX - sideOffset, minY + 16, maxX + sideOffset, maxY + 1, outlineColor.argb());

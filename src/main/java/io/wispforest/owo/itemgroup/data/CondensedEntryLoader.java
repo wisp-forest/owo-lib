@@ -8,6 +8,7 @@ import io.wispforest.owo.itemgroup.base.ItemStacksSupplier;
 import io.wispforest.owo.itemgroup.core.CondensedEntries;
 import io.wispforest.owo.itemgroup.core.CondensedEntry;
 import io.wispforest.owo.serialization.CodecUtils;
+import io.wispforest.owo.serialization.EndecDataLoader;
 import net.minecraft.resource.ResourceFinder;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;

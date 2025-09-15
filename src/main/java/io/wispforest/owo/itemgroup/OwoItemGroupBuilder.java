@@ -22,6 +22,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+// TODO [ItemGroupPR]: DOCUMENT
 public class OwoItemGroupBuilder {
 
     private final Event<ExtensionInitialization> onInitEvent = EventFactory.createArrayBacked(

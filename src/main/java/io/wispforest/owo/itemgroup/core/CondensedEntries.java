@@ -3,7 +3,6 @@ package io.wispforest.owo.itemgroup.core;
 import io.wispforest.owo.itemgroup.base.ItemStacksSupplier;
 import io.wispforest.owo.itemgroup.base.OwoItemGroupState;
 import io.wispforest.owo.itemgroup.impl.OwoItemGroupStateImpl;
-import io.wispforest.owo.itemgroup.util.ItemStackUtils;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemConvertible;
@@ -19,6 +18,7 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.*;
 import java.util.function.Predicate;
 
+// TODO [ItemGroupPR]: DOCUMENT
 public class CondensedEntries {
 
     private static final Map<RegistryKey<ItemGroup>, Map<Integer, Map<Identifier, CondensedEntry>>> ENTRIES = new LinkedHashMap<>();
@@ -89,7 +89,7 @@ public class CondensedEntries {
 
         // -- State Entries --
 
-        var state = OwoItemGroupState.getState(group);
+        var state = OwoItemGroupState.get(group);
 
         if (state != null) {
             var entries = ((OwoItemGroupStateImpl) state).activeCondensedEntries();
@@ -108,11 +108,11 @@ public class CondensedEntries {
         }
 
         default RegistrationCallback addEntry(Identifier identifier, TagKey<? extends ItemConvertible> tagKey) {
-            return addEntry(identifier, ItemStacksSupplier.of(tagKey));
+            return addEntry(identifier, ItemStacksSupplier.tag(tagKey));
         }
 
         default RegistrationCallback addEntry(Identifier identifier, ItemConvertible item) {
-            return addEntry(identifier, ItemStacksSupplier.of(item));
+            return addEntry(identifier, ItemStacksSupplier.itemVariants(item));
         }
 
 //        default RegistrationCallback addItems(Identifier identifier, SequencedCollection<? extends ItemConvertible> items) {
@@ -120,7 +120,7 @@ public class CondensedEntries {
 //        }
 
         default RegistrationCallback addEntry(Identifier identifier, SequencedCollection<ItemStack> stacks) {
-            return addEntry(identifier, ItemStacksSupplier.of(stacks));
+            return addEntry(identifier, ItemStacksSupplier.stacks(stacks));
         }
 
         default RegistrationCallback addEntry(Identifier identifier, ItemStacksSupplier supplier) {

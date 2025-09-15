@@ -21,7 +21,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
 import net.minecraft.resource.featuretoggle.FeatureSet;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
@@ -82,7 +81,7 @@ public abstract class CreativeInventoryScreenMixin extends HandledScreen<Creativ
 
     @ModifyArg(method = "drawBackground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawTexture(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/util/Identifier;IIFFIIII)V", ordinal = 0))
     private Identifier injectCustomGroupTexture(Identifier original) {
-        var extension = OwoItemGroup.getExtension(selectedTab);
+        var extension = OwoItemGroup.get(selectedTab);
 
         return (extension != null && extension.backgroundTexture() != null)
             ? extension.backgroundTexture()
@@ -95,7 +94,7 @@ public abstract class CreativeInventoryScreenMixin extends HandledScreen<Creativ
 
     @ModifyArg(method = "drawBackground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/util/Identifier;IIII)V"))
     private Identifier injectCustomScrollbarTexture(Identifier texture) {
-        var extension = OwoItemGroup.getExtension(selectedTab);
+        var extension = OwoItemGroup.get(selectedTab);
 
         return (extension != null && extension.scrollerTextures() != null)
             ? extension.scrollerTextures().getTexture(this.hasScrollbar())
@@ -108,14 +107,11 @@ public abstract class CreativeInventoryScreenMixin extends HandledScreen<Creativ
 
     @ModifyArg(method = "renderTabIcon", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/util/Identifier;IIII)V"))
     private Identifier injectCustomTabTexture(Identifier texture, @Local(argsOnly = true) ItemGroup group) {
-        var extension = OwoItemGroup.getExtension(group);
+        var extension = OwoItemGroup.get(group);
 
-        if (extension == null || extension.tabTextures() == null) return texture;
-
-        var textures = extension.tabTextures();
-        return group.getRow() == ItemGroup.Row.TOP
-                ? selectedTab == group ? group.getColumn() == 0 ? textures.topSelectedFirstColumn() : textures.topSelected() : textures.topUnselected()
-                : selectedTab == group ? group.getColumn() == 0 ? textures.bottomSelectedFirstColumn() : textures.bottomSelected() : textures.bottomUnselected();
+        return (extension != null && extension.tabTextures() != null)
+            ? extension.tabTextures().getTexture(group, selectedTab)
+            : texture;
     }
 
     @Unique private float delta = 0;
@@ -131,7 +127,7 @@ public abstract class CreativeInventoryScreenMixin extends HandledScreen<Creativ
 
     @Inject(method = "renderTabIcon", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemGroup;getIcon()Lnet/minecraft/item/ItemStack;"))
     private void renderOwoIcon(DrawContext context, ItemGroup group, CallbackInfo ci, @Local(ordinal = 3) int j, @Local(ordinal = 4) int k) {
-        var extension = OwoItemGroup.getExtension(group);
+        var extension = OwoItemGroup.get(group);
 
         if (extension != null) {
             IconRenderRegistry.renderIcon(extension.icon(), context, j, k, mouseX, mouseY, delta);
@@ -158,7 +154,7 @@ public abstract class CreativeInventoryScreenMixin extends HandledScreen<Creativ
         this.owoButtons.forEach(this::remove);
         this.owoButtons.clear();
 
-        currentState = OwoItemGroupState.getState(group);
+        currentState = OwoItemGroupState.get(group);
 
         if (currentState != null) {
             var extension = currentState.getExtension();

@@ -4,7 +4,6 @@ import io.wispforest.owo.itemgroup.base.OwoItemGroup;
 import io.wispforest.owo.itemgroup.OwoItemGroupBuilder;
 import io.wispforest.owo.itemgroup.base.OwoItemGroupState;
 import io.wispforest.owo.itemgroup.impl.OwoItemGroupImpl;
-import io.wispforest.owo.itemgroup.impl.OwoItemGroupStateImpl;
 import io.wispforest.owo.util.pond.OwoItemGroupExtension;
 import net.minecraft.item.ItemGroup;
 import org.jetbrains.annotations.Nullable;
@@ -48,7 +47,7 @@ public abstract class ItemGroupMixin implements OwoItemGroupExtension {
     private void owo$handlePossibleExtensionSearchEntries(ItemGroup.DisplayContext context, CallbackInfo ci) {
         var group = (ItemGroup) (Object) this;
 
-        var state = OwoItemGroupState.getState(group, context);
+        var state = OwoItemGroupState.get(group, context);
 
         if (state != null) {
             state.updateSearchEntries(group, context);

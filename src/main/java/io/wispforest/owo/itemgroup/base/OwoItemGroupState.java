@@ -13,14 +13,20 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
+///
+/// The state for the given [OwoItemGroup] with the currently selected
+/// tabs and acts as the primary access for the given entries of the
+/// group
+///
 public interface OwoItemGroupState extends ItemGroup.EntryCollector {
 
     @Nullable
-    static OwoItemGroupState getState(ItemGroup group) {
-        return getState(group, null);
+    static OwoItemGroupState get(ItemGroup group) {
+        return get(group, null);
     }
 
-    static OwoItemGroupState getState(ItemGroup group, @Nullable ItemGroup.DisplayContext context) {
+    @Nullable
+    static OwoItemGroupState get(ItemGroup group, @Nullable ItemGroup.DisplayContext context) {
         var isClientSide = true;
 
         if (context != null) {
@@ -29,9 +35,10 @@ public interface OwoItemGroupState extends ItemGroup.EntryCollector {
             isClientSide = server == null || server.getRegistryManager() != context.lookup();
         }
 
-        return getState(group, isClientSide);
+        return get(group, isClientSide);
     }
-    static OwoItemGroupState getState(ItemGroup group, boolean isClientSide) {
+
+    static OwoItemGroupState get(ItemGroup group, boolean isClientSide) {
         return OwoItemGroupStateImpl.getState(group, isClientSide);
     }
 
@@ -84,9 +91,9 @@ public interface OwoItemGroupState extends ItemGroup.EntryCollector {
     Text getDisplayName(Text baseDisplayName);
 
     default Collection<ScreenRect> getExclusionZones(int x, int y) {
-        var extension = OwoItemGroup.getExtension(CreativeInventoryScreenAccessor.owo$getSelectedTab());
-        if (extension == null) return Collections.emptySet();
-        if (extension.getButtons().isEmpty()) return Collections.emptySet();
+        var extension = OwoItemGroup.get(CreativeInventoryScreenAccessor.owo$getSelectedTab());
+
+        if (extension == null || extension.getButtons().isEmpty()) return Collections.emptySet();
 
         int stackHeight = extension.buttonStackHeight();
         y -= 13 * (stackHeight - 4);

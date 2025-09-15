@@ -1,23 +1,19 @@
-package io.wispforest.owo.itemgroup.data;
+package io.wispforest.owo.serialization;
 
-import com.google.gson.JsonElement;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import io.wispforest.endec.Endec;
-import io.wispforest.owo.serialization.CodecUtils;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.resource.JsonDataLoader;
 import net.minecraft.resource.ResourceFinder;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.profiler.Profiler;
 
-import java.util.Map;
-
+///
+/// An implementation of [JsonDataLoader] but designed for use with a [Endec]
+/// combined with access to primary constructor when not using a [Registry] object
+/// for server loading
+///
 public abstract class EndecDataLoader<T> extends JsonDataLoader<T> implements IdentifiableResourceReloadListener {
 
     protected final Endec<T> endec;
