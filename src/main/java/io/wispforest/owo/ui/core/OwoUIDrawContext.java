@@ -402,7 +402,7 @@ public class OwoUIDrawContext extends DrawContext {
          * or {@link #setLinkSource(Screen)} must be called prior to invoking this method
          */
         @Override
-        public boolean handleTextClick(@Nullable Style style) {
+        public boolean handleTextClick(Style style) {
             return super.handleTextClick(style);
         }
 
