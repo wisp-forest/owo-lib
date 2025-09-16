@@ -13,6 +13,7 @@ import io.wispforest.owo.braid.widgets.basic.*;
 import io.wispforest.owo.braid.widgets.flex.CrossAxisAlignment;
 import io.wispforest.owo.braid.widgets.flex.MainAxisAlignment;
 import io.wispforest.owo.braid.widgets.flex.Row;
+import io.wispforest.owo.braid.widgets.focus.Focusable;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.sharedstate.SharedState;
 import net.minecraft.text.Text;
@@ -78,7 +79,7 @@ public class InstanceTitle extends StatefulWidget {
                 )
             );
 
-            return new KeyboardInput(
+            return new Focusable(
                 widget -> widget
                     .focusGainedCallback(() -> SharedState.set(context, InspectorState.class, state -> state.selectedElement = this.widget().instance)),
                 new MouseArea(

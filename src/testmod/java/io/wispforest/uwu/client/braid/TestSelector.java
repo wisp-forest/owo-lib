@@ -30,6 +30,7 @@ import io.wispforest.owo.braid.widgets.cycle.MessageCyclingButton;
 import io.wispforest.owo.braid.widgets.drag.DragArena;
 import io.wispforest.owo.braid.widgets.drag.DragArenaElement;
 import io.wispforest.owo.braid.widgets.flex.*;
+import io.wispforest.owo.braid.widgets.focus.Focusable;
 import io.wispforest.owo.braid.widgets.grid.Grid;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
@@ -1364,7 +1365,7 @@ public class TestSelector extends StatefulWidget {
                                             .dragEndCallback(() -> this.addToList(Text.literal("Drag ended")))
                                             .enterCallback(() -> this.addToList(Text.literal("Mouse entered")))
                                             .exitCallback(() -> this.addToList(Text.literal("Mouse exited"))),
-                                        new KeyboardInput(
+                                        new Focusable(
                                             input ->
                                                 input.keyDownCallback((key, modifiers) -> this.addToList(getKeyName(key).append(" pressed")))
                                                     .keyUpCallback((key, modifiers) -> this.addToList(getKeyName(key).append(" released")))

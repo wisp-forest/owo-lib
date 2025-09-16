@@ -93,8 +93,8 @@ public class WidgetTransform {
 
     public Box aabb() {
         if (this.aabb == null) {
-            var min = new Vector3f().mulPosition(this.toParent());
-            var max = new Vector3f((float) this.width, (float) this.height, 0).mulPosition(this.toParent());
+            var min = this.toParent().transformPosition(new Vector3f());
+            var max = this.toParent().transformPosition((float) this.width, (float) this.height, 0, new Vector3f());
 
             this.aabb = new Box(min.x, min.y, min.z, max.x, max.y, max.z);
         }

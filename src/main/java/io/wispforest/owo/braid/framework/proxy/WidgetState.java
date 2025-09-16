@@ -52,7 +52,7 @@ public abstract class WidgetState<T extends StatefulWidget> {
         this.owner.host().schedulePostLayoutCallback(callback);
     }
 
-    protected T widget() {
+    public T widget() {
         Preconditions.checkNotNull(this.widget);
         return this.widget;
     }

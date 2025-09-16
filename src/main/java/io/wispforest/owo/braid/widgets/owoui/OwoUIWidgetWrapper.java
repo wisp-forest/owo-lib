@@ -6,7 +6,6 @@ import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.KeyModifiers;
 import io.wispforest.owo.braid.core.Size;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
-import io.wispforest.owo.braid.framework.instance.KeyboardListener;
 import io.wispforest.owo.braid.framework.instance.LeafWidgetInstance;
 import io.wispforest.owo.braid.framework.instance.MouseListener;
 import io.wispforest.owo.braid.framework.widget.LeafInstanceWidget;
@@ -29,7 +28,7 @@ public class OwoUIWidgetWrapper extends LeafInstanceWidget {
         return new Instance(this);
     }
 
-    public static class Instance extends LeafWidgetInstance<OwoUIWidgetWrapper> implements MouseListener, KeyboardListener {
+    public static class Instance extends LeafWidgetInstance<OwoUIWidgetWrapper> implements MouseListener {
         private int mouseX = -100;
         private int mouseY = -100;
 
@@ -91,7 +90,6 @@ public class OwoUIWidgetWrapper extends LeafInstanceWidget {
             this.mouseY = -100;
         }
 
-        @Override
         public void onFocusLost() {
             this.widget.rootComponent.focusHandler().focus(null, Component.FocusSource.MOUSE_CLICK);
         }
@@ -147,12 +145,10 @@ public class OwoUIWidgetWrapper extends LeafInstanceWidget {
             this.dragButton = -1;
         }
 
-        @Override
         public boolean onKeyDown(int keyCode, KeyModifiers modifiers) {
             return this.widget.rootComponent.onKeyPress(keyCode, GLFW.glfwGetKeyScancode(keyCode), modifiers.bitMask());
         }
 
-        @Override
         public boolean onChar(int charCode, KeyModifiers modifiers) {
             return this.widget.rootComponent.onCharTyped((char) charCode, modifiers.bitMask());
         }

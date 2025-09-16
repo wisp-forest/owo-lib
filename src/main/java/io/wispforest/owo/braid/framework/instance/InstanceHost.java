@@ -22,11 +22,5 @@ public interface InstanceHost {
     /// This is used to implement the [LayoutBuilder] mechanism
     void notifySubtreeRebuild();
 
-    /// Request that focus be moved to `focusTarget`. Given that
-    /// the host allows the operation, it will generally be
-    /// executed immediately and the listener is ready to receive
-    /// input events from the next frame onwards
-    void moveFocusTo(KeyboardListener focusTarget);
-
     void schedulePostLayoutCallback(Runnable callback);
 }

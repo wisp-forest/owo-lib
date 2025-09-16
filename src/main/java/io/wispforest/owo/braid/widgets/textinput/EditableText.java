@@ -5,7 +5,8 @@ import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
-import io.wispforest.owo.braid.widgets.basic.*;
+import io.wispforest.owo.braid.widgets.basic.Builder;
+import io.wispforest.owo.braid.widgets.focus.Focusable;
 import io.wispforest.owo.braid.widgets.scroll.ScrollAnimationSettings;
 import io.wispforest.owo.braid.widgets.scroll.ScrollController;
 import io.wispforest.owo.braid.widgets.scroll.Scrollable;
@@ -205,7 +206,7 @@ public class EditableText extends StatefulWidget {
 
         @Override
         public Widget build(BuildContext context) {
-            return new KeyboardInput(
+            return new Focusable(
                 widget -> widget
                     .focusGainedCallback(() -> {
                         this.focused = true;
@@ -214,6 +215,12 @@ public class EditableText extends StatefulWidget {
                     .focusLostCallback(() -> {
                         this.focused = false;
                         this.stopBlinking();
+                    })
+                    .keyDownCallback((keyCode, modifiers) -> {
+                        return ((TextInput.Instance) this.inputContext.instance()).onKeyDown(keyCode, modifiers);
+                    })
+                    .charCallback((charCode, modifiers) -> {
+                        return ((TextInput.Instance) this.inputContext.instance()).onChar(charCode, modifiers);
                     }),
                 new Scrollable(
                     true, this.widget().maxLines != 1,
