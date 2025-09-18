@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
-@Debug(export = true)
 @Mixin(Language.class)
 public class LanguageMixin {
     @Shadow @Final private static Logger LOGGER;
