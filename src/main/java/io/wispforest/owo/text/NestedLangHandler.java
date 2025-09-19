@@ -14,14 +14,12 @@ import java.util.regex.Pattern;
 
 @ApiStatus.Internal
 public class NestedLangHandler {
-    private static final Pattern NESTED_OBJECT_PATTERN = Pattern.compile("^((?:(.*?)\\.\\.)?)( ?)((?:\\.\\.(.*?))?)$");
-    private static final Pattern NESTED_LIST_PATTERN = Pattern.compile("^((?:(.*?)\\.\\.)?)((?:-?[0-9]*| )?)((?:\\.\\.(.*?))?)$");
+    private static final Pattern NESTED_OBJECT_PATTERN = Pattern.compile("^((?:(.*?)(?:\\.\\.|\\{))?)( ?)((?:(?:\\.\\.|\\})(.*?))?)$");
+    private static final Pattern NESTED_LIST_PATTERN = Pattern.compile("^((?:(.*?)(?:\\.\\.|\\{))?)((?:-?[0-9]*| )?)((?:(?:\\.\\.|\\})(.*?))?)$");
     private static final Pattern AFFIX_ESCAPE_PATTERN = Pattern.compile("^(/*)([^/]*)(/*)$");
     private static final Pattern EMPTY_STRIP_PATTERN = Pattern.compile("[^a-zA-Z0-9]+$");
 
     public static Set<Map.Entry<String, JsonElement>> deNest(Set<Map.Entry<String, JsonElement>> entries) {
-        var denested = deNest("", entries, "");
-        denested.forEach(entry -> System.out.println(entry.getKey() + " = " + entry.getValue()));
         return deNest("", entries, "");
     }
 

@@ -1,7 +1,7 @@
 {
-  "owo:nested_lang": true,
+  "owo:extended_lang": 1,
 
-  "text.uwu...": {
+  "text.uwu.{}": {
     "chyz": [
       {"text": "c", "color": "#fdf433"},
       {"text": "h", "color": "#fffdff"},
@@ -25,30 +25,30 @@
     ]
   },
 
-  "text.config.uwu...": {
+  "text.config.uwu.{}": {
     "title": "Test Config Screen",
-    "section...": {
+    "section.{}": {
       "top": "Top Text",
       "bottom": "Bottom Text",
       "nesting_yo?": "That's Nestnite"
     },
-    "category...": {
-      "nestingTime...": {
+    "category.{}": {
+      "nestingTime.{}": {
         "": "Nesting Time",
         "tooltip": "Yep, it's nesting Time",
         "nestingTimeIntensifies": "Nesting Time Intensifies"
       }
     },
-    "option...": {
+    "option.{}": {
       "aValue": "A Value",
-      "regex...": {
+      "regex.{}": {
         "": "Regex'd",
         "tooltip": "Regex tooltip, this is epic"
       },
-      "nestingTime...": {
+      "nestingTime.{}": {
         "togglee": "Togglee",
         "yesThisIsAlsoNested": "Yes this is also nested",
-        "nestedIntegers...": {
+        "nestedIntegers.{}": {
           "": "A nested List of Integers",
           "tooltip": [
             "A very epic nested Integers tooltip",
@@ -58,22 +58,22 @@
         "nestingTimeIntensifies.wowSoNested": "Wow so nested"
       },
       "someOption": "Hello, yes, this is the predicate constraint tutorial",
-      "floting...": {
+      "floting.{}": {
         "": "Floting",
         "tooltip": "messes with button?"
       },
       "thisIsAStringValue": "Clearly, this is a string value",
       "thereAreStringsHere": "There are Strings here",
-      "brotheresAnEnum...": {
+      "brotheresAnEnum.{}": {
         "": "Bro, there's an Enum!",
         "tooltip": "Yeah, it's crazy"
       },
-      "anEpicColor...": {
+      "anEpicColor.{}": {
         "": "An epic color",
         "WithAlpha": "An epic color with alpha"
       }
     },
-    "enum.wowValues...": {
+    "enum.wowValues.{}": {
       "first": "First",
       "second": "Second",
       "third": "Third",
@@ -82,7 +82,7 @@
   },
   "text.config.uowou.option.thisIsNotSyncable": "Unsyncable Option",
 
-  "uwu...": {
+  "uwu.{}": {
     "a": {"index": 0, "color": "#ae0000"},
     "homicide": "homicide"
   },
@@ -92,14 +92,14 @@
   ],
 
   "text.ui.test_slider": "Value: %s",
-  "itemGroup...": {
+  "itemGroup.{}": {
     "food_and_drink.button.consume": "C o n s u m e",
-    "ingredients.tab...": {
+    "ingredients.tab.{}": {
       "the_logs": "The Logs",
       "extra_ores": "Extra Ores"
     },
-    "uwu...": {
-      "four_tab_group...": {
+    "uwu.{}": {
+      "four_tab_group.{}": {
         "": "uωu",
         "tab.tab_..": [
           "Tab 1",
@@ -110,7 +110,7 @@
         ],
         "button.github": "oωo GitHub"
       },
-      "six_tab_group...": {
+      "six_tab_group.{}": {
         "": "uωu",
         "tab.tab_..": [
           "Tab 1",
@@ -122,11 +122,11 @@
         ],
         "button.owo": "ouωuo"
       },
-      "single_tab_group...": {
+      "single_tab_group.{}": {
         "": "uωu",
         "tab.tab_1": "uωu~"
       },
-      "vanilla_group...": {
+      "vanilla_group.{}": {
         "": "uωu (.❛ ᴗ ❛.)",
         "tab.tab_..0": [
           "(´• ω •`)",
@@ -135,12 +135,12 @@
       }
     }
   },
-  "menu...": {
-    "returnToGame": {
+  "menu.returnTo{}": {
+    "Game": {
       "text": "Back to Game",
       "color": "#FF5272"
     },
-    "returnToMenu": [
+    "Menu": [
       "",
       {"text": "Save", "color": "#52BDFF"},
       {"text": " and", "color": "#52FFAA"},
@@ -150,7 +150,7 @@
     ]
   },
 
-  "item.uwu...": {
+  "item.uwu.{}": {
     "counter": "Counter",
     "test_stick": [
       "",
@@ -170,51 +170,51 @@
     " display"
   ],
 
-  "nestedLangTests...": {
-    "prefixTest...": {
+  "nestedLangTests.{}": {
+    "prefixTest.{}": {
       "prefixTestKey": "nestedLangTests.prefixTest.prefixTestKey"
     },
-    "middleTest... ...Suffix": {
+    "middleTest.{}.Suffix": {
       "middleTestKey": "nestedLangTests.middleTest.middleTestKey.Suffix"
     },
-    "...suffixTest": {
+    "{}.suffixTest": {
       "suffixTestKey": "nestedLangTests.suffixTest.suffixTestKey"
     },
 
-    "listPrefixTest...": [
+    "listPrefixTest.{}": [
       "nestedLangTests.listPrefixTest.1",
       "nestedLangTests.listPrefixTest.2"
     ],
-    "listPrefixTestWithIndex...2": [
+    "listPrefixTestWithIndex.{2}": [
       "nestedLangTests.listPrefixTestWithIndex.2",
       "nestedLangTests.listPrefixTestWithIndex.3"
     ],
-    "listMiddleTest... ...Suffix": [
+    "listMiddleTest.{}.Suffix": [
       "nestedLangTests.listMiddleTest.1.Suffix",
       "nestedLangTests.listMiddleTest.2.Suffix"
     ],
-    "listMiddleTestWithIndex...2...Suffix": [
+    "listMiddleTestWithIndex.{2}.Suffix": [
       "nestedLangTests.listMiddleTestWithIndex.2.Suffix",
       "nestedLangTests.listMiddleTestWithIndex.3.Suffix"
     ],
-    "...ListSuffixTest": [
+    "{}.ListSuffixTest": [
       "nestedLangTests.1.ListSuffixTest",
       "nestedLangTests.2.ListSuffixTest"
     ],
-    "2...ListSuffixTestWithIndex": [
+    "{2}.ListSuffixTestWithIndex": [
       "nestedLangTests.2.ListSuffixTestWithIndex",
       "nestedLangTests.3.ListSuffixTestWithIndex"
     ],
-    "escapeTests...": {
+    "escapeTests.{}": {
       "/": "nestedLangTests.escapeTests",
       "//": "nestedLangTests.escapeTest",
-      "...withSuffix": {
+      "{}.withSuffix": {
         "/": "nestedLangTests.escapeTests.withSuffix",
         "without/////": "nestedLangTests.escapeTests.withoutSuffix"
       }
     }
   },
   "This key is here to trigger owo language loading fail prevention": {
-    "does it work?": true
+    "does it work?": "probably"
   }
 }
