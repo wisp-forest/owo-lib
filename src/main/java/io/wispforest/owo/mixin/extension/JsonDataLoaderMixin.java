@@ -1,4 +1,4 @@
-package io.wispforest.owo.mixin.recipe_remainders;
+package io.wispforest.owo.mixin.extension;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -9,6 +9,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.serialization.JsonOps;
 import io.wispforest.owo.Owo;
+import io.wispforest.owo.mixin.extension.recipe.ServerRecipeManagerAccessor;
 import io.wispforest.owo.util.RecipeRemainderStorage;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -25,8 +26,19 @@ import java.util.HashMap;
 @Mixin(JsonDataLoader.class)
 public abstract class JsonDataLoaderMixin {
 
-    @WrapOperation(method = "load(Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/resource/ResourceFinder;Lcom/mojang/serialization/DynamicOps;Lcom/mojang/serialization/Codec;Ljava/util/Map;)V", at = @At(value = "INVOKE", target = "Lcom/google/gson/JsonParser;parseReader(Ljava/io/Reader;)Lcom/google/gson/JsonElement;"))
-    private static JsonElement deserializeRecipeSpecificRemainders(Reader jsonReader, Operation<JsonElement> original, @Local(argsOnly = true) ResourceFinder finder, @Local(ordinal = 1) Identifier recipeId) {
+    @WrapOperation(
+        method = "load(Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/resource/ResourceFinder;Lcom/mojang/serialization/DynamicOps;Lcom/mojang/serialization/Codec;Ljava/util/Map;)V",
+        at = @At(
+            value = "INVOKE",
+            target = "Lcom/google/gson/JsonParser;parseReader(Ljava/io/Reader;)Lcom/google/gson/JsonElement;"
+        )
+    )
+    private static JsonElement loadRecipeExtensions(
+        Reader jsonReader,
+        Operation<JsonElement> original,
+        @Local(argsOnly = true) ResourceFinder finder,
+        @Local(ordinal = 1) Identifier recipeId
+    ) {
         var element = original.call(jsonReader);
 
         if (ServerRecipeManagerAccessor.owo$getFinder() == finder && element instanceof JsonObject json) {
@@ -37,7 +49,10 @@ public abstract class JsonDataLoaderMixin {
                     var item = JsonHelper.asItem(new JsonPrimitive(remainderEntry.getKey()), remainderEntry.getKey());
 
                     if (remainderEntry.getValue().isJsonObject()) {
-                        var remainderStack = ItemStack.CODEC.parse(JsonOps.INSTANCE, remainderEntry.getValue().getAsJsonObject()).getOrThrow(JsonParseException::new);
+                        var remainderStack = ItemStack.CODEC.parse(
+                            JsonOps.INSTANCE,
+                            remainderEntry.getValue().getAsJsonObject()
+                        ).getOrThrow(JsonParseException::new);
                         remainders.put(item.value(), remainderStack);
                     } else {
                         var remainderItem = JsonHelper.asItem(remainderEntry.getValue(), "item");

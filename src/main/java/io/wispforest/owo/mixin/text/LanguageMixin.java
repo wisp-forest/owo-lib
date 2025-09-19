@@ -36,8 +36,8 @@ public class LanguageMixin {
     ) private static Set<Map.Entry<String, JsonElement>> deNestNestedKeys(
         JsonObject instance,
         Operation<Set<Map.Entry<String, JsonElement>>> original,
-        @Share(namespace = Owo.MOD_ID, value = RICH_TRANSLATIONS_ENABLER) LocalBooleanRef richTranslationsEnabled,
-        @Share(namespace = Owo.MOD_ID, value = NESTED_LANG_ENABLER) LocalBooleanRef nestedLangEnabled
+        @Share(RICH_TRANSLATIONS_ENABLER) LocalBooleanRef richTranslationsEnabled,
+        @Share(NESTED_LANG_ENABLER) LocalBooleanRef nestedLangEnabled
     ) {
         var enabledByDefault = featureEnabled(instance, "extended_lang", false);
         richTranslationsEnabled.set(featureEnabled(instance, RICH_TRANSLATIONS_ENABLER, enabledByDefault));
@@ -65,9 +65,9 @@ public class LanguageMixin {
         JsonElement element,
         String name,
         Operation<String> original,
-        @Share(namespace = Owo.MOD_ID, value = RICH_TRANSLATIONS_ENABLER) LocalBooleanRef richTranslationsEnabled,
-        @Share(namespace = Owo.MOD_ID, value = NESTED_LANG_ENABLER) LocalBooleanRef nestedLangEnabled,
-        @Share(namespace = Owo.MOD_ID, value = SKIP_NEXT) LocalBooleanRef skipNext
+        @Share(RICH_TRANSLATIONS_ENABLER) LocalBooleanRef richTranslationsEnabled,
+        @Share(NESTED_LANG_ENABLER) LocalBooleanRef nestedLangEnabled,
+        @Share(SKIP_NEXT) LocalBooleanRef skipNext
     ) {
         skipNext.set(false);
         var rich = richTranslationsEnabled.get();
@@ -108,7 +108,7 @@ public class LanguageMixin {
         BiConsumer<Object, Object> biConsumer,
         Object t,
         Object u,
-        @Share(namespace = Owo.MOD_ID, value = SKIP_NEXT) LocalBooleanRef skipNext
+        @Share(SKIP_NEXT) LocalBooleanRef skipNext
     ) {
         return !skipNext.get();
     }

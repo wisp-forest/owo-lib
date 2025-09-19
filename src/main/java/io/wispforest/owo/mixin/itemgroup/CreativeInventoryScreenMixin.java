@@ -24,10 +24,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -99,8 +96,17 @@ public abstract class CreativeInventoryScreenMixin extends HandledScreen<Creativ
                 : selectedTab == contextGroup ? contextGroup.getColumn() == 0 ? textures.bottomSelectedFirstColumn() : textures.bottomSelected() : textures.bottomUnselected();
     }
 
-    @Inject(method = "renderTabIcon", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemGroup;getIcon()Lnet/minecraft/item/ItemStack;"), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void renderOwoIcon(DrawContext context, ItemGroup group, CallbackInfo ci, boolean bl, boolean bl2, int i, int j, int k) {
+    @Inject(
+        method = "renderTabIcon",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemGroup;getIcon()Lnet/minecraft/item/ItemStack;")
+    )
+    private void renderOwoIcon(
+        DrawContext context,
+        ItemGroup group,
+        CallbackInfo ci,
+        @Local(ordinal = 1) int j,
+        @Local(ordinal = 2) int k
+    ) {
         if (!(group instanceof OwoItemGroup owoGroup)) return;
 
         RenderSystem.enableBlend();
