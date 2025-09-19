@@ -1,11 +1,7 @@
 package io.wispforest.owo.mixin.ui;
 
-import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
 import io.wispforest.owo.util.pond.OwoSlotExtension;
 import net.minecraft.client.gui.DrawContext;
@@ -26,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class HandledScreenMixin extends Screen {
 
     @Unique
-    private static boolean owo$inOwoScreen = false;
+    private static boolean inOwoScreen = false;
 
     protected HandledScreenMixin(Text title) {
         super(title);
@@ -35,17 +31,17 @@ public abstract class HandledScreenMixin extends Screen {
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "render", at = @At("HEAD"))
     private void captureOwoState(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-        owo$inOwoScreen = (Object) this instanceof BaseOwoHandledScreen<?, ?>;
+        inOwoScreen = (Object) this instanceof BaseOwoHandledScreen<?, ?>;
     }
 
     @Inject(method = "render", at = @At("TAIL"))
     private void resetOwoState(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-        owo$inOwoScreen = false;
+        inOwoScreen = false;
     }
 
     @Inject(method = "drawSlot", at = @At("HEAD"))
     private void injectSlotScissors(DrawContext context, Slot slot, CallbackInfo ci) {
-        if (!owo$inOwoScreen) return;
+        if (!inOwoScreen) return;
 
         var scissorArea = ((OwoSlotExtension) slot).owo$getScissorArea();
         if (scissorArea == null) return;
@@ -56,7 +52,7 @@ public abstract class HandledScreenMixin extends Screen {
 
     @Inject(method = "drawSlot", at = @At("RETURN"))
     private void clearSlotScissors(DrawContext context, Slot slot, CallbackInfo ci) {
-        if (!owo$inOwoScreen) return;
+        if (!inOwoScreen) return;
 
         var scissorArea = ((OwoSlotExtension) slot).owo$getScissorArea();
         if (scissorArea == null) return;

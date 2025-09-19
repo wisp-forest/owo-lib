@@ -40,13 +40,13 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
 
     @Shadow private boolean disableSync;
 
-    private final List<SyncedProperty<?>> owo$properties = new ArrayList<>();
+    @Unique private final List<SyncedProperty<?>> properties = new ArrayList<>();
 
-    private final Map<Class<?>, ScreenhandlerMessageData<?>> owo$messages = new LinkedHashMap<>();
-    private final List<ScreenhandlerMessageData<?>> owo$clientboundMessages = new ArrayList<>();
-    private final List<ScreenhandlerMessageData<?>> owo$serverboundMessages = new ArrayList<>();
+    @Unique private final Map<Class<?>, ScreenhandlerMessageData<?>> messages = new LinkedHashMap<>();
+    @Unique private final List<ScreenhandlerMessageData<?>> clientBoundMessages = new ArrayList<>();
+    @Unique private final List<ScreenhandlerMessageData<?>> serverBoundMessages = new ArrayList<>();
 
-    private PlayerEntity owo$player = null;
+    @Unique private PlayerEntity player = null;
 
     @Unique
     private ReflectiveEndecBuilder builder;
@@ -63,34 +63,34 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
 
     @Override
     public void owo$attachToPlayer(PlayerEntity player) {
-        this.owo$player = player;
+        this.player = player;
     }
 
     @Override
     public PlayerEntity player() {
-        return this.owo$player;
+        return this.player;
     }
 
     @Override
     public <R extends Record> void addServerboundMessage(Class<R> messageClass, Endec<R> endec, Consumer<R> handler) {
-        int id = this.owo$serverboundMessages.size();
+        int id = this.serverBoundMessages.size();
 
         var messageData = new ScreenhandlerMessageData<>(id, false, endec, handler);
-        this.owo$serverboundMessages.add(messageData);
+        this.serverBoundMessages.add(messageData);
 
-        if (this.owo$messages.put(messageClass, messageData) != null) {
+        if (this.messages.put(messageClass, messageData) != null) {
             throw new NetworkException(messageClass + " is already registered as a message!");
         }
     }
 
     @Override
     public <R extends Record> void addClientboundMessage(Class<R> messageClass, Endec<R> endec, Consumer<R> handler) {
-        int id = this.owo$clientboundMessages.size();
+        int id = this.clientBoundMessages.size();
 
         var messageData = new ScreenhandlerMessageData<>(id, true, endec, handler);
-        this.owo$clientboundMessages.add(messageData);
+        this.clientBoundMessages.add(messageData);
 
-        if (this.owo$messages.put(messageClass, messageData) != null) {
+        if (this.messages.put(messageClass, messageData) != null) {
             throw new NetworkException(messageClass + " is already registered as a message!");
         }
     }
@@ -98,30 +98,30 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
     public <R extends Record> void sendMessage(@NotNull R message) {
-        if (this.owo$player == null) {
+        if (this.player == null) {
             throw new NetworkException("Tried to send a message before player was attached");
         }
 
-        ScreenhandlerMessageData messageData = this.owo$messages.get(message.getClass());
+        ScreenhandlerMessageData messageData = this.messages.get(message.getClass());
 
         if (messageData == null) {
             throw new NetworkException("Tried to send message of unknown type " + message.getClass());
         }
 
-        var ctx = SerializationContext.attributes(RegistriesAttribute.of(this.owo$player.getRegistryManager()));
+        var ctx = SerializationContext.attributes(RegistriesAttribute.of(this.player.getRegistryManager()));
         var buf = PacketByteBufs.create();
         buf.write(ctx, messageData.endec(), message);
 
         var packet = new ScreenInternals.LocalPacket(messageData.id(), buf);
 
         if (messageData.clientbound()) {
-            if (!(this.owo$player instanceof ServerPlayerEntity serverPlayer)) {
+            if (!(this.player instanceof ServerPlayerEntity serverPlayer)) {
                 throw new NetworkException("Tried to send clientbound message on the server");
             }
 
             ServerPlayNetworking.send(serverPlayer, packet);
         } else {
-            if (!this.owo$player.getWorld().isClient) {
+            if (!this.player.getWorld().isClient) {
                 throw new NetworkException("Tried to send serverbound message on the client");
             }
 
@@ -138,16 +138,16 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
     public void owo$handlePacket(ScreenInternals.LocalPacket packet, boolean clientbound) {
-        ScreenhandlerMessageData messageData = (clientbound ? this.owo$clientboundMessages : this.owo$serverboundMessages).get(packet.packetId());
-        var ctx = SerializationContext.attributes(RegistriesAttribute.of(this.owo$player.getRegistryManager()));
+        ScreenhandlerMessageData messageData = (clientbound ? this.clientBoundMessages : this.serverBoundMessages).get(packet.packetId());
+        var ctx = SerializationContext.attributes(RegistriesAttribute.of(this.player.getRegistryManager()));
 
         messageData.handler().accept(packet.payload().read(ctx, messageData.endec()));
     }
 
     @Override
     public <T> SyncedProperty<T> createProperty(Class<T> clazz, Endec<T> endec, T initial) {
-        var prop = new SyncedProperty<>(this.owo$properties.size(), endec, initial, (ScreenHandler)(Object) this);
-        this.owo$properties.add(prop);
+        var prop = new SyncedProperty<>(this.properties.size(), endec, initial, (ScreenHandler)(Object) this);
+        this.properties.add(prop);
         return prop;
     }
 
@@ -157,7 +157,7 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
 
         for (int i = 0; i < count; i++) {
             int idx = packet.payload().readVarInt();
-            this.owo$properties.get(idx).read(packet.payload());
+            this.properties.get(idx).read(packet.payload());
         }
     }
 
@@ -175,12 +175,12 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
 
     @Unique
     private void syncProperties() {
-        if (this.owo$player == null) return;
-        if (!(this.owo$player instanceof ServerPlayerEntity player)) return;
+        if (this.player == null) return;
+        if (!(this.player instanceof ServerPlayerEntity player)) return;
 
         int count = 0;
 
-        for (var property : this.owo$properties) {
+        for (var property : this.properties) {
             if (property.needsSync()) count++;
         }
 
@@ -189,7 +189,7 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
         var buf = PacketByteBufs.create();
         buf.writeVarInt(count);
 
-        for (var prop : owo$properties) {
+        for (var prop : properties) {
             if (!prop.needsSync()) continue;
 
             buf.writeVarInt(prop.index());

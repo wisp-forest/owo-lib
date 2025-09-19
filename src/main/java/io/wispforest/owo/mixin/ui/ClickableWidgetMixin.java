@@ -32,8 +32,9 @@ public abstract class ClickableWidgetMixin implements ComponentStub, net.minecra
     @Shadow public boolean active;
 
     @Shadow protected boolean hovered;
+
     @Unique
-    protected VanillaWidgetComponent owo$wrapper = null;
+    protected VanillaWidgetComponent wrapper = null;
 
     @Override
     public void inflate(Size space) {
@@ -311,16 +312,16 @@ public abstract class ClickableWidgetMixin implements ComponentStub, net.minecra
 
     @Unique
     protected VanillaWidgetComponent owo$getWrapper() {
-        if (this.owo$wrapper == null) {
-            this.owo$wrapper = Components.wrapVanillaWidget((ClickableWidget) (Object) this);
+        if (this.wrapper == null) {
+            this.wrapper = Components.wrapVanillaWidget((ClickableWidget) (Object) this);
         }
 
-        return this.owo$wrapper;
+        return this.wrapper;
     }
 
     @Override
     public @Nullable VanillaWidgetComponent widgetWrapper() {
-        return this.owo$wrapper;
+        return this.wrapper;
     }
 
     @Override
@@ -345,7 +346,7 @@ public abstract class ClickableWidgetMixin implements ComponentStub, net.minecra
 
     @Inject(method = "setWidth", at = @At("HEAD"), cancellable = true)
     private void applyWidthToWrapper(int width, CallbackInfo ci) {
-        var wrapper = this.owo$wrapper;
+        var wrapper = this.wrapper;
         if (wrapper != null) {
             wrapper.horizontalSizing(Sizing.fixed(width));
             ci.cancel();
@@ -368,6 +369,6 @@ public abstract class ClickableWidgetMixin implements ComponentStub, net.minecra
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/ClickableWidget;renderWidget(Lnet/minecraft/client/gui/DrawContext;IIF)V"))
     private void setHovered(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-        if (this.owo$wrapper != null) this.hovered = this.hovered && this.owo$wrapper.hovered();
+        if (this.wrapper != null) this.hovered = this.hovered && this.wrapper.hovered();
     }
 }
