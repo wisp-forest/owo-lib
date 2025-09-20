@@ -18,7 +18,7 @@ public class UwuItems {
     public static final Item COUNTER = register("counter", UwuCounterItem::new);
     public static final Item BRAID = register("braid", UwuBraidItem::new);
 
-    public static final Item OWO_INGOT = register(Identifier.of("uowou", "owo_ingot"), new Item.Settings().group(Uwu.FOUR_TAB_GROUP).tab(2));
+    public static final Item OWO_INGOT = register(Identifier.of("uowou", "owo_ingot"), new Item.Settings().group(Uwu.FOUR_TAB_GROUP).tab(2).maxCount(69));
 
 
     public static <T extends Item> T register(String path, Function<Item.Settings, T> factory) {
