@@ -2,6 +2,7 @@ package io.wispforest.owo.mixin.extension.json5;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import io.wispforest.owo.Owo;
 import net.minecraft.resource.*;
 import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,7 +24,7 @@ public abstract class ProbablyAllImplementationsOfResourceManagerMixin {
     private List<Resource> json5$getAllResources(Identifier id, Operation<List<Resource>> original) {
         var base = original.call(id);
         if (id.getPath().endsWith(".json")) original
-            .call(id.withPath(id.getPath() + "5"))
+            .call(id.withPath(id.getPath() + 5))
             .forEach(resource -> base.add(new Resource(
                 resource.getPack(),
                 () -> coerceJson(resource.getInputStream())

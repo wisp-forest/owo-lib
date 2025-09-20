@@ -1,25 +1,28 @@
 {
-  // enable extended lang features
-  "owo:extended_lang": 1,
-
   "block.uwu.braid_display": [
     {translate: "text.uwu.braid"},
     " display"
   ],
 
-  "item.uwu.{}": {
-    counter: "Counter",
-    test_stick: [
-      "",
-      {text: "Test", color: "green"},
-      {text: " Stick", color: "red"}
-    ],
-    screen_shard: [
-      {text: "Screen Shard", color: "#3AB0FF"}
-    ],
-    braid: [
-      {translate: "text.uwu.braid"},
-      {text: " (chyz tried)", color: "#FFFFFF"}
+  "item.{}": {
+    "uwu.{}": {
+      counter: "Counter",
+      test_stick: [
+        "",
+        {text: "Test", color: "green"},
+        {text: " Stick", color: "red"}
+      ],
+      screen_shard: [
+        {text: "Screen Shard", color: "#3AB0FF"}
+      ],
+      braid: [
+        {translate: "text.uwu.braid"},
+        {text: " (chyz tried)", color: "#FFFFFF"}
+      ]
+    },
+    "uowou.owo_ingot": [
+      {text: "uωu", color: "#3AB0FF"},
+      {text: " Ingot", color: "#FFFFFF"}
     ]
   },
   "itemGroup.{}": {
