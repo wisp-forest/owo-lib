@@ -8,20 +8,20 @@ import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
 import io.wispforest.owo.braid.widgets.basic.CustomDraw;
+import io.wispforest.owo.braid.widgets.scroll.Scrollable;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.braid.widgets.stack.StackBase;
 import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.util.NinePatchTexture;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector2d;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.List;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -50,10 +50,21 @@ public class FocusScope extends Focusable {
         private @Nullable FocusEntry previousPrimaryFocus;
         private final Deque<FocusEntry> previouslyFocusedScopes = new ArrayDeque<>();
 
+        private final Deque<Focusable.State<?>> traversalHistory = new LinkedList<>();
+        private FocusTraversalDirection lastTraversalDirection = null;
+
         public void updateFocus(@Nullable Focusable.State<?> primary, @Nullable FocusLevel level) {
+            this.updateFocus(primary, level, false);
+        }
+
+        public void updateFocus(@Nullable Focusable.State<?> primary, @Nullable FocusLevel level, boolean keepTraversalHistory) {
             var currentPrimaryFocus = !this.focusedDescendants.isEmpty() ? this.focusedDescendants.getFirst() : null;
             if (primary == currentPrimaryFocus && (primary != null ? primary.level : null) == level) {
                 return;
+            }
+
+            if (!keepTraversalHistory) {
+                this.traversalHistory.clear();
             }
 
             if (level != null && primary != null) {
@@ -86,6 +97,13 @@ public class FocusScope extends Focusable {
                 noLongerFocused.onFocusChange(null);
             }
 
+            if (primary != null) {
+                var scrollable = Scrollable.maybeOf(primary.context());
+                if (scrollable != null) {
+                    Scrollable.reveal(primary.context());
+                }
+            }
+
             this.focusedDescendants = nowFocused;
         }
 
@@ -96,6 +114,7 @@ public class FocusScope extends Focusable {
             }
 
             this.focusedDescendants.remove(descendant);
+            this.traversalHistory.remove(descendant);
             this.previouslyFocusedScopes.removeIf(entry -> entry.state() == descendant);
         }
 
@@ -113,19 +132,123 @@ public class FocusScope extends Focusable {
 
         @Override
         public void traverseFocus(FocusTraversalDirection direction) {
+            switch (direction) {
+                case PREVIOUS, NEXT -> this.traverseFocusLogical(direction == FocusTraversalDirection.NEXT);
+                case LEFT, RIGHT, UP, DOWN -> this.traverseFocusDirectional(direction);
+            }
+        }
+
+        private void traverseFocusLogical(boolean forwards) {
             var descendants = this.descendants.get();
 
             var searchStartIdx = !this.focusedDescendants.isEmpty()
                 ? descendants.indexOf(this.focusedDescendants.getFirst())
-                : (direction == FocusTraversalDirection.BACKWARDS ? 0 : -1);
-            var offset = direction == FocusTraversalDirection.BACKWARDS ? -1 : 1;
+                : (forwards ? -1 : 0);
+            var offset = forwards ? 1 : -1;
 
             var nextFocusIdx = searchStartIdx;
             do {
-                nextFocusIdx = (nextFocusIdx + offset) % descendants.size();
+                nextFocusIdx = MathHelper.floorMod(nextFocusIdx + offset, descendants.size());
             } while (descendants.get(nextFocusIdx).widget().skipTraversal());
 
             this.updateFocus(descendants.get(nextFocusIdx), FocusLevel.HIGHLIGHT);
+        }
+
+        private boolean tryTraverseFocusHistory(FocusTraversalDirection direction) {
+            var poppedHistory = false;
+
+            if (!this.traversalHistory.isEmpty()) {
+                if (this.lastTraversalDirection == direction.opposite()) {
+                    poppedHistory = true;
+                    this.updateFocus(this.traversalHistory.pop(), FocusLevel.HIGHLIGHT, true);
+                } else if (this.lastTraversalDirection != direction) {
+                    this.traversalHistory.clear();
+                }
+            }
+
+            this.lastTraversalDirection = direction;
+            if (!poppedHistory && !this.focusedDescendants.isEmpty()) {
+                this.traversalHistory.push(this.focusedDescendants.getFirst());
+            }
+
+            return poppedHistory;
+        }
+
+        private void traverseFocusDirectional(FocusTraversalDirection direction) {
+            if (this.focusedDescendants.isEmpty() || this.tryTraverseFocusHistory(direction)) return;
+
+            var descendants = this.descendants.get();
+
+            var focusedBounds = this.focusedDescendants.getFirst().context().instance().computeGlobalBounds();
+            var focusedCenter = FocusTraversalCandidate.of(this.focusedDescendants.getFirst()).center();
+
+            var candidates = descendants.stream()
+                .map(FocusTraversalCandidate::of)
+                .filter(candidate -> {
+                    return this.filterCandidate(candidate, focusedBounds, direction);
+                })
+                .collect(Collectors.toList());
+
+            var candidatesInBand = candidates.stream()
+                .filter(candidate -> {
+                    return this.filterInBand(candidate, focusedBounds, direction);
+                })
+                .collect(Collectors.toList());
+
+            if (!candidatesInBand.isEmpty()) {
+                candidatesInBand.sort(this.sortInBand(focusedCenter, direction));
+
+                this.updateFocus(candidatesInBand.getFirst().state(), FocusLevel.HIGHLIGHT, true);
+                return;
+            }
+
+            candidates.sort(this.sortOutOfBand(focusedCenter, direction));
+
+            if (!candidates.isEmpty()) {
+                this.updateFocus(candidates.getFirst().state(), FocusLevel.HIGHLIGHT, true);
+            }
+        }
+
+        private boolean filterCandidate(FocusTraversalCandidate candidate, Box focusedBounds, FocusTraversalDirection direction) {
+            return switch (direction) {
+                case LEFT -> candidate.center().x <= focusedBounds.minX;
+                case RIGHT -> candidate.center().x >= focusedBounds.maxX;
+                case UP -> candidate.center().y <= focusedBounds.minY;
+                case DOWN -> candidate.center().y >= focusedBounds.maxY;
+                default -> throw new IllegalStateException();
+            };
+        }
+
+        private boolean filterInBand(FocusTraversalCandidate candidate, Box focusedBounds, FocusTraversalDirection direction) {
+            return switch (direction) {
+                case LEFT, RIGHT -> candidate.aabb().minY < focusedBounds.maxY && candidate.aabb().maxY > focusedBounds.minY;
+                case UP, DOWN -> candidate.aabb().minX < focusedBounds.maxX && candidate.aabb().maxX > focusedBounds.minX;
+                default -> throw new IllegalStateException();
+            };
+        }
+
+        private Comparator<FocusTraversalCandidate> sortInBand(Vector2d focusedCenter, FocusTraversalDirection direction) {
+            return switch (direction) {
+                case LEFT -> Comparator.<FocusTraversalCandidate>comparingDouble(candidate -> -candidate.center().x)
+                    .thenComparingDouble(candidate -> Math.abs(candidate.center().y - focusedCenter.y));
+                case RIGHT -> Comparator.<FocusTraversalCandidate>comparingDouble(candidate -> candidate.center().x)
+                    .thenComparingDouble(candidate -> Math.abs(candidate.center().y - focusedCenter.y));
+                case UP -> Comparator.<FocusTraversalCandidate>comparingDouble(candidate -> -candidate.center().y)
+                    .thenComparingDouble(candidate -> Math.abs(candidate.center().x - focusedCenter.x));
+                case DOWN -> Comparator.<FocusTraversalCandidate>comparingDouble(candidate -> candidate.center().y)
+                    .thenComparingDouble(candidate -> Math.abs(candidate.center().x - focusedCenter.x));
+                default -> throw new IllegalStateException();
+            };
+        }
+
+        private Comparator<FocusTraversalCandidate> sortOutOfBand(Vector2d focusedCenter, FocusTraversalDirection direction) {
+            return switch (direction) {
+                case LEFT, RIGHT -> Comparator.<FocusTraversalCandidate>comparingDouble(candidate -> Math.abs(candidate.center().y - focusedCenter.y))
+                    .thenComparingDouble(candidate -> Math.abs(candidate.center().x - focusedCenter.x));
+                case UP, DOWN -> Comparator.<FocusTraversalCandidate>comparingDouble(candidate -> Math.abs(candidate.center().x - focusedCenter.x))
+                    .thenComparingDouble(candidate -> Math.abs(candidate.center().y - focusedCenter.y));
+                default -> throw new IllegalStateException();
+            };
         }
 
         @Override
@@ -153,7 +276,17 @@ public class FocusScope extends Focusable {
 
             // TODO(glisco): replace with intents
             if (keyCode == GLFW.GLFW_KEY_TAB) {
-                this.traverseFocus(modifiers.shift() ? FocusTraversalDirection.BACKWARDS : FocusTraversalDirection.FORWARDS);
+                this.traverseFocus(modifiers.shift() ? FocusTraversalDirection.PREVIOUS : FocusTraversalDirection.NEXT);
+                return true;
+            }
+
+            if (keyCode == GLFW.GLFW_KEY_LEFT || keyCode == GLFW.GLFW_KEY_RIGHT) {
+                this.traverseFocus(keyCode == GLFW.GLFW_KEY_LEFT ? FocusTraversalDirection.LEFT : FocusTraversalDirection.RIGHT);
+                return true;
+            }
+
+            if (keyCode == GLFW.GLFW_KEY_UP || keyCode == GLFW.GLFW_KEY_DOWN) {
+                this.traverseFocus(keyCode == GLFW.GLFW_KEY_UP ? FocusTraversalDirection.UP : FocusTraversalDirection.DOWN);
                 return true;
             }
 
@@ -268,3 +401,15 @@ class FocusScopeProxy extends StatefulProxy {
 }
 
 record FocusEntry(Focusable.State<?> state, FocusLevel level) {}
+
+record FocusTraversalCandidate(Focusable.State<?> state, Box aabb, Vector2d center) {
+    public static FocusTraversalCandidate of(Focusable.State<?> state) {
+        var aabb = state.context().instance().computeGlobalBounds();
+        var center = new Vector2d(
+            aabb.minX + (aabb.maxX - aabb.minX) / 2,
+            aabb.minY + (aabb.maxY - aabb.minY) / 2
+        );
+
+        return new FocusTraversalCandidate(state, aabb, center);
+    }
+}
