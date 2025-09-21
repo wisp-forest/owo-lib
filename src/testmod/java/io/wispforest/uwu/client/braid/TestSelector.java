@@ -99,25 +99,7 @@ import java.util.stream.Stream;
 public class TestSelector extends StatefulWidget {
 
     public enum Tests {
-        COUNTER,
-        FLEX,
-        DRAGGING,
-        SPLIT_PANE,
-        SLIDERS,
-        TEXT_INPUT,
-        BURNING_CHYZ,
-        SCROLLING,
-        INPUT,
-        CYCLING,
-        VANILLA,
-        SHARED_STATE,
-        STACKS,
-        GRIDS,
-        CONTRIBUTORS,
-        ANIMATIONS,
-        NAVIGATOR,
-        OVERLAY,
-        TEXT
+        COUNTER, FLEX, DRAGGING, SPLIT_PANE, SLIDERS, TEXT_INPUT, BURNING_CHYZ, SCROLLING, INPUT, CYCLING, VANILLA, SHARED_STATE, STACKS, GRIDS, CONTRIBUTORS, ANIMATIONS, NAVIGATOR, OVERLAY, TEXT
     }
 
     @Override
@@ -181,10 +163,7 @@ public class TestSelector extends StatefulWidget {
                     new Stack(
                         Alignment.CENTER,
                         new Transform(
-                            new Matrix4f()
-                                .m01((float) Math.tan(this.xSkew))
-                                .m10((float) Math.tan(this.ySkew))
-                                .rotateZ((float) Math.toRadians(this.rotat)),
+                            new Matrix4f().m01((float) Math.tan(this.xSkew)).m10((float) Math.tan(this.ySkew)).rotateZ((float) Math.toRadians(this.rotat)),
                             new Center(
                                 switch (this.test) {
                                     case COUNTER -> new Counter();
@@ -287,19 +266,13 @@ public class TestSelector extends StatefulWidget {
                                             MainAxisAlignment.START,
                                             CrossAxisAlignment.CENTER,
                                             new Flexible(
-                                                new MessageButton(
-                                                    Text.literal("-"),
-                                                    () -> this.setState(() -> this.fliptat -= 1)
-                                                )
+                                                new MessageButton(Text.literal("-"), () -> this.setState(() -> this.fliptat -= 1))
                                             ),
                                             new Flexible(
                                                 new Label(Text.literal(String.valueOf(this.fliptat)))
                                             ),
                                             new Flexible(
-                                                new MessageButton(
-                                                    Text.literal("+"),
-                                                    () -> this.setState(() -> this.fliptat += 1)
-                                                )
+                                                new MessageButton(Text.literal("+"), () -> this.setState(() -> this.fliptat += 1))
                                             )
                                         )
                                     )
@@ -328,8 +301,7 @@ public class TestSelector extends StatefulWidget {
                                             this.xSkew = xValue;
                                             this.ySkew = yValue;
                                         }),
-                                        Text.literal("x skew: " + (formatDouble(this.xSkew)) + "\ny skew: " + (formatDouble(
-                                            this.ySkew)))
+                                        Text.literal("x skew: " + (formatDouble(this.xSkew)) + "\ny skew: " + (formatDouble(this.ySkew)))
                                     )
                                 )
                             )
@@ -512,16 +484,8 @@ public class TestSelector extends StatefulWidget {
                             new Align(
                                 Alignment.TOP_LEFT,
                                 new Column(
-                                    new Label(Text
-                                        .literal("a")
-                                        .setStyle(Style.EMPTY.withClickEvent(new ClickEvent(
-                                            ClickEvent.Action.OPEN_URL,
-                                            "https://chyz.xyz/box"
-                                        )))),
-                                    new MessageButton(
-                                        Text.literal("window button :o"),
-                                        () -> setState(() -> controller.expanded = !controller.expanded)
-                                    )
+                                    new Label(Text.literal("a").setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://chyz.xyz/box")))),
+                                    new MessageButton(Text.literal("window button :o"), () -> setState(() -> controller.expanded = !controller.expanded))
                                 )
                             ),
                             new Align(
@@ -529,11 +493,7 @@ public class TestSelector extends StatefulWidget {
                                 new Tooltip(
                                     Text.literal("tooltip\nhere?"),
                                     new ItemStackWidget(
-                                        Registries.ITEM
-                                            .getRandom(Random.create(controller.hashCode()))
-                                            .get()
-                                            .value()
-                                            .getDefaultStack(),
+                                        Registries.ITEM.getRandom(Random.create(controller.hashCode())).get().value().getDefaultStack(),
                                         false
                                     )
                                 )
@@ -541,11 +501,7 @@ public class TestSelector extends StatefulWidget {
                             new Align(
                                 Alignment.BOTTOM_LEFT,
                                 new BlockWidget(
-                                    Registries.BLOCK
-                                        .getRandom(Random.create(controller.hashCode()))
-                                        .get()
-                                        .value()
-                                        .getDefaultState()
+                                    Registries.BLOCK.getRandom(Random.create(controller.hashCode())).get().value().getDefaultState()
                                 )
                             )
                         )
@@ -671,25 +627,11 @@ public class TestSelector extends StatefulWidget {
                         new CoolSlider(2.0, value -> Text.literal("v: " + formatDouble(value))),
                         new CoolSlider(null, value -> Text.literal("v: " + formatDouble(value))),
                         new Label(Text.literal("XY")),
-                        new CoolXlyder(
-                            2.0,
-                            2.0,
-                            (x, y) -> Text.literal("x: " + formatDouble(x) + "\ny: " + formatDouble(y))
-                        ),
-                        new CoolXlyder(
-                            null,
-                            null,
-                            (x, y) -> Text.literal("x: " + formatDouble(x) + "\ny: " + formatDouble(y))
-                        ),
+                        new CoolXlyder(2.0, 2.0, (x, y) -> Text.literal("x: " + formatDouble(x) + "\ny: " + formatDouble(y))),
+                        new CoolXlyder(null, null, (x, y) -> Text.literal("x: " + formatDouble(x) + "\ny: " + formatDouble(y))),
                         new Label(Text.literal("Range")),
-                        new CoolRangeSlider(
-                            2.0,
-                            (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max))
-                        ),
-                        new CoolRangeSlider(
-                            null,
-                            (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max))
-                        )
+                        new CoolRangeSlider(2.0, (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max))),
+                        new CoolRangeSlider(null, (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max)))
                     )
                         : new IncrediblyRedundantSlider(),
                     new Align(
@@ -705,11 +647,7 @@ public class TestSelector extends StatefulWidget {
     }
 
     public static String formatDouble(double value) {
-        return BigDecimal
-            .valueOf(value)
-            .setScale(2, RoundingMode.HALF_UP)
-            .toPlainString()
-            .replaceAll("(\\.0*|(?<=\\d)\\.0+)$", "");
+        return BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP).toPlainString().replaceAll("(\\.0*|(?<=\\d)\\.0+)$", "");
     }
 
     public static class CoolSlider extends StatefulWidget {
@@ -949,11 +887,7 @@ public class TestSelector extends StatefulWidget {
                                     new Sized(
                                         20,
                                         20,
-                                        new EntityWidget(
-                                            1.5d,
-                                            this.chyz,
-                                            widget -> widget.displayMode(EntityWidget.DisplayMode.CURSOR)
-                                        )
+                                        new EntityWidget(1.5d, this.chyz, widget -> widget.displayMode(EntityWidget.DisplayMode.CURSOR))
                                     ),
                                     new Padding(Insets.none())
                                 ),
@@ -964,12 +898,7 @@ public class TestSelector extends StatefulWidget {
                                     this.checked,
                                     this::onUpdate,
                                     new SpriteWidget(Checkbox.TEXTURE, false),
-                                    new SpriteWidget(
-                                        new SpriteIdentifier(
-                                            SpriteWidget.GUI_ATLAS_ID,
-                                            Identifier.of("uwu", "czechbox")
-                                        ), false
-                                    )
+                                    new SpriteWidget(new SpriteIdentifier(SpriteWidget.GUI_ATLAS_ID, Identifier.of("uwu", "czechbox")), false)
                                 ),
                                 this.checked ? "czechbox" : "checkbox"
                             ),
@@ -1416,8 +1345,7 @@ public class TestSelector extends StatefulWidget {
         public static class State extends WidgetState<InputTest> {
             private final List<Text> inputs = Util.make(() -> {
                 var list = new ArrayList<Text>();
-                list.add(Text.literal(
-                    "Help idk how to make this scroll to the bottom when i add shit (everyone laugh at this user)"));
+                list.add(Text.literal("Help idk how to make this scroll to the bottom when i add shit (everyone laugh at this user)"));
                 return list;
             });
             private final ScrollController controller = new ScrollController(this);
@@ -1437,31 +1365,19 @@ public class TestSelector extends StatefulWidget {
                                     null, 200,
                                     new MouseArea(
                                         area -> area.cursorStyle(CursorStyle.HAND)
-                                            .clickCallback((x, y, button, modifiers) -> this.addToList(
-                                                getMouseButtonName(button)
-                                                    .append(" pressed at:\n")
-                                                    .append(formatCoordinates(x, y))))
-                                            .releaseCallback((x, y, button, modifiers) -> this.addToList(
-                                                getMouseButtonName(button)
-                                                    .append(" released at:\n")
-                                                    .append(formatCoordinates(x, y))))
-                                            .dragStartCallback((button, modifiers) -> this.addToList(getMouseButtonName(
-                                                button).append(" drag started")))
+                                            .clickCallback((x, y, button, modifiers) -> this.addToList(getMouseButtonName(button).append(" pressed at:\n").append(formatCoordinates(x, y))))
+                                            .releaseCallback((x, y, button, modifiers) -> this.addToList(getMouseButtonName(button).append(" released at:\n").append(formatCoordinates(x, y))))
+                                            .dragStartCallback((button, modifiers) -> this.addToList(getMouseButtonName(button).append(" drag started")))
                                             .dragEndCallback(() -> this.addToList(Text.literal("Drag ended")))
                                             .enterCallback(() -> this.addToList(Text.literal("Mouse entered")))
                                             .exitCallback(() -> this.addToList(Text.literal("Mouse exited"))),
                                         new Focusable(
                                             input ->
-                                                input
-                                                    .keyDownCallback((key, modifiers) -> this.addToList(getKeyName(key).append(
-                                                        " pressed")))
-                                                    .keyUpCallback((key, modifiers) -> this.addToList(getKeyName(key).append(
-                                                        " released")))
-                                                    .focusGainedCallback(() -> this.addToList(Text.literal(
-                                                        "Focus gained")))
+                                                input.keyDownCallback((key, modifiers) -> this.addToList(getKeyName(key).append(" pressed")))
+                                                    .keyUpCallback((key, modifiers) -> this.addToList(getKeyName(key).append(" released")))
+                                                    .focusGainedCallback(() -> this.addToList(Text.literal("Focus gained")))
                                                     .focusLostCallback(() -> this.addToList(Text.literal("Focus lost")))
-                                                    .charCallback((charCode, modifiers) -> this.addToList(Text.literal(
-                                                        "Character typed: \"" + (char) charCode + "\""))),
+                                                    .charCallback((charCode, modifiers) -> this.addToList(Text.literal("Character typed: \"" + (char) charCode + "\""))),
                                             new Panel(
                                                 Panel.VANILLA_INSET,
                                                 new VerticallyScrollable(
@@ -1553,10 +1469,7 @@ public class TestSelector extends StatefulWidget {
                         Text.literal(selectedEnumNoWrap.name()),
                         (value, index) -> this.setState(() -> this.selectedEnumNoWrap = value)
                     ),
-                    new Label(Text.literal(String.join(
-                        ", ",
-                        Arrays.stream(CoolEnum.values()).map(Enum::name).collect(Collectors.toList())
-                    ))),
+                    new Label(Text.literal(String.join(", ", Arrays.stream(CoolEnum.values()).map(Enum::name).collect(Collectors.toList())))),
                     new Label(Text.literal("Boolean")),
                     MessageCyclingButton.forBoolean(
                         this.selectedBoolean,
@@ -1596,8 +1509,8 @@ public class TestSelector extends StatefulWidget {
                     ),
                     new Label(
                         Text.literal(coolNumbers.stream()
-                            .map(String::valueOf)
-                            .collect(Collectors.joining(", ")))
+                                         .map(String::valueOf)
+                                         .collect(Collectors.joining(", ")))
                     )
                 );
             }
@@ -1641,8 +1554,7 @@ public class TestSelector extends StatefulWidget {
                                     0, 0, 100, 20,
                                     Text.literal("Text Field")
                                 );
-                                widget.setPlaceholder(Text.literal(
-                                    "when the vanilla widget is no longer better than the braid widget"));
+                                widget.setPlaceholder(Text.literal("when the vanilla widget is no longer better than the braid widget"));
                                 return widget;
                             }
                         ),
@@ -1652,26 +1564,14 @@ public class TestSelector extends StatefulWidget {
                                 root.child(
                                     Components.button(
                                         Text.literal("A very very cool button"),
-                                        button -> MinecraftClient
-                                            .getInstance()
-                                            .getSoundManager()
-                                            .play(PositionedSoundInstance.master(
-                                                SoundEvents.ENTITY_GENERIC_EXPLODE,
-                                                Random.create().nextFloat() * 2f
-                                            ))
+                                        button -> MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.ENTITY_GENERIC_EXPLODE, Random.create().nextFloat() * 2f))
                                     )
                                 ).child(
                                     new BraidComponent(
                                         new Column(
                                             new MessageButton(
                                                 Text.literal("amogus"),
-                                                () -> MinecraftClient
-                                                    .getInstance()
-                                                    .getSoundManager()
-                                                    .play(PositionedSoundInstance.master(
-                                                        SoundEvents.BLOCK_ANVIL_BREAK,
-                                                        Random.create().nextFloat() * 2f
-                                                    ))
+                                                () -> MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.BLOCK_ANVIL_BREAK, Random.create().nextFloat() * 2f))
                                             ),
                                             // idk why this needs to be here but if it's not the split pane becomes
                                             // infinity sized
@@ -1788,11 +1688,7 @@ public class TestSelector extends StatefulWidget {
                 @Override
                 public Widget build(BuildContext context) {
                     System.out.println("text rebuild");
-                    return new Label(Text.literal("current state: " + SharedState.select(
-                        context,
-                        CounterState.class,
-                        state -> state.count
-                    )));
+                    return new Label(Text.literal("current state: " + SharedState.select(context, CounterState.class, state -> state.count)));
                 }
             }
         }
@@ -1811,31 +1707,19 @@ public class TestSelector extends StatefulWidget {
                     new Stack(
                         new Panel(Panel.VANILLA_LIGHT),
                         new StackBase(new Sized(100, 100, new Padding(Insets.none()))),
-                        new Label(
-                            new LabelStyle(Alignment.BOTTOM_RIGHT, null, null, null),
-                            true,
-                            Text.literal("based corner text")
-                        )
+                        new Label(new LabelStyle(Alignment.BOTTOM_RIGHT, null, null, null), true, Text.literal("based corner text"))
                     ),
                     new Padding(Insets.horizontal(20)),
                     new Stack(
                         new Sized(100, 100, new Panel(Panel.VANILLA_LIGHT)),
-                        new Label(
-                            new LabelStyle(Alignment.BOTTOM_RIGHT, null, null, null),
-                            true,
-                            Text.literal("failed corner text")
-                        )
+                        new Label(new LabelStyle(Alignment.BOTTOM_RIGHT, null, null, null), true, Text.literal("failed corner text"))
                     ),
                     new Padding(Insets.horizontal(20)),
                     new IntrinsicWidth(
                         new IntrinsicHeight(
                             new Stack(
                                 new Sized(100, 100, new Panel(Panel.VANILLA_LIGHT)),
-                                new Label(
-                                    new LabelStyle(Alignment.BOTTOM_RIGHT, null, null, null),
-                                    true,
-                                    Text.literal("intrinsic corner text")
-                                )
+                                new Label(new LabelStyle(Alignment.BOTTOM_RIGHT, null, null, null), true, Text.literal("intrinsic corner text"))
                             )
                         )
                     )
@@ -1922,31 +1806,11 @@ public class TestSelector extends StatefulWidget {
 
             private List<Contributor> genContributors() {
                 return List.of(
-                    new Contributor(
-                        UUID.fromString("b6c2d403-bf7c-4e19-b7a2-f64c9e44e56a"),
-                        "glisco",
-                        Text.translatable("text.uwu.glisco")
-                    ),
-                    new Contributor(
-                        UUID.fromString("09de8a6d-86bf-4c15-bb93-ce3384ce4e96"),
-                        "chyzman",
-                        Text.translatable("text.uwu.chyz")
-                    ),
-                    new Contributor(
-                        UUID.fromString("517253c6-5ae6-4a70-8e8f-b8515321f774"),
-                        "Dragon_Seeker",
-                        TextOps.withColor("blodhgarm", 0xae0000)
-                    ),
-                    new Contributor(
-                        UUID.fromString("63db48b4-723a-4323-8d67-45679507fd82"),
-                        "GreatGrayOwl",
-                        TextOps.withColor("skibediah fœtus", 0x9b57d0)
-                    ),
-                    new Contributor(
-                        UUID.fromString("91a033f7-1dd3-4858-9c7b-8fb61ba6363d"),
-                        "Noaaan",
-                        Text.literal("no" + "a".repeat((int) (1 + Math.random() * 7)) + "n")
-                    )
+                    new Contributor(UUID.fromString("b6c2d403-bf7c-4e19-b7a2-f64c9e44e56a"), "glisco", Text.translatable("text.uwu.glisco")),
+                    new Contributor(UUID.fromString("09de8a6d-86bf-4c15-bb93-ce3384ce4e96"), "chyzman", Text.translatable("text.uwu.chyz")),
+                    new Contributor(UUID.fromString("517253c6-5ae6-4a70-8e8f-b8515321f774"), "Dragon_Seeker", TextOps.withColor("blodhgarm", 0xae0000)),
+                    new Contributor(UUID.fromString("63db48b4-723a-4323-8d67-45679507fd82"), "GreatGrayOwl", TextOps.withColor("skibediah fœtus", 0x9b57d0)),
+                    new Contributor(UUID.fromString("91a033f7-1dd3-4858-9c7b-8fb61ba6363d"), "Noaaan", Text.literal("no" + "a".repeat((int) (1 + Math.random() * 7)) + "n"))
                 );
             }
 
@@ -1962,24 +1826,8 @@ public class TestSelector extends StatefulWidget {
                             MainAxisAlignment.CENTER,
                             CrossAxisAlignment.CENTER,
                             new Padding(Insets.all(10)),
-                            new Label(murders.compareTo(BigInteger.ZERO) > 0 ? Text
-                                .literal("You have committed " + murders + " act" + (murders.compareTo(BigInteger.ONE) > 0
-                                    ? "s"
-                                    : "") + " of " + Text
-                                             .stringifiedTranslatable("uwu.homicide")
-                                             .getString() + " against the owo contributors!" + (murders.compareTo(
-                                    BigInteger.valueOf(1000)) > 0 ? "... wtf bro" : ""))
-                                .withColor(Colors.RED) : Text.literal("OWO Contributors")),
-                            new Label(eepies.compareTo(BigInteger.ZERO) > 0
-                                ? Text
-                                .literal("You have committed " + eepies + " act" + (eepies.compareTo(BigInteger.ONE) > 0
-                                    ? "s"
-                                    : "") + " of " + Text
-                                             .stringifiedTranslatable("uwu.eepy")
-                                             .getString() + " against the owo contributors!" + (murders.compareTo(
-                                    BigInteger.valueOf(1000)) > 0 ? "... idk" : ""))
-                                .withColor(bed.getMapColor(MinecraftClient.getInstance().world, BlockPos.ORIGIN).color)
-                                : Text.empty()),
+                            new Label(murders.compareTo(BigInteger.ZERO) > 0 ? Text.literal("You have committed " + murders + " act" + (murders.compareTo(BigInteger.ONE) > 0 ? "s" : "") + " of " + Text.stringifiedTranslatable("uwu.homicide").getString() + " against the owo contributors!" + (murders.compareTo(BigInteger.valueOf(1000)) > 0 ? "... wtf bro" : "")).withColor(Colors.RED) : Text.literal("OWO Contributors")),
+                            new Label(eepies.compareTo(BigInteger.ZERO) > 0 ? Text.literal("You have committed " + eepies + " act" + (eepies.compareTo(BigInteger.ONE) > 0 ? "s" : "") + " of " + Text.stringifiedTranslatable("uwu.eepy").getString() + " against the owo contributors!" + (murders.compareTo(BigInteger.valueOf(1000)) > 0 ? "... idk" : "")).withColor(bed.getMapColor(MinecraftClient.getInstance().world, BlockPos.ORIGIN).color) : Text.empty()),
                             new Grid(
                                 LayoutAxis.VERTICAL,
                                 3,
@@ -1998,27 +1846,11 @@ public class TestSelector extends StatefulWidget {
                                                                 CrossAxisAlignment.CENTER,
                                                                 new Padding(Insets.top(4)),
                                                                 List.of(
-                                                                    new FirePlayer(new GameProfile(
-                                                                        contributor.uuid,
-                                                                        contributor.name
-                                                                    )),
+                                                                    new FirePlayer(new GameProfile(contributor.uuid, contributor.name)),
                                                                     new Label(
                                                                         LabelStyle.SHADOW,
                                                                         true,
-                                                                        contributor
-                                                                            .displayName()
-                                                                            .copy()
-                                                                            .setStyle(contributor.displayName
-                                                                                .copy()
-                                                                                .getStyle()
-                                                                                .withHoverEvent(new HoverEvent(
-                                                                                    HoverEvent.Action.SHOW_ENTITY,
-                                                                                    new HoverEvent.EntityContent(
-                                                                                        EntityType.PLAYER,
-                                                                                        contributor.uuid,
-                                                                                        contributor.displayName
-                                                                                    )
-                                                                                )))
+                                                                        contributor.displayName().copy().setStyle(contributor.displayName.copy().getStyle().withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY, new HoverEvent.EntityContent(EntityType.PLAYER, contributor.uuid, contributor.displayName))))
                                                                     ),
                                                                     new RatingBar()
                                                                 )
@@ -2089,36 +1921,18 @@ public class TestSelector extends StatefulWidget {
                                 this.setState(() -> {
                                     this.dead = true;
                                 });
-                                MinecraftClient
-                                    .getInstance()
-                                    .getSoundManager()
-                                    .play(PositionedSoundInstance.master(SoundEvents.ENTITY_PLAYER_DEATH, 1));
-                                SharedState.set(
-                                    context, MurderState.class, state -> {
-                                        if (!displayEntity
-                                            .getUuid()
-                                            .equals(UUID.fromString("91a033f7-1dd3-4858-9c7b-8fb61ba6363d"))) {
-                                            state.murders = state.murders.add(BigInteger.ONE);
-                                        } else {
-                                            state.eepies = state.eepies.add(BigInteger.ONE);
-                                            state.bed = Registries.BLOCK
-                                                .getRandomEntry(BlockTags.BEDS, Random.create())
-                                                .get()
-                                                .value()
-                                                .getDefaultState();
-                                        }
-                                    }
-                                );
+                                MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.ENTITY_PLAYER_DEATH, 1));
+                                SharedState.set(context, MurderState.class, state -> {
+                                    if (!displayEntity.getUuid().equals(UUID.fromString("91a033f7-1dd3-4858-9c7b-8fb61ba6363d"))) {
+                                        state.murders = state.murders.add(BigInteger.ONE);
+                                    } else {
+                                        state.eepies = state.eepies.add(BigInteger.ONE);
+                                        state.bed = Registries.BLOCK.getRandomEntry(BlockTags.BEDS, Random.create()).get().value().getDefaultState();}
+                                });
                                 scheduleDelayedCallback(
-                                    Duration.ofSeconds(displayEntity
-                                        .getUuid()
-                                        .equals(UUID.fromString("09de8a6d-86bf-4c15-bb93-ce3384ce4e96")) ? 1 : 3),
-                                    () -> this.setState(() -> {
+                                    Duration.ofSeconds(displayEntity.getUuid().equals(UUID.fromString("09de8a6d-86bf-4c15-bb93-ce3384ce4e96")) ? 1 : 3), () -> this.setState(() -> {
                                         this.dead = false;
-                                        MinecraftClient
-                                            .getInstance()
-                                            .getSoundManager()
-                                            .play(PositionedSoundInstance.master(SoundEvents.ITEM_TOTEM_USE, 1));
+                                        MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.ITEM_TOTEM_USE, 1));
                                     })
                                 );
                             },
@@ -2133,20 +1947,14 @@ public class TestSelector extends StatefulWidget {
                                                 96,
                                                 new Transform(
                                                     new Matrix4f().translate(0, 0, 200),
-                                                    new EntityWidget(
-                                                        1.35,
-                                                        this.displayEntity,
-                                                        widget -> widget.displayMode(EntityWidget.DisplayMode.CURSOR)
-                                                    )
+                                                    new EntityWidget(1.35, this.displayEntity, widget -> widget.displayMode(EntityWidget.DisplayMode.CURSOR))
                                                 )
                                             )
                                         )
                                     )
                                 ),
                                 new Visibility(
-                                    this.dead && this.displayEntity
-                                        .getUuid()
-                                        .equals(UUID.fromString("91a033f7-1dd3-4858-9c7b-8fb61ba6363d")),
+                                    this.dead && this.displayEntity.getUuid().equals(UUID.fromString("91a033f7-1dd3-4858-9c7b-8fb61ba6363d")),
                                     new Stack(
                                         new BlockWidget(
                                             SharedState.getWithoutDependency(context, MurderState.class).bed,
@@ -2162,11 +1970,7 @@ public class TestSelector extends StatefulWidget {
                                             new Transform(
                                                 new Matrix4f()
                                                     .translation(120, 70, 400),
-                                                new Label(
-                                                    new LabelStyle(Alignment.TOP_LEFT, null, null, true),
-                                                    true,
-                                                    Text.literal("    z\n  z\nz")
-                                                )
+                                                new Label(new LabelStyle(Alignment.TOP_LEFT, null, null, true), true, Text.literal("    z\n  z\nz"))
                                             )
                                         )
                                     )
@@ -2208,21 +2012,13 @@ public class TestSelector extends StatefulWidget {
                         return new Actions(
                             widget -> widget
                                 .addAction(ActionTrigger.CLICK, () -> setState(() -> this.selectedStarCount = idx + 1))
-                                .addAction(
-                                    ActionTrigger.SECONDARY_CLICK,
-                                    () -> setState(() -> this.selectedStarCount = 0)
-                                )
+                                .addAction(ActionTrigger.SECONDARY_CLICK, () -> setState(() -> this.selectedStarCount = 0))
                                 .enterCallback(() -> setState(() -> this.hoverStarCount = idx + 1)),
                             new Stack(
                                 new SpriteWidget(
                                     new SpriteIdentifier(
                                         Identifier.of("textures/atlas/gui.png"),
-                                        Identifier.of(
-                                            "uwu",
-                                            (idx + 1) <= this.selectedStarCount
-                                                ? "favorite_icon_selected"
-                                                : "favorite_icon"
-                                        )
+                                        Identifier.of("uwu", (idx + 1) <= this.selectedStarCount ? "favorite_icon_selected" : "favorite_icon")
                                     ),
                                     false
                                 ),
@@ -2267,10 +2063,7 @@ public class TestSelector extends StatefulWidget {
                                     Duration.ofMillis(250),
                                     Easing.IN_OUT_EXPO,
                                     this.end ? Alignment.RIGHT : Alignment.CENTER,
-                                    new MessageButton(
-                                        Text.literal("toggle"),
-                                        () -> this.setState(() -> this.end = !this.end)
-                                    )
+                                    new MessageButton(Text.literal("toggle"), () -> this.setState(() -> this.end = !this.end))
                                 ),
                                 new Box(
                                     Color.WHITE,
@@ -2366,9 +2159,7 @@ public class TestSelector extends StatefulWidget {
                         new MessageButton(
                             Text.literal("toggle"),
                             () -> {
-                                var next = this.currentTarget == Animation.Target.START
-                                    ? Animation.Target.END
-                                    : Animation.Target.START;
+                                var next = this.currentTarget == Animation.Target.START ? Animation.Target.END : Animation.Target.START;
                                 this.currentTarget = next;
 
                                 this.animation.towards(next, false);
@@ -2549,10 +2340,7 @@ public class TestSelector extends StatefulWidget {
                                                 120,
                                                 null,
                                                 new ComboBox<>(
-                                                    test -> Text.literal(test
-                                                        .name()
-                                                        .toLowerCase(Locale.ROOT)
-                                                        .replace('_', ' ')),
+                                                    test -> Text.literal(test.name().toLowerCase(Locale.ROOT).replace('_', ' ')),
                                                     Arrays.asList(Tests.values()),
                                                     this.selectedOption,
                                                     option -> this.setState(() -> this.selectedOption = option)
@@ -2608,8 +2396,7 @@ public class TestSelector extends StatefulWidget {
                         null, null,
                         new Column(
                             Wisdom.ALL_THE_WISDOM.stream()
-                                .sorted(Comparator.comparingInt(value -> MinecraftClient.getInstance().textRenderer.getWidth(
-                                    value)))
+                                .sorted(Comparator.comparingInt(value -> MinecraftClient.getInstance().textRenderer.getWidth(value)))
                                 .map(s -> new Marquee(
                                     new Label(
                                         new LabelStyle(Alignment.TOP_LEFT, null, null, null),
@@ -2678,7 +2465,6 @@ public class TestSelector extends StatefulWidget {
     public static class GayAmogus extends StatefulWidget {
 
         public final double pixelSize;
-
         public GayAmogus(double pixelSize) {
             this.pixelSize = pixelSize;
         }
