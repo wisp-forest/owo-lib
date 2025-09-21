@@ -34,7 +34,6 @@ import io.wispforest.owo.braid.widgets.focus.Focusable;
 import io.wispforest.owo.braid.widgets.grid.Grid;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
-import io.wispforest.owo.braid.widgets.label.RawLabel;
 import io.wispforest.owo.braid.widgets.overlay.Overlay;
 import io.wispforest.owo.braid.widgets.overlay.OverlayEntryBuilder;
 import io.wispforest.owo.braid.widgets.owoui.OwoUIWidget;
@@ -64,6 +63,7 @@ import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.ViewerStack;
 import io.wispforest.owo.util.Wisdom;
 import io.wispforest.uwu.client.Bikeshed;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.CheckboxWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -75,11 +75,14 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.*;
 import net.minecraft.util.Colors;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
@@ -1817,11 +1820,14 @@ public class TestSelector extends StatefulWidget {
                     MurderState::new,
                     new Builder(context -> {
                         var murders = SharedState.get(context, MurderState.class).murders;
+                        var eepies = SharedState.get(context, MurderState.class).eepies;
+                        var bed = SharedState.get(context, MurderState.class).bed;
                         return new Column(
                             MainAxisAlignment.CENTER,
                             CrossAxisAlignment.CENTER,
                             new Padding(Insets.all(10)),
                             new Label(murders.compareTo(BigInteger.ZERO) > 0 ? Text.literal("You have committed " + murders + " act" + (murders.compareTo(BigInteger.ONE) > 0 ? "s" : "") + " of " + Text.stringifiedTranslatable("uwu.homicide").getString() + " against the owo contributors!" + (murders.compareTo(BigInteger.valueOf(1000)) > 0 ? "... wtf bro" : "")).withColor(Colors.RED) : Text.literal("OWO Contributors")),
+                            new Label(eepies.compareTo(BigInteger.ZERO) > 0 ? Text.literal("You have committed " + eepies + " act" + (eepies.compareTo(BigInteger.ONE) > 0 ? "s" : "") + " of " + Text.stringifiedTranslatable("uwu.eepy").getString() + " against the owo contributors!" + (murders.compareTo(BigInteger.valueOf(1000)) > 0 ? "... idk" : "")).withColor(bed.getMapColor(MinecraftClient.getInstance().world, BlockPos.ORIGIN).color) : Text.empty()),
                             new Grid(
                                 LayoutAxis.VERTICAL,
                                 3,
@@ -1873,6 +1879,8 @@ public class TestSelector extends StatefulWidget {
 
             public static class MurderState extends ShareableState {
                 public BigInteger murders = BigInteger.ZERO;
+                public BigInteger eepies = BigInteger.ZERO;
+                private BlockState bed;
             }
 
             public record Contributor(UUID uuid, String name, Text displayName) {}
@@ -1910,9 +1918,17 @@ public class TestSelector extends StatefulWidget {
                                 .exitCallback(!this.dead ? () -> this.displayEntity.setOnFire(false) : null)
                                 .cursorStyle(!this.dead ? CursorStyle.CROSSHAIR : null),
                             this.dead ? null : () -> {
-                                this.setState(() -> this.dead = true);
+                                this.setState(() -> {
+                                    this.dead = true;
+                                });
                                 MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.ENTITY_PLAYER_DEATH, 1));
-                                SharedState.set(context, MurderState.class, state -> state.murders = state.murders.add(BigInteger.ONE));
+                                SharedState.set(context, MurderState.class, state -> {
+                                    if (!displayEntity.getUuid().equals(UUID.fromString("91a033f7-1dd3-4858-9c7b-8fb61ba6363d"))) {
+                                        state.murders = state.murders.add(BigInteger.ONE);
+                                    } else {
+                                        state.eepies = state.eepies.add(BigInteger.ONE);
+                                        state.bed = Registries.BLOCK.getRandomEntry(BlockTags.BEDS, Random.create()).get().value().getDefaultState();}
+                                });
                                 scheduleDelayedCallback(
                                     Duration.ofSeconds(displayEntity.getUuid().equals(UUID.fromString("09de8a6d-86bf-4c15-bb93-ce3384ce4e96")) ? 1 : 3), () -> this.setState(() -> {
                                         this.dead = false;
@@ -1920,14 +1936,43 @@ public class TestSelector extends StatefulWidget {
                                     })
                                 );
                             },
-                            new Panel(
-                                Identifier.of("uwu", "contributors_panel"),
-                                new Padding(
-                                    Insets.bottom(8),
-                                    new Sized(
-                                        96,
-                                        96,
-                                        new EntityWidget(1.35, this.displayEntity, widget -> widget.displayMode(EntityWidget.DisplayMode.CURSOR))
+                            new Stack(
+                                new StackBase(
+                                    new Panel(
+                                        Identifier.of("uwu", "contributors_panel"),
+                                        new Padding(
+                                            Insets.top(8),
+                                            new Sized(
+                                                96,
+                                                96,
+                                                new Transform(
+                                                    new Matrix4f().translate(0, 0, 200),
+                                                    new EntityWidget(1.35, this.displayEntity, widget -> widget.displayMode(EntityWidget.DisplayMode.CURSOR))
+                                                )
+                                            )
+                                        )
+                                    )
+                                ),
+                                new Visibility(
+                                    this.dead && this.displayEntity.getUuid().equals(UUID.fromString("91a033f7-1dd3-4858-9c7b-8fb61ba6363d")),
+                                    new Stack(
+                                        new BlockWidget(
+                                            SharedState.getWithoutDependency(context, MurderState.class).bed,
+                                            matrixStack -> {
+                                                matrixStack.translate(1, -.7, 0);
+                                                matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(30));
+                                                matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(90));
+                                                matrixStack.scale(.85f, .85f, .85f);
+                                            }
+                                        ),
+                                        new Align(
+                                            Alignment.TOP_LEFT,
+                                            new Transform(
+                                                new Matrix4f()
+                                                    .translation(120, 70, 400),
+                                                new Label(new LabelStyle(Alignment.TOP_LEFT, null, null, true), true, Text.literal("    z\n  z\nz"))
+                                            )
+                                        )
                                     )
                                 )
                             )

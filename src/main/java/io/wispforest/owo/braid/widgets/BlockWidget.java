@@ -92,8 +92,9 @@ public class BlockWidget extends LeafInstanceWidget {
 
             matrices.scale(40 * (float) (this.transform.width() / 64f), -40 * (float) (this.transform.height() / 64f), 40);
 
-            if (this.widget.transform != null) this.widget.transform.accept(matrices);
-            else {
+            if (this.widget.transform != null) {
+                this.widget.transform.accept(matrices);
+            } else {
                 matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(30));
                 matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(45 + 180));
             }
