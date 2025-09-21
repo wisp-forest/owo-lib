@@ -20,8 +20,6 @@ public class DataExtensionUtil {
 
     private DataExtensionUtil() {}
 
-    //region Coercion
-
     public static InputStream coerceJson(InputStream inputStream) {
         try {
             return new CoercedByteArrayInputStream(JANKSON
@@ -39,6 +37,4 @@ public class DataExtensionUtil {
             super(buf);
         }
     }
-
-    //endregion
 }
