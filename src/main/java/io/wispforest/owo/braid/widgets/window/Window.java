@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets.window;
 
+import io.wispforest.owo.braid.core.Alignment;
 import io.wispforest.owo.braid.core.Color;
 import io.wispforest.owo.braid.core.Insets;
 import io.wispforest.owo.braid.core.Size;
@@ -16,6 +17,7 @@ import io.wispforest.owo.braid.widgets.flex.Column;
 import io.wispforest.owo.braid.widgets.flex.Flexible;
 import io.wispforest.owo.braid.widgets.flex.Row;
 import io.wispforest.owo.braid.widgets.label.Label;
+import io.wispforest.owo.braid.widgets.label.LabelStyle;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -82,8 +84,7 @@ public class Window extends StatefulWidget {
                 ));
             }
 
-            titleBar.add(new Label(this.widget().title));
-            titleBar.add(new Flexible(new Padding(Insets.none())));
+            titleBar.add(new Flexible(new Label(new LabelStyle(Alignment.LEFT, null, null, null), false, Label.Overflow.ELLIPSIS, this.widget().title)));
 
             if (this.widget().onClose != null) {
                 titleBar.add(Actions.click(
@@ -136,9 +137,9 @@ public class Window extends StatefulWidget {
                                             new Sized(
                                                 Math.floor(this.controller.size.width()),
                                                 Math.floor(this.controller.size.height()),
-                                                new Clip(
-                                                    new Padding(
-                                                        Insets.all(4),
+                                                new Padding(
+                                                    Insets.all(4),
+                                                    new Clip(
                                                         this.widget().content
                                                     )
                                                 )

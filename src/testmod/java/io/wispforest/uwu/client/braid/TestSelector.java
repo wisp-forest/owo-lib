@@ -34,6 +34,7 @@ import io.wispforest.owo.braid.widgets.focus.Focusable;
 import io.wispforest.owo.braid.widgets.grid.Grid;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
+import io.wispforest.owo.braid.widgets.label.RawLabel;
 import io.wispforest.owo.braid.widgets.overlay.Overlay;
 import io.wispforest.owo.braid.widgets.overlay.OverlayEntryBuilder;
 import io.wispforest.owo.braid.widgets.owoui.OwoUIWidget;
@@ -58,7 +59,6 @@ import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.EntityComponent;
 import io.wispforest.owo.ui.container.Containers;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.ViewerStack;
@@ -96,7 +96,7 @@ import java.util.stream.Stream;
 public class TestSelector extends StatefulWidget {
 
     public enum Tests {
-        COUNTER, FLEX, DRAGGING, SPLIT_PANE, SLIDERS, TEXT_INPUT, BURNING_CHYZ, SCROLLING, INPUT, CYCLING, VANILLA, SHARED_STATE, STACKS, GRIDS, CONTRIBUTORS, ANIMATIONS, NAVIGATOR, OVERLAY
+        COUNTER, FLEX, DRAGGING, SPLIT_PANE, SLIDERS, TEXT_INPUT, BURNING_CHYZ, SCROLLING, INPUT, CYCLING, VANILLA, SHARED_STATE, STACKS, GRIDS, CONTRIBUTORS, ANIMATIONS, NAVIGATOR, OVERLAY, TEXT
     }
 
     @Override
@@ -181,6 +181,7 @@ public class TestSelector extends StatefulWidget {
                                     case ANIMATIONS -> new AnimationsTest();
                                     case NAVIGATOR -> new NavigatorTest();
                                     case OVERLAY -> new OverlayTest();
+                                    case TEXT -> new TextTest();
                                     case null -> new Center(new Label(Text.literal("select a test")));
                                 }
                             )
@@ -2306,6 +2307,146 @@ public class TestSelector extends StatefulWidget {
                             )
                         );
                     })
+                );
+            }
+        }
+    }
+
+    public static class TextTest extends StatefulWidget {
+        @Override
+        public WidgetState<TextTest> createState() {
+            return new State();
+        }
+
+        public static class State extends WidgetState<TextTest> {
+
+            @Override
+            public Widget build(BuildContext context) {
+                var wisdomText = Text.literal(String.join(" ", Wisdom.ALL_THE_WISDOM));
+
+                return new DragArena(
+                    new Window(
+                        false,
+                        Text.literal("ellipsis moment"),
+                        null, null,
+                        new Label(
+                            new LabelStyle(Alignment.TOP_LEFT, null, null, null),
+                            true, Label.Overflow.ELLIPSIS,
+                            wisdomText
+                        )
+                    ),
+                    new Window(
+                        false,
+                        Text.literal("clip moment"),
+                        null, null,
+                        new Label(
+                            new LabelStyle(Alignment.TOP_LEFT, null, null, null),
+                            true, Label.Overflow.CLIP,
+                            wisdomText
+                        )
+                    ),
+                    new Window(
+                        false,
+                        Text.literal("marquee moment"),
+                        null, null,
+                        new Column(
+                            Wisdom.ALL_THE_WISDOM.stream()
+                                .sorted(Comparator.comparingInt(value -> MinecraftClient.getInstance().textRenderer.getWidth(value)))
+                                .map(s -> new Marquee(
+                                    new Label(
+                                        new LabelStyle(Alignment.TOP_LEFT, null, null, null),
+                                        true, Label.Overflow.CLIP,
+                                        Text.literal(s)
+                                    )
+                                )).toList()
+                        )
+                    ),
+                    new Window(
+                        false,
+                        Text.literal("cursed marquee moment"),
+                        null, null,
+                        new Marquee(
+                            new Bikeshed()
+                        )
+                    ),
+                    new Window(
+                        false,
+                        Text.literal("dvd moment"),
+                        null, null,
+                        new Center(
+                            new Marquee(
+                                LayoutAxis.VERTICAL,
+                                new Marquee(
+                                    LayoutAxis.HORIZONTAL,
+                                    new Panel(
+                                        Identifier.of("uwu", "contributors_panel"),
+                                        new Sized(
+                                            32 * 4,
+                                            32 * 4,
+                                            new Marquee(
+                                                Easing.LINEAR,
+                                                Duration.ofSeconds(0),
+                                                Duration.ofMillis(15),
+                                                Duration.ZERO,
+                                                LayoutAxis.HORIZONTAL,
+                                                new Marquee(
+                                                    Easing.LINEAR,
+                                                    Duration.ofSeconds(0),
+                                                    Duration.ofMillis(20),
+                                                    Duration.ZERO,
+                                                    LayoutAxis.VERTICAL,
+                                                    new Align(
+                                                        Alignment.TOP_LEFT,
+                                                        new Padding(
+                                                            Insets.all(32 * 3),
+                                                            new GayAmogus(
+                                                                8
+                                                            )
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                );
+            }
+        }
+    }
+
+    public static class GayAmogus extends StatefulWidget {
+
+        public final double pixelSize;
+        public GayAmogus(double pixelSize) {
+            this.pixelSize = pixelSize;
+        }
+
+        @Override
+        public WidgetState<GayAmogus> createState() {
+            return new State();
+        }
+
+        public static class State extends WidgetState<GayAmogus> {
+
+            @Override
+            public void init() {
+                this.update(Duration.ZERO);
+            }
+
+            private void update(Duration delta) {
+                this.setState(() -> {});
+                this.scheduleAnimationCallback(this::update);
+            }
+
+            @Override
+            public Widget build(BuildContext context) {
+                return new Amogus(
+                    new Box(Color.hsv(System.currentTimeMillis() / 5000d % 1d, .85, 1)),
+                    new Box(Color.WHITE),
+                    this.widget().pixelSize
                 );
             }
         }
