@@ -1945,7 +1945,7 @@ public class TestSelector extends StatefulWidget {
                                                 new Transform(
                                                     new Matrix4f().translate(0, 0, 200),
                                                     new EntityWidget(1.35, this.displayEntity, widget -> {
-                                                        widget.displayMode(displayEntity.isDead() ? EntityWidget.DisplayMode.FIXED : EntityWidget.DisplayMode.CURSOR);
+                                                        widget.displayMode(displayEntity.isDead() ? EntityWidget.DisplayMode.NONE : EntityWidget.DisplayMode.CURSOR);
                                                         if (displayEntity.isDead()) widget.transform((matrices) ->matrices.rotateX((float) Math.toRadians(0.01)));
                                                     })
                                                 )
