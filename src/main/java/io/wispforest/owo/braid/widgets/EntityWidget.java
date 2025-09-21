@@ -152,7 +152,7 @@ public class EntityWidget extends LeafInstanceWidget {
             if (this.widget.displayMode == DisplayMode.FIXED) {
                 xRotation = 35;
                 yRotation = -45;
-            } else {
+            } else if (this.widget.displayMode != DisplayMode.NONE) {
                 var globalCursorPos = this.host().cursorPosition();
                 var cursorTransform = new Matrix4f(ctx.getMatrices().peek().getPositionMatrix())
                     .mul(entitySpaceToWidgetSpace)
@@ -218,6 +218,6 @@ public class EntityWidget extends LeafInstanceWidget {
     }
 
     public enum DisplayMode {
-        FIXED, VANILLA, CURSOR
+        FIXED, VANILLA, CURSOR, NONE
     }
 }

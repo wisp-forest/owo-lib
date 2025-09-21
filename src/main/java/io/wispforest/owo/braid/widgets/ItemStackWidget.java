@@ -5,6 +5,7 @@ import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.Size;
 import io.wispforest.owo.braid.framework.instance.LeafWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.LeafInstanceWidget;
+import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.LightmapTextureManager;
@@ -12,8 +13,11 @@ import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.item.ItemRenderState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ModelTransformationMode;
+import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 
 import java.util.OptionalDouble;
+import java.util.function.Consumer;
 
 /// A widget that renders an [ItemStack]
 ///
@@ -22,28 +26,59 @@ import java.util.OptionalDouble;
 public class ItemStackWidget extends LeafInstanceWidget {
 
     public final ItemStack stack;
-    public final boolean showOverlay;
-    public final ModelTransformationMode transformationMode;
+    protected boolean showOverlay = true;
+    protected ModelTransformationMode transformationMode = ModelTransformationMode.GUI;
+    protected @Nullable LightOverride lightOverride = null;
+    protected @Nullable Consumer<Matrix4f> transform = null;
 
-    public ItemStackWidget(ItemStack stack, boolean showOverlay, ModelTransformationMode transformationMode) {
+    public ItemStackWidget(ItemStack stack, @Nullable WidgetSetupCallback<ItemStackWidget> setupCallback) {
         this.stack = stack;
-        this.showOverlay = showOverlay;
-        this.transformationMode = transformationMode;
+        if (setupCallback != null) setupCallback.setup(this);
     }
 
-    /// Create an ItemStackWidget with the default GUI transformation mode
-    public ItemStackWidget(ItemStack stack, boolean showOverlay) {
-        this(stack, showOverlay, ModelTransformationMode.GUI);
-    }
-
-    /// Create an ItemStackWidget with the specified transformation mode and no overlay
-    public ItemStackWidget(ItemStack stack, ModelTransformationMode transformationMode) {
-        this(stack, false, transformationMode);
-    }
-
-    /// Create an ItemStackWidget with the default GUI transformation mode and an overlay
     public ItemStackWidget(ItemStack stack) {
-        this(stack, true);
+        this(stack, null);
+    }
+
+    public ItemStackWidget showOverlay(boolean showOverlay) {
+        this.assertMutable();
+        this.showOverlay = showOverlay;
+        return this;
+    }
+
+    public boolean showOverlay() {
+        return this.showOverlay;
+    }
+
+    public ItemStackWidget transformationMode(ModelTransformationMode transformationMode) {
+        this.assertMutable();
+        this.transformationMode = transformationMode;
+        this.showOverlay = false;
+        return this;
+    }
+
+    public ModelTransformationMode transformationMode() {
+        return this.transformationMode;
+    }
+
+    public ItemStackWidget lightOverride(@Nullable LightOverride lightOverride) {
+        this.assertMutable();
+        this.lightOverride = lightOverride;
+        return this;
+    }
+
+    public @Nullable LightOverride lightOverride() {
+        return this.lightOverride;
+    }
+
+    public ItemStackWidget transform(@Nullable Consumer<Matrix4f> transform) {
+        this.assertMutable();
+        this.transform = transform;
+        return this;
+    }
+
+    public @Nullable Consumer<Matrix4f> transform() {
+        return this.transform;
     }
 
     @Override
@@ -86,7 +121,7 @@ public class ItemStackWidget extends LeafInstanceWidget {
             var client = this.host().client();
             client.getItemModelManager().update(ITEM_RENDER_STATE, this.widget.stack, this.widget.transformationMode, false, null, null, 0);
 
-            final boolean notSideLit = !ITEM_RENDER_STATE.isSideLit();
+            final boolean notSideLit = this.widget.lightOverride == LightOverride.FRONT || (this.widget.lightOverride == null && !ITEM_RENDER_STATE.isSideLit());
             if (notSideLit) {
                 ctx.draw();
                 DiffuseLighting.disableGuiDepthLighting();
@@ -102,6 +137,8 @@ public class ItemStackWidget extends LeafInstanceWidget {
             // Vanilla scaling and y inversion
             matrices.scale(16, -16, 16);
 
+            if (this.widget.transform != null) this.widget.transform.accept(matrices.peek().getPositionMatrix());
+
             ITEM_RENDER_STATE.render(matrices, OwoUIDrawContext.of(ctx).vertexConsumers(), LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV);
             ctx.draw();
 
@@ -115,5 +152,10 @@ public class ItemStackWidget extends LeafInstanceWidget {
                 DiffuseLighting.enableGuiDepthLighting();
             }
         }
+    }
+
+    public enum LightOverride {
+        FRONT,
+        SIDE
     }
 }
