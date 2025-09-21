@@ -14,10 +14,8 @@ import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
+import net.minecraft.text.*;
+import net.minecraft.util.Language;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -29,11 +27,13 @@ public class RawLabel extends LeafInstanceWidget {
 
     public final LabelStyle style;
     public final boolean softWrap;
+    public final boolean ellipsize;
     public final Text text;
 
-    public RawLabel(LabelStyle style, boolean softWrap, Text text) {
+    public RawLabel(LabelStyle style, boolean softWrap, boolean ellipsize, Text text) {
         this.style = style;
         this.softWrap = softWrap;
+        this.ellipsize = ellipsize;
         this.text = text;
     }
 
@@ -61,6 +61,7 @@ public class RawLabel extends LeafInstanceWidget {
         public void setWidget(RawLabel widget) {
             if (Objects.equals(this.widget.style, widget.style)
                 && this.widget.softWrap == widget.softWrap
+                && this.widget.ellipsize == widget.ellipsize
                 && Objects.equals(this.widget.text, widget.text)) {
                 return;
             }
@@ -69,12 +70,25 @@ public class RawLabel extends LeafInstanceWidget {
             this.markNeedsLayout();
         }
 
-        protected List<OrderedText> wrapText(TextRenderer textRenderer, int maxWidth) {
+        protected List<OrderedText> wrapText(TextRenderer textRenderer, int maxWidth, double maxHeight) {
             var styledText = this.widget.text.copy().styled(textStyle -> textStyle.withParent(this.widget.style.textStyle()));
-            return textRenderer.wrapLines(styledText, this.widget.softWrap ? maxWidth : Integer.MAX_VALUE);
+            var wrappedLines = textRenderer.getTextHandler().wrapLines(styledText, this.widget.softWrap ? maxWidth : Integer.MAX_VALUE, Style.EMPTY);
+
+            var maxLines = (int) Math.floor(maxHeight / textRenderer.fontHeight);
+            if (this.widget.ellipsize && !wrappedLines.isEmpty() && maxLines > 0 && (wrappedLines.size() > maxLines || textRenderer.getWidth(wrappedLines.getLast()) > maxWidth)) {
+                wrappedLines = wrappedLines.subList(0, maxLines);
+
+                var trimmedLastLine = textRenderer.trimToWidth(wrappedLines.getLast(), maxWidth - 6);
+                wrappedLines.set(
+                    wrappedLines.size() - 1,
+                    StringVisitable.concat(trimmedLastLine, StringVisitable.plain("…"))
+                );
+            }
+
+            return Language.getInstance().reorder(wrappedLines);
         }
 
-        protected TextMetrics layoutText(TextRenderer textRenderer, List<OrderedText> lines) {
+        protected TextMetrics measureText(TextRenderer textRenderer, List<OrderedText> lines) {
             var textWidth = 0;
             var textHeight = 0;
             var lineWidths = new DoubleArrayList();
@@ -93,9 +107,9 @@ public class RawLabel extends LeafInstanceWidget {
         @Override
         protected void doLayout(Constraints constraints) {
             var textRenderer = this.host().client().textRenderer;
-            this.renderText = this.wrapText(textRenderer, (int) constraints.maxWidth());
+            this.renderText = this.wrapText(textRenderer, (int) constraints.maxWidth(), (int) constraints.maxHeight());
 
-            var metrics = this.layoutText(textRenderer, this.renderText);
+            var metrics = this.measureText(textRenderer, this.renderText);
 
             this.renderTextWidths = metrics.lineWidths();
             this.renderTextHeight = metrics.height();
@@ -107,13 +121,13 @@ public class RawLabel extends LeafInstanceWidget {
         @Override
         protected double measureIntrinsicWidth(double height) {
             var renderer = this.host().client().textRenderer;
-            return this.layoutText(renderer, this.wrapText(renderer, Integer.MAX_VALUE)).width;
+            return this.measureText(renderer, this.wrapText(renderer, Integer.MAX_VALUE, (int) height)).width;
         }
 
         @Override
         protected double measureIntrinsicHeight(double width) {
             var renderer = this.host().client().textRenderer;
-            return this.layoutText(renderer, this.wrapText(renderer, this.widget.softWrap ? (int) width : Integer.MAX_VALUE)).height;
+            return this.measureText(renderer, this.wrapText(renderer, this.widget.softWrap ? (int) width : Integer.MAX_VALUE, Integer.MAX_VALUE)).height;
         }
 
         @Override
