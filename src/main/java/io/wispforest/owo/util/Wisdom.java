@@ -61,7 +61,6 @@ public final class Wisdom {
             "Cheese Cheese Creeper, the newest release from MC Basic",
             "THIS ROOM IS SO VANILLA IT HURTS",
             "Owo.currentServer()",
-            "I'm gonna become a hydra, but not with the heads you'd think",
             //Here's the 4 dots that were previously used in nested lang formatting:
             "...."
     );

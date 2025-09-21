@@ -3,16 +3,12 @@ package io.wispforest.owo.util;
 import blue.endless.jankson.Jankson;
 import blue.endless.jankson.JsonGrammar;
 import blue.endless.jankson.api.SyntaxError;
-import io.wispforest.owo.Owo;
-import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.regex.Pattern;
 
 @ApiStatus.Internal
 public class DataExtensionUtil {
@@ -28,7 +24,7 @@ public class DataExtensionUtil {
                 .getBytes(StandardCharsets.UTF_8)
             );
         } catch (IOException | SyntaxError e) {
-            throw new RuntimeException("Failed to coerce JSON", e);
+            throw new RuntimeException("Failed to convert JSON5 to JSON", e);
         }
     }
 

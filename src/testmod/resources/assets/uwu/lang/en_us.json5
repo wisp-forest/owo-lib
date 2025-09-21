@@ -225,14 +225,8 @@
       "nestedLangTests.2.ListSuffixTestWithIndex",
       "nestedLangTests.3.ListSuffixTestWithIndex"
     ],
-    "escapeTests.{}": {
-      "": "nestedLangTests.escapeTests",
-      "/": "nestedLangTests.escapeTests",
-      "//": "nestedLangTests.escapeTest",
-      "{}.withSuffix": {
-        "/": "nestedLangTests.escapeTests.withSuffix",
-        "without/////": "nestedLangTests.escapeTests.withoutSuffix"
-      }
+    "escapeTest./+=_!{}": {
+      "": "nestedLangTests.escapeTest",
     }
   },
 
