@@ -19,14 +19,14 @@ import java.time.Duration;
 public class EditableText extends StatefulWidget {
 
     public final TextEditingController controller;
-    private boolean softWrap = true;
-    private boolean autoFocus = false;
-    private int maxLines = -1;
-    private int maxCharacters = -1;
-    private Style baseStyle = Style.EMPTY;
-    private Text suggestion = Text.empty();
-    private boolean textShadow = false;
-    private boolean suggestionIsPlaceholder = false;
+    protected boolean softWrap = true;
+    protected boolean autoFocus = false;
+    protected int maxLines = -1;
+    protected int maxCharacters = -1;
+    protected Style baseStyle = Style.EMPTY;
+    protected Text suggestion = Text.empty();
+    protected boolean textShadow = false;
+    protected boolean suggestionIsPlaceholder = false;
 
     public EditableText(
         TextEditingController controller,

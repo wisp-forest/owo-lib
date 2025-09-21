@@ -493,6 +493,12 @@ public class TestSelector extends StatefulWidget {
                                         false
                                     )
                                 )
+                            ),
+                            new Align(
+                                Alignment.BOTTOM_LEFT,
+                                new BlockWidget(
+                                    Registries.BLOCK.getRandom(Random.create(controller.hashCode())).get().value().getDefaultState()
+                                )
                             )
                         )
                     ));
@@ -877,7 +883,7 @@ public class TestSelector extends StatefulWidget {
                                     new Sized(
                                         20,
                                         20,
-                                        new EntityWidget(1.5d, false, true, false, this.chyz)
+                                        new EntityWidget(1.5d, this.chyz, widget -> widget.displayMode(EntityWidget.DisplayMode.CURSOR))
                                     ),
                                     new Padding(Insets.none())
                                 ),
@@ -965,10 +971,8 @@ public class TestSelector extends StatefulWidget {
                                 new Matrix4f().rotationZ((float) Math.toRadians(90)),
                                 new EntityWidget(
                                     3.5,
-                                    false,
-                                    true,
-                                    false,
-                                    this.chyz
+                                    this.chyz,
+                                    widget -> widget.displayMode(EntityWidget.DisplayMode.CURSOR)
                                 )
                             )
                         )
@@ -1018,10 +1022,8 @@ public class TestSelector extends StatefulWidget {
                                             new RecipeViewerExclusionZone(
                                                 new EntityWidget(
                                                     1,
-                                                    false,
-                                                    true,
-                                                    true,
-                                                    this.chyz
+                                                    this.chyz,
+                                                    widget -> widget.displayMode(EntityWidget.DisplayMode.CURSOR)
                                                 )
                                             )
                                         )
@@ -1503,8 +1505,8 @@ public class TestSelector extends StatefulWidget {
                     ),
                     new Label(
                         Text.literal(coolNumbers.stream()
-                            .map(String::valueOf)
-                            .collect(Collectors.joining(", ")))
+                                         .map(String::valueOf)
+                                         .collect(Collectors.joining(", ")))
                     )
                 );
             }
@@ -1910,10 +1912,12 @@ public class TestSelector extends StatefulWidget {
                                 this.setState(() -> this.dead = true);
                                 MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.ENTITY_PLAYER_DEATH, 1));
                                 SharedState.set(context, MurderState.class, state -> state.murders = state.murders.add(BigInteger.ONE));
-                                scheduleDelayedCallback(Duration.ofSeconds(displayEntity.getUuid().equals(UUID.fromString("09de8a6d-86bf-4c15-bb93-ce3384ce4e96")) ? 1 : 3), () -> this.setState(() -> {
-                                    this.dead = false;
-                                    MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.ITEM_TOTEM_USE, 1));
-                                }));
+                                scheduleDelayedCallback(
+                                    Duration.ofSeconds(displayEntity.getUuid().equals(UUID.fromString("09de8a6d-86bf-4c15-bb93-ce3384ce4e96")) ? 1 : 3), () -> this.setState(() -> {
+                                        this.dead = false;
+                                        MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.ITEM_TOTEM_USE, 1));
+                                    })
+                                );
                             },
                             new Panel(
                                 Identifier.of("uwu", "contributors_panel"),
@@ -1922,7 +1926,7 @@ public class TestSelector extends StatefulWidget {
                                     new Sized(
                                         96,
                                         96,
-                                        new EntityWidget(1.35, false, true, false, this.displayEntity)
+                                        new EntityWidget(1.35, this.displayEntity, widget -> widget.displayMode(EntityWidget.DisplayMode.CURSOR))
                                     )
                                 )
                             )
@@ -2190,26 +2194,30 @@ public class TestSelector extends StatefulWidget {
                     ),
                     new MessageButton(
                         Text.literal("page 2"),
-                        () -> Navigator.push(context, new BasePage(
-                            new Column(
-                                new Label(Text.literal("page 2")),
-                                new MessageButton(
-                                    Text.literal("popup"),
-                                    () -> Navigator.pushOverlay(context, new Dialog(
-                                        new Panel(
-                                            Panel.VANILLA_LIGHT,
-                                            new Padding(
-                                                Insets.all(5),
-                                                new Sized(
-                                                    Size.square(64),
-                                                    new Bikeshed()
+                        () -> Navigator.push(
+                            context, new BasePage(
+                                new Column(
+                                    new Label(Text.literal("page 2")),
+                                    new MessageButton(
+                                        Text.literal("popup"),
+                                        () -> Navigator.pushOverlay(
+                                            context, new Dialog(
+                                                new Panel(
+                                                    Panel.VANILLA_LIGHT,
+                                                    new Padding(
+                                                        Insets.all(5),
+                                                        new Sized(
+                                                            Size.square(64),
+                                                            new Bikeshed()
+                                                        )
+                                                    )
                                                 )
                                             )
                                         )
-                                    ))
+                                    )
                                 )
                             )
-                        ))
+                        )
                     )
                 );
             }
@@ -2218,6 +2226,7 @@ public class TestSelector extends StatefulWidget {
         public static class BasePage extends StatelessWidget {
 
             public final Widget content;
+
             public BasePage(Widget content) {
                 this.content = content;
             }

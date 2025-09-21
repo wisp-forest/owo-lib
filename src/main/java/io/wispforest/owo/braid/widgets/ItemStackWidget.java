@@ -6,7 +6,6 @@ import io.wispforest.owo.braid.core.Size;
 import io.wispforest.owo.braid.framework.instance.LeafWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.LeafInstanceWidget;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.OverlayTexture;
@@ -16,14 +15,35 @@ import net.minecraft.item.ModelTransformationMode;
 
 import java.util.OptionalDouble;
 
+/// A widget that renders an [ItemStack]
+///
+/// The stack is rendered using the specified [ModelTransformationMode]
+/// and can show overlay information (item bar, count, cooldown progress, etc.)
 public class ItemStackWidget extends LeafInstanceWidget {
 
     public final ItemStack stack;
     public final boolean showOverlay;
+    public final ModelTransformationMode transformationMode;
 
-    public ItemStackWidget(ItemStack stack, boolean showOverlay) {
+    public ItemStackWidget(ItemStack stack, boolean showOverlay, ModelTransformationMode transformationMode) {
         this.stack = stack;
         this.showOverlay = showOverlay;
+        this.transformationMode = transformationMode;
+    }
+
+    /// Create an ItemStackWidget with the default GUI transformation mode
+    public ItemStackWidget(ItemStack stack, boolean showOverlay) {
+        this(stack, showOverlay, ModelTransformationMode.GUI);
+    }
+
+    /// Create an ItemStackWidget with the specified transformation mode and no overlay
+    public ItemStackWidget(ItemStack stack, ModelTransformationMode transformationMode) {
+        this(stack, false, transformationMode);
+    }
+
+    /// Create an ItemStackWidget with the default GUI transformation mode and an overlay
+    public ItemStackWidget(ItemStack stack) {
+        this(stack, true);
     }
 
     @Override
@@ -63,7 +83,8 @@ public class ItemStackWidget extends LeafInstanceWidget {
 
         @Override
         public void draw(BraidDrawContext ctx) {
-            this.host().client().getItemModelManager().update(ITEM_RENDER_STATE, this.widget.stack, ModelTransformationMode.GUI, false, null, null, 0);
+            var client = this.host().client();
+            client.getItemModelManager().update(ITEM_RENDER_STATE, this.widget.stack, this.widget.transformationMode, false, null, null, 0);
 
             final boolean notSideLit = !ITEM_RENDER_STATE.isSideLit();
             if (notSideLit) {
@@ -80,8 +101,6 @@ public class ItemStackWidget extends LeafInstanceWidget {
 
             // Vanilla scaling and y inversion
             matrices.scale(16, -16, 16);
-
-            var client = MinecraftClient.getInstance();
 
             ITEM_RENDER_STATE.render(matrices, OwoUIDrawContext.of(ctx).vertexConsumers(), LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV);
             ctx.draw();
