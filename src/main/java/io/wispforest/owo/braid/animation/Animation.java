@@ -10,6 +10,7 @@ public class Animation {
 
     private final Scheduler scheduler;
     private final Listener listener;
+    private final @Nullable FinishListener finishListener;
 
     public Easing easing;
     public Duration duration;
@@ -17,12 +18,21 @@ public class Animation {
     private double progress;
     private @Nullable Target target;
 
-    public Animation(Easing easing, Duration duration, Scheduler scheduler, Listener listener, Target startFrom) {
+    public Animation(Easing easing, Duration duration, Scheduler scheduler, Listener listener, @Nullable FinishListener finishListener, Target startFrom) {
         this.easing = easing;
         this.duration = duration;
         this.scheduler = scheduler;
         this.listener = listener;
+        this.finishListener = finishListener;
         this.progress = startFrom.targetProgress;
+    }
+
+    public Animation(Easing easing, Duration duration, Scheduler scheduler, Listener listener, Target startFrom) {
+        this(easing, duration, scheduler, listener, null, startFrom);
+    }
+
+    public @Nullable Target target() {
+        return this.target;
     }
 
     public double progress() {
@@ -69,14 +79,18 @@ public class Animation {
             1
         );
 
+        this.listener.onUpdate(this.easing.apply((float) this.progress));
+
         if (Math.abs(this.progress - this.target.targetProgress) > EPSILON) {
             this.scheduler.schedule(this::callback);
         } else {
+            if (this.finishListener != null) {
+                this.finishListener.onFinished(this.target);
+            }
+
             this.progress = this.target.targetProgress;
             this.target = null;
         }
-
-        this.listener.onUpdate(this.easing.apply((float) this.progress));
     }
 
     // ---
@@ -101,6 +115,11 @@ public class Animation {
     @FunctionalInterface
     public interface Listener {
         void onUpdate(double progress);
+    }
+
+    @FunctionalInterface
+    public interface FinishListener {
+        void onFinished(Target atTarget);
     }
 
     @FunctionalInterface
