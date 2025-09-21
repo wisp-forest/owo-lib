@@ -7,44 +7,93 @@ import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
 import io.wispforest.owo.braid.widgets.basic.Clip;
 import io.wispforest.owo.braid.widgets.basic.ListenableBuilder;
 import io.wispforest.owo.braid.widgets.scroll.RawScrollView;
 import io.wispforest.owo.braid.widgets.scroll.ScrollController;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
 
 public class Marquee extends StatefulWidget {
 
-    public final Easing easing;
-    public final Duration minDuration;
-    public final Duration durationPerPixel;
-    public final Duration pauseTime;
-    public final LayoutAxis axis;
+    protected Easing easing = Easing.IN_OUT_SINE;
+    protected Duration minDuration = Duration.ofSeconds(1);
+    protected Duration durationPerPixel = Duration.ofMillis(100);
+    protected Duration pauseTime = Duration.ofSeconds(2);
+    protected LayoutAxis axis = LayoutAxis.HORIZONTAL;
     public final Widget child;
 
-    public Marquee(Easing easing, Duration minDuration, Duration durationPerPixel, Duration pauseTime, LayoutAxis axis, Widget child) {
-        this.easing = easing;
-        this.minDuration = minDuration;
-        this.durationPerPixel = durationPerPixel;
-        this.pauseTime = pauseTime;
-        this.axis = axis;
+    public Marquee(@Nullable WidgetSetupCallback<Marquee> setup, Widget child) {
         this.child = child;
-    }
-
-    public Marquee(LayoutAxis axis, Widget child) {
-        this(
-            Easing.IN_OUT_SINE,
-            Duration.ofSeconds(1),
-            Duration.ofMillis(100),
-            Duration.ofSeconds(2),
-            axis,
-            child
-        );
+        if (setup != null) setup.setup(this);
     }
 
     public Marquee(Widget child) {
-        this(LayoutAxis.HORIZONTAL, child);
+        this.child = child;
+    }
+
+    public Marquee easing(Easing easing) {
+        this.assertMutable();
+        this.easing = easing;
+        return this;
+    }
+
+    public Easing easing() {
+        return this.easing;
+    }
+
+    public Marquee minDuration(Duration minDuration) {
+        this.assertMutable();
+        this.minDuration = minDuration;
+        return this;
+    }
+
+    public Marquee minDuration(long millis) {
+        return this.minDuration(Duration.ofMillis(millis));
+    }
+
+    public Duration minDuration() {
+        return this.minDuration;
+    }
+
+    public Marquee durationPerPixel(Duration durationPerPixel) {
+        this.assertMutable();
+        this.durationPerPixel = durationPerPixel;
+        return this;
+    }
+
+    public Marquee durationPerPixel(long millisPerPixel) {
+        return this.durationPerPixel(Duration.ofMillis(millisPerPixel));
+    }
+
+    public Duration durationPerPixel() {
+        return this.durationPerPixel;
+    }
+
+    public Marquee pauseTime(Duration pauseTime) {
+        this.assertMutable();
+        this.pauseTime = pauseTime;
+        return this;
+    }
+
+    public Marquee pauseTime(long millis) {
+        return this.pauseTime(Duration.ofMillis(millis));
+    }
+
+    public Duration pauseTime() {
+        return this.pauseTime;
+    }
+
+    public Marquee axis(LayoutAxis axis) {
+        this.assertMutable();
+        this.axis = axis;
+        return this;
+    }
+
+    public LayoutAxis axis() {
+        return this.axis;
     }
 
     @Override

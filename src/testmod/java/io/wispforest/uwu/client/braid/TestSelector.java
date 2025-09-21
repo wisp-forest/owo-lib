@@ -2420,26 +2420,26 @@ public class TestSelector extends StatefulWidget {
                         null, null,
                         new Center(
                             new Marquee(
-                                LayoutAxis.VERTICAL,
+                                widget -> widget.axis(LayoutAxis.VERTICAL),
                                 new Marquee(
-                                    LayoutAxis.HORIZONTAL,
                                     new Panel(
                                         Identifier.of("uwu", "contributors_panel"),
                                         new Sized(
                                             32 * 4,
                                             32 * 4,
                                             new Marquee(
-                                                Easing.LINEAR,
-                                                Duration.ofSeconds(0),
-                                                Duration.ofMillis(15),
-                                                Duration.ZERO,
-                                                LayoutAxis.HORIZONTAL,
+                                                widget -> widget
+                                                    .easing(Easing.LINEAR)
+                                                    .minDuration(0)
+                                                    .durationPerPixel(15)
+                                                    .pauseTime(0),
                                                 new Marquee(
-                                                    Easing.LINEAR,
-                                                    Duration.ofSeconds(0),
-                                                    Duration.ofMillis(20),
-                                                    Duration.ZERO,
-                                                    LayoutAxis.VERTICAL,
+                                                    widget -> widget
+                                                        .easing(Easing.LINEAR)
+                                                        .minDuration(0)
+                                                        .durationPerPixel(15)
+                                                        .pauseTime(0)
+                                                        .axis(LayoutAxis.VERTICAL),
                                                     new Align(
                                                         Alignment.TOP_LEFT,
                                                         new Padding(
