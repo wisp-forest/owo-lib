@@ -39,8 +39,6 @@ public class EntityWidget extends LeafInstanceWidget {
         this.displayMode = DisplayMode.VANILLA;
     }
 
-    //region Setup Methodsx
-
     public EntityWidget displayMode(DisplayMode displayMode) {
         this.displayMode = displayMode;
         return this;
@@ -76,8 +74,6 @@ public class EntityWidget extends LeafInstanceWidget {
     public @Nullable Consumer<MatrixStack> transform() {
         return this.transform;
     }
-
-    //endregion
 
     @Override
     public LeafWidgetInstance<?> instantiate() {
