@@ -150,8 +150,10 @@ public class EntityWidget extends LeafInstanceWidget {
             var prevPitch = entity.prevPitch;
 
             if (this.widget.displayMode == DisplayMode.FIXED) {
-                xRotation = 35;
-                yRotation = -45;
+                if (this.widget.transform == null) {
+                    xRotation = 35;
+                    yRotation = -45;
+                }
             } else {
                 var globalCursorPos = this.host().cursorPosition();
                 var cursorTransform = new Matrix4f(ctx.getMatrices().peek().getPositionMatrix())

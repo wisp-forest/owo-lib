@@ -492,10 +492,7 @@ public class TestSelector extends StatefulWidget {
                                 Alignment.BOTTOM_RIGHT,
                                 new Tooltip(
                                     Text.literal("tooltip\nhere?"),
-                                    new ItemStackWidget(
-                                        Registries.ITEM.getRandom(Random.create(controller.hashCode())).get().value().getDefaultStack(),
-                                        false
-                                    )
+                                    new ItemStackWidget(Registries.ITEM.getRandom(Random.create(controller.hashCode())).get().value().getDefaultStack())
                                 )
                             ),
                             new Align(
@@ -1947,7 +1944,10 @@ public class TestSelector extends StatefulWidget {
                                                 96,
                                                 new Transform(
                                                     new Matrix4f().translate(0, 0, 200),
-                                                    new EntityWidget(1.35, this.displayEntity, widget -> widget.displayMode(EntityWidget.DisplayMode.CURSOR))
+                                                    new EntityWidget(1.35, this.displayEntity, widget -> {
+                                                        widget.displayMode(displayEntity.isDead() ? EntityWidget.DisplayMode.FIXED : EntityWidget.DisplayMode.CURSOR);
+                                                        if (displayEntity.isDead()) widget.transform((matrices) ->matrices.rotateX((float) Math.toRadians(0.01)));
+                                                    })
                                                 )
                                             )
                                         )
