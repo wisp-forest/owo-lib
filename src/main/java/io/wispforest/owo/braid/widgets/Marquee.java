@@ -10,6 +10,7 @@ import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
 import io.wispforest.owo.braid.widgets.basic.Clip;
 import io.wispforest.owo.braid.widgets.basic.ListenableBuilder;
+import io.wispforest.owo.braid.widgets.basic.MouseArea;
 import io.wispforest.owo.braid.widgets.scroll.RawScrollView;
 import io.wispforest.owo.braid.widgets.scroll.ScrollController;
 import org.jetbrains.annotations.Nullable;
@@ -22,6 +23,7 @@ public class Marquee extends StatefulWidget {
     protected Duration minDuration = Duration.ofSeconds(1);
     protected Duration durationPerPixel = Duration.ofMillis(100);
     protected Duration pauseTime = Duration.ofSeconds(2);
+    protected boolean pauseWhileHovered = true;
     protected LayoutAxis axis = LayoutAxis.HORIZONTAL;
     public final Widget child;
 
@@ -86,6 +88,15 @@ public class Marquee extends StatefulWidget {
         return this.pauseTime;
     }
 
+    public Marquee pauseWhileHovered(boolean pauseWhileHovered) {
+        this.pauseWhileHovered = pauseWhileHovered;
+        return this;
+    }
+
+    public boolean pauseWhileHovered() {
+        return this.pauseWhileHovered;
+    }
+
     public Marquee axis(LayoutAxis axis) {
         this.assertMutable();
         this.axis = axis;
@@ -105,6 +116,7 @@ public class Marquee extends StatefulWidget {
 
         private final ScrollController controller = new ScrollController(this);
         private Animation animation;
+        private Animation.Target pausedAnimationTarget = null;
 
         private long callbackId = -1;
 
@@ -159,13 +171,27 @@ public class Marquee extends StatefulWidget {
 
         @Override
         public Widget build(BuildContext context) {
-            return new Clip(
-                new ListenableBuilder(
-                    this.controller,
-                    buildContext -> new RawScrollView(
-                        this.widget().axis == LayoutAxis.HORIZONTAL ? this.controller : null,
-                        this.widget().axis == LayoutAxis.VERTICAL ? this.controller : null,
-                        this.widget().child
+            return new MouseArea(
+                widget -> {
+                    if (!this.widget().pauseWhileHovered) return;
+                    widget
+                        .enterCallback(() -> {
+                            this.pausedAnimationTarget = this.animation.target();
+                            this.animation.pause();
+                        })
+                        .exitCallback(() -> {
+                            if (this.pausedAnimationTarget == null) return;
+                            this.animation.towards(this.pausedAnimationTarget, false);
+                        });
+                },
+                new Clip(
+                    new ListenableBuilder(
+                        this.controller,
+                        buildContext -> new RawScrollView(
+                            this.widget().axis == LayoutAxis.HORIZONTAL ? this.controller : null,
+                            this.widget().axis == LayoutAxis.VERTICAL ? this.controller : null,
+                            this.widget().child
+                        )
                     )
                 )
             );

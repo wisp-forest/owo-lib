@@ -2411,6 +2411,7 @@ public class TestSelector extends StatefulWidget {
                         Text.literal("cursed marquee moment"),
                         null, null,
                         new Marquee(
+                            widget -> widget.pauseWhileHovered(false),
                             new Bikeshed()
                         )
                     ),
