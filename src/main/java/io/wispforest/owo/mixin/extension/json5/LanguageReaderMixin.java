@@ -32,7 +32,7 @@ public abstract class LanguageReaderMixin {
         Operation<Map<Identifier, Resource>> original
     ) {
         var base = original.call(instance, s, identifierPredicate);
-        original.call(instance, s, DataExtensionUtil.OptInIdentifierPredicate.of(DataExtensionUtil.OptInIdentifierPredicate.of(path -> path.getPath().endsWith(".json5"))))
+        original.call(instance, s, DataExtensionUtil.OptInIdentifierPredicate.of(path -> path.getPath().endsWith(".json5")))
             .forEach((identifier, resource) -> base.putIfAbsent(
                 identifier, new Resource(resource.getPack(), () -> coerceJson(resource.getInputStream()))
             ));
