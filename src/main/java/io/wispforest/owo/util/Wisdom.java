@@ -62,7 +62,8 @@ public final class Wisdom {
             "THIS ROOM IS SO VANILLA IT HURTS",
             "Owo.currentServer()",
             //Here's the 4 dots that were previously used in nested lang formatting:
-            "...."
+            "....",
+            "Weakeys"
     );
 
     public static void spread() {
