@@ -2,6 +2,7 @@ package io.wispforest.owo.mixin.extension.json5;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import io.wispforest.owo.util.DataExtensionUtil;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
@@ -31,7 +32,7 @@ public abstract class LanguageReaderMixin {
         Operation<Map<Identifier, Resource>> original
     ) {
         var base = original.call(instance, s, identifierPredicate);
-        original.call(instance, s, (Predicate<Identifier>) path -> path.getPath().endsWith(".json5"))
+        original.call(instance, s, DataExtensionUtil.OptInIdentifierPredicate.of(DataExtensionUtil.OptInIdentifierPredicate.of(path -> path.getPath().endsWith(".json5"))))
             .forEach((identifier, resource) -> base.putIfAbsent(
                 identifier, new Resource(resource.getPack(), () -> coerceJson(resource.getInputStream()))
             ));

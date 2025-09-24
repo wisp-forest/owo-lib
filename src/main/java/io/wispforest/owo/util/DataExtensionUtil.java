@@ -3,16 +3,29 @@ package io.wispforest.owo.util;
 import blue.endless.jankson.Jankson;
 import blue.endless.jankson.JsonGrammar;
 import blue.endless.jankson.api.SyntaxError;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.minecraft.resource.ResourcePack;
+import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
+import java.util.function.Predicate;
+
+import static java.util.Collections.newSetFromMap;
 
 @ApiStatus.Internal
 public class DataExtensionUtil {
     public static final Jankson JANKSON = Jankson.builder().build();
+
+    public static final Set<ResourcePack> JSON5_ENABLED_PACKS = newSetFromMap(new WeakHashMap<>());
 
     private DataExtensionUtil() {}
 
@@ -31,6 +44,12 @@ public class DataExtensionUtil {
     public static class CoercedByteArrayInputStream extends ByteArrayInputStream {
         public CoercedByteArrayInputStream(byte[] buf) {
             super(buf);
+        }
+    }
+
+    public interface OptInIdentifierPredicate extends Predicate<Identifier> {
+        static OptInIdentifierPredicate of(Predicate<Identifier> delegate) {
+            return delegate instanceof OptInIdentifierPredicate optIn ? optIn : delegate::test;
         }
     }
 }

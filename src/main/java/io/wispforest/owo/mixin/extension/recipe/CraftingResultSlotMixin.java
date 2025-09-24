@@ -28,7 +28,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 @Mixin(CraftingResultSlot.class)
-public class CraftingResultSlotMixin {
+public abstract class CraftingResultSlotMixin {
 
     @Shadow
     @Final

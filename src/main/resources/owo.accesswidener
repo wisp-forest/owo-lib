@@ -16,3 +16,6 @@ accessible class net/minecraft/registry/RegistryOps$CachedRegistryInfoGetter
 extendable method net/minecraft/client/gui/screen/ingame/HandledScreen drawSlotHighlightBack (Lnet/minecraft/client/gui/DrawContext;)V
 extendable method net/minecraft/client/gui/screen/ingame/HandledScreen drawSlotHighlightFront (Lnet/minecraft/client/gui/DrawContext;)V
 extendable method net/minecraft/client/gui/screen/ingame/HandledScreen drawItem (Lnet/minecraft/client/gui/DrawContext;Lnet/minecraft/item/ItemStack;IILjava/lang/String;)V
+
+accessible class net/minecraft/resource/NamespaceResourceManager$FilterablePack
+accessible field net/minecraft/resource/NamespaceResourceManager$FilterablePack underlying Lnet/minecraft/resource/ResourcePack;

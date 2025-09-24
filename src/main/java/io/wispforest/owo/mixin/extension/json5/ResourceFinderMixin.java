@@ -2,6 +2,7 @@ package io.wispforest.owo.mixin.extension.json5;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceFinder;
 import net.minecraft.resource.ResourceManager;
@@ -9,46 +10,70 @@ import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import static io.wispforest.owo.util.DataExtensionUtil.*;
 
 @Mixin(ResourceFinder.class)
 public abstract class ResourceFinderMixin {
 
-    @Shadow @Final private String directoryName;
     @Shadow @Final private String fileExtension;
 
-    @WrapMethod(method = "findResources")
+    @WrapOperation(
+        method = "findResources",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/resource/ResourceManager;findResources(Ljava/lang/String;Ljava/util/function/Predicate;)Ljava/util/Map;"
+        )
+    )
     private Map<Identifier, Resource> json5$findResources(
-        ResourceManager resourceManager,
+        ResourceManager instance,
+        String directoryName,
+        Predicate<Identifier> identifierPredicate,
         Operation<Map<Identifier, Resource>> original
     ) {
-        var base = original.call(resourceManager);
+        var base = original.call(instance, directoryName, identifierPredicate);
         if (this.fileExtension.equals(".json")) {
-            new ResourceFinder(directoryName, ".json5")
-                .findResources(resourceManager)
-                .forEach((identifier, resource) -> base
-                    .put(identifier, new Resource(resource.getPack(), () -> coerceJson(resource.getInputStream()))));
+            original
+                .call(instance, directoryName, OptInIdentifierPredicate.of(path -> path.getPath().endsWith(".json5")))
+                .forEach((identifier, resource) -> base.put(
+                    identifier,
+                    new Resource(resource.getPack(), () -> coerceJson(resource.getInputStream()))
+                ));
         }
         return base;
     }
 
-    @WrapMethod(method = "findAllResources")
+    @WrapOperation(
+        method = "findAllResources",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/resource/ResourceManager;findAllResources(Ljava/lang/String;Ljava/util/function/Predicate;)Ljava/util/Map;"
+        )
+    )
     private Map<Identifier, List<Resource>> json5$findAllResources(
-        ResourceManager resourceManager,
+        ResourceManager instance,
+        String directoryName,
+        Predicate<Identifier> identifierPredicate,
         Operation<Map<Identifier, List<Resource>>> original
     ) {
-        var base = original.call(resourceManager);
+        var base = original.call(instance, directoryName, identifierPredicate);
         if (this.fileExtension.equals(".json")) {
-            new ResourceFinder(directoryName, ".json5")
-                .findResources(resourceManager)
-                .forEach((identifier, resource) -> base
+            original
+                .call(instance, directoryName, OptInIdentifierPredicate.of(path -> path.getPath().endsWith(".json5")))
+                .forEach((identifier, resources) -> base
                     .computeIfAbsent(identifier, id -> new ArrayList<>())
-                    .add(new Resource(resource.getPack(), () -> coerceJson(resource.getInputStream()))));
+                    .addAll(resources
+                        .stream()
+                        .map(resource -> new Resource(resource.getPack(), () -> coerceJson(resource.getInputStream())))
+                        .toList()
+                    )
+                );
         }
         return base;
     }
