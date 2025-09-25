@@ -23,8 +23,8 @@ public class RangeSlider extends RawRangeSlider {
             null,
             onChanged,
             new Panel(ButtonComponent.DISABLED_TEXTURE),
-            8, new DefaultSliderHandle(),
-            8, new DefaultSliderHandle(),
+            new DefaultSliderHandle(), 8,
+            new DefaultSliderHandle(), 8,
             new Box(new Color(0x7f000000))
         );
         if (setupCallback != null) setupCallback.setup(this);
@@ -40,49 +40,62 @@ public class RangeSlider extends RawRangeSlider {
         this(minValue, maxValue, setupCallback, active ? onChanged : null);
     }
 
-    //region Setup Methods
+    @Override
+    public RangeSlider min(double min) {return (RangeSlider) super.min(min);}
 
     @Override
-    public RangeSlider min(double min) { return (RangeSlider) super.min(min); }
+    public RangeSlider max(double max) {return (RangeSlider) super.max(max);}
 
     @Override
-    public RangeSlider max(double max) { return (RangeSlider) super.max(max); }
+    public RangeSlider range(double min, double max) {return (RangeSlider) super.range(min, max);}
 
     @Override
-    public RangeSlider range(double min, double max) { return (RangeSlider) super.range(min, max); }
+    public RangeSlider minRange(double minRange) {return (RangeSlider) super.minRange(minRange);}
 
     @Override
-    public RangeSlider minRange(double minRange) { return (RangeSlider) super.minRange(minRange); }
+    public RangeSlider maxRange(double maxRange) {return (RangeSlider) super.maxRange(maxRange);}
 
     @Override
-    public RangeSlider maxRange(double maxRange) { return (RangeSlider) super.maxRange(maxRange); }
+    public RangeSlider clampRange(double minRange, double maxRange) {
+        return (RangeSlider) super.clampRange(
+            minRange,
+            maxRange
+        );
+    }
 
     @Override
-    public RangeSlider clampRange(double minRange, double maxRange) { return (RangeSlider) super.clampRange(minRange, maxRange); }
+    public RangeSlider step(@Nullable Double step) {return (RangeSlider) super.step(step);}
 
     @Override
-    public RangeSlider step(@Nullable Double step) { return (RangeSlider) super.step(step); }
+    public RangeSlider step(double step) {return (RangeSlider) super.step(step);}
 
     @Override
-    public RangeSlider step(double step) { return (RangeSlider) super.step(step); }
+    public RangeSlider sliderFunction(io.wispforest.owo.braid.widgets.slider.slider.SliderFunction function) {
+        return (RangeSlider) super.sliderFunction(function);
+    }
 
     @Override
-    public RangeSlider sliderFunction(io.wispforest.owo.braid.widgets.slider.slider.SliderFunction function) { return (RangeSlider) super.sliderFunction(function); }
+    public RangeSlider axis(LayoutAxis axis) {return (RangeSlider) super.axis(axis);}
 
     @Override
-    public RangeSlider axis(LayoutAxis axis) { return (RangeSlider) super.axis(axis); }
+    public RangeSlider vertical() {return (RangeSlider) super.vertical();}
 
     @Override
-    public RangeSlider vertical() { return (RangeSlider) super.vertical(); }
+    public RawRangeSlider incrementStep(double incrementStep) {return super.incrementStep(incrementStep);}
 
-    @Override
-    public RawRangeSlider incrementStep(double incrementStep) { return super.incrementStep(incrementStep); }
+    public RangeSlider minHandleSize(double size) {
+        this.assertMutable();
+        this.minHandleSize = size;
+        return this;
+    }
 
-    public RangeSlider minHandleSize(double size) { this.assertMutable(); this.minHandleSize = size; return this; }
-    public double minHandleSize() { return this.minHandleSize; }
+    public double minHandleSize() {return this.minHandleSize;}
 
-    public RangeSlider maxHandleSize(double size) { this.assertMutable(); this.maxHandleSize = size; return this; }
-    public double maxHandleSize() { return this.maxHandleSize; }
+    public RangeSlider maxHandleSize(double size) {
+        this.assertMutable();
+        this.maxHandleSize = size;
+        return this;
+    }
 
-    //endregion
+    public double maxHandleSize() {return this.maxHandleSize;}
 }

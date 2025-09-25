@@ -22,8 +22,8 @@ public class Xlyder extends RawXlyder {
             null,
             onChanged,
             new Panel(ButtonComponent.DISABLED_TEXTURE),
-            Size.square(8),
-            new DefaultSliderHandle()
+            new DefaultSliderHandle(),
+            Size.square(8)
         );
         if (setupCallback != null) setupCallback.setup(this);
     }
@@ -53,8 +53,6 @@ public class Xlyder extends RawXlyder {
     ) {
         this(new Vector2d(x, y), setupCallback, active ? onChanged : null);
     }
-
-    //region Setup Methods
 
     @Override
     public Xlyder min(Vector2d min) {
@@ -215,6 +213,4 @@ public class Xlyder extends RawXlyder {
     public Size handleSize() {
         return this.handleSize;
     }
-
-    //endregion
 }

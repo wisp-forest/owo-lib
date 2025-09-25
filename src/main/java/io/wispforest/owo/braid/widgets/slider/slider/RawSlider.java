@@ -37,18 +37,16 @@ public class RawSlider extends StatefulWidget {
         @Nullable WidgetSetupCallback<RawSlider> setupCallback,
         @Nullable SliderCallback onChanged,
         @Nullable Widget track,
-        double handleSize,
-        Widget handle
+        Widget handle,
+        double handleSize
     ) {
         this.value = value;
         this.onChanged = onChanged;
         this.track = track;
-        this.handleSize = handleSize;
         this.handle = handle;
+        this.handleSize = handleSize;
         if (setupCallback != null) setupCallback.setup(this);
     }
-
-    //region Setup Methods
 
     public RawSlider min(double min) {
         this.assertMutable();
@@ -127,8 +125,6 @@ public class RawSlider extends StatefulWidget {
         return this.incrementStep;
     }
 
-    //endregion
-
     @Override
     public WidgetState<?> createState() {
         return new State();
@@ -147,10 +143,12 @@ public class RawSlider extends StatefulWidget {
         public Widget build(BuildContext context) {
             var widget = this.widget();
             this.normalizedValue = widget.function.normalize(widget.value, widget.min, widget.max);
+            var trueMin = Math.min(widget.max, widget.min);
+            var trueMax = Math.max(widget.max, widget.min);
             this.incrementStep = widget.incrementStep != null
-                ? widget.function.normalize(widget.incrementStep, widget.min, widget.max)
+                ? widget.function.normalize(widget.incrementStep, trueMin, trueMax)
                 : widget.step != null
-                    ? widget.function.normalize(widget.step, widget.min, widget.max)
+                    ? widget.function.normalize(widget.step, trueMin, trueMax)
                     : 0.01;
             this.draggingCursorStyle = null;
             return new LayoutBuilder((innerContext, constraints) -> {

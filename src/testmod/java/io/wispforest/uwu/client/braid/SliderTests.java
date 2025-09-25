@@ -331,7 +331,9 @@ public class SliderTests extends StatefulWidget {
                         new Transform(
                             new Matrix4f().scale(0.5f),
                             new Label(
+                                null,
                                 false,
+                                Label.Overflow.SHOW,
                                 Text.literal(formatDouble(x) + "\n" + formatDouble(y))
                             )
                         )

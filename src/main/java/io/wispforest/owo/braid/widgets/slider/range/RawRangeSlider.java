@@ -44,20 +44,20 @@ public class RawRangeSlider extends StatefulWidget {
         @Nullable WidgetSetupCallback<RawRangeSlider> setupCallback,
         @Nullable RangeSliderCallback onChanged,
         @Nullable Widget track,
-        double minHandleSize,
         Widget minHandle,
-        double maxHandleSize,
+        double minHandleSize,
         Widget maxHandle,
+        double maxHandleSize,
         Widget rangeIndicator
     ) {
         this.minValue = minValue;
         this.maxValue = maxValue;
         this.onChanged = onChanged;
         this.track = track;
-        this.minHandleSize = minHandleSize;
         this.minHandle = minHandle;
-        this.maxHandleSize = maxHandleSize;
+        this.minHandleSize = minHandleSize;
         this.maxHandle = maxHandle;
+        this.maxHandleSize = maxHandleSize;
         this.rangeIndicator = rangeIndicator;
         if (setupCallback != null) setupCallback.setup(this);
     }
@@ -69,10 +69,10 @@ public class RawRangeSlider extends StatefulWidget {
         boolean active,
         RangeSliderCallback onChanged,
         @Nullable Widget track,
-        double minHandleSize,
         Widget minHandle,
-        double maxHandleSize,
+        double minHandleSize,
         Widget maxHandle,
+        double maxHandleSize,
         Widget rangeIndicator
     ) {
         this(
@@ -80,8 +80,8 @@ public class RawRangeSlider extends StatefulWidget {
             setupCallback,
             active ? onChanged : null,
             track,
-            minHandleSize, minHandle,
-            maxHandleSize, maxHandle,
+            minHandle, minHandleSize,
+            maxHandle, maxHandleSize,
             rangeIndicator
         );
     }
@@ -92,8 +92,8 @@ public class RawRangeSlider extends StatefulWidget {
         @Nullable WidgetSetupCallback<RawRangeSlider> setupCallback,
         @Nullable RangeSliderCallback onChanged,
         @Nullable Widget track,
-        double handleSize,
         Widget handle,
+        double handleSize,
         Widget rangeIndicator
     ) {
         this(
@@ -102,8 +102,8 @@ public class RawRangeSlider extends StatefulWidget {
             setupCallback,
             onChanged,
             track,
-            handleSize, handle,
-            handleSize, handle,
+            handle, handleSize,
+            handle, handleSize,
             rangeIndicator
         );
     }
@@ -115,8 +115,8 @@ public class RawRangeSlider extends StatefulWidget {
         boolean active,
         RangeSliderCallback onChanged,
         @Nullable Widget track,
-        double handleSize,
         Widget handle,
+        double handleSize,
         Widget rangeIndicator
     ) {
         this(
@@ -125,12 +125,10 @@ public class RawRangeSlider extends StatefulWidget {
             setupCallback,
             active ? onChanged : null,
             track,
-            handleSize, handle,
+            handle, handleSize,
             rangeIndicator
         );
     }
-
-    //region Setup Methods
 
     public RawRangeSlider min(double min) {
         this.assertMutable();
@@ -236,8 +234,6 @@ public class RawRangeSlider extends StatefulWidget {
         return this.incrementStep;
     }
 
-    //endregion
-
     @Override
     public WidgetState<?> createState() {
         return new State();
@@ -258,10 +254,12 @@ public class RawRangeSlider extends StatefulWidget {
         @Override
         public void init() {
             var widget = this.widget();
+            var trueMin = Math.min(widget.min, widget.max);
+            var trueMax = Math.max(widget.min, widget.max);
             this.incrementStep = widget.incrementStep != null
-                ? widget.sliderFunction.normalize(widget.incrementStep, widget.min, widget.max)
+                ? widget.sliderFunction.normalize(widget.incrementStep, trueMin, trueMax)
                 : widget.step != null
-                    ? widget.sliderFunction.normalize(widget.step, widget.min, widget.max)
+                    ? widget.sliderFunction.normalize(widget.step, trueMin, trueMax)
                     : 0.01;
         }
 
@@ -475,7 +473,7 @@ public class RawRangeSlider extends StatefulWidget {
 
         protected void increment(double increment) {
             if (this.widget().onChanged == null) return;
-            var target = this.grabbedHandle != null ? this.grabbedHandle : Handle.MAX;
+            var target = this.grabbedHandle != null ? this.grabbedHandle : Handle.BOTH;
             var delta = this.incrementStep * increment;
             var newMin = this.normalizedMin;
             var newMax = this.normalizedMax;

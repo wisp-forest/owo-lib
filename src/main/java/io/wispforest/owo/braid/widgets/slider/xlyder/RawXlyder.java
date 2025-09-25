@@ -39,14 +39,14 @@ public class RawXlyder extends StatefulWidget {
         @Nullable WidgetSetupCallback<RawXlyder> setupCallback,
         @Nullable XlyderCallback onChanged,
         @Nullable Widget track,
-        Size handleSize,
-        Widget handle
+        Widget handle,
+        Size handleSize
     ) {
         this.value = value;
         this.onChanged = onChanged;
         this.track = track;
-        this.handleSize = handleSize;
         this.handle = handle;
+        this.handleSize = handleSize;
         if (setupCallback != null) setupCallback.setup(this);
     }
 
@@ -56,10 +56,10 @@ public class RawXlyder extends StatefulWidget {
         boolean active,
         XlyderCallback onChanged,
         @Nullable Widget track,
-        Size handleSize,
-        Widget handle
+        Widget handle,
+        Size handleSize
     ) {
-        this(value, setupCallback, active ? onChanged : null, track, handleSize, handle);
+        this(value, setupCallback, active ? onChanged : null, track, handle, handleSize);
     }
 
     public RawXlyder(
@@ -67,10 +67,10 @@ public class RawXlyder extends StatefulWidget {
         @Nullable WidgetSetupCallback<RawXlyder> setupCallback,
         @Nullable XlyderCallback onChanged,
         @Nullable Widget track,
-        Size handleSize,
-        Widget handle
+        Widget handle,
+        Size handleSize
     ) {
-        this(new Vector2d(x, y), setupCallback, onChanged, track, handleSize, handle);
+        this(new Vector2d(x, y), setupCallback, onChanged, track, handle, handleSize);
     }
 
     public RawXlyder(
@@ -79,13 +79,11 @@ public class RawXlyder extends StatefulWidget {
         boolean active,
         XlyderCallback onChanged,
         @Nullable Widget track,
-        Size handleSize,
-        Widget handle
+        Widget handle,
+        Size handleSize
     ) {
-        this(new Vector2d(x, y), setupCallback, active ? onChanged : null, track, handleSize, handle);
+        this(new Vector2d(x, y), setupCallback, active ? onChanged : null, track, handle, handleSize);
     }
-
-    //region Setup Methods
 
     public RawXlyder min(Vector2d min) {
         this.assertMutable();
@@ -325,8 +323,6 @@ public class RawXlyder extends StatefulWidget {
         return this.yIncrementStep;
     }
 
-    //endregion
-
     @Override
     public WidgetState<?> createState() {
         return new State();
@@ -343,9 +339,13 @@ public class RawXlyder extends StatefulWidget {
         @Override
         public void init() {
             var widget = this.widget();
+            var trueMinX = Math.min(widget.min.x, widget.max.x);
+            var trueMaxX = Math.max(widget.min.x, widget.max.x);
+            var trueMinY = Math.min(widget.min.y, widget.max.y);
+            var trueMaxY = Math.max(widget.min.y, widget.max.y);
             this.incrementStep = new Vector2d(
-                widget.xIncrementStep != null ? widget.xSliderFunction.normalize(widget.xIncrementStep, widget.min.x, widget.max.x) : widget.xStep != null ? widget.xSliderFunction.normalize(widget.xStep, widget.min.x, widget.max.x) : 0.01,
-                widget.yIncrementStep != null ? widget.ySliderFunction.normalize(widget.yIncrementStep, widget.min.y, widget.max.y) : widget.yStep != null ? widget.ySliderFunction.normalize(widget.yStep, widget.min.y, widget.max.y) : 0.01
+                widget.xIncrementStep != null ? widget.xSliderFunction.normalize(widget.xIncrementStep, trueMinX, trueMaxX) : widget.xStep != null ? widget.xSliderFunction.normalize(widget.xStep, trueMinX, trueMaxX) : 0.01,
+                widget.yIncrementStep != null ? widget.ySliderFunction.normalize(widget.yIncrementStep, trueMinY, trueMaxY) : widget.yStep != null ? widget.ySliderFunction.normalize(widget.yStep, trueMinY, trueMaxY) : 0.01
             );
         }
 

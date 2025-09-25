@@ -46,8 +46,6 @@ public class RawDrag extends StatefulWidget {
         if (setupCallback != null) setupCallback.setup(this);
     }
 
-    //region Setup Methods
-
     public RawDrag min(@Nullable Double min) {
         this.assertMutable();
         this.min = min;
@@ -163,8 +161,6 @@ public class RawDrag extends StatefulWidget {
     public @Nullable Double incrementStep() {
         return this.incrementStep;
     }
-
-    //endregion
 
 
     @Override

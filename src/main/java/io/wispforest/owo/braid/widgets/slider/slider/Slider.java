@@ -19,8 +19,8 @@ public class Slider extends RawSlider {
             null,
             onChanged,
             new Panel(ButtonComponent.DISABLED_TEXTURE),
-            8,
-            new DefaultSliderHandle()
+            new DefaultSliderHandle(),
+            8
         );
         if (setupCallback != null) setupCallback.setup(this);
     }
@@ -33,8 +33,6 @@ public class Slider extends RawSlider {
     ) {
         this(value, setupCallback, active ? onChanged : null);
     }
-
-    //region Setup Methods
 
     @Override
     public Slider min(double min) {
@@ -92,6 +90,4 @@ public class Slider extends RawSlider {
     }
 
     //TODO: do we let the handle/track be changed?
-
-    //endregion
 }

@@ -32,8 +32,6 @@ public class Drag extends RawDrag {
         this(value, setupCallback, active ? onChanged : null);
     }
 
-    //region Setup Methods
-
     @Override
     public Drag min(@Nullable Double min) {
         return (Drag) super.min(min);
@@ -103,6 +101,4 @@ public class Drag extends RawDrag {
     public Drag incrementStep(double incrementStep) {
         return (Drag) super.incrementStep(incrementStep);
     }
-
-    //endregion
 }
