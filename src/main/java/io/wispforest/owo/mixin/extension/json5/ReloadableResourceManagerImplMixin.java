@@ -1,5 +1,6 @@
 package io.wispforest.owo.mixin.extension.json5;
 
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.util.DataExtensionUtil;
 import net.minecraft.resource.*;
 import net.minecraft.util.Unit;
@@ -24,5 +25,9 @@ public abstract class ReloadableResourceManagerImplMixin {
         CallbackInfoReturnable<ResourceReload> cir
     ) {
         DataExtensionUtil.JSON5_ENABLED_PACKS.clear();
+        for (var pack : packs) {
+            var inputSupplier = pack.openRoot(Owo.MOD_ID + "-json5");
+            if (inputSupplier != null) DataExtensionUtil.JSON5_ENABLED_PACKS.add(pack);
+        }
     }
 }
