@@ -78,10 +78,13 @@ public class RawLabel extends LeafInstanceWidget {
             if (this.widget.ellipsize && !wrappedLines.isEmpty() && maxLines > 0 && (wrappedLines.size() > maxLines || textRenderer.getWidth(wrappedLines.getLast()) > maxWidth)) {
                 wrappedLines = wrappedLines.subList(0, maxLines);
 
-                var trimmedLastLine = textRenderer.trimToWidth(wrappedLines.getLast(), maxWidth - 6);
+                var ellipsis = StringVisitable.plain("…");
+                var ellipsisLength = textRenderer.getWidth(ellipsis);
+
+                var trimmedLastLine = textRenderer.trimToWidth(wrappedLines.getLast(), maxWidth - ellipsisLength);
                 wrappedLines.set(
                     wrappedLines.size() - 1,
-                    StringVisitable.concat(trimmedLastLine, StringVisitable.plain("…"))
+                    StringVisitable.concat(trimmedLastLine, ellipsis)
                 );
             }
 

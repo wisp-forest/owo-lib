@@ -471,6 +471,7 @@ public class TestSelector extends StatefulWidget {
                         Text.literal("window " + controller.hashCode()),
                         () -> setState(() -> this.windows.remove(controller)),
                         controller,
+                        Size.of(150, 75),
                         new Stack(
                             new Center(
                                 new AspectRatio(
@@ -485,7 +486,7 @@ public class TestSelector extends StatefulWidget {
                                 Alignment.TOP_LEFT,
                                 new Column(
                                     new Label(Text.literal("a").setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://chyz.xyz/box")))),
-                                    new MessageButton(Text.literal("window button :o"), () -> setState(() -> controller.expanded = !controller.expanded))
+                                    new MessageButton(Text.literal("window button :o"), () -> setState(() -> controller.toggleCollapsed()))
                                 )
                             ),
                             new Align(
@@ -511,7 +512,7 @@ public class TestSelector extends StatefulWidget {
                         Alignment.BOTTOM,
                         new MessageButton(
                             Text.literal("add window"),
-                            () -> setState(() -> this.windows.add(new WindowController(Size.of(150, 75))))
+                            () -> setState(() -> this.windows.add(new WindowController()))
                         )
                     )
                 );
@@ -1055,17 +1056,17 @@ public class TestSelector extends StatefulWidget {
 
             private final ScrollController horizontalController = new ScrollController(this);
             private final ScrollController verticalController = new ScrollController(this);
-            private final WindowController controller = new WindowController(Size.square(200));
+            private final WindowController controller = new WindowController();
 
             private final ScrollController horizontalNestedScrollController = new ScrollController(this);
             private final ScrollController verticalNestedScrollController = new ScrollController(this);
-            private final WindowController nestedScrollController = new WindowController(Size.square(200));
+            private final WindowController nestedScrollController = new WindowController();
             private double nestedSliderValue = 0.5;
 
             @Override
             public void init() {
-                this.controller.x = (MinecraftClient.getInstance().getWindow().getScaledWidth() - 200) / 2d;
-                this.controller.y = (MinecraftClient.getInstance().getWindow().getScaledHeight() - 200) / 2d;
+                this.controller.setX((MinecraftClient.getInstance().getWindow().getScaledWidth() - 200) / 2d);
+                this.controller.setY((MinecraftClient.getInstance().getWindow().getScaledHeight() - 200) / 2d);
             }
 
             @Override
@@ -1090,6 +1091,7 @@ public class TestSelector extends StatefulWidget {
                         Text.literal("wisdom, but colored!"),
                         null,
                         this.controller,
+                        Size.square(200),
                         new Column(
                             new Flexible(
                                 new Row(
@@ -1155,6 +1157,7 @@ public class TestSelector extends StatefulWidget {
                         Text.literal("Scrollception"),
                         null,
                         this.nestedScrollController,
+                        Size.square(200),
                         new Column(
                             Label.literal("Damn bro, you can scroll this?"),
                             new Flexible(
@@ -1506,8 +1509,8 @@ public class TestSelector extends StatefulWidget {
                     ),
                     new Label(
                         Text.literal(coolNumbers.stream()
-                                         .map(String::valueOf)
-                                         .collect(Collectors.joining(", ")))
+                            .map(String::valueOf)
+                            .collect(Collectors.joining(", ")))
                     )
                 );
             }
@@ -1924,7 +1927,8 @@ public class TestSelector extends StatefulWidget {
                                         state.murders = state.murders.add(BigInteger.ONE);
                                     } else {
                                         state.eepies = state.eepies.add(BigInteger.ONE);
-                                        state.bed = Registries.BLOCK.getRandomEntry(BlockTags.BEDS, Random.create()).get().value().getDefaultState();}
+                                        state.bed = Registries.BLOCK.getRandomEntry(BlockTags.BEDS, Random.create()).get().value().getDefaultState();
+                                    }
                                 });
                                 scheduleDelayedCallback(
                                     Duration.ofSeconds(displayEntity.getUuid().equals(UUID.fromString("09de8a6d-86bf-4c15-bb93-ce3384ce4e96")) ? 1 : 3), () -> this.setState(() -> {
@@ -1946,7 +1950,9 @@ public class TestSelector extends StatefulWidget {
                                                     new Matrix4f().translate(0, 0, 200),
                                                     new EntityWidget(1.35, this.displayEntity, widget -> {
                                                         widget.displayMode(displayEntity.isDead() ? EntityWidget.DisplayMode.NONE : EntityWidget.DisplayMode.CURSOR);
-                                                        if (displayEntity.isDead()) widget.transform((matrices) ->matrices.rotateX((float) Math.toRadians(0.01)));
+                                                        if (displayEntity.isDead()) {
+                                                            widget.transform((matrices) -> matrices.rotateX((float) Math.toRadians(0.01)));
+                                                        }
                                                     })
                                                 )
                                             )
@@ -2374,6 +2380,7 @@ public class TestSelector extends StatefulWidget {
                         false,
                         Text.literal("ellipsis moment"),
                         null, null,
+                        Size.square(100),
                         new Label(
                             new LabelStyle(Alignment.TOP_LEFT, null, null, null),
                             true, Label.Overflow.ELLIPSIS,
@@ -2384,6 +2391,7 @@ public class TestSelector extends StatefulWidget {
                         false,
                         Text.literal("clip moment"),
                         null, null,
+                        Size.square(100),
                         new Label(
                             new LabelStyle(Alignment.TOP_LEFT, null, null, null),
                             true, Label.Overflow.CLIP,
@@ -2394,6 +2402,7 @@ public class TestSelector extends StatefulWidget {
                         false,
                         Text.literal("marquee moment"),
                         null, null,
+                        Size.square(100),
                         new Column(
                             Wisdom.ALL_THE_WISDOM.stream()
                                 .sorted(Comparator.comparingInt(value -> MinecraftClient.getInstance().textRenderer.getWidth(value)))
@@ -2410,6 +2419,7 @@ public class TestSelector extends StatefulWidget {
                         false,
                         Text.literal("cursed marquee moment"),
                         null, null,
+                        Size.square(100),
                         new Marquee(
                             widget -> widget.pauseWhileHovered(false),
                             new Bikeshed()
@@ -2419,6 +2429,7 @@ public class TestSelector extends StatefulWidget {
                         false,
                         Text.literal("dvd moment"),
                         null, null,
+                        Size.square(100),
                         new Center(
                             new Marquee(
                                 widget -> widget.axis(LayoutAxis.VERTICAL),
