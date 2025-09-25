@@ -31,7 +31,6 @@
     "extension.json5.LanguageReaderMixin",
     "extension.json5.LifecycledResourceManagerImplMixin",
     "extension.json5.NamespaceResourceManagerMixin",
-    "extension.json5.ReloadableResourceManagerImplMixin",
     "extension.json5.ResourceFinderMixin",
     "extension.recipe.CraftingResultSlotMixin",
     "extension.recipe.ServerRecipeManagerAccessor",

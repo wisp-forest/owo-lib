@@ -25,7 +25,7 @@ public abstract class NamespaceResourceManagerMixin {
         if (id.getPath().endsWith(".json")) original
             .call(id.withPath(id.getPath() + 5))
             .forEach(resource -> {
-                if (DataExtensionUtil.JSON5_ENABLED_PACKS.contains(resource.getPack())) {
+                if (DataExtensionUtil.JSON5_ENABLED_PACKS.contains(resource.getPack().getId())) {
                     base.add(new Resource(resource.getPack(), () -> coerceJson(resource.getInputStream())));
                 }
             });
@@ -48,7 +48,7 @@ public abstract class NamespaceResourceManagerMixin {
         @Local(argsOnly = true) Predicate<Identifier> predicate
     ) {
         return !(predicate instanceof DataExtensionUtil.OptInIdentifierPredicate)
-               || DataExtensionUtil.JSON5_ENABLED_PACKS.contains(instance);
+               || DataExtensionUtil.JSON5_ENABLED_PACKS.contains(instance.getId());
     }
 
     @WrapWithCondition(
@@ -67,6 +67,6 @@ public abstract class NamespaceResourceManagerMixin {
         @Local(argsOnly = true) Predicate<Identifier> predicate
     ) {
         return !(predicate instanceof DataExtensionUtil.OptInIdentifierPredicate)
-               || DataExtensionUtil.JSON5_ENABLED_PACKS.contains(pack.underlying);
+               || pack.underlying != null && DataExtensionUtil.JSON5_ENABLED_PACKS.contains(pack.underlying.getId());
     }
 }
