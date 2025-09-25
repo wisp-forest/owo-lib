@@ -47,8 +47,8 @@ public class Scrollbar extends StatelessWidget {
                                 .axis(this.axis),
                             this.controller::setOffset,
                             this.track,
-                            Math.max(5, scrollbarLength),
-                            this.handle
+                            this.handle,
+                            Math.max(5, scrollbarLength)
                         ) : new Padding(Insets.none());
                     }
                 );

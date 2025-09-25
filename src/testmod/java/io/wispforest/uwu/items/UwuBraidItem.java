@@ -7,10 +7,14 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.tooltip.TooltipData;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Rarity;
 import net.minecraft.world.World;
+
+import java.util.Optional;
 
 public class UwuBraidItem extends Item {
 
@@ -29,4 +33,11 @@ public class UwuBraidItem extends Item {
         }
         return ActionResult.PASS;
     }
+
+    @Override
+    public Optional<TooltipData> getTooltipData(ItemStack stack) {
+        return Optional.of(new Tooltip());
+    }
+
+    public record Tooltip() implements TooltipData {}
 }

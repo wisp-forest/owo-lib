@@ -104,7 +104,7 @@ public class BraidDisplayBlockEntity extends BlockEntity {
                                 new Sized(
                                     16,
                                     16,
-                                    new ItemStackWidget(UwuItems.BRAID.getDefaultStack(), false)
+                                    new ItemStackWidget(UwuItems.BRAID.getDefaultStack())
                                 ),
                                 new Padding(Insets.horizontal(2)),
                                 new Label(

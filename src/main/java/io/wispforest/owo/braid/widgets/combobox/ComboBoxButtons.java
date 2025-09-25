@@ -73,6 +73,7 @@ class ComboBoxButtons<T> extends StatelessWidget {
                                         new ScrollableWithBars(
                                             null,
                                             null,
+                                            null,
                                             4,
                                             (layoutAxis, scrollController) -> new FlatScrollbar(layoutAxis, scrollController, Color.WHITE, Color.WHITE),
                                             new Column(buttons)

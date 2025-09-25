@@ -22,13 +22,15 @@ public class ScrollableWithBars extends StatefulWidget {
 
     public final @Nullable ScrollController horizontalController;
     public final @Nullable ScrollController verticalController;
+    public final @Nullable ScrollAnimationSettings animationSettings;
     public final int scrollbarSize;
     public final BiFunction<LayoutAxis, ScrollController, Scrollbar> scrollbarFactory;
     public final Widget child;
 
-    public ScrollableWithBars(@Nullable ScrollController horizontalController, @Nullable ScrollController verticalController, int scrollbarSize, BiFunction<LayoutAxis, ScrollController, Scrollbar> scrollbarFactory, Widget child) {
+    public ScrollableWithBars(@Nullable ScrollController horizontalController, @Nullable ScrollController verticalController, @Nullable ScrollAnimationSettings animationSettings, int scrollbarSize, BiFunction<LayoutAxis, ScrollController, Scrollbar> scrollbarFactory, Widget child) {
         this.horizontalController = horizontalController;
         this.verticalController = verticalController;
+        this.animationSettings = animationSettings;
         this.scrollbarSize = scrollbarSize;
         this.scrollbarFactory = scrollbarFactory;
         this.child = child;
@@ -46,10 +48,10 @@ public class ScrollableWithBars extends StatefulWidget {
 
         private void updateControllers() {
             var newHorizontalController = this.widget().horizontalController != null ? this.widget().horizontalController : this.horizontalController;
-            this.horizontalController = newHorizontalController != null ? newHorizontalController : new ScrollController();
+            this.horizontalController = newHorizontalController != null ? newHorizontalController : new ScrollController(this);
 
             var newVerticalController = this.widget().verticalController != null ? this.widget().verticalController : this.verticalController;
-            this.verticalController = newVerticalController != null ? newVerticalController : new ScrollController();
+            this.verticalController = newVerticalController != null ? newVerticalController : new ScrollController(this);
         }
 
         @Override
@@ -88,6 +90,7 @@ public class ScrollableWithBars extends StatefulWidget {
                                         true,
                                         this.horizontalController,
                                         this.verticalController,
+                                        this.widget().animationSettings,
                                         this.widget().child
                                     )
                                 )

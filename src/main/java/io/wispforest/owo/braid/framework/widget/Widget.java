@@ -40,6 +40,14 @@ public abstract class Widget {
     public static boolean canUpdate(Widget oldWidget, Widget newWidget) {
         return oldWidget.getClass() == newWidget.getClass() && Objects.equals(oldWidget.key, newWidget.key);
     }
+
+    public static <T extends Widget> WidgetSetupCallback<T> noSetup() {
+        //noinspection unchecked
+        return NO_SETUP;
+    }
+
+    @SuppressWarnings("rawtypes")
+    private static final WidgetSetupCallback NO_SETUP = widget -> {};
 }
 
 class ImmutableWidgetError extends Error {

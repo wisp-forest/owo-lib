@@ -6,6 +6,8 @@ import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.Align;
+import io.wispforest.owo.braid.widgets.basic.Builder;
+import io.wispforest.owo.braid.widgets.focus.Focusable;
 import io.wispforest.owo.ui.core.ParentComponent;
 
 import java.util.function.Supplier;
@@ -24,6 +26,7 @@ public class OwoUIWidget extends StatefulWidget {
 
     public static class State extends WidgetState<OwoUIWidget> {
         private ParentComponent component;
+        private BuildContext owoUiContext;
 
         @Override
         public void init() {
@@ -34,7 +37,16 @@ public class OwoUIWidget extends StatefulWidget {
         public Widget build(BuildContext context) {
             return new Align(
                 Alignment.TOP_LEFT,
-                new OwoUIWidgetWrapper(component)
+                new Focusable(
+                    widget -> widget
+                        .focusLostCallback(() -> ((OwoUIWidgetWrapper.Instance) this.owoUiContext.instance()).onFocusLost())
+                        .keyDownCallback((keyCode, modifiers) -> ((OwoUIWidgetWrapper.Instance) this.owoUiContext.instance()).onKeyDown(keyCode, modifiers))
+                        .charCallback((charCode, modifiers) -> ((OwoUIWidgetWrapper.Instance) this.owoUiContext.instance()).onChar(charCode, modifiers)),
+                    new Builder(owoUiContext -> {
+                        this.owoUiContext = owoUiContext;
+                        return new OwoUIWidgetWrapper(component);
+                    })
+                )
             );
         }
     }

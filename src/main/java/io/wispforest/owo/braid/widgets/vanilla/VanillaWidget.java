@@ -7,8 +7,10 @@ import io.wispforest.owo.braid.framework.widget.Key;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.Align;
+import io.wispforest.owo.braid.widgets.basic.Builder;
 import io.wispforest.owo.braid.widgets.basic.Center;
 import io.wispforest.owo.braid.widgets.basic.Sized;
+import io.wispforest.owo.braid.widgets.focus.Focusable;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.widget.ClickableWidget;
@@ -36,6 +38,11 @@ public class VanillaWidget<T extends Drawable & Element> extends StatefulWidget 
     public static class State<T extends Drawable & Element> extends WidgetState<VanillaWidget<T>> {
 
         private T widget;
+        private BuildContext vanillaContext;
+
+        private VanillaWidgetWrapper.Instance instance() {
+            return (VanillaWidgetWrapper.Instance) this.vanillaContext.instance();
+        }
 
         @Override
         public void init() {
@@ -45,9 +52,20 @@ public class VanillaWidget<T extends Drawable & Element> extends StatefulWidget 
         @Override
         public Widget build(BuildContext context) {
             return new Center(
-                new Sized(
-                    this.widget().size,
-                    new VanillaWidgetWrapper<>(widget)
+                new Focusable(
+                    focusable -> focusable
+                        .keyDownCallback((keyCode, modifiers) -> this.instance().onKeyDown(keyCode, modifiers))
+                        .keyUpCallback((keyCode, modifiers) -> this.instance().onKeyUp(keyCode, modifiers))
+                        .charCallback((charCode, modifiers) -> this.instance().onChar(charCode, modifiers))
+                        .focusGainedCallback(() -> this.instance().onFocusGained())
+                        .focusLostCallback(() -> this.instance().onFocusLost()),
+                    new Sized(
+                        this.widget().size,
+                        new Builder(vanillaContext -> {
+                            this.vanillaContext = vanillaContext;
+                            return new VanillaWidgetWrapper<>(widget);
+                        })
+                    )
                 )
             );
         }

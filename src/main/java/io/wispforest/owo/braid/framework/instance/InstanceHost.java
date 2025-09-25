@@ -2,6 +2,7 @@ package io.wispforest.owo.braid.framework.instance;
 
 import io.wispforest.owo.braid.widgets.basic.LayoutBuilder;
 import net.minecraft.client.MinecraftClient;
+import org.joml.Vector2dc;
 
 public interface InstanceHost {
     MinecraftClient client();
@@ -22,11 +23,7 @@ public interface InstanceHost {
     /// This is used to implement the [LayoutBuilder] mechanism
     void notifySubtreeRebuild();
 
-    /// Request that focus be moved to `focusTarget`. Given that
-    /// the host allows the operation, it will generally be
-    /// executed immediately and the listener is ready to receive
-    /// input events from the next frame onwards
-    void moveFocusTo(KeyboardListener focusTarget);
-
     void schedulePostLayoutCallback(Runnable callback);
+
+    Vector2dc cursorPosition();
 }

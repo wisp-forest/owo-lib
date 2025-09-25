@@ -15,6 +15,9 @@ import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.Tooltip;
 import io.wispforest.owo.braid.widgets.basic.VisitorWidget;
+import io.wispforest.owo.braid.widgets.focus.FocusClickArea;
+import io.wispforest.owo.braid.widgets.focus.RootFocusScope;
+import io.wispforest.owo.braid.widgets.inspector.BraidEventStream;
 import io.wispforest.owo.braid.widgets.inspector.BraidInspector;
 import io.wispforest.owo.braid.widgets.inspector.InstancePicker;
 import io.wispforest.owo.util.EventSource;
@@ -25,6 +28,7 @@ import net.minecraft.text.Style;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
+import org.joml.Vector2dc;
 import org.joml.Vector4f;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
@@ -70,7 +74,9 @@ public class AppState implements InstanceHost, ProxyHost {
     private Vector2d scrollPos = new Vector2d();
     private Instant lastScrollTime = Instant.EPOCH;
 
-    private List<KeyboardListener> focused = new ArrayList<>();
+    private final BraidEventStream<RootFocusScope.KeyDownEvent> keyDownStream = new BraidEventStream<>();
+    private final BraidEventStream<RootFocusScope.KeyUpEvent> keyUpStream = new BraidEventStream<>();
+    private final BraidEventStream<RootFocusScope.CharEvent> charStream = new BraidEventStream<>();
 
     private final BraidHotReloadCallback.Listener reloadListener;
     private final EventSource<?>.Subscription resizeSubscription;
@@ -100,10 +106,15 @@ public class AppState implements InstanceHost, ProxyHost {
                 new InstancePicker(
                     this.inspector.onPick(),
                     this.inspector::revealInstance,
-                    new UserRoot(
-                        widgetProxy -> inspector.rootProxy = widgetProxy,
-                        widgetInstance -> inspector.rootInstance = widgetInstance,
-                        root
+                    new RootFocusScope(
+                        this.keyDownStream.source(),
+                        this.keyUpStream.source(),
+                        this.charStream.source(),
+                        new UserRoot(
+                            widgetProxy -> inspector.rootProxy = widgetProxy,
+                            widgetInstance -> inspector.rootInstance = widgetInstance,
+                            root
+                        )
                     )
                 )
             ),
@@ -246,14 +257,12 @@ public class AppState implements InstanceHost, ProxyHost {
                     this.scrollHit = null;
                     var state = this.hitTest();
 
-                    this.updateFocus(
-                        Streams.stream(state.occludedTrace())
-                            .map(Hit::instance)
-                            .filter(KeyboardListener.class::isInstance)
-                            .map(KeyboardListener.class::cast)
-                            .findFirst()
-                            .orElse(null)
-                    );
+                    state.firstWhere(hit -> {
+                        if (!(hit.instance() instanceof FocusClickArea.Instance instance)) return false;
+
+                        instance.widget().clickCallback.run();
+                        return true;
+                    });
 
                     var clicked = state.firstWhere(
                         (hit) -> hit.instance() instanceof MouseListener && ((MouseListener) hit.instance()).onMouseDown(hit.x(), hit.y(), button, modifiers)
@@ -364,25 +373,13 @@ public class AppState implements InstanceHost, ProxyHost {
                         break;
                     }
 
-                    for (var listener : this.focused) {
-                        if (listener.onKeyDown(keyCode, modifiers)) {
-                            break;
-                        }
-                    }
+                    this.keyDownStream.sink().onEvent(new RootFocusScope.KeyDownEvent(keyCode, modifiers));
                 }
                 case KeyReleaseEvent(int keycode, int scancode, KeyModifiers modifiers) -> {
-                    for (var listener : this.focused) {
-                        if (listener.onKeyUp(keycode, modifiers)) {
-                            break;
-                        }
-                    }
+                    this.keyUpStream.sink().onEvent(new RootFocusScope.KeyUpEvent(keycode, modifiers));
                 }
                 case CharInputEvent(char codepoint, KeyModifiers modifiers) -> {
-                    for (var listener : this.focused) {
-                        if (listener.onChar(codepoint, modifiers)) {
-                            break;
-                        }
-                    }
+                    this.charStream.sink().onEvent(new RootFocusScope.CharEvent(codepoint, modifiers));
                 }
                 case FilesDroppedEvent filesDroppedEvent -> {}
                 case CloseEvent ignored -> {
@@ -420,28 +417,6 @@ public class AppState implements InstanceHost, ProxyHost {
         this.rootInstance().hitTest(x, y, state);
 
         return state;
-    }
-
-    // ---
-
-    private void updateFocus(@Nullable KeyboardListener focusTarget) {
-        var nowFocused = focusTarget != null
-            ? Stream.concat(Stream.of(focusTarget), ((WidgetInstance<?>) focusTarget).ancestors().stream().filter(KeyboardListener.class::isInstance).map(KeyboardListener.class::cast)).collect(Collectors.toList())
-            : List.<KeyboardListener>of();
-
-        for (var listener : nowFocused) {
-            if (this.focused.contains(listener)) {
-                this.focused.remove(listener);
-            } else {
-                listener.onFocusGained();
-            }
-        }
-
-        for (var noLongerFocused : this.focused) {
-            noLongerFocused.onFocusLost();
-        }
-
-        this.focused = nowFocused;
     }
 
     // ---
@@ -506,11 +481,6 @@ public class AppState implements InstanceHost, ProxyHost {
     }
 
     @Override
-    public void moveFocusTo(KeyboardListener focusTarget) {
-        this.updateFocus(focusTarget);
-    }
-
-    @Override
     public void scheduleAnimationCallback(AnimationCallback callback) {
         this.animationCallbacks.offer(callback);
     }
@@ -533,6 +503,11 @@ public class AppState implements InstanceHost, ProxyHost {
     @Override
     public void schedulePostLayoutCallback(Runnable callback) {
         this.postLayoutCallbacks.offer(callback);
+    }
+
+    @Override
+    public Vector2dc cursorPosition() {
+        return this.cursorPosition;
     }
 
     @Override

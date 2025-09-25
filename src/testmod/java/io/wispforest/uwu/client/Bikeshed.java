@@ -1,5 +1,6 @@
 package io.wispforest.uwu.client;
 
+import io.wispforest.owo.braid.core.Color;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
@@ -15,7 +16,7 @@ public class Bikeshed extends StatelessWidget {
             256,
             new TextureWidget(
                 Identifier.of("uwu", "textures/gui/bikeshed.png"),
-                0, 0, 512, 512, 512, 512, true
+                TextureWidget.Wrap.STRETCH, Color.WHITE
             )
         );
     }
