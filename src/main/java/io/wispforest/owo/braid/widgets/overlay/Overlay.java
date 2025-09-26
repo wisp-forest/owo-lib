@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
+import io.wispforest.owo.braid.framework.widget.Key;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.EmptyWidget;
@@ -101,7 +102,7 @@ public class Overlay extends StatefulWidget {
                     new StackBase(
                         new RawOverlay(
                             this.entries.stream()
-                                .map(entry -> new RawOverlayElement(entry.x, entry.y, entry.widget))
+                                .map(entry -> (RawOverlayElement) new RawOverlayElement(entry.x, entry.y, entry.widget).key(Key.of(entry.uuid.toString())))
                                 .toList()
                         )
                     )
