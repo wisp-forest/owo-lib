@@ -44,7 +44,7 @@ public class ScreenInternals {
         PayloadTypeRegistry.playS2C().register(SyncPropertiesPacket.ID, CodecUtils.toPacketCodec(SyncPropertiesPacket.ENDEC));
 
         PayloadTypeRegistry.playS2C().register(HandshakeRequest.ID, CodecUtils.toPacketCodec(HandshakeRequest.ENDEC));
-        PayloadTypeRegistry.playS2C().register(HandshakeResponse.ID, CodecUtils.toPacketCodec(HandshakeResponse.ENDEC));
+        PayloadTypeRegistry.playC2S().register(HandshakeResponse.ID, CodecUtils.toPacketCodec(HandshakeResponse.ENDEC));
 
         ServerPlayNetworking.registerGlobalReceiver(LocalPacket.ID, (payload, context) -> {
             var screenHandler = context.player().currentScreenHandler;
