@@ -177,7 +177,7 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
     public void owo$verifyData(ServerPlayerEntity player, Set<String> clientMessageNames) {
         var errorMessage = new StringBuilder();
 
-        if (!OwoHandshake.checkForMismatchStrIds("screen_handler_messages", clientMessageNames, owo$gatherMessageNames(), errorMessage)) return;
+        if (OwoHandshake.checkForMismatchStrIds("screen_handler_messages", clientMessageNames, owo$gatherMessageNames(), errorMessage)) return;
 
         player.closeHandledScreen();
 

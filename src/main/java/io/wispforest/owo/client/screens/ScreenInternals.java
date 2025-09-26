@@ -61,12 +61,12 @@ public class ScreenInternals {
             var screenHandler = context.player().currentScreenHandler;
 
             if (screenHandler == null) {
-                Owo.LOGGER.error("Received handshake response for null ScreenHandler");
+                Owo.LOGGER.error("[ScreenHandlerHandshake] Received handshake response for null ScreenHandler");
                 return;
             }
 
-            if (payload.type().equals(screenHandler.getType())) {
-                Owo.LOGGER.error("Received handshake response packet for different ScreenHandler type: [Expected Type: {}, Current Type: {}]", payload.type(), screenHandler.getType());
+            if (!payload.type().equals(screenHandler.getType())) {
+                Owo.LOGGER.error("[ScreenHandlerHandshake] Received handshake response packet for different ScreenHandler type: [Expected Type: {}, Current Type: {}]", payload.type(), screenHandler.getType());
                 return;
             }
 
@@ -107,7 +107,13 @@ public class ScreenInternals {
             return;
         }
 
-        ServerPlayNetworking.send(player, new HandshakeRequest(handler.getType()));
+        try {
+            var type = handler.getType();
+
+            ServerPlayNetworking.send(player, new HandshakeRequest(type));
+        } catch (Exception e) {
+            Owo.LOGGER.error("[ScreenHandlerHandshake] Unable to Handshake check handler as getting the type encountered an error: ", e);
+        }
     }
 
     private record HandshakeRequest(ScreenHandlerType<?> type) implements CustomPayload {
@@ -171,12 +177,12 @@ public class ScreenInternals {
                 var screenHandler = context.player().currentScreenHandler;
 
                 if (screenHandler == null) {
-                    Owo.LOGGER.error("Received handshake request packet for null ScreenHandler");
+                    Owo.LOGGER.error("[ScreenHandlerHandshake] Received handshake request packet for null ScreenHandler");
                     return;
                 }
 
-                if (payload.type().equals(screenHandler.getType())) {
-                    Owo.LOGGER.error("Received handshake request packet for different ScreenHandler type: [Expected Type: {}, Current Type: {}]", payload.type(), screenHandler.getType());
+                if (!payload.type().equals(screenHandler.getType())) {
+                    Owo.LOGGER.error("[ScreenHandlerHandshake] Received handshake request packet for different ScreenHandler type: [Expected Type: {}, Current Type: {}]", payload.type(), screenHandler.getType());
                     return;
                 }
 
