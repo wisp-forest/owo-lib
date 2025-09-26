@@ -16,6 +16,7 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientConfigurationConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientConfigurationNetworking;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerConfigurationConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerConfigurationNetworking;
@@ -29,7 +30,6 @@ import net.minecraft.server.network.ServerConfigurationNetworkHandler;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.HashMap;
@@ -37,6 +37,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.ToIntFunction;
+import java.util.stream.Collectors;
 
 @ApiStatus.Internal
 public final class OwoHandshake {
@@ -47,7 +48,7 @@ public final class OwoHandshake {
     public static final Identifier CHANNEL_ID = Identifier.of("owo", "handshake");
     public static final Identifier OFF_CHANNEL_ID = Identifier.of("owo", "handshake_off");
 
-    private static final boolean ENABLED = System.getProperty("owo.handshake.enabled") != null ? Boolean.getBoolean("owo.handshake.enabled") : Owo.DEBUG;
+    public static final boolean ENABLED = System.getProperty("owo.handshake.enabled") != null ? Boolean.getBoolean("owo.handshake.enabled") : Owo.DEBUG;
     private static boolean HANDSHAKE_REQUIRED = false;
     private static boolean QUERY_RECEIVED = false;
 
@@ -82,6 +83,9 @@ public final class OwoHandshake {
             if (!ENABLED) {
                 PayloadTypeRegistry.configurationS2C().register(HandshakeOff.ID, PacketCodec.unit(new HandshakeOff()));
                 ClientConfigurationNetworking.registerGlobalReceiver(HandshakeOff.ID, (payload, context) -> {});
+
+                PayloadTypeRegistry.playC2S().register(HandshakeOff.ID, PacketCodec.unit(new HandshakeOff()));
+                ClientPlayNetworking.registerGlobalReceiver(HandshakeOff.ID, (payload, context) -> {});
             }
 
             ClientConfigurationNetworking.registerGlobalReceiver(HandshakeRequest.ID, OwoHandshake::syncClient);
@@ -190,23 +194,7 @@ public final class OwoHandshake {
     }
 
     private static <T> boolean verifyReceivedHashes(String serviceNamePlural, Map<Identifier, Integer> clientMap, Map<Identifier, T> serverMap, ToIntFunction<T> hashFunction, StringBuilder disconnectMessage) {
-        boolean isAllGood = true;
-
-        if (!clientMap.keySet().equals(serverMap.keySet())) {
-            isAllGood = false;
-
-            var leftovers = findCollisions(clientMap.keySet(), serverMap.keySet());
-
-            if (!leftovers.getLeft().isEmpty()) {
-                disconnectMessage.append("server is missing ").append(serviceNamePlural).append(":\n");
-                leftovers.getLeft().forEach(identifier -> disconnectMessage.append("§7").append(identifier).append("§r\n"));
-            }
-
-            if (!leftovers.getRight().isEmpty()) {
-                disconnectMessage.append("client is missing ").append(serviceNamePlural).append(":\n");
-                leftovers.getRight().forEach(identifier -> disconnectMessage.append("§7").append(identifier).append("§r\n"));
-            }
-        }
+        boolean isAllGood = checkForMismatchIds(serviceNamePlural, clientMap.keySet(), serverMap.keySet(), disconnectMessage);
 
         boolean hasMismatchedHashes = false;
         for (var entry : clientMap.entrySet()) {
@@ -240,9 +228,38 @@ public final class OwoHandshake {
         return hashes;
     }
 
-    private static Pair<Set<Identifier>, Set<Identifier>> findCollisions(Set<Identifier> first, Set<Identifier> second) {
-        var firstLeftovers = new HashSet<Identifier>();
-        var secondLeftovers = new HashSet<Identifier>();
+    private record PacketMismatches(Set<String> missingServerPackets, Set<String> missingClientPackets) {}
+
+    private static boolean checkForMismatchIds(String serviceNamePlural, Set<Identifier> clientIds, Set<Identifier> serverIds, StringBuilder disconnectMessage) {
+        return checkForMismatchStrIds(serviceNamePlural,
+            clientIds.stream().map(Identifier::toString).collect(Collectors.toSet()),
+            serverIds.stream().map(Identifier::toString).collect(Collectors.toSet()),
+            disconnectMessage);
+    }
+
+    public static boolean checkForMismatchStrIds(String serviceNamePlural, Set<String> clientIds, Set<String> serverIds, StringBuilder disconnectMessage) {
+        if (!clientIds.equals(serverIds)) {
+            var mismatches = findCollisions(clientIds, serverIds);
+
+            if (!mismatches.missingServerPackets().isEmpty()) {
+                disconnectMessage.append("server is missing ").append(serviceNamePlural).append(":\n");
+                mismatches.missingServerPackets().forEach(identifier -> disconnectMessage.append("§7").append(identifier).append("§r\n"));
+            }
+
+            if (!mismatches.missingClientPackets().isEmpty()) {
+                disconnectMessage.append("client is missing ").append(serviceNamePlural).append(":\n");
+                mismatches.missingClientPackets().forEach(identifier -> disconnectMessage.append("§7").append(identifier).append("§r\n"));
+            }
+
+            return false;
+        }
+
+        return true;
+    }
+
+    private static PacketMismatches findCollisions(Set<String> first, Set<String> second) {
+        var firstLeftovers = new HashSet<String>();
+        var secondLeftovers = new HashSet<String>();
 
         first.forEach(identifier -> {
             if (!second.contains(identifier)) firstLeftovers.add(identifier);
@@ -252,7 +269,7 @@ public final class OwoHandshake {
             if (!first.contains(identifier)) secondLeftovers.add(identifier);
         });
 
-        return new Pair<>(firstLeftovers, secondLeftovers);
+        return new PacketMismatches(firstLeftovers, secondLeftovers);
     }
 
     private static int hashChannel(OwoNetChannel channel) {
