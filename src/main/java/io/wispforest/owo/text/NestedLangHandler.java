@@ -1,6 +1,7 @@
 package io.wispforest.owo.text;
 
 import com.google.gson.JsonElement;
+import io.wispforest.owo.Owo;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -20,9 +21,9 @@ public class NestedLangHandler {
     }
 
     private static Set<Map.Entry<String, JsonElement>> deNest(
-        @NotNull String prefix,
-        @NotNull Set<Map.Entry<String, JsonElement>> entries,
-        @NotNull String suffix
+        String prefix,
+        Set<Map.Entry<String, JsonElement>> entries,
+        String suffix
     ) {
         var returned = new HashSet<Map.Entry<String, JsonElement>>();
         for (var entry : entries) {
@@ -33,34 +34,28 @@ public class NestedLangHandler {
             var listMatcher = NESTED_LIST_PATTERN.matcher(key);
             if (value.isJsonObject() && objectMatcher.matches()) {
                 returned.addAll(deNest(
-                    finalizeKey(prefix, groupOrNothing(objectMatcher, 1), ""),
+                    prefix + objectMatcher.group(1),
                     value.getAsJsonObject().entrySet(),
-                    finalizeKey("", groupOrNothing(objectMatcher, 2), suffix)
+                    objectMatcher.group(2) + suffix
                 ));
             } else if (value.isJsonArray() && listMatcher.matches()) {
-                var start = MathHelper.parseInt(groupOrNothing(listMatcher, 2), 1);
+                var start = MathHelper.parseInt(listMatcher.group(2), 1);
                 var array = value.getAsJsonArray();
                 for (int i = 0; i < array.size(); i++) {
                     returned.addAll(deNest(
-                        finalizeKey(prefix, groupOrNothing(listMatcher, 1), ""),
+                        prefix + listMatcher.group(1),
                         Set.of(Map.entry(String.valueOf((start + i)), array.get(i))),
-                        finalizeKey("", groupOrNothing(listMatcher, 3), suffix)
+                        listMatcher.group(3) + suffix
                     ));
                 }
             } else {
-                returned.add(Map.entry(finalizeKey(prefix, key, suffix), value));
+                returned.add(Map.entry(
+                    key.isEmpty()
+                        ? prefix.replaceAll(EMPTY_STRIP_PATTERN.pattern(), "") + suffix
+                        : prefix + key + suffix, value
+                ));
             }
         }
         return returned;
-    }
-
-    private static String groupOrNothing(Matcher matcher, int group) {
-        return matcher.group(group) == null ? "" : matcher.group(group);
-    }
-
-    private static String finalizeKey(String prefix, String key, String suffix) {
-        return key.isEmpty()
-            ? prefix.replaceAll(EMPTY_STRIP_PATTERN.pattern(), "") + suffix
-            : prefix + key + suffix;
     }
 }

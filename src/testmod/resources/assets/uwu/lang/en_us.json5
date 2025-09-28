@@ -198,7 +198,7 @@
       middleTestKey: "nestedLangTests.middleTest.middleTestKey.Suffix"
     },
     "{}.suffixTest": {
-      suffixTestKey: "nestedLangTests.suffixTest.suffixTestKey"
+      suffixTestKey: "nestedLangTests.suffixTestKey.suffixTest"
     },
 
     "listPrefixTest.{}": [
