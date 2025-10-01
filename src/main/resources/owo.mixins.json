@@ -14,6 +14,8 @@
     "NbtCompoundMixin",
     "PacketByteBufMixin",
     "RegistryOpsAccessor",
+    "serialization.ReadViewMixin",
+    "serialization.WriteViewMixin",
     "ScreenHandlerInvoker",
     "ScreenHandlerMixin",
     "ServerCommonNetworkHandlerAccessor",
