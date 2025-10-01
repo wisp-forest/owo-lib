@@ -3,6 +3,7 @@ package io.wispforest.owo.moddata;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import io.wispforest.owo.Owo;
+import io.wispforest.owo.util.DataExtensionUtil;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Identifier;
 import org.apache.commons.io.FilenameUtils;
@@ -63,9 +64,9 @@ public final class ModDataLoader {
         try {
             if (!Files.exists(targetPath)) return;
             Files.walk(targetPath).forEach(path -> {
-                if (!path.toString().endsWith(".json")) return;
+                if (!path.endsWith(".json") && !path.endsWith(".json5")) return;
                 try {
-                    final InputStreamReader tabData = new InputStreamReader(Files.newInputStream(path));
+                    final InputStreamReader tabData = new InputStreamReader(DataExtensionUtil.coerceJson(Files.newInputStream(path)) );
 
                     foundFiles.put(Identifier.of(namespace, FilenameUtils.removeExtension(targetPath.relativize(path).toString())), GSON.fromJson(tabData, JsonObject.class));
                 } catch (IOException e) {

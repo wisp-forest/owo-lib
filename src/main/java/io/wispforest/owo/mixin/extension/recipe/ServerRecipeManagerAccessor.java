@@ -1,4 +1,4 @@
-package io.wispforest.owo.mixin.recipe_remainders;
+package io.wispforest.owo.mixin.extension.recipe;
 
 import net.minecraft.recipe.ServerRecipeManager;
 import net.minecraft.resource.ResourceFinder;

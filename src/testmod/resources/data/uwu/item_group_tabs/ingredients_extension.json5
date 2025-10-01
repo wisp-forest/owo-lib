@@ -1,0 +1,11 @@
+{
+  target_group: "minecraft:ingredients",
+  extend: true,
+  tabs: [
+    {
+      tag: "minecraft:diamond_ores",
+      name: "extra_ores",
+      icon: "minecraft:deepslate"
+    }
+  ]
+}
