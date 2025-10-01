@@ -256,7 +256,6 @@ public abstract class ClickableWidgetMixin implements ComponentStub, net.minecra
 
         UIParsing.apply(children, "margins", Insets::parse, this::margins);
         UIParsing.apply(children, "positioning", Positioning::parse, this::positioning);
-        UIParsing.apply(children, "z-index", UIParsing::parseSignedInt, this::zIndex);
         UIParsing.apply(children, "cursor-style", UIParsing.parseEnum(CursorStyle.class), this::cursorStyle);
         UIParsing.apply(children, "tooltip-text", UIParsing::parseText, this::tooltip);
 
@@ -289,16 +288,6 @@ public abstract class ClickableWidgetMixin implements ComponentStub, net.minecra
     @Override
     public List<TooltipComponent> tooltip() {
         return this.owo$getWrapper().tooltip();
-    }
-
-    @Override
-    public Component zIndex(int zIndex) {
-        return this.owo$getWrapper().zIndex(zIndex);
-    }
-
-    @Override
-    public int zIndex() {
-        return this.owo$getWrapper().zIndex();
     }
 
     @Override

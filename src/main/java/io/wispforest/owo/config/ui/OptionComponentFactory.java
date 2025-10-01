@@ -108,7 +108,7 @@ public interface OptionComponentFactory<T> {
                                 flowLayout.parent().remove();
                             });
                         })
-                ).zIndex(100));
+                ));
 
                 return true;
             });

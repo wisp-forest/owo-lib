@@ -427,7 +427,6 @@
             <xs:element type="owo-ui-positioning" name="positioning" minOccurs="0"/>
             <xs:element type="owo-ui-sizing" name="sizing" minOccurs="0"/>
             <xs:element type="owo-ui-text" name="tooltip-text" minOccurs="0"/>
-            <xs:element type="xs:integer" name="z-index" minOccurs="0"/>
             <xs:element name="cursor-style" minOccurs="0">
                 <xs:simpleType>
                     <xs:restriction base="xs:string">

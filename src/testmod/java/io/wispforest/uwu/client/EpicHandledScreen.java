@@ -68,7 +68,7 @@ public class EpicHandledScreen extends BaseOwoHandledScreen<FlowLayout, EpicScre
                                             } catch (Exception e) {}
                                         }).tooltip(Text.literal("Disable"))).verticalAlignment(VerticalAlignment.CENTER).horizontalAlignment(HorizontalAlignment.CENTER))
                                 .allowOverflow(true)
-                ).surface(Surface.DARK_PANEL).padding(Insets.of(5)).allowOverflow(true).zIndex(500).positioning(Positioning.absolute(100, 100))
+                ).surface(Surface.DARK_PANEL).padding(Insets.of(5)).allowOverflow(true).positioning(Positioning.absolute(100, 100))
         ).child(
                 Containers.verticalScroll(Sizing.content(), Sizing.fill(50), Containers.verticalFlow(Sizing.content(), Sizing.content())
                         .child(this.slotAsComponent(0).tooltip(Text.of("bruh")))

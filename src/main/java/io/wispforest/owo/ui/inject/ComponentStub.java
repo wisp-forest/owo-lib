@@ -107,16 +107,6 @@ public interface ComponentStub extends Component {
     }
 
     @Override
-    default Component zIndex(int zIndex) {
-        throw new IllegalStateException("Interface stub method called");
-    }
-
-    @Override
-    default int zIndex() {
-        throw new IllegalStateException("Interface stub method called");
-    }
-
-    @Override
     default void inflate(Size space) {
         throw new IllegalStateException("Interface stub method called");
     }
