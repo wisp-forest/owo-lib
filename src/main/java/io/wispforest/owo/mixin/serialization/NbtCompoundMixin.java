@@ -1,4 +1,4 @@
-package io.wispforest.owo.mixin;
+package io.wispforest.owo.mixin.serialization;
 
 import io.wispforest.endec.SerializationAttributes;
 import io.wispforest.endec.SerializationContext;
