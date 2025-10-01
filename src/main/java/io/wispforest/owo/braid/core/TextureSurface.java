@@ -80,7 +80,7 @@ public class TextureSurface implements Surface {
         var viewportWidth = GlStateManager.Viewport.getWidth();
         var viewportHeight = GlStateManager.Viewport.getHeight();
 
-        var framebuffer = new SimpleFramebuffer(width, height, true);
+        var framebuffer = new SimpleFramebuffer(width, height, useDepth);
 
         GlStateManager._glBindFramebuffer(GL32.GL_FRAMEBUFFER, previousFramebuffer);
         GlStateManager._viewport(viewportX, viewportY, viewportWidth, viewportHeight);

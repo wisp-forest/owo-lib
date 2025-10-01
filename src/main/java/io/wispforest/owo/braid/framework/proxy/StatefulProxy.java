@@ -16,6 +16,10 @@ public class StatefulProxy extends ComposedProxy {
         this.state.owner = this;
     }
 
+    public WidgetState<?> state() {
+        return this.state;
+    }
+
     @Override
     public void mount(WidgetProxy parent, @Nullable Object slot) {
         super.mount(parent, slot);

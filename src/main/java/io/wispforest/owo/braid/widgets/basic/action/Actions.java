@@ -9,8 +9,8 @@ import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
-import io.wispforest.owo.braid.widgets.basic.KeyboardInput;
 import io.wispforest.owo.braid.widgets.basic.MouseArea;
+import io.wispforest.owo.braid.widgets.focus.Focusable;
 import net.minecraft.util.Pair;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,8 +23,8 @@ public class Actions extends StatefulWidget {
     private @Nullable MouseArea.ExitCallback exitCallback;
     private @Nullable MouseArea.CursorStyleSupplier cursorStyleSupplier;
 
-    private @Nullable KeyboardInput.FocusGainedCallback focusGainedCallback;
-    private @Nullable KeyboardInput.FocusLostCallback focusLostCallback;
+    private @Nullable Focusable.FocusGainedCallback focusGainedCallback;
+    private @Nullable Focusable.FocusLostCallback focusLostCallback;
 
     private final Map<List<ActionTrigger>, Runnable> actions = new LinkedHashMap<>();
 
@@ -86,23 +86,23 @@ public class Actions extends StatefulWidget {
         return this.cursorStyleSupplier;
     }
 
-    public Actions focusGainedCallback(@Nullable KeyboardInput.FocusGainedCallback focusGainedCallback) {
+    public Actions focusGainedCallback(@Nullable Focusable.FocusGainedCallback focusGainedCallback) {
         this.assertMutable();
         this.focusGainedCallback = focusGainedCallback;
         return this;
     }
 
-    public @Nullable KeyboardInput.FocusGainedCallback focusGainedCallback() {
+    public @Nullable Focusable.FocusGainedCallback focusGainedCallback() {
         return this.focusGainedCallback;
     }
 
-    public Actions focusLostCallback(@Nullable KeyboardInput.FocusLostCallback focusLostCallback) {
+    public Actions focusLostCallback(@Nullable Focusable.FocusLostCallback focusLostCallback) {
         this.assertMutable();
         this.focusLostCallback = focusLostCallback;
         return this;
     }
 
-    public @Nullable KeyboardInput.FocusLostCallback focusLostCallback() {
+    public @Nullable Focusable.FocusLostCallback focusLostCallback() {
         return this.focusLostCallback;
     }
 
@@ -152,7 +152,7 @@ public class Actions extends StatefulWidget {
                     .clickCallback((x, y, button, modifiers) -> stepActions(trigger -> trigger.isTriggeredByMouseButton(button, modifiers)
                         ? ActionTriggerResult.ACTIVATED
                         : ActionTriggerResult.NOT_ACTIVATED)),
-                new KeyboardInput(
+                new Focusable(
                     widget -> widget
                         .focusGainedCallback(this.widget().focusGainedCallback())
                         .focusLostCallback(this.widget().focusLostCallback())

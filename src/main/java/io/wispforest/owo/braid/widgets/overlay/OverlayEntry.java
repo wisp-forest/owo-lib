@@ -3,11 +3,14 @@ package io.wispforest.owo.braid.widgets.overlay;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.UUID;
+
 public class OverlayEntry {
 
     private final Overlay.State owner;
     final Widget widget;
     final @Nullable Runnable onRemove;
+    final UUID uuid = UUID.randomUUID();
 
     public boolean dismissOnOverlayClick;
     public boolean occludeHitTest;

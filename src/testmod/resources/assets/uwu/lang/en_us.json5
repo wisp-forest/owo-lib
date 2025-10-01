@@ -185,7 +185,8 @@
 
   "uwu.{}": {
     a: {index: 0, color: "#ae0000"},
-    homicide: "homicide"
+    homicide: "homicide",
+    eepy: "honk mimimimimimimimimi"
   },
 
   //Nested lang tests

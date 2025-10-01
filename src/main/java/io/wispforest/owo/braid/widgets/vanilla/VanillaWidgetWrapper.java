@@ -4,7 +4,6 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import io.wispforest.owo.braid.core.BraidDrawContext;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.KeyModifiers;
-import io.wispforest.owo.braid.framework.instance.KeyboardListener;
 import io.wispforest.owo.braid.framework.instance.LeafWidgetInstance;
 import io.wispforest.owo.braid.framework.instance.MouseListener;
 import io.wispforest.owo.braid.framework.widget.LeafInstanceWidget;
@@ -28,7 +27,7 @@ public class VanillaWidgetWrapper<T extends Drawable & Element> extends LeafInst
         return new Instance(this);
     }
 
-    public static class Instance extends LeafWidgetInstance<VanillaWidgetWrapper<?>> implements MouseListener, KeyboardListener {
+    public static class Instance extends LeafWidgetInstance<VanillaWidgetWrapper<?>> implements MouseListener {
         private int draggingMouseButton = 0;
 
         private double x, y;
@@ -77,27 +76,22 @@ public class VanillaWidgetWrapper<T extends Drawable & Element> extends LeafInst
             GlStateManager._enableScissorTest();
         }
 
-        @Override
         public boolean onKeyDown(int keyCode, KeyModifiers modifiers) {
             return widget.wrapped.keyPressed(keyCode, 0, modifiers.bitMask());
         }
 
-        @Override
         public boolean onKeyUp(int keyCode, KeyModifiers modifiers) {
             return widget.wrapped.keyReleased(keyCode, 0, modifiers.bitMask());
         }
 
-        @Override
         public boolean onChar(int charCode, KeyModifiers modifiers) {
             return widget.wrapped.charTyped((char) charCode, modifiers.bitMask());
         }
 
-        @Override
         public void onFocusGained() {
             this.widget.wrapped.setFocused(true);
         }
 
-        @Override
         public void onFocusLost() {
             this.widget.wrapped.setFocused(false);
         }

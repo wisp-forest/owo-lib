@@ -2,7 +2,6 @@ package io.wispforest.owo.braid.widgets.textinput;
 
 import io.wispforest.owo.braid.core.*;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
-import io.wispforest.owo.braid.framework.instance.KeyboardListener;
 import io.wispforest.owo.braid.framework.instance.LeafWidgetInstance;
 import io.wispforest.owo.braid.framework.instance.MouseListener;
 import io.wispforest.owo.braid.framework.widget.LeafInstanceWidget;
@@ -33,7 +32,6 @@ public class TextInput extends LeafInstanceWidget {
     public final TextEditingController controller;
     public final boolean showCursor;
     public final boolean softWrap;
-    public final boolean autoFocus;
     public final int maxLines;
     public final int maxCharacters;
     public final Style baseStyle;
@@ -44,7 +42,6 @@ public class TextInput extends LeafInstanceWidget {
         this.controller = controller;
         this.showCursor = showCursor;
         this.softWrap = softWrap;
-        this.autoFocus = autoFocus;
         this.maxLines = maxLines;
         this.maxCharacters = maxCharacters;
         this.baseStyle = baseStyle;
@@ -57,7 +54,7 @@ public class TextInput extends LeafInstanceWidget {
         return new Instance(this);
     }
 
-    public static class Instance extends LeafWidgetInstance<TextInput> implements MouseListener, KeyboardListener {
+    public static class Instance extends LeafWidgetInstance<TextInput> implements MouseListener {
 
         protected String text;
         protected TextSelection selection;
@@ -74,10 +71,6 @@ public class TextInput extends LeafInstanceWidget {
             super(widget);
             this.layoutText = this.text = widget.controller.text();
             this.layoutSelection = this.selection = widget.controller.selection;
-
-            if (this.widget().autoFocus) {
-                this.requestFocus();
-            }
         }
 
         public Vector2d cursorPosition() {
@@ -91,11 +84,11 @@ public class TextInput extends LeafInstanceWidget {
         @Override
         public void setWidget(TextInput widget) {
             if (!(this.layoutText.equals(widget.controller.text())
-                  && this.layoutSelection.equals(widget.controller.selection())
-                  && this.widget.softWrap == widget.softWrap
-                  && this.widget.maxLines == widget.maxLines
-                  && this.widget.maxCharacters == widget.maxCharacters
-                  && this.widget.baseStyle.equals(widget.baseStyle))) {
+                && this.layoutSelection.equals(widget.controller.selection())
+                && this.widget.softWrap == widget.softWrap
+                && this.widget.maxLines == widget.maxLines
+                && this.widget.maxCharacters == widget.maxCharacters
+                && this.widget.baseStyle.equals(widget.baseStyle))) {
 
                 this.layoutText = this.text = widget.controller.text();
                 this.layoutSelection = this.selection = widget.controller.selection();
@@ -335,13 +328,11 @@ public class TextInput extends LeafInstanceWidget {
             return !this.text.isEmpty() ? this.text.charAt(MathHelper.clamp(charIdx, 0, this.text.length() - 1)) : ' ';
         }
 
-        @Override
         public boolean onChar(int charCode, KeyModifiers modifiers) {
             this.insert(Character.toString(charCode));
             return true;
         }
 
-        @Override
         public boolean onKeyDown(int keyCode, KeyModifiers modifiers) {
             var cursorPosition = this.selection.end();
 

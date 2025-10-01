@@ -1,6 +1,6 @@
 package io.wispforest.owo.braid.framework.widget;
 
-public interface WidgetSetupCallback<T> {
+public interface WidgetSetupCallback<T extends Widget> {
     void setup(T widget);
 
     default WidgetSetupCallback<T> compose(WidgetSetupCallback<? super T> before) {
