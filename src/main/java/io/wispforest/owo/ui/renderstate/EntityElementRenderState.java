@@ -1,18 +1,19 @@
 package io.wispforest.owo.ui.renderstate;
 
-import io.wispforest.owo.util.pond.OwoEntityRenderDispatcherExtension;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.client.gui.render.SpecialGuiElementRenderer;
 import net.minecraft.client.gui.render.state.special.SpecialGuiElementRenderState;
 import net.minecraft.client.render.DiffuseLighting;
-import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
+import net.minecraft.client.render.entity.EntityRenderManager;
 import net.minecraft.client.render.entity.state.EntityRenderState;
+import net.minecraft.client.render.state.CameraRenderState;
 import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.spongepowered.asm.service.ITransformer;
 
 public record EntityElementRenderState(
     EntityRenderState entityState,
@@ -58,7 +59,7 @@ public record EntityElementRenderState(
 
     public static class Renderer extends SpecialGuiElementRenderer<EntityElementRenderState> {
 
-        private final EntityRenderDispatcher dispatcher = MinecraftClient.getInstance().getEntityRenderDispatcher();
+        private final EntityRenderManager renderManager = MinecraftClient.getInstance().getEntityRenderDispatcher();
 
         protected Renderer(VertexConsumerProvider.Immediate vertexConsumers) {
             super(vertexConsumers);
@@ -73,16 +74,14 @@ public record EntityElementRenderState(
         protected void render(EntityElementRenderState state, MatrixStack matrices) {
             MinecraftClient.getInstance().gameRenderer.getDiffuseLighting().setShaderLights(DiffuseLighting.Type.ENTITY_IN_UI);
 
-            var dispatcher = (OwoEntityRenderDispatcherExtension) this.dispatcher;
-            dispatcher.owo$setCounterRotate(true);
-
             matrices.multiplyPositionMatrix(state.transform);
 
-            this.dispatcher.setRenderShadows(false);
-            this.dispatcher.render(state.entityState, 0, 0, 0, matrices, this.vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE);
-            this.dispatcher.setRenderShadows(true);
+            var camera = new CameraRenderState();
+            camera.orientation = state.transform.invert().getUnnormalizedRotation(new Quaternionf());
 
-            dispatcher.owo$setCounterRotate(false);
+            var dispatcher = MinecraftClient.getInstance().gameRenderer.getEntityRenderDispatcher();
+            this.renderManager.render(state.entityState, camera, 0, 0, 0, matrices, dispatcher.getQueue());
+            dispatcher.render();
         }
 
         @Override

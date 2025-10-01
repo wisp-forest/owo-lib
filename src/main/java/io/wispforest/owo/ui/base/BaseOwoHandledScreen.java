@@ -8,12 +8,13 @@ import io.wispforest.owo.ui.util.DisposableScreen;
 import io.wispforest.owo.ui.util.UIErrorToast;
 import io.wispforest.owo.util.pond.OwoSlotExtension;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
@@ -231,14 +232,14 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if ((modifiers & GLFW.GLFW_MOD_CONTROL) == 0
+    public boolean keyPressed(KeyInput input) {
+        if (!input.hasCtrl()
             && this.uiAdapter.rootComponent.focusHandler().focused() instanceof GreedyInputComponent inputComponent
-            && inputComponent.onKeyPress(keyCode, scanCode, modifiers)) {
+            && inputComponent.onKeyPress(input)) {
             return true;
         }
 
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(input);
     }
 
     @Override
@@ -247,13 +248,13 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        return this.uiAdapter.mouseClicked(mouseX, mouseY, button) || super.mouseClicked(mouseX, mouseY, button);
+    public boolean mouseClicked(Click click, boolean doubled) {
+        return this.uiAdapter.mouseClicked(click, doubled) || super.mouseClicked(click, doubled);
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        return this.uiAdapter.mouseDragged(mouseX, mouseY, button, deltaX, deltaY) || super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+    public boolean mouseDragged(Click click, double deltaX, double deltaY) {
+        return this.uiAdapter.mouseDragged(click, deltaX, deltaY) || super.mouseDragged(click, deltaX, deltaY);
     }
 
     @Override

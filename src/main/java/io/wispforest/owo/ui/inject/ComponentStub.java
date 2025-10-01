@@ -5,7 +5,10 @@ import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.event.*;
 import io.wispforest.owo.ui.util.FocusHandler;
 import io.wispforest.owo.util.EventSource;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -144,7 +147,7 @@ public interface ComponentStub extends Component {
     }
 
     @Override
-    default boolean onMouseDown(double mouseX, double mouseY, int button) {
+    default boolean onMouseDown(Click click, boolean doubled) {
         throw new IllegalStateException("Interface stub method called");
     }
 
@@ -154,7 +157,7 @@ public interface ComponentStub extends Component {
     }
 
     @Override
-    default boolean onMouseUp(double mouseX, double mouseY, int button) {
+    default boolean onMouseUp(Click click) {
         throw new IllegalStateException("Interface stub method called");
     }
 
@@ -174,7 +177,7 @@ public interface ComponentStub extends Component {
     }
 
     @Override
-    default boolean onMouseDrag(double mouseX, double mouseY, double deltaX, double deltaY, int button) {
+    default boolean onMouseDrag(Click click, double deltaX, double deltaY) {
         throw new IllegalStateException("Interface stub method called");
     }
 
@@ -184,7 +187,7 @@ public interface ComponentStub extends Component {
     }
 
     @Override
-    default boolean onKeyPress(int keyCode, int scanCode, int modifiers) {
+    default boolean onKeyPress(KeyInput input) {
         throw new IllegalStateException("Interface stub method called");
     }
 
@@ -194,7 +197,7 @@ public interface ComponentStub extends Component {
     }
 
     @Override
-    default boolean onCharTyped(char chr, int modifiers) {
+    default boolean onCharTyped(CharInput input) {
         throw new IllegalStateException("Interface stub method called");
     }
 

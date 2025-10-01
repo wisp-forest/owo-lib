@@ -21,14 +21,14 @@ public record LineElementRenderState(
     Color color
 ) implements SimpleGuiElementRenderState {
     @Override
-    public void setupVertices(VertexConsumer vertices, float depth) {
+    public void setupVertices(VertexConsumer vertices) {
         var offset = new Vector2d(this.x1 - this.x0, this.y1 - this.y0).perpendicular().normalize().mul(this.thiccness * .5d);
 
         int vColor = this.color.argb();
-        vertices.vertex(this.pose, (float) (x0 + offset.x), (float) (y0 + offset.y), depth).color(vColor);
-        vertices.vertex(this.pose, (float) (x0 - offset.x), (float) (y0 - offset.y), depth).color(vColor);
-        vertices.vertex(this.pose, (float) (x1 - offset.x), (float) (y1 - offset.y), depth).color(vColor);
-        vertices.vertex(this.pose, (float) (x1 + offset.x), (float) (y1 + offset.y), depth).color(vColor);
+        vertices.vertex(this.pose, (float) (x0 + offset.x), (float) (y0 + offset.y)).color(vColor);
+        vertices.vertex(this.pose, (float) (x0 - offset.x), (float) (y0 - offset.y)).color(vColor);
+        vertices.vertex(this.pose, (float) (x1 - offset.x), (float) (y1 - offset.y)).color(vColor);
+        vertices.vertex(this.pose, (float) (x1 + offset.x), (float) (y1 + offset.y)).color(vColor);
     }
 
     @Override

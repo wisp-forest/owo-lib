@@ -3,6 +3,7 @@ package io.wispforest.owo.ui.container;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
+import net.minecraft.client.gui.Click;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 
@@ -32,13 +33,13 @@ public class DraggableContainer<C extends Component> extends WrappingParentCompo
     }
 
     @Override
-    public boolean onMouseDrag(double mouseX, double mouseY, double deltaX, double deltaY, int button) {
+    public boolean onMouseDrag(Click click, double deltaX, double deltaY) {
         this.xOffset += deltaX;
         this.yOffset += deltaY;
 
         super.updateX((int) (this.baseX + Math.round(this.xOffset)));
         super.updateY((int) (this.baseY + Math.round(this.yOffset)));
-        return super.onMouseDrag(mouseX, mouseY, deltaX, deltaY, button);
+        return super.onMouseDrag(click, deltaX, deltaY);
     }
 
     @Override

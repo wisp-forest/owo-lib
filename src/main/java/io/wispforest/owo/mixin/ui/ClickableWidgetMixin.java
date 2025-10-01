@@ -9,9 +9,12 @@ import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.FocusHandler;
 import io.wispforest.owo.util.EventSource;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -147,13 +150,13 @@ public abstract class ClickableWidgetMixin implements ComponentStub, net.minecra
     }
 
     @Override
-    public boolean onMouseDown(double mouseX, double mouseY, int button) {
-        return this.owo$getWrapper().onMouseDown(mouseX, mouseY, button);
+    public boolean onMouseDown(Click click, boolean doubled) {
+        return this.owo$getWrapper().onMouseDown(click, doubled);
     }
 
     @Override
-    public boolean onMouseUp(double mouseX, double mouseY, int button) {
-        return this.owo$getWrapper().onMouseUp(mouseX, mouseY, button);
+    public boolean onMouseUp(Click click) {
+        return this.owo$getWrapper().onMouseUp(click);
     }
 
     @Override
@@ -207,18 +210,18 @@ public abstract class ClickableWidgetMixin implements ComponentStub, net.minecra
     }
 
     @Override
-    public boolean onMouseDrag(double mouseX, double mouseY, double deltaX, double deltaY, int button) {
-        return this.owo$getWrapper().onMouseDrag(mouseX, mouseY, deltaX, deltaY, button);
+    public boolean onMouseDrag(Click click, double deltaX, double deltaY) {
+        return this.owo$getWrapper().onMouseDrag(click, deltaX, deltaY);
     }
 
     @Override
-    public boolean onKeyPress(int keyCode, int scanCode, int modifiers) {
-        return this.owo$getWrapper().onKeyPress(keyCode, scanCode, modifiers);
+    public boolean onKeyPress(KeyInput input) {
+        return this.owo$getWrapper().onKeyPress(input);
     }
 
     @Override
-    public boolean onCharTyped(char chr, int modifiers) {
-        return this.owo$getWrapper().onCharTyped(chr, modifiers);
+    public boolean onCharTyped(CharInput input) {
+        return this.owo$getWrapper().onCharTyped(input);
     }
 
     @Override

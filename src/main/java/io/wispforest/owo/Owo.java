@@ -49,7 +49,7 @@ public class Owo implements ModInitializer {
     @ApiStatus.Internal
     public void onInitialize() {
         LootOps.registerListener();
-        CustomTextRegistry.register(InsertingTextContent.TYPE, "index");
+        CustomTextRegistry.register("index", InsertingTextContent.CODEC);
         ScreenInternals.init();
 
         ServerLifecycleEvents.SERVER_STARTING.register(server -> SERVER = server);

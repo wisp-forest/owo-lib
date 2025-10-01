@@ -7,6 +7,7 @@ import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.util.Observable;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.Click;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -233,8 +234,8 @@ public class LabelComponent extends BaseComponent {
     }
 
     @Override
-    public boolean onMouseDown(double mouseX, double mouseY, int button) {
-        return this.textClickHandler.apply(this.styleAt((int) mouseX, (int) mouseY)) | super.onMouseDown(mouseX, mouseY, button);
+    public boolean onMouseDown(Click click, boolean doubled) {
+        return this.textClickHandler.apply(this.styleAt((int) click.x(), (int) click.y())) | super.onMouseDown(click, doubled);
     }
 
     @Nullable

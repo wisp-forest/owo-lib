@@ -25,7 +25,7 @@ public record RingElementRenderState(
     Color outerColor
 ) implements SimpleGuiElementRenderState {
     @Override
-    public void setupVertices(VertexConsumer vertices, float depth) {
+    public void setupVertices(VertexConsumer vertices) {
         double angleStep = Math.toRadians(this.angleTo - this.angleFrom) / this.segments;
         int inColor = this.innerColor.argb();
         int outColor = this.outerColor.argb();
@@ -33,9 +33,9 @@ public record RingElementRenderState(
         for (int i = 0; i <= this.segments; i++) {
             double theta = Math.toRadians(this.angleFrom) + i * angleStep;
 
-            vertices.vertex(this.pose, (float) (this.centerX - Math.cos(theta) * this.outerRadius), (float) (this.centerY - Math.sin(theta) * this.outerRadius), depth)
+            vertices.vertex(this.pose, (float) (this.centerX - Math.cos(theta) * this.outerRadius), (float) (this.centerY - Math.sin(theta) * this.outerRadius))
                 .color(outColor);
-            vertices.vertex(this.pose, (float) (this.centerX - Math.cos(theta) * this.innerRadius), (float) (this.centerY - Math.sin(theta) * this.innerRadius), depth)
+            vertices.vertex(this.pose, (float) (this.centerX - Math.cos(theta) * this.innerRadius), (float) (this.centerY - Math.sin(theta) * this.innerRadius))
                 .color(inColor);
         }
     }

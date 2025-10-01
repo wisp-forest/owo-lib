@@ -9,8 +9,8 @@ import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.UISounds;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -70,8 +70,8 @@ public class DropdownComponent extends FlowLayout {
         dropdown.positioning(Positioning.absolute(xLocation, yLocation));
 
         var dismounted = new MutableBoolean(false);
-        ScreenMouseEvents.beforeMouseClick(screen).register((screen_, mouseX_, mouseY_, button) -> {
-            if (dismounted.isTrue() || dropdown.isInBoundingBox(mouseX_, mouseY_)) return;
+        ScreenMouseEvents.beforeMouseClick(screen).register((screen_, click) -> {
+            if (dismounted.isTrue() || dropdown.isInBoundingBox(click.x(), click.y())) return;
 
             rootComponent.removeChild(dropdown);
             dismounted.setTrue();
@@ -286,8 +286,8 @@ public class DropdownComponent extends FlowLayout {
         }
 
         @Override
-        public boolean onMouseDown(double mouseX, double mouseY, int button) {
-            super.onMouseDown(mouseX, mouseY, button);
+        public boolean onMouseDown(Click click, boolean doubled) {
+            super.onMouseDown(click, doubled);
 
             this.onClick.accept(this.parentDropdown);
             this.playInteractionSound();

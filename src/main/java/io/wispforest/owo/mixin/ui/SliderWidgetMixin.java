@@ -3,6 +3,7 @@ package io.wispforest.owo.mixin.ui;
 import io.wispforest.owo.ui.component.DiscreteSliderComponent;
 import io.wispforest.owo.ui.component.SliderComponent;
 import io.wispforest.owo.ui.core.CursorStyle;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.SliderWidget;
 import net.minecraft.text.Text;
@@ -35,13 +36,13 @@ public abstract class SliderWidgetMixin extends ClickableWidget {
     }
 
     @Inject(method = "setValueFromMouse", at = @At("HEAD"), cancellable = true)
-    private void makeItSnappyTeam(double mouseX, CallbackInfo ci) {
+    private void makeItSnappyTeam(Click click, CallbackInfo ci) {
         if (!((Object) this instanceof DiscreteSliderComponent discrete)) return;
         if (!discrete.snap()) return;
 
         ci.cancel();
 
-        double value = (mouseX - (this.getX() + 4d)) / (this.width - 8d);
+        double value = (click.x() - (this.getX() + 4d)) / (this.width - 8d);
         double min = discrete.min(), max = discrete.max();
         int decimalPlaces = discrete.decimalPlaces();
 

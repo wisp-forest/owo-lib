@@ -9,9 +9,11 @@ import io.wispforest.owo.ui.inject.GreedyInputComponent;
 import io.wispforest.owo.ui.util.DisposableScreen;
 import io.wispforest.owo.ui.util.UIErrorToast;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -134,20 +136,20 @@ public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen im
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyInput input) {
         if (this.uiAdapter == null) return false;
 
-        if ((modifiers & GLFW.GLFW_MOD_CONTROL) == 0
+        if (!input.hasCtrl()
                 && this.uiAdapter.rootComponent.focusHandler().focused() instanceof GreedyInputComponent inputComponent
-                && inputComponent.onKeyPress(keyCode, scanCode, modifiers)) {
+                && inputComponent.onKeyPress(input)) {
             return true;
         }
 
-        if (super.keyPressed(keyCode, scanCode, modifiers)) {
+        if (super.keyPressed(input)) {
             return true;
         }
 
-        if (keyCode == GLFW.GLFW_KEY_ESCAPE && this.shouldCloseOnEsc()) {
+        if (input.isEscape() && this.shouldCloseOnEsc()) {
             this.close();
             return true;
         }
@@ -156,10 +158,10 @@ public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen im
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+    public boolean mouseDragged(Click click, double deltaX, double deltaY) {
         if (this.uiAdapter == null) return false;
 
-        return this.uiAdapter.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        return this.uiAdapter.mouseDragged(click, deltaX, deltaY);
     }
 
     @Nullable

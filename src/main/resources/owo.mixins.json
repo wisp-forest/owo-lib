@@ -62,8 +62,6 @@
     "ui.CubeMapRendererMixin",
     "ui.access.DrawContextAccessor",
     "ui.EditBoxWidgetMixin",
-    "ui.EntityRenderDispatcherMixin",
-    "ui.EntityRendererMixin",
     "ui.GuiRendererMixin",
     "ui.HandledScreenMixin",
     "ui.MinecraftClientMixin",

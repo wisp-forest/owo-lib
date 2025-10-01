@@ -2,7 +2,6 @@ package io.wispforest.owo.ui.renderstate;
 
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.client.gui.render.SpecialGuiElementRenderer;
@@ -11,13 +10,15 @@ import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.block.entity.state.BlockEntityRenderState;
+import net.minecraft.client.render.state.CameraRenderState;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.RotationAxis;
 import org.jetbrains.annotations.Nullable;
 
 public record BlockElementRenderState(
     BlockState state,
-    @Nullable BlockEntity entity,
+    @Nullable BlockEntityRenderState entity,
     ScreenRect bounds,
     ScreenRect scissorArea
 ) implements SpecialGuiElementRenderState {
@@ -92,9 +93,11 @@ public record BlockElementRenderState(
             }
 
             if (state.entity != null) {
-                var медведь = MinecraftClient.getInstance().getBlockEntityRenderDispatcher().get(state.entity);
+                var медведь = MinecraftClient.getInstance().getBlockEntityRenderDispatcher().getByRenderState(state.entity);
                 if (медведь != null) {
-                    медведь.render(state.entity, MinecraftClient.getInstance().getRenderTickCounter().getTickProgress(false), matrices, vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, MinecraftClient.getInstance().gameRenderer.getCamera().getPos());
+                    var dispatcher = MinecraftClient.getInstance().gameRenderer.getEntityRenderDispatcher();
+                    медведь.render(state.entity, matrices, dispatcher.getQueue(), new CameraRenderState());
+                    dispatcher.render();
                 }
             }
         }
