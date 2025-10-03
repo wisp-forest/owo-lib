@@ -10,13 +10,16 @@ import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.*;
-import io.wispforest.owo.braid.widgets.basic.action.ActionTrigger;
-import io.wispforest.owo.braid.widgets.basic.action.Actions;
+import io.wispforest.owo.braid.widgets.intents.AdjustIntent;
+import io.wispforest.owo.braid.widgets.intents.Intent;
+import io.wispforest.owo.braid.widgets.intents.Interactable;
+import io.wispforest.owo.braid.widgets.intents.ShortcutTrigger;
 import io.wispforest.owo.braid.widgets.stack.Stack;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+import java.util.Map;
 import java.util.function.DoubleConsumer;
 
 public class RawSlider extends StatefulWidget {
@@ -100,11 +103,14 @@ public class RawSlider extends StatefulWidget {
                 return new Center(
                     widget.onChanged == null || ControlsOverride.controlsDisabled(context)
                         ? content
-                        : new Actions(
-                            actions -> {
-                                actions.addAction(ActionTrigger.POSITIVE_DIRECTIONS, () -> widget.onChanged.accept(Math.min(widget.value + step, widget.max)));
-                                actions.addAction(ActionTrigger.NEGATIVE_DIRECTIONS, () -> widget.onChanged.accept(Math.max(widget.value - step, widget.min)));
-                            },
+                        : new Interactable(
+                            SHORTCUTS,
+                            actions -> actions.addCallbackAction(
+                                AdjustIntent.class,
+                                (actionCtx, intent) -> {
+                                    widget.onChanged.accept(Math.min(widget.value + step * intent.direction().offset(), widget.max));
+                                }
+                            ),
                             new MouseArea(
                                 mouseArea -> mouseArea
                                     //TODO: decide what to do with buttons here
@@ -170,4 +176,11 @@ public class RawSlider extends StatefulWidget {
             this.widget().onChanged.accept(step != null ? Math.round(newValue / step) * step : newValue);
         }
     }
+
+    // ---
+
+    private static final Map<List<ShortcutTrigger>, Intent> SHORTCUTS = Map.of(
+        List.of(ShortcutTrigger.of(ShortcutTrigger.UP, ShortcutTrigger.RIGHT)), new AdjustIntent(AdjustIntent.Direction.INCREMENT),
+        List.of(ShortcutTrigger.of(ShortcutTrigger.DOWN, ShortcutTrigger.LEFT)), new AdjustIntent(AdjustIntent.Direction.DECREMENT)
+    );
 }

@@ -1,20 +1,26 @@
 package io.wispforest.owo.braid.widgets.slider;
 
-import io.wispforest.owo.braid.core.*;
+import io.wispforest.owo.braid.core.Alignment;
+import io.wispforest.owo.braid.core.Constraints;
+import io.wispforest.owo.braid.core.Insets;
+import io.wispforest.owo.braid.core.Size;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
-import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.*;
-import io.wispforest.owo.braid.widgets.basic.action.ActionTrigger;
-import io.wispforest.owo.braid.widgets.basic.action.Actions;
+import io.wispforest.owo.braid.widgets.intents.Intent;
+import io.wispforest.owo.braid.widgets.intents.Interactable;
+import io.wispforest.owo.braid.widgets.intents.ShortcutTrigger;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
+
+import java.util.List;
+import java.util.Map;
 
 public class RawXlyder extends StatefulWidget {
 
@@ -91,13 +97,16 @@ public class RawXlyder extends StatefulWidget {
                 return new Center(
                     widget.onChanged == null || ControlsOverride.controlsDisabled(context)
                         ? content
-                        : new Actions(
-                            actions -> {
-                                actions.addAction(ActionTrigger.UP, () -> widget.onChanged.accept(widget.xValue, Math.min(widget.yValue + yStep, widget.maxY)));
-                                actions.addAction(ActionTrigger.DOWN, () -> widget.onChanged.accept(widget.xValue, Math.max(widget.yValue - yStep, widget.minY)));
-                                actions.addAction(ActionTrigger.RIGHT, () -> widget.onChanged.accept(Math.min(widget.xValue + xStep, widget.maxX), widget.yValue));
-                                actions.addAction(ActionTrigger.LEFT, () -> widget.onChanged.accept(Math.max(widget.xValue - xStep, widget.minX), widget.yValue));
-                            },
+                        : new Interactable(
+                            SHORTCUTS,
+                            actions -> actions.addCallbackAction(XlydeIntent.class, (actionCtx, intent) -> {
+                                switch (intent.direction()) {
+                                    case XlydeIntent.Direction.UP -> widget.onChanged.accept(widget.xValue, Math.min(widget.yValue + yStep, widget.maxY));
+                                    case XlydeIntent.Direction.DOWN -> widget.onChanged.accept(widget.xValue, Math.max(widget.yValue - yStep, widget.minY));
+                                    case XlydeIntent.Direction.RIGHT -> widget.onChanged.accept(Math.min(widget.xValue + xStep, widget.maxX), widget.yValue);
+                                    case XlydeIntent.Direction.LEFT -> widget.onChanged.accept(Math.max(widget.xValue - xStep, widget.minX), widget.yValue);
+                                }
+                            }),
                             new MouseArea(
                                 mouseArea -> mouseArea
                                     //TODO: decide what to do with buttons here
@@ -184,5 +193,20 @@ public class RawXlyder extends StatefulWidget {
     @FunctionalInterface
     public interface XlyderCallback {
         void accept(double x, double y);
+    }
+
+    // ---
+
+    private static final Map<List<ShortcutTrigger>, Intent> SHORTCUTS = Map.of(
+        List.of(ShortcutTrigger.UP), new XlydeIntent(XlydeIntent.Direction.UP),
+        List.of(ShortcutTrigger.DOWN), new XlydeIntent(XlydeIntent.Direction.DOWN),
+        List.of(ShortcutTrigger.LEFT), new XlydeIntent(XlydeIntent.Direction.LEFT),
+        List.of(ShortcutTrigger.RIGHT), new XlydeIntent(XlydeIntent.Direction.RIGHT)
+    );
+
+    public record XlydeIntent(Direction direction) implements Intent {
+        public enum Direction {
+            UP, DOWN, LEFT, RIGHT
+        }
     }
 }

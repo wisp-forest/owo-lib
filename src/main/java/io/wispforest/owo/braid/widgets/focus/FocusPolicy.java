@@ -8,7 +8,7 @@ public class FocusPolicy extends InheritedWidget {
 
     public final boolean clickFocus;
 
-    protected FocusPolicy(boolean clickFocus, Widget child) {
+    public FocusPolicy(boolean clickFocus, Widget child) {
         super(child);
         this.clickFocus = clickFocus;
     }

@@ -13,9 +13,7 @@ import io.wispforest.owo.braid.widgets.SpriteWidget;
 import io.wispforest.owo.braid.widgets.basic.HoverableBuilder;
 import io.wispforest.owo.braid.widgets.basic.Padding;
 import io.wispforest.owo.braid.widgets.basic.Panel;
-import io.wispforest.owo.braid.widgets.basic.action.ActionTrigger;
-import io.wispforest.owo.braid.widgets.basic.action.Actions;
-import io.wispforest.owo.braid.widgets.basic.action.Trigger;
+import io.wispforest.owo.braid.widgets.intents.*;
 import io.wispforest.owo.braid.widgets.flex.CrossAxisAlignment;
 import io.wispforest.owo.braid.widgets.flex.Flexible;
 import io.wispforest.owo.braid.widgets.flex.MainAxisAlignment;
@@ -32,6 +30,7 @@ import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.OptionalInt;
 import java.util.function.Function;
@@ -218,14 +217,20 @@ public class ComboBox<T> extends StatefulWidget {
         public Widget build(BuildContext context) {
             var expanded = this.isOpen();
 
-            return new Actions(
+            return new Interactable(
+                SHORTCUTS,
                 widget -> widget
                     .focusLostCallback(this::resetTextInput)
                     .cursorStyle(CursorStyle.HAND)
-                    .addAction(PREVIOUS_OPTION_TRIGGER, () -> this.cycle(-1))
-                    .addAction(NEXT_OPTION_TRIGGER, () -> this.cycle(1))
-                    .addAction(SELECT_HIGHLIGHTED_OPTION_TRIGGER, this::trySelectHighlightedValue)
-                    .addAction(ActionTrigger.CLICK, () -> {
+                    .addCallbackAction(CycleIntent.class, (actionCtx, intent) -> this.cycle(intent.previous() ? -1 : 1))
+                    .addCallbackAction(SelectIntent.class, (actionCtx, intent) -> {
+                        if (expanded) {
+                            this.trySelectHighlightedValue();
+                        } else {
+                            this.open();
+                        }
+                    })
+                    .addCallbackAction(PrimaryActionIntent.class, (actionCtx, intent) -> {
                         if (expanded) {
                             this.close();
                         } else {
@@ -264,7 +269,13 @@ public class ComboBox<T> extends StatefulWidget {
 
     // ---
 
-    private static final ActionTrigger PREVIOUS_OPTION_TRIGGER = new ActionTrigger(Trigger.ofKey(GLFW.GLFW_KEY_UP));
-    private static final ActionTrigger NEXT_OPTION_TRIGGER = new ActionTrigger(Trigger.ofKey(GLFW.GLFW_KEY_DOWN));
-    private static final ActionTrigger SELECT_HIGHLIGHTED_OPTION_TRIGGER = new ActionTrigger(Trigger.ofKey(GLFW.GLFW_KEY_ENTER), Trigger.ofKey(GLFW.GLFW_KEY_KP_ENTER));
+    private static final Map<List<ShortcutTrigger>, Intent> SHORTCUTS = Map.of(
+        List.of(ShortcutTrigger.UP), new CycleIntent(true),
+        List.of(ShortcutTrigger.DOWN), new CycleIntent(false),
+        List.of(new ShortcutTrigger(Trigger.ofKey(GLFW.GLFW_KEY_ENTER), Trigger.ofKey(GLFW.GLFW_KEY_KP_ENTER))), new SelectIntent(),
+        List.of(ShortcutTrigger.LEFT_CLICK), PrimaryActionIntent.INSTANCE
+    );
 }
+
+record CycleIntent(boolean previous) implements Intent {}
+record SelectIntent() implements Intent {}

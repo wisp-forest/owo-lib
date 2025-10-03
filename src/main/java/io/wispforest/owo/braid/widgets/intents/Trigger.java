@@ -1,4 +1,4 @@
-package io.wispforest.owo.braid.widgets.basic.action;
+package io.wispforest.owo.braid.widgets.intents;
 
 import io.wispforest.owo.braid.core.KeyModifiers;
 

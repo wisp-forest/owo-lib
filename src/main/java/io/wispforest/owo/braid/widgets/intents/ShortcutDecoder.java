@@ -1,4 +1,4 @@
-package io.wispforest.owo.braid.widgets.basic.action;
+package io.wispforest.owo.braid.widgets.intents;
 
 import com.google.common.collect.Iterables;
 import io.wispforest.owo.braid.core.BraidUtils;
@@ -18,7 +18,7 @@ import java.time.Duration;
 import java.util.*;
 import java.util.function.Function;
 
-public class Actions extends StatefulWidget {
+public class ShortcutDecoder extends StatefulWidget {
     private @Nullable MouseArea.EnterCallback enterCallback;
     private @Nullable MouseArea.ExitCallback exitCallback;
     private @Nullable MouseArea.CursorStyleSupplier cursorStyleSupplier;
@@ -26,33 +26,19 @@ public class Actions extends StatefulWidget {
     private @Nullable Focusable.FocusGainedCallback focusGainedCallback;
     private @Nullable Focusable.FocusLostCallback focusLostCallback;
 
-    private final Map<List<ActionTrigger>, Runnable> actions = new LinkedHashMap<>();
+    private final Map<List<ShortcutTrigger>, Listener> shortcuts = new LinkedHashMap<>();
 
     private final Widget child;
 
-    public Actions(
-        WidgetSetupCallback<Actions> setupCallback,
+    public ShortcutDecoder(
+        WidgetSetupCallback<ShortcutDecoder> setupCallback,
         Widget child
     ) {
         this.child = child;
         setupCallback.setup(this);
     }
 
-    public static Actions click(
-        WidgetSetupCallback<Actions> setupCallback,
-        @Nullable Runnable onClick,
-        Widget child
-    ) {
-        return new Actions(
-            widget -> {
-                if (onClick != null) widget.addAction(ActionTrigger.CLICK, onClick);
-                setupCallback.setup(widget);
-            },
-            child
-        );
-    }
-
-    public Actions enterCallback(@Nullable MouseArea.EnterCallback enterCallback) {
+    public ShortcutDecoder enterCallback(@Nullable MouseArea.EnterCallback enterCallback) {
         this.assertMutable();
         this.enterCallback = enterCallback;
         return this;
@@ -62,7 +48,7 @@ public class Actions extends StatefulWidget {
         return this.enterCallback;
     }
 
-    public Actions exitCallback(@Nullable MouseArea.ExitCallback exitCallback) {
+    public ShortcutDecoder exitCallback(@Nullable MouseArea.ExitCallback exitCallback) {
         this.assertMutable();
         this.exitCallback = exitCallback;
         return this;
@@ -72,13 +58,13 @@ public class Actions extends StatefulWidget {
         return this.exitCallback;
     }
 
-    public Actions cursorStyleSupplier(@Nullable MouseArea.CursorStyleSupplier cursorStyleSupplier) {
+    public ShortcutDecoder cursorStyleSupplier(@Nullable MouseArea.CursorStyleSupplier cursorStyleSupplier) {
         this.assertMutable();
         this.cursorStyleSupplier = cursorStyleSupplier;
         return this;
     }
 
-    public Actions cursorStyle(@Nullable CursorStyle style) {
+    public ShortcutDecoder cursorStyle(@Nullable CursorStyle style) {
         return this.cursorStyleSupplier((x, y) -> style);
     }
 
@@ -86,7 +72,7 @@ public class Actions extends StatefulWidget {
         return this.cursorStyleSupplier;
     }
 
-    public Actions focusGainedCallback(@Nullable Focusable.FocusGainedCallback focusGainedCallback) {
+    public ShortcutDecoder focusGainedCallback(@Nullable Focusable.FocusGainedCallback focusGainedCallback) {
         this.assertMutable();
         this.focusGainedCallback = focusGainedCallback;
         return this;
@@ -96,7 +82,7 @@ public class Actions extends StatefulWidget {
         return this.focusGainedCallback;
     }
 
-    public Actions focusLostCallback(@Nullable Focusable.FocusLostCallback focusLostCallback) {
+    public ShortcutDecoder focusLostCallback(@Nullable Focusable.FocusLostCallback focusLostCallback) {
         this.assertMutable();
         this.focusLostCallback = focusLostCallback;
         return this;
@@ -106,26 +92,37 @@ public class Actions extends StatefulWidget {
         return this.focusLostCallback;
     }
 
-    public Actions addAction(List<ActionTrigger> triggers, Runnable action) {
+    public ShortcutDecoder shortcuts(Map<List<ShortcutTrigger>, Listener> shortcuts) {
         this.assertMutable();
-        this.actions.put(triggers, action);
+        this.shortcuts.putAll(shortcuts);
         return this;
     }
 
-    public Actions addAction(ActionTrigger trigger, Runnable action) {
-        return this.addAction(List.of(trigger), action);
+    public ShortcutDecoder addShortcut(List<ShortcutTrigger> triggers, Listener action) {
+        this.assertMutable();
+        this.shortcuts.put(triggers, action);
+        return this;
     }
 
-    public Map<List<ActionTrigger>, Runnable> actions() {
-        return this.actions;
+    public ShortcutDecoder addShortcut(ShortcutTrigger trigger, Listener action) {
+        return this.addShortcut(List.of(trigger), action);
+    }
+
+    public Map<List<ShortcutTrigger>, Listener> actions() {
+        return this.shortcuts;
     }
 
     @Override
-    public WidgetState<Actions> createState() {
+    public WidgetState<ShortcutDecoder> createState() {
         return new State();
     }
 
-    public static class State extends WidgetState<Actions> {
+    @FunctionalInterface
+    public interface Listener {
+        void trigger(TriggerType type);
+    }
+
+    public static class State extends WidgetState<ShortcutDecoder> {
         private List<ActionSequence> sequences = new ArrayList<>();
 
         private final List<ActionSequence> queuedSequences = new ArrayList<>();
@@ -133,13 +130,16 @@ public class Actions extends StatefulWidget {
 
         @Override
         public void init() {
-            sequences = widget().actions.entrySet().stream().map(emongus -> new ActionSequence(emongus.getKey(), emongus.getValue())).toList();
+            this.buildSequences();
         }
 
-        // TODO: dart ver. says "probably not ideal to rebuild this list every time"
         @Override
-        public void didUpdateWidget(Actions oldWidget) {
-            sequences = widget().actions.entrySet().stream().map(emongus -> new ActionSequence(emongus.getKey(), emongus.getValue())).toList();
+        public void didUpdateWidget(ShortcutDecoder oldWidget) {
+            this.buildSequences();
+        }
+
+        private void buildSequences() {
+            this.sequences = widget().shortcuts.entrySet().stream().map(emongus -> new ActionSequence(emongus.getKey(), emongus.getValue())).toList();
         }
 
         @Override
@@ -151,7 +151,7 @@ public class Actions extends StatefulWidget {
                     .cursorStyleSupplier(this.widget().cursorStyleSupplier())
                     .clickCallback((x, y, button, modifiers) -> stepActions(trigger -> trigger.isTriggeredByMouseButton(button, modifiers)
                         ? ActionTriggerResult.ACTIVATED
-                        : ActionTriggerResult.NOT_ACTIVATED)),
+                        : ActionTriggerResult.NOT_ACTIVATED, TriggerType.MOUSE)),
                 new Focusable(
                     widget -> widget
                         .focusGainedCallback(this.widget().focusGainedCallback())
@@ -159,13 +159,13 @@ public class Actions extends StatefulWidget {
                         .keyDownCallback((keyCode, modifiers) -> stepActions(trigger -> {
                             if (trigger.isTriggeredByKeyCode(keyCode, modifiers)) return ActionTriggerResult.ACTIVATED;
                             return KeyModifiers.isModifier(keyCode) ? ActionTriggerResult.IGNORED : ActionTriggerResult.NOT_ACTIVATED;
-                        })),
+                        }, TriggerType.KEY)),
                     this.widget().child
                 )
             );
         }
 
-        private boolean stepActions(Function<ActionTrigger, ActionTriggerResult> test) {
+        private boolean stepActions(Function<ShortcutTrigger, ActionTriggerResult> test, TriggerType trigger) {
             // in case we currently have a dispatch queued, we
             // must cancel it *now* to avoid prematurely triggering
             // a dispatch before the user is done entering triggers
@@ -212,7 +212,7 @@ public class Actions extends StatefulWidget {
             // every remaining (non-poisoned) sequence stepped to completion,
             // dispatch immediately
             if (steppedSequences.stream().allMatch(pair -> pair.getRight() == ActionSequenceStep.COMPLETE) && completed != null) {
-                this.dispatch(completed.getLeft(), completed.getLeft().isSingular);
+                this.dispatch(completed.getLeft(), completed.getLeft().isSingular, trigger);
                 return true;
             } else {
                 // otherwise, queue up the completed sequence (if any)
@@ -230,19 +230,19 @@ public class Actions extends StatefulWidget {
                     completed.getLeft().nextTriggerIndex = 0;
                 }
 
-                callbackId = this.scheduleDelayedCallback(MAX_INPUT_DELAY, () -> this.dispatch(null, true));
+                callbackId = this.scheduleDelayedCallback(MAX_INPUT_DELAY, () -> this.dispatch(null, true, trigger));
 
                 return !steppedSequences.isEmpty();
             }
 
         }
 
-        private void dispatch(@Nullable ActionSequence completedSequence, boolean runQueued) {
+        private void dispatch(@Nullable ActionSequence completedSequence, boolean runQueued, TriggerType trigger) {
             if (runQueued) {
-                for (ActionSequence sequence : queuedSequences) sequence.callback.run();
+                for (ActionSequence sequence : queuedSequences) sequence.callback.trigger(trigger);
             }
 
-            if (completedSequence != null) completedSequence.callback.run();
+            if (completedSequence != null) completedSequence.callback.trigger(trigger);
 
             queuedSequences.clear();
             for (ActionSequence sequence : sequences) sequence.nextTriggerIndex = 0;
@@ -271,8 +271,8 @@ public class Actions extends StatefulWidget {
         }
 
         private static class ActionSequence {
-            public final List<ActionTrigger> triggers;
-            public final Runnable callback;
+            public final List<ShortcutTrigger> triggers;
+            public final Listener callback;
 
             /// whether this sequence is singular, i.e. it only has
             /// a single trigger and can be completed at any time
@@ -280,7 +280,7 @@ public class Actions extends StatefulWidget {
 
             public int nextTriggerIndex = 0;
 
-            public ActionSequence(List<ActionTrigger> triggers, Runnable callback) {
+            public ActionSequence(List<ShortcutTrigger> triggers, Listener callback) {
                 this.triggers = triggers;
                 this.callback = callback;
                 this.isSingular = triggers.size() == 1;
@@ -290,7 +290,7 @@ public class Actions extends StatefulWidget {
             /// - if the sequence ignored the input, is poisoned or is completed, return [ActionSequenceStep#IGNORE
             /// - if the sequence activated its final trigger, return [ActionSequenceStep#COMPLETE]
             /// - if the sequence activated an intermediate trigger, return [ActionSequenceStep#ADVANCE]
-            public ActionSequenceStep step(Function<ActionTrigger, ActionTriggerResult> test) {
+            public ActionSequenceStep step(Function<ShortcutTrigger, ActionTriggerResult> test) {
                 if (this.nextTriggerIndex < 0 || nextTriggerIndex >= triggers.size()) return ActionSequenceStep.IGNORE;
 
                 var result = test.apply(triggers.get(nextTriggerIndex));

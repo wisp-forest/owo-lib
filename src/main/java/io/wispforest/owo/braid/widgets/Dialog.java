@@ -7,9 +7,7 @@ import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.Box;
 import io.wispforest.owo.braid.widgets.basic.Center;
 import io.wispforest.owo.braid.widgets.basic.HitTestTrap;
-import io.wispforest.owo.braid.widgets.basic.action.ActionTrigger;
-import io.wispforest.owo.braid.widgets.basic.action.Actions;
-import io.wispforest.owo.braid.widgets.basic.action.Trigger;
+import io.wispforest.owo.braid.widgets.basic.MouseArea;
 import org.lwjgl.glfw.GLFW;
 
 public class Dialog extends StatelessWidget {
@@ -39,10 +37,14 @@ public class Dialog extends StatelessWidget {
     @Override
     public Widget build(BuildContext context) {
         return new HitTestTrap(
-            new Actions(
-                widget -> {
-                    if (this.barrierCanDismiss) widget.addAction(DISMISS_TRIGGER, () -> Navigator.pop(context));
-                },
+            new MouseArea(
+                widget -> widget
+                    .clickCallback((x, y, button, modifiers) -> {
+                        if (!this.barrierCanDismiss || button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return false;
+
+                        Navigator.pop(context);
+                        return true;
+                    }),
                 new Box(
                     this.barrierColor,
                     new Center(
@@ -58,5 +60,4 @@ public class Dialog extends StatelessWidget {
     // ---
 
     private static final Color DEFAULT_BARRIER_COLOR = Color.BLACK.withA(.25);
-    private static final ActionTrigger DISMISS_TRIGGER = new ActionTrigger(Trigger.ofMouse(GLFW.GLFW_MOUSE_BUTTON_LEFT));
 }
