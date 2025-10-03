@@ -2443,7 +2443,7 @@ public class TestSelector extends StatefulWidget {
                                                 widget -> widget
                                                     .easing(Easing.LINEAR)
                                                     .minDuration(0)
-                                                    .durationPerPixel(15)
+                                                    .durationPerPixel(10)
                                                     .pauseTime(0),
                                                 new Marquee(
                                                     widget -> widget

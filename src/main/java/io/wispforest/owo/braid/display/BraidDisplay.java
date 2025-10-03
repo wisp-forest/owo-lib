@@ -85,6 +85,7 @@ public class BraidDisplay {
             .program(RenderPhase.CUTOUT_PROGRAM)
             .transparency(RenderPhase.TRANSLUCENT_TRANSPARENCY)
             .lightmap(RenderPhase.ENABLE_LIGHTMAP)
+            .cull(RenderPhase.DISABLE_CULLING)
             .build(false)
     );
 

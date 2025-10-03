@@ -142,7 +142,6 @@ public class BraidDisplayBlockEntity extends BlockEntity {
 
                             var display =BraidDisplayBlockEntity.of(context).display;
 
-
                             display.quad = new DisplayQuad(
                                 display.quad.pos,
                                 new Vec3d(0, 0, -14 / 16d),
