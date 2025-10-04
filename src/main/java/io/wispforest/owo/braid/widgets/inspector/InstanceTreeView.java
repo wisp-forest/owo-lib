@@ -12,13 +12,15 @@ import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.SpriteWidget;
 import io.wispforest.owo.braid.widgets.animated.AnimatedBox;
 import io.wispforest.owo.braid.widgets.basic.Sized;
+import io.wispforest.owo.braid.widgets.eventstream.BraidEventSource;
+import io.wispforest.owo.braid.widgets.eventstream.BraidEventStream;
+import io.wispforest.owo.braid.widgets.eventstream.StreamListenerState;
 import io.wispforest.owo.braid.widgets.flex.Column;
 import io.wispforest.owo.braid.widgets.flex.CrossAxisAlignment;
 import io.wispforest.owo.braid.widgets.flex.MainAxisAlignment;
 import io.wispforest.owo.braid.widgets.flex.Row;
 import io.wispforest.owo.braid.widgets.scroll.Scrollable;
 import io.wispforest.owo.braid.widgets.sharedstate.SharedState;
-import io.wispforest.owo.util.EventSource;
 import net.minecraft.util.Unit;
 
 import java.time.Duration;
@@ -26,10 +28,10 @@ import java.util.ArrayList;
 
 public class InstanceTreeView extends StatefulWidget {
 
-    public final EventSource<BraidEventStream.Listener<RevealInstanceEvent>> revealEvents;
+    public final BraidEventSource<RevealInstanceEvent> revealEvents;
     public final WidgetInstance<?> viewInstance;
 
-    public InstanceTreeView(EventSource<BraidEventStream.Listener<RevealInstanceEvent>> revealEvents, WidgetInstance<?> viewInstance) {
+    public InstanceTreeView(BraidEventSource<RevealInstanceEvent> revealEvents, WidgetInstance<?> viewInstance) {
         this.revealEvents = revealEvents;
         this.viewInstance = viewInstance;
     }

@@ -1,8 +1,7 @@
-package io.wispforest.owo.braid.widgets.inspector;
+package io.wispforest.owo.braid.widgets.eventstream;
 
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
-import io.wispforest.owo.util.EventSource;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -13,7 +12,7 @@ import java.util.function.Function;
 public abstract class StreamListenerState<T extends StatefulWidget> extends WidgetState<T> {
     private final List<SubscriptionData<T, ?>> streamSubscriptions = new ArrayList<>();
 
-    protected <S> void streamListen(Function<T, @Nullable EventSource<BraidEventStream.Listener<S>>> streamGetter, Consumer<S> onData) {
+    protected <S> void streamListen(Function<T, @Nullable BraidEventSource<S>> streamGetter, Consumer<S> onData) {
         this.streamSubscriptions.add(
             new SubscriptionData<>(this.widget(), streamGetter, stream -> stream.subscribe(onData::accept))
         );
@@ -39,13 +38,13 @@ public abstract class StreamListenerState<T extends StatefulWidget> extends Widg
 
 
     private static class SubscriptionData<W, T> {
-        private final Function<W, @Nullable EventSource<BraidEventStream.Listener<T>>> getter;
-        private final Function<EventSource<BraidEventStream.Listener<T>>, EventSource.Subscription> listenerFactory;
+        private final Function<W, @Nullable BraidEventSource<T>> getter;
+        private final Function<BraidEventSource<T>, BraidEventSource<T>.Subscription> listenerFactory;
 
-        private @Nullable EventSource<BraidEventStream.Listener<T>> currentStream;
-        private @Nullable EventSource.Subscription currentSubscription;
+        private @Nullable BraidEventSource<T> currentStream;
+        private @Nullable BraidEventSource<T>.Subscription currentSubscription;
 
-        private SubscriptionData(W widget, Function<W, @Nullable EventSource<BraidEventStream.Listener<T>>> getter, Function<EventSource<BraidEventStream.Listener<T>>, EventSource.Subscription> listenerFactory) {
+        private SubscriptionData(W widget, Function<W, @Nullable BraidEventSource<T>> getter, Function<BraidEventSource<T>, BraidEventSource<T>.Subscription> listenerFactory) {
             this.getter = getter;
             this.listenerFactory = listenerFactory;
 

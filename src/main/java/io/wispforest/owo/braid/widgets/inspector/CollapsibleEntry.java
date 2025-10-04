@@ -5,10 +5,11 @@ import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.collapsible.LazyCollapsible;
+import io.wispforest.owo.braid.widgets.eventstream.BraidEventSource;
+import io.wispforest.owo.braid.widgets.eventstream.StreamListenerState;
 import io.wispforest.owo.braid.widgets.intents.Intent;
 import io.wispforest.owo.braid.widgets.intents.Interactable;
 import io.wispforest.owo.braid.widgets.intents.ShortcutTrigger;
-import io.wispforest.owo.util.EventSource;
 import net.minecraft.util.Unit;
 
 import java.util.List;
@@ -16,12 +17,12 @@ import java.util.Map;
 
 public class CollapsibleEntry extends StatefulWidget {
 
-    public final EventSource<BraidEventStream.Listener<Unit>> onExpand;
+    public final BraidEventSource<Unit> onExpand;
     public final boolean startCollapsed;
     public final Widget title;
     public final Widget content;
 
-    public CollapsibleEntry(EventSource<BraidEventStream.Listener<Unit>> onExpand, boolean startCollapsed, Widget title, Widget content) {
+    public CollapsibleEntry(BraidEventSource<Unit> onExpand, boolean startCollapsed, Widget title, Widget content) {
         this.onExpand = onExpand;
         this.startCollapsed = startCollapsed;
         this.title = title;

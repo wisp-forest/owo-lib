@@ -17,7 +17,7 @@ import io.wispforest.owo.braid.widgets.basic.Tooltip;
 import io.wispforest.owo.braid.widgets.basic.VisitorWidget;
 import io.wispforest.owo.braid.widgets.focus.FocusClickArea;
 import io.wispforest.owo.braid.widgets.focus.RootFocusScope;
-import io.wispforest.owo.braid.widgets.inspector.BraidEventStream;
+import io.wispforest.owo.braid.widgets.eventstream.BraidEventStream;
 import io.wispforest.owo.braid.widgets.inspector.BraidInspector;
 import io.wispforest.owo.braid.widgets.inspector.InstancePicker;
 import io.wispforest.owo.util.EventSource;
@@ -38,8 +38,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class AppState implements InstanceHost, ProxyHost {
 

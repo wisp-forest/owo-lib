@@ -11,9 +11,10 @@ import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.Builder;
 import io.wispforest.owo.braid.widgets.basic.MouseArea;
 import io.wispforest.owo.braid.widgets.basic.Padding;
+import io.wispforest.owo.braid.widgets.eventstream.BraidEventSource;
+import io.wispforest.owo.braid.widgets.eventstream.StreamListenerState;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.braid.widgets.stack.StackBase;
-import io.wispforest.owo.util.EventSource;
 import net.minecraft.util.Unit;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -23,11 +24,11 @@ import java.util.Comparator;
 
 public class InstancePicker extends StatefulWidget {
 
-    public final EventSource<BraidEventStream.Listener<Unit>> activateEvents;
+    public final BraidEventSource<Unit> activateEvents;
     public final PickCallback pickCallback;
     public final Widget child;
 
-    public InstancePicker(EventSource<BraidEventStream.Listener<Unit>> activateEvents, PickCallback pickCallback, Widget child) {
+    public InstancePicker(BraidEventSource<Unit> activateEvents, PickCallback pickCallback, Widget child) {
         this.activateEvents = activateEvents;
         this.pickCallback = pickCallback;
         this.child = child;

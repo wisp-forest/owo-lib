@@ -13,6 +13,7 @@ import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.SpriteWidget;
 import io.wispforest.owo.braid.widgets.basic.*;
 import io.wispforest.owo.braid.widgets.button.Button;
+import io.wispforest.owo.braid.widgets.eventstream.StreamListenerState;
 import io.wispforest.owo.braid.widgets.flex.Flexible;
 import io.wispforest.owo.braid.widgets.flex.Row;
 import io.wispforest.owo.braid.widgets.label.DefaultLabelStyle;

@@ -4,7 +4,8 @@ import io.wispforest.owo.braid.core.AppState;
 import io.wispforest.owo.braid.core.BraidWindow;
 import io.wispforest.owo.braid.framework.instance.WidgetInstance;
 import io.wispforest.owo.braid.framework.proxy.WidgetProxy;
-import io.wispforest.owo.util.EventSource;
+import io.wispforest.owo.braid.widgets.eventstream.BraidEventSource;
+import io.wispforest.owo.braid.widgets.eventstream.BraidEventStream;
 import net.minecraft.util.Unit;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -27,7 +28,7 @@ public class BraidInspector {
         this.subject = subject;
     }
 
-    public EventSource<BraidEventStream.Listener<Unit>> onPick() {
+    public BraidEventSource<Unit> onPick() {
         return this.pickEvents.source();
     }
 
@@ -35,11 +36,11 @@ public class BraidInspector {
         this.pickEvents.sink().onEvent(Unit.INSTANCE);
     }
 
-    public EventSource<BraidEventStream.Listener<Unit>> onRefresh() {
+    public BraidEventSource<Unit> onRefresh() {
         return this.refreshEvents.source();
     }
 
-    public EventSource<BraidEventStream.Listener<RevealInstanceEvent>> onReveal() {
+    public BraidEventSource<RevealInstanceEvent> onReveal() {
         return this.revealEvents.source();
     }
 

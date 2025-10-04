@@ -6,21 +6,20 @@ import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.Builder;
-import io.wispforest.owo.braid.widgets.inspector.BraidEventStream;
-import io.wispforest.owo.braid.widgets.inspector.StreamListenerState;
-import io.wispforest.owo.util.EventSource;
+import io.wispforest.owo.braid.widgets.eventstream.BraidEventSource;
+import io.wispforest.owo.braid.widgets.eventstream.StreamListenerState;
 
 public class RootFocusScope extends StatefulWidget {
 
-    public final EventSource<BraidEventStream.Listener<KeyDownEvent>> onKeyDown;
-    public final EventSource<BraidEventStream.Listener<KeyUpEvent>> onKeyUp;
-    public final EventSource<BraidEventStream.Listener<CharEvent>> onChar;
+    public final BraidEventSource<KeyDownEvent> onKeyDown;
+    public final BraidEventSource<KeyUpEvent> onKeyUp;
+    public final BraidEventSource<CharEvent> onChar;
     public final Widget child;
 
     public RootFocusScope(
-        EventSource<BraidEventStream.Listener<KeyDownEvent>> onKeyDown,
-        EventSource<BraidEventStream.Listener<KeyUpEvent>> onKeyUp,
-        EventSource<BraidEventStream.Listener<CharEvent>> onChar,
+        BraidEventSource<KeyDownEvent> onKeyDown,
+        BraidEventSource<KeyUpEvent> onKeyUp,
+        BraidEventSource<CharEvent> onChar,
         Widget child
     ) {
         this.onKeyDown = onKeyDown;
