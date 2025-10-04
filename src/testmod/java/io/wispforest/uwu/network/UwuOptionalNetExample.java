@@ -58,7 +58,7 @@ public class UwuOptionalNetExample {
 
     //@OnlyIn(Dist.CLIENT)
     public static final class Client {
-        public static final KeyBinding NETWORK_TEST = new KeyBinding("key.uwu.network_opt_test", GLFW.GLFW_KEY_M, "misc");
+        public static final KeyBinding NETWORK_TEST = new KeyBinding("key.uwu.network_opt_test", GLFW.GLFW_KEY_M, KeyBinding.Category.MISC);
 
         public static void init(IEventBus eventBus) {
             var clientChannel = OwoNetChannel.createOptional(Identifier.of("uwu", "optional_client"));

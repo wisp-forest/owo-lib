@@ -407,7 +407,7 @@ public class OwoNetChannel {
      * to all players tracking the given block entity
      */
     public ServerHandle serverHandle(BlockEntity entity) {
-        if (entity.getWorld().isClient) throw new NetworkException("Server handle cannot be obtained on the client");
+        if (entity.getWorld().isClient()) throw new NetworkException("Server handle cannot be obtained on the client");
         return serverHandle((ServerWorld) entity.getWorld(), entity.getPos());
     }
 

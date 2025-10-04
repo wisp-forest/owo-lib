@@ -8,8 +8,8 @@ import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.UISounds;
 import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -71,8 +71,8 @@ public class DropdownComponent extends FlowLayout {
         dropdown.positioning(Positioning.absolute(xLocation, yLocation));
 
         var dismounted = new MutableBoolean(false);
-        componentHook.computeIfAbsent(screen, screen1 -> new ArrayList<>()).add((mouseX_, mouseY_) -> {
-            if (dismounted.isTrue() || dropdown.isInBoundingBox(mouseX_, mouseY_)) return;
+        componentHook.computeIfAbsent(screen, screen1 -> new ArrayList<>()).add((click) -> {
+            if (dismounted.isTrue() || dropdown.isInBoundingBox(click.x(), click.y())) return;
 
             rootComponent.removeChild(dropdown);
             dismounted.setTrue();
@@ -81,7 +81,7 @@ public class DropdownComponent extends FlowLayout {
         return dropdown;
     }
 
-    private static final Map<Screen, List<BiConsumer<Double, Double>>> componentHook = new HashMap<>();
+    private static final Map<Screen, List<Consumer<Click>>> componentHook = new HashMap<>();
 
     static {
         NeoForge.EVENT_BUS.<ScreenEvent.Closing>addListener((event) -> {
@@ -298,8 +298,8 @@ public class DropdownComponent extends FlowLayout {
         }
 
         @Override
-        public boolean onMouseDown(double mouseX, double mouseY, int button) {
-            super.onMouseDown(mouseX, mouseY, button);
+        public boolean onMouseDown(Click click, boolean doubled) {
+            super.onMouseDown(click, doubled);
 
             this.onClick.accept(this.parentDropdown);
             this.playInteractionSound();

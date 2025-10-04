@@ -12,11 +12,15 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.ScreenRect;
+import net.minecraft.client.render.block.entity.state.BlockEntityRenderState;
+import net.minecraft.client.render.command.ModelCommandRenderer;
+import net.minecraft.client.render.entity.state.EntityRenderState;
 import net.minecraft.command.argument.BlockArgumentParser;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
 import net.minecraft.storage.NbtReadView;
 import net.minecraft.util.ErrorReporter;
+import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 
@@ -32,9 +36,21 @@ public class BlockComponent extends BaseComponent {
 
     @Override
     public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+        BlockEntityRenderState entity = null;
+        if (this.entity != null) {
+            var renderer = MinecraftClient.getInstance().getBlockEntityRenderDispatcher().get(this.entity);
+            if (renderer != null) {
+                entity = renderer.createRenderState();
+
+                renderer.updateRenderState(
+                    this.entity, entity, partialTicks, Vec3d.ZERO, null
+                );
+            }
+        }
+
         context.state.addSpecialElement(new BlockElementRenderState(
             this.state,
-            this.entity,
+            entity,
             new ScreenRect(this.x, this.y, this.width, this.height),
             context.scissorStack.peekLast()
         ));

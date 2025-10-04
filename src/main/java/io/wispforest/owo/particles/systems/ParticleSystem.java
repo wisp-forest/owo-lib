@@ -74,7 +74,7 @@ public class ParticleSystem<T> {
     public void spawn(World world, Vec3d pos, @Nullable T data) {
         if (data == null && !permitsContextlessExecution) throw new IllegalStateException("This particle system does not permit 'null' data");
 
-        if (world.isClient) {
+        if (world.isClient()) {
             handler.executeParticleSystem(world, pos, data);
         } else {
             manager.sendPacket(this, (ServerWorld) world, pos, data);

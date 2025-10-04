@@ -1,5 +1,6 @@
 package io.wispforest.uwu.text;
 
+import com.mojang.serialization.MapCodec;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.serialization.CodecUtils;
@@ -7,13 +8,12 @@ import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Style;
 import net.minecraft.text.TextContent;
 
+import java.util.Map;
 import java.util.Optional;
 
 public class BasedTextContent implements TextContent {
 
-    public static final Type<BasedTextContent> TYPE = new Type<>(
-            CodecUtils.toMapCodec(StructEndecBuilder.of(Endec.STRING.fieldOf("based", o -> o.basedText), BasedTextContent::new)),
-            "uwu:based");
+    public static final MapCodec<BasedTextContent> CODEC = CodecUtils.toMapCodec(StructEndecBuilder.of(Endec.STRING.fieldOf("based", o -> o.basedText), BasedTextContent::new));
 
     private final String basedText;
 
@@ -32,7 +32,7 @@ public class BasedTextContent implements TextContent {
     }
 
     @Override
-    public Type<?> getType() {
-        return TYPE;
+    public MapCodec<? extends TextContent> getCodec() {
+        return CODEC;
     }
 }

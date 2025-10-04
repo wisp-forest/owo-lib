@@ -9,6 +9,7 @@ import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.uwu.EpicScreenHandler;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerInventory;
@@ -67,7 +68,7 @@ public class EpicHandledScreen extends BaseOwoHandledScreen<FlowLayout, EpicScre
                                             } catch (Exception e) {}
                                         }).tooltip(Text.literal("Disable"))).verticalAlignment(VerticalAlignment.CENTER).horizontalAlignment(HorizontalAlignment.CENTER))
                                 .allowOverflow(true)
-                ).surface(Surface.DARK_PANEL).padding(Insets.of(5)).allowOverflow(true).zIndex(500).positioning(Positioning.absolute(100, 100))
+                ).surface(Surface.DARK_PANEL).padding(Insets.of(5)).allowOverflow(true).positioning(Positioning.absolute(100, 100))
         ).child(
                 Containers.verticalScroll(Sizing.content(), Sizing.fill(50), Containers.verticalFlow(Sizing.content(), Sizing.content())
                         .child(this.slotAsComponent(0).tooltip(Text.of("bruh")))
@@ -90,27 +91,27 @@ public class EpicHandledScreen extends BaseOwoHandledScreen<FlowLayout, EpicScre
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (Screen.hasAltDown() && this.focusedSlot != null) {
+    public boolean mouseClicked(Click click, boolean doubled) {
+        if (click.hasAlt() && this.focusedSlot != null) {
             return false;
         }
 
-        if (button == GLFW.GLFW_MOUSE_BUTTON_MIDDLE) {
+        if (click.button() == GLFW.GLFW_MOUSE_BUTTON_MIDDLE) {
             this.uiAdapter.rootComponent.child(Containers.overlay(Components.label(Text.literal("a"))));
             return true;
         }
 
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(click, doubled);
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (Screen.hasAltDown() && this.focusedSlot != null) {
+    public boolean mouseDragged(Click click, double deltaX, double deltaY) {
+        if (click.hasAlt() && this.focusedSlot != null) {
             var accessor = ((SlotAccessor) this.focusedSlot);
             accessor.owo$setX((int) Math.round(this.focusedSlot.x + deltaX));
             accessor.owo$setY((int) Math.round(this.focusedSlot.y + deltaY));
         }
 
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        return super.mouseDragged(click, deltaX, deltaY);
     }
 }

@@ -14,8 +14,6 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Rarity;
 import net.minecraft.world.World;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 
 public class UwuScreenShardItem extends Item {
@@ -27,8 +25,8 @@ public class UwuScreenShardItem extends Item {
     @Override
     public ActionResult use(World world, PlayerEntity user, Hand hand) {
         if (user.isSneaking()) {
-            //if (world.isClient) MinecraftClient.getInstance().setScreen(new SelectUwuScreenScreen());
-        } else if (!world.isClient) {
+            //if (world.isClient()) MinecraftClient.getInstance().setScreen(new SelectUwuScreenScreen());
+        } else if (!world.isClient()) {
             user.openHandledScreen(new NamedScreenHandlerFactory() {
                 @Override
                 public Text getDisplayName() {

@@ -3,6 +3,7 @@ package io.wispforest.owo.ui.core;
 import io.wispforest.owo.ui.parsing.IncompatibleUIModelException;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
+import net.minecraft.client.gui.Click;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
@@ -160,13 +161,13 @@ public interface ParentComponent extends Component {
     }
 
     @Override
-    default boolean onMouseDown(double mouseX, double mouseY, int button) {
+    default boolean onMouseDown(Click click, boolean doubled) {
         var iter = this.children().listIterator(this.children().size());
 
         while (iter.hasPrevious()) {
             var child = iter.previous();
-            if (!child.isInBoundingBox(this.x() + mouseX, this.y() + mouseY)) continue;
-            if (child.onMouseDown(this.x() + mouseX - child.x(), this.y() + mouseY - child.y(), button)) {
+            if (!child.isInBoundingBox(this.x() + click.x(), this.y() + click.y())) continue;
+            if (child.onMouseDown(new Click(this.x() + click.x() - child.x(), this.y() + click.y() - child.y(), click.buttonInfo()), doubled)) {
                 return true;
             }
         }

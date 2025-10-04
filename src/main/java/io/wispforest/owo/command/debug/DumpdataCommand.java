@@ -129,7 +129,7 @@ public class DumpdataCommand {
 
         final var pos = ((BlockHitResult) target).getBlockPos();
 
-        final var blockState = player.getWorld().getBlockState(pos);
+        final var blockState = player.getEntityWorld().getBlockState(pos);
         final var blockStateString = blockState.toString();
 
         informationHeader(source, "Block");
@@ -149,7 +149,7 @@ public class DumpdataCommand {
             feedback(source, TextOps.withFormatting("No state properties", Formatting.GRAY));
         }
 
-        final var blockEntity = player.getWorld().getBlockEntity(pos);
+        final var blockEntity = player.getEntityWorld().getBlockEntity(pos);
         if (blockEntity != null) {
             feedback(source, TextOps.withFormatting("Block Entity NBT" + formatPath(path) + ": ", Formatting.GRAY)
                     .append(NbtHelper.toPrettyPrintedText(getPath(blockEntity.createNbt(player.getRegistryManager()), path))));

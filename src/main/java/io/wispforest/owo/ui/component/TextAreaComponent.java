@@ -13,10 +13,12 @@ import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.Observable;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.EditBox;
 import net.minecraft.client.gui.widget.EditBoxWidget;
 import net.minecraft.client.input.CursorMovement;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
@@ -91,19 +93,19 @@ public class TextAreaComponent extends EditBoxWidget {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(Click click, boolean doubled) {
         this.width -= 9;
-        var result = super.mouseClicked(mouseX, mouseY, button);
+        var result = super.mouseClicked(click, doubled);
         this.width += 9;
 
         return result;
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        boolean result = super.keyPressed(keyCode, scanCode, modifiers);
+    public boolean keyPressed(KeyInput input) {
+        boolean result = super.keyPressed(input);
 
-        if (keyCode == GLFW.GLFW_KEY_TAB) {
+        if (input.isTab()) {
             this.editBox.replaceSelection("    ");
             return true;
         } else {

@@ -58,7 +58,7 @@ public class UwuNetworkExample {
 
     //@OnlyIn(Dist.CLIENT)
     public static final class Client {
-        public static final KeyBinding NETWORK_TEST = new KeyBinding("key.uwu.network_test", GLFW.GLFW_KEY_U, "misc");
+        public static final KeyBinding NETWORK_TEST = new KeyBinding("key.uwu.network_test", GLFW.GLFW_KEY_U, KeyBinding.Category.MISC);
 
         public static void init(IEventBus eventBus) {
             eventBus.addListener((RegisterKeyMappingsEvent mappingsEvent) -> {

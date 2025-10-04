@@ -101,7 +101,7 @@ public final class Layers {
         NeoForge.EVENT_BUS.<ScreenEvent.MouseButtonPressed.Pre>addListener(EventPriority.LOW, (event) -> {
             boolean handled;
             for (var instance : getInstances(event.getScreen())) {
-                handled = instance.adapter.mouseClicked(event.getMouseX(), event.getMouseY(), event.getButton());
+                handled = instance.adapter.mouseClicked(event.getClick(), false);
                 if (handled) {
                     event.setCanceled(true);
                     return;
@@ -112,7 +112,7 @@ public final class Layers {
         NeoForge.EVENT_BUS.<ScreenEvent.MouseButtonReleased.Pre>addListener(EventPriority.LOW, (event) -> {
             boolean handled;
             for (var instance : getInstances(event.getScreen())) {
-                handled = instance.adapter.mouseReleased(event.getMouseX(), event.getMouseY(), event.getButton());
+                handled = instance.adapter.mouseReleased(event.getClick());
                 if (handled) {
                     event.setCanceled(true);
                     return;
@@ -134,7 +134,7 @@ public final class Layers {
         NeoForge.EVENT_BUS.<ScreenEvent.KeyPressed.Pre>addListener(EventPriority.LOW, (event) -> {
             boolean handled;
             for (var instance : getInstances(event.getScreen())) {
-                handled = instance.adapter.keyPressed(event.getKeyCode(), event.getScanCode(), event.getModifiers());
+                handled = instance.adapter.keyPressed(event.getInput());
                 if (handled) {
                     event.setCanceled(true);
                     return;
@@ -145,7 +145,7 @@ public final class Layers {
         NeoForge.EVENT_BUS.<ScreenEvent.KeyReleased.Pre>addListener(EventPriority.LOW, (event) -> {
             boolean handled;
             for (var instance : getInstances(event.getScreen())) {
-                handled = instance.adapter.keyReleased(event.getKeyCode(), event.getScanCode(), event.getModifiers());
+                handled = instance.adapter.keyReleased(event.getInput());
                 if (handled) {
                     event.setCanceled(true);
                     return;
