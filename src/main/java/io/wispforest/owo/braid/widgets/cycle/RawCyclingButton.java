@@ -5,12 +5,12 @@ import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.MouseArea;
-import io.wispforest.owo.braid.widgets.basic.action.ActionTrigger;
-import io.wispforest.owo.braid.widgets.basic.action.Actions;
+import io.wispforest.owo.braid.widgets.intents.*;
 import io.wispforest.owo.ui.util.UISounds;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Map;
 
 public class RawCyclingButton<T> extends StatelessWidget {
 
@@ -78,14 +78,27 @@ public class RawCyclingButton<T> extends StatelessWidget {
                     widget ->
                         widget.scrollCallback((horizontal, vertical) -> cycle.forScroll(vertical))
                             .cursorStyle(CursorStyle.HAND),
-                    new Actions(
+                    new Interactable(
+                        SHORTCUTS,
                         widget ->
-                            widget
-                                .addAction(ActionTrigger.INCREMENT, () -> {if (cycle.cycle(1)) UISounds.playButtonSound();})
-                                .addAction(ActionTrigger.DECREMENT, () -> {if (cycle.cycle(-1)) UISounds.playButtonSound();}),
+                            widget.addCallbackAction(
+                                AdjustIntent.class,
+                                (actionCtx, intent) -> {
+                                    if (cycle.cycle(intent.direction().offset())) {
+                                        UISounds.playButtonSound();
+                                    }
+                                }
+                            ),
                         child
                     )
                 )
         );
     }
+
+    // ---
+
+    private static final Map<List<ShortcutTrigger>, Intent> SHORTCUTS = Map.of(
+        List.of(ShortcutTrigger.of(ShortcutTrigger.LEFT_CLICK, ShortcutTrigger.UP, ShortcutTrigger.RIGHT)), new AdjustIntent(AdjustIntent.Direction.INCREMENT),
+        List.of(ShortcutTrigger.of(ShortcutTrigger.RIGHT_CLICK, ShortcutTrigger.DOWN, ShortcutTrigger.LEFT)), new AdjustIntent(AdjustIntent.Direction.DECREMENT)
+    );
 }

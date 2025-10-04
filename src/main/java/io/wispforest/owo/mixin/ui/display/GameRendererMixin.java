@@ -5,6 +5,7 @@ import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import io.wispforest.owo.braid.core.KeyModifiers;
 import io.wispforest.owo.braid.core.events.MouseButtonReleaseEvent;
+import io.wispforest.owo.braid.core.events.MouseMoveEvent;
 import io.wispforest.owo.braid.display.BraidDisplayBinding;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GameRenderer;
@@ -13,10 +14,12 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -42,8 +45,6 @@ public class GameRendererMixin {
         @Share("camera") LocalRef<Entity> cameraRef,
         @Share("target_display") LocalRef<BraidDisplayBinding.DisplayHitResult> targetDisplay
     ) {
-        BraidDisplayBinding.targetDisplay = null;
-
         cameraRef.set(camera);
         targetDisplay.set(
             BraidDisplayBinding.queryTargetDisplay(camera.getCameraPosVec(tickDelta), camera.getRotationVec(tickDelta))
@@ -57,13 +58,16 @@ public class GameRendererMixin {
         @Share("camera") LocalRef<Entity> cameraRef,
         @Share("target_display") LocalRef<BraidDisplayBinding.DisplayHitResult> targetDisplay
     ) {
-        if (targetDisplay.get() == null) return;
+        if (targetDisplay.get() == null) {
+            this.setTargetDisplay(null);
+            return;
+        }
 
         var displayHitPoint = targetDisplay.get().display().quad.unproject(targetDisplay.get().point());
 
         var cameraPos = cameraRef.get().getCameraPosVec(tickDelta);
         if (this.client.crosshairTarget.getPos().squaredDistanceTo(cameraPos) > displayHitPoint.squaredDistanceTo(cameraPos)) {
-            BraidDisplayBinding.targetDisplay = targetDisplay.get();
+            this.setTargetDisplay(targetDisplay.get());
             BraidDisplayBinding.onDisplayHit(BraidDisplayBinding.targetDisplay);
 
             var display = BraidDisplayBinding.targetDisplay.display();
@@ -85,6 +89,23 @@ public class GameRendererMixin {
             );
 
             this.client.targetedEntity = null;
+        } else {
+            this.setTargetDisplay(null);
         }
+    }
+
+    @Unique
+    private void setTargetDisplay(@Nullable BraidDisplayBinding.DisplayHitResult newTarget) {
+        if (BraidDisplayBinding.targetDisplay == null) {
+            BraidDisplayBinding.targetDisplay = newTarget;
+            return;
+        }
+
+        if (newTarget == null || BraidDisplayBinding.targetDisplay.display() != newTarget.display()) {
+            // TODO: not emitting proper deltas is quite cringe
+            BraidDisplayBinding.targetDisplay.display().app.eventBuffer.add(new MouseMoveEvent(0, 0, 0, 0));
+        }
+
+        BraidDisplayBinding.targetDisplay = newTarget;
     }
 }

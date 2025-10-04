@@ -331,30 +331,30 @@ public class FocusScope extends Focusable {
                         this.level,
                         super.build(context)
                     )
-                ),
-                new CustomDraw((ctx, transform) -> {
-                    if (this.focusedDescendants.isEmpty()) return;
-
-                    var instance = this.focusedDescendants.getFirst().context().instance();
-                    var drawTransform = instance.parent().computeTransformFrom(this.context().instance()).invert();
-
-                    var boxMin = drawTransform.transformPosition(instance.transform.aabb().getMinPos().toVector3f());
-                    var boxMax = drawTransform.transformPosition(instance.transform.aabb().getMaxPos().toVector3f());
-
-                    var box = new Box(new Vec3d(boxMin), new Vec3d(boxMax));
-
-                    ctx.push();
-                    ctx.translate(box.minX, box.minY, box.minZ);
-
-                    NinePatchTexture.draw(
-                        Identifier.of("owo", "braid_debug_focused"),
-                        ctx,
-                        0, 0, (int) (box.maxX - box.minX), (int) (box.maxY - box.minY),
-                        Color.ofHsv(this.focusedDescendants.getFirst().debugDepth() / 8f % 1f, .75f, 1)
-                    );
-
-                    ctx.pop();
-                })
+                )
+//                new CustomDraw((ctx, transform) -> {
+//                    if (this.focusedDescendants.isEmpty()) return;
+//
+//                    var instance = this.focusedDescendants.getFirst().context().instance();
+//                    var drawTransform = instance.parent().computeTransformFrom(this.context().instance()).invert();
+//
+//                    var boxMin = drawTransform.transformPosition(instance.transform.aabb().getMinPos().toVector3f());
+//                    var boxMax = drawTransform.transformPosition(instance.transform.aabb().getMaxPos().toVector3f());
+//
+//                    var box = new Box(new Vec3d(boxMin), new Vec3d(boxMax));
+//
+//                    ctx.push();
+//                    ctx.translate(box.minX, box.minY, box.minZ);
+//
+//                    NinePatchTexture.draw(
+//                        Identifier.of("owo", "braid_debug_focused"),
+//                        ctx,
+//                        0, 0, (int) (box.maxX - box.minX), (int) (box.maxY - box.minY),
+//                        Color.ofHsv(this.focusedDescendants.getFirst().debugDepth() / 8f % 1f, .75f, 1)
+//                    );
+//
+//                    ctx.pop();
+//                })
             );
         }
 

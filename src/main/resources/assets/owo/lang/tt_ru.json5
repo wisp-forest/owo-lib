@@ -1,0 +1,75 @@
+{
+  "modmenu.{}.owo": {
+    descriptionTranslation: "әйе бу начар мин беләм",
+    summaryTranslation: "әйе бу начар мин беләм"
+  },
+  "test.owo.{}": {
+    "itemGroup.{}": {
+      tab_template: [
+        {index: 0},
+        {text: " > ", color: "gray"},
+        {index: 1, color: "dark_gray"}
+      ],
+      select_hint: {text: "Берничә сайлау өчен Shift төймәсенә басыгыз", color: "gray"}
+    },
+    "configure_hot_reload.{}": {
+      title: "Кайнар яңадан йөкләү",
+      choose_file: "Файлны сайлау",
+      save: "Саклау",
+      model: [
+        {text: "Модель: ", color: "yellow"},
+        {index: 0, color: "gray"}
+      ],
+      "reload_from.unset": "Сайланмаган",
+      reload_from: [
+        {text: "Яңадан йөкләү урыны: ", color: "yellow"},
+        {index: 0, color: "gray"}
+      ]
+    },
+    "config.{}": {
+      search: "Эзләү.{}",
+      "search.{}": {
+        matches: "%$2d нәтиҗәдән %$1d нәтиҗә",
+        no_matches: "Нәтиҗәләр юк"
+      },
+      must_restart: "Сез керткән кайбер үзгәрешләр куллану өчен яңадан йөкләүне таләп итә",
+      "button.{}": {
+        exit_minecraft: "Minecraft-тан чыгу",
+        ignore_restart: "Яңадан кушу соңрак",
+        "range.edit_{}": {
+          as_text: "Текст кебек үзгәртү",
+          with_slider: "Шудырма белән үзгәртү"
+        },
+        reload: "↻",
+        done: "Булды"
+      },
+      applies_after_restart: [
+        {text: "⏻ ", color: "#FAEA48"},
+        {text: "Бу көйләү яңадан йөкләүдән соң кулланыла", color: "gray"}
+      ],
+      managed_by_server: [
+        {text: "⚑ ", color: "#EB1D36"},
+        {text: "Бу көйләү сервер белән идарә ителә\n   Аны үзгәртү өчен өзелегез", color: "gray"}
+      ],
+      sections_tooltip: "Бүлекләр",
+      sections: {text: "Бүлекләр", underlined: true},
+      "list.add_entry": "Элементны өстәү",
+      "boolean_toggle.{}": {
+        enabled: [
+          "",
+          {text: "[", color: "gray"},
+          {text: "✔", color: "#28FFBF"},
+          {text: "]", color: "gray"},
+          " Кушык"
+        ],
+        disabled: [
+          "",
+          {text: "[", color: "gray"},
+          {text: "❌", color: "#EB1D36"},
+          {text: "]", color: "gray"},
+          " Сүнек"
+        ]
+      }
+    }
+  }
+}

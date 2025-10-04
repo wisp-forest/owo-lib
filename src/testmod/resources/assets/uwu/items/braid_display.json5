@@ -1,0 +1,6 @@
+{
+	model: {
+		type: "minecraft:model",
+		model: "uwu:block/braid_display"
+	}
+}

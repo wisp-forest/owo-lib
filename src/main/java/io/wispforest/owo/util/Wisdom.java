@@ -60,7 +60,10 @@ public final class Wisdom {
             "BasiqueEvangelist: what if... iphones",
             "Cheese Cheese Creeper, the newest release from MC Basic",
             "THIS ROOM IS SO VANILLA IT HURTS",
-            "Owo.currentServer()"
+            "Owo.currentServer()",
+            //Here's the 4 dots that were previously used in nested lang formatting:
+            "....",
+            "Weakeys"
     );
 
     public static void spread() {

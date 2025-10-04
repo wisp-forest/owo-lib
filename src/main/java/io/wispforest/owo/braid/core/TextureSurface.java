@@ -22,6 +22,8 @@ public class TextureSurface implements Surface {
     private final SimpleFramebuffer framebuffer;
     private final EventStream<ResizeCallback> resizeEvents = ResizeCallback.newStream();
 
+    private CursorStyle currentCursorStyle = CursorStyle.NONE;
+
     public TextureSurface(int width, int height) {
         this.framebuffer = createFramebufferAndRestoreState(width, height, true);
     }
@@ -57,13 +59,12 @@ public class TextureSurface implements Surface {
 
     @Override
     public CursorStyle currentCursorStyle() {
-        return CursorStyle.NONE;
+        return this.currentCursorStyle;
     }
 
     @Override
     public void setCursorStyle(CursorStyle style) {
-        // it doesn't make sense to style the cursor
-        // when rendering to a texture
+        this.currentCursorStyle = style;
     }
 
     // ---

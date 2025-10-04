@@ -117,7 +117,7 @@ public class UIModelLoader implements SynchronousResourceReloader, IdentifiableR
 
                 LOADED_MODELS.put(modelId, UIModel.load(resource.getInputStream()));
             } catch (ParserConfigurationException | IOException | SAXException e) {
-                Owo.LOGGER.error("Could not parse UI model {}", resourceId, e);
+                Owo.LOGGER.error("Couldn't parse UI model {}", resourceId, e);
             }
         });
 

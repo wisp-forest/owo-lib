@@ -1,0 +1,23 @@
+{
+  type: "minecraft:crafting_shaped",
+  key: {
+    O : "minecraft:stick",
+    X: "minecraft:sand"
+  },
+  "owo:remainders": {
+    "minecraft:sand": "minecraft:sand",
+    "minecraft:stick": {
+      id: "minecraft:stick",
+      count: 64
+    }
+  },
+  pattern: [
+    "XXX",
+    "XOX",
+    "XXX"
+  ],
+  result: {
+    id: "minecraft:bedrock"
+  },
+  // no way a comment?!?!?!?
+}

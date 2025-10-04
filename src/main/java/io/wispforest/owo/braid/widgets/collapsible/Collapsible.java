@@ -11,14 +11,14 @@ import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.SpriteWidget;
 import io.wispforest.owo.braid.widgets.basic.*;
-import io.wispforest.owo.braid.widgets.basic.action.Actions;
+import io.wispforest.owo.braid.widgets.intents.Interactable;
+import io.wispforest.owo.braid.widgets.intents.ShortcutDecoder;
 import io.wispforest.owo.braid.widgets.flex.Column;
 import io.wispforest.owo.braid.widgets.flex.CrossAxisAlignment;
 import io.wispforest.owo.braid.widgets.flex.MainAxisAlignment;
 import io.wispforest.owo.braid.widgets.flex.Row;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.braid.widgets.stack.StackBase;
-import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
 
@@ -84,8 +84,7 @@ public class Collapsible extends StatefulWidget {
                         new Sized(
                             12,
                             12,
-                            Actions.click(
-                                widget -> widget.cursorStyle(CursorStyle.HAND),
+                            Interactable.primary(
                                 () -> this.widget().onToggled.onToggled(!this.widget().collapsed),
                                 new Center(
                                     new SpriteWidget(Owo.id(this.widget().collapsed ? "braid_collapsible_closed" : "braid_collapsible_open"), false)
