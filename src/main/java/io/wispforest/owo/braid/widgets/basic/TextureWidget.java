@@ -1,15 +1,12 @@
 package io.wispforest.owo.braid.widgets.basic;
 
-import io.wispforest.owo.braid.core.BraidDrawContext;
-import io.wispforest.owo.braid.core.Color;
-import io.wispforest.owo.braid.core.Constraints;
-import io.wispforest.owo.braid.core.Size;
+import io.wispforest.owo.braid.core.*;
 import io.wispforest.owo.braid.framework.instance.OptionalChildWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.OptionalChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.util.TextureSizeLookup;
-import io.wispforest.owo.ui.core.OwoUIRenderLayers;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.TriState;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.OptionalDouble;
@@ -18,17 +15,27 @@ public class TextureWidget extends OptionalChildInstanceWidget {
 
     public final Identifier texture;
     public final Wrap wrap;
+    public final Filter filter;
     public final Color color;
 
-    public TextureWidget(Identifier texture, Wrap wrap, Color color, @Nullable Widget child) {
+    public TextureWidget(Identifier texture, Wrap wrap, Filter filter, Color color, @Nullable Widget child) {
         super(child);
         this.texture = texture;
         this.wrap = wrap;
+        this.filter = filter;
         this.color = color;
     }
 
+    public TextureWidget(Identifier texture, Wrap wrap, Color color, @Nullable Widget child) {
+        this(texture, wrap, Filter.NEAREST, color, child);
+    }
+
+    public TextureWidget(Identifier texture, Wrap wrap, Filter filter, Color color) {
+        this(texture, wrap, filter, color, null);
+    }
+
     public TextureWidget(Identifier texture, Wrap wrap, Color color) {
-        this(texture, wrap, color, null);
+        this(texture, wrap, Filter.NEAREST, color);
     }
 
     @Override
@@ -40,6 +47,10 @@ public class TextureWidget extends OptionalChildInstanceWidget {
 
     public enum Wrap {
         NONE, STRETCH, REPEAT
+    }
+
+    public enum Filter {
+        TEXTURE_DEFAULT, NEAREST, LINEAR;
     }
 
     // ---
@@ -120,8 +131,14 @@ public class TextureWidget extends OptionalChildInstanceWidget {
                 matrices.scale((int) this.transform.width() / (float) textureWidth, (int) this.transform.height() / (float) textureHeight, 1);
             }
 
+            var bilinearState = switch (this.widget.filter) {
+                case TEXTURE_DEFAULT -> TriState.DEFAULT;
+                case NEAREST -> TriState.FALSE;
+                case LINEAR -> TriState.TRUE;
+            };
+
             ctx.drawTexture(
-                texture -> OwoUIRenderLayers.getGuiTextured(texture, true),
+                texture -> BraidRenderLayers.getTextured(texture, bilinearState),
                 this.widget.texture,
                 0, 0, 0, 0,
                 quadWidth, quadHeight,
