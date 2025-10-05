@@ -22,10 +22,11 @@ public class Interactable extends StatefulWidget {
 
     private @Nullable Focusable.FocusGainedCallback focusGainedCallback;
     private @Nullable Focusable.FocusLostCallback focusLostCallback;
+    private boolean skipTraversal = false;
+    private boolean autoFocus = false;
 
     public final Map<List<ShortcutTrigger>, Intent> shortcuts;
 
-    private boolean autoFocus = false;
     private final Map<Class<? extends Intent>, Action<?>> actions = new HashMap<>();
 
     public final Widget child;
@@ -116,6 +117,16 @@ public class Interactable extends StatefulWidget {
         return this.focusLostCallback;
     }
 
+    public Interactable skipTraversal(boolean skipTraversal) {
+        this.assertMutable();
+        this.skipTraversal = skipTraversal;
+        return this;
+    }
+
+    public boolean skipTraversal() {
+        return this.skipTraversal;
+    }
+
     public Interactable autoFocus(boolean autoFocus) {
         this.assertMutable();
         this.autoFocus = autoFocus;
@@ -170,7 +181,6 @@ public class Interactable extends StatefulWidget {
             return new Actions(
                 actions -> actions
                     .focusable(false)
-                    .autoFocus(this.widget().autoFocus)
                     .actions(this.widget().actions),
                 new Shortcuts(
                     widget.shortcuts,
@@ -179,7 +189,9 @@ public class Interactable extends StatefulWidget {
                         .exitCallback(this.widget().exitCallback)
                         .cursorStyleSupplier(this.widget().cursorStyleSupplier)
                         .focusGainedCallback(this.widget().focusGainedCallback)
-                        .focusLostCallback(this.widget().focusLostCallback),
+                        .focusLostCallback(this.widget().focusLostCallback)
+                        .skipTraversal(this.widget().skipTraversal)
+                        .autoFocus(this.widget().autoFocus),
                     widget.child
                 )
             );

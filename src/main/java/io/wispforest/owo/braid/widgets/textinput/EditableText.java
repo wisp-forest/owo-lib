@@ -208,6 +208,7 @@ public class EditableText extends StatefulWidget {
         public Widget build(BuildContext context) {
             return new Focusable(
                 widget -> widget
+                    .autoFocus(this.widget().autoFocus)
                     .focusGainedCallback(() -> {
                         this.focused = true;
                         this.restartBlinking();
@@ -233,7 +234,6 @@ public class EditableText extends StatefulWidget {
                             this.widget().controller,
                             this.showCursor,
                             this.widget().softWrap,
-                            this.widget().autoFocus,
                             this.widget().maxLines,
                             this.widget().maxCharacters,
                             this.widget().baseStyle,

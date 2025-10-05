@@ -22,6 +22,8 @@ public class Shortcuts extends StatefulWidget {
 
     private @Nullable Focusable.FocusGainedCallback focusGainedCallback;
     private @Nullable Focusable.FocusLostCallback focusLostCallback;
+    private boolean skipTraversal = false;
+    private boolean autoFocus = false;
 
     public final Map<List<ShortcutTrigger>, Intent> shortcuts;
     public final Widget child;
@@ -86,6 +88,26 @@ public class Shortcuts extends StatefulWidget {
         return this.focusLostCallback;
     }
 
+    public Shortcuts skipTraversal(boolean skipTraversal) {
+        this.assertMutable();
+        this.skipTraversal = skipTraversal;
+        return this;
+    }
+
+    public boolean skipTraversal() {
+        return this.skipTraversal;
+    }
+
+    public Shortcuts autoFocus(boolean autoFocus) {
+        this.assertMutable();
+        this.autoFocus = autoFocus;
+        return this;
+    }
+
+    public boolean autoFocus() {
+        return this.autoFocus;
+    }
+
     @Override
     public WidgetState<Shortcuts> createState() {
         return new State();
@@ -129,7 +151,8 @@ public class Shortcuts extends StatefulWidget {
                     .cursorStyleSupplier(this.widget().cursorStyleSupplier)
                     .focusGainedCallback(this.widget().focusGainedCallback)
                     .focusLostCallback(this.widget().focusLostCallback)
-                ,
+                    .skipTraversal(this.widget().skipTraversal)
+                    .autoFocus(this.widget().autoFocus),
                 this.widget().child
             );
         }

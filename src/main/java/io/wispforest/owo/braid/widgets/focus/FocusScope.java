@@ -7,19 +7,13 @@ import io.wispforest.owo.braid.framework.proxy.WidgetProxy;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
-import io.wispforest.owo.braid.widgets.basic.CustomDraw;
 import io.wispforest.owo.braid.widgets.scroll.Scrollable;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.braid.widgets.stack.StackBase;
-import io.wispforest.owo.ui.core.Color;
-import io.wispforest.owo.ui.util.NinePatchTexture;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -51,7 +45,7 @@ public class FocusScope extends Focusable {
         private final Deque<FocusEntry> previouslyFocusedScopes = new ArrayDeque<>();
 
         private final Deque<Focusable.State<?>> traversalHistory = new LinkedList<>();
-        private FocusTraversalDirection lastTraversalDirection = null;
+        private FocusTraversalDirection historyDirection = null;
 
         public void updateFocus(@Nullable Focusable.State<?> primary, @Nullable FocusLevel level) {
             this.updateFocus(primary, level, false);
@@ -158,17 +152,17 @@ public class FocusScope extends Focusable {
             var poppedHistory = false;
 
             if (!this.traversalHistory.isEmpty()) {
-                if (this.lastTraversalDirection == direction.opposite()) {
+                if (this.historyDirection == direction.opposite()) {
                     poppedHistory = true;
                     this.updateFocus(this.traversalHistory.pop(), FocusLevel.HIGHLIGHT, true);
-                } else if (this.lastTraversalDirection != direction) {
+                } else if (this.historyDirection != direction) {
                     this.traversalHistory.clear();
                 }
             }
 
-            this.lastTraversalDirection = direction;
             if (!poppedHistory && !this.focusedDescendants.isEmpty()) {
                 this.traversalHistory.push(this.focusedDescendants.getFirst());
+                this.historyDirection = direction;
             }
 
             return poppedHistory;
@@ -183,6 +177,7 @@ public class FocusScope extends Focusable {
             var focusedCenter = FocusTraversalCandidate.of(this.focusedDescendants.getFirst()).center();
 
             var candidates = descendants.stream()
+                .filter(state -> !state.widget().skipTraversal())
                 .map(FocusTraversalCandidate::of)
                 .filter(candidate -> {
                     return this.filterCandidate(candidate, focusedBounds, direction);
@@ -272,22 +267,6 @@ public class FocusScope extends Focusable {
                 if (descendant.onKeyDown(keyCode, modifiers)) {
                     return true;
                 }
-            }
-
-            // TODO(glisco): replace with intents
-            if (keyCode == GLFW.GLFW_KEY_TAB) {
-                this.traverseFocus(modifiers.shift() ? FocusTraversalDirection.PREVIOUS : FocusTraversalDirection.NEXT);
-                return true;
-            }
-
-            if (keyCode == GLFW.GLFW_KEY_LEFT || keyCode == GLFW.GLFW_KEY_RIGHT) {
-                this.traverseFocus(keyCode == GLFW.GLFW_KEY_LEFT ? FocusTraversalDirection.LEFT : FocusTraversalDirection.RIGHT);
-                return true;
-            }
-
-            if (keyCode == GLFW.GLFW_KEY_UP || keyCode == GLFW.GLFW_KEY_DOWN) {
-                this.traverseFocus(keyCode == GLFW.GLFW_KEY_UP ? FocusTraversalDirection.UP : FocusTraversalDirection.DOWN);
-                return true;
             }
 
             return super.onKeyDown(keyCode, modifiers);

@@ -38,7 +38,7 @@ public class TextInput extends LeafInstanceWidget {
     public final boolean textShadow;
     public final Text suggestion;
 
-    public TextInput(TextEditingController controller, boolean showCursor, boolean softWrap, boolean autoFocus, int maxLines, int maxCharacters, Style baseStyle, boolean textShadow, @Nullable Text suggestion) {
+    public TextInput(TextEditingController controller, boolean showCursor, boolean softWrap, int maxLines, int maxCharacters, Style baseStyle, boolean textShadow, @Nullable Text suggestion) {
         this.controller = controller;
         this.showCursor = showCursor;
         this.softWrap = softWrap;

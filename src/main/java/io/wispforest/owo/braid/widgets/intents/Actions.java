@@ -16,6 +16,7 @@ public class Actions extends StatefulWidget {
 
     private boolean focusable = true;
     private boolean autoFocus = false;
+    private boolean skipTraversal = false;
 
     private final Map<Class<? extends Intent>, Action<?>> actions;
     public final Widget child;
@@ -44,6 +45,16 @@ public class Actions extends StatefulWidget {
 
     public boolean autoFocus() {
         return this.autoFocus;
+    }
+
+    public Actions skipTraversal(boolean skipTraversal) {
+        this.assertMutable();
+        this.skipTraversal = skipTraversal;
+        return this;
+    }
+
+    public boolean skipTraversal() {
+        return this.skipTraversal;
     }
 
     public Actions actions(Map<Class<? extends Intent>, Action<?>> actions) {
@@ -110,7 +121,7 @@ public class Actions extends StatefulWidget {
             return new ActionsProvider(
                 this,
                 widget.focusable
-                    ? new Focusable(focusable -> focusable.autoFocus(widget.autoFocus), widget.child)
+                    ? new Focusable(focusable -> focusable.autoFocus(widget.autoFocus).skipTraversal(this.widget().skipTraversal), widget.child)
                     : widget.child
             );
         }

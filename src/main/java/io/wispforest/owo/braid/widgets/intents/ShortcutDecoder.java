@@ -25,6 +25,8 @@ public class ShortcutDecoder extends StatefulWidget {
 
     private @Nullable Focusable.FocusGainedCallback focusGainedCallback;
     private @Nullable Focusable.FocusLostCallback focusLostCallback;
+    private boolean skipTraversal = false;
+    private boolean autoFocus = false;
 
     private final Map<List<ShortcutTrigger>, Listener> shortcuts = new LinkedHashMap<>();
 
@@ -92,6 +94,26 @@ public class ShortcutDecoder extends StatefulWidget {
         return this.focusLostCallback;
     }
 
+    public ShortcutDecoder skipTraversal(boolean skipTraversal) {
+        this.assertMutable();
+        this.skipTraversal = skipTraversal;
+        return this;
+    }
+
+    public boolean skipTraversal() {
+        return this.skipTraversal;
+    }
+
+    public ShortcutDecoder autoFocus(boolean autoFocus) {
+        this.assertMutable();
+        this.autoFocus = autoFocus;
+        return this;
+    }
+
+    public boolean autoFocus() {
+        return this.autoFocus;
+    }
+
     public ShortcutDecoder shortcuts(Map<List<ShortcutTrigger>, Listener> shortcuts) {
         this.assertMutable();
         this.shortcuts.putAll(shortcuts);
@@ -156,6 +178,8 @@ public class ShortcutDecoder extends StatefulWidget {
                     widget -> widget
                         .focusGainedCallback(this.widget().focusGainedCallback())
                         .focusLostCallback(this.widget().focusLostCallback())
+                        .skipTraversal(this.widget().skipTraversal())
+                        .autoFocus(this.widget().autoFocus())
                         .keyDownCallback((keyCode, modifiers) -> stepActions(trigger -> {
                             if (trigger.isTriggeredByKeyCode(keyCode, modifiers)) return ActionTriggerResult.ACTIVATED;
                             return KeyModifiers.isModifier(keyCode) ? ActionTriggerResult.IGNORED : ActionTriggerResult.NOT_ACTIVATED;

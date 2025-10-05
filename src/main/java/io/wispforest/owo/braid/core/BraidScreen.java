@@ -4,6 +4,7 @@ import io.wispforest.owo.braid.core.events.*;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.InheritedWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.braid.widgets.BraidApp;
 import io.wispforest.owo.ui.util.DisposableScreen;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -36,13 +37,17 @@ public class BraidScreen extends Screen implements DisposableScreen {
         super.init();
 
         if (this.state == null) {
+            var widget = this.settings.useBraidAppWidget
+                ? new BraidApp(this.rootWidget)
+                : this.rootWidget;
+
             this.state = new AppState(
                 null,
                 AppState.formatName("BraidScreen", this.rootWidget),
                 this.client,
                 this.surface,
                 this.eventBuffer,
-                new BraidScreenProvider(this, this.rootWidget)
+                new BraidScreenProvider(this, widget)
             );
         }
     }
@@ -132,6 +137,7 @@ public class BraidScreen extends Screen implements DisposableScreen {
 
     public static class Settings {
         public boolean shouldPause = true;
+        public boolean useBraidAppWidget = true;
     }
 }
 
