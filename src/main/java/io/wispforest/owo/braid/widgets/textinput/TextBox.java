@@ -49,7 +49,8 @@ public class TextBox extends StatefulWidget {
                 new Focusable(
                     widget -> widget
                         .focusGainedCallback(() -> this.setState(() -> this.focused = true))
-                        .focusLostCallback(() -> this.setState(() -> this.focused = false)),
+                        .focusLostCallback(() -> this.setState(() -> this.focused = false))
+                        .skipTraversal(true),
                     new Padding(
                         Insets.all(1),
                         new Box(
