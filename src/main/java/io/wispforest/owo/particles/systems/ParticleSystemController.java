@@ -95,8 +95,8 @@ public class ParticleSystemController {
         OwoHandshake.enable();
         OwoHandshake.requireHandshake();
 
-        if (FMLLoader.getDist() == Dist.CLIENT) {
-            NeoOwoNetworking.registerClientPayload(payloadId, (payload, player) -> new Client().handler(payload, player.getWorld()));
+        if (FMLLoader.getCurrent().getDist() == Dist.CLIENT) {
+            NeoOwoNetworking.registerClientPayload(payloadId, (payload, player) -> new Client().handler(payload, player.getEntityWorld()));
         } else {
             NeoOwoNetworking.registerClientPayload(payloadId, NeoOwoNetworking.PayloadHandler.empty());
         }
@@ -168,7 +168,7 @@ public class ParticleSystemController {
     }
 
     private void verify() {
-        if (FMLLoader.getDist() == Dist.CLIENT) {
+        if (FMLLoader.getCurrent().getDist() == Dist.CLIENT) {
             for (ParticleSystem<?> system : systemsByIndex.values()) {
                 if (system.handler == null) {
                     throw new NetworkException("Some particle systems of " + channelId + " don't have handlers registered");

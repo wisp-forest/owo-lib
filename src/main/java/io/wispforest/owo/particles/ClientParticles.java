@@ -251,7 +251,7 @@ public final class ClientParticles {
      */
     @SuppressWarnings("ConstantConditions")
     public static <T extends ParticleEffect> void spawnWithMaxAge(T particleType, Vec3d pos, int maxAge) {
-        if (!FMLLoader.getDist().isClient()) throw new IllegalStateException("Unable to execute spawnWithMaxAge as currently its not a CLIENT Dist!");
+        if (!FMLLoader.getCurrent().getDist().isClient()) throw new IllegalStateException("Unable to execute spawnWithMaxAge as currently its not a CLIENT Dist!");
         var particle = MinecraftClient.getInstance().particleManager.addParticle(particleType, pos.x, pos.y, pos.z, velocity.x, velocity.y, velocity.z);
         if (particle == null) {
             return;

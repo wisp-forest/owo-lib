@@ -43,7 +43,7 @@ public class Owo {
             .append(Text.literal(" > ").formatted(Formatting.GRAY));
 
     static {
-        boolean debug = !FMLLoader.isProduction();
+        boolean debug = !FMLLoader.getCurrent().isProduction();
         if (System.getProperty("owo.debug") != null) debug = Boolean.getBoolean("owo.debug");
         if (Boolean.getBoolean("owo.forceDisableDebug")) {
             LOGGER.warn("Deprecated system property 'owo.forceDisableDebug=true' was used - use 'owo.debug=false' instead");

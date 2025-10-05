@@ -157,7 +157,7 @@ public class OwoNetChannel {
             serverHandlers.get(endecsByClass.get(payload.message().getClass()).serverHandlerIndex).handle(payload.message, new ServerAccess((ServerPlayerEntity) player));
         });
 
-        if (FMLLoader.getDist() == Dist.CLIENT) {
+        if (FMLLoader.getCurrent().getDist() == Dist.CLIENT) {
             NeoOwoNetworking.registerClientMessageHandler(this.packetId, (payload, player) -> {
                 clientHandlers.get(endecsByClass.get(payload.message.getClass()).clientHandlerIndex).handle(payload.message, new ClientAccess(player));
             });
@@ -338,8 +338,8 @@ public class OwoNetChannel {
      * @return The client handle of this channel
      */
     public ClientHandle clientHandle() {
-        if (FMLLoader.getDist() != Dist.CLIENT)
-            throw new NetworkException("Cannot obtain client handle in environment type '" + FMLLoader.getDist() + "'");
+        if (FMLLoader.getCurrent().getDist() != Dist.CLIENT)
+            throw new NetworkException("Cannot obtain client handle in environment type '" + FMLLoader.getCurrent().getDist() + "'");
 
         if (this.clientHandle == null) this.clientHandle = new ClientHandle();
         return clientHandle;
@@ -548,7 +548,7 @@ public class OwoNetChannel {
     }
 
     private void verify() {
-        if (FMLLoader.getDist() == Dist.CLIENT) {
+        if (FMLLoader.getCurrent().getDist() == Dist.CLIENT) {
             if (!this.deferredClientEndecs.isEmpty()) {
                 throw new NetworkException("Some deferred client handlers for channel " + this.packetId + " haven't been registered: " + deferredClientEndecs.keySet().stream().map(Class::getName).collect(Collectors.joining(", ")));
             }

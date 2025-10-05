@@ -28,7 +28,7 @@ allprojects {
         minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
         mappings loom.layered {
             it.mappings("net.fabricmc:yarn:${rootProject.yarn_mappings}:v2")
-            it.mappings("dev.architectury:yarn-mappings-patch-neoforge:1.21+build.4")
+            it.mappings("dev.architectury:yarn-mappings-patch-neoforge:1.21+build.6")
         }
         //modImplementation "net.fabricmc:fabric-loader:${rootProject.loader_version}"
 

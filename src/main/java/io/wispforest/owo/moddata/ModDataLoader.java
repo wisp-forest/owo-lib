@@ -24,7 +24,7 @@ public final class ModDataLoader {
 
     private static final Gson GSON = new Gson();
 
-    private static final Path DATA_PATH = FMLLoader.getGamePath().resolve("moddata");
+    private static final Path DATA_PATH = FMLLoader.getCurrent().getGameDir().resolve("moddata");
 
     private ModDataLoader() {}
 

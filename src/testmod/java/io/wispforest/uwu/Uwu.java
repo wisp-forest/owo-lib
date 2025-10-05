@@ -233,7 +233,7 @@ public class Uwu {
             access.player().sendMessage(Text.of(String.valueOf(message)), false);
         });
 
-        if (FMLLoader.getDist() == Dist.DEDICATED_SERVER && WE_TESTEN_HANDSHAKE) {
+        if (FMLLoader.getCurrent().getDist() == Dist.DEDICATED_SERVER && WE_TESTEN_HANDSHAKE) {
             OwoNetChannel.create(Identifier.of("uwu", "server_only_channel"));
             new ParticleSystemController(Identifier.of("uwu", "server_only_particles"));
         }

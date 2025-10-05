@@ -103,7 +103,7 @@ public abstract class ConfigWrapper<C> {
                     + " is already taken an by instance of class '" + KNOWN_CONFIG_CLASSES.get(this.name).getName() + "'");
         }
 
-        if (FMLLoader.getDist() == Dist.CLIENT && clazz.isAnnotationPresent(Modmenu.class)) {
+        if (FMLLoader.getCurrent().getDist() == Dist.CLIENT && clazz.isAnnotationPresent(Modmenu.class)) {
             var modmenuAnnotation = clazz.getAnnotation(Modmenu.class);
             ConfigScreenProviders.register(
                     modmenuAnnotation.modId(),
@@ -234,7 +234,7 @@ public abstract class ConfigWrapper<C> {
      * @return The location to which this config is saved
      */
     public Path fileLocation() {
-        return FMLLoader.getGamePath().resolve(FMLPaths.CONFIGDIR.relative()).resolve(this.name + ".json5");
+        return FMLLoader.getCurrent().getGameDir().resolve(FMLPaths.CONFIGDIR.relative()).resolve(this.name + ".json5");
     }
 
     /**

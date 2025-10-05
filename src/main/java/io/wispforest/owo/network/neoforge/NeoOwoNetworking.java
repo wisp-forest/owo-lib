@@ -60,7 +60,7 @@ public class NeoOwoNetworking {
                 iPayloadContext.enqueueWork(() -> {
                     var player = iPayloadContext.player();
 
-                    var handler = (!player.getWorld().isClient())
+                    var handler = (!player.getEntityWorld().isClient())
                         ? PAYLOAD_ID_TO_SERVER_PAYLOAD_HANDLER.get(id)
                         : PAYLOAD_ID_TO_CLIENT_PAYLOAD_HANDLER.get(id);
 

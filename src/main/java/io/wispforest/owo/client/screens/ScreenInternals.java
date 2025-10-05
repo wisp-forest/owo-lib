@@ -35,7 +35,7 @@ public class ScreenInternals {
                     return;
                 }
 
-                ((OwoScreenHandlerExtension) screenHandler).owo$handlePacket(payload, context.player().getWorld().isClient());
+                ((OwoScreenHandlerExtension) screenHandler).owo$handlePacket(payload, context.player().getEntityWorld().isClient());
             });
         };
 

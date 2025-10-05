@@ -101,7 +101,7 @@ public final class Layers {
         NeoForge.EVENT_BUS.<ScreenEvent.MouseButtonPressed.Pre>addListener(EventPriority.LOW, (event) -> {
             boolean handled;
             for (var instance : getInstances(event.getScreen())) {
-                handled = instance.adapter.mouseClicked(event.getClick(), false);
+                handled = instance.adapter.mouseClicked(event.getMouseButtonEvent(), false);
                 if (handled) {
                     event.setCanceled(true);
                     return;
@@ -112,7 +112,7 @@ public final class Layers {
         NeoForge.EVENT_BUS.<ScreenEvent.MouseButtonReleased.Pre>addListener(EventPriority.LOW, (event) -> {
             boolean handled;
             for (var instance : getInstances(event.getScreen())) {
-                handled = instance.adapter.mouseReleased(event.getClick());
+                handled = instance.adapter.mouseReleased(event.getMouseButtonEvent());
                 if (handled) {
                     event.setCanceled(true);
                     return;
@@ -134,7 +134,7 @@ public final class Layers {
         NeoForge.EVENT_BUS.<ScreenEvent.KeyPressed.Pre>addListener(EventPriority.LOW, (event) -> {
             boolean handled;
             for (var instance : getInstances(event.getScreen())) {
-                handled = instance.adapter.keyPressed(event.getInput());
+                handled = instance.adapter.keyPressed(event.getKeyEvent());
                 if (handled) {
                     event.setCanceled(true);
                     return;
@@ -145,7 +145,7 @@ public final class Layers {
         NeoForge.EVENT_BUS.<ScreenEvent.KeyReleased.Pre>addListener(EventPriority.LOW, (event) -> {
             boolean handled;
             for (var instance : getInstances(event.getScreen())) {
-                handled = instance.adapter.keyReleased(event.getInput());
+                handled = instance.adapter.keyReleased(event.getKeyEvent());
                 if (handled) {
                     event.setCanceled(true);
                     return;

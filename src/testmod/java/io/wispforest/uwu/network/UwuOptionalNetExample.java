@@ -23,7 +23,7 @@ public class UwuOptionalNetExample {
     public static final boolean CLIENT_CHANNEL_IN_SERVER = false;
 
     public static void init() {
-        if (FMLLoader.getDist() == Dist.DEDICATED_SERVER || SERVER_CHANNEL_IN_CLIENT) {
+        if (FMLLoader.getCurrent().getDist() == Dist.DEDICATED_SERVER || SERVER_CHANNEL_IN_CLIENT) {
             var serverChannel = OwoNetChannel.createOptional(Identifier.of("uwu", "optional_server"));
 
             serverChannel.registerClientbound(StringPacket.class, (message, access) -> {

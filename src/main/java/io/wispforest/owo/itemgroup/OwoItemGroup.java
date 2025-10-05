@@ -101,7 +101,7 @@ public abstract class OwoItemGroup extends ItemGroup {
     public void initialize() {
         if (this.initialized) return;
 
-        if (FMLLoader.getDist() == Dist.CLIENT) this.initializer.accept(this);
+        if (FMLLoader.getCurrent().getDist() == Dist.CLIENT) this.initializer.accept(this);
         if (this.tabs.isEmpty()) this.tabs.add(PLACEHOLDER_TAB);
 
         if (this.allowMultiSelect) {

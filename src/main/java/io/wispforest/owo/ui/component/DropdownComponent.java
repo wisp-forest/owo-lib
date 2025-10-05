@@ -88,7 +88,7 @@ public class DropdownComponent extends FlowLayout {
             componentHook.remove(event.getScreen());
         });
         NeoForge.EVENT_BUS.<ScreenEvent.MouseButtonPressed.Pre>addListener((event) -> {
-            componentHook.getOrDefault(event.getScreen(), List.of()).forEach(consumer -> consumer.accept(event.getMouseX(), event.getMouseY()));
+            componentHook.getOrDefault(event.getScreen(), List.of()).forEach(consumer -> consumer.accept(event.getMouseButtonEvent()));
         });
     }
 

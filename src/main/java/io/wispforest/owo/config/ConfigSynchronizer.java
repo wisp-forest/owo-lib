@@ -121,7 +121,7 @@ public class ConfigSynchronizer {
 
     //@OnlyIn(Dist.CLIENT)
     private static void applyClient(ConfigSyncPacket payload, IPayloadContext context) {
-        if (!FMLLoader.getDist().isClient()) throw new IllegalStateException("Unable to execute applyClient as currently its not a CLIENT Dist!");
+        if (!FMLLoader.getCurrent().getDist().isClient()) throw new IllegalStateException("Unable to execute applyClient as currently its not a CLIENT Dist!");
         var client = MinecraftClient.getInstance();
 
         Owo.LOGGER.info("Applying server overrides");
@@ -203,7 +203,7 @@ public class ConfigSynchronizer {
 
         IPayloadHandler<ConfigSyncPacket> handler = (payload, context) -> {
             context.enqueueWork(() -> {
-                if (context.player().getWorld().isClient()) {
+                if (context.player().getEntityWorld().isClient()) {
                     ConfigSynchronizer.applyClient(payload, context);
                 } else {
                     ConfigSynchronizer.applyServer(payload, context);
@@ -223,6 +223,6 @@ public class ConfigSynchronizer {
     }
 
     public static void onDisconnect() {
-        if (FMLLoader.getDist() == Dist.CLIENT) KNOWN_CONFIGS.forEach((name, config) -> config.forEachOption(Option::reattach));
+        if (FMLLoader.getCurrent().getDist() == Dist.CLIENT) KNOWN_CONFIGS.forEach((name, config) -> config.forEachOption(Option::reattach));
     }
 }
