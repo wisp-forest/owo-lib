@@ -20,7 +20,7 @@ public class Checkbox extends StatelessWidget {
         this.onUpdate = onUpdate;
     }
 
-    public Checkbox(boolean checked, CheckboxCallback onUpdate, boolean active) {
+    public Checkbox(boolean checked, boolean active, CheckboxCallback onUpdate) {
         this(checked, active ? onUpdate : null);
     }
 

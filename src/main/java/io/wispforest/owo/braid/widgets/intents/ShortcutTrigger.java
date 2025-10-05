@@ -12,21 +12,6 @@ public record ShortcutTrigger(Set<Trigger> triggers) {
     public static final ShortcutTrigger LEFT_CLICK = new ShortcutTrigger(Trigger.ofMouse(GLFW_MOUSE_BUTTON_LEFT));
     public static final ShortcutTrigger RIGHT_CLICK = new ShortcutTrigger(Trigger.ofMouse(GLFW_MOUSE_BUTTON_RIGHT));
 
-//    public static final ShortcutTrigger CLICK = new ShortcutTrigger(
-//        Trigger.ofMouse(GLFW_MOUSE_BUTTON_LEFT),
-//        Trigger.ofKey(GLFW_KEY_SPACE),
-//        Trigger.ofKey(GLFW_KEY_ENTER),
-//        Trigger.ofKey(GLFW_KEY_KP_ENTER)
-//    );
-//
-//    public static final ShortcutTrigger SECONDARY_CLICK = new ShortcutTrigger(
-//        Trigger.ofMouse(GLFW_MOUSE_BUTTON_RIGHT),
-//        Trigger.ofMouse(GLFW_MOUSE_BUTTON_LEFT, new KeyModifiers(GLFW_MOD_SHIFT)),
-//        Trigger.ofKey(GLFW_KEY_SPACE, new KeyModifiers(GLFW_MOD_SHIFT)),
-//        Trigger.ofKey(GLFW_KEY_ENTER, new KeyModifiers(GLFW_MOD_SHIFT)),
-//        Trigger.ofKey(GLFW_KEY_KP_ENTER, new KeyModifiers(GLFW_MOD_SHIFT))
-//    );
-//
     public static final ShortcutTrigger UP = new ShortcutTrigger(
         Trigger.ofKey(GLFW_KEY_UP)
     );
@@ -42,12 +27,22 @@ public record ShortcutTrigger(Set<Trigger> triggers) {
     public static final ShortcutTrigger LEFT = new ShortcutTrigger(
         Trigger.ofKey(GLFW_KEY_LEFT)
     );
-//
-//    public static final ShortcutTrigger POSITIVE_DIRECTIONS = ShortcutTrigger.of(UP, RIGHT);
-//    public static final ShortcutTrigger NEGATIVE_DIRECTIONS = ShortcutTrigger.of(DOWN, LEFT);
-//
-//    public static final ShortcutTrigger INCREMENT = ShortcutTrigger.of(CLICK, POSITIVE_DIRECTIONS);
-//    public static final ShortcutTrigger DECREMENT = ShortcutTrigger.of(SECONDARY_CLICK, NEGATIVE_DIRECTIONS);
+
+    public static final ShortcutTrigger PAGE_UP = new ShortcutTrigger(
+        Trigger.ofKey(GLFW_KEY_PAGE_UP)
+    );
+
+    public static final ShortcutTrigger PAGE_DOWN = new ShortcutTrigger(
+        Trigger.ofKey(GLFW_KEY_PAGE_DOWN)
+    );
+
+    public static final ShortcutTrigger HOME = new ShortcutTrigger(
+        Trigger.ofKey(GLFW_KEY_HOME)
+    );
+
+    public static final ShortcutTrigger END = new ShortcutTrigger(
+        Trigger.ofKey(GLFW_KEY_END)
+    );
 
     public static ShortcutTrigger of(ShortcutTrigger... triggers) {
         return new ShortcutTrigger(Arrays.stream(triggers).flatMap(actionTrigger -> actionTrigger.triggers.stream()).collect(Collectors.toSet()));

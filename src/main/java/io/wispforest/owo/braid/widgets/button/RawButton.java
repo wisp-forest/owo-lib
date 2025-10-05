@@ -18,7 +18,7 @@ public class RawButton extends StatelessWidget {
         this.child = child;
     }
 
-    public RawButton(Runnable onClick, boolean active, Widget child) {
+    public RawButton(boolean active, Runnable onClick, Widget child) {
         this(active ? onClick : null, child);
     }
 

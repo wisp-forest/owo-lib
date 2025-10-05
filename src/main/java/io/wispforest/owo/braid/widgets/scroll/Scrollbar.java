@@ -8,7 +8,7 @@ import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.LayoutBuilder;
 import io.wispforest.owo.braid.widgets.basic.ListenableBuilder;
 import io.wispforest.owo.braid.widgets.basic.Padding;
-import io.wispforest.owo.braid.widgets.slider.RawSlider;
+import io.wispforest.owo.braid.widgets.slider.slider.RawSlider;
 import org.jetbrains.annotations.Nullable;
 
 public class Scrollbar extends StatelessWidget {
@@ -41,10 +41,10 @@ public class Scrollbar extends StatelessWidget {
 
                         return maxOffset != 0 ? new RawSlider(
                             currentOffset,
-                            this.axis.choose(0, maxOffset).doubleValue(),
-                            this.axis.choose(maxOffset, 0).doubleValue(),
-                            null,
-                            this.axis,
+                            widget -> widget
+                                .min(this.axis.choose(0d, maxOffset))
+                                .max(this.axis.choose(maxOffset, 0d))
+                                .axis(this.axis),
                             this.controller::jumpTo,
                             this.track,
                             this.handle,

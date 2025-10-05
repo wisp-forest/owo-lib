@@ -43,7 +43,11 @@ import io.wispforest.owo.braid.widgets.recipeviewer.StackDropArea;
 import io.wispforest.owo.braid.widgets.scroll.*;
 import io.wispforest.owo.braid.widgets.sharedstate.ShareableState;
 import io.wispforest.owo.braid.widgets.sharedstate.SharedState;
-import io.wispforest.owo.braid.widgets.slider.*;
+import io.wispforest.owo.braid.widgets.slider.Incrementor;
+import io.wispforest.owo.braid.widgets.slider.slider.MessageSlider;
+import io.wispforest.owo.braid.widgets.slider.slider.RawSlider;
+import io.wispforest.owo.braid.widgets.slider.slider.Slider;
+import io.wispforest.owo.braid.widgets.slider.xlyder.MessageXlyder;
 import io.wispforest.owo.braid.widgets.splitpane.MultiSplitPane;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.braid.widgets.stack.StackBase;
@@ -54,7 +58,6 @@ import io.wispforest.owo.braid.widgets.window.Window;
 import io.wispforest.owo.braid.widgets.window.WindowController;
 import io.wispforest.owo.ops.TextOps;
 import io.wispforest.owo.ui.component.BraidComponent;
-import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.EntityComponent;
 import io.wispforest.owo.ui.container.Containers;
@@ -87,14 +90,13 @@ import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.math.RoundingMode;
 import java.time.Duration;
 import java.util.*;
-import java.util.function.DoubleFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static io.wispforest.uwu.client.braid.SliderTests.formatDouble;
 
 public class TestSelector extends StatefulWidget {
 
@@ -170,7 +172,7 @@ public class TestSelector extends StatefulWidget {
                                     case FLEX -> new FunnySwitchLayout();
                                     case DRAGGING -> new DragArenaTest();
                                     case SPLIT_PANE -> new SplitPaneTest();
-                                    case SLIDERS -> new SliderTest();
+                                    case SLIDERS -> new SliderTests();
                                     case TEXT_INPUT -> new TextInputTest();
                                     case BURNING_CHYZ -> new BurningChyzTest(this.chyz);
                                     case SCROLLING -> new ScrollTest();
@@ -235,19 +237,19 @@ public class TestSelector extends StatefulWidget {
                                             Grid.CellFit.tight(),
                                             new MessageButton(
                                                 Text.literal("↑"),
-                                                () -> Actions.invoke(Focusable.of(context).primaryFocus().context(), new RawXlyder.XlydeIntent(RawXlyder.XlydeIntent.Direction.UP))
+                                                () -> Actions.invoke(Focusable.of(context).primaryFocus().context(), new Incrementor.IncrementIntent(LayoutAxis.VERTICAL, 1))
                                             ),
                                             new MessageButton(
                                                 Text.literal("↓"),
-                                                () -> Actions.invoke(Focusable.of(context).primaryFocus().context(), new RawXlyder.XlydeIntent(RawXlyder.XlydeIntent.Direction.DOWN))
+                                                () -> Actions.invoke(Focusable.of(context).primaryFocus().context(), new Incrementor.IncrementIntent(LayoutAxis.VERTICAL, -1))
                                             ),
                                             new MessageButton(
                                                 Text.literal("←"),
-                                                () -> Actions.invoke(Focusable.of(context).primaryFocus().context(), new RawXlyder.XlydeIntent(RawXlyder.XlydeIntent.Direction.LEFT))
+                                                () -> Actions.invoke(Focusable.of(context).primaryFocus().context(), new Incrementor.IncrementIntent(LayoutAxis.HORIZONTAL, -1))
                                             ),
                                             new MessageButton(
                                                 Text.literal("→"),
-                                                () -> Actions.invoke(Focusable.of(context).primaryFocus().context(), new RawXlyder.XlydeIntent(RawXlyder.XlydeIntent.Direction.RIGHT))
+                                                () -> Actions.invoke(Focusable.of(context).primaryFocus().context(), new Incrementor.IncrementIntent(LayoutAxis.HORIZONTAL, 1))
                                             )
                                         )
                                     )
@@ -308,9 +310,7 @@ public class TestSelector extends StatefulWidget {
                                     75, 20,
                                     new MessageSlider(
                                         rotat,
-                                        0d, 360d,
-                                        null,
-                                        LayoutAxis.HORIZONTAL,
+                                        widget -> widget.range(0, 360).incrementStep(1),
                                         value -> this.setState(() -> this.rotat = value),
                                         Text.literal("rotat: " + formatDouble(this.rotat))
                                     )
@@ -319,11 +319,9 @@ public class TestSelector extends StatefulWidget {
                                     75.0,
                                     75.0,
                                     new MessageXlyder(
-                                        this.xSkew,
-                                        this.ySkew,
-                                        -.75, -.75,
-                                        .75, .75,
-                                        null, null,
+                                        this.xSkew, this.ySkew,
+                                        xlyder -> xlyder.range(-.75, .75),
+
                                         (xValue, yValue) -> this.setState(() -> {
                                             this.xSkew = xValue;
                                             this.ySkew = yValue;
@@ -623,182 +621,6 @@ public class TestSelector extends StatefulWidget {
                     )
                 )
             );
-        }
-    }
-
-    public static class SliderTest extends StatefulWidget {
-        @Override
-        public WidgetState<SliderTest> createState() {
-            return new State();
-        }
-
-        public static class State extends WidgetState<SliderTest> {
-
-            private boolean redundant = false;
-
-            @Override
-            public Widget build(BuildContext context) {
-                return new Stack(
-                    !this.redundant
-                        ? new Grid(
-                        LayoutAxis.VERTICAL,
-                        3,
-                        Grid.CellFit.tight(),
-                        widget -> new Padding(Insets.all(5), widget),
-                        null,
-                        new Label(Text.literal("Discrete")),
-                        new Label(Text.literal("Smooth")),
-                        new Label(Text.literal("Basic")),
-                        new CoolSlider(2.0, value -> Text.literal("v: " + formatDouble(value))),
-                        new CoolSlider(null, value -> Text.literal("v: " + formatDouble(value))),
-                        new Label(Text.literal("XY")),
-                        new CoolXlyder(2.0, 2.0, (x, y) -> Text.literal("x: " + formatDouble(x) + "\ny: " + formatDouble(y))),
-                        new CoolXlyder(null, null, (x, y) -> Text.literal("x: " + formatDouble(x) + "\ny: " + formatDouble(y))),
-                        new Label(Text.literal("Range")),
-                        new CoolRangeSlider(2.0, (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max))),
-                        new CoolRangeSlider(null, (min, max) -> Text.literal("v: " + formatDouble(min) + "-" + formatDouble(max)))
-                    )
-                        : new IncrediblyRedundantSlider(),
-                    new Align(
-                        Alignment.BOTTOM,
-                        new MessageButton(
-                            Text.literal(this.redundant ? "no more redundancy" : "we love redundancy"),
-                            () -> this.setState(() -> this.redundant = !this.redundant)
-                        )
-                    )
-                );
-            }
-        }
-    }
-
-    public static String formatDouble(double value) {
-        return BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP).toPlainString().replaceAll("(\\.0*|(?<=\\d)\\.0+)$", "");
-    }
-
-    public static class CoolSlider extends StatefulWidget {
-
-        public final @Nullable Double step;
-        public final DoubleFunction<Text> textSupplier;
-
-        public CoolSlider(@Nullable Double step, DoubleFunction<Text> textSupplier) {
-            this.step = step;
-            this.textSupplier = textSupplier;
-        }
-
-        @Override
-        public WidgetState<CoolSlider> createState() {
-            return new State();
-        }
-
-        public static class State extends WidgetState<CoolSlider> {
-
-            private double value = 16;
-
-            @Override
-            public Widget build(BuildContext context) {
-                return new Sized(
-                    100.0,
-                    20.0,
-                    new MessageSlider(
-                        this.value,
-                        0,
-                        32,
-                        this.widget().step,
-                        LayoutAxis.HORIZONTAL,
-                        newValue -> setState(() -> this.value = newValue),
-                        this.widget().textSupplier.apply(this.value)
-                    )
-                );
-            }
-        }
-    }
-
-    public static class CoolXlyder extends StatefulWidget {
-
-        public final @Nullable Double xStep, yStep;
-        public final MessageXlyder.XlyderMessageProvider textSupplier;
-
-        public CoolXlyder(
-            @Nullable Double xStep,
-            @Nullable Double yStep,
-            MessageXlyder.XlyderMessageProvider textSupplier
-        ) {
-            this.xStep = xStep;
-            this.yStep = yStep;
-            this.textSupplier = textSupplier;
-        }
-
-        @Override
-        public WidgetState<CoolXlyder> createState() {
-            return new State();
-        }
-
-        public static class State extends WidgetState<CoolXlyder> {
-
-            private double x = 16;
-            private double y = 16;
-
-            @Override
-            public Widget build(BuildContext context) {
-                return new Sized(
-                    100.0,
-                    100.0,
-                    new MessageXlyder(
-                        this.x, this.y,
-                        0, 0,
-                        32, 32,
-                        this.widget().xStep, this.widget().yStep,
-                        (newX, newY) -> setState(() -> {
-                            this.x = newX;
-                            this.y = newY;
-                        }),
-                        this.widget().textSupplier.getMessage(this.x, this.y)
-                    )
-                );
-            }
-        }
-    }
-
-    public static class CoolRangeSlider extends StatefulWidget {
-
-        public final @Nullable Double step;
-        public final MessageRangeSlider.RangeSliderMessageProvider textSupplier;
-
-        public CoolRangeSlider(@Nullable Double step, MessageRangeSlider.RangeSliderMessageProvider textSupplier) {
-            this.step = step;
-            this.textSupplier = textSupplier;
-        }
-
-        @Override
-        public WidgetState<CoolRangeSlider> createState() {
-            return new State();
-        }
-
-        public static class State extends WidgetState<CoolRangeSlider> {
-
-            private double minValue = 10;
-            private double maxValue = 20;
-
-            @Override
-            public Widget build(BuildContext context) {
-                return new Sized(
-                    100.0,
-                    20.0,
-                    new MessageRangeSlider(
-                        this.minValue,
-                        this.maxValue,
-                        0,
-                        32,
-                        this.widget().step,
-                        LayoutAxis.HORIZONTAL,
-                        (min, max) -> setState(() -> {
-                            this.minValue = min;
-                            this.maxValue = max;
-                        }),
-                        this.widget().textSupplier.getMessage(this.minValue, this.maxValue)
-                    )
-                );
-            }
         }
     }
 
@@ -1147,10 +969,9 @@ public class TestSelector extends StatefulWidget {
                                             this.verticalController,
                                             buildContext -> new Slider(
                                                 this.verticalController.offset(),
-                                                this.verticalController.maxOffset(),
-                                                0,
-                                                null,
-                                                LayoutAxis.VERTICAL,
+                                                widget -> widget
+                                                    .range(this.verticalController.maxOffset(), 0)
+                                                    .vertical(),
                                                 this.verticalController::jumpTo
                                             )
                                         )
@@ -1166,10 +987,8 @@ public class TestSelector extends StatefulWidget {
                                             this.horizontalController,
                                             buildContext -> new Slider(
                                                 this.horizontalController.offset(),
-                                                0,
-                                                this.horizontalController.maxOffset(),
-                                                null,
-                                                LayoutAxis.HORIZONTAL,
+                                                widget -> widget
+                                                    .range(0, this.horizontalController.maxOffset()),
                                                 this.horizontalController::jumpTo
                                             )
                                         )
@@ -1204,9 +1023,7 @@ public class TestSelector extends StatefulWidget {
                                                     100, 20,
                                                     new Slider(
                                                         this.nestedSliderValue,
-                                                        0, 1,
                                                         null,
-                                                        LayoutAxis.HORIZONTAL,
                                                         value -> this.setState(() -> this.nestedSliderValue = value)
                                                     )
                                                 ),
@@ -1214,9 +1031,7 @@ public class TestSelector extends StatefulWidget {
                                                     20, 100,
                                                     new Slider(
                                                         this.nestedSliderValue,
-                                                        0, 1,
-                                                        null,
-                                                        LayoutAxis.VERTICAL,
+                                                        RawSlider::vertical,
                                                         value -> this.setState(() -> this.nestedSliderValue = value)
                                                     )
                                                 )
@@ -1225,137 +1040,6 @@ public class TestSelector extends StatefulWidget {
                                     )
                                 )
                             )
-                        )
-                    )
-                );
-            }
-        }
-    }
-
-    public static class IncrediblyRedundantSlider extends StatefulWidget {
-        @Override
-        public WidgetState<IncrediblyRedundantSlider> createState() {
-            return new State();
-        }
-
-        public static class State extends WidgetState<IncrediblyRedundantSlider> {
-
-            private double x, y;
-
-            @Override
-            public Widget build(BuildContext context) {
-                return new Column(
-                    MainAxisAlignment.START,
-                    CrossAxisAlignment.CENTER,
-                    new Padding(
-                        Insets.all(20),
-                        new Label(Text.literal("incredibly redundant slider™"))
-                    ),
-                    new Sized(
-                        100.0,
-                        15.0,
-                        new Slider(
-                            this.x,
-                            0, 1,
-                            null,
-                            LayoutAxis.HORIZONTAL,
-                            (x) -> this.setState(() -> this.x = x)
-                        )
-                    ),
-                    new Row(
-                        new Sized(
-                            15.0,
-                            100.0,
-                            new Slider(
-                                this.y,
-                                0, 1,
-                                null,
-                                LayoutAxis.VERTICAL,
-                                (y) -> this.setState(() -> this.y = y)
-                            )
-                        ),
-                        new Sized(
-                            100.0,
-                            100.0,
-                            new RawXlyder(
-                                this.x, this.y,
-                                0, 0, 1, 1,
-                                null, null,
-                                (x, y) -> this.setState(() -> {
-                                    this.x = x;
-                                    this.y = y;
-                                }),
-                                new Panel(ButtonComponent.DISABLED_TEXTURE),
-                                new DefaultSliderHandle(),
-                                Size.square((1 - this.y) * 16 + 8)
-                            )
-                        ),
-                        new Sized(
-                            15.0,
-                            100.0,
-                            new Slider(
-                                this.y,
-                                0, 1,
-                                null,
-                                LayoutAxis.VERTICAL,
-                                (y) -> this.setState(() -> this.y = y)
-                            )
-                        )
-                    ),
-                    new Sized(
-                        100.0,
-                        15.0,
-                        new RawSlider(
-                            this.x,
-                            0, 1,
-                            null,
-                            LayoutAxis.HORIZONTAL,
-                            (x) -> this.setState(() -> this.x = x),
-                            new Panel(ButtonComponent.DISABLED_TEXTURE),
-                            new DefaultSliderHandle(),
-                            24
-                        )
-                    ),
-                    new Sized(
-                        100.0,
-                        15.0,
-                        new RawSlider(
-                            this.x,
-                            0, 1,
-                            null,
-                            LayoutAxis.HORIZONTAL,
-                            (x) -> this.setState(() -> this.x = x),
-                            new Panel(ButtonComponent.DISABLED_TEXTURE),
-                            new DefaultSliderHandle(),
-                            18
-                        )
-                    ),
-                    new Sized(
-                        100.0,
-                        15.0,
-                        new RawSlider(
-                            this.x,
-                            0, 1,
-                            null,
-                            LayoutAxis.HORIZONTAL,
-                            (x) -> this.setState(() -> this.x = x),
-                            new Panel(ButtonComponent.DISABLED_TEXTURE),
-                            new DefaultSliderHandle(),
-                            12
-                        )
-                    ),
-                    new Sized(
-                        100.0,
-                        15.0,
-                        new RawSlider(
-                            this.x,
-                            0, 1,
-                            null,
-                            LayoutAxis.HORIZONTAL,
-                            (x) -> this.setState(() -> this.x = x),
-                            new Panel(ButtonComponent.DISABLED_TEXTURE),
-                            new DefaultSliderHandle(),
-                            6
                         )
                     )
                 );
@@ -1960,7 +1644,7 @@ public class TestSelector extends StatefulWidget {
                                     })
                                 );
                             },
-                widget -> widget
+                            widget -> widget
                                 .enterCallback(!this.dead ? () -> this.displayEntity.setOnFire(true) : null)
                                 .exitCallback(!this.dead ? () -> this.displayEntity.setOnFire(false) : null)
                                 .cursorStyle(!this.dead ? CursorStyle.CROSSHAIR : null),

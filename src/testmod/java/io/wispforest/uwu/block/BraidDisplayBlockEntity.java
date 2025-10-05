@@ -24,7 +24,7 @@ import io.wispforest.owo.braid.widgets.flex.MainAxisAlignment;
 import io.wispforest.owo.braid.widgets.flex.Row;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
-import io.wispforest.owo.braid.widgets.slider.MessageSlider;
+import io.wispforest.owo.braid.widgets.slider.slider.MessageSlider;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.uwu.Uwu;
 import io.wispforest.uwu.items.UwuItems;
@@ -133,10 +133,8 @@ public class BraidDisplayBlockEntity extends BlockEntity {
                 public Widget build(BuildContext context) {
                     return new MessageSlider(
                         this.value,
-                        1,
-                        3,
-                        null,
-                        LayoutAxis.HORIZONTAL,
+                        slider -> slider
+                            .range(1, 3),
                         (newValue) -> {
                             this.setState(() -> this.value = newValue);
 
