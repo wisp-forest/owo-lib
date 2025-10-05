@@ -1,6 +1,7 @@
 package io.wispforest.owo.braid.widgets.intents;
 
 import io.wispforest.owo.braid.core.KeyModifiers;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -60,6 +61,15 @@ public record ShortcutTrigger(Set<Trigger> triggers) {
 
     public ShortcutTrigger(Trigger... triggers) {
         this(Set.of(triggers));
+    }
+
+    public ShortcutTrigger withModifiers(@Nullable KeyModifiers modifiers) {
+        var triggers = new HashSet<Trigger>();
+        for (var trigger : this.triggers) {
+            triggers.add(trigger.withModifiers(modifiers));
+        }
+
+        return new ShortcutTrigger(triggers);
     }
 
     public boolean isTriggeredByMouseButton(int button, KeyModifiers modifiers) {
