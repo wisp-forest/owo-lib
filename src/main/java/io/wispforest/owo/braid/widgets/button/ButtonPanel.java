@@ -7,6 +7,7 @@ import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.HoverableBuilder;
 import io.wispforest.owo.braid.widgets.basic.Padding;
 import io.wispforest.owo.braid.widgets.basic.Panel;
+import io.wispforest.owo.braid.widgets.focus.FocusLevel;
 import io.wispforest.owo.braid.widgets.focus.Focusable;
 import io.wispforest.owo.ui.component.ButtonComponent;
 
@@ -25,7 +26,7 @@ public class ButtonPanel extends StatelessWidget {
             (innerContext, hovered, child) -> {
                 return new Panel(
                     this.active
-                        ? (hovered || Focusable.isFocused(context))
+                        ? (hovered || Focusable.levelOf(context) == FocusLevel.HIGHLIGHT)
                         ? ButtonComponent.HOVERED_TEXTURE
                         : ButtonComponent.ACTIVE_TEXTURE
                         : ButtonComponent.DISABLED_TEXTURE,

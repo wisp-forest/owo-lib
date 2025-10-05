@@ -14,34 +14,34 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class SlotMixin implements OwoSlotExtension {
 
     @Unique
-    private boolean owo$disabledOverride = false;
+    private boolean disabledOverride = false;
 
     @Unique
-    private @Nullable PositionedRectangle owo$scissorArea = null;
+    private @Nullable PositionedRectangle scissorArea = null;
 
     @Override
     public void owo$setDisabledOverride(boolean disabled) {
-        this.owo$disabledOverride = disabled;
+        this.disabledOverride = disabled;
     }
 
     @Override
     public boolean owo$getDisabledOverride() {
-        return this.owo$disabledOverride;
+        return this.disabledOverride;
     }
 
     @Override
     public void owo$setScissorArea(@Nullable PositionedRectangle scissor) {
-        this.owo$scissorArea = scissor;
+        this.scissorArea = scissor;
     }
 
     @Override
     public @Nullable PositionedRectangle owo$getScissorArea() {
-        return this.owo$scissorArea;
+        return this.scissorArea;
     }
 
     @Inject(method = "isEnabled", at = @At("TAIL"), cancellable = true)
     private void injectOverride(CallbackInfoReturnable<Boolean> cir) {
-        if (!this.owo$disabledOverride) return;
+        if (!this.disabledOverride) return;
         cir.setReturnValue(false);
     }
 }

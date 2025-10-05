@@ -17,8 +17,6 @@ import io.wispforest.owo.braid.widgets.animated.AnimatedAlign;
 import io.wispforest.owo.braid.widgets.animated.AnimatedBox;
 import io.wispforest.owo.braid.widgets.animated.AnimatedPadding;
 import io.wispforest.owo.braid.widgets.basic.*;
-import io.wispforest.owo.braid.widgets.basic.action.ActionTrigger;
-import io.wispforest.owo.braid.widgets.basic.action.Actions;
 import io.wispforest.owo.braid.widgets.button.Button;
 import io.wispforest.owo.braid.widgets.button.MessageButton;
 import io.wispforest.owo.braid.widgets.button.RawButton;
@@ -30,8 +28,10 @@ import io.wispforest.owo.braid.widgets.cycle.MessageCyclingButton;
 import io.wispforest.owo.braid.widgets.drag.DragArena;
 import io.wispforest.owo.braid.widgets.drag.DragArenaElement;
 import io.wispforest.owo.braid.widgets.flex.*;
+import io.wispforest.owo.braid.widgets.focus.FocusPolicy;
 import io.wispforest.owo.braid.widgets.focus.Focusable;
 import io.wispforest.owo.braid.widgets.grid.Grid;
+import io.wispforest.owo.braid.widgets.intents.*;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
 import io.wispforest.owo.braid.widgets.overlay.Overlay;
@@ -43,13 +43,11 @@ import io.wispforest.owo.braid.widgets.recipeviewer.StackDropArea;
 import io.wispforest.owo.braid.widgets.scroll.*;
 import io.wispforest.owo.braid.widgets.sharedstate.ShareableState;
 import io.wispforest.owo.braid.widgets.sharedstate.SharedState;
-import io.wispforest.owo.braid.widgets.slider.drag.MessageDrag;
-import io.wispforest.owo.braid.widgets.slider.range.MessageRangeSlider;
+import io.wispforest.owo.braid.widgets.slider.Incrementor;
 import io.wispforest.owo.braid.widgets.slider.slider.MessageSlider;
 import io.wispforest.owo.braid.widgets.slider.slider.RawSlider;
 import io.wispforest.owo.braid.widgets.slider.slider.Slider;
 import io.wispforest.owo.braid.widgets.slider.xlyder.MessageXlyder;
-import io.wispforest.owo.braid.widgets.slider.xlyder.Xlyder;
 import io.wispforest.owo.braid.widgets.splitpane.MultiSplitPane;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.braid.widgets.stack.StackBase;
@@ -92,9 +90,7 @@ import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.math.RoundingMode;
 import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -231,6 +227,33 @@ public class TestSelector extends StatefulWidget {
                         new Sized(
                             75, null,
                             new Column(
+                                new Sized(
+                                    75, 20,
+                                    new FocusPolicy(
+                                        false,
+                                        new Grid(
+                                            LayoutAxis.VERTICAL,
+                                            4,
+                                            Grid.CellFit.tight(),
+                                            new MessageButton(
+                                                Text.literal("↑"),
+                                                () -> Actions.invoke(Focusable.of(context).primaryFocus().context(), new Incrementor.IncrementIntent(LayoutAxis.VERTICAL, 1))
+                                            ),
+                                            new MessageButton(
+                                                Text.literal("↓"),
+                                                () -> Actions.invoke(Focusable.of(context).primaryFocus().context(), new Incrementor.IncrementIntent(LayoutAxis.VERTICAL, -1))
+                                            ),
+                                            new MessageButton(
+                                                Text.literal("←"),
+                                                () -> Actions.invoke(Focusable.of(context).primaryFocus().context(), new Incrementor.IncrementIntent(LayoutAxis.HORIZONTAL, -1))
+                                            ),
+                                            new MessageButton(
+                                                Text.literal("→"),
+                                                () -> Actions.invoke(Focusable.of(context).primaryFocus().context(), new Incrementor.IncrementIntent(LayoutAxis.HORIZONTAL, 1))
+                                            )
+                                        )
+                                    )
+                                ),
                                 new Sized(
                                     75, 20,
                                     new MessageButton(
@@ -1197,8 +1220,8 @@ public class TestSelector extends StatefulWidget {
                     ),
                     new Label(
                         Text.literal(coolNumbers.stream()
-                                         .map(String::valueOf)
-                                         .collect(Collectors.joining(", ")))
+                            .map(String::valueOf)
+                            .collect(Collectors.joining(", ")))
                     )
                 );
             }
@@ -1600,11 +1623,7 @@ public class TestSelector extends StatefulWidget {
                         if (this.dead) this.displayEntity.setOnFire(false);
                         this.displayEntity.setHealth(dead ? 0 : 20);
                         this.displayEntity.deathTime = dead ? 20 : 0;
-                        return Actions.click(
-                            widget -> widget
-                                .enterCallback(!this.dead ? () -> this.displayEntity.setOnFire(true) : null)
-                                .exitCallback(!this.dead ? () -> this.displayEntity.setOnFire(false) : null)
-                                .cursorStyle(!this.dead ? CursorStyle.CROSSHAIR : null),
+                        return Interactable.primary(
                             this.dead ? null : () -> {
                                 this.setState(() -> {
                                     this.dead = true;
@@ -1625,6 +1644,10 @@ public class TestSelector extends StatefulWidget {
                                     })
                                 );
                             },
+                            widget -> widget
+                                .enterCallback(!this.dead ? () -> this.displayEntity.setOnFire(true) : null)
+                                .exitCallback(!this.dead ? () -> this.displayEntity.setOnFire(false) : null)
+                                .cursorStyle(!this.dead ? CursorStyle.CROSSHAIR : null),
                             new Stack(
                                 new StackBase(
                                     new Panel(
@@ -1703,10 +1726,11 @@ public class TestSelector extends StatefulWidget {
                     }
 
                     private Widget star(int idx) {
-                        return new Actions(
+                        return new Interactable(
+                            SHORTCUTS,
                             widget -> widget
-                                .addAction(ActionTrigger.CLICK, () -> setState(() -> this.selectedStarCount = idx + 1))
-                                .addAction(ActionTrigger.SECONDARY_CLICK, () -> setState(() -> this.selectedStarCount = 0))
+                                .addCallbackAction(PrimaryActionIntent.class, ($, $$) -> setState(() -> this.selectedStarCount = idx + 1))
+                                .addCallbackAction(SecondaryActionIntent.class, ($, $$) -> setState(() -> this.selectedStarCount = 0))
                                 .enterCallback(() -> setState(() -> this.hoverStarCount = idx + 1)),
                             new Stack(
                                 new SpriteWidget(
@@ -1730,6 +1754,11 @@ public class TestSelector extends StatefulWidget {
                 }
             }
         }
+
+        private static final Map<List<ShortcutTrigger>, Intent> SHORTCUTS = Map.of(
+            List.of(ShortcutTrigger.LEFT_CLICK), PrimaryActionIntent.INSTANCE,
+            List.of(ShortcutTrigger.RIGHT_CLICK), SecondaryActionIntent.INSTANCE
+        );
     }
 
     public static class AnimationsTest extends StatefulWidget {
@@ -2131,7 +2160,7 @@ public class TestSelector extends StatefulWidget {
                                                 widget -> widget
                                                     .easing(Easing.LINEAR)
                                                     .minDuration(0)
-                                                    .durationPerPixel(15)
+                                                    .durationPerPixel(10)
                                                     .pauseTime(0),
                                                 new Marquee(
                                                     widget -> widget

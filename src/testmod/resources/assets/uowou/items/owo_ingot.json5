@@ -1,0 +1,6 @@
+{
+  model: {
+    type: "minecraft:model",
+    model: "uowou:item/owo_ingot"
+  }
+}

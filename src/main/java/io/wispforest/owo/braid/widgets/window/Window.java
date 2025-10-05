@@ -11,11 +11,11 @@ import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.HoverStyledLabel;
 import io.wispforest.owo.braid.widgets.basic.*;
-import io.wispforest.owo.braid.widgets.basic.action.Actions;
 import io.wispforest.owo.braid.widgets.drag.DragArenaElement;
 import io.wispforest.owo.braid.widgets.flex.Column;
 import io.wispforest.owo.braid.widgets.flex.Flexible;
 import io.wispforest.owo.braid.widgets.flex.Row;
+import io.wispforest.owo.braid.widgets.intents.Interactable;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
 import net.minecraft.text.Style;
@@ -94,8 +94,7 @@ public class Window extends StatefulWidget {
                 (buildContext, child) -> {
                     var titleBar = new ArrayList<Widget>();
                     if (this.widget().collapsible) {
-                        titleBar.add(Actions.click(
-                            widget -> widget.cursorStyle(CursorStyle.HAND),
+                        titleBar.add(Interactable.primary(
                             () -> this.controller.toggleCollapsed(),
                             new Padding(
                                 Insets.of(2, 0, 0, 4),
@@ -107,8 +106,7 @@ public class Window extends StatefulWidget {
                     titleBar.add(new Flexible(new Label(new LabelStyle(Alignment.LEFT, null, null, null), false, Label.Overflow.ELLIPSIS, this.widget().title)));
 
                     if (this.widget().onClose != null) {
-                        titleBar.add(Actions.click(
-                            widget -> widget.cursorStyle(CursorStyle.HAND),
+                        titleBar.add(Interactable.primary(
                             () -> this.widget().onClose.run(),
                             new HoverStyledLabel(Text.literal("x"), Style.EMPTY.withFormatting(Formatting.RED))
                         ));

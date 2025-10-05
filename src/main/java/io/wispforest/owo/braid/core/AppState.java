@@ -1,6 +1,6 @@
 package io.wispforest.owo.braid.core;
 
-import com.google.common.collect.Streams;
+import com.google.common.collect.Iterables;
 import com.mojang.blaze3d.platform.GlStateManager;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.core.events.*;
@@ -189,6 +189,33 @@ public class AppState implements InstanceHost, ProxyHost {
 
         // ---
 
+        var nowHovered = new HashSet<MouseListener>();
+        for (var hit : Iterables.filter(state.occludedTrace(), hit -> hit.instance() instanceof MouseListener)) {
+            var listener = (MouseListener) hit.instance();
+
+            nowHovered.add(listener);
+
+            if (this.hovered.contains(listener)) {
+                this.hovered.remove(listener);
+            } else {
+                listener.onMouseEnter();
+            }
+
+            var mousePosition = this.mousePositions.getOrDefault(listener, MousePosition.ORIGIN);
+            if (mousePosition.x() != hit.x() || mousePosition.y() != hit.y()) {
+                listener.onMouseMove(hit.x(), hit.y());
+                this.mousePositions.put(listener, new MousePosition(hit.x(), hit.y()));
+            }
+        }
+
+        for (var noLongerHovered : this.hovered) {
+            noLongerHovered.onMouseExit();
+        }
+
+        this.hovered = nowHovered;
+
+        // ---
+
         @Nullable CursorStyle activeStyle = null;
         if (this.dragging != null) {
             activeStyle = this.draggingCursorStyle;
@@ -283,35 +310,6 @@ public class AppState implements InstanceHost, ProxyHost {
                     this.cursorPosition.x = x;
                     this.cursorPosition.y = y;
                     if (cursorPosition.distance(scrollPos) > SCROLL_MOVEMENT_THRESHOLD) this.scrollHit = null;
-
-                    var state = this.hitTest();
-
-                    var nowHovered = new HashSet<MouseListener>();
-                    Streams.stream(state.occludedTrace()).filter(hit -> hit.instance() instanceof MouseListener).forEach(hit -> {
-                        var listener = (MouseListener) hit.instance();
-
-                        nowHovered.add(listener);
-
-                        if (this.hovered.contains(listener)) {
-                            this.hovered.remove(listener);
-                        } else {
-                            listener.onMouseEnter();
-                        }
-
-                        var mousePosition = this.mousePositions.getOrDefault(listener, MousePosition.ORIGIN);
-                        if (mousePosition.x() != hit.x() || mousePosition.y() != hit.y()) {
-                            listener.onMouseMove(hit.x(), hit.y());
-                            this.mousePositions.put(listener, new MousePosition(hit.x(), hit.y()));
-                        }
-                    });
-
-                    for (var noLongerHovered : this.hovered) {
-                        noLongerHovered.onMouseExit();
-                    }
-
-                    this.hovered = nowHovered;
-
-                    // ---
 
                     if (!(this.dragging instanceof WidgetInstance<?>)) break;
 

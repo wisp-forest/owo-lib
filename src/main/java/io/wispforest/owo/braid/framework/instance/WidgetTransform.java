@@ -7,12 +7,9 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Box;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
-import org.joml.Matrix4fc;
 import org.joml.Vector3f;
 
 public class WidgetTransform {
-    protected @Nullable Matrix4f toParent;
-    protected @Nullable Matrix4f toWidget;
     protected @Nullable Box aabb;
 
     protected double x = 0, y = 0;
@@ -75,26 +72,13 @@ public class WidgetTransform {
         return Size.of(this.width, this.height);
     }
 
-    public Matrix4fc toParent() {
-        if (this.toParent == null) {
-            this.toParent = new Matrix4f().translate((float) this.x, (float) this.y, 0);
-        }
-
-        return this.toParent;
-    }
-
-    public Matrix4fc toWidget() {
-        if (this.toWidget == null) {
-            this.toWidget = new Matrix4f(this.toParent()).invert();
-        }
-
-        return this.toWidget;
-    }
-
     public Box aabb() {
         if (this.aabb == null) {
-            var min = this.toParent().transformPosition(new Vector3f());
-            var max = this.toParent().transformPosition((float) this.width, (float) this.height, 0, new Vector3f());
+            var min = new Vector3f();
+            this.toParentCoordinates(min);
+
+            var max = new Vector3f((float) this.width, (float) this.height, 0);
+            this.toParentCoordinates(max);
 
             this.aabb = new Box(min.x, min.y, min.z, max.x, max.y, max.z);
         }
@@ -160,8 +144,6 @@ public class WidgetTransform {
     }
 
     public void recompute() {
-        this.toParent = null;
-        this.toWidget = null;
         this.aabb = null;
     }
 }

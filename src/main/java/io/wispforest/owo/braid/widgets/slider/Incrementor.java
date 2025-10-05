@@ -5,11 +5,17 @@ import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.MouseArea;
-import io.wispforest.owo.braid.widgets.basic.action.ActionTrigger;
-import io.wispforest.owo.braid.widgets.basic.action.Actions;
+import io.wispforest.owo.braid.widgets.intents.Intent;
+import io.wispforest.owo.braid.widgets.intents.Interactable;
+import io.wispforest.owo.braid.widgets.intents.ShortcutTrigger;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.util.Util;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.DoubleConsumer;
 
 public class Incrementor extends StatelessWidget {
@@ -41,21 +47,21 @@ public class Incrementor extends StatelessWidget {
 
     @Override
     public Widget build(BuildContext context) {
-        return new Actions(
-            actions -> {
-                if (this.xCallback != null) {
-                    actions.addAction(ActionTrigger.RIGHT, () -> this.xCallback.accept(1));
-                    actions.addAction(ActionTrigger.LEFT, () -> this.xCallback.accept(-1));
-                    actions.addAction(ActionTrigger.HOME, () -> this.xCallback.accept(Double.NEGATIVE_INFINITY));
-                    actions.addAction(ActionTrigger.END, () -> this.xCallback.accept(Double.POSITIVE_INFINITY));
+        return new Interactable(
+            this.xCallback != null && this.yCallback != null ? BOTH_AXIS_SHORTCUTS : this.xCallback != null ? HORIZONTAL_SHORTCUTS : this.yCallback != null ? VERTICAL_SHORTCUTS : Map.of(),
+            actions -> actions.addCallbackAction(
+                IncrementIntent.class,
+                (actionCtx, intent) -> {
+                    switch (intent.axis) {
+                        case HORIZONTAL -> {
+                            if (this.xCallback != null) this.xCallback.accept(intent.amount);
+                        }
+                        case VERTICAL -> {
+                            if (this.yCallback != null) this.yCallback.accept(intent.amount);
+                        }
+                    }
                 }
-                if (this.yCallback != null) {
-                    actions.addAction(ActionTrigger.UP, () -> this.yCallback.accept(1));
-                    actions.addAction(ActionTrigger.DOWN, () -> this.yCallback.accept(-1));
-                    actions.addAction(ActionTrigger.PAGE_UP, () -> this.yCallback.accept(Double.POSITIVE_INFINITY));
-                    actions.addAction(ActionTrigger.PAGE_DOWN, () -> this.yCallback.accept(Double.NEGATIVE_INFINITY));
-                }
-            },
+            ),
             new MouseArea(
                 mouseArea -> mouseArea
                     .scrollCallback((baseHorizontal, baseVertical) -> {
@@ -76,4 +82,29 @@ public class Incrementor extends StatelessWidget {
             )
         );
     }
+
+    // ---
+
+    public static final Map<List<ShortcutTrigger>, Intent> HORIZONTAL_SHORTCUTS = Map.of(
+        List.of(ShortcutTrigger.RIGHT), new IncrementIntent(LayoutAxis.HORIZONTAL, 1),
+        List.of(ShortcutTrigger.LEFT), new IncrementIntent(LayoutAxis.HORIZONTAL, -1),
+        List.of(ShortcutTrigger.HOME), new IncrementIntent(LayoutAxis.HORIZONTAL, Double.NEGATIVE_INFINITY),
+        List.of(ShortcutTrigger.END), new IncrementIntent(LayoutAxis.HORIZONTAL, Double.POSITIVE_INFINITY)
+    );
+
+    public static final Map<List<ShortcutTrigger>, Intent> VERTICAL_SHORTCUTS = Map.of(
+        List.of(ShortcutTrigger.UP), new IncrementIntent(LayoutAxis.VERTICAL, 1),
+        List.of(ShortcutTrigger.DOWN), new IncrementIntent(LayoutAxis.VERTICAL, -1),
+        List.of(ShortcutTrigger.PAGE_UP), new IncrementIntent(LayoutAxis.VERTICAL, Double.POSITIVE_INFINITY),
+        List.of(ShortcutTrigger.PAGE_DOWN), new IncrementIntent(LayoutAxis.VERTICAL, Double.NEGATIVE_INFINITY)
+    );
+
+    public static final Map<List<ShortcutTrigger>, Intent> BOTH_AXIS_SHORTCUTS = Util.make(() -> {
+        var map = new HashMap<List<ShortcutTrigger>, Intent>();
+        map.putAll(HORIZONTAL_SHORTCUTS);
+        map.putAll(VERTICAL_SHORTCUTS);
+        return Collections.unmodifiableMap(map);
+    });
+
+    public record IncrementIntent(LayoutAxis axis, double amount) implements Intent {}
 }

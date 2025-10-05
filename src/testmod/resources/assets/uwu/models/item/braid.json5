@@ -1,0 +1,12 @@
+{
+  credit: "Made with Blockbench",
+  parent: "item/generated",
+  textures: {
+    layer0: "uwu:item/braid"
+  },
+  display: {
+    gui: {
+      translation: [0, 0.5, 0]
+    }
+  }
+}

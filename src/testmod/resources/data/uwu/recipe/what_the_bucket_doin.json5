@@ -1,0 +1,12 @@
+{
+  type: "minecraft:crafting_shapeless",
+  "owo:remainders": {
+    "minecraft:water_bucket": "minecraft:potato",
+  },
+  ingredients: [
+    "minecraft:water_bucket"
+  ],
+  result: {
+    id: "minecraft:water_bucket"
+  }
+}

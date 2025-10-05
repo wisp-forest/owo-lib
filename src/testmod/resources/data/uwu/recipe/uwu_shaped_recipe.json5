@@ -1,0 +1,19 @@
+{
+  type: "uwu:crafting_shaped",
+  key: {
+    O: {
+      item: "minecraft:cobblestone"
+    },
+    X: {
+      item: "minecraft:sand"
+    }
+  },
+  pattern: [
+    "XXX",
+    "XOX",
+    "XXX"
+  ],
+  result: {
+    item: "minecraft:stone"
+  }
+}

@@ -4,13 +4,15 @@ import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import io.wispforest.owo.braid.widgets.basic.action.ActionTrigger;
-import io.wispforest.owo.braid.widgets.basic.action.Actions;
 import io.wispforest.owo.braid.widgets.collapsible.LazyCollapsible;
+import io.wispforest.owo.braid.widgets.intents.Intent;
+import io.wispforest.owo.braid.widgets.intents.Interactable;
+import io.wispforest.owo.braid.widgets.intents.ShortcutTrigger;
 import io.wispforest.owo.util.EventSource;
-import it.unimi.dsi.fastutil.ints.IntSet;
 import net.minecraft.util.Unit;
-import org.lwjgl.glfw.GLFW;
+
+import java.util.List;
+import java.util.Map;
 
 public class CollapsibleEntry extends StatefulWidget {
 
@@ -49,10 +51,12 @@ public class CollapsibleEntry extends StatefulWidget {
 
         @Override
         public Widget build(BuildContext context) {
-            return new Actions(
+            return new Interactable(
+                SHORTCUTS,
                 widget -> widget
-                    .addAction(ActionTrigger.RIGHT, () -> this.setState(() -> this.collapsed = false))
-                    .addAction(ActionTrigger.LEFT, () -> this.setState(() -> this.collapsed = true)),
+                    .addCallbackAction(SetCollapsedIntent.class, (actionCtx, intent) -> {
+                        this.setState(() -> this.collapsed = intent.collapsed());
+                    }),
                 new LazyCollapsible(
                     true,
                     this.collapsed,
@@ -63,4 +67,13 @@ public class CollapsibleEntry extends StatefulWidget {
             );
         }
     }
+
+    // ---
+
+    public static final Map<List<ShortcutTrigger>, Intent> SHORTCUTS = Map.of(
+        List.of(ShortcutTrigger.LEFT), new SetCollapsedIntent(true),
+        List.of(ShortcutTrigger.RIGHT), new SetCollapsedIntent(false)
+    );
 }
+
+record SetCollapsedIntent(boolean collapsed) implements Intent {}
