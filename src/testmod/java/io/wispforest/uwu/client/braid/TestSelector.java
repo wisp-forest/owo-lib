@@ -116,6 +116,7 @@ public class TestSelector extends StatefulWidget {
 
         private double rotat = 0f;
         private int fliptat = 0;
+        private boolean bouncy = false;
 
         private Tests test = null;
         private Entity chyz;
@@ -200,11 +201,36 @@ public class TestSelector extends StatefulWidget {
                                         Panel.VANILLA_LIGHT,
                                         new Padding(
                                             Insets.all(8),
-                                            new VerticallyScrollable(
-                                                new IntrinsicWidth(
-                                                    new Column(
-                                                        new Padding(Insets.all(2)),
-                                                        buttons
+                                            new IntrinsicWidth(
+                                                new Column(
+                                                    new Flexible(
+                                                        new Panel(
+                                                            Panel.VANILLA_INSET,
+                                                            new Padding(
+                                                                Insets.all(2),
+                                                                new VerticallyScrollable(
+                                                                    null,
+                                                                    this.bouncy
+                                                                        ? new ScrollAnimationSettings(Duration.ofMillis(750), Easing.OUT_BOUNCE)
+                                                                        : new ScrollAnimationSettings(Duration.ofMillis(250), Easing.OUT_EXPO),
+
+                                                                    new Column(
+                                                                        new Padding(Insets.all(2)),
+                                                                        buttons
+                                                                    )
+                                                                )
+                                                            )
+                                                        )
+                                                    ),
+                                                    new Padding(Insets.vertical(3)),
+                                                    new Row(
+                                                        MainAxisAlignment.SPACE_AROUND,
+                                                        CrossAxisAlignment.CENTER,
+                                                        new BraidCheckbox(this.bouncy, nowChecked -> this.setState(() -> this.bouncy = nowChecked)),
+                                                        new Label(
+                                                            LabelStyle.SHADOW,
+                                                            true, Text.literal("bouncy?")
+                                                        )
                                                     )
                                                 )
                                             )
@@ -1844,7 +1870,7 @@ public class TestSelector extends StatefulWidget {
                 public void init() {
                     this.currentTarget = Animation.Target.START;
                     this.animation = new Animation(
-                        Easing.IN_OUT_EXPO,
+                        Easing.OUT_BOUNCE,
                         Duration.ofMillis(500),
                         this::scheduleAnimationCallback,
                         this::onAnimationTick,

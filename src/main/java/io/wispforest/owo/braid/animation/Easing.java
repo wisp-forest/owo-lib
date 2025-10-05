@@ -25,6 +25,21 @@ public class Easing {
     public static final Easing OUT_CIRC = new Easing(x -> Math.sqrt(1.0 - Math.pow(x - 1.0, 2.0)));
     public static final Easing IN_OUT_CIRC = new Easing(x -> x < 0.5 ? (1.0 - Math.sqrt(1.0 - Math.pow(2.0 * x, 2.0))) / 2 : (Math.sqrt(1.0 - Math.pow(-2.0 * x + 2.0, 2.0)) + 1.0) / 2.0);
 
+    public static final Easing OUT_BOUNCE = new Easing(x -> {
+        var n1 = 7.5625;
+        var d1 = 2.75;
+
+        if (x < 1 / d1) {
+            return n1 * x * x;
+        } else if (x < 2 / d1) {
+            return n1 * (x -= 1.5 / d1) * x + 0.75;
+        } else if (x < 2.5 / d1) {
+            return n1 * (x -= 2.25 / d1) * x + 0.9375;
+        } else {
+            return n1 * (x -= 2.625 / d1) * x + 0.984375;
+        }
+    });
+
     // ---
 
     private final Function function;
