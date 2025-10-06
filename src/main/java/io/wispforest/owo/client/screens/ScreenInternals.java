@@ -101,15 +101,15 @@ public class ScreenInternals {
         }
     }
 
-    public static void attemptHandshake(ScreenHandler handler, ServerPlayerEntity player) {
+    public static void attemptHandshake(ScreenHandlerType<?> type, ServerPlayerEntity player) {
+        if (type == null) return;
+
         if (ServerPlayNetworking.canSend(player, OwoHandshake.OFF_CHANNEL_ID)) {
             Owo.LOGGER.info("[ScreenHandlerHandshake] Handshake disabled by client, skipping");
             return;
         }
 
         try {
-            var type = handler.getType();
-
             ServerPlayNetworking.send(player, new HandshakeRequest(type));
         } catch (Exception e) {
             Owo.LOGGER.error("[ScreenHandlerHandshake] Unable to Handshake check handler as getting the type encountered an error: ", e);

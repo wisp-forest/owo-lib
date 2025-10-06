@@ -29,6 +29,8 @@ import net.minecraft.text.Text;
 import net.minecraft.text.Texts;
 import org.apache.commons.lang3.stream.Streams;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -48,6 +50,9 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
     @Shadow
     public abstract ScreenHandlerType<?> getType();
 
+    @Shadow
+    @Final
+    private @Nullable ScreenHandlerType<?> type;
     private final List<SyncedProperty<?>> owo$properties = new ArrayList<>();
 
     private final Map<Class<?>, ScreenhandlerMessageData<?>> owo$messages = new LinkedHashMap<>();
@@ -162,7 +167,7 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
     private void compareHandlersNetworking(ScreenHandlerSyncHandler handler, CallbackInfo ci) {
         if (!(player() instanceof ServerPlayerEntity serverPlayer)) return;
 
-        ScreenInternals.attemptHandshake((ScreenHandler) (Object) this, serverPlayer);
+        ScreenInternals.attemptHandshake(this.type, serverPlayer);
     }
 
     @Override
