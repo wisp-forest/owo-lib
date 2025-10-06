@@ -6,6 +6,8 @@ import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.MountingHelper;
 import io.wispforest.owo.util.Observable;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -158,6 +160,14 @@ public class FlowLayout extends BaseParentComponent {
         for (var child : components) {
             this.child(model.parseComponent(Component.class, child));
         }
+    }
+
+    @Override
+    public MutableText inspectorDescriptor() {
+        final var descriptor = super.inspectorDescriptor();
+        return this.gap() == 0 ? descriptor : descriptor.append(
+                Text.literal(" [" + this.gap() + "]")
+        );
     }
 
     public static FlowLayout parse(Element element) {
