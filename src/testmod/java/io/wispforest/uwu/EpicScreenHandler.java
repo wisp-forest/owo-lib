@@ -59,7 +59,7 @@ public class EpicScreenHandler extends ScreenHandler {
 
     @Override
     public void onSlotClick(int slotIndex, int button, SlotActionType actionType, PlayerEntity player) {
-        if (!player.getWorld().isClient)
+        if (!player.getEntityWorld().isClient())
             this.sendMessage(new MaldMessage(slotIndex));
 
         super.onSlotClick(slotIndex, button, actionType, player);

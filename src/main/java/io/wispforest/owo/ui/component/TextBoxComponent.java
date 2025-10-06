@@ -10,9 +10,8 @@ import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.Observable;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 import org.w3c.dom.Element;
@@ -51,15 +50,27 @@ public class TextBoxComponent extends TextFieldWidget {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        boolean result = super.keyPressed(keyCode, scanCode, modifiers);
+    public boolean keyPressed(KeyInput input) {
+        boolean result = super.keyPressed(input);
 
-        if (keyCode == GLFW.GLFW_KEY_TAB) {
+        if (input.isTab()) {
             this.write("    ");
             return true;
         } else {
             return result;
         }
+    }
+
+    @Override
+    public void updateX(int x) {
+        super.updateX(x);
+        ((TextFieldWidgetAccessor) this).owo$updateTextPosition();
+    }
+
+    @Override
+    public void updateY(int y) {
+        super.updateY(y);
+        ((TextFieldWidgetAccessor) this).owo$updateTextPosition();
     }
 
     @Override

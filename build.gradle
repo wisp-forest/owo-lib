@@ -1,6 +1,6 @@
 //file:noinspection GradlePackageVersionRange
 plugins {
-    id 'fabric-loom' version '1.10-SNAPSHOT'
+    id 'fabric-loom' version '1.11-SNAPSHOT'
     id 'maven-publish'
 }
 
@@ -41,6 +41,8 @@ allprojects {
         if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
             it.options.release = targetJavaVersion
         }
+
+        options.compilerArgs << "-Xmaxerrs" << "69420"
     }
 
     java {
@@ -135,7 +137,7 @@ dependencies {
 //    modLocalRuntime("dev.emi:emi-fabric:${project.emi_version}")
 
     modCompileOnly("com.terraformersmc:modmenu:${project.modmenu_version}")
-    modLocalRuntime("com.terraformersmc:modmenu:${project.modmenu_version}")
+//    modLocalRuntime("com.terraformersmc:modmenu:${project.modmenu_version}")
 
     include api("io.wispforest:endec:0.1.9")
     include api("io.wispforest.endec:netty:0.1.5")

@@ -12,9 +12,9 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static io.wispforest.owo.ops.TextOps.withColor;
 
@@ -25,7 +25,7 @@ public class Owo implements ModInitializer {
      * To override that behavior, add the {@code -Dowo.debug=false} java argument
      */
     public static final boolean DEBUG;
-    public static final Logger LOGGER = LogManager.getLogger("owo");
+    public static final Logger LOGGER = LoggerFactory.getLogger("owo");
     private static MinecraftServer SERVER;
 
     public static final Text PREFIX = Text.empty().formatted(Formatting.GRAY)
@@ -49,7 +49,7 @@ public class Owo implements ModInitializer {
     @ApiStatus.Internal
     public void onInitialize() {
         LootOps.registerListener();
-        CustomTextRegistry.register(InsertingTextContent.TYPE, "index");
+        CustomTextRegistry.register("index", InsertingTextContent.CODEC);
         ScreenInternals.init();
 
         ServerLifecycleEvents.SERVER_STARTING.register(server -> SERVER = server);

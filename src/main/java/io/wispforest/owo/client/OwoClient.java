@@ -8,6 +8,7 @@ import io.wispforest.owo.itemgroup.json.OwoItemGroupLoader;
 import io.wispforest.owo.moddata.ModDataLoader;
 import io.wispforest.owo.ui.core.OwoUIPipelines;
 import io.wispforest.owo.ui.parsing.UIModelLoader;
+import io.wispforest.owo.ui.renderstate.OwoSpecialGuiElementRenderers;
 import io.wispforest.owo.ui.util.NinePatchTexture;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
@@ -71,5 +72,7 @@ public class OwoClient implements ClientModInitializer {
         if (Owo.DEBUG) {
             OwoDebugCommands.Client.register();
         }
+
+        OwoSpecialGuiElementRenderers.init();
     }
 }

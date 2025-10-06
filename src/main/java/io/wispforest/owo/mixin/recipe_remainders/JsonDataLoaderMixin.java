@@ -24,7 +24,10 @@ import java.util.HashMap;
 @Mixin(JsonDataLoader.class)
 public abstract class JsonDataLoaderMixin {
 
-    @WrapOperation(method = "load(Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/resource/ResourceFinder;Lcom/mojang/serialization/DynamicOps;Lcom/mojang/serialization/Codec;Ljava/util/Map;)V", at = @At(value = "INVOKE", target = "Lcom/google/gson/JsonParser;parseReader(Ljava/io/Reader;)Lcom/google/gson/JsonElement;"))
+    @WrapOperation(
+        method = "load(Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/resource/ResourceFinder;Lcom/mojang/serialization/DynamicOps;Lcom/mojang/serialization/Codec;Ljava/util/Map;)V",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/util/StrictJsonParser;parse(Ljava/io/Reader;)Lcom/google/gson/JsonElement;")
+    )
     private static JsonElement deserializeRecipeSpecificRemainders(Reader jsonReader, Operation<JsonElement> original, @Local(argsOnly = true) ResourceFinder finder, @Local(ordinal = 1) Identifier recipeId) {
         var element = original.call(jsonReader);
 

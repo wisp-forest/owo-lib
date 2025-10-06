@@ -8,12 +8,13 @@ import io.wispforest.owo.ui.util.DisposableScreen;
 import io.wispforest.owo.ui.util.UIErrorToast;
 import io.wispforest.owo.util.pond.OwoSlotExtension;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
@@ -209,8 +210,6 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
             super.render(context, mouseX, mouseY, delta);
 
             if (this.uiAdapter.enableInspector) {
-                context.getMatrices().translate(0, 0, 500);
-
                 for (int i = 0; i < this.handler.slots.size(); i++) {
                     var slot = this.handler.slots.get(i);
                     if (!slot.isEnabled()) continue;
@@ -224,8 +223,6 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
                         OwoUIDrawContext.TextAnchor.BOTTOM_RIGHT
                     );
                 }
-
-                context.getMatrices().translate(0, 0, -500);
             }
 
             this.drawMouseoverTooltip(context, mouseX, mouseY);
@@ -235,14 +232,14 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if ((modifiers & GLFW.GLFW_MOD_CONTROL) == 0
+    public boolean keyPressed(KeyInput input) {
+        if (!input.hasCtrl()
             && this.uiAdapter.rootComponent.focusHandler().focused() instanceof GreedyInputComponent inputComponent
-            && inputComponent.onKeyPress(keyCode, scanCode, modifiers)) {
+            && inputComponent.onKeyPress(input)) {
             return true;
         }
 
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(input);
     }
 
     @Override
@@ -251,13 +248,13 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        return this.uiAdapter.mouseClicked(mouseX, mouseY, button) || super.mouseClicked(mouseX, mouseY, button);
+    public boolean mouseClicked(Click click, boolean doubled) {
+        return this.uiAdapter.mouseClicked(click, doubled) || super.mouseClicked(click, doubled);
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        return this.uiAdapter.mouseDragged(mouseX, mouseY, button, deltaX, deltaY) || super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+    public boolean mouseDragged(Click click, double deltaX, double deltaY) {
+        return this.uiAdapter.mouseDragged(click, deltaX, deltaY) || super.mouseDragged(click, deltaX, deltaY);
     }
 
     @Override
@@ -286,63 +283,6 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
 
     @Override
     protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {}
-
-    @Override
-    protected void drawSlotHighlightBack(DrawContext context) {
-        context.push().translate(0, 0, this.getLayerZOffset(HandledScreenLayer.SLOT));
-        super.drawSlotHighlightBack(context);
-    }
-
-    @Override
-    protected void drawSlotHighlightFront(DrawContext context) {
-        super.drawSlotHighlightFront(context);
-        context.pop();
-    }
-
-    @Override
-    protected void drawItem(DrawContext context, ItemStack stack, int x, int y, @Nullable String amountText) {
-        context.push().translate(0, 0, this.getLayerZOffset(HandledScreenLayer.CURSOR_ITEM));
-        super.drawItem(context, stack, x, y, amountText);
-        context.pop();
-    }
-
-    @Override
-    protected void drawMouseoverTooltip(DrawContext context, int x, int y) {
-        context.push().translate(0, 0, this.getLayerZOffset(HandledScreenLayer.ITEM_TOOLTIP));
-        super.drawMouseoverTooltip(context, x, y);
-        context.pop();
-    }
-
-    /**
-     * Return the z-offset to apply to rendering the given {@code layer}
-     */
-    protected int getLayerZOffset(HandledScreenLayer layer) {
-        return 300;
-    }
-
-    /**
-     * Different layers of handled screen rendering, the z-offset
-     * of which can be adjusted in an owo screen using {@link #getLayerZOffset(HandledScreenLayer)}
-     */
-    protected enum HandledScreenLayer {
-        /**
-         * The items in all slots, along with the highlight
-         * of the hovered slot
-         */
-        SLOT,
-
-        /**
-         * The item currently held by the cursor. More specifically, any item
-         * rendered through the {@link #drawItem(DrawContext, ItemStack, int, int, String)} method
-         */
-        CURSOR_ITEM,
-
-        /**
-         * The tooltip of an item in a slot. More specifically, any tooltip
-         * rendered through {@link #drawMouseoverTooltip(DrawContext, int, int)}
-         */
-        ITEM_TOOLTIP
-    }
 
     public class SlotComponent extends BaseComponent {
 

@@ -10,6 +10,7 @@ import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.CommandOpenedScreen;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
@@ -98,14 +99,14 @@ public class RenderdocScreen extends BaseOwoScreen<FlowLayout> implements Comman
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyInput input) {
         if (this.setCaptureKey) {
             this.captureKeyButton.active = true;
             this.captureKeyButton.setMessage(Text.of("Capture Hotkey"));
 
             this.setCaptureKey = false;
 
-            var key = RenderDoc.Key.fromGLFW(keyCode);
+            var key = RenderDoc.Key.fromGLFW(input.key());
             if (key != null) {
                 this.ticks = 0;
                 this.scheduledKey = key;
@@ -113,7 +114,7 @@ public class RenderdocScreen extends BaseOwoScreen<FlowLayout> implements Comman
                 return true;
             }
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(input);
     }
 
     private Text createCapturesText() {

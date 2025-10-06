@@ -59,9 +59,4 @@ public final class Containers {
     public static <C extends Component> OverlayContainer<C> overlay(C child) {
         return new OverlayContainer<>(child);
     }
-
-    public static <C extends Component> RenderEffectWrapper<C> renderEffect(C child) {
-        return new RenderEffectWrapper<>(child);
-    }
-
 }

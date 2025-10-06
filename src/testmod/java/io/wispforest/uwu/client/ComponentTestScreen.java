@@ -4,30 +4,27 @@ import com.mojang.authlib.GameProfile;
 import io.wispforest.owo.ui.component.*;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
-import io.wispforest.owo.ui.container.RenderEffectWrapper;
 import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.core.*;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.FurnaceBlock;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.Tooltip;
-import net.minecraft.client.texture.SpriteAtlasTexture;
-import net.minecraft.client.util.SpriteIdentifier;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.BundleContentsComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
+import net.minecraft.text.StyleSpriteSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Colors;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.RotationAxis;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -44,7 +41,7 @@ import java.util.stream.IntStream;
 public class ComponentTestScreen extends Screen {
 
     private OwoUIAdapter<FlowLayout> uiAdapter = null;
-    private RenderEffectWrapper<?>.RenderEffectSlot fadeSlot = null;
+//    private RenderEffectWrapper<?>.RenderEffectSlot fadeSlot = null;
 
     public ComponentTestScreen() {
         super(Text.empty());
@@ -59,7 +56,7 @@ public class ComponentTestScreen extends Screen {
                 Containers.verticalFlow(Sizing.content(), Sizing.content())
                         .child(Components.button(Text.of("Dark Background"), button -> rootComponent.surface(Surface.flat(0x77000000))).horizontalSizing(Sizing.fixed(95)))
                         .child(Components.button(Text.of("No Background"), button -> rootComponent.surface(Surface.BLANK)).margins(Insets.vertical(5)).horizontalSizing(Sizing.fixed(95)))
-                        .child(Components.button(Text.of("Dirt Background"), button -> rootComponent.surface(Surface.OPTIONS_BACKGROUND)).horizontalSizing(Sizing.fixed(95)))
+                        .child(Components.button(Text.of("Dirt Background"), button -> rootComponent.surface(Surface.optionsBackground())).horizontalSizing(Sizing.fixed(95)))
                         .child(Components.checkbox(Text.of("bruh")).onChanged(aBoolean -> this.client.player.sendMessage(Text.of("bruh: " + aBoolean), false)).margins(Insets.top(5)))
                         .padding(Insets.of(10))
                         .surface(Surface.vanillaPanorama(true))
@@ -122,7 +119,7 @@ public class ComponentTestScreen extends Screen {
         );
 
         rootComponent.child(Containers.verticalFlow(Sizing.content(), Sizing.content())
-                .child(Components.label(Text.literal("A profound vertical Flow Layout, as well as a leally long text to demonstrate wrapping").styled(style -> style.withFont(MinecraftClient.UNICODE_FONT_ID))
+                .child(Components.label(Text.literal("A profound vertical Flow Layout, as well as a leally long text to demonstrate wrapping").styled(style -> style.withFont(new StyleSpriteSource.Font(MinecraftClient.UNICODE_FONT_ID)))
                                 .styled(style -> {
                                     return style.withClickEvent(new ClickEvent.CopyToClipboard("yes"))
                                             .withHoverEvent(new HoverEvent.ShowItem(Items.SCULK_SHRIEKER.getDefaultStack()));
@@ -200,27 +197,27 @@ public class ComponentTestScreen extends Screen {
         }).margins(Insets.horizontal(8));
         dropdown.mouseLeave().subscribe(() -> dropdown.closeWhenNotHovered(true));
 
-        rootComponent.child(
-                Containers.renderEffect(
-                        Containers.verticalFlow(Sizing.content(), Sizing.content())
-                                .child(Containers.renderEffect(
-                                        Components.sprite(new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, Identifier.of("block/stone"))).margins(Insets.of(5))
-                                ).<RenderEffectWrapper<?>>configure(wrapper -> {
-                                    wrapper.effect(RenderEffectWrapper.RenderEffect.rotate(RotationAxis.POSITIVE_Z, -45));
-                                    wrapper.effect(RenderEffectWrapper.RenderEffect.color(Color.ofHsv(.5f, 1f, 1f)));
-                                }))
-                                .child(dropdownButton)
-                ).<RenderEffectWrapper<?>>configure(wrapper -> {
-                    wrapper.effect(RenderEffectWrapper.RenderEffect.transform(matrices -> matrices.translate(0, 25, 0)));
+//        rootComponent.child(
+//                Containers.renderEffect(
+//                        Containers.verticalFlow(Sizing.content(), Sizing.content())
+//                                .child(Containers.renderEffect(
+//                                        Components.sprite(new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, Identifier.of("block/stone"))).margins(Insets.of(5))
+//                                ).<RenderEffectWrapper<?>>configure(wrapper -> {
+//                                    wrapper.effect(RenderEffectWrapper.RenderEffect.rotate(RotationAxis.POSITIVE_Z, -45));
+//                                    wrapper.effect(RenderEffectWrapper.RenderEffect.color(Color.ofHsv(.5f, 1f, 1f)));
+//                                }))
+//                                .child(dropdownButton)
+//                ).<RenderEffectWrapper<?>>configure(wrapper -> {
+//                    wrapper.effect(RenderEffectWrapper.RenderEffect.transform(matrices -> matrices.translate(0, 25, 0)));
+//
+//                    wrapper.effect(RenderEffectWrapper.RenderEffect.rotate(90f));
+//                    this.fadeSlot = wrapper.effect(RenderEffectWrapper.RenderEffect.color(Color.WHITE));
+//                })
+//        );
 
-                    wrapper.effect(RenderEffectWrapper.RenderEffect.rotate(90f));
-                    this.fadeSlot = wrapper.effect(RenderEffectWrapper.RenderEffect.color(Color.WHITE));
-                })
-        );
-
-        rootComponent.mouseDown().subscribe((mouseX, mouseY, button) -> {
-            if (button != GLFW.GLFW_MOUSE_BUTTON_RIGHT) return false;
-            DropdownComponent.openContextMenu(this, rootComponent, FlowLayout::child, mouseX, mouseY, contextMenu -> {
+        rootComponent.mouseDown().subscribe((click, doubled) -> {
+            if (click.button() != GLFW.GLFW_MOUSE_BUTTON_RIGHT) return false;
+            DropdownComponent.openContextMenu(this, rootComponent, FlowLayout::child, click.x(), click.y(), contextMenu -> {
                 contextMenu.text(Text.literal("That's a context menu"));
                 contextMenu.checkbox(Text.literal("Yup"), true, aBoolean -> {});
                 contextMenu.divider();
@@ -229,12 +226,11 @@ public class ComponentTestScreen extends Screen {
             return true;
         });
 
-        rootComponent.child(
+//        rootComponent.child(
 //                new BaseComponent() {
 //                    @Override
-//                    public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
-//                        Drawer.drawCircle(
-//                                matrices,
+//                    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+//                        context.drawCircle(
 //                                this.x + this.width / 2,
 //                                this.y + this.height / 2,
 //                                75,
@@ -242,8 +238,7 @@ public class ComponentTestScreen extends Screen {
 //                                Color.ofArgb(0x99000000)
 //                        );
 //
-//                        Drawer.drawRing(
-//                                matrices,
+//                        context.drawRing(
 //                                this.x + this.width / 2,
 //                                this.y + this.height / 2,
 //                                75,
@@ -254,8 +249,7 @@ public class ComponentTestScreen extends Screen {
 //                        );
 //
 //                        var time = (System.currentTimeMillis() / 1000d) % (Math.PI * 2);
-//                        Drawer.drawLine(
-//                                matrices,
+//                        context.drawLine(
 //                                (int) (this.x + this.width / 2 + Math.cos(time) * this.width / 2),
 //                                (int) (this.y + this.height / 2 + Math.sin(time) * this.height / 2),
 //                                (int) (this.x + this.width / 2 + Math.sin(time) * this.width / 2),
@@ -264,9 +258,10 @@ public class ComponentTestScreen extends Screen {
 //                                Color.BLUE
 //                        );
 //
-//                        Drawer.drawSpectrum(matrices, this.x, this.y, this.width, (int) (this.height * (Math.sin(time) * .5 + .5)), true);
+//                        context.drawSpectrum(this.x, this.y, this.width, (int) (this.height * (Math.sin(time) * .5 + .5)), true);
 //                    }
-//                }.positioning(Positioning.relative(50, 50)).sizing(Sizing.fixed(350))
+//                }.positioning(Positioning.relative(50, 50)).sizing(Sizing.fixed(350)));
+        rootComponent.child(
                 Components.button(Text.of("overlay"), button -> {
                     rootComponent.child(Containers.overlay(
                             Containers.verticalFlow(Sizing.content(), Sizing.content())
@@ -275,7 +270,7 @@ public class ComponentTestScreen extends Screen {
                                             .selectedColor(Color.ofArgb(0x7F3955E5))
                                             .sizing(Sizing.fixed(160), Sizing.fixed(100))
                                     ).padding(Insets.of(5)).surface(Surface.DARK_PANEL)
-                    ).zIndex(1000));
+                    ));
                 })
         );
 
@@ -292,7 +287,7 @@ public class ComponentTestScreen extends Screen {
         );
 
         rootComponent.child(
-                Components.block(Blocks.FURNACE.getDefaultState(), (NbtCompound) null).sizing(Sizing.fixed(100))
+                Components.block(Blocks.FURNACE.getDefaultState().with(FurnaceBlock.LIT, true), (NbtCompound) null).sizing(Sizing.fixed(100))
         );
 
         var bundle = Items.BUNDLE.getDefaultStack();
@@ -400,20 +395,20 @@ public class ComponentTestScreen extends Screen {
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
-        this.fadeSlot.update(RenderEffectWrapper.RenderEffect.color(new Color(
-                1f, 1f, 1f,
-                (float) (Math.sin(System.currentTimeMillis() / 1000d) * .5 + .5)
-        )));
+//        this.fadeSlot.update(RenderEffectWrapper.RenderEffect.color(new Color(
+//                1f, 1f, 1f,
+//                (float) (Math.sin(System.currentTimeMillis() / 1000d) * .5 + .5)
+//        )));
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+    public boolean keyPressed(KeyInput input) {
+        if (input.isEscape()) {
             this.close();
             return true;
         }
 
-        if (keyCode == GLFW.GLFW_KEY_F12) {
+        if (input.key() == GLFW.GLFW_KEY_F12) {
             try (var out = Files.newOutputStream(Path.of("component_tree.dot")); var writer = new OutputStreamWriter(out, StandardCharsets.UTF_8)) {
                 writer.write("digraph D {\n");
 
@@ -431,13 +426,13 @@ public class ComponentTestScreen extends Screen {
             }
             return true;
         } else {
-            return this.uiAdapter.keyPressed(keyCode, scanCode, modifiers);
+            return this.uiAdapter.keyPressed(input);
         }
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        return this.uiAdapter.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+    public boolean mouseDragged(Click click, double deltaX, double deltaY) {
+        return this.uiAdapter.mouseDragged(click, deltaX, deltaY);
     }
 
     @Override

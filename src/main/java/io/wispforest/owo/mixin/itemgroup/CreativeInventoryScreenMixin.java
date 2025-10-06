@@ -1,33 +1,31 @@
 package io.wispforest.owo.mixin.itemgroup;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButtonWidget;
 import io.wispforest.owo.ui.core.CursorStyle;
 import io.wispforest.owo.ui.util.CursorAdapter;
 import io.wispforest.owo.util.pond.OwoCreativeInventoryScreenExtensions;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.resource.featuretoggle.FeatureSet;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,41 +64,41 @@ public abstract class CreativeInventoryScreenMixin extends HandledScreen<Creativ
     // Background
     // ----------
 
-    @ModifyArg(method = "drawBackground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawTexture(Ljava/util/function/Function;Lnet/minecraft/util/Identifier;IIFFIIII)V", ordinal = 0))
+    @ModifyArg(method = "drawBackground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawTexture(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/util/Identifier;IIFFIIII)V", ordinal = 0))
     private Identifier injectCustomGroupTexture(Identifier original) {
-        if (!(selectedTab instanceof OwoItemGroup owoGroup) || owoGroup.getBackgroundTexture() == null) return original;
-        return owoGroup.getBackgroundTexture();
+        if (!(selectedTab instanceof OwoItemGroup owoGroup) || owoGroup.getOwoBackgroundTexture() == null) return original;
+        return owoGroup.getOwoBackgroundTexture();
     }
 
     // ----------------
     // Scrollbar slider
     // ----------------
 
-    @ModifyArg(method = "drawBackground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Ljava/util/function/Function;Lnet/minecraft/util/Identifier;IIII)V"))
+    @ModifyArg(method = "drawBackground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/util/Identifier;IIII)V"))
     private Identifier injectCustomScrollbarTexture(Identifier texture) {
         if (!(selectedTab instanceof OwoItemGroup owoGroup) || owoGroup.getScrollerTextures() == null) return texture;
 
         return this.hasScrollbar()
-                ? owoGroup.getScrollerTextures().enabled()
-                : owoGroup.getScrollerTextures().disabled();
+            ? owoGroup.getScrollerTextures().enabled()
+            : owoGroup.getScrollerTextures().disabled();
     }
 
     // -------------
     // Group headers
     // -------------
 
-    @ModifyArg(method = "renderTabIcon", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Ljava/util/function/Function;Lnet/minecraft/util/Identifier;IIII)V"))
+    @ModifyArg(method = "renderTabIcon", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/util/Identifier;IIII)V"))
     private Identifier injectCustomTabTexture(Identifier texture, @Local(argsOnly = true) ItemGroup group) {
-        if(!(group instanceof OwoItemGroup contextGroup) || contextGroup.getTabTextures() == null) return texture;
+        if (!(group instanceof OwoItemGroup contextGroup) || contextGroup.getTabTextures() == null) return texture;
 
         var textures = contextGroup.getTabTextures();
         return contextGroup.getRow() == ItemGroup.Row.TOP
-                ? selectedTab == contextGroup ? contextGroup.getColumn() == 0 ? textures.topSelectedFirstColumn() : textures.topSelected() : textures.topUnselected()
-                : selectedTab == contextGroup ? contextGroup.getColumn() == 0 ? textures.bottomSelectedFirstColumn() : textures.bottomSelected() : textures.bottomUnselected();
+            ? selectedTab == contextGroup ? contextGroup.getColumn() == 0 ? textures.topSelectedFirstColumn() : textures.topSelected() : textures.topUnselected()
+            : selectedTab == contextGroup ? contextGroup.getColumn() == 0 ? textures.bottomSelectedFirstColumn() : textures.bottomSelected() : textures.bottomUnselected();
     }
 
-    @Inject(method = "renderTabIcon", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemGroup;getIcon()Lnet/minecraft/item/ItemStack;"), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void renderOwoIcon(DrawContext context, ItemGroup group, CallbackInfo ci, boolean bl, boolean bl2, int i, int j, int k) {
+    @Inject(method = "renderTabIcon", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemGroup;getIcon()Lnet/minecraft/item/ItemStack;"))
+    private void renderOwoIcon(DrawContext context, ItemGroup group, CallbackInfo ci, @Local(ordinal = 3) int j, @Local(ordinal = 4) int k) {
         if (!(group instanceof OwoItemGroup owoGroup)) return;
 
         owoGroup.icon().render(context, j, k, 0, 0, 0);
@@ -110,7 +108,7 @@ public abstract class CreativeInventoryScreenMixin extends HandledScreen<Creativ
     // oωo tab title
     // -------------
 
-    @ModifyArg(method = "drawForeground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawText(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/text/Text;IIIZ)I"))
+    @ModifyArg(method = "drawForeground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawText(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/text/Text;IIIZ)V"))
     private Text injectTabNameAsTitle(Text original) {
         if (!(selectedTab instanceof OwoItemGroup owoGroup) || !owoGroup.hasDynamicTitle() || owoGroup.selectedTabs().size() != 1) {
             return original;
@@ -121,9 +119,9 @@ public abstract class CreativeInventoryScreenMixin extends HandledScreen<Creativ
             return singleActiveTab.name();
         } else {
             return Text.translatable(
-                    "text.owo.itemGroup.tab_template",
-                    owoGroup.getDisplayName(),
-                    singleActiveTab.name()
+                "text.owo.itemGroup.tab_template",
+                owoGroup.getDisplayName(),
+                singleActiveTab.name()
             );
         }
     }
@@ -183,13 +181,13 @@ public abstract class CreativeInventoryScreenMixin extends HandledScreen<Creativ
         for (var button : this.owoButtons) {
             if (button.trulyHovered()) {
                 context.drawTooltip(
-                        this.textRenderer,
-                        button.isTab() && ((OwoItemGroup) selectedTab).canSelectMultipleTabs()
-                                ? List.of(button.getMessage(), Text.translatable("text.owo.itemGroup.select_hint"))
-                                : List.of(button.getMessage()),
-                        mouseX,
-                        mouseY,
-                        null
+                    this.textRenderer,
+                    button.isTab() && ((OwoItemGroup) selectedTab).canSelectMultipleTabs()
+                        ? List.of(button.getMessage(), Text.translatable("text.owo.itemGroup.select_hint"))
+                        : List.of(button.getMessage()),
+                    mouseX,
+                    mouseY,
+                    null
                 );
                 anyButtonHovered = true;
             }
@@ -216,8 +214,13 @@ public abstract class CreativeInventoryScreenMixin extends HandledScreen<Creativ
     @Unique
     private Consumer<ItemGroupButtonWidget> owo$createSelectAction(OwoItemGroup group, int tabIdx) {
         return button -> {
-            var context = new ItemGroup.DisplayContext(this.enabledFeatures, this.shouldShowOperatorTab(this.handler.player()), this.handler.player().getWorld().getRegistryManager());
-            if (Screen.hasShiftDown()) {
+            var context = new ItemGroup.DisplayContext(this.enabledFeatures, this.shouldShowOperatorTab(this.handler.player()), this.handler.player().getEntityWorld().getRegistryManager());
+
+            // cringe
+            var shift = InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow(), GLFW.GLFW_KEY_LEFT_SHIFT)
+                || InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow(), GLFW.GLFW_KEY_RIGHT_SHIFT);
+
+            if (shift) {
                 group.toggleTab(tabIdx, context);
             } else {
                 group.selectSingleTab(tabIdx, context);

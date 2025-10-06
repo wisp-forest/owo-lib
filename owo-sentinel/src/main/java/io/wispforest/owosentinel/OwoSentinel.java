@@ -79,7 +79,7 @@ public class OwoSentinel {
     @SuppressWarnings("deprecation")
     public static void downloadAndInstall(Consumer<String> logger) throws Exception {
         logger.accept("Fetching versions");
-        final URL url = new URL("https://api.modrinth.com/v2/project/owo-lib/version?game_versions=[%22" + SharedConstants.VERSION_NAME + "%22]&loaders=[%22fabric%22]");
+        final URL url = new URL("https://api.modrinth.com/v2/project/owo-lib/version?game_versions=[%22" + FabricLoader.getInstance().getRawGameVersion() + "%22]&loaders=[%22fabric%22]");
 
         final var response = GSON.fromJson(new InputStreamReader(url.openStream()), JsonArray.class);
 

@@ -104,7 +104,7 @@ public abstract class ConfigWrapper<C> {
 
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT && clazz.isAnnotationPresent(Modmenu.class)) {
             var modmenuAnnotation = clazz.getAnnotation(Modmenu.class);
-            ConfigScreenProviders.registerOwoConfigScreen(
+            ConfigScreenProviders.register(
                     modmenuAnnotation.modId(),
                     screen -> ConfigScreen.createWithCustomModel(Identifier.of(modmenuAnnotation.uiModelId()), this, screen)
             );

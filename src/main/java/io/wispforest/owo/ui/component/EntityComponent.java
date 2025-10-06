@@ -1,41 +1,47 @@
 package io.wispforest.owo.ui.component;
 
 import com.mojang.authlib.GameProfile;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import io.wispforest.owo.Owo;
+import io.wispforest.owo.mixin.ui.access.EntityRendererAccessor;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
-import io.wispforest.owo.util.pond.OwoEntityRenderDispatcherExtension;
+import io.wispforest.owo.ui.renderstate.EntityElementRenderState;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.*;
-import net.minecraft.client.render.DiffuseLighting;
-import net.minecraft.client.render.LightmapTextureManager;
+import net.minecraft.client.gui.Click;
+import net.minecraft.client.gui.ScreenRect;
+import net.minecraft.client.network.ClientConnectionState;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
+import net.minecraft.client.render.entity.EntityRenderManager;
+import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.session.telemetry.TelemetrySender;
 import net.minecraft.client.session.telemetry.WorldSession;
 import net.minecraft.client.util.DefaultSkinHelper;
-import net.minecraft.client.util.SkinTextures;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.SpawnReason;
+import net.minecraft.client.world.ClientChunkLoadProgress;
+import net.minecraft.component.type.ProfileComponent;
+import net.minecraft.entity.*;
 import net.minecraft.entity.player.PlayerModelPart;
+import net.minecraft.entity.player.SkinTextures;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.ServerLinks;
+import net.minecraft.storage.NbtReadView;
+import net.minecraft.util.ErrorReporter;
+import net.minecraft.util.PlayerInput;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.RotationAxis;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3f;
+import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 import org.w3c.dom.Element;
 
@@ -45,7 +51,7 @@ import java.util.function.Consumer;
 
 public class EntityComponent<E extends Entity> extends BaseComponent {
 
-    protected final EntityRenderDispatcher dispatcher;
+    protected final EntityRenderManager manager;
     protected final VertexConsumerProvider.Immediate entityBuffers;
     protected final E entity;
 
@@ -55,11 +61,11 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
     protected boolean allowMouseRotation = false;
     protected boolean scaleToFit = false;
     protected boolean showNametag = false;
-    protected Consumer<MatrixStack> transform = matrixStack -> {};
+    protected Consumer<Matrix4f> transform = matrixStack -> {};
 
     protected EntityComponent(Sizing sizing, E entity) {
         final var client = MinecraftClient.getInstance();
-        this.dispatcher = client.getEntityRenderDispatcher();
+        this.manager = client.getEntityRenderDispatcher();
         this.entityBuffers = client.getBufferBuilders().getEntityVertexConsumers();
 
         this.entity = entity;
@@ -70,11 +76,11 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
     @SuppressWarnings("DataFlowIssue")
     protected EntityComponent(Sizing sizing, EntityType<E> type, @Nullable NbtCompound nbt) {
         final var client = MinecraftClient.getInstance();
-        this.dispatcher = client.getEntityRenderDispatcher();
+        this.manager = client.getEntityRenderDispatcher();
         this.entityBuffers = client.getBufferBuilders().getEntityVertexConsumers();
 
         this.entity = type.create(client.world, SpawnReason.BREEDING);
-        if (nbt != null) entity.readNbt(nbt);
+        if (nbt != null) entity.readData(NbtReadView.create(new ErrorReporter.Logging(Owo.LOGGER), client.world.getRegistryManager(), nbt));
         entity.updatePosition(client.player.getX(), client.player.getY(), client.player.getZ());
 
         this.sizing(sizing);
@@ -82,15 +88,12 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
 
     @Override
     public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
-        var matrices = context.getMatrices();
-        matrices.push();
+        var matrix = new Matrix4f();
+        matrix.scale(75 * this.scale * this.width / 64f, -75 * this.scale * this.height / 64f, -75 * this.scale);
 
-        matrices.translate(x + this.width / 2f, y + this.height / 2f, 100);
-        matrices.scale(75 * this.scale * this.width / 64f, -75 * this.scale * this.height / 64f, 75 * this.scale);
+        matrix.translate(0, entity.getHeight() / 2f, 0);
 
-        matrices.translate(0, entity.getHeight() / -2f, 0);
-
-        this.transform.accept(matrices);
+        this.transform.accept(matrix);
 
         if (this.lookAtCursor) {
             float xRotation = (float) Math.toDegrees(Math.atan((mouseY - this.y - this.height / 2f) / 40f));
@@ -105,39 +108,44 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
 
             // We make sure the xRotation never becomes 0, as the lighting otherwise becomes very unhappy
             if (xRotation == 0) xRotation = .1f;
-            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(xRotation * .15f));
-            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(yRotation * .15f));
+            matrix.rotate(RotationAxis.POSITIVE_X.rotationDegrees(xRotation * .15f));
+            matrix.rotate(RotationAxis.POSITIVE_Y.rotationDegrees(yRotation * .15f));
         } else {
-            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(35));
-            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-45 + this.mouseRotation));
+            matrix.rotate(RotationAxis.POSITIVE_X.rotationDegrees(35));
+            matrix.rotate(RotationAxis.POSITIVE_Y.rotationDegrees(-45 + this.mouseRotation));
         }
 
-        var dispatcher = (OwoEntityRenderDispatcherExtension) this.dispatcher;
-        dispatcher.owo$setCounterRotate(true);
-        dispatcher.owo$setShowNametag(this.showNametag);
+        var entityState = this.manager.getRenderer(this.entity).createRenderState();
 
-        RenderSystem.setShaderLights(new Vector3f(.15f, 1, 0), new Vector3f(.15f, -1, 0));
-        this.dispatcher.setRenderShadows(false);
-        this.dispatcher.render(this.entity, 0, 0, 0, 0, matrices, this.entityBuffers, LightmapTextureManager.MAX_LIGHT_COORDINATE);
-        this.dispatcher.setRenderShadows(true);
-        this.entityBuffers.draw();
-        DiffuseLighting.enableGuiDepthLighting();
+        var renderer = (EntityRenderer) this.manager.getRenderer(this.entity);
 
-        matrices.pop();
+        renderer.updateRenderState(this.entity, entityState, partialTicks);
 
-        dispatcher.owo$setCounterRotate(false);
-        dispatcher.owo$setShowNametag(true);
+        if (showNametag) {
+            entityState.displayName = ((EntityRendererAccessor) renderer).owo$getDisplayName(entity);
+            entityState.nameLabelPos = entity.getAttachments().getPointNullable(EntityAttachmentType.NAME_TAG, 0, entity.getLerpedYaw(partialTicks));
+        } else {
+            entityState.displayName = null;
+            entityState.nameLabelPos = null;
+        }
+
+        context.state.addSpecialElement(new EntityElementRenderState(
+            entityState,
+            matrix,
+            new ScreenRect(this.x, this.y, this.width, this.height),
+            context.scissorStack.peekLast()
+        ));
     }
 
     @Override
-    public boolean onMouseDrag(double mouseX, double mouseY, double deltaX, double deltaY, int button) {
-        if (this.allowMouseRotation && button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+    public boolean onMouseDrag(Click click, double deltaX, double deltaY) {
+        if (this.allowMouseRotation && click.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
             this.mouseRotation += deltaX;
 
-            super.onMouseDrag(mouseX, mouseY, deltaX, deltaY, button);
+            super.onMouseDrag(click, deltaX, deltaY);
             return true;
         } else {
-            return super.onMouseDrag(mouseX, mouseY, deltaX, deltaY, button);
+            return super.onMouseDrag(click, deltaX, deltaY);
         }
     }
 
@@ -189,12 +197,12 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
         return this.scaleToFit;
     }
 
-    public EntityComponent<E> transform(Consumer<MatrixStack> transform) {
+    public EntityComponent<E> transform(Consumer<Matrix4f> transform) {
         this.transform = transform;
         return this;
     }
 
-    public Consumer<MatrixStack> transform() {
+    public Consumer<Matrix4f> transform() {
         return transform;
     }
 
@@ -249,21 +257,23 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
 
         protected RenderablePlayerEntity(GameProfile profile) {
             super(MinecraftClient.getInstance(),
-                    MinecraftClient.getInstance().world,
-                    new ClientPlayNetworkHandler(MinecraftClient.getInstance(),
-                            new ClientConnection(NetworkSide.CLIENTBOUND),
-                            new ClientConnectionState(
-                                    profile, new WorldSession(TelemetrySender.NOOP, false, Duration.ZERO, ""),
-                                    MinecraftClient.getInstance().world.getRegistryManager().toImmutable(),
-                                    MinecraftClient.getInstance().world.getEnabledFeatures(),
-                                    "Wisp Forest Enterprises", null, null, Map.of(), null, Map.of(), ServerLinks.EMPTY
+                MinecraftClient.getInstance().world,
+                new ClientPlayNetworkHandler(MinecraftClient.getInstance(),
+                    new ClientConnection(NetworkSide.CLIENTBOUND),
+                    new ClientConnectionState(
+                        new ClientChunkLoadProgress(0),
+                        profile, new WorldSession(TelemetrySender.NOOP, false, Duration.ZERO, ""),
+                        MinecraftClient.getInstance().world.getRegistryManager().toImmutable(),
+                        MinecraftClient.getInstance().world.getEnabledFeatures(),
+                        "Wisp Forest Enterprises", null, null, Map.of(), null, Map.of(), ServerLinks.EMPTY, Map.of(),
+                        true
                     )),
-                    null, null, false, false
+                null, null, PlayerInput.DEFAULT, false
             );
 
-            this.skinTextures = DefaultSkinHelper.getSkinTextures(profile.getId());
+            this.skinTextures = DefaultSkinHelper.getSkinTextures(profile);
             Util.getMainWorkerExecutor().execute(() -> {
-                var completeProfile = MinecraftClient.getInstance().getSessionService().fetchProfile(profile.getId(), false).profile();
+                var completeProfile = MinecraftClient.getInstance().getApiServices().profileResolver().getProfileById(profile.id()).orElse(profile);
 
                 this.skinTextures = DefaultSkinHelper.getSkinTextures(completeProfile);
                 this.client.getSkinProvider().fetchSkinTextures(completeProfile).thenAccept(textures -> {
@@ -273,12 +283,12 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
         }
 
         @Override
-        public SkinTextures getSkinTextures() {
+        public SkinTextures getSkin() {
             return this.skinTextures;
         }
 
         @Override
-        public boolean isPartVisible(PlayerModelPart modelPart) {
+        public boolean isModelPartVisible(PlayerModelPart part) {
             return true;
         }
 
