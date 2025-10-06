@@ -115,11 +115,8 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
             matrix.rotate(RotationAxis.POSITIVE_Y.rotationDegrees(-45 + this.mouseRotation));
         }
 
-        var entityState = this.manager.getRenderer(this.entity).createRenderState();
-
-        var renderer = (EntityRenderer) this.manager.getRenderer(this.entity);
-
-        renderer.updateRenderState(this.entity, entityState, partialTicks);
+        var entityState = this.manager.getAndUpdateRenderState(this.entity, partialTicks);
+        var renderer = this.manager.getRenderer(this.entity);
 
         if (showNametag) {
             entityState.displayName = ((EntityRendererAccessor) renderer).owo$getDisplayName(entity);

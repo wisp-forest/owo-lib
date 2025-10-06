@@ -1,4 +1,4 @@
-package io.wispforest.owo.mixin;
+package io.wispforest.owo.mixin.serialization;
 
 import com.mojang.serialization.DynamicOps;
 import net.minecraft.util.dynamic.ForwardingDynamicOps;
