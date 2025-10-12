@@ -35,7 +35,7 @@ public class ConfigureHotReloadScreen extends BaseUIModelScreen<FlowLayout> impl
 
     @Override
     protected void build(FlowLayout rootComponent) {
-        rootComponent.childById(LabelComponent.class, "ui-model-label").text(Text.translatable("text.owo.configure_hot_reload.model", this.modelId));
+        rootComponent.childById(LabelComponent.class, "ui-model-label").text(Text.translatable("text.owo.configure_hot_reload.model", this.modelId.toString()));
         this.fileNameLabel = rootComponent.childById(LabelComponent.class, "file-name-label");
         this.updateFileNameLabel();
 
