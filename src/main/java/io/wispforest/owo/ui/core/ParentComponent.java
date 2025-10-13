@@ -4,6 +4,10 @@ import io.wispforest.owo.ui.parsing.IncompatibleUIModelException;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import net.minecraft.client.gui.Click;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
@@ -211,6 +215,15 @@ public interface ParentComponent extends Component {
         UIParsing.apply(children, "vertical-alignment", VerticalAlignment::parse, this::verticalAlignment);
         UIParsing.apply(children, "horizontal-alignment", HorizontalAlignment::parse, this::horizontalAlignment);
         UIParsing.apply(children, "allow-overflow", UIParsing::parseBool, this::allowOverflow);
+    }
+
+    @Override
+    default MutableText inspectorDescriptor() {
+        final var padding = this.padding().get();
+        return Component.super.inspectorDescriptor().append(
+                Text.literal(" >" + padding.top() + "," + padding.bottom() + "," + padding.left() + "," + padding.right() + "<")
+                        .setStyle(Style.EMPTY.withColor(Formatting.AQUA))
+        );
     }
 
     /**

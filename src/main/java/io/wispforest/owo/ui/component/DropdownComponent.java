@@ -94,7 +94,9 @@ public class DropdownComponent extends FlowLayout {
 
     @Override
     public ParentComponent surface(Surface surface) {
-        return this.entries.surface(surface);
+        this.entries.surface(surface);
+
+        return this;
     }
 
     @Override

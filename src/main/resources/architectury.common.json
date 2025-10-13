@@ -3,6 +3,12 @@
     "net/minecraft/class_2487": [
       "io/wispforest/endec/util/MapCarrier"
     ],
+    "net/minecraft/class_11368": [
+      "io/wispforest/endec/util/MapCarrierDecodable"
+    ],
+    "net/minecraft/class_11372": [
+      "io/wispforest/endec/util/MapCarrierEncodable"
+    ],
     "net/minecraft/class_2540": [
       "io/wispforest/endec/util/EndecBuffer"
     ],

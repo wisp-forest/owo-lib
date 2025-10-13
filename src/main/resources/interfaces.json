@@ -2,6 +2,12 @@
   "net/minecraft/nbt/CompoundTag": [
     "io/wispforest/endec/util/MapCarrier"
   ],
+  "net/minecraft/world/level/storage/ValueInput": [
+    "io/wispforest/endec/util/MapCarrierDecodable"
+  ],
+  "net/minecraft/world/level/storage/ValueOutput": [
+    "io/wispforest/endec/util/MapCarrierEncodable"
+  ],
   "net/minecraft/network/FriendlyByteBuf": [
     "io/wispforest/endec/util/EndecBuffer"
   ],
