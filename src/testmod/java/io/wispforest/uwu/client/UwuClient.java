@@ -163,6 +163,8 @@ public class UwuClient {
         }, InventoryScreen.class);
 
         NeoForge.EVENT_BUS.addListener(PlayerInteractEvent.RightClickItem.class, event -> {
+            if (!event.getEntity().getEntityWorld().isClient()) return;
+
             if (event.getEntity().isSneaking() && event.getEntity().getStackInHand(event.getHand()).isOf(UwuItems.SCREEN_SHARD)) {
                 MinecraftClient.getInstance().setScreen(new SelectUwuScreenScreen());
                 event.setCancellationResult(ActionResult.PASS);
