@@ -41,6 +41,8 @@
     "serialization.ValueInputMixin",
     "serialization.RegistryOpsAccessor",
     "serialization.ValueOutputMixin",
+    "serialization.NbtReadViewMixin",
+    "serialization.NbtWriteViewMixin",
     "text.LanguageMixin",
     "text.ComponentSerializationMixin",
     "text.TranslatableContentsMixin",

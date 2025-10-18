@@ -393,7 +393,7 @@ public class CodecUtils {
 
     // ---
 
-    private static SerializationContext createContext(DynamicOps<?> ops, SerializationContext assumedContext) {
+    public static SerializationContext createContext(DynamicOps<?> ops, SerializationContext assumedContext) {
         var rootOps = ops;
         var context = rootOps instanceof ContextHolder holder
             ? holder.capturedContext().and(assumedContext)
