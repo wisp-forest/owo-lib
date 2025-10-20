@@ -38,11 +38,12 @@ public abstract class NbtWriteViewMixin implements MapCarrierEncodable {
         } catch (Exception e) {
             boolean defaultValueErrored = false;
 
-            try {
-                this.nbt.put(ctx, key, key.defaultValue());
-            } catch (Exception ignore) {
-                defaultValueErrored = true;
-            }
+            // TODO: Unknow if such is best to encode default value as KeyedEndec have a default value getter
+//            try {
+//                this.nbt.put(ctx, key, key.defaultValue());
+//            } catch (Exception ignore) {
+//                defaultValueErrored = true;
+//            }
 
             reporter.report(new KeyedEndecEncodeError(key, value, e, !defaultValueErrored));
         }
