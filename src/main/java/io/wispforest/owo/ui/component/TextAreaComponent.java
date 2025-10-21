@@ -3,6 +3,7 @@ package io.wispforest.owo.ui.component;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.mixin.ui.access.EditBoxAccessor;
 import io.wispforest.owo.mixin.ui.access.EditBoxWidgetAccessor;
+import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.CursorStyle;
 import io.wispforest.owo.ui.core.Size;
 import io.wispforest.owo.ui.core.Sizing;
@@ -12,10 +13,12 @@ import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.Observable;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.EditBox;
 import net.minecraft.client.gui.widget.EditBoxWidget;
 import net.minecraft.client.input.CursorMovement;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
@@ -34,7 +37,7 @@ public class TextAreaComponent extends EditBoxWidget {
     protected final Observable<Integer> maxLines = Observable.of(-1);
 
     protected TextAreaComponent(Sizing horizontalSizing, Sizing verticalSizing) {
-        super(MinecraftClient.getInstance().textRenderer, 0, 0, 0, 0, Text.empty(), Text.empty());
+        super(MinecraftClient.getInstance().textRenderer, 0, 0, 0, 0, Text.empty(), Text.empty(), Color.WHITE.argb(), false, Color.WHITE.argb(), true, true);
         this.editBox = ((EditBoxWidgetAccessor) this).owo$getEditBox();
         this.sizing(horizontalSizing, verticalSizing);
 
@@ -66,8 +69,8 @@ public class TextAreaComponent extends EditBoxWidget {
         this.height -= 1;
 
         var matrices = context.getMatrices();
-        matrices.push();
-        matrices.translate(-9, 1, 0);
+        matrices.pushMatrix();
+        matrices.translate(-9, 1);
 
         int previousMaxLength = this.editBox.getMaxLength();
         this.editBox.setMaxLength(Integer.MAX_VALUE);
@@ -76,7 +79,7 @@ public class TextAreaComponent extends EditBoxWidget {
 
         this.editBox.setMaxLength(previousMaxLength);
 
-        matrices.pop();
+        matrices.popMatrix();
         this.height += 1;
 
         if (this.displayCharCount.get()) {
@@ -90,19 +93,19 @@ public class TextAreaComponent extends EditBoxWidget {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(Click click, boolean doubled) {
         this.width -= 9;
-        var result = super.mouseClicked(mouseX, mouseY, button);
+        var result = super.mouseClicked(click, doubled);
         this.width += 9;
 
         return result;
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        boolean result = super.keyPressed(keyCode, scanCode, modifiers);
+    public boolean keyPressed(KeyInput input) {
+        boolean result = super.keyPressed(input);
 
-        if (keyCode == GLFW.GLFW_KEY_TAB) {
+        if (input.isTab()) {
             this.editBox.replaceSelection("    ");
             return true;
         } else {
@@ -118,10 +121,10 @@ public class TextAreaComponent extends EditBoxWidget {
         int selection = ((EditBoxAccessor) this.editBox).owo$getSelectionEnd();
 
         ((EditBoxAccessor) this.editBox).owo$setWidth(this.width() - this.getPadding() - 9);
-        this.editBox.setText(this.getText());
+        this.editBox.setText(this.getText(), false);
 
         super.inflate(space);
-        this.editBox.setText(this.getText());
+        this.editBox.setText(this.getText(), false);
 
         this.editBox.moveCursor(CursorMovement.ABSOLUTE, cursor);
         ((EditBoxAccessor) this.editBox).owo$setSelectionEnd(selection);

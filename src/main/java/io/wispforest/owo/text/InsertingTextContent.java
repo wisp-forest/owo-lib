@@ -1,8 +1,8 @@
 package io.wispforest.owo.text;
 
+import com.mojang.serialization.MapCodec;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.impl.StructEndecBuilder;
-import io.wispforest.owo.Owo;
 import io.wispforest.owo.serialization.CodecUtils;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Style;
@@ -13,10 +13,7 @@ import java.util.Optional;
 
 public record InsertingTextContent(int index) implements TextContent {
 
-    public static final TextContent.Type<InsertingTextContent> TYPE = new Type<>(
-        CodecUtils.toMapCodec(StructEndecBuilder.of(Endec.INT.fieldOf("index", InsertingTextContent::index), InsertingTextContent::new)),
-        Owo.id("insert").toString()
-    );
+    public static final MapCodec<InsertingTextContent> CODEC = CodecUtils.toMapCodec(StructEndecBuilder.of(Endec.INT.fieldOf("index", InsertingTextContent::index), InsertingTextContent::new));
 
     @Override
     public <T> Optional<T> visit(StringVisitable.Visitor<T> visitor) {
@@ -51,7 +48,7 @@ public record InsertingTextContent(int index) implements TextContent {
     }
 
     @Override
-    public Type<?> getType() {
-        return TYPE;
+    public MapCodec<? extends TextContent> getCodec() {
+        return CODEC;
     }
 }

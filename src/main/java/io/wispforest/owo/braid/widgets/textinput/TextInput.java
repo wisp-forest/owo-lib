@@ -8,6 +8,7 @@ import io.wispforest.owo.braid.framework.widget.LeafInstanceWidget;
 import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.text.OrderedText;
@@ -156,10 +157,10 @@ public class TextInput extends LeafInstanceWidget {
             var height = this.host().client().textRenderer.fontHeight;
 
             ctx.push();
-            ctx.translate(startX, lineBaseY - height, 0d);
+            ctx.translate(startX, lineBaseY - height);
 
             var width = endX - startX;
-            ctx.fill(RenderLayer.getGuiTextHighlight(), 0, 0, (int) width, height, Colors.BLUE);
+            ctx.fill(RenderPipelines.GUI_TEXT_HIGHLIGHT, 0, 0, (int) width, height, Colors.BLUE);
 
             ctx.pop();
         }
@@ -467,7 +468,7 @@ public class TextInput extends LeafInstanceWidget {
                 widget.controller.setSelection(new TextSelection(Math.max(0, start), end));
             } else {
                 this.lastClickTime = Instant.now();
-                this.moveCursor(clickedIdx, Screen.hasShiftDown());
+                this.moveCursor(clickedIdx, modifiers.shift());
             }
 
             return true;

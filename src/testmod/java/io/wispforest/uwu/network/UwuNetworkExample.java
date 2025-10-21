@@ -57,7 +57,7 @@ public class UwuNetworkExample {
 
     @Environment(EnvType.CLIENT)
     public static final class Client {
-        public static final KeyBinding NETWORK_TEST = new KeyBinding("key.uwu.network_test", GLFW.GLFW_KEY_U, "misc");
+        public static final KeyBinding NETWORK_TEST = new KeyBinding("key.uwu.network_test", GLFW.GLFW_KEY_U, KeyBinding.Category.MISC);
 
         public static void init() {
             KeyBindingHelper.registerKeyBinding(NETWORK_TEST);

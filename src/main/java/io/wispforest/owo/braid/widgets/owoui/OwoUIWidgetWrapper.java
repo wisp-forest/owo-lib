@@ -1,6 +1,6 @@
 package io.wispforest.owo.braid.widgets.owoui;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.opengl.GlStateManager;
 import io.wispforest.owo.braid.core.BraidDrawContext;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.KeyModifiers;
@@ -11,6 +11,10 @@ import io.wispforest.owo.braid.framework.instance.MouseListener;
 import io.wispforest.owo.braid.framework.widget.LeafInstanceWidget;
 import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.ParentComponent;
+import net.minecraft.client.gui.Click;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
+import net.minecraft.client.input.MouseInput;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -117,12 +121,12 @@ public class OwoUIWidgetWrapper extends LeafInstanceWidget {
 
         @Override
         public boolean onMouseDown(double x, double y, int button, KeyModifiers modifiers) {
-            return this.widget.rootComponent.onMouseDown(x, y, button);
+            return this.widget.rootComponent.onMouseDown(new Click(x, y, new MouseInput(button, modifiers.bitMask())), false);
         }
 
         @Override
         public boolean onMouseUp(double x, double y, int button, KeyModifiers modifiers) {
-            return this.widget.rootComponent.onMouseUp(x, y, button);
+            return this.widget.rootComponent.onMouseUp(new Click(x, y, new MouseInput(button, modifiers.bitMask())));
         }
 
         @Override
@@ -137,7 +141,7 @@ public class OwoUIWidgetWrapper extends LeafInstanceWidget {
 
         @Override
         public void onMouseDrag(double x, double y, double dx, double dy) {
-            this.widget.rootComponent.onMouseDrag(x, y, dx, dy, dragButton);
+            this.widget.rootComponent.onMouseDrag(new Click(x, y, new MouseInput(this.dragButton, 0)), dx, dy);
         }
 
         @Override
@@ -146,11 +150,11 @@ public class OwoUIWidgetWrapper extends LeafInstanceWidget {
         }
 
         public boolean onKeyDown(int keyCode, KeyModifiers modifiers) {
-            return this.widget.rootComponent.onKeyPress(keyCode, GLFW.glfwGetKeyScancode(keyCode), modifiers.bitMask());
+            return this.widget.rootComponent.onKeyPress(new KeyInput(keyCode, GLFW.glfwGetKeyScancode(keyCode), modifiers.bitMask()));
         }
 
         public boolean onChar(int charCode, KeyModifiers modifiers) {
-            return this.widget.rootComponent.onCharTyped((char) charCode, modifiers.bitMask());
+            return this.widget.rootComponent.onCharTyped(new CharInput(charCode, modifiers.bitMask()));
         }
 
         @Override
@@ -158,7 +162,7 @@ public class OwoUIWidgetWrapper extends LeafInstanceWidget {
             var client = host().client();
 
             this.widget.rootComponent.update(
-                client.getRenderTickCounter().getLastFrameDuration(),
+                client.getRenderTickCounter().getDynamicDeltaTicks(),
                 mouseX,
                 mouseY
             );
@@ -167,8 +171,8 @@ public class OwoUIWidgetWrapper extends LeafInstanceWidget {
                 ctx,
                 mouseX,
                 mouseY,
-                client.getRenderTickCounter().getTickDelta(false),
-                client.getRenderTickCounter().getLastFrameDuration()
+                client.getRenderTickCounter().getTickProgress(false),
+                client.getRenderTickCounter().getDynamicDeltaTicks()
             );
 
             // TODO: tooltips.

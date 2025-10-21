@@ -3,17 +3,15 @@ package io.wispforest.owo.braid.widgets;
 import io.wispforest.owo.braid.core.BraidDrawContext;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.Size;
+import io.wispforest.owo.braid.core.element.BraidItemElement;
 import io.wispforest.owo.braid.framework.instance.LeafWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.LeafInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
-import net.minecraft.client.render.DiffuseLighting;
-import net.minecraft.client.render.LightmapTextureManager;
-import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.item.ItemRenderState;
+import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ModelTransformationMode;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix3x2f;
 import org.joml.Matrix4f;
 
 import java.util.OptionalDouble;
@@ -21,15 +19,15 @@ import java.util.function.Consumer;
 
 /// A widget that renders an [ItemStack]
 ///
-/// The stack is rendered using the specified [ModelTransformationMode]
+/// The stack is rendered using the specified [ItemDisplayContext]
 /// and can show overlay information (item bar, count, cooldown progress, etc.)
 public class ItemStackWidget extends LeafInstanceWidget {
 
     public final ItemStack stack;
     protected boolean showOverlay = true;
-    protected ModelTransformationMode transformationMode = ModelTransformationMode.GUI;
+    protected ItemDisplayContext displayContext = ItemDisplayContext.GUI;
     protected @Nullable LightOverride lightOverride = null;
-    protected @Nullable Consumer<Matrix4f> transform = null;
+    protected @Nullable Consumer<Matrix4f> transform;
 
     public ItemStackWidget(ItemStack stack, @Nullable WidgetSetupCallback<ItemStackWidget> setupCallback) {
         this.stack = stack;
@@ -50,15 +48,15 @@ public class ItemStackWidget extends LeafInstanceWidget {
         return this.showOverlay;
     }
 
-    public ItemStackWidget transformationMode(ModelTransformationMode transformationMode) {
+    public ItemStackWidget displayContext(ItemDisplayContext displayContext) {
         this.assertMutable();
-        this.transformationMode = transformationMode;
+        this.displayContext = displayContext;
         this.showOverlay = false;
         return this;
     }
 
-    public ModelTransformationMode transformationMode() {
-        return this.transformationMode;
+    public ItemDisplayContext displayContext() {
+        return this.displayContext;
     }
 
     public ItemStackWidget lightOverride(@Nullable LightOverride lightOverride) {
@@ -72,7 +70,6 @@ public class ItemStackWidget extends LeafInstanceWidget {
     }
 
     public ItemStackWidget transform(@Nullable Consumer<Matrix4f> transform) {
-        this.assertMutable();
         this.transform = transform;
         return this;
     }
@@ -118,38 +115,32 @@ public class ItemStackWidget extends LeafInstanceWidget {
 
         @Override
         public void draw(BraidDrawContext ctx) {
-            var client = this.host().client();
-            client.getItemModelManager().update(ITEM_RENDER_STATE, this.widget.stack, this.widget.transformationMode, false, null, null, 0);
+            if (this.transform.width() <= 16 && this.transform.height() <= 16 && this.widget.displayContext == ItemDisplayContext.GUI && this.widget.transform == null) {
+                // scale according to widget size, since items assume a 16x16 window
+                ctx.push().scale((float) (this.transform.width() / 16f), (float) (this.transform.height() / 16f));
+                ctx.drawItem(this.widget.stack, 0, 0);
+                ctx.pop();
+            } else {
+                var state = new ItemRenderState();
+                this.host().client().getItemModelManager().update(state, this.widget.stack, this.widget.displayContext, this.host().client().world, this.host().client().player, 0);
 
-            final boolean notSideLit = this.widget.lightOverride == LightOverride.FRONT || (this.widget.lightOverride == null && !ITEM_RENDER_STATE.isSideLit());
-            if (notSideLit) {
-                ctx.draw();
-                DiffuseLighting.disableGuiDepthLighting();
+                var transformThisFrame = new Matrix4f();
+                if (this.widget.transform != null) {
+                    this.widget.transform.accept(transformThisFrame);
+                }
+
+                ctx.state.addSpecialElement(new BraidItemElement(
+                    state,
+                    this.transform.width(),
+                    this.transform.height(),
+                    ctx.scissorStack.peekLast(),
+                    transformThisFrame,
+                    new Matrix3x2f(ctx.getMatrices())
+                ));
             }
-
-            var matrices = ctx.getMatrices();
-            matrices.push();
-
-            // Scale according to component size and translate to the center
-            matrices.scale((float) (this.transform.width() / 16), (float) (this.transform.height() / 16), 1);
-            matrices.translate(8.0, 8.0, 8.0);
-
-            // Vanilla scaling and y inversion
-            matrices.scale(16, -16, 16);
-
-            if (this.widget.transform != null) this.widget.transform.accept(matrices.peek().getPositionMatrix());
-
-            ITEM_RENDER_STATE.render(matrices, OwoUIDrawContext.of(ctx).vertexConsumers(), LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV);
-            ctx.draw();
-
-            // Clean up
-            matrices.pop();
 
             if (this.widget.showOverlay) {
-                ctx.drawStackOverlay(client.textRenderer, this.widget.stack, 0, 0);
-            }
-            if (notSideLit) {
-                DiffuseLighting.enableGuiDepthLighting();
+                ctx.drawStackOverlay(this.host().client().textRenderer, this.widget.stack, 0, 0);
             }
         }
     }

@@ -32,7 +32,7 @@ public class BraidDisplayBlock extends BlockWithEntity {
     protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
         var entity = world.getBlockEntity(pos);
         if (player.isSneaking() && entity instanceof BraidDisplayBlockEntity display && display.display != null) {
-            display.display.app.eventBuffer.add(new KeyPressEvent(GLFW.GLFW_KEY_I, GLFW.glfwGetKeyScancode(GLFW.GLFW_KEY_I), new KeyModifiers(GLFW.GLFW_MOD_SHIFT | GLFW.GLFW_MOD_CONTROL)));
+            display.display.app.eventBinding.add(new KeyPressEvent(GLFW.GLFW_KEY_I, GLFW.glfwGetKeyScancode(GLFW.GLFW_KEY_I), new KeyModifiers(GLFW.GLFW_MOD_SHIFT | GLFW.GLFW_MOD_CONTROL)));
 
             return ActionResult.SUCCESS;
         }

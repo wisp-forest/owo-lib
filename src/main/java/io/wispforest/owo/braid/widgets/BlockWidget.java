@@ -1,19 +1,26 @@
 package io.wispforest.owo.braid.widgets;
 
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.core.BraidDrawContext;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.Size;
+import io.wispforest.owo.braid.core.element.BraidBlockElement;
 import io.wispforest.owo.braid.framework.instance.LeafWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.LeafInstanceWidget;
-import net.minecraft.block.BlockRenderType;
+import io.wispforest.owo.mixin.ui.access.BlockEntityAccessor;
+import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.render.DiffuseLighting;
-import net.minecraft.client.render.LightmapTextureManager;
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.block.entity.state.BlockEntityRenderState;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.storage.NbtReadView;
+import net.minecraft.util.ErrorReporter;
 import net.minecraft.util.math.RotationAxis;
+import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix3x2f;
+import org.joml.Matrix4f;
 
 import java.util.OptionalDouble;
 import java.util.function.Consumer;
@@ -23,12 +30,11 @@ public class BlockWidget extends LeafInstanceWidget {
 
     public final BlockState blockState;
     public final @Nullable BlockEntity blockEntity;
-    public final @Nullable Consumer<MatrixStack> transform;
+    public final @Nullable Consumer<Matrix4f> transform;
 
-    public BlockWidget(BlockState blockState, @Nullable BlockEntity blockEntity, @Nullable Consumer<MatrixStack> transform) {
+    public BlockWidget(BlockState blockState, @Nullable BlockEntity blockEntity, @Nullable Consumer<Matrix4f> transform) {
         this.blockState = blockState;
         this.blockEntity = blockEntity;
-//        this.transform = matrixStack -> matrixStack.translate(0, Math.sin(System.currentTimeMillis() / 1000d), 0);
         this.transform = transform;
     }
 
@@ -36,7 +42,7 @@ public class BlockWidget extends LeafInstanceWidget {
         this(blockState, blockEntity, null);
     }
 
-    public BlockWidget(BlockState blockState, Consumer<MatrixStack> transform) {
+    public BlockWidget(BlockState blockState, Consumer<Matrix4f> transform) {
         this(blockState, null, transform);
     }
 
@@ -44,12 +50,34 @@ public class BlockWidget extends LeafInstanceWidget {
         this(blockState, null, null);
     }
 
-
-
     @Override
     public LeafWidgetInstance<?> instantiate() {
         return new Instance(this);
     }
+
+    // ---
+
+    public static @Nullable BlockEntity prepareBlockEntity(BlockState state, @Nullable BlockEntity blockEntity, @Nullable NbtCompound nbt) {
+        var client = MinecraftClient.getInstance();
+        if (blockEntity == null && state.hasBlockEntity()) {
+            blockEntity = ((BlockEntityProvider)state.getBlock()).createBlockEntity(client.player.getBlockPos(), state);
+        }
+
+        if (blockEntity == null) {
+            return null;
+        }
+
+        ((BlockEntityAccessor) blockEntity).owo$setCachedState(state);
+        blockEntity.setWorld(client.world);
+
+        if (nbt != null) {
+            blockEntity.read(NbtReadView.create(new ErrorReporter.Logging(Owo.LOGGER), client.world.getRegistryManager(), nbt));
+        }
+
+        return blockEntity;
+    }
+
+    // ---
 
     public static class Instance extends LeafWidgetInstance<BlockWidget> {
 
@@ -81,59 +109,39 @@ public class BlockWidget extends LeafInstanceWidget {
         }
 
         @Override
-        @SuppressWarnings("NonAsciiCharacters")
         public void draw(BraidDrawContext ctx) {
-            var client = this.host().client();
-            var matrices = ctx.getMatrices();
-
-            matrices.push();
-
-            matrices.translate(this.transform.width() / 2f, this.transform.height() / 2f, 100);
-
-            matrices.scale(40 * (float) (this.transform.width() / 64f), -40 * (float) (this.transform.height() / 64f), 40);
+            var drawTransform = new Matrix4f();
+            drawTransform.scale(40 * (float) (this.transform.width() / 64f), -40 * (float) (this.transform.height() / 64f), -40);
 
             if (this.widget.transform != null) {
-                this.widget.transform.accept(matrices);
+                this.widget.transform.accept(drawTransform);
             } else {
-                matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(30));
-                matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(45 + 180));
+                drawTransform.rotate(RotationAxis.POSITIVE_X.rotationDegrees(30));
+                drawTransform.rotate(RotationAxis.POSITIVE_Y.rotationDegrees(45 + 180));
             }
 
-            matrices.translate(-.5, -.5, -.5);
+            drawTransform.translate(-.5f, -.5f, -.5f);
 
-            final var vertexConsumers = client.getBufferBuilders().getEntityVertexConsumers();
-            if (this.widget.blockState.getRenderType() != BlockRenderType.INVISIBLE) {
-                client.getBlockRenderManager().renderBlockAsEntity(
-                    this.widget.blockState,
-                    matrices,
-                    vertexConsumers,
-                    LightmapTextureManager.MAX_LIGHT_COORDINATE,
-                    OverlayTexture.DEFAULT_UV
-                );
-            }
-
+            BlockEntityRenderState entity = null;
             if (this.widget.blockEntity != null) {
-                var медведь = client.getBlockEntityRenderDispatcher().get(this.widget.blockEntity);
-                if (медведь != null) {
-                    медведь.render(
-                        this.widget.blockEntity,
-                        0f,
-                        matrices,
-                        vertexConsumers,
-                        LightmapTextureManager.MAX_LIGHT_COORDINATE,
-                        OverlayTexture.DEFAULT_UV
+                var renderer = MinecraftClient.getInstance().getBlockEntityRenderDispatcher().get(this.widget.blockEntity);
+                if (renderer != null) {
+                    entity = renderer.createRenderState();
+                    renderer.updateRenderState(
+                        this.widget.blockEntity, entity, 0, Vec3d.ZERO, null
                     );
                 }
             }
 
-            //TODO: apply lighting from widget.blockState.getLuminance()?
-            DiffuseLighting.disableGuiDepthLighting();
-            vertexConsumers.draw();
-            DiffuseLighting.enableGuiDepthLighting();
-
-            matrices.pop();
+            ctx.state.addSpecialElement(new BraidBlockElement(
+                this.widget.blockState,
+                entity,
+                drawTransform,
+                new Matrix3x2f(ctx.getMatrices()),
+                this.transform.width(),
+                this.transform.height(),
+                ctx.scissorStack.peekLast()
+            ));
         }
     }
-
-    //TODO: idk what prepareBlockEntity is for in BlockComponent
 }

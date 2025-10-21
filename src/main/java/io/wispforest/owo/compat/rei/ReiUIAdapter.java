@@ -3,16 +3,17 @@ package io.wispforest.owo.compat.rei;
 import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.core.Sizing;
-import io.wispforest.owo.ui.util.ScissorStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
 
 import java.util.List;
 import java.util.function.BiFunction;
@@ -63,8 +64,8 @@ public class ReiUIAdapter<T extends ParentComponent> extends Widget {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        return this.adapter.mouseClicked(mouseX - this.adapter.x(), mouseY - this.adapter.y(), button);
+    public boolean mouseClicked(Click click, boolean doubled) {
+        return this.adapter.mouseClicked(new Click(click.x() - this.adapter.x(), click.y() - this.adapter.y(), click.buttonInfo()), doubled);
     }
 
     @Override
@@ -73,37 +74,35 @@ public class ReiUIAdapter<T extends ParentComponent> extends Widget {
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        return this.adapter.mouseReleased(mouseX - this.adapter.x(), mouseY - this.adapter.y(), button);
+    public boolean mouseReleased(Click click) {
+        return this.adapter.mouseReleased(new Click(click.x() - this.adapter.x(), click.y() - this.adapter.y(), click.buttonInfo()));
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        return this.adapter.mouseDragged(mouseX - this.adapter.x(), mouseY - this.adapter.y(), button, deltaX, deltaY);
+    public boolean mouseDragged(Click click, double deltaX, double deltaY) {
+        return this.adapter.mouseDragged(new Click(click.x() - this.adapter.x(), click.y() - this.adapter.y(), click.buttonInfo()), deltaX, deltaY);
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        return this.adapter.keyPressed(keyCode, scanCode, modifiers);
+    public boolean keyPressed(KeyInput input) {
+        return this.adapter.keyPressed(input);
     }
 
     @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-        return this.adapter.keyReleased(keyCode, scanCode, modifiers);
+    public boolean keyReleased(KeyInput input) {
+        return this.adapter.keyReleased(input);
     }
 
     @Override
-    public boolean charTyped(char chr, int modifiers) {
-        return this.adapter.charTyped(chr, modifiers);
+    public boolean charTyped(CharInput input) {
+        return this.adapter.charTyped(input);
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float partialTicks) {
-        ScissorStack.push(this.adapter.x(), this.adapter.y(), this.adapter.width(), this.adapter.height(), context);
+        context.enableScissor(this.adapter.x(), this.adapter.y(), this.adapter.width(), this.adapter.height());
         this.adapter.render(context, mouseX, mouseY, partialTicks);
-        ScissorStack.pop();
-
-        context.draw();
+        context.disableScissor();
     }
 
     @Override

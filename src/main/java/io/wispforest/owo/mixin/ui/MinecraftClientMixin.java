@@ -2,8 +2,10 @@ package io.wispforest.owo.mixin.ui;
 
 import io.wispforest.owo.ui.event.ClientRenderCallback;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
+import io.wispforest.owo.ui.renderstate.BlurQuadElementRenderState;
 import io.wispforest.owo.ui.util.DisposableScreen;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.RunArgs;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.Window;
 import net.minecraft.util.crash.CrashException;
@@ -79,5 +81,10 @@ public class MinecraftClientMixin {
 
             this.screensToDispose.clear();
         }
+    }
+
+    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;initRenderer(JIZLjava/util/function/BiFunction;Z)V", shift = At.Shift.AFTER))
+    private void initBlurRenderer(RunArgs args, CallbackInfo ci) {
+        BlurQuadElementRenderState.initialize((MinecraftClient) (Object) this);
     }
 }

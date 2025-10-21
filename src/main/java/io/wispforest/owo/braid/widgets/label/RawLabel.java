@@ -50,7 +50,7 @@ public class RawLabel extends LeafInstanceWidget {
 
         protected Function<Style, Boolean> textClickHandler = style -> {
             OwoUIDrawContext.utilityScreen().captureLinkSource();
-            return OwoUIDrawContext.utilityScreen().handleTextClick(style);
+            return style != null && OwoUIDrawContext.utilityScreen().handleTextClick(style);
         };
 
         public Instance(RawLabel widget) {

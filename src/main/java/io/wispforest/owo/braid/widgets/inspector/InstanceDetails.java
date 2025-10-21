@@ -19,8 +19,7 @@ import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.sharedstate.SharedState;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import org.joml.Matrix4f;
-import org.joml.Vector4f;
+import org.joml.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -105,8 +104,8 @@ public class InstanceDetails extends StatefulWidget {
         }
 
         private static List<Text> gatherProperties(WidgetInstance<?> instance) {
-            var instanceTransform = instance.hasParent() ? instance.parent().computeGlobalTransform().invert() : new Matrix4f();
-            var absPos = new Vector4f((float) instance.transform.x(), (float) instance.transform.y(), 0f, 1f).mul(instanceTransform);
+            var instanceTransform = instance.hasParent() ? instance.parent().computeGlobalTransform().invert() : new Matrix3x2f();
+            var absPos = new Vector3f((float) instance.transform.x(), (float) instance.transform.y(), 1f).mul(instanceTransform);
 
             var properties = new ArrayList<>(List.<Text>of(
                     Text.literal("Rel. Position").formatted(Formatting.BOLD),

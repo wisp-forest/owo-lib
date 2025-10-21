@@ -1,5 +1,6 @@
 package io.wispforest.owo.serialization.format.nbt;
 
+import com.google.common.collect.MapMaker;
 import io.wispforest.endec.*;
 import io.wispforest.endec.util.RecursiveSerializer;
 import net.minecraft.nbt.*;
@@ -101,7 +102,7 @@ public class NbtSerializer extends RecursiveSerializer<NbtElement> implements Se
         this.consume(new NbtByteArray(bytes));
     }
 
-    private final Set<IdentityHolder<NbtElement>> encodedOptionals = Collections.newSetFromMap(new WeakHashMap<>());
+    private final Set<NbtElement> encodedOptionals = Collections.newSetFromMap(new MapMaker().weakKeys().makeMap());
 
     @Override
     public <V> void writeOptional(SerializationContext ctx, Endec<V> endec, Optional<V> optional) {
@@ -115,7 +116,7 @@ public class NbtSerializer extends RecursiveSerializer<NbtElement> implements Se
 
             var compound = encoded.require("optional representation");
 
-            encodedOptionals.add(new IdentityHolder<>(compound));
+            encodedOptionals.add(compound);
             frameData.setValue(compound);
         });
 
@@ -177,10 +178,10 @@ public class NbtSerializer extends RecursiveSerializer<NbtElement> implements Se
 
                 var element = encoded.require("struct field");
 
-                if (mayOmit && NbtSerializer.this.encodedOptionals.contains(new IdentityHolder<>(element))) {
+                if (mayOmit && NbtSerializer.this.encodedOptionals.contains(element)) {
                     var nbtCompound = (NbtCompound) element;
 
-                    if(!nbtCompound.getBoolean("present")) return;
+                    if(!nbtCompound.getBoolean("present", false)) return;
 
                     element = nbtCompound.get("value");
                 }

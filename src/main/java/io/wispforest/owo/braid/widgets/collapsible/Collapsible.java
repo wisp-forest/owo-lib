@@ -4,7 +4,6 @@ import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.core.Alignment;
 import io.wispforest.owo.braid.core.Color;
 import io.wispforest.owo.braid.core.Insets;
-import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
@@ -12,7 +11,6 @@ import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.SpriteWidget;
 import io.wispforest.owo.braid.widgets.basic.*;
 import io.wispforest.owo.braid.widgets.intents.Interactable;
-import io.wispforest.owo.braid.widgets.intents.ShortcutDecoder;
 import io.wispforest.owo.braid.widgets.flex.Column;
 import io.wispforest.owo.braid.widgets.flex.CrossAxisAlignment;
 import io.wispforest.owo.braid.widgets.flex.MainAxisAlignment;
@@ -87,7 +85,7 @@ public class Collapsible extends StatefulWidget {
                             Interactable.primary(
                                 () -> this.widget().onToggled.onToggled(!this.widget().collapsed),
                                 new Center(
-                                    new SpriteWidget(Owo.id(this.widget().collapsed ? "braid_collapsible_closed" : "braid_collapsible_open"), false)
+                                    new SpriteWidget(Owo.id(this.widget().collapsed ? "braid_collapsible_closed" : "braid_collapsible_open"))
                                 )
                             )
                         ),

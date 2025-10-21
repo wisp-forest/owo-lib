@@ -29,7 +29,7 @@ public class RestartRequiredScreen extends BaseUIModelScreen<FlowLayout> {
     @SuppressWarnings("ConstantConditions")
     protected void build(FlowLayout rootComponent) {
         if (this.client.world == null) {
-            rootComponent.surface(Surface.OPTIONS_BACKGROUND);
+            rootComponent.surface(Surface.optionsBackground());
         }
 
         rootComponent.childById(ButtonComponent.class, "exit-button")

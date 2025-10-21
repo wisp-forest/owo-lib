@@ -258,7 +258,7 @@ public class ComboBox<T> extends StatefulWidget {
                             ),
                             new Padding(
                                 Insets.horizontal(3),
-                                new SpriteWidget(Owo.id("braid_combo_box_arrow"), false)
+                                new SpriteWidget(Owo.id("braid_combo_box_arrow"))
                             )
                         )
                     )

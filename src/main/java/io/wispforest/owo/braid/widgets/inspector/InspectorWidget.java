@@ -26,6 +26,7 @@ import io.wispforest.owo.braid.widgets.sharedstate.SharedState;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Style;
+import net.minecraft.text.StyleSpriteSource;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
@@ -81,7 +82,7 @@ public class InspectorWidget extends StatefulWidget {
                         return new Box(
                             Color.rgb(0x1d2026),
                             new DefaultLabelStyle(
-                                new LabelStyle(null, null, Style.EMPTY.withFont(MinecraftClient.UNICODE_FONT_ID), null),
+                                new LabelStyle(null, null, Style.EMPTY.withFont(new StyleSpriteSource.Font(MinecraftClient.UNICODE_FONT_ID)), null),
                                 new Row(
                                     new Flexible(
                                         new Stack(
@@ -116,8 +117,7 @@ public class InspectorWidget extends StatefulWidget {
                                                                         new SpriteWidget(
                                                                             this.alwaysOnTop
                                                                                 ? Owo.id("braid_inspector_always_on_top")
-                                                                                : Owo.id("braid_inspector_not_always_on_top"),
-                                                                            false
+                                                                                : Owo.id("braid_inspector_not_always_on_top")
                                                                         )
                                                                     )
                                                                 )
@@ -129,7 +129,7 @@ public class InspectorWidget extends StatefulWidget {
                                                                     Text.literal("reassemble app"),
                                                                     new Button(
                                                                         () -> this.widget().inspector.subject.rebuildRoot(),
-                                                                        new SpriteWidget(Owo.id("braid_inspector_reassemble"), false)
+                                                                        new SpriteWidget(Owo.id("braid_inspector_reassemble"))
                                                                     )
                                                                 )
                                                             ),
@@ -140,7 +140,7 @@ public class InspectorWidget extends StatefulWidget {
                                                                     Text.literal("pick widget"),
                                                                     new Button(
                                                                         () -> this.widget().inspector.pick(),
-                                                                        new SpriteWidget(Owo.id("braid_inspector_pick"), false)
+                                                                        new SpriteWidget(Owo.id("braid_inspector_pick"))
                                                                     )
                                                                 )
                                                             )

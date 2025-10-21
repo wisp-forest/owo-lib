@@ -7,6 +7,7 @@ import io.wispforest.owo.braid.framework.instance.SingleChildWidgetInstance;
 import io.wispforest.owo.braid.framework.instance.WidgetTransform;
 import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
+import org.joml.Matrix3x2f;
 import org.joml.Matrix4f;
 
 import java.util.OptionalDouble;
@@ -72,10 +73,10 @@ public class RotatedLayout extends SingleChildInstanceWidget {
 
             this.transform.setSize(selfSize);
 
-            var childTransform = new Matrix4f()
-                .translate((float) (selfSize.width() / 2), (float) (selfSize.height() / 2), 0)
-                .rotateZ((float) (this.visualIncrements * Math.PI / 2))
-                .translate((float) (-childSize.width() / 2), (float) (-childSize.height() / 2), 0);
+            var childTransform = new Matrix3x2f()
+                .translate((float) (selfSize.width() / 2), (float) (selfSize.height() / 2))
+                .rotate((float) (this.visualIncrements * Math.PI / 2))
+                .translate((float) (-childSize.width() / 2), (float) (-childSize.height() / 2));
 
             ((CustomWidgetTransform) this.transform).setMatrix(childTransform);
         }

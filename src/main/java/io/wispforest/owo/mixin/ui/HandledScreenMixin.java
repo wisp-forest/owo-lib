@@ -1,12 +1,13 @@
 package io.wispforest.owo.mixin.ui;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.opengl.GlStateManager;
 import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
 import io.wispforest.owo.util.pond.OwoSlotExtension;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
@@ -60,16 +61,16 @@ public abstract class HandledScreenMixin extends Screen {
         GlStateManager._disableScissorTest();
     }
 
-    @ModifyVariable(method = "mouseClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/option/SimpleOption;getValue()Ljava/lang/Object;", ordinal = 0), ordinal = 3)
+    @ModifyVariable(method = "mouseClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/option/SimpleOption;getValue()Ljava/lang/Object;", ordinal = 0), ordinal = 2)
     private int doNoThrow(int slotId, @Local() Slot slot) {
         return (((Object) this instanceof BaseOwoHandledScreen<?, ?>) && slot != null) ? slot.id : slotId;
     }
 
-    @Inject(method = "keyPressed", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/HandledScreen;handleHotbarKeyPressed(II)Z"), cancellable = true)
-    private void closeIt(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "keyPressed", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/HandledScreen;handleHotbarKeyPressed(Lnet/minecraft/client/input/KeyInput;)Z"), cancellable = true)
+    private void closeIt(KeyInput input, CallbackInfoReturnable<Boolean> cir) {
         if (!((Object) this instanceof BaseOwoHandledScreen<?, ?>)) return;
 
-        if (keyCode == GLFW.GLFW_KEY_ESCAPE && this.shouldCloseOnEsc()) {
+        if (input.isEscape() && this.shouldCloseOnEsc()) {
             this.close();
             cir.setReturnValue(true);
         }

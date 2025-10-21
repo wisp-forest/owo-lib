@@ -2,25 +2,18 @@ package io.wispforest.owo.braid.widgets;
 
 import io.wispforest.owo.braid.core.BraidDrawContext;
 import io.wispforest.owo.braid.core.Constraints;
+import io.wispforest.owo.braid.core.element.BraidEntityElement;
 import io.wispforest.owo.braid.framework.instance.LeafWidgetInstance;
-import io.wispforest.owo.braid.framework.instance.MouseListener;
 import io.wispforest.owo.braid.framework.widget.LeafInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
-import io.wispforest.owo.util.pond.OwoEntityRenderDispatcherExtension;
-import net.minecraft.client.render.DiffuseLighting;
-import net.minecraft.client.render.LightmapTextureManager;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import org.jetbrains.annotations.Nullable;
-import org.joml.*;
+import org.joml.Matrix3x2f;
+import org.joml.Matrix4f;
+import org.joml.Vector4f;
 
-import java.awt.*;
-import java.lang.Math;
 import java.util.OptionalDouble;
 import java.util.function.Consumer;
 
@@ -128,12 +121,11 @@ public class EntityWidget extends LeafInstanceWidget {
         @Override
         public void draw(BraidDrawContext ctx) {
             var entity = this.widget.entity;
-            ctx.push();
 
             var entitySpaceToWidgetSpace = new Matrix4f();
-            entitySpaceToWidgetSpace.translate((float) (this.transform.width() / 2), (float) (this.transform.height() / 2), 100);
+            entitySpaceToWidgetSpace.translate(0, (float) (this.transform.height() / 2), 100);
             entitySpaceToWidgetSpace.scale((float) (this.widget.scale * this.baseScale));
-            entitySpaceToWidgetSpace.scale(1, -1, 1);
+            entitySpaceToWidgetSpace.scale(1, -1, -1);
 
             var entityTransform = new Matrix4f();
             if (this.widget.transform != null) {
@@ -145,16 +137,22 @@ public class EntityWidget extends LeafInstanceWidget {
             var xRotation = 0f;
             var yRotation = 0f;
 
-            var prevHeadYaw = entity instanceof LivingEntity living ? living.prevHeadYaw : 0;
-            var prevYaw = entity.prevYaw;
-            var prevPitch = entity.prevPitch;
+            var lastHeadYaw = entity instanceof LivingEntity living ? living.lastHeadYaw : 0;
+            var lastYaw = entity.lastYaw;
+            var lastPitch = entity.lastPitch;
 
             if (this.widget.displayMode == DisplayMode.FIXED) {
                 xRotation = 35;
                 yRotation = -45;
             } else if (this.widget.displayMode != DisplayMode.NONE) {
                 var globalCursorPos = this.host().cursorPosition();
-                var cursorTransform = new Matrix4f(ctx.getMatrices().peek().getPositionMatrix())
+                var cursor4x4Buffer = ctx.getMatrices().get4x4(new float[16]);
+
+                var cursorTransform = new Matrix4f()
+                    .set(cursor4x4Buffer)
+                    // we do this ugly cursor-specific offset here to account for the
+                    // centering being indiscriminately applied inside the PIP renderer
+                    .translate((float) (this.transform.width() / 2), 0, 0)
                     .mul(entitySpaceToWidgetSpace)
                     .mul(entityTransform)
                     .invert();
@@ -167,20 +165,20 @@ public class EntityWidget extends LeafInstanceWidget {
 
                         xRotation = (float) Math.toDegrees(Math.atan(localCursorPos.y - center.y)) * -.15f;
                         yRotation = (float) Math.toDegrees(Math.atan(localCursorPos.x - center.x)) * .15f;
-                        if (entity instanceof LivingEntity living) living.prevHeadYaw = -yRotation * 3;
+                        if (entity instanceof LivingEntity living) living.lastHeadYaw = -yRotation * 3;
 
-                        entity.prevYaw = -yRotation * .65f;
-                        entity.prevPitch = xRotation * 2.5f;
+                        entity.lastYaw = -yRotation * .65f;
+                        entity.lastPitch = xRotation * 2.5f;
                     }
                     case VANILLA -> {
                         var center = new Vector4f(0, entity.getHeight() / 2, 0, 1);
 
                         xRotation = (float) Math.atan(localCursorPos.y - center.y) * -20f;
                         yRotation = (float) Math.atan(localCursorPos.x - center.x) * 20f;
-                        if (entity instanceof LivingEntity living) living.prevHeadYaw = -yRotation;
+                        if (entity instanceof LivingEntity living) living.lastHeadYaw = -yRotation;
 
-                        entity.prevYaw = -yRotation;
-                        entity.prevPitch = xRotation;
+                        entity.lastYaw = -yRotation;
+                        entity.lastPitch = xRotation;
                     }
                 }
             }
@@ -191,29 +189,23 @@ public class EntityWidget extends LeafInstanceWidget {
             entityTransform.rotate(RotationAxis.POSITIVE_X.rotationDegrees(xRotation));
             entityTransform.rotate(RotationAxis.POSITIVE_Y.rotationDegrees(yRotation));
 
-            ctx.multiplyPositionMatrix(entitySpaceToWidgetSpace);
-            ctx.multiplyPositionMatrix(entityTransform);
+            var entityState = this.host().client().getEntityRenderDispatcher().getAndUpdateRenderState(this.widget.entity, 0);
 
-            var dispatcher = this.host().client().getEntityRenderDispatcher();
-            var dispatcherExtension = (OwoEntityRenderDispatcherExtension) dispatcher;
-            dispatcherExtension.owo$setShowNametag(this.widget.showNametag);
+            if (!this.widget.showNametag) {
+                entityState.displayName = null;
+            }
 
-            // TODO: counterrotate properly
-            dispatcher.setRotation(entityTransform.getUnnormalizedRotation(new Quaternionf()).normalize().invert());
+            ctx.state.addSpecialElement(new BraidEntityElement(
+                entityState,
+                new Matrix4f().mul(entitySpaceToWidgetSpace).mul(entityTransform),
+                new Matrix3x2f(ctx.getMatrices()),
+                this.transform.width(), this.transform.height(),
+                ctx.scissorStack.peekLast()
+            ));
 
-            DiffuseLighting.enableForLevel();
-            dispatcher.setRenderShadows(false);
-            dispatcher.render(entity, 0, 0, 0, 0, ctx.getMatrices(), ctx.vertexConsumers(), LightmapTextureManager.MAX_LIGHT_COORDINATE);
-            dispatcher.setRenderShadows(true);
-            ctx.draw();
-            DiffuseLighting.enableGuiDepthLighting();
-
-            ctx.pop();
-
-            dispatcherExtension.owo$setShowNametag(true);
-            if (entity instanceof LivingEntity living) living.prevHeadYaw = prevHeadYaw;
-            entity.prevPitch = prevPitch;
-            entity.prevYaw = prevYaw;
+            if (entity instanceof LivingEntity living) living.lastHeadYaw = lastHeadYaw;
+            entity.lastPitch = lastPitch;
+            entity.lastYaw = lastYaw;
         }
     }
 

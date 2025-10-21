@@ -1,21 +1,19 @@
 package io.wispforest.owo.ui.component;
 
-import io.wispforest.owo.client.OwoClient;
 import io.wispforest.owo.ui.base.BaseComponent;
-import io.wispforest.owo.ui.core.Color;
-import io.wispforest.owo.ui.core.CursorStyle;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
+import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
+import io.wispforest.owo.ui.renderstate.GradientQuadElementRenderState;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.Observable;
-import net.minecraft.client.render.BufferRenderer;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.gui.Click;
+import net.minecraft.client.gui.ScreenPos;
+import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix3x2f;
 import org.w3c.dom.Element;
 
 import java.util.Map;
@@ -53,20 +51,16 @@ public class ColorPickerComponent extends BaseComponent {
 
         // Color area
 
-        var buffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
-        var matrix = context.getMatrices().peek().getPositionMatrix();
-
-        buffer.vertex(matrix, this.renderX(), this.renderY(), 0)
-                .color(this.hue, 0f, 1f, 1f);
-        buffer.vertex(matrix, this.renderX(), this.renderY() + this.renderHeight(), 0)
-                .color(this.hue, 0f, 0f, 1f);
-        buffer.vertex(matrix, this.renderX() + this.colorAreaWidth(), this.renderY() + this.renderHeight(), 0)
-                .color(this.hue, 1f, 0f, 1f);
-        buffer.vertex(matrix, this.renderX() + this.colorAreaWidth(), this.renderY(), 0)
-                .color(this.hue, 1f, 1f, 1f);
-
-        OwoClient.HSV_PROGRAM.use();
-        BufferRenderer.drawWithGlobalProgram(buffer.end());
+        context.state.addSimpleElement(new GradientQuadElementRenderState(
+            OwoUIPipelines.GUI_HSV,
+            new Matrix3x2f(context.getMatrices()),
+            new ScreenRect(new ScreenPos(this.renderX(), this.renderY()), this.colorAreaWidth(), this.renderHeight()),
+            context.scissorStack.peekLast(),
+            new Color(this.hue, 0f, 1f),
+            new Color(this.hue, 1f, 1f),
+            new Color(this.hue, 0f, 0f),
+            new Color(this.hue, 1f, 0f)
+        ));
 
         context.drawRectOutline(
                 (int) (this.renderX() + (this.saturation * this.colorAreaWidth()) - 1),
@@ -100,24 +94,24 @@ public class ColorPickerComponent extends BaseComponent {
     }
 
     @Override
-    public boolean onMouseDown(double mouseX, double mouseY, int button) {
-        this.lastClicked = this.showAlpha && mouseX >= this.alphaSelectorX()
+    public boolean onMouseDown(Click click, boolean doubled) {
+        this.lastClicked = this.showAlpha && click.x() >= this.alphaSelectorX()
                 ? Section.ALPHA_SELECTOR
-                : mouseX > this.hueSelectorX()
+                : click.x() > this.hueSelectorX()
                 ? Section.HUE_SELECTOR
                 : Section.COLOR_AREA;
 
-        this.updateFromMouse(mouseX, mouseY);
+        this.updateFromMouse(click.x(), click.y());
 
-        super.onMouseDown(mouseX, mouseY, button);
+        super.onMouseDown(click, doubled);
         return true;
     }
 
     @Override
-    public boolean onMouseDrag(double mouseX, double mouseY, double deltaX, double deltaY, int button) {
-        this.updateFromMouse(mouseX, mouseY);
+    public boolean onMouseDrag(Click click, double deltaX, double deltaY) {
+        this.updateFromMouse(click.x(), click.y());
 
-        super.onMouseDrag(mouseX, mouseY, deltaX, deltaY, button);
+        super.onMouseDrag(click, deltaX, deltaY);
         return true;
     }
 

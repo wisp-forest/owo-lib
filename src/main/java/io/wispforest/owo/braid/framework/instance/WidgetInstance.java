@@ -15,10 +15,7 @@ import net.minecraft.util.math.Box;
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
-import org.joml.Vector2d;
-import org.joml.Vector3d;
-import org.joml.Vector3f;
+import org.joml.*;
 
 import java.util.*;
 
@@ -230,12 +227,12 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
         return x >= 0 && x < this.transform.width && y >= 0 && y < this.transform.height;
     }
 
-    public Matrix4f computeGlobalTransform() {
+    public Matrix3x2f computeGlobalTransform() {
         return this.computeTransformFrom(null);
     }
 
-    public Matrix4f computeTransformFrom(@Nullable WidgetInstance<?> ancestor) {
-        var result = new Matrix4f();
+    public Matrix3x2f computeTransformFrom(@Nullable WidgetInstance<?> ancestor) {
+        var result = new Matrix3x2f();
 
         this.transform.transformToWidget(result);
 
@@ -248,18 +245,18 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
     }
 
     public Box computeGlobalBounds() {
-        var global = this.parent != null ? this.parent.computeGlobalTransform().invert() : new Matrix4f();
+        var global = this.parent != null ? this.parent.computeGlobalTransform().invert() : new Matrix3x2f();
 
-        var min = new Vector3f((float) this.transform.x, (float) this.transform.y, 0).mulPosition(global);
-        var max = new Vector3f((float) (this.transform.x + this.transform.width), (float) (this.transform.y + this.transform.height), 0).mulPosition(global);
+        var min = new Vector2f((float) this.transform.x, (float) this.transform.y).mulPosition(global);
+        var max = new Vector2f((float) (this.transform.x + this.transform.width), (float) (this.transform.y + this.transform.height)).mulPosition(global);
 
-        return new Box(min.x, min.y, min.z, max.x, max.y, max.z);
+        return new Box(min.x, min.y, 0, max.x, max.y, 0);
     }
 
     public Vector2d computeGlobalPosition() {
-        var global = this.parent != null ? this.parent.computeGlobalTransform().invert() : new Matrix4f();
+        var global = this.parent != null ? this.parent.computeGlobalTransform().invert() : new Matrix3x2f();
 
-        var pos = new Vector3d(this.transform.x, this.transform.y, 0).mulPosition(global);
+        var pos = new Vector2f((float) this.transform.x, (float) this.transform.y).mulPosition(global);
         return new Vector2d(pos.x, pos.y);
     }
 

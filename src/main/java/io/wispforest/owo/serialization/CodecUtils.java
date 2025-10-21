@@ -17,8 +17,8 @@ import io.wispforest.endec.format.forwarding.ForwardingSerializer;
 import io.wispforest.endec.format.gson.GsonDeserializer;
 import io.wispforest.endec.format.gson.GsonEndec;
 import io.wispforest.endec.format.gson.GsonSerializer;
-import io.wispforest.owo.mixin.ForwardingDynamicOpsAccessor;
-import io.wispforest.owo.mixin.RegistryOpsAccessor;
+import io.wispforest.owo.mixin.serialization.ForwardingDynamicOpsAccessor;
+import io.wispforest.owo.mixin.serialization.RegistryOpsAccessor;
 import io.wispforest.owo.serialization.endec.EitherEndec;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.serialization.endec.StructEitherEndec;
@@ -236,11 +236,6 @@ public class CodecUtils {
                 });
             }
         };
-    }
-
-    @Deprecated
-    public static <T> Codec<T> ofEndec(Endec<T> endec) {
-        return toCodec(endec);
     }
 
     public static <T> Codec<T> toCodec(Endec<T> endec) {
@@ -630,7 +625,7 @@ public class CodecUtils {
                         throw new IllegalStateException("Unable to parse key: " + key);
                     }
 
-                    compound.put(primitive.asString(), value);
+                    compound.put(primitive.asString().get(), value);
                 });
 
                 return compound;

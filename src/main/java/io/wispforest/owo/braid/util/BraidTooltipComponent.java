@@ -3,7 +3,7 @@ package io.wispforest.owo.braid.util;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.core.Alignment;
 import io.wispforest.owo.braid.core.AppState;
-import io.wispforest.owo.braid.core.EventBuffer;
+import io.wispforest.owo.braid.core.EventBinding;
 import io.wispforest.owo.braid.core.Surface;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.Align;
@@ -27,7 +27,7 @@ public class BraidTooltipComponent implements TooltipComponent {
             AppState.formatName("BraidTooltipComponent", widget),
             MinecraftClient.getInstance(),
             new Surface.Default(),
-            new EventBuffer(),
+            new EventBinding.Headless(),
             new Align(
                 Alignment.TOP_LEFT,
                 new EmbedderRoot(
@@ -45,8 +45,7 @@ public class BraidTooltipComponent implements TooltipComponent {
 
     @Override
     public void drawItems(TextRenderer textRenderer, int x, int y, int width, int height, DrawContext context) {
-        context.draw();
-        context.push().translate(x, y, 0);
+        context.push().translate(x, y);
         this.app.draw(context);
         context.pop();
     }

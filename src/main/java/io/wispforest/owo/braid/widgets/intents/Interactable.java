@@ -41,13 +41,15 @@ public class Interactable extends StatefulWidget {
         setup.setup(this);
     }
 
-    public static Widget primary(Runnable onClick, @Nullable WidgetSetupCallback<Interactable> setup, Widget child) {
+    public static Widget primary(@Nullable Runnable onClick, @Nullable WidgetSetupCallback<Interactable> setup, Widget child) {
         return new Interactable(
             CLICK_SHORTCUT,
             widget -> {
-                widget
-                    .addAction(PrimaryActionIntent.class, Action.callback((context, intent) -> onClick.run()))
-                    .cursorStyle(CursorStyle.HAND);
+                if (onClick != null) {
+                    widget
+                        .addAction(PrimaryActionIntent.class, Action.callback((context, intent) -> onClick.run()))
+                        .cursorStyle(CursorStyle.HAND);
+                }
 
                 if (setup != null) {
                     setup.setup(widget);

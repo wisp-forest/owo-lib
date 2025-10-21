@@ -1,9 +1,11 @@
 package io.wispforest.owo.itemgroup;
 
+import com.mojang.blaze3d.pipeline.RenderPipeline;
 import io.wispforest.owo.client.texture.AnimatedTextureDrawable;
 import io.wispforest.owo.client.texture.SpriteSheetMetadata;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.item.ItemConvertible;
@@ -38,7 +40,7 @@ public interface Icon {
         return new Icon() {
             @Override
             public void render(DrawContext context, int x, int y, int mouseX, int mouseY, float delta) {
-                context.drawTexture(RenderLayer::getGuiTextured, texture, x, y, u, v, 16, 16, textureWidth, textureHeight);
+                context.drawTexture(RenderPipelines.GUI_TEXTURED, texture, x, y, u, v, 16, 16, textureWidth, textureHeight);
             }
         };
     }

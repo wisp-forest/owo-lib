@@ -9,24 +9,24 @@ import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
+import io.wispforest.owo.ui.renderstate.OwoItemElementRenderState;
 import net.fabricmc.fabric.api.client.rendering.v1.TooltipComponentCallback;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.item.ItemModelManager;
-import net.minecraft.client.render.DiffuseLighting;
-import net.minecraft.client.render.LightmapTextureManager;
-import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.item.ItemRenderState;
 import net.minecraft.command.argument.ItemStringReader;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ModelTransformationMode;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix3x2f;
 import org.w3c.dom.Element;
 
 import java.util.ArrayList;
@@ -36,8 +36,6 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 public class ItemComponent extends BaseComponent {
-
-    protected static final ItemRenderState ITEM_RENDER_STATE = new ItemRenderState();
 
     protected final ItemModelManager itemModelManager;
     protected ItemStack stack;
@@ -61,40 +59,35 @@ public class ItemComponent extends BaseComponent {
 
     @Override
     public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
-        this.itemModelManager.update(ITEM_RENDER_STATE, this.stack, ModelTransformationMode.GUI, false, null, null, 0);
-
-        final boolean notSideLit = !ITEM_RENDER_STATE.isSideLit();
-        if (notSideLit) {
-            context.draw();
-            DiffuseLighting.disableGuiDepthLighting();
-        }
-
         var matrices = context.getMatrices();
-        matrices.push();
+        matrices.pushMatrix();
 
         // Translate to the root of the component
-        matrices.translate(this.x, this.y, 100);
+        matrices.translate(this.x, this.y);
 
         // Scale according to component size and translate to the center
-        matrices.scale(this.width / 16f, this.height / 16f, 1);
-        matrices.translate(8.0, 8.0, 0.0);
-
-        // Vanilla scaling and y inversion
-        matrices.scale(16, -16, 16);
+        matrices.scale(this.width / 16f, this.height / 16f);
 
         var client = MinecraftClient.getInstance();
 
-        ITEM_RENDER_STATE.render(matrices, context.vertexConsumers(), LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV);
-        context.draw();
+        if (this.width <= 16 && this.height <= 16) {
+            context.drawItem(this.stack, 0, 0);
+        } else {
+            var state = new ItemRenderState();
+            this.itemModelManager.update(state, this.stack, ItemDisplayContext.GUI, MinecraftClient.getInstance().world, MinecraftClient.getInstance().player, 0);
+
+            context.state.addSpecialElement(new OwoItemElementRenderState(
+                state,
+                new ScreenRect(this.x, this.y, this.width, this.height),
+                context.scissorStack.peekLast()
+            ));
+        }
 
         // Clean up
-        matrices.pop();
+        matrices.popMatrix();
 
         if (this.showOverlay) {
             context.drawStackOverlay(client.textRenderer, this.stack, this.x, this.y);
-        }
-        if (notSideLit) {
-            DiffuseLighting.enableGuiDepthLighting();
         }
     }
 
@@ -157,15 +150,15 @@ public class ItemComponent extends BaseComponent {
 
         var tooltip = new ArrayList<TooltipComponent>();
         stack.getTooltip(context, player, type)
-                .stream()
-                .map(Text::asOrderedText)
-                .map(TooltipComponent::of)
-                .forEach(tooltip::add);
+            .stream()
+            .map(Text::asOrderedText)
+            .map(TooltipComponent::of)
+            .forEach(tooltip::add);
 
         stack.getTooltipData().ifPresent(data -> {
             tooltip.add(1, Objects.requireNonNullElseGet(
-                    TooltipComponentCallback.EVENT.invoker().getComponent(data),
-                    () -> TooltipComponent.of(data)
+                TooltipComponentCallback.EVENT.invoker().getComponent(data),
+                () -> TooltipComponent.of(data)
             ));
         });
 

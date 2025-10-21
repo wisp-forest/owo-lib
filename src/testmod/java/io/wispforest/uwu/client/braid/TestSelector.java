@@ -66,7 +66,7 @@ import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.ViewerStack;
 import io.wispforest.owo.util.Wisdom;
 import io.wispforest.uwu.client.Bikeshed;
-import net.minecraft.block.BlockState;
+import io.wispforest.uwu.items.UwuItems;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.CheckboxWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -76,9 +76,12 @@ import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.BlockItem;
+import net.minecraft.item.ItemDisplayContext;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
-import net.minecraft.registry.tag.BlockTags;
+import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.*;
 import net.minecraft.util.Colors;
@@ -88,9 +91,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
+import org.joml.Matrix3x2f;
 
 import java.math.BigInteger;
+import java.net.URI;
 import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -166,7 +170,13 @@ public class TestSelector extends StatefulWidget {
                     new Stack(
                         Alignment.CENTER,
                         new Transform(
-                            new Matrix4f().m01((float) Math.tan(this.xSkew)).m10((float) Math.tan(this.ySkew)).rotateZ((float) Math.toRadians(this.rotat)),
+                            Util.make(() -> {
+                                var mat = new Matrix3x2f();
+                                mat.m01 = (float) Math.tan(this.xSkew);
+                                mat.m10 = (float) Math.tan(this.ySkew);
+                                mat.rotate((float) Math.toRadians(this.rotat));
+                                return mat;
+                            }),
                             new Center(
                                 switch (this.test) {
                                     case COUNTER -> new Counter();
@@ -536,7 +546,7 @@ public class TestSelector extends StatefulWidget {
                             new Align(
                                 Alignment.TOP_LEFT,
                                 new Column(
-                                    new Label(Text.literal("a").setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://chyz.xyz/box")))),
+                                    new Label(Text.literal("a").setStyle(Style.EMPTY.withClickEvent(new ClickEvent.OpenUrl(URI.create("https://chyz.xyz/box"))))),
                                     new MessageButton(Text.literal("window button :o"), () -> setState(() -> controller.toggleCollapsed()))
                                 )
                             ),
@@ -770,8 +780,8 @@ public class TestSelector extends StatefulWidget {
                                 new RawCheckbox(
                                     this.checked,
                                     this::onUpdate,
-                                    new SpriteWidget(Checkbox.TEXTURE, false),
-                                    new SpriteWidget(new SpriteIdentifier(SpriteWidget.GUI_ATLAS_ID, Identifier.of("uwu", "czechbox")), false)
+                                    new SpriteWidget(Checkbox.TEXTURE),
+                                    new SpriteWidget(new SpriteIdentifier(SpriteWidget.GUI_ATLAS_ID, Identifier.of("uwu", "czechbox")))
                                 ),
                                 this.checked ? "czechbox" : "checkbox"
                             ),
@@ -845,7 +855,7 @@ public class TestSelector extends StatefulWidget {
                             20.0,
                             20.0,
                             new Transform(
-                                new Matrix4f().rotationZ((float) Math.toRadians(90)),
+                                new Matrix3x2f().rotation((float) Math.toRadians(90)),
                                 new EntityWidget(
                                     3.5,
                                     this.chyz,
@@ -854,13 +864,10 @@ public class TestSelector extends StatefulWidget {
                             )
                         )
                     ),
-                    new Transform(
-                        new Matrix4f().translate(0, 0, 300),
-                        new Label(
-                            LabelStyle.SHADOW,
-                            true,
-                            Text.literal("burning chyz")
-                        )
+                    new Label(
+                        LabelStyle.SHADOW,
+                        true,
+                        Text.literal("burning chyz")
                     )
                 )
             );
@@ -1564,7 +1571,7 @@ public class TestSelector extends StatefulWidget {
                             CrossAxisAlignment.CENTER,
                             new Padding(Insets.all(10)),
                             new Label(murders.compareTo(BigInteger.ZERO) > 0 ? Text.literal("You have committed " + murders + " act" + (murders.compareTo(BigInteger.ONE) > 0 ? "s" : "") + " of " + Text.stringifiedTranslatable("uwu.homicide").getString() + " against the owo contributors!" + (murders.compareTo(BigInteger.valueOf(1000)) > 0 ? "... wtf bro" : "")).withColor(Colors.RED) : Text.literal("OWO Contributors")),
-                            new Label(eepies.compareTo(BigInteger.ZERO) > 0 ? Text.literal("You have committed " + eepies + " act" + (eepies.compareTo(BigInteger.ONE) > 0 ? "s" : "") + " of " + Text.stringifiedTranslatable("uwu.eepy").getString() + " against the owo contributors!" + (murders.compareTo(BigInteger.valueOf(1000)) > 0 ? "... idk" : "")).withColor(bed.getMapColor(MinecraftClient.getInstance().world, BlockPos.ORIGIN).color) : Text.empty()),
+                            new Label(eepies.compareTo(BigInteger.ZERO) > 0 ? Text.literal("You have committed " + eepies + " act" + (eepies.compareTo(BigInteger.ONE) > 0 ? "s" : "") + " of " + Text.stringifiedTranslatable("uwu.eepy").getString() + " against the owo contributors!" + (murders.compareTo(BigInteger.valueOf(1000)) > 0 ? "... idk" : "")).withColor(((BlockItem) bed.getItem()).getBlock().getDefaultState().getMapColor(MinecraftClient.getInstance().world, BlockPos.ORIGIN).color) : Text.empty()),
                             new Grid(
                                 LayoutAxis.VERTICAL,
                                 3,
@@ -1587,7 +1594,7 @@ public class TestSelector extends StatefulWidget {
                                                                     new Label(
                                                                         LabelStyle.SHADOW,
                                                                         true,
-                                                                        contributor.displayName().copy().setStyle(contributor.displayName.copy().getStyle().withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY, new HoverEvent.EntityContent(EntityType.PLAYER, contributor.uuid, contributor.displayName))))
+                                                                        contributor.displayName().copy().setStyle(contributor.displayName.copy().getStyle().withHoverEvent(new HoverEvent.ShowEntity(new HoverEvent.EntityContent(EntityType.PLAYER, contributor.uuid, contributor.displayName))))
                                                                     ),
                                                                     new RatingBar()
                                                                 )
@@ -1617,7 +1624,7 @@ public class TestSelector extends StatefulWidget {
             public static class MurderState extends ShareableState {
                 public BigInteger murders = BigInteger.ZERO;
                 public BigInteger eepies = BigInteger.ZERO;
-                private BlockState bed;
+                private ItemStack bed = UwuItems.BRAID.getDefaultStack();
             }
 
             public record Contributor(UUID uuid, String name, Text displayName) {}
@@ -1660,7 +1667,7 @@ public class TestSelector extends StatefulWidget {
                                         state.murders = state.murders.add(BigInteger.ONE);
                                     } else {
                                         state.eepies = state.eepies.add(BigInteger.ONE);
-                                        state.bed = Registries.BLOCK.getRandomEntry(BlockTags.BEDS, Random.create()).get().value().getDefaultState();
+                                        state.bed = Registries.ITEM.getRandomEntry(ItemTags.BEDS, Random.create()).get().value().getDefaultStack();
                                     }
                                 });
                                 scheduleDelayedCallback(
@@ -1683,15 +1690,18 @@ public class TestSelector extends StatefulWidget {
                                             new Sized(
                                                 96,
                                                 96,
-                                                new Transform(
-                                                    new Matrix4f().translate(0, 0, 200),
-                                                    new EntityWidget(1.35, this.displayEntity, widget -> {
-                                                        widget.displayMode(displayEntity.isDead() ? EntityWidget.DisplayMode.NONE : EntityWidget.DisplayMode.CURSOR);
-                                                        if (displayEntity.isDead()) {
-                                                            widget.transform((matrices) -> matrices.rotateX((float) Math.toRadians(0.01)));
-                                                        }
-                                                    })
-                                                )
+                                                new EntityWidget(1.35, this.displayEntity, widget -> {
+                                                    widget.displayMode(displayEntity.isDead() ? EntityWidget.DisplayMode.NONE : EntityWidget.DisplayMode.CURSOR);
+                                                    if (displayEntity.isDead()) {
+                                                        widget.transform((matrix) -> {
+                                                            if (displayEntity.getUuid().equals(UUID.fromString("91a033f7-1dd3-4858-9c7b-8fb61ba6363d"))) {
+                                                                matrix.translate(-1f, 1f, 0);
+                                                            }
+
+                                                            matrix.rotateX((float) Math.toRadians(0.01));
+                                                        });
+                                                    }
+                                                })
                                             )
                                         )
                                     )
@@ -1699,20 +1709,23 @@ public class TestSelector extends StatefulWidget {
                                 new Visibility(
                                     this.dead && this.displayEntity.getUuid().equals(UUID.fromString("91a033f7-1dd3-4858-9c7b-8fb61ba6363d")),
                                     new Stack(
-                                        new BlockWidget(
-                                            SharedState.getWithoutDependency(context, MurderState.class).bed,
-                                            matrixStack -> {
-                                                matrixStack.translate(1, -.7, 0);
-                                                matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(30));
-                                                matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(90));
-                                                matrixStack.scale(.85f, .85f, .85f);
-                                            }
+                                        new Transform(
+                                            new Matrix3x2f(),
+                                            new ItemStackWidget(
+                                                SharedState.getWithoutDependency(context, MurderState.class).bed,
+                                                widget -> widget
+                                                    .displayContext(ItemDisplayContext.NONE)
+                                                    .transform(matrix4f -> matrix4f
+                                                        .rotate(RotationAxis.POSITIVE_Y.rotationDegrees(90))
+                                                        .rotate(RotationAxis.POSITIVE_Z.rotationDegrees(15))
+                                                        .scale(.45f, .45f, .45f)
+                                                        .translate(0, -.45f, .45f))
+                                            )
                                         ),
                                         new Align(
                                             Alignment.TOP_LEFT,
                                             new Transform(
-                                                new Matrix4f()
-                                                    .translation(120, 70, 400),
+                                                new Matrix3x2f().translation(75, 10),
                                                 new Label(new LabelStyle(Alignment.TOP_LEFT, null, null, true), true, Text.literal("    z\n  z\nz"))
                                             )
                                         )
@@ -1763,16 +1776,14 @@ public class TestSelector extends StatefulWidget {
                                     new SpriteIdentifier(
                                         Identifier.of("textures/atlas/gui.png"),
                                         Identifier.of("uwu", (idx + 1) <= this.selectedStarCount ? "favorite_icon_selected" : "favorite_icon")
-                                    ),
-                                    false
+                                    )
                                 ),
                                 (idx + 1) <= this.hoverStarCount
                                     ? new SpriteWidget(
                                     new SpriteIdentifier(
                                         Identifier.of("textures/atlas/gui.png"),
                                         Identifier.of("uwu", "favorite_icon_hover")
-                                    ),
-                                    true
+                                    )
                                 ) : new Padding(Insets.none())
                             )
                         );

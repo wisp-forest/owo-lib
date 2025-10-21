@@ -17,7 +17,7 @@ import java.util.function.Predicate;
 @SuppressWarnings("UnusedReturnValue")
 public class ConfigTextBox extends TextBoxComponent implements OptionValueProvider {
 
-    protected int invalidColor = 0xEB1D36, validColor = 0x28FFBF;
+    protected int invalidColor = 0xFFEB1D36, validColor = 0xFF28FFBF;
     protected Function<String, Object> valueParser = s -> s;
     protected Predicate<String> inputPredicate = s -> true, applyPredicate = s -> true;
 

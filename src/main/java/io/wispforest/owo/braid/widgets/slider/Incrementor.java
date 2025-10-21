@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets.slider;
 
+import io.wispforest.owo.braid.core.AppState;
 import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
@@ -66,8 +67,10 @@ public class Incrementor extends StatelessWidget {
                 mouseArea -> mouseArea
                     .scrollCallback((baseHorizontal, baseVertical) -> {
                         var handled = false;
-                        var horizontal = Screen.hasShiftDown() ? baseVertical : baseHorizontal;
-                        var vertical = Screen.hasShiftDown() ? baseHorizontal : baseVertical;
+                        var modifiers = AppState.of(context).eventBinding.activeModifiers();
+                        var horizontal = modifiers.shift() ? baseVertical : baseHorizontal;
+                        var vertical = modifiers.shift() ? baseHorizontal : baseVertical;
+
                         if (horizontal != 0 && this.xCallback != null) {
                             this.xCallback.accept(horizontal);
                             handled = true;

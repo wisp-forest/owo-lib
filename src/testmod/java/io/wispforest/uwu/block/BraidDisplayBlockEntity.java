@@ -1,5 +1,6 @@
 package io.wispforest.uwu.block;
 
+import io.wispforest.owo.braid.core.Color;
 import io.wispforest.owo.braid.core.Insets;
 import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.display.BraidDisplay;
@@ -11,11 +12,9 @@ import io.wispforest.owo.braid.framework.widget.InheritedWidget;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.braid.widgets.BlockWidget;
 import io.wispforest.owo.braid.widgets.ItemStackWidget;
-import io.wispforest.owo.braid.widgets.basic.Center;
-import io.wispforest.owo.braid.widgets.basic.Padding;
-import io.wispforest.owo.braid.widgets.basic.Panel;
-import io.wispforest.owo.braid.widgets.basic.Sized;
+import io.wispforest.owo.braid.widgets.basic.*;
 import io.wispforest.owo.braid.widgets.button.Button;
 import io.wispforest.owo.braid.widgets.button.MessageButton;
 import io.wispforest.owo.braid.widgets.flex.Column;
@@ -31,8 +30,10 @@ import io.wispforest.uwu.items.UwuItems;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.item.Items;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -104,7 +105,7 @@ public class BraidDisplayBlockEntity extends BlockEntity {
                                 new Sized(
                                     16,
                                     16,
-                                    new ItemStackWidget(UwuItems.BRAID.getDefaultStack())
+                                    new BlockWidget(Blocks.OBSERVER.getDefaultState())
                                 ),
                                 new Padding(Insets.horizontal(2)),
                                 new Label(

@@ -1,5 +1,6 @@
 package io.wispforest.owo.ui.component;
 
+import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.mixin.ui.access.ButtonWidgetAccessor;
@@ -13,6 +14,7 @@ import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.NinePatchTexture;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -44,7 +46,7 @@ public class ButtonComponent extends ButtonWidget {
         this.renderer.draw((OwoUIDrawContext) context, this, delta);
 
         var textRenderer = MinecraftClient.getInstance().textRenderer;
-        int color = this.active ? 0xffffff : 0xa0a0a0;
+        int color = this.active ? 0xffffffff : 0xffa0a0a0;
 
         if (this.textShadow) {
             context.drawCenteredTextWithShadow(textRenderer, this.getMessage(), this.getX() + this.width / 2, this.getY() + (this.height - 8) / 2, color);
@@ -54,7 +56,7 @@ public class ButtonComponent extends ButtonWidget {
 
         var tooltip = ((ClickableWidgetAccessor) this).owo$getTooltip();
         if (this.hovered && tooltip.getTooltip() != null)
-            context.drawTooltip(textRenderer, tooltip.getTooltip().getLines(MinecraftClient.getInstance()), HoveredTooltipPositioner.INSTANCE, mouseX, mouseY);
+            context.drawTooltip(textRenderer, tooltip.getTooltip().getLines(MinecraftClient.getInstance()), HoveredTooltipPositioner.INSTANCE, mouseX, mouseY, false);
     }
 
     public ButtonComponent onPress(Consumer<ButtonComponent> onPress) {
@@ -104,8 +106,6 @@ public class ButtonComponent extends ButtonWidget {
     @FunctionalInterface
     public interface Renderer {
         Renderer VANILLA = (matrices, button, delta) -> {
-            RenderSystem.enableDepthTest();
-
             var texture = button.active
                     ? button.hovered ? HOVERED_TEXTURE : ACTIVE_TEXTURE
                     : DISABLED_TEXTURE;
@@ -114,8 +114,6 @@ public class ButtonComponent extends ButtonWidget {
 
         static Renderer flat(int color, int hoveredColor, int disabledColor) {
             return (context, button, delta) -> {
-                RenderSystem.enableDepthTest();
-
                 if (button.active) {
                     if (button.hovered) {
                         context.fill(button.getX(), button.getY(), button.getX() + button.width, button.getY() + button.height, hoveredColor);
@@ -137,8 +135,7 @@ public class ButtonComponent extends ButtonWidget {
                     renderV += button.height;
                 }
 
-                RenderSystem.enableDepthTest();
-                context.drawTexture(RenderLayer::getGuiTextured, texture, button.getX(), button.getY(), u, renderV, button.width, button.height, textureWidth, textureHeight);
+                context.drawTexture(RenderPipelines.GUI_TEXTURED, texture, button.getX(), button.getY(), u, renderV, button.width, button.height, textureWidth, textureHeight);
             };
         }
 

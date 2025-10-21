@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.core.Alignment;
 import io.wispforest.owo.braid.core.AppState;
-import io.wispforest.owo.braid.core.EventBuffer;
+import io.wispforest.owo.braid.core.EventBinding;
 import io.wispforest.owo.braid.core.Surface;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.InheritedWidget;
@@ -36,7 +36,7 @@ public class BraidToast implements Toast {
             AppState.formatName("BraidToast", widget),
             MinecraftClient.getInstance(),
             new Surface.Default(),
-            new EventBuffer(),
+            new EventBinding.Headless(),
             new Align(
                 Alignment.TOP_LEFT,
                 new EmbedderRoot(
@@ -104,8 +104,8 @@ public class BraidToast implements Toast {
 
         var tickCounter = MinecraftClient.getInstance().getRenderTickCounter();
         this.app.updateWidgetsAndInteractions(
-            tickCounter.getTickDelta(false),
-            tickCounter.getLastFrameDuration()
+            tickCounter.getTickProgress(false),
+            tickCounter.getDynamicDeltaTicks()
         );
     }
 

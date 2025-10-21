@@ -1,14 +1,13 @@
 package io.wispforest.owo.ui.component;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
-import io.wispforest.owo.ui.core.OwoUIRenderLayers;
+import io.wispforest.owo.ui.core.OwoUIPipelines;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.SpriteUtilInvoker;
-import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.SpriteIdentifier;
 import org.w3c.dom.Element;
@@ -37,17 +36,7 @@ public class SpriteComponent extends BaseComponent {
     @Override
     public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
         SpriteUtilInvoker.markSpriteActive(this.sprite);
-
-        if (this.blend) {
-            RenderSystem.enableBlend();
-            RenderSystem.defaultBlendFunc();
-        }
-
-        context.drawSpriteStretched(identifier -> OwoUIRenderLayers.getGuiTextured(identifier, this.blend), this.sprite, this.x, this.y, this.width, this.height);
-
-        if (this.blend) {
-            RenderSystem.disableBlend();
-        }
+        context.drawSpriteStretched(this.blend ? RenderPipelines.GUI_TEXTURED : OwoUIPipelines.GUI_TEXTURED_NO_BLEND, this.sprite, this.x, this.y, this.width, this.height);
     }
 
     public SpriteComponent blend(boolean blend) {

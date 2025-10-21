@@ -73,12 +73,12 @@ public class GameRendererMixin {
             var display = BraidDisplayBinding.targetDisplay.display();
 
             if (display.primaryPressed && !MinecraftClient.getInstance().options.useKey.isPressed()) {
-                display.app.eventBuffer.add(new MouseButtonReleaseEvent(GLFW.GLFW_MOUSE_BUTTON_LEFT, KeyModifiers.NONE));
+                display.app.eventBinding.add(new MouseButtonReleaseEvent(GLFW.GLFW_MOUSE_BUTTON_LEFT, KeyModifiers.NONE));
                 display.primaryPressed = false;
             }
 
             if (display.secondaryPressed && !MinecraftClient.getInstance().options.attackKey.isPressed()) {
-                display.app.eventBuffer.add(new MouseButtonReleaseEvent(GLFW.GLFW_MOUSE_BUTTON_RIGHT, KeyModifiers.NONE));
+                display.app.eventBinding.add(new MouseButtonReleaseEvent(GLFW.GLFW_MOUSE_BUTTON_RIGHT, KeyModifiers.NONE));
                 display.secondaryPressed = false;
             }
 
@@ -103,7 +103,7 @@ public class GameRendererMixin {
 
         if (newTarget == null || BraidDisplayBinding.targetDisplay.display() != newTarget.display()) {
             // TODO: not emitting proper deltas is quite cringe
-            BraidDisplayBinding.targetDisplay.display().app.eventBuffer.add(new MouseMoveEvent(0, 0, 0, 0));
+            BraidDisplayBinding.targetDisplay.display().app.eventBinding.add(new MouseMoveEvent(0, 0, 0, 0));
         }
 
         BraidDisplayBinding.targetDisplay = newTarget;

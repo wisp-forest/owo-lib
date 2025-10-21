@@ -7,10 +7,11 @@ import io.wispforest.owo.braid.framework.instance.WidgetInstance;
 import io.wispforest.owo.braid.framework.widget.MultiChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.Padding;
-import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.text.StyleSpriteSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
@@ -189,7 +190,7 @@ public class Grid extends MultiChildInstanceWidget {
 
         @Override
         protected void debugDrawVisualizers(BraidDrawContext ctx) {
-            var frameColor = Color.ofRgb(0xFFD65A);
+            var frameColor = Color.rgb(0xFFD65A);
             ctx.drawRectOutline(
                 0, 0, (int) this.transform.width(), (int) this.transform.height(), frameColor.argb()
             );
@@ -206,14 +207,14 @@ public class Grid extends MultiChildInstanceWidget {
             for (int i = 0; i < verticalSizes.length; i++) {
                 if (i > 0) {
                     ctx.drawDashedLine(
-                        RenderLayer.getGui(),
+                        RenderPipelines.GUI,
                         0, verticalPos, this.transform.width(), verticalPos,
                         1, 2, frameColor
                     );
                 }
 
                 ctx.drawText(
-                    Text.literal(verticalSizes[i] + "px").styled(style -> style.withFont(MinecraftClient.UNICODE_FONT_ID)),
+                    Text.literal(verticalSizes[i] + "px").styled(style -> style.withFont(new StyleSpriteSource.Font(MinecraftClient.UNICODE_FONT_ID))),
                     0, (float) verticalPos, 1f, Color.WHITE.argb(),
                     OwoUIDrawContext.TextAnchor.TOP_RIGHT
                 );
@@ -225,14 +226,14 @@ public class Grid extends MultiChildInstanceWidget {
             for (int i = 0; i < horizontalSizes.length; i++) {
                 if (i > 0) {
                     ctx.drawDashedLine(
-                        RenderLayer.getGui(),
+                        RenderPipelines.GUI,
                         horizontalPos, 0, horizontalPos, this.transform.height(),
                         1, 2, frameColor
                     );
                 }
 
                 ctx.drawText(
-                    Text.literal(horizontalSizes[i] + "px").styled(style -> style.withFont(MinecraftClient.UNICODE_FONT_ID)),
+                    Text.literal(horizontalSizes[i] + "px").styled(style -> style.withFont(new StyleSpriteSource.Font(MinecraftClient.UNICODE_FONT_ID))),
                     (float) horizontalPos, 0, 1f, Color.WHITE.argb(),
                     OwoUIDrawContext.TextAnchor.BOTTOM_LEFT
                 );

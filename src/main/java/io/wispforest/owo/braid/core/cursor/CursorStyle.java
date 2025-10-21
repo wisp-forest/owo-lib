@@ -23,11 +23,9 @@ public sealed interface CursorStyle permits SystemCursorStyle {
 
     long allocate();
 
-    static CursorStyle forDraggingAlong(LayoutAxis axis, Matrix4f transform) {
+    static CursorStyle forDraggingAlong(LayoutAxis axis, Matrix3x2f transform3x2) {
         // Extract the Z rotation from the transform
-        var rotation = transform
-            .getUnnormalizedRotation(new Quaterniond())
-            .getEulerAnglesXYZ(new Vector3d()).z;
+        var rotation = Math.atan2(transform3x2.m01, transform3x2.m11);
 
         // Convert to degrees
         rotation = Math.toDegrees(rotation);

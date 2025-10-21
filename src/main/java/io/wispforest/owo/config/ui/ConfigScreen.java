@@ -22,6 +22,7 @@ import io.wispforest.owo.util.NumberReflection;
 import io.wispforest.owo.util.ReflectionUtils;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
@@ -33,8 +34,6 @@ import org.lwjgl.glfw.GLFW;
 
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -100,30 +99,6 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
         return new ConfigScreen(modelId, config, parent);
     }
 
-    /**
-     * @deprecated Use {@link ConfigScreenProviders#register(String, Function)} instead
-     */
-    @Deprecated(forRemoval = true)
-    public static <S extends ConfigScreen> void registerProvider(String modId, Function<Screen, S> supplier) {
-        ConfigScreenProviders.registerOwoConfigScreen(modId, supplier);
-    }
-
-    /**
-     * @deprecated Use {@link ConfigScreenProviders#get(String)} instead
-     */
-    @Deprecated(forRemoval = true)
-    public static @Nullable Function<Screen, ? extends ConfigScreen> getProvider(String modId) {
-        return ConfigScreenProviders.getOwoProvider(modId);
-    }
-
-    /**
-     * @deprecated Use {@link ConfigScreenProviders#forEach(BiConsumer)} instead
-     */
-    @Deprecated(forRemoval = true)
-    public static void forEachProvider(BiConsumer<String, Function<Screen, ? extends ConfigScreen>> action) {
-        ConfigScreenProviders.forEachOwoProvider(action);
-    }
-
     @Override
     @SuppressWarnings({"ConstantConditions", "unchecked"})
     protected void build(FlowLayout rootComponent) {
@@ -131,7 +106,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
 
         rootComponent.childById(LabelComponent.class, "title").text(Text.translatable("text.config." + this.config.name() + ".title"));
         if (this.client.world == null) {
-            rootComponent.surface(Surface.OPTIONS_BACKGROUND);
+            rootComponent.surface(Surface.optionsBackground());
         }
 
         rootComponent.childById(ButtonComponent.class, "done-button").onPress(button -> this.close());
@@ -163,8 +138,8 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                 }
             });
 
-            searchField.keyPress().subscribe((keyCode, scanCode, modifiers) -> {
-                if (keyCode != GLFW.GLFW_KEY_ENTER && keyCode != GLFW.GLFW_KEY_KP_ENTER) return false;
+            searchField.keyPress().subscribe((input) -> {
+                if (!input.isEnter()) return false;
 
                 var query = searchField.getText().toLowerCase(Locale.ROOT);
                 if (query.isBlank()) return false;
@@ -318,7 +293,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                 label.mouseEnter().subscribe(() -> label.text(hoveredText));
                 label.mouseLeave().subscribe(() -> label.text(text));
 
-                label.mouseDown().subscribe((mouseX, mouseY, button) -> {
+                label.mouseDown().subscribe((click, doubled) -> {
                     panelScroll.scrollTo(component);
                     UISounds.playInteractionSound();
                     return true;
@@ -332,8 +307,8 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
             closeButton.positioning(Positioning.relative(100, 50)).cursorStyle(CursorStyle.HAND).margins(Insets.right(2));
 
             panelContainer.child(closeButton);
-            panelContainer.mouseDown().subscribe((mouseX, mouseY, button) -> {
-                if (mouseX < panelContainer.width() - 10) return false;
+            panelContainer.mouseDown().subscribe((click, doubled) -> {
+                if (click.x() < panelContainer.width() - 10) return false;
 
                 if (buttonPanel.horizontalSizing().animation() == null) {
                     buttonPanel.horizontalSizing().animate(350, Easing.CUBIC, Sizing.content());
@@ -385,15 +360,15 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == GLFW.GLFW_KEY_F && ((modifiers & GLFW.GLFW_MOD_CONTROL) != 0)) {
+    public boolean keyPressed(KeyInput input) {
+        if (input.key() == GLFW.GLFW_KEY_F && input.hasCtrl()) {
             this.uiAdapter.rootComponent.focusHandler().focus(
                     this.uiAdapter.rootComponent.childById(Component.class, "search-field"),
                     Component.FocusSource.MOUSE_CLICK
             );
             return true;
         } else {
-            return super.keyPressed(keyCode, scanCode, modifiers);
+            return super.keyPressed(input);
         }
     }
 

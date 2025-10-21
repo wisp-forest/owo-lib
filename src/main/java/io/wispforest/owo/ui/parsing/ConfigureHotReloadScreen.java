@@ -54,7 +54,7 @@ public class ConfigureHotReloadScreen extends BaseUIModelScreen<FlowLayout> impl
             this.close();
         });
 
-        rootComponent.childById(LabelComponent.class, "close-label").mouseDown().subscribe((mouseX, mouseY, button) -> {
+        rootComponent.childById(LabelComponent.class, "close-label").mouseDown().subscribe((click, doubled) -> {
             UISounds.playInteractionSound();
             this.close();
             return true;

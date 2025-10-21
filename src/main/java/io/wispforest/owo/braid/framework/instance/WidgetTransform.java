@@ -3,10 +3,10 @@ package io.wispforest.owo.braid.framework.instance;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.core.Size;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Box;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
+import org.joml.Matrix3x2f;
+import org.joml.Matrix3x2fStack;
 import org.joml.Vector3f;
 
 public class WidgetTransform {
@@ -86,20 +86,20 @@ public class WidgetTransform {
         return this.aabb;
     }
 
-    public void transformToParent(Matrix4f mat) {
-        mat.translate((float) this.x, (float) this.y, 0);
+    public void transformToParent(Matrix3x2f mat) {
+        mat.translate((float) this.x, (float) this.y);
     }
 
-    public void transformToParent(MatrixStack matrices) {
-        matrices.translate(this.x, this.y, 0);
+    public void transformToParent(Matrix3x2fStack matrices) {
+        matrices.translate((float) this.x, (float) this.y);
     }
 
-    public void transformToWidget(Matrix4f mat) {
-        mat.translate((float) -this.x, (float) -this.y, 0);
+    public void transformToWidget(Matrix3x2f mat) {
+        mat.translate((float) -this.x, (float) -this.y);
     }
 
-    public void transformToWidget(MatrixStack matrices) {
-        matrices.translate(-this.x, -this.y, 0);
+    public void transformToWidget(Matrix3x2fStack matrices) {
+        matrices.translate((float) -this.x, (float) -this.y);
     }
 
     public void toParentCoordinates(Vector3f vec) {

@@ -1,6 +1,6 @@
 //file:noinspection GradlePackageVersionRange
 plugins {
-    id 'fabric-loom' version '1.7-SNAPSHOT'
+    id 'fabric-loom' version '1.11-SNAPSHOT'
     id 'maven-publish'
 }
 
@@ -41,6 +41,8 @@ allprojects {
         if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
             it.options.release = targetJavaVersion
         }
+
+        options.compilerArgs << "-Xmaxerrs" << "69420"
     }
 
     java {
@@ -122,16 +124,22 @@ loom {
 
 dependencies {
 //    modLocalRuntime("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}")
-    modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:${project.rei_version}")
-    modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}")
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:${project.rei_version}") {
+        exclude "group": "net.fabricmc.fabric-api"
+    }
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}") {
+        exclude "group": "net.fabricmc.fabric-api"
+    }
 
-    modCompileOnly("dev.emi:emi-fabric:${project.emi_version}")
+    modCompileOnly("dev.emi:emi-fabric:${project.emi_version}") {
+        exclude "group": "net.fabricmc.fabric-api"
+    }
 //    modLocalRuntime("dev.emi:emi-fabric:${project.emi_version}")
 
     modCompileOnly("com.terraformersmc:modmenu:${project.modmenu_version}")
-    modLocalRuntime("com.terraformersmc:modmenu:${project.modmenu_version}")
+//    modLocalRuntime("com.terraformersmc:modmenu:${project.modmenu_version}")
 
-    include api("io.wispforest:endec:0.1.9")
+    include api("io.wispforest:endec:0.1.11")
     include api("io.wispforest.endec:netty:0.1.5")
     include api("io.wispforest.endec:gson:0.1.6")
     include api("io.wispforest.endec:jankson:0.1.6")

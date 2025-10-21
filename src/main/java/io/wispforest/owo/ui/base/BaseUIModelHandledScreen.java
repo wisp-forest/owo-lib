@@ -5,6 +5,7 @@ import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.parsing.ConfigureHotReloadScreen;
 import io.wispforest.owo.ui.parsing.UIModel;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.Text;
@@ -51,12 +52,12 @@ public abstract class BaseUIModelHandledScreen<R extends ParentComponent, S exte
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (Owo.DEBUG && this.modelId != null && keyCode == GLFW.GLFW_KEY_F5 && (modifiers & GLFW.GLFW_MOD_CONTROL) != 0) {
+    public boolean keyPressed(KeyInput input) {
+        if (Owo.DEBUG && this.modelId != null && input.key() == GLFW.GLFW_KEY_F5 && input.hasCtrl()) {
             this.client.setScreen(new ConfigureHotReloadScreen(this.modelId, this));
             return true;
         }
 
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(input);
     }
 }

@@ -2,9 +2,10 @@ package io.wispforest.owo.ui.base;
 
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.FocusHandler;
-import io.wispforest.owo.ui.util.ScissorStack;
 import io.wispforest.owo.util.Observable;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.Click;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -204,22 +205,22 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
     }
 
     @Override
-    public boolean onMouseDown(double mouseX, double mouseY, int button) {
+    public boolean onMouseDown(Click click, boolean doubled) {
         if (this.focusHandler != null) {
-            this.focusHandler.updateClickFocus(this.x + mouseX, this.y + mouseY);
+            this.focusHandler.updateClickFocus(this.x + click.x(), this.y + click.y());
         }
 
-        return ParentComponent.super.onMouseDown(mouseX, mouseY, button)
-                || super.onMouseDown(mouseX, mouseY, button);
+        return ParentComponent.super.onMouseDown(click, doubled)
+            || super.onMouseDown(click, doubled);
     }
 
     @Override
-    public boolean onMouseUp(double mouseX, double mouseY, int button) {
+    public boolean onMouseUp(Click click) {
         if (this.focusHandler != null && this.focusHandler.focused() != null) {
             final var focused = this.focusHandler.focused();
-            return focused.onMouseUp(this.x + mouseX - focused.x(), this.y + mouseY - focused.y(), button);
+            return focused.onMouseUp(new Click(this.x + click.x() - focused.x(), this.y + click.y() - focused.y(), click.buttonInfo()));
         } else {
-            return super.onMouseUp(mouseX, mouseY, button);
+            return super.onMouseUp(click);
         }
     }
 
@@ -229,40 +230,39 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
     }
 
     @Override
-    public boolean onMouseDrag(double mouseX, double mouseY, double deltaX, double deltaY, int button) {
+    public boolean onMouseDrag(Click click, double deltaX, double deltaY) {
         if (this.focusHandler != null && this.focusHandler.focused() != null) {
             final var focused = this.focusHandler.focused();
-            return focused.onMouseDrag(this.x + mouseX - focused.x(), this.y + mouseY - focused.y(), deltaX, deltaY, button);
+            return focused.onMouseDrag(new Click(this.x + click.x() - focused.x(), this.y + click.y() - focused.y(), click.buttonInfo()), deltaX, deltaY);
         } else {
-            return super.onMouseDrag(mouseX, mouseY, deltaX, deltaY, button);
+            return super.onMouseDrag(click, deltaX, deltaY);
         }
     }
 
     @Override
-    public boolean onKeyPress(int keyCode, int scanCode, int modifiers) {
+    public boolean onKeyPress(KeyInput input) {
         if (this.focusHandler == null) return false;
 
-        if (keyCode == GLFW.GLFW_KEY_TAB) {
-            this.focusHandler.cycle((modifiers & GLFW.GLFW_MOD_SHIFT) == 0);
-        } else if ((keyCode == GLFW.GLFW_KEY_RIGHT || keyCode == GLFW.GLFW_KEY_LEFT || keyCode == GLFW.GLFW_KEY_DOWN || keyCode == GLFW.GLFW_KEY_UP)
-                && (modifiers & GLFW.GLFW_MOD_ALT) != 0) {
-            this.focusHandler.moveFocus(keyCode);
+        if (input.isTab()) {
+            this.focusHandler.cycle(!input.hasShift());
+        } else if ((input.isUp() || input.isDown() || input.isLeft() || input.isRight()) && input.hasAlt()) {
+            this.focusHandler.moveFocus(input.key());
         } else if (this.focusHandler.focused() != null) {
-            return this.focusHandler.focused().onKeyPress(keyCode, scanCode, modifiers);
+            return this.focusHandler.focused().onKeyPress(input);
         }
 
-        return super.onKeyPress(keyCode, scanCode, modifiers);
+        return super.onKeyPress(input);
     }
 
     @Override
-    public boolean onCharTyped(char chr, int modifiers) {
+    public boolean onCharTyped(CharInput input) {
         if (this.focusHandler == null) return false;
 
         if (this.focusHandler.focused() != null) {
-            return this.focusHandler.focused().onCharTyped(chr, modifiers);
+            return this.focusHandler.focused().onCharTyped(input);
         }
 
-        return super.onCharTyped(chr, modifiers);
+        return super.onCharTyped(input);
     }
 
     @Override
@@ -313,19 +313,19 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
         switch (positioning.type) {
             case LAYOUT -> layoutFunc.accept(child);
             case ABSOLUTE -> child.mount(
-                    this,
-                    this.x + positioning.x + componentMargins.left() + padding.left(),
-                    this.y + positioning.y + componentMargins.top() + padding.top()
+                this,
+                this.x + positioning.x + componentMargins.left() + padding.left(),
+                this.y + positioning.y + componentMargins.top() + padding.top()
             );
             case RELATIVE -> child.mount(
-                    this,
-                    this.x + padding.left() + componentMargins.left() + Math.round((positioning.x / 100f) * (this.width() - child.fullSize().width() - padding.horizontal())),
-                    this.y + padding.top() + componentMargins.top() + Math.round((positioning.y / 100f) * (this.height() - child.fullSize().height() - padding.vertical()))
+                this,
+                this.x + padding.left() + componentMargins.left() + Math.round((positioning.x / 100f) * (this.width() - child.fullSize().width() - padding.horizontal())),
+                this.y + padding.top() + componentMargins.top() + Math.round((positioning.y / 100f) * (this.height() - child.fullSize().height() - padding.vertical()))
             );
             case ACROSS -> child.mount(
-                    this,
-                    this.x + padding.left() + componentMargins.left() + Math.round((positioning.x / 100f) * (this.width() - padding.horizontal())),
-                    this.y + padding.top() + componentMargins.top() + Math.round((positioning.y / 100f) * (this.height() - padding.vertical()))
+                this,
+                this.x + padding.left() + componentMargins.left() + Math.round((positioning.x / 100f) * (this.width() - padding.horizontal())),
+                this.y + padding.top() + componentMargins.top() + Math.round((positioning.y / 100f) * (this.height() - padding.vertical()))
             );
         }
     }
@@ -340,7 +340,7 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
     protected void drawChildren(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta, List<? extends Component> children) {
         if (!this.allowOverflow) {
             var padding = this.padding.get();
-            ScissorStack.push(this.x + padding.left(), this.y + padding.top(), this.width - padding.horizontal(), this.height - padding.vertical(), context);
+            context.enableScissor(this.x + padding.left(), this.y + padding.top(), this.x + padding.left() + this.width - padding.horizontal(), this.y + padding.top() + this.height - padding.vertical());
         }
 
         var focusHandler = this.focusHandler();
@@ -348,19 +348,16 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
         for (int i = 0; i < children.size(); i++) {
             final var child = children.get(i);
 
-            if (!ScissorStack.isVisible(child, context.getMatrices())) continue;
-            context.getMatrices().translate(0, 0, child.zIndex() + 1);
+            if (!context.intersectsScissor(child)) continue;
 
             child.draw(context, mouseX, mouseY, partialTicks, delta);
             if (focusHandler.lastFocusSource() == FocusSource.KEYBOARD_CYCLE && focusHandler.focused() == child) {
                 child.drawFocusHighlight(context, mouseX, mouseY, partialTicks, delta);
             }
-
-            context.getMatrices().translate(0, 0, -child.zIndex() - 1);
         }
 
         if (!this.allowOverflow) {
-            ScissorStack.pop();
+            context.disableScissor();
         }
     }
 
@@ -375,8 +372,8 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
         final var padding = this.padding.get();
 
         return Size.of(
-                MathHelper.lerp(this.horizontalSizing.get().contentFactor(), this.width - padding.horizontal(), thisSpace.width() - padding.horizontal()),
-                MathHelper.lerp(this.verticalSizing.get().contentFactor(), this.height - padding.vertical(), thisSpace.height() - padding.vertical())
+            MathHelper.lerp(this.horizontalSizing.get().contentFactor(), this.width - padding.horizontal(), thisSpace.width() - padding.horizontal()),
+            MathHelper.lerp(this.verticalSizing.get().contentFactor(), this.height - padding.vertical(), thisSpace.height() - padding.vertical())
         );
     }
 

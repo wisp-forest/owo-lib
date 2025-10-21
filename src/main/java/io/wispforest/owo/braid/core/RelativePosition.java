@@ -4,6 +4,8 @@ import com.google.common.base.Preconditions;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.framework.BuildContext;
 import org.joml.Vector2d;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 public record RelativePosition(BuildContext context, double x, double y) {
@@ -19,8 +21,8 @@ public record RelativePosition(BuildContext context, double x, double y) {
             );
         }
 
-        var transform = contextInstance.computeTransformFrom(ancestorInstance).invert();
-        var coordinates = transform.transform((float) this.x, (float) this.y, 0, 1, new Vector4f());
+        var coordinates = new Vector2f((float) this.x, (float) this.y);
+        coordinates.mulPosition(contextInstance.computeTransformFrom(ancestorInstance).invert());
 
         return new Vector2d(coordinates.x, coordinates.y);
     }

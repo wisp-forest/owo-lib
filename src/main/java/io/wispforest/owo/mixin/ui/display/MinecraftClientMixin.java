@@ -26,8 +26,8 @@ public class MinecraftClientMixin {
     public void dispatchSecondaryPressEvent(CallbackInfo ci) {
         if (BraidDisplayBinding.targetDisplay == null || BraidDisplayBinding.targetDisplay.display().primaryPressed) return;
 
-        var eventBuffer = BraidDisplayBinding.targetDisplay.display().app.eventBuffer;
-        eventBuffer.add(new MouseButtonPressEvent(GLFW.GLFW_MOUSE_BUTTON_LEFT, KeyModifiers.NONE));
+        var eventBinding = BraidDisplayBinding.targetDisplay.display().app.eventBinding;
+        eventBinding.add(new MouseButtonPressEvent(GLFW.GLFW_MOUSE_BUTTON_LEFT, KeyModifiers.NONE));
 
         BraidDisplayBinding.targetDisplay.display().primaryPressed = true;
         this.player.swingHand(Hand.MAIN_HAND);
@@ -39,8 +39,8 @@ public class MinecraftClientMixin {
     public void dispatchPrimaryPressEvent(CallbackInfoReturnable<Boolean> cir) {
         if (BraidDisplayBinding.targetDisplay == null || BraidDisplayBinding.targetDisplay.display().secondaryPressed) return;
 
-        var eventBuffer = BraidDisplayBinding.targetDisplay.display().app.eventBuffer;
-        eventBuffer.add(new MouseButtonPressEvent(GLFW.GLFW_MOUSE_BUTTON_RIGHT, KeyModifiers.NONE));
+        var eventBinding = BraidDisplayBinding.targetDisplay.display().app.eventBinding;
+        eventBinding.add(new MouseButtonPressEvent(GLFW.GLFW_MOUSE_BUTTON_RIGHT, KeyModifiers.NONE));
 
         BraidDisplayBinding.targetDisplay.display().secondaryPressed = true;
         this.player.swingHand(Hand.MAIN_HAND);

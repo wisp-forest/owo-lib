@@ -1,9 +1,11 @@
 package io.wispforest.owo.braid.core;
 
+import io.wispforest.owo.mixin.braid.GameRendererAccessor;
 import io.wispforest.owo.ui.event.ClientRenderCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.render.state.GuiRenderState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,13 +28,13 @@ public class BraidWindowScheduler {
             }
 
             app.state().updateWidgetsAndInteractions(
-                MinecraftClient.getInstance().getRenderTickCounter().getTickDelta(false),
-                MinecraftClient.getInstance().getRenderTickCounter().getLastFrameDuration()
+                MinecraftClient.getInstance().getRenderTickCounter().getTickProgress(false),
+                MinecraftClient.getInstance().getRenderTickCounter().getDynamicDeltaTicks()
             );
 
             app.state().draw(new DrawContext(
                 MinecraftClient.getInstance(),
-                MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers()
+                ((GameRendererAccessor) MinecraftClient.getInstance().gameRenderer).owo$getGuiState()
             ));
         }
     }

@@ -45,7 +45,7 @@
   "depends": {
     "fabricloader": ">=0.15.0",
     "fabric-api": ">=0.100",
-    "minecraft": ">=1.21"
+    "minecraft": ">=1.21.6"
   },
   "custom": {
     "modmenu": {
@@ -59,6 +59,12 @@
     "loom:injected_interfaces": {
       "net/minecraft/class_2487": [
         "io/wispforest/endec/util/MapCarrier"
+      ],
+      "net/minecraft/class_11368": [
+        "io/wispforest/endec/util/MapCarrierDecodable"
+      ],
+      "net/minecraft/class_11372": [
+        "io/wispforest/endec/util/MapCarrierEncodable"
       ],
       "net/minecraft/class_2540": [
         "io/wispforest/endec/util/EndecBuffer"

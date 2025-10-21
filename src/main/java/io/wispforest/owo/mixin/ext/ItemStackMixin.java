@@ -26,7 +26,7 @@ public class ItemStackMixin {
 
     @Unique private DerivedComponentMap derivedMap;
 
-    @Inject(method = "<init>(Lnet/minecraft/item/ItemConvertible;ILnet/minecraft/component/MergedComponentMap;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/Item;postProcessComponents(Lnet/minecraft/item/ItemStack;)V"))
+    @Inject(method = "<init>(Lnet/minecraft/item/ItemConvertible;ILnet/minecraft/component/MergedComponentMap;)V", at = @At("TAIL"))
     private void injectDerivedComponentMap(ItemConvertible item, int count, MergedComponentMap components, CallbackInfo ci) {
         var base = ((MergedComponentMapAccessor)(Object) this.components).owo$getBaseComponents();
 
@@ -38,15 +38,20 @@ public class ItemStackMixin {
         }
     }
 
-    @WrapOperation(
-        method = {
-            "<init>(Lnet/minecraft/item/ItemConvertible;ILnet/minecraft/component/MergedComponentMap;)V",
-            "applyChanges",
-            "applyUnvalidatedChanges",
-            "applyComponentsFrom"
-        }, at = @At(value = "INVOKE", target = "Lnet/minecraft/item/Item;postProcessComponents(Lnet/minecraft/item/ItemStack;)V"))
-    private void deriveComponents1(Item instance, ItemStack stack, Operation<Void> original) {
-        original.call(instance, stack);
+    @Inject(method = "applyChanges", at = @At(value = "INVOKE", target = "Lnet/minecraft/component/MergedComponentMap;applyChanges(Lnet/minecraft/component/ComponentChanges;)V", shift = At.Shift.AFTER))
+    private void deriveComponents2(ComponentChanges changes, CallbackInfo ci) {
+        if (derivedMap == null) return;
+        derivedMap.derive((ItemStack)(Object) this);
+    }
+
+    @Inject(method = "applyUnvalidatedChanges", at = @At(value = "INVOKE", target = "Lnet/minecraft/component/MergedComponentMap;applyChanges(Lnet/minecraft/component/ComponentChanges;)V", shift = At.Shift.AFTER))
+    private void deriveComponents3(ComponentChanges changes, CallbackInfo ci) {
+        if (derivedMap == null) return;
+        derivedMap.derive((ItemStack)(Object) this);
+    }
+
+    @Inject(method = "applyComponentsFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/component/MergedComponentMap;setAll(Lnet/minecraft/component/ComponentMap;)V", shift = At.Shift.AFTER))
+    private void deriveComponents4(ComponentMap components, CallbackInfo ci) {
         if (derivedMap == null) return;
         derivedMap.derive((ItemStack)(Object) this);
     }

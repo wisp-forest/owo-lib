@@ -29,6 +29,7 @@ import io.wispforest.owo.braid.widgets.slider.xlyder.Xlyder;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import net.minecraft.text.Text;
+import org.joml.Matrix3x2f;
 import org.joml.Matrix4f;
 
 import java.math.BigDecimal;
@@ -329,7 +330,7 @@ public class SliderTests extends StatefulWidget {
                     new Sized(
                         20, 20,
                         new Transform(
-                            new Matrix4f().scale(0.5f),
+                            new Matrix3x2f().scale(0.5f),
                             new Label(
                                 null,
                                 false,

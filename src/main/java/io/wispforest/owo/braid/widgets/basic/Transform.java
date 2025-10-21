@@ -5,15 +5,15 @@ import io.wispforest.owo.braid.framework.instance.SingleChildWidgetInstance;
 import io.wispforest.owo.braid.framework.instance.WidgetTransform;
 import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import org.joml.Matrix4f;
+import org.joml.Matrix3x2f;
 
 import java.util.Objects;
 
 public class Transform extends SingleChildInstanceWidget {
 
-    public final Matrix4f matrix;
+    public final Matrix3x2f matrix;
 
-    public Transform(Matrix4f matrix, Widget child) {
+    public Transform(Matrix3x2f matrix, Widget child) {
         super(child);
         this.matrix = matrix;
     }

@@ -91,10 +91,10 @@ public class UIErrorToast implements Toast {
         owoContext.drawRectOutline(0, 0, this.getWidth(), this.getHeight(), 0xA7FF0000);
 
         int xOffset = this.getWidth() / 2 - this.textRenderer.getWidth(this.errorMessage.get(0)) / 2;
-        owoContext.drawTextWithShadow(this.textRenderer, this.errorMessage.get(0), 4 + xOffset, 4, 0xFFFFFF);
+        owoContext.drawTextWithShadow(this.textRenderer, this.errorMessage.get(0), 4 + xOffset, 4, 0xFFFFFFFF);
 
         for (int i = 1; i < this.errorMessage.size(); i++) {
-            owoContext.drawText(this.textRenderer, this.errorMessage.get(i), 4, 4 + i * 11, 0xFFFFFF, false);
+            owoContext.drawText(this.textRenderer, this.errorMessage.get(i), 4, 4 + i * 11, 0xFFFFFFFF, false);
         }
     }
 

@@ -3,6 +3,7 @@ package io.wispforest.owo.ui.container;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
+import net.minecraft.client.gui.Click;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 
@@ -32,13 +33,13 @@ public class DraggableContainer<C extends Component> extends WrappingParentCompo
     }
 
     @Override
-    public boolean onMouseDrag(double mouseX, double mouseY, double deltaX, double deltaY, int button) {
+    public boolean onMouseDrag(Click click, double deltaX, double deltaY) {
         this.xOffset += deltaX;
         this.yOffset += deltaY;
 
         super.updateX((int) (this.baseX + Math.round(this.xOffset)));
         super.updateY((int) (this.baseY + Math.round(this.yOffset)));
-        return super.onMouseDrag(mouseX, mouseY, deltaX, deltaY, button);
+        return super.onMouseDrag(click, deltaX, deltaY);
     }
 
     @Override
@@ -90,24 +91,9 @@ public class DraggableContainer<C extends Component> extends WrappingParentCompo
         return this.foreheadSize;
     }
 
-    /**
-     * @deprecated This method merely sets the z-index of this component
-     * to 500/0. Simply use {@link #zIndex(int)} with an appropriate value instead
-     */
-    @Deprecated(forRemoval = true)
-    public DraggableContainer<C> alwaysOnTop(boolean alwaysOnTop) {
-        this.zIndex(alwaysOnTop ? 500 : 0);
-        return this;
-    }
-
-    public boolean alwaysOnTop() {
-        return false;
-    }
-
     @Override
     public void parseProperties(UIModel model, Element element, Map<String, Element> children) {
         super.parseProperties(model, element, children);
         UIParsing.apply(children, "forehead-size", UIParsing::parseUnsignedInt, this::foreheadSize);
-        UIParsing.apply(children, "always-on-top", UIParsing::parseBool, this::alwaysOnTop);
     }
 }

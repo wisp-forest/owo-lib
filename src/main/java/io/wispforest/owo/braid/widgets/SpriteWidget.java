@@ -1,12 +1,12 @@
 package io.wispforest.owo.braid.widgets;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.braid.core.BraidDrawContext;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.Size;
 import io.wispforest.owo.braid.framework.instance.LeafWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.LeafInstanceWidget;
-import io.wispforest.owo.ui.core.OwoUIRenderLayers;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.util.Identifier;
@@ -18,16 +18,13 @@ public class SpriteWidget extends LeafInstanceWidget {
     public static final Identifier GUI_ATLAS_ID = Identifier.of("textures/atlas/gui.png");
 
     public final SpriteIdentifier spriteIdentifier;
-    public final boolean blend;
 
-    public SpriteWidget(SpriteIdentifier spriteIdentifier, boolean blend) {
+    public SpriteWidget(SpriteIdentifier spriteIdentifier) {
         this.spriteIdentifier = spriteIdentifier;
-        this.blend = blend;
     }
 
-    public SpriteWidget(Identifier spriteIdentifier, boolean blend) {
+    public SpriteWidget(Identifier spriteIdentifier) {
         this.spriteIdentifier = new SpriteIdentifier(GUI_ATLAS_ID, spriteIdentifier);
-        this.blend = blend;
     }
 
     @Override
@@ -52,9 +49,7 @@ public class SpriteWidget extends LeafInstanceWidget {
         }
 
         protected Sprite findSprite() {
-            return this.sprite = this.widget.spriteIdentifier.getAtlasId().equals(GUI_ATLAS_ID)
-                ? this.host().client().getGuiAtlasManager().getSprite(this.widget.spriteIdentifier.getTextureId())
-                : this.widget.spriteIdentifier.getSprite();
+            return this.sprite = MinecraftClient.getInstance().getAtlasManager().getSprite(this.widget.spriteIdentifier);
         }
 
         @Override
@@ -86,23 +81,14 @@ public class SpriteWidget extends LeafInstanceWidget {
 
         @Override
         public void draw(BraidDrawContext ctx) {
-            if (this.widget.blend) {
-                RenderSystem.enableBlend();
-                RenderSystem.defaultBlendFunc();
-            }
-
             ctx.drawSpriteStretched(
-                identifier -> OwoUIRenderLayers.getGuiTextured(identifier, this.widget.blend),
+                RenderPipelines.GUI_TEXTURED,
                 this.sprite,
                 0,
                 0,
                 (int) this.transform.width(),
                 (int) this.transform.height()
             );
-
-            if (this.widget.blend) {
-                RenderSystem.disableBlend();
-            }
         }
     }
 }

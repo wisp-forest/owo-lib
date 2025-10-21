@@ -17,7 +17,6 @@ import io.wispforest.owo.braid.widgets.focus.Focusable;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.sharedstate.SharedState;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 
 import java.util.regex.Pattern;
 
@@ -61,7 +60,7 @@ public class InstanceTitle extends StatefulWidget {
                                 Insets.left(2),
                                 new Tooltip(
                                     Text.literal("Relayout Boundary"),
-                                    new SpriteWidget(Owo.id("braid_inspector_relayout_boundary"), false)
+                                    new SpriteWidget(Owo.id("braid_inspector_relayout_boundary"))
                                 )
                             )
                         ),
@@ -71,7 +70,7 @@ public class InstanceTitle extends StatefulWidget {
                                 Insets.left(2),
                                 new Tooltip(
                                     Text.literal("Hit Test Boundary"),
-                                    new SpriteWidget(Owo.id("braid_inspector_hit_test_boundary"), false)
+                                    new SpriteWidget(Owo.id("braid_inspector_hit_test_boundary"))
                                 )
                             )
                         )

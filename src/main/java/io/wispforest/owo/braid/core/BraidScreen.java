@@ -6,15 +6,18 @@ import io.wispforest.owo.braid.framework.widget.InheritedWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.BraidApp;
 import io.wispforest.owo.ui.util.DisposableScreen;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
 
 public class BraidScreen extends Screen implements DisposableScreen {
 
-    protected final EventBuffer eventBuffer = new EventBuffer();
+    protected final EventBinding eventBinding = new EventBinding.Default();
     protected final Surface.Default surface = new Surface.Default();
     protected final Vector2i cursorPos = new Vector2i();
 
@@ -46,7 +49,7 @@ public class BraidScreen extends Screen implements DisposableScreen {
                 AppState.formatName("BraidScreen", this.rootWidget),
                 this.client,
                 this.surface,
-                this.eventBuffer,
+                this.eventBinding,
                 new BraidScreenProvider(this, widget)
             );
         }
@@ -63,12 +66,12 @@ public class BraidScreen extends Screen implements DisposableScreen {
         this.cursorPos.y = mouseY;
 
         if (deltaX != 0 || deltaY != 0) {
-            this.eventBuffer.add(new MouseMoveEvent(this.cursorPos.x, this.cursorPos.y, deltaX, deltaY));
+            this.eventBinding.add(new MouseMoveEvent(this.cursorPos.x, this.cursorPos.y, deltaX, deltaY));
         }
 
         this.state.updateWidgetsAndInteractions(
-            this.client.getRenderTickCounter().getTickDelta(false),
-            this.client.getRenderTickCounter().getLastFrameDuration()
+            this.client.getRenderTickCounter().getTickProgress(false),
+            this.client.getRenderTickCounter().getDynamicDeltaTicks()
         );
 
         this.state.draw(context);
@@ -84,47 +87,39 @@ public class BraidScreen extends Screen implements DisposableScreen {
         return this.settings.shouldPause;
     }
 
-    public boolean mouseClicked(double mouseX, double mouseY, int button, int modifiers) {
-        this.eventBuffer.add(new MouseButtonPressEvent(button, new KeyModifiers(modifiers)));
+    @Override
+    public boolean mouseClicked(Click click, boolean doubled) {
+        this.eventBinding.add(new MouseButtonPressEvent(click.button(), click.modifiers()));
         return true;
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        return this.mouseClicked(mouseX, mouseY, button, 0);
-    }
-
-    public boolean mouseReleased(double mouseX, double mouseY, int button, int modifiers) {
-        this.eventBuffer.add(new MouseButtonReleaseEvent(button, new KeyModifiers(modifiers)));
+    public boolean mouseReleased(Click click) {
+        this.eventBinding.add(new MouseButtonReleaseEvent(click.button(), click.modifiers()));
         return true;
-    }
-
-    @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        return this.mouseReleased(mouseX, mouseY, button, 0);
     }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        this.eventBuffer.add(new MouseScrollEvent(horizontalAmount, verticalAmount));
+        this.eventBinding.add(new MouseScrollEvent(horizontalAmount, verticalAmount));
         return true;
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        this.eventBuffer.add(new KeyPressEvent(keyCode, scanCode, new KeyModifiers(modifiers)));
-        return super.keyPressed(keyCode, scanCode, modifiers);
+    public boolean keyPressed(KeyInput input) {
+        this.eventBinding.add(new KeyPressEvent(input.key(), input.scancode(), input.modifiers()));
+        return super.keyPressed(input);
     }
 
     @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-        this.eventBuffer.add(new KeyReleaseEvent(keyCode, scanCode, new KeyModifiers(modifiers)));
+    public boolean keyReleased(KeyInput input) {
+        this.eventBinding.add(new KeyReleaseEvent(input.key(), input.scancode(), input.modifiers()));
         return true;
     }
 
     @Override
-    public boolean charTyped(char chr, int modifiers) {
-        this.eventBuffer.add(new CharInputEvent(chr, new KeyModifiers(modifiers)));
+    public boolean charTyped(CharInput input) {
+        this.eventBinding.add(new CharInputEvent((char) input.codepoint(), input.modifiers()));
         return true;
     }
 

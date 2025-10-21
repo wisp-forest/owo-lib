@@ -126,7 +126,7 @@ public class InstanceTreeView extends StatefulWidget {
                             new Sized(
                                 12,
                                 12,
-                                new SpriteWidget(Owo.id("braid_inspector_leaf"), false)
+                                new SpriteWidget(Owo.id("braid_inspector_leaf"))
                             ),
                             title
                         )

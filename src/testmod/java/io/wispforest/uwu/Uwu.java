@@ -23,8 +23,6 @@ import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
 import io.wispforest.owo.network.OwoNetChannel;
-import io.wispforest.owo.offline.OfflineAdvancementLookup;
-import io.wispforest.owo.offline.OfflineDataLookup;
 import io.wispforest.owo.particles.ClientParticles;
 import io.wispforest.owo.particles.systems.ParticleSystem;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
@@ -63,6 +61,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.particle.DragonBreathParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -174,7 +173,7 @@ public class Uwu implements ModInitializer {
         ClientParticles.persist();
 
         ClientParticles.setParticleCount(30);
-        ClientParticles.spawnLine(ParticleTypes.DRAGON_BREATH, world, pos.add(.5, .5, .5), pos.add(.5, 2.5, .5), .015f);
+        ClientParticles.spawnLine(DragonBreathParticleEffect.of(ParticleTypes.DRAGON_BREATH, 1), world, pos.add(.5, .5, .5), pos.add(.5, 2.5, .5), .015f);
 
         ClientParticles.randomizeVelocityOnAxis(.1, Direction.Axis.Z);
         ClientParticles.spawn(ParticleTypes.CLOUD, world, pos.add(.5, 2.5, .5), 0);
@@ -184,7 +183,7 @@ public class Uwu implements ModInitializer {
 
     public static final UwuConfig CONFIG = UwuConfig.createAndLoad();
     public static final BruhConfig BRUHHHHH = BruhConfig.createAndLoad(builder -> {
-        builder.janksonBuilder().registerSerializer(Color.class, (color, marshaller) -> new JsonPrimitive("bruv"));
+//        builder.janksonBuilder().registerSerializer(Color.class, (color, marshaller) -> new JsonPrimitive("bruv"));
     });
 
     @Override
@@ -245,39 +244,6 @@ public class Uwu implements ModInitializer {
 //        UwuShapedRecipe.init();
 
         CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> {
-            dispatcher.register(
-                literal("show_nbt")
-                    .then(argument("player", GameProfileArgumentType.gameProfile())
-                        .executes(context -> {
-                            GameProfile profile = GameProfileArgumentType.getProfileArgument(context, "player").iterator().next();
-                            NbtCompound tag = OfflineDataLookup.get(profile.getId());
-                            context.getSource().sendFeedback(() -> NbtHelper.toPrettyPrintedText(tag), false);
-                            return 0;
-                        })));
-
-            dispatcher.register(
-                literal("test_advancement_cache")
-                    .then(literal("read")
-                        .then(argument("player", GameProfileArgumentType.gameProfile())
-                            .executes(context -> {
-                                GameProfile profile = GameProfileArgumentType.getProfileArgument(context, "player").iterator().next();
-                                Map<Identifier, AdvancementProgress> map = OfflineAdvancementLookup.get(profile.getId());
-                                context.getSource().sendFeedback(() -> Text.literal(map.toString()), false);
-                                System.out.println(map);
-                                return 0;
-                            })))
-                    .then(literal("write")
-                        .then(argument("player", GameProfileArgumentType.gameProfile())
-                            .executes(context -> {
-                                MinecraftServer server = context.getSource().getServer();
-                                GameProfile profile = GameProfileArgumentType.getProfileArgument(context, "player").iterator().next();
-
-                                OfflineAdvancementLookup.edit(profile.getId(), handle -> {
-                                    handle.grant(server.getAdvancementLoader().get(Identifier.of("story/iron_tools")));
-                                });
-
-                                return 0;
-                            }))));
 
             dispatcher.register(literal("get_option")
                 .then(argument("config", StringArgumentType.string())
@@ -387,47 +353,48 @@ public class Uwu implements ModInitializer {
 
                     //--
 
-                    {
-                        LOGGER.info("--- Format Based Endec Test");
-
-                        var nbtDataStack = handStack.toNbt(access);
-
-                        LOGGER.info("  Input:  " + nbtDataStack.asString().replace("\n", "\\n"));
-
-                        var jsonDataStack = NbtEndec.ELEMENT.encodeFully(GsonSerializer::of, nbtDataStack);
-
-                        LOGGER.info("  Json:  " + jsonDataStack);
-
-                        var convertedNbtDataStack = NbtEndec.ELEMENT.decodeFully(GsonDeserializer::of, jsonDataStack);
-
-                        LOGGER.info("Output:  " + convertedNbtDataStack.asString().replace("\n", "\\n"));
-
-                        LOGGER.info("---");
-
-                        LOGGER.info("");
-                    }
-
-                    //--
-
-                    {
-                        LOGGER.info("--- Transpose Format Based Endec Test");
-
-                        var nbtDataStack = handStack.toNbt(access);
-
-                        LOGGER.info("  Input:  " + nbtDataStack.asString().replace("\n", "\\n"));
-
-                        var jsonDataStack = NbtEndec.ELEMENT.encodeFully(GsonSerializer::of, nbtDataStack);
-
-                        LOGGER.info("  Json:  " + jsonDataStack);
-
-                        var convertedNbtDataStack = GsonEndec.INSTANCE.encodeFully(NbtSerializer::of, jsonDataStack);
-
-                        LOGGER.info("Output:  " + convertedNbtDataStack.asString().replace("\n", "\\n"));
-
-                        LOGGER.info("---");
-
-                        LOGGER.info("");
-                    }
+                    // TODO: kodeck test
+//{
+//                            LOGGER.info("--- Format Based Endec Test");
+//
+//                            var nbtDataStack = handStack.toNbt(access);
+//
+//                            LOGGER.info("  Input:  " + nbtDataStack.asString().get().replace("\n", "\\n"));
+//
+//                            var jsonDataStack = NbtEndec.ELEMENT.encodeFully(GsonSerializer::of, nbtDataStack);
+//
+//                            LOGGER.info("  Json:  " + jsonDataStack);
+//
+//                            var convertedNbtDataStack = NbtEndec.ELEMENT.decodeFully(GsonDeserializer::of, jsonDataStack);
+//
+//                            LOGGER.info("Output:  " + convertedNbtDataStack.asString().get().replace("\n", "\\n"));
+//
+//                            LOGGER.info("---");
+//
+//                        LOGGER.info("");
+//                        }
+//
+                    ////--
+//
+//                    {
+//                            LOGGER.info("--- Transpose Format Based Endec Test");
+//
+//                            var nbtDataStack = handStack.toNbt(access);
+//
+//                            LOGGER.info("  Input:  " + nbtDataStack.asString().get().replace("\n", "\\n"));
+//
+//                            var jsonDataStack = NbtEndec.ELEMENT.encodeFully(GsonSerializer::of, nbtDataStack);
+//
+//                            LOGGER.info("  Json:  " + jsonDataStack);
+//
+//                            var convertedNbtDataStack = GsonEndec.INSTANCE.encodeFully(NbtSerializer::of, jsonDataStack);
+//
+//                            LOGGER.info("Output:  " + convertedNbtDataStack.asString().get().replace("\n", "\\n"));
+//
+//                            LOGGER.info("---");
+//
+//                        LOGGER.info("");
+//                        }
 
                     //--
 
@@ -451,7 +418,7 @@ public class Uwu implements ModInitializer {
                         compound.put(variable3Endec, variable3);
 
                         LOGGER.info("");
-                        LOGGER.info(compound.asString());
+                        LOGGER.info(compound.asString().get());
 
                         LOGGER.info("");
 
@@ -495,7 +462,7 @@ public class Uwu implements ModInitializer {
                 }));
         });
 
-        CustomTextRegistry.register(BasedTextContent.TYPE, "based");
+        CustomTextRegistry.register("based", BasedTextContent.CODEC);
 
         UwuNetworkExample.init();
         UwuOptionalNetExample.init();

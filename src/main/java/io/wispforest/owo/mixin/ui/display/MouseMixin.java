@@ -23,7 +23,7 @@ public class MouseMixin {
     public void scrollBraidDisplays(long window, double horizontal, double vertical, CallbackInfo ci, @Local(ordinal = 3) double xOffset, @Local(ordinal = 4) double yOffset) {
         if (BraidDisplayBinding.targetDisplay == null || this.client.player.isSneaking()) return;
 
-        BraidDisplayBinding.targetDisplay.display().app.eventBuffer.add(new MouseScrollEvent(xOffset, yOffset));
+        BraidDisplayBinding.targetDisplay.display().app.eventBinding.add(new MouseScrollEvent(xOffset, yOffset));
         ci.cancel();
     }
 

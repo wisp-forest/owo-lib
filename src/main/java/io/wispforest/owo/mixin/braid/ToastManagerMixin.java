@@ -2,6 +2,7 @@ package io.wispforest.owo.mixin.braid;
 
 import io.wispforest.owo.braid.util.BraidToast;
 import net.minecraft.client.toast.ToastManager;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -20,7 +21,7 @@ public class ToastManagerMixin {
     private List<ToastManager.Entry<?>> visibleEntries;
 
     @Inject(method = "method_61991", at = @At(value = "INVOKE", target = "Ljava/util/BitSet;clear(II)V"))
-    private void disposeBraidToasts(ToastManager.Entry<?> entry, CallbackInfoReturnable<Boolean> cir) {
+    private void disposeBraidToasts(MutableBoolean mutableBoolean, ToastManager.Entry<?> entry, CallbackInfoReturnable<Boolean> cir) {
         if (entry.getInstance() instanceof BraidToast toast) {
             toast.dispose();
         }

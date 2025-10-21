@@ -1,10 +1,11 @@
 package io.wispforest.owo.braid.widgets.basic;
 
 import io.wispforest.owo.braid.core.*;
+import io.wispforest.owo.braid.framework.instance.InstanceHost;
 import io.wispforest.owo.braid.framework.instance.OptionalChildWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.OptionalChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import io.wispforest.owo.braid.util.TextureSizeLookup;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.TriState;
 import org.jetbrains.annotations.Nullable;
@@ -27,7 +28,7 @@ public class TextureWidget extends OptionalChildInstanceWidget {
     }
 
     public TextureWidget(Identifier texture, Wrap wrap, Color color, @Nullable Widget child) {
-        this(texture, wrap, Filter.NEAREST, color, child);
+        this(texture, wrap, Filter.TEXTURE_DEFAULT, color, child);
     }
 
     public TextureWidget(Identifier texture, Wrap wrap, Filter filter, Color color) {
@@ -35,7 +36,7 @@ public class TextureWidget extends OptionalChildInstanceWidget {
     }
 
     public TextureWidget(Identifier texture, Wrap wrap, Color color) {
-        this(texture, wrap, Filter.NEAREST, color);
+        this(texture, wrap, Filter.TEXTURE_DEFAULT, color);
     }
 
     @Override
@@ -61,6 +62,11 @@ public class TextureWidget extends OptionalChildInstanceWidget {
 
         public Instance(TextureWidget widget) {
             super(widget);
+        }
+
+        @Override
+        public void attachHost(InstanceHost host) {
+            super.attachHost(host);
             this.refreshTextureSize();
         }
 
@@ -71,7 +77,11 @@ public class TextureWidget extends OptionalChildInstanceWidget {
         }
 
         private void refreshTextureSize() {
-            this.textureSize = TextureSizeLookup.sizeOf(widget.texture);
+            var texture = this.host().client().getTextureManager().getTexture(widget.texture).getGlTexture();
+            this.textureSize = Size.of(
+                texture.getWidth(0),
+                texture.getHeight(0)
+            );
         }
 
         private double imageAspectRatio() {
@@ -127,18 +137,18 @@ public class TextureWidget extends OptionalChildInstanceWidget {
             var quadHeight = (int) (this.widget.wrap != Wrap.REPEAT ? textureHeight : this.transform.height());
 
             if (stretch) {
-                matrices.push();
-                matrices.scale((int) this.transform.width() / (float) textureWidth, (int) this.transform.height() / (float) textureHeight, 1);
+                matrices.pushMatrix();
+                matrices.scale((int) this.transform.width() / (float) textureWidth, (int) this.transform.height() / (float) textureHeight);
             }
 
-            var bilinearState = switch (this.widget.filter) {
-                case TEXTURE_DEFAULT -> TriState.DEFAULT;
-                case NEAREST -> TriState.FALSE;
-                case LINEAR -> TriState.TRUE;
+            var pipeline = switch (this.widget.filter) {
+                case TEXTURE_DEFAULT -> BraidRenderPipelines.TEXTURED_DEFAULT;
+                case NEAREST -> BraidRenderPipelines.TEXTURED_NEAREST;
+                case LINEAR -> BraidRenderPipelines.TEXTURED_BILINEAR;
             };
 
             ctx.drawTexture(
-                texture -> BraidRenderLayers.getTextured(texture, bilinearState),
+                pipeline,
                 this.widget.texture,
                 0, 0, 0, 0,
                 quadWidth, quadHeight,
@@ -147,7 +157,7 @@ public class TextureWidget extends OptionalChildInstanceWidget {
             );
 
             if (stretch) {
-                matrices.pop();
+                matrices.popMatrix();
             }
 
             super.draw(ctx);

@@ -7,9 +7,6 @@ import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.SpriteWidget;
 import io.wispforest.owo.braid.widgets.checkbox.RawCheckbox.CheckboxCallback;
 import net.minecraft.client.util.SpriteIdentifier;
-import net.minecraft.util.Identifier;
-
-import java.util.function.Consumer;
 
 public class BraidCheckbox extends StatelessWidget {
 
@@ -31,8 +28,8 @@ public class BraidCheckbox extends StatelessWidget {
         return new RawCheckbox(
             this.checked,
             this.onUpdate,
-            new SpriteWidget(BACKGROUND_TEXTURE, false),
-            new SpriteWidget(CHECKMARK_TEXTURE, false)
+            new SpriteWidget(BACKGROUND_TEXTURE),
+            new SpriteWidget(CHECKMARK_TEXTURE)
         );
     }
 

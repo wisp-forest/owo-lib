@@ -5,7 +5,7 @@ import io.wispforest.owo.braid.framework.instance.HitTestState;
 import io.wispforest.owo.braid.framework.instance.SingleChildWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import io.wispforest.owo.ui.util.ScissorStack;
+import net.minecraft.client.gui.ScreenRect;
 
 // TODO: stencil clip
 //  also warn in docs about transforms which aren't pure translations
@@ -42,10 +42,9 @@ public class Clip extends SingleChildInstanceWidget {
                 return;
             }
 
-            ScissorStack.push(0, 0, (int) this.transform.width(), (int) this.transform.height(), ctx);
+            ctx.scissorStack.push(new ScreenRect(0, 0, (int) this.transform.width(), (int) this.transform.height()).transformEachVertex(ctx.getMatrices()));
             super.draw(ctx);
-            ctx.draw();
-            ScissorStack.pop();
+            ctx.disableScissor();
         }
 
         @Override

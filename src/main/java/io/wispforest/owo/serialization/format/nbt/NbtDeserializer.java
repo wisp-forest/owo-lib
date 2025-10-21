@@ -1,5 +1,6 @@
 package io.wispforest.owo.serialization.format.nbt;
 
+import com.google.common.collect.MapMaker;
 import io.wispforest.endec.*;
 import io.wispforest.endec.util.RecursiveDeserializer;
 import net.minecraft.nbt.*;
@@ -79,7 +80,7 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
 
     @Override
     public String readString(SerializationContext ctx) {
-        return this.getAs(this.getValue(), NbtString.class).asString();
+        return this.getAs(this.getValue(), NbtString.class).asString().get();
     }
 
     @Override
@@ -87,12 +88,12 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
         return this.getAs(this.getValue(), NbtByteArray.class).getByteArray();
     }
 
-    private final Set<IdentityHolder<NbtElement>> encodedOptionals = Collections.newSetFromMap(new WeakHashMap<>());
+    private final Set<NbtElement> encodedOptionals = Collections.newSetFromMap(new MapMaker().weakKeys().makeMap());
 
     @Override
     public <V> Optional<V> readOptional(SerializationContext ctx, Endec<V> endec) {
         var value = this.getValue();
-        if (this.encodedOptionals.contains(new IdentityHolder<>(value))) {
+        if (this.encodedOptionals.contains(value)) {
             return Optional.of(endec.decode(ctx, this));
         }
 
@@ -107,7 +108,8 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
     @Override
     public <E> Deserializer.Sequence<E> sequence(SerializationContext ctx, Endec<E> elementEndec) {
         //noinspection unchecked
-        return new Sequence<>(ctx, elementEndec, this.getAs(this.getValue(), AbstractNbtList.class));
+        var list = this.getAs(this.getValue(), AbstractNbtList.class);
+        return new Sequence<E>(ctx, elementEndec, list, list.size());
     }
 
     @Override
@@ -135,10 +137,10 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
             case NbtElement.LONG_TYPE -> visitor.writeLong(ctx, ((NbtLong) value).longValue());
             case NbtElement.FLOAT_TYPE -> visitor.writeFloat(ctx, ((NbtFloat) value).floatValue());
             case NbtElement.DOUBLE_TYPE -> visitor.writeDouble(ctx, ((NbtDouble) value).doubleValue());
-            case NbtElement.STRING_TYPE -> visitor.writeString(ctx, value.asString());
+            case NbtElement.STRING_TYPE -> visitor.writeString(ctx, value.asString().get());
             case NbtElement.BYTE_ARRAY_TYPE -> visitor.writeBytes(ctx, ((NbtByteArray) value).getByteArray());
             case NbtElement.INT_ARRAY_TYPE, NbtElement.LONG_ARRAY_TYPE, NbtElement.LIST_TYPE -> {
-                var list = (AbstractNbtList<?>) value;
+                var list = (AbstractNbtList) value;
                 try (var sequence = visitor.sequence(ctx, Endec.<NbtElement>of(this::decodeValue, (ctx1, deserializer) -> null), list.size())) {
                     list.forEach(sequence::element);
                 }
@@ -165,12 +167,12 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
         private final Iterator<NbtElement> elements;
         private final int size;
 
-        private Sequence(SerializationContext ctx, Endec<V> valueEndec, List<NbtElement> elements) {
+        private Sequence(SerializationContext ctx, Endec<V> valueEndec, Iterable<NbtElement> elements, int size) {
             this.ctx = ctx;
             this.valueEndec = valueEndec;
 
             this.elements = elements.iterator();
-            this.size = elements.size();
+            this.size = size;
         }
 
         @Override
@@ -185,8 +187,10 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
 
         @Override
         public V next() {
+            var value = this.elements.next();
+
             return NbtDeserializer.this.frame(
-                    this.elements::next,
+                    () -> value,
                     () -> this.valueEndec.decode(this.ctx, NbtDeserializer.this)
             );
         }
@@ -247,7 +251,7 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
                 return defaultValueFactory.get();
             }
             var element = this.compound.get(name);
-            if (defaultValueFactory != null) NbtDeserializer.this.encodedOptionals.add(new IdentityHolder<>(element));
+            if (defaultValueFactory != null) NbtDeserializer.this.encodedOptionals.add(element);
             return NbtDeserializer.this.frame(
                     () -> element,
                     () -> endec.decode(ctx, NbtDeserializer.this)

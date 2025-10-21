@@ -1,6 +1,7 @@
 package io.wispforest.owo.braid.widgets.scroll;
 
 import com.google.common.base.Preconditions;
+import io.wispforest.owo.braid.core.AppState;
 import io.wispforest.owo.braid.core.CompoundListenable;
 import io.wispforest.owo.braid.core.Insets;
 import io.wispforest.owo.braid.framework.BuildContext;
@@ -14,6 +15,7 @@ import io.wispforest.owo.braid.widgets.basic.MouseArea;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.math.Box;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
@@ -110,13 +112,13 @@ public class Scrollable extends StatefulWidget {
 
             var transform = revealInstance.computeTransformFrom(scrollInstance).invert().translate(
                 this.horizontalController != null ? (float) this.horizontalController.offset : 0,
-                this.verticalController != null ? (float) this.verticalController.offset : 0, 0
+                this.verticalController != null ? (float) this.verticalController.offset : 0
             );
 
-            var min = new Vector4f((float) box.minX, (float) box.minY, (float) box.minZ, 1f).mul(transform);
-            var max = new Vector4f((float) box.maxX, (float) box.maxY, (float) box.maxZ, 1f).mul(transform);
+            var min = new Vector2f((float) box.minX, (float) box.minY).mulPosition(transform);
+            var max = new Vector2f((float) box.maxX, (float) box.maxY).mulPosition(transform);
 
-            var revealBox = new Box(min.x, min.y, min.z, max.x, max.y, max.z);
+            var revealBox = new Box(min.x, min.y, box.minZ, max.x, max.y, box.maxZ);
 
             if (this.horizontalController != null) {
                 if (revealBox.minX < this.horizontalController.offset) {
@@ -191,8 +193,7 @@ public class Scrollable extends StatefulWidget {
                             var verticalDelta = vertical * -15;
                             var horizontalDelta = horizontal * -15;
 
-                            //Singleton usage spotted :alarm: :alarm:
-                            if (Screen.hasShiftDown()) {
+                            if (AppState.of(context).eventBinding.activeModifiers().shift()) {
                                 if (this.widget().horizontal) {
                                     if (animationSettings != null) {
                                         this.horizontalController.animateBy(verticalDelta, animationSettings.duration(), animationSettings.easing());

@@ -54,7 +54,7 @@ public class UwuBraidItem extends Item {
     @Override
     @Environment(EnvType.CLIENT)
     public ActionResult use(World world, PlayerEntity user, Hand hand) {
-        if (world.isClient) {
+        if (world.isClient()) {
             if (user.isSneaking()) {
                 if (display == null) {
                     display = new BraidDisplay(

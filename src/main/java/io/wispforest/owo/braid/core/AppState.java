@@ -1,7 +1,7 @@
 package io.wispforest.owo.braid.core;
 
 import com.google.common.collect.Iterables;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.opengl.GlStateManager;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.core.events.*;
 import io.wispforest.owo.braid.framework.BuildContext;
@@ -29,7 +29,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
 import org.joml.Vector2dc;
-import org.joml.Vector4f;
+import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 
@@ -45,7 +45,7 @@ public class AppState implements InstanceHost, ProxyHost {
     private final MinecraftClient client;
 
     public final Surface surface;
-    public final EventBuffer eventBuffer;
+    public final EventBinding eventBinding;
 
     private final BuildScope rootBuildScope = new BuildScope();
     private Deque<AnimationCallback> animationCallbacks = new LinkedList<>();
@@ -88,14 +88,14 @@ public class AppState implements InstanceHost, ProxyHost {
         @Nullable String name,
         MinecraftClient client,
         Surface surface,
-        EventBuffer eventBuffer,
+        EventBinding eventBinding,
         Widget root
     ) {
         this.logger = logger;
         this.client = client;
 
         this.surface = surface;
-        this.eventBuffer = eventBuffer;
+        this.eventBinding = eventBinding;
 
         this.name = name != null ? name : root.getClass().getName();
         this.root = new RootWidget(
@@ -164,7 +164,6 @@ public class AppState implements InstanceHost, ProxyHost {
         }
 
         ctx.pop();
-        ctx.draw();
 
         this.surface.endRendering();
     }
@@ -274,7 +273,7 @@ public class AppState implements InstanceHost, ProxyHost {
     }
 
     private void pollAndDispatchEvents() {
-        var events = this.eventBuffer.poll();
+        var events = this.eventBinding.poll();
 
         for (var event : events) {
             switch (event) {
@@ -317,13 +316,13 @@ public class AppState implements InstanceHost, ProxyHost {
                     }
 
                     var globalTransform = ((WidgetInstance<?>) this.dragging).computeGlobalTransform();
-                    var coordinates = new Vector4f((float) x, (float) y, 0, 1);
-                    globalTransform.transform(coordinates);
+                    var coordinates = new Vector2f((float) x, (float) y);
+                    coordinates.mulPosition(globalTransform);
 
                     // apply *only the rotation* of the instance's transform
                     // to the mouse movement
-                    var delta = new Vector4f((float) deltaX, (float) deltaY, 0, 0);
-                    globalTransform.transform(delta);
+                    var delta = new Vector2f((float) deltaX, (float) deltaY);
+                    delta.mulDirection(globalTransform);
 
                     this.dragging.onMouseDrag(coordinates.x, coordinates.y, delta.x, delta.y);
                 }

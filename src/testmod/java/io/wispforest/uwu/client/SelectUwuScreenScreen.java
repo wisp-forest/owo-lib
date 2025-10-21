@@ -68,6 +68,10 @@ public class SelectUwuScreenScreen extends BaseOwoScreen<FlowLayout> {
 
             this.client.setScreen(new BraidScreen(settings, new TestSelector()));
         }));
+        panel.child(Components.button(Text.literal("smolnite"), button -> this.client.setScreen(new SmolComponentTestScreen())));
+        panel.child(Components.button(Text.literal("sizenite"), button -> this.client.setScreen(new SizingTestScreen())));
+        panel.child(Components.button(Text.literal("parse fail"), button -> this.client.setScreen(new ParseFailScreen())));
+        panel.child(Components.button(Text.literal("scissor test"), button -> this.client.setScreen(new ScissorTestScreen())));
 
         this.uiAdapter.rootComponent.child(panel);
     }
