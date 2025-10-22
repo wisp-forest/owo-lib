@@ -3,6 +3,7 @@ package io.wispforest.owo.ui.renderstate;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.client.gui.render.SpecialGuiElementRenderer;
+import net.minecraft.client.gui.render.state.special.SpecialGuiElementRenderState;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.OverlayTexture;
@@ -15,12 +16,7 @@ public record LargeItemElementRenderState(
     ItemRenderState item,
     ScreenRect bounds,
     ScreenRect scissorArea
-) implements OwoSpecialElementRenderState<LargeItemElementRenderState> {
-
-    @Override
-    public SpecialGuiElementRenderer<LargeItemElementRenderState> createRenderer(VertexConsumerProvider.Immediate vertexConsumers) {
-        return new Renderer(vertexConsumers);
-    }
+) implements SpecialGuiElementRenderState {
 
     @Override
     public int x1() {
@@ -79,7 +75,9 @@ public record LargeItemElementRenderState(
                 MinecraftClient.getInstance().gameRenderer.getDiffuseLighting().setShaderLights(DiffuseLighting.Type.ITEMS_3D);
             }
 
-            state.item.render(matrices, this.vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV);
+            var dispatcher = MinecraftClient.getInstance().gameRenderer.getEntityRenderDispatcher();
+            state.item.render(matrices, dispatcher.getQueue(), LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, 0);
+            dispatcher.render();
         }
 
         @Override

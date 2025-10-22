@@ -1,4 +1,4 @@
-package io.wispforest.owo.mixin;
+package io.wispforest.owo.mixin.serialization;
 
 import net.minecraft.registry.RegistryOps;
 import org.spongepowered.asm.mixin.Mixin;

@@ -81,17 +81,17 @@ public class UwuTestStickItem extends Item {
     @Override
     public ActionResult use(World world, PlayerEntity user, Hand hand) {
         if (user.isSneaking()) {
-            if (world.isClient) return ActionResult.SUCCESS;
+            if (world.isClient()) return ActionResult.SUCCESS;
 
             Uwu.CHANNEL.serverHandle(user).send(new Uwu.OtherTestMessage(user.getBlockPos(), "based"));
 
-            var server = user.getServer();
+            var server = user.getEntityWorld().getServer();
             var teleportTo = world.getRegistryKey() == World.END ? server.getWorld(World.OVERWORLD) : server.getWorld(World.END);
 
             WorldOps.teleportToWorld((ServerPlayerEntity) user, teleportTo, new Vec3d(0, 128, 0));
 
         } else {
-            if (!world.isClient) return ActionResult.SUCCESS;
+            if (!world.isClient()) return ActionResult.SUCCESS;
 
             Uwu.CHANNEL.clientHandle().send(Uwu.MESSAGE);
 
@@ -105,11 +105,11 @@ public class UwuTestStickItem extends Item {
     @Override
     public ActionResult useOnBlock(ItemUsageContext context) {
         if (!context.getPlayer().isSneaking()) {
-            if (context.getWorld().isClient) Uwu.CHANNEL.clientHandle().send(new ThatPacket("stringnite"));
+            if (context.getWorld().isClient()) Uwu.CHANNEL.clientHandle().send(new ThatPacket("stringnite"));
 
             try {
                 var stack = context.getStack();
-                var data = stack.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT).getNbt()
+                var data = stack.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT).copyNbt()
                         .get(SerializationContext.attributes(RegistriesAttribute.of(context.getWorld().getRegistryManager())), KYED);
 
                 context.getPlayer().sendMessage(Text.literal("current: " + data), false);
@@ -129,7 +129,7 @@ public class UwuTestStickItem extends Item {
             return ActionResult.SUCCESS;
         }
 
-        if (context.getWorld().isClient) return ActionResult.SUCCESS;
+        if (context.getWorld().isClient()) return ActionResult.SUCCESS;
 
         final var breakStack = new ItemStack(Items.NETHERITE_PICKAXE);
 

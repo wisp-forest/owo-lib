@@ -9,6 +9,8 @@ import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.Delta;
 import io.wispforest.owo.ui.util.NinePatchTexture;
+import net.minecraft.client.gui.Click;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
@@ -228,19 +230,19 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
     }
 
     @Override
-    public boolean onMouseDown(double mouseX, double mouseY, int button) {
-        if (this.isInScrollbar(this.x + mouseX, this.y + mouseY)) {
-            super.onMouseDown(mouseX, mouseY, button);
+    public boolean onMouseDown(Click click, boolean doubled) {
+        if (this.isInScrollbar(this.x + click.x(), this.y + click.y())) {
+            super.onMouseDown(click, doubled);
             return true;
         } else {
-            return super.onMouseDown(mouseX, mouseY, button);
+            return super.onMouseDown(click, doubled);
         }
     }
 
     @Override
-    public boolean onMouseDrag(double mouseX, double mouseY, double deltaX, double deltaY, int button) {
-        if (!this.scrollbaring && !this.isInScrollbar(this.x + mouseX, this.y + mouseY))
-            return super.onMouseDrag(mouseX, mouseY, deltaX, deltaY, button);
+    public boolean onMouseDrag(Click click, double deltaX, double deltaY) {
+        if (!this.scrollbaring && !this.isInScrollbar(this.x + click.x(), this.y + click.y()))
+            return super.onMouseDrag(click, deltaX, deltaY);
 
         double delta = this.direction.choose(deltaX, deltaY);
         double selfSize = this.direction.sizeGetter.apply(this) - this.direction.insetGetter.apply(this.padding.get());
@@ -254,15 +256,15 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
     }
 
     @Override
-    public boolean onKeyPress(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == this.direction.lessKeycode) {
+    public boolean onKeyPress(KeyInput input) {
+        if (input.key() == this.direction.lessKeycode) {
             this.scrollBy(-10, false, true);
-        } else if (keyCode == this.direction.moreKeycode) {
+        } else if (input.key() == this.direction.moreKeycode) {
             this.scrollBy(10, false, true);
-        } else if (keyCode == GLFW.GLFW_KEY_PAGE_DOWN) {
+        } else if (input.key() == GLFW.GLFW_KEY_PAGE_DOWN) {
             this.scrollBy(this.direction.choose(this.width, this.height) * .8, false, true);
             this.lastScrollbarInteractTime = System.currentTimeMillis() + 1250;
-        } else if (keyCode == GLFW.GLFW_KEY_PAGE_UP) {
+        } else if (input.key() == GLFW.GLFW_KEY_PAGE_UP) {
             this.scrollBy(this.direction.choose(this.width, this.height) * -.8, false, true);
         }
 
@@ -270,7 +272,7 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
     }
 
     @Override
-    public boolean onMouseUp(double mouseX, double mouseY, int button) {
+    public boolean onMouseUp(Click click) {
         this.scrollbaring = false;
         return true;
     }

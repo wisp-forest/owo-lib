@@ -10,12 +10,10 @@ import io.wispforest.owo.util.Observable;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.Click;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 
@@ -48,9 +46,9 @@ public class LabelComponent extends BaseComponent {
 
     protected boolean scrolling = false;
 
-    protected Function<Style, Boolean> textClickHandler = style -> {
+    protected Function<@Nullable Style, Boolean> textClickHandler = style -> {
         OwoUIDrawContext.utilityScreen().captureLinkSource();
-        var success = OwoUIDrawContext.utilityScreen().handleTextClick(style);
+        var success = style != null && OwoUIDrawContext.utilityScreen().handleTextClick(style);
         OwoUIDrawContext.utilityScreen().getAndClearLinkSource();
 
         return success;
@@ -180,7 +178,7 @@ public class LabelComponent extends BaseComponent {
         return this.lineSpacing.get();
     }
 
-    public LabelComponent textClickHandler(Function<Style, Boolean> textClickHandler) {
+    public LabelComponent textClickHandler(Function<@Nullable Style, Boolean> textClickHandler) {
         this.textClickHandler = textClickHandler;
         return this;
     }
@@ -404,10 +402,11 @@ public class LabelComponent extends BaseComponent {
     }
 
     @Override
-    public boolean onMouseDown(double mouseX, double mouseY, int button) {
-        return this.textClickHandler.apply(this.styleAt((int) mouseX, (int) mouseY)) | super.onMouseDown(mouseX, mouseY, button);
+    public boolean onMouseDown(Click click, boolean doubled) {
+        return this.textClickHandler.apply(this.styleAt((int) click.x(), (int) click.y())) | super.onMouseDown(click, doubled);
     }
 
+    @Nullable
     protected Style styleAt(int mouseX, int mouseY) {
         return this.textRenderer.getTextHandler().getStyleAt(this.wrappedText.get(Math.min(mouseY / (this.lineHeight() + this.lineSpacing()), this.wrappedText.size() - 1)), mouseX);
     }

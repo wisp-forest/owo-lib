@@ -50,10 +50,10 @@ public class UwuClient implements ClientModInitializer {
         HandledScreens.register(Uwu.EPIC_SCREEN_HANDLER_TYPE, EpicHandledScreen::new);
 //        HandledScreens.register(EPIC_SCREEN_HANDLER_TYPE, EpicHandledModelScreen::new);
 
-        final var binding = new KeyBinding("key.uwu.hud_test", GLFW.GLFW_KEY_J, "misc");
+        final var binding = new KeyBinding("key.uwu.hud_test", GLFW.GLFW_KEY_J, KeyBinding.Category.MISC);
         KeyBindingHelper.registerKeyBinding(binding);
 
-        final var bindingButCooler = new KeyBinding("key.uwu.hud_test_two", GLFW.GLFW_KEY_K, "misc");
+        final var bindingButCooler = new KeyBinding("key.uwu.hud_test_two", GLFW.GLFW_KEY_K, KeyBinding.Category.MISC);
         KeyBindingHelper.registerKeyBinding(bindingButCooler);
 
         final var hudComponentId = Identifier.of("uwu", "test_element");
@@ -121,7 +121,7 @@ public class UwuClient implements ClientModInitializer {
                                 component.allowMouseRotation(true)
                                         .scale(.75f);
 
-                                component.mouseDown().subscribe((mouseX, mouseY, button) -> {
+                                component.mouseDown().subscribe((click, doubled) -> {
                                     UISounds.playInteractionSound();
                                     return true;
                                 });

@@ -12,8 +12,8 @@ import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.Observable;
 import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
@@ -83,22 +83,22 @@ public class SlimSliderComponent extends BaseComponent {
     }
 
     @Override
-    public boolean onMouseDown(double mouseX, double mouseY, int button) {
-        super.onMouseDown(mouseX, mouseY, button);
-        this.setValueFromMouse(mouseX, mouseY);
+    public boolean onMouseDown(Click click, boolean doubled) {
+        super.onMouseDown(click, doubled);
+        this.setValueFromMouse(click.x(), click.y());
         return true;
     }
 
     @Override
-    public boolean onMouseDrag(double mouseX, double mouseY, double deltaX, double deltaY, int button) {
-        super.onMouseDrag(mouseX, mouseY, deltaX, deltaY, button);
-        this.setValueFromMouse(mouseX, mouseY);
+    public boolean onMouseDrag(Click click, double deltaX, double deltaY) {
+        super.onMouseDrag(click, deltaX, deltaY);
+        this.setValueFromMouse(click.x(), click.y());
         return true;
     }
 
     @Override
-    public boolean onMouseUp(double mouseX, double mouseY, int button) {
-        super.onMouseUp(mouseX, mouseY, button);
+    public boolean onMouseUp(Click click) {
+        super.onMouseUp(click);
         this.slideEndEvents.sink().onSlideEnd();
         return true;
     }

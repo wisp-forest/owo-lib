@@ -7,13 +7,12 @@ import io.wispforest.owo.renderdoc.RenderDoc;
 import io.wispforest.owo.ui.util.CursorAdapter;
 import io.wispforest.owo.ui.util.UIErrorToast;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.Drawable;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.Selectable;
+import net.minecraft.client.gui.*;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import org.jetbrains.annotations.Nullable;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.function.BiFunction;
@@ -198,7 +197,7 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
 
             this.rootComponent.update(delta, mouseX, mouseY);
 
-            context.enableScissor(0, 0, window.getWidth(), window.getHeight());
+            context.enableScissor(0, 0, window.getFramebufferWidth(), window.getFramebufferHeight());
             this.rootComponent.draw(owoContext, mouseX, mouseY, partialTicks, delta);
             context.disableScissor();
 
@@ -253,13 +252,13 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        return this.rootComponent.onMouseDown(mouseX, mouseY, button);
+    public boolean mouseClicked(Click click, boolean doubled) {
+        return this.rootComponent.onMouseDown(click, doubled);
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        return this.rootComponent.onMouseUp(mouseX, mouseY, button);
+    public boolean mouseReleased(Click click) {
+        return this.rootComponent.onMouseUp(click);
     }
 
     @Override
@@ -268,32 +267,32 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        return this.rootComponent.onMouseDrag(mouseX, mouseY, deltaX, deltaY, button);
+    public boolean mouseDragged(Click click, double deltaX, double deltaY) {
+        return this.rootComponent.onMouseDrag(click, deltaX, deltaY);
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (Owo.DEBUG && keyCode == GLFW.GLFW_KEY_LEFT_SHIFT) {
-            if ((modifiers & GLFW.GLFW_MOD_CONTROL) != 0) {
+    public boolean keyPressed(KeyInput input) {
+        if (Owo.DEBUG && input.key() == GLFW.GLFW_KEY_LEFT_SHIFT) {
+            if (input.hasCtrl()) {
                 this.toggleInspector();
-            } else if ((modifiers & GLFW.GLFW_MOD_ALT) != 0) {
+            } else if (input.hasAlt()) {
                 this.toggleGlobalInspector();
             }
         }
 
-        if (Owo.DEBUG && keyCode == GLFW.GLFW_KEY_R && RenderDoc.isAvailable()) {
-            if ((modifiers & GLFW.GLFW_MOD_ALT) != 0 && (modifiers & GLFW.GLFW_MOD_CONTROL) != 0) {
+        if (Owo.DEBUG && input.key() == GLFW.GLFW_KEY_R && RenderDoc.isAvailable()) {
+            if (input.hasAlt() && input.hasCtrl()) {
                 this.captureFrame = true;
             }
         }
 
-        return this.rootComponent.onKeyPress(keyCode, scanCode, modifiers);
+        return this.rootComponent.onKeyPress(input);
     }
 
     @Override
-    public boolean charTyped(char chr, int modifiers) {
-        return this.rootComponent.onCharTyped(chr, modifiers);
+    public boolean charTyped(CharInput input) {
+        return this.rootComponent.onCharTyped(input);
     }
 
     @Override

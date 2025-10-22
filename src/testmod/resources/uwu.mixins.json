@@ -5,7 +5,8 @@
   "compatibilityLevel": "JAVA_16",
   "mixins": [],
   "client": [
-    "TitleScreenMixin"
+    "TitleScreenMixin",
+    "RenderPassImplMixin"
   ],
   "injectors": {
     "defaultRequire": 1

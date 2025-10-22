@@ -21,6 +21,7 @@ import io.wispforest.owo.util.ReflectionUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
@@ -365,8 +366,8 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                 }
             });
 
-            searchField.keyPress().subscribe((keyCode, scanCode, modifiers) -> {
-                if (keyCode != GLFW.GLFW_KEY_ENTER && keyCode != GLFW.GLFW_KEY_KP_ENTER) return false;
+            searchField.keyPress().subscribe((input) -> {
+                if (!input.isEnter()) return false;
 
                 var query = searchField.getText().toLowerCase(Locale.ROOT);
                 if (query.isBlank()) return false;
@@ -554,7 +555,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
             sections.forEach((component, text) -> {
                 final var label = this.model.expandTemplate(LabelComponent.class, "section-overlay-label", Map.of("section-name", text));
 
-                label.mouseDown().subscribe((mouseX, mouseY, button) -> {
+                label.mouseDown().subscribe((click, doubled) -> {
                     panelScroll.scrollTo(component);
                     UISounds.playInteractionSound();
                     return true;
@@ -567,8 +568,8 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
 
             panelContainer.child(sectionState.closeButton);
 
-            panelContainer.mouseDown().subscribe((mouseX, mouseY, button) -> {
-                if ((sectionsOnRight && mouseX > panelContainer.width() - 10) || (!sectionsOnRight && mouseX < 10)) {
+            panelContainer.mouseDown().subscribe((click, button) -> {
+                if ((sectionsOnRight && click.x() > panelContainer.width() - 10) || (!sectionsOnRight && click.x() < 10)) {
                     sectionState.togglePanel();
 
                     return true;
@@ -683,15 +684,15 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == GLFW.GLFW_KEY_F && ((modifiers & GLFW.GLFW_MOD_CONTROL) != 0)) {
+    public boolean keyPressed(KeyInput input) {
+        if (input.key() == GLFW.GLFW_KEY_F && input.hasCtrl()) {
             this.uiAdapter.rootComponent.focusHandler().focus(
                     this.uiAdapter.rootComponent.childById(Component.class, "search-field"),
                     Component.FocusSource.MOUSE_CLICK
             );
             return true;
         } else {
-            return super.keyPressed(keyCode, scanCode, modifiers);
+            return super.keyPressed(input);
         }
     }
 

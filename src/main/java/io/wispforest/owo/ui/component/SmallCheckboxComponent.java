@@ -13,7 +13,8 @@ import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.Observable;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.gui.Click;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
@@ -68,10 +69,10 @@ public class SmallCheckboxComponent extends BaseComponent {
     }
 
     @Override
-    public boolean onMouseDown(double mouseX, double mouseY, int button) {
-        boolean result = super.onMouseDown(mouseX, mouseY, button);
+    public boolean onMouseDown(Click click, boolean doubled) {
+        boolean result = super.onMouseDown(click, doubled);
 
-        if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+        if (click.isLeft()) {
             this.toggle();
             return true;
         }
@@ -80,10 +81,10 @@ public class SmallCheckboxComponent extends BaseComponent {
     }
 
     @Override
-    public boolean onKeyPress(int keyCode, int scanCode, int modifiers) {
-        boolean result = super.onKeyPress(keyCode, scanCode, modifiers);
+    public boolean onKeyPress(KeyInput input) {
+        boolean result = super.onKeyPress(input);
 
-        if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER || keyCode == GLFW.GLFW_KEY_SPACE) {
+        if (input.isEnterOrSpace()) {
             this.toggle();
             return true;
         }

@@ -5,6 +5,9 @@ import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.core.Sizing;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
+import net.minecraft.client.gui.Click;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
 
 public class ReiWidgetComponent extends BaseComponent {
 
@@ -73,15 +76,15 @@ public class ReiWidgetComponent extends BaseComponent {
     }
 
     @Override
-    public boolean onMouseDown(double mouseX, double mouseY, int button) {
-        return this.widget.mouseClicked(this.x + mouseX, this.y + mouseY, button)
-                | super.onMouseDown(mouseX, mouseY, button);
+    public boolean onMouseDown(Click click, boolean doubled) {
+        return this.widget.mouseClicked(new Click(this.x + click.x(), this.y + click.y(), click.buttonInfo()), doubled)
+                | super.onMouseDown(click, doubled);
     }
 
     @Override
-    public boolean onMouseUp(double mouseX, double mouseY, int button) {
-        return this.widget.mouseReleased(this.x + mouseX, this.y + mouseY, button)
-                | super.onMouseUp(mouseX, mouseY, button);
+    public boolean onMouseUp(Click click) {
+        return this.widget.mouseReleased(new Click(this.x + click.x(), this.y + click.y(), click.buttonInfo()))
+                | super.onMouseUp(click);
     }
 
     @Override
@@ -91,21 +94,21 @@ public class ReiWidgetComponent extends BaseComponent {
     }
 
     @Override
-    public boolean onMouseDrag(double mouseX, double mouseY, double deltaX, double deltaY, int button) {
-        return this.widget.mouseDragged(this.x + mouseX, this.y + mouseY, button, deltaX, deltaY)
-                | super.onMouseDrag(mouseX, mouseY, deltaX, deltaY, button);
+    public boolean onMouseDrag(Click click, double deltaX, double deltaY) {
+        return this.widget.mouseDragged(new Click(this.x + click.x(), this.y + click.y(), click.buttonInfo()), deltaX, deltaY)
+                | super.onMouseDrag(click, deltaX, deltaY);
     }
 
     @Override
-    public boolean onCharTyped(char chr, int modifiers) {
-        return this.widget.charTyped(chr, modifiers)
-                | super.onCharTyped(chr, modifiers);
+    public boolean onCharTyped(CharInput input) {
+        return this.widget.charTyped(input)
+                | super.onCharTyped(input);
     }
 
     @Override
-    public boolean onKeyPress(int keyCode, int scanCode, int modifiers) {
-        return this.widget.keyPressed(keyCode, scanCode, modifiers)
-                | super.onKeyPress(keyCode, scanCode, modifiers);
+    public boolean onKeyPress(KeyInput input) {
+        return this.widget.keyPressed(input)
+                | super.onKeyPress(input);
     }
 
     @Override

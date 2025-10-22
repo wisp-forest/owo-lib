@@ -22,7 +22,7 @@ public class ProcessBlockEntity extends BlockEntity {
     @Override
     public void setWorld(World world) {
         super.setWorld(world);
-        PROCESS.configureExecutor(this.executor, world.isClient);
+        PROCESS.configureExecutor(this.executor, world.isClient());
     }
 
     public void tick() {

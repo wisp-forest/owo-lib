@@ -61,6 +61,21 @@ public class OwoUIDrawContext extends DrawContext {
         return UtilityScreen.get();
     }
 
+    public boolean intersectsScissor(PositionedRectangle other) {
+        other = other.transform(getMatrixStack());
+
+        var rect = this.scissorStack.peekLast();
+
+        if (rect == null) return true;
+
+        var pos = rect.position();
+
+        return other.x() < pos.x() + rect.width()
+            && other.x() + other.width() >= pos.x()
+            && other.y() < pos.y() + rect.height()
+            && other.y() + other.height() >= pos.y();
+    }
+
     public void drawRectOutline(int x, int y, int width, int height, int color) {
         drawRectOutline(RenderPipelines.GUI, x, y, width, height, color);
     }
@@ -303,31 +318,32 @@ public class OwoUIDrawContext extends DrawContext {
 
                 int inspectorX = child.x() + 1;
                 int inspectorY = child.y() + child.height() + child.margins().get().bottom() + 1;
-                int inspectorHeight = textRenderer.fontHeight * 2 + 4;
+
+                final var message = Text.literal(child.getClass().getSimpleName())
+                        .append(child.id() == null ? "\n" : " '" + child.id() + "'\n")
+                        .append(child.inspectorDescriptor());
+                final var wrappedMessage = textRenderer.wrapLines(message, client.getWindow().getScaledWidth() + 4);
+                int inspectorWidth = wrappedMessage.stream().mapToInt(textRenderer::getWidth).max().orElse(30);
+                int inspectorHeight = textRenderer.fontHeight * wrappedMessage.size() + 4;
 
                 if (inspectorY > client.getWindow().getScaledHeight() - inspectorHeight) {
                     inspectorY -= child.fullSize().height() + inspectorHeight + 1;
-                    if (inspectorY < 0) inspectorY = 1;
                     if (child instanceof ParentComponent parentComponent) {
                         inspectorX += parentComponent.padding().get().left();
                         inspectorY += parentComponent.padding().get().top();
                     }
                 }
+                if (inspectorY < 0) inspectorY = 1;
 
-                final var nameText = Text.of(child.getClass().getSimpleName() + (child.id() != null ? " '" + child.id() + "'" : ""));
-                final var descriptor = Text.literal(child.x() + "," + child.y() + " (" + child.width() + "," + child.height() + ")"
-                    + " <" + margins.top() + "," + margins.bottom() + "," + margins.left() + "," + margins.right() + "> ");
-                if (child instanceof ParentComponent parentComponent) {
-                    var padding = parentComponent.padding().get();
-                    descriptor.append(" >" + padding.top() + "," + padding.bottom() + "," + padding.left() + "," + padding.right() + "<");
+                if (inspectorX > client.getWindow().getScaledWidth() - inspectorWidth) {
+                    inspectorX = client.getWindow().getScaledWidth() - inspectorWidth - 2;
                 }
+                if (inspectorX < 0) inspectorX = 1;
 
-                int width = Math.max(textRenderer.getWidth(nameText), textRenderer.getWidth(descriptor));
-                this.fill(pipeline, inspectorX, inspectorY, inspectorX + width + 3, inspectorY + inspectorHeight, 0xA7000000);
-                this.drawRectOutline(pipeline, inspectorX, inspectorY, width + 3, inspectorHeight, 0xA7000000);
+                this.fill(pipeline, inspectorX, inspectorY, inspectorX + inspectorWidth + 3, inspectorY + inspectorHeight, 0xA7000000);
+                this.drawRectOutline(pipeline, inspectorX, inspectorY, inspectorWidth + 3, inspectorHeight, 0xA7000000);
 
-                this.drawText(textRenderer, nameText, inspectorX + 2, inspectorY + 2, 0xFFFFFFFF, false);
-                this.drawText(textRenderer, descriptor, inspectorX + 2, inspectorY + textRenderer.fontHeight + 2, 0xFFFFFFFF, false);
+                this.drawWrappedText(textRenderer, message, inspectorX + 2, inspectorY + 2, inspectorWidth, 0xFFFFFFFF, false);
             }
         }
     }
@@ -389,7 +405,7 @@ public class OwoUIDrawContext extends DrawContext {
          * or {@link #setLinkSource(Screen)} must be called prior to invoking this method
          */
         @Override
-        public boolean handleTextClick(@Nullable Style style) {
+        public boolean handleTextClick(Style style) {
             return super.handleTextClick(style);
         }
 

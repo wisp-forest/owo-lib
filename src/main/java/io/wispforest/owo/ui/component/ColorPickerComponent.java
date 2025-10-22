@@ -8,6 +8,7 @@ import io.wispforest.owo.ui.renderstate.GradientQuadElementRenderState;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.Observable;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.ScreenPos;
 import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.util.math.MathHelper;
@@ -93,24 +94,24 @@ public class ColorPickerComponent extends BaseComponent {
     }
 
     @Override
-    public boolean onMouseDown(double mouseX, double mouseY, int button) {
-        this.lastClicked = this.showAlpha && mouseX >= this.alphaSelectorX()
+    public boolean onMouseDown(Click click, boolean doubled) {
+        this.lastClicked = this.showAlpha && click.x() >= this.alphaSelectorX()
                 ? Section.ALPHA_SELECTOR
-                : mouseX > this.hueSelectorX()
+                : click.x() > this.hueSelectorX()
                 ? Section.HUE_SELECTOR
                 : Section.COLOR_AREA;
 
-        this.updateFromMouse(mouseX, mouseY);
+        this.updateFromMouse(click.x(), click.y());
 
-        super.onMouseDown(mouseX, mouseY, button);
+        super.onMouseDown(click, doubled);
         return true;
     }
 
     @Override
-    public boolean onMouseDrag(double mouseX, double mouseY, double deltaX, double deltaY, int button) {
-        this.updateFromMouse(mouseX, mouseY);
+    public boolean onMouseDrag(Click click, double deltaX, double deltaY) {
+        this.updateFromMouse(click.x(), click.y());
 
-        super.onMouseDrag(mouseX, mouseY, deltaX, deltaY, button);
+        super.onMouseDrag(click, deltaX, deltaY);
         return true;
     }
 

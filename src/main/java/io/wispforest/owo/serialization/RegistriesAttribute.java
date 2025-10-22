@@ -1,7 +1,7 @@
 package io.wispforest.owo.serialization;
 
 import io.wispforest.endec.SerializationAttribute;
-import io.wispforest.owo.mixin.CachedRegistryInfoGetterAccessor;
+import io.wispforest.owo.mixin.serialization.CachedRegistryInfoGetterAccessor;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.RegistryOps;
 import org.jetbrains.annotations.ApiStatus;
