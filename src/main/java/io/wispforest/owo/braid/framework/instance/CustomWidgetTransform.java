@@ -76,7 +76,7 @@ public class CustomWidgetTransform extends WidgetTransform {
         var vec2 = new Vector2f(vec.x, vec.y);
         vec2.mulPosition(this.toParent());
 
-        vec.set(vec2.x, vec.y, vec.z);
+        vec.set(vec2.x, vec2.y, vec.z);
     }
 
     @Override
@@ -84,7 +84,7 @@ public class CustomWidgetTransform extends WidgetTransform {
         var vec2 = new Vector2f(vec.x, vec.y);
         vec2.mulPosition(this.toWidget());
 
-        vec.set(vec2.x, vec.y, vec.z);
+        vec.set(vec2.x, vec2.y, vec.z);
     }
 
     @Override

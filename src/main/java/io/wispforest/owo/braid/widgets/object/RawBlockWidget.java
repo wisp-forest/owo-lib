@@ -1,4 +1,4 @@
-package io.wispforest.owo.braid.widgets;
+package io.wispforest.owo.braid.widgets.object;
 
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.core.BraidDrawContext;
@@ -26,28 +26,16 @@ import java.util.OptionalDouble;
 import java.util.function.Consumer;
 
 /// A widget that renders a [BlockState] and optionally a [BlockEntity]
-public class BlockWidget extends LeafInstanceWidget {
+public class RawBlockWidget extends LeafInstanceWidget {
 
     public final BlockState blockState;
     public final @Nullable BlockEntity blockEntity;
     public final @Nullable Consumer<Matrix4f> transform;
 
-    public BlockWidget(BlockState blockState, @Nullable BlockEntity blockEntity, @Nullable Consumer<Matrix4f> transform) {
+    public RawBlockWidget(BlockState blockState, @Nullable BlockEntity blockEntity, @Nullable Consumer<Matrix4f> transform) {
         this.blockState = blockState;
         this.blockEntity = blockEntity;
         this.transform = transform;
-    }
-
-    public BlockWidget(BlockState blockState, @Nullable BlockEntity blockEntity) {
-        this(blockState, blockEntity, null);
-    }
-
-    public BlockWidget(BlockState blockState, Consumer<Matrix4f> transform) {
-        this(blockState, null, transform);
-    }
-
-    public BlockWidget(BlockState blockState) {
-        this(blockState, null, null);
     }
 
     @Override
@@ -57,33 +45,11 @@ public class BlockWidget extends LeafInstanceWidget {
 
     // ---
 
-    public static @Nullable BlockEntity prepareBlockEntity(BlockState state, @Nullable BlockEntity blockEntity, @Nullable NbtCompound nbt) {
-        var client = MinecraftClient.getInstance();
-        if (blockEntity == null && state.hasBlockEntity()) {
-            blockEntity = ((BlockEntityProvider)state.getBlock()).createBlockEntity(client.player.getBlockPos(), state);
-        }
-
-        if (blockEntity == null) {
-            return null;
-        }
-
-        ((BlockEntityAccessor) blockEntity).owo$setCachedState(state);
-        blockEntity.setWorld(client.world);
-
-        if (nbt != null) {
-            blockEntity.read(NbtReadView.create(new ErrorReporter.Logging(Owo.LOGGER), client.world.getRegistryManager(), nbt));
-        }
-
-        return blockEntity;
-    }
-
-    // ---
-
-    public static class Instance extends LeafWidgetInstance<BlockWidget> {
+    public static class Instance extends LeafWidgetInstance<RawBlockWidget> {
 
         public static final Size DEFAULT_SIZE = Size.square(16);
 
-        public Instance(BlockWidget widget) {
+        public Instance(RawBlockWidget widget) {
             super(widget);
         }
 

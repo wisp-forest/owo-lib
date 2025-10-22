@@ -12,7 +12,6 @@ import net.minecraft.client.gui.render.state.GuiRenderState;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix3x2fStack;
 import org.joml.Matrix3x2fc;
-import org.joml.Vector2d;
 
 import java.util.function.Consumer;
 

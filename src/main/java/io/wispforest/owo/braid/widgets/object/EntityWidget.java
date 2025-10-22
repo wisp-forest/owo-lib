@@ -1,4 +1,4 @@
-package io.wispforest.owo.braid.widgets;
+package io.wispforest.owo.braid.widgets.object;
 
 import io.wispforest.owo.braid.core.BraidDrawContext;
 import io.wispforest.owo.braid.core.Constraints;

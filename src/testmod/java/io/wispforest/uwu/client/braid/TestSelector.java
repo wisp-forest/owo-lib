@@ -12,7 +12,10 @@ import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.util.BraidToast;
-import io.wispforest.owo.braid.widgets.*;
+import io.wispforest.owo.braid.widgets.Dialog;
+import io.wispforest.owo.braid.widgets.Marquee;
+import io.wispforest.owo.braid.widgets.Navigator;
+import io.wispforest.owo.braid.widgets.SpriteWidget;
 import io.wispforest.owo.braid.widgets.animated.AnimatedAlign;
 import io.wispforest.owo.braid.widgets.animated.AnimatedBox;
 import io.wispforest.owo.braid.widgets.animated.AnimatedPadding;
@@ -34,6 +37,9 @@ import io.wispforest.owo.braid.widgets.grid.Grid;
 import io.wispforest.owo.braid.widgets.intents.*;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
+import io.wispforest.owo.braid.widgets.object.BlockWidget;
+import io.wispforest.owo.braid.widgets.object.EntityWidget;
+import io.wispforest.owo.braid.widgets.object.ItemStackWidget;
 import io.wispforest.owo.braid.widgets.overlay.Overlay;
 import io.wispforest.owo.braid.widgets.overlay.OverlayEntryBuilder;
 import io.wispforest.owo.braid.widgets.owoui.OwoUIWidget;
@@ -62,6 +68,7 @@ import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.EntityComponent;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.core.Sizing;
+import io.wispforest.owo.ui.util.Delta;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.ViewerStack;
 import io.wispforest.owo.util.Wisdom;
@@ -76,6 +83,7 @@ import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
@@ -88,6 +96,7 @@ import net.minecraft.util.Colors;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.Nullable;
@@ -97,6 +106,7 @@ import java.math.BigInteger;
 import java.net.URI;
 import java.time.Duration;
 import java.util.*;
+import java.util.function.IntConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -105,7 +115,26 @@ import static io.wispforest.uwu.client.braid.SliderTests.formatDouble;
 public class TestSelector extends StatefulWidget {
 
     public enum Tests {
-        COUNTER, FLEX, DRAGGING, SPLIT_PANE, SLIDERS, TEXT_INPUT, BURNING_CHYZ, SCROLLING, INPUT, CYCLING, VANILLA, SHARED_STATE, STACKS, GRIDS, CONTRIBUTORS, ANIMATIONS, NAVIGATOR, OVERLAY, TEXT
+        COUNTER,
+        FLEX,
+        DRAGGING,
+        SPLIT_PANE,
+        SLIDERS,
+        TEXT_INPUT,
+        BURNING_CHYZ,
+        SCROLLING,
+        INPUT,
+        CYCLING,
+        VANILLA,
+        SHARED_STATE,
+        STACKS,
+        GRIDS,
+        CONTRIBUTORS,
+        ANIMATIONS,
+        NAVIGATOR,
+        OVERLAY,
+        TEXT,
+        SPINNY_GHAST
     }
 
     @Override
@@ -198,6 +227,7 @@ public class TestSelector extends StatefulWidget {
                                     case NAVIGATOR -> new NavigatorTest();
                                     case OVERLAY -> new OverlayTest();
                                     case TEXT -> new TextTest();
+                                    case SPINNY_GHAST -> new SpinnyGhastTest();
                                     case null -> new Center(new Label(Text.literal("select a test")));
                                 }
                             )
@@ -2259,6 +2289,201 @@ public class TestSelector extends StatefulWidget {
                     new Box(Color.WHITE),
                     this.widget().pixelSize
                 );
+            }
+        }
+    }
+
+    public static class SpinnyGhastTest extends StatefulWidget {
+        @Override
+        public WidgetState<SpinnyGhastTest> createState() {
+            return new State();
+        }
+
+        public static class State extends WidgetState<SpinnyGhastTest> {
+
+            private List<Entity> entities;
+            private int selectedEntityIdx = 0;
+
+            private double pitch = 35;
+            private double pitchDelta = 0;
+
+            private double yaw = -45;
+            private double yawDelta = 0;
+
+            private boolean releasedLate = false;
+
+            @Override
+            public void init() {
+                this.entities = Stream.of(
+                    EntityType.HAPPY_GHAST,
+                    EntityType.ALLAY,
+                    EntityType.COW,
+                    EntityType.CREAKING,
+                    EntityType.BREEZE,
+                    EntityType.COPPER_GOLEM
+                ).<Entity>map(
+                    entityType -> entityType.create(MinecraftClient.getInstance().world, SpawnReason.MOB_SUMMONED)
+                ).toList();
+            }
+
+            private void animate(Duration delta) {
+                var seconds = delta.toNanos() / (double) Duration.ofSeconds(1).toNanos();
+                this.pitch += this.pitchDelta * seconds * 10;
+                this.yaw += this.yawDelta * seconds * 10;
+
+                this.pitchDelta += Delta.compute(this.pitchDelta, 0, seconds * .5);
+                this.yawDelta += Delta.compute(this.yawDelta, 0, seconds * .5);
+
+                if (Math.abs(this.pitchDelta) > 1e-4 || Math.abs(this.yawDelta) > 1e-4) {
+                    this.scheduleAnimationCallback(this::animate);
+                }
+            }
+
+            @Override
+            public Widget build(BuildContext context) {
+                var random = Random.create(123);
+
+                return new Row(
+                    MainAxisAlignment.CENTER,
+                    CrossAxisAlignment.CENTER,
+                    new Padding(Insets.all(10)),
+                    List.of(
+                        new VerticalCarouselThing(
+                            this.selectedEntityIdx,
+                            idx -> this.setState(() -> this.selectedEntityIdx = idx),
+                            Size.square(64), this.entities.stream().<Widget>map(entity -> new EntityWidget(.75, entity, null)).toList()),
+                        new MouseArea(
+                            widget -> widget
+                                .clickCallback((x, y, button, modifiers) -> {
+                                    this.yawDelta = 0;
+                                    this.pitchDelta = 0;
+
+                                    return true;
+                                })
+                                .dragCallback((x, y, dx, dy) -> {
+                                    this.yaw += dx * .5;
+                                    this.pitch += dy * .5;
+
+                                    this.yawDelta = dx;
+                                    this.pitchDelta = dy;
+
+                                    this.releasedLate = false;
+                                    this.scheduleDelayedCallback(Duration.ofMillis(200), () -> {
+                                        this.releasedLate = true;
+                                    });
+                                })
+                                .dragEndCallback(() -> {
+                                    if (this.releasedLate) return;
+                                    this.animate(Duration.ZERO);
+                                }),
+                            new Sized(
+                                Size.square(400),
+                                new EntityWidget(
+                                    .75,
+                                    this.entities.get(this.selectedEntityIdx),
+                                    widget -> widget
+                                        .displayMode(EntityWidget.DisplayMode.NONE)
+                                        .transform(matrix4f -> {
+                                            matrix4f.rotateX((float) Math.toRadians(this.pitch));
+                                            matrix4f.rotateY((float) Math.toRadians(this.yaw));
+                                        })
+                                )
+                            )
+                        )
+                    )
+                );
+            }
+        }
+
+        public static class VerticalCarouselThing extends StatefulWidget {
+
+            public final int selectedIndex;
+            public final IntConsumer onChanged;
+            public final Size itemSize;
+            public final List<Widget> children;
+
+            public VerticalCarouselThing(int selectedIndex, IntConsumer onChanged, Size itemSize, List<Widget> children) {
+                this.selectedIndex = selectedIndex;
+                this.onChanged = onChanged;
+                this.itemSize = itemSize;
+                this.children = children;
+            }
+
+            @Override
+            public WidgetState<VerticalCarouselThing> createState() {
+                return new State();
+            }
+
+            public static class State extends WidgetState<VerticalCarouselThing> {
+
+                @Override
+                public Widget build(BuildContext context) {
+                    var displayChildren = new ArrayList<Widget>();
+                    displayChildren.add(new Panel(Panel.VANILLA_INSET));
+
+                    var offset = -this.widget().selectedIndex * this.widget().itemSize.height() / 2;
+                    offset -= this.widget().itemSize.height() / 4;
+
+                    for (var i = 0; i < this.widget().children.size(); i++) {
+                        var thisOffset = (float) offset;
+
+                        var scale = i == this.widget().selectedIndex ? 1 : .5f;
+                        offset += this.widget().itemSize.height() * scale;
+
+                        if (scale == 1) {
+                            //noinspection lossy-conversions
+                            thisOffset += this.widget().itemSize.height() / 4f;
+                        }
+
+                        var elementIndex = i;
+                        displayChildren.add(
+                            new Transform(
+                                new Matrix3x2f()
+                                    .translate(0f, thisOffset)
+                                    .scale(scale, scale),
+                                Interactable.primary(
+                                    () -> this.widget().onChanged.accept(elementIndex),
+                                    this.widget().children.get(i)
+                                )
+                            ));
+                    }
+
+                    return new MouseArea(
+                        widget -> widget
+                            .scrollCallback((horizontal, vertical) -> {
+                                if (vertical == 0) return false;
+                                this.setState(() -> {
+                                    this.widget().onChanged.accept(MathHelper.clamp(
+                                        this.widget().selectedIndex - (int) Math.signum(vertical),
+                                        0,
+                                        this.widget().children.size() - 1
+                                    ));
+                                });
+
+                                return true;
+                            }),
+                        new Row(
+                            MainAxisAlignment.CENTER,
+                            CrossAxisAlignment.CENTER,
+                            new Sized(
+                                Size.of(18, this.widget().itemSize.height()),
+                                new Grid(
+                                    LayoutAxis.HORIZONTAL,
+                                    2,
+                                    Grid.CellFit.tight(),
+                                    new MessageButton(Text.literal("↑"), this.widget().selectedIndex > 0 ? () -> this.widget().onChanged.accept(this.widget().selectedIndex - 1) : null),
+                                    new MessageButton(Text.literal("↓"), this.widget().selectedIndex < this.widget().children.size() - 1 ? () -> this.widget().onChanged.accept(this.widget().selectedIndex + 1) : null)
+                                )
+                            ),
+                            new Sized(
+                                this.widget().itemSize,
+                                new Stack(
+                                    displayChildren
+                                )
+                            )
+                        )
+                    );
+                }
             }
         }
     }
