@@ -7,6 +7,7 @@ import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.core.Size;
 import io.wispforest.owo.ui.core.Sizing;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Range;
 import org.lwjgl.glfw.GLFW;
@@ -68,14 +69,14 @@ public class SelectableScrollContainer extends ScrollContainer<FlowLayout> {
     }
 
     @Override
-    public boolean onKeyPress(int keyCode, int scanCode, int modifiers) {
-        if (this.targetComponent != null && keyCode == GLFW.GLFW_KEY_ENTER) {
+    public boolean onKeyPress(KeyInput input) {
+        if (this.targetComponent != null && input.isEnter()) {
             this.focusHandler().focus(this.targetComponent, FocusSource.KEYBOARD_CYCLE);
 
-            return this.targetComponent.onKeyPress(keyCode, scanCode, modifiers);
+            return this.targetComponent.onKeyPress(input);
         }
 
-        return super.onKeyPress(keyCode, scanCode, modifiers);
+        return super.onKeyPress(input);
     }
 
     @Override

@@ -63,7 +63,7 @@ public abstract class OrderedOptionContainer<C, T> extends CollapsibleContainer 
 
         if (!this.isDetached) {
             var addLabel = uiModel.expandTemplate(LabelComponent.class, "collection-add-label", Map.of()).<LabelComponent>configure(label -> {
-                label.mouseDown().subscribe((mouseX, mouseY, button) -> {
+                label.mouseDown().subscribe((click, button) -> {
                     UISounds.playInteractionSound();
 
                     var index = this.backingList.size();
@@ -145,7 +145,7 @@ public abstract class OrderedOptionContainer<C, T> extends CollapsibleContainer 
             label.hoverText(null);
             label.cursorStyle(CursorStyle.NONE);
         } else {
-            label.mouseDown().subscribe((mouseX, mouseY, button) -> {
+            label.mouseDown().subscribe((click, button) -> {
                 this.backingList.remove(optionIndex);
                 this.collapsibleChildren.remove(optionIndex);
                 this.backingProviders.remove(optionIndex);

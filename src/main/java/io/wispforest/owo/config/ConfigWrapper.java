@@ -74,7 +74,7 @@ public abstract class ConfigWrapper<C> {
 
         if (KNOWN_CONFIG_INSTANCES.containsKey(this.id)) {
             throw new IllegalStateException("Config name '" + this.id + "'"
-                    + " is already taken an by instance of class '" + KNOWN_CONFIG_INSTANCES.get(this.id).getClass().getName() + "'");
+                    + " is already taken by an instance of class '" + KNOWN_CONFIG_INSTANCES.get(this.id).getClass().getName() + "'");
         } else {
             KNOWN_CONFIG_INSTANCES.put(this.id, this);
         }

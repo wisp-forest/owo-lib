@@ -8,8 +8,11 @@ import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.WrappedMatrix2fStack;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.input.AbstractInput;
+import net.minecraft.client.input.MouseInput;
 import net.minecraft.text.PlainTextContent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -69,14 +72,14 @@ public abstract class IncrementButton extends ButtonComponent {
     }
 
     @Override
-    public boolean onMouseDown(double mouseX, double mouseY, int button) {
-        this.wasRightClicked = button == GLFW.GLFW_MOUSE_BUTTON_RIGHT;
-        return super.onMouseDown(mouseX, mouseY, button);
+    public boolean onMouseDown(Click click, boolean doubled) {
+        this.wasRightClicked = click.button() == GLFW.GLFW_MOUSE_BUTTON_RIGHT;
+        return super.onMouseDown(click, doubled);
     }
 
     @Override
-    protected boolean isValidClickButton(int button) {
-        return button == GLFW.GLFW_MOUSE_BUTTON_RIGHT || super.isValidClickButton(button);
+    protected boolean isValidClickButton(MouseInput input) {
+        return input.button() == GLFW.GLFW_MOUSE_BUTTON_RIGHT || super.isValidClickButton(input);
     }
 
     @Override
@@ -111,8 +114,8 @@ public abstract class IncrementButton extends ButtonComponent {
     }
 
     @Override
-    public void onPress() {
-        if (this.wasRightClicked || Screen.hasShiftDown()) {
+    public void onPress(AbstractInput input) {
+        if (this.wasRightClicked || input.hasShift()) {
             this.currentValue--;
             if (this.currentValue < 0) this.currentValue += this.maxValue;
         } else {
@@ -122,7 +125,7 @@ public abstract class IncrementButton extends ButtonComponent {
 
         this.setMessage(buildMessage());
 
-        super.onPress();
+        super.onPress(input);
     }
 
     public void rollbackPress() {

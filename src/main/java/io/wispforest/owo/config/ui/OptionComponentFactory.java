@@ -221,7 +221,7 @@ public interface OptionComponentFactory<T> {
                                 component.color(unhoveredColor);
                             });
 
-                            component.mouseDown().subscribe((mouseX, mouseY, button) -> {
+                            component.mouseDown().subscribe((click, bl) -> {
                                 var client = MinecraftClient.getInstance();
 
                                 client.keyboard.setClipboard(translationKey);

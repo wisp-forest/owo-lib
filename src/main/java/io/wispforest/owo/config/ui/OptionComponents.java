@@ -59,7 +59,7 @@ public class OptionComponents {
 
             result.optionProvider().onChanged().subscribe(value -> box.color(valueGetter.get()));
 
-            box.mouseDown().subscribe((mouseX, mouseY, button) -> {
+            box.mouseDown().subscribe((click, button) -> {
                 ((FlowLayout) box.root()).child(Containers.overlay(
                         model.expandTemplate(
                                 FlowLayout.class,
@@ -80,7 +80,7 @@ public class OptionComponents {
                                 flowLayout.parent().remove();
                             });
                         })
-                ).zIndex(100));
+                ));
 
                 return true;
             });

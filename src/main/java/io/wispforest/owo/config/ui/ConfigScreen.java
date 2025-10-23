@@ -247,7 +247,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
 
                     titles.child(titleHolder);
 
-                    titleHolder.mouseDown().subscribe((mouseX, mouseY, button) -> {
+                    titleHolder.mouseDown().subscribe((click, button) -> {
                         if (ConfigScreenProviders.safelyOpenConfigScreen(this.config.id().withPath(configName), parent, this)) {
                             UISounds.playButtonSound();
 
@@ -257,8 +257,8 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                         return false;
                     });
 
-                    titleHolder.keyPress().subscribe((keyCode, scanCode, modifiers) -> {
-                        if (keyCode == GLFW.GLFW_KEY_ENTER) {
+                    titleHolder.keyPress().subscribe((keyInput) -> {
+                        if (keyInput.isEnter()) {
                             if (ConfigScreenProviders.safelyOpenConfigScreen(this.config.id().withPath(configName), parent, this)) {
                                 UISounds.playButtonSound();
 
@@ -535,8 +535,8 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
             var sectionState = new SectionPanelState(overlay, sectionsOnRight);
 
             overlay.configure((FlowLayout overlayComponent) -> {
-                overlayComponent.mouseDown().subscribe((mouseX, mouseY, button) -> true);
-                overlayComponent.mouseUp().subscribe((mouseX, mouseY, button) -> true);
+                overlayComponent.mouseDown().subscribe((click, bl) -> true);
+                overlayComponent.mouseUp().subscribe((click) -> true);
 
                 overlayComponent.componentUpdate().subscribe((delta, mouseX, mouseY) -> {
                     if (!overlayComponent.isInBoundingBox(mouseX, mouseY) && !sectionState.isPanelMoving && sectionState.isPanelOpened) {
@@ -544,8 +544,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                     }
                 });
 
-                overlayComponent.positioning(Positioning.relative(sectionsOnRight ? 100 : 0, 0))
-                        .zIndex(10);
+                overlayComponent.positioning(Positioning.relative(sectionsOnRight ? 100 : 0, 0));
             });
 
             var panelScroll = rootComponent.childById(ScrollContainer.class, "option-panel-scroll");
