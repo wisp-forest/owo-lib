@@ -18,6 +18,10 @@
       braid: [
         {translate: "text.uwu.braid"},
         {text: " (chyz tried)", color: "#FFFFFF"}
+      ],
+      braid_samples: [
+        {translate: "text.uwu.braid"},
+        {text: " samples", color: "#FFFFFF"}
       ]
     },
     "uowou.owo_ingot": [

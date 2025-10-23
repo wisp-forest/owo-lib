@@ -1,6 +1,7 @@
 package io.wispforest.uwu.items;
 
 import io.wispforest.owo.Owo;
+import io.wispforest.owo.samples.braid.BraidSamplesItem;
 import io.wispforest.uwu.Uwu;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
@@ -17,6 +18,7 @@ public class UwuItems {
     public static final Item SCREEN_SHARD = register("screen_shard", UwuScreenShardItem::new);
     public static final Item COUNTER = register("counter", UwuCounterItem::new);
     public static final Item BRAID = register("braid", UwuBraidItem::new);
+    public static final Item BRAID_SAMPLES = register("braid_samples", BraidSamplesItem::new);
 
     public static final Item OWO_INGOT = register(Identifier.of("uowou", "owo_ingot"), new Item.Settings().group(Uwu.FOUR_TAB_GROUP).tab(2).maxCount(69));
 

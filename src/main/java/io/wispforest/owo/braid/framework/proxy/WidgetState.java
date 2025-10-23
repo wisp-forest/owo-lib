@@ -53,7 +53,7 @@ public abstract class WidgetState<T extends StatefulWidget> {
     }
 
     public T widget() {
-        Preconditions.checkNotNull(this.widget);
+        Preconditions.checkNotNull(this.widget, "widget() accessor on a WidgetState was used before init()");
         return this.widget;
     }
 }

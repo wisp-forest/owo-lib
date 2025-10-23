@@ -2341,8 +2341,6 @@ public class TestSelector extends StatefulWidget {
 
             @Override
             public Widget build(BuildContext context) {
-                var random = Random.create(123);
-
                 return new Row(
                     MainAxisAlignment.CENTER,
                     CrossAxisAlignment.CENTER,
