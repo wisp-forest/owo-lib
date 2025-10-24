@@ -49,7 +49,7 @@ public class BraidToast implements Toast {
             )
         );
 
-        this.app.updateWidgetsAndInteractions(0, 0);
+        this.app.processEvents(0);
     }
 
     public static void show(@Nullable Duration timeout, @Nullable Object token, Widget widget) {
@@ -103,8 +103,7 @@ public class BraidToast implements Toast {
         }
 
         var tickCounter = MinecraftClient.getInstance().getRenderTickCounter();
-        this.app.updateWidgetsAndInteractions(
-            tickCounter.getTickProgress(false),
+        this.app.processEvents(
             tickCounter.getDynamicDeltaTicks()
         );
     }

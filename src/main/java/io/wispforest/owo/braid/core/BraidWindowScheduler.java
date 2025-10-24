@@ -5,7 +5,6 @@ import io.wispforest.owo.ui.event.ClientRenderCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.render.state.GuiRenderState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +26,7 @@ public class BraidWindowScheduler {
                 continue;
             }
 
-            app.state().updateWidgetsAndInteractions(
-                MinecraftClient.getInstance().getRenderTickCounter().getTickProgress(false),
+            app.state().processEvents(
                 MinecraftClient.getInstance().getRenderTickCounter().getDynamicDeltaTicks()
             );
 

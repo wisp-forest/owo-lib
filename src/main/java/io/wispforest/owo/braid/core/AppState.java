@@ -168,7 +168,7 @@ public class AppState implements InstanceHost, ProxyHost {
         this.surface.endRendering();
     }
 
-    public void updateWidgetsAndInteractions(float partialTicks, float frameDeltaInTicks) {
+    public void processEvents(float frameDeltaInTicks) {
         this.pollAndDispatchEvents();
 
         var state = this.hitTest();
@@ -275,8 +275,8 @@ public class AppState implements InstanceHost, ProxyHost {
     private void pollAndDispatchEvents() {
         var events = this.eventBinding.poll();
 
-        for (var event : events) {
-            switch (event) {
+        for (var slot : events) {
+            switch (slot.event) {
                 case MouseButtonPressEvent(int button, KeyModifiers modifiers) -> {
                     this.scrollHit = null;
                     var state = this.hitTest();
@@ -292,21 +292,27 @@ public class AppState implements InstanceHost, ProxyHost {
                         (hit) -> hit.instance() instanceof MouseListener && ((MouseListener) hit.instance()).onMouseDown(hit.x(), hit.y(), button, modifiers)
                     );
 
-                    if (clicked != null && this.dragging == null) {
-                        this.dragging = (MouseListener) clicked.instance();
-                        this.draggingCursorStyle = ((MouseListener) clicked.instance()).cursorStyleAt(
-                            clicked.x(),
-                            clicked.y()
-                        );
-                        this.dragStarted = false;
-                        this.draggingButton = button;
-                        this.draggingModifiers = modifiers;
+                    if (clicked != null) {
+                        slot.markHandled();
+
+                        if (this.dragging == null) {
+                            this.dragging = (MouseListener) clicked.instance();
+                            this.draggingCursorStyle = ((MouseListener) clicked.instance()).cursorStyleAt(
+                                clicked.x(),
+                                clicked.y()
+                            );
+                            this.dragStarted = false;
+                            this.draggingButton = button;
+                            this.draggingModifiers = modifiers;
+                        }
                     }
                 }
                 case MouseMoveEvent(double x, double y, double deltaX, double deltaY) -> {
+                    slot.markHandled();
+
                     this.cursorPosition.x = x;
                     this.cursorPosition.y = y;
-                    if (cursorPosition.distance(scrollPos) > SCROLL_MOVEMENT_THRESHOLD) this.scrollHit = null;
+                    if (this.cursorPosition.distance(this.scrollPos) > SCROLL_MOVEMENT_THRESHOLD) this.scrollHit = null;
 
                     if (!(this.dragging instanceof WidgetInstance<?>)) break;
 
@@ -329,9 +335,13 @@ public class AppState implements InstanceHost, ProxyHost {
                 case MouseButtonReleaseEvent(int button, KeyModifiers modifiers) -> {
                     this.scrollHit = null;
                     var state = this.hitTest();
-                    state.firstWhere(
+                    var unClicked = state.firstWhere(
                         (hit) -> hit.instance() instanceof MouseListener && ((MouseListener) hit.instance()).onMouseUp(hit.x(), hit.y(), button, modifiers)
                     );
+
+                    if (unClicked != null) {
+                        slot.markHandled();
+                    }
 
                     if (this.draggingButton == button) {
                         if (this.dragStarted && this.dragging != null) {
@@ -347,7 +357,7 @@ public class AppState implements InstanceHost, ProxyHost {
                     if (this.scrollHit == null || now.minus(grace).isAfter(this.lastScrollTime) ) this.scrollHit = this.hitTest();
                     this.lastScrollTime = now;
                     this.scrollPos = new Vector2d(this.cursorPosition);
-                    this.scrollHit.firstWhere(
+                    var scrolled = this.scrollHit.firstWhere(
                         (hit) -> hit.instance() instanceof MouseListener &&
                             ((MouseListener) hit.instance()).onMouseScroll(
                                 hit.x(),
@@ -356,28 +366,52 @@ public class AppState implements InstanceHost, ProxyHost {
                                 yOffset
                             )
                     );
+
+                    if (scrolled != null) {
+                        slot.markHandled();
+                    }
                 }
                 case KeyPressEvent(int keyCode, int scancode, KeyModifiers modifiers) -> {
                     if (keyCode == GLFW.GLFW_KEY_R && modifiers.shift() && modifiers.alt()) {
                         this.rebuildRoot();
+                        slot.markHandled();
+
                         break;
                     }
 
                     if (keyCode == GLFW.GLFW_KEY_I && modifiers.ctrl() && modifiers.shift()) {
                         this.inspector.activate();
+                        slot.markHandled();
+
                         break;
                     }
 
-                    this.keyDownStream.sink().onEvent(new RootFocusScope.KeyDownEvent(keyCode, modifiers));
+                    var event = new RootFocusScope.KeyDownEvent(keyCode, modifiers);
+                    this.keyDownStream.sink().onEvent(event);
+
+                    if (event.handled()) {
+                        slot.markHandled();
+                    }
                 }
                 case KeyReleaseEvent(int keycode, int scancode, KeyModifiers modifiers) -> {
-                    this.keyUpStream.sink().onEvent(new RootFocusScope.KeyUpEvent(keycode, modifiers));
+                    var event = new RootFocusScope.KeyUpEvent(keycode, modifiers);
+                    this.keyUpStream.sink().onEvent(event);
+
+                    if (event.handled()) {
+                        slot.markHandled();
+                    }
                 }
                 case CharInputEvent(char codepoint, KeyModifiers modifiers) -> {
-                    this.charStream.sink().onEvent(new RootFocusScope.CharEvent(codepoint, modifiers));
+                    var event = new RootFocusScope.CharEvent(codepoint, modifiers);
+                    this.charStream.sink().onEvent(event);
+
+                    if (event.handled()) {
+                        slot.markHandled();
+                    }
                 }
                 case FilesDroppedEvent filesDroppedEvent -> {}
                 case CloseEvent ignored -> {
+                    slot.markHandled();
                     this.scheduleShutdown();
                 }
             }

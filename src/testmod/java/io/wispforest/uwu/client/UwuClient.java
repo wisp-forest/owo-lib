@@ -3,6 +3,7 @@ package io.wispforest.uwu.client;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.util.BraidHudElement;
+import io.wispforest.owo.braid.util.BraidLayersBinding;
 import io.wispforest.owo.braid.util.BraidTooltipComponent;
 import io.wispforest.owo.braid.widgets.basic.*;
 import io.wispforest.owo.braid.widgets.flex.Row;
@@ -33,6 +34,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.TooltipComponentCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.GameMenuScreen;
+import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -199,6 +201,11 @@ public class UwuClient implements ClientModInitializer {
 
             instance.alignComponentToHandledScreenCoordinates(button, 125, 65);
         }, InventoryScreen.class);
+
+        BraidLayersBinding.add(
+            screen -> screen instanceof InventoryScreen || screen instanceof CreativeInventoryScreen,
+            new LayersTestWidget()
+        );
 
         BlockEntityRendererFactories.register(Uwu.BRAID_DISPLAY_ENTITY, BraidDisplayBlockEntityRenderer::new);
     }

@@ -43,7 +43,7 @@ public class BraidHudElement implements HudElement {
             throw new IllegalStateException("tried to render a BraidHudElement before it was initialized");
         }
 
-        this.app.updateWidgetsAndInteractions(tickCounter.getTickProgress(false), tickCounter.getDynamicDeltaTicks());
+        this.app.processEvents(tickCounter.getDynamicDeltaTicks());
         this.app.draw(context);
     }
 

@@ -57,8 +57,7 @@ public class BraidDisplay {
     public void updateAndDrawApp() {
         var client = this.app.client();
 
-        this.app.updateWidgetsAndInteractions(
-            client.getRenderTickCounter().getTickProgress(false),
+        this.app.processEvents(
             client.getRenderTickCounter().getDynamicDeltaTicks()
         );
 

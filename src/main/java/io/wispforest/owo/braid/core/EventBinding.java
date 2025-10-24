@@ -4,20 +4,22 @@ import io.wispforest.owo.braid.core.events.UserEvent;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class EventBinding {
 
-    private final List<UserEvent> bufferedEvents = new ArrayList<>();
+    private final List<EventSlot> bufferedEvents = new ArrayList<>();
 
-    public void add(UserEvent event) {
-        this.bufferedEvents.add(event);
+    public EventSlot add(UserEvent event) {
+        var slot = new EventSlot(event);
+        this.bufferedEvents.add(slot);
+
+        return slot;
     }
 
-    public List<UserEvent> poll() {
+    List<EventSlot> poll() {
         var events = new ArrayList<>(this.bufferedEvents);
         this.bufferedEvents.clear();
 
@@ -35,6 +37,23 @@ public abstract class EventBinding {
             | (this.isKeyPressed(GLFW.GLFW_KEY_NUM_LOCK) ? GLFW.GLFW_MOD_NUM_LOCK : 0)
             | (this.isKeyPressed(GLFW.GLFW_KEY_CAPS_LOCK) ? GLFW.GLFW_MOD_CAPS_LOCK : 0)
         );
+    }
+
+    public static class EventSlot {
+        final UserEvent event;
+        private boolean handled = false;
+
+        public EventSlot(UserEvent event) {
+            this.event = event;
+        }
+
+        public boolean handled() {
+            return this.handled;
+        }
+
+        void markHandled() {
+            this.handled = true;
+        }
     }
 
     // ---

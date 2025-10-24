@@ -8,10 +8,7 @@ import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import io.wispforest.owo.braid.widgets.basic.Align;
-import io.wispforest.owo.braid.widgets.basic.ListenableBuilder;
-import io.wispforest.owo.braid.widgets.basic.Padding;
-import io.wispforest.owo.braid.widgets.basic.Visibility;
+import io.wispforest.owo.braid.widgets.basic.*;
 import io.wispforest.owo.braid.widgets.flex.Column;
 import io.wispforest.owo.braid.widgets.flex.CrossAxisAlignment;
 import io.wispforest.owo.braid.widgets.flex.MainAxisAlignment;
@@ -40,6 +37,10 @@ public class HudTestWidget extends StatelessWidget {
                     new Column(
                         MainAxisAlignment.CENTER,
                         CrossAxisAlignment.CENTER,
+                        new Sized(
+                            100, null,
+                            new Label(LabelStyle.SHADOW, true, Text.translatable("compliance.playtime.message"))
+                        ),
                         new Padding(
                             Insets.all(3),
                             new ItemStackWidget(UwuItems.BRAID.getDefaultStack())

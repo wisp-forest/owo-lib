@@ -59,6 +59,8 @@
     "DrawContextMixin",
     "MinecraftClientMixin",
     "braid.GuiRendererMixin",
+    "braid.KeyboardMixin",
+    "braid.ScreenMixin",
     "braid.ToastManagerMixin",
     "braid.WorldRendererMixin",
     "itemgroup.CreativeInventoryScreenAccessor",

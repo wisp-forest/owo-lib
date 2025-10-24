@@ -88,8 +88,7 @@ public class BraidComponent extends BaseComponent {
             prevMouseY = mouseY;
         }
 
-        appState.updateWidgetsAndInteractions(
-            MinecraftClient.getInstance().getRenderTickCounter().getTickProgress(false),
+        appState.processEvents(
             delta
         );
     }

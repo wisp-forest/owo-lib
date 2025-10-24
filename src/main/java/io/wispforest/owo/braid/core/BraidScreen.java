@@ -69,8 +69,7 @@ public class BraidScreen extends Screen implements DisposableScreen {
             this.eventBinding.add(new MouseMoveEvent(this.cursorPos.x, this.cursorPos.y, deltaX, deltaY));
         }
 
-        this.state.updateWidgetsAndInteractions(
-            this.client.getRenderTickCounter().getTickProgress(false),
+        this.state.processEvents(
             this.client.getRenderTickCounter().getDynamicDeltaTicks()
         );
 

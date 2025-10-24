@@ -37,7 +37,7 @@ public class BraidTooltipComponent implements TooltipComponent {
             )
         );
 
-        this.app.updateWidgetsAndInteractions(0, 0);
+        this.app.processEvents(0);
         this.instance = embedderInstance.getValue();
 
         APP_CLEANER.register(this, new CleanCallback(this.app));
