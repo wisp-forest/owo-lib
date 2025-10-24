@@ -27,6 +27,7 @@ import io.wispforest.owo.braid.widgets.checkbox.BraidCheckbox;
 import io.wispforest.owo.braid.widgets.checkbox.Checkbox;
 import io.wispforest.owo.braid.widgets.checkbox.RawCheckbox;
 import io.wispforest.owo.braid.widgets.combobox.ComboBox;
+import io.wispforest.owo.braid.widgets.cycle.CyclingButton;
 import io.wispforest.owo.braid.widgets.cycle.MessageCyclingButton;
 import io.wispforest.owo.braid.widgets.drag.DragArena;
 import io.wispforest.owo.braid.widgets.drag.DragArenaElement;
@@ -73,6 +74,7 @@ import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.ViewerStack;
 import io.wispforest.owo.util.Wisdom;
 import io.wispforest.uwu.client.Bikeshed;
+import io.wispforest.uwu.client.HudTestWidget;
 import io.wispforest.uwu.items.UwuItems;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.CheckboxWidget;
@@ -317,6 +319,17 @@ public class TestSelector extends StatefulWidget {
                                                 Text.literal("→"),
                                                 () -> Actions.invoke(Focusable.of(context).primaryFocus().context(), new Incrementor.IncrementIntent(LayoutAxis.HORIZONTAL, 1))
                                             )
+                                        )
+                                    )
+                                ),
+                                new Sized(
+                                    75, 20,
+                                    new ListenableBuilder(
+                                        HudTestWidget.SHOW_TEST_HUD,
+                                        listenableContext -> MessageCyclingButton.forBoolean(
+                                            HudTestWidget.SHOW_TEST_HUD.get(),
+                                            Text.literal("hud: " + (HudTestWidget.SHOW_TEST_HUD.get() ? "on" : "off")),
+                                            (newValue, newIndex) -> HudTestWidget.SHOW_TEST_HUD.set(newValue)
                                         )
                                     )
                                 ),

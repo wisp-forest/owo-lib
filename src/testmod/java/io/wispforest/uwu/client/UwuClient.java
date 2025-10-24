@@ -1,11 +1,10 @@
 package io.wispforest.uwu.client;
 
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.core.LayoutAxis;
+import io.wispforest.owo.braid.util.BraidHudElement;
 import io.wispforest.owo.braid.util.BraidTooltipComponent;
-import io.wispforest.owo.braid.widgets.basic.Box;
-import io.wispforest.owo.braid.widgets.basic.Clip;
-import io.wispforest.owo.braid.widgets.basic.Sized;
-import io.wispforest.owo.braid.widgets.basic.Transform;
+import io.wispforest.owo.braid.widgets.basic.*;
 import io.wispforest.owo.braid.widgets.flex.Row;
 import io.wispforest.owo.braid.widgets.grid.Grid;
 import io.wispforest.owo.network.OwoNetChannel;
@@ -31,6 +30,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.TooltipComponentCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
@@ -116,6 +116,11 @@ public class UwuClient implements ClientModInitializer {
 
             return null;
         });
+
+        HudElementRegistry.addLast(
+            Identifier.of("uwu", "braid_test"),
+            new BraidHudElement(new HudTestWidget())
+        );
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (binding.wasPressed()) {

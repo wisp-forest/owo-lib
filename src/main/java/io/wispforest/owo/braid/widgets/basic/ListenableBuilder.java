@@ -8,22 +8,19 @@ import io.wispforest.owo.braid.framework.widget.Widget;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.BiFunction;
-import java.util.function.Function;
-
 public class ListenableBuilder extends StatefulWidget {
 
     public final Listenable listenable;
-    public final BiFunction<BuildContext, Widget, Widget> builder;
+    public final ListenableBuilderWithChildFunction builder;
     public final @Nullable Widget child;
 
-    public ListenableBuilder(Listenable listenable, Function<BuildContext, Widget> builder) {
+    public ListenableBuilder(Listenable listenable, ListenableBuilderFunction builder) {
         this.listenable = listenable;
-        this.builder = (context, $) -> builder.apply(context);
+        this.builder = (context, $) -> builder.build(context);
         this.child = null;
     }
 
-    public ListenableBuilder(Listenable listenable, BiFunction<BuildContext, Widget, Widget> builder, @NotNull Widget child) {
+    public ListenableBuilder(Listenable listenable, ListenableBuilderWithChildFunction builder, @NotNull Widget child) {
         this.listenable = listenable;
         this.builder = builder;
         this.child = child;
@@ -53,12 +50,24 @@ public class ListenableBuilder extends StatefulWidget {
 
         @Override
         public Widget build(BuildContext context) {
-            return this.widget().builder.apply(context, this.widget().child);
+            return this.widget().builder.build(context, this.widget().child);
         }
 
         @Override
         public void dispose() {
             this.widget().listenable.removeListener(this.listener);
         }
+    }
+
+    // ---
+
+    @FunctionalInterface
+    public interface ListenableBuilderFunction {
+        Widget build(BuildContext listenableContext);
+    }
+
+    @FunctionalInterface
+    public interface ListenableBuilderWithChildFunction {
+        Widget build(BuildContext listenableContext, Widget child);
     }
 }
