@@ -44,10 +44,10 @@ public class BuildScope {
             this.dirtyProxies.get(idx).rebuild();
         }
 
-        if (Owo.DEBUG && Iterables.any(this.dirtyProxies, input -> input.needsRebuild)) {
+        if (Owo.DEBUG && this.dirtyProxies.stream().anyMatch(BuildScope::isMissed)) {
             throw new IllegalStateException(
                 "missed the following dirty proxies: ["
-                    + this.dirtyProxies.stream().filter(widgetProxy -> widgetProxy.needsRebuild).map(Objects::toString).collect(Collectors.joining(", "))
+                    + this.dirtyProxies.stream().filter(BuildScope::isMissed).map(Objects::toString).collect(Collectors.joining(", "))
                     + "]"
             );
         }
@@ -68,5 +68,11 @@ public class BuildScope {
         }
 
         return idx;
+    }
+
+    // ---
+
+    private static boolean isMissed(WidgetProxy proxy) {
+        return proxy.needsRebuild && proxy.lifecycle == WidgetProxy.Lifecycle.LIVE;
     }
 }
