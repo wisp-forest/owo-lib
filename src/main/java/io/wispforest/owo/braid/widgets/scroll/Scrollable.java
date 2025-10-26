@@ -1,6 +1,7 @@
 package io.wispforest.owo.braid.widgets.scroll;
 
 import com.google.common.base.Preconditions;
+import io.wispforest.owo.braid.core.Aabb2d;
 import io.wispforest.owo.braid.core.AppState;
 import io.wispforest.owo.braid.core.CompoundListenable;
 import io.wispforest.owo.braid.core.Insets;
@@ -12,10 +13,8 @@ import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.Clip;
 import io.wispforest.owo.braid.widgets.basic.ListenableBuilder;
 import io.wispforest.owo.braid.widgets.basic.MouseArea;
-import net.minecraft.util.math.Box;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector2d;
-import org.joml.Vector2f;
+import org.joml.Matrix3x2f;
 
 import java.util.Objects;
 
@@ -59,7 +58,7 @@ public class Scrollable extends StatefulWidget {
         of(context).reveal(context, padding);
     }
 
-    public static void revealAabb(BuildContext context, Box box) {
+    public static void revealAabb(BuildContext context, Aabb2d box) {
         of(context).revealAabb(context, box);
     }
 
@@ -87,24 +86,21 @@ public class Scrollable extends StatefulWidget {
         private void reveal(BuildContext context, Insets padding) {
             var transform = context.instance().transform;
 
-            var box = transform.aabb();
-            var min = new Vector2d(box.minX - padding.left(), box.minY - padding.top());
-            var max = new Vector2d(box.maxX + padding.right(), box.maxY + padding.bottom());
+            var matrix = new Matrix3x2f();
+            transform.transformToWidget(matrix);
 
-            transform.toWidgetCoordinates(min);
-            transform.toWidgetCoordinates(max);
+            var box = new Aabb2d(
+                transform.x() - padding.left(),
+                transform.y() - padding.top(),
+                transform.width() + padding.horizontal(),
+                transform.height() + padding.vertical()
+            ).transform(matrix);
 
-            revealAabb(
-                context,
-                new Box(
-                    min.x, min.y, box.minZ,
-                    max.x, max.y, box.maxZ
-                )
-            );
+            revealAabb(context, box);
         }
 
         // TODO: support animations
-        private void revealAabb(BuildContext context, Box box) {
+        private void revealAabb(BuildContext context, Aabb2d box) {
             var scrollInstance = this.context().instance();
             var revealInstance = context.instance();
 
@@ -113,28 +109,25 @@ public class Scrollable extends StatefulWidget {
                 this.verticalController != null ? (float) this.verticalController.offset : 0
             );
 
-            var min = transform.transformPosition(new Vector2f((float) box.minX, (float) box.minY));
-            var max = transform.transformPosition(new Vector2f((float) box.maxX, (float) box.maxY));
-
-            var revealBox = new Box(min.x, min.y, box.minZ, max.x, max.y, box.maxZ);
+            box.transform(transform);
 
             if (this.horizontalController != null) {
-                if (revealBox.minX < this.horizontalController.offset) {
-                    this.horizontalController.jumpTo(revealBox.minX);
+                if (box.minX() < this.horizontalController.offset) {
+                    this.horizontalController.jumpTo(box.minX());
                 }
 
-                if (revealBox.maxX > scrollInstance.transform.width() + this.horizontalController.offset) {
-                    this.horizontalController.jumpTo(revealBox.maxX - scrollInstance.transform.width());
+                if (box.maxX() > scrollInstance.transform.width() + this.horizontalController.offset) {
+                    this.horizontalController.jumpTo(box.maxX() - scrollInstance.transform.width());
                 }
             }
 
             if (this.verticalController != null) {
-                if (revealBox.minY < this.verticalController.offset) {
-                    this.verticalController.jumpTo(revealBox.minY);
+                if (box.minY() < this.verticalController.offset) {
+                    this.verticalController.jumpTo(box.minY());
                 }
 
-                if (revealBox.maxY > scrollInstance.transform.height() + this.verticalController.offset) {
-                    this.verticalController.jumpTo(revealBox.maxY - scrollInstance.transform.height());
+                if (box.maxY() > scrollInstance.transform.height() + this.verticalController.offset) {
+                    this.verticalController.jumpTo(box.maxY() - scrollInstance.transform.height());
                 }
             }
         }

@@ -105,7 +105,7 @@ public class InstanceDetails extends StatefulWidget {
 
         private static List<Text> gatherProperties(WidgetInstance<?> instance) {
             var instanceTransform = instance.hasParent() ? instance.parent().computeGlobalTransform().invert() : new Matrix3x2f();
-            var absPos = new Vector3f((float) instance.transform.x(), (float) instance.transform.y(), 1f).mul(instanceTransform);
+            var absPos = instanceTransform.transformPosition((float) instance.transform.x(), (float) instance.transform.y(), new Vector2f());
 
             var properties = new ArrayList<>(List.<Text>of(
                     Text.literal("Rel. Position").formatted(Formatting.BOLD),

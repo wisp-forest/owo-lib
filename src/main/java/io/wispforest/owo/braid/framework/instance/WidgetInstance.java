@@ -282,7 +282,7 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
 
     /// To prevent excessive IDE warnings, the return type of this
     /// getter is not annotated `@Nullable` even though if it is called
-    /// before this proxy is mounted it will (correctly) return null
+    /// before this instance is adopted it will (correctly) return null
     public InstanceHost host() {
         return this.host;
     }

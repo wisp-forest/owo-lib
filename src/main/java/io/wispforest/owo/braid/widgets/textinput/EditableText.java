@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets.textinput;
 
+import io.wispforest.owo.braid.core.Aabb2d;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
@@ -12,7 +13,6 @@ import io.wispforest.owo.braid.widgets.scroll.ScrollController;
 import io.wispforest.owo.braid.widgets.scroll.Scrollable;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.util.math.Box;
 
 import java.time.Duration;
 
@@ -163,13 +163,11 @@ public class EditableText extends StatefulWidget {
 
                 Scrollable.revealAabb(
                     this.inputContext,
-                    new Box(
+                    new Aabb2d(
                         cursorPos.x,
                         cursorPos.y - lineHeight,
-                        0,
-                        cursorPos.x + 2,
-                        cursorPos.y,
-                        0
+                        2,
+                        lineHeight
                     )
                 );
             });
@@ -240,8 +238,8 @@ public class EditableText extends StatefulWidget {
                             this.widget().textShadow,
                             this.widget().suggestionIsPlaceholder
                                 ? this.widget().controller.text.isEmpty()
-                                    ? this.widget().suggestion
-                                    : Text.empty()
+                                ? this.widget().suggestion
+                                : Text.empty()
                                 : this.widget().suggestion
                         );
                     })
