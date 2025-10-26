@@ -40,7 +40,8 @@ public abstract non-sealed class InstanceWidgetProxy extends WidgetProxy {
 
         this.ancestorsUntilNextInstanceProxy.add(ancestor);
 
-        rebuild();
+        this.rebuild();
+        this.notifyAncestors();
     }
 
     @Override
@@ -60,12 +61,6 @@ public abstract non-sealed class InstanceWidgetProxy extends WidgetProxy {
     public void updateWidget(Widget newWidget) {
         super.updateWidget(newWidget);
         this.instance.setWidget((InstanceWidget) newWidget);
-    }
-
-    @Override
-    protected void doRebuild() {
-        super.doRebuild();
-        this.notifyAncestors();
     }
 
     private void notifyAncestors() {

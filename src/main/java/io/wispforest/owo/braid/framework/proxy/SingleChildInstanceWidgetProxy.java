@@ -27,8 +27,8 @@ public class SingleChildInstanceWidgetProxy extends InstanceWidgetProxy {
 
     @Override
     protected void doRebuild() {
-        this.child = this.refreshChild(this.child, ((SingleChildInstanceWidget) this.widget()).child, null);
         super.doRebuild();
+        this.child = this.refreshChild(this.child, ((SingleChildInstanceWidget) this.widget()).child, null);
     }
 
     @Override

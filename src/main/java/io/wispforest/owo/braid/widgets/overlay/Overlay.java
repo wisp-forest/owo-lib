@@ -53,8 +53,8 @@ public class Overlay extends StatefulWidget {
 
             var entry = new OverlayEntry(
                 this,
-                builder.widget,
                 builder.onRemove,
+                builder.widget,
                 builder.dismissOverlayOnClick,
                 builder.occludeHitTest,
                 entryPosition.x,

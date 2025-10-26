@@ -45,6 +45,7 @@ public class MultiChildInstanceWidgetProxy extends InstanceWidgetProxy {
 
     @Override
     public void doRebuild() {
+        super.doRebuild();
         var newWidgets = ((MultiChildInstanceWidget) this.widget()).children;
 
         var newChildrenTop = 0;
@@ -160,8 +161,6 @@ public class MultiChildInstanceWidgetProxy extends InstanceWidgetProxy {
 
         // finally, install new children
         this.children = newChildren;
-
-        super.doRebuild();
     }
 
     @Override

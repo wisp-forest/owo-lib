@@ -28,13 +28,12 @@ public class OptionalChildInstanceWidgetProxy extends InstanceWidgetProxy {
 
     @Override
     protected void doRebuild() {
+        super.doRebuild();
         this.child = this.refreshChild(this.child, ((OptionalChildInstanceWidget) this.widget()).child, null);
 
         if (((OptionalChildInstanceWidget) this.widget()).child == null) {
             this.instance().setChild(null);
         }
-
-        super.doRebuild();
     }
 
     @Override

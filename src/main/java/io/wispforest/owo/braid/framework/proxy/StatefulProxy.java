@@ -5,7 +5,9 @@ import io.wispforest.owo.braid.framework.widget.Widget;
 import org.jetbrains.annotations.Nullable;
 
 public class StatefulProxy extends ComposedProxy {
+
     private final WidgetState<StatefulWidget> state;
+    private boolean dependenciesChanged = false;
 
     public StatefulProxy(StatefulWidget widget) {
         super(widget);
@@ -29,6 +31,12 @@ public class StatefulProxy extends ComposedProxy {
     }
 
     @Override
+    public void notifyDependenciesChanged() {
+        super.notifyDependenciesChanged();
+        this.dependenciesChanged = true;
+    }
+
+    @Override
     public void unmount() {
         super.unmount();
         this.state.dispose();
@@ -47,9 +55,14 @@ public class StatefulProxy extends ComposedProxy {
 
     @Override
     protected void doRebuild() {
-        var newWidget = this.state.build(this);
-        this.child = this.refreshChild(this.child, newWidget, this.slot());
+        if (this.dependenciesChanged) {
+            this.state.notifyDependenciesChanged();
+            this.dependenciesChanged = false;
+        }
 
+        var newWidget = this.state.build(this);
         super.doRebuild();
+
+        this.child = this.refreshChild(this.child, newWidget, this.slot());
     }
 }

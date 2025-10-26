@@ -19,6 +19,7 @@ public abstract class VisitorWidget extends Widget {
     public static class Proxy<T extends VisitorWidget> extends ComposedProxy {
 
         public final VisitorWidget.Visitor<T> visitor;
+        public WidgetInstance<?> descendantInstance;
 
         public Proxy(Widget widget, VisitorWidget.Visitor<T> visitor) {
             super(widget);
@@ -39,13 +40,18 @@ public abstract class VisitorWidget extends Widget {
 
         @Override
         protected void doRebuild() {
-            this.child = this.refreshChild(this.child, ((VisitorWidget)this.widget()).child, this.slot());
             super.doRebuild();
+            this.child = this.refreshChild(this.child, ((VisitorWidget)this.widget()).child, this.slot());
+
+            if (this.descendantInstance != null) {
+                this.visitor.visit((T) this.widget(), this.descendantInstance);
+            }
         }
 
         @Override
         public void notifyDescendantInstance(@Nullable WidgetInstance<?> instance, @Nullable Object slot) {
             this.visitor.visit((T) this.widget(), instance);
+            this.descendantInstance = instance;
         }
     }
 

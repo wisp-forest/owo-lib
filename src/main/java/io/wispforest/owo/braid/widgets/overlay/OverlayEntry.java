@@ -8,20 +8,20 @@ import java.util.UUID;
 public class OverlayEntry {
 
     private final Overlay.State owner;
-    final Widget widget;
     final @Nullable Runnable onRemove;
     final UUID uuid = UUID.randomUUID();
 
+    public Widget widget;
     public boolean dismissOnOverlayClick;
     public boolean occludeHitTest;
 
     public double x;
     public double y;
 
-    OverlayEntry(Overlay.State owner, Widget widget, @Nullable Runnable onRemove, boolean dismissOnOverlayClick, boolean occludeHitTest, double x, double y) {
+    OverlayEntry(Overlay.State owner, @Nullable Runnable onRemove, Widget widget, boolean dismissOnOverlayClick, boolean occludeHitTest, double x, double y) {
         this.owner = owner;
-        this.widget = widget;
         this.onRemove = onRemove;
+        this.widget = widget;
         this.dismissOnOverlayClick = dismissOnOverlayClick;
         this.occludeHitTest = occludeHitTest;
         this.x = x;
@@ -36,7 +36,7 @@ public class OverlayEntry {
 
     public void remove() {
         this.owner.setState(() -> {
-            if(this.onRemove != null) this.onRemove.run();
+            if (this.onRemove != null) this.onRemove.run();
             this.owner.entries.remove(this);
         });
     }

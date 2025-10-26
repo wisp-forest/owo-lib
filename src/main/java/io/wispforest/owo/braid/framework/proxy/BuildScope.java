@@ -1,10 +1,14 @@
 package io.wispforest.owo.braid.framework.proxy;
 
+import com.google.common.collect.Iterables;
+import io.wispforest.owo.Owo;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class BuildScope {
     private final List<WidgetProxy> dirtyProxies = new ArrayList<>();
@@ -38,6 +42,14 @@ public class BuildScope {
 
         for (var idx = 0; idx < this.dirtyProxies.size(); idx = this.nextDirtyIndex(idx)) {
             this.dirtyProxies.get(idx).rebuild();
+        }
+
+        if (Owo.DEBUG && Iterables.any(this.dirtyProxies, input -> input.needsRebuild)) {
+            throw new IllegalStateException(
+                "missed the following dirty proxies: ["
+                    + this.dirtyProxies.stream().filter(widgetProxy -> widgetProxy.needsRebuild).map(Objects::toString).collect(Collectors.joining(", "))
+                    + "]"
+            );
         }
 
         this.dirtyProxies.clear();

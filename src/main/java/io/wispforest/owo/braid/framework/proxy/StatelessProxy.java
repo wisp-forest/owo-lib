@@ -24,8 +24,8 @@ public class StatelessProxy extends ComposedProxy {
     @Override
     protected void doRebuild() {
         var newWidget = ((StatelessWidget) this.widget()).build(this);
-        this.child = this.refreshChild(this.child, newWidget, this.slot());
-
         super.doRebuild();
+
+        this.child = this.refreshChild(this.child, newWidget, this.slot());
     }
 }
