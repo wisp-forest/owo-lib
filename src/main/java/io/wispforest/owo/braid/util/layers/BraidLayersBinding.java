@@ -1,4 +1,4 @@
-package io.wispforest.owo.braid.util;
+package io.wispforest.owo.braid.util.layers;
 
 import com.google.common.base.Suppliers;
 import io.wispforest.owo.Owo;
@@ -8,6 +8,8 @@ import io.wispforest.owo.braid.core.Surface;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.core.events.*;
 import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.braid.widgets.eventstream.BraidEventStream;
+import io.wispforest.owo.braid.widgets.overlay.Overlay;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.util.pond.OwoScreenExtension;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
@@ -15,10 +17,12 @@ import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.fabricmc.fabric.api.event.Event;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.cursor.Cursor;
 import net.minecraft.client.gui.cursor.StandardCursors;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Unit;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
@@ -37,7 +41,7 @@ public class BraidLayersBinding {
 
     @ApiStatus.Internal
     public static boolean tryHandleEvent(Screen screen, UserEvent event) {
-        var app = ((OwoScreenExtension) screen).owo$getBraidLayersState();
+        var app = ((OwoScreenExtension) screen).owo$getBraidLayersApp();
         if (app == null) {
             return false;
         }
@@ -48,20 +52,48 @@ public class BraidLayersBinding {
         return slot.handled();
     }
 
+    @ApiStatus.Internal
+    public static void renderLayers(Screen screen, DrawContext context, double mouseX, double mouseY) {
+        var state = ((OwoScreenExtension) screen).owo$getBraidLayersState();
+        if (state == null) {
+            return;
+        }
+
+        state.refreshEvents.sink().onEvent(Unit.INSTANCE);
+        state.app.eventBinding.add(new MouseMoveEvent(mouseX, mouseY, 0, 0));
+
+        state.app.processEvents(MinecraftClient.getInstance().getRenderTickCounter().getDynamicDeltaTicks());
+        state.app.draw(context);
+
+        var cursorStyle = ((LayerSurface) state.app.surface).currentCursorStyle;
+        if (cursorStyle != CursorStyle.NONE && CURSOR_MAPPINGS.get().containsKey(cursorStyle)) {
+            context.setCursor(CURSOR_MAPPINGS.get().get(cursorStyle));
+        }
+    }
+
     private static void setupLayers(Screen screen) {
         var widgets = LAYERS.stream().filter(layer -> layer.screenPredicate.test(screen)).map(Layer::widget).toList();
         if (widgets.isEmpty()) {
             return;
         }
 
-        ((OwoScreenExtension) screen).owo$setBraidLayersState(new AppState(
+        var refreshEvents = new BraidEventStream<Unit>();
+        var app = new AppState(
             null,
             "BraidLayersBinding",
             MinecraftClient.getInstance(),
             new LayerSurface(),
             new EventBinding.Default(),
-            new Stack(widgets)
-        ));
+            new LayerContext(
+                refreshEvents.source(),
+                screen,
+                new Overlay(
+                    new Stack(widgets)
+                )
+            )
+        );
+
+        ((OwoScreenExtension) screen).owo$setBraidLayersState(new LayersState(app, refreshEvents));
     }
 
     // ---
@@ -71,6 +103,9 @@ public class BraidLayersBinding {
     private static final List<Layer> LAYERS = new ArrayList<>();
 
     private record Layer(Predicate<Screen> screenPredicate, Widget widget) {}
+
+    @ApiStatus.Internal
+    public record LayersState(AppState app, BraidEventStream<Unit> refreshEvents) {}
 
     private static class LayerSurface extends Surface.Default {
 
@@ -103,29 +138,14 @@ public class BraidLayersBinding {
     static {
         ScreenEvents.AFTER_INIT.addPhaseOrdering(Event.DEFAULT_PHASE, INIT_PHASE);
         ScreenEvents.AFTER_INIT.register(INIT_PHASE, (client, screeen, scaledWidth, scaledHeight) -> {
-            setupLayers(screeen);
+            if (((OwoScreenExtension)screeen).owo$getBraidLayersState() == null) {
+                setupLayers(screeen);
+            }
 
             ScreenEvents.remove(screeen).register(screen -> {
-                var app = ((OwoScreenExtension) screen).owo$getBraidLayersState();
+                var app = ((OwoScreenExtension) screen).owo$getBraidLayersApp();
                 if (app != null) {
                     app.dispose();
-                }
-            });
-
-            ScreenEvents.afterRender(screeen).register((screen, context, mouseX, mouseY, tickDelta) -> {
-                var app = ((OwoScreenExtension) screen).owo$getBraidLayersState();
-                if (app == null) {
-                    return;
-                }
-
-                app.eventBinding.add(new MouseMoveEvent(mouseX, mouseY, 0, 0));
-
-                app.processEvents(MinecraftClient.getInstance().getRenderTickCounter().getDynamicDeltaTicks());
-                app.draw(context);
-
-                var cursorStyle = ((LayerSurface) app.surface).currentCursorStyle;
-                if (cursorStyle != CursorStyle.NONE && CURSOR_MAPPINGS.get().containsKey(cursorStyle)) {
-                    context.setCursor(CURSOR_MAPPINGS.get().get(cursorStyle));
                 }
             });
 

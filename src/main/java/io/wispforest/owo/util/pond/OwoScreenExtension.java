@@ -1,6 +1,7 @@
 package io.wispforest.owo.util.pond;
 
 import io.wispforest.owo.braid.core.AppState;
+import io.wispforest.owo.braid.util.layers.BraidLayersBinding;
 import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.layers.Layer;
 import net.minecraft.client.gui.screen.Screen;
@@ -16,6 +17,15 @@ public interface OwoScreenExtension {
 
     // ---
 
-    void owo$setBraidLayersState(AppState state);
-    @Nullable AppState owo$getBraidLayersState();
+    void owo$setBraidLayersState(BraidLayersBinding.LayersState state);
+    @Nullable BraidLayersBinding.LayersState owo$getBraidLayersState();
+    default @Nullable AppState owo$getBraidLayersApp() {
+        var state = this.owo$getBraidLayersState();
+        if (state == null) {
+            return null;
+        }
+
+        return state.app();
+    }
+
 }

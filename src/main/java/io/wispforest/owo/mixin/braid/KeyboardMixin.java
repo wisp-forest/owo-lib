@@ -3,7 +3,7 @@ package io.wispforest.owo.mixin.braid;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import io.wispforest.owo.braid.core.events.CharInputEvent;
-import io.wispforest.owo.braid.util.BraidLayersBinding;
+import io.wispforest.owo.braid.util.layers.BraidLayersBinding;
 import net.minecraft.client.Keyboard;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.input.CharInput;

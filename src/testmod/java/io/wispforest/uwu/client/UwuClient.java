@@ -1,11 +1,13 @@
 package io.wispforest.uwu.client;
 
-import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.util.BraidHudElement;
-import io.wispforest.owo.braid.util.BraidLayersBinding;
+import io.wispforest.owo.braid.util.layers.BraidLayersBinding;
 import io.wispforest.owo.braid.util.BraidTooltipComponent;
-import io.wispforest.owo.braid.widgets.basic.*;
+import io.wispforest.owo.braid.widgets.basic.Box;
+import io.wispforest.owo.braid.widgets.basic.Clip;
+import io.wispforest.owo.braid.widgets.basic.Sized;
+import io.wispforest.owo.braid.widgets.basic.Transform;
 import io.wispforest.owo.braid.widgets.flex.Row;
 import io.wispforest.owo.braid.widgets.grid.Grid;
 import io.wispforest.owo.network.OwoNetChannel;
@@ -49,7 +51,6 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableTextContent;
 import net.minecraft.util.Identifier;
 import org.joml.Matrix3x2f;
-import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 
 import java.nio.file.Path;
@@ -203,7 +204,7 @@ public class UwuClient implements ClientModInitializer {
         }, InventoryScreen.class);
 
         BraidLayersBinding.add(
-            screen -> screen instanceof InventoryScreen || screen instanceof CreativeInventoryScreen,
+            screen -> screen instanceof InventoryScreen,
             new LayersTestWidget()
         );
 
