@@ -7,7 +7,7 @@ import net.minecraft.util.math.Box;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix3x2fStack;
-import org.joml.Vector3f;
+import org.joml.Vector2d;
 
 public class WidgetTransform {
     protected @Nullable Box aabb;
@@ -74,13 +74,13 @@ public class WidgetTransform {
 
     public Box aabb() {
         if (this.aabb == null) {
-            var min = new Vector3f();
+            var min = new Vector2d();
             this.toParentCoordinates(min);
 
-            var max = new Vector3f((float) this.width, (float) this.height, 0);
+            var max = new Vector2d(this.width, this.height);
             this.toParentCoordinates(max);
 
-            this.aabb = new Box(min.x, min.y, min.z, max.x, max.y, max.z);
+            this.aabb = new Box(min.x, min.y, 0, max.x, max.y, 0);
         }
 
         return this.aabb;
@@ -102,12 +102,12 @@ public class WidgetTransform {
         matrices.translate((float) -this.x, (float) -this.y);
     }
 
-    public void toParentCoordinates(Vector3f vec) {
-        vec.add((float) this.x, (float) this.y, 0);
+    public void toParentCoordinates(Vector2d vec) {
+        vec.add(this.x, this.y);
     }
 
-    public void toWidgetCoordinates(Vector3f vec) {
-        vec.sub((float) this.x, (float) this.y, 0);
+    public void toWidgetCoordinates(Vector2d vec) {
+        vec.sub(this.x, this.y);
     }
 
     public void setExtent(LayoutAxis axis, double value) {

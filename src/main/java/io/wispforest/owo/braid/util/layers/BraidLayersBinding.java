@@ -60,7 +60,7 @@ public class BraidLayersBinding {
         }
 
         state.refreshEvents.sink().onEvent(Unit.INSTANCE);
-        state.app.eventBinding.add(new MouseMoveEvent(mouseX, mouseY, 0, 0));
+        state.app.eventBinding.add(new MouseMoveEvent(mouseX, mouseY));
 
         state.app.processEvents(MinecraftClient.getInstance().getRenderTickCounter().getDynamicDeltaTicks());
         state.app.draw(context);

@@ -35,9 +35,6 @@ public class BraidComponent extends BaseComponent {
 
     private BraidWidget.State braidWidgetState;
 
-    private int prevMouseX = -1;
-    private int prevMouseY = -1;
-
     private CursorStyle cursorStyle = CursorStyle.NONE;
 
     public BraidComponent(Widget braidWidget) {
@@ -81,13 +78,7 @@ public class BraidComponent extends BaseComponent {
     public void update(float delta, int mouseX, int mouseY) {
         super.update(delta, mouseX, mouseY);
 
-        if (prevMouseX != mouseX || prevMouseY != mouseY) {
-            eventBinding.add(new MouseMoveEvent(mouseX, mouseY, mouseX - prevMouseX, mouseY - prevMouseY));
-
-            prevMouseX = mouseX;
-            prevMouseY = mouseY;
-        }
-
+        eventBinding.add(new MouseMoveEvent(mouseX, mouseY));
         appState.processEvents(
             delta
         );

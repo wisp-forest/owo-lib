@@ -16,7 +16,6 @@ import net.minecraft.client.gl.SimpleFramebuffer;
 import net.minecraft.client.render.fog.FogRenderer;
 import net.minecraft.client.texture.GlTexture;
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.joml.Vector2i;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL32;
 import org.lwjgl.system.NativeResource;
@@ -40,7 +39,6 @@ public class BraidWindow implements Surface {
     private int localFbo;
 
     private final CursorController cursorController;
-    private final Vector2i cursorPos = new Vector2i();
 
     private int framebufferWidth;
     private int framebufferHeight;
@@ -89,20 +87,10 @@ public class BraidWindow implements Surface {
         })));
 
         GLFW.glfwSetCursorPosCallback(this.handle, this.storeNativeResource(GLFWCursorPosCallback.create((window, mouseX, mouseY) -> {
-            var deltaX = mouseX - this.cursorPos.x;
-            var deltaY = mouseY - this.cursorPos.y;
-
-            this.cursorPos.x = (int) mouseX;
-            this.cursorPos.y = (int) mouseY;
-
-            if (deltaX != 0 || deltaY != 0) {
-                this.eventBinding.add(new MouseMoveEvent(
-                    (double) this.cursorPos.x / this.scaleFactor,
-                    (double) this.cursorPos.y / this.scaleFactor,
-                    deltaX / this.scaleFactor,
-                    deltaY / this.scaleFactor
-                ));
-            }
+            this.eventBinding.add(new MouseMoveEvent(
+                mouseX / this.scaleFactor,
+                mouseY / this.scaleFactor
+            ));
         })));
 
         GLFW.glfwSetScrollCallback(this.handle, this.storeNativeResource(GLFWScrollCallback.create((window, xOffset, yOffset) -> {

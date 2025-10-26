@@ -22,7 +22,7 @@ public record RelativePosition(BuildContext context, double x, double y) {
         }
 
         var coordinates = new Vector2f((float) this.x, (float) this.y);
-        coordinates.mulPosition(contextInstance.computeTransformFrom(ancestorInstance).invert());
+        contextInstance.computeTransformFrom(ancestorInstance).invert().transformPosition(coordinates);
 
         return new Vector2d(coordinates.x, coordinates.y);
     }

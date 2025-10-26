@@ -12,12 +12,10 @@ import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.Clip;
 import io.wispforest.owo.braid.widgets.basic.ListenableBuilder;
 import io.wispforest.owo.braid.widgets.basic.MouseArea;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.math.Box;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector2d;
 import org.joml.Vector2f;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
 
 import java.util.Objects;
 
@@ -90,8 +88,8 @@ public class Scrollable extends StatefulWidget {
             var transform = context.instance().transform;
 
             var box = transform.aabb();
-            var min = new Vector3f((float) (box.minX - padding.left()), (float) (box.minY - padding.top()), (float) box.minZ);
-            var max = new Vector3f((float) (box.maxX + padding.right()), (float) (box.maxY + padding.bottom()), (float) box.maxZ);
+            var min = new Vector2d(box.minX - padding.left(), box.minY - padding.top());
+            var max = new Vector2d(box.maxX + padding.right(), box.maxY + padding.bottom());
 
             transform.toWidgetCoordinates(min);
             transform.toWidgetCoordinates(max);
@@ -99,8 +97,8 @@ public class Scrollable extends StatefulWidget {
             revealAabb(
                 context,
                 new Box(
-                    min.x, min.y, min.z,
-                    max.x, max.y, max.z
+                    min.x, min.y, box.minZ,
+                    max.x, max.y, box.maxZ
                 )
             );
         }
@@ -115,8 +113,8 @@ public class Scrollable extends StatefulWidget {
                 this.verticalController != null ? (float) this.verticalController.offset : 0
             );
 
-            var min = new Vector2f((float) box.minX, (float) box.minY).mulPosition(transform);
-            var max = new Vector2f((float) box.maxX, (float) box.maxY).mulPosition(transform);
+            var min = transform.transformPosition(new Vector2f((float) box.minX, (float) box.minY));
+            var max = transform.transformPosition(new Vector2f((float) box.maxX, (float) box.maxY));
 
             var revealBox = new Box(min.x, min.y, box.minZ, max.x, max.y, box.maxZ);
 

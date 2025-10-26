@@ -13,13 +13,11 @@ import net.minecraft.client.input.CharInput;
 import net.minecraft.client.input.KeyInput;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector2i;
 
 public class BraidScreen extends Screen implements DisposableScreen {
 
     protected final EventBinding eventBinding = new EventBinding.Default();
     protected final Surface.Default surface = new Surface.Default();
-    protected final Vector2i cursorPos = new Vector2i();
 
     protected final Settings settings;
     protected final Widget rootWidget;
@@ -59,16 +57,7 @@ public class BraidScreen extends Screen implements DisposableScreen {
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
 
-        var deltaX = mouseX - this.cursorPos.x;
-        var deltaY = mouseY - this.cursorPos.y;
-
-        this.cursorPos.x = mouseX;
-        this.cursorPos.y = mouseY;
-
-        if (deltaX != 0 || deltaY != 0) {
-            this.eventBinding.add(new MouseMoveEvent(this.cursorPos.x, this.cursorPos.y, deltaX, deltaY));
-        }
-
+        this.eventBinding.add(new MouseMoveEvent(mouseX, mouseY));
         this.state.processEvents(
             this.client.getRenderTickCounter().getDynamicDeltaTicks()
         );

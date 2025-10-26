@@ -32,8 +32,6 @@ public class BraidDisplay {
     @ApiStatus.Internal
     public boolean secondaryPressed = false;
 
-    double cursorX, cursorY;
-
     boolean renderAutomatically = false;
 
     public BraidDisplay(DisplayQuad quad, int surfaceWidth, int surfaceHeight, Widget widget) {

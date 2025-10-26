@@ -49,20 +49,12 @@ public class BraidDisplayBinding {
 
     @ApiStatus.Internal
     public static void onDisplayHit(DisplayHitResult targetDisplay) {
-        var display = targetDisplay.display;
         var app = targetDisplay.display.app;
 
         var cursorX = targetDisplay.point.x() * app.surface.width();
         var cursorY = targetDisplay.point.y() * app.surface.height();
 
-        var deltaX = cursorX - display.cursorX;
-        var deltaY = cursorY - display.cursorY;
-        display.cursorX = cursorX;
-        display.cursorY = cursorY;
-
-        if (deltaX != 0 || deltaY != 0) {
-            app.eventBinding.add(new MouseMoveEvent(cursorX, cursorY, deltaX, deltaY));
-        }
+        app.eventBinding.add(new MouseMoveEvent(cursorX, cursorY));
     }
 
     @ApiStatus.Internal

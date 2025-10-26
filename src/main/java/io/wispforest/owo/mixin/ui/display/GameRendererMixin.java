@@ -102,8 +102,7 @@ public class GameRendererMixin {
         }
 
         if (newTarget == null || BraidDisplayBinding.targetDisplay.display() != newTarget.display()) {
-            // TODO: not emitting proper deltas is quite cringe
-            BraidDisplayBinding.targetDisplay.display().app.eventBinding.add(new MouseMoveEvent(0, 0, 0, 0));
+            BraidDisplayBinding.targetDisplay.display().app.eventBinding.add(new MouseMoveEvent(0, 0));
         }
 
         BraidDisplayBinding.targetDisplay = newTarget;

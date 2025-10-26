@@ -15,7 +15,9 @@ import net.minecraft.util.math.Box;
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.joml.*;
+import org.joml.Matrix3x2f;
+import org.joml.Vector2d;
+import org.joml.Vector2f;
 
 import java.util.*;
 
@@ -214,9 +216,9 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
             state.addHit(this, x, y);
         }
 
-        var coordinates = new Vector3f();
+        var coordinates = new Vector2d();
         this.visitChildren(child -> {
-            coordinates.set((float) x, (float) y, 0);
+            coordinates.set(x, y);
             child.transform.toWidgetCoordinates(coordinates);
 
             child.hitTest(coordinates.x, coordinates.y, state);
@@ -247,8 +249,8 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
     public Box computeGlobalBounds() {
         var global = this.parent != null ? this.parent.computeGlobalTransform().invert() : new Matrix3x2f();
 
-        var min = new Vector2f((float) this.transform.x, (float) this.transform.y).mulPosition(global);
-        var max = new Vector2f((float) (this.transform.x + this.transform.width), (float) (this.transform.y + this.transform.height)).mulPosition(global);
+        var min = global.transformPosition(new Vector2f((float) this.transform.x, (float) this.transform.y));
+        var max = global.transformPosition(new Vector2f((float) (this.transform.x + this.transform.width), (float) (this.transform.y + this.transform.height)));
 
         return new Box(min.x, min.y, 0, max.x, max.y, 0);
     }
@@ -256,7 +258,7 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
     public Vector2d computeGlobalPosition() {
         var global = this.parent != null ? this.parent.computeGlobalTransform().invert() : new Matrix3x2f();
 
-        var pos = new Vector2f((float) this.transform.x, (float) this.transform.y).mulPosition(global);
+        var pos = global.transformPosition(new Vector2f((float) this.transform.x, (float) this.transform.y));
         return new Vector2d(pos.x, pos.y);
     }
 

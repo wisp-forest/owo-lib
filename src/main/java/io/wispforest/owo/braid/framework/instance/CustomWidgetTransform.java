@@ -1,6 +1,5 @@
 package io.wispforest.owo.braid.framework.instance;
 
-import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.Nullable;
 import org.joml.*;
 
@@ -28,7 +27,7 @@ public class CustomWidgetTransform extends WidgetTransform {
         return this.applyAtCenter;
     }
 
-     protected Matrix3x2fc toParent() {
+    protected Matrix3x2fc toParent() {
         if (this.toParent == null) {
             if (this.applyAtCenter) {
                 this.toParent = new Matrix3x2f()
@@ -36,7 +35,9 @@ public class CustomWidgetTransform extends WidgetTransform {
                     .mul(this.matrix)
                     .translate((float) (-this.width / 2), (float) (-this.height / 2));
             } else {
-                this.toParent = new Matrix3x2f(this.matrix);
+                this.toParent = new Matrix3x2f()
+                    .translate((float) this.x, (float) this.y)
+                    .mul(this.matrix);
             }
         }
 
@@ -72,19 +73,19 @@ public class CustomWidgetTransform extends WidgetTransform {
     }
 
     @Override
-    public void toParentCoordinates(Vector3f vec) {
-        var vec2 = new Vector2f(vec.x, vec.y);
-        vec2.mulPosition(this.toParent());
+    public void toParentCoordinates(Vector2d vec) {
+        var vec2f = new Vector2f(vec);
+        this.toParent().transformPosition(vec2f);
 
-        vec.set(vec2.x, vec2.y, vec.z);
+        vec.set(vec2f.x, vec2f.y);
     }
 
     @Override
-    public void toWidgetCoordinates(Vector3f vec) {
-        var vec2 = new Vector2f(vec.x, vec.y);
-        vec2.mulPosition(this.toWidget());
+    public void toWidgetCoordinates(Vector2d vec) {
+        var vec2f = new Vector2f(vec);
+        this.toWidget().transformPosition(vec2f);
 
-        vec.set(vec2.x, vec2.y, vec.z);
+        vec.set(vec2f.x, vec2f.y);
     }
 
     @Override

@@ -307,8 +307,12 @@ public class AppState implements InstanceHost, ProxyHost {
                         }
                     }
                 }
-                case MouseMoveEvent(double x, double y, double deltaX, double deltaY) -> {
+                case MouseMoveEvent(double x, double y) -> {
                     slot.markHandled();
+
+                    var deltaX = x - this.cursorPosition.x;
+                    var deltaY = y - this.cursorPosition.y;
+                    if (deltaX == 0 && deltaY == 0) return;
 
                     this.cursorPosition.x = x;
                     this.cursorPosition.y = y;
@@ -323,12 +327,12 @@ public class AppState implements InstanceHost, ProxyHost {
 
                     var globalTransform = ((WidgetInstance<?>) this.dragging).computeGlobalTransform();
                     var coordinates = new Vector2f((float) x, (float) y);
-                    coordinates.mulPosition(globalTransform);
+                    globalTransform.transformPosition(coordinates);
 
                     // apply *only the rotation* of the instance's transform
                     // to the mouse movement
                     var delta = new Vector2f((float) deltaX, (float) deltaY);
-                    delta.mulDirection(globalTransform);
+                    globalTransform.transformDirection(delta);
 
                     this.dragging.onMouseDrag(coordinates.x, coordinates.y, delta.x, delta.y);
                 }
