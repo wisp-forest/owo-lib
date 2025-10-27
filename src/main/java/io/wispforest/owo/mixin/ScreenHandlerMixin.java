@@ -2,12 +2,15 @@ package io.wispforest.owo.mixin;
 
 import io.wispforest.endec.SerializationContext;
 import io.wispforest.endec.impl.ReflectiveEndecBuilder;
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.client.screens.OwoScreenHandler;
 import io.wispforest.owo.client.screens.ScreenInternals;
 import io.wispforest.owo.client.screens.ScreenhandlerMessageData;
 import io.wispforest.owo.client.screens.SyncedProperty;
 import io.wispforest.owo.network.NetworkException;
 import io.wispforest.endec.Endec;
+import io.wispforest.owo.network.OwoHandshake;
+import io.wispforest.owo.network.OwoNetChannel;
 import io.wispforest.owo.serialization.RegistriesAttribute;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.util.pond.OwoScreenHandlerExtension;
@@ -19,9 +22,15 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.ScreenHandlerSyncHandler;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
+import net.minecraft.text.Texts;
+import org.apache.commons.lang3.stream.Streams;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -29,17 +38,21 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 @Mixin(ScreenHandler.class)
 public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenHandlerExtension {
 
     @Shadow private boolean disableSync;
 
+    @Shadow
+    public abstract ScreenHandlerType<?> getType();
+
+    @Shadow
+    @Final
+    private @Nullable ScreenHandlerType<?> type;
     private final List<SyncedProperty<?>> owo$properties = new ArrayList<>();
 
     private final Map<Class<?>, ScreenhandlerMessageData<?>> owo$messages = new LinkedHashMap<>();
@@ -75,7 +88,7 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
     public <R extends Record> void addServerboundMessage(Class<R> messageClass, Endec<R> endec, Consumer<R> handler) {
         int id = this.owo$serverboundMessages.size();
 
-        var messageData = new ScreenhandlerMessageData<>(id, false, endec, handler);
+        var messageData = new ScreenhandlerMessageData<>(id, messageClass, false, endec, handler);
         this.owo$serverboundMessages.add(messageData);
 
         if (this.owo$messages.put(messageClass, messageData) != null) {
@@ -87,7 +100,7 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
     public <R extends Record> void addClientboundMessage(Class<R> messageClass, Endec<R> endec, Consumer<R> handler) {
         int id = this.owo$clientboundMessages.size();
 
-        var messageData = new ScreenhandlerMessageData<>(id, true, endec, handler);
+        var messageData = new ScreenhandlerMessageData<>(id, messageClass, true, endec, handler);
         this.owo$clientboundMessages.add(messageData);
 
         if (this.owo$messages.put(messageClass, messageData) != null) {
@@ -116,13 +129,13 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
 
         if (messageData.clientbound()) {
             if (!(this.owo$player instanceof ServerPlayerEntity serverPlayer)) {
-                throw new NetworkException("Tried to send clientbound message on the server");
+                throw new NetworkException("Tried to send clientbound message on the server: [Type: " + message.getClass().getSimpleName() + "]");
             }
 
             ServerPlayNetworking.send(serverPlayer, packet);
         } else {
             if (!this.owo$player.getEntityWorld().isClient()) {
-                throw new NetworkException("Tried to send serverbound message on the client");
+                throw new NetworkException("Tried to send serverbound message on the client: [Type: " + message.getClass().getSimpleName() + "]");
             }
 
             this.owo$sendToServer(packet);
@@ -138,10 +151,43 @@ public abstract class ScreenHandlerMixin implements OwoScreenHandler, OwoScreenH
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
     public void owo$handlePacket(ScreenInternals.LocalPacket packet, boolean clientbound) {
-        ScreenhandlerMessageData messageData = (clientbound ? this.owo$clientboundMessages : this.owo$serverboundMessages).get(packet.packetId());
+        var messages = (clientbound ? this.owo$clientboundMessages : this.owo$serverboundMessages);
+
+        if (packet.packetId() < 0 || packet.packetId() >= messages.size()) {
+            throw new NetworkException("Unable to handle packet as it was not properly registered on the [" + (clientbound ?  "CLIENT" : "SERVER") + "]");
+        }
+
+        ScreenhandlerMessageData messageData = messages.get(packet.packetId());
         var ctx = SerializationContext.attributes(RegistriesAttribute.of(this.owo$player.getRegistryManager()));
 
         messageData.handler().accept(packet.payload().read(ctx, messageData.endec()));
+    }
+
+    @Inject(method = "updateSyncHandler", at = @At("HEAD"))
+    private void compareHandlersNetworking(ScreenHandlerSyncHandler handler, CallbackInfo ci) {
+        if (!(player() instanceof ServerPlayerEntity serverPlayer)) return;
+
+        ScreenInternals.attemptHandshake(this.type, serverPlayer);
+    }
+
+    @Override
+    public LinkedHashSet<String> owo$gatherMessageNames() {
+        return Streams.of(this.owo$clientboundMessages, this.owo$serverboundMessages)
+            .flatMap(Collection::stream)
+            .map(ScreenhandlerMessageData::messageName)
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    @Override
+    public void owo$verifyData(ServerPlayerEntity player, Set<String> clientMessageNames) {
+        var errorMessage = new StringBuilder();
+
+        if (OwoHandshake.checkForMismatchStrIds("screen_handler_messages", clientMessageNames, owo$gatherMessageNames(), errorMessage)) return;
+
+        player.closeHandledScreen();
+
+        player.sendMessage(Texts.join(List.of(Owo.PREFIX, Text.of("Unable to open screen as there was a message mismatch:")), Text.empty()));
+        player.sendMessage(Text.of(errorMessage.toString()));
     }
 
     @Override
