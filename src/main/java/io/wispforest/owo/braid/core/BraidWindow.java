@@ -6,14 +6,12 @@ import io.wispforest.owo.braid.core.cursor.CursorController;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.core.events.*;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import io.wispforest.owo.braid.util.BraidGuiRendererTargetOverride;
-import io.wispforest.owo.mixin.braid.GameRendererAccessor;
+import io.wispforest.owo.braid.util.BraidGuiRenderer;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.GlDebug;
 import net.minecraft.client.gl.SimpleFramebuffer;
-import net.minecraft.client.render.fog.FogRenderer;
 import net.minecraft.client.texture.GlTexture;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.lwjgl.glfw.*;
@@ -38,6 +36,8 @@ public class BraidWindow implements Surface {
     private SimpleFramebuffer remoteFramebuffer;
     private int localFbo;
 
+    public final BraidGuiRenderer guiRenderer;
+
     private final CursorController cursorController;
 
     private int framebufferWidth;
@@ -50,6 +50,8 @@ public class BraidWindow implements Surface {
     public BraidWindow(long handle) {
         this.handle = handle;
         this.cursorController = new CursorController(this.handle);
+
+        this.guiRenderer = new BraidGuiRenderer(MinecraftClient.getInstance());
 
         var framebufferWidthOut = new int[1];
         var framebufferHeightOut = new int[1];
@@ -224,6 +226,8 @@ public class BraidWindow implements Surface {
         GLFW.glfwDestroyWindow(this.handle);
         this.cursorController.dispose();
 
+        this.guiRenderer.close();
+
         this.remoteFramebuffer.delete();
 
         for (var resource : this.resources) {
@@ -277,16 +281,10 @@ public class BraidWindow implements Surface {
 
     @Override
     public void endRendering() {
-        BraidGuiRendererTargetOverride.run(
-            new BraidGuiRendererTargetOverride(
-                this.remoteFramebuffer,
-                this
-            ),
-            () -> {
-                var gameRenderer = (GameRendererAccessor) MinecraftClient.getInstance().gameRenderer;
-                gameRenderer.owo$getGuiRenderer().render(gameRenderer.owo$getFogRenderer().getFogBuffer(FogRenderer.FogType.NONE));
-            }
-        );
+        this.guiRenderer.render(new BraidGuiRenderer.Target(
+            this.remoteFramebuffer,
+            this
+        ));
 
         // ---
 

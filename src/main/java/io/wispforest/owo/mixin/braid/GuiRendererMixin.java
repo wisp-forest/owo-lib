@@ -7,61 +7,68 @@ import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import io.wispforest.owo.braid.core.BraidRenderPipelines;
-import io.wispforest.owo.braid.util.BraidGuiRendererTargetOverride;
+import io.wispforest.owo.braid.util.BraidGuiRenderer;
+import io.wispforest.owo.util.pond.BraidGuiRendererExtension;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.gui.render.GuiRenderer;
+import net.minecraft.client.gui.render.SpecialGuiElementRenderer;
+import net.minecraft.client.gui.render.state.special.SpecialGuiElementRenderState;
 import net.minecraft.client.render.ProjectionMatrix2;
-import net.minecraft.client.texture.TextureSetup;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.Map;
+
 @Mixin(GuiRenderer.class)
-public class GuiRendererMixin {
+public class GuiRendererMixin implements BraidGuiRendererExtension {
 
-    @Shadow
-    private @Nullable RenderPipeline pipeline;
+    @Unique
+    private BraidGuiRenderer.Target target = null;
 
-    @Shadow
-    private @Nullable TextureSetup textureSetup;
+    @Override
+    public void owo$setTarget(BraidGuiRenderer.Target target) {
+        this.target = target;
+    }
+
+    // ---
+
     @WrapOperation(method = "renderPreparedDraws", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/ProjectionMatrix2;set(FF)Lcom/mojang/blaze3d/buffers/GpuBufferSlice;"))
     private GpuBufferSlice injectSurfaceDimensions(ProjectionMatrix2 instance, float width, float height, Operation<GpuBufferSlice> original) {
-        if (BraidGuiRendererTargetOverride.current() == null) return original.call(instance, width, height);
+        if (this.target == null) return original.call(instance, width, height);
 
-        var surface = BraidGuiRendererTargetOverride.current().surface();
+        var surface = this.target.surface();
         return original.call(instance, (float) surface.width(), (float) surface.height());
     }
 
     @ModifyExpressionValue(method = "renderPreparedDraws", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;getFramebuffer()Lnet/minecraft/client/gl/Framebuffer;"))
     private Framebuffer injectFramebuffer(Framebuffer original) {
-        if (BraidGuiRendererTargetOverride.current() == null) return original;
-        return BraidGuiRendererTargetOverride.current().framebuffer();
+        if (this.target == null) return original;
+        return this.target.framebuffer();
     }
 
     @ModifyExpressionValue(method = "enableScissor", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/Window;getFramebufferHeight()I"))
     private int injectSurfaceHeightForScissor(int original) {
-        if (BraidGuiRendererTargetOverride.current() == null) return original;
-        return BraidGuiRendererTargetOverride.current().framebuffer().textureHeight;
+        if (this.target == null) return original;
+        return this.target.framebuffer().textureHeight;
     }
 
     @ModifyExpressionValue(method = "enableScissor", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/Window;getScaleFactor()I"))
     private int injectSurfaceScaleForScissor(int original) {
-        if (BraidGuiRendererTargetOverride.current() == null) return original;
-        return (int) BraidGuiRendererTargetOverride.current().surface().scaleFactor();
+        if (this.target == null) return original;
+        return (int) this.target.surface().scaleFactor();
     }
 
     @ModifyExpressionValue(method = "prepareSpecialElements", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/Window;getScaleFactor()I"))
     private int injectSurfaceScaleForPIP(int original) {
-        if (BraidGuiRendererTargetOverride.current() == null) return original;
-        return (int) BraidGuiRendererTargetOverride.current().surface().scaleFactor();
+        if (this.target == null) return original;
+        return (int) this.target.surface().scaleFactor();
     }
 
     // ---
@@ -96,5 +103,16 @@ public class GuiRendererMixin {
 
             texture.setTextureFilter(minFilter.get(), magFilter.get(), textureAccess.owo$getUseMipmaps());
         }
+    }
+
+    // ---
+
+    @ModifyExpressionValue(method = "close", at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/render/GuiRenderer;specialElementRenderers:Ljava/util/Map;"))
+    private Map<Class<? extends SpecialGuiElementRenderState>, SpecialGuiElementRenderer<?>> keepAliveRenderers(Map<Class<? extends SpecialGuiElementRenderState>, SpecialGuiElementRenderer<?>> original) {
+        if (((Object) this) instanceof BraidGuiRenderer) {
+            return Map.of();
+        }
+
+        return original;
     }
 }

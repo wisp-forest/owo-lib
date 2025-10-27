@@ -3,13 +3,11 @@ package io.wispforest.owo.braid.core;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
-import io.wispforest.owo.braid.util.BraidGuiRendererTargetOverride;
-import io.wispforest.owo.mixin.braid.GameRendererAccessor;
+import io.wispforest.owo.braid.util.BraidGuiRenderer;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.SimpleFramebuffer;
-import net.minecraft.client.render.fog.FogRenderer;
 
 public class TextureSurface implements Surface {
 
@@ -18,8 +16,11 @@ public class TextureSurface implements Surface {
 
     private CursorStyle currentCursorStyle = CursorStyle.NONE;
 
+    public final BraidGuiRenderer guiRenderer;
+
     public TextureSurface(int width, int height) {
         this.framebuffer = new SimpleFramebuffer("texture surface", width, height, true);
+        this.guiRenderer = new BraidGuiRenderer(MinecraftClient.getInstance());
     }
 
     public void resize(int width, int height) {
@@ -75,16 +76,10 @@ public class TextureSurface implements Surface {
 
     @Override
     public void endRendering() {
-        BraidGuiRendererTargetOverride.run(
-            new BraidGuiRendererTargetOverride(
-                this.framebuffer,
-                this
-            ),
-            () -> {
-                var gameRenderer = (GameRendererAccessor) MinecraftClient.getInstance().gameRenderer;
-                gameRenderer.owo$getGuiRenderer().render(gameRenderer.owo$getFogRenderer().getFogBuffer(FogRenderer.FogType.NONE));
-            }
-        );
+        this.guiRenderer.render(new BraidGuiRenderer.Target(
+            this.framebuffer,
+            this
+        ));
     }
 
     @Override

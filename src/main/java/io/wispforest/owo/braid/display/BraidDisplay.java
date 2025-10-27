@@ -8,10 +8,8 @@ import io.wispforest.owo.braid.core.AppState;
 import io.wispforest.owo.braid.core.EventBinding;
 import io.wispforest.owo.braid.core.TextureSurface;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import io.wispforest.owo.mixin.braid.GameRendererAccessor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.RenderPhase;
 import net.minecraft.client.render.command.OrderedRenderCommandQueue;
@@ -59,7 +57,7 @@ public class BraidDisplay {
             client.getRenderTickCounter().getDynamicDeltaTicks()
         );
 
-        this.app.draw(new DrawContext(client, ((GameRendererAccessor) client.gameRenderer).owo$getGuiState()));
+        this.app.draw(this.surface.guiRenderer.newDrawContext());
     }
 
     public void render(MatrixStack matrices, OrderedRenderCommandQueue queue, int light) {

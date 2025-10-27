@@ -27,7 +27,6 @@ import io.wispforest.owo.braid.widgets.checkbox.BraidCheckbox;
 import io.wispforest.owo.braid.widgets.checkbox.Checkbox;
 import io.wispforest.owo.braid.widgets.checkbox.RawCheckbox;
 import io.wispforest.owo.braid.widgets.combobox.ComboBox;
-import io.wispforest.owo.braid.widgets.cycle.CyclingButton;
 import io.wispforest.owo.braid.widgets.cycle.MessageCyclingButton;
 import io.wispforest.owo.braid.widgets.drag.DragArena;
 import io.wispforest.owo.braid.widgets.drag.DragArenaElement;
@@ -136,7 +135,8 @@ public class TestSelector extends StatefulWidget {
         NAVIGATOR,
         OVERLAY,
         TEXT,
-        SPINNY_GHAST
+        SPINNY_GHAST,
+        OPTIMIZATION
     }
 
     @Override
@@ -230,6 +230,7 @@ public class TestSelector extends StatefulWidget {
                                     case OVERLAY -> new OverlayTest();
                                     case TEXT -> new TextTest();
                                     case SPINNY_GHAST -> new SpinnyGhastTest();
+                                    case OPTIMIZATION -> new OptimizationTest(this.chyz);
                                     case null -> new Center(new Label(Text.literal("select a test")));
                                 }
                             )
@@ -2496,6 +2497,33 @@ public class TestSelector extends StatefulWidget {
                     );
                 }
             }
+        }
+    }
+
+    public static class OptimizationTest extends StatelessWidget {
+
+        public final Entity chyz;
+        public OptimizationTest(Entity chyz) {
+            this.chyz = chyz;
+        }
+
+        @Override
+        public Widget build(BuildContext context) {
+            var widget = new Sized(
+                128, 128,
+                new EntityWidget(
+                    1.5, this.chyz,
+                    entityWidget -> entityWidget.displayMode(EntityWidget.DisplayMode.CURSOR)
+                )
+            );
+            return new VerticallyScrollable(
+                new Grid(
+                    LayoutAxis.VERTICAL,
+                    32,
+                    Grid.CellFit.loose(),
+                    Stream.generate(() -> widget).limit(32*32).toList()
+                )
+            );
         }
     }
 
