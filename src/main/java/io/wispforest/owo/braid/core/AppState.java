@@ -312,7 +312,7 @@ public class AppState implements InstanceHost, ProxyHost {
 
                     var deltaX = x - this.cursorPosition.x;
                     var deltaY = y - this.cursorPosition.y;
-                    if (deltaX == 0 && deltaY == 0) return;
+                    if (deltaX == 0 && deltaY == 0) break;
 
                     this.cursorPosition.x = x;
                     this.cursorPosition.y = y;
