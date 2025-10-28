@@ -56,7 +56,7 @@ public abstract class SimpleRegistryMixin<T> implements MutableRegistry<T>, OwoS
 
             ((ReferenceAccessor<T>) reference).owo$setRegistryKey(arg);
         } else {
-            reference = this.keyToEntry.computeIfAbsent(arg, k -> RegistryEntry.Reference.standAlone(this, k));
+            reference = this.keyToEntry.computeIfAbsent(arg, k -> RegistryEntry.Reference.standAlone(this.getEntryOwner(), k));
             ((ReferenceAccessor<T>) reference).owo$setValue((T)object);
         }
 

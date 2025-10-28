@@ -18,9 +18,7 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.storage.NbtWriteView;
 import net.minecraft.text.Text;
-import net.minecraft.util.ErrorReporter;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -88,12 +86,12 @@ public class DumpdataCommand {
         final var player = source.getPlayer();
 
         final var target = ProjectileUtil.raycast(
-                player,
-                player.getCameraPosVec(0),
-                player.getCameraPosVec(0).add(player.getRotationVec(0).multiply(5)),
-                player.getBoundingBox().stretch(player.getRotationVec(0).multiply(5)).expand(1),
-                entity -> true,
-                5 * 5);
+            player,
+            player.getCameraPosVec(0),
+            player.getCameraPosVec(0).add(player.getRotationVec(0).multiply(5)),
+            player.getBoundingBox().stretch(player.getRotationVec(0).multiply(5)).expand(1),
+            entity -> true,
+            5 * 5);
 
         if (target == null || target.getType() != HitResult.Type.ENTITY) {
             source.sendError(TextOps.concat(Owo.PREFIX, Text.literal("You're not looking at an entity")));
@@ -105,11 +103,8 @@ public class DumpdataCommand {
         informationHeader(source, "Entity");
         sendIdentifier(source, entity.getType(), Registries.ENTITY_TYPE);
 
-        var writeView = NbtWriteView.create(new ErrorReporter.Logging(Owo.LOGGER));
-        entity.saveData(writeView);
-
         feedback(source, TextOps.withFormatting("NBT" + formatPath(path) + ": ", Formatting.GRAY)
-                .append(NbtHelper.toPrettyPrintedText(getPath(writeView.getNbt(), path))));
+            .append(NbtHelper.toPrettyPrintedText(getPath(entity.writeNbt(new NbtCompound()), path))));
 
         feedback(source, TextOps.withFormatting("-----------------------", Formatting.GRAY));
 

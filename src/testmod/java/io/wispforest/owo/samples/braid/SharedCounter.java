@@ -70,8 +70,13 @@ public class SharedCounter extends StatelessWidget {
         @Override
         public Widget build(BuildContext context) {
             return new MessageButton(
-                this.countBy > 0 ? Text.literal("+" + this.countBy) : Text.literal(String.valueOf(this.countBy)),
-                () -> SharedState.set(context, CounterState.class, state -> state.count += this.countBy)
+                this.countBy > 0
+                    ? Text.literal("+" + this.countBy)
+                    : Text.literal(String.valueOf(this.countBy)),
+                () -> SharedState.set(
+                    context, CounterState.class,
+                    state -> state.count += this.countBy
+                )
             );
         }
     }

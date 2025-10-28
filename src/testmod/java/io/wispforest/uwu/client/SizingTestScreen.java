@@ -31,6 +31,6 @@ public class SizingTestScreen extends BaseOwoScreen<FlowLayout> {
             }).horizontalSizing(Sizing.fill(50)));
         }));
 
-        rootComponent.child(Components.label(Text.literal("bruh").setStyle(Style.EMPTY.withClickEvent(new ClickEvent.OpenUrl(URI.create("https://wispforest.io"))))));
+        rootComponent.child(Components.label(Text.literal("bruh").setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://wispforest.io")))));
     }
 }

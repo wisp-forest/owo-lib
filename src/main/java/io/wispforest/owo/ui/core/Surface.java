@@ -1,18 +1,21 @@
 package io.wispforest.owo.ui.core;
 
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
+import io.wispforest.owo.client.OwoClient;
+import io.wispforest.owo.mixin.ScreenAccessor;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
-import io.wispforest.owo.ui.renderstate.BlurQuadElementRenderState;
-import io.wispforest.owo.ui.renderstate.CubeMapElementRenderState;
 import io.wispforest.owo.ui.util.NinePatchTexture;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.RotatingCubeMapRenderer;
-import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.client.gui.tooltip.TooltipBackgroundRenderer;
+import net.minecraft.client.render.BufferRenderer;
+import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexFormat;
+import net.minecraft.client.render.VertexFormats;
 import net.minecraft.util.Identifier;
-import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix3x2f;
+import net.minecraft.util.math.MathHelper;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -39,22 +42,28 @@ public interface Surface {
         );
     };
 
-    Surface TOOLTIP = tooltip(null);
+    Surface TOOLTIP = (context, component) -> {
+        context.draw(() -> {
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
 
-    static Surface tooltip(@Nullable Identifier texture) {
-        return (context, component) -> {
-            TooltipBackgroundRenderer.render(context, component.x() + 4, component.y() + 4, component.width() - 8, component.height() - 8, texture);
-        };
-    }
+            TooltipBackgroundRenderer.render(context, component.x() + 4, component.y() + 4, component.width() - 8, component.height() - 8, 0);
+        });
+    };
 
     static Surface blur(float quality, float size) {
         return (context, component) -> {
-            context.state.addSimpleElement(new BlurQuadElementRenderState(
-                new Matrix3x2f(context.getMatrices()),
-                new ScreenRect(component.x(), component.y(), component.width(), component.height()),
-                context.scissorStack.peekLast(),
-                16, quality, size
-            ));
+            var buffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION);
+            var matrix = context.getMatrices().peek().getPositionMatrix();
+
+            buffer.vertex(matrix, component.x(), component.y(), 0);
+            buffer.vertex(matrix, component.x(), component.y() + component.height(), 0);
+            buffer.vertex(matrix, component.x() + component.width(), component.y() + component.height(), 0);
+            buffer.vertex(matrix, component.x() + component.width(), component.y(), 0);
+
+            OwoClient.BLUR_PROGRAM.setParameters(16, quality, size);
+            OwoClient.BLUR_PROGRAM.use();
+            BufferRenderer.drawWithGlobalProgram(buffer.end());
         };
     }
 
@@ -63,17 +72,44 @@ public interface Surface {
     }
 
     static Surface vanillaPanorama(boolean alwaysVisible) {
-        return panorama(MinecraftClient.getInstance().gameRenderer.getRotatingPanoramaRenderer(), alwaysVisible);
+        return panorama(new RotatingCubeMapRenderer(ScreenAccessor.owo$PANORAMA_RENDERER()), alwaysVisible);
     }
 
     static Surface panorama(RotatingCubeMapRenderer renderer, boolean alwaysVisible) {
         return (context, component) -> {
             if (!alwaysVisible && MinecraftClient.getInstance().world != null) return;
-            context.state.addSpecialElement(new CubeMapElementRenderState(
-                renderer, true,
-                new ScreenRect(component.x(), component.y(), component.width(), component.height()),
-                context.scissorStack.peekLast()
-            ));
+
+            var client = MinecraftClient.getInstance();
+
+            int prevX = GlStateManager.Viewport.getX();
+            int prevY = GlStateManager.Viewport.getY();
+            int prevWidth = GlStateManager.Viewport.getWidth();
+            int prevHeight = GlStateManager.Viewport.getHeight();
+
+            var window = client.getWindow();
+            var scale = window.getScaleFactor();
+
+            var x = component.x();
+            var y = component.y();
+            var width = component.width();
+            var height = component.height();
+
+            RenderSystem.viewport(
+                (int) (x * scale),
+                (int) (window.getFramebufferHeight() - (y * scale) - height * scale),
+                MathHelper.clamp((int) (width * scale), 0, window.getFramebufferWidth()),
+                MathHelper.clamp((int) (height * scale), 0, window.getFramebufferHeight())
+            );
+
+            var delta = client.getRenderTickCounter().getLastDuration();
+
+            RenderSystem.disableDepthTest();
+
+            renderer.render(context, width, height, 1.0F, delta);
+
+            RenderSystem.enableDepthTest();
+
+            RenderSystem.viewport(prevX, prevY, prevWidth, prevHeight);
         };
     }
 
@@ -87,7 +123,7 @@ public interface Surface {
 
     static Surface tiled(Identifier texture, int textureWidth, int textureHeight) {
         return (context, component) -> {
-            context.drawTexture(RenderPipelines.GUI_TEXTURED, texture, component.x(), component.y(), 0, 0, component.width(), component.height(), textureWidth, textureHeight);
+            context.drawTexture(texture, component.x(), component.y(), 0, 0, component.width(), component.height(), textureWidth, textureHeight);
         };
     }
 

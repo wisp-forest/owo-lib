@@ -28,7 +28,7 @@ public class LayersTestWidget extends StatelessWidget {
                     Insets.all(15),
                     new MessageButton(
                         Text.literal("layers??"),
-                        () -> MinecraftClient.getInstance().getServer().getPlayerManager().getPlayerList().getFirst().kill(MinecraftClient.getInstance().getServer().getOverworld())
+                        () -> MinecraftClient.getInstance().getServer().getPlayerManager().getPlayerList().getFirst().kill()
                     )
                 )
             ),

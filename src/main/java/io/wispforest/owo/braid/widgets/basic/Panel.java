@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets.basic;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.core.BraidDrawContext;
 import io.wispforest.owo.braid.framework.instance.OptionalChildWidgetInstance;
@@ -43,6 +44,9 @@ public class Panel extends OptionalChildInstanceWidget {
         @Override
         public void draw(BraidDrawContext ctx) {
             if (this.widget.texture != null) {
+                RenderSystem.enableBlend();
+                RenderSystem.defaultBlendFunc();
+
                 NinePatchTexture.draw(this.widget.texture, OwoUIDrawContext.of(ctx), 0, 0, (int) this.transform.width(), (int) this.transform.height());
             }
 

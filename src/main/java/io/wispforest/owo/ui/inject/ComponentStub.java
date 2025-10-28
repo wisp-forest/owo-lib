@@ -5,10 +5,7 @@ import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.event.*;
 import io.wispforest.owo.ui.util.FocusHandler;
 import io.wispforest.owo.util.EventSource;
-import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -107,6 +104,16 @@ public interface ComponentStub extends Component {
     }
 
     @Override
+    default Component zIndex(int zIndex) {
+        throw new IllegalStateException("Interface stub method called");
+    }
+
+    @Override
+    default int zIndex() {
+        throw new IllegalStateException("Interface stub method called");
+    }
+
+    @Override
     default void inflate(Size space) {
         throw new IllegalStateException("Interface stub method called");
     }
@@ -137,7 +144,7 @@ public interface ComponentStub extends Component {
     }
 
     @Override
-    default boolean onMouseDown(Click click, boolean doubled) {
+    default boolean onMouseDown(double mouseX, double mouseY, int button) {
         throw new IllegalStateException("Interface stub method called");
     }
 
@@ -147,7 +154,7 @@ public interface ComponentStub extends Component {
     }
 
     @Override
-    default boolean onMouseUp(Click click) {
+    default boolean onMouseUp(double mouseX, double mouseY, int button) {
         throw new IllegalStateException("Interface stub method called");
     }
 
@@ -167,7 +174,7 @@ public interface ComponentStub extends Component {
     }
 
     @Override
-    default boolean onMouseDrag(Click click, double deltaX, double deltaY) {
+    default boolean onMouseDrag(double mouseX, double mouseY, double deltaX, double deltaY, int button) {
         throw new IllegalStateException("Interface stub method called");
     }
 
@@ -177,7 +184,7 @@ public interface ComponentStub extends Component {
     }
 
     @Override
-    default boolean onKeyPress(KeyInput input) {
+    default boolean onKeyPress(int keyCode, int scanCode, int modifiers) {
         throw new IllegalStateException("Interface stub method called");
     }
 
@@ -187,7 +194,7 @@ public interface ComponentStub extends Component {
     }
 
     @Override
-    default boolean onCharTyped(CharInput input) {
+    default boolean onCharTyped(char chr, int modifiers) {
         throw new IllegalStateException("Interface stub method called");
     }
 

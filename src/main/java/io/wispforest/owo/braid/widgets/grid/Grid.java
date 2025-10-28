@@ -9,9 +9,7 @@ import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.Padding;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.text.StyleSpriteSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
@@ -207,14 +205,14 @@ public class Grid extends MultiChildInstanceWidget {
             for (int i = 0; i < verticalSizes.length; i++) {
                 if (i > 0) {
                     ctx.drawDashedLine(
-                        RenderPipelines.GUI,
+                        RenderLayer.getGui(),
                         0, verticalPos, this.transform.width(), verticalPos,
                         1, 2, frameColor
                     );
                 }
 
                 ctx.drawText(
-                    Text.literal(verticalSizes[i] + "px").styled(style -> style.withFont(new StyleSpriteSource.Font(MinecraftClient.UNICODE_FONT_ID))),
+                    Text.literal(verticalSizes[i] + "px").styled(style -> style.withFont(MinecraftClient.UNICODE_FONT_ID)),
                     0, (float) verticalPos, 1f, Color.WHITE.argb(),
                     OwoUIDrawContext.TextAnchor.TOP_RIGHT
                 );
@@ -226,14 +224,14 @@ public class Grid extends MultiChildInstanceWidget {
             for (int i = 0; i < horizontalSizes.length; i++) {
                 if (i > 0) {
                     ctx.drawDashedLine(
-                        RenderPipelines.GUI,
+                        RenderLayer.getGui(),
                         horizontalPos, 0, horizontalPos, this.transform.height(),
                         1, 2, frameColor
                     );
                 }
 
                 ctx.drawText(
-                    Text.literal(horizontalSizes[i] + "px").styled(style -> style.withFont(new StyleSpriteSource.Font(MinecraftClient.UNICODE_FONT_ID))),
+                    Text.literal(horizontalSizes[i] + "px").styled(style -> style.withFont(MinecraftClient.UNICODE_FONT_ID)),
                     (float) horizontalPos, 0, 1f, Color.WHITE.argb(),
                     OwoUIDrawContext.TextAnchor.BOTTOM_LEFT
                 );

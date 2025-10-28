@@ -2,7 +2,6 @@ package io.wispforest.owo.ui.container;
 
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.util.EventSource;
-import net.minecraft.client.gui.Click;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -30,8 +29,8 @@ public class OverlayContainer<C extends Component> extends WrappingParentCompone
     @Override
     public void mount(ParentComponent parent, int x, int y) {
         super.mount(parent, x, y);
-        this.exitSubscription = this.root().keyPress().subscribe((input) -> {
-            if (input.isEscape()) {
+        this.exitSubscription = this.root().keyPress().subscribe((keyCode, scanCode, modifiers) -> {
+            if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
                 this.remove();
                 return true;
             }
@@ -50,8 +49,8 @@ public class OverlayContainer<C extends Component> extends WrappingParentCompone
     }
 
     @Override
-    public boolean onMouseDown(Click click, boolean doubled) {
-        boolean handled = super.onMouseDown(click, doubled) || this.child.isInBoundingBox(click.x(), click.y());
+    public boolean onMouseDown(double mouseX, double mouseY, int button) {
+        boolean handled = super.onMouseDown(mouseX, mouseY, button) || this.child.isInBoundingBox(mouseX, mouseY);
 
         if (!handled && this.closeOnClick) {
             this.remove();

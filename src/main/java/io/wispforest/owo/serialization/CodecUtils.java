@@ -625,7 +625,7 @@ public class CodecUtils {
                         throw new IllegalStateException("Unable to parse key: " + key);
                     }
 
-                    compound.put(primitive.asString().get(), value);
+                    compound.put(primitive.asString(), value);
                 });
 
                 return compound;

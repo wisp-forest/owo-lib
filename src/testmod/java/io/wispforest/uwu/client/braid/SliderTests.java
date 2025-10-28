@@ -330,7 +330,7 @@ public class SliderTests extends StatefulWidget {
                     new Sized(
                         20, 20,
                         new Transform(
-                            new Matrix3x2f().scale(0.5f),
+                            new Matrix4f().scale(0.5f),
                             new Label(
                                 null,
                                 false,

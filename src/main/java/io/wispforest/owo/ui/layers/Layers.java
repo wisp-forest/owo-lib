@@ -101,20 +101,20 @@ public final class Layers {
                 }
             });
 
-            ScreenMouseEvents.allowMouseClick(screeen).register((screen, click) -> {
+            ScreenMouseEvents.allowMouseClick(screeen).register((screen, mouseX, mouseY, button) -> {
                 boolean handled;
                 for (var instance : getInstances(screen)) {
-                    handled = instance.adapter.mouseClicked(click, false);
+                    handled = instance.adapter.mouseClicked(mouseX, mouseY, button);
                     if (handled) return false;
                 }
 
                 return true;
             });
 
-            ScreenMouseEvents.allowMouseRelease(screeen).register((screen, click) -> {
+            ScreenMouseEvents.allowMouseRelease(screeen).register((screen, mouseX, mouseY, button) -> {
                 boolean handled;
                 for (var instance : getInstances(screen)) {
-                    handled = instance.adapter.mouseReleased(click);
+                    handled = instance.adapter.mouseReleased(mouseX, mouseY, button);
                     if (handled) return false;
                 }
 
@@ -131,20 +131,20 @@ public final class Layers {
                 return true;
             });
 
-            ScreenKeyboardEvents.allowKeyPress(screeen).register((screen, keyInput) -> {
+            ScreenKeyboardEvents.allowKeyPress(screeen).register((screen, key, scancode, modifiers) -> {
                 boolean handled;
                 for (var instance : getInstances(screen)) {
-                    handled = instance.adapter.keyPressed(keyInput);
+                    handled = instance.adapter.keyPressed(key, scancode, modifiers);
                     if (handled) return false;
                 }
 
                 return true;
             });
 
-            ScreenKeyboardEvents.allowKeyRelease(screeen).register((screen, keyInput) -> {
+            ScreenKeyboardEvents.allowKeyRelease(screeen).register((screen, key, scancode, modifiers) -> {
                 boolean handled;
                 for (var instance : getInstances(screen)) {
-                    handled = instance.adapter.keyReleased(keyInput);
+                    handled = instance.adapter.keyReleased(key, scancode, modifiers);
                     if (handled) return false;
                 }
 

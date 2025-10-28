@@ -1,10 +1,8 @@
 package io.wispforest.owo.braid.display;
 
 import io.wispforest.owo.braid.core.events.MouseMoveEvent;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.render.LightmapTextureManager;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.render.state.CameraRenderState;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -64,18 +62,26 @@ public class BraidDisplayBinding {
         }
     }
 
-    @ApiStatus.Internal
-    public static void renderAutomaticDisplays(MatrixStack matrices, CameraRenderState camera, OrderedRenderCommandQueue queue) {
-        for (var display : ACTIVE_DISPLAYS) {
-            if (!display.renderAutomatically) continue;
+    // ---
 
-            matrices.push();
-            matrices.translate(display.quad.pos.subtract(camera.pos));
+    static {
+        WorldRenderEvents.AFTER_ENTITIES.register(context -> {
+            for (var display : ACTIVE_DISPLAYS) {
+                if (!display.renderAutomatically) continue;
 
-            display.render(matrices, queue, LightmapTextureManager.MAX_LIGHT_COORDINATE);
+                var matrices = context.matrixStack();
+                var offset = display.quad.pos.subtract(context.camera().getPos());
 
-            matrices.pop();
-        }
+                //noinspection DataFlowIssue
+                matrices.push();
+                matrices.translate(offset.x, offset.y, offset.z);
+
+                //noinspection DataFlowIssue
+                display.render(matrices, context.consumers(), LightmapTextureManager.MAX_LIGHT_COORDINATE);
+
+                matrices.pop();
+            }
+        });
     }
 
     // ---

@@ -22,6 +22,7 @@ import java.time.Duration;
 
 public class BraidToast implements Toast {
 
+    private Visibility visibility = Visibility.SHOW;
     private final @Nullable Duration timeout;
     private final Object token;
     private final AppState app;
@@ -78,8 +79,14 @@ public class BraidToast implements Toast {
     }
 
     @Override
-    public void draw(DrawContext context, TextRenderer textRenderer, long startTime) {
+    public Visibility draw(DrawContext context, ToastManager manager, long startTime) {
         this.app.draw(context);
+
+        if (this.timeout != null && startTime > this.timeout.toMillis()) {
+            this.visibility = Visibility.HIDE;
+        }
+
+        return this.visibility;
     }
 
     @Override
@@ -93,25 +100,6 @@ public class BraidToast implements Toast {
     }
 
     // ---
-
-    private Visibility visibility = Visibility.SHOW;
-
-    @Override
-    public void update(ToastManager manager, long time) {
-        if (this.timeout != null && time > this.timeout.toMillis()) {
-            this.visibility = Visibility.HIDE;
-        }
-
-        var tickCounter = MinecraftClient.getInstance().getRenderTickCounter();
-        this.app.processEvents(
-            tickCounter.getDynamicDeltaTicks()
-        );
-    }
-
-    @Override
-    public Visibility getVisibility() {
-        return this.visibility;
-    }
 
     @Override
     public Object getType() {

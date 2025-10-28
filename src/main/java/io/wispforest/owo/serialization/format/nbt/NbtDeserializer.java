@@ -2,12 +2,12 @@ package io.wispforest.owo.serialization.format.nbt;
 
 import com.google.common.collect.MapMaker;
 import io.wispforest.endec.*;
+import io.wispforest.endec.temp.OptionalFieldFlag;
 import io.wispforest.endec.util.RecursiveDeserializer;
 import net.minecraft.nbt.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.Supplier;
 
 public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implements SelfDescribedDeserializer<NbtElement> {
 
@@ -80,7 +80,7 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
 
     @Override
     public String readString(SerializationContext ctx) {
-        return this.getAs(this.getValue(), NbtString.class).asString().get();
+        return this.getAs(this.getValue(), NbtString.class).asString();
     }
 
     @Override
@@ -99,8 +99,8 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
 
         var struct = this.struct();
         return struct.field("present", ctx, Endec.BOOLEAN)
-                ? Optional.of(struct.field("value", ctx, endec))
-                : Optional.empty();
+            ? Optional.of(struct.field("value", ctx, endec))
+            : Optional.empty();
     }
 
     // ---
@@ -108,8 +108,7 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
     @Override
     public <E> Deserializer.Sequence<E> sequence(SerializationContext ctx, Endec<E> elementEndec) {
         //noinspection unchecked
-        var list = this.getAs(this.getValue(), AbstractNbtList.class);
-        return new Sequence<E>(ctx, elementEndec, list, list.size());
+        return new Sequence<>(ctx, elementEndec, this.getAs(this.getValue(), AbstractNbtList.class));
     }
 
     @Override
@@ -137,10 +136,10 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
             case NbtElement.LONG_TYPE -> visitor.writeLong(ctx, ((NbtLong) value).longValue());
             case NbtElement.FLOAT_TYPE -> visitor.writeFloat(ctx, ((NbtFloat) value).floatValue());
             case NbtElement.DOUBLE_TYPE -> visitor.writeDouble(ctx, ((NbtDouble) value).doubleValue());
-            case NbtElement.STRING_TYPE -> visitor.writeString(ctx, value.asString().get());
+            case NbtElement.STRING_TYPE -> visitor.writeString(ctx, value.asString());
             case NbtElement.BYTE_ARRAY_TYPE -> visitor.writeBytes(ctx, ((NbtByteArray) value).getByteArray());
             case NbtElement.INT_ARRAY_TYPE, NbtElement.LONG_ARRAY_TYPE, NbtElement.LIST_TYPE -> {
-                var list = (AbstractNbtList) value;
+                var list = (AbstractNbtList<?>) value;
                 try (var sequence = visitor.sequence(ctx, Endec.<NbtElement>of(this::decodeValue, (ctx1, deserializer) -> null), list.size())) {
                     list.forEach(sequence::element);
                 }
@@ -154,7 +153,7 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
                 }
             }
             default ->
-                    throw new IllegalArgumentException("Non-standard, unrecognized NbtElement implementation cannot be decoded");
+                throw new IllegalArgumentException("Non-standard, unrecognized NbtElement implementation cannot be decoded");
         }
     }
 
@@ -167,12 +166,12 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
         private final Iterator<NbtElement> elements;
         private final int size;
 
-        private Sequence(SerializationContext ctx, Endec<V> valueEndec, Iterable<NbtElement> elements, int size) {
+        private Sequence(SerializationContext ctx, Endec<V> valueEndec, List<NbtElement> elements) {
             this.ctx = ctx;
             this.valueEndec = valueEndec;
 
             this.elements = elements.iterator();
-            this.size = size;
+            this.size = elements.size();
         }
 
         @Override
@@ -187,11 +186,11 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
 
         @Override
         public V next() {
-            var value = this.elements.next();
-
+            var element = this.elements.next();
             return NbtDeserializer.this.frame(
-                    () -> value,
-                    () -> this.valueEndec.decode(this.ctx, NbtDeserializer.this)
+                () -> element,
+                () -> this.valueEndec.decode(this.ctx, NbtDeserializer.this),
+                false
             );
         }
     }
@@ -227,8 +226,9 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
         public java.util.Map.Entry<String, V> next() {
             var key = this.keys.next();
             return NbtDeserializer.this.frame(
-                    () -> this.compound.get(key),
-                    () -> java.util.Map.entry(key, this.valueEndec.decode(this.ctx, NbtDeserializer.this))
+                () -> this.compound.get(key),
+                () -> java.util.Map.entry(key, this.valueEndec.decode(this.ctx, NbtDeserializer.this)),
+                false
             );
         }
     }
@@ -242,19 +242,35 @@ public class NbtDeserializer extends RecursiveDeserializer<NbtElement> implement
         }
 
         @Override
-        public <F> @Nullable F field(String name, SerializationContext ctx, Endec<F> endec, @Nullable Supplier<F> defaultValueFactory) {
+        public <F> @Nullable F field(String name, SerializationContext ctx, Endec<F> endec) {
             if (!this.compound.contains(name)) {
-                if (defaultValueFactory == null) {
+                throw new IllegalStateException("Field '" + name + "' was missing from serialized data, but no default value was provided");
+            }
+
+            return NbtDeserializer.this.frame(
+                () -> this.compound.get(name),
+                () -> endec.decode(ctx, NbtDeserializer.this),
+                true
+            );
+        }
+
+        @Override
+        public <F> @Nullable F field(String name, SerializationContext ctx, Endec<F> endec, @Nullable F defaultValue) {
+            boolean mayOmit = ctx.hasAttribute(OptionalFieldFlag.INSTANCE);
+
+            if (!this.compound.contains(name)) {
+                if (!mayOmit) {
                     throw new IllegalStateException("Field '" + name + "' was missing from serialized data, but no default value was provided");
                 }
 
-                return defaultValueFactory.get();
+                return defaultValue;
             }
             var element = this.compound.get(name);
-            if (defaultValueFactory != null) NbtDeserializer.this.encodedOptionals.add(element);
+            if (mayOmit) NbtDeserializer.this.encodedOptionals.add(element);
             return NbtDeserializer.this.frame(
-                    () -> element,
-                    () -> endec.decode(ctx, NbtDeserializer.this)
+                () -> element,
+                () -> endec.decode(ctx, NbtDeserializer.this),
+                false
             );
         }
     }

@@ -26,7 +26,6 @@ import io.wispforest.owo.braid.widgets.sharedstate.SharedState;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Style;
-import net.minecraft.text.StyleSpriteSource;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
@@ -82,7 +81,7 @@ public class InspectorWidget extends StatefulWidget {
                         return new Box(
                             Color.rgb(0x1d2026),
                             new DefaultLabelStyle(
-                                new LabelStyle(null, null, Style.EMPTY.withFont(new StyleSpriteSource.Font(MinecraftClient.UNICODE_FONT_ID)), null),
+                                new LabelStyle(null, null, Style.EMPTY.withFont(MinecraftClient.UNICODE_FONT_ID), null),
                                 new Row(
                                     new Flexible(
                                         new Stack(

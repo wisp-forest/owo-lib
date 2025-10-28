@@ -29,14 +29,14 @@ public class UwuOptionalNetExample {
 
             CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> {
                 dispatcher.register(literal("test_optional_channels")
-                        .executes(context -> {
-                            ServerPlayerEntity player = context.getSource().getPlayer();
+                    .executes(context -> {
+                        ServerPlayerEntity player = context.getSource().getPlayer();
 
-                            if (serverChannel.canSendToPlayer(player))
-                                serverChannel.serverHandle(player).send(new StringPacket("Based™"));
+                        if (serverChannel.canSendToPlayer(player))
+                            serverChannel.serverHandle(player).send(new StringPacket("Based™"));
 
-                            return 0;
-                        }));
+                        return 0;
+                    }));
             });
 
             if (CLIENT_CHANNEL_IN_SERVER) {
@@ -51,7 +51,7 @@ public class UwuOptionalNetExample {
 
     @Environment(EnvType.CLIENT)
     public static final class Client {
-        public static final KeyBinding NETWORK_TEST = new KeyBinding("key.uwu.network_opt_test", GLFW.GLFW_KEY_M, KeyBinding.Category.MISC);
+        public static final KeyBinding NETWORK_TEST = new KeyBinding("key.uwu.network_opt_test", GLFW.GLFW_KEY_M, "misc");
 
         public static void init() {
             var clientChannel = OwoNetChannel.createOptional(Identifier.of("uwu", "optional_client"));

@@ -8,28 +8,29 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Rarity;
+import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 
 public class UwuScreenShardItem extends Item {
 
-    public UwuScreenShardItem(Item.Settings settings) {
-        super(settings.rarity(Rarity.UNCOMMON));
+    public UwuScreenShardItem() {
+        super(new Settings().rarity(Rarity.UNCOMMON));
     }
 
     @Override
     @Environment(EnvType.CLIENT)
-    public ActionResult use(World world, PlayerEntity user, Hand hand) {
+    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         if (user.isSneaking()) {
-            if (world.isClient()) MinecraftClient.getInstance().setScreen(new SelectUwuScreenScreen());
-        } else if (!world.isClient()) {
+            if (world.isClient) MinecraftClient.getInstance().setScreen(new SelectUwuScreenScreen());
+        } else if (!world.isClient) {
             user.openHandledScreen(new NamedScreenHandlerFactory() {
                 @Override
                 public Text getDisplayName() {
@@ -42,6 +43,6 @@ public class UwuScreenShardItem extends Item {
                 }
             });
         }
-        return ActionResult.PASS;
+        return TypedActionResult.pass(user.getStackInHand(hand));
     }
 }

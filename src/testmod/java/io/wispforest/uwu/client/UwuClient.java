@@ -1,9 +1,10 @@
 package io.wispforest.uwu.client;
 
 import io.wispforest.owo.braid.core.LayoutAxis;
+import io.wispforest.owo.braid.util.BraidHudBinding;
 import io.wispforest.owo.braid.util.BraidHudElement;
-import io.wispforest.owo.braid.util.layers.BraidLayersBinding;
 import io.wispforest.owo.braid.util.BraidTooltipComponent;
+import io.wispforest.owo.braid.util.layers.BraidLayersBinding;
 import io.wispforest.owo.braid.widgets.basic.Box;
 import io.wispforest.owo.braid.widgets.basic.Clip;
 import io.wispforest.owo.braid.widgets.basic.Sized;
@@ -33,10 +34,8 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.TooltipComponentCallback;
-import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.GameMenuScreen;
-import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -50,7 +49,7 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableTextContent;
 import net.minecraft.util.Identifier;
-import org.joml.Matrix3x2f;
+import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 
 import java.nio.file.Path;
@@ -69,10 +68,10 @@ public class UwuClient implements ClientModInitializer {
         HandledScreens.register(Uwu.EPIC_SCREEN_HANDLER_TYPE, EpicHandledScreen::new);
 //        HandledScreens.register(EPIC_SCREEN_HANDLER_TYPE, EpicHandledModelScreen::new);
 
-        final var binding = new KeyBinding("key.uwu.hud_test", GLFW.GLFW_KEY_J, KeyBinding.Category.MISC);
+        final var binding = new KeyBinding("key.uwu.hud_test", GLFW.GLFW_KEY_J, KeyBinding.MISC_CATEGORY);
         KeyBindingHelper.registerKeyBinding(binding);
 
-        final var bindingButCooler = new KeyBinding("key.uwu.hud_test_two", GLFW.GLFW_KEY_K, KeyBinding.Category.MISC);
+        final var bindingButCooler = new KeyBinding("key.uwu.hud_test_two", GLFW.GLFW_KEY_K, KeyBinding.MISC_CATEGORY);
         KeyBindingHelper.registerKeyBinding(bindingButCooler);
 
         final var hudComponentId = Identifier.of("uwu", "test_element");
@@ -96,10 +95,10 @@ public class UwuClient implements ClientModInitializer {
                 var random = new Random(System.currentTimeMillis() / 450);
                 return new BraidTooltipComponent(new Sized(
                     32 * 5, 32 * 5, new Clip(
-                        true, true,
+                    true, true,
                     new Row(
                         new Transform(
-                            new Matrix3x2f().translation(((float) (System.currentTimeMillis() / 450d - Math.floor(System.currentTimeMillis() / 450d))) * -32, 0),
+                            new Matrix4f().translation(((float) (System.currentTimeMillis() / 450d - Math.floor(System.currentTimeMillis() / 450d))) * -32, 0, 0),
                             new Grid(
                                 LayoutAxis.VERTICAL,
                                 6,
@@ -120,10 +119,7 @@ public class UwuClient implements ClientModInitializer {
             return null;
         });
 
-        HudElementRegistry.addLast(
-            Identifier.of("uwu", "braid_test"),
-            new BraidHudElement(new HudTestWidget())
-        );
+        BraidHudBinding.activate(new BraidHudElement(new HudTestWidget()));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (binding.wasPressed()) {
@@ -174,7 +170,7 @@ public class UwuClient implements ClientModInitializer {
                         component.allowMouseRotation(true)
                             .scale(.75f);
 
-                        component.mouseDown().subscribe((click, doubled) -> {
+                        component.mouseDown().subscribe((mouseX, mouseY, button) -> {
                             UISounds.playInteractionSound();
                             return true;
                         });

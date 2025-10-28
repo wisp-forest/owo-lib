@@ -5,11 +5,7 @@ import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
-import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.widget.SliderWidget;
-import net.minecraft.client.input.AbstractInput;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.client.input.MouseInput;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
 import org.w3c.dom.Element;
@@ -101,20 +97,20 @@ public class SliderComponent extends SliderWidget {
     }
 
     @Override
-    public boolean onMouseUp(Click click) {
+    public boolean onMouseUp(double mouseX, double mouseY, int button) {
         this.slideEndEvents.sink().onSlideEnd();
-        return super.onMouseUp(click);
+        return super.onMouseUp(mouseX, mouseY, button);
     }
 
     @Override
-    public boolean keyPressed(KeyInput input) {
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (!this.active) return false;
-        return super.keyPressed(input);
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
-    protected boolean isValidClickButton(MouseInput input) {
-        return this.active && super.isValidClickButton(input);
+    protected boolean isValidClickButton(int button) {
+        return this.active && super.isValidClickButton(button);
     }
 
     @Override

@@ -2,6 +2,7 @@ package io.wispforest.owo.ui.component;
 
 import io.wispforest.owo.braid.core.AppState;
 import io.wispforest.owo.braid.core.EventBinding;
+import io.wispforest.owo.braid.core.KeyModifiers;
 import io.wispforest.owo.braid.core.Surface;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.core.cursor.SystemCursorStyle;
@@ -17,14 +18,15 @@ import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.Size;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;
 
 import java.lang.ref.Cleaner;
 import java.lang.ref.WeakReference;
 import java.util.function.Consumer;
+
+import static org.lwjgl.glfw.GLFW.*;
 
 public class BraidComponent extends BaseComponent {
 
@@ -89,35 +91,47 @@ public class BraidComponent extends BaseComponent {
         appState.draw(context);
     }
 
+    private KeyModifiers collectModifiers() {
+        int modifiers = 0;
+        if (Screen.hasShiftDown()) modifiers |= GLFW_MOD_SHIFT;
+        if (Screen.hasControlDown()) modifiers |= GLFW_MOD_CONTROL;
+        if (Screen.hasAltDown()) modifiers |= GLFW_MOD_ALT;
+        if (InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), InputUtil.GLFW_KEY_LEFT_SUPER) || InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), InputUtil.GLFW_KEY_RIGHT_SUPER)) {
+            modifiers |= GLFW_MOD_SUPER;
+        }
+        return new KeyModifiers(modifiers);
+    }
+
     @Override
-    public boolean onMouseDown(Click click, boolean doubled) {
-        eventBinding.add(new MouseButtonPressEvent(click.button(), click.modifiers()));
+    public boolean onMouseDown(double mouseX, double mouseY, int button) {
+        eventBinding.add(new MouseButtonPressEvent(button, collectModifiers()));
         return true;
     }
 
     @Override
-    public boolean onMouseUp(Click click) {
-        eventBinding.add(new MouseButtonReleaseEvent(click.button(), click.modifiers()));
+    public boolean onMouseUp(double mouseX, double mouseY, int button) {
+        eventBinding.add(new MouseButtonReleaseEvent(button, collectModifiers()));
         return true;
     }
 
     @Override
     public boolean onMouseScroll(double mouseX, double mouseY, double amount) {
-        // TODO: reconsider
-        eventBinding.add(new MouseScrollEvent(0, amount));
+        var x = Screen.hasShiftDown() ? 0 : amount;
+        var y = Screen.hasShiftDown() ? amount : 0;
+        eventBinding.add(new MouseScrollEvent(x, y));
         return true;
     }
 
     @Override
-    public boolean onKeyPress(KeyInput input) {
-        this.eventBinding.add(new KeyPressEvent(input.key(), input.scancode(), input.modifiers()));
-        this.eventBinding.add(new KeyReleaseEvent(input.key(), input.scancode(), input.modifiers()));
+    public boolean onKeyPress(int keyCode, int scanCode, int modifiers) {
+        this.eventBinding.add(new KeyPressEvent(keyCode, scanCode, modifiers));
+        this.eventBinding.add(new KeyReleaseEvent(keyCode, scanCode, modifiers));
         return true;
     }
 
     @Override
-    public boolean onCharTyped(CharInput input) {
-        this.eventBinding.add(new CharInputEvent((char) input.codepoint(), input.modifiers()));
+    public boolean onCharTyped(char chr, int modifiers) {
+        this.eventBinding.add(new CharInputEvent(chr, modifiers));
         return true;
     }
 

@@ -7,7 +7,6 @@ import io.wispforest.owo.ui.parsing.ConfigureHotReloadScreen;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelLoader;
 import io.wispforest.owo.ui.util.UIErrorToast;
-import net.minecraft.client.input.KeyInput;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -49,8 +48,8 @@ public abstract class BaseUIModelScreen<R extends ParentComponent> extends BaseO
         this.model = providedModel;
 
         this.modelId = source instanceof DataSource.AssetDataSource assetSource
-                ? assetSource.assetPath()
-                : null;
+            ? assetSource.assetPath()
+            : null;
     }
 
     protected BaseUIModelScreen(Class<R> rootComponentClass, Identifier modelId) {
@@ -63,13 +62,13 @@ public abstract class BaseUIModelScreen<R extends ParentComponent> extends BaseO
     }
 
     @Override
-    public boolean keyPressed(KeyInput input) {
-        if (Owo.DEBUG && this.modelId != null && input.key() == GLFW.GLFW_KEY_F5 && input.hasCtrl()) {
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (Owo.DEBUG && this.modelId != null && keyCode == GLFW.GLFW_KEY_F5 && (modifiers & GLFW.GLFW_MOD_CONTROL) != 0) {
             this.client.setScreen(new ConfigureHotReloadScreen(this.modelId, this));
             return true;
         }
 
-        return super.keyPressed(input);
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     /**

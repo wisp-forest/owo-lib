@@ -31,20 +31,22 @@ import net.minecraft.registry.RegistryOps;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.text.TextCodecs;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 public class UwuTestStickItem extends Item {
 
     private static final ComponentType<Text> TEXT_COMPONENT = Registry.register(
-            Registries.DATA_COMPONENT_TYPE,
-            Identifier.of("uwu", "text"),
-            ComponentType.<Text>builder()
-                    .endec(MinecraftEndecs.TEXT)
-                    .build()
+        Registries.DATA_COMPONENT_TYPE,
+        Identifier.of("uwu", "text"),
+        ComponentType.<Text>builder()
+            .endec(MinecraftEndecs.TEXT)
+            .build()
     );
 
     private static final Codec<String> THIS_CODEC_NEEDS_REGISTRIES = new Codec<>() {
@@ -63,15 +65,15 @@ public class UwuTestStickItem extends Item {
     private static final Endec<String> YEP_SAME_HERE = CodecUtils.toEndec(CodecUtils.toCodec(CodecUtils.toEndec(THIS_CODEC_NEEDS_REGISTRIES)));
     private static final KeyedEndec<String> KYED = YEP_SAME_HERE.keyed("kyed", (String) null);
 
-    public UwuTestStickItem(Item.Settings settings) {
-        super(settings
-                .group(Uwu.SIX_TAB_GROUP).tab(3).maxCount(1)
-                .trackUsageStat()
-                .stackGenerator(OwoItemGroup.DEFAULT_STACK_GENERATOR.andThen((item, stacks) -> {
-                    final var stack = new ItemStack(item);
-                    stack.set(DataComponentTypes.CUSTOM_NAME, Text.literal("the stick of the test").styled(style -> style.withItalic(false)));
-                    stacks.add(stack);
-                })));
+    public UwuTestStickItem() {
+        super(new Item.Settings()
+            .group(Uwu.SIX_TAB_GROUP).tab(3).maxCount(1)
+            .trackUsageStat()
+            .stackGenerator(OwoItemGroup.DEFAULT_STACK_GENERATOR.andThen((item, stacks) -> {
+                final var stack = new ItemStack(item);
+                stack.set(DataComponentTypes.CUSTOM_NAME, Text.literal("the stick of the test").styled(style -> style.withItalic(false)));
+                stacks.add(stack);
+            })));
 
         Uwu.CHANNEL.registerServerbound(ThatPacket.class, StructEndecBuilder.of(YEP_SAME_HERE.fieldOf("mhmm", ThatPacket::mhmm), ThatPacket::new), (message, access) -> {
             System.out.println("that's a packet received alright: " + message.mhmm);
@@ -79,61 +81,62 @@ public class UwuTestStickItem extends Item {
     }
 
     @Override
-    public ActionResult use(World world, PlayerEntity user, Hand hand) {
+    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         if (user.isSneaking()) {
-            if (world.isClient()) return ActionResult.SUCCESS;
+            if (world.isClient) return TypedActionResult.success(user.getStackInHand(hand));
 
             Uwu.CHANNEL.serverHandle(user).send(new Uwu.OtherTestMessage(user.getBlockPos(), "based"));
 
-            var server = user.getEntityWorld().getServer();
+            var server = user.getServer();
             var teleportTo = world.getRegistryKey() == World.END ? server.getWorld(World.OVERWORLD) : server.getWorld(World.END);
 
             WorldOps.teleportToWorld((ServerPlayerEntity) user, teleportTo, new Vec3d(0, 128, 0));
 
+            return TypedActionResult.success(user.getStackInHand(hand));
         } else {
-            if (!world.isClient()) return ActionResult.SUCCESS;
+            if (!world.isClient) return TypedActionResult.success(user.getStackInHand(hand));
 
             Uwu.CHANNEL.clientHandle().send(Uwu.MESSAGE);
 
             Uwu.CUBE.spawn(world, user.getEyePos().add(user.getRotationVec(0).multiply(3)).subtract(.5, .5, .5), null);
-            user.sendMessage(Text.translatable("uwu.a", "bruh"), false);
-        }
+            user.sendMessage(Text.translatable("uwu.a", "bruh"));
 
-        return ActionResult.SUCCESS;
+            return TypedActionResult.success(user.getStackInHand(hand));
+        }
     }
 
     @Override
     public ActionResult useOnBlock(ItemUsageContext context) {
         if (!context.getPlayer().isSneaking()) {
-            if (context.getWorld().isClient()) Uwu.CHANNEL.clientHandle().send(new ThatPacket("stringnite"));
+            if (context.getWorld().isClient) Uwu.CHANNEL.clientHandle().send(new ThatPacket("stringnite"));
 
             try {
                 var stack = context.getStack();
-                var data = stack.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT).copyNbt()
-                        .get(SerializationContext.attributes(RegistriesAttribute.of(context.getWorld().getRegistryManager())), KYED);
+                var data = stack.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT).getNbt()
+                    .get(SerializationContext.attributes(RegistriesAttribute.of(context.getWorld().getRegistryManager())), KYED);
 
-                context.getPlayer().sendMessage(Text.literal("current: " + data), false);
+                context.getPlayer().sendMessage(Text.literal("current: " + data));
 
                 stack.apply(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT, nbt -> {
                     return nbt.apply(nbtCompound -> nbtCompound.put(
-                            SerializationContext.attributes(RegistriesAttribute.of(context.getWorld().getRegistryManager())),
-                            KYED,
-                            String.valueOf(context.getWorld().random.nextInt(10000))
+                        SerializationContext.attributes(RegistriesAttribute.of(context.getWorld().getRegistryManager())),
+                        KYED,
+                        String.valueOf(context.getWorld().random.nextInt(10000))
                     ));
                 });
-                context.getPlayer().sendMessage(Text.literal("modified"), false);
+                context.getPlayer().sendMessage(Text.literal("modified"));
             } catch (Exception bruh) {
-                context.getPlayer().sendMessage(Text.literal("bruh: " + bruh.getMessage()), false);
+                context.getPlayer().sendMessage(Text.literal("bruh: " + bruh.getMessage()));
             }
 
             return ActionResult.SUCCESS;
         }
 
-        if (context.getWorld().isClient()) return ActionResult.SUCCESS;
+        if (context.getWorld().isClient) return ActionResult.SUCCESS;
 
         final var breakStack = new ItemStack(Items.NETHERITE_PICKAXE);
 
-        final var fortune = context.getWorld().getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT).getOrThrow(Enchantments.FORTUNE);
+        final var fortune = context.getWorld().getRegistryManager().get(RegistryKeys.ENCHANTMENT).getEntry(Enchantments.FORTUNE).orElseThrow();
         breakStack.addEnchantment(fortune, 3);
         WorldOps.breakBlockWithItem(context.getWorld(), context.getBlockPos(), breakStack);
 

@@ -11,12 +11,13 @@ import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
-import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Rarity;
+import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 
 public class UwuCounterItem extends Item {
@@ -28,12 +29,12 @@ public class UwuCounterItem extends Item {
             .build()
     );
 
-    public UwuCounterItem(Item.Settings settings) {
-        super(settings.rarity(Rarity.UNCOMMON));
+    public UwuCounterItem() {
+        super(new Settings().rarity(Rarity.UNCOMMON));
     }
 
     @Override
-    public ActionResult use(World world, PlayerEntity user, Hand hand) {
+    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         var stack = user.getStackInHand(hand);
 
         if (user.isSneaking()) {
@@ -42,13 +43,13 @@ public class UwuCounterItem extends Item {
             stack.apply(COUNT, 0, old -> old + 1);
         }
 
-        return ActionResult.SUCCESS.withNewHandStack(stack);
+        return TypedActionResult.success(stack);
     }
 
     @Override
     public void deriveStackComponents(ComponentMap source, ComponentChanges.Builder target) {
         target.add(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.builder()
-            .add(EntityAttributes.ATTACK_DAMAGE,
+            .add(EntityAttributes.GENERIC_ATTACK_DAMAGE,
                 new EntityAttributeModifier(Identifier.of("uwu", "counter_attribute"), source.getOrDefault(COUNT, 0), EntityAttributeModifier.Operation.ADD_VALUE),
                 AttributeModifierSlot.MAINHAND)
             .build());

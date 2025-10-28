@@ -1,6 +1,5 @@
 package io.wispforest.owo.text;
 
-import com.mojang.serialization.MapCodec;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.serialization.CodecUtils;
@@ -13,7 +12,10 @@ import java.util.Optional;
 
 public record InsertingTextContent(int index) implements TextContent {
 
-    public static final MapCodec<InsertingTextContent> CODEC = CodecUtils.toMapCodec(StructEndecBuilder.of(Endec.INT.fieldOf("index", InsertingTextContent::index), InsertingTextContent::new));
+    public static final TextContent.Type<InsertingTextContent> TYPE = new Type<>(
+        CodecUtils.toMapCodec(StructEndecBuilder.of(Endec.INT.fieldOf("index", InsertingTextContent::index), InsertingTextContent::new)),
+        "owo:insert"
+    );
 
     @Override
     public <T> Optional<T> visit(StringVisitable.Visitor<T> visitor) {
@@ -48,7 +50,7 @@ public record InsertingTextContent(int index) implements TextContent {
     }
 
     @Override
-    public MapCodec<? extends TextContent> getCodec() {
-        return CODEC;
+    public Type<?> getType() {
+        return TYPE;
     }
 }

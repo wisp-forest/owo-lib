@@ -23,8 +23,8 @@ public abstract class TitleScreenMixin extends Screen {
 
     @Inject(method = "method_41198", at = @At("HEAD"), cancellable = true)
     private void injectUwuConfigScreen(ButtonWidget button, CallbackInfo ci) {
-        var alt = InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow(), GLFW.GLFW_KEY_LEFT_ALT)
-            || InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow(), GLFW.GLFW_KEY_RIGHT_ALT);
+        var alt = InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_LEFT_ALT)
+            || InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_RIGHT_ALT);
         if (!alt) return;
 
         MinecraftClient.getInstance().setScreen(ConfigScreen.create(Uwu.BRUHHHHH, this));

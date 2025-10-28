@@ -9,9 +9,8 @@ import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.UISounds;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -71,8 +70,8 @@ public class DropdownComponent extends FlowLayout {
         dropdown.positioning(Positioning.absolute(xLocation, yLocation));
 
         var dismounted = new MutableBoolean(false);
-        ScreenMouseEvents.beforeMouseClick(screen).register((screen_, click) -> {
-            if (dismounted.isTrue() || dropdown.isInBoundingBox(click.x(), click.y())) return;
+        ScreenMouseEvents.beforeMouseClick(screen).register((screen_, mouseX_, mouseY_, button) -> {
+            if (dismounted.isTrue() || dropdown.isInBoundingBox(mouseX_, mouseY_)) return;
 
             rootComponent.removeChild(dropdown);
             dismounted.setTrue();
@@ -83,9 +82,7 @@ public class DropdownComponent extends FlowLayout {
 
     @Override
     public ParentComponent surface(Surface surface) {
-        this.entries.surface(surface);
-
-        return this;
+        return this.entries.surface(surface);
     }
 
     @Override
@@ -193,8 +190,8 @@ public class DropdownComponent extends FlowLayout {
                 }
                 case "nested" -> {
                     var text = entry.getAttribute("translate").equals("true")
-                            ? Text.translatable(entry.getAttribute("name"))
-                            : Text.literal(entry.getAttribute("name"));
+                        ? Text.translatable(entry.getAttribute("name"))
+                        : Text.literal(entry.getAttribute("name"));
                     this.nested(text, Sizing.content(), dropdownComponent -> dropdownComponent.parseAndApplyEntries(entry));
                 }
             }
@@ -202,11 +199,11 @@ public class DropdownComponent extends FlowLayout {
     }
 
     protected static void drawIconFromTexture(OwoUIDrawContext context, ParentComponent dropdown, int y, int u, int v) {
-        context.drawTexture(RenderPipelines.GUI_TEXTURED, ICONS_TEXTURE,
-                dropdown.x() + dropdown.width() - dropdown.padding().get().right() - 10, y,
-                u, v,
-                9, 9,
-                32, 32
+        context.drawTexture(ICONS_TEXTURE,
+            dropdown.x() + dropdown.width() - dropdown.padding().get().right() - 10, y,
+            u, v,
+            9, 9,
+            32, 32
         );
     }
 
@@ -224,11 +221,11 @@ public class DropdownComponent extends FlowLayout {
         public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
             var margins = this.margins.get();
             context.fill(
-                    this.x - margins.left(),
-                    this.y - margins.top(),
-                    this.x + this.width + margins.right(),
-                    this.y + this.height + margins.bottom(),
-                    0xFF121212
+                this.x - margins.left(),
+                this.y - margins.top(),
+                this.x + this.width + margins.right(),
+                this.y + this.height + margins.bottom(),
+                0xFF121212
             );
         }
 
@@ -289,8 +286,8 @@ public class DropdownComponent extends FlowLayout {
         }
 
         @Override
-        public boolean onMouseDown(Click click, boolean doubled) {
-            super.onMouseDown(click, doubled);
+        public boolean onMouseDown(double mouseX, double mouseY, int button) {
+            super.onMouseDown(mouseX, mouseY, button);
 
             this.onClick.accept(this.parentDropdown);
             this.playInteractionSound();
@@ -303,11 +300,11 @@ public class DropdownComponent extends FlowLayout {
             if (this.isInBoundingBox(mouseX, mouseY)) {
                 var margins = this.margins.get();
                 context.fill(
-                        this.x - margins.left(),
-                        this.y - margins.top(),
-                        this.x + this.width + margins.right(),
-                        this.y + this.height + margins.bottom(),
-                        0x44FFFFFF
+                    this.x - margins.left(),
+                    this.y - margins.top(),
+                    this.x + this.width + margins.right(),
+                    this.y + this.height + margins.bottom(),
+                    0x44FFFFFF
                 );
             }
 

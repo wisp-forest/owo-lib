@@ -6,10 +6,7 @@ import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.FocusHandler;
 import io.wispforest.owo.util.EventSource;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -204,6 +201,19 @@ public interface Component extends PositionedRectangle {
     @Nullable List<TooltipComponent> tooltip();
 
     /**
+     * Set the Z-Index of this component. This is used
+     * for layering components during rendering
+     *
+     * @param zIndex The new Z-Index of this component
+     */
+    Component zIndex(int zIndex);
+
+    /**
+     * @return The current Z-Index of this component
+     */
+    int zIndex();
+
+    /**
      * Determine if this component should currently
      * render its tooltip
      *
@@ -314,12 +324,16 @@ public interface Component extends PositionedRectangle {
      * Called when the mouse has been clicked inside
      * the bounding box of this component
      *
-     * @param click
-     * @param doubled
+     * @param mouseX The x coordinate at which the mouse was clicked, relative
+     *               to this component's bounding box root
+     * @param mouseY The y coordinate at which the mouse was clicked, relative
+     *               to this component's bounding box root
+     * @param button The mouse button which was clicked, refer to the constants
+     *               in {@link org.lwjgl.glfw.GLFW}
      * @return {@code true} if this component handled the click and no more
      * components should be notified
      */
-    boolean onMouseDown(Click click, boolean doubled);
+    boolean onMouseDown(double mouseX, double mouseY, int button);
 
     EventSource<MouseDown> mouseDown();
 
@@ -327,11 +341,12 @@ public interface Component extends PositionedRectangle {
      * Called when a mouse button has been released
      * while this component is focused
      *
-     * @param click
+     * @param button The mouse button which was released, refer to the constants
+     *               in {@link org.lwjgl.glfw.GLFW}
      * @return {@code true} if this component handled the event and no more
-     *                     components should be notified
+     * components should be notified
      */
-    boolean onMouseUp(Click click);
+    boolean onMouseUp(double mouseX, double mouseY, int button);
 
     EventSource<MouseUp> mouseUp();
 
@@ -355,13 +370,18 @@ public interface Component extends PositionedRectangle {
      * Called when the mouse has been dragged
      * while this component is focused
      *
-     * @param click
+     * @param mouseX The x coordinate at which the mouse was dragged, relative
+     *               to this component's bounding box root
+     * @param mouseY The y coordinate at which the mouse was dragged, relative
+     *               to this component's bounding box root
      * @param deltaX How far the mouse was moved on the x-axis
      * @param deltaY How far the mouse was moved on the y-axis
+     * @param button The mouse button which was clicked, refer to the constants
+     *               in {@link org.lwjgl.glfw.GLFW}
      * @return {@code true} if this component handled the mouse move and no more
      * components should be notified
      */
-    boolean onMouseDrag(Click click, double deltaX, double deltaY);
+    boolean onMouseDrag(double mouseX, double mouseY, double deltaX, double deltaY, int button);
 
     EventSource<MouseDrag> mouseDrag();
 
@@ -369,11 +389,14 @@ public interface Component extends PositionedRectangle {
      * Called when a key on the keyboard has been pressed
      * while this component is focused
      *
-     * @param input
+     * @param keyCode   The key token of the pressed key, refer to the constants in {@link org.lwjgl.glfw.GLFW}
+     * @param scanCode  A platform-specific scancode uniquely identifying the exact key that was pressed
+     * @param modifiers A bitfield describing which modifier keys were pressed,
+     *                  refer to <a href="https://www.glfw.org/docs/3.3/group__mods.html">GLFW Modifier key flags</a>
      * @return {@code true} if this component handled the key-press and no
-     *                     more components should be notified
+     * more components should be notified
      */
-    boolean onKeyPress(KeyInput input);
+    boolean onKeyPress(int keyCode, int scanCode, int modifiers);
 
     EventSource<KeyPress> keyPress();
 
@@ -382,11 +405,13 @@ public interface Component extends PositionedRectangle {
      * a key has been pressed and the OS determined it should result
      * in a character being typed
      *
-     * @param input
+     * @param chr       The character that was typed
+     * @param modifiers A bitfield describing which modifier keys were pressed,
+     *                  refer to <a href="https://www.glfw.org/docs/3.3/group__mods.html">GLFW Modifier key flags</a>
      * @return {@code true} if this component handled the input and no
-     *                     * more components should be notified
+     * * more components should be notified
      */
-    boolean onCharTyped(CharInput input);
+    boolean onCharTyped(char chr, int modifiers);
 
     EventSource<CharTyped> charTyped();
 

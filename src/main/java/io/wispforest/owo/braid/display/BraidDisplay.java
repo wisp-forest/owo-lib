@@ -1,7 +1,5 @@
 package io.wispforest.owo.braid.display;
 
-import com.mojang.blaze3d.pipeline.BlendFunction;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.core.AppState;
@@ -9,10 +7,8 @@ import io.wispforest.owo.braid.core.EventBinding;
 import io.wispforest.owo.braid.core.TextureSurface;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.RenderPhase;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -54,39 +50,41 @@ public class BraidDisplay {
         var client = this.app.client();
 
         this.app.processEvents(
-            client.getRenderTickCounter().getDynamicDeltaTicks()
+            client.getRenderTickCounter().getLastFrameDuration()
         );
 
-        this.app.draw(this.surface.guiRenderer.newDrawContext());
+        var ctx = new DrawContext(client, client.getBufferBuilders().getEntityVertexConsumers());
+        ctx.translate(0, 0, -11000);
+
+        this.app.draw(ctx);
     }
 
-    public void render(MatrixStack matrices, OrderedRenderCommandQueue queue, int light) {
+    public void render(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
         var layer = RENDER_TYPE.apply(this.surface);
-        queue.submitCustom(matrices, layer, (matricesEntry, buffer) -> {
-            var normal = this.quad.normal.toVector3f();
-            buffer.vertex(matricesEntry, 0, 0, 0).color(1f, 1f, 1f, 1f).texture(0, 1).light(light).normal(matricesEntry, normal);
-            buffer.vertex(matricesEntry, this.quad.left.toVector3f()).color(1f, 1f, 1f, 1f).texture(0, 0).light(light).normal(matricesEntry, normal);
-            buffer.vertex(matricesEntry, this.quad.top.add(this.quad.left).toVector3f()).color(1f, 1f, 1f, 1f).texture(1, 0).light(light).normal(matricesEntry, normal);
-            buffer.vertex(matricesEntry, this.quad.top.toVector3f()).color(1f, 1f, 1f, 1f).texture(1, 1).light(light).normal(matricesEntry, normal);
-        });
+
+        var buffer = vertexConsumers.getBuffer(layer);
+
+        var matrixFrame = matrices.peek();
+        var normal = this.quad.normal.toVector3f();
+
+        buffer.vertex(matrixFrame, 0, 0, 0).color(1f, 1f, 1f, 1f).texture(0, 1).light(light).normal(matrixFrame, normal.x, normal.y, normal.z);
+        buffer.vertex(matrixFrame, this.quad.left.toVector3f()).color(1f, 1f, 1f, 1f).texture(0, 0).light(light).normal(matrixFrame, normal.x, normal.y, normal.z);
+        buffer.vertex(matrixFrame, this.quad.top.add(this.quad.left).toVector3f()).color(1f, 1f, 1f, 1f).texture(1, 0).light(light).normal(matrixFrame, normal.x, normal.y, normal.z);
+        buffer.vertex(matrixFrame, this.quad.top.toVector3f()).color(1f, 1f, 1f, 1f).texture(1, 1).light(light).normal(matrixFrame, normal.x, normal.y, normal.z);
     }
 
     // ---
-
-    public static final RenderPipeline PIPELINE = RenderPipeline.builder(RenderPipelines.TERRAIN_SNIPPET)
-        .withLocation(Owo.id("pipeline/braid_display"))
-        .withShaderDefine("ALPHA_CUTOUT", 0.1F)
-        .withCull(false)
-        .withBlend(BlendFunction.TRANSLUCENT)
-        .build();
-
     private static final Function<TextureSurface, RenderLayer> RENDER_TYPE = surface -> RenderLayer.of(
         Owo.id("braid_display").toString(),
+        VertexFormats.POSITION_COLOR_TEXTURE_LIGHT_NORMAL,
+        VertexFormat.DrawMode.QUADS,
         16384,
-        PIPELINE,
         RenderLayer.MultiPhaseParameters.builder()
             .texture(new SurfaceTexture(surface))
+            .program(RenderPhase.CUTOUT_PROGRAM)
+            .transparency(RenderPhase.TRANSLUCENT_TRANSPARENCY)
             .lightmap(RenderPhase.ENABLE_LIGHTMAP)
+            .cull(RenderPhase.DISABLE_CULLING)
             .build(false)
     );
 

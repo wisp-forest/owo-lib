@@ -7,13 +7,10 @@ import io.wispforest.owo.ui.inject.GreedyInputComponent;
 import io.wispforest.owo.ui.util.DisposableScreen;
 import io.wispforest.owo.ui.util.UIErrorToast;
 import io.wispforest.owo.util.pond.OwoSlotExtension;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.input.KeyInput;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
@@ -25,7 +22,6 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
-import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
@@ -92,19 +88,6 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
                 this.invalid = true;
             }
         }
-
-        ScreenEvents.afterRender(this).register((screen, drawContext, mouseX, mouseY, tickDelta) -> {
-            this.drawComponentTooltip(drawContext, mouseX, mouseY, tickDelta);
-        });
-    }
-
-    /**
-     * Draw the tooltip of this screen's component tree, invoked
-     * by {@link ScreenEvents#afterRender(Screen)} so that tooltips are
-     * properly rendered above content
-     */
-    protected void drawComponentTooltip(DrawContext drawContext, int mouseX, int mouseY, float tickDelta) {
-        if (this.uiAdapter != null) this.uiAdapter.drawTooltip(drawContext, mouseX, mouseY, tickDelta);
     }
 
     /**
@@ -210,6 +193,8 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
             super.render(context, mouseX, mouseY, delta);
 
             if (this.uiAdapter.enableInspector) {
+                context.getMatrices().translate(0, 0, 500);
+
                 for (int i = 0; i < this.handler.slots.size(); i++) {
                     var slot = this.handler.slots.get(i);
                     if (!slot.isEnabled()) continue;
@@ -223,6 +208,8 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
                         OwoUIDrawContext.TextAnchor.BOTTOM_RIGHT
                     );
                 }
+
+                context.getMatrices().translate(0, 0, -500);
             }
 
             this.drawMouseoverTooltip(context, mouseX, mouseY);
@@ -232,34 +219,19 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
     }
 
     @Override
-    public boolean keyPressed(KeyInput input) {
-        if (!input.hasCtrl()
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if ((modifiers & GLFW.GLFW_MOD_CONTROL) == 0
             && this.uiAdapter.rootComponent.focusHandler().focused() instanceof GreedyInputComponent inputComponent
-            && inputComponent.onKeyPress(input)) {
+            && inputComponent.onKeyPress(keyCode, scanCode, modifiers)) {
             return true;
         }
 
-        return super.keyPressed(input);
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
-    public Optional<Element> hoveredElement(double mouseX, double mouseY) {
-        return super.hoveredElement(mouseX, mouseY).flatMap(element -> element != this.uiAdapter ? Optional.of(element) : Optional.empty());
-    }
-
-    @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
-        return this.uiAdapter.mouseClicked(click, doubled) || super.mouseClicked(click, doubled);
-    }
-
-    @Override
-    public boolean mouseDragged(Click click, double deltaX, double deltaY) {
-        return this.uiAdapter.mouseDragged(click, deltaX, deltaY) || super.mouseDragged(click, deltaX, deltaY);
-    }
-
-    @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        return this.uiAdapter.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount) || super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+        return this.uiAdapter.mouseDragged(mouseX, mouseY, button, deltaX, deltaY) || super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
     }
 
     @Nullable

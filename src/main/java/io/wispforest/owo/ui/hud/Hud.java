@@ -6,7 +6,6 @@ import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.event.ClientRenderCallback;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
-import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
@@ -107,9 +106,13 @@ public class Hud {
             }
         });
 
-        HudElementRegistry.addLast(Identifier.of("owo", "owo_ui_hud"), (context, tickCounter) -> {
+        HudRenderCallback.EVENT.register((context, tickDelta) -> {
             if (adapter == null || suppress || MinecraftClient.getInstance().options.hudHidden) return;
-            adapter.render(context, -69, -69, tickCounter.getTickProgress(false));
+
+            context.push().translate(0, 0, 100);
+            adapter.render(context, -69, -69, tickDelta.getTickDelta(false));
+            context.pop();
         });
     }
+
 }

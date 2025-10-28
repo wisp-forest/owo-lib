@@ -9,7 +9,4 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 public interface TextFieldWidgetAccessor {
     @Accessor("drawsBackground")
     boolean owo$drawsBackground();
-
-    @Invoker("updateTextPosition")
-    void owo$updateTextPosition();
 }

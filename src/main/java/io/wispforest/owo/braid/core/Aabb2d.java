@@ -1,7 +1,9 @@
 package io.wispforest.owo.braid.core;
 
 import org.joml.Matrix3x2f;
+import org.joml.Matrix4f;
 import org.joml.Vector2f;
+import org.joml.Vector3f;
 
 public class Aabb2d {
 
@@ -33,11 +35,11 @@ public class Aabb2d {
         return this.y + this.height;
     }
 
-    public Aabb2d transform(Matrix3x2f matrix) {
-        var topLeft = matrix.transformPosition((float) this.x, (float) this.y, new Vector2f());
-        var topRight = matrix.transformPosition((float) (this.x + this.width), (float) this.y, new Vector2f());
-        var bottomLeft = matrix.transformPosition((float) this.x, (float) (this.y + this.height), new Vector2f());
-        var bottomRight = matrix.transformPosition((float) (this.x + this.width), (float) (this.y + this.height), new Vector2f());
+    public Aabb2d transform(Matrix4f matrix) {
+        var topLeft = matrix.transformPosition((float) this.x, (float) this.y, 0, new Vector3f());
+        var topRight = matrix.transformPosition((float) (this.x + this.width), (float) this.y, 0, new Vector3f());
+        var bottomLeft = matrix.transformPosition((float) this.x, (float) (this.y + this.height), 0, new Vector3f());
+        var bottomRight = matrix.transformPosition((float) (this.x + this.width), (float) (this.y + this.height), 0, new Vector3f());
 
         this.x = Math.min(Math.min(Math.min(topLeft.x, topRight.x), bottomLeft.x), bottomRight.x);
         this.width = Math.max(Math.max(Math.max(topLeft.x, topRight.x), bottomLeft.x), bottomRight.x) - this.x;

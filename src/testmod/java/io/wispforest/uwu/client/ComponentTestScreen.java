@@ -9,12 +9,10 @@ import io.wispforest.owo.ui.core.*;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.FurnaceBlock;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.Tooltip;
-import net.minecraft.client.input.KeyInput;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.BundleContentsComponent;
 import net.minecraft.item.ItemStack;
@@ -22,7 +20,6 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
-import net.minecraft.text.StyleSpriteSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Colors;
 import org.jetbrains.annotations.Nullable;
@@ -53,14 +50,14 @@ public class ComponentTestScreen extends Screen {
         final var rootComponent = uiAdapter.rootComponent;
 
         rootComponent.child(
-                Containers.verticalFlow(Sizing.content(), Sizing.content())
-                        .child(Components.button(Text.of("Dark Background"), button -> rootComponent.surface(Surface.flat(0x77000000))).horizontalSizing(Sizing.fixed(95)))
-                        .child(Components.button(Text.of("No Background"), button -> rootComponent.surface(Surface.BLANK)).margins(Insets.vertical(5)).horizontalSizing(Sizing.fixed(95)))
-                        .child(Components.button(Text.of("Dirt Background"), button -> rootComponent.surface(Surface.optionsBackground())).horizontalSizing(Sizing.fixed(95)))
-                        .child(Components.checkbox(Text.of("bruh")).onChanged(aBoolean -> this.client.player.sendMessage(Text.of("bruh: " + aBoolean), false)).margins(Insets.top(5)))
-                        .padding(Insets.of(10))
-                        .surface(Surface.vanillaPanorama(true))
-                        .positioning(Positioning.relative(1, 1))
+            Containers.verticalFlow(Sizing.content(), Sizing.content())
+                .child(Components.button(Text.of("Dark Background"), button -> rootComponent.surface(Surface.flat(0x77000000))).horizontalSizing(Sizing.fixed(95)))
+                .child(Components.button(Text.of("No Background"), button -> rootComponent.surface(Surface.BLANK)).margins(Insets.vertical(5)).horizontalSizing(Sizing.fixed(95)))
+                .child(Components.button(Text.of("Dirt Background"), button -> rootComponent.surface(Surface.optionsBackground())).horizontalSizing(Sizing.fixed(95)))
+                .child(Components.checkbox(Text.of("bruh")).onChanged(aBoolean -> this.client.player.sendMessage(Text.of("bruh: " + aBoolean), false)).margins(Insets.top(5)))
+                .padding(Insets.of(10))
+                .surface(Surface.vanillaPanorama(true))
+                .positioning(Positioning.relative(1, 1))
         );
 
         final var innerLayout = Containers.verticalFlow(Sizing.content(100), Sizing.content());
@@ -79,32 +76,32 @@ public class ComponentTestScreen extends Screen {
         innerLayout.child(otherBox);
 
         innerLayout.child(Containers.verticalScroll(Sizing.content(), Sizing.fixed(50), Containers.verticalFlow(Sizing.content(), Sizing.content())
-                                .child(new BoxComponent(Sizing.fixed(20), Sizing.fixed(40)).margins(Insets.of(5)))
-                                .child(new BoxComponent(Sizing.fixed(45), Sizing.fixed(45)).margins(Insets.of(5)))
-                                .child(Components.textBox(Sizing.fixed(60)))
-                                .horizontalAlignment(HorizontalAlignment.RIGHT)
-                                .surface(Surface.flat(0x77000000)))
-                        .scrollbar(ScrollContainer.Scrollbar.vanilla())
-                        .fixedScrollbarLength(15)
-                        .scrollbarThiccness(12)
-                        .id("scrollnite")
-                )
-                .child(Components.button(Text.of("+"), (ButtonComponent button) -> {
-                            verticalAnimation.reverse();
+                    .child(new BoxComponent(Sizing.fixed(20), Sizing.fixed(40)).margins(Insets.of(5)))
+                    .child(new BoxComponent(Sizing.fixed(45), Sizing.fixed(45)).margins(Insets.of(5)))
+                    .child(Components.textBox(Sizing.fixed(60)))
+                    .horizontalAlignment(HorizontalAlignment.RIGHT)
+                    .surface(Surface.flat(0x77000000)))
+                .scrollbar(ScrollContainer.Scrollbar.vanilla())
+                .fixedScrollbarLength(15)
+                .scrollbarThiccness(12)
+                .id("scrollnite")
+            )
+            .child(Components.button(Text.of("+"), (ButtonComponent button) -> {
+                    verticalAnimation.reverse();
 
-                            button.setMessage(verticalAnimation.direction() == Animation.Direction.FORWARDS
-                                    ? Text.of("-")
-                                    : Text.of("+")
-                            );
-                        }).<ButtonComponent>configure(button -> {
-                            button.setTooltip(Tooltip.of(Text.of("a vanilla tooltip")));
-                            button.margins(Insets.of(5)).sizing(Sizing.fixed(12));
-                        })
-                )
-                .child(new BoxComponent(Sizing.fixed(40), Sizing.fixed(20)).margins(Insets.of(5)))
-                .horizontalAlignment(HorizontalAlignment.CENTER)
-                .verticalAlignment(VerticalAlignment.CENTER)
-                .padding(Insets.of(5));
+                    button.setMessage(verticalAnimation.direction() == Animation.Direction.FORWARDS
+                        ? Text.of("-")
+                        : Text.of("+")
+                    );
+                }).<ButtonComponent>configure(button -> {
+                    button.setTooltip(Tooltip.of(Text.of("a vanilla tooltip")));
+                    button.margins(Insets.of(5)).sizing(Sizing.fixed(12));
+                })
+            )
+            .child(new BoxComponent(Sizing.fixed(40), Sizing.fixed(20)).margins(Insets.of(5)))
+            .horizontalAlignment(HorizontalAlignment.CENTER)
+            .verticalAlignment(VerticalAlignment.CENTER)
+            .padding(Insets.of(5));
 
         innerLayout.child(Components.textArea(Sizing.fixed(75), Sizing.content()).maxLines(5).displayCharCount(true));
         innerLayout.child(Components.textArea(Sizing.fixed(75), Sizing.fixed(75)).<TextAreaComponent>configure(textArea -> {
@@ -112,36 +109,36 @@ public class ComponentTestScreen extends Screen {
         }));
 
         rootComponent.child(Containers.horizontalScroll(Sizing.fill(20), Sizing.content(), innerLayout)
-                .scrollbarThiccness(6)
-                .scrollbar(ScrollContainer.Scrollbar.vanillaFlat())
-                .surface(Surface.DARK_PANEL)
-                .padding(Insets.of(3))
+            .scrollbarThiccness(6)
+            .scrollbar(ScrollContainer.Scrollbar.vanillaFlat())
+            .surface(Surface.DARK_PANEL)
+            .padding(Insets.of(3))
         );
 
         rootComponent.child(Containers.verticalFlow(Sizing.content(), Sizing.content())
-                .child(Components.label(Text.literal("A profound vertical Flow Layout, as well as a leally long text to demonstrate wrapping").styled(style -> style.withFont(new StyleSpriteSource.Font(MinecraftClient.UNICODE_FONT_ID)))
-                                .styled(style -> {
-                                    return style.withClickEvent(new ClickEvent.CopyToClipboard("yes"))
-                                            .withHoverEvent(new HoverEvent.ShowItem(Items.SCULK_SHRIEKER.getDefaultStack()));
-                                }))
-                        .shadow(true)
-                        .lineHeight(7)
-                        .lineSpacing(0)
-                        .maxWidth(100)
-                        .margins(Insets.horizontal(15)))
+            .child(Components.label(Text.literal("A profound vertical Flow Layout, as well as a leally long text to demonstrate wrapping").styled(style -> style.withFont(MinecraftClient.UNICODE_FONT_ID))
+                    .styled(style -> {
+                        return style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, "yes"))
+                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackContent(Items.SCULK_SHRIEKER.getDefaultStack())));
+                    }))
+                .shadow(true)
+                .lineHeight(7)
+                .lineSpacing(0)
+                .maxWidth(100)
+                .margins(Insets.horizontal(15)))
         );
 
         final var buttonPanel = Containers.horizontalFlow(Sizing.content(), Sizing.content())
-                .child(Components.label(Text.literal("AAAAAAAAAAAAAAAAAAA").append(Text.literal("Layout")
-                                .styled(style -> style.withHoverEvent(new HoverEvent.ShowItem(Items.SCULK_SHRIEKER.getDefaultStack()))))
-                        .append(Text.literal("\nAAAAAAAAAAAAAAA"))).margins(Insets.of(5)))
-                .child(Components.button(Text.of("⇄"), button -> this.clearAndInit()).sizing(Sizing.fixed(20)))
-                .child(Components.button(Text.of("X"), button -> this.close()).sizing(Sizing.fixed(20)))
-                .positioning(Positioning.relative(100, 0))
-                .verticalAlignment(VerticalAlignment.CENTER)
-                .surface(Surface.TOOLTIP)
-                .padding(Insets.of(5))
-                .margins(Insets.of(10));
+            .child(Components.label(Text.literal("AAAAAAAAAAAAAAAAAAA").append(Text.literal("Layout")
+                    .styled(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackContent(Items.SCULK_SHRIEKER.getDefaultStack())))))
+                .append(Text.literal("\nAAAAAAAAAAAAAAA"))).margins(Insets.of(5)))
+            .child(Components.button(Text.of("⇄"), button -> this.clearAndInit()).sizing(Sizing.fixed(20)))
+            .child(Components.button(Text.of("X"), button -> this.close()).sizing(Sizing.fixed(20)))
+            .positioning(Positioning.relative(100, 0))
+            .verticalAlignment(VerticalAlignment.CENTER)
+            .surface(Surface.TOOLTIP)
+            .padding(Insets.of(5))
+            .margins(Insets.of(10));
 
         final var growingTextBox = Components.textBox(Sizing.fixed(60));
         final var growAnimation = growingTextBox.horizontalSizing().animate(500, Easing.SINE, Sizing.fixed(80));
@@ -150,46 +147,46 @@ public class ComponentTestScreen extends Screen {
 
         var weeAnimation = buttonPanel.positioning().animate(1000, Easing.CUBIC, Positioning.relative(0, 100));
         rootComponent.child(Containers.verticalFlow(Sizing.content(), Sizing.content())
-                .child(growingTextBox)
-                .child(new SmallCheckboxComponent())
-                .child(Components.textBox(Sizing.fixed(60)))
-                .child(Components.button(Text.of("weeeee"), button -> {
-                    weeAnimation.loop(!weeAnimation.looping());
-                    rootComponent.<FlowLayout>configure(layout -> {
-                        var padding = layout.padding().get();
-                        for (int i = 0; i < 696969; i++) {
-                            layout.padding(Insets.of(i));
-                        }
-                        layout.padding(padding.add(5, 5, 5, 5));
-                    });
-                }).renderer(ButtonComponent.Renderer.flat(0x77000000, 0x77070707, 0xA0000000)).sizing(Sizing.content()))
-                .child(Components.discreteSlider(Sizing.fill(10), 0, 5).<DiscreteSliderComponent>configure(
-                        slider -> slider.snap(true)
-                                .decimalPlaces(1)
-                                .message(value -> Text.translatable("text.ui.test_slider", value))
-                                .onChanged().subscribe(value -> {
-                                    slider.parent().surface(Surface.blur(3, (float) (value * 3)));
-                                    this.client.player.sendMessage(Text.of("sliding towards " + value), false);
-                                })
-                ))
-                .gap(10)
-                .padding(Insets.both(5, 10))
-                .horizontalAlignment(HorizontalAlignment.CENTER)
-                .surface(Surface.blur(3, 0))
+            .child(growingTextBox)
+            .child(new SmallCheckboxComponent())
+            .child(Components.textBox(Sizing.fixed(60)))
+            .child(Components.button(Text.of("weeeee"), button -> {
+                weeAnimation.loop(!weeAnimation.looping());
+                rootComponent.<FlowLayout>configure(layout -> {
+                    var padding = layout.padding().get();
+                    for (int i = 0; i < 696969; i++) {
+                        layout.padding(Insets.of(i));
+                    }
+                    layout.padding(padding.add(5, 5, 5, 5));
+                });
+            }).renderer(ButtonComponent.Renderer.flat(0x77000000, 0x77070707, 0xA0000000)).sizing(Sizing.content()))
+            .child(Components.discreteSlider(Sizing.fill(10), 0, 5).<DiscreteSliderComponent>configure(
+                slider -> slider.snap(true)
+                    .decimalPlaces(1)
+                    .message(value -> Text.translatable("text.ui.test_slider", value))
+                    .onChanged().subscribe(value -> {
+                        slider.parent().surface(Surface.blur(3, (float) (value * 3)));
+                        this.client.player.sendMessage(Text.of("sliding towards " + value), false);
+                    })
+            ))
+            .gap(10)
+            .padding(Insets.both(5, 10))
+            .horizontalAlignment(HorizontalAlignment.CENTER)
+            .surface(Surface.blur(3, 0))
         );
 
         var dropdown = Components.dropdown(Sizing.content())
-                .checkbox(Text.of("more checking"), true, aBoolean -> {})
-                .text(Text.of("hahayes"))
-                .button(Text.of("epic button"), dropdownComponent -> {})
-                .divider()
-                .text(Text.of("very good"))
-                .checkbox(Text.of("checking time"), false, aBoolean -> {})
-                .nested(Text.of("nested entry"), Sizing.content(), nested -> {
-                    nested.text(Text.of("nest title"))
-                            .divider()
-                            .button(Text.of("nest button"), dropdownComponent -> {});
-                });
+            .checkbox(Text.of("more checking"), true, aBoolean -> {})
+            .text(Text.of("hahayes"))
+            .button(Text.of("epic button"), dropdownComponent -> {})
+            .divider()
+            .text(Text.of("very good"))
+            .checkbox(Text.of("checking time"), false, aBoolean -> {})
+            .nested(Text.of("nested entry"), Sizing.content(), nested -> {
+                nested.text(Text.of("nest title"))
+                    .divider()
+                    .button(Text.of("nest button"), dropdownComponent -> {});
+            });
 
         var dropdownButton = Components.button(Text.of("Dropdown"), button -> {
             if (dropdown.hasParent()) return;
@@ -215,9 +212,9 @@ public class ComponentTestScreen extends Screen {
 //                })
 //        );
 
-        rootComponent.mouseDown().subscribe((click, doubled) -> {
-            if (click.button() != GLFW.GLFW_MOUSE_BUTTON_RIGHT) return false;
-            DropdownComponent.openContextMenu(this, rootComponent, FlowLayout::child, click.x(), click.y(), contextMenu -> {
+        rootComponent.mouseDown().subscribe((mouseX, mouseY, button) -> {
+            if (button != GLFW.GLFW_MOUSE_BUTTON_RIGHT) return false;
+            DropdownComponent.openContextMenu(this, rootComponent, FlowLayout::child, mouseX, mouseY, contextMenu -> {
                 contextMenu.text(Text.literal("That's a context menu"));
                 contextMenu.checkbox(Text.literal("Yup"), true, aBoolean -> {});
                 contextMenu.divider();
@@ -262,16 +259,16 @@ public class ComponentTestScreen extends Screen {
 //                    }
 //                }.positioning(Positioning.relative(50, 50)).sizing(Sizing.fixed(350)));
         rootComponent.child(
-                Components.button(Text.of("overlay"), button -> {
-                    rootComponent.child(Containers.overlay(
-                            Containers.verticalFlow(Sizing.content(), Sizing.content())
-                                    .child(new ColorPickerComponent()
-                                            .showAlpha(true)
-                                            .selectedColor(Color.ofArgb(0x7F3955E5))
-                                            .sizing(Sizing.fixed(160), Sizing.fixed(100))
-                                    ).padding(Insets.of(5)).surface(Surface.DARK_PANEL)
-                    ));
-                })
+            Components.button(Text.of("overlay"), button -> {
+                rootComponent.child(Containers.overlay(
+                    Containers.verticalFlow(Sizing.content(), Sizing.content())
+                        .child(new ColorPickerComponent()
+                            .showAlpha(true)
+                            .selectedColor(Color.ofArgb(0x7F3955E5))
+                            .sizing(Sizing.fixed(160), Sizing.fixed(100))
+                        ).padding(Insets.of(5)).surface(Surface.DARK_PANEL)
+                ));
+            })
         );
 
 
@@ -280,15 +277,15 @@ public class ComponentTestScreen extends Screen {
         pig.setOnFire(true);
 
         rootComponent.child(
-                Components.entity(Sizing.fixed(100), pig)
-                        .allowMouseRotation(true)
-                        .scaleToFit(true)
-                        .showNametag(true)
-                    .lookAtCursor(true)
+            Components.entity(Sizing.fixed(100), pig)
+                .allowMouseRotation(true)
+                .scaleToFit(true)
+                .showNametag(true)
+                .lookAtCursor(true)
         );
 
         rootComponent.child(
-                Components.block(Blocks.FURNACE.getDefaultState().with(FurnaceBlock.LIT, true), (NbtCompound) null).sizing(Sizing.fixed(100))
+            Components.block(Blocks.FURNACE.getDefaultState().with(FurnaceBlock.LIT, true), (NbtCompound) null).sizing(Sizing.fixed(100))
         );
 
         var bundle = Items.BUNDLE.getDefaultStack();
@@ -298,77 +295,77 @@ public class ComponentTestScreen extends Screen {
         bundle.set(DataComponentTypes.BUNDLE_CONTENTS, new BundleContentsComponent(itemList));
 
         rootComponent.child(Components.item(new ItemStack(Items.EMERALD, 16))
-                .showOverlay(true)
-                .setTooltipFromStack(true)
-                .positioning(Positioning.absolute(120, 30))
+            .showOverlay(true)
+            .setTooltipFromStack(true)
+            .positioning(Positioning.absolute(120, 30))
         );
 
         final var buttonGrid = Containers.grid(Sizing.content(), Sizing.fixed(85), 3, 5);
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 5; column++) {
                 buttonGrid.child(
-                        Components.button(Text.of("" + (row * 5 + column)), button -> {
-                            if (button.getMessage().getString().equals("11")) {
-                                buttonGrid.child(Components.button(Text.of("long boiii"), b -> buttonGrid.child(button, 2, 1)).margins(Insets.of(3)), 2, 1);
-                            } else if (button.getMessage().getString().equals("8")) {
-                                final var box = Components.textBox(Sizing.fill(10));
-                                box.setSuggestion("thicc boi");
-                                box.sizing(box.horizontalSizing().get(), Sizing.fixed(40));
+                    Components.button(Text.of("" + (row * 5 + column)), button -> {
+                        if (button.getMessage().getString().equals("11")) {
+                            buttonGrid.child(Components.button(Text.of("long boiii"), b -> buttonGrid.child(button, 2, 1)).margins(Insets.of(3)), 2, 1);
+                        } else if (button.getMessage().getString().equals("8")) {
+                            final var box = Components.textBox(Sizing.fill(10));
+                            box.setSuggestion("thicc boi");
+                            box.sizing(box.horizontalSizing().get(), Sizing.fixed(40));
 
-                                buttonGrid.child(box.margins(Insets.of(3)), 1, 3);
-                            }
-                        }).margins(Insets.of(3)).sizing(Sizing.fixed(20)),
-                        row, column
+                            buttonGrid.child(box.margins(Insets.of(3)), 1, 3);
+                        }
+                    }).margins(Insets.of(3)).sizing(Sizing.fixed(20)),
+                    row, column
                 );
             }
         }
 
         rootComponent.child(buttonGrid
-                .horizontalAlignment(HorizontalAlignment.CENTER)
-                .verticalAlignment(VerticalAlignment.CENTER)
-                .surface(Surface.PANEL)
-                .padding(Insets.of(4))
+            .horizontalAlignment(HorizontalAlignment.CENTER)
+            .verticalAlignment(VerticalAlignment.CENTER)
+            .surface(Surface.PANEL)
+            .padding(Insets.of(4))
         );
 
         var data = IntStream.rangeClosed(1, 15).boxed().toList();
         rootComponent.child(
-                Containers.horizontalScroll(
-                                Sizing.fixed(26 * 7 + 8),
-                                Sizing.content(),
-                                Components.list(
-                                        data,
-                                        flowLayout -> flowLayout.margins(Insets.bottom(10)),
-                                        integer -> Components.button(Text.literal(integer.toString()), (ButtonComponent button) -> {}).margins(Insets.horizontal(3)).horizontalSizing(Sizing.fixed(20)),
-                                        false
-                                )
-                        )
-                        .scrollStep(26)
-                        .scrollbarThiccness(7)
-                        .scrollbar(ScrollContainer.Scrollbar.vanilla())
-                        .surface(Surface.PANEL)
-                        .padding(Insets.of(4, 5, 5, 5))
-                        .margins(Insets.bottom(5))
-                        .positioning(Positioning.relative(50, 100))
+            Containers.horizontalScroll(
+                    Sizing.fixed(26 * 7 + 8),
+                    Sizing.content(),
+                    Components.list(
+                        data,
+                        flowLayout -> flowLayout.margins(Insets.bottom(10)),
+                        integer -> Components.button(Text.literal(integer.toString()), (ButtonComponent button) -> {}).margins(Insets.horizontal(3)).horizontalSizing(Sizing.fixed(20)),
+                        false
+                    )
+                )
+                .scrollStep(26)
+                .scrollbarThiccness(7)
+                .scrollbar(ScrollContainer.Scrollbar.vanilla())
+                .surface(Surface.PANEL)
+                .padding(Insets.of(4, 5, 5, 5))
+                .margins(Insets.bottom(5))
+                .positioning(Positioning.relative(50, 100))
         );
 
         rootComponent.child(
-                Containers.verticalFlow(Sizing.content(), Sizing.content())
-                        .child(Components.label(Text.literal("Cursor Tester").withColor(Colors.GRAY))
-                                .tooltip(Text.literal("by chyzman")))
-                        .child(
-                                Components.list(
-                                        Arrays.stream(CursorStyle.values()).toList(),
-                                        flowLayout -> flowLayout.margins(Insets.bottom(10)),
-                                        cursor -> Components.label(Text.literal(cursor.toString()).withColor(Colors.GRAY))
-                                                .cursorStyle(cursor)
-                                                .margins(Insets.horizontal(3)),
-                                        true
-                                )
-                        )
-                        .surface(Surface.PANEL)
-                        .padding(Insets.of(4, 5, 5, 5))
-                        .margins(Insets.bottom(5))
-                        .positioning(Positioning.relative(100, 100))
+            Containers.verticalFlow(Sizing.content(), Sizing.content())
+                .child(Components.label(Text.literal("Cursor Tester").withColor(Colors.GRAY))
+                    .tooltip(Text.literal("by chyzman")))
+                .child(
+                    Components.list(
+                        Arrays.stream(CursorStyle.values()).toList(),
+                        flowLayout -> flowLayout.margins(Insets.bottom(10)),
+                        cursor -> Components.label(Text.literal(cursor.toString()).withColor(Colors.GRAY))
+                            .cursorStyle(cursor)
+                            .margins(Insets.horizontal(3)),
+                        true
+                    )
+                )
+                .surface(Surface.PANEL)
+                .padding(Insets.of(4, 5, 5, 5))
+                .margins(Insets.bottom(5))
+                .positioning(Positioning.relative(100, 100))
         );
 
         // infinity scroll test
@@ -384,8 +381,8 @@ public class ComponentTestScreen extends Screen {
 
         rootComponent.child(buttonPanel);
         rootComponent.surface(Surface.flat(0x77000000))
-                .verticalAlignment(VerticalAlignment.CENTER)
-                .horizontalAlignment(HorizontalAlignment.CENTER);
+            .verticalAlignment(VerticalAlignment.CENTER)
+            .horizontalAlignment(HorizontalAlignment.CENTER);
 
         uiAdapter.inflateAndMount();
     }
@@ -403,13 +400,13 @@ public class ComponentTestScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(KeyInput input) {
-        if (input.isEscape()) {
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
             this.close();
             return true;
         }
 
-        if (input.key() == GLFW.GLFW_KEY_F12) {
+        if (keyCode == GLFW.GLFW_KEY_F12) {
             try (var out = Files.newOutputStream(Path.of("component_tree.dot")); var writer = new OutputStreamWriter(out, StandardCharsets.UTF_8)) {
                 writer.write("digraph D {\n");
 
@@ -427,13 +424,13 @@ public class ComponentTestScreen extends Screen {
             }
             return true;
         } else {
-            return this.uiAdapter.keyPressed(input);
+            return this.uiAdapter.keyPressed(keyCode, scanCode, modifiers);
         }
     }
 
     @Override
-    public boolean mouseDragged(Click click, double deltaX, double deltaY) {
-        return this.uiAdapter.mouseDragged(click, deltaX, deltaY);
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+        return this.uiAdapter.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
     }
 
     @Override
@@ -457,7 +454,7 @@ public class ComponentTestScreen extends Screen {
             return "root";
         } else {
             return component.getClass().getSimpleName() + "@" + Integer.toHexString(component.hashCode())
-                    + "(" + component.x() + " " + component.y() + ")";
+                + "(" + component.x() + " " + component.y() + ")";
         }
     }
 }

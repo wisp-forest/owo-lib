@@ -73,10 +73,10 @@ public class RotatedLayout extends SingleChildInstanceWidget {
 
             this.transform.setSize(selfSize);
 
-            var childTransform = new Matrix3x2f()
-                .translate((float) (selfSize.width() / 2), (float) (selfSize.height() / 2))
-                .rotate((float) (this.visualIncrements * Math.PI / 2))
-                .translate((float) (-childSize.width() / 2), (float) (-childSize.height() / 2));
+            var childTransform = new Matrix4f()
+                .translate((float) (selfSize.width() / 2), (float) (selfSize.height() / 2), 0)
+                .rotateZ((float) (this.visualIncrements * Math.PI / 2))
+                .translate((float) (-childSize.width() / 2), (float) (-childSize.height() / 2), 0);
 
             ((CustomWidgetTransform) this.transform).setMatrix(childTransform);
         }

@@ -1,14 +1,12 @@
 #version 150
 
-#moj_import <minecraft:dynamictransforms.glsl>
-
 uniform sampler2D InputSampler;
-layout(std140) uniform BlurSettings {
-    vec2 InputResolution;
-    float Directions;
-    float Quality;
-    float Size;
-};
+uniform vec2 InputResolution;
+uniform vec4 ColorModulator;
+
+uniform float Directions;
+uniform float Quality;
+uniform float Size;
 
 out vec4 fragColor;
 

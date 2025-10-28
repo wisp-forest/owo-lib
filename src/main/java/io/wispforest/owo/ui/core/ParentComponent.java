@@ -3,7 +3,6 @@ package io.wispforest.owo.ui.core;
 import io.wispforest.owo.ui.parsing.IncompatibleUIModelException;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
-import net.minecraft.client.gui.Click;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -154,7 +153,7 @@ public interface ParentComponent extends Component {
             context.push();
             for (; i >= 0; i--) {
                 if (i > 0 && hoveredDescendants.get(i).parent() != hoveredDescendants.get(i - 1)) break;
-                context.translate(0, 0);
+                context.translate(0, 0, hoveredDescendants.get(i).zIndex());
             }
 
             current.drawTooltip(context, mouseX, mouseY, partialTicks, delta);
@@ -165,13 +164,13 @@ public interface ParentComponent extends Component {
     }
 
     @Override
-    default boolean onMouseDown(Click click, boolean doubled) {
+    default boolean onMouseDown(double mouseX, double mouseY, int button) {
         var iter = this.children().listIterator(this.children().size());
 
         while (iter.hasPrevious()) {
             var child = iter.previous();
-            if (!child.isInBoundingBox(this.x() + click.x(), this.y() + click.y())) continue;
-            if (child.onMouseDown(new Click(this.x() + click.x() - child.x(), this.y() + click.y() - child.y(), click.buttonInfo()), doubled)) {
+            if (!child.isInBoundingBox(this.x() + mouseX, this.y() + mouseY)) continue;
+            if (child.onMouseDown(this.x() + mouseX - child.x(), this.y() + mouseY - child.y(), button)) {
                 return true;
             }
         }

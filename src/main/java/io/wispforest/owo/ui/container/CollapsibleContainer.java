@@ -8,10 +8,9 @@ import io.wispforest.owo.ui.util.Delta;
 import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.input.KeyInput;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.math.RotationAxis;
 import org.lwjgl.glfw.GLFW;
 import org.w3c.dom.Element;
 
@@ -23,11 +22,11 @@ import java.util.List;
 public class CollapsibleContainer extends FlowLayout {
 
     public static final Surface SURFACE = (context, component) -> context.fill(
-            component.x() + 5,
-            component.y(),
-            component.x() + 6,
-            component.y() + component.height(),
-            0x77FFFFFF
+        component.x() + 5,
+        component.y(),
+        component.x() + 6,
+        component.y() + component.height(),
+        0x77FFFFFF
     );
 
     protected final EventStream<OnToggled> toggledEvents = OnToggled.newStream();
@@ -105,22 +104,22 @@ public class CollapsibleContainer extends FlowLayout {
     }
 
     @Override
-    public boolean onKeyPress(KeyInput input) {
-        if (input.isEnterOrSpace()) {
+    public boolean onKeyPress(int keyCode, int scanCode, int modifiers) {
+        if (keyCode == GLFW.GLFW_KEY_SPACE || keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
             this.toggleExpansion();
 
-            super.onKeyPress(input);
+            super.onKeyPress(keyCode, scanCode, modifiers);
             return true;
         }
 
-        return super.onKeyPress(input);
+        return super.onKeyPress(keyCode, scanCode, modifiers);
     }
 
     @Override
-    public boolean onMouseDown(Click click, boolean doubled) {
-        final var superResult = super.onMouseDown(click, doubled);
+    public boolean onMouseDown(double mouseX, double mouseY, int button) {
+        final var superResult = super.onMouseDown(mouseX, mouseY, button);
 
-        if (click.y() <= this.titleLayout.fullSize().height() && !superResult) {
+        if (mouseY <= this.titleLayout.fullSize().height() && !superResult) {
             this.toggleExpansion();
             UISounds.playInteractionSound();
             return true;
@@ -168,8 +167,8 @@ public class CollapsibleContainer extends FlowLayout {
         var title = textElement == null ? Text.empty() : UIParsing.parseText(textElement);
 
         return element.getAttribute("expanded").equals("true")
-                ? Containers.collapsible(Sizing.content(), Sizing.content(), title, true)
-                : Containers.collapsible(Sizing.content(), Sizing.content(), title, false);
+            ? Containers.collapsible(Sizing.content(), Sizing.content(), title, true)
+            : Containers.collapsible(Sizing.content(), Sizing.content(), title, false);
     }
 
     public interface OnToggled {
@@ -205,13 +204,13 @@ public class CollapsibleContainer extends FlowLayout {
         public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
             var matrices = context.getMatrices();
 
-            matrices.pushMatrix();
-            matrices.translate(this.x + this.width / 2f - 1, this.y + this.height / 2f - 1);
-            matrices.rotate((float) Math.toRadians(this.rotation));
-            matrices.translate(-(this.x + this.width / 2f - 1), -(this.y + this.height / 2f - 1));
+            matrices.push();
+            matrices.translate(this.x + this.width / 2f - 1, this.y + this.height / 2f - 1, 0);
+            matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(this.rotation));
+            matrices.translate(-(this.x + this.width / 2f - 1), -(this.y + this.height / 2f - 1), 0);
 
             super.draw(context, mouseX, mouseY, partialTicks, delta);
-            matrices.popMatrix();
+            matrices.pop();
         }
     }
 }

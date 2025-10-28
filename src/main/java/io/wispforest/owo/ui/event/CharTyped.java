@@ -1,16 +1,15 @@
 package io.wispforest.owo.ui.event;
 
 import io.wispforest.owo.util.EventStream;
-import net.minecraft.client.input.CharInput;
 
 public interface CharTyped {
-    boolean onCharTyped(CharInput input);
+    boolean onCharTyped(char chr, int modifiers);
 
     static EventStream<CharTyped> newStream() {
-        return new EventStream<>(subscribers -> (input) -> {
+        return new EventStream<>(subscribers -> (chr, modifiers) -> {
             var anyTriggered = false;
             for (var subscriber : subscribers) {
-                anyTriggered |= subscriber.onCharTyped(input);
+                anyTriggered |= subscriber.onCharTyped(chr, modifiers);
             }
             return anyTriggered;
         });

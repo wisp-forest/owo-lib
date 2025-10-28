@@ -7,11 +7,9 @@ import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.util.Observable;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.Click;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 
 import java.util.ArrayList;
@@ -35,12 +33,9 @@ public class LabelComponent extends BaseComponent {
     protected boolean shadow;
     protected int maxWidth;
 
-    protected Function<@Nullable Style, Boolean> textClickHandler = style -> {
+    protected Function<Style, Boolean> textClickHandler = style -> {
         OwoUIDrawContext.utilityScreen().captureLinkSource();
-        var success = style != null && OwoUIDrawContext.utilityScreen().handleTextClick(style);
-        OwoUIDrawContext.utilityScreen().getAndClearLinkSource();
-
-        return success;
+        return OwoUIDrawContext.utilityScreen().handleTextClick(style);
     };
 
     protected LabelComponent(Text text) {
@@ -127,7 +122,7 @@ public class LabelComponent extends BaseComponent {
         return this.lineSpacing.get();
     }
 
-    public LabelComponent textClickHandler(Function<@Nullable Style, Boolean> textClickHandler) {
+    public LabelComponent textClickHandler(Function<Style, Boolean> textClickHandler) {
         this.textClickHandler = textClickHandler;
         return this;
     }
@@ -182,8 +177,8 @@ public class LabelComponent extends BaseComponent {
     public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
         var matrices = context.getMatrices();
 
-        matrices.pushMatrix();
-        matrices.translate(0, 1f / MinecraftClient.getInstance().getWindow().getScaleFactor());
+        matrices.push();
+        matrices.translate(0, 1 / MinecraftClient.getInstance().getWindow().getScaleFactor(), 0);
 
         int x = this.x;
         int y = this.y;
@@ -203,22 +198,24 @@ public class LabelComponent extends BaseComponent {
         final int lambdaX = x;
         final int lambdaY = y;
 
-        for (int i = 0; i < this.wrappedText.size(); i++) {
-            var renderText = this.wrappedText.get(i);
-            int renderX = lambdaX;
+        context.draw(() -> {
+            for (int i = 0; i < this.wrappedText.size(); i++) {
+                var renderText = this.wrappedText.get(i);
+                int renderX = lambdaX;
 
-            switch (this.horizontalTextAlignment) {
-                case CENTER -> renderX += (this.width - this.textRenderer.getWidth(renderText)) / 2;
-                case RIGHT -> renderX += this.width - this.textRenderer.getWidth(renderText);
+                switch (this.horizontalTextAlignment) {
+                    case CENTER -> renderX += (this.width - this.textRenderer.getWidth(renderText)) / 2;
+                    case RIGHT -> renderX += this.width - this.textRenderer.getWidth(renderText);
+                }
+
+                int renderY = lambdaY + i * (this.lineHeight() + this.lineSpacing());
+                renderY += this.lineHeight() - this.textRenderer.fontHeight;
+
+                context.drawText(this.textRenderer, renderText, renderX, renderY, this.color.get().argb(), this.shadow);
             }
+        });
 
-            int renderY = lambdaY + i * (this.lineHeight() + this.lineSpacing());
-            renderY += this.lineHeight() - this.textRenderer.fontHeight;
-
-            context.drawText(this.textRenderer, renderText, renderX, renderY, this.color.get().argb(), this.shadow);
-        }
-
-        matrices.popMatrix();
+        matrices.pop();
     }
 
     @Override
@@ -234,11 +231,10 @@ public class LabelComponent extends BaseComponent {
     }
 
     @Override
-    public boolean onMouseDown(Click click, boolean doubled) {
-        return this.textClickHandler.apply(this.styleAt((int) click.x(), (int) click.y())) | super.onMouseDown(click, doubled);
+    public boolean onMouseDown(double mouseX, double mouseY, int button) {
+        return this.textClickHandler.apply(this.styleAt((int) mouseX, (int) mouseY)) | super.onMouseDown(mouseX, mouseY, button);
     }
 
-    @Nullable
     protected Style styleAt(int mouseX, int mouseY) {
         return this.textRenderer.getTextHandler().getStyleAt(this.wrappedText.get(Math.min(mouseY / (this.lineHeight() + this.lineSpacing()), this.wrappedText.size() - 1)), mouseX);
     }

@@ -2,6 +2,7 @@ package io.wispforest.owo.serialization.format.nbt;
 
 import com.google.common.collect.MapMaker;
 import io.wispforest.endec.*;
+import io.wispforest.endec.temp.OptionalFieldFlag;
 import io.wispforest.endec.util.RecursiveSerializer;
 import net.minecraft.nbt.*;
 import net.minecraft.network.encoding.VarInts;
@@ -10,10 +11,7 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import org.spongepowered.asm.mixin.Mutable;
 
 import java.lang.ref.WeakReference;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.Set;
-import java.util.WeakHashMap;
+import java.util.*;
 
 public class NbtSerializer extends RecursiveSerializer<NbtElement> implements SelfDescribedSerializer<NbtElement> {
 
@@ -111,14 +109,14 @@ public class NbtSerializer extends RecursiveSerializer<NbtElement> implements Se
         this.frame(encoded -> {
             try (var struct = this.struct()) {
                 struct.field("present", ctx, Endec.BOOLEAN, optional.isPresent());
-                optional.ifPresent(value -> struct.field("value", ctx, endec, value));
+                optional.ifPresent(value -> struct.field("value", ctx.withoutAttributes(OptionalFieldFlag.INSTANCE), endec, value));
             }
 
             var compound = encoded.require("optional representation");
 
             encodedOptionals.add(compound);
             frameData.setValue(compound);
-        });
+        }, false);
 
         this.consume(frameData.getValue());
     }
@@ -168,11 +166,13 @@ public class NbtSerializer extends RecursiveSerializer<NbtElement> implements Se
             NbtSerializer.this.frame(encoded -> {
                 this.valueEndec.encode(this.ctx, NbtSerializer.this, value);
                 this.result.put(key, encoded.require("map value"));
-            });
+            }, false);
         }
 
         @Override
-        public <F> Struct field(String name, SerializationContext ctx, Endec<F> endec, F value, boolean mayOmit) {
+        public <F> Struct field(String name, SerializationContext ctx, Endec<F> endec, F value) {
+            boolean mayOmit = ctx.hasAttribute(OptionalFieldFlag.INSTANCE);
+
             NbtSerializer.this.frame(encoded -> {
                 endec.encode(ctx, NbtSerializer.this, value);
 
@@ -181,13 +181,13 @@ public class NbtSerializer extends RecursiveSerializer<NbtElement> implements Se
                 if (mayOmit && NbtSerializer.this.encodedOptionals.contains(element)) {
                     var nbtCompound = (NbtCompound) element;
 
-                    if(!nbtCompound.getBoolean("present", false)) return;
+                    if(!nbtCompound.getBoolean("present")) return;
 
                     element = nbtCompound.get("value");
                 }
 
                 this.result.put(name, element);
-            });
+            }, false);
 
             return this;
         }
@@ -224,12 +224,37 @@ public class NbtSerializer extends RecursiveSerializer<NbtElement> implements Se
             NbtSerializer.this.frame(encoded -> {
                 this.valueEndec.encode(this.ctx, NbtSerializer.this, element);
                 this.result.add(encoded.require("sequence element"));
-            });
+            }, false);
         }
 
         @Override
         public void end() {
-            NbtSerializer.this.consume(this.result);
+            var convertedResult = switch (this.result.getHeldType()) {
+                case NbtElement.BYTE_TYPE -> {
+                    var list = new ArrayList<Byte>();
+                    for (var nbtElement : this.result) {
+                        list.add(((AbstractNbtNumber) nbtElement).byteValue());
+                    }
+                    yield new NbtByteArray(list);
+                }
+                case NbtElement.INT_TYPE -> {
+                    var list = new ArrayList<Integer>();
+                    for (var nbtElement : this.result) {
+                        list.add(((AbstractNbtNumber) nbtElement).intValue());
+                    }
+                    yield new NbtIntArray(list);
+                }
+                case NbtElement.LONG_TYPE -> {
+                    var list = new ArrayList<Long>();
+                    for (NbtElement nbtElement : this.result) {
+                        list.add(((AbstractNbtNumber) nbtElement).longValue());
+                    }
+                    yield new NbtLongArray(list);
+                }
+                default -> this.result;
+            };
+
+            NbtSerializer.this.consume(convertedResult);
         }
     }
 }

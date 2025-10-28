@@ -1,16 +1,15 @@
 package io.wispforest.owo.ui.event;
 
 import io.wispforest.owo.util.EventStream;
-import net.minecraft.client.gui.Click;
 
 public interface MouseDown {
-    boolean onMouseDown(Click click, boolean doubled);
+    boolean onMouseDown(double mouseX, double mouseY, int button);
 
     static EventStream<MouseDown> newStream() {
-        return new EventStream<>(subscribers -> (click, doubled) -> {
+        return new EventStream<>(subscribers -> (mouseX, mouseY, button) -> {
             var anyTriggered = false;
             for (var subscriber : subscribers) {
-                anyTriggered |= subscriber.onMouseDown(click, doubled);
+                anyTriggered |= subscriber.onMouseDown(mouseX, mouseY, button);
             }
             return anyTriggered;
         });

@@ -1,7 +1,7 @@
 package io.wispforest.owo.braid.core;
 
 import com.google.common.collect.Iterables;
-import com.mojang.blaze3d.opengl.GlStateManager;
+import com.mojang.blaze3d.platform.GlStateManager;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.core.events.*;
 import io.wispforest.owo.braid.framework.BuildContext;
@@ -20,6 +20,7 @@ import io.wispforest.owo.braid.widgets.focus.RootFocusScope;
 import io.wispforest.owo.braid.widgets.eventstream.BraidEventStream;
 import io.wispforest.owo.braid.widgets.inspector.BraidInspector;
 import io.wispforest.owo.braid.widgets.inspector.InstancePicker;
+import io.wispforest.owo.ui.util.ScissorStack;
 import io.wispforest.owo.util.EventSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
@@ -30,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
 import org.joml.Vector2dc;
 import org.joml.Vector2f;
+import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 
@@ -149,13 +151,16 @@ public class AppState implements InstanceHost, ProxyHost {
     public void draw(DrawContext ctx) {
         this.surface.beginRendering();
 
+        ctx.draw();
         ctx.push();
         this.rootInstance().transform.transformToParent(ctx.getMatrices());
 
         var braidContext = BraidDrawContext.create(ctx, this.surface);
 
         GlStateManager._enableScissorTest();
+        ScissorStack.push(0, 0, this.surface.width(), this.surface.height(), ctx);
         this.rootInstance().draw(braidContext);
+        ScissorStack.pop();
         GlStateManager._disableScissorTest();
 
         if (this.activeTooltip != null) {
@@ -164,6 +169,7 @@ public class AppState implements InstanceHost, ProxyHost {
         }
 
         ctx.pop();
+        ctx.draw();
 
         this.surface.endRendering();
     }
@@ -312,7 +318,7 @@ public class AppState implements InstanceHost, ProxyHost {
 
                     var deltaX = x - this.cursorPosition.x;
                     var deltaY = y - this.cursorPosition.y;
-                    if (deltaX == 0 && deltaY == 0) return;
+                    if (deltaX == 0 && deltaY == 0) break;
 
                     this.cursorPosition.x = x;
                     this.cursorPosition.y = y;
@@ -326,12 +332,12 @@ public class AppState implements InstanceHost, ProxyHost {
                     }
 
                     var globalTransform = ((WidgetInstance<?>) this.dragging).computeGlobalTransform();
-                    var coordinates = new Vector2f((float) x, (float) y);
+                    var coordinates = new Vector3f((float) x, (float) y, 0);
                     globalTransform.transformPosition(coordinates);
 
                     // apply *only the rotation* of the instance's transform
                     // to the mouse movement
-                    var delta = new Vector2f((float) deltaX, (float) deltaY);
+                    var delta = new Vector3f((float) deltaX, (float) deltaY, 0);
                     globalTransform.transformDirection(delta);
 
                     this.dragging.onMouseDrag(coordinates.x, coordinates.y, delta.x, delta.y);

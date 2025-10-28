@@ -1,11 +1,9 @@
 package io.wispforest.uwu;
 
-import blue.endless.jankson.JsonPrimitive;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.logging.LogUtils;
 import io.netty.buffer.Unpooled;
@@ -13,7 +11,6 @@ import io.wispforest.endec.Endec;
 import io.wispforest.endec.SerializationContext;
 import io.wispforest.endec.format.bytebuf.ByteBufSerializer;
 import io.wispforest.endec.format.gson.GsonDeserializer;
-import io.wispforest.endec.format.gson.GsonEndec;
 import io.wispforest.endec.format.gson.GsonSerializer;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.Owo;
@@ -26,14 +23,14 @@ import io.wispforest.owo.network.OwoNetChannel;
 import io.wispforest.owo.particles.ClientParticles;
 import io.wispforest.owo.particles.systems.ParticleSystem;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
+import io.wispforest.owo.registration.reflect.AutoRegistryContainer;
+import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
 import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.RegistriesAttribute;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.serialization.format.nbt.NbtDeserializer;
-import io.wispforest.owo.serialization.format.nbt.NbtEndec;
 import io.wispforest.owo.serialization.format.nbt.NbtSerializer;
 import io.wispforest.owo.text.CustomTextRegistry;
-import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.util.TagInjector;
 import io.wispforest.uwu.block.BraidDisplayBlock;
 import io.wispforest.uwu.block.BraidDisplayBlockEntity;
@@ -49,30 +46,24 @@ import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.command.argument.GameProfileArgumentType;
 import net.minecraft.item.*;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.particle.DragonBreathParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.resource.featuretoggle.FeatureFlags;
 import net.minecraft.screen.ScreenHandlerType;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
@@ -103,7 +94,7 @@ public class Uwu implements ModInitializer {
         new ScreenHandlerType<>(EpicScreenHandler::new, FeatureFlags.VANILLA_FEATURES)
     );
 
-    public static final Block BRAID_DISPLAY_BLOCK = new BraidDisplayBlock(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK).registryKey(RegistryKey.of(RegistryKeys.BLOCK, Identifier.of("uwu", "braid_display"))));
+    public static final Block BRAID_DISPLAY_BLOCK = new BraidDisplayBlock(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK));
     public static final BlockEntityType<BraidDisplayBlockEntity> BRAID_DISPLAY_ENTITY = FabricBlockEntityTypeBuilder.create(BraidDisplayBlockEntity::new, BRAID_DISPLAY_BLOCK).build();
 
     public static final OwoItemGroup FOUR_TAB_GROUP = OwoItemGroup.builder(Identifier.of("uwu", "four_tab_group"), () -> Icon.of(Items.AXOLOTL_BUCKET))
@@ -173,7 +164,7 @@ public class Uwu implements ModInitializer {
         ClientParticles.persist();
 
         ClientParticles.setParticleCount(30);
-        ClientParticles.spawnLine(DragonBreathParticleEffect.of(ParticleTypes.DRAGON_BREATH, 1), world, pos.add(.5, .5, .5), pos.add(.5, 2.5, .5), .015f);
+        ClientParticles.spawnLine(ParticleTypes.DRAGON_BREATH, world, pos.add(.5, .5, .5), pos.add(.5, 2.5, .5), .015f);
 
         ClientParticles.randomizeVelocityOnAxis(.1, Direction.Axis.Z);
         ClientParticles.spawn(ParticleTypes.CLOUD, world, pos.add(.5, 2.5, .5), 0);
@@ -209,7 +200,7 @@ public class Uwu implements ModInitializer {
         System.out.println(serializer.result().read(SerializationContext.empty(), stackEndec));
         System.out.println(CodecUtils.toCodec(MinecraftEndecs.BLOCK_POS).encodeStart(NbtOps.INSTANCE, new BlockPos(34, 35, 69)).result().get());
 
-        UwuItems.init();
+        AutoRegistryContainer.register(UwuItems.class, "uwu", true);
 
         TagInjector.inject(Registries.BLOCK, BlockTags.BASE_STONE_OVERWORLD.id(), Blocks.GLASS);
         TagInjector.injectTagReference(Registries.ITEM, ItemTags.COALS.id(), ItemTags.FOX_FOOD.id());
@@ -238,7 +229,7 @@ public class Uwu implements ModInitializer {
         System.out.println(Registries.ITEM.getEntry(Identifier.of("acacia_planks")));
 
         Registry.register(Registries.BLOCK, Identifier.of("uwu", "braid_display"), BRAID_DISPLAY_BLOCK);
-        Registry.register(Registries.ITEM, Identifier.of("uwu", "braid_display"), new BlockItem(BRAID_DISPLAY_BLOCK, new Item.Settings().registryKey(RegistryKey.of(RegistryKeys.ITEM, Identifier.of("uwu", "braid_display"))).useBlockPrefixedTranslationKey()));
+        Registry.register(Registries.ITEM, Identifier.of("uwu", "braid_display"), new BlockItem(BRAID_DISPLAY_BLOCK, new Item.Settings()));
         Registry.register(Registries.BLOCK_ENTITY_TYPE, Identifier.of("uwu", "braid_display"), BRAID_DISPLAY_ENTITY);
 
 //        UwuShapedRecipe.init();
@@ -418,7 +409,7 @@ public class Uwu implements ModInitializer {
                         compound.put(variable3Endec, variable3);
 
                         LOGGER.info("");
-                        LOGGER.info(compound.asString().get());
+                        LOGGER.info(compound.asString());
 
                         LOGGER.info("");
 
@@ -462,7 +453,7 @@ public class Uwu implements ModInitializer {
                 }));
         });
 
-        CustomTextRegistry.register("based", BasedTextContent.CODEC);
+        CustomTextRegistry.register(BasedTextContent.TYPE, "based");
 
         UwuNetworkExample.init();
         UwuOptionalNetExample.init();

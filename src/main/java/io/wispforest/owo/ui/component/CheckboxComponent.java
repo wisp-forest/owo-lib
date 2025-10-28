@@ -9,7 +9,6 @@ import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.util.Observable;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.CheckboxWidget;
-import net.minecraft.client.input.AbstractInput;
 import net.minecraft.text.Text;
 import org.w3c.dom.Element;
 
@@ -27,8 +26,8 @@ public class CheckboxComponent extends CheckboxWidget {
     }
 
     @Override
-    public void onPress(AbstractInput input) {
-        super.onPress(input);
+    public void onPress() {
+        super.onPress();
         this.listeners.set(this.isChecked());
     }
 

@@ -93,7 +93,7 @@ public class BraidDisplayBlockEntity extends BlockEntity {
                             )
                         ),
                         new Button(
-                            () -> MinecraftClient.getInstance().player.dropCreativeStack(UwuItems.BRAID.getDefaultStack()),
+                            () -> MinecraftClient.getInstance().interactionManager.dropCreativeStack(UwuItems.BRAID.getDefaultStack()),
                             new Row(
                                 MainAxisAlignment.START,
                                 CrossAxisAlignment.CENTER,

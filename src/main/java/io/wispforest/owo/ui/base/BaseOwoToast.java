@@ -34,33 +34,15 @@ public abstract class BaseOwoToast<R extends ParentComponent> implements Toast {
         this(rootComponent, VisibilityPredicate.timeout(timeout));
     }
 
-    private Visibility visibility = Visibility.HIDE;
-
     @Override
-    public void update(ToastManager manager, long time) {
-        final var delta = MinecraftClient.getInstance().getRenderTickCounter().getDynamicDeltaTicks();
+    public Visibility draw(DrawContext context, ToastManager manager, long startTime) {
+        var client = MinecraftClient.getInstance();
 
-        var client = manager.getClient();
-        var window = client.getWindow();
-
-        int mouseX = -1000; //(int)(client.mouse.getX() * (double) window.getScaledWidth() / (double) window.getWidth());
-        int mouseY = -1000; //(int)(client.mouse.getY() * (double) window.getScaledHeight() / (double) window.getHeight());
-
-        this.rootComponent.update(delta, mouseX, mouseY);
-
-        this.visibility = this.visibilityPredicate.test(this, time);
-    }
-
-    @Override
-    public Visibility getVisibility() {
-        return this.visibility;
-    }
-
-    @Override
-    public void draw(DrawContext context, TextRenderer textRenderer, long startTime) {
         var tickCounter = MinecraftClient.getInstance().getRenderTickCounter();
 
-        this.rootComponent.draw(OwoUIDrawContext.of(context), -1000, -1000, tickCounter.getTickProgress(false), tickCounter.getDynamicDeltaTicks());
+        this.rootComponent.draw(OwoUIDrawContext.of(context), -1000, -1000, tickCounter.getTickDelta(false), tickCounter.getLastFrameDuration());
+
+        return this.visibilityPredicate.test(this, startTime);
     }
 
     @Override

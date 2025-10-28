@@ -44,8 +44,9 @@ public class BraidTooltipComponent implements TooltipComponent {
     }
 
     @Override
-    public void drawItems(TextRenderer textRenderer, int x, int y, int width, int height, DrawContext context) {
-        context.push().translate(x, y);
+    public void drawItems(TextRenderer textRenderer, int x, int y, DrawContext context) {
+        context.draw();
+        context.push().translate(x, y, 0);
         this.app.draw(context);
         context.pop();
     }
@@ -56,7 +57,7 @@ public class BraidTooltipComponent implements TooltipComponent {
     }
 
     @Override
-    public int getHeight(TextRenderer textRenderer) {
+    public int getHeight() {
         return (int) this.instance.transform.height();
     }
 

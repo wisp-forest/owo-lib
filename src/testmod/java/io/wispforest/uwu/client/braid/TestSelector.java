@@ -78,15 +78,14 @@ import io.wispforest.uwu.items.UwuItems;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.CheckboxWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.SpawnReason;
 import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
@@ -101,10 +100,9 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix3x2f;
+import org.joml.Matrix4f;
 
 import java.math.BigInteger;
-import java.net.URI;
 import java.time.Duration;
 import java.util.*;
 import java.util.function.IntConsumer;
@@ -202,10 +200,10 @@ public class TestSelector extends StatefulWidget {
                         Alignment.CENTER,
                         new Transform(
                             Util.make(() -> {
-                                var mat = new Matrix3x2f();
-                                mat.m01 = (float) Math.tan(this.xSkew);
-                                mat.m10 = (float) Math.tan(this.ySkew);
-                                mat.rotate((float) Math.toRadians(this.rotat));
+                                var mat = new Matrix4f();
+                                mat.m01((float) Math.tan(this.xSkew));
+                                mat.m10((float) Math.tan(this.ySkew));
+                                mat.rotateZ((float) Math.toRadians(this.rotat));
                                 return mat;
                             }),
                             new Center(
@@ -590,7 +588,7 @@ public class TestSelector extends StatefulWidget {
                             new Align(
                                 Alignment.TOP_LEFT,
                                 new Column(
-                                    new Label(Text.literal("a").setStyle(Style.EMPTY.withClickEvent(new ClickEvent.OpenUrl(URI.create("https://chyz.xyz/box"))))),
+                                    new Label(Text.literal("a").setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://chyz.xyz/box")))),
                                     new MessageButton(Text.literal("window button :o"), () -> setState(() -> controller.toggleCollapsed()))
                                 )
                             ),
@@ -899,7 +897,7 @@ public class TestSelector extends StatefulWidget {
                             20.0,
                             20.0,
                             new Transform(
-                                new Matrix3x2f().rotation((float) Math.toRadians(90)),
+                                new Matrix4f().rotationZ((float) Math.toRadians(90)),
                                 new EntityWidget(
                                     3.5,
                                     this.chyz,
@@ -1638,7 +1636,7 @@ public class TestSelector extends StatefulWidget {
                                                                     new Label(
                                                                         LabelStyle.SHADOW,
                                                                         true,
-                                                                        contributor.displayName().copy().setStyle(contributor.displayName.copy().getStyle().withHoverEvent(new HoverEvent.ShowEntity(new HoverEvent.EntityContent(EntityType.PLAYER, contributor.uuid, contributor.displayName))))
+                                                                        contributor.displayName().copy().setStyle(contributor.displayName.copy().getStyle().withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY, new HoverEvent.EntityContent(EntityType.PLAYER, contributor.uuid, contributor.displayName))))
                                                                     ),
                                                                     new RatingBar()
                                                                 )
@@ -1754,11 +1752,11 @@ public class TestSelector extends StatefulWidget {
                                     this.dead && this.displayEntity.getUuid().equals(UUID.fromString("91a033f7-1dd3-4858-9c7b-8fb61ba6363d")),
                                     new Stack(
                                         new Transform(
-                                            new Matrix3x2f(),
+                                            new Matrix4f(),
                                             new ItemStackWidget(
                                                 SharedState.getWithoutDependency(context, MurderState.class).bed,
                                                 widget -> widget
-                                                    .displayContext(ItemDisplayContext.NONE)
+                                                    .transformationMode(ModelTransformationMode.NONE)
                                                     .transform(matrix4f -> matrix4f
                                                         .rotate(RotationAxis.POSITIVE_Y.rotationDegrees(90))
                                                         .rotate(RotationAxis.POSITIVE_Z.rotationDegrees(15))
@@ -1769,7 +1767,7 @@ public class TestSelector extends StatefulWidget {
                                         new Align(
                                             Alignment.TOP_LEFT,
                                             new Transform(
-                                                new Matrix3x2f().translation(75, 10),
+                                                new Matrix4f().translation(75, 10, 0),
                                                 new Label(new LabelStyle(Alignment.TOP_LEFT, null, null, true), true, Text.literal("    z\n  z\nz"))
                                             )
                                         )
@@ -2329,14 +2327,14 @@ public class TestSelector extends StatefulWidget {
             @Override
             public void init() {
                 this.entities = Stream.of(
-                    EntityType.HAPPY_GHAST,
+                    EntityType.GHAST,
                     EntityType.ALLAY,
                     EntityType.COW,
-                    EntityType.CREAKING,
+                    EntityType.WARDEN,
                     EntityType.BREEZE,
-                    EntityType.COPPER_GOLEM
+                    EntityType.SNOW_GOLEM
                 ).<Entity>map(
-                    entityType -> entityType.create(MinecraftClient.getInstance().world, SpawnReason.MOB_SUMMONED)
+                    entityType -> entityType.create(MinecraftClient.getInstance().world)
                 ).toList();
             }
 
@@ -2450,9 +2448,9 @@ public class TestSelector extends StatefulWidget {
                         var elementIndex = i;
                         displayChildren.add(
                             new Transform(
-                                new Matrix3x2f()
-                                    .translate(0f, thisOffset)
-                                    .scale(scale, scale),
+                                new Matrix4f()
+                                    .translate(0f, thisOffset, 0)
+                                    .scale(scale, scale, 1),
                                 Interactable.primary(
                                     () -> this.widget().onChanged.accept(elementIndex),
                                     this.widget().children.get(i)
@@ -2521,7 +2519,7 @@ public class TestSelector extends StatefulWidget {
                     LayoutAxis.VERTICAL,
                     32,
                     Grid.CellFit.loose(),
-                    Stream.generate(() -> widget).limit(32*32).toList()
+                    Stream.generate(() -> widget).limit(32 * 32).toList()
                 )
             );
         }

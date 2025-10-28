@@ -11,7 +11,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.storage.NbtReadView;
 import net.minecraft.util.ErrorReporter;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
@@ -114,7 +113,7 @@ public class BlockWidget extends StatefulWidget {
             blockEntity.setWorld(client.world);
 
             if (nbt != null) {
-                blockEntity.read(NbtReadView.create(new ErrorReporter.Logging(Owo.LOGGER), client.world.getRegistryManager(), nbt));
+                blockEntity.read(nbt, client.world.getRegistryManager());
             }
 
             return blockEntity;

@@ -1,16 +1,15 @@
 package io.wispforest.owo.ui.event;
 
 import io.wispforest.owo.util.EventStream;
-import net.minecraft.client.input.KeyInput;
 
 public interface KeyPress {
-    boolean onKeyPress(KeyInput input);
+    boolean onKeyPress(int keyCode, int scanCode, int modifiers);
 
     static EventStream<KeyPress> newStream() {
-        return new EventStream<>(subscribers -> (input) -> {
+        return new EventStream<>(subscribers -> (keyCode, scanCode, modifiers) -> {
             var anyTriggered = false;
             for (var subscriber : subscribers) {
-                anyTriggered |= subscriber.onKeyPress(input);
+                anyTriggered |= subscriber.onKeyPress(keyCode, scanCode, modifiers);
             }
             return anyTriggered;
         });

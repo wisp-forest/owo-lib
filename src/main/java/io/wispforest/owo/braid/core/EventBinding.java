@@ -68,7 +68,7 @@ public abstract class EventBinding {
     public static class Default extends EventBinding {
         @Override
         public boolean isKeyPressed(int keyCode) {
-            return InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow(), keyCode);
+            return InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), keyCode);
         }
     }
 }

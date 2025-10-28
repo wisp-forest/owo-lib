@@ -9,24 +9,25 @@ import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
-import io.wispforest.owo.ui.renderstate.OwoItemElementRenderState;
 import net.fabricmc.fabric.api.client.rendering.v1.TooltipComponentCallback;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.item.ItemModelManager;
-import net.minecraft.client.render.item.ItemRenderState;
+import net.minecraft.client.render.DiffuseLighting;
+import net.minecraft.client.render.LightmapTextureManager;
+import net.minecraft.client.render.OverlayTexture;
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.item.ItemRenderer;
+import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.command.argument.ItemStringReader;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix3x2f;
+import org.joml.Matrix4f;
 import org.w3c.dom.Element;
 
 import java.util.ArrayList;
@@ -37,13 +38,17 @@ import java.util.stream.Stream;
 
 public class ItemComponent extends BaseComponent {
 
-    protected final ItemModelManager itemModelManager;
+    protected static final Matrix4f ITEM_SCALING = new Matrix4f().scaling(16, -16, 16);
+
+    protected final VertexConsumerProvider.Immediate entityBuffers;
+    protected final ItemRenderer itemRenderer;
     protected ItemStack stack;
     protected boolean showOverlay = false;
     protected boolean setTooltipFromStack = false;
 
     protected ItemComponent(ItemStack stack) {
-        this.itemModelManager = MinecraftClient.getInstance().getItemModelManager();
+        this.entityBuffers = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
+        this.itemRenderer = MinecraftClient.getInstance().getItemRenderer();
         this.stack = stack;
     }
 
@@ -59,35 +64,41 @@ public class ItemComponent extends BaseComponent {
 
     @Override
     public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+        final boolean notSideLit = !this.itemRenderer.getModel(this.stack, null, null, 0).isSideLit();
+        if (notSideLit) {
+            DiffuseLighting.disableGuiDepthLighting();
+        }
+
         var matrices = context.getMatrices();
-        matrices.pushMatrix();
+        matrices.push();
 
         // Translate to the root of the component
-        matrices.translate(this.x, this.y);
+        matrices.translate(this.x, this.y, 100);
 
         // Scale according to component size and translate to the center
-        matrices.scale(this.width / 16f, this.height / 16f);
+        matrices.scale(this.width / 16f, this.height / 16f, 1);
+        matrices.translate(8.0, 8.0, 0.0);
+
+        // Vanilla scaling and y inversion
+        if (notSideLit) {
+            matrices.scale(16, -16, 16);
+        } else {
+            matrices.multiplyPositionMatrix(ITEM_SCALING);
+        }
 
         var client = MinecraftClient.getInstance();
 
-        if (this.width <= 16 && this.height <= 16) {
-            context.drawItem(this.stack, 0, 0);
-        } else {
-            var state = new ItemRenderState();
-            this.itemModelManager.update(state, this.stack, ItemDisplayContext.GUI, MinecraftClient.getInstance().world, MinecraftClient.getInstance().player, 0);
-
-            context.state.addSpecialElement(new OwoItemElementRenderState(
-                state,
-                new ScreenRect(this.x, this.y, this.width, this.height),
-                context.scissorStack.peekLast()
-            ));
-        }
+        this.itemRenderer.renderItem(this.stack, ModelTransformationMode.GUI, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, matrices, entityBuffers, client.world, 0);
+        this.entityBuffers.draw();
 
         // Clean up
-        matrices.popMatrix();
+        matrices.pop();
 
         if (this.showOverlay) {
-            context.drawStackOverlay(client.textRenderer, this.stack, this.x, this.y);
+            context.drawItemInSlot(client.textRenderer, this.stack, this.x, this.y);
+        }
+        if (notSideLit) {
+            DiffuseLighting.enableGuiDepthLighting();
         }
     }
 
@@ -174,13 +185,13 @@ public class ItemComponent extends BaseComponent {
         UIParsing.apply(children, "item", UIParsing::parseIdentifier, itemId -> {
             Owo.debugWarn(Owo.LOGGER, "Deprecated <item> property populated on item component - migrate to <stack> instead");
 
-            var item = Registries.ITEM.getOptionalValue(itemId).orElseThrow(() -> new UIModelParsingException("Unknown item " + itemId));
+            var item = Registries.ITEM.getOrEmpty(itemId).orElseThrow(() -> new UIModelParsingException("Unknown item " + itemId));
             this.stack(item.getDefaultStack());
         });
 
         UIParsing.apply(children, "stack", $ -> $.getTextContent().strip(), stackString -> {
             try {
-                var result = new ItemStringReader(RegistryWrapper.WrapperLookup.of(Stream.of(Registries.ITEM)))
+                var result = new ItemStringReader(RegistryWrapper.WrapperLookup.of(Stream.of(Registries.ITEM.getReadOnlyWrapper())))
                     .consume(new StringReader(stackString));
 
                 var stack = new ItemStack(result.item());

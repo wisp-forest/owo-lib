@@ -25,15 +25,17 @@ public abstract class BaseOwoTooltipComponent<R extends ParentComponent> impleme
     }
 
     @Override
-    public void drawItems(TextRenderer textRenderer, int x, int y, int width, int height, DrawContext context) {
+    public void drawItems(TextRenderer textRenderer, int x, int y, DrawContext context) {
+        var client = MinecraftClient.getInstance();
+
         var tickCounter = MinecraftClient.getInstance().getRenderTickCounter();
 
         this.rootComponent.moveTo(x, y);
-        this.rootComponent.draw(OwoUIDrawContext.of(context), -1000, -1000, tickCounter.getTickProgress(false), tickCounter.getDynamicDeltaTicks());
+        this.rootComponent.draw(OwoUIDrawContext.of(context), -1000, -1000, tickCounter.getTickDelta(false), tickCounter.getLastFrameDuration());
     }
 
     @Override
-    public int getHeight(TextRenderer textRenderer) {
+    public int getHeight() {
         return this.rootComponent.fullSize().height();
     }
 

@@ -70,7 +70,7 @@ public final class VectorSerializer {
      */
     public static NbtCompound puti(NbtCompound nbt, String key, Vec3i vec3i) {
 
-        nbt.putIntArray(key, new int[]{vec3i.getX(), vec3i.getY(), vec3i.getZ()});
+        nbt.putIntArray(key, List.of(vec3i.getX(), vec3i.getY(), vec3i.getZ()));
 
         return nbt;
     }
@@ -85,10 +85,10 @@ public final class VectorSerializer {
      */
     public static Vec3d get(NbtCompound nbt, String key) {
 
-        NbtList vectorArray = nbt.getList(key).get();
-        double x = vectorArray.getDouble(0, 0d);
-        double y = vectorArray.getDouble(1, 0d);
-        double z = vectorArray.getDouble(2, 0d);
+        NbtList vectorArray = nbt.getList(key, NbtElement.DOUBLE_TYPE);
+        double x = vectorArray.getDouble(0);
+        double y = vectorArray.getDouble(1);
+        double z = vectorArray.getDouble(2);
 
         return new Vec3d(x, y, z);
     }
@@ -103,10 +103,10 @@ public final class VectorSerializer {
      */
     public static Vector3f getf(NbtCompound nbt, String key) {
 
-        NbtList vectorArray = nbt.getList(key).get();
-        float x = vectorArray.getFloat(0, 0f);
-        float y = vectorArray.getFloat(1, 0f);
-        float z = vectorArray.getFloat(2, 0f);
+        NbtList vectorArray = nbt.getList(key, NbtElement.FLOAT_TYPE);
+        float x = vectorArray.getFloat(0);
+        float y = vectorArray.getFloat(1);
+        float z = vectorArray.getFloat(2);
 
         return new Vector3f(x, y, z);
     }
@@ -121,7 +121,7 @@ public final class VectorSerializer {
      */
     public static Vec3i geti(NbtCompound nbt, String key) {
 
-        int[] vectorArray = nbt.getIntArray(key).get();
+        int[] vectorArray = nbt.getIntArray(key);
         int x = vectorArray[0];
         int y = vectorArray[1];
         int z = vectorArray[2];

@@ -87,7 +87,7 @@ public interface OptionComponentFactory<T> {
 
             result.optionProvider.onChanged().subscribe(value -> box.color(valueGetter.get()));
 
-            box.mouseDown().subscribe((click, doubled) -> {
+            box.mouseDown().subscribe((mouseX, mouseY, button) -> {
                 ((FlowLayout) box.root()).child(Containers.overlay(
                         model.expandTemplate(
                                 FlowLayout.class,

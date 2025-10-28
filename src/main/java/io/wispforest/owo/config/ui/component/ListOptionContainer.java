@@ -55,7 +55,7 @@ public class ListOptionContainer<T> extends CollapsibleContainer implements Opti
 
                 label.mouseEnter().subscribe(() -> label.text(label.text().copy().styled(style -> style.withColor(Formatting.YELLOW))));
                 label.mouseLeave().subscribe(() -> label.text(label.text().copy().styled(style -> style.withColor(Formatting.GRAY))));
-                label.mouseDown().subscribe((click, doubled) -> {
+                label.mouseDown().subscribe((mouseX, mouseY, button) -> {
                     UISounds.playInteractionSound();
                     this.backingList.add((T) "");
 
@@ -64,8 +64,8 @@ public class ListOptionContainer<T> extends CollapsibleContainer implements Opti
 
                     var lastEntry = (ParentComponent) this.collapsibleChildren.get(this.collapsibleChildren.size() - 1);
                     this.focusHandler().focus(
-                            lastEntry.children().get(lastEntry.children().size() - 1),
-                            FocusSource.MOUSE_CLICK
+                        lastEntry.children().get(lastEntry.children().size() - 1),
+                        FocusSource.MOUSE_CLICK
                     );
 
                     return true;
@@ -111,7 +111,7 @@ public class ListOptionContainer<T> extends CollapsibleContainer implements Opti
                 label.cursorStyle(CursorStyle.HAND);
                 label.mouseEnter().subscribe(() -> label.text(TextOps.withFormatting("x ", Formatting.GRAY)));
                 label.mouseLeave().subscribe(() -> label.text(TextOps.withFormatting("- ", Formatting.GRAY)));
-                label.mouseDown().subscribe((click, doubled) -> {
+                label.mouseDown().subscribe((mouseX, mouseY, button) -> {
                     this.backingList.remove(optionIndex);
                     this.refreshResetButton();
                     this.refreshOptions();

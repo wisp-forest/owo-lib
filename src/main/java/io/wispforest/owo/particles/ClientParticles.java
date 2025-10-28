@@ -4,7 +4,6 @@ import io.wispforest.owo.util.VectorRandomUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.particle.Particle;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.util.math.BlockPos;
@@ -118,7 +117,7 @@ public final class ClientParticles {
             }
         }
 
-        world.addParticleClient(particle, location.x, location.y, location.z, velocity.x, velocity.y, velocity.z);
+        world.addParticle(particle, location.x, location.y, location.z, velocity.x, velocity.y, velocity.z);
     }
 
     /**
@@ -235,7 +234,7 @@ public final class ClientParticles {
 
         for (int i = 0; i < particleCount; i++) {
             location = VectorRandomUtils.getRandomOffset(world, particleVector, deviation);
-            world.addParticleClient(ParticleTypes.ENCHANT, destination.x, destination.y, destination.z, location.x, location.y, location.z);
+            world.addParticle(ParticleTypes.ENCHANT, destination.x, destination.y, destination.z, location.x, location.y, location.z);
         }
 
         clearState();

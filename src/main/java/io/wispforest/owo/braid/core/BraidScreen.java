@@ -6,11 +6,8 @@ import io.wispforest.owo.braid.framework.widget.InheritedWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.BraidApp;
 import io.wispforest.owo.ui.util.DisposableScreen;
-import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 
@@ -59,7 +56,7 @@ public class BraidScreen extends Screen implements DisposableScreen {
 
         this.eventBinding.add(new MouseMoveEvent(mouseX, mouseY));
         this.state.processEvents(
-            this.client.getRenderTickCounter().getDynamicDeltaTicks()
+            this.client.getRenderTickCounter().getLastFrameDuration()
         );
 
         this.state.draw(context);
@@ -75,16 +72,24 @@ public class BraidScreen extends Screen implements DisposableScreen {
         return this.settings.shouldPause;
     }
 
-    @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
-        this.eventBinding.add(new MouseButtonPressEvent(click.button(), click.modifiers()));
+    public boolean mouseClicked(double mouseX, double mouseY, int button, int modifiers) {
+        this.eventBinding.add(new MouseButtonPressEvent(button, new KeyModifiers(modifiers)));
         return true;
     }
 
     @Override
-    public boolean mouseReleased(Click click) {
-        this.eventBinding.add(new MouseButtonReleaseEvent(click.button(), click.modifiers()));
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        return this.mouseClicked(mouseX, mouseY, button, 0);
+    }
+
+    public boolean mouseReleased(double mouseX, double mouseY, int button, int modifiers) {
+        this.eventBinding.add(new MouseButtonReleaseEvent(button, new KeyModifiers(modifiers)));
         return true;
+    }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        return this.mouseReleased(mouseX, mouseY, button, 0);
     }
 
     @Override
@@ -94,20 +99,20 @@ public class BraidScreen extends Screen implements DisposableScreen {
     }
 
     @Override
-    public boolean keyPressed(KeyInput input) {
-        this.eventBinding.add(new KeyPressEvent(input.key(), input.scancode(), input.modifiers()));
-        return super.keyPressed(input);
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        this.eventBinding.add(new KeyPressEvent(keyCode, scanCode, new KeyModifiers(modifiers)));
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
-    public boolean keyReleased(KeyInput input) {
-        this.eventBinding.add(new KeyReleaseEvent(input.key(), input.scancode(), input.modifiers()));
+    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+        this.eventBinding.add(new KeyReleaseEvent(keyCode, scanCode, new KeyModifiers(modifiers)));
         return true;
     }
 
     @Override
-    public boolean charTyped(CharInput input) {
-        this.eventBinding.add(new CharInputEvent((char) input.codepoint(), input.modifiers()));
+    public boolean charTyped(char chr, int modifiers) {
+        this.eventBinding.add(new CharInputEvent(chr, new KeyModifiers(modifiers)));
         return true;
     }
 

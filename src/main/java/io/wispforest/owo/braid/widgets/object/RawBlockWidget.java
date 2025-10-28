@@ -1,25 +1,18 @@
 package io.wispforest.owo.braid.widgets.object;
 
-import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.core.BraidDrawContext;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.Size;
-import io.wispforest.owo.braid.core.element.BraidBlockElement;
 import io.wispforest.owo.braid.framework.instance.LeafWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.LeafInstanceWidget;
-import io.wispforest.owo.mixin.ui.access.BlockEntityAccessor;
-import net.minecraft.block.BlockEntityProvider;
+import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.block.entity.state.BlockEntityRenderState;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.storage.NbtReadView;
-import net.minecraft.util.ErrorReporter;
+import net.minecraft.client.render.DiffuseLighting;
+import net.minecraft.client.render.LightmapTextureManager;
+import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix3x2f;
 import org.joml.Matrix4f;
 
 import java.util.OptionalDouble;
@@ -76,38 +69,50 @@ public class RawBlockWidget extends LeafInstanceWidget {
 
         @Override
         public void draw(BraidDrawContext ctx) {
-            var drawTransform = new Matrix4f();
-            drawTransform.scale(40 * (float) (this.transform.width() / 64f), -40 * (float) (this.transform.height() / 64f), -40);
+            var client = this.host().client();
+
+            ctx.push();
+            ctx.translate(this.transform.width() / 2, this.transform.height() / 2, 100);
+            ctx.scale(40 * (float) (this.transform.width() / 64f), -40 * (float) (this.transform.height() / 64f), 40);
 
             if (this.widget.transform != null) {
-                this.widget.transform.accept(drawTransform);
+                this.widget.transform.accept(ctx.getMatrices().peek().getPositionMatrix());
             } else {
-                drawTransform.rotate(RotationAxis.POSITIVE_X.rotationDegrees(30));
-                drawTransform.rotate(RotationAxis.POSITIVE_Y.rotationDegrees(45 + 180));
+                ctx.multiply(RotationAxis.POSITIVE_X.rotationDegrees(30));
+                ctx.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(45 + 180));
             }
 
-            drawTransform.translate(-.5f, -.5f, -.5f);
+            ctx.translate(-.5f, -.5f, -.5f);
 
-            BlockEntityRenderState entity = null;
+            if (this.widget.blockState.getRenderType() != BlockRenderType.INVISIBLE) {
+                client.getBlockRenderManager().renderBlockAsEntity(
+                    this.widget.blockState,
+                    ctx.getMatrices(),
+                    ctx.getVertexConsumers(),
+                    LightmapTextureManager.MAX_LIGHT_COORDINATE,
+                    OverlayTexture.DEFAULT_UV
+                );
+            }
+
             if (this.widget.blockEntity != null) {
-                var renderer = MinecraftClient.getInstance().getBlockEntityRenderDispatcher().get(this.widget.blockEntity);
-                if (renderer != null) {
-                    entity = renderer.createRenderState();
-                    renderer.updateRenderState(
-                        this.widget.blockEntity, entity, 0, Vec3d.ZERO, null
+                var медведь = client.getBlockEntityRenderDispatcher().get(this.widget.blockEntity);
+                if (медведь != null) {
+                    медведь.render(
+                        this.widget.blockEntity,
+                        0f,
+                        ctx.getMatrices(),
+                        ctx.getVertexConsumers(),
+                        LightmapTextureManager.MAX_LIGHT_COORDINATE,
+                        OverlayTexture.DEFAULT_UV
                     );
                 }
             }
 
-            ctx.state.addSpecialElement(new BraidBlockElement(
-                this.widget.blockState,
-                entity,
-                drawTransform,
-                new Matrix3x2f(ctx.getMatrices()),
-                this.transform.width(),
-                this.transform.height(),
-                ctx.scissorStack.peekLast()
-            ));
+            DiffuseLighting.disableGuiDepthLighting();
+            ctx.getVertexConsumers().draw();
+            DiffuseLighting.enableGuiDepthLighting();
+
+            ctx.pop();
         }
     }
 }

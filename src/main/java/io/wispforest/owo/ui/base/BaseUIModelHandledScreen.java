@@ -5,7 +5,6 @@ import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.parsing.ConfigureHotReloadScreen;
 import io.wispforest.owo.ui.parsing.UIModel;
-import net.minecraft.client.input.KeyInput;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.Text;
@@ -38,8 +37,8 @@ public abstract class BaseUIModelHandledScreen<R extends ParentComponent, S exte
         this.model = providedModel;
 
         this.modelId = source instanceof BaseUIModelScreen.DataSource.AssetDataSource assetSource
-                ? assetSource.assetPath()
-                : null;
+            ? assetSource.assetPath()
+            : null;
     }
 
     protected BaseUIModelHandledScreen(S handler, PlayerInventory inventory, Text title, Class<R> rootComponentClass, Identifier modelId) {
@@ -52,12 +51,12 @@ public abstract class BaseUIModelHandledScreen<R extends ParentComponent, S exte
     }
 
     @Override
-    public boolean keyPressed(KeyInput input) {
-        if (Owo.DEBUG && this.modelId != null && input.key() == GLFW.GLFW_KEY_F5 && input.hasCtrl()) {
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (Owo.DEBUG && this.modelId != null && keyCode == GLFW.GLFW_KEY_F5 && (modifiers & GLFW.GLFW_MOD_CONTROL) != 0) {
             this.client.setScreen(new ConfigureHotReloadScreen(this.modelId, this));
             return true;
         }
 
-        return super.keyPressed(input);
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 }

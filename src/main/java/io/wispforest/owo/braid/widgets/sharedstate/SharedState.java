@@ -49,7 +49,7 @@ public class SharedState<T extends ShareableState> extends StatefulWidget {
     }
 
     public static <T extends ShareableState> void set(BuildContext context, Class<T> clazz, Consumer<T> consumer) {
-        var provider = context.dependOnAncestor(SharedStateProvider.class, SharedStateProvider.keyOf(clazz));
+        var provider = context.getAncestor(SharedStateProvider.class, SharedStateProvider.keyOf(clazz));
         Preconditions.checkArgument(provider != null, "attempted to set shared state which is not provided by the current context");
 
         provider.state.state.setState(() -> consumer.accept((T) provider.state.state));

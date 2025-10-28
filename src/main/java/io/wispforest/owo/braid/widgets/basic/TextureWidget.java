@@ -1,13 +1,17 @@
 package io.wispforest.owo.braid.widgets.basic;
 
-import io.wispforest.owo.braid.core.*;
+import com.mojang.blaze3d.systems.RenderSystem;
+import io.wispforest.owo.braid.core.BraidDrawContext;
+import io.wispforest.owo.braid.core.Color;
+import io.wispforest.owo.braid.core.Constraints;
+import io.wispforest.owo.braid.core.Size;
 import io.wispforest.owo.braid.framework.instance.InstanceHost;
 import io.wispforest.owo.braid.framework.instance.OptionalChildWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.OptionalChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import net.minecraft.client.gl.RenderPipelines;
+import io.wispforest.owo.braid.util.TextureSizeLookup;
+import io.wispforest.owo.mixin.ui.access.AbstractTextureAccessor;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.TriState;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.OptionalDouble;
@@ -77,11 +81,7 @@ public class TextureWidget extends OptionalChildInstanceWidget {
         }
 
         private void refreshTextureSize() {
-            var texture = this.host().client().getTextureManager().getTexture(widget.texture).getGlTexture();
-            this.textureSize = Size.of(
-                texture.getWidth(0),
-                texture.getHeight(0)
-            );
+            this.textureSize = TextureSizeLookup.sizeOf(widget.texture);
         }
 
         private double imageAspectRatio() {
@@ -137,27 +137,38 @@ public class TextureWidget extends OptionalChildInstanceWidget {
             var quadHeight = (int) (this.widget.wrap != Wrap.REPEAT ? textureHeight : this.transform.height());
 
             if (stretch) {
-                matrices.pushMatrix();
-                matrices.scale((int) this.transform.width() / (float) textureWidth, (int) this.transform.height() / (float) textureHeight);
+                matrices.push();
+                matrices.scale((int) this.transform.width() / (float) textureWidth, (int) this.transform.height() / (float) textureHeight, 1);
             }
 
-            var pipeline = switch (this.widget.filter) {
-                case TEXTURE_DEFAULT -> BraidRenderPipelines.TEXTURED_DEFAULT;
-                case NEAREST -> BraidRenderPipelines.TEXTURED_NEAREST;
-                case LINEAR -> BraidRenderPipelines.TEXTURED_BILINEAR;
-            };
+            var texture = this.host().client().getTextureManager().getTexture(this.widget.texture);
+            var textureBilinear = ((AbstractTextureAccessor) texture).owo$getBilinear();
+            var textureMipmap = ((AbstractTextureAccessor) texture).owo$getMipmap();
+
+            switch (this.widget.filter) {
+                case NEAREST -> texture.setFilter(false, textureMipmap);
+                case LINEAR -> texture.setFilter(true, textureMipmap);
+            }
+
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+            var shaderColor = RenderSystem.getShaderColor().clone();
+            RenderSystem.setShaderColor((float) this.widget.color.r, (float) this.widget.color.g, (float) this.widget.color.b, (float) this.widget.color.a);
 
             ctx.drawTexture(
-                pipeline,
                 this.widget.texture,
                 0, 0, 0, 0,
                 quadWidth, quadHeight,
-                textureWidth, textureHeight,
-                this.widget.color.argb()
+                textureWidth, textureHeight
             );
 
+            RenderSystem.setShaderColor(shaderColor[0], shaderColor[1], shaderColor[2], shaderColor[3]);
+            RenderSystem.disableBlend();
+
+            texture.setFilter(textureBilinear, textureMipmap);
+
             if (stretch) {
-                matrices.popMatrix();
+                matrices.pop();
             }
 
             super.draw(ctx);

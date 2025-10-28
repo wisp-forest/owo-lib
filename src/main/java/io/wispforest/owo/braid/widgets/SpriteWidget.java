@@ -5,8 +5,6 @@ import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.Size;
 import io.wispforest.owo.braid.framework.instance.LeafWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.LeafInstanceWidget;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.util.Identifier;
@@ -49,7 +47,9 @@ public class SpriteWidget extends LeafInstanceWidget {
         }
 
         protected Sprite findSprite() {
-            return this.sprite = MinecraftClient.getInstance().getAtlasManager().getSprite(this.widget.spriteIdentifier);
+            return this.sprite = this.widget.spriteIdentifier.getAtlasId().equals(GUI_ATLAS_ID)
+                ? this.host().client().getGuiAtlasManager().getSprite(this.widget.spriteIdentifier.getTextureId())
+                : this.widget.spriteIdentifier.getSprite();
         }
 
         @Override
@@ -81,13 +81,13 @@ public class SpriteWidget extends LeafInstanceWidget {
 
         @Override
         public void draw(BraidDrawContext ctx) {
-            ctx.drawSpriteStretched(
-                RenderPipelines.GUI_TEXTURED,
-                this.sprite,
+            ctx.drawSprite(
+                0,
                 0,
                 0,
                 (int) this.transform.width(),
-                (int) this.transform.height()
+                (int) this.transform.height(),
+                this.sprite
             );
         }
     }

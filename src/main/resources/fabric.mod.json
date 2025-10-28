@@ -45,7 +45,7 @@
   "depends": {
     "fabricloader": ">=0.15.0",
     "fabric-api": ">=0.100",
-    "minecraft": ">=1.21.6"
+    "minecraft": ">=1.21"
   },
   "custom": {
     "modmenu": {

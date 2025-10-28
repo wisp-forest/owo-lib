@@ -3,9 +3,7 @@ package io.wispforest.owo.config.ui.component;
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.core.Sizing;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.input.AbstractInput;
-import net.minecraft.client.input.MouseInput;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.Text;
 import org.apache.commons.lang3.StringUtils;
@@ -31,14 +29,14 @@ public class ConfigEnumButton extends ButtonComponent implements OptionValueProv
     }
 
     @Override
-    public boolean onMouseDown(Click click, boolean doubled) {
-        this.wasRightClicked = click.button() == GLFW.GLFW_MOUSE_BUTTON_RIGHT;
-        return super.onMouseDown(click, doubled);
+    public boolean onMouseDown(double mouseX, double mouseY, int button) {
+        this.wasRightClicked = button == GLFW.GLFW_MOUSE_BUTTON_RIGHT;
+        return super.onMouseDown(mouseX, mouseY, button);
     }
 
     @Override
-    public void onPress(AbstractInput input) {
-        if (this.wasRightClicked || input.hasShift()) {
+    public void onPress() {
+        if (this.wasRightClicked || Screen.hasShiftDown()) {
             this.selectedIndex--;
             if (this.selectedIndex < 0) this.selectedIndex += this.backingValues.length;
         } else {
@@ -48,12 +46,12 @@ public class ConfigEnumButton extends ButtonComponent implements OptionValueProv
 
         this.updateMessage();
 
-        super.onPress(input);
+        super.onPress();
     }
 
     @Override
-    protected boolean isValidClickButton(MouseInput input) {
-        return input.button() == GLFW.GLFW_MOUSE_BUTTON_RIGHT || super.isValidClickButton(input);
+    protected boolean isValidClickButton(int button) {
+        return button == GLFW.GLFW_MOUSE_BUTTON_RIGHT || super.isValidClickButton(button);
     }
 
     protected void updateMessage() {

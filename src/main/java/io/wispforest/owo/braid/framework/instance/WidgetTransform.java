@@ -3,9 +3,9 @@ package io.wispforest.owo.braid.framework.instance;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.core.Size;
-import org.joml.Matrix3x2f;
-import org.joml.Matrix3x2fStack;
-import org.joml.Vector2d;
+import net.minecraft.client.util.math.MatrixStack;
+import org.joml.Matrix4f;
+import org.joml.Vector3d;
 
 public class WidgetTransform {
     protected double x = 0, y = 0;
@@ -68,28 +68,28 @@ public class WidgetTransform {
         return Size.of(this.width, this.height);
     }
 
-    public void transformToParent(Matrix3x2f mat) {
-        mat.translate((float) this.x, (float) this.y);
+    public void transformToParent(Matrix4f mat) {
+        mat.translate((float) this.x, (float) this.y, 0);
     }
 
-    public void transformToParent(Matrix3x2fStack matrices) {
-        matrices.translate((float) this.x, (float) this.y);
+    public void transformToParent(MatrixStack matrices) {
+        matrices.translate((float) this.x, (float) this.y, 0);
     }
 
-    public void transformToWidget(Matrix3x2f mat) {
-        mat.translate((float) -this.x, (float) -this.y);
+    public void transformToWidget(Matrix4f mat) {
+        mat.translate((float) -this.x, (float) -this.y, 0);
     }
 
-    public void transformToWidget(Matrix3x2fStack matrices) {
-        matrices.translate((float) -this.x, (float) -this.y);
+    public void transformToWidget(MatrixStack matrices) {
+        matrices.translate((float) -this.x, (float) -this.y, 0);
     }
 
-    public void toParentCoordinates(Vector2d vec) {
-        vec.add(this.x, this.y);
+    public void toParentCoordinates(Vector3d vec) {
+        vec.add(this.x, this.y, 0);
     }
 
-    public void toWidgetCoordinates(Vector2d vec) {
-        vec.sub(this.x, this.y);
+    public void toWidgetCoordinates(Vector3d vec) {
+        vec.sub(this.x, this.y, 0);
     }
 
     public void setExtent(LayoutAxis axis, double value) {

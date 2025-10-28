@@ -15,6 +15,7 @@ import io.wispforest.owo.braid.widgets.basic.ListenableBuilder;
 import io.wispforest.owo.braid.widgets.basic.MouseArea;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2f;
+import org.joml.Matrix4f;
 
 import java.util.Objects;
 
@@ -86,7 +87,7 @@ public class Scrollable extends StatefulWidget {
         private void reveal(BuildContext context, Insets padding) {
             var transform = context.instance().transform;
 
-            var matrix = new Matrix3x2f();
+            var matrix = new Matrix4f();
             transform.transformToWidget(matrix);
 
             var box = new Aabb2d(
@@ -106,7 +107,8 @@ public class Scrollable extends StatefulWidget {
 
             var transform = revealInstance.computeTransformFrom(scrollInstance).invert().translate(
                 this.horizontalController != null ? (float) this.horizontalController.offset : 0,
-                this.verticalController != null ? (float) this.verticalController.offset : 0
+                this.verticalController != null ? (float) this.verticalController.offset : 0,
+                0
             );
 
             box.transform(transform);

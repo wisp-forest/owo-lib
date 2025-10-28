@@ -1,12 +1,10 @@
 package io.wispforest.owo.ui.component;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.util.Identifier;
 import org.w3c.dom.Element;
 
@@ -52,17 +50,24 @@ public class TextureComponent extends BaseComponent {
 
     @Override
     public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+        RenderSystem.enableDepthTest();
+
+        if (this.blend) {
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+        }
+
         var matrices = context.getMatrices();
-        matrices.pushMatrix();
-        matrices.translate(x, y);
-        matrices.scale(this.width / (float) this.regionWidth, this.height / (float) this.regionHeight);
+        matrices.push();
+        matrices.translate(x, y, 0);
+        matrices.scale(this.width / (float) this.regionWidth, this.height / (float) this.regionHeight, 0);
 
         var visibleArea = this.visibleArea.get();
 
         int bottomEdge = Math.min(visibleArea.y() + visibleArea.height(), regionHeight);
         int rightEdge = Math.min(visibleArea.x() + visibleArea.width(), regionWidth);
 
-        context.drawTexture(this.blend ? RenderPipelines.GUI_TEXTURED : OwoUIPipelines.GUI_TEXTURED_NO_BLEND,
+        context.drawTexture(
             this.texture,
             visibleArea.x(),
             visibleArea.y(),
@@ -75,7 +80,11 @@ public class TextureComponent extends BaseComponent {
             this.textureWidth, this.textureHeight
         );
 
-        matrices.popMatrix();
+        if (this.blend) {
+            RenderSystem.disableBlend();
+        }
+
+        matrices.pop();
     }
 
     public TextureComponent visibleArea(PositionedRectangle visibleArea) {

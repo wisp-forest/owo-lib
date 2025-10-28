@@ -1,6 +1,7 @@
 package io.wispforest.owo.braid.framework.instance;
 
 import com.google.common.base.Preconditions;
+import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.core.BraidDrawContext;
 import io.wispforest.owo.braid.core.Constraints;
@@ -15,9 +16,7 @@ import net.minecraft.util.math.Box;
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix3x2f;
-import org.joml.Vector2d;
-import org.joml.Vector2f;
+import org.joml.*;
 
 import java.util.*;
 
@@ -147,6 +146,9 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
         }
 
         if (child.debugHighlighted) {
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+
             NinePatchTexture.draw(
                 Owo.id("braid_debug_highlighted"),
                 ctx,
@@ -216,9 +218,9 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
             state.addHit(this, x, y);
         }
 
-        var coordinates = new Vector2d();
+        var coordinates = new Vector3d();
         this.visitChildren(child -> {
-            coordinates.set(x, y);
+            coordinates.set(x, y, 0);
             child.transform.toWidgetCoordinates(coordinates);
 
             child.hitTest(coordinates.x, coordinates.y, state);
@@ -229,12 +231,12 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
         return x >= 0 && x < this.transform.width && y >= 0 && y < this.transform.height;
     }
 
-    public Matrix3x2f computeGlobalTransform() {
+    public Matrix4f computeGlobalTransform() {
         return this.computeTransformFrom(null);
     }
 
-    public Matrix3x2f computeTransformFrom(@Nullable WidgetInstance<?> ancestor) {
-        var result = new Matrix3x2f();
+    public Matrix4f computeTransformFrom(@Nullable WidgetInstance<?> ancestor) {
+        var result = new Matrix4f();
 
         this.transform.transformToWidget(result);
 
@@ -247,19 +249,19 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
     }
 
     public Box computeGlobalBounds() {
-        var global = this.parent != null ? this.parent.computeGlobalTransform().invert() : new Matrix3x2f();
+        var global = this.parent != null ? this.parent.computeGlobalTransform().invert() : new Matrix4f();
 
-        var min = global.transformPosition(new Vector2f((float) this.transform.x, (float) this.transform.y));
-        var max = global.transformPosition(new Vector2f((float) (this.transform.x + this.transform.width), (float) (this.transform.y + this.transform.height)));
+        var min = global.transformPosition(new Vector3f((float) this.transform.x, (float) this.transform.y, 0));
+        var max = global.transformPosition(new Vector3f((float) (this.transform.x + this.transform.width), (float) (this.transform.y + this.transform.height), 0));
 
-        return new Box(min.x, min.y, 0, max.x, max.y, 0);
+        return new Box(min.x, min.y, min.z, max.x, max.y, max.z);
     }
 
-    public Vector2d computeGlobalPosition() {
-        var global = this.parent != null ? this.parent.computeGlobalTransform().invert() : new Matrix3x2f();
+    public Vector3d computeGlobalPosition() {
+        var global = this.parent != null ? this.parent.computeGlobalTransform().invert() : new Matrix4f();
 
-        var pos = global.transformPosition(new Vector2f((float) this.transform.x, (float) this.transform.y));
-        return new Vector2d(pos.x, pos.y);
+        var pos = global.transformPosition(new Vector3f((float) this.transform.x, (float) this.transform.y, 0));
+        return new Vector3d(pos.x, pos.y, pos.z);
     }
 
     // ---

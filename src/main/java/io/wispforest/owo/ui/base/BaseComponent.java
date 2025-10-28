@@ -6,10 +6,7 @@ import io.wispforest.owo.ui.util.FocusHandler;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.Observable;
-import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -23,6 +20,7 @@ public abstract class BaseComponent implements Component {
 
     @Nullable protected ParentComponent parent = null;
     @Nullable protected String id = null;
+    protected int zIndex = 0;
 
     protected boolean mounted = false;
 
@@ -163,8 +161,8 @@ public abstract class BaseComponent implements Component {
     }
 
     @Override
-    public boolean onMouseDown(Click click, boolean doubled) {
-        return this.mouseDownEvents.sink().onMouseDown(click, doubled);
+    public boolean onMouseDown(double mouseX, double mouseY, int button) {
+        return this.mouseDownEvents.sink().onMouseDown(mouseX, mouseY, button);
     }
 
     @Override
@@ -173,8 +171,8 @@ public abstract class BaseComponent implements Component {
     }
 
     @Override
-    public boolean onMouseUp(Click click) {
-        return this.mouseUpEvents.sink().onMouseUp(click);
+    public boolean onMouseUp(double mouseX, double mouseY, int button) {
+        return this.mouseUpEvents.sink().onMouseUp(mouseX, mouseY, button);
     }
 
     @Override
@@ -193,8 +191,8 @@ public abstract class BaseComponent implements Component {
     }
 
     @Override
-    public boolean onMouseDrag(Click click, double deltaX, double deltaY) {
-        return this.mouseDragEvents.sink().onMouseDrag(click, deltaX, deltaY);
+    public boolean onMouseDrag(double mouseX, double mouseY, double deltaX, double deltaY, int button) {
+        return this.mouseDragEvents.sink().onMouseDrag(mouseX, mouseY, deltaX, deltaY, button);
     }
 
     @Override
@@ -203,8 +201,8 @@ public abstract class BaseComponent implements Component {
     }
 
     @Override
-    public boolean onKeyPress(KeyInput input) {
-        return this.keyPressEvents.sink().onKeyPress(input);
+    public boolean onKeyPress(int keyCode, int scanCode, int modifiers) {
+        return this.keyPressEvents.sink().onKeyPress(keyCode, scanCode, modifiers);
     }
 
     @Override
@@ -213,8 +211,8 @@ public abstract class BaseComponent implements Component {
     }
 
     @Override
-    public boolean onCharTyped(CharInput input) {
-        return this.charTypedEvents.sink().onCharTyped(input);
+    public boolean onCharTyped(char chr, int modifiers) {
+        return this.charTypedEvents.sink().onCharTyped(chr, modifiers);
     }
 
     @Override
@@ -350,6 +348,17 @@ public abstract class BaseComponent implements Component {
     @Override
     public @Nullable String id() {
         return this.id;
+    }
+
+    @Override
+    public Component zIndex(int zIndex) {
+        this.zIndex = zIndex;
+        return this;
+    }
+
+    @Override
+    public int zIndex() {
+        return this.zIndex;
     }
 
     @Override

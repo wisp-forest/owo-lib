@@ -1,16 +1,17 @@
 package io.wispforest.owo.ui.core;
 
-import com.mojang.blaze3d.opengl.GlStateManager;
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.renderdoc.RenderDoc;
 import io.wispforest.owo.ui.util.CursorAdapter;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.*;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.Drawable;
+import net.minecraft.client.gui.Element;
+import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.function.BiFunction;
@@ -171,14 +172,19 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
 
             if (this.captureFrame) RenderDoc.startFrameCapture();
 
-            final var delta = MinecraftClient.getInstance().getRenderTickCounter().getDynamicDeltaTicks();
+            final var delta = MinecraftClient.getInstance().getRenderTickCounter().getLastFrameDuration();
             final var window = MinecraftClient.getInstance().getWindow();
 
             this.rootComponent.update(delta, mouseX, mouseY);
 
-            context.enableScissor(0, 0, window.getFramebufferWidth(), window.getFramebufferHeight());
+            RenderSystem.enableDepthTest();
+            GlStateManager._enableScissorTest();
+
+            GlStateManager._scissorBox(0, 0, window.getFramebufferWidth(), window.getFramebufferHeight());
             this.rootComponent.draw(owoContext, mouseX, mouseY, partialTicks, delta);
-            context.disableScissor();
+
+            GlStateManager._disableScissorTest();
+            RenderSystem.disableDepthTest();
 
             final var hovered = this.rootComponent.childAt(mouseX, mouseY);
             if (!disposed && hovered != null) {
@@ -186,7 +192,9 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
             }
 
             if (this.enableInspector) {
+                context.getMatrices().translate(0, 0, this.inspectorZOffset);
                 owoContext.drawInspector(this.rootComponent, mouseX, mouseY, !this.globalInspector);
+                context.getMatrices().translate(0, 0, -this.inspectorZOffset);
             }
 
             if (this.captureFrame) RenderDoc.endFrameCapture();
@@ -206,7 +214,7 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
         if (!(context instanceof OwoUIDrawContext)) context = OwoUIDrawContext.of(context);
         var owoContext = (OwoUIDrawContext) context;
 
-        final var delta = MinecraftClient.getInstance().getRenderTickCounter().getDynamicDeltaTicks();
+        final var delta = MinecraftClient.getInstance().getRenderTickCounter().getLastFrameDuration();
 
         this.rootComponent.drawTooltip(owoContext, mouseX, mouseY, partialTicks, delta);
     }
@@ -225,13 +233,13 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
-        return this.rootComponent.onMouseDown(click, doubled);
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        return this.rootComponent.onMouseDown(mouseX, mouseY, button);
     }
 
     @Override
-    public boolean mouseReleased(Click click) {
-        return this.rootComponent.onMouseUp(click);
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        return this.rootComponent.onMouseUp(mouseX, mouseY, button);
     }
 
     @Override
@@ -240,32 +248,32 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
     }
 
     @Override
-    public boolean mouseDragged(Click click, double deltaX, double deltaY) {
-        return this.rootComponent.onMouseDrag(click, deltaX, deltaY);
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+        return this.rootComponent.onMouseDrag(mouseX, mouseY, deltaX, deltaY, button);
     }
 
     @Override
-    public boolean keyPressed(KeyInput input) {
-        if (Owo.DEBUG && input.key() == GLFW.GLFW_KEY_LEFT_SHIFT) {
-            if (input.hasCtrl()) {
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (Owo.DEBUG && keyCode == GLFW.GLFW_KEY_LEFT_SHIFT) {
+            if ((modifiers & GLFW.GLFW_MOD_CONTROL) != 0) {
                 this.toggleInspector();
-            } else if (input.hasAlt()) {
+            } else if ((modifiers & GLFW.GLFW_MOD_ALT) != 0) {
                 this.toggleGlobalInspector();
             }
         }
 
-        if (Owo.DEBUG && input.key() == GLFW.GLFW_KEY_R && RenderDoc.isAvailable()) {
-            if (input.hasAlt() && input.hasCtrl()) {
+        if (Owo.DEBUG && keyCode == GLFW.GLFW_KEY_R && RenderDoc.isAvailable()) {
+            if ((modifiers & GLFW.GLFW_MOD_ALT) != 0 && (modifiers & GLFW.GLFW_MOD_CONTROL) != 0) {
                 this.captureFrame = true;
             }
         }
 
-        return this.rootComponent.onKeyPress(input);
+        return this.rootComponent.onKeyPress(keyCode, scanCode, modifiers);
     }
 
     @Override
-    public boolean charTyped(CharInput input) {
-        return this.rootComponent.onCharTyped(input);
+    public boolean charTyped(char chr, int modifiers) {
+        return this.rootComponent.onCharTyped(chr, modifiers);
     }
 
     @Override

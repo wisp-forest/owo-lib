@@ -147,7 +147,7 @@ public class LinearProcessExecutor<T> {
      * @param targetTag The nbt to read state from
      */
     public void readState(NbtCompound targetTag) {
-        this.processTick = targetTag.getInt("ProcessTick", 0);
+        this.processTick = targetTag.getInt("ProcessTick");
 
         activeSteps.clear();
         processStepTable.forEach((index, step) -> {

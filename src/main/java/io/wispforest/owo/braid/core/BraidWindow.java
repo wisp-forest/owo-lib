@@ -1,19 +1,23 @@
 package io.wispforest.owo.braid.core;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.systems.VertexSorter;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.core.cursor.CursorController;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.core.events.*;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import io.wispforest.owo.braid.util.BraidGuiRenderer;
+import io.wispforest.owo.ui.util.ScissorStack;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
+import io.wispforest.owo.util.FramebufferOverride;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.GlDebug;
 import net.minecraft.client.gl.SimpleFramebuffer;
-import net.minecraft.client.texture.GlTexture;
+import net.minecraft.client.render.DiffuseLighting;
 import org.apache.commons.lang3.mutable.MutableLong;
+import org.joml.Matrix4f;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL32;
 import org.lwjgl.system.NativeResource;
@@ -22,7 +26,6 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 public class BraidWindow implements Surface {
@@ -35,8 +38,6 @@ public class BraidWindow implements Surface {
     private final EventStream<ResizeCallback> onResize = ResizeCallback.newStream();
     private SimpleFramebuffer remoteFramebuffer;
     private int localFbo;
-
-    public final BraidGuiRenderer guiRenderer;
 
     private final CursorController cursorController;
 
@@ -51,15 +52,13 @@ public class BraidWindow implements Surface {
         this.handle = handle;
         this.cursorController = new CursorController(this.handle);
 
-        this.guiRenderer = new BraidGuiRenderer(MinecraftClient.getInstance());
-
         var framebufferWidthOut = new int[1];
         var framebufferHeightOut = new int[1];
         GLFW.glfwGetFramebufferSize(this.handle, framebufferWidthOut, framebufferHeightOut);
 
         this.framebufferWidth = framebufferWidthOut[0];
         this.framebufferHeight = framebufferHeightOut[0];
-        this.remoteFramebuffer = new SimpleFramebuffer("braid window", this.framebufferWidth, this.framebufferHeight, true);
+        this.remoteFramebuffer = TextureSurface.createFramebufferAndRestoreState(this.framebufferWidth, this.framebufferHeight, true);
         this.recreateLocalFbo();
 
         GLFW.glfwSetWindowCloseCallback(this.handle, this.storeNativeResource(GLFWWindowCloseCallback.create(window -> {
@@ -72,7 +71,7 @@ public class BraidWindow implements Surface {
 
             withContext(MinecraftClient.getInstance().getWindow().getHandle(), () -> {
                 this.remoteFramebuffer.delete();
-                this.remoteFramebuffer = new SimpleFramebuffer("braid window", this.framebufferWidth, this.framebufferHeight, true);
+                this.remoteFramebuffer = new SimpleFramebuffer(this.framebufferWidth, this.framebufferHeight, true, MinecraftClient.IS_SYSTEM_MAC);
             });
 
             this.recreateLocalFbo();
@@ -138,7 +137,7 @@ public class BraidWindow implements Surface {
 
             this.localFbo = GL32.glGenFramebuffers();
             GL32.glBindFramebuffer(GL32.GL_FRAMEBUFFER, this.localFbo);
-            GL32.glFramebufferTexture2D(GL32.GL_FRAMEBUFFER, GL32.GL_COLOR_ATTACHMENT0, GL32.GL_TEXTURE_2D, ((GlTexture) this.remoteFramebuffer.getColorAttachment()).getGlId(), 0);
+            GL32.glFramebufferTexture2D(GL32.GL_FRAMEBUFFER, GL32.GL_COLOR_ATTACHMENT0, GL32.GL_TEXTURE_2D, this.remoteFramebuffer.getColorAttachment(), 0);
 
             if (GL32.glCheckFramebufferStatus(GL32.GL_FRAMEBUFFER) != GL32.GL_FRAMEBUFFER_COMPLETE) {
                 throw new UnsupportedOperationException("Failed to initialize local FBO");
@@ -196,7 +195,7 @@ public class BraidWindow implements Surface {
             GLFW.glfwMakeContextCurrent(handle);
             GLFW.glfwSwapInterval(0);
 
-            GlDebug.enableDebug(MinecraftClient.getInstance().options.glDebugVerbosity, true, new HashSet<>());
+            GlDebug.enableDebug(MinecraftClient.getInstance().options.glDebugVerbosity, true);
 
             handleOut.setValue(handle);
         });
@@ -225,8 +224,6 @@ public class BraidWindow implements Surface {
     public void dispose() {
         GLFW.glfwDestroyWindow(this.handle);
         this.cursorController.dispose();
-
-        this.guiRenderer.close();
 
         this.remoteFramebuffer.delete();
 
@@ -269,27 +266,54 @@ public class BraidWindow implements Surface {
 
     // ---
 
+    private Matrix4f projectionBackup;
+    private VertexSorter vertexSorterBackup;
+
     @Override
     public void beginRendering() {
-        RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(
-            this.remoteFramebuffer.getColorAttachment(),
-            0xFF000000,
-            this.remoteFramebuffer.getDepthAttachment(),
-            1
-        );
+        this.remoteFramebuffer.beginWrite(true);
+        FramebufferOverride.push(this.remoteFramebuffer);
+
+        ScissorStack.pushViewportDimensions(() -> new ScissorStack.ViewportDimensions(this.scaleFactor, this.scaledWidth, this.scaledHeight, this.framebufferWidth, this.framebufferHeight));
+
+        RenderSystem.clearColor(0f, 0f, 0f, 1f);
+        RenderSystem.clear(GL32.GL_COLOR_BUFFER_BIT | GL32.GL_DEPTH_BUFFER_BIT, MinecraftClient.IS_SYSTEM_MAC);
+
+        this.projectionBackup = new Matrix4f(RenderSystem.getProjectionMatrix());
+        this.vertexSorterBackup = RenderSystem.getVertexSorting();
+
+        var projection = new Matrix4f().setOrtho(0, (float) this.framebufferWidth / this.scaleFactor, (float) this.framebufferHeight / this.scaleFactor, 0, 1000, 21000);
+        RenderSystem.setProjectionMatrix(projection, VertexSorter.BY_Z);
+
+        var modelViewStack = RenderSystem.getModelViewStack();
+        modelViewStack.pushMatrix();
+        modelViewStack.identity();
+        modelViewStack.translate(0, 0, -11000);
+
+        DiffuseLighting.enableGuiDepthLighting();
     }
 
     @Override
     public void endRendering() {
-        this.guiRenderer.render(new BraidGuiRenderer.Target(
-            this.remoteFramebuffer,
-            this
-        ));
+        ScissorStack.popViewportDimensions();
+        FramebufferOverride.pop();
+
+        var activeFramebuffer = FramebufferOverride.top();
+        if (activeFramebuffer == null) {
+            activeFramebuffer = MinecraftClient.getInstance().getFramebuffer();
+        }
+
+        activeFramebuffer.beginWrite(true);
+
+        RenderSystem.getModelViewStack().popMatrix();
+
+        RenderSystem.setProjectionMatrix(this.projectionBackup, this.vertexSorterBackup);
+        this.projectionBackup = null;
 
         // ---
 
         withContext(this.handle, () -> {
-            GL32.glBindFramebuffer(GL32.GL_READ_FRAMEBUFFER, this.localFbo);
+            GL32.glBindFramebuffer(GL32.GL_READ_FRAMEBUFFER, this.remoteFramebuffer.fbo);
             GL32.glBindFramebuffer(GL32.GL_DRAW_FRAMEBUFFER, 0);
 
             GL32.glBlitFramebuffer(
@@ -301,6 +325,7 @@ public class BraidWindow implements Surface {
 
             GLFW.glfwSwapBuffers(this.handle);
         });
+
     }
 
     // ---

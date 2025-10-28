@@ -5,10 +5,7 @@ import io.wispforest.owo.mixin.ui.access.TextFieldWidgetAccessor;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.*;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.widget.*;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.function.Consumer;
@@ -126,8 +123,8 @@ public class VanillaWidgetComponent extends BaseComponent {
             this.runAndDeferEvents(() -> closure.accept((C) this.widget));
         } catch (ClassCastException theUserDidBadItWasNotMyFault) {
             throw new IllegalArgumentException(
-                    "Invalid target class passed when configuring component of type " + this.getClass().getSimpleName(),
-                    theUserDidBadItWasNotMyFault
+                "Invalid target class passed when configuring component of type " + this.getClass().getSimpleName(),
+                theUserDidBadItWasNotMyFault
             );
         }
 
@@ -150,38 +147,38 @@ public class VanillaWidgetComponent extends BaseComponent {
     }
 
     @Override
-    public boolean onMouseDown(Click click, boolean doubled) {
-        return this.widget.mouseClicked(new Click(this.x + click.x(), this.y + click.y(), click.buttonInfo()), doubled)
-                | super.onMouseDown(click, doubled);
+    public boolean onMouseDown(double mouseX, double mouseY, int button) {
+        return this.widget.mouseClicked(this.x + mouseX, this.y + mouseY, button)
+            | super.onMouseDown(mouseX, mouseY, button);
     }
 
     @Override
-    public boolean onMouseUp(Click click) {
-        return this.widget.mouseReleased(new Click(this.x + click.x(), this.y + click.y(), click.buttonInfo()))
-                | super.onMouseUp(click);
+    public boolean onMouseUp(double mouseX, double mouseY, int button) {
+        return this.widget.mouseReleased(this.x + mouseX, this.y + mouseY, button)
+            | super.onMouseUp(mouseX, mouseY, button);
     }
 
     @Override
     public boolean onMouseScroll(double mouseX, double mouseY, double amount) {
         return this.widget.mouseScrolled(this.x + mouseX, this.y + mouseY, 0, amount)
-                | super.onMouseScroll(mouseX, mouseY, amount);
+            | super.onMouseScroll(mouseX, mouseY, amount);
     }
 
     @Override
-    public boolean onMouseDrag(Click click, double deltaX, double deltaY) {
-        return this.widget.mouseDragged(new Click(this.x + click.x(), this.y + click.y(), click.buttonInfo()), deltaX, deltaY)
-                | super.onMouseDrag(click, deltaX, deltaY);
+    public boolean onMouseDrag(double mouseX, double mouseY, double deltaX, double deltaY, int button) {
+        return this.widget.mouseDragged(this.x + mouseX, this.y + mouseY, button, deltaX, deltaY)
+            | super.onMouseDrag(mouseX, mouseY, deltaX, deltaY, button);
     }
 
     @Override
-    public boolean onCharTyped(CharInput input) {
-        return this.widget.charTyped(input)
-                | super.onCharTyped(input);
+    public boolean onCharTyped(char chr, int modifiers) {
+        return this.widget.charTyped(chr, modifiers)
+            | super.onCharTyped(chr, modifiers);
     }
 
     @Override
-    public boolean onKeyPress(KeyInput input) {
-        return this.widget.keyPressed(input)
-                | super.onKeyPress(input);
+    public boolean onKeyPress(int keyCode, int scanCode, int modifiers) {
+        return this.widget.keyPressed(keyCode, scanCode, modifiers)
+            | super.onKeyPress(keyCode, scanCode, modifiers);
     }
 }

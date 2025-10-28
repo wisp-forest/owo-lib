@@ -70,10 +70,10 @@ public class OwoDebugCommands {
             dispatcher.register(literal("query-poi").then(argument("poi_type", IdentifierArgumentType.identifier()).suggests(POI_TYPES)
                 .then(argument("radius", IntegerArgumentType.integer()).executes(context -> {
                     var player = context.getSource().getPlayer();
-                    var poiType = Registries.POINT_OF_INTEREST_TYPE.getOptionalValue(IdentifierArgumentType.getIdentifier(context, "poi_type"))
+                    var poiType = Registries.POINT_OF_INTEREST_TYPE.getOrEmpty(IdentifierArgumentType.getIdentifier(context, "poi_type"))
                         .orElseThrow(NO_POI_TYPE::create);
 
-                    var entries = ((ServerWorld) player.getEntityWorld()).getPointOfInterestStorage().getInCircle(type -> type.value() == poiType,
+                    var entries = ((ServerWorld) player.getWorld()).getPointOfInterestStorage().getInCircle(type -> type.value() == poiType,
                         player.getBlockPos(), IntegerArgumentType.getInteger(context, "radius"), PointOfInterestStorage.OccupationStatus.ANY).toList();
 
                     player.sendMessage(TextOps.concat(Owo.PREFIX, TextOps.withColor("Found §" + entries.size() + " §entr" + (entries.size() == 1 ? "y" : "ies"),
@@ -82,15 +82,15 @@ public class OwoDebugCommands {
                     for (var entry : entries) {
 
                         final var entryPos = entry.getPos();
-                        final var blockId = Registries.BLOCK.getId(player.getEntityWorld().getBlockState(entryPos).getBlock()).toString();
+                        final var blockId = Registries.BLOCK.getId(player.getWorld().getBlockState(entryPos).getBlock()).toString();
                         final var posString = "(" + entryPos.getX() + " " + entryPos.getY() + " " + entryPos.getZ() + ")";
 
                         final var message = TextOps.withColor("-> §" + blockId + " §" + posString,
                             TextOps.color(Formatting.GRAY), KEY_BLUE, VALUE_BLUE);
 
-                        message.styled(style -> style.withClickEvent(new ClickEvent.SuggestCommand(
+                        message.styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND,
                                 "/tp " + entryPos.getX() + " " + entryPos.getY() + " " + entryPos.getZ()))
-                            .withHoverEvent(new HoverEvent.ShowText(Text.of("Click to teleport"))));
+                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("Click to teleport"))));
 
                         player.sendMessage(message, false);
                     }

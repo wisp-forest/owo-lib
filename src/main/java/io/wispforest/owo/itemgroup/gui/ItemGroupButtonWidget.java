@@ -2,7 +2,6 @@ package io.wispforest.owo.itemgroup.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
-import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.render.RenderLayer;
@@ -25,7 +24,7 @@ public class ItemGroupButtonWidget extends ButtonWidget {
 
     @Override
     public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
-        context.drawTexture(RenderPipelines.GUI_TEXTURED, this.definition.texture(), this.getX(), this.getY(), this.baseU, this.isSelected() || this.isSelected ? this.height : 0, this.width, this.height, 64, 64);
+        context.drawTexture(this.definition.texture(), this.getX(), this.getY(), this.baseU, this.isSelected() || this.isSelected ? this.height : 0, this.width, this.height, 64, 64);
 
         this.definition.icon().render(context, this.getX() + 4, this.getY() + 4, mouseX, mouseY, delta);
     }

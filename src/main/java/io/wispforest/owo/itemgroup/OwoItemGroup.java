@@ -286,7 +286,7 @@ public abstract class OwoItemGroup extends ItemGroup {
         return this.activeTabs.contains(tab);
     }
 
-    public @Nullable Identifier getOwoBackgroundTexture() {
+    public @Nullable Identifier getBackgroundTexture() {
         return this.backgroundTexture;
     }
 

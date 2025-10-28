@@ -32,10 +32,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipData;
 import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Colors;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Rarity;
+import net.minecraft.util.*;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
@@ -53,7 +50,7 @@ public class UwuBraidItem extends Item {
 
     @Override
     @Environment(EnvType.CLIENT)
-    public ActionResult use(World world, PlayerEntity user, Hand hand) {
+    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         if (world.isClient()) {
             if (user.isSneaking()) {
                 if (display == null) {
@@ -86,7 +83,7 @@ public class UwuBraidItem extends Item {
                 openTestSelector();
             }
         }
-        return ActionResult.PASS;
+        return TypedActionResult.pass(user.getStackInHand(hand));
     }
 
     @Override
@@ -155,7 +152,7 @@ public class UwuBraidItem extends Item {
                                         )
                                     ),
                                     new Button(
-                                        () -> MinecraftClient.getInstance().player.dropCreativeStack(UwuItems.BRAID.getDefaultStack()),
+                                        () -> MinecraftClient.getInstance().interactionManager.dropCreativeStack(UwuItems.BRAID.getDefaultStack()),
                                         new Label(
                                             LabelStyle.SHADOW,
                                             true,
