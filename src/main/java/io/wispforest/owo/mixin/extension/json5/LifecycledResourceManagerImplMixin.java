@@ -22,7 +22,7 @@ public abstract class LifecycledResourceManagerImplMixin {
             target = "Lnet/minecraft/resource/LifecycledResourceManagerImpl;parseResourceFilter(Lnet/minecraft/resource/ResourcePack;)Lnet/minecraft/resource/metadata/ResourceFilter;"
         )
     )
-    private static void json5$optInPacks(ResourceType type, List<ResourcePack> packs, CallbackInfo ci) {
+    private void json5$optInPacks(ResourceType type, List<ResourcePack> packs, CallbackInfo ci) {
         for (var pack : packs) {
             var inputSupplier = pack.openRoot(Owo.MOD_ID + "-json5");
             if (inputSupplier != null) {
