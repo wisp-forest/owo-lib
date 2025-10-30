@@ -2,11 +2,12 @@ package io.wispforest.owo.util;
 
 import io.wispforest.owo.registration.annotations.AssignedName;
 import io.wispforest.owo.registration.annotations.IterationIgnored;
+import it.unimi.dsi.fastutil.Pair;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.*;
-import java.util.Locale;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -29,6 +30,25 @@ public final class ReflectionUtils {
         } catch (InstantiationException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             throw new RuntimeException((e instanceof NoSuchMethodException ? "No zero-args constructor defined on class " : "Could not instantiate class ") + clazz, e);
         }
+    }
+    public static <C> C tryInstantiation(Class<C> clazz) {
+        Object returnObj;
+
+        if(NumberReflection.isNumberType(clazz)) {
+            returnObj = NumberReflection.convert(0, (Class<Number>) clazz);
+        } else if (clazz == String.class) {
+            returnObj = "";
+        } else if (clazz == List.class) {
+            returnObj = new ArrayList<>();
+        } else if (clazz == Set.class) {
+            returnObj = new LinkedHashSet<>();
+        } else if (clazz == Map.class) {
+            returnObj = new LinkedHashMap<>();
+        } else {
+            returnObj = ReflectionUtils.tryInstantiateWithNoArgs(clazz);
+        }
+
+        return (C) returnObj;
     }
 
     /**
@@ -177,6 +197,29 @@ public final class ReflectionUtils {
         if (!(typeArgument instanceof Class<?> typeClass)) return null;
 
         return typeClass;
+    }
+
+    @Nullable
+    public static Pair<Type, @Nullable Class<?>> getTypeAndClassArgument(Type type, int index) {
+        if (!(type instanceof ParameterizedType parameterizedType)) return null;
+
+        var typeArgs = parameterizedType.getActualTypeArguments();
+        if (index > typeArgs.length - 1) return null;
+
+        var typeArgument = typeArgs[index];
+
+        Class<?> typeClass = null;
+
+        if (typeArgument instanceof Class<?> clazz) {
+            typeClass = clazz;
+        } else if(typeArgument instanceof ParameterizedType innerParameterizedType) {
+            if (!(innerParameterizedType.getRawType() instanceof Class<?> clazz)) {
+                return null;
+            }
+            typeClass = clazz;
+        }
+
+        return Pair.of(typeArgument, typeClass);
     }
 
     @FunctionalInterface

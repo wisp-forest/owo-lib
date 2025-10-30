@@ -1,6 +1,9 @@
 package io.wispforest.owo.ui.container;
 
 import io.wispforest.owo.ui.core.*;
+import io.wispforest.owo.ui.core.Color;
+import io.wispforest.owo.ui.core.Component;
+import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
@@ -16,7 +19,8 @@ import org.lwjgl.glfw.GLFW;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import java.util.Map;
+import java.awt.*;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -29,9 +33,13 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
     public static final Identifier VANILLA_SCROLLBAR_TRACK_TEXTURE = Identifier.of("owo", "scrollbar/track");
     public static final Identifier FLAT_VANILLA_SCROLLBAR_TEXTURE = Identifier.of("owo", "scrollbar/vanilla_flat");
 
+    @Nullable
+    protected Runnable queuedScrollTarget = null;
+
     protected double scrollOffset = 0;
-    protected double currentScrollPosition = 0;
-    protected int lastScrollPosition = -1;
+    protected double currentScrollOffset = 0;
+    protected int lastScrollOffset = -1;
+
     protected int scrollStep = 0;
 
     protected int fixedScrollbarLength = 0;
@@ -49,9 +57,15 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
 
     protected final ScrollDirection direction;
 
+    protected boolean scrollbarOppositeSide = false;
+
     protected ScrollContainer(ScrollDirection direction, Sizing horizontalSizing, Sizing verticalSizing, C child) {
         super(horizontalSizing, verticalSizing, child);
         this.direction = direction;
+    }
+
+    protected double scrolledAmount() {
+        return this.currentScrollOffset;
     }
 
     @Override
@@ -77,58 +91,69 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
         super.layout(space);
 
         this.maxScroll = Math.max(0, this.direction.sizeGetter.apply(child) - (this.direction.sizeGetter.apply(this) - this.direction.insetGetter.apply(this.padding.get())));
+
+        if (this.queuedScrollTarget != null) {
+            this.queuedScrollTarget.run();
+        }
+
         this.scrollOffset = MathHelper.clamp(this.scrollOffset, 0, this.maxScroll + .5);
+
+        if (this.queuedScrollTarget != null) {
+            this.queuedScrollTarget = null;
+
+            this.currentScrollOffset = this.scrollOffset;
+        }
+
         this.childSize = this.direction.sizeGetter.apply(this.child);
-        this.lastScrollPosition = -1;
     }
 
     @Override
     protected int childMountX() {
-        return (int) (super.childMountX() - this.direction.choose(this.currentScrollPosition, 0));
+        return (int) (super.childMountX() - this.direction.choose(this.currentScrollOffset, 0.0));
     }
 
     @Override
     protected int childMountY() {
-        return (int) (super.childMountY() - this.direction.choose(0, this.currentScrollPosition));
+        return (int) (super.childMountY() - this.direction.choose(0.0, this.currentScrollOffset));
     }
 
     @Override
     protected void parentUpdate(float delta, int mouseX, int mouseY) {
         super.parentUpdate(delta, mouseX, mouseY);
-        this.currentScrollPosition += Delta.compute(this.currentScrollPosition, this.scrollOffset, delta * .5);
+        this.currentScrollOffset += Delta.compute(this.currentScrollOffset, this.scrollOffset, delta * .5);
+
+        // Update child
+        int effectiveScrollOffset = this.scrollStep > 0
+                ? ((int) this.scrollOffset / this.scrollStep) * this.scrollStep
+                : (int) this.currentScrollOffset;
+        if (this.scrollStep > 0 && this.maxScroll - this.scrollOffset == -1) {
+            effectiveScrollOffset += this.scrollOffset % this.scrollStep;
+        }
+
+        int newScrollOffset = this.direction.coordinateGetter.apply(this) - effectiveScrollOffset;
+        if (newScrollOffset != this.lastScrollOffset) {
+            this.direction.coordinateSetter.accept(this.child, newScrollOffset + (this.direction == ScrollDirection.VERTICAL
+                    ? this.padding.get().top() + this.child.margins().get().top()
+                    : this.padding.get().left() + this.child.margins().get().left())
+            );
+            this.lastScrollOffset = newScrollOffset;
+        }
     }
 
     @Override
     public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
         super.draw(context, mouseX, mouseY, partialTicks, delta);
 
-        // Update child
-        int effectiveScrollOffset = this.scrollStep > 0
-                ? ((int) this.scrollOffset / this.scrollStep) * this.scrollStep
-                : (int) this.currentScrollPosition;
-        if (this.scrollStep > 0 && this.maxScroll - this.scrollOffset == -1) {
-            effectiveScrollOffset += this.scrollOffset % this.scrollStep;
-        }
-
-        int newScrollPosition = this.direction.coordinateGetter.apply(this) - effectiveScrollOffset;
-        if (newScrollPosition != this.lastScrollPosition) {
-            this.direction.coordinateSetter.accept(this.child, newScrollPosition + (this.direction == ScrollDirection.VERTICAL
-                    ? this.padding.get().top() + this.child.margins().get().top()
-                    : this.padding.get().left() + this.child.margins().get().left())
-            );
-            this.lastScrollPosition = newScrollPosition;
-        }
-
         // Draw, adding the fractional part of the offset via matrix translation
-        context.getMatrices().pushMatrix();
-
-        double visualOffset = -(this.currentScrollPosition % 1d);
+        double visualOffset = -(this.currentScrollOffset % 1d);
         if (visualOffset > 9999999e-7 || visualOffset < .1e-6) visualOffset = 0;
 
-        context.getMatrices().translate((float) this.direction.choose(visualOffset, 0), (float) this.direction.choose(0, visualOffset));
+        context.push()
+            .translate(this.direction.choose(visualOffset, 0.0), this.direction.choose(0.0, visualOffset));
+
         this.drawChildren(context, mouseX, mouseY, partialTicks, delta, this.childView);
 
-        context.getMatrices().popMatrix();
+        context.pop();
 
         // -----
 
@@ -144,14 +169,14 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
         // Determine the offset of the scrollbar on the
         // *opposite* axis to the one we scroll on
         this.scrollbarOffset = this.direction == ScrollDirection.VERTICAL
-                ? this.x + this.width - padding.right() - scrollbarThiccness
-                : this.y + this.height - padding.bottom() - scrollbarThiccness;
+                ? this.x + (this.scrollbarOppositeSide ? 0 : this.width - padding.right() - scrollbarThiccness)
+                : this.y + (this.scrollbarOppositeSide ? 0 : this.height - padding.bottom() - scrollbarThiccness);
 
         this.lastScrollbarLength = this.fixedScrollbarLength == 0
                 ? Math.min(Math.floor(((float) selfSize / this.childSize) * contentSize), contentSize)
                 : this.fixedScrollbarLength;
         double scrollbarPosition = this.maxScroll != 0
-                ? (this.currentScrollPosition / this.maxScroll) * (contentSize - this.lastScrollbarLength)
+                ? (this.scrolledAmount() / this.maxScroll) * (contentSize - this.lastScrollbarLength)
                 : 0;
 
         if (this.direction == ScrollDirection.VERTICAL) {
@@ -160,9 +185,12 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
                     (int) (this.y + scrollbarPosition + padding.top()),
                     this.scrollbarThiccness,
                     (int) (this.lastScrollbarLength),
-                    this.scrollbarOffset, this.y + padding.top(),
-                    this.scrollbarThiccness, this.height - padding.vertical(),
-                    lastScrollbarInteractTime, this.direction,
+                    this.scrollbarOffset,
+                    this.y + padding.top(),
+                    this.scrollbarThiccness,
+                    this.height - padding.vertical(),
+                    lastScrollbarInteractTime,
+                    this.direction,
                     this.maxScroll > 0
             );
         } else {
@@ -171,9 +199,12 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
                     this.scrollbarOffset,
                     (int) (this.lastScrollbarLength),
                     this.scrollbarThiccness,
-                    this.x + padding.left(), this.scrollbarOffset,
-                    this.width - padding.horizontal(), this.scrollbarThiccness,
-                    lastScrollbarInteractTime, this.direction,
+                    this.x + padding.left(),
+                    this.scrollbarOffset,
+                    this.width - padding.horizontal(),
+                    this.scrollbarThiccness,
+                    lastScrollbarInteractTime,
+                    this.direction,
                     this.maxScroll > 0
             );
         }
@@ -184,16 +215,16 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
         return true;
     }
 
+    protected double mouseScrollStepAmount() {
+        return this.scrollStep < 1 ? 15 : 1;
+    }
+
     @Override
     public boolean onMouseScroll(double mouseX, double mouseY, double amount) {
         if (this.child.onMouseScroll(this.x + mouseX - this.child.x(), this.y + mouseY - this.child.y(), amount))
             return true;
 
-        if (this.scrollStep < 1) {
-            this.scrollBy(-amount * 15, false, true);
-        } else {
-            this.scrollBy(-amount * this.scrollStep, true, true);
-        }
+        this.scrollBy(-amount * mouseScrollStepAmount(), false, true, true);
 
         return true;
     }
@@ -256,25 +287,41 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
     }
 
     protected void scrollBy(double offset, boolean instant, boolean showScrollbar) {
+        scrollBy(offset, instant, showScrollbar, false);
+    }
+
+    protected void scrollBy(double offset, boolean instant, boolean showScrollbar, boolean scrollStepped) {
+        if (scrollStepped && this.scrollStep > 1) offset *= this.scrollStep;
+
         this.scrollOffset = MathHelper.clamp(this.scrollOffset + offset, 0, this.maxScroll + .5);
-        if (instant) this.currentScrollPosition = this.scrollOffset;
+
+        scrollByPost(instant, showScrollbar);
+    }
+
+    protected void scrollByPost(boolean instant, boolean showScrollbar) {
+        if (instant) this.currentScrollOffset = this.scrollOffset;
         if (showScrollbar) this.lastScrollbarInteractTime = System.currentTimeMillis() + 1250;
     }
 
     protected boolean isInScrollbar(double mouseX, double mouseY) {
-        return this.isInBoundingBox(mouseX, mouseY) && this.direction.choose(mouseY, mouseX) >= this.scrollbarOffset;
+        var value = this.direction.choose(mouseY, mouseX);
+
+        return this.isInBoundingBox(mouseX, mouseY)
+                && value >= this.scrollbarOffset
+                && (!this.scrollbarOppositeSide || (value < this.scrollbarOffset + this.scrollbarThiccness));
     }
 
     /**
      * Scroll to the given component
      */
     public ScrollContainer<C> scrollTo(Component component) {
-        if (this.direction == ScrollDirection.VERTICAL) {
-            this.scrollOffset = MathHelper.clamp(this.scrollOffset - (this.y - component.y() + component.margins().get().top()), 0, this.maxScroll);
-        } else {
-            this.scrollOffset = MathHelper.clamp(this.scrollOffset - (this.x - component.x() + component.margins().get().right()), 0, this.maxScroll);
-        }
-        return this;
+        return scrollTo(() -> {
+            var amount = this.direction.choose(
+                    this.x - component.x() + component.margins().get().right(),
+                    this.y - component.y() + component.margins().get().top());
+
+            this.scrollOffset = MathHelper.clamp(this.scrollOffset - amount, 0, this.maxScroll);
+        });
     }
 
     /**
@@ -282,8 +329,29 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
      * length of this container's content
      */
     public ScrollContainer<C> scrollTo(@Range(from = 0, to = 1) double progress) {
-        this.scrollOffset = this.maxScroll * progress;
+        return scrollTo(() -> this.scrollOffset = this.maxScroll * progress);
+    }
+
+    public ScrollContainer<C> scrollToOffset(double value) {
+        return scrollTo(() -> this.scrollOffset = value);
+    }
+
+    protected ScrollContainer<C> scrollTo(Runnable target) {
+        if (this.mounted) {
+            target.run();
+        } else {
+            this.queuedScrollTarget = target;
+        }
+
         return this;
+    }
+
+    public double scrollProgress() {
+        return this.scrollOffset / this.maxScroll;
+    }
+
+    public double scrollOffset() {
+        return this.scrollOffset;
     }
 
     /**
@@ -345,6 +413,16 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
         return this;
     }
 
+    public boolean scrollbarOppositeSide(){
+        return this.scrollbarOppositeSide;
+    }
+
+    public ScrollContainer<C> scrollbarOppositeSide(boolean value){
+        this.scrollbarOppositeSide = value;
+
+        return this;
+    }
+
     /**
      * @return The current fixed length of this container's scrollbar,
      * or {@code 0} if it adjusts based on the content
@@ -358,9 +436,9 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
         super.parseProperties(model, element, children);
         UIParsing.apply(children, "fixed-scrollbar-length", UIParsing::parseUnsignedInt, this::fixedScrollbarLength);
         UIParsing.apply(children, "scrollbar-thiccness", UIParsing::parseUnsignedInt, this::scrollbarThiccness);
-        UIParsing.apply(children, "scrollbar", Scrollbar::parse, this::scrollbar);
-
         UIParsing.apply(children, "scroll-step", UIParsing::parseUnsignedInt, this::scrollStep);
+        UIParsing.apply(children, "scrollbar", Scrollbar::parse, this::scrollbar);
+        UIParsing.apply(children, "scrollbar-opposite-side", UIParsing::parseBool, this::scrollbarOppositeSide);
     }
 
     public static ScrollContainer<?> parse(Element element) {
@@ -456,12 +534,11 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
             this.moreKeycode = moreKeycode;
         }
 
-        public double choose(double horizontal, double vertical) {
+        public <N extends Number> N choose(N horizontal, N vertical) {
             return switch (this) {
                 case VERTICAL -> vertical;
                 case HORIZONTAL -> horizontal;
             };
         }
-
     }
 }

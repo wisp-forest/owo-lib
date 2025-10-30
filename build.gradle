@@ -110,12 +110,22 @@ loom {
             ideConfigGenerated project.rootProject == project
             name = "Testmod Client"
             source sourceSets.testmod
+            vmArg "-XX:+AllowEnhancedClassRedefinition"
+        }
+        testmodClientRenderDoc {
+            client()
+            ideConfigGenerated project.rootProject == project
+            name = "Testmod Client [RenderDoc]"
+            source sourceSets.testmod
+            vmArg "-Dowo.renderdocPath=${System.getenv('renderDocPath')}"
+            vmArg "-XX:+AllowEnhancedClassRedefinition"
         }
         testmodServer {
             server()
             ideConfigGenerated project.rootProject == project
             name = "Testmod Server"
             source sourceSets.testmod
+            vmArg "-XX:+AllowEnhancedClassRedefinition"
         }
     }
 

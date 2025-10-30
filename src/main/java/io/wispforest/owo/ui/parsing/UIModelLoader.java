@@ -55,7 +55,12 @@ public class UIModelLoader implements SynchronousResourceReloader, IdentifiableR
             try (var stream = Files.newInputStream(HOT_RELOAD_LOCATIONS.get(id))) {
                 return UIModel.load(stream);
             } catch (ParserConfigurationException | IOException | SAXException e) {
-                MinecraftClient.getInstance().player.sendMessage(TextOps.concat(Owo.PREFIX, TextOps.withFormatting("hot ui model reload failed, check the log for details", Formatting.RED)), false);
+                var player = MinecraftClient.getInstance().player;
+
+                if (player != null){
+                    player.sendMessage(TextOps.concat(Owo.PREFIX, TextOps.withFormatting("hot ui model reload failed, check the log for details", Formatting.RED)), false);
+                }
+
                 Owo.LOGGER.error("Hot UI model reload failed", e);
             }
         }

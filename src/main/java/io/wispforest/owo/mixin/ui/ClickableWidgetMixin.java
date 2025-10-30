@@ -277,12 +277,14 @@ public abstract class ClickableWidgetMixin implements ComponentStub, net.minecra
 
     @Override
     public Component cursorStyle(CursorStyle style) {
-        return this.owo$getWrapper().cursorStyle(style);
+        this.owo$getWrapper().cursorStyle(style);
+        return this;
     }
 
     @Override
     public Component tooltip(List<TooltipComponent> tooltip) {
-        return this.owo$getWrapper().tooltip(tooltip);
+        this.owo$getWrapper().tooltip(tooltip);
+        return this;
     }
 
     @Override
@@ -361,5 +363,15 @@ public abstract class ClickableWidgetMixin implements ComponentStub, net.minecra
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/ClickableWidget;renderWidget(Lnet/minecraft/client/gui/DrawContext;IIF)V"))
     private void setHovered(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         if (this.owo$wrapper != null) this.hovered = this.hovered && this.owo$wrapper.hovered();
+    }
+
+    @Override
+    public EventSource<ComponentUpdate> componentUpdate() {
+        return this.owo$getWrapper().componentUpdate();
+    }
+
+    @Override
+    public boolean hovered() {
+        return this.hovered;
     }
 }

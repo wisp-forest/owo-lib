@@ -1,34 +1,63 @@
 package io.wispforest.owo.config.ui;
 
+import com.terraformersmc.modmenu.gui.ModsScreen;
+import io.wispforest.owo.Owo;
+import io.wispforest.owo.config.ConfigWrapper;
+import io.wispforest.owo.config.serialization.RawConfigData;
+import io.wispforest.owo.packets.OwoPackets;
+import io.wispforest.owo.packets.c2s.AdjustServerConfig;
+import io.wispforest.owo.ui.util.UIErrorToast;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
-import org.jetbrains.annotations.ApiStatus;
+import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiConsumer;
-import java.util.function.Function;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
+@Environment(EnvType.CLIENT)
 public class ConfigScreenProviders {
 
-    private static final Map<String, Function<Screen, ? extends Screen>> PROVIDERS = new HashMap<>();
-    private static final Map<String, Function<Screen, ? extends ConfigScreen>> OWO_SCREEN_PROVIDERS = new HashMap<>();
+    public static final Identifier NONE = Identifier.of("owo", "none");
+
+    private static boolean rebuildSortedProviders = false;
+
+    private static final Map<Identifier, ScreenProviderData> PROVIDERS = new LinkedHashMap<>();
 
     /**
      * Register the given config screen provider. This is primarily
      * used for making a config screen available in ModMenu and to the
      * {@code /owo-config} command, although other places my use it as well
      *
-     * @param modId    The mod id for which to supply a config screen
+     * @param configId The mod id for which to supply a config screen
      * @param supplier The supplier to register - this gets the parent screen
      *                 as argument
      * @throws IllegalArgumentException If a config screen provider is
      *                                  already registered for the given mod id
      */
-    public static <S extends Screen> void register(String modId, Function<Screen, S> supplier) {
-        if (PROVIDERS.put(modId, supplier) != null) {
-            throw new IllegalArgumentException("Tried to register config screen provider for mod id " + modId + " twice");
+    public static <S extends Screen, W extends ConfigWrapper<?>> void register(Identifier configId, Class<W> wrapperClass, BiFunction<@Nullable Screen, W, S> supplier) {
+        register(configId, 0, wrapperClass, supplier);
+    }
+
+    public static <S extends Screen, W extends ConfigWrapper<?>> void register(Identifier configId, int order, Class<W> wrapperClass, BiFunction<@Nullable Screen, W, S> supplier) {
+        if (PROVIDERS.containsKey(configId)) {
+            throw new IllegalArgumentException("Tried to register config screen provider for mod id " + configId.toString() + " twice");
         }
+
+        PROVIDERS.put(configId, new ScreenProviderData(configId, ConfigScreenProvider.of(wrapperClass, supplier), order));
+
+        if (!rebuildSortedProviders) rebuildSortedProviders = true;
+    }
+
+    public static void register(ConfigWrapper<?> wrapper, int order, Identifier modelId) {
+        ConfigScreenProviders.<Screen, ConfigWrapper<?>>register(
+                wrapper.id(), order, (Class<ConfigWrapper<?>>) wrapper.getClass(), (screen, wrapper1) -> ConfigScreen.createWithCustomModel(modelId, wrapper1, screen));
     }
 
     /**
@@ -38,11 +67,149 @@ public class ConfigScreenProviders {
      * @return The associated config screen provider, or {@code null} if
      * none is registered
      */
-    public static @Nullable Function<Screen, ? extends Screen> get(String modId) {
-        return PROVIDERS.get(modId);
+    public static @Nullable ConfigScreenProvider<? extends ConfigWrapper<?>> get(Identifier configId) {
+        return PROVIDERS.get(configId).provider();
     }
 
-    public static void forEach(BiConsumer<String, Function<Screen, ? extends Screen>> action) {
-        PROVIDERS.forEach(action);
+    public static void forEach(BiConsumer<Identifier, ConfigScreenProvider<? extends ConfigWrapper<?>>> action) {
+        PROVIDERS.forEach((identifier, data) -> action.accept(identifier, data.provider()));
     }
+
+    private static final Map<String, SequencedSet<String>> SORTED_PROVIDER_CACHE = new HashMap<>();
+
+    public static Map<String, SequencedSet<String>> getSortedProviders() {
+        if (rebuildSortedProviders) {
+            SORTED_PROVIDER_CACHE.clear();
+
+            var tempMap = new HashMap<String, List<ScreenProviderData>>();
+
+            for (var entry : PROVIDERS.entrySet()) {
+                var configId = entry.getKey();
+                var data = entry.getValue();
+
+                tempMap.computeIfAbsent(configId.getNamespace(), string -> new ArrayList<>())
+                        .add(data);
+            }
+
+            var baseMap = new HashMap<String, SequencedSet<String>>();
+
+            for (var entry : tempMap.entrySet()) {
+                /*
+                 * 1. Sort by natural ordering of Strings
+                 * 2. Sort by Order Number
+                 * 3. Sort by primary configs
+                 */
+                var sortedSet = entry.getValue().stream()
+                        .sorted(Comparator.comparing(data -> data.configId().getPath(), CharSequence::compare))
+                        .sorted(Comparator.comparingInt(ScreenProviderData::order))
+                        .map(data -> data.configId().getPath())
+                        .collect(Collectors.toCollection(LinkedHashSet::new));
+
+                baseMap.put(entry.getKey(), sortedSet);
+            }
+
+            SORTED_PROVIDER_CACHE.putAll(baseMap);
+        }
+
+        return SORTED_PROVIDER_CACHE;
+    }
+
+    public static Identifier getPrimaryModProvider(String modid) {
+        var modProviders = getSortedProviders().get(modid);
+
+        if (modProviders == null || modProviders.isEmpty()) return NONE;
+
+        return Identifier.of(modid, modProviders.getFirst());
+    }
+
+    public static boolean safelyOpenConfigScreen(Identifier configId, @Nullable Screen parent, ConfigScreen prevConfigScreen) {
+        var result = safelyOpenConfigScreen(configId, parent, prevConfigScreen.serverConfigData);
+
+        if (result && MinecraftClient.getInstance().currentScreen instanceof ConfigScreen configScreen) {
+            configScreen.setConfigScreenData(prevConfigScreen);
+        }
+
+        return result;
+    }
+
+    public static boolean safelyOpenConfigScreen(String modid, @Nullable Screen parent, Map<Identifier, RawConfigData<?>> configData) {
+        return safelyOpenConfigScreen(getPrimaryModProvider(modid), parent, configData);
+    }
+
+    public static boolean safelyOpenConfigScreen(Identifier configId, @Nullable Screen parent, Map<Identifier, RawConfigData<?>> configData) {
+        var screen = safelyCreateConfigScreen(configId, parent, configData);
+
+        if (screen == null) return false;
+
+        // THIS IS REQUIRED FOR COMMANDS AS CLIENT COMMANDS WILL CLOSE THE SCREEN AS WE CLOSE CHAT AND ITS A PAIN!!!
+        MinecraftClient.getInstance().send(() -> {
+            MinecraftClient.getInstance().setScreen(screen);
+        });
+
+        return true;
+    }
+
+    @Nullable
+    public static Screen safelyCreateConfigScreen(Identifier configId, @Nullable Screen parent, Map<Identifier, RawConfigData<?>> configData) {
+        try {
+            var data = configData != null && MinecraftClient.getInstance().getServer() == null
+                    ? configData.get(configId)
+                    : null;
+
+            var wrapper = ConfigWrapper.getOrDuplicateWrapper(configId, data);
+
+            var providerData = PROVIDERS.get(configId);
+
+            if (providerData == null) return null;
+
+            Screen screen = providerData.provider().openScreenSafely(parent, wrapper);
+
+            if (screen instanceof ConfigScreen configScreen) {
+                configScreen.addRemovedHook((config, shouldRestart, shouldReload) -> {
+                    if (!config.isServerConfig()) return;
+
+                    OwoPackets.MAIN.clientHandle().send(new AdjustServerConfig(config.id(), config.saveToRawData(), shouldRestart, shouldReload));
+                });
+
+                configScreen.setServerConfigData(configData);
+            } else {
+                ScreenEvents.remove(screen).register(screen1 -> {
+                    if (!wrapper.isServerConfig()) return;
+
+                    OwoPackets.MAIN.clientHandle().send(new AdjustServerConfig(wrapper.id(), wrapper.saveToRawData(), false, false));
+                });
+            }
+
+            return screen;
+        } catch (java.lang.NoClassDefFoundError e) {
+            Owo.LOGGER.warn("The '{}' mod config screen is not available because {} is missing.", configId, e.getLocalizedMessage());
+            handleError(parent, configId, e);
+        } catch (Throwable e) {
+            Owo.LOGGER.error("Error from mod '{}'", configId, e);
+            handleError(parent, configId, e);
+        }
+
+        return null;
+    }
+
+    private static void handleError(Screen startingScreen, Identifier configId, Throwable e) {
+        if(!FabricLoader.getInstance().isModLoaded("modmenu") || !handleModScreenError(startingScreen, configId, e)) {
+            //Owo.LOGGER.warn("Could not set owo config screen [" + modId + ":" + configName + "]", e);
+            UIErrorToast.report(e);
+        }
+
+        MinecraftClient.getInstance().setScreen(startingScreen);
+    }
+
+    private static boolean handleModScreenError(Screen startingScreen, Identifier configId, Throwable e) {
+        if(startingScreen instanceof ModsScreen screen) {
+            screen.modScreenErrors.put(configId.getNamespace(), e);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private record ScreenProviderData(Identifier configId, ConfigScreenProvider<? extends ConfigWrapper<?>> provider, int order){}
 }

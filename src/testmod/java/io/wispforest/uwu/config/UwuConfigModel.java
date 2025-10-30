@@ -1,23 +1,23 @@
 package io.wispforest.uwu.config;
 
 import blue.endless.jankson.Comment;
-import io.wispforest.owo.config.Option;
+import io.wispforest.owo.config.base.SyncMode;
 import io.wispforest.owo.config.annotation.*;
 import io.wispforest.owo.ui.core.Color;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Sync(Option.SyncMode.OVERRIDE_CLIENT)
-@Modmenu(modId = "uwu", uiModelId = "uwu:config")
-@Config(name = "uwu", wrapperName = "UwuConfig")
+@Sync(SyncMode.OVERRIDE_CLIENT)
+@Modmenu(uiModelId = "uwu:config_duplicate", priorityOrder = 1)
+@Config(modId = "uwu", name = "uwu", wrapperName = "UwuConfig")
 public class UwuConfigModel {
 
     @SectionHeader("top")
     @RangeConstraint(min = 0, max = 56)
     public int aValue = 56;
 
-    @RegexConstraint("[A-Za-z]{1,3}")
+    @RegexConstraint(inputValue = "[A-Za-z]{1,3}", applyValue = "[A-Za-z]{1,3}")
     public String regex = "yes";
 
     @Nest
@@ -25,7 +25,7 @@ public class UwuConfigModel {
     @SectionHeader("nesting_yo?")
     public Nested nestingTime = new Nested();
 
-    @PredicateConstraint("predicateFunction")
+    @PredicateConstraint(applyMethodName = "predicateApplyFunction", inputMethodName = "predicateInputFunction")
     public List<String> someOption = new ArrayList<>(List.of("1", "2", "3", "4", "5"));
 
     @RangeConstraint(min = 0, max = 10, decimalPlaces = 1)
@@ -38,6 +38,9 @@ public class UwuConfigModel {
 
     @RestartRequired
     public WowValues broTheresAnEnum = WowValues.FIRST;
+
+    @ReloadRequired
+    public String coolReloadableString = "woooooooooooooooooooooooo";
 
     public Color anEpicColor = Color.BLUE;
 
@@ -55,7 +58,7 @@ public class UwuConfigModel {
         @Comment("Commented nesting")
         public SuperNested nestingTimeIntensifies = new SuperNested();
 
-        @Sync(Option.SyncMode.INFORM_SERVER)
+        @Sync(SyncMode.INFORM_SERVER)
         public List<Integer> nestedIntegers = new ArrayList<>(List.of(69, 34, 35, 420));
     }
 
@@ -68,10 +71,17 @@ public class UwuConfigModel {
     }
 
     // so we declare a predicate method
-    public static boolean predicateFunction(List<String> list) {
+    public static boolean predicateApplyFunction(List<String> list) {
         // and do the check in here
         // this could be arbitrarily complex code, but
         // we'll keep it simple for this demonstration
         return list.size() == 5;
+    }
+
+    public static boolean predicateInputFunction(String entry) {
+        // and do the check in here
+        // this could be arbitrarily complex code, but
+        // we'll keep it simple for this demonstration
+        return !entry.contains("2");
     }
 }

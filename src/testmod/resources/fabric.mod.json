@@ -9,6 +9,7 @@
   ],
   "contact": {},
   "license": "MIT",
+  "icon": "assets/uwu/icon.png",
   "environment": "*",
   "mixins": [
     "uwu.mixins.json"

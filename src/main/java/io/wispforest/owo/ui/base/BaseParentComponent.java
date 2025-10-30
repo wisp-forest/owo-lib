@@ -45,6 +45,7 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
         ParentComponent.super.update(delta, mouseX, mouseY);
         super.update(delta, mouseX, mouseY);
         this.parentUpdate(delta, mouseX, mouseY);
+        this.componentUpdateEvents.sink().onUpdate(delta, mouseX, mouseY);
 
         if (this.taskQueue != null) {
             this.taskQueue.forEach(Runnable::run);
@@ -241,14 +242,14 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
 
     @Override
     public boolean onKeyPress(KeyInput input) {
-        if (this.focusHandler == null) return false;
-
-        if (input.isTab()) {
-            this.focusHandler.cycle(!input.hasShift());
-        } else if ((input.isUp() || input.isDown() || input.isLeft() || input.isRight()) && input.hasAlt()) {
-            this.focusHandler.moveFocus(input.key());
-        } else if (this.focusHandler.focused() != null) {
-            return this.focusHandler.focused().onKeyPress(input);
+        if (this.focusHandler != null) {
+            if (input.isTab()) {
+                this.focusHandler.cycle(!input.hasShift());
+            } else if ((input.isUp() || input.isDown() || input.isLeft() || input.isRight()) && input.hasAlt()) {
+                this.focusHandler.moveFocus(input.key());
+            } else if (this.focusHandler.focused() != null) {
+                return this.focusHandler.focused().onKeyPress(input);
+            }
         }
 
         return super.onKeyPress(input);
@@ -256,9 +257,7 @@ public abstract class BaseParentComponent extends BaseComponent implements Paren
 
     @Override
     public boolean onCharTyped(CharInput input) {
-        if (this.focusHandler == null) return false;
-
-        if (this.focusHandler.focused() != null) {
+        if (this.focusHandler != null && this.focusHandler.focused() != null) {
             return this.focusHandler.focused().onCharTyped(input);
         }
 

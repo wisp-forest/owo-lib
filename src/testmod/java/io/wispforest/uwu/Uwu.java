@@ -1,21 +1,19 @@
 package io.wispforest.uwu;
 
-import blue.endless.jankson.JsonPrimitive;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.logging.LogUtils;
 import io.netty.buffer.Unpooled;
 import io.wispforest.endec.format.gson.GsonDeserializer;
-import io.wispforest.endec.format.gson.GsonEndec;
 import io.wispforest.endec.format.gson.GsonSerializer;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.Owo;
+import io.wispforest.owo.config.ConfigIdentifierArgumentType;
 import io.wispforest.owo.config.ConfigSynchronizer;
-import io.wispforest.owo.config.Option;
+import io.wispforest.owo.config.base.Key;
 import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
@@ -23,7 +21,6 @@ import io.wispforest.owo.network.OwoNetChannel;
 import io.wispforest.owo.particles.ClientParticles;
 import io.wispforest.owo.particles.systems.ParticleSystem;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
-import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
 import io.wispforest.endec.SerializationContext;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.format.bytebuf.ByteBufSerializer;
@@ -31,12 +28,15 @@ import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.RegistriesAttribute;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.serialization.format.nbt.NbtDeserializer;
-import io.wispforest.owo.serialization.format.nbt.NbtEndec;
 import io.wispforest.owo.serialization.format.nbt.NbtSerializer;
 import io.wispforest.owo.text.CustomTextRegistry;
-import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.util.TagInjector;
+import io.wispforest.uwu.config.AdditionalConfig1;
+import io.wispforest.uwu.config.AdditionalConfig2;
+import io.wispforest.uwu.config.AdditionalConfig3;
+import io.wispforest.uwu.config.AdditionalConfig4;
 import io.wispforest.uwu.config.BruhConfig;
+import io.wispforest.uwu.config.FullTest;
 import io.wispforest.uwu.config.UwuConfig;
 import io.wispforest.uwu.items.UwuItems;
 import io.wispforest.uwu.network.*;
@@ -47,16 +47,13 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.command.argument.GameProfileArgumentType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.particle.DragonBreathParticleEffect;
@@ -69,7 +66,6 @@ import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.resource.featuretoggle.FeatureFlags;
 import net.minecraft.screen.ScreenHandlerType;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
@@ -176,6 +172,15 @@ public class Uwu implements ModInitializer {
 //        builder.janksonBuilder().registerSerializer(Color.class, (color, marshaller) -> new JsonPrimitive("bruv"));
     });
 
+    public static final FullTest FULL_CONFIG_MODEL = FullTest.createAndLoad(builder -> {
+        
+    });
+
+    public static final AdditionalConfig1 ADDITIONAL_CONFIG_1 = AdditionalConfig1.createAndLoad();
+    public static final AdditionalConfig2 ADDITIONAL_CONFIG_2 = AdditionalConfig2.createAndLoad();
+    public static final AdditionalConfig3 ADDITIONAL_CONFIG_3 = AdditionalConfig3.createAndLoad();
+    public static final AdditionalConfig4 ADDITIONAL_CONFIG_4 = AdditionalConfig4.createAndLoad();
+
     @Override
     public void onInitialize() {
 
@@ -232,14 +237,18 @@ public class Uwu implements ModInitializer {
         CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> {
 
             dispatcher.register(literal("get_option")
-                    .then(argument("config", StringArgumentType.string())
+                    .then(argument("config_id", ConfigIdentifierArgumentType.INSTANCE)
                             .then(argument("option", StringArgumentType.string()).executes(context -> {
-                                var value = ConfigSynchronizer.getClientOptions(
-                                        context.getSource().getPlayer(),
-                                        StringArgumentType.getString(context, "config")
-                                ).get(new Option.Key(StringArgumentType.getString(context, "option")));
+                                var clientValues = ConfigSynchronizer.getClientOptions(
+                                        context.getSource().getPlayerOrThrow(),
+                                        context.getArgument("config_id", Identifier.class)
+                                );
 
-                                context.getSource().sendFeedback(() -> Text.literal(String.valueOf(value)), false);
+                                if (clientValues != null) {
+                                    var value = clientValues.get(new Key(StringArgumentType.getString(context, "option")));
+
+                                    context.getSource().sendFeedback(() -> Text.literal(String.valueOf(value)), false);
+                                }
 
                                 return 0;
                             }))));

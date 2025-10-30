@@ -19,6 +19,10 @@ public class ConfigSlider extends DiscreteSliderComponent implements OptionValue
         return this;
     }
 
+    public ConfigSlider range(double min, double max) {
+        return min(min).max(max);
+    }
+
     public ConfigSlider min(double min) {
         this.min = min;
         return this;

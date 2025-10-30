@@ -265,4 +265,14 @@ public interface ComponentStub extends Component {
     default int heightOffset() {
         throw new IllegalStateException("Interface stub method called");
     }
+
+    @Override
+    default EventSource<ComponentUpdate> componentUpdate() {
+        throw new IllegalStateException("Interface stub method called");
+    }
+
+    @Override
+    default boolean hovered() {
+        throw new IllegalStateException("Interface stub method called");
+    }
 }

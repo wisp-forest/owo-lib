@@ -12,7 +12,7 @@ import java.util.Map;
 public class UwuConfigScreen extends BaseUIModelScreen<FlowLayout> {
 
     public UwuConfigScreen() {
-        super(FlowLayout.class, DataSource.file("config.xml"));
+        super(FlowLayout.class, DataSource.file("config_duplicate.xml"));
     }
 
     @Override

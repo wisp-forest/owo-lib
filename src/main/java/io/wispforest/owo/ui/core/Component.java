@@ -443,6 +443,8 @@ public interface Component extends PositionedRectangle {
         this.verticalSizing().update(delta);
     }
 
+    EventSource<ComponentUpdate> componentUpdate();
+
     /**
      * Test whether the given coordinates
      * are inside this component's bounding box
@@ -614,6 +616,11 @@ public interface Component extends PositionedRectangle {
         this.updateX(x);
         this.updateY(y);
     }
+
+    /**
+     * @return If the given component is currently hovered
+     */
+    boolean hovered();
 
     /**
      * @return a textual representation of the component's details for use in debugging with the inspector HUD.

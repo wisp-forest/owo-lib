@@ -1,0 +1,28 @@
+package io.wispforest.owo.config.options;
+
+import io.wispforest.owo.config.ConfigWrapper;
+import io.wispforest.owo.config.base.OptionConstraint;
+import io.wispforest.owo.config.base.BoundedAccess;
+import io.wispforest.owo.config.base.Key;
+import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
+
+///
+/// Describes a single option for a field found on a given [Record] object
+/// as an inner type for a field found on a [ConfigWrapper].
+///
+public final class RecordOption<T> extends MemoryOption<T> implements ReflectiveOption<T> {
+
+    private final BoundedAccess.BoundRecordComponent<T> backingComponent;
+
+    public RecordOption(Identifier configId, Key key, T defaultValue, BoundedAccess.BoundRecordComponent<T> backingComponent, @Nullable OptionConstraint<T> constraint, T currentValue) {
+        super(configId, key, defaultValue, backingComponent.type(), backingComponent.genericType(), constraint, currentValue);
+
+        this.backingComponent = backingComponent;
+    }
+
+    @Override
+    public BoundedAccess<T> backingAccess() {
+        return this.backingComponent;
+    }
+}

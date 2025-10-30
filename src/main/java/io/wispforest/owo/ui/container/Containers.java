@@ -59,4 +59,8 @@ public final class Containers {
     public static <C extends Component> OverlayContainer<C> overlay(C child) {
         return new OverlayContainer<>(child);
     }
+
+    public static <C extends Component> SelectableContainer<C> selectable(Sizing horizontalSizing, Sizing verticalSizing, C child) {
+        return new SelectableContainer<>(horizontalSizing, verticalSizing, child);
+    }
 }
