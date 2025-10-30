@@ -1,6 +1,5 @@
 package io.wispforest.owo.config;
 
-import blue.endless.jankson.JsonObject;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
@@ -10,7 +9,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.wispforest.owo.Owo;
-import io.wispforest.owo.command.RecordArgumentTypeInfo;
+import io.wispforest.owo.config.serialization.RawConfigData;
 import io.wispforest.owo.config.ui.ConfigScreenProviders;
 import io.wispforest.owo.ops.TextOps;
 import io.wispforest.owo.packets.OwoPackets;
@@ -22,9 +21,9 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
+import net.minecraft.command.argument.serialize.ConstantArgumentSerializer;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -94,7 +93,7 @@ public class OwoConfigCommand {
                                         if (wrapper == null) throw NO_SUCH_CONFIG_SCREEN.create();
 
                                         OwoPackets.MAIN.serverHandle(context.getSource().getPlayerOrThrow())
-                                                .send(new OpenServerConfig(wrapper.id(), wrapper.saveToObject()));
+                                                .send(new OpenServerConfig(wrapper.id(), wrapper.saveToRawData()));
 
                                         return 0;
                                     })
@@ -109,11 +108,11 @@ public class OwoConfigCommand {
                                         if (modSpecificConfigs.size() == 1) {
                                             var wrapper = List.copyOf(modSpecificConfigs.values()).getFirst();
 
-                                            handler.send(new OpenServerConfig(wrapper.id(), wrapper.saveToObject()));
+                                            handler.send(new OpenServerConfig(wrapper.id(), wrapper.saveToRawData()));
                                         } else {
-                                            var availableConfigs = new LinkedHashMap<Identifier, JsonObject>();
+                                            var availableConfigs = new LinkedHashMap<Identifier, RawConfigData<?>>();
 
-                                            modSpecificConfigs.forEach((string, wrapper) -> availableConfigs.put(wrapper.id(), wrapper.saveToObject()));
+                                            modSpecificConfigs.forEach((string, wrapper) -> availableConfigs.put(wrapper.id(), wrapper.saveToRawData()));
 
                                             handler.send(new OpenServerConfigSelection(modId, availableConfigs));
                                         }
@@ -128,13 +127,13 @@ public class OwoConfigCommand {
         ArgumentTypeRegistry.registerArgumentType(
                 Identifier.of("owo", "config_argument"),
                 ConfigIdentifierArgumentType.class,
-                RecordArgumentTypeInfo.of(commandRegistryAccess -> new ConfigIdentifierArgumentType())
+                ConstantArgumentSerializer.of(ConfigIdentifierArgumentType::new)
         );
 
         ArgumentTypeRegistry.registerArgumentType(
                 Identifier.of("owo", "configurable_mod_argument"),
                 ConfigurableModArgumentType.class,
-                RecordArgumentTypeInfo.of(commandRegistryAccess -> new ConfigurableModArgumentType())
+                ConstantArgumentSerializer.of(ConfigurableModArgumentType::new)
         );
     }
 
