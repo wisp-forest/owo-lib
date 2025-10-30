@@ -62,7 +62,7 @@ public class StructOptionContainer<T> extends AbstractStructOptionContainer<Fiel
             var genericType = typeInfo != null ? typeInfo.left() : field.getGenericType();
             var type = typeInfo != null ? typeInfo.right() : field.getType();
 
-            var boundField = new BoundedAccess.BoundField<>(backingValue, field, type, genericType);
+            var boundField = new BoundedAccess.BoundField(backingValue, field, type, genericType);
 
             try {
                 var currentValue = boundField.withOwner(value).getValue();

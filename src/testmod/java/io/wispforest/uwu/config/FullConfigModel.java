@@ -8,7 +8,7 @@ import net.minecraft.util.Identifier;
 
 import java.util.*;
 
-@Modmenu(modId = "uwu", priorityOrder = 0)
+@Modmenu(priorityOrder = 0)
 @Config(modId = "uwu", name = "full_test", wrapperName = "FullTest")
 public class FullConfigModel {
 

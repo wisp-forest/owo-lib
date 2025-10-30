@@ -30,7 +30,7 @@ public interface BoundedAccess<T> extends AnnotatedElement {
     ///
     /// The [Class<?>] of the given field without any generics
     ///
-    Class<?> type();
+    Class<T> type();
 
     ///
     /// The [Type] of the given field with any generics
@@ -45,23 +45,23 @@ public interface BoundedAccess<T> extends AnnotatedElement {
     ///
     T getValue();
 
-    /**
-     * A simple container which stores both a record component
-     * and an instance of the containing class on which to query
-     * values
-     *
-     * @param owner     The owner object which holds the value the field points to
-     * @param component The component itself
-     * @param <T>       The type of object this field stores
-     */
+    ///
+    /// A simple container which stores both a record component
+    /// and an instance of the containing class on which to query
+    /// values
+    ///
+    /// @param owner     The owner object which holds the value the field points to
+    /// @param component The component itself
+    /// @param <T>       The type of object this field stores
+    ///
     record BoundRecordComponent<T>(Record owner, RecordComponent component, Function<Record, T> getter) implements BoundedAccess<T> {
         public String name() {
             return this.component.getName();
         }
 
         @Override
-        public Class<?> type() {
-            return this.component.getType();
+        public Class<T> type() {
+            return (Class<T>) this.component.getType();
         }
 
         public Type genericType() {
@@ -98,20 +98,20 @@ public interface BoundedAccess<T> extends AnnotatedElement {
         }
     }
 
-    /**
-     * A simple container which stores both a non-static field
-     * and an instance of the containing class on which to query
-     * values
-     *
-     * @param owner The owner object which holds the value the field points to
-     * @param field The field itself
-     * @param <T>   The type of object this field stores
-     */
+    ///
+    /// A simple container which stores both a non-static field
+    /// and an instance of the containing class on which to query
+    /// values
+    ///
+    /// @param owner The owner object which holds the value the field points to
+    /// @param field The field itself
+    /// @param <T>   The type of object this field stores
+    ///
     @SuppressWarnings("unchecked")
-    record BoundField<T>(Object owner, Field field, Class<?> type, Type genericType) implements BoundedAccess<T> {
+    record BoundField<T>(Object owner, Field field, Class<T> type, Type genericType) implements BoundedAccess<T> {
 
         public BoundField(Object owner, Field field) {
-            this(owner, field, field.getType(), field.getGenericType());
+            this(owner, field, (Class<T>) field.getType(), field.getGenericType());
         }
 
         public String name() {

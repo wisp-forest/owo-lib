@@ -1,12 +1,14 @@
 package io.wispforest.owo.config.ui;
 
 import io.wispforest.owo.Owo;
+import io.wispforest.owo.config.ConfigReflectionUtils;
 import io.wispforest.owo.config.options.FieldOption;
 import io.wispforest.owo.config.options.OptionControlSpec;
 import io.wispforest.owo.config.options.ReflectiveOption;
 import io.wispforest.owo.config.annotation.Expanded;
 import io.wispforest.owo.config.annotation.RangeConstraint;
 import io.wispforest.owo.config.annotation.WithAlpha;
+import io.wispforest.owo.config.ui.component.ListOptionContainer;
 import io.wispforest.owo.config.ui.component.OptionValueProvider;
 import io.wispforest.owo.config.ui.component.SearchAnchorComponent;
 import io.wispforest.owo.config.ui.component.struct.*;
@@ -39,29 +41,12 @@ import java.util.*;
 public interface OptionComponentFactory<T> {
 
     OptionComponentFactory<? extends Number> NUMBER = withOptionLabel((model, option) -> {
-        var floatingPointType = NumberReflection.isFloatingPointType(option.clazz());
+        var data = ConfigReflectionUtils.getRangeConstraintData(option.clazz(), option);
 
-        var useSlider = false;
-
-        var decimalPlaces = floatingPointType ? 2 : 0;
-
-        Double min = NumberReflection.minValue(option.clazz()).doubleValue(), max = NumberReflection.maxValue(option.clazz()).doubleValue();
-
-        if (option.isAnnotationPresent(RangeConstraint.class)) {
-            var constraintData = option.getAnnotation(RangeConstraint.class);
-
-            useSlider = constraintData.useSlider();
-
-            if (floatingPointType) decimalPlaces = constraintData.decimalPlaces();
-
-            min = constraintData.min();
-            max = constraintData.max();
-        }
-
-        return OptionComponents.createNumberComponent(model, option, decimalPlaces, min, max, useSlider, option.detached());
+        return OptionComponents.createNumberComponent(model, option, data.decimalPlaces(), data.min(), data.max(), data.useSlider(), option.detached());
     });
 
-    OptionComponentFactory<? extends CharSequence> STRING = withOptionLabel((model, option) -> OptionComponents.createStringComponent(model, option, option.detached()));
+    OptionComponentFactory<String> STRING = withOptionLabel((model, option) -> OptionComponents.createStringComponent(model, option, option.detached()));
 
     OptionComponentFactory<Identifier> IDENTIFIER = withOptionLabel((model, option) -> OptionComponents.createIdentifierComponent(model, option, option.detached()));
 
@@ -74,65 +59,63 @@ public interface OptionComponentFactory<T> {
     @SuppressWarnings({"unchecked"})
     OptionComponentFactory<List<?>> LIST = (model, option) -> {
         var expanded = option.isAnnotationPresent(Expanded.class);
-        var layout = new ListOptionContainer<>(model, (OptionControlSpec) option, ArrayList::new, expanded, option.detached());
-        return new Result<>(layout, layout);
+        return Result.of(new ListOptionContainer<>(model, (OptionControlSpec) option, ArrayList::new, expanded, option.detached()));
     };
 
     @SuppressWarnings({"unchecked"})
     OptionComponentFactory<Set<?>> SET = (model, option) -> {
         var expanded = option.isAnnotationPresent(Expanded.class);
-        var layout = new ListOptionContainer<>(model, (OptionControlSpec) option, LinkedHashSet::new, expanded, option.detached());
-        return new Result<>(layout, layout);
+        return Result.of(new ListOptionContainer<>(model, (OptionControlSpec) option, LinkedHashSet::new, expanded, option.detached()));
     };
 
     @SuppressWarnings({"unchecked"})
     OptionComponentFactory<Map<?, ?>> SIMPLE_MAP = (model, option) -> {
         var expanded = option.isAnnotationPresent(Expanded.class);
-        var layout = new MapOptionContainer<>(model, (OptionControlSpec) option, expanded, option.detached());
-        return new Result<>(layout, layout);
+        return Result.of(new MapOptionContainer<>(model, (OptionControlSpec) option, expanded, option.detached()));
     };
 
     @SuppressWarnings({"unchecked"})
     OptionComponentFactory<Object> STRUCT = (model, option) -> {
+        var layout = (option.value() instanceof Record)
+            ? RecordStructOptionContainer.of(model, (FieldOption<? extends Record>) (Object) option)
+            : StructOptionContainer.of(model, option);
+
+        var container = wrapStructOption(layout, option, option.isAnnotationPresent(Expanded.class));
+
+        return new Result(container, layout);
+    };
+
+    static CollapsibleContainer wrapStructOption(AbstractStructOptionContainer<?> layout, OptionControlSpec<?> option, boolean isExpanded) {
         var key = option.key();
 
-        var expanded = !key.isRoot() && option.isAnnotationPresent(Expanded.class);
-
-        AbstractStructOptionContainer<?> layout;
-
-        if (option.value() instanceof Record) {
-            layout = RecordStructOptionContainer.of(model, (FieldOption<? extends Record>) (Object) option);
-        } else {
-            layout = StructOptionContainer.of(model, option);
-        }
-
         var titleKey = option.labelTranslationKey();
+        var expanded = !key.isRoot() && isExpanded;
 
         var container = Containers.collapsible(
-                Sizing.fill(100), Sizing.content(),
-                Text.translatable(titleKey),
-                expanded
+            Sizing.fill(100), Sizing.content(),
+            Text.translatable(titleKey),
+            expanded
         ).<CollapsibleContainer>configure(nestedContainer -> {
             if (I18n.hasTranslation(option.tooltipTranslationKey())) {
                 nestedContainer.titleLayout().tooltip(Text.translatable(option.tooltipTranslationKey()));
             }
 
             nestedContainer.titleLayout().child(new SearchAnchorComponent(
-                    nestedContainer.titleLayout(),
-                    key,
-                    () -> I18n.translate(titleKey)
+                nestedContainer.titleLayout(),
+                key,
+                () -> I18n.translate(titleKey)
             ).highlightConfigurator(highlight ->
-                    highlight.positioning(Positioning.absolute(-5, -5))
-                            .verticalSizing(Sizing.fixed(19))
+                highlight.positioning(Positioning.absolute(-5, -5))
+                    .verticalSizing(Sizing.fixed(19))
             ));
+
+            nestedContainer.child(layout);
         });
 
-        OptionComponentFactory.addEasyCopyLabel(container.titleLayout(), titleKey);
+        addEasyCopyLabel(container.titleLayout(), titleKey);
 
-        container.child(layout);
-
-        return new Result(container, layout);
-    };
+        return container;
+    }
 
     /**
      * Create a new component fitting for, and bound to,
@@ -146,7 +129,11 @@ public interface OptionComponentFactory<T> {
      */
     Result<?, ?> make(UIModel model, ReflectiveOption<T> option);
 
-    record Result<B extends Component, P extends OptionValueProvider>(B baseComponent, P optionProvider) {}
+    record Result<B extends Component, P extends OptionValueProvider>(B baseComponent, P optionProvider) {
+        public static <P extends Component & OptionValueProvider> Result<P, P> of(P optionProvider) {
+            return new Result<>(optionProvider, optionProvider);
+        }
+    }
 
     ///
     /// Wraps the given factory with an option label which is recommended depending on the
@@ -185,12 +172,13 @@ public interface OptionComponentFactory<T> {
         }
 
         baseComponent
-                .child(
-                        new SearchAnchorComponent(
-                                baseComponent,
-                                option.key(),
-                                () -> baseComponent.childById(LabelComponent.class, "option-name").text().getString())
-                );
+            .child(
+                new SearchAnchorComponent(
+                    baseComponent,
+                    option.key(),
+                    () -> baseComponent.childById(LabelComponent.class, "option-name").text().getString()
+                )
+            );
 
         baseComponent.childById(FlowLayout.class, "controls")
                 .child(result.baseComponent());
@@ -199,7 +187,7 @@ public interface OptionComponentFactory<T> {
     }
 
     static void addEasyCopyLabel(@NotNull FlowLayout nameHolder, String translationKey) {
-        Objects.requireNonNull(nameHolder);
+        Objects.requireNonNull(nameHolder, "Unable to add label as the nameHolder was found to be null!");
 
         if (!Owo.DEBUG || I18n.hasTranslation(translationKey)) return;
 
@@ -209,34 +197,32 @@ public interface OptionComponentFactory<T> {
         var hoveredColor = baseColor.interpolate(Color.WHITE, 0.6f);
 
         nameHolder.child(0,
-                Components.label(Text.literal("\uD83D\uDCCB"))
-                        .configure((LabelComponent component) -> {
-                            component.mouseEnter().subscribe(() -> {
-                                component.color(hoveredColor);
+            Components.label(Text.literal("\uD83D\uDCCB"))
+                .configure((LabelComponent component) -> {
+                    component.mouseEnter().subscribe(() -> {
+                        component.color(hoveredColor);
 
-                                component.tooltip(Text.of("Copy Translation Key"));
-                            });
+                        component.tooltip(Text.of("Copy Translation Key"));
+                    });
 
-                            component.mouseLeave().subscribe(() -> {
-                                component.color(unhoveredColor);
-                            });
+                    component.mouseLeave().subscribe(() -> component.color(unhoveredColor));
 
-                            component.mouseDown().subscribe((click, bl) -> {
-                                var client = MinecraftClient.getInstance();
+                    component.mouseDown().subscribe((click, bl) -> {
+                        var client = MinecraftClient.getInstance();
 
-                                client.keyboard.setClipboard(translationKey);
-                                UISounds.playButtonSound();
+                        client.keyboard.setClipboard(translationKey);
+                        UISounds.playButtonSound();
 
-                                component.tooltip(
-                                        Text.literal("Translation Key Copied!")
-                                                .formatted(Formatting.GREEN)
-                                );
+                        component.tooltip(
+                                Text.literal("Translation Key Copied!")
+                                        .formatted(Formatting.GREEN)
+                        );
 
-                                return true;
-                            });
-                        })
-                        .color(unhoveredColor)
-                        .margins(Insets.of(0,0,2,2))
+                        return true;
+                    });
+                })
+                .color(unhoveredColor)
+                .margins(Insets.of(0,0,2,2))
         );
     }
 }

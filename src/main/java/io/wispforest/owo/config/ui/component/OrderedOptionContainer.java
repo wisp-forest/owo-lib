@@ -37,11 +37,7 @@ public abstract class OrderedOptionContainer<C, T> extends CollapsibleContainer 
     protected final ButtonWidget resetButton;
     
     public OrderedOptionContainer(UIModel uiModel, OptionControlSpec<C> option, boolean expanded, boolean isDetached) {
-        super(
-                Sizing.fill(100), Sizing.content(),
-                Text.translatable(option.labelTranslationKey()),
-                expanded
-        );
+        super(Sizing.fill(100), Sizing.content(), Text.translatable(option.labelTranslationKey()), expanded);
 
         this.isDetached = isDetached;
 
@@ -94,15 +90,15 @@ public abstract class OrderedOptionContainer<C, T> extends CollapsibleContainer 
         }
 
         this.resetButton = uiModel.expandTemplate(ButtonComponent.class, "control-reset-button", Map.of())
-                .<ButtonComponent>configure(buttonWidget -> {
-                    buttonWidget.onPress(btn -> {
-                        this.backingList.clear();
-                        this.backingList.addAll(convertToList(option.defaultValue()));
+            .<ButtonComponent>configure(buttonWidget -> {
+                buttonWidget.onPress(btn -> {
+                    this.backingList.clear();
+                    this.backingList.addAll(convertToList(option.defaultValue()));
 
-                        this.refreshOptions();
-                        btn.active = false;
-                    }).positioning(Positioning.relative(100, 50));
-                });
+                    this.refreshOptions();
+                    btn.active = false;
+                }).positioning(Positioning.relative(100, 50));
+            });
 
         this.titleLayout.child(resetButton);
 
@@ -111,10 +107,10 @@ public abstract class OrderedOptionContainer<C, T> extends CollapsibleContainer 
         this.refreshOptions();
 
         this.titleLayout.child(new SearchAnchorComponent(
-                this.titleLayout,
-                option.key(),
-                () -> I18n.translate(option.labelTranslationKey()),
-                () -> this.backingList.stream().map(Objects::toString).collect(Collectors.joining())
+            this.titleLayout,
+            option.key(),
+            () -> I18n.translate(option.labelTranslationKey()),
+            () -> this.backingList.stream().map(Objects::toString).collect(Collectors.joining())
         ));
     }
 
@@ -158,9 +154,9 @@ public abstract class OrderedOptionContainer<C, T> extends CollapsibleContainer 
         }
 
         container.child(
-                Containers.verticalFlow(Sizing.fixed(19), Sizing.content())
-                        .child(label)
-                        .margins(tickAtTop ? Insets.top(12) : Insets.none())
+            Containers.verticalFlow(Sizing.fixed(19), Sizing.content())
+                .child(label)
+                .margins(tickAtTop ? Insets.top(12) : Insets.none())
         );
 
         return container;

@@ -24,6 +24,6 @@ public record AskToOpenServerConfig(Identifier configId) {
             return;
         }
 
-        OwoPackets.MAIN.serverHandle(access.player()).send(new OpenServerConfig(packet.configId(), wrapper.saveToObject()));
+        OwoPackets.MAIN.serverHandle(access.player()).send(new OpenServerConfig(packet.configId(), wrapper.saveToRawData()));
     }
 }

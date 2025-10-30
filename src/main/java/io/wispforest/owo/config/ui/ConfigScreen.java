@@ -6,6 +6,8 @@ import io.wispforest.owo.config.*;
 import io.wispforest.owo.config.annotation.*;
 import io.wispforest.owo.config.base.Key;
 import io.wispforest.owo.config.options.FieldOption;
+import io.wispforest.owo.config.ConfigWrapper;
+import io.wispforest.owo.config.serialization.RawConfigData;
 import io.wispforest.owo.config.ui.component.*;
 import io.wispforest.owo.packets.OwoPackets;
 import io.wispforest.owo.packets.c2s.AskToOpenServerConfig;
@@ -78,7 +80,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
         this.config = config;
     }
 
-    protected Map<Identifier, JsonObject> serverConfigData = Map.of();
+    protected Map<Identifier, RawConfigData<?>> serverConfigData = Map.of();
 
     protected Map<String, LabelComponent> prevLabels = Map.of();
     protected Map<String, LabelComponent> currentLabels = new HashMap<>();
@@ -92,7 +94,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
         return this;
     }
 
-    protected ConfigScreen setServerConfigData(Map<Identifier, JsonObject> configData) {
+    protected ConfigScreen setServerConfigData(Map<Identifier, RawConfigData<?>> configData) {
         this.serverConfigData = configData;
 
         return this;

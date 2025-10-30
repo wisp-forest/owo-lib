@@ -1,9 +1,7 @@
 package io.wispforest.owo.config.ui;
 
 import io.wispforest.owo.config.ConfigWrapper;
-import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiFunction;

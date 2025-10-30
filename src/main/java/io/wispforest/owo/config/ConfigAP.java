@@ -30,11 +30,11 @@ public class ConfigAP extends AbstractProcessor {
             import blue.endless.jankson.Jankson;
             import io.wispforest.endec.impl.ReflectiveEndecBuilder;
             import io.wispforest.owo.config.ConfigWrapper;
-            import io.wispforest.owo.config.ConfigWrapper.BuilderConsumer;
+            import io.wispforest.owo.config.ConfigWrapper.Builder;
             import io.wispforest.owo.config.options.FieldOption;
             import io.wispforest.owo.config.base.Key;
             import io.wispforest.owo.util.Observable;
-            import it.unimi.dsi.fastutil.Pair;
+            import io.wispforest.owo.config.serialization.ConfigSerializer;
 
             import java.util.HashMap;
             import java.util.Map;
@@ -50,12 +50,16 @@ public class ConfigAP extends AbstractProcessor {
                     super({config_class_name}.class);
                 }
 
-                private {wrapper_class_name}(BuilderConsumer consumer) {
+                private {wrapper_class_name}(Builder consumer) {
                     super({config_class_name}.class, consumer);
                 }
+                
+                private {wrapper_class_name}(ConfigSerializer<?> serializer, Builder consumer) {
+                    super({config_class_name}.class, serializer, consumer);
+                }
 
-                private {wrapper_class_name}(Class<{config_class_name}> clazz, Pair<Jankson, ReflectiveEndecBuilder> dataHandlers, boolean setupConfigSyncing) {
-                    super(clazz, dataHandlers, setupConfigSyncing);
+                private {wrapper_class_name}(Class<{config_class_name}> clazz, ConfigSerializer<?> serializer, ReflectiveEndecBuilder builder, boolean setupConfigSyncing) {
+                    super(clazz, serializer, builder, setupConfigSyncing);
                 }
 
                 public static {wrapper_class_name} createAndLoad() {
@@ -64,8 +68,14 @@ public class ConfigAP extends AbstractProcessor {
                     return wrapper;
                 }
 
-                public static {wrapper_class_name} createAndLoad(BuilderConsumer consumer) {
+                public static {wrapper_class_name} createAndLoad(Builder consumer) {
                     var wrapper = new {wrapper_class_name}(consumer);
+                    wrapper.loadFile();
+                    return wrapper;
+                }
+                
+                public static {wrapper_class_name} createAndLoad(ConfigSerializer<?> serializer, Builder consumer) {
+                    var wrapper = new {wrapper_class_name}(serializer, consumer);
                     wrapper.loadFile();
                     return wrapper;
                 }

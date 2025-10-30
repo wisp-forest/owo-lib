@@ -4,6 +4,8 @@ import blue.endless.jankson.JsonObject;
 import io.wispforest.endec.StructEndec;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.Owo;
+import io.wispforest.owo.config.serialization.ConfigSerializer;
+import io.wispforest.owo.config.serialization.RawConfigData;
 import io.wispforest.owo.config.ui.ConfigScreen;
 import io.wispforest.owo.config.ui.ConfigScreenProviders;
 import io.wispforest.owo.network.ClientAccess;
@@ -14,11 +16,11 @@ import net.minecraft.util.Identifier;
 
 import java.util.Map;
 
-public record OpenServerConfig(Identifier configId, JsonObject configData){
+public record OpenServerConfig(Identifier configId, RawConfigData<?> configData){
 
     public static final StructEndec<OpenServerConfig> ENDEC = StructEndecBuilder.of(
             MinecraftEndecs.IDENTIFIER.fieldOf("configId", OpenServerConfig::configId),
-            MinecraftEndecs.JANK_JSON_OBJECT.fieldOf("configData", OpenServerConfig::configData),
+            ConfigSerializer.RAW_DATA_ENDEC.fieldOf("configData", OpenServerConfig::configData),
             OpenServerConfig::new);
 
     @Environment(EnvType.CLIENT)

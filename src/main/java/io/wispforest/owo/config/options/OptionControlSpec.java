@@ -1,6 +1,6 @@
 package io.wispforest.owo.config.options;
 
-import io.wispforest.owo.config.ConfigWrapper;
+import io.wispforest.owo.config.base.OptionConstraint;
 import io.wispforest.owo.config.base.Key;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
@@ -73,5 +73,5 @@ public sealed interface OptionControlSpec<T> permits OptionBase, ReflectiveOptio
     /// @return The constraint placed on the value of this option,
     /// or `null` if the option is unconstrained
     ///
-    ConfigWrapper.@Nullable Constraint constraint();
+    @Nullable OptionConstraint<T> constraint();
 }

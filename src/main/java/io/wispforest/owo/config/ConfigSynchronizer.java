@@ -59,9 +59,7 @@ public class ConfigSynchronizer {
      */
     public static @Nullable Map<Key, ?> getClientOptions(ServerPlayerEntity player, Identifier configId) {
         var storage = CLIENT_OPTION_STORAGE.get(((ServerCommonNetworkHandlerAccessor) player.networkHandler).owo$getConnection());
-        if (storage == null) return null;
-
-        return storage.get(configId);
+        return (storage != null) ? storage.get(configId) : null;
     }
 
     /**
@@ -96,7 +94,7 @@ public class ConfigSynchronizer {
     }
 
     private static ConfigSyncPacket toPacket(SyncMode targetMode) {
-        Map<Identifier, ConfigEntry> configs = new HashMap<>();
+        var configs = new HashMap<Identifier, ConfigEntry>();
 
         KNOWN_CONFIGS.forEach((configId, config) -> {
             var entry = new ConfigEntry(new HashMap<>());
@@ -119,13 +117,14 @@ public class ConfigSynchronizer {
     private static void read(Map<Identifier, ConfigEntry> configs, BiConsumer<FieldOption<?>, PacketByteBuf> optionConsumer) {
         for (var entry : configs.entrySet()) {
             var configId = entry.getKey();
-            var configEntry = entry.getValue();
 
             var config = KNOWN_CONFIGS.get(configId);
             if (config == null) {
                 Owo.LOGGER.error("Received overrides for unknown config '{}', skipping", configId);
                 return;
             }
+
+            var configEntry = entry.getValue();
 
             for (var optionEntry : configEntry.options().entrySet()) {
                 var optionKey = new Key(optionEntry.getKey());
@@ -219,24 +218,18 @@ public class ConfigSynchronizer {
 
     public static void sendLoadedServerConfig(Identifier configId) {
         var server = Owo.currentServer();
-
-        if (server == null) return;
-
-        if (!KNOWN_CONFIGS.containsKey(configId)) return;
+        if (server == null || !KNOWN_CONFIGS.containsKey(configId)) return;
 
         Owo.LOGGER.info("Resending server config values to client");
-
         OwoPackets.MAIN.serverHandle(server).send(toPacket(configId, SyncMode.OVERRIDE_CLIENT));
     }
 
     @Environment(EnvType.CLIENT)
     public static void sendChangedConfigValues(Identifier configId) {
         var player = MinecraftClient.getInstance().player;
-
         if (player == null || !KNOWN_CONFIGS.containsKey(configId)) return;
 
         Owo.LOGGER.info("Sending client config values to server");
-
         OwoPackets.MAIN.clientHandle().send(toPacket(configId, SyncMode.INFORM_SERVER));
     }
 

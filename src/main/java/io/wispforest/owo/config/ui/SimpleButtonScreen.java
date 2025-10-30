@@ -73,9 +73,6 @@ public class SimpleButtonScreen extends BaseOwoScreen<FlowLayout> {
                         .horizontalAlignment(HorizontalAlignment.CENTER)
                 )
                 .padding(Insets.of(12))
-                /*.surface(
-                    Surface.VANILLA_TRANSLUCENT.and(Surface.outline(Color.ofRgb(0x3955e5).argb()))
-                )*/
                 .verticalAlignment(VerticalAlignment.CENTER)
                 .horizontalAlignment(HorizontalAlignment.CENTER)
         );

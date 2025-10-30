@@ -9,6 +9,7 @@ import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.util.NumberReflection;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 
 import java.util.Map;
@@ -19,9 +20,11 @@ import java.util.function.Predicate;
 @SuppressWarnings("UnusedReturnValue")
 public class ConfigTextBox extends TextBoxComponent implements OptionValueProvider {
 
+    public static final Predicate<String> ALWAYS_PREDICATE = s -> true;
+
     protected int invalidColor = 0xFFEB1D36, validColor = 0xFF28FFBF;
     protected Function<String, Object> valueParser = s -> s;
-    protected Predicate<String> inputPredicate = s -> true, applyPredicate = s -> true;
+    protected Predicate<String> inputPredicate = ALWAYS_PREDICATE, applyPredicate = ALWAYS_PREDICATE;
 
     public ConfigTextBox() {
         super(Sizing.fixed(0));
@@ -67,8 +70,8 @@ public class ConfigTextBox extends TextBoxComponent implements OptionValueProvid
         return this.valueParser.apply(this.getText());
     }
 
-    public ConfigTextBox inputPredicate(Predicate<String> inputPredicate) {
-        this.inputPredicate = inputPredicate;
+    public ConfigTextBox inputPredicate(@Nullable Predicate<String> inputPredicate) {
+        this.inputPredicate = inputPredicate != null ? inputPredicate : ALWAYS_PREDICATE;
         this.setTextPredicate(this.inputPredicate);
         return this;
     }
@@ -77,8 +80,8 @@ public class ConfigTextBox extends TextBoxComponent implements OptionValueProvid
         return inputPredicate;
     }
 
-    public ConfigTextBox applyPredicate(Predicate<String> applyPredicate) {
-        this.applyPredicate = applyPredicate;
+    public ConfigTextBox applyPredicate(@Nullable Predicate<String> applyPredicate) {
+        this.applyPredicate = applyPredicate != null ? applyPredicate : ALWAYS_PREDICATE;
         return this;
     }
 

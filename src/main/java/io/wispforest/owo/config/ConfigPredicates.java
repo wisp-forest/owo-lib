@@ -12,9 +12,7 @@ public class ConfigPredicates {
     public static final Predicate<String> IDENTIFIER_APPLY = s -> Identifier.tryParse(s) != null;
 
     public static Predicate<String> numberInput(boolean floatingPoint) {
-        return floatingPoint
-            ? s -> s.matches("-?\\d*\\.?\\d*")
-            : s -> s.matches("-?\\d*");
+        return s -> s.matches(floatingPoint ? "-?\\d*\\.?\\d*" : "-?\\d*");
     }
 
     public static Predicate<String> numberApply(double min, double max) {
@@ -26,5 +24,13 @@ public class ConfigPredicates {
                 return false;
             }
         };
+    }
+
+    public static Predicate<String> hexColorInput(boolean withAlpha) {
+        return s -> s.matches(withAlpha ? "#[a-zA-Z\\d]{0,8}" : "#[a-zA-Z\\d]{0,6}");
+    }
+
+    public static Predicate<String> hexColorApply(boolean withAlpha) {
+        return s -> s.matches(withAlpha ? "#[a-zA-Z\\d]{8}" : "#[a-zA-Z\\d]{6}");
     }
 }

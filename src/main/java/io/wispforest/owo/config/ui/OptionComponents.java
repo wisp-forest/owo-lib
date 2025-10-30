@@ -1,5 +1,6 @@
 package io.wispforest.owo.config.ui;
 
+import io.wispforest.owo.config.ConfigPredicates;
 import io.wispforest.owo.config.options.OptionControlSpec;
 import io.wispforest.owo.config.ui.component.*;
 import io.wispforest.owo.ui.component.*;
@@ -10,11 +11,13 @@ import io.wispforest.owo.ui.parsing.UIModel;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.apache.commons.lang3.mutable.MutableBoolean;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static io.wispforest.owo.config.ui.OptionComponentFactory.Result;
@@ -23,35 +26,50 @@ import static io.wispforest.owo.config.ui.OptionComponentFactory.Result;
 @SuppressWarnings("ConstantConditions")
 public class OptionComponents {
 
-    public static Result<FlowLayout, ConfigTextBox> createStringComponent(UIModel model, OptionControlSpec<CharSequence> option, boolean isDetached) {
-        return OptionComponents.createTextBox(model, option, configTextBox -> {
-            if (option.constraint() != null) {
-                configTextBox
-                    .inputPredicate(option.constraint()::testInput)
-                    .applyPredicate(option.constraint()::testApply);
-            }
+    public static Result<FlowLayout, ConfigTextBox> createStringComponent(UIModel model, OptionControlSpec<String> option, boolean isDetached) {
+        var constraint = option.constraint();
+
+        // This is safe since the constraint for the option works off of a String type input
+        Predicate<String> inputPredicate = constraint != null ? constraint.inputPredicate() : null,
+            applyPredicate = constraint != null ? constraint.applyPredicate() : null;
+
+        return createStringComponent(model, option, inputPredicate, applyPredicate, isDetached);
+    }
+
+    ///
+    /// Creates a [Result] for a [String] based [OptionControlSpec] with an ability to declare custom `inputPredicate`
+    /// used when validating user input and `applyPredicate` used to verify the final option before saving it to the config
+    ///
+    public static Result<FlowLayout, ConfigTextBox> createStringComponent(UIModel model, OptionControlSpec<String> option, @Nullable Predicate<String> inputPredicate, @Nullable Predicate<String> applyPredicate, boolean isDetached) {
+        return createTextBox(model, option, configTextBox -> {
+            configTextBox
+                .inputPredicate(inputPredicate)
+                .applyPredicate(applyPredicate);
         }, isDetached);
     }
 
     public static Result<FlowLayout, ConfigTextBox> createIdentifierComponent(UIModel model, OptionControlSpec<Identifier> option, boolean isDetached) {
-        return OptionComponents.createTextBox(model, option, ConfigTextBox::configureForIdentifier, isDetached);
+        return createTextBox(model, option, ConfigTextBox::configureForIdentifier, isDetached);
     }
 
     @SuppressWarnings("DataFlowIssue")
     public static Result<FlowLayout, ConfigTextBox> createColorComponent(UIModel model, OptionControlSpec<Color> option, boolean withAlpha, boolean isDetached) {
-        final var result = OptionComponents.createTextBox(model, option, color -> color.asHexString(withAlpha), configTextBox -> {
-            configTextBox.inputPredicate(withAlpha ? s -> s.matches("#[a-zA-Z\\d]{0,8}") : s -> s.matches("#[a-zA-Z\\d]{0,6}"));
-            configTextBox.applyPredicate(withAlpha ? s -> s.matches("#[a-zA-Z\\d]{8}") : s -> s.matches("#[a-zA-Z\\d]{6}"));
-            configTextBox.valueParser(withAlpha
-                    ? s -> Color.ofArgb(Integer.parseUnsignedInt(s.substring(1), 16))
-                    : s -> Color.ofRgb(Integer.parseUnsignedInt(s.substring(1), 16))
-            );
+        final var result = createTextBox(model, option, color -> color.asHexString(withAlpha), configTextBox -> {
+            configTextBox
+                .inputPredicate(ConfigPredicates.hexColorInput(withAlpha))
+                .applyPredicate(ConfigPredicates.hexColorApply(withAlpha))
+                .valueParser(withAlpha
+                        ? s -> Color.ofArgb(Integer.parseUnsignedInt(s.substring(1), 16))
+                        : s -> Color.ofRgb(Integer.parseUnsignedInt(s.substring(1), 16))
+                );
         }, isDetached);
 
         result.baseComponent().<FlowLayout>configure(controls -> {
-            Supplier<Color> valueGetter = () -> result.optionProvider().isValid()
+            Supplier<Color> valueGetter = () -> {
+                return result.optionProvider().isValid()
                     ? (Color) result.optionProvider().parsedValue()
                     : Color.BLACK;
+            };
 
             var box = Components.box(Sizing.fixed(15), Sizing.fixed(15)).color(valueGetter.get()).fill(true);
             box.margins(Insets.right(5)).cursorStyle(CursorStyle.HAND);
@@ -61,25 +79,25 @@ public class OptionComponents {
 
             box.mouseDown().subscribe((click, button) -> {
                 ((FlowLayout) box.root()).child(Containers.overlay(
-                        model.expandTemplate(
-                                FlowLayout.class,
-                                "color-picker-panel",
-                                Map.of("color", valueGetter.get().asHexString(withAlpha), "with-alpha", String.valueOf(withAlpha))
-                        ).<FlowLayout>configure(flowLayout -> {
-                            var picker = flowLayout.childById(ColorPickerComponent.class, "color-picker");
-                            var previewBox = flowLayout.childById(BoxComponent.class, "current-color");
+                    model.expandTemplate(
+                        FlowLayout.class,
+                        "color-picker-panel",
+                        Map.of("color", valueGetter.get().asHexString(withAlpha), "with-alpha", String.valueOf(withAlpha))
+                    ).<FlowLayout>configure(flowLayout -> {
+                        var picker = flowLayout.childById(ColorPickerComponent.class, "color-picker");
+                        var previewBox = flowLayout.childById(BoxComponent.class, "current-color");
 
-                            picker.onChanged().subscribe(previewBox::color);
+                        picker.onChanged().subscribe(previewBox::color);
 
-                            flowLayout.childById(ButtonComponent.class, "confirm-button").onPress(confirmButton -> {
-                                result.optionProvider().text(picker.selectedColor().asHexString(withAlpha));
-                                flowLayout.parent().remove();
-                            });
+                        flowLayout.childById(ButtonComponent.class, "confirm-button").onPress(confirmButton -> {
+                            result.optionProvider().text(picker.selectedColor().asHexString(withAlpha));
+                            flowLayout.parent().remove();
+                        });
 
-                            flowLayout.childById(ButtonComponent.class, "cancel-button").onPress(cancelButton -> {
-                                flowLayout.parent().remove();
-                            });
-                        })
+                        flowLayout.childById(ButtonComponent.class, "cancel-button").onPress(cancelButton -> {
+                            flowLayout.parent().remove();
+                        });
+                    })
                 ));
 
                 return true;
@@ -129,8 +147,8 @@ public class OptionComponents {
 
     public static Result<FlowLayout, ? extends OptionValueProvider> createNumberComponent(UIModel model, OptionControlSpec<? extends Number> option, int decimalPlaces, Double min, Double max, boolean createRange, boolean isDetached) {
         return (createRange)
-                ? OptionComponents.createRangeControls(model, option, decimalPlaces, min, max, isDetached)
-                : OptionComponents.createTextBox(model, option, configTextBox -> configTextBox.configureForNumber(option.clazz(), min, max), isDetached);
+                ? createRangeControls(model, option, decimalPlaces, min, max, isDetached)
+                : createTextBox(model, option, configTextBox -> configTextBox.configureForNumber(option.clazz(), min, max), isDetached);
     }
 
     public static Result<FlowLayout, OptionValueProvider> createRangeControls(UIModel model, OptionControlSpec<? extends Number> option, int decimalPlaces, Double min, Double max, boolean isDetached) {
@@ -144,8 +162,8 @@ public class OptionComponents {
         var optionComponent = model.expandTemplate(FlowLayout.class, "range-config-option", Map.of());
 
         var sliderInput = optionComponent.childById(ConfigSlider.class, "value-slider");
-        sliderInput.min(min).max(max).decimalPlaces(decimalPlaces).snap(!withDecimals).setFromDiscreteValue(value.doubleValue());
-        sliderInput.valueType(option.clazz());
+        sliderInput.valueType(option.clazz()).range(min, max).decimalPlaces(decimalPlaces).snap(!withDecimals)
+            .setFromDiscreteValue(value.doubleValue());
 
         var resetButton = optionComponent.childById(ButtonComponent.class, "reset-button");
 
@@ -170,13 +188,12 @@ public class OptionComponents {
 
         var sliderControls = optionComponent.childById(FlowLayout.class, "slider-controls");
         var textControls = createTextBox(model, option, configTextBox -> {
-            configTextBox.configureForNumber(option.clazz(), min, max);
-
-            var predicate = configTextBox.applyPredicate();
-            configTextBox.applyPredicate(predicate.and(s -> {
-                final var parsed = Double.parseDouble(s);
-                return parsed >= min && parsed <= max;
-            }));
+            configTextBox
+                .configureForNumber(option.clazz(), min, max)
+                .applyPredicate(configTextBox.applyPredicate().and(s -> {
+                    final var parsed = Double.parseDouble(s);
+                    return parsed >= min && parsed <= max;
+                }));
         }, isDetached).baseComponent().positioning(Positioning.layout());
         var textInput = textControls.childById(ConfigTextBox.class, "value-box");
 
@@ -210,9 +227,9 @@ public class OptionComponents {
         });
 
         optionComponent.child(new SearchAnchorComponent(
-                optionComponent,
-                option.key(),
-                () -> textMode.isTrue() ? textInput.getText() : sliderInput.getMessage().getString()
+            optionComponent,
+            option.key(),
+            () -> textMode.isTrue() ? textInput.getText() : sliderInput.getMessage().getString()
         ));
 
         return new Result<>(optionComponent, new OptionValueProvider() {
@@ -238,10 +255,10 @@ public class OptionComponents {
         var toggleButton = optionComponent.childById(ConfigToggleButton.class, "toggle-button");
         var resetButton = optionComponent.childById(ButtonComponent.class, "reset-button");
 
-        toggleButton.horizontalSizing(Sizing.fixed(Math.round(toggleButton.horizontalSizing().get().value / 1.25f))); // Difference 2
-        toggleButton.margins(Insets.horizontal(1));
-
-        toggleButton.enabled(option.value());
+        toggleButton
+            .enabled(option.value())
+            .horizontalSizing(Sizing.fixed(Math.round(toggleButton.horizontalSizing().get().value / 1.25f)))
+            .margins(Insets.horizontal(1));
 
         if (isDetached) {
             resetButton.active = false;
@@ -257,9 +274,9 @@ public class OptionComponents {
         }
 
         optionComponent.child(new SearchAnchorComponent(
-                optionComponent,
-                option.key(),
-                () -> toggleButton.getMessage().getString()
+            optionComponent,
+            option.key(),
+            () -> toggleButton.getMessage().getString()
         ));
 
         return new Result<>(optionComponent, toggleButton);
@@ -271,10 +288,10 @@ public class OptionComponents {
         var enumButton = optionComponent.childById(ConfigEnumButton.class, "enum-button");
         var resetButton = optionComponent.childById(ButtonComponent.class, "reset-button");
 
-        enumButton.horizontalSizing(Sizing.fixed(Math.round(enumButton.horizontalSizing().get().value / 1.25f))); // Difference 2
-        enumButton.margins(Insets.horizontal(1));
-
-        enumButton.init(option, option.value().ordinal());
+        enumButton
+            .init(option, option.value().ordinal())
+            .horizontalSizing(Sizing.fixed(Math.round(enumButton.horizontalSizing().get().value / 1.25f)))
+            .margins(Insets.horizontal(1));
 
         if (isDetached) {
             resetButton.active = false;
@@ -290,9 +307,9 @@ public class OptionComponents {
         }
 
         optionComponent.child(new SearchAnchorComponent(
-                optionComponent,
-                option.key(),
-                () -> enumButton.getMessage().getString()
+            optionComponent,
+            option.key(),
+            () -> enumButton.getMessage().getString()
         ));
 
         return new Result<>(optionComponent, enumButton);

@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Sync(SyncMode.OVERRIDE_CLIENT)
-@Modmenu(modId = "uwu", uiModelId = "uwu:config_duplicate", priorityOrder = 1)
+@Modmenu(uiModelId = "uwu:config_duplicate", priorityOrder = 1)
 @Config(modId = "uwu", name = "uwu", wrapperName = "UwuConfig")
 public class UwuConfigModel {
 
@@ -78,10 +78,10 @@ public class UwuConfigModel {
         return list.size() == 5;
     }
 
-    public static boolean predicateInputFunction(List<String> list) {
+    public static boolean predicateInputFunction(String entry) {
         // and do the check in here
         // this could be arbitrarily complex code, but
         // we'll keep it simple for this demonstration
-        return list.size() <= 5;
+        return !entry.contains("2");
     }
 }

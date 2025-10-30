@@ -12,6 +12,10 @@ import java.lang.reflect.AnnotatedElement;
 ///
 public sealed interface ReflectiveOption<T> extends OptionControlSpec<T>, AnnotatedElement permits FieldOption, RecordOption {
 
+    ///
+    /// @return the [BoundedAccess] for the given option allowing for various
+    /// reflective access of the base object and its location within Java
+    ///
     BoundedAccess<T> backingAccess();
 
     @Override

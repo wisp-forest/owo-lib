@@ -27,9 +27,7 @@ public class ConfigIdentifierArgumentType implements ArgumentType<Identifier> {
     @Override
     public Identifier parse(StringReader reader) throws CommandSyntaxException {
         var id = Identifier.fromCommandInput(reader);
-        var wrapper = ConfigWrapper.getKnownConfigInstances().get(id);
-        if (wrapper == null) throw NO_SUCH_CONFIG_SCREEN.create();
-
+        if (ConfigWrapper.getKnownConfigInstances().get(id) == null) throw NO_SUCH_CONFIG_SCREEN.create();
         return id;
     }
 

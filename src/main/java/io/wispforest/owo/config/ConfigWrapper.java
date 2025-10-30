@@ -1,13 +1,9 @@
 package io.wispforest.owo.config;
 
-import blue.endless.jankson.*;
-import blue.endless.jankson.api.DeserializationException;
-import blue.endless.jankson.api.SyntaxError;
-import blue.endless.jankson.impl.POJODeserializer;
-import blue.endless.jankson.magic.TypeMagic;
+import blue.endless.jankson.Comment;
 import io.wispforest.endec.Endec;
-import io.wispforest.endec.format.jankson.JanksonDeserializer;
-import io.wispforest.endec.format.jankson.JanksonSerializer;
+import io.wispforest.endec.SerializationContext;
+import io.wispforest.endec.impl.CommentAttribute;
 import io.wispforest.endec.impl.ReflectiveEndecBuilder;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.annotation.*;
@@ -15,21 +11,20 @@ import io.wispforest.owo.config.base.BoundedAccess;
 import io.wispforest.owo.config.base.Key;
 import io.wispforest.owo.config.base.SyncMode;
 import io.wispforest.owo.config.options.FieldOption;
+import io.wispforest.owo.config.serialization.ConfigSerializer;
+import io.wispforest.owo.config.serialization.RawConfigData;
 import io.wispforest.owo.config.ui.ConfigScreenProviders;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.util.Observable;
 import io.wispforest.owo.util.ReflectionUtils;
-import it.unimi.dsi.fastutil.Pair;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
@@ -38,7 +33,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 /**
  * The common base class of all generated config classes.
@@ -54,11 +48,13 @@ public abstract class ConfigWrapper<C> {
 
     private static final Map<Identifier, ConfigWrapper<?>> KNOWN_CONFIG_INSTANCES = new LinkedHashMap<>();
 
+    protected final ConfigSerializer<?> serializer;
+
     protected final Identifier id;
     protected final C instance;
+    protected final Endec<C> instanceEndec;
 
     protected boolean loading = false;
-    protected final Jankson jankson;
 
     @SuppressWarnings("rawtypes") protected final Map<Key, FieldOption> options = new LinkedHashMap<>();
     @SuppressWarnings("rawtypes") protected final Map<Key, FieldOption> optionsView = Collections.unmodifiableMap(options);
@@ -66,11 +62,19 @@ public abstract class ConfigWrapper<C> {
     protected final ReflectiveEndecBuilder builder;
 
     protected ConfigWrapper(Class<C> clazz) {
-        this(clazz, (SerializationBuilder builder) -> {});
+        this(clazz, ConfigSerializer.JANKSON);
     }
 
-    protected ConfigWrapper(Class<C> clazz, BuilderConsumer consumer) {
-        this(clazz, BuilderConsumer.fullyBuild(consumer), true);
+    protected ConfigWrapper(Class<C> clazz, ConfigSerializer<?> serializer) {
+        this(clazz, serializer, builder1 -> {});
+    }
+
+    protected ConfigWrapper(Class<C> clazz, Builder consumer) {
+        this(clazz, ConfigSerializer.JANKSON, consumer);
+    }
+
+    protected ConfigWrapper(Class<C> clazz, ConfigSerializer<?> serializer, Builder consumer) {
+        this(clazz, serializer, Builder.fullyBuild(consumer), true);
 
         if (KNOWN_CONFIG_INSTANCES.containsKey(this.id)) {
             throw new IllegalStateException("Config name '" + this.id + "'"
@@ -86,15 +90,22 @@ public abstract class ConfigWrapper<C> {
         }
     }
 
-    protected ConfigWrapper(Class<C> clazz, Pair<Jankson, ReflectiveEndecBuilder> dataHandlers, boolean setupConfigSyncing) {
-        this.jankson = dataHandlers.left();
-        this.builder = dataHandlers.right();
+    protected ConfigWrapper(Class<C> clazz, ConfigSerializer<?> serializer, ReflectiveEndecBuilder builder, boolean setupConfigSyncing) {
+        var configAnnotation = clazz.getAnnotation(Config.class);
+        this.id = Identifier.of(configAnnotation.modId(), configAnnotation.name());
+
+        this.serializer = serializer;
+
+        this.builder = builder;
 
         ReflectionUtils.requireZeroArgsConstructor(clazz, s -> "Config model class " + s + " must provide a zero-args constructor");
         this.instance = ReflectionUtils.tryInstantiateWithNoArgs(clazz);
 
-        var configAnnotation = clazz.getAnnotation(Config.class);
-        this.id = Identifier.of(configAnnotation.modId(), configAnnotation.name());
+        try {
+            this.instanceEndec = builder.get(clazz);
+        } catch (Exception e) {
+            throw new IllegalStateException("Unable to create the required Endec for '" + id + "' due to an error: ", e);
+        }
 
         try {
             this.initializeOptions(configAnnotation.saveOnModification());
@@ -136,8 +147,8 @@ public abstract class ConfigWrapper<C> {
         return wrapper;
     }
 
-    public static Map<String, Map<String, ConfigWrapper<?>>> getGroupedConfigInstances() {
-        Map<String, Map<String, ConfigWrapper<?>>> baseMap = new HashMap<>();
+    public static Map<String, SequencedMap<String, ConfigWrapper<?>>> getGroupedConfigInstances() {
+        var baseMap = new HashMap<String, SequencedMap<String, ConfigWrapper<?>>>();
 
         for (var entry : KNOWN_CONFIG_INSTANCES.entrySet()) {
             var configId = entry.getKey();
@@ -158,14 +169,15 @@ public abstract class ConfigWrapper<C> {
 
         try {
             this.fileLocation().getParent().toFile().mkdirs();
-            Files.writeString(this.fileLocation(), saveToObject().toJson(JsonGrammar.JANKSON), StandardCharsets.UTF_8);
+
+            Files.writeString(this.fileLocation(), serializer.encodeToString(SerializationContext.empty(), this.instanceEndec, this.instance), StandardCharsets.UTF_8);
         } catch (IOException e) {
             Owo.LOGGER.warn("Could not save config {}", this.id, e);
         }
     }
 
-    public JsonObject saveToObject() {
-        return (JsonObject) this.jankson.toJson(this.instance);
+    public RawConfigData<?> saveToRawData() {
+        return serializer.encodeToRaw(SerializationContext.empty(), this.instanceEndec, this.instance);
     }
 
     public void reload() {
@@ -183,13 +195,9 @@ public abstract class ConfigWrapper<C> {
         }
 
         try {
-            var configObject = this.jankson.load(Files.readString(this.fileLocation(), StandardCharsets.UTF_8));
-
-            load(configObject, true);
-        } catch (IOException | SyntaxError e) {
-            Owo.LOGGER.warn("Could not load config {}", this.id, e);
-        } finally {
-            this.loading = false;
+            load(serializer.decodeToRaw(Files.readString(this.fileLocation(), StandardCharsets.UTF_8)), true);
+        } catch (Exception e) {
+            Owo.LOGGER.warn("Could not read config file {}", this.id, e);
         }
     }
 
@@ -197,60 +205,41 @@ public abstract class ConfigWrapper<C> {
      * Load the config represented by this wrapper from
      * its associated file, or create it if it does not exist
      */
+    public <E> boolean load(RawConfigData<E> holder, boolean allowServerSync) {
+        return load(holder.element(), holder.serializer(), allowServerSync);
+    }
+
     @SuppressWarnings({"unchecked"})
-    public boolean load(JsonObject configObject, boolean allowServerSync) {
+    public <E> boolean load(E configObject, ConfigSerializer<E> serializer, boolean allowServerSync) {
         try {
             this.loading = true;
 
             for (var option : this.options.values()) {
-                Object newValue;
+                final var element = serializer.getElementForKey(configObject, option.key());
 
-                final var clazz = option.clazz();
-                final var element = configObject.recursiveGet(JsonElement.class, option.key().asString());
                 if (element == null) {
                     option.set(option.defaultValue());
                     continue;
                 }
 
-                if (Map.class.isAssignableFrom(clazz)) {
-                    var genericType = option.getGenericType();
-
-                    newValue = TypeMagic.createAndCast(clazz);
-                    POJODeserializer.unpackMap(
-                            (Map<Object, Object>) newValue,
-                            ReflectionUtils.getTypeArgument(genericType, 0),
-                            ReflectionUtils.getTypeArgument(genericType, 1),
-                            element,
-                            this.jankson.getMarshaller()
-                    );
-                } else if (List.class.isAssignableFrom(clazz) || Set.class.isAssignableFrom(clazz)) {
-                    newValue = TypeMagic.createAndCast(clazz);
-                    POJODeserializer.unpackCollection(
-                            (Collection<Object>) newValue,
-                            ReflectionUtils.getTypeArgument(option.getGenericType(), 0),
-                            element,
-                            this.jankson.getMarshaller()
-                    );
-                } else {
-                    newValue = configObject.getMarshaller().marshall(clazz, element);
-                }
+                final var newValue = serializer.decodeFromFormat(SerializationContext.empty(), option.endec(), element);
 
                 if (!option.verifyConstraint(newValue)) continue;
 
                 option.set(newValue == null ? option.defaultValue() : newValue);
             }
 
-
-
             if (allowServerSync) {
                 ConfigSynchronizer.sendLoadedServerConfig(this.id);
             }
 
             return true;
-        } catch (DeserializationException e) {
+        } catch (Exception e) {
             Owo.LOGGER.warn("Could not load config {}", this.id, e);
 
             return false;
+        } finally {
+            this.loading = false;
         }
     }
 
@@ -270,10 +259,10 @@ public abstract class ConfigWrapper<C> {
             var clazz = this.instance.getClass();
 
             while (path.size() > 1) {
-                clazz = clazz.getDeclaredField(path.remove(0)).getType();
+                clazz = clazz.getDeclaredField(path.removeFirst()).getType();
             }
 
-            return clazz.getField(path.get(0));
+            return clazz.getField(path.getFirst());
         } catch (NoSuchFieldException e) {
             return null;
         }
@@ -374,74 +363,44 @@ public abstract class ConfigWrapper<C> {
 
             if (field.isAnnotationPresent(Nest.class)) {
                 var fieldValue = field.get(instance);
-                if (fieldValue != null) {
-                    this.collectFieldValues(parent.child(field.getName()), fieldValue, fields);
-                } else {
+                if (fieldValue == null) {
                     throw new IllegalStateException("Nested config option containers must never be null");
                 }
+
+                this.collectFieldValues(parent.child(field.getName()), fieldValue, fields);
             } else {
                 fields.put(parent.child(field.getName()), new BoundedAccess.BoundField<>(instance, field));
             }
         }
     }
 
-    private boolean invokePredicate(MethodHandle predicate, Object value) {
-        try {
-            return (boolean) predicate.invoke(value);
-        } catch (Throwable e) {
-            throw new RuntimeException("Could not invoke predicate", e);
-        }
-    }
+    public interface Builder {
+        void build(ReflectiveEndecBuilder builder);
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public record Constraint(String formatted, Predicate inputPredicate, Predicate applyPredicate) {
-        public boolean testInput(Object value) {
-            return this.inputPredicate.test(value);
-        }
-        public boolean testApply(Object value) {
-            return this.inputPredicate.test(value);
-        }
-    }
+        static ReflectiveEndecBuilder fullyBuild(Builder consumer) {
+            var builder = MinecraftEndecs.addDefaults(new ReflectiveEndecBuilder())
+                .register(Color.RGBA_HEX_ENDEC, Color.class);
 
-    public record SerializationBuilder(Jankson.Builder janksonBuilder, ReflectiveEndecBuilder endecBuilder) {
-        public <T> SerializationBuilder addEndec(Class<T> clazz, Endec<T> endec) {
-            endecBuilder().register(endec, clazz);
-
-            janksonBuilder()
-                    .registerSerializer(clazz, (t, marshaller) -> endec.encodeFully(JanksonSerializer::of, t))
-                    .registerDeserializer(JsonElement.class, clazz, (element, marshaller) -> endec.decodeFully(JanksonDeserializer::of, element));
-
-            return this;
-        }
-    }
-
-    public interface BuilderConsumer {
-        void build(SerializationBuilder builder);
-
-        static Pair<Jankson, ReflectiveEndecBuilder> fullyBuild(BuilderConsumer consumer) {
-            var builder = new SerializationBuilder(Jankson.builder(), MinecraftEndecs.addDefaults(new ReflectiveEndecBuilder()));
-
-            builder.janksonBuilder()
-                    .registerSerializer(Identifier.class, (identifier, marshaller) -> new JsonPrimitive(identifier.toString()))
-                    .registerDeserializer(JsonPrimitive.class, Identifier.class, (primitive, m) -> Identifier.tryParse(primitive.asString()));
-
-            builder.addEndec(Color.class, Color.RGBA_HEX_ENDEC);
+            // TODO: REMOVE WITHIN THE FUTURE
+            builder.registerContextGatherer(Comment.class, (annotatedType, annotation) -> {
+                return SerializationContext.attributes(new CommentAttribute(annotation.value()));
+            });
 
             consumer.build(builder);
 
-            return Pair.of(builder.janksonBuilder().build(), builder.endecBuilder());
+            return builder;
         }
     }
 
-    public static ConfigWrapper<?> getOrDuplicateWrapper(Identifier configId, @Nullable JsonObject jsonObject) {
+    public static ConfigWrapper<?> getOrDuplicateWrapper(Identifier configId, @Nullable RawConfigData<?> data) {
         var wrapper = ConfigWrapper.getKnownConfigInstances().get(configId);
 
         if (wrapper == null) {
             throw new IllegalStateException("Unable to locate the given wrapper instance with the following id: " + configId);
         }
 
-        if (jsonObject != null) {
-            wrapper = wrapper.attemptToDuplicate(jsonObject);
+        if (data != null) {
+            wrapper = wrapper.attemptToDuplicate(data);
         }
 
         return wrapper;
@@ -456,22 +415,26 @@ public abstract class ConfigWrapper<C> {
     }
 
     @Nullable
-    private JsonObject memoryData = null;
+    private RawConfigData<?> memoryData = null;
 
     @ApiStatus.Internal
     @Nullable
-    private ConfigWrapper<?> attemptToDuplicate(JsonObject jsonObject) {
+    private ConfigWrapper<?> attemptToDuplicate(RawConfigData<?> data) {
+        if (!data.isFrom(this.serializer)) {
+            Owo.LOGGER.warn("Could not load data into the given duplicated config {} as the serializer of the data do not match", this.id);
+        }
+
         var clazz = this.getClass();
 
         try {
-            var constructor = clazz.getDeclaredConstructor(Class.class, Pair.class, boolean.class);
+            var constructor = clazz.getDeclaredConstructor(Class.class, ReflectiveEndecBuilder.class, boolean.class);
 
             if (constructor.trySetAccessible()) {
-                var newWrapper = constructor.newInstance(this.instance.getClass(), Pair.of(this.jankson, this.builder), false);
+                var newWrapper = constructor.newInstance(this.instance.getClass(), this.builder, false);
 
-                if (newWrapper.load(jsonObject, false)) {
+                if (newWrapper.load(data, false)) {
                     newWrapper.serverConfig = true;
-                    newWrapper.memoryData = jsonObject;
+                    newWrapper.memoryData = data;
 
                     return newWrapper;
                 } else {

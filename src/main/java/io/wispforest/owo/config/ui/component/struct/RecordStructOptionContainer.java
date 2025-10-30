@@ -72,8 +72,6 @@ public class RecordStructOptionContainer<T extends Record> extends AbstractStruc
 
         //--
 
-        //this.sideBySideFormat(fields.size() >= 2);
-
         var defaultValue = ReflectionUtils.tryInstantiateWithNoArgs(clazz);
 
         this.sideBySideFormating(sideBySideFormat && fields.size() > 1);
@@ -111,7 +109,6 @@ public class RecordStructOptionContainer<T extends Record> extends AbstractStruc
     }
 
     public Object parsedValue() {
-        var objects = this.optionsProviders.values().stream().map(OptionValueProvider::parsedValue).toArray();
-        return this.canonicalConstructor.apply(objects);
+        return this.canonicalConstructor.apply(this.optionsProviders.values().stream().map(OptionValueProvider::parsedValue).toArray());
     }
 }

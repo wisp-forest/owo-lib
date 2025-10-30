@@ -58,8 +58,9 @@ public record Key(String[] path) {
      * without any of its parents
      */
     public String name() {
-        if (this.path.length < 1) return "";
-        return this.path[this.path.length - 1];
+        return (this.path.length > 0)
+            ? this.path[this.path.length - 1]
+            : "";
     }
 
     /**
@@ -75,10 +76,7 @@ public record Key(String[] path) {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Key key = (Key) o;
-        return Arrays.equals(path, key.path);
+        return (o instanceof Key(String[] otherPath)) && Arrays.equals(this.path, otherPath);
     }
 
     @Override

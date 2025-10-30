@@ -6,16 +6,18 @@ import io.wispforest.endec.StructEndec;
 import io.wispforest.endec.format.jankson.JanksonEndec;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.config.ConfigWrapper;
+import io.wispforest.owo.config.serialization.ConfigSerializer;
+import io.wispforest.owo.config.serialization.RawConfigData;
 import io.wispforest.owo.network.ServerAccess;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
-public record AdjustServerConfig(Identifier configId, JsonObject configData, boolean shouldRestart, boolean shouldReload) {
+public record AdjustServerConfig(Identifier configId, RawConfigData<?> configData, boolean shouldRestart, boolean shouldReload) {
 
     public static final StructEndec<AdjustServerConfig> ENDEC = StructEndecBuilder.of(
             MinecraftEndecs.IDENTIFIER.fieldOf("config_id", AdjustServerConfig::configId),
-            JanksonEndec.INSTANCE.xmap(jsonElement -> (JsonObject) jsonElement, jsonObject -> jsonObject).fieldOf("config_data", AdjustServerConfig::configData),
+            ConfigSerializer.RAW_DATA_ENDEC.fieldOf("config_data", AdjustServerConfig::configData),
             Endec.BOOLEAN.fieldOf("should_restart", AdjustServerConfig::shouldRestart),
             Endec.BOOLEAN.fieldOf("should_reload", AdjustServerConfig::shouldReload),
             AdjustServerConfig::new

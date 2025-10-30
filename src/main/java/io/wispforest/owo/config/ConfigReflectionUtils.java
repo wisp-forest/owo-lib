@@ -1,9 +1,12 @@
 package io.wispforest.owo.config;
 
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.type.CollectionType;
 import io.wispforest.owo.config.annotation.PredicateConstraint;
 import io.wispforest.owo.config.annotation.RangeConstraint;
 import io.wispforest.owo.config.annotation.RegexConstraint;
 import io.wispforest.owo.config.base.BoundedAccess;
+import io.wispforest.owo.config.base.OptionConstraint;
 import io.wispforest.owo.config.options.OptionControlSpec;
 import io.wispforest.owo.config.options.ReflectiveOption;
 import io.wispforest.owo.util.NumberReflection;
@@ -13,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.function.Predicate;
@@ -20,22 +24,27 @@ import java.util.regex.Pattern;
 
 public class ConfigReflectionUtils {
 
-    public static RangeConstraintData getConstraintData(Class<? extends Number> clazz, OptionControlSpec<?> option) {
+    public static RangeConstraintData getRangeConstraintData(Class<? extends Number> clazz, OptionControlSpec<?> option) {
         @Nullable BoundedAccess<?> possibleAccess = option instanceof ReflectiveOption<?> reflectiveOption
                 ? reflectiveOption.backingAccess()
                 : null;
 
-        return getConstraintData(clazz, possibleAccess);
+        return getRangeConstraintData(clazz, possibleAccess);
     }
 
-    public static RangeConstraintData getConstraintData(Class<? extends Number> clazz, @Nullable BoundedAccess<?> access) {
+    public static RangeConstraintData getRangeConstraintData(Class<? extends Number> clazz, ReflectiveOption<?> option) {
+        return getRangeConstraintData(clazz, option.backingAccess());
+    }
+
+    public static RangeConstraintData getRangeConstraintData(Class<? extends Number> clazz, @Nullable BoundedAccess<?> access) {
         var floatingPointType = NumberReflection.isFloatingPointType(clazz);
 
         var useSlider = false;
 
         var decimalPlaces = floatingPointType ? 2 : 0;
 
-        double min = NumberReflection.minValue(clazz).doubleValue(), max = NumberReflection.maxValue(clazz).doubleValue();
+        double min = NumberReflection.minValue(clazz).doubleValue(),
+            max = NumberReflection.maxValue(clazz).doubleValue();
 
         if (access != null && access.isAnnotationPresent(RangeConstraint.class)) {
             var constraintData = access.getAnnotation(RangeConstraint.class);
@@ -52,99 +61,110 @@ public class ConfigReflectionUtils {
     }
 
     @Nullable
-    public static <T> ConfigWrapper.Constraint getConstraint(BoundedAccess<T> boundField) throws IllegalAccessException, NoSuchMethodException {
-        var fieldType = boundField.type();
+    public static <T> OptionConstraint<T> getConstraint(BoundedAccess<T> access) throws IllegalAccessException, NoSuchMethodException {
+        var fieldType = access.type();
 
-        ConfigWrapper.Constraint constraint = null;
+        OptionConstraint<T> constraint = null;
 
-        if (boundField.isAnnotationPresent(RangeConstraint.class)) {
-            var annotation = boundField.getAnnotation(RangeConstraint.class);
+        if (access.isAnnotationPresent(RangeConstraint.class)) {
+            var annotation = access.getAnnotation(RangeConstraint.class);
 
-            if (NumberReflection.isNumberType(fieldType)) {
-                Predicate<?> predicate;
-                if (fieldType == long.class || fieldType == Long.class) {
-                    predicate = o -> o != null && (Long) o >= annotation.min() && (Long) o <= annotation.max();
-                } else {
-                    predicate = o -> o != null && ((Number) o).doubleValue() >= annotation.min() && ((Number) o).doubleValue() <= annotation.max();
-                }
-
-                constraint = new ConfigWrapper.Constraint(
-                    "Range from " + annotation.min() + " to " + annotation.max(),
-                    predicate,
-                    predicate
-                );
-            } else {
+            if (!NumberReflection.isNumberType(fieldType)) {
                 throw new IllegalStateException("@RangeConstraint can only be applied to numeric fields");
             }
-        }
 
-        if (boundField.isAnnotationPresent(RegexConstraint.class)) {
-            var annotation = boundField.getAnnotation(RegexConstraint.class);
+            Double min = annotation.min(), max = annotation.max();
 
-            if (CharSequence.class.isAssignableFrom(fieldType)) {
-                var applyStr = annotation.applyValue();
-                var applyPattern = Pattern.compile(applyStr);
-                Predicate applyPrediacate = o -> o != null && applyPattern.matcher((CharSequence) o).matches();
+            Predicate predicate = (fieldType == long.class || fieldType == Long.class)
+                ? o -> o != null && (Long) o >= min && (Long) o <= max
+                : o -> o != null && ((Number) o).doubleValue() >= min && ((Number) o).doubleValue() <= max;
 
-                var inputStr = annotation.inputValue();
-                Predicate inputPredicate;
+            constraint = new OptionConstraint<>("Range from " + min + " to " + max, predicate);
+        } else if (access.isAnnotationPresent(RegexConstraint.class)) {
+            var annotation = access.getAnnotation(RegexConstraint.class);
 
-                var format = "Regex [Apply: " + applyStr;
-
-                if (!inputStr.isEmpty()) {
-                    var inputPattern = Pattern.compile(inputStr);
-
-                    format += ", Input: " + inputStr;
-
-                    inputPredicate = o -> o != null && inputPattern.matcher((CharSequence) o).matches();
-                } else {
-                    inputPredicate = s -> true;
-                }
-
-                format += "]";
-
-                constraint = new ConfigWrapper.Constraint(format, inputPredicate, applyPrediacate);
-            } else {
+            if (!CharSequence.class.isAssignableFrom(fieldType)) {
                 throw new IllegalStateException("@RegexConstraint can only be applied to fields with a string representation");
             }
-        }
 
-        if (boundField.isAnnotationPresent(PredicateConstraint.class)) {
-            var annotation = boundField.getAnnotation(PredicateConstraint.class);
+            var applyStr = annotation.applyValue();
+            var applyPattern = Pattern.compile(applyStr);
+            Predicate applyPrediacate = o -> o != null && applyPattern.matcher((CharSequence) o).matches();
+
+            var inputStr = annotation.inputValue();
+            Predicate<String> inputPredicate;
+
+            var format = "Regex [Apply: " + applyStr;
+
+            if (!inputStr.isEmpty()) {
+                var inputPattern = Pattern.compile(inputStr);
+
+                format += ", Input: " + inputStr;
+
+                inputPredicate = o -> o != null && inputPattern.matcher(o).matches();
+            } else {
+                inputPredicate = o -> true;
+            }
+
+            format += "]";
+
+            constraint = new OptionConstraint<>(format, applyPrediacate, inputPredicate);
+        } else if (access.isAnnotationPresent(PredicateConstraint.class)) {
+            var annotation = access.getAnnotation(PredicateConstraint.class);
 
             var applyMethodName = annotation.applyMethodName();
-            Predicate applyPrediacate = getPredicate(boundField.owner().getClass(), applyMethodName, fieldType);
+            Predicate applyPrediacate = getPredicate(access.owner().getClass(), applyMethodName, fieldType);
 
             var inputMethodName = annotation.inputMethodName();
-            Predicate inputPredicate;
+            Predicate<String> inputPredicate;
 
             var format = "Predicate method [Apply: " + applyMethodName;
 
             if (!inputMethodName.isEmpty()) {
                 format += ", Input: " + inputMethodName;
 
-                inputPredicate = getPredicate(boundField.owner().getClass(), inputMethodName, fieldType);
+                inputPredicate = getPredicate(access.owner().getClass(), inputMethodName, String.class);
             } else {
                 inputPredicate = s -> true;
             }
 
             format += "]";
 
-            constraint = new ConfigWrapper.Constraint(format, inputPredicate, applyPrediacate);
+            constraint = new OptionConstraint<>(format, applyPrediacate, inputPredicate);
         }
 
         return constraint;
     }
 
-    private static Predicate getPredicate(Class<?> ownerClass, String methodName, Class<?> fieldType) throws IllegalAccessException, NoSuchMethodException {
-        var method = ownerClass.getMethod(methodName, fieldType);
+    private static <T> Predicate<T> getPredicate(Class<?> ownerClass, String methodName, Class<T> fieldType) throws IllegalAccessException, NoSuchMethodException {
+        Method method = null;
 
-        if (method.getReturnType() != boolean.class) {
-            throw new NoSuchMethodException("Return type of predicate implementation '" + methodName + "' must be 'boolean'");
+        for (var possbileMethod : ownerClass.getDeclaredMethods()) {
+            if (!possbileMethod.getName().equals(methodName)) continue;
+
+            if (possbileMethod.getReturnType() != boolean.class) {
+                throw new NoSuchMethodException("Return type of predicate implementation '" + methodName + "' must be 'boolean'");
+            } else if (!Modifier.isStatic(possbileMethod.getModifiers())) {
+                throw new IllegalStateException("Predicate implementation '" + methodName + "' must be static");
+            } else if (!Modifier.isPublic(possbileMethod.getModifiers())) {
+                throw new IllegalStateException("Predicate implementation '" + methodName + "' must be public");
+            } else if (possbileMethod.getParameterCount() != 1) {
+                throw new IllegalStateException("Predicate implementation '" + methodName + "' must have a single parameter");
+            }
+
+            var arg = possbileMethod.getParameterTypes()[0];
+
+            if (!fieldType.isAssignableFrom(arg)) {
+                throw new IllegalStateException("Predicate implementation '" + methodName + "' parameter must have the given type '" + fieldType.getSimpleName() + "'");
+            }
+
+            method = possbileMethod;
+
+            break;
         }
 
-        if (!Modifier.isStatic(method.getModifiers())) {
-            throw new IllegalStateException("Predicate implementation '" + methodName + "' must be static");
+        if (method == null) {
+            throw new IllegalStateException("Predicate implementation with the method name '" + methodName + "' dose not exist within '" + ownerClass.getSimpleName() + "'");
         }
 
         var handle = MethodHandles.publicLookup().unreflect(method);
@@ -194,9 +214,10 @@ public class ConfigReflectionUtils {
     @Nullable
     public static CollectionType getCollectionType(Type type) {
         var collectionType = ReflectionUtils.getTypeArgument(type, 0);
-        if (collectionType == null) return null;
 
-        if (collectionType == Identifier.class || collectionType == String.class || NumberReflection.isNumberType(collectionType)) {
+        if (collectionType == null) {
+            return null;
+        } else if (collectionType == Identifier.class || collectionType == String.class || NumberReflection.isNumberType(collectionType)) {
             return CollectionType.SIMPLE;
         } else if (ReflectionUtils.getTypeArgument(collectionType, 0) == null) {
             return CollectionType.COMPLEX;

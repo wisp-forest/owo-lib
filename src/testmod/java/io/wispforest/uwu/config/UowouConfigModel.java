@@ -7,7 +7,7 @@ import net.minecraft.util.Identifier;
 
 import java.util.Set;
 
-@Modmenu(modId = "fabric-api")
+@Modmenu()
 @Config(modId = "fabric-api", name = "uowou", wrapperName = "BruhConfig")
 @Sync(SyncMode.OVERRIDE_CLIENT)
 public class UowouConfigModel {

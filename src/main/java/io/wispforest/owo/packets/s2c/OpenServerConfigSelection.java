@@ -5,6 +5,8 @@ import io.wispforest.endec.Endec;
 import io.wispforest.endec.StructEndec;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.Owo;
+import io.wispforest.owo.config.serialization.ConfigSerializer;
+import io.wispforest.owo.config.serialization.RawConfigData;
 import io.wispforest.owo.config.ui.ConfigScreenProviders;
 import io.wispforest.owo.network.ClientAccess;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
@@ -14,11 +16,11 @@ import net.minecraft.util.Identifier;
 
 import java.util.Map;
 
-public record OpenServerConfigSelection(String modId, Map<Identifier, JsonObject> modConfigData) {
+public record OpenServerConfigSelection(String modId, Map<Identifier, RawConfigData<?>> modConfigData) {
 
     public static final StructEndec<OpenServerConfigSelection> ENDEC = StructEndecBuilder.of(
             Endec.STRING.fieldOf("modId", OpenServerConfigSelection::modId),
-            Endec.map(Identifier::toString, Identifier::tryParse, MinecraftEndecs.JANK_JSON_OBJECT).fieldOf("modConfigData", OpenServerConfigSelection::modConfigData),
+            Endec.map(Identifier::toString, Identifier::tryParse, ConfigSerializer.RAW_DATA_ENDEC).fieldOf("modConfigData", OpenServerConfigSelection::modConfigData),
             OpenServerConfigSelection::new
     );
 

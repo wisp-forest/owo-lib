@@ -1,13 +1,9 @@
 package io.wispforest.owo.config.ui.component.struct;
 
 import io.wispforest.owo.Owo;
-import io.wispforest.owo.config.ConfigReflectionUtils;
-import io.wispforest.owo.config.annotation.Expanded;
-import io.wispforest.owo.config.options.FieldOption;
 import io.wispforest.owo.config.options.ReflectiveOption;
 import io.wispforest.owo.config.base.Key;
 import io.wispforest.owo.config.options.OptionControlSpec;
-import io.wispforest.owo.config.ui.OptionComponentFactory;
 import io.wispforest.owo.config.ui.component.*;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
@@ -17,6 +13,9 @@ import io.wispforest.owo.util.NumberReflection;
 import io.wispforest.owo.util.ReflectionUtils;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
+
+import static io.wispforest.owo.config.ui.OptionComponentFactory.*;
+import static io.wispforest.owo.config.ConfigReflectionUtils.*;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -49,9 +48,7 @@ public abstract class AbstractStructOptionContainer<O extends ReflectiveOption> 
     protected final OptionValueProvider getProvider(Key key) {
         var option = this.options.get(key);
 
-        if (option != null) return optionsProviders.get(option);
-
-        return null;
+        return (option != null) ? optionsProviders.get(option) : null;
     }
 
     public AbstractStructOptionContainer<O> sideBySideFormating(boolean value) {
@@ -79,38 +76,34 @@ public abstract class AbstractStructOptionContainer<O extends ReflectiveOption> 
     protected final void addOptionComponent(O option) {
         var optionClazz = (Class<?>) option.clazz();
 
-        OptionComponentFactory.Result<? extends Component, ? extends OptionValueProvider> result = null;
+        Result<?, ?> result = null;
 
         // TODO: DEHARDCODE?
         if (NumberReflection.isNumberType(option.clazz())) {
-            result = adjustOptionLabel(OptionComponentFactory.NUMBER.make(model, option), sideBySideFormat, true);
+            result = adjustOptionLabel(NUMBER.make(model, option), sideBySideFormat, true);
         } else if (optionClazz == String.class) {
-            result = adjustOptionLabel(OptionComponentFactory.STRING.make(model, option), sideBySideFormat, true);
+            result = adjustOptionLabel(STRING.make(model, option), sideBySideFormat, true);
         } else if (optionClazz == Boolean.class || optionClazz == boolean.class){
-            result = adjustOptionLabel(OptionComponentFactory.BOOLEAN.make(model, option), sideBySideFormat, true);
+            result = adjustOptionLabel(BOOLEAN.make(model, option), sideBySideFormat, true);
         } else if (optionClazz == Identifier.class) {
-            result = adjustOptionLabel(OptionComponentFactory.IDENTIFIER.make(model, option), sideBySideFormat, true);
+            result = adjustOptionLabel(IDENTIFIER.make(model, option), sideBySideFormat, true);
         } else if (optionClazz == Color.class) {
-            result = adjustOptionLabel(OptionComponentFactory.COLOR.make(model, option), sideBySideFormat, true);
+            result = adjustOptionLabel(COLOR.make(model, option), sideBySideFormat, true);
         }  else if (optionClazz.isEnum()) {
-            result = adjustOptionLabel(OptionComponentFactory.ENUM.make(model, option), sideBySideFormat, true);
+            result = adjustOptionLabel(ENUM.make(model, option), sideBySideFormat, true);
         } else if (optionClazz == List.class) {
-            result = adjustOptionLabel(OptionComponentFactory.LIST.make(model, option), true, false);
+            result = adjustOptionLabel(LIST.make(model, option), true, false);
         } else if (optionClazz == Set.class) {
-            result = adjustOptionLabel(OptionComponentFactory.SET.make(model, option), true, false);
-        } else if (option.clazz() == Map.class) {
-            if (ConfigReflectionUtils.getMapType(option.getGenericType()) == ConfigReflectionUtils.CollectionType.SIMPLE) {
-                result = adjustOptionLabel(OptionComponentFactory.SIMPLE_MAP.make(model, option), true, false);
-            }
+            result = adjustOptionLabel(SET.make(model, option), true, false);
+        } else if (option.clazz() == Map.class && getMapType(option.getGenericType()) == CollectionType.SIMPLE) {
+            result = adjustOptionLabel(SIMPLE_MAP.make(model, option), true, false);
         } else if (optionClazz.isRecord()) {
-            var layout = RecordStructOptionContainer.of(model, option);
-            result = new OptionComponentFactory.Result<>(layout, layout);
+            result = Result.of(RecordStructOptionContainer.of(model, option));
         } else if (option.clazz() != Map.class) {
             try {
                 ReflectionUtils.getNoArgsConstructor(option.clazz());
 
-                var layout = StructOptionContainer.of(model, option);
-                result = new OptionComponentFactory.Result<>(layout, layout);
+                result = Result.of(StructOptionContainer.of(model, option));
             } catch (IllegalStateException ignored) {}
         }
 
@@ -135,10 +128,7 @@ public abstract class AbstractStructOptionContainer<O extends ReflectiveOption> 
         }).toList();
     }
 
-    private static OptionComponentFactory.Result<? extends Component, ? extends OptionValueProvider> adjustOptionLabel(
-        OptionComponentFactory.Result<? extends Component, ? extends OptionValueProvider> labeledResult,
-        boolean sideBySideFormat,
-        boolean adjustParentPadding) {
+    private static Result<?, ?> adjustOptionLabel(Result<?,?> labeledResult, boolean sideBySideFormat, boolean adjustParentPadding) {
         var optionComponent = labeledResult.baseComponent();
 
         if (sideBySideFormat) optionComponent.horizontalSizing(Sizing.fill(50));

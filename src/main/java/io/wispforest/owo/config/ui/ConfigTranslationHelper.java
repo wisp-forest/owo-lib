@@ -58,9 +58,7 @@ public class ConfigTranslationHelper  {
     public static Identifier getConfigId() {
         var activeStorage = storages.peek();
 
-        if (activeStorage == null) return null;
-
-        return activeStorage.configId;
+        return (activeStorage != null) ? activeStorage.configId : null;
     }
 
     public static Identifier getConfigIdOrThrow() {
@@ -79,13 +77,14 @@ public class ConfigTranslationHelper  {
 
     public static String createSectionTranslation(Key parentKey, String section, boolean isTooltip) {
         var translation = createTranslation(getConfigIdOrThrow(), "section." + section, isTooltip);
+        var storage = peekStorage();
 
-        peekStorage().parentKeyToSection.computeIfAbsent(parentKey, key -> new LinkedHashSet<>(List.of(BASE_SECTION))).addLast(section);
+        storage.parentKeyToSection.computeIfAbsent(parentKey, key -> new LinkedHashSet<>(List.of(BASE_SECTION))).addLast(section);
 
         if (!parentKey.isRoot()) {
             var parentParentKey = parentKey.parent();
 
-            peekStorage().sectionToOptionKeys.computeIfAbsent(parentParentKey, key -> new LinkedHashMap<>())
+            storage.sectionToOptionKeys.computeIfAbsent(parentParentKey, key -> new LinkedHashMap<>())
                 .computeIfAbsent(getTrackingSectionValue(parentParentKey), s -> new LinkedHashSet<>())
                 .add(parentKey);
         }

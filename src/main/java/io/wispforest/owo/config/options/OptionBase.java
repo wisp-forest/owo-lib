@@ -1,7 +1,7 @@
 package io.wispforest.owo.config.options;
 
 import io.wispforest.owo.Owo;
-import io.wispforest.owo.config.ConfigWrapper;
+import io.wispforest.owo.config.base.OptionConstraint;
 import io.wispforest.owo.config.base.Key;
 import io.wispforest.owo.config.ui.ConfigTranslationHelper;
 import net.minecraft.util.Identifier;
@@ -24,7 +24,7 @@ public sealed abstract class OptionBase<T> implements OptionControlSpec<T> permi
     private final Class<T> clazz;
     private final Type genericType;
 
-    private final ConfigWrapper.@Nullable Constraint constraint;
+    private final @Nullable OptionConstraint<T> constraint;
 
     /**
      * @param configId   The name of the config this option is contained in
@@ -41,7 +41,7 @@ public sealed abstract class OptionBase<T> implements OptionControlSpec<T> permi
                              T defaultValue,
                              Class<T> clazz,
                              Type genericType,
-                             @Nullable ConfigWrapper.Constraint constraint
+                             @Nullable OptionConstraint<T> constraint
     ) {
         this.configId = configId;
         this.key = key;
@@ -79,7 +79,7 @@ public sealed abstract class OptionBase<T> implements OptionControlSpec<T> permi
     public boolean verifyConstraint(T value) {
         if (this.constraint == null) return true;
 
-        final var matched = this.constraint.testApply(value);
+        final var matched = this.constraint.applyPredicate().test(value);
         if (!matched) {
             Owo.LOGGER.warn(
                     "Option {} in config '{}' could not be updated, as the given value '{}' does not match its constraint: {}",
@@ -111,7 +111,7 @@ public sealed abstract class OptionBase<T> implements OptionControlSpec<T> permi
     }
 
     @Override
-    public @Nullable ConfigWrapper.Constraint constraint() {
+    public @Nullable OptionConstraint<T> constraint() {
         return this.constraint;
     }
 

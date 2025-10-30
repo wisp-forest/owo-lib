@@ -5,11 +5,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * Applied to a field to indicate
- * that changes made to its value will only
- * apply after a reload of the server
- */
+///
+/// Applied to a field to indicate
+/// that changes made to its value will only
+/// apply after a reload of the server
+///
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface ReloadRequired {}

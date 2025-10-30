@@ -1,9 +1,9 @@
 package io.wispforest.owo.config.ui;
 
-import blue.endless.jankson.JsonObject;
 import com.terraformersmc.modmenu.gui.ModsScreen;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.ConfigWrapper;
+import io.wispforest.owo.config.serialization.RawConfigData;
 import io.wispforest.owo.packets.OwoPackets;
 import io.wispforest.owo.packets.c2s.AdjustServerConfig;
 import io.wispforest.owo.ui.util.UIErrorToast;
@@ -132,11 +132,11 @@ public class ConfigScreenProviders {
         return result;
     }
 
-    public static boolean safelyOpenConfigScreen(String modid, @Nullable Screen parent, Map<Identifier, JsonObject> configData) {
+    public static boolean safelyOpenConfigScreen(String modid, @Nullable Screen parent, Map<Identifier, RawConfigData<?>> configData) {
         return safelyOpenConfigScreen(getPrimaryModProvider(modid), parent, configData);
     }
 
-    public static boolean safelyOpenConfigScreen(Identifier configId, @Nullable Screen parent, Map<Identifier, JsonObject> configData) {
+    public static boolean safelyOpenConfigScreen(Identifier configId, @Nullable Screen parent, Map<Identifier, RawConfigData<?>> configData) {
         var screen = safelyCreateConfigScreen(configId, parent, configData);
 
         if (screen == null) return false;
@@ -150,7 +150,7 @@ public class ConfigScreenProviders {
     }
 
     @Nullable
-    public static Screen safelyCreateConfigScreen(Identifier configId, @Nullable Screen parent, Map<Identifier, JsonObject> configData) {
+    public static Screen safelyCreateConfigScreen(Identifier configId, @Nullable Screen parent, Map<Identifier, RawConfigData<?>> configData) {
         try {
             var data = configData != null && MinecraftClient.getInstance().getServer() == null
                     ? configData.get(configId)
@@ -168,7 +168,7 @@ public class ConfigScreenProviders {
                 configScreen.addRemovedHook((config, shouldRestart, shouldReload) -> {
                     if (!config.isServerConfig()) return;
 
-                    OwoPackets.MAIN.clientHandle().send(new AdjustServerConfig(config.id(), config.saveToObject(), shouldRestart, shouldReload));
+                    OwoPackets.MAIN.clientHandle().send(new AdjustServerConfig(config.id(), config.saveToRawData(), shouldRestart, shouldReload));
                 });
 
                 configScreen.setServerConfigData(configData);
@@ -176,7 +176,7 @@ public class ConfigScreenProviders {
                 ScreenEvents.remove(screen).register(screen1 -> {
                     if (!wrapper.isServerConfig()) return;
 
-                    OwoPackets.MAIN.clientHandle().send(new AdjustServerConfig(wrapper.id(), wrapper.saveToObject(), false, false));
+                    OwoPackets.MAIN.clientHandle().send(new AdjustServerConfig(wrapper.id(), wrapper.saveToRawData(), false, false));
                 });
             }
 
