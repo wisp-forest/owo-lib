@@ -1,9 +1,7 @@
 package io.wispforest.uwu.client.braid;
 
 import com.mojang.authlib.GameProfile;
-import io.wispforest.owo.braid.animation.AlignmentLerp;
-import io.wispforest.owo.braid.animation.Animation;
-import io.wispforest.owo.braid.animation.Easing;
+import io.wispforest.owo.braid.animation.*;
 import io.wispforest.owo.braid.core.*;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.framework.BuildContext;
@@ -12,10 +10,7 @@ import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.util.BraidToast;
-import io.wispforest.owo.braid.widgets.Dialog;
-import io.wispforest.owo.braid.widgets.Marquee;
-import io.wispforest.owo.braid.widgets.Navigator;
-import io.wispforest.owo.braid.widgets.SpriteWidget;
+import io.wispforest.owo.braid.widgets.*;
 import io.wispforest.owo.braid.widgets.animated.AnimatedAlign;
 import io.wispforest.owo.braid.widgets.animated.AnimatedBox;
 import io.wispforest.owo.braid.widgets.animated.AnimatedPadding;
@@ -136,7 +131,8 @@ public class TestSelector extends StatefulWidget {
         OVERLAY,
         TEXT,
         SPINNY_GHAST,
-        OPTIMIZATION
+        OPTIMIZATION,
+        AUTOMATIC_ANIMATION
     }
 
     @Override
@@ -231,6 +227,7 @@ public class TestSelector extends StatefulWidget {
                                     case TEXT -> new TextTest();
                                     case SPINNY_GHAST -> new SpinnyGhastTest();
                                     case OPTIMIZATION -> new OptimizationTest(this.chyz);
+                                    case AUTOMATIC_ANIMATION -> new AutomaticAnimationTest();
                                     case null -> new Center(new Label(Text.literal("select a test")));
                                 }
                             )
@@ -2521,9 +2518,90 @@ public class TestSelector extends StatefulWidget {
                     LayoutAxis.VERTICAL,
                     32,
                     Grid.CellFit.loose(),
-                    Stream.generate(() -> widget).limit(32*32).toList()
+                    Stream.generate(() -> widget).limit(32 * 32).toList()
                 )
             );
+        }
+    }
+
+    public static class AutomaticAnimationTest extends StatefulWidget {
+        @Override
+        public WidgetState<AutomaticAnimationTest> createState() {
+            return new State();
+        }
+
+        public static class State extends WidgetState<AutomaticAnimationTest> {
+
+            private double x = 0;
+            private double y = 0;
+
+            @Override
+            public Widget build(BuildContext context) {
+                return new MouseArea(
+                    widget -> widget
+                        .clickCallback((toX, toY, button, mods) -> {
+                            this.setState(() -> {
+                                this.x = toX;
+                                this.y = toY;
+                            });
+
+                            return true;
+                        }).dragCallback((x, y, dx, dy) -> this.setState(() -> {
+                            this.x = x;
+                            this.y = y;
+                        })),
+                    new DragArena(
+                        new TheWidget(
+                            Duration.ofMillis(250),
+                            Easing.OUT_EXPO,
+                            this.x,
+                            this.y
+                        )
+                    )
+                );
+            }
+        }
+
+        public static class TheWidget extends AutomaticallyAnimatedWidget {
+
+            public final double x;
+            public final double y;
+
+            public TheWidget(Duration duration, Easing easing, double x, double y) {
+                super(duration, easing);
+                this.x = x;
+                this.y = y;
+            }
+
+            @Override
+            public State createState() {
+                return new State();
+            }
+
+            public static class State extends AutomaticallyAnimatedWidget.State<TheWidget> {
+
+                private DoubleLerp x;
+                private DoubleLerp y;
+
+                @Override
+                protected void updateLerps() {
+                    this.x = this.visitLerp(this.x, this.widget().x, DoubleLerp::new);
+                    this.y = this.visitLerp(this.y, this.widget().y, DoubleLerp::new);
+                }
+
+                @Override
+                public Widget build(BuildContext context) {
+                    return new DragArenaElement(
+                        this.x.compute(this.animationValue()),
+                        this.y.compute(this.animationValue()),
+                        new Align(
+                            Alignment.of(-.5, -.5),
+                            2d, 2d,
+                            new BraidLogo()
+                        )
+                    );
+                }
+            }
         }
     }
 
