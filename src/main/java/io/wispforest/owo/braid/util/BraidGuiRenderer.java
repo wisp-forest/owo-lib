@@ -30,6 +30,9 @@ public class BraidGuiRenderer extends GuiRenderer {
     }
 
     public DrawContext newDrawContext() {
+        ((GuiRendererAccessor) this).owo$setFabricInitialized(true);
+        ((GuiRendererAccessor) this).owo$setRenderCommandQueue(this.client.gameRenderer.getEntityRenderCommandQueue());
+
         return new DrawContext(
             this.client,
             ((GuiRendererAccessor) this).owo$getState()
