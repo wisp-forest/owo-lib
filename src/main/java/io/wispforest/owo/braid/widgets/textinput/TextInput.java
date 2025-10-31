@@ -9,8 +9,6 @@ import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;

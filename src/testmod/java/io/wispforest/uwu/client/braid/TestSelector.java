@@ -285,7 +285,7 @@ public class TestSelector extends StatefulWidget {
                     Alignment.BOTTOM_RIGHT,
                     new Row(
                         MainAxisAlignment.START,
-                        CrossAxisAlignment.CENTER,
+                        CrossAxisAlignment.END,
                         new Padding(
                             Insets.all(5),
                             new SurfaceDimensions()
@@ -2550,14 +2550,20 @@ public class TestSelector extends StatefulWidget {
                             this.x = x;
                             this.y = y;
                         })),
-                    new DragArena(
-                        new TheWidget(
-                            Duration.ofMillis(250),
-                            Easing.OUT_EXPO,
-                            this.x,
-                            this.y
-                        )
-                    )
+                    new LayoutBuilder((context1, constraints) -> {
+                        System.out.println("layout rebuild");
+                        return new Constrain(
+                            Constraints.of(constraints.maxWidth(), constraints.maxHeight(), constraints.maxWidth(), constraints.maxHeight()),
+                            new DragArena(
+                                new TheWidget(
+                                    Duration.ofMillis(250),
+                                    Easing.OUT_EXPO,
+                                    this.x,
+                                    this.y
+                                )
+                            )
+                        );
+                    })
                 );
             }
         }

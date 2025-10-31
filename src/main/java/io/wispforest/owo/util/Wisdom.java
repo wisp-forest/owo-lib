@@ -63,7 +63,8 @@ public final class Wisdom {
             "Owo.currentServer()",
             //Here's the 4 dots that were previously used in nested lang formatting:
             "....",
-            "Weakeys"
+            "Weakeys",
+            "glisco: It is only sometimes a hazard, so I would say it is a casino"
     );
 
     public static void spread() {
