@@ -21,6 +21,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.joml.*;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -109,9 +111,9 @@ public class InstanceDetails extends StatefulWidget {
 
             var properties = new ArrayList<>(List.<Text>of(
                     Text.literal("Rel. Position").formatted(Formatting.BOLD),
-                    Text.literal(instance.transform.x() + ", " + instance.transform.y()),
+                    Text.literal(rounded(instance.transform.x()) + ", " + rounded(instance.transform.y())),
                     Text.literal("Abs. Position").formatted(Formatting.BOLD),
-                    Text.literal(absPos.x() + ", " + absPos.y()),
+                    Text.literal(rounded(absPos.x()) + ", " + rounded(absPos.y())),
                     Text.literal("Width").formatted(Formatting.BOLD),
                     Text.literal(instance.transform.width() + "px"),
                     Text.literal("Height").formatted(Formatting.BOLD),
@@ -149,6 +151,10 @@ public class InstanceDetails extends StatefulWidget {
             }
 
             return result;
+        }
+
+        private static String rounded(double value) {
+            return BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP).toPlainString();
         }
 
         // ---
