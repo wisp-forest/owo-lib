@@ -25,6 +25,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+// TODO: consider somehow getting notified or polling
+//       for changes in the gui scale option so we can react
+//       instantly when it changes rather than on next resize
 public class BraidWindow implements Surface {
 
     public final EventBinding eventBinding = new WindowEventBinding(this);

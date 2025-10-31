@@ -71,6 +71,12 @@ public class GuiRendererMixin implements BraidGuiRendererExtension {
         return (int) this.target.surface().scaleFactor();
     }
 
+    @ModifyExpressionValue(method = "getWindowScaleFactor", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/Window;getScaleFactor()I"))
+    private int injectSurfaceScaleForItemAtlas(int original) {
+        if (this.target == null) return original;
+        return (int) this.target.surface().scaleFactor();
+    }
+
     // ---
 
     @Inject(method = "render(Lnet/minecraft/client/gui/render/GuiRenderer$Draw;Lcom/mojang/blaze3d/systems/RenderPass;Lcom/mojang/blaze3d/buffers/GpuBuffer;Lcom/mojang/blaze3d/vertex/VertexFormat$IndexType;)V", at = @At(value = "HEAD"))
