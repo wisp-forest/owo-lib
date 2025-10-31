@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
+import java.util.Objects;
 
 public abstract class AutomaticallyAnimatedWidget extends StatefulWidget {
 
@@ -55,7 +56,7 @@ public abstract class AutomaticallyAnimatedWidget extends StatefulWidget {
 
             if (restartAnimation.isFalse()) {
                 this.visitLerps((previous, targetValue, factory) -> {
-                    if (previous.end != targetValue) {
+                    if (!Objects.equals(previous.end, targetValue)) {
                         restartAnimation.setTrue();
                     }
 
