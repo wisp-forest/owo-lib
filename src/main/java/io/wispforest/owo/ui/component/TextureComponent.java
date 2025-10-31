@@ -71,10 +71,10 @@ public class TextureComponent extends BaseComponent {
             this.texture,
             visibleArea.x(),
             visibleArea.y(),
-            this.u + visibleArea.x(),
-            this.v + visibleArea.y(),
             rightEdge - visibleArea.x(),
             bottomEdge - visibleArea.y(),
+            this.u + visibleArea.x(),
+            this.v + visibleArea.y(),
             rightEdge - visibleArea.x(),
             bottomEdge - visibleArea.y(),
             this.textureWidth, this.textureHeight

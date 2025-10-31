@@ -32,9 +32,6 @@ public class ReiUIAdapter<T extends ParentComponent> extends Widget {
 
         if (screenWithREI != null) {
             ScreenEvents.remove(screenWithREI).register(screen -> this.adapter.dispose());
-            ScreenEvents.afterRender(screenWithREI).register((screen, drawContext, mouseX, mouseY, tickDelta) -> {
-                this.adapter.drawTooltip(drawContext, mouseX, mouseY, tickDelta);
-            });
         }
     }
 
