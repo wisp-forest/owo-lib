@@ -136,7 +136,7 @@ public class Shortcuts extends StatefulWidget {
                         case MOUSE -> this.context();
                     };
 
-                    Actions.invoke(sourceContext, intent);
+                    return Actions.invoke(sourceContext, intent);
                 });
             });
         }

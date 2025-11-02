@@ -23,6 +23,7 @@ import io.wispforest.owo.braid.widgets.overlay.OverlayEntry;
 import io.wispforest.owo.braid.widgets.overlay.OverlayEntryBuilder;
 import io.wispforest.owo.braid.widgets.textinput.EditableText;
 import io.wispforest.owo.braid.widgets.textinput.TextEditingController;
+import io.wispforest.owo.braid.widgets.textinput.TextEditingValue;
 import io.wispforest.owo.braid.widgets.textinput.TextSelection;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -116,10 +117,10 @@ public class ComboBox<T> extends StatefulWidget {
         }
 
         private void textListener() {
-            if (Objects.equals(this.controller.text(), this.lastText)) return;
-            this.lastText = controller.text();
+            if (Objects.equals(this.controller.value().text(), this.lastText)) return;
+            this.lastText = controller.value().text();
 
-            if (this.widget().optionNames().stream().map(Text::getString).anyMatch(s -> s.equals(this.controller.text()))) {
+            if (this.widget().optionNames().stream().map(Text::getString).anyMatch(s -> s.equals(this.controller.value().text()))) {
                 return;
             }
 
@@ -127,17 +128,20 @@ public class ComboBox<T> extends StatefulWidget {
                 this.open();
             }
 
-            this.buttonsState.set(new ComboBoxButtonsState<>(
+            this.buttonsState.setValue(new ComboBoxButtonsState<>(
                 this.widget().options.stream()
-                    .filter(option -> this.widget().nameOption(option).getString().startsWith(this.controller.text()))
+                    .filter(option -> this.widget().nameOption(option).getString().startsWith(this.controller.value().text()))
                     .toList(),
                 OptionalInt.empty()
             ));
         }
 
         private void resetTextInput() {
-            this.controller.setText(this.widget().nameOption(this.widget().selectedOption).getString());
-            this.controller.setSelection(TextSelection.collapsed(this.controller.text().length()));
+            var text = this.widget().nameOption(this.widget().selectedOption).getString();
+            this.controller.setValue(new TextEditingValue(
+                text,
+                TextSelection.collapsed(text.length())
+            ));
         }
 
         private void select(T option) {
@@ -152,7 +156,7 @@ public class ComboBox<T> extends StatefulWidget {
         private void trySelectHighlightedValue() {
             if (this.buttonsState == null) return;
 
-            var state = this.buttonsState.get();
+            var state = this.buttonsState.value();
             if (state.highlightedOptionIdx().isEmpty() && state.options().isEmpty()) {
                 return;
             }
@@ -166,12 +170,12 @@ public class ComboBox<T> extends StatefulWidget {
 
         private void cycle(int offset) {
             if (this.isOpen()) {
-                var state = this.buttonsState.get();
+                var state = this.buttonsState.value();
 
                 var currentOptionIdx = state.highlightedOptionIdx().orElse(offset > 0 ? -1 : 0);
                 var nextOptionIdx = Math.floorMod(currentOptionIdx + offset, state.options().size());
 
-                this.buttonsState.set(new ComboBoxButtonsState<>(
+                this.buttonsState.setValue(new ComboBoxButtonsState<>(
                     state.options(),
                     OptionalInt.of(nextOptionIdx)
                 ));
@@ -252,8 +256,7 @@ public class ComboBox<T> extends StatefulWidget {
                                     this.controller,
                                     widget -> widget
                                         .textShadow(true)
-                                        .softWrap(false)
-                                        .maxLines(1)
+                                        .singleLine()
                                 )
                             ),
                             new Padding(

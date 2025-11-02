@@ -8,11 +8,11 @@ public class ListenableValue<V> extends Listenable {
         this.value = value;
     }
 
-    public V get() {
+    public V value() {
         return this.value;
     }
 
-    public void set(V value) {
+    public void setValue(V value) {
         this.value = value;
         this.notifyListeners();
     }
