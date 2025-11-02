@@ -130,7 +130,7 @@ public class ShortcutDecoder extends StatefulWidget {
         return this.addShortcut(List.of(trigger), action);
     }
 
-    public Map<List<ShortcutTrigger>, Listener> actions() {
+    public Map<List<ShortcutTrigger>, Listener> shortcuts() {
         return this.shortcuts;
     }
 
@@ -141,13 +141,13 @@ public class ShortcutDecoder extends StatefulWidget {
 
     @FunctionalInterface
     public interface Listener {
-        void trigger(TriggerType type);
+        boolean trigger(TriggerType type);
     }
 
     public static class State extends WidgetState<ShortcutDecoder> {
-        private List<ActionSequence> sequences = new ArrayList<>();
+        private List<ShortcutSequence> sequences = new ArrayList<>();
 
-        private final List<ActionSequence> queuedSequences = new ArrayList<>();
+        private final List<ShortcutSequence> queuedSequences = new ArrayList<>();
         @Nullable private Long callbackId;
 
         @Override
@@ -161,7 +161,7 @@ public class ShortcutDecoder extends StatefulWidget {
         }
 
         private void buildSequences() {
-            this.sequences = widget().shortcuts.entrySet().stream().map(emongus -> new ActionSequence(emongus.getKey(), emongus.getValue())).toList();
+            this.sequences = widget().shortcuts.entrySet().stream().map(emongus -> new ShortcutSequence(emongus.getKey(), emongus.getValue())).toList();
         }
 
         @Override
@@ -171,25 +171,25 @@ public class ShortcutDecoder extends StatefulWidget {
                     .enterCallback(this.widget().enterCallback())
                     .exitCallback(this.widget().exitCallback())
                     .cursorStyleSupplier(this.widget().cursorStyleSupplier())
-                    .clickCallback((x, y, button, modifiers) -> stepActions(trigger -> trigger.isTriggeredByMouseButton(button, modifiers)
-                        ? ActionTriggerResult.ACTIVATED
-                        : ActionTriggerResult.NOT_ACTIVATED, TriggerType.MOUSE)),
+                    .clickCallback((x, y, button, modifiers) -> stepShortcuts(trigger -> trigger.isTriggeredByMouseButton(button, modifiers)
+                        ? ShortcutTriggerResult.ACTIVATED
+                        : ShortcutTriggerResult.NOT_ACTIVATED, TriggerType.MOUSE)),
                 new Focusable(
                     widget -> widget
                         .focusGainedCallback(this.widget().focusGainedCallback())
                         .focusLostCallback(this.widget().focusLostCallback())
                         .skipTraversal(this.widget().skipTraversal())
                         .autoFocus(this.widget().autoFocus())
-                        .keyDownCallback((keyCode, modifiers) -> stepActions(trigger -> {
-                            if (trigger.isTriggeredByKeyCode(keyCode, modifiers)) return ActionTriggerResult.ACTIVATED;
-                            return KeyModifiers.isModifier(keyCode) ? ActionTriggerResult.IGNORED : ActionTriggerResult.NOT_ACTIVATED;
+                        .keyDownCallback((keyCode, modifiers) -> stepShortcuts(trigger -> {
+                            if (trigger.isTriggeredByKeyCode(keyCode, modifiers)) return ShortcutTriggerResult.ACTIVATED;
+                            return KeyModifiers.isModifier(keyCode) ? ShortcutTriggerResult.IGNORED : ShortcutTriggerResult.NOT_ACTIVATED;
                         }, TriggerType.KEY)),
                     this.widget().child
                 )
             );
         }
 
-        private boolean stepActions(Function<ShortcutTrigger, ActionTriggerResult> test, TriggerType trigger) {
+        private boolean stepShortcuts(Function<ShortcutTrigger, ShortcutTriggerResult> test, TriggerType trigger) {
             // in case we currently have a dispatch queued, we
             // must cancel it *now* to avoid prematurely triggering
             // a dispatch before the user is done entering triggers
@@ -212,7 +212,7 @@ public class ShortcutDecoder extends StatefulWidget {
             //     will not step
             var steppedSequences = sequences.stream()
                 .map(sequence -> new Pair<>(sequence, sequence.step(test)))
-                .filter(pair -> pair.getRight() != ActionSequenceStep.IGNORE)
+                .filter(pair -> pair.getRight() != ShortcutSequenceStep.IGNORE)
                 .toList();
 
             // next, get the sequence to treat as completed on this iteration - if any
@@ -222,8 +222,8 @@ public class ShortcutDecoder extends StatefulWidget {
             //   a non-singular sequence (user intent) and immediately complete a
             //   singular one (this would be an artifact)
             var completed = BraidUtils.fold(
-                Iterables.filter(steppedSequences, pair -> pair.getRight() == ActionSequenceStep.COMPLETE),
-                (Pair<ActionSequence, ActionSequenceStep>) null,
+                Iterables.filter(steppedSequences, pair -> pair.getRight() == ShortcutSequenceStep.COMPLETE),
+                (Pair<ShortcutSequence, ShortcutSequenceStep>) null,
                 (acc, element) -> {
                     if (acc == null) return element;
                     if (!element.getLeft().isSingular && acc.getLeft().isSingular) return element;
@@ -235,9 +235,8 @@ public class ShortcutDecoder extends StatefulWidget {
             // if we have successfully resolved all ambiguity, that is,
             // every remaining (non-poisoned) sequence stepped to completion,
             // dispatch immediately
-            if (steppedSequences.stream().allMatch(pair -> pair.getRight() == ActionSequenceStep.COMPLETE) && completed != null) {
-                this.dispatch(completed.getLeft(), completed.getLeft().isSingular, trigger);
-                return true;
+            if (steppedSequences.stream().allMatch(pair -> pair.getRight() == ShortcutSequenceStep.COMPLETE) && completed != null) {
+                return this.dispatch(completed.getLeft(), completed.getLeft().isSingular, trigger);
             } else {
                 // otherwise, queue up the completed sequence (if any)
                 // and queue dispatch after the maximum possible input delay
@@ -254,28 +253,36 @@ public class ShortcutDecoder extends StatefulWidget {
                     completed.getLeft().nextTriggerIndex = 0;
                 }
 
-                callbackId = this.scheduleDelayedCallback(MAX_INPUT_DELAY, () -> this.dispatch(null, true, trigger));
+                this.callbackId = this.scheduleDelayedCallback(MAX_INPUT_DELAY, () -> this.dispatch(null, true, trigger));
 
                 return !steppedSequences.isEmpty();
             }
 
         }
 
-        private void dispatch(@Nullable ActionSequence completedSequence, boolean runQueued, TriggerType trigger) {
+        private boolean dispatch(@Nullable ShortcutDecoder.State.ShortcutSequence completedSequence, boolean runQueued, TriggerType trigger) {
             if (runQueued) {
-                for (ActionSequence sequence : queuedSequences) sequence.callback.trigger(trigger);
+                for (var sequence : this.queuedSequences) {
+                    sequence.callback.trigger(trigger);
+                }
             }
 
-            if (completedSequence != null) completedSequence.callback.trigger(trigger);
+            var success = false;
+            if (completedSequence != null) {
+                success = completedSequence.callback.trigger(trigger);
+            }
 
-            queuedSequences.clear();
-            for (ActionSequence sequence : sequences) sequence.nextTriggerIndex = 0;
+            this.queuedSequences.clear();
+            for (var sequence : sequences) {
+                sequence.nextTriggerIndex = 0;
+            }
 
+            return success;
         }
 
-        public static Duration MAX_INPUT_DELAY = Duration.ofMillis(250);
+        public static final Duration MAX_INPUT_DELAY = Duration.ofMillis(250);
 
-        private enum ActionTriggerResult {
+        private enum ShortcutTriggerResult {
             /// the trigger was not activated by this input.
             /// non-singular sequences should poison
             NOT_ACTIVATED,
@@ -288,13 +295,13 @@ public class ShortcutDecoder extends StatefulWidget {
             IGNORED
         }
 
-        private enum ActionSequenceStep {
+        private enum ShortcutSequenceStep {
             IGNORE,
             ADVANCE,
             COMPLETE
         }
 
-        private static class ActionSequence {
+        private static class ShortcutSequence {
             public final List<ShortcutTrigger> triggers;
             public final Listener callback;
 
@@ -304,30 +311,30 @@ public class ShortcutDecoder extends StatefulWidget {
 
             public int nextTriggerIndex = 0;
 
-            public ActionSequence(List<ShortcutTrigger> triggers, Listener callback) {
+            public ShortcutSequence(List<ShortcutTrigger> triggers, Listener callback) {
                 this.triggers = triggers;
                 this.callback = callback;
                 this.isSingular = triggers.size() == 1;
             }
 
             /// step this sequence
-            /// - if the sequence ignored the input, is poisoned or is completed, return [ActionSequenceStep#IGNORE
-            /// - if the sequence activated its final trigger, return [ActionSequenceStep#COMPLETE]
-            /// - if the sequence activated an intermediate trigger, return [ActionSequenceStep#ADVANCE]
-            public ActionSequenceStep step(Function<ShortcutTrigger, ActionTriggerResult> test) {
-                if (this.nextTriggerIndex < 0 || nextTriggerIndex >= triggers.size()) return ActionSequenceStep.IGNORE;
+            /// - if the sequence ignored the input, is poisoned or is completed, return [ShortcutSequenceStep#IGNORE]
+            /// - if the sequence activated its final trigger, return [ShortcutSequenceStep#COMPLETE]
+            /// - if the sequence activated an intermediate trigger, return [ShortcutSequenceStep#ADVANCE]
+            public ShortcutSequenceStep step(Function<ShortcutTrigger, ShortcutTriggerResult> test) {
+                if (this.nextTriggerIndex < 0 || this.nextTriggerIndex >= this.triggers.size()) return ShortcutSequenceStep.IGNORE;
 
-                var result = test.apply(triggers.get(nextTriggerIndex));
-                if (result == ActionTriggerResult.ACTIVATED) {
-                    nextTriggerIndex++;
-                    return nextTriggerIndex == triggers.size() ? ActionSequenceStep.COMPLETE : ActionSequenceStep.ADVANCE;
-                } else if (!isSingular && result == ActionTriggerResult.NOT_ACTIVATED) {
+                var result = test.apply(this.triggers.get(this.nextTriggerIndex));
+                if (result == ShortcutTriggerResult.ACTIVATED) {
+                    this.nextTriggerIndex++;
+                    return this.nextTriggerIndex == this.triggers.size() ? ShortcutSequenceStep.COMPLETE : ShortcutSequenceStep.ADVANCE;
+                } else if (!this.isSingular && result == ShortcutTriggerResult.NOT_ACTIVATED) {
                     // only poison non-singular sequences. this is important, because
                     // otherwise we could incorrectly swallow a singular sequence completed
                     // just after the first trigger of a non-singular sequence
-                    nextTriggerIndex = -1;
+                    this.nextTriggerIndex = -1;
                 }
-                return ActionSequenceStep.IGNORE;
+                return ShortcutSequenceStep.IGNORE;
             }
         }
 

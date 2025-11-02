@@ -35,6 +35,10 @@ public record KeyModifiers(int bitMask) {
         return MODIFIER_KEYS.contains(keyCode);
     }
 
+    public static KeyModifiers both(KeyModifiers a, KeyModifiers b) {
+        return new KeyModifiers(a.bitMask | b.bitMask);
+    }
+
     public static final IntList MODIFIER_KEYS = IntList.of(
         GLFW_KEY_LEFT_SHIFT,
         GLFW_KEY_RIGHT_SHIFT,

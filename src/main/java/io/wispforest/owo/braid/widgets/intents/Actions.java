@@ -88,11 +88,14 @@ public class Actions extends StatefulWidget {
 
     // ---
 
-    public static void invoke(BuildContext context, Intent intent) {
+    public static boolean invoke(BuildContext context, Intent intent) {
         var action = actionForIntent(context, intent);
         if (action != null) {
             action.invoke(context, intent);
+            return true;
         }
+
+        return false;
     }
 
     @SuppressWarnings({"unchecked"})

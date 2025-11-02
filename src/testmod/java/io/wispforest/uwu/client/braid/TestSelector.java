@@ -100,6 +100,7 @@ import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2f;
+import org.lwjgl.glfw.GLFW;
 
 import java.math.BigInteger;
 import java.net.URI;
@@ -730,6 +731,8 @@ public class TestSelector extends StatefulWidget {
             private final TextEditingController controller4 = new TextEditingController();
             private final TextEditingController controller5 = new TextEditingController();
 
+            private Color numbersColor = Color.randomHue();
+
             @Override
             public Widget build(BuildContext context) {
                 return new Row(
@@ -765,11 +768,24 @@ public class TestSelector extends StatefulWidget {
                             new Sized(
                                 100.0,
                                 20,
-                                new TextBox(
-                                    this.controller3,
+                                new Focusable(
                                     widget -> widget
-                                        .formatter(PatternFormatter.allow(Pattern.compile("[0-9]")))
-                                        .placeholder(Text.literal("only numbers"))
+                                        .skipTraversal(true)
+                                        .keyDownCallback((keyCode, modifiers) -> {
+                                            if (keyCode != GLFW.GLFW_KEY_ENTER || !modifiers.equals(KeyModifiers.NONE)) {
+                                                return false;
+                                            }
+
+                                            this.setState(() -> this.numbersColor = Color.randomHue());
+                                            return true;
+                                        }),
+                                    new TextBox(
+                                        this.controller3,
+                                        widget -> widget
+                                            .baseStyle(Style.EMPTY.withColor(this.numbersColor.argb()))
+                                            .formatter(PatternFormatter.allow(Pattern.compile("[0-9]")))
+                                            .placeholder(Text.literal("only numbers"))
+                                    )
                                 )
                             ),
                             new Sized(

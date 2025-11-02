@@ -8,6 +8,9 @@ import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
 import io.wispforest.owo.braid.widgets.basic.Builder;
 import io.wispforest.owo.braid.widgets.focus.Focusable;
+import io.wispforest.owo.braid.widgets.intents.Action;
+import io.wispforest.owo.braid.widgets.intents.Actions;
+import io.wispforest.owo.braid.widgets.intents.Intent;
 import io.wispforest.owo.braid.widgets.scroll.ScrollAnimationSettings;
 import io.wispforest.owo.braid.widgets.scroll.ScrollController;
 import io.wispforest.owo.braid.widgets.scroll.Scrollable;
@@ -16,7 +19,9 @@ import net.minecraft.text.Text;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class EditableText extends StatefulWidget {
 
@@ -134,9 +139,51 @@ public class EditableText extends StatefulWidget {
         private final ScrollController verticalController = new ScrollController(this);
         private BuildContext inputContext;
 
+        private final Map<Class<? extends Intent>, Action<?>> actions = new HashMap<>();
+
         @Override
         public void init() {
             this.widget().controller.addListener(this.listener);
+
+            this.actions.put(
+                InsertNewlineIntent.class,
+                Action.<InsertNewlineIntent>callback((actionCtx, intent) -> this.instance().insert("\n"))
+            );
+
+            this.actions.put(
+                DeleteTextIntent.class,
+                Action.<DeleteTextIntent>callback((actionCtx, intent) -> this.instance().deleteText(intent))
+            );
+
+            this.actions.put(
+                DeleteLineIntent.class,
+                Action.<DeleteLineIntent>callback((actionCtx, intent) -> this.instance().deleteLine())
+            );
+
+            this.actions.put(
+                MoveCursorIntent.class,
+                Action.<MoveCursorIntent>callback((actionCtx, intent) -> this.instance().moveCursor(intent))
+            );
+
+            this.actions.put(
+                TeleportCursorIntent.class,
+                Action.<TeleportCursorIntent>callback((actionCtx, intent) -> this.instance().teleportCursor(intent))
+            );
+
+            this.actions.put(
+                SelectAllIntent.class,
+                Action.<SelectAllIntent>callback((actionCtx, intent) -> this.instance().selectAllText())
+            );
+
+            this.actions.put(
+                CopyTextIntent.class,
+                Action.<CopyTextIntent>callback((actionCtx, intent) -> this.instance().copyToClipboard(intent))
+            );
+
+            this.actions.put(
+                PasteTextIntent.class,
+                Action.<PasteTextIntent>callback((actionCtx, intent) -> this.instance().pasteFromClipboard())
+            );
         }
 
         @Override
@@ -199,12 +246,15 @@ public class EditableText extends StatefulWidget {
             this.blinkCallbackId = this.scheduleDelayedCallback(CURSOR_BLINK_INTERVAL, this::blink);
         }
 
+        private TextInput.Instance instance() {
+            return (TextInput.Instance) this.inputContext.instance();
+        }
+
         @Override
         public Widget build(BuildContext context) {
             var widget = this.widget();
             return new Focusable(
                 focusable -> focusable
-                    .autoFocus(widget.autoFocus)
                     .focusGainedCallback(() -> {
                         this.focused = true;
                         this.restartBlinking();
@@ -213,31 +263,31 @@ public class EditableText extends StatefulWidget {
                         this.focused = false;
                         this.stopBlinking();
                     })
-                    .keyDownCallback((keyCode, modifiers) -> {
-                        return ((TextInput.Instance) this.inputContext.instance()).onKeyDown(keyCode, modifiers);
-                    })
-                    .charCallback((charCode, modifiers) -> {
-                        return ((TextInput.Instance) this.inputContext.instance()).onChar(charCode);
-                    }),
-                new Scrollable(
-                    true, true,
-                    this.horizontalController,
-                    this.verticalController,
-                    ScrollAnimationSettings.NO_ANIMATION,
-                    new Builder(inputContext -> {
-                        this.inputContext = inputContext;
-                        return new TextInput(
-                            widget.controller,
-                            this.showCursor,
-                            widget.softWrap,
-                            widget.formatters,
-                            widget.baseStyle,
-                            widget.textShadow,
-                            !widget.suggestionIsPlaceholder || widget.controller.value().text().isEmpty()
-                                ? widget.suggestion
-                                : Text.empty()
-                        );
-                    })
+                    .charCallback((charCode, modifiers) -> this.instance().onChar(charCode)),
+                new Actions(
+                    actions -> actions
+                        .autoFocus(widget.autoFocus)
+                        .actions(this.actions),
+                    new Scrollable(
+                        true, true,
+                        this.horizontalController,
+                        this.verticalController,
+                        ScrollAnimationSettings.NO_ANIMATION,
+                        new Builder(inputContext -> {
+                            this.inputContext = inputContext;
+                            return new TextInput(
+                                widget.controller,
+                                this.showCursor,
+                                widget.softWrap,
+                                widget.formatters,
+                                widget.baseStyle,
+                                widget.textShadow,
+                                !widget.suggestionIsPlaceholder || widget.controller.value().text().isEmpty()
+                                    ? widget.suggestion
+                                    : Text.empty()
+                            );
+                        })
+                    )
                 )
             );
         }

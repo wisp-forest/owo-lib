@@ -50,7 +50,7 @@ public class Incrementor extends StatelessWidget {
     public Widget build(BuildContext context) {
         return new Interactable(
             this.xCallback != null && this.yCallback != null ? BOTH_AXIS_SHORTCUTS : this.xCallback != null ? HORIZONTAL_SHORTCUTS : this.yCallback != null ? VERTICAL_SHORTCUTS : Map.of(),
-            actions -> actions.addCallbackAction(
+            interactable -> interactable.addCallbackAction(
                 IncrementIntent.class,
                 (actionCtx, intent) -> {
                     switch (intent.axis) {

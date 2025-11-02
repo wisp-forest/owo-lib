@@ -244,7 +244,7 @@ public class TextInput extends LeafInstanceWidget {
             return new Vector2d(x, y);
         }
 
-        private void insert(String insertion) {
+        public void insert(String insertion) {
             insertion = StringHelper.stripInvalidChars(insertion, true);
 
             var chars = new StringBuilder(this.value.text());
@@ -254,7 +254,7 @@ public class TextInput extends LeafInstanceWidget {
             var newText = chars.toString();
             this.formatAndSetValue(new TextEditingValue(
                 newText,
-                TextSelection.collapsed(selection.lower() + insertion.length()) // TODO: check whether the check that used to be here was checking good
+                TextSelection.collapsed(selection.lower() + insertion.length())
             ));
         }
 
@@ -300,7 +300,7 @@ public class TextInput extends LeafInstanceWidget {
                 newLocalRune++;
             }
 
-            this.moveCursor(newLine.beginIdx() + newLocalRune, selecting);
+            this.setCursorPosition(newLine.beginIdx() + newLocalRune, selecting);
         }
 
         private int charIdxAt(double x, double y) {
@@ -312,7 +312,7 @@ public class TextInput extends LeafInstanceWidget {
             return clickedLine.beginIdx() + textRenderer.trimToWidth(lineText, (int) x + 1).length();
         }
 
-        private void moveCursor(int toRune, boolean selecting) {
+        private void setCursorPosition(int toRune, boolean selecting) {
             this.formatAndSetValue(this.value.withSelection(
                 selecting
                     ? new TextSelection(this.value.selection().start(), toRune)
@@ -362,126 +362,119 @@ public class TextInput extends LeafInstanceWidget {
             return true;
         }
 
-        public boolean onKeyDown(int keyCode, KeyModifiers modifiers) {
-            var text = this.value.text();
+        public void deleteText(DeleteTextIntent intent) {
             var selection = this.value.selection();
+            if (!selection.collapsed()) {
+                this.deleteSelection();
+                return;
+            }
 
+            var text = this.value.text();
             var cursorPosition = selection.end();
 
-            if (keyCode == GLFW.GLFW_KEY_BACKSPACE) {
-                if (!selection.collapsed()) {
-                    this.deleteSelection();
-                } else {
-                    var chars = new StringBuilder(text);
-                    var start = Math.max(
-                        0,
-                        modifiers.ctrl()
-                            ? this.nextWordBoundary(false, OptionalInt.empty())
-                            : cursorPosition - 1
-                    );
-                    chars.delete(start, cursorPosition);
-
-                    this.formatAndSetValue(new TextEditingValue(
-                        chars.toString(),
-                        TextSelection.collapsed(start)
-                    ));
-                }
-
-                return true;
-            } else if (keyCode == GLFW.GLFW_KEY_DELETE) {
-                if (!selection.collapsed()) {
-                    this.deleteSelection();
-                } else {
-                    var chars = new StringBuilder(text);
-                    var start = Math.max(
-                        0,
-                        modifiers.shift() && !modifiers.ctrl()
-                            ? this.currentLine().beginIdx() - 1
-                            : cursorPosition
-                    );
-                    var end = Math.min(
-                        text.length(),
-                        modifiers.ctrl()
-                            ? this.nextWordBoundary(true, OptionalInt.empty())
-                            : modifiers.shift()
-                                ? this.currentLine().endIdx()
-                                : cursorPosition + 1
-                    );
-
-                    chars.delete(start, end);
-
-                    this.formatAndSetValue(new TextEditingValue(
-                        chars.toString(),
-                        TextSelection.collapsed(start)
-                    ));
-                }
-
-                return true;
-            } else if (keyCode == GLFW.GLFW_KEY_V && modifiers.ctrl()) {
-                this.insert(MinecraftClient.getInstance().keyboard.getClipboard());
-
-                return true;
-            } else if ((keyCode == GLFW.GLFW_KEY_C || keyCode == GLFW.GLFW_KEY_X) && modifiers.ctrl()) {
-                MinecraftClient.getInstance().keyboard.setClipboard(text.substring(selection.lower(), selection.upper()));
-
-                if (keyCode == GLFW.GLFW_KEY_X) {
-                    this.deleteSelection();
-                }
-
-                return true;
-            } else if (keyCode == GLFW.GLFW_KEY_A && modifiers.ctrl()) {
-                this.formatAndSetValue(this.value.withSelection(new TextSelection(0, text.length())));
-                return true;
-            } else if (keyCode == GLFW.GLFW_KEY_LEFT) {
-                var endingSelection = !selection.collapsed() && !modifiers.shift();
-                this.moveCursor(
-                    Math.max(
-                        0,
-                        endingSelection
-                            ? selection.lower()
-                            : modifiers.ctrl()
-                                ? this.nextWordBoundary(false, OptionalInt.empty())
-                                : cursorPosition - 1
-                    ),
-                    modifiers.shift()
+            if (intent.forwards()) {
+                var chars = new StringBuilder(text);
+                var end = Math.min(
+                    text.length(),
+                    intent.entireWord()
+                        ? this.nextWordBoundary(true, OptionalInt.empty())
+                        : cursorPosition + 1
                 );
-                return true;
-            } else if (keyCode == GLFW.GLFW_KEY_RIGHT) {
-                var endingSelection = !selection.collapsed() && !modifiers.shift();
-                this.moveCursor(
+
+                chars.delete(cursorPosition, end);
+
+                this.formatAndSetValue(new TextEditingValue(
+                    chars.toString(),
+                    TextSelection.collapsed(cursorPosition)
+                ));
+            } else {
+                var chars = new StringBuilder(text);
+                var start = Math.max(
+                    0,
+                    intent.entireWord()
+                        ? this.nextWordBoundary(false, OptionalInt.empty())
+                        : cursorPosition - 1
+                );
+                chars.delete(start, cursorPosition);
+
+                this.formatAndSetValue(new TextEditingValue(
+                    chars.toString(),
+                    TextSelection.collapsed(start)
+                ));
+            }
+        }
+
+        public void moveCursor(MoveCursorIntent intent) {
+            var selection = this.value.selection();
+            var text = this.value.text();
+            var cursorPosition = selection.end();
+
+            var endingSelection = !selection.collapsed() && !intent.selecting();
+
+            switch (intent.direction()) {
+                case UP -> this.moveCursorVertically(-1, intent.selecting());
+                case DOWN -> this.moveCursorVertically(1, intent.selecting());
+                case RIGHT -> this.setCursorPosition(
                     Math.min(
                         text.length(),
                         endingSelection
                             ? selection.upper()
-                            : modifiers.ctrl()
+                            : intent.skipWord()
                                 ? this.nextWordBoundary(true, OptionalInt.empty())
                                 : cursorPosition + 1
                     ),
-                    modifiers.shift()
+                    intent.selecting()
                 );
-                return true;
-            } else if (keyCode == GLFW.GLFW_KEY_HOME) {
-                this.moveCursor(this.currentLine().beginIdx(), modifiers.shift());
-                return true;
-            } else if (keyCode == GLFW.GLFW_KEY_END) {
-                this.moveCursor(Math.min(text.length(), this.currentLine().endIdx()), modifiers.shift());
-                return true;
+                case LEFT -> this.setCursorPosition(
+                    Math.max(
+                        0,
+                        endingSelection
+                            ? selection.lower()
+                            : intent.skipWord()
+                                ? this.nextWordBoundary(false, OptionalInt.empty())
+                                : cursorPosition - 1
+                    ),
+                    intent.selecting()
+                );
             }
+        }
 
-//            if (this.widget.maxLines < 0 || this.widget.maxLines > 1) {
-                if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
-                    this.insert("\n");
-                    return true;
-                } else if (keyCode == GLFW.GLFW_KEY_UP) {
-                    this.moveCursorVertically(-1, modifiers.shift());
-                    return true;
-                } else if (keyCode == GLFW.GLFW_KEY_DOWN) {
-                    this.moveCursorVertically(1, modifiers.shift());
-                    return true;
-                }
-//            }
+        public void pasteFromClipboard() {
+            this.insert(MinecraftClient.getInstance().keyboard.getClipboard());
+        }
 
-            return false;
+        public void copyToClipboard(CopyTextIntent intent) {
+            MinecraftClient.getInstance().keyboard.setClipboard(this.value.text().substring(
+                this.value.selection().lower(),
+                this.value.selection().upper()
+            ));
+
+            if (intent.delete()) {
+                this.deleteSelection();
+            }
+        }
+
+        public void selectAllText() {
+            this.formatAndSetValue(this.value.withSelection(new TextSelection(0, this.value.text().length())));
+        }
+
+        public void teleportCursor(TeleportCursorIntent intent) {
+            if (intent.toStart()) {
+                this.setCursorPosition(this.currentLine().beginIdx(), intent.selecting());
+            } else {
+                this.setCursorPosition(Math.min(this.value.text().length(), this.currentLine().endIdx()), intent.selecting());
+            }
+        }
+
+        public void deleteLine() {
+            var chars = new StringBuilder(this.value.text());
+            var line = this.currentLine();
+
+            chars.delete(line.beginIdx(), line.endIdx());
+            this.formatAndSetValue(new TextEditingValue(
+                chars.toString(),
+                TextSelection.collapsed(line.beginIdx())
+            ));
         }
 
         @Override
@@ -505,7 +498,7 @@ public class TextInput extends LeafInstanceWidget {
                 ));
             } else {
                 this.lastClickTime = Instant.now();
-                this.moveCursor(clickedIdx, modifiers.shift());
+                this.setCursorPosition(clickedIdx, modifiers.shift());
             }
 
             return true;
@@ -513,7 +506,7 @@ public class TextInput extends LeafInstanceWidget {
 
         @Override
         public void onMouseDrag(double x, double y, double dx, double dy) {
-            this.moveCursor(this.charIdxAt(x, y), true);
+            this.setCursorPosition(this.charIdxAt(x, y), true);
         }
 
         protected interface SkipClass {
