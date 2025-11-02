@@ -10,7 +10,7 @@ import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
 import io.wispforest.owo.braid.widgets.basic.Box;
 import io.wispforest.owo.braid.widgets.basic.Padding;
 import io.wispforest.owo.braid.widgets.focus.Focusable;
-import net.minecraft.client.input.KeyboardInput;
+import net.minecraft.text.Style;
 import net.minecraft.util.Colors;
 
 public class TextBox extends StatefulWidget {
@@ -27,7 +27,7 @@ public class TextBox extends StatefulWidget {
             controller,
             widget -> {
                 setupCallback.setup(widget);
-                widget.suggestion(widget.suggestion().copy().withColor(Colors.GRAY));
+                widget.suggestion(widget.suggestion().copy().styled(style -> style.withParent(Style.EMPTY.withColor(Colors.GRAY))));
             }
         );
     }

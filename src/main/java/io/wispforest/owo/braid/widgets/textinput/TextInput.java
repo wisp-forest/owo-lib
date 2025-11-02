@@ -1,5 +1,7 @@
 package io.wispforest.owo.braid.widgets.textinput;
 
+import com.google.common.base.Preconditions;
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.core.*;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.framework.instance.LeafWidgetInstance;
@@ -21,28 +23,23 @@ import org.lwjgl.glfw.GLFW;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.OptionalDouble;
-import java.util.OptionalInt;
+import java.util.*;
 
 public class TextInput extends LeafInstanceWidget {
 
     public final TextEditingController controller;
     public final boolean showCursor;
     public final boolean softWrap;
-    public final int maxLines;
-    public final int maxCharacters;
+    public final List<Formatter> formatters;
     public final Style baseStyle;
     public final boolean textShadow;
     public final Text suggestion;
 
-    public TextInput(TextEditingController controller, boolean showCursor, boolean softWrap, int maxLines, int maxCharacters, Style baseStyle, boolean textShadow, @Nullable Text suggestion) {
+    public TextInput(TextEditingController controller, boolean showCursor, boolean softWrap, List<Formatter> formatters, Style baseStyle, boolean textShadow, @Nullable Text suggestion) {
         this.controller = controller;
         this.showCursor = showCursor;
         this.softWrap = softWrap;
-        this.maxLines = maxLines;
-        this.maxCharacters = maxCharacters;
+        this.formatters = formatters;
         this.baseStyle = baseStyle;
         this.textShadow = textShadow;
         this.suggestion = suggestion == null ? Text.empty() : suggestion;
@@ -53,13 +50,15 @@ public class TextInput extends LeafInstanceWidget {
         return new Instance(this);
     }
 
+    @FunctionalInterface
+    public interface Formatter {
+        TextEditingValue format(TextEditingValue previousState, TextEditingValue newState);
+    }
+
     public static class Instance extends LeafWidgetInstance<TextInput> implements MouseListener {
 
-        protected String text;
-        protected TextSelection selection;
-
-        protected String layoutText;
-        protected TextSelection layoutSelection;
+        protected TextEditingValue lastValue;
+        protected TextEditingValue value;
 
         protected CursorLocation cursorLocation;
 
@@ -68,12 +67,11 @@ public class TextInput extends LeafInstanceWidget {
 
         public Instance(TextInput widget) {
             super(widget);
-            this.layoutText = this.text = widget.controller.text();
-            this.layoutSelection = this.selection = widget.controller.selection;
+            this.lastValue = this.value = widget.controller.value();
         }
 
         public Vector2d cursorPosition() {
-            return this.coordinatesAtCharIdx(this.selection.end());
+            return this.coordinatesAtCharIdx(this.value.selection().end());
         }
 
         public TextLayout.LineMetrics currentLine() {
@@ -82,15 +80,12 @@ public class TextInput extends LeafInstanceWidget {
 
         @Override
         public void setWidget(TextInput widget) {
-            if (!(this.layoutText.equals(widget.controller.text())
-                && this.layoutSelection.equals(widget.controller.selection())
+            if (!(this.lastValue.equals(widget.controller.value())
                 && this.widget.softWrap == widget.softWrap
-                && this.widget.maxLines == widget.maxLines
-                && this.widget.maxCharacters == widget.maxCharacters
-                && this.widget.baseStyle.equals(widget.baseStyle))) {
+                && this.widget.baseStyle.equals(widget.baseStyle)
+                && this.widget.suggestion.equals(widget.suggestion))) {
 
-                this.layoutText = this.text = widget.controller.text();
-                this.layoutSelection = this.selection = widget.controller.selection();
+                this.lastValue = this.value = widget.controller.value();
 
                 this.markNeedsLayout();
             }
@@ -105,7 +100,7 @@ public class TextInput extends LeafInstanceWidget {
 
             this.metrics = TextLayout.measure(
                 this.host().client().textRenderer,
-                this.text,
+                this.value.text() + this.widget.suggestion.getString(),
                 this.widget.baseStyle,
                 wrapWidth
             );
@@ -122,15 +117,15 @@ public class TextInput extends LeafInstanceWidget {
 
             this.transform.setSize(size);
 
-            var newLineIdx = this.lineIdxAtCharIdx(this.selection.end());
-            this.cursorLocation = new CursorLocation(newLineIdx, this.selection.end() - this.metrics.lineMetrics().get(newLineIdx).beginIdx());
+            var newLineIdx = this.lineIdxAtCharIdx(this.value.selection().end());
+            this.cursorLocation = new CursorLocation(newLineIdx, this.value.selection().end() - this.metrics.lineMetrics().get(newLineIdx).beginIdx());
         }
 
         @Override
         protected double measureIntrinsicWidth(double height) {
             return TextLayout.measure(
                 this.host().client().textRenderer,
-                this.text,
+                this.value.text(),
                 this.widget.baseStyle,
                 Integer.MAX_VALUE
             ).width();
@@ -140,7 +135,7 @@ public class TextInput extends LeafInstanceWidget {
         protected double measureIntrinsicHeight(double width) {
             return TextLayout.measure(
                 this.host().client().textRenderer,
-                this.text,
+                this.value.text(),
                 this.widget.baseStyle,
                 this.widget.softWrap ? (int) width : Integer.MAX_VALUE
             ).height();
@@ -180,17 +175,18 @@ public class TextInput extends LeafInstanceWidget {
 
             // ---
 
-            if (!this.selection.collapsed()) {
-                var startLine = this.lineIdxAtCharIdx(this.selection.lower());
-                var endLine = this.lineIdxAtCharIdx(this.selection.upper());
+            var selection = this.value.selection();
+            if (!selection.collapsed()) {
+                var startLine = this.lineIdxAtCharIdx(selection.lower());
+                var endLine = this.lineIdxAtCharIdx(selection.upper());
 
                 if (startLine == endLine) {
-                    var startPos = this.coordinatesAtCharIdx(this.selection.lower());
-                    var endPos = this.coordinatesAtCharIdx(this.selection.upper());
+                    var startPos = this.coordinatesAtCharIdx(selection.lower());
+                    var endPos = this.coordinatesAtCharIdx(selection.upper());
 
                     this.drawSelection(ctx, startPos.x, endPos.x, endPos.y);
                 } else {
-                    var startPos = this.coordinatesAtCharIdx(this.selection.lower());
+                    var startPos = this.coordinatesAtCharIdx(selection.lower());
                     this.drawSelection(ctx, startPos.x, this.metrics.lineMetrics().get(startLine).width(), startPos.y);
 
                     for (var lineIdx = startLine + 1; lineIdx < endLine; lineIdx++) {
@@ -200,7 +196,7 @@ public class TextInput extends LeafInstanceWidget {
                         this.drawSelection(ctx, 0, width, (lineIdx + 1) * textRenderer.fontHeight);
                     }
 
-                    var endPos = this.coordinatesAtCharIdx(this.selection.upper());
+                    var endPos = this.coordinatesAtCharIdx(selection.upper());
                     drawSelection(ctx, 0, endPos.x, endPos.y);
                 }
             }
@@ -208,7 +204,7 @@ public class TextInput extends LeafInstanceWidget {
             // ---
 
             if (this.widget.showCursor) {
-                var cursorPos = this.coordinatesAtCharIdx(this.selection.end());
+                var cursorPos = this.coordinatesAtCharIdx(this.value.selection().end());
 
                 ctx.drawVerticalLine(
                     (int) cursorPos.x,
@@ -239,42 +235,60 @@ public class TextInput extends LeafInstanceWidget {
             var lineIdx = this.lineIdxAtCharIdx(charIdx);
             var line = this.metrics.lineMetrics().get(lineIdx);
 
-            final var textRenderer = this.host().client().textRenderer;
-            var x = textRenderer.getWidth(this.text.substring(line.beginIdx(), Math.min(this.text.length(), charIdx)));
+            var textRenderer = this.host().client().textRenderer;
+            var text = this.value.text();
+
+            var x = textRenderer.getWidth(text.substring(line.beginIdx(), Math.min(text.length(), charIdx)));
             var y = (lineIdx + 1) * textRenderer.fontHeight;
 
             return new Vector2d(x, y);
         }
 
         private void insert(String insertion) {
-            insertion = StringHelper.stripInvalidChars(insertion, this.widget.maxLines < 0 || this.widget.maxLines > 1);
+            insertion = StringHelper.stripInvalidChars(insertion, true);
 
-            var chars = new StringBuilder(this.text);
-            chars.replace(this.selection.lower(), this.selection.upper(), insertion);
+            var chars = new StringBuilder(this.value.text());
+            var selection = this.value.selection();
+            chars.replace(selection.lower(), selection.upper(), insertion);
 
-            var stripped = chars.toString();
-            if (this.widget.maxCharacters > 0) stripped = stripped.substring(0, Math.min(stripped.length(), this.widget.maxCharacters));
-
-            this.widget.controller.setText(this.text = stripped);
-            this.widget.controller.setSelection(this.selection = TextSelection.collapsed(Math.min(this.selection.lower() + insertion.length(), stripped.length())));
+            var newText = chars.toString();
+            this.formatAndSetValue(new TextEditingValue(
+                newText,
+                TextSelection.collapsed(selection.lower() + insertion.length()) // TODO: check whether the check that used to be here was checking good
+            ));
         }
 
         private void deleteSelection() {
+            if (Owo.DEBUG) {
+                Preconditions.checkState(!this.value.selection().collapsed(), "deleteSelection invoked with collapsed selection");
+            }
+
             this.insert("");
         }
 
+        private int lastTextLineIdx() {
+            var lastTextLineIdx = 0;
+            while (lastTextLineIdx < this.metrics.lineMetrics().size() && this.metrics.lineMetrics().get(lastTextLineIdx).endIdx() < this.value.text().length()) {
+                lastTextLineIdx++;
+            }
+
+            return lastTextLineIdx;
+        }
+
         private void moveCursorVertically(int byLines, boolean selecting) {
-            var newLineIdx = MathHelper.clamp(this.cursorLocation.line + byLines, 0, this.metrics.lineMetrics().size() - 1);
+            var newLineIdx = MathHelper.clamp(this.cursorLocation.line + byLines, 0, this.lastTextLineIdx());
             var currentX = this.cursorPosition().x;
 
             var newLine = this.metrics.lineMetrics().get(newLineIdx);
             var newLocalRune = 0;
 
-            while (newLocalRune < (newLine.endIdx() - newLine.beginIdx())) {
-                var glyphX = this.host().client().textRenderer.getWidth(this.text.substring(newLine.beginIdx(), newLine.beginIdx() + newLocalRune));
+            var text = this.value.text();
+            var actualEndIdx = Math.min(newLine.endIdx(), text.length());
+            while (newLocalRune < (actualEndIdx - newLine.beginIdx())) {
+                var glyphX = this.host().client().textRenderer.getWidth(text.substring(newLine.beginIdx(), newLine.beginIdx() + newLocalRune));
 
                 if (glyphX >= currentX) {
-                    var previousGlyphX = this.host().client().textRenderer.getWidth(this.text.substring(newLine.beginIdx(), newLine.beginIdx() + Math.max(0, newLocalRune - 1)));
+                    var previousGlyphX = this.host().client().textRenderer.getWidth(text.substring(newLine.beginIdx(), newLine.beginIdx() + Math.max(0, newLocalRune - 1)));
 
                     if (Math.abs(currentX - previousGlyphX) < Math.abs(currentX - glyphX)) {
                         newLocalRune--;
@@ -292,26 +306,26 @@ public class TextInput extends LeafInstanceWidget {
         private int charIdxAt(double x, double y) {
             var textRenderer = this.host().client().textRenderer;
 
-            var clickedLine = this.metrics.lineMetrics().get(MathHelper.clamp((int) (y / textRenderer.fontHeight), 0, this.metrics.lineMetrics().size() - 1));
-            var lineText = this.text.substring(clickedLine.beginIdx(), clickedLine.endIdx());
+            var clickedLine = this.metrics.lineMetrics().get(MathHelper.clamp((int) (y / textRenderer.fontHeight), 0, this.lastTextLineIdx()));
+            var lineText = this.value.text().substring(clickedLine.beginIdx(), Math.min(clickedLine.endIdx(), this.value.text().length()));
 
             return clickedLine.beginIdx() + textRenderer.trimToWidth(lineText, (int) x + 1).length();
         }
 
         private void moveCursor(int toRune, boolean selecting) {
-            if (selecting) {
-                widget.controller.setSelection(this.selection = new TextSelection(this.selection.start(), toRune));
-            } else {
-                widget.controller.setSelection(this.selection = TextSelection.collapsed(toRune));
-            }
+            this.formatAndSetValue(this.value.withSelection(
+                selecting
+                    ? new TextSelection(this.value.selection().start(), toRune)
+                    : TextSelection.collapsed(toRune)
+            ));
         }
 
         private int nextWordBoundary(boolean forwards, OptionalInt fromChar) {
-            var fromCharIdx = fromChar.orElse(this.selection.end());
+            var fromCharIdx = fromChar.orElse(this.value.selection().end());
 
             var direction = forwards ? 1 : -1;
             var lookAhead = forwards ? 0 : -1;
-            var bound = forwards ? this.text.length() + 1 : -1;
+            var bound = forwards ? this.value.text().length() + 1 : -1;
 
             var startingClass = SkipClass.of(this.safeCharAt(fromCharIdx + lookAhead));
             var idx = fromCharIdx + direction;
@@ -324,22 +338,41 @@ public class TextInput extends LeafInstanceWidget {
         }
 
         private char safeCharAt(int charIdx) {
-            return !this.text.isEmpty() ? this.text.charAt(MathHelper.clamp(charIdx, 0, this.text.length() - 1)) : ' ';
+            var text = this.value.text();
+            return !text.isEmpty() ? text.charAt(MathHelper.clamp(charIdx, 0, text.length() - 1)) : ' ';
         }
 
-        public boolean onChar(int charCode, KeyModifiers modifiers) {
+        private void formatAndSetValue(TextEditingValue newValue) {
+            var actual = newValue;
+            if (!Objects.equals(this.value.text(), newValue.text())) {
+                actual = BraidUtils.fold(
+                    this.widget.formatters,
+                    newValue,
+                    (value, formatter) -> formatter.format(this.value, value)
+                );
+            }
+
+            this.widget.controller.setValue(this.value = actual);
+        }
+
+        // ---
+
+        public boolean onChar(int charCode) {
             this.insert(Character.toString(charCode));
             return true;
         }
 
         public boolean onKeyDown(int keyCode, KeyModifiers modifiers) {
-            var cursorPosition = this.selection.end();
+            var text = this.value.text();
+            var selection = this.value.selection();
+
+            var cursorPosition = selection.end();
 
             if (keyCode == GLFW.GLFW_KEY_BACKSPACE) {
-                if (!this.selection.collapsed()) {
+                if (!selection.collapsed()) {
                     this.deleteSelection();
                 } else {
-                    var chars = new StringBuilder(this.text);
+                    var chars = new StringBuilder(text);
                     var start = Math.max(
                         0,
                         modifiers.ctrl()
@@ -348,16 +381,18 @@ public class TextInput extends LeafInstanceWidget {
                     );
                     chars.delete(start, cursorPosition);
 
-                    this.widget.controller.setSelection(this.selection = TextSelection.collapsed(start));
-                    this.widget.controller.setText(this.text = chars.toString());
+                    this.formatAndSetValue(new TextEditingValue(
+                        chars.toString(),
+                        TextSelection.collapsed(start)
+                    ));
                 }
 
                 return true;
             } else if (keyCode == GLFW.GLFW_KEY_DELETE) {
-                if (!this.selection.collapsed()) {
+                if (!selection.collapsed()) {
                     this.deleteSelection();
                 } else {
-                    var chars = new StringBuilder(this.text);
+                    var chars = new StringBuilder(text);
                     var start = Math.max(
                         0,
                         modifiers.shift() && !modifiers.ctrl()
@@ -365,7 +400,7 @@ public class TextInput extends LeafInstanceWidget {
                             : cursorPosition
                     );
                     var end = Math.min(
-                        this.text.length(),
+                        text.length(),
                         modifiers.ctrl()
                             ? this.nextWordBoundary(true, OptionalInt.empty())
                             : modifiers.shift()
@@ -375,8 +410,10 @@ public class TextInput extends LeafInstanceWidget {
 
                     chars.delete(start, end);
 
-                    this.widget.controller.setSelection(this.selection = TextSelection.collapsed(start));
-                    this.widget.controller.setText(this.text = chars.toString());
+                    this.formatAndSetValue(new TextEditingValue(
+                        chars.toString(),
+                        TextSelection.collapsed(start)
+                    ));
                 }
 
                 return true;
@@ -385,7 +422,7 @@ public class TextInput extends LeafInstanceWidget {
 
                 return true;
             } else if ((keyCode == GLFW.GLFW_KEY_C || keyCode == GLFW.GLFW_KEY_X) && modifiers.ctrl()) {
-                MinecraftClient.getInstance().keyboard.setClipboard(this.text.substring(this.selection.lower(), this.selection.upper()));
+                MinecraftClient.getInstance().keyboard.setClipboard(text.substring(selection.lower(), selection.upper()));
 
                 if (keyCode == GLFW.GLFW_KEY_X) {
                     this.deleteSelection();
@@ -393,15 +430,15 @@ public class TextInput extends LeafInstanceWidget {
 
                 return true;
             } else if (keyCode == GLFW.GLFW_KEY_A && modifiers.ctrl()) {
-                this.widget.controller.setSelection(this.selection = new TextSelection(0, this.text.length()));
+                this.formatAndSetValue(this.value.withSelection(new TextSelection(0, text.length())));
                 return true;
             } else if (keyCode == GLFW.GLFW_KEY_LEFT) {
-                var endingSelection = !this.selection.collapsed() && !modifiers.shift();
+                var endingSelection = !selection.collapsed() && !modifiers.shift();
                 this.moveCursor(
                     Math.max(
                         0,
                         endingSelection
-                            ? this.selection.lower()
+                            ? selection.lower()
                             : modifiers.ctrl()
                                 ? this.nextWordBoundary(false, OptionalInt.empty())
                                 : cursorPosition - 1
@@ -410,12 +447,12 @@ public class TextInput extends LeafInstanceWidget {
                 );
                 return true;
             } else if (keyCode == GLFW.GLFW_KEY_RIGHT) {
-                var endingSelection = !this.selection.collapsed() && !modifiers.shift();
+                var endingSelection = !selection.collapsed() && !modifiers.shift();
                 this.moveCursor(
                     Math.min(
-                        this.text.length(),
+                        text.length(),
                         endingSelection
-                            ? this.selection.upper()
+                            ? selection.upper()
                             : modifiers.ctrl()
                                 ? this.nextWordBoundary(true, OptionalInt.empty())
                                 : cursorPosition + 1
@@ -427,12 +464,12 @@ public class TextInput extends LeafInstanceWidget {
                 this.moveCursor(this.currentLine().beginIdx(), modifiers.shift());
                 return true;
             } else if (keyCode == GLFW.GLFW_KEY_END) {
-                this.moveCursor(this.currentLine().endIdx(), modifiers.shift());
+                this.moveCursor(Math.min(text.length(), this.currentLine().endIdx()), modifiers.shift());
                 return true;
             }
 
-            if (this.widget.maxLines < 0 || this.widget.maxLines > 1) {
-                if (this.widget.maxLines > this.metrics.lineMetrics().size() && keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
+//            if (this.widget.maxLines < 0 || this.widget.maxLines > 1) {
+                if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
                     this.insert("\n");
                     return true;
                 } else if (keyCode == GLFW.GLFW_KEY_UP) {
@@ -442,7 +479,7 @@ public class TextInput extends LeafInstanceWidget {
                     this.moveCursorVertically(1, modifiers.shift());
                     return true;
                 }
-            }
+//            }
 
             return false;
         }
@@ -463,7 +500,9 @@ public class TextInput extends LeafInstanceWidget {
                 var start = this.nextWordBoundary(false, OptionalInt.of(clickedIdx));
                 var end = this.nextWordBoundary(true, OptionalInt.of(clickedIdx));
 
-                widget.controller.setSelection(new TextSelection(Math.max(0, start), end));
+                this.formatAndSetValue(this.value.withSelection(
+                    new TextSelection(Math.max(0, start), end)
+                ));
             } else {
                 this.lastClickTime = Instant.now();
                 this.moveCursor(clickedIdx, modifiers.shift());

@@ -27,7 +27,7 @@ public class HudTestWidget extends StatelessWidget {
         return new ListenableBuilder(
             SHOW_TEST_HUD,
             (listenableContext, child) -> new Visibility(
-                SHOW_TEST_HUD.get(),
+                SHOW_TEST_HUD.value(),
                 child
             ),
             new Align(

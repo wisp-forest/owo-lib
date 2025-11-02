@@ -55,7 +55,7 @@ class ComboBoxButtons<T> extends StatelessWidget {
                                 this.state,
                                 (listenableContext) -> {
                                     var buttons = new ArrayList<Widget>();
-                                    var state = this.state.get();
+                                    var state = this.state.value();
 
                                     for (var idx = 0; idx < state.options().size(); idx++) {
                                         var option = state.options().get(idx);

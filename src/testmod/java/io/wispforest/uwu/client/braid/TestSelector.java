@@ -52,6 +52,8 @@ import io.wispforest.owo.braid.widgets.slider.xlyder.MessageXlyder;
 import io.wispforest.owo.braid.widgets.splitpane.MultiSplitPane;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.braid.widgets.stack.StackBase;
+import io.wispforest.owo.braid.widgets.textinput.MaxLengthFormatter;
+import io.wispforest.owo.braid.widgets.textinput.PatternFormatter;
 import io.wispforest.owo.braid.widgets.textinput.TextBox;
 import io.wispforest.owo.braid.widgets.textinput.TextEditingController;
 import io.wispforest.owo.braid.widgets.vanilla.VanillaWidget;
@@ -80,6 +82,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
@@ -103,6 +106,7 @@ import java.net.URI;
 import java.time.Duration;
 import java.util.*;
 import java.util.function.IntConsumer;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -140,6 +144,15 @@ public class TestSelector extends StatefulWidget {
         return new State();
     }
 
+    public static class BurningChyz extends ShareableState {
+        public final PlayerEntity chyz;
+        public BurningChyz(PlayerEntity chyz) {this.chyz = chyz;}
+
+        public static PlayerEntity of(BuildContext context) {
+            return SharedState.getWithoutDependency(context, BurningChyz.class).chyz;
+        }
+    }
+
     public static class State extends WidgetState<TestSelector> {
 
         private double xSkew = 0f;
@@ -150,7 +163,7 @@ public class TestSelector extends StatefulWidget {
         private boolean bouncy = false;
 
         private Tests test = null;
-        private Entity chyz;
+        private PlayerEntity chyz;
 
         @Override
         public void init() {
@@ -204,32 +217,35 @@ public class TestSelector extends StatefulWidget {
                                 mat.rotate((float) Math.toRadians(this.rotat));
                                 return mat;
                             }),
-                            new Center(
-                                switch (this.test) {
-                                    case COUNTER -> new Counter();
-                                    case FLEX -> new FunnySwitchLayout();
-                                    case DRAGGING -> new DragArenaTest();
-                                    case SPLIT_PANE -> new SplitPaneTest();
-                                    case SLIDERS -> new SliderTests();
-                                    case TEXT_INPUT -> new TextInputTest();
-                                    case BURNING_CHYZ -> new BurningChyzTest(this.chyz);
-                                    case SCROLLING -> new ScrollTest();
-                                    case INPUT -> new InputTest();
-                                    case CYCLING -> new CyclingTest();
-                                    case VANILLA -> new VanillaTest();
-                                    case SHARED_STATE -> new SharedStateTest();
-                                    case STACKS -> new StacksTest();
-                                    case GRIDS -> new GridsTest();
-                                    case CONTRIBUTORS -> new ContributorsTest();
-                                    case ANIMATIONS -> new AnimationsTest();
-                                    case NAVIGATOR -> new NavigatorTest();
-                                    case OVERLAY -> new OverlayTest();
-                                    case TEXT -> new TextTest();
-                                    case SPINNY_GHAST -> new SpinnyGhastTest();
-                                    case OPTIMIZATION -> new OptimizationTest(this.chyz);
-                                    case AUTOMATIC_ANIMATION -> new AutomaticAnimationTest();
-                                    case null -> new Center(new Label(Text.literal("select a test")));
-                                }
+                            new SharedState<>(
+                                () -> new BurningChyz(this.chyz),
+                                new Center(
+                                    switch (this.test) {
+                                        case COUNTER -> new Counter();
+                                        case FLEX -> new FunnySwitchLayout();
+                                        case DRAGGING -> new DragArenaTest();
+                                        case SPLIT_PANE -> new SplitPaneTest();
+                                        case SLIDERS -> new SliderTests();
+                                        case TEXT_INPUT -> new TextInputTest();
+                                        case BURNING_CHYZ -> new BurningChyzTest();
+                                        case SCROLLING -> new ScrollTest();
+                                        case INPUT -> new InputTest();
+                                        case CYCLING -> new CyclingTest();
+                                        case VANILLA -> new VanillaTest();
+                                        case SHARED_STATE -> new SharedStateTest();
+                                        case STACKS -> new StacksTest();
+                                        case GRIDS -> new GridsTest();
+                                        case CONTRIBUTORS -> new ContributorsTest();
+                                        case ANIMATIONS -> new AnimationsTest();
+                                        case NAVIGATOR -> new NavigatorTest();
+                                        case OVERLAY -> new OverlayTest();
+                                        case TEXT -> new TextTest();
+                                        case SPINNY_GHAST -> new SpinnyGhastTest();
+                                        case OPTIMIZATION -> new OptimizationTest();
+                                        case AUTOMATIC_ANIMATION -> new AutomaticAnimationTest();
+                                        case null -> new Center(new Label(Text.literal("select a test")));
+                                    }
+                                )
                             )
                         ),
                         new Align(
@@ -325,9 +341,9 @@ public class TestSelector extends StatefulWidget {
                                     new ListenableBuilder(
                                         HudTestWidget.SHOW_TEST_HUD,
                                         listenableContext -> MessageCyclingButton.forBoolean(
-                                            HudTestWidget.SHOW_TEST_HUD.get(),
-                                            Text.literal("hud: " + (HudTestWidget.SHOW_TEST_HUD.get() ? "on" : "off")),
-                                            (newValue, newIndex) -> HudTestWidget.SHOW_TEST_HUD.set(newValue)
+                                            HudTestWidget.SHOW_TEST_HUD.value(),
+                                            Text.literal("hud: " + (HudTestWidget.SHOW_TEST_HUD.value() ? "on" : "off")),
+                                            (newValue, newIndex) -> HudTestWidget.SHOW_TEST_HUD.setValue(newValue)
                                         )
                                     )
                                 ),
@@ -730,7 +746,9 @@ public class TestSelector extends StatefulWidget {
                                 new TextBox(
                                     this.controller1,
                                     widget -> widget
-                                        .placeholder(Text.literal("Soft Wrapping Moment"))
+                                        .suggestion(Text.literal("Soft Wrapping Moment"))
+                                        .formatter(PatternFormatter.deny(Pattern.compile("\\*\\*\\*\\*\\*"), "Penis"))
+                                        .formatter(PatternFormatter.deny(Pattern.compile("\\*\\*\\*\\*"), "cunt"))
                                 )
                             ),
                             new Sized(
@@ -746,12 +764,12 @@ public class TestSelector extends StatefulWidget {
                             ),
                             new Sized(
                                 100.0,
-                                30,
+                                20,
                                 new TextBox(
                                     this.controller3,
                                     widget -> widget
-                                        .maxLines(2)
-                                        .placeholder(Text.literal("2 lines, TILI"))
+                                        .formatter(PatternFormatter.allow(Pattern.compile("[0-9]")))
+                                        .placeholder(Text.literal("only numbers"))
                                 )
                             ),
                             new Sized(
@@ -771,7 +789,7 @@ public class TestSelector extends StatefulWidget {
                                     this.controller5,
                                     widget -> widget
                                         .singleLine()
-                                        .maxCharacters(3)
+                                        .formatter(new MaxLengthFormatter(3))
                                         .placeholder(Text.literal("3 chars, TILI"))
                                 )
                             )
@@ -917,12 +935,6 @@ public class TestSelector extends StatefulWidget {
 
     public static class BurningChyzTest extends StatelessWidget {
 
-        public final Entity chyz;
-
-        public BurningChyzTest(Entity chyz) {
-            this.chyz = chyz;
-        }
-
         @Override
         public Widget build(BuildContext context) {
             return new Row(
@@ -947,7 +959,7 @@ public class TestSelector extends StatefulWidget {
                                             new RecipeViewerExclusionZone(
                                                 new EntityWidget(
                                                     1,
-                                                    this.chyz,
+                                                    BurningChyz.of(context),
                                                     widget -> widget.displayMode(EntityWidget.DisplayMode.CURSOR)
                                                 )
                                             )
@@ -2499,17 +2511,12 @@ public class TestSelector extends StatefulWidget {
 
     public static class OptimizationTest extends StatelessWidget {
 
-        public final Entity chyz;
-        public OptimizationTest(Entity chyz) {
-            this.chyz = chyz;
-        }
-
         @Override
         public Widget build(BuildContext context) {
             var widget = new Sized(
                 128, 128,
                 new EntityWidget(
-                    1.5, this.chyz,
+                    1.5, BurningChyz.of(context),
                     entityWidget -> entityWidget.displayMode(EntityWidget.DisplayMode.CURSOR)
                 )
             );

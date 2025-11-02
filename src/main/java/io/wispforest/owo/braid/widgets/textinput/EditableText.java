@@ -15,14 +15,15 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 
 public class EditableText extends StatefulWidget {
 
     public final TextEditingController controller;
     protected boolean softWrap = true;
     protected boolean autoFocus = false;
-    protected int maxLines = -1;
-    protected int maxCharacters = -1;
+    protected List<TextInput.Formatter> formatters = new ArrayList<>();
     protected Style baseStyle = Style.EMPTY;
     protected Text suggestion = Text.empty();
     protected boolean textShadow = false;
@@ -56,24 +57,20 @@ public class EditableText extends StatefulWidget {
         return this.autoFocus;
     }
 
-    public EditableText maxLines(int maxLines) {
+    public EditableText formatter(TextInput.Formatter formatter) {
         this.assertMutable();
-        this.maxLines = maxLines;
+        this.formatters.add(formatter);
         return this;
     }
 
-    public int maxLines() {
-        return this.maxLines;
-    }
-
-    public EditableText maxCharacters(int maxCharacters) {
+    public EditableText formatters(List<TextInput.Formatter> formatters) {
         this.assertMutable();
-        this.maxCharacters = maxCharacters;
+        this.formatters = formatters;
         return this;
     }
 
-    public int maxCharacters() {
-        return this.maxCharacters;
+    public List<TextInput.Formatter> formatters() {
+        return this.formatters;
     }
 
     public EditableText baseStyle(Style baseStyle) {
@@ -99,7 +96,7 @@ public class EditableText extends StatefulWidget {
     public EditableText placeholder(Text placeholder) {
         this.assertMutable();
         this.suggestionIsPlaceholder = true;
-        return this.suggestion(controller.text.isEmpty() ? placeholder : Text.empty());
+        return this.suggestion(placeholder);
     }
 
     public EditableText textShadow(boolean shadow) {
@@ -115,7 +112,7 @@ public class EditableText extends StatefulWidget {
     public EditableText singleLine() {
         return this
             .softWrap(false)
-            .maxLines(1);
+            .formatter(PatternFormatter.NO_NEWLINES);
     }
 
     @Override
@@ -204,9 +201,10 @@ public class EditableText extends StatefulWidget {
 
         @Override
         public Widget build(BuildContext context) {
+            var widget = this.widget();
             return new Focusable(
-                widget -> widget
-                    .autoFocus(this.widget().autoFocus)
+                focusable -> focusable
+                    .autoFocus(widget.autoFocus)
                     .focusGainedCallback(() -> {
                         this.focused = true;
                         this.restartBlinking();
@@ -219,28 +217,25 @@ public class EditableText extends StatefulWidget {
                         return ((TextInput.Instance) this.inputContext.instance()).onKeyDown(keyCode, modifiers);
                     })
                     .charCallback((charCode, modifiers) -> {
-                        return ((TextInput.Instance) this.inputContext.instance()).onChar(charCode, modifiers);
+                        return ((TextInput.Instance) this.inputContext.instance()).onChar(charCode);
                     }),
                 new Scrollable(
-                    true, this.widget().maxLines != 1,
+                    true, true,
                     this.horizontalController,
                     this.verticalController,
                     ScrollAnimationSettings.NO_ANIMATION,
                     new Builder(inputContext -> {
                         this.inputContext = inputContext;
                         return new TextInput(
-                            this.widget().controller,
+                            widget.controller,
                             this.showCursor,
-                            this.widget().softWrap,
-                            this.widget().maxLines,
-                            this.widget().maxCharacters,
-                            this.widget().baseStyle,
-                            this.widget().textShadow,
-                            this.widget().suggestionIsPlaceholder
-                                ? this.widget().controller.text.isEmpty()
-                                ? this.widget().suggestion
+                            widget.softWrap,
+                            widget.formatters,
+                            widget.baseStyle,
+                            widget.textShadow,
+                            !widget.suggestionIsPlaceholder || widget.controller.value().text().isEmpty()
+                                ? widget.suggestion
                                 : Text.empty()
-                                : this.widget().suggestion
                         );
                     })
                 )
