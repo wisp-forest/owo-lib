@@ -54,6 +54,7 @@
     "ClientLoginNetworkHandlerAccessor",
     "DrawContextMixin",
     "MinecraftClientMixin",
+    "ScreenAccessor",
     "braid.KeyboardMixin",
     "braid.Matrix3x2fStackAccessor",
     "braid.ScreenMixin",
