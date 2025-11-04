@@ -12,27 +12,27 @@ public class Cycler<T> extends StatelessWidget {
     //Psyckler
 
     public final List<T> values;
-    public final int index;
+    public final int currentIndex;
 
     public final boolean wrap;
     public final CyclerCallback<T> onChanged;
 
     public final CyclingWidgetBuilder<T> builder;
 
-    public Cycler(List<T> values, int index, boolean wrap, CyclerCallback<T> onChanged, CyclingWidgetBuilder<T> builder) {
+    public Cycler(List<T> values, T currentValue, boolean wrap, CyclerCallback<T> onChanged, CyclingWidgetBuilder<T> builder) {
         this.values = values;
-        this.index = index;
+        this.currentIndex = this.values.indexOf(currentValue);
         this.wrap = wrap;
         this.onChanged = onChanged;
         this.builder = builder;
     }
 
-    public Cycler(List<T> values, int index, CyclerCallback<T> onChanged, CyclingWidgetBuilder<T> builder) {
-        this(values, index, true, onChanged, builder);
+    public Cycler(List<T> values, T currentValue, CyclerCallback<T> onChanged, CyclingWidgetBuilder<T> builder) {
+        this(values, currentValue, true, onChanged, builder);
     }
 
     public static Cycler<Boolean> forBoolean(boolean value, boolean wrap, CyclerCallback<Boolean> onChanged, CyclingWidgetBuilder<Boolean> builder) {
-        return new Cycler<>(List.of(false, true), value ? 1 : 0, wrap, onChanged, builder);
+        return new Cycler<>(List.of(false, true), value, wrap, onChanged, builder);
     }
 
     public static Cycler<Boolean> forBoolean(boolean value, CyclerCallback<Boolean> onChanged, CyclingWidgetBuilder<Boolean> builder) {
@@ -41,7 +41,7 @@ public class Cycler<T> extends StatelessWidget {
 
     @SuppressWarnings("unchecked")
     public static <T extends Enum<T>> Cycler<T> forEnum(T value, boolean wrap, CyclerCallback<T> onChanged, CyclingWidgetBuilder<T> builder) {
-        return new Cycler<>((List<T>) Arrays.stream(value.getClass().getEnumConstants()).toList(), value.ordinal(), wrap, onChanged, builder);
+        return new Cycler<>((List<T>) Arrays.stream(value.getClass().getEnumConstants()).toList(), value, wrap, onChanged, builder);
     }
 
     public static <T extends Enum<T>> Cycler<T> forEnum(T value, CyclerCallback<T> onChanged, CyclingWidgetBuilder<T> builder) {
@@ -51,11 +51,11 @@ public class Cycler<T> extends StatelessWidget {
     @Override
     public Widget build(BuildContext context) {
         return this.builder.build(
-            this.values.get(this.index),
-            this.index,
+            this.values.get(this.currentIndex),
+            this.currentIndex,
             amount -> {
-                var newIndex = this.wrap ? MathHelper.floorMod(this.index + amount, this.values.size()) : MathHelper.clamp(this.index + amount, 0, this.values.size() - 1);
-                if (newIndex == this.index) return false;
+                var newIndex = this.wrap ? MathHelper.floorMod(this.currentIndex + amount, this.values.size()) : MathHelper.clamp(this.currentIndex + amount, 0, this.values.size() - 1);
+                if (newIndex == this.currentIndex) return false;
                 this.onChanged.cycle(this.values.get(newIndex), newIndex);
                 return true;
             }

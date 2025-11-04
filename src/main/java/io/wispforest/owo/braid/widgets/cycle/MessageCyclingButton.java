@@ -15,35 +15,34 @@ import java.util.List;
 public class MessageCyclingButton<T> extends StatelessWidget {
 
     public final List<T> values;
-    public final int index;
+    public final T currentValue;
 
     public final boolean wrap;
     public final Text text;
     public final @Nullable Cycler.CyclerCallback<T> onChanged;
 
-
-    public MessageCyclingButton(List<T> values, int index, boolean wrap, Text text, @Nullable Cycler.CyclerCallback<T> onChanged) {
+    public MessageCyclingButton(List<T> values, T currentValue, boolean wrap, Text text, @Nullable Cycler.CyclerCallback<T> onChanged) {
         this.values = values;
-        this.index = index;
+        this.currentValue = currentValue;
         this.wrap = wrap;
         this.text = text;
         this.onChanged = onChanged;
     }
 
-    public MessageCyclingButton(List<T> values, int index, boolean wrap, Text text, Cycler.CyclerCallback<T> onChanged, boolean active) {
-        this(values, index, wrap, text, active ? onChanged : null);
+    public MessageCyclingButton(List<T> values, T currentValue, boolean wrap, Text text, Cycler.CyclerCallback<T> onChanged, boolean active) {
+        this(values, currentValue, wrap, text, active ? onChanged : null);
     }
 
-    public MessageCyclingButton(List<T> values, int index, Text text, @Nullable Cycler.CyclerCallback<T> onChanged) {
-        this(values, index, true, text, onChanged);
+    public MessageCyclingButton(List<T> values, T currentValue, Text text, @Nullable Cycler.CyclerCallback<T> onChanged) {
+        this(values, currentValue, true, text, onChanged);
     }
 
-    public MessageCyclingButton(List<T> values, int index, Text text, Cycler.CyclerCallback<T> onChanged, boolean active) {
-        this(values, index, true, text, onChanged, active);
+    public MessageCyclingButton(List<T> values, T currentValue, Text text, Cycler.CyclerCallback<T> onChanged, boolean active) {
+        this(values, currentValue, true, text, onChanged, active);
     }
 
     public static MessageCyclingButton<Boolean> forBoolean(boolean value, Text text, @Nullable Cycler.CyclerCallback<Boolean> onChanged) {
-        return new MessageCyclingButton<>(List.of(false, true), value ? 1 : 0, true, text, onChanged);
+        return new MessageCyclingButton<>(List.of(false, true), value, true, text, onChanged);
     }
 
     public static MessageCyclingButton<Boolean> forBoolean(boolean value, Text text, Cycler.CyclerCallback<Boolean> onChanged, boolean active) {
@@ -51,7 +50,7 @@ public class MessageCyclingButton<T> extends StatelessWidget {
     }
 
     public static <T extends Enum<T>> MessageCyclingButton<T> forEnum(T value, boolean wrap, Text text, @Nullable Cycler.CyclerCallback<T> onChanged) {
-        return new MessageCyclingButton<>(List.of(value.getDeclaringClass().getEnumConstants()), value.ordinal(), wrap, text, onChanged);
+        return new MessageCyclingButton<>(List.of(value.getDeclaringClass().getEnumConstants()), value, wrap, text, onChanged);
     }
 
     public static <T extends Enum<T>> MessageCyclingButton<T> forEnum(T value, boolean wrap, Text text, Cycler.CyclerCallback<T> onChanged, boolean active) {
@@ -70,7 +69,7 @@ public class MessageCyclingButton<T> extends StatelessWidget {
     public Widget build(BuildContext context) {
         return new CyclingButton<>(
             this.values,
-            this.index,
+            this.currentValue,
             this.wrap,
             this.onChanged,
             //TODO: abstract away the million places where a ternary operator is used to determine the label style for a possibly disabled button

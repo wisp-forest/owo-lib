@@ -37,11 +37,11 @@ public class CyclingClickable extends StatelessWidget {
 
         return new MouseArea(
             widget ->
-                widget.scrollCallback((horizontal, vertical) -> this.cycle.forScroll(vertical))
-                    .cursorStyle(CursorStyle.HAND),
+                widget.scrollCallback((horizontal, vertical) -> this.cycle.forScroll(vertical)),
             new Interactable(
                 SHORTCUTS,
                 widget -> widget
+                    .cursorStyle(CursorStyle.HAND)
                     .skipTraversal(this.skipFocusTraversal)
                     .addCallbackAction(
                         AdjustIntent.class,

@@ -1311,7 +1311,7 @@ public class TestSelector extends StatefulWidget {
                                 (value, index) -> this.setState(() -> this.selectedBoolean = value)
                             ),
                             new MessageCyclingButton<>(
-                                List.of(false, true), this.selectedBooleanNoWrap ? 1 : 0, false,
+                                List.of(false, true), this.selectedBooleanNoWrap, false,
                                 Text.literal(this.selectedBooleanNoWrap ? "true" : "false"),
                                 (value, index) -> this.setState(() -> this.selectedBooleanNoWrap = value)
                             ),
@@ -1319,13 +1319,13 @@ public class TestSelector extends StatefulWidget {
                             new Label(Text.literal("String")),
                             new MessageCyclingButton<>(
                                 coolStrings,
-                                coolStrings.indexOf(this.selectedString),
+                                this.selectedString,
                                 Text.literal(this.selectedString),
                                 (value, index) -> this.setState(() -> this.selectedString = value)
                             ),
                             new MessageCyclingButton<>(
                                 coolStrings,
-                                coolStrings.indexOf(this.selectedStringNoWrap),
+                                this.selectedStringNoWrap,
                                 false,
                                 Text.literal(this.selectedStringNoWrap),
                                 (value, index) -> this.setState(() -> this.selectedStringNoWrap = value)

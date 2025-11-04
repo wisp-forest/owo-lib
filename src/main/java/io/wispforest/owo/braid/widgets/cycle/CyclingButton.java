@@ -14,33 +14,33 @@ import java.util.List;
 public class CyclingButton<T> extends StatelessWidget {
 
     public final List<T> values;
-    public final int index;
+    public final T currentValue;
     public final boolean wrap;
     public final @Nullable Cycler.CyclerCallback<T> onChanged;
     public final Widget child;
 
-    public CyclingButton(List<T> values, int index, boolean wrap, @Nullable Cycler.CyclerCallback<T> onChanged, Widget child) {
+    public CyclingButton(List<T> values, T currentValue, boolean wrap, @Nullable Cycler.CyclerCallback<T> onChanged, Widget child) {
         this.values = values;
-        this.index = index;
+        this.currentValue = currentValue;
         this.wrap = wrap;
         this.onChanged = onChanged;
         this.child = child;
     }
 
-    public CyclingButton(List<T> values, int index, boolean wrap, Cycler.CyclerCallback<T> onChanged, boolean active, Widget child) {
-        this(values, index, wrap, active ? onChanged : null, child);
+    public CyclingButton(List<T> values, T currentValue, boolean wrap, Cycler.CyclerCallback<T> onChanged, boolean active, Widget child) {
+        this(values, currentValue, wrap, active ? onChanged : null, child);
     }
 
-    public CyclingButton(List<T> values, int index, @Nullable Cycler.CyclerCallback<T> onChanged, Widget child) {
-        this(values, index, true, onChanged, child);
+    public CyclingButton(List<T> values, T currentValue, @Nullable Cycler.CyclerCallback<T> onChanged, Widget child) {
+        this(values, currentValue, true, onChanged, child);
     }
 
-    public CyclingButton(List<T> values, int index, Cycler.CyclerCallback<T> onChanged, boolean active, Widget child) {
-        this(values, index, true, active ? onChanged : null, child);
+    public CyclingButton(List<T> values, T currentValue, Cycler.CyclerCallback<T> onChanged, boolean active, Widget child) {
+        this(values, currentValue, true, active ? onChanged : null, child);
     }
 
     public static CyclingButton<Boolean> forBoolean(boolean value, @Nullable Cycler.CyclerCallback<Boolean> onChanged, Widget child) {
-        return new CyclingButton<>(List.of(false, true), value ? 1 : 0, true, onChanged, child);
+        return new CyclingButton<>(List.of(false, true), value, true, onChanged, child);
     }
 
     public static CyclingButton<Boolean> forBoolean(boolean value, Cycler.CyclerCallback<Boolean> onChanged, boolean active, Widget child) {
@@ -48,7 +48,7 @@ public class CyclingButton<T> extends StatelessWidget {
     }
 
     public static <T extends Enum<T>> CyclingButton<T> forEnum(T value, boolean wrap, @Nullable Cycler.CyclerCallback<T> onChanged, Widget child) {
-        return new CyclingButton<>(List.of(value.getDeclaringClass().getEnumConstants()), value.ordinal(), wrap, onChanged, child);
+        return new CyclingButton<>(List.of(value.getDeclaringClass().getEnumConstants()), value, wrap, onChanged, child);
     }
 
     public static <T extends Enum<T>> CyclingButton<T> forEnum(T value, boolean wrap, Cycler.CyclerCallback<T> onChanged, boolean active, Widget child) {
@@ -74,7 +74,7 @@ public class CyclingButton<T> extends StatelessWidget {
 
             content = new Cycler<>(
                 this.values,
-                this.index,
+                this.currentValue,
                 this.wrap,
                 this.onChanged,
                 (currentValue, currentIndex, cycle) -> {
