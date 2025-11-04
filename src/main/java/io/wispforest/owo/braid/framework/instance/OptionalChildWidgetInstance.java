@@ -55,17 +55,17 @@ public abstract class OptionalChildWidgetInstance<T extends InstanceWidget> exte
 
         @Override
         protected double measureIntrinsicWidth(double height) {
-            return this.child != null ? this.child.measureIntrinsicWidth(height) : 0;
+            return this.child != null ? this.child.getIntrinsicWidth(height) : 0;
         }
 
         @Override
         protected double measureIntrinsicHeight(double width) {
-            return this.child != null ? this.child.measureIntrinsicHeight(width) : 0;
+            return this.child != null ? this.child.getIntrinsicHeight(width) : 0;
         }
 
         @Override
         protected OptionalDouble measureBaselineOffset() {
-            return this.child != null ? this.child.measureBaselineOffset() : OptionalDouble.empty();
+            return this.child != null ? this.child.getBaselineOffset() : OptionalDouble.empty();
         }
     }
 }
