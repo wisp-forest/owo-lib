@@ -24,7 +24,7 @@ public class ButtonPanel extends StatelessWidget {
             (innerContext, hovered, child) -> {
                 return new Panel(
                     this.active
-                        ? (hovered || Focusable.levelOf(context) == FocusLevel.HIGHLIGHT)
+                        ? (hovered || Focusable.shouldShowHighlight(context))
                         ? ButtonComponent.HOVERED_TEXTURE
                         : ButtonComponent.ACTIVE_TEXTURE
                         : ButtonComponent.DISABLED_TEXTURE,

@@ -12,7 +12,8 @@ import io.wispforest.owo.braid.widgets.basic.Box;
 import io.wispforest.owo.braid.widgets.basic.Center;
 import io.wispforest.owo.braid.widgets.basic.Padding;
 import io.wispforest.owo.braid.widgets.basic.Sized;
-import io.wispforest.owo.braid.widgets.checkbox.BraidCheckbox;
+import io.wispforest.owo.braid.widgets.checkbox.Checkbox;
+import io.wispforest.owo.braid.widgets.checkbox.CheckboxStyle;
 import io.wispforest.owo.braid.widgets.flex.*;
 import io.wispforest.owo.braid.widgets.grid.Grid;
 import io.wispforest.owo.braid.widgets.label.Label;
@@ -64,7 +65,8 @@ public class InstanceDetails extends StatefulWidget {
                         new Row(
                             MainAxisAlignment.START,
                             CrossAxisAlignment.CENTER,
-                            new BraidCheckbox(
+                            new Checkbox(
+                                CheckboxStyle.BRAID,
                                 instance.debugDrawVisualizers,
                                 nowChecked -> setState(() -> {
                                     instance.debugDrawVisualizers = nowChecked;

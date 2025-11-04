@@ -16,9 +16,9 @@ import io.wispforest.owo.braid.widgets.animated.AnimatedBox;
 import io.wispforest.owo.braid.widgets.animated.AnimatedPadding;
 import io.wispforest.owo.braid.widgets.basic.*;
 import io.wispforest.owo.braid.widgets.button.*;
-import io.wispforest.owo.braid.widgets.checkbox.BraidCheckbox;
 import io.wispforest.owo.braid.widgets.checkbox.Checkbox;
-import io.wispforest.owo.braid.widgets.checkbox.RawCheckbox;
+import io.wispforest.owo.braid.widgets.checkbox.CheckboxStyle;
+import io.wispforest.owo.braid.widgets.checkbox.DefaultCheckboxStyle;
 import io.wispforest.owo.braid.widgets.combobox.ComboBox;
 import io.wispforest.owo.braid.widgets.cycle.MessageCyclingButton;
 import io.wispforest.owo.braid.widgets.drag.DragArena;
@@ -203,89 +203,92 @@ public class TestSelector extends StatefulWidget {
                 )
             );
 
-            return new Stack(
-                Alignment.CENTER,
-                new RotatedLayout(
-                    this.fliptat,
-                    new Stack(
-                        Alignment.CENTER,
-                        new Transform(
-                            Util.make(() -> {
-                                var mat = new Matrix3x2f();
-                                mat.m01 = (float) Math.tan(this.xSkew);
-                                mat.m10 = (float) Math.tan(this.ySkew);
-                                mat.rotate((float) Math.toRadians(this.rotat));
-                                return mat;
-                            }),
-                            new SharedState<>(
-                                () -> new BurningChyz(this.chyz),
-                                new Center(
-                                    switch (this.test) {
-                                        case COUNTER -> new Counter();
-                                        case FLEX -> new FunnySwitchLayout();
-                                        case DRAGGING -> new DragArenaTest();
-                                        case SPLIT_PANE -> new SplitPaneTest();
-                                        case SLIDERS -> new SliderTests();
-                                        case TEXT_INPUT -> new TextInputTest();
-                                        case BURNING_CHYZ -> new BurningChyzTest();
-                                        case SCROLLING -> new ScrollTest();
-                                        case INPUT -> new InputTest();
-                                        case CYCLING -> new CyclingTest();
-                                        case VANILLA -> new VanillaTest();
-                                        case SHARED_STATE -> new SharedStateTest();
-                                        case STACKS -> new StacksTest();
-                                        case GRIDS -> new GridsTest();
-                                        case CONTRIBUTORS -> new ContributorsTest();
-                                        case ANIMATIONS -> new AnimationsTest();
-                                        case NAVIGATOR -> new NavigatorTest();
-                                        case OVERLAY -> new OverlayTest();
-                                        case TEXT -> new TextTest();
-                                        case SPINNY_GHAST -> new SpinnyGhastTest();
-                                        case OPTIMIZATION -> new OptimizationTest();
-                                        case AUTOMATIC_ANIMATION -> new AutomaticAnimationTest();
-                                        case null -> new Center(new Label(Text.literal("select a test")));
-                                    }
+            return new DefaultCheckboxStyle(
+                new CheckboxStyle(null, null, SoundEvents.ENTITY_ENDER_DRAGON_FLAP),
+                new Stack(
+                    Alignment.CENTER,
+                    new RotatedLayout(
+                        this.fliptat,
+                        new Stack(
+                            Alignment.CENTER,
+                            new Transform(
+                                Util.make(() -> {
+                                    var mat = new Matrix3x2f();
+                                    mat.m01 = (float) Math.tan(this.xSkew);
+                                    mat.m10 = (float) Math.tan(this.ySkew);
+                                    mat.rotate((float) Math.toRadians(this.rotat));
+                                    return mat;
+                                }),
+                                new SharedState<>(
+                                    () -> new BurningChyz(this.chyz),
+                                    new Center(
+                                        switch (this.test) {
+                                            case COUNTER -> new Counter();
+                                            case FLEX -> new FunnySwitchLayout();
+                                            case DRAGGING -> new DragArenaTest();
+                                            case SPLIT_PANE -> new SplitPaneTest();
+                                            case SLIDERS -> new SliderTests();
+                                            case TEXT_INPUT -> new TextInputTest();
+                                            case BURNING_CHYZ -> new BurningChyzTest();
+                                            case SCROLLING -> new ScrollTest();
+                                            case INPUT -> new InputTest();
+                                            case CYCLING -> new CyclingTest();
+                                            case VANILLA -> new VanillaTest();
+                                            case SHARED_STATE -> new SharedStateTest();
+                                            case STACKS -> new StacksTest();
+                                            case GRIDS -> new GridsTest();
+                                            case CONTRIBUTORS -> new ContributorsTest();
+                                            case ANIMATIONS -> new AnimationsTest();
+                                            case NAVIGATOR -> new NavigatorTest();
+                                            case OVERLAY -> new OverlayTest();
+                                            case TEXT -> new TextTest();
+                                            case SPINNY_GHAST -> new SpinnyGhastTest();
+                                            case OPTIMIZATION -> new OptimizationTest();
+                                            case AUTOMATIC_ANIMATION -> new AutomaticAnimationTest();
+                                            case null -> new Center(new Label(Text.literal("select a test")));
+                                        }
+                                    )
                                 )
-                            )
-                        ),
-                        new Align(
-                            Alignment.LEFT,
-                            new Padding(
-                                Insets.vertical(50).withLeft(5),
-                                new HitTestTrap(
-                                    new Panel(
-                                        Panel.VANILLA_LIGHT,
-                                        new Padding(
-                                            Insets.all(8),
-                                            new IntrinsicWidth(
-                                                new Column(
-                                                    new Flexible(
-                                                        new Panel(
-                                                            Panel.VANILLA_INSET,
-                                                            new Padding(
-                                                                Insets.all(2),
-                                                                new VerticallyScrollable(
-                                                                    null,
-                                                                    this.bouncy
-                                                                        ? new ScrollAnimationSettings(Duration.ofMillis(750), Easing.OUT_BOUNCE)
-                                                                        : new ScrollAnimationSettings(Duration.ofMillis(250), Easing.OUT_EXPO),
+                            ),
+                            new Align(
+                                Alignment.LEFT,
+                                new Padding(
+                                    Insets.vertical(50).withLeft(5),
+                                    new HitTestTrap(
+                                        new Panel(
+                                            Panel.VANILLA_LIGHT,
+                                            new Padding(
+                                                Insets.all(8),
+                                                new IntrinsicWidth(
+                                                    new Column(
+                                                        new Flexible(
+                                                            new Panel(
+                                                                Panel.VANILLA_INSET,
+                                                                new Padding(
+                                                                    Insets.all(2),
+                                                                    new VerticallyScrollable(
+                                                                        null,
+                                                                        this.bouncy
+                                                                            ? new ScrollAnimationSettings(Duration.ofMillis(750), Easing.OUT_BOUNCE)
+                                                                            : new ScrollAnimationSettings(Duration.ofMillis(250), Easing.OUT_EXPO),
 
-                                                                    new Column(
-                                                                        new Padding(Insets.all(2)),
-                                                                        buttons
+                                                                        new Column(
+                                                                            new Padding(Insets.all(2)),
+                                                                            buttons
+                                                                        )
                                                                     )
                                                                 )
                                                             )
-                                                        )
-                                                    ),
-                                                    new Padding(Insets.vertical(3)),
-                                                    new Row(
-                                                        MainAxisAlignment.SPACE_AROUND,
-                                                        CrossAxisAlignment.CENTER,
-                                                        new BraidCheckbox(this.bouncy, nowChecked -> this.setState(() -> this.bouncy = nowChecked)),
-                                                        new Label(
-                                                            LabelStyle.SHADOW,
-                                                            true, Text.literal("bouncy?")
+                                                        ),
+                                                        new Padding(Insets.vertical(3)),
+                                                        new Row(
+                                                            MainAxisAlignment.SPACE_AROUND,
+                                                            CrossAxisAlignment.CENTER,
+                                                            new Checkbox(CheckboxStyle.BRAID, this.bouncy, nowChecked -> this.setState(() -> this.bouncy = nowChecked)),
+                                                            new Label(
+                                                                LabelStyle.SHADOW,
+                                                                true, Text.literal("bouncy?")
+                                                            )
                                                         )
                                                     )
                                                 )
@@ -295,131 +298,131 @@ public class TestSelector extends StatefulWidget {
                                 )
                             )
                         )
-                    )
-                ),
-                new Align(
-                    Alignment.BOTTOM_RIGHT,
-                    new Row(
-                        MainAxisAlignment.START,
-                        CrossAxisAlignment.END,
-                        new Padding(
-                            Insets.all(5),
-                            new SurfaceDimensions()
-                        ),
-                        new Sized(
-                            75, null,
-                            new Column(
-                                new Sized(
-                                    75, 20,
-                                    new FocusPolicy(
-                                        false,
-                                        new Grid(
-                                            LayoutAxis.VERTICAL,
-                                            4,
-                                            Grid.CellFit.tight(),
-                                            new MessageButton(
-                                                Text.literal("↑"),
-                                                () -> Actions.invoke(Focusable.of(context).primaryFocus().context(), new Incrementor.IncrementIntent(LayoutAxis.VERTICAL, 1))
-                                            ),
-                                            new MessageButton(
-                                                Text.literal("↓"),
-                                                () -> Actions.invoke(Focusable.of(context).primaryFocus().context(), new Incrementor.IncrementIntent(LayoutAxis.VERTICAL, -1))
-                                            ),
-                                            new MessageButton(
-                                                Text.literal("←"),
-                                                () -> Actions.invoke(Focusable.of(context).primaryFocus().context(), new Incrementor.IncrementIntent(LayoutAxis.HORIZONTAL, -1))
-                                            ),
-                                            new MessageButton(
-                                                Text.literal("→"),
-                                                () -> Actions.invoke(Focusable.of(context).primaryFocus().context(), new Incrementor.IncrementIntent(LayoutAxis.HORIZONTAL, 1))
+                    ),
+                    new Align(
+                        Alignment.BOTTOM_RIGHT,
+                        new Row(
+                            MainAxisAlignment.START,
+                            CrossAxisAlignment.END,
+                            new Padding(
+                                Insets.all(5),
+                                new SurfaceDimensions()
+                            ),
+                            new Sized(
+                                75, null,
+                                new Column(
+                                    new Sized(
+                                        75, 20,
+                                        new FocusPolicy(
+                                            false,
+                                            new Grid(
+                                                LayoutAxis.VERTICAL,
+                                                4,
+                                                Grid.CellFit.tight(),
+                                                new MessageButton(
+                                                    Text.literal("↑"),
+                                                    () -> Actions.invoke(Focusable.of(context).primaryFocus().context(), new Incrementor.IncrementIntent(LayoutAxis.VERTICAL, 1))
+                                                ),
+                                                new MessageButton(
+                                                    Text.literal("↓"),
+                                                    () -> Actions.invoke(Focusable.of(context).primaryFocus().context(), new Incrementor.IncrementIntent(LayoutAxis.VERTICAL, -1))
+                                                ),
+                                                new MessageButton(
+                                                    Text.literal("←"),
+                                                    () -> Actions.invoke(Focusable.of(context).primaryFocus().context(), new Incrementor.IncrementIntent(LayoutAxis.HORIZONTAL, -1))
+                                                ),
+                                                new MessageButton(
+                                                    Text.literal("→"),
+                                                    () -> Actions.invoke(Focusable.of(context).primaryFocus().context(), new Incrementor.IncrementIntent(LayoutAxis.HORIZONTAL, 1))
+                                                )
                                             )
                                         )
-                                    )
-                                ),
-                                new Sized(
-                                    75, 20,
-                                    new ListenableBuilder(
-                                        HudTestWidget.SHOW_TEST_HUD,
-                                        listenableContext -> MessageCyclingButton.forBoolean(
-                                            HudTestWidget.SHOW_TEST_HUD.value(),
-                                            Text.literal("hud: " + (HudTestWidget.SHOW_TEST_HUD.value() ? "on" : "off")),
-                                            (newValue, newIndex) -> HudTestWidget.SHOW_TEST_HUD.setValue(newValue)
+                                    ),
+                                    new Sized(
+                                        75, 20,
+                                        new ListenableBuilder(
+                                            HudTestWidget.SHOW_TEST_HUD,
+                                            listenableContext -> MessageCyclingButton.forBoolean(
+                                                HudTestWidget.SHOW_TEST_HUD.value(),
+                                                Text.literal("hud: " + (HudTestWidget.SHOW_TEST_HUD.value() ? "on" : "off")),
+                                                (newValue, newIndex) -> HudTestWidget.SHOW_TEST_HUD.setValue(newValue)
+                                            )
                                         )
-                                    )
-                                ),
-                                new Sized(
-                                    75, 20,
-                                    new MessageButton(
-                                        Text.literal("yum"),
-                                        () -> BraidToast.show(
-                                            Duration.ofSeconds(5),
-                                            null,
+                                    ),
+                                    new Sized(
+                                        75, 20,
+                                        new MessageButton(
+                                            Text.literal("yum"),
+                                            () -> BraidToast.show(
+                                                Duration.ofSeconds(5),
+                                                null,
+                                                new Row(
+                                                    Stream.generate(() -> new Amogus(
+                                                        new Box(Color.randomHue()),
+                                                        new Box(Color.WHITE),
+                                                        8
+                                                    )).limit(100).toList()
+                                                )
+                                            )
+                                        )
+                                    ),
+                                    new Sized(
+                                        75, 20,
+                                        new MessageButton(
+                                            Text.literal("reset"),
+                                            () -> this.setState(() -> {
+                                                this.xSkew = 0f;
+                                                this.ySkew = 0f;
+                                                this.rotat = 0f;
+                                                this.fliptat = 0;
+                                            })
+                                        )
+                                    ),
+                                    new Sized(
+                                        75,
+                                        null,
+                                        new Column(
+                                            new Padding(
+                                                Insets.top(5),
+                                                new Label(Text.literal("fliptat:"))
+                                            ),
                                             new Row(
-                                                Stream.generate(() -> new Amogus(
-                                                    new Box(Color.randomHue()),
-                                                    new Box(Color.WHITE),
-                                                    8
-                                                )).limit(100).toList()
+                                                MainAxisAlignment.START,
+                                                CrossAxisAlignment.CENTER,
+                                                new Flexible(
+                                                    new MessageButton(Text.literal("-"), () -> this.setState(() -> this.fliptat -= 1))
+                                                ),
+                                                new Flexible(
+                                                    new Label(Text.literal(String.valueOf(this.fliptat)))
+                                                ),
+                                                new Flexible(
+                                                    new MessageButton(Text.literal("+"), () -> this.setState(() -> this.fliptat += 1))
+                                                )
                                             )
                                         )
-                                    )
-                                ),
-                                new Sized(
-                                    75, 20,
-                                    new MessageButton(
-                                        Text.literal("reset"),
-                                        () -> this.setState(() -> {
-                                            this.xSkew = 0f;
-                                            this.ySkew = 0f;
-                                            this.rotat = 0f;
-                                            this.fliptat = 0;
-                                        })
-                                    )
-                                ),
-                                new Sized(
-                                    75,
-                                    null,
-                                    new Column(
-                                        new Padding(
-                                            Insets.top(5),
-                                            new Label(Text.literal("fliptat:"))
-                                        ),
-                                        new Row(
-                                            MainAxisAlignment.START,
-                                            CrossAxisAlignment.CENTER,
-                                            new Flexible(
-                                                new MessageButton(Text.literal("-"), () -> this.setState(() -> this.fliptat -= 1))
-                                            ),
-                                            new Flexible(
-                                                new Label(Text.literal(String.valueOf(this.fliptat)))
-                                            ),
-                                            new Flexible(
-                                                new MessageButton(Text.literal("+"), () -> this.setState(() -> this.fliptat += 1))
-                                            )
+                                    ),
+                                    new Sized(
+                                        75, 20,
+                                        new MessageSlider(
+                                            rotat,
+                                            widget -> widget.range(0, 360).incrementStep(1),
+                                            value -> this.setState(() -> this.rotat = value),
+                                            Text.literal("rotat: " + formatDouble(this.rotat))
                                         )
-                                    )
-                                ),
-                                new Sized(
-                                    75, 20,
-                                    new MessageSlider(
-                                        rotat,
-                                        widget -> widget.range(0, 360).incrementStep(1),
-                                        value -> this.setState(() -> this.rotat = value),
-                                        Text.literal("rotat: " + formatDouble(this.rotat))
-                                    )
-                                ),
-                                new Sized(
-                                    75.0,
-                                    75.0,
-                                    new MessageXlyder(
-                                        this.xSkew, this.ySkew,
-                                        xlyder -> xlyder.range(-.75, .75),
+                                    ),
+                                    new Sized(
+                                        75.0,
+                                        75.0,
+                                        new MessageXlyder(
+                                            this.xSkew, this.ySkew,
+                                            xlyder -> xlyder.range(-.75, .75),
 
-                                        (xValue, yValue) -> this.setState(() -> {
-                                            this.xSkew = xValue;
-                                            this.ySkew = yValue;
-                                        }),
-                                        Text.literal("x skew: " + (formatDouble(this.xSkew)) + "\ny skew: " + (formatDouble(this.ySkew)))
+                                            (xValue, yValue) -> this.setState(() -> {
+                                                this.xSkew = xValue;
+                                                this.ySkew = yValue;
+                                            }),
+                                            Text.literal("x skew: " + (formatDouble(this.xSkew)) + "\ny skew: " + (formatDouble(this.ySkew)))
+                                        )
                                     )
                                 )
                             )
@@ -838,24 +841,28 @@ public class TestSelector extends StatefulWidget {
                         new Padding(Insets.vertical(5)),
                         List.of(
                             new LabelBox(
-                                new RawCheckbox(
-                                    this.checked,
-                                    this::onUpdate,
-                                    new Sized(
-                                        20,
-                                        20,
-                                        new EntityWidget(1.5d, this.chyz, widget -> widget.displayMode(EntityWidget.DisplayMode.CURSOR))
-                                    ),
-                                    new Padding(Insets.none())
+                                new Checkbox(
+                                    new CheckboxStyle(
+                                        active -> new Sized(
+                                            20,
+                                            20,
+                                            new EntityWidget(1.5d, this.chyz, widget -> widget.displayMode(EntityWidget.DisplayMode.CURSOR))
+                                        ),
+                                        EmptyWidget.INSTANCE,
+                                        null
+                                    ), this.checked,
+                                    this::onUpdate
                                 ),
                                 "chyzbox"
                             ),
                             new LabelBox(
-                                new RawCheckbox(
-                                    this.checked,
-                                    this::onUpdate,
-                                    new SpriteWidget(Checkbox.TEXTURE),
-                                    new SpriteWidget(new SpriteIdentifier(SpriteWidget.GUI_ATLAS_ID, Identifier.of("uwu", "czechbox")))
+                                new Checkbox(
+                                    new CheckboxStyle(
+                                        null,
+                                        new Center(new SpriteWidget(new SpriteIdentifier(SpriteWidget.GUI_ATLAS_ID, Identifier.of("uwu", "czechbox")))),
+                                        null
+                                    ), this.checked,
+                                    this::onUpdate
                                 ),
                                 this.checked ? "czechbox" : "checkbox"
                             ),
@@ -864,7 +871,7 @@ public class TestSelector extends StatefulWidget {
                                 "checkbox"
                             ),
                             new LabelBox(
-                                new BraidCheckbox(this.checked, this::onUpdate),
+                                new Checkbox(CheckboxStyle.BRAID, this.checked, this::onUpdate),
                                 "smolbox"
                             )
                         )
@@ -1355,7 +1362,7 @@ public class TestSelector extends StatefulWidget {
                     new Row(
                         MainAxisAlignment.CENTER,
                         CrossAxisAlignment.CENTER,
-                        new BraidCheckbox(this.altButtons, nowChecked -> this.setState(() -> this.altButtons = nowChecked)),
+                        new Checkbox(CheckboxStyle.BRAID, this.altButtons, nowChecked -> this.setState(() -> this.altButtons = nowChecked)),
                         new Padding(
                             Insets.left(5),
                             Label.literal("alternate buttons")

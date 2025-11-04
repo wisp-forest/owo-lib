@@ -12,38 +12,38 @@ import java.util.function.BooleanSupplier;
 
 public class Button extends StatelessWidget {
 
-    public final @Nullable BooleanSupplier onClick;
     public final @Nullable ButtonStyle style;
+    public final @Nullable BooleanSupplier onClick;
     public final Widget child;
 
-    public Button(@Nullable BooleanSupplier onClick, @Nullable ButtonStyle style, Widget child) {
+    public Button(@Nullable ButtonStyle style, @Nullable BooleanSupplier onClick, Widget child) {
         this.onClick = onClick;
         this.style = style;
         this.child = child;
     }
 
-    public Button(@Nullable Runnable onClick, @Nullable ButtonStyle style, Widget child) {
-        this(Clickable.alwaysClick(onClick), style, child);
+    public Button(@Nullable ButtonStyle style, @Nullable Runnable onClick, Widget child) {
+        this(style, Clickable.alwaysClick(onClick), child);
     }
 
     public Button(@Nullable BooleanSupplier onClick, Widget child) {
-        this(onClick, null, child);
+        this(null, onClick, child);
     }
 
     public Button(@Nullable Runnable onClick, Widget child) {
         this(Clickable.alwaysClick(onClick), child);
     }
 
-    public Button(boolean active, BooleanSupplier onClick, @Nullable ButtonStyle style, Widget child) {
-        this(active ? onClick : null, style, child);
+    public Button(@Nullable ButtonStyle style, boolean active, BooleanSupplier onClick, Widget child) {
+        this(style, active ? onClick : null, child);
     }
 
-    public Button(boolean active, Runnable onClick, @Nullable ButtonStyle style, Widget child) {
-        this(active, Clickable.alwaysClick(onClick), style, child);
+    public Button(@Nullable ButtonStyle style, boolean active, Runnable onClick, Widget child) {
+        this(style, active, Clickable.alwaysClick(onClick), child);
     }
 
     public Button(boolean active, BooleanSupplier onClick, Widget child) {
-        this(active, onClick, null, child);
+        this(null, active, onClick, child);
     }
 
     public Button(boolean active, Runnable onClick, Widget child) {
@@ -69,9 +69,11 @@ public class Button extends StatelessWidget {
             ? effectiveStyle.builder().build(!disabled, content)
             : new ButtonPanel(!disabled, content);
 
-        return !disabled
-            ? new Clickable(this.onClick, effectiveStyle.clickSound(), content)
-            : content;
+        return new Clickable(
+            this.onClick,
+            effectiveStyle.clickSound(),
+            content
+        );
     }
 }
 
