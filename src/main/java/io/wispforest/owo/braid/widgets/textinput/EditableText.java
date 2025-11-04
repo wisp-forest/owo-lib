@@ -263,7 +263,8 @@ public class EditableText extends StatefulWidget {
                         this.focused = false;
                         this.stopBlinking();
                     })
-                    .charCallback((charCode, modifiers) -> this.instance().onChar(charCode)),
+                    .charCallback((charCode, modifiers) -> this.instance().onChar(charCode))
+                    .skipTraversal(true),
                 new Actions(
                     actions -> actions
                         .autoFocus(widget.autoFocus)
