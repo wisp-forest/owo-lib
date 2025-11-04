@@ -7,7 +7,7 @@ import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.*;
-import io.wispforest.owo.braid.widgets.button.RawButton;
+import io.wispforest.owo.braid.widgets.button.Clickable;
 import io.wispforest.owo.braid.widgets.flex.Column;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
@@ -118,8 +118,8 @@ class ComboBoxButtons<T> extends StatelessWidget {
 
             @Override
             public Widget build(BuildContext context) {
-                return new RawButton(
-                    () -> this.widget().onSelect.onSelect(this.widget().option),
+                return new Clickable(
+                    Clickable.alwaysClick(() -> this.widget().onSelect.onSelect(this.widget().option)),
                     new HoverableBuilder(
                         (hoverableContext, hovered) -> {
                             var highlighted = hovered || this.widget().highlighted;

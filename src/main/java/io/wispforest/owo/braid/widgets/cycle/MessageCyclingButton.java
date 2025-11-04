@@ -42,7 +42,6 @@ public class MessageCyclingButton<T> extends StatelessWidget {
         this(values, index, true, text, onChanged, active);
     }
 
-
     public static MessageCyclingButton<Boolean> forBoolean(boolean value, Text text, @Nullable Cycler.CyclerCallback<Boolean> onChanged) {
         return new MessageCyclingButton<>(List.of(false, true), value ? 1 : 0, true, text, onChanged);
     }

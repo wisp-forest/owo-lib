@@ -1,11 +1,9 @@
 package io.wispforest.owo.braid.widgets.button;
 
-import io.wispforest.owo.braid.core.Insets;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.HoverableBuilder;
-import io.wispforest.owo.braid.widgets.basic.Padding;
 import io.wispforest.owo.braid.widgets.basic.Panel;
 import io.wispforest.owo.braid.widgets.focus.FocusLevel;
 import io.wispforest.owo.braid.widgets.focus.Focusable;
@@ -33,10 +31,7 @@ public class ButtonPanel extends StatelessWidget {
                     child
                 );
             },
-            new Padding(
-                Insets.all(5),
-                this.child
-            )
+            this.child
         );
     }
 }

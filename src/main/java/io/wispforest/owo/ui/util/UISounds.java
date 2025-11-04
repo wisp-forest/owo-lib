@@ -7,7 +7,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Identifier;
 
 public final class UISounds {
 
@@ -16,13 +15,17 @@ public final class UISounds {
     private UISounds() {}
 
     @Environment(EnvType.CLIENT)
+    public static void play(SoundEvent event) {
+        MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(event, 1));
+    }
+
+    @Environment(EnvType.CLIENT)
     public static void playButtonSound() {
-        MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1));
+        play(SoundEvents.UI_BUTTON_CLICK.value());
     }
 
     @Environment(EnvType.CLIENT)
     public static void playInteractionSound() {
-        MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(UI_INTERACTION, 1));
+        play(UI_INTERACTION);
     }
-
 }

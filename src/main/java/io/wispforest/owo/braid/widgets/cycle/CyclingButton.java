@@ -4,7 +4,9 @@ import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.ControlsOverride;
-import io.wispforest.owo.braid.widgets.button.ButtonPanel;
+import io.wispforest.owo.braid.widgets.button.Button;
+import io.wispforest.owo.braid.widgets.button.ButtonStyle;
+import io.wispforest.owo.braid.widgets.button.DefaultButtonStyle;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -63,8 +65,32 @@ public class CyclingButton<T> extends StatelessWidget {
 
     @Override
     public Widget build(BuildContext context) {
-        var disabled = this.onChanged == null || ControlsOverride.controlsDisabled(context);
-        var content = new ButtonPanel(!disabled, this.child);
-        return !disabled ? new RawCyclingButton<>(this.values, this.index, this.wrap, this.onChanged, content) : content;
+        Widget content = this.child;
+        if (this.onChanged != null && !ControlsOverride.controlsDisabled(context)) {
+            // TODO: properly override the style once this is setupcallbackified
+            var clickSound = DefaultButtonStyle.maybeOf(context) instanceof ButtonStyle style
+                ? style.clickSound()
+                : null;
+
+            content = new Cycler<>(
+                this.values,
+                this.index,
+                this.wrap,
+                this.onChanged,
+                (currentValue, currentIndex, cycle) -> {
+                    return new CyclingClickable(
+                        cycle,
+                        clickSound,
+                        true,
+                        new Button(
+                            () -> cycle.cycle(1),
+                            this.child
+                        )
+                    );
+                }
+            );
+        }
+
+        return content;
     }
 }

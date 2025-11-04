@@ -15,9 +15,7 @@ import io.wispforest.owo.braid.widgets.animated.AnimatedAlign;
 import io.wispforest.owo.braid.widgets.animated.AnimatedBox;
 import io.wispforest.owo.braid.widgets.animated.AnimatedPadding;
 import io.wispforest.owo.braid.widgets.basic.*;
-import io.wispforest.owo.braid.widgets.button.Button;
-import io.wispforest.owo.braid.widgets.button.MessageButton;
-import io.wispforest.owo.braid.widgets.button.RawButton;
+import io.wispforest.owo.braid.widgets.button.*;
 import io.wispforest.owo.braid.widgets.checkbox.BraidCheckbox;
 import io.wispforest.owo.braid.widgets.checkbox.Checkbox;
 import io.wispforest.owo.braid.widgets.checkbox.RawCheckbox;
@@ -26,6 +24,7 @@ import io.wispforest.owo.braid.widgets.cycle.MessageCyclingButton;
 import io.wispforest.owo.braid.widgets.drag.DragArena;
 import io.wispforest.owo.braid.widgets.drag.DragArenaElement;
 import io.wispforest.owo.braid.widgets.flex.*;
+import io.wispforest.owo.braid.widgets.focus.FocusLevel;
 import io.wispforest.owo.braid.widgets.focus.FocusPolicy;
 import io.wispforest.owo.braid.widgets.focus.Focusable;
 import io.wispforest.owo.braid.widgets.grid.Grid;
@@ -922,8 +921,8 @@ public class TestSelector extends StatefulWidget {
 
         @Override
         public Widget build(BuildContext context) {
-            return new RawButton(
-                this.clickCallback,
+            return new Clickable(
+                Clickable.alwaysClick(this.clickCallback),
                 new Stack(
                     new Center(
                         new Sized(
@@ -1259,71 +1258,108 @@ public class TestSelector extends StatefulWidget {
             private int selectedInt = 0;
             private int selectedIntNoWrap = 0;
 
+            private boolean altButtons = true;
+
             @Override
             public Widget build(BuildContext context) {
-                return new Grid(
-                    LayoutAxis.VERTICAL,
-                    4,
-                    Grid.CellFit.tight(),
-                    widget -> new Padding(Insets.all(5), widget),
-                    null,
-                    new Label(Text.literal("Cycler")),
-                    new Label(Text.literal("No Wrap")),
-                    new Label(Text.literal("Values")),
-                    new Label(Text.literal("Enum")),
-                    MessageCyclingButton.forEnum(
-                        this.selectedEnum,
-                        Text.literal(selectedEnum.name()),
-                        (value, index) -> this.setState(() -> this.selectedEnum = value)
+                return new Column(
+                    MainAxisAlignment.CENTER,
+                    CrossAxisAlignment.CENTER,
+                    new DefaultButtonStyle(
+                        this.altButtons ? new ButtonStyle(
+                            (active, child) -> new HoverableBuilder(
+                                (hoverableContext, hovered, hoverableChild) -> {
+                                    return new Box(
+                                        active
+                                            ? (hovered || Focusable.levelOf(hoverableContext) == FocusLevel.HIGHLIGHT ? Color.BLUE : Color.WHITE)
+                                            : Color.BLACK,
+                                        true,
+                                        hoverableChild
+                                    );
+                                },
+                                child
+                            ),
+                            Insets.all(10.0),
+                            SoundEvents.ENTITY_GENERIC_EXPLODE.value()
+                        ) : ButtonStyle.EMPTY,
+                        new Grid(
+                            LayoutAxis.VERTICAL,
+                            4,
+                            Grid.CellFit.tight(),
+                            widget -> new Padding(Insets.all(5), widget),
+                            null,
+                            new Label(Text.literal("Cycler")),
+                            new Label(Text.literal("No Wrap")),
+                            new Label(Text.literal("Values")),
+                            new Label(Text.literal("Enum")),
+                            MessageCyclingButton.forEnum(
+                                this.selectedEnum,
+                                Text.literal(selectedEnum.name()),
+                                (value, index) -> this.setState(() -> this.selectedEnum = value)
+                            ),
+                            MessageCyclingButton.forEnum(
+                                this.selectedEnumNoWrap,
+                                false,
+                                Text.literal(selectedEnumNoWrap.name()),
+                                (value, index) -> this.setState(() -> this.selectedEnumNoWrap = value)
+                            ),
+                            new Label(Text.literal(String.join(", ", Arrays.stream(CoolEnum.values()).map(Enum::name).collect(Collectors.toList())))),
+                            new Label(Text.literal("Boolean")),
+                            MessageCyclingButton.forBoolean(
+                                this.selectedBoolean,
+                                Text.literal(this.selectedBoolean ? "true" : "false"),
+                                (value, index) -> this.setState(() -> this.selectedBoolean = value)
+                            ),
+                            new MessageCyclingButton<>(
+                                List.of(false, true), this.selectedBooleanNoWrap ? 1 : 0, false,
+                                Text.literal(this.selectedBooleanNoWrap ? "true" : "false"),
+                                (value, index) -> this.setState(() -> this.selectedBooleanNoWrap = value)
+                            ),
+                            new Label(Text.literal("false, true")),
+                            new Label(Text.literal("String")),
+                            new MessageCyclingButton<>(
+                                coolStrings,
+                                coolStrings.indexOf(this.selectedString),
+                                Text.literal(this.selectedString),
+                                (value, index) -> this.setState(() -> this.selectedString = value)
+                            ),
+                            new MessageCyclingButton<>(
+                                coolStrings,
+                                coolStrings.indexOf(this.selectedStringNoWrap),
+                                false,
+                                Text.literal(this.selectedStringNoWrap),
+                                (value, index) -> this.setState(() -> this.selectedStringNoWrap = value)
+                            ),
+                            new Label(Text.literal(String.join(", ", coolStrings))),
+                            new Label(Text.literal("Int")),
+                            new MessageCyclingButton<>(
+                                coolNumbers,
+                                this.selectedInt,
+                                Text.literal(coolNumbers.get(this.selectedInt).toString()),
+                                (value, index) -> this.setState(() -> this.selectedInt = index)
+                            ),
+                            new MessageCyclingButton<>(
+                                coolNumbers,
+                                this.selectedIntNoWrap,
+                                false,
+                                Text.literal(coolNumbers.get(this.selectedIntNoWrap).toString()),
+                                (value, index) -> this.setState(() -> this.selectedIntNoWrap = index)
+                            ),
+                            new Label(
+                                Text.literal(coolNumbers.stream()
+                                    .map(String::valueOf)
+                                    .collect(Collectors.joining(", ")))
+                            )
+                        )
                     ),
-                    MessageCyclingButton.forEnum(
-                        this.selectedEnumNoWrap,
-                        false,
-                        Text.literal(selectedEnumNoWrap.name()),
-                        (value, index) -> this.setState(() -> this.selectedEnumNoWrap = value)
-                    ),
-                    new Label(Text.literal(String.join(", ", Arrays.stream(CoolEnum.values()).map(Enum::name).collect(Collectors.toList())))),
-                    new Label(Text.literal("Boolean")),
-                    MessageCyclingButton.forBoolean(
-                        this.selectedBoolean,
-                        Text.literal(this.selectedBoolean ? "true" : "false"),
-                        (value, index) -> this.setState(() -> this.selectedBoolean = value)
-                    ),
-                    null,
-                    new Label(Text.literal("false, true")),
-                    new Label(Text.literal("String")),
-                    new MessageCyclingButton<>(
-                        coolStrings,
-                        coolStrings.indexOf(this.selectedString),
-                        Text.literal(this.selectedString),
-                        (value, index) -> this.setState(() -> this.selectedString = value)
-                    ),
-                    new MessageCyclingButton<>(
-                        coolStrings,
-                        coolStrings.indexOf(this.selectedStringNoWrap),
-                        false,
-                        Text.literal(this.selectedStringNoWrap),
-                        (value, index) -> this.setState(() -> this.selectedStringNoWrap = value)
-                    ),
-                    new Label(Text.literal(String.join(", ", coolStrings))),
-                    new Label(Text.literal("Int")),
-                    new MessageCyclingButton<>(
-                        coolNumbers,
-                        this.selectedInt,
-                        Text.literal(coolNumbers.get(this.selectedInt).toString()),
-                        (value, index) -> this.setState(() -> this.selectedInt = index)
-                    ),
-                    new MessageCyclingButton<>(
-                        coolNumbers,
-                        this.selectedIntNoWrap,
-                        false,
-                        Text.literal(coolNumbers.get(this.selectedIntNoWrap).toString()),
-                        (value, index) -> this.setState(() -> this.selectedIntNoWrap = index)
-                    ),
-                    new Label(
-                        Text.literal(coolNumbers.stream()
-                            .map(String::valueOf)
-                            .collect(Collectors.joining(", ")))
+                    new Row(
+                        MainAxisAlignment.CENTER,
+                        CrossAxisAlignment.CENTER,
+                        new BraidCheckbox(this.altButtons, nowChecked -> this.setState(() -> this.altButtons = nowChecked)),
+                        new Padding(
+                            Insets.left(5),
+                            Label.literal("alternate buttons")
+                        )
                     )
                 );
             }

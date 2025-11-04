@@ -4,7 +4,7 @@ import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.ControlsOverride;
-import io.wispforest.owo.braid.widgets.button.RawButton;
+import io.wispforest.owo.braid.widgets.button.Clickable;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,7 +31,7 @@ public class RawCheckbox extends StatelessWidget {
         var content = this.checked ? new Stack(this.background, this.checkmark) : this.background;
         var disabled = this.onUpdate == null || ControlsOverride.controlsDisabled(context);
         //TODO: should disabled be passed to background and checkmark?
-        return !disabled ? new RawButton(() -> this.onUpdate.accept(!this.checked), content) : content;
+        return !disabled ? new Clickable(Clickable.alwaysClick(() -> this.onUpdate.accept(!this.checked)), content) : content;
     }
 
     @FunctionalInterface
