@@ -1,6 +1,7 @@
 package io.wispforest.owo.braid.util;
 
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.core.Surface;
 import io.wispforest.owo.mixin.braid.GameRendererAccessor;
 import io.wispforest.owo.mixin.braid.GuiRendererAccessor;
@@ -30,13 +31,32 @@ public class BraidGuiRenderer extends GuiRenderer {
     }
 
     public DrawContext newDrawContext() {
-        ((GuiRendererAccessor) this).owo$setFabricInitialized(true);
-        ((GuiRendererAccessor) this).owo$setRenderCommandQueue(this.client.gameRenderer.getEntityRenderCommandQueue());
-
+        this.trySetFabricState();
         return new DrawContext(
             this.client,
             ((GuiRendererAccessor) this).owo$getState()
         );
+    }
+
+    private boolean fabricStateSet = false;
+    private void trySetFabricState() {
+        if (this.fabricStateSet) {
+            return;
+        }
+
+        try {
+            var initField = GuiRenderer.class.getDeclaredField("hasFabricInitialized");
+            initField.setAccessible(true);
+            initField.set(this, true);
+
+            var commandQueueField = GuiRenderer.class.getDeclaredField("orderedRenderCommandQueue");
+            commandQueueField.setAccessible(true);
+            commandQueueField.set(this, this.client.gameRenderer.getEntityRenderCommandQueue());
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            Owo.LOGGER.warn("Failed to apply braid's Fabric API GuiRendererMixin workaround, there might be crashes with texture and window surfaces");
+        } finally {
+            this.fabricStateSet = true;
+        }
     }
 
     public void render(Target target) {
