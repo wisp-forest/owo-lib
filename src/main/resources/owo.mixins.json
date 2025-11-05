@@ -41,6 +41,7 @@
     "serialization.WriteViewMixin",
     "text.LanguageMixin",
     "text.TextCodecsMixin",
+    "text.TranslatableTextContentAccessor",
     "text.TranslatableTextContentMixin",
     "text.stapi.SystemDelegatedLanguageFixin",
     "tweaks.EulaReaderMixin",
