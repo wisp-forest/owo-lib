@@ -12,6 +12,7 @@ import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
 import com.mojang.serialization.JsonOps;
 import io.wispforest.owo.Owo;
+import io.wispforest.owo.text.CursedTranslatableTextContent;
 import io.wispforest.owo.text.LanguageAccess;
 import io.wispforest.owo.text.NestedLangHandler;
 import io.wispforest.owo.util.DataExtensionUtil;
@@ -87,7 +88,7 @@ public class LanguageMixin {
                     MutableComponent text = (MutableComponent) ComponentSerialization.CODEC
                         .parse(JsonOps.INSTANCE, element)
                         .getOrThrow(JsonParseException::new);
-                    consumer.accept(name, text);
+                    consumer.accept(name, CursedTranslatableTextContent.unpackArgs(text));
 
                     return "";
                 } else if (element.isJsonPrimitive()) {
