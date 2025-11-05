@@ -45,7 +45,6 @@ import io.wispforest.owo.braid.widgets.sharedstate.ShareableState;
 import io.wispforest.owo.braid.widgets.sharedstate.SharedState;
 import io.wispforest.owo.braid.widgets.slider.Incrementor;
 import io.wispforest.owo.braid.widgets.slider.slider.MessageSlider;
-import io.wispforest.owo.braid.widgets.slider.slider.RawSlider;
 import io.wispforest.owo.braid.widgets.slider.slider.Slider;
 import io.wispforest.owo.braid.widgets.slider.xlyder.MessageXlyder;
 import io.wispforest.owo.braid.widgets.splitpane.MultiSplitPane;
@@ -405,9 +404,8 @@ public class TestSelector extends StatefulWidget {
                                         75, 20,
                                         new MessageSlider(
                                             rotat,
-                                            widget -> widget.range(0, 360).incrementStep(1),
-                                            value -> this.setState(() -> this.rotat = value),
-                                            Text.literal("rotat: " + formatDouble(this.rotat))
+                                            Text.literal("rotat: " + formatDouble(this.rotat)), widget -> widget.range(0, 360).incrementStep(1),
+                                            value -> this.setState(() -> this.rotat = value)
                                         )
                                     ),
                                     new Sized(
@@ -415,13 +413,12 @@ public class TestSelector extends StatefulWidget {
                                         75.0,
                                         new MessageXlyder(
                                             this.xSkew, this.ySkew,
-                                            xlyder -> xlyder.range(-.75, .75),
+                                            Text.literal("x skew: " + (formatDouble(this.xSkew)) + "\ny skew: " + (formatDouble(this.ySkew))), xlyder -> xlyder.range(-.75, .75),
 
                                             (xValue, yValue) -> this.setState(() -> {
                                                 this.xSkew = xValue;
                                                 this.ySkew = yValue;
-                                            }),
-                                            Text.literal("x skew: " + (formatDouble(this.xSkew)) + "\ny skew: " + (formatDouble(this.ySkew)))
+                                            })
                                         )
                                     )
                                 )
@@ -1079,8 +1076,7 @@ public class TestSelector extends StatefulWidget {
                                                 this.verticalController.offset(),
                                                 widget -> widget
                                                     .range(this.verticalController.maxOffset(), 0)
-                                                    .vertical(),
-                                                this.verticalController::jumpTo
+                                                    .vertical(), this.verticalController::jumpTo
                                             )
                                         )
                                     )
@@ -1096,8 +1092,7 @@ public class TestSelector extends StatefulWidget {
                                             buildContext -> new Slider(
                                                 this.horizontalController.offset(),
                                                 widget -> widget
-                                                    .range(0, this.horizontalController.maxOffset()),
-                                                this.horizontalController::jumpTo
+                                                    .range(0, this.horizontalController.maxOffset()), this.horizontalController::jumpTo
                                             )
                                         )
                                     ),
@@ -1131,16 +1126,14 @@ public class TestSelector extends StatefulWidget {
                                                     100, 20,
                                                     new Slider(
                                                         this.nestedSliderValue,
-                                                        null,
-                                                        value -> this.setState(() -> this.nestedSliderValue = value)
+                                                        null, value -> this.setState(() -> this.nestedSliderValue = value)
                                                     )
                                                 ),
                                                 new Sized(
                                                     20, 100,
                                                     new Slider(
                                                         this.nestedSliderValue,
-                                                        RawSlider::vertical,
-                                                        value -> this.setState(() -> this.nestedSliderValue = value)
+                                                        Slider::vertical, value -> this.setState(() -> this.nestedSliderValue = value)
                                                     )
                                                 )
                                             )
@@ -1288,7 +1281,7 @@ public class TestSelector extends StatefulWidget {
                             ),
                             Insets.all(10.0),
                             SoundEvents.ENTITY_GENERIC_EXPLODE.value()
-                        ) : ButtonStyle.EMPTY,
+                        ) : ButtonStyle.DEFAULT,
                         new Grid(
                             LayoutAxis.VERTICAL,
                             4,

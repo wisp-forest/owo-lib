@@ -40,7 +40,7 @@ public class Checkbox extends StatelessWidget {
 
     @Override
     public Widget build(BuildContext context) {
-        var effectiveStyle = this.style != null ? this.style : CheckboxStyle.EMPTY;
+        var effectiveStyle = this.style != null ? this.style : CheckboxStyle.DEFAULT;
         if (DefaultCheckboxStyle.maybeOf(context) instanceof CheckboxStyle contextStyle) {
             effectiveStyle = effectiveStyle.overriding(contextStyle);
         }

@@ -23,7 +23,7 @@ public record CheckboxStyle(
         );
     }
 
-    public static final CheckboxStyle EMPTY = new CheckboxStyle(null, null, null);
+    public static final CheckboxStyle DEFAULT = new CheckboxStyle(null, null, null);
 
     @FunctionalInterface
     public interface BackgroundBuilder {

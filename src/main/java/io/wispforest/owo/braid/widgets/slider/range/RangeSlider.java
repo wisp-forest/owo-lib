@@ -24,8 +24,8 @@ public class RangeSlider extends RawRangeSlider {
             null,
             onChanged,
             new Panel(ButtonComponent.DISABLED_TEXTURE),
-            new DefaultSliderHandle(), 8,
-            new DefaultSliderHandle(), 8,
+            new DefaultSliderHandle(true), 8,
+            new DefaultSliderHandle(true), 8,
             new Box(new Color(0x7f000000))
         );
         if (setupCallback != null) setupCallback.setup(this);

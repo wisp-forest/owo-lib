@@ -18,7 +18,7 @@ public record ButtonStyle(
         );
     }
 
-    public static final ButtonStyle EMPTY = new ButtonStyle(null, null, null);
+    public static final ButtonStyle DEFAULT = new ButtonStyle(null, null, null);
 
     @FunctionalInterface
     public interface ContentBuilder {

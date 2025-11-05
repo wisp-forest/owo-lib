@@ -52,7 +52,7 @@ public class Button extends StatelessWidget {
 
     @Override
     public Widget build(BuildContext context) {
-        var effectiveStyle = this.style != null ? this.style : ButtonStyle.EMPTY;
+        var effectiveStyle = this.style != null ? this.style : ButtonStyle.DEFAULT;
         if (DefaultButtonStyle.maybeOf(context) instanceof ButtonStyle contextStyle) {
             effectiveStyle = effectiveStyle.overriding(contextStyle);
         }

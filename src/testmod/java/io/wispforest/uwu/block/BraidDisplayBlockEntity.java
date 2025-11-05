@@ -11,7 +11,6 @@ import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.object.BlockWidget;
-import io.wispforest.owo.braid.widgets.object.RawBlockWidget;
 import io.wispforest.owo.braid.widgets.basic.*;
 import io.wispforest.owo.braid.widgets.button.Button;
 import io.wispforest.owo.braid.widgets.flex.Column;
@@ -129,7 +128,7 @@ public class BraidDisplayBlockEntity extends BlockEntity {
                 public Widget build(BuildContext context) {
                     return new MessageSlider(
                         this.value,
-                        slider -> slider
+                        Text.literal("size: " + BigDecimal.valueOf(this.value).setScale(2, RoundingMode.HALF_UP).toPlainString()), slider -> slider
                             .range(1, 3),
                         (newValue) -> {
                             this.setState(() -> this.value = newValue);
@@ -143,8 +142,7 @@ public class BraidDisplayBlockEntity extends BlockEntity {
                             );
 
                             display.surface.resize(128, (int) (146.29 * display.quad.left.x));
-                        },
-                        Text.literal("size: " + BigDecimal.valueOf(this.value).setScale(2, RoundingMode.HALF_UP).toPlainString())
+                        }
                     );
                 }
             }
