@@ -4,8 +4,8 @@
     { "text": " > ", "color": "gray" },
     { "index": 1, "color": "dark_gray" }
   ],
-  "text.owo.itemGroup.select_hint": {"text": "Шифт-кликните, чтобы выбрать несколько", "color": "gray"},
-  "text.owo.configure_hot_reload.title": "Настроить горячую перезагрузку",
+  "text.owo.itemGroup.select_hint": {"text": "Кликните с зажатым Shift, чтобы выбрать несколько", "color": "gray"},
+  "text.owo.configure_hot_reload.title": "Настроить перезагрузку «на лету»",
   "text.owo.configure_hot_reload.choose_file": "Выбрать файл",
   "text.owo.configure_hot_reload.save": "Сохранить",
   "text.owo.configure_hot_reload.model": [
@@ -20,9 +20,9 @@
   "text.owo.config.search": "Поиск...",
   "text.owo.config.search.matches": "%d из %d",
   "text.owo.config.search.no_matches": "Нет совпадений",
-  "text.owo.config.must_restart": "Для применения некоторых внесенных вами изменений требуется перезапуск",
+  "text.owo.config.must_restart": "Для применения некоторых внесённых вами изменений требуется перезапуск",
   "text.owo.config.button.exit_minecraft": "Выйти из Minecraft",
-  "text.owo.config.button.ignore_restart": "Перепустить позже",
+  "text.owo.config.button.ignore_restart": "Перезапустить позже",
   "text.owo.config.button.range.edit_as_text": "Редактировать как текст",
   "text.owo.config.button.range.edit_with_slider": "Редактировать с помощью ползунка",
   "text.owo.config.applies_after_restart": [
