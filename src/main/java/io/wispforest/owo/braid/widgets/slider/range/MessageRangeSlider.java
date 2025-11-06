@@ -20,9 +20,9 @@ public class MessageRangeSlider extends StatelessWidget {
     public MessageRangeSlider(
         double minValue,
         double maxValue,
+        Text message,
         @Nullable WidgetSetupCallback<RangeSlider> setupCallback,
-        @Nullable RangeSliderCallback onChanged,
-        Text message
+        @Nullable RangeSliderCallback onChanged
     ) {
         this.minValue = minValue;
         this.maxValue = maxValue;
@@ -34,12 +34,12 @@ public class MessageRangeSlider extends StatelessWidget {
     public MessageRangeSlider(
         double minValue,
         double maxValue,
+        Text message,
         @Nullable WidgetSetupCallback<RangeSlider> setupCallback,
         boolean active,
-        RangeSliderCallback onChanged,
-        Text message
+        RangeSliderCallback onChanged
     ) {
-        this(minValue, maxValue, setupCallback, active ? onChanged : null, message);
+        this(minValue, maxValue, message, setupCallback, active ? onChanged : null);
     }
 
     @Override

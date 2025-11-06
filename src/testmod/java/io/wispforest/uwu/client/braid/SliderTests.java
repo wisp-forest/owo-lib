@@ -17,7 +17,9 @@ import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.scroll.VerticallyScrollable;
 import io.wispforest.owo.braid.widgets.slider.SliderStyle;
 import io.wispforest.owo.braid.widgets.slider.drag.MessageDrag;
+import io.wispforest.owo.braid.widgets.slider.range.DefaultRangeSliderStyle;
 import io.wispforest.owo.braid.widgets.slider.range.MessageRangeSlider;
+import io.wispforest.owo.braid.widgets.slider.range.RangeSliderStyle;
 import io.wispforest.owo.braid.widgets.slider.slider.MessageSlider;
 import io.wispforest.owo.braid.widgets.slider.slider.Slider;
 import io.wispforest.owo.braid.widgets.slider.slider.SliderFunction;
@@ -26,6 +28,8 @@ import io.wispforest.owo.braid.widgets.slider.xlyder.MessageXlyder;
 import io.wispforest.owo.braid.widgets.slider.xlyder.Xlyder;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
+import io.wispforest.uwu.client.Bikeshed;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import org.joml.Matrix3x2f;
 
@@ -64,12 +68,15 @@ public class SliderTests extends StatefulWidget {
                         Size.of(16, 16),
                         null
                     ),
-                    switch (this.test) {
-                        case BASIC -> new BasicSliderTest();
-                        case DIRECTION -> new SliderDirectionTest();
-                        case REDUNDANT -> new IncrediblyRedundantSlider();
-                        case SLIDER -> new NormalSliderTest();
-                    }
+                    new DefaultRangeSliderStyle(
+                        new RangeSliderStyle(null, new Bikeshed(), null, null, null, null, Optional.of(SoundEvents.BLOCK_ANVIL_LAND)),
+                        switch (this.test) {
+                            case BASIC -> new BasicSliderTest();
+                            case DIRECTION -> new SliderDirectionTest();
+                            case REDUNDANT -> new IncrediblyRedundantSlider();
+                            case SLIDER -> new NormalSliderTest();
+                        }
+                    )
                 ),
                 new Align(
                     Alignment.TOP_RIGHT,
@@ -184,26 +191,24 @@ public class SliderTests extends StatefulWidget {
                         100, 20,
                         new MessageRangeSlider(
                             discreteX, discreteY,
-                            slider -> slider
+                            Text.literal("v: " + formatDouble(discreteX) + "-" + formatDouble(discreteY)), slider -> slider
                                 .range(0, 32)
                                 .step(2),
                             (min, max) -> this.setState(() -> {
                                 this.discreteX = min;
                                 this.discreteY = max;
-                            }),
-                            Text.literal("v: " + formatDouble(discreteX) + "-" + formatDouble(discreteY))
+                            })
                         )
                     ),
                     new Sized(
                         100, 20,
                         new MessageRangeSlider(
                             smoothX, smoothY,
-                            slider -> slider.range(0, 32),
+                            Text.literal("v: " + formatDouble(smoothX) + "-" + formatDouble(smoothY)), slider -> slider.range(0, 32),
                             (min, max) -> this.setState(() -> {
                                 this.smoothX = min;
                                 this.smoothY = max;
-                            }),
-                            Text.literal("v: " + formatDouble(smoothX) + "-" + formatDouble(smoothY))
+                            })
                         )
                     ),
                     Label.literal("Drag"),

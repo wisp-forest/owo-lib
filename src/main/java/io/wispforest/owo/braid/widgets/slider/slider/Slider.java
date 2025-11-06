@@ -34,9 +34,8 @@ public class Slider extends StatefulWidget {
     protected @Nullable Double step;
     protected SliderFunction function = SliderFunction.LINEAR;
     protected LayoutAxis axis = LayoutAxis.HORIZONTAL;
-    protected @Nullable SliderStyle<Double> style;
-
     protected @Nullable Double incrementStep = null;
+    protected @Nullable SliderStyle<Double> style;
 
     public Slider(
         double value,
@@ -124,16 +123,6 @@ public class Slider extends StatefulWidget {
         return this.axis;
     }
 
-    public Slider style(SliderStyle<Double> style) {
-        this.assertMutable();
-        this.style = style;
-        return this;
-    }
-
-    public @Nullable SliderStyle<Double> style() {
-        return this.style;
-    }
-
     public Slider incrementStep(double incrementStep) {
         this.assertMutable();
         this.incrementStep = incrementStep;
@@ -142,6 +131,16 @@ public class Slider extends StatefulWidget {
 
     public @Nullable Double incrementStep() {
         return this.incrementStep;
+    }
+
+    public Slider style(SliderStyle<Double> style) {
+        this.assertMutable();
+        this.style = style;
+        return this;
+    }
+
+    public @Nullable SliderStyle<Double> style() {
+        return this.style;
     }
 
     @Override
