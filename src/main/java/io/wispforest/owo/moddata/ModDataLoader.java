@@ -70,7 +70,7 @@ public final class ModDataLoader {
 
             try (var stream = Files.walk(targetPath)) {
                 stream.forEach(path -> {
-                    if (!path.endsWith(".json") && !path.endsWith(".json5")) return;
+                    if (!path.toString().endsWith(".json") && !path.toString().endsWith(".json5")) return;
                     try {
                         final InputStreamReader tabData = new InputStreamReader(DataExtensionUtil.coerceJson(Files.newInputStream(path)) );
 
