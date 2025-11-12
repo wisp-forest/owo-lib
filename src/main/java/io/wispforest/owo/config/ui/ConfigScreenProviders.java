@@ -45,4 +45,20 @@ public class ConfigScreenProviders {
     public static void forEach(BiConsumer<String, Function<Screen, ? extends Screen>> action) {
         PROVIDERS.forEach(action);
     }
+
+    // -- internal methods for backwards-compat in ConfigScreen --
+
+    @ApiStatus.Internal
+    public static <S extends ConfigScreen> void registerOwoConfigScreen(String modId, Function<Screen, S> supplier) {
+        register(modId, supplier);
+        OWO_SCREEN_PROVIDERS.put(modId, supplier);
+    }
+
+    static @Nullable Function<Screen, ? extends ConfigScreen> getOwoProvider(String modId) {
+        return OWO_SCREEN_PROVIDERS.get(modId);
+    }
+
+    static void forEachOwoProvider(BiConsumer<String, Function<Screen, ? extends ConfigScreen>> action) {
+        OWO_SCREEN_PROVIDERS.forEach(action);
+    }
 }

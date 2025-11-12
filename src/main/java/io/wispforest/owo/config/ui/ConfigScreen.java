@@ -33,6 +33,8 @@ import org.lwjgl.glfw.GLFW;
 
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -96,6 +98,30 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
      */
     public static ConfigScreen createWithCustomModel(Identifier modelId, ConfigWrapper<?> config, @Nullable Screen parent) {
         return new ConfigScreen(modelId, config, parent);
+    }
+
+    /**
+     * @deprecated Use {@link ConfigScreenProviders#register(String, Function)} instead
+     */
+    @Deprecated(forRemoval = true)
+    public static <S extends ConfigScreen> void registerProvider(String modId, Function<Screen, S> supplier) {
+        ConfigScreenProviders.registerOwoConfigScreen(modId, supplier);
+    }
+
+    /**
+     * @deprecated Use {@link ConfigScreenProviders#get(String)} instead
+     */
+    @Deprecated(forRemoval = true)
+    public static @Nullable Function<Screen, ? extends ConfigScreen> getProvider(String modId) {
+        return ConfigScreenProviders.getOwoProvider(modId);
+    }
+
+    /**
+     * @deprecated Use {@link ConfigScreenProviders#forEach(BiConsumer)} instead
+     */
+    @Deprecated(forRemoval = true)
+    public static void forEachProvider(BiConsumer<String, Function<Screen, ? extends ConfigScreen>> action) {
+        ConfigScreenProviders.forEachOwoProvider(action);
     }
 
     @Override
