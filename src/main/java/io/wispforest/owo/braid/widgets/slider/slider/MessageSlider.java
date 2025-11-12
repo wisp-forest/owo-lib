@@ -4,9 +4,9 @@ import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
-import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
+import io.wispforest.owo.braid.widgets.stack.Stack;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,9 +20,9 @@ public class MessageSlider extends StatelessWidget {
 
     public MessageSlider(
         double value,
+        Text message,
         @Nullable WidgetSetupCallback<Slider> setupCallback,
-        @Nullable SliderCallback onChanged,
-        Text message
+        @Nullable SliderCallback onChanged
     ) {
         this.value = value;
         this.setupCallback = setupCallback;
@@ -32,22 +32,20 @@ public class MessageSlider extends StatelessWidget {
 
     public MessageSlider(
         double value,
+        Text message,
         @Nullable WidgetSetupCallback<Slider> setupCallback,
         boolean active,
-        SliderCallback onChanged,
-        Text message
+        SliderCallback onChanged
     ) {
-        this(value, setupCallback, active ? onChanged : null, message);
+        this(value, message, setupCallback, active ? onChanged : null);
     }
-
 
     @Override
     public Widget build(BuildContext context) {
         return new Stack(
             new Slider(
                 this.value,
-                this.setupCallback,
-                this.onChanged
+                this.setupCallback, this.onChanged
             ),
             //TODO: abstract this styling?
             new Label(

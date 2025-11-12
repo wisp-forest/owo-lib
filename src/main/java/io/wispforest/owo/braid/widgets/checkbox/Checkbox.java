@@ -1,36 +1,66 @@
 package io.wispforest.owo.braid.widgets.checkbox;
 
-import blue.endless.jankson.annotation.Nullable;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.SpriteWidget;
-import io.wispforest.owo.braid.widgets.checkbox.RawCheckbox.CheckboxCallback;
+import io.wispforest.owo.braid.widgets.basic.Builder;
+import io.wispforest.owo.braid.widgets.basic.ControlsOverride;
+import io.wispforest.owo.braid.widgets.checkbox.TogglingClickable.CheckboxCallback;
+import io.wispforest.owo.braid.widgets.focus.Focusable;
+import io.wispforest.owo.braid.widgets.stack.Stack;
+import io.wispforest.owo.braid.widgets.stack.StackBase;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 
 public class Checkbox extends StatelessWidget {
 
+    public final @Nullable CheckboxStyle style;
     public final boolean checked;
     public final @Nullable CheckboxCallback onUpdate;
 
-    public Checkbox(boolean checked, @Nullable CheckboxCallback onUpdate) {
+    public Checkbox(@Nullable CheckboxStyle style, boolean checked, @Nullable CheckboxCallback onUpdate) {
         this.checked = checked;
+        this.style = style;
         this.onUpdate = onUpdate;
     }
 
+    public Checkbox(boolean checked, @Nullable CheckboxCallback onUpdate) {
+        this(null, checked, onUpdate);
+    }
+
+    public Checkbox(@Nullable CheckboxStyle style, boolean checked, boolean active, CheckboxCallback onUpdate) {
+        this(style, checked, active ? onUpdate : null);
+    }
+
     public Checkbox(boolean checked, boolean active, CheckboxCallback onUpdate) {
-        this(checked, active ? onUpdate : null);
+        this(null, checked, active, onUpdate);
     }
 
     @Override
     public Widget build(BuildContext context) {
-        //TODO: visual indication of disabled/hovered states
-        return new RawCheckbox(
+        var effectiveStyle = this.style != null ? this.style : CheckboxStyle.DEFAULT;
+        if (DefaultCheckboxStyle.maybeOf(context) instanceof CheckboxStyle contextStyle) {
+            effectiveStyle = effectiveStyle.overriding(contextStyle);
+        }
+
+        var disabled = this.onUpdate == null || ControlsOverride.controlsDisabled(context);
+        var background = effectiveStyle.backgroundBuilder() != null
+            ? effectiveStyle.backgroundBuilder().build(disabled)
+            : DEFAULT_BACKGROUND;
+
+        var checkmark = effectiveStyle.checkmark() != null
+            ? effectiveStyle.checkmark()
+            : DEFAULT_CHECKMARK;
+
+        return new TogglingClickable(
             this.checked,
             this.onUpdate,
-            new SpriteWidget(TEXTURE),
-            new SpriteWidget(SELECTED_TEXTURE)
+            effectiveStyle.clickSound(),
+            this.checked
+                ? new Stack(new StackBase(background), checkmark)
+                : background
         );
     }
 
@@ -55,4 +85,14 @@ public class Checkbox extends StatelessWidget {
         SpriteWidget.GUI_ATLAS_ID,
         Identifier.ofVanilla("widget/checkbox")
     );
+
+    // ---
+
+    private static final Widget DEFAULT_BACKGROUND = new Builder(context -> {
+        return new SpriteWidget(Focusable.shouldShowHighlight(context) ? HIGHLIGHTED_TEXTURE : TEXTURE);
+    });
+
+    private static final Widget DEFAULT_CHECKMARK = new Builder(context -> {
+        return new SpriteWidget(Focusable.shouldShowHighlight(context) ? SELECTED_HIGHLIGHTED_TEXTURE : SELECTED_TEXTURE);
+    });
 }

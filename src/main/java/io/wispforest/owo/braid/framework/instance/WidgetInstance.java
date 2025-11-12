@@ -39,6 +39,11 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
     public boolean debugHighlighted = false;
     public boolean debugDrawVisualizers = false;
 
+    public boolean debugParentHasDependency() {
+        //noinspection OptionalAssignedToNull
+        return !this.intrinsicSizeCache.isEmpty() || this.baselineOffsetCache != null;
+    }
+
     // ---
 
     private @Nullable Constraints constraints;
@@ -177,12 +182,15 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
         }
     }
 
+    @SuppressWarnings("OptionalAssignedToNull")
     public void markNeedsLayout() {
         this.needsLayout = true;
+
+        var parentHasDependency = !this.intrinsicSizeCache.isEmpty() || this.baselineOffsetCache != null;
         this.intrinsicSizeCache.clear();
         this.baselineOffsetCache = null;
 
-        if (this.isRelayoutBoundary()) {
+        if (!parentHasDependency && this.isRelayoutBoundary()) {
             if (this.host != null) this.host.scheduleLayout(this);
         } else {
             if (this.parent != null) this.parent.markNeedsLayout();

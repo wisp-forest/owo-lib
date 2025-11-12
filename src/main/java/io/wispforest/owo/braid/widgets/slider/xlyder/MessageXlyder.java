@@ -4,10 +4,9 @@ import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
-import io.wispforest.owo.braid.widgets.slider.slider.RawSlider;
-import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
+import io.wispforest.owo.braid.widgets.stack.Stack;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
@@ -23,9 +22,9 @@ public class MessageXlyder extends StatelessWidget {
 
     public MessageXlyder(
         Vector2dc value,
+        Text message,
         @Nullable WidgetSetupCallback<Xlyder> setupCallback,
-        @Nullable XlyderCallback onChanged,
-        Text message
+        @Nullable XlyderCallback onChanged
     ) {
         this.value = value;
         this.setupCallback = setupCallback;
@@ -35,31 +34,31 @@ public class MessageXlyder extends StatelessWidget {
 
     public MessageXlyder(
         Vector2dc value,
+        Text message,
         @Nullable WidgetSetupCallback<Xlyder> setupCallback,
         boolean active,
-        XlyderCallback onChanged,
-        Text message
+        XlyderCallback onChanged
     ) {
-        this(value, setupCallback, active ? onChanged : null, message);
+        this(value, message, setupCallback, active ? onChanged : null);
     }
 
     public MessageXlyder(
         double x, double y,
+        Text message,
         @Nullable WidgetSetupCallback<Xlyder> setupCallback,
-        @Nullable XlyderCallback onChanged,
-        Text message
+        @Nullable XlyderCallback onChanged
     ) {
-        this(new Vector2d(x, y), setupCallback, onChanged, message);
+        this(new Vector2d(x, y), message, setupCallback, onChanged);
     }
 
     public MessageXlyder(
         double x, double y,
+        Text message,
         @Nullable WidgetSetupCallback<Xlyder> setupCallback,
         boolean active,
-        XlyderCallback onChanged,
-        Text message
+        XlyderCallback onChanged
     ) {
-        this(new Vector2d(x, y), setupCallback, active ? onChanged : null, message);
+        this(new Vector2d(x, y), message, setupCallback, active ? onChanged : null);
     }
 
     @Override
@@ -67,8 +66,7 @@ public class MessageXlyder extends StatelessWidget {
         return new Stack(
             new Xlyder(
                 this.value,
-                this.setupCallback,
-                this.onChanged
+                this.setupCallback, this.onChanged
             ),
             //TODO: abstract this styling?
             new Label(

@@ -3,6 +3,9 @@ package io.wispforest.owo.braid.widgets.label;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.InheritedWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.braid.widgets.basic.Builder;
+import io.wispforest.owo.braid.widgets.button.ButtonStyle;
+import io.wispforest.owo.braid.widgets.button.DefaultButtonStyle;
 import org.jetbrains.annotations.Nullable;
 
 public class DefaultLabelStyle extends InheritedWidget {
@@ -12,6 +15,13 @@ public class DefaultLabelStyle extends InheritedWidget {
     public DefaultLabelStyle(LabelStyle style, Widget child) {
         super(child);
         this.style = style;
+    }
+
+    public static Widget merge(LabelStyle style, Widget child) {
+        return new Builder(context -> {
+            var contextStyle = DefaultLabelStyle.maybeOf(context);
+            return new DefaultLabelStyle(contextStyle != null ? style.overriding(contextStyle) : style, child);
+        });
     }
 
     @Override

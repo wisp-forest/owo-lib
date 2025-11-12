@@ -59,6 +59,10 @@ public class Focusable extends StatefulWidget {
         return levelOf(context) != null;
     }
 
+    public static boolean shouldShowHighlight(BuildContext context) {
+        return levelOf(context) == FocusLevel.HIGHLIGHT;
+    }
+
     // ---
 
     public Focusable keyDownCallback(@Nullable KeyDownCallback keyDownCallback) {
