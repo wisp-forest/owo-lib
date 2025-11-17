@@ -72,7 +72,7 @@ public class SmallCheckboxComponent extends BaseComponent {
     public boolean onMouseDown(Click click, boolean doubled) {
         boolean result = super.onMouseDown(click, doubled);
 
-        if (click.isLeft()) {
+        if (click.button() == 0) {
             this.toggle();
             return true;
         }
