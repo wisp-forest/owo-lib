@@ -90,22 +90,5 @@ public interface OwoItemGroupState extends ItemGroup.EntryCollector {
 
     Text getDisplayName(Text baseDisplayName);
 
-    default Collection<ScreenRect> getExclusionZones(int x, int y) {
-        var extension = OwoItemGroup.get(CreativeInventoryScreenAccessor.owo$getSelectedTab());
 
-        if (extension == null || extension.getButtons().isEmpty()) return Collections.emptySet();
-
-        int stackHeight = extension.buttonStackHeight();
-        y -= 13 * (stackHeight - 4);
-
-        final var rectangles = new ArrayList<ScreenRect>();
-
-        for (int i = 0; i < extension.getButtons().size(); i++) {
-            int xOffset = x + 198 + (i / stackHeight) * 26;
-            int yOffset = y + 10 + (i % stackHeight) * 30;
-            rectangles.add(new ScreenRect(xOffset, yOffset, 24, 24));
-        }
-
-        return rectangles;
-    }
 }

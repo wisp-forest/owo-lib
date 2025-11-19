@@ -1,14 +1,15 @@
 package io.wispforest.owo.itemgroup.base;
 
 import io.wispforest.owo.itemgroup.core.OwoEntryCollector;
-import io.wispforest.owo.itemgroup.gui.ScrollerTextures;
-import io.wispforest.owo.itemgroup.gui.TabTextures;
+import io.wispforest.owo.itemgroup.core.ScrollerTextures;
+import io.wispforest.owo.itemgroup.core.TabTextures;
 import io.wispforest.owo.itemgroup.core.ItemGroupButton;
 import io.wispforest.owo.itemgroup.core.ItemGroupTab;
 import io.wispforest.owo.util.pond.OwoItemGroupExtension;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.Identifier;
@@ -93,11 +94,20 @@ public interface OwoItemGroup {
 
     //--
 
+    @Nullable
+    Identifier rendererId();
+
     ///
     /// @return Alternative textures for when rendering the background for the given [ItemGroup]
     ///
     @Nullable
     Identifier backgroundTexture();
+
+    ///
+    /// @return Alternative textures for when rendering the background for the given [ItemGroup]
+    ///
+    @Nullable
+    Identifier pageButtonTexture();
 
     ///
     /// @return Alternative textures for when rendering the scrollbar for the given [ItemGroup]
@@ -158,4 +168,10 @@ public interface OwoItemGroup {
     List<ItemGroupButton> getButtons();
 
     RegistryKey<ItemGroup> itemGroupId();
+
+    default boolean isExtensionFor(ItemGroup group) {
+        return Registries.ITEM_GROUP.getKey(group)
+            .orElseThrow(() -> new IllegalStateException("Unable to get ItemGroup entry from Registry: " + group))
+            .equals(itemGroupId());
+    }
 }

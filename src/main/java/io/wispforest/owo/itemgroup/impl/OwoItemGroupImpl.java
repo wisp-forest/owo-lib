@@ -5,8 +5,8 @@ import io.wispforest.owo.itemgroup.base.Icon;
 import io.wispforest.owo.itemgroup.base.OwoItemGroup;
 import io.wispforest.owo.itemgroup.base.OwoItemGroupState;
 import io.wispforest.owo.itemgroup.core.*;
-import io.wispforest.owo.itemgroup.gui.ScrollerTextures;
-import io.wispforest.owo.itemgroup.gui.TabTextures;
+import io.wispforest.owo.itemgroup.core.ScrollerTextures;
+import io.wispforest.owo.itemgroup.core.TabTextures;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.registry.RegistryKey;
@@ -29,7 +29,9 @@ public class OwoItemGroupImpl implements OwoItemGroup {
     private final Supplier<Icon> iconSupplier;
     private Icon icon = null;
 
+    private final @Nullable Identifier rendererId;
     private @Nullable Identifier backgroundTexture;
+    private final @Nullable Identifier pageButtonTexture;
     private final @Nullable ScrollerTextures scrollerTextures;
     private final @Nullable TabTextures tabTextures;
 
@@ -38,14 +40,16 @@ public class OwoItemGroupImpl implements OwoItemGroup {
     private final boolean useDynamicTitle;
     private final boolean allowMultiSelect;
 
-    public OwoItemGroupImpl(RegistryKey<ItemGroup> itemGroupId, Supplier<Icon> iconSupplier,
-                            @Nullable Identifier backgroundTexture, @Nullable ScrollerTextures scrollerTextures, @Nullable TabTextures tabTextures,
+    public OwoItemGroupImpl(RegistryKey<ItemGroup> itemGroupId, Supplier<Icon> iconSupplier, @Nullable Identifier rendererId,
+                            @Nullable Identifier backgroundTexture, @Nullable Identifier pageButtonTexture, @Nullable ScrollerTextures scrollerTextures, @Nullable TabTextures tabTextures,
                             int tabStackHeight, int buttonStackHeight, boolean useDynamicTitle, boolean allowMultiSelect
     ) {
         this.itemGroupId = itemGroupId;
 
         this.iconSupplier = iconSupplier;
+        this.rendererId = rendererId;
         this.backgroundTexture = backgroundTexture;
+        this.pageButtonTexture = pageButtonTexture;
         this.scrollerTextures = scrollerTextures;
         this.tabTextures = tabTextures;
 
@@ -123,10 +127,21 @@ public class OwoItemGroupImpl implements OwoItemGroup {
 
     //--
 
+
+    @Override
+    public @Nullable Identifier rendererId() {
+        return rendererId;
+    }
+
+    @Override
+    public @Nullable Identifier backgroundTexture() {
+        return backgroundTexture;
+    }
+
     @Override
     @Nullable
-    public Identifier backgroundTexture() {
-        return backgroundTexture;
+    public Identifier pageButtonTexture() {
+        return pageButtonTexture;
     }
 
     @Override

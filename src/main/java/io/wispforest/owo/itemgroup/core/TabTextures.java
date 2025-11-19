@@ -1,4 +1,4 @@
-package io.wispforest.owo.itemgroup.gui;
+package io.wispforest.owo.itemgroup.core;
 
 import net.minecraft.item.ItemGroup;
 import net.minecraft.util.Identifier;

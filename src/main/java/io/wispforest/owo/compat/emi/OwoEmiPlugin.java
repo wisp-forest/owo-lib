@@ -3,23 +3,21 @@ package io.wispforest.owo.compat.emi;
 import dev.emi.emi.api.EmiPlugin;
 import dev.emi.emi.api.EmiRegistry;
 import dev.emi.emi.api.widget.Bounds;
-import io.wispforest.owo.itemgroup.base.OwoItemGroupState;
-import io.wispforest.owo.mixin.itemgroup.CreativeInventoryScreenAccessor;
+import io.wispforest.owo.itemgroup.gui.OwoItemGroupRendererHandler;
+import io.wispforest.owo.mixin.ui.layers.HandledScreenAccessor;
 import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
-import io.wispforest.owo.util.pond.OwoCreativeInventoryScreenExtensions;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 
 public class OwoEmiPlugin implements EmiPlugin {
     @Override
     public void register(EmiRegistry registry) {
         registry.addExclusionArea(CreativeInventoryScreen.class, (screen, consumer) -> {
-            var state = OwoItemGroupState.get(CreativeInventoryScreenAccessor.owo$getSelectedTab());
-            if (state == null) return;
+            int x = ((HandledScreenAccessor) screen).owo$getRootX();
+            int y = ((HandledScreenAccessor) screen).owo$getRootY();
 
-            int x = ((OwoCreativeInventoryScreenExtensions) screen).owo$getRootX();
-            int y = ((OwoCreativeInventoryScreenExtensions) screen).owo$getRootY();
-
-            state.getExclusionZones(x, y).forEach(rect -> consumer.accept(new Bounds(rect.position().x(), rect.position().y(), rect.width(), rect.height())));
+           OwoItemGroupRendererHandler.getSelectedRenderer()
+                .getExclusionZones(x, y, rect -> new Bounds(rect.x(), rect.y(), rect.width(), rect.height()))
+                .forEach(consumer);
         });
 
         registry.addGenericExclusionArea((screen, consumer) -> {

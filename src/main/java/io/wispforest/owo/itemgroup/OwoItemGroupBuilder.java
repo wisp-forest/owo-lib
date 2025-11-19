@@ -2,8 +2,8 @@ package io.wispforest.owo.itemgroup;
 
 import io.wispforest.owo.itemgroup.base.OwoItemGroup;
 import io.wispforest.owo.itemgroup.base.Icon;
-import io.wispforest.owo.itemgroup.gui.ScrollerTextures;
-import io.wispforest.owo.itemgroup.gui.TabTextures;
+import io.wispforest.owo.itemgroup.core.ScrollerTextures;
+import io.wispforest.owo.itemgroup.core.TabTextures;
 import io.wispforest.owo.itemgroup.impl.OwoItemGroupImpl;
 import io.wispforest.owo.util.pond.OwoItemGroupExtension;
 import net.fabricmc.fabric.api.event.Event;
@@ -25,6 +25,8 @@ import java.util.function.Supplier;
 // TODO [ItemGroupPR]: DOCUMENT
 public class OwoItemGroupBuilder {
 
+    public static final Identifier DEFAULT_RENDERER_ID = Identifier.of("owo", "default");
+
     private final Event<ExtensionInitialization> onInitEvent = EventFactory.createArrayBacked(
         ExtensionInitialization.class,
         invokers -> extension -> {
@@ -33,11 +35,13 @@ public class OwoItemGroupBuilder {
 
     private final RegistryKey<ItemGroup> id;
     private Supplier<Icon> iconSupplier = () -> Icon.NONE;
-    private int tabStackHeight = 4;
-    private int buttonStackHeight = 4;
+    private @Nullable Identifier rendererId = DEFAULT_RENDERER_ID;
     private @Nullable Identifier backgroundTexture = null;
+    private @Nullable Identifier pageButtonTexture = null;
     private @Nullable ScrollerTextures scrollerTextures = null;
     private @Nullable TabTextures tabTextures = null;
+    private int tabStackHeight = 4;
+    private int buttonStackHeight = 4;
     private boolean useDynamicTitle = true;
     private boolean allowMultiSelect = true;
 
@@ -87,18 +91,18 @@ public class OwoItemGroupBuilder {
         this.onInitEvent.register(invoker);
     }
 
-    public OwoItemGroupBuilder tabStackHeight(int tabStackHeight) {
-        this.tabStackHeight = tabStackHeight;
-        return this;
-    }
-
-    public OwoItemGroupBuilder buttonStackHeight(int buttonStackHeight) {
-        this.buttonStackHeight = buttonStackHeight;
+    public OwoItemGroupBuilder renderer(Identifier rendererId) {
+        this.rendererId = rendererId;
         return this;
     }
 
     public OwoItemGroupBuilder backgroundTexture(Identifier backgroundTexture) {
         this.backgroundTexture = backgroundTexture;
+        return this;
+    }
+
+    public OwoItemGroupBuilder pageButtonTexture(Identifier pageButtonTexture) {
+        this.pageButtonTexture = pageButtonTexture;
         return this;
     }
 
@@ -112,6 +116,16 @@ public class OwoItemGroupBuilder {
         return this;
     }
 
+    public OwoItemGroupBuilder tabStackHeight(int tabStackHeight) {
+        this.tabStackHeight = tabStackHeight;
+        return this;
+    }
+
+    public OwoItemGroupBuilder buttonStackHeight(int buttonStackHeight) {
+        this.buttonStackHeight = buttonStackHeight;
+        return this;
+    }
+
     public OwoItemGroupBuilder disableDynamicTitle() {
         this.useDynamicTitle = false;
         return this;
@@ -119,7 +133,7 @@ public class OwoItemGroupBuilder {
 
     @ApiStatus.Internal
     private OwoItemGroupImpl build() {
-        return new OwoItemGroupImpl(id, iconSupplier, backgroundTexture, scrollerTextures, tabTextures, tabStackHeight, buttonStackHeight, useDynamicTitle, allowMultiSelect);
+        return new OwoItemGroupImpl(id, iconSupplier, rendererId, backgroundTexture, pageButtonTexture, scrollerTextures, tabTextures, tabStackHeight, buttonStackHeight, useDynamicTitle, allowMultiSelect);
     }
 
     public interface ExtensionInitialization {

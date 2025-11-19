@@ -1,12 +1,8 @@
 package io.wispforest.owo.itemgroup.gui;
 
 import com.google.common.collect.MapMaker;
-import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.itemgroup.base.Icon;
-import io.wispforest.owo.ui.component.TextureComponent;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
-import io.wispforest.owo.ui.core.OwoUIPipelines;
-import io.wispforest.owo.ui.core.PositionedRectangle;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
@@ -23,6 +19,8 @@ public class IconRenderRegistry {
 
     private static final Map<Identifier, IconRenderer<?>> TYPE_TO_RENDERER = new HashMap<>();
 
+    //--
+
     public static <T extends Icon> void addRenderer(Identifier id, IconRenderer<T> renderer) {
         if (TYPE_TO_RENDERER.containsKey(id)) {
             throw new IllegalStateException("Unable to add renderer for the given icon type [" + id + "] due to it already being registered!");
@@ -31,18 +29,16 @@ public class IconRenderRegistry {
         TYPE_TO_RENDERER.put(id, renderer);
     }
 
+    //--
+
     public static <T extends Icon> boolean renderIcon(T icon, DrawContext context, int x, int y, int mouseX, int mouseY, float partialTicks) {
-        var renderer = TYPE_TO_RENDERER.get(icon.getClass());
+        var renderer = TYPE_TO_RENDERER.get(icon.getTypeId());
 
         if (renderer == null) return false;
 
         ((IconRenderer<T>) renderer).renderIcon(icon, context, x, y,mouseX, mouseY, partialTicks);
 
         return true;
-    }
-
-    public interface IconRenderer<T extends Icon> {
-        void renderIcon(T icon, DrawContext context, int x, int y, int mouseX, int mouseY, float partialTicks);
     }
 
     static {
