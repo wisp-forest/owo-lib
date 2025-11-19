@@ -1,10 +1,11 @@
 package io.wispforest.owo.itemgroup.impl;
 
 import io.wispforest.owo.Owo;
-import io.wispforest.owo.itemgroup.core.CondensedEntries;
+import io.wispforest.owo.itemgroup.base.ItemStacksSupplier;
 import io.wispforest.owo.itemgroup.base.OwoItemGroup;
 import io.wispforest.owo.itemgroup.base.OwoItemGroupEntries;
 import io.wispforest.owo.itemgroup.base.OwoItemGroupState;
+import io.wispforest.owo.itemgroup.core.CondensedEntries;
 import io.wispforest.owo.itemgroup.core.CondensedEntry;
 import io.wispforest.owo.mixin.itemgroup.ItemGroupAccessor;
 import io.wispforest.owo.util.pond.OwoItemExtensions;
@@ -26,6 +27,7 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 
 public class OwoItemGroupStateImpl implements OwoItemGroupState {
 
@@ -86,32 +88,43 @@ public class OwoItemGroupStateImpl implements OwoItemGroupState {
     }
 
     @Override
-    public void accept(ItemGroup.DisplayContext context, ItemGroup.Entries entries) {
-        var activeTabs = isClientSide(context)
-            ? this.activeTabs
-            : IntSets.fromTo(0, this.extension.getTabs().size());
+    public Map<Identifier, CondensedEntry> gatherGlobalCondensedEntries(ItemGroup.DisplayContext context) {
+        return gatherEntriesForAllTabs(context, (stack, visibility) -> {});
+    }
 
+    @Override
+    public void accept(ItemGroup.DisplayContext context, ItemGroup.Entries entries) {
+        if (isClientSide(context)) {
+            gatherEntriesForActiveTabs(context, entries, this.activeTabs);
+        } else {
+            gatherEntriesForAllTabs(context, entries);
+        }
+    }
+
+    @Override
+    public Map<Identifier, CondensedEntry> gatherEntriesForActiveTabs(ItemGroup.DisplayContext context, ItemGroup.Entries entries, IntSet activeTabs) {
         var tabs = this.extension.getTabs();
 
         this.condensedEntries.clear();
 
         var key = this.extension.itemGroupId();
 
+        var globalCondensedEntries = new LinkedHashMap<Identifier, CondensedEntry>();
+
         activeTabs.forEach(tabIdx -> {
             this.collectItemsFromRegistry(entries, tabIdx);
 
-            var callback = new CondensedEntries.RegistrationCallback() {
-                @Override
-                public CondensedEntries.RegistrationCallback addEntry(CondensedEntry entry) {
-                    condensedEntries.computeIfAbsent(tabIdx, integer -> new LinkedHashMap<>())
-                        .put(entry.id(), entry);
+            tabs.get(tabIdx).contentSupplier().addItems(context, new OwoItemGroupEntriesImpl(entries, key, tabIdx, (entry, isGlobal) -> {
+                condensedEntries.computeIfAbsent(tabIdx, integer -> new LinkedHashMap<>())
+                    .put(entry.id(), entry);
 
-                    return this;
+                if (isGlobal) {
+                    globalCondensedEntries.put(entry.id(), entry);
                 }
-            };
-
-            tabs.get(tabIdx).contentSupplier().addItems(context, new OwoItemGroupEntriesImpl(entries, key, tabIdx, callback));
+            }));
         });
+
+        return globalCondensedEntries;
     }
 
     public static boolean isClientSide(ItemGroup.DisplayContext context) {
@@ -139,12 +152,7 @@ public class OwoItemGroupStateImpl implements OwoItemGroupState {
         for (int i = 0; i < tabs.size(); i++) {
             var tab = tabs.get(i);
 
-            tab.contentSupplier().addItems(context, new OwoItemGroupEntriesImpl(searchEntries, key, i, new CondensedEntries.RegistrationCallback() {
-                @Override
-                public CondensedEntries.RegistrationCallback addEntry(CondensedEntry entry) {
-                    return this;
-                }
-            }));
+            tab.contentSupplier().addItems(context, new OwoItemGroupEntriesImpl(searchEntries, key, i, (entry, isGlobal) -> {}));
         }
 
         ((ItemGroupAccessor) group).owo$setSearchTabStacks(searchEntries.searchTabStacks);
@@ -216,7 +224,32 @@ public class OwoItemGroupStateImpl implements OwoItemGroupState {
         );
     }
 
-    private record OwoItemGroupEntriesImpl(ItemGroup.Entries entries, RegistryKey<ItemGroup> groupKey, int tab, CondensedEntries.RegistrationCallback callback) implements OwoItemGroupEntries {
+    private static final class OwoItemGroupEntriesImpl implements OwoItemGroupEntries {
+        private final ItemGroup.Entries entries;
+        private final RegistryKey<ItemGroup> groupKey;
+        private final int tab;
+        private final BiConsumer<CondensedEntry, Boolean> condensedEntryCallback;
+
+        private boolean globalCondensedEntries = false;
+
+        private OwoItemGroupEntriesImpl(ItemGroup.Entries entries, RegistryKey<ItemGroup> groupKey, int tab, BiConsumer<CondensedEntry, Boolean> condensedEntryAddCallback) {
+            this.entries = entries;
+            this.groupKey = groupKey;
+            this.tab = tab;
+            this.condensedEntryCallback = condensedEntryAddCallback;
+        }
+
+        @Override
+        public OwoItemGroupEntries globalCondensedEntries(boolean value) {
+            this.globalCondensedEntries = value;
+
+            return this;
+        }
+
+        @Override
+        public boolean areCondensedEntriesGlobal() {
+            return this.globalCondensedEntries;
+        }
 
         @Override
         public OwoItemGroupEntries add(ItemStack stack, ItemGroup.StackVisibility visibility) {
@@ -226,17 +259,59 @@ public class OwoItemGroupStateImpl implements OwoItemGroupState {
         }
 
         @Override
-        public OwoItemGroupEntries addEntry(CondensedEntry entry) {
-            callback.addEntry(entry);
+        public OwoItemGroupEntries addEntry(CondensedEntry entry, boolean isGlobal) {
+            var childrenEntries = entry.childrenEntries();
 
-            this.addAll(entry.childrenEntries().get());
+            if (childrenEntries.get().isEmpty() && Owo.DEBUG) {
+                Owo.LOGGER.warn("A CondensedEntry loaded into owoItemGroup '{}' was found to be empty? Ignore if intentional. [Entry: {}]", createPath(), entry);
+
+                return this;
+            }
+
+            condensedEntryCallback.accept(entry, isGlobal);
+
+            this.addAll(childrenEntries);
+
+            return this;
+        }
+
+        @Override
+        public OwoItemGroupEntries addAll(ItemStacksSupplier supplier, ItemGroup.StackVisibility visibility) {
+            var stacks = supplier.get();
+
+            if (stacks.isEmpty() && Owo.DEBUG) {
+                Owo.LOGGER.warn("A Collection of stacks loaded into owoItemGroup '{}' was found to be empty? Ignore if intentional. [Stacks: {}]", createPath(), supplier);
+
+                return this;
+            }
+
+            return this.addAll(stacks, visibility);
+        }
+
+        @Override
+        public OwoItemGroupEntries addEntryReference(Identifier entryId) {
+            var entry = CondensedEntries.getEntry(entryId);
+
+            if (entry != null) {
+                addEntry(entry);
+            } else {
+                var msg = "Unable to add a given referenced CondensedEntry to the owoItemGroup '" + createPath() + "' as it was not found! [Id: " + entryId + "]";
+
+                if (Owo.DEBUG) throw new IllegalStateException(msg);
+
+                Owo.LOGGER.warn(msg);
+            }
 
             return this;
         }
 
         @Override
         public OwoItemGroupEntries addEntry(TagKey<? extends ItemConvertible> tagKey) {
-            return addEntry(groupKey.getValue().withSuffixedPath("/tab_" + tab + "/tag_" + tagKey.id().toUnderscoreSeparatedString()), tagKey);
+            return addEntry(createPath().withSuffixedPath("/tag_" + tagKey.id().toUnderscoreSeparatedString()), tagKey);
+        }
+
+        private Identifier createPath() {
+            return groupKey.getValue().withSuffixedPath("/tab_" + tab);
         }
     }
 
@@ -248,8 +323,8 @@ public class OwoItemGroupStateImpl implements OwoItemGroupState {
 
         @Override
         public void add(ItemStack stack, ItemGroup.StackVisibility visibility) {
-            if (visibility == ItemGroup.StackVisibility.PARENT_TAB_ONLY) return;
-            super.add(stack, ItemGroup.StackVisibility.SEARCH_TAB_ONLY);
+            if (visibility == net.minecraft.item.ItemGroup.StackVisibility.PARENT_TAB_ONLY) return;
+            super.add(stack, net.minecraft.item.ItemGroup.StackVisibility.SEARCH_TAB_ONLY);
         }
     }
 }

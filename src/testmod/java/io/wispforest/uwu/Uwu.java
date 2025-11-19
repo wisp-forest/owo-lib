@@ -138,11 +138,31 @@ public class Uwu implements ModInitializer {
         builder.initializer(group -> {
             group.addCustomTab(Icon.of(Items.SPONGE), "tab_1", (context, entries) -> {
                 entries
+                    .globalCondensedEntries(true)
                     .add(Items.DIAMOND)
                     .addEntry(ItemTags.LOGS)
                     .add(Items.EMERALD)
                     .addEntry(ItemTags.BEDS)
                     .add(Items.GOLD_INGOT);
+            }, true);
+        });
+    });
+
+    public static final RegistryKey<ItemGroup> ALOT_CONDENSED_ENTRIES_GROUP = OwoItemGroupBuilder.createItemGroup(Identifier.of("uwu", "alot_condensed_entries_group"), () -> Icon.of(Items.CHEST.getDefaultStack()), builder -> {
+        builder.initializer(group -> {
+            group.addCustomTab(Icon.of(Items.SPONGE), "tab_1", (context, entries) -> {
+                entries.globalCondensedEntries(true);
+
+                Registries.ITEM.getTags().forEach(tagEntries -> {
+                    var tag = tagEntries.getTag();
+
+                    if (tagEntries.size() <= 0) return;
+
+                    try {
+                        entries.addEntry(tag)
+                            .add(Items.DEBUG_STICK.getDefaultStack());
+                    } catch (Exception e) {}
+                });
             }, true);
         });
     });

@@ -1,17 +1,16 @@
 package io.wispforest.owo.itemgroup.base;
 
 import io.wispforest.owo.Owo;
+import io.wispforest.owo.itemgroup.core.CondensedEntry;
 import io.wispforest.owo.itemgroup.impl.OwoItemGroupStateImpl;
-import io.wispforest.owo.mixin.itemgroup.CreativeInventoryScreenAccessor;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import net.minecraft.client.gui.ScreenRect;
+import it.unimi.dsi.fastutil.ints.IntSets;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.Map;
 
 ///
 /// The state for the given [OwoItemGroup] with the currently selected
@@ -43,6 +42,20 @@ public interface OwoItemGroupState extends ItemGroup.EntryCollector {
     }
 
     OwoItemGroup getExtension();
+
+    default Map<Identifier, CondensedEntry> gatherGlobalCondensedEntries(ItemGroup.DisplayContext context) {
+        return gatherEntriesForAllTabs(context, (stack, visibility) -> {});
+    }
+
+    default Map<Identifier, CondensedEntry> gatherGlobalCondensedEntries(ItemGroup.DisplayContext context, IntSet activeTabs) {
+        return gatherEntriesForActiveTabs(context, (stack, visibility) -> {}, activeTabs);
+    }
+
+    default Map<Identifier, CondensedEntry> gatherEntriesForAllTabs(ItemGroup.DisplayContext context, ItemGroup.Entries entries) {
+        return gatherEntriesForActiveTabs(context, entries, IntSets.fromTo(0, this.getExtension().getTabs().size()));
+    }
+
+    Map<Identifier, CondensedEntry> gatherEntriesForActiveTabs(ItemGroup.DisplayContext context, ItemGroup.Entries entries, IntSet activeTabs);
 
     void updateSearchEntries(ItemGroup group, ItemGroup.DisplayContext context);
 

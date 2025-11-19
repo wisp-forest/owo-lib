@@ -70,7 +70,7 @@ public class DispatchedEndec<T> implements StructEndec<T> {
         }
 
         if (emptyValue != null) {
-            registerEndec(EMPTY_ID, Endec.unit(emptyValue));
+            typeToEndec.put(EMPTY_ID, Endec.unit(emptyValue));
         }
 
         this.classesToLoad = classesToLoad;

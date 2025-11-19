@@ -3,6 +3,7 @@ package io.wispforest.owo.itemgroup.base;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.StructEndec;
 import io.wispforest.endec.impl.StructEndecBuilder;
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.itemgroup.util.ItemStackOps;
 import io.wispforest.owo.serialization.DispatchedEndec;
 import io.wispforest.owo.serialization.IdentifiedData;
@@ -10,10 +11,12 @@ import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
+import net.minecraft.predicate.item.ItemPredicate;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.TagKey;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -21,9 +24,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.SequencedCollection;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
-public interface ItemStacksSupplier extends Supplier<SequencedCollection<ItemStack>> {
+public interface ItemStacksSupplier {
 
     @ApiStatus.Internal
     ItemStacksSupplier EMPTY = Collections::emptyList;
@@ -32,6 +34,8 @@ public interface ItemStacksSupplier extends Supplier<SequencedCollection<ItemSta
         .baseClasses(StackCollection.class, RegistryTag.class, ItemVariants.class)
         .allowTypelessData()
         .create();
+
+    SequencedCollection<ItemStack> get();
 
     static ItemStacksSupplier compound(SequencedCollection<ItemStacksSupplier> suppliers) {
         return new SupplierCollection(suppliers);
@@ -61,6 +65,14 @@ public interface ItemStacksSupplier extends Supplier<SequencedCollection<ItemSta
         return (supplier instanceof ItemConvertible convertible)
             ? new ItemVariants(convertible, false)
             : supplier;
+    }
+
+    default String translationKey() {
+        if (this instanceof IdentifiedData data) {
+            return data.getTypeId().toTranslationKey("text.owo.item_stack_supplier.type");
+        }
+
+        return this.getClass().getSimpleName();
     }
 
     record StackCollection(SequencedCollection<net.minecraft.item.ItemStack> stacks) implements ItemStacksSupplier, IdentifiedData {
@@ -128,6 +140,11 @@ public interface ItemStacksSupplier extends Supplier<SequencedCollection<ItemSta
                 .map(net.minecraft.item.Item::getDefaultStack)
                 .toList();
         }
+
+        @Override
+        public String translationKey() {
+            return "text.owo.item_stack_supplier.type.owo.predicate";
+        }
     }
 
     record ItemVariants(ItemConvertible item, boolean overrideClassSupplier) implements ItemStacksSupplier, IdentifiedData {
@@ -137,7 +154,7 @@ public interface ItemStacksSupplier extends Supplier<SequencedCollection<ItemSta
             }
         }
 
-        public static final Identifier ID = Identifier.of("owo", "item");
+        public static final Identifier ID = Identifier.of("owo", "item_variant");
 
         public static final StructEndec<ItemVariants> ENDEC = ItemStacksSupplier.ENDEC.registerEndec(ID,
             StructEndecBuilder.of(

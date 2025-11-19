@@ -1,5 +1,6 @@
 package io.wispforest.owo.itemgroup.base;
 
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.itemgroup.core.CondensedEntries;
 import io.wispforest.owo.itemgroup.core.CondensedEntry;
 import io.wispforest.owo.itemgroup.util.ItemStackOps;
@@ -14,7 +15,7 @@ import java.util.SequencedCollection;
 import java.util.function.Predicate;
 
 // TODO [ItemGroupPR]: DOCUMENT?
-public interface OwoItemGroupEntries extends CondensedEntries.RegistrationCallback {
+public interface OwoItemGroupEntries extends CondensedEntries.ItemGroupRegistrationCallback {
 
     default OwoItemGroupEntries addAll(TagKey<? extends ItemConvertible> tagKey) {
         return this.addAll(tagKey, ItemGroup.StackVisibility.PARENT_AND_SEARCH_TABS);
@@ -48,6 +49,12 @@ public interface OwoItemGroupEntries extends CondensedEntries.RegistrationCallba
         return this;
     }
 
+    default OwoItemGroupEntries addAll(ItemStacksSupplier supplier) {
+        return addAll(supplier, ItemGroup.StackVisibility.PARENT_AND_SEARCH_TABS);
+    }
+
+    OwoItemGroupEntries addAll(ItemStacksSupplier supplier, ItemGroup.StackVisibility visibility);
+
     OwoItemGroupEntries add(ItemStack stack, ItemGroup.StackVisibility visibility);
 
     //--
@@ -58,7 +65,7 @@ public interface OwoItemGroupEntries extends CondensedEntries.RegistrationCallba
     }
 
     @Override
-    default CondensedEntries.RegistrationCallback addEntry(Identifier identifier, ItemConvertible item) {
+    default OwoItemGroupEntries addEntry(Identifier identifier, ItemConvertible item) {
         return addEntry(identifier, ItemStacksSupplier.itemVariants(item));
     }
 
@@ -79,5 +86,18 @@ public interface OwoItemGroupEntries extends CondensedEntries.RegistrationCallba
         return addEntry(new CondensedEntry(identifier, supplier, false));
     }
 
-    OwoItemGroupEntries addEntry(CondensedEntry entry);
+    default OwoItemGroupEntries addEntry(CondensedEntry entry) {
+        return addEntry(entry, areCondensedEntriesGlobal());
+    }
+
+    OwoItemGroupEntries globalCondensedEntries(boolean value);
+
+    default boolean areCondensedEntriesGlobal() {
+        return false;
+    }
+
+    OwoItemGroupEntries addEntry(CondensedEntry entry, boolean isGlobal);
+
+    @Override
+    OwoItemGroupEntries addEntryReference(Identifier entryId);
 }

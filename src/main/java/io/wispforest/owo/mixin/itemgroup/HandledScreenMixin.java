@@ -1,11 +1,10 @@
 package io.wispforest.owo.mixin.itemgroup;
 
-import com.google.common.collect.MapMaker;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import io.wispforest.owo.itemgroup.impl.CondensedEntryStates;
-import io.wispforest.owo.itemgroup.gui.CondensedEntryRenderUtils;
+import io.wispforest.owo.itemgroup.util.CondensedEntryRenderUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
@@ -45,21 +44,18 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     @Unique
     private double currentDelta = 0;
 
-    @Unique
-    private final Map<ItemStack, CondensedEntryStates.Results> slotToResults = new MapMaker().weakKeys().makeMap();
-
     @Nullable
     @Unique
     private CondensedEntryStates.Results getResult(Slot slot) {
-        if (!(slot instanceof CreativeInventoryScreen.LockableSlot)) return null;
-
-        return getResult(slot.getStack());
+        return (slot instanceof CreativeInventoryScreen.LockableSlot)
+            ? getResult(slot.getStack())
+            : null;
     }
 
     @Nullable
     @Unique
     private CondensedEntryStates.Results getResult(ItemStack stack) {
-        return CondensedEntryStates.getState(stack);//slotToResults.computeIfAbsent(stack, CondensedEntryStates::getState);
+        return CondensedEntryStates.getState(stack);
     }
 
     @Inject(method = "drawSlots", at = @At("HEAD"))
@@ -78,7 +74,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     }
 
     @WrapOperation(method = "drawSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/screen/slot/Slot;getStack()Lnet/minecraft/item/ItemStack;"))
-    private ItemStack adjustItemStack(Slot slot, Operation<ItemStack> original, @Local(argsOnly = true) DrawContext context) {
+    private ItemStack adjustItemStack(Slot slot, Operation<ItemStack> original) {
         var result = getResult(slot);
 
         return (result != null && result.isParent())
@@ -105,20 +101,13 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
             var result = getResult(stack);
 
             if (result != null && result.isParent()) {
-                var state = result.state();
-
                 text = new ArrayList<>();
 
-                text.add(state.title());
+                var type = client.options.advancedItemTooltips ? TooltipType.Default.ADVANCED : TooltipType.Default.BASIC;
 
-                var description = state.description();
-
-                if (description != null) text.add(description);
-
-                state.entry().addExtraInfo(text::add, client.options.advancedItemTooltips ? TooltipType.Default.ADVANCED : TooltipType.Default.BASIC);
+                result.state().appendTooltip(type.withCreative(), text::add);
 
                 data = Optional.empty();
-
                 texture = null;
             }
         }

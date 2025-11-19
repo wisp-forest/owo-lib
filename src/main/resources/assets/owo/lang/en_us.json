@@ -52,7 +52,19 @@
     {"text": "]", "color": "gray"},
     " Disabled"
   ],
-  "text.owo.condensed_entries.tag_key": [
+  "text.owo.condensed_entries.type": [
+    "",
+    {"text": "Type", "color": "#3955e5"},
+    ": ",
+    { "index": 0 }
+  ],
+  "text.owo.condensed_entries.tag.registry": [
+    "",
+    {"text": "Registry", "color": "#3955e5"},
+    ": ",
+    { "index": 0 }
+  ],
+  "text.owo.condensed_entries.tag.key": [
     "",
     {"text": "Tag", "color": "#3955e5"},
     ": ",
@@ -65,6 +77,14 @@
     ": ",
     { "index": 0 }
   ],
+  "text.owo.condensed_entries.expand": "Expand All Entries",
+  "text.owo.condensed_entries.collapse": "Collapse All Entries",
+  "text.owo.item_stack_supplier.type.owo.itemstacks": "Stacks",
+  "text.owo.item_stack_supplier.type.owo.tag": "Tag",
+  "text.owo.item_stack_supplier.type.owo.item": "Item Variants",
+  "text.owo.item_stack_supplier.type.owo.compound": "Compound",
+  "text.owo.item_stack_supplier.type.owo.predicate": "Predicate",
+
   "text.config.owo.title": [
     {"text": "[", "color": "dark_gray"},
     {"text": "o", "color": "#3955e5"},
@@ -73,10 +93,18 @@
     {"text": "]", "color": "dark_gray"},
     {"text": " Configuration", "color": "white"}
   ],
+
   "text.config.owo.section.condensed_entries": "Condensed Entry Options",
   "text.config.owo.option.expandedCondensedEntries": "Expanded All Entries",
   "text.config.owo.option.expandedCondensedEntries.tooltip": "Will force all Condensed Entries to always be expanded",
   "text.config.owo.option.showBackgroundColor": "Show Background Color",
   "text.config.owo.option.showBorderColor": "Show Border Color",
-  "text.config.owo.option.borderColor": "Border Color"
+  "text.config.owo.option.borderColor": "Border Color",
+  "text.config.owo.option.showEntryShuffle": "Show Entry Shuffle",
+  "text.config.owo.option.entryShuffleTime": "Entry Shuffle Time",
+  "text.config.owo.option.showExpandEntriesButton": "Show Expand Entries Button",
+
+  "text.config.owo.category.info": "Debug Tooltip Info",
+  "text.config.owo.option.info.showTagData": "Show Tag Data",
+  "text.config.owo.option.info.showEntryData": "Show Entry Data"
 }

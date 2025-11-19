@@ -1,6 +1,8 @@
 package io.wispforest.owo.itemgroup.core;
 
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.itemgroup.base.ItemStacksSupplier;
+import io.wispforest.owo.serialization.IdentifiedData;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
@@ -11,7 +13,9 @@ import net.minecraft.util.Language;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.function.Consumer;
 
@@ -29,13 +33,23 @@ public record CondensedEntry(Identifier id, ItemStacksSupplier childrenEntries, 
     }
 
     public void addExtraInfo(Consumer<Text> tooltipAddCallback, TooltipType type) {
-        if (type.isAdvanced()) {
+        if (!type.isAdvanced()) return;
+
+        if (Owo.CONFIG.info.showTagData() && childrenEntries instanceof ItemStacksSupplier.RegistryTag registryTag) {
+            var tagKey = registryTag.tagKey();
+
             tooltipAddCallback.accept(Text.empty());
 
-            if (childrenEntries instanceof ItemStacksSupplier.RegistryTag registryTag) {
-                tooltipAddCallback.accept(Text.translatable("text.owo.condensed_entries.tag_key", Text.translatable(registryTag.tagKey().getTranslationKey())));
-            }
+            var registry = tagKey.registryRef().getValue();
 
+            tooltipAddCallback.accept(Text.translatable("text.owo.condensed_entries.tag.registry", Objects.equals(registry.getNamespace(), "minecraft") ? registry.getPath() : registry.toString()));
+            tooltipAddCallback.accept(Text.translatable("text.owo.condensed_entries.tag.key", tagKey.id().toString()));
+        }
+
+        if (Owo.CONFIG.info.showEntryData()) {
+            tooltipAddCallback.accept(Text.empty());
+
+            tooltipAddCallback.accept(Text.translatable("text.owo.condensed_entries.type", Text.translatable(childrenEntries.translationKey())));
             tooltipAddCallback.accept(Text.translatable("text.owo.condensed_entries.entry_id", id));
         }
     }
@@ -70,10 +84,10 @@ public record CondensedEntry(Identifier id, ItemStacksSupplier childrenEntries, 
         }
 
         public ItemStack getDisplayStack(double delta) {
-            this.totalTime += delta * 50;
+            if (Owo.CONFIG.showEntryShuffle()) this.totalTime += delta * 50;
 
             // TODO: ADJUSTABLE TIME?
-            if (this.iconStack == null || (this.totalTime > 1500)) {
+            if (this.iconStack == null || (this.totalTime > Owo.CONFIG.entryShuffleTime())) {
                 this.totalTime = 0;
 
                 ItemStack chosenIconStack = null;
@@ -84,7 +98,7 @@ public record CondensedEntry(Identifier id, ItemStacksSupplier childrenEntries, 
 
                     var entry = this.children.get(index);
 
-                    if (this.iconStack != entry) {
+                    if (this.iconStack != entry || this.children.size() == 1) {
                         chosenIconStack = entry;
                     }
                 }
@@ -102,8 +116,13 @@ public record CondensedEntry(Identifier id, ItemStacksSupplier childrenEntries, 
         public void toggleChildren(List<ItemStack> displayStacks) {
             var startingIndex = displayStacks.indexOf(parent);
 
+            if (startingIndex <= 0) {
+                System.out.println("Invalid Index detected `" + startingIndex + "` for entry State: " + this.entry());
+            }
+
             if (this.showChildren) {
-                displayStacks.removeAll(children);
+                children.forEach(displayStacks::remove);
+                //displayStacks.removeAll(children);
             } else {
                 displayStacks.addAll(startingIndex + 1, children);
             }
@@ -111,7 +130,7 @@ public record CondensedEntry(Identifier id, ItemStacksSupplier childrenEntries, 
             toggleChildren();
         }
 
-        public void toggleChildren() {
+        private void toggleChildren() {
             this.showChildren = !this.showChildren;
         }
 
@@ -126,6 +145,16 @@ public record CondensedEntry(Identifier id, ItemStacksSupplier childrenEntries, 
             return Language.getInstance().hasTranslation(key)
                 ? Text.translatable(key).formatted(Formatting.GRAY)
                 : null;
+        }
+
+        public void appendTooltip(TooltipType type, Consumer<Text> addCallback) {
+            addCallback.accept(this.title());
+
+            var description = this.description();
+
+            if (description != null) addCallback.accept(description);
+
+            this.entry().addExtraInfo(addCallback, type);
         }
     }
 }

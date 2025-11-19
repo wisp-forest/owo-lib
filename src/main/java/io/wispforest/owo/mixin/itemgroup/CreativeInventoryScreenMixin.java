@@ -6,10 +6,13 @@ import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.itemgroup.base.OwoItemGroupState;
+import io.wispforest.owo.itemgroup.util.DisplayContextUtils;
 import io.wispforest.owo.itemgroup.gui.OwoItemGroupRendererHandler;
 import io.wispforest.owo.itemgroup.impl.CondensedEntryStates;
+import io.wispforest.owo.mixin.itemgroup.fabric.ItemGroupButtonWidgetAccessor;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import it.unimi.dsi.fastutil.ints.IntSet;
+import net.fabricmc.fabric.impl.client.itemgroup.FabricCreativeGuiComponents;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
@@ -111,7 +114,7 @@ public abstract class CreativeInventoryScreenMixin extends HandledScreen<Creativ
         if (renderer.renderTitle(context, x, y, text, textHolder::setValue)) return;
 
         if (renderer != OwoItemGroupRendererHandler.EMPTY) {
-            int width = 171 - 15 - 3 - x;
+            int width = (expandEntriesButton != null ? expandEntriesButton.getX() : this.x + 171 - 15) - this.x - 3 - x;
 
             var owoCtx = OwoUIDrawContext.of(context);
 
@@ -134,31 +137,128 @@ public abstract class CreativeInventoryScreenMixin extends HandledScreen<Creativ
 
     //--
 
+    @Unique
+    private static final Identifier EXPAND_BUTTON_TEXTURE = Identifier.of("owo", "textures/gui/condensed_entry/expand_button.png");
+
+    @Unique
+    private boolean anyEntryExpanded = false;
+
+    @Unique
+    private ButtonWidget expandEntriesButton = null;
+
+    @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/CreativeInventoryScreen;setSelectedTab(Lnet/minecraft/item/ItemGroup;)V"))
+    private void setupCondensedEntryToggle(CallbackInfo ci) {
+        ButtonWidget buttonRoot = null;
+
+        for (var owo$drawable : ((ScreenAccessor) this).owo$drawables()) {
+            if (owo$drawable instanceof FabricCreativeGuiComponents.ItemGroupButtonWidget itemGroupButtonWidget) {
+                var type = ((ItemGroupButtonWidgetAccessor) itemGroupButtonWidget).owo$type();
+
+                if (type == FabricCreativeGuiComponents.Type.PREVIOUS) {
+                    buttonRoot = itemGroupButtonWidget;
+
+                    break;
+                }
+            }
+        }
+
+
+        int x, y;
+
+        if (buttonRoot != null) {
+            x = buttonRoot.getX();
+            y = buttonRoot.getY();
+        } else {
+            x = this.x + 171;
+            y = this.y + 4;
+        }
+
+        x -= 15;
+
+        if (Owo.CONFIG.showExpandEntriesButton()) {
+            expandEntriesButton = this.addDrawableChild(new ButtonWidget(x, y, 12, 12, Text.empty(), button -> {
+                updateStackEntries(itemStacks -> {
+                    CondensedEntryStates.forAllState(state -> {
+                        if (anyEntryExpanded) {
+                            if (state.showChildren()) {
+                                state.toggleChildren(itemStacks);
+                            }
+                        } else {
+                            state.toggleChildren(itemStacks);
+                        }
+                    });
+
+                    anyEntryExpanded = !anyEntryExpanded;
+                });
+
+            }, Supplier::get) {
+                @Override
+                protected void renderWidget(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
+                    //this.active = type.isEnabled.test(screen);
+                    //this.visible = screen.hasAdditionalPages();
+
+                    if (!this.visible) return;
+
+                    int u = active && this.isHovered() ? 12 : 0;
+                    int v = active ? 0 : 12;
+
+                    context.drawTexture(RenderPipelines.GUI_TEXTURED, EXPAND_BUTTON_TEXTURE, this.getX(), this.getY(), u, v, 12, 12, 24, 24);
+
+                    if (this.isHovered() && this.active) {
+                        var type = anyEntryExpanded ? "collapse" : "expand";
+
+                        context.drawTooltip(textRenderer, Text.translatable("text.owo.condensed_entries." + type), mouseX, mouseY);
+                    }
+                }
+            });
+        }
+    }
+
+    // Handle general setup of condensed entries for the given selected group and the toggled tabs
     @WrapOperation(method = "setSelectedTab", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/collection/DefaultedList;addAll(Ljava/util/Collection;)Z", ordinal = 1))
     private boolean adjustStacksIfCondensedEntries(DefaultedList instance, Collection<ItemStack> collection, Operation<Boolean> original, @Local(argsOnly = true) ItemGroup group) {
+        var state = OwoItemGroupState.get(group, true);
+
         var list = new ArrayList<>(collection);
 
-        var tabIndex = (currentState != null) ? currentState.selectedTabs() : IntSet.of(0);
+        var tabIndex = (state != null) ? state.selectedTabs() : IntSet.of(0);
 
-        CondensedEntryStates.handleCondensedEntries(group, tabIndex, list);
+        var wasEntriesAdded = CondensedEntryStates.handleCondensedEntries(DisplayContextUtils.createClientContext(), group, tabIndex, list);
+
+        if (expandEntriesButton != null) {
+            expandEntriesButton.active = wasEntriesAdded;
+        }
+
+        anyEntryExpanded = false;
 
         return original.call(instance, list);
     }
 
+
+    // Attempt to check if a condensed entry should be expanded
     @Inject(method = "onMouseClick", at = @At(value = "HEAD"), cancellable = true)
     private void attemptEntryHandling(Slot slot, int slotId, int button, SlotActionType actionType, CallbackInfo ci) {
         if (!(slot instanceof CreativeInventoryScreen.LockableSlot)) return;
 
-        var state = CondensedEntryStates.getState(slot.getStack());
+        var results = CondensedEntryStates.getState(slot.getStack());
 
-        if (state == null || !state.isParent()) return;
+        if (results == null || !results.isParent()) return;
 
-        var list = new ArrayList<>(handler.itemList);
+        updateStackEntries(itemStacks -> {
+            results.state().toggleChildren(itemStacks);
 
-        state.state().toggleChildren(list);
-
-        this.refreshSelectedTab(list);
+            anyEntryExpanded = true;
+        });
 
         ci.cancel();
+    }
+
+    @Unique
+    private void updateStackEntries(Consumer<ArrayList<ItemStack>> consumer) {
+        var list = new ArrayList<>(handler.itemList);
+
+        consumer.accept(list);
+
+        this.refreshSelectedTab(list);
     }
 }

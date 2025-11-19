@@ -1,14 +1,14 @@
-package io.wispforest.owo.itemgroup.gui;
+package io.wispforest.owo.itemgroup.util;
 
 
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.itemgroup.impl.CondensedEntryStates;
 import io.wispforest.owo.itemgroup.core.CondensedEntry;
-import io.wispforest.owo.ui.core.Color;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
@@ -18,6 +18,7 @@ import org.jetbrains.annotations.ApiStatus;
 /// may need like the parent icon, entry background, and the entry outline
 ///
 @ApiStatus.Internal
+@Environment(EnvType.CLIENT)
 public class CondensedEntryRenderUtils {
 
     private static final Identifier CONDENSED_ENTRY_BACKGROUND = Identifier.of("owo", "textures/gui/condensed_entry/background.png");

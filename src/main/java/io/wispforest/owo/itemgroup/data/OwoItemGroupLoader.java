@@ -6,6 +6,7 @@ import io.wispforest.endec.Endec;
 import io.wispforest.endec.StructEndec;
 import io.wispforest.endec.format.gson.GsonDeserializer;
 import io.wispforest.endec.impl.StructEndecBuilder;
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.itemgroup.OwoItemGroupBuilder;
 import io.wispforest.owo.itemgroup.base.ButtonDefinition;
 import io.wispforest.owo.itemgroup.base.Icon;
@@ -235,7 +236,7 @@ public class OwoItemGroupLoader implements ModDataConsumer {
                                     if (tab.areTagsCondensable() && supplier instanceof ItemStacksSupplier.RegistryTag(var tagKey)) {
                                         entries.addEntry(tagKey);
                                     } else {
-                                        entries.addAll(supplier.get());
+                                        entries.addAll(supplier);
                                     }
                                 }
                             }
