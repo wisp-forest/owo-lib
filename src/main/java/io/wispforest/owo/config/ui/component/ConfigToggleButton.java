@@ -2,6 +2,8 @@ package io.wispforest.owo.config.ui.component;
 
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.core.Sizing;
+import net.minecraft.client.input.AbstractInput;
+import net.minecraft.client.input.MouseInput;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -20,10 +22,10 @@ public class ConfigToggleButton extends ButtonComponent implements OptionValuePr
     }
 
     @Override
-    public void onPress() {
+    public void onPress(AbstractInput input) {
         this.enabled = !this.enabled;
         this.updateMessage();
-        super.onPress();
+        super.onPress(input);
     }
 
     protected void updateMessage() {

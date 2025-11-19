@@ -73,7 +73,7 @@ public class OwoDebugCommands {
                     var poiType = Registries.POINT_OF_INTEREST_TYPE.getOptionalValue(IdentifierArgumentType.getIdentifier(context, "poi_type"))
                         .orElseThrow(NO_POI_TYPE::create);
 
-                    var entries = ((ServerWorld) player.getWorld()).getPointOfInterestStorage().getInCircle(type -> type.value() == poiType,
+                    var entries = ((ServerWorld) player.getEntityWorld()).getPointOfInterestStorage().getInCircle(type -> type.value() == poiType,
                         player.getBlockPos(), IntegerArgumentType.getInteger(context, "radius"), PointOfInterestStorage.OccupationStatus.ANY).toList();
 
                     player.sendMessage(TextOps.concat(Owo.PREFIX, TextOps.withColor("Found §" + entries.size() + " §entr" + (entries.size() == 1 ? "y" : "ies"),
@@ -82,7 +82,7 @@ public class OwoDebugCommands {
                     for (var entry : entries) {
 
                         final var entryPos = entry.getPos();
-                        final var blockId = Registries.BLOCK.getId(player.getWorld().getBlockState(entryPos).getBlock()).toString();
+                        final var blockId = Registries.BLOCK.getId(player.getEntityWorld().getBlockState(entryPos).getBlock()).toString();
                         final var posString = "(" + entryPos.getX() + " " + entryPos.getY() + " " + entryPos.getZ() + ")";
 
                         final var message = TextOps.withColor("-> §" + blockId + " §" + posString,
@@ -110,7 +110,7 @@ public class OwoDebugCommands {
                 }
 
                 BlockPos pos = ((BlockHitResult) target).getBlockPos();
-                final var blockEntity = player.getWorld().getBlockEntity(pos);
+                final var blockEntity = player.getEntityWorld().getBlockEntity(pos);
 
                 if (blockEntity == null) {
                     source.sendError(TextOps.concat(Owo.PREFIX, Text.literal(("No block entity"))));

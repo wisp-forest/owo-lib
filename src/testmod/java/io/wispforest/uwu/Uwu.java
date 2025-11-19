@@ -50,6 +50,7 @@ import net.minecraft.item.*;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.particle.DragonBreathParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -195,7 +196,7 @@ public class Uwu implements ModInitializer {
         ClientParticles.persist();
 
         ClientParticles.setParticleCount(30);
-        ClientParticles.spawnLine(ParticleTypes.DRAGON_BREATH, world, pos.add(.5, .5, .5), pos.add(.5, 2.5, .5), .015f);
+        ClientParticles.spawnLine(DragonBreathParticleEffect.of(ParticleTypes.DRAGON_BREATH, 1), world, pos.add(.5, .5, .5), pos.add(.5, 2.5, .5), .015f);
 
         ClientParticles.randomizeVelocityOnAxis(.1, Direction.Axis.Z);
         ClientParticles.spawn(ParticleTypes.CLOUD, world, pos.add(.5, 2.5, .5), 0);
@@ -476,7 +477,7 @@ public class Uwu implements ModInitializer {
                     }));
         });
 
-        CustomTextRegistry.register(BasedTextContent.TYPE, "based");
+        CustomTextRegistry.register("based", BasedTextContent.CODEC);
 
         UwuNetworkExample.init();
         UwuOptionalNetExample.init();

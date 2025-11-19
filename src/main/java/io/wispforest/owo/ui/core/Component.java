@@ -6,8 +6,14 @@ import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.FocusHandler;
 import io.wispforest.owo.util.EventSource;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -198,19 +204,6 @@ public interface Component extends PositionedRectangle {
     @Nullable List<TooltipComponent> tooltip();
 
     /**
-     * Set the Z-Index of this component. This is used
-     * for layering components during rendering
-     *
-     * @param zIndex The new Z-Index of this component
-     */
-    Component zIndex(int zIndex);
-
-    /**
-     * @return The current Z-Index of this component
-     */
-    int zIndex();
-
-    /**
      * Determine if this component should currently
      * render its tooltip
      *
@@ -321,16 +314,12 @@ public interface Component extends PositionedRectangle {
      * Called when the mouse has been clicked inside
      * the bounding box of this component
      *
-     * @param mouseX The x coordinate at which the mouse was clicked, relative
-     *               to this component's bounding box root
-     * @param mouseY The y coordinate at which the mouse was clicked, relative
-     *               to this component's bounding box root
-     * @param button The mouse button which was clicked, refer to the constants
-     *               in {@link org.lwjgl.glfw.GLFW}
+     * @param click
+     * @param doubled
      * @return {@code true} if this component handled the click and no more
      * components should be notified
      */
-    boolean onMouseDown(double mouseX, double mouseY, int button);
+    boolean onMouseDown(Click click, boolean doubled);
 
     EventSource<MouseDown> mouseDown();
 
@@ -338,12 +327,11 @@ public interface Component extends PositionedRectangle {
      * Called when a mouse button has been released
      * while this component is focused
      *
-     * @param button The mouse button which was released, refer to the constants
-     *               in {@link org.lwjgl.glfw.GLFW}
+     * @param click
      * @return {@code true} if this component handled the event and no more
-     * components should be notified
+     *                     components should be notified
      */
-    boolean onMouseUp(double mouseX, double mouseY, int button);
+    boolean onMouseUp(Click click);
 
     EventSource<MouseUp> mouseUp();
 
@@ -367,18 +355,13 @@ public interface Component extends PositionedRectangle {
      * Called when the mouse has been dragged
      * while this component is focused
      *
-     * @param mouseX The x coordinate at which the mouse was dragged, relative
-     *               to this component's bounding box root
-     * @param mouseY The y coordinate at which the mouse was dragged, relative
-     *               to this component's bounding box root
+     * @param click
      * @param deltaX How far the mouse was moved on the x-axis
      * @param deltaY How far the mouse was moved on the y-axis
-     * @param button The mouse button which was clicked, refer to the constants
-     *               in {@link org.lwjgl.glfw.GLFW}
      * @return {@code true} if this component handled the mouse move and no more
      * components should be notified
      */
-    boolean onMouseDrag(double mouseX, double mouseY, double deltaX, double deltaY, int button);
+    boolean onMouseDrag(Click click, double deltaX, double deltaY);
 
     EventSource<MouseDrag> mouseDrag();
 
@@ -386,14 +369,11 @@ public interface Component extends PositionedRectangle {
      * Called when a key on the keyboard has been pressed
      * while this component is focused
      *
-     * @param keyCode   The key token of the pressed key, refer to the constants in {@link org.lwjgl.glfw.GLFW}
-     * @param scanCode  A platform-specific scancode uniquely identifying the exact key that was pressed
-     * @param modifiers A bitfield describing which modifier keys were pressed,
-     *                  refer to <a href="https://www.glfw.org/docs/3.3/group__mods.html">GLFW Modifier key flags</a>
+     * @param input
      * @return {@code true} if this component handled the key-press and no
-     * more components should be notified
+     *                     more components should be notified
      */
-    boolean onKeyPress(int keyCode, int scanCode, int modifiers);
+    boolean onKeyPress(KeyInput input);
 
     EventSource<KeyPress> keyPress();
 
@@ -402,13 +382,11 @@ public interface Component extends PositionedRectangle {
      * a key has been pressed and the OS determined it should result
      * in a character being typed
      *
-     * @param chr       The character that was typed
-     * @param modifiers A bitfield describing which modifier keys were pressed,
-     *                  refer to <a href="https://www.glfw.org/docs/3.3/group__mods.html">GLFW Modifier key flags</a>
+     * @param input
      * @return {@code true} if this component handled the input and no
-     * * more components should be notified
+     *                     * more components should be notified
      */
-    boolean onCharTyped(char chr, int modifiers);
+    boolean onCharTyped(CharInput input);
 
     EventSource<CharTyped> charTyped();
 
@@ -504,7 +482,6 @@ public interface Component extends PositionedRectangle {
 
         UIParsing.apply(children, "margins", Insets::parse, this::margins);
         UIParsing.apply(children, "positioning", Positioning::parse, this::positioning);
-        UIParsing.apply(children, "z-index", UIParsing::parseSignedInt, this::zIndex);
         UIParsing.apply(children, "cursor-style", UIParsing.parseEnum(CursorStyle.class), this::cursorStyle);
         UIParsing.apply(children, "tooltip-text", UIParsing::parseText, this::tooltip);
 
@@ -636,6 +613,20 @@ public interface Component extends PositionedRectangle {
     default void moveTo(int x, int y) {
         this.updateX(x);
         this.updateY(y);
+    }
+
+    /**
+     * @return a textual representation of the component's details for use in debugging with the inspector HUD.
+     *          Default implementation contains positioning, size and margins.
+     * @see OwoUIDrawContext#drawInspector(ParentComponent, double, double, boolean)
+     */
+    default MutableText inspectorDescriptor() {
+        final var margins = this.margins().get();
+        return Text.literal(this.x() + "," + this.y() + " (" + this.width() + "," + this.height() + ")")
+                .append(
+                        Text.literal(" <" + margins.top() + "," + margins.bottom() + "," + margins.left() + "," + margins.right() + ">")
+                                .setStyle(Style.EMPTY.withColor(Formatting.YELLOW))
+                );
     }
 
     enum FocusSource {

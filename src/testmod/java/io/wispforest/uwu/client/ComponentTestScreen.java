@@ -1,7 +1,6 @@
 package io.wispforest.uwu.client;
 
 import com.mojang.authlib.GameProfile;
-import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.component.*;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
@@ -10,13 +9,12 @@ import io.wispforest.owo.ui.core.*;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.FurnaceBlock;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.Tooltip;
-import net.minecraft.client.texture.SpriteAtlasTexture;
-import net.minecraft.client.util.SpriteIdentifier;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.BundleContentsComponent;
 import net.minecraft.item.ItemStack;
@@ -24,10 +22,9 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
+import net.minecraft.text.StyleSpriteSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Colors;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.RotationAxis;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -122,7 +119,7 @@ public class ComponentTestScreen extends Screen {
         );
 
         rootComponent.child(Containers.verticalFlow(Sizing.content(), Sizing.content())
-                .child(Components.label(Text.literal("A profound vertical Flow Layout, as well as a leally long text to demonstrate wrapping").styled(style -> style.withFont(MinecraftClient.UNICODE_FONT_ID))
+                .child(Components.label(Text.literal("A profound vertical Flow Layout, as well as a leally long text to demonstrate wrapping").styled(style -> style.withFont(new StyleSpriteSource.Font(MinecraftClient.UNICODE_FONT_ID)))
                                 .styled(style -> {
                                     return style.withClickEvent(new ClickEvent.CopyToClipboard("yes"))
                                             .withHoverEvent(new HoverEvent.ShowItem(Items.SCULK_SHRIEKER.getDefaultStack()));
@@ -218,9 +215,9 @@ public class ComponentTestScreen extends Screen {
 //                })
 //        );
 
-        rootComponent.mouseDown().subscribe((mouseX, mouseY, button) -> {
-            if (button != GLFW.GLFW_MOUSE_BUTTON_RIGHT) return false;
-            DropdownComponent.openContextMenu(this, rootComponent, FlowLayout::child, mouseX, mouseY, contextMenu -> {
+        rootComponent.mouseDown().subscribe((click, doubled) -> {
+            if (click.button() != GLFW.GLFW_MOUSE_BUTTON_RIGHT) return false;
+            DropdownComponent.openContextMenu(this, rootComponent, FlowLayout::child, click.x(), click.y(), contextMenu -> {
                 contextMenu.text(Text.literal("That's a context menu"));
                 contextMenu.checkbox(Text.literal("Yup"), true, aBoolean -> {});
                 contextMenu.divider();
@@ -273,7 +270,7 @@ public class ComponentTestScreen extends Screen {
                                             .selectedColor(Color.ofArgb(0x7F3955E5))
                                             .sizing(Sizing.fixed(160), Sizing.fixed(100))
                                     ).padding(Insets.of(5)).surface(Surface.DARK_PANEL)
-                    ).zIndex(1000));
+                    ));
                 })
         );
 
@@ -405,13 +402,13 @@ public class ComponentTestScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+    public boolean keyPressed(KeyInput input) {
+        if (input.isEscape()) {
             this.close();
             return true;
         }
 
-        if (keyCode == GLFW.GLFW_KEY_F12) {
+        if (input.key() == GLFW.GLFW_KEY_F12) {
             try (var out = Files.newOutputStream(Path.of("component_tree.dot")); var writer = new OutputStreamWriter(out, StandardCharsets.UTF_8)) {
                 writer.write("digraph D {\n");
 
@@ -429,13 +426,13 @@ public class ComponentTestScreen extends Screen {
             }
             return true;
         } else {
-            return this.uiAdapter.keyPressed(keyCode, scanCode, modifiers);
+            return this.uiAdapter.keyPressed(input);
         }
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        return this.uiAdapter.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+    public boolean mouseDragged(Click click, double deltaX, double deltaY) {
+        return this.uiAdapter.mouseDragged(click, deltaX, deltaY);
     }
 
     @Override

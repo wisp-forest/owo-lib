@@ -23,15 +23,15 @@ public record CircleElementRenderState(
     Color color
 ) implements SimpleGuiElementRenderState {
     @Override
-    public void setupVertices(VertexConsumer vertices, float depth) {
+    public void setupVertices(VertexConsumer vertices) {
         double angleStep = Math.toRadians(this.angleTo - this.angleFrom) / this.segments;
         int vColor = this.color.argb();
 
-        vertices.vertex(this.pose, this.centerX, this.centerY, depth).color(vColor);
+        vertices.vertex(this.pose, this.centerX, this.centerY).color(vColor);
 
         for (int i = this.segments; i >= 0; i--) {
             double theta = Math.toRadians(this.angleFrom) + i * angleStep;
-            vertices.vertex(this.pose, (float) (this.centerX - Math.cos(theta) * this.radius), (float) (this.centerY - Math.sin(theta) * this.radius), depth)
+            vertices.vertex(this.pose, (float) (this.centerX - Math.cos(theta) * this.radius), (float) (this.centerY - Math.sin(theta) * this.radius))
                 .color(vColor);
         }
     }

@@ -8,9 +8,10 @@ import io.wispforest.owo.ui.util.Delta;
 import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
+import net.minecraft.client.gui.Click;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.math.RotationAxis;
 import org.lwjgl.glfw.GLFW;
 import org.w3c.dom.Element;
 
@@ -104,22 +105,22 @@ public class CollapsibleContainer extends FlowLayout {
     }
 
     @Override
-    public boolean onKeyPress(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == GLFW.GLFW_KEY_SPACE || keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
+    public boolean onKeyPress(KeyInput input) {
+        if (input.isEnterOrSpace()) {
             this.toggleExpansion();
 
-            super.onKeyPress(keyCode, scanCode, modifiers);
+            super.onKeyPress(input);
             return true;
         }
 
-        return super.onKeyPress(keyCode, scanCode, modifiers);
+        return super.onKeyPress(input);
     }
 
     @Override
-    public boolean onMouseDown(double mouseX, double mouseY, int button) {
-        final var superResult = super.onMouseDown(mouseX, mouseY, button);
+    public boolean onMouseDown(Click click, boolean doubled) {
+        final var superResult = super.onMouseDown(click, doubled);
 
-        if (mouseY <= this.titleLayout.fullSize().height() && !superResult) {
+        if (click.y() <= this.titleLayout.fullSize().height() && !superResult) {
             this.toggleExpansion();
             UISounds.playInteractionSound();
             return true;

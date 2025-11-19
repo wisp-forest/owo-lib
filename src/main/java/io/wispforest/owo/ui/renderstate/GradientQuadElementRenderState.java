@@ -22,11 +22,11 @@ public record GradientQuadElementRenderState(
 ) implements SimpleGuiElementRenderState {
 
     @Override
-    public void setupVertices(VertexConsumer vertices, float depth) {
-        vertices.vertex(this.pose(), (float) this.bounds.getLeft(), (float) this.bounds.getTop(), depth).color(this.colorTL.argb());
-        vertices.vertex(this.pose(), (float) this.bounds.getLeft(), (float) this.bounds.getBottom(), depth).color(this.colorBL.argb());
-        vertices.vertex(this.pose(), (float) this.bounds.getRight(), (float) this.bounds.getBottom(), depth).color(this.colorBR.argb());
-        vertices.vertex(this.pose(), (float) this.bounds.getRight(), (float) this.bounds.getTop(), depth).color(this.colorTR.argb());
+    public void setupVertices(VertexConsumer vertices) {
+        vertices.vertex(this.pose(), (float) this.bounds.getLeft(), (float) this.bounds.getTop()).color(this.colorTL.argb());
+        vertices.vertex(this.pose(), (float) this.bounds.getLeft(), (float) this.bounds.getBottom()).color(this.colorBL.argb());
+        vertices.vertex(this.pose(), (float) this.bounds.getRight(), (float) this.bounds.getBottom()).color(this.colorBR.argb());
+        vertices.vertex(this.pose(), (float) this.bounds.getRight(), (float) this.bounds.getTop()).color(this.colorTR.argb());
     }
 
     @Override

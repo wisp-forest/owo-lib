@@ -1,7 +1,6 @@
 package io.wispforest.owo.ui.component;
 
 import com.mojang.authlib.GameProfile;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.mixin.ui.access.EntityRendererAccessor;
@@ -12,22 +11,24 @@ import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.renderstate.EntityElementRenderState;
-import io.wispforest.owo.util.pond.OwoEntityRenderDispatcherExtension;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.ScreenRect;
-import net.minecraft.client.network.*;
-import net.minecraft.client.render.DiffuseLighting;
-import net.minecraft.client.render.LightmapTextureManager;
+import net.minecraft.client.network.ClientConnectionState;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
+import net.minecraft.client.render.entity.EntityRenderManager;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.session.telemetry.TelemetrySender;
 import net.minecraft.client.session.telemetry.WorldSession;
 import net.minecraft.client.util.DefaultSkinHelper;
-import net.minecraft.client.util.SkinTextures;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.world.ClientChunkLoadProgress;
+import net.minecraft.component.type.ProfileComponent;
 import net.minecraft.entity.*;
 import net.minecraft.entity.player.PlayerModelPart;
+import net.minecraft.entity.player.SkinTextures;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.network.ClientConnection;
@@ -41,7 +42,6 @@ import net.minecraft.util.Util;
 import net.minecraft.util.math.RotationAxis;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
-import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.w3c.dom.Element;
 
@@ -51,7 +51,7 @@ import java.util.function.Consumer;
 
 public class EntityComponent<E extends Entity> extends BaseComponent {
 
-    protected final EntityRenderDispatcher dispatcher;
+    protected final EntityRenderManager manager;
     protected final VertexConsumerProvider.Immediate entityBuffers;
     protected final E entity;
 
@@ -65,7 +65,7 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
 
     protected EntityComponent(Sizing sizing, E entity) {
         final var client = MinecraftClient.getInstance();
-        this.dispatcher = client.getEntityRenderDispatcher();
+        this.manager = client.getEntityRenderDispatcher();
         this.entityBuffers = client.getBufferBuilders().getEntityVertexConsumers();
 
         this.entity = entity;
@@ -76,7 +76,7 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
     @SuppressWarnings("DataFlowIssue")
     protected EntityComponent(Sizing sizing, EntityType<E> type, @Nullable NbtCompound nbt) {
         final var client = MinecraftClient.getInstance();
-        this.dispatcher = client.getEntityRenderDispatcher();
+        this.manager = client.getEntityRenderDispatcher();
         this.entityBuffers = client.getBufferBuilders().getEntityVertexConsumers();
 
         this.entity = type.create(client.world, SpawnReason.BREEDING);
@@ -115,11 +115,8 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
             matrix.rotate(RotationAxis.POSITIVE_Y.rotationDegrees(-45 + this.mouseRotation));
         }
 
-        var entityState = this.dispatcher.getRenderer(this.entity).createRenderState();
-
-        var renderer = (EntityRenderer)this.dispatcher.getRenderer(this.entity);
-
-        renderer.updateRenderState(this.entity, entityState, partialTicks);
+        var entityState = this.manager.getAndUpdateRenderState(this.entity, partialTicks);
+        var renderer = this.manager.getRenderer(this.entity);
 
         if (showNametag) {
             entityState.displayName = ((EntityRendererAccessor) renderer).owo$getDisplayName(entity);
@@ -138,14 +135,14 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
     }
 
     @Override
-    public boolean onMouseDrag(double mouseX, double mouseY, double deltaX, double deltaY, int button) {
-        if (this.allowMouseRotation && button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+    public boolean onMouseDrag(Click click, double deltaX, double deltaY) {
+        if (this.allowMouseRotation && click.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
             this.mouseRotation += deltaX;
 
-            super.onMouseDrag(mouseX, mouseY, deltaX, deltaY, button);
+            super.onMouseDrag(click, deltaX, deltaY);
             return true;
         } else {
-            return super.onMouseDrag(mouseX, mouseY, deltaX, deltaY, button);
+            return super.onMouseDrag(click, deltaX, deltaY);
         }
     }
 
@@ -257,21 +254,23 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
 
         protected RenderablePlayerEntity(GameProfile profile) {
             super(MinecraftClient.getInstance(),
-                    MinecraftClient.getInstance().world,
-                    new ClientPlayNetworkHandler(MinecraftClient.getInstance(),
-                            new ClientConnection(NetworkSide.CLIENTBOUND),
-                            new ClientConnectionState(
-                                    profile, new WorldSession(TelemetrySender.NOOP, false, Duration.ZERO, ""),
-                                    MinecraftClient.getInstance().world.getRegistryManager().toImmutable(),
-                                    MinecraftClient.getInstance().world.getEnabledFeatures(),
-                                    "Wisp Forest Enterprises", null, null, Map.of(), null, Map.of(), ServerLinks.EMPTY
+                MinecraftClient.getInstance().world,
+                new ClientPlayNetworkHandler(MinecraftClient.getInstance(),
+                    new ClientConnection(NetworkSide.CLIENTBOUND),
+                    new ClientConnectionState(
+                        new ClientChunkLoadProgress(0),
+                        profile, new WorldSession(TelemetrySender.NOOP, false, Duration.ZERO, ""),
+                        MinecraftClient.getInstance().world.getRegistryManager().toImmutable(),
+                        MinecraftClient.getInstance().world.getEnabledFeatures(),
+                        "Wisp Forest Enterprises", null, null, Map.of(), null, Map.of(), ServerLinks.EMPTY, Map.of(),
+                        true
                     )),
-                    null, null, PlayerInput.DEFAULT, false
+                null, null, PlayerInput.DEFAULT, false
             );
 
-            this.skinTextures = DefaultSkinHelper.getSkinTextures(profile.getId());
+            this.skinTextures = DefaultSkinHelper.getSkinTextures(profile);
             Util.getMainWorkerExecutor().execute(() -> {
-                var completeProfile = MinecraftClient.getInstance().getSessionService().fetchProfile(profile.getId(), false).profile();
+                var completeProfile = MinecraftClient.getInstance().getApiServices().profileResolver().getProfileById(profile.id()).orElse(profile);
 
                 this.skinTextures = DefaultSkinHelper.getSkinTextures(completeProfile);
                 this.client.getSkinProvider().fetchSkinTextures(completeProfile).thenAccept(textures -> {
@@ -281,12 +280,12 @@ public class EntityComponent<E extends Entity> extends BaseComponent {
         }
 
         @Override
-        public SkinTextures getSkinTextures() {
+        public SkinTextures getSkin() {
             return this.skinTextures;
         }
 
         @Override
-        public boolean isPartVisible(PlayerModelPart modelPart) {
+        public boolean isModelPartVisible(PlayerModelPart part) {
             return true;
         }
 

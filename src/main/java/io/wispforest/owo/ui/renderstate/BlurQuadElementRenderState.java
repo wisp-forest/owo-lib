@@ -70,11 +70,11 @@ public record BlurQuadElementRenderState(
     }
 
     @Override
-    public void setupVertices(VertexConsumer vertices, float depth) {
-        vertices.vertex(this.pose(), (float) this.bounds.getLeft(), (float) this.bounds.getTop(), depth);
-        vertices.vertex(this.pose(), (float) this.bounds.getLeft(), (float) this.bounds.getBottom(), depth);
-        vertices.vertex(this.pose(), (float) this.bounds.getRight(), (float) this.bounds.getBottom(), depth);
-        vertices.vertex(this.pose(), (float) this.bounds.getRight(), (float) this.bounds.getTop(), depth);
+    public void setupVertices(VertexConsumer vertices) {
+        vertices.vertex(this.pose(), (float) this.bounds.getLeft(), (float) this.bounds.getTop());
+        vertices.vertex(this.pose(), (float) this.bounds.getLeft(), (float) this.bounds.getBottom());
+        vertices.vertex(this.pose(), (float) this.bounds.getRight(), (float) this.bounds.getBottom());
+        vertices.vertex(this.pose(), (float) this.bounds.getRight(), (float) this.bounds.getTop());
     }
 
     @Override
