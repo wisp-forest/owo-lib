@@ -11,10 +11,10 @@ import java.util.Objects;
 
 public class DisplayContextUtils {
     public static ItemGroup.DisplayContext createContext(PlayerEntity player) {
-        if (player.getWorld().isClient()) {
+        if (player.getEntityWorld().isClient()) {
             return createClientContext();
         } else if (player instanceof ServerPlayerEntity serverPlayer) {
-            var featureSet = serverPlayer.getServer().getSaveProperties().getEnabledFeatures();
+            var featureSet = serverPlayer.getEntityWorld().getServer().getSaveProperties().getEnabledFeatures();
             var hasPerms = player.isCreativeLevelTwoOp();
 
             return new ItemGroup.DisplayContext(featureSet, hasPerms, player.getRegistryManager());

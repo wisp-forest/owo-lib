@@ -9,13 +9,16 @@ import io.wispforest.owo.mixin.itemgroup.ScreenAccessor;
 import io.wispforest.owo.ui.core.PositionedRectangle;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -185,7 +188,7 @@ public abstract class OwoItemGroupRenderer {
         return button -> {
             var context = DisplayContextUtils.createContext(screen.getScreenHandler().player());
 
-            if (Screen.hasShiftDown()) {
+            if (MinecraftClient.getInstance().isShiftPressed()) {
                 state.toggleTab(tabIdx, context);
             } else {
                 state.selectSingleTab(tabIdx, context);

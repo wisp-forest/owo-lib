@@ -116,13 +116,8 @@ public record CondensedEntry(Identifier id, ItemStacksSupplier childrenEntries, 
         public void toggleChildren(List<ItemStack> displayStacks) {
             var startingIndex = displayStacks.indexOf(parent);
 
-            if (startingIndex <= 0) {
-                System.out.println("Invalid Index detected `" + startingIndex + "` for entry State: " + this.entry());
-            }
-
             if (this.showChildren) {
-                children.forEach(displayStacks::remove);
-                //displayStacks.removeAll(children);
+                displayStacks.removeAll(children);
             } else {
                 displayStacks.addAll(startingIndex + 1, children);
             }
