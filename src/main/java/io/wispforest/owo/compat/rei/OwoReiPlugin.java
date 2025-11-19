@@ -37,9 +37,9 @@ public class OwoReiPlugin implements REIClientPlugin {
         });
 
         zones.register(BaseOwoHandledScreen.class, screen -> {
-            return ((BaseOwoHandledScreen<?, ?>) screen).componentsForExclusionAreas()
-                    .map(rect -> new Rectangle(rect.x(), rect.y(), rect.width(), rect.height()))
-                    .toList();
+            return ((BaseOwoHandledScreen<?, ?>) screen)
+                .componentsForExclusionAreas(rect -> new Rectangle(rect.x(), rect.y(), rect.width(), rect.height()))
+                .toList();
         });
     }
 

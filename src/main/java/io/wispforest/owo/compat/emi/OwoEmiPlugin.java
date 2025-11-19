@@ -25,8 +25,8 @@ public class OwoEmiPlugin implements EmiPlugin {
         registry.addGenericExclusionArea((screen, consumer) -> {
             if (!(screen instanceof BaseOwoHandledScreen<?, ?> owoHandledScreen)) return;
 
-            owoHandledScreen.componentsForExclusionAreas()
-                .map(component -> new Bounds(component.x(), component.y(), component.width(), component.height()))
+            owoHandledScreen
+                .componentsForExclusionAreas(rect -> new Bounds(rect.x(), rect.y(), rect.width(), rect.height()))
                 .forEach(consumer);
         });
     }
