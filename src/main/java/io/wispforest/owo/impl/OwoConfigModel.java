@@ -11,7 +11,7 @@ public class OwoConfigModel {
     public boolean expandedCondensedEntries = false;
 
     public boolean shouldRenderBackground = true;
-    public boolean shouldRenderBorder = true;
+    public boolean shouldRenderBorder = false;
 
     @WithAlpha
     public Color borderColor = Color.ofArgb(0xFF3955e5);
