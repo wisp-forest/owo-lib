@@ -5,7 +5,9 @@
     {
       "tag": "minecraft:diamond_ores",
       "name": "extra_ores",
-      "icon": "minecraft:deepslate"
+      "icon": {
+        "stack": "minecraft:deepslate"
+      }
     }
   ]
 }

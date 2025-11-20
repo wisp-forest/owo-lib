@@ -4,12 +4,16 @@
     {
       "tag": "minecraft:diamond_ores",
       "name": "tab_0",
-      "icon": "minecraft:deepslate"
+      "icon": {
+        "stack": "minecraft:deepslate"
+      }
     },
     {
       "tag": "minecraft:gold_ores",
       "name": "tab_1",
-      "icon": "minecraft:emerald"
+      "icon": {
+        "stack": "minecraft:emerald"
+      }
     }
   ]
 }

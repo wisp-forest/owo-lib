@@ -2,13 +2,19 @@ package io.wispforest.owo;
 
 import io.wispforest.owo.client.screens.ScreenInternals;
 import io.wispforest.owo.command.debug.OwoDebugCommands;
+import io.wispforest.owo.impl.OwoConfigImpl;
+import io.wispforest.owo.itemgroup.data.OwoItemGroupLoader;
+import io.wispforest.owo.moddata.ModDataLoader;
 import io.wispforest.owo.ops.LootOps;
 import io.wispforest.owo.text.CustomTextRegistry;
 import io.wispforest.owo.text.InsertingTextContent;
+import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.Wisdom;
+import io.wispforest.owo.util.pond.OwoItemGroupExtension;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.item.ItemGroups;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -45,6 +51,8 @@ public class Owo implements ModInitializer {
         DEBUG = debug;
     }
 
+    public static final OwoConfigImpl CONFIG = OwoConfigImpl.createAndLoad();
+
     @Override
     @ApiStatus.Internal
     public void onInitialize() {
@@ -56,6 +64,12 @@ public class Owo implements ModInitializer {
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> SERVER = null);
 
         Wisdom.spread();
+
+        OwoFreezer.registerFreezeCallback(() -> {
+            ModDataLoader.load(OwoItemGroupLoader.INSTANCE);
+
+            ItemGroups.getGroups().forEach(group -> ((OwoItemGroupExtension) group).attemptToBuildExtension());
+        });
 
         if (!DEBUG) return;
 

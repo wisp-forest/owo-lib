@@ -3,6 +3,7 @@ package io.wispforest.owo.compat.modmenu;
 import com.google.common.collect.ForwardingMap;
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.ui.ConfigScreenProviders;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.ApiStatus;
@@ -27,5 +28,10 @@ public class OwoModMenuPlugin implements ModMenuApi {
     @Override
     public Map<String, ConfigScreenFactory<?>> getProvidedConfigScreenFactories() {
         return OWO_FACTORIES;
+    }
+
+    @Override
+    public ConfigScreenFactory<?> getModConfigScreenFactory() {
+        return parent -> OWO_FACTORIES.getOrDefault("owo", parent1 -> null).create(parent);
     }
 }

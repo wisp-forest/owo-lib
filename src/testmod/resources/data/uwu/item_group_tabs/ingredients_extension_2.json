@@ -5,7 +5,9 @@
     {
       "tag": "minecraft:logs",
       "name": "the_logs",
-      "icon": "minecraft:stripped_oak_log"
+      "icon": {
+        "stack": "minecraft:stripped_oak_log"
+      }
     }
   ]
 }

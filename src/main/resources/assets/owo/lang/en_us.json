@@ -51,5 +51,81 @@
     {"text": "❌", "color": "#EB1D36"},
     {"text": "]", "color": "gray"},
     " Disabled"
-  ]
+  ],
+  "text.owo.condensed_entries.type": [
+    "",
+    {"text": "Type", "color": "#3955e5"},
+    ": ",
+    { "index": 0 }
+  ],
+  "text.owo.condensed_entries.tag.registry": [
+    "",
+    {"text": "Registry", "color": "#3955e5"},
+    ": ",
+    { "index": 0 }
+  ],
+  "text.owo.condensed_entries.tag.key": [
+    "",
+    {"text": "Tag", "color": "#3955e5"},
+    ": ",
+    {"text": "#", "color": "#13a6f0"},
+    { "index": 0 }
+  ],
+  "text.owo.condensed_entries.entry_id": [
+    "",
+    {"text": "Entry", "color": "#3955e5"},
+    ": ",
+    { "index": 0 }
+  ],
+  "text.owo.condensed_entries.expand": "Expand All Entries",
+  "text.owo.condensed_entries.collapse": "Collapse All Entries",
+  "text.owo.item_stack_supplier.type.owo.itemstacks": "Stacks",
+  "text.owo.item_stack_supplier.type.owo.tag": "Tag",
+  "text.owo.item_stack_supplier.type.owo.item": "Item Variants",
+  "text.owo.item_stack_supplier.type.owo.compound": "Compound",
+  "text.owo.item_stack_supplier.type.owo.predicate": "Predicate",
+
+  "text.config.owo.title": [
+    {"text": "[", "color": "dark_gray"},
+    {"text": "o", "color": "#3955e5"},
+    {"text": "ω", "color": "#13a6f0"},
+    {"text": "o", "color": "#3955e5"},
+    {"text": "]", "color": "dark_gray"},
+    {"text": " Configuration", "color": "white"}
+  ],
+
+  "text.config.owo.section.condensed_entries": "Condensed Entry Options",
+
+  "text.config.owo.option.expandedCondensedEntries": "Expanded All Entries",
+  "text.config.owo.option.expandedCondensedEntries.tooltip": "Will force all Condensed Entries to always be expanded",
+
+  "text.config.owo.option.shouldRenderBackground": "Render Background",
+  "text.config.owo.option.shouldRenderBackground.tooltip": "Toggle whether or not the given background texture will render for children entries",
+
+  "text.config.owo.option.shouldRenderBorder": "Render Border",
+  "text.config.owo.option.shouldRenderBorder.tooltip": "Show a border around all children and parent entries",
+
+  "text.config.owo.option.borderColor": "Border Color",
+  "text.config.owo.option.borderColor.tooltip": "Adjust the Color around all children and parent entries if enabled",
+
+  "text.config.owo.option.showEntryShuffle": "Show Entry Shuffle",
+  "text.config.owo.option.showEntryShuffle.tooltip": "If parent entry rendering should shuffle though the given possible entries",
+
+  "text.config.owo.option.entryShuffleTime": "Entry Shuffle Time",
+  "text.config.owo.option.entryShuffleTime.tooltip": "The timing in seconds required before shuffling to a new entry",
+
+  "text.config.owo.option.showExpandEntriesButton": "Show Expand Entries Button",
+  "text.config.owo.option.showExpandEntriesButton.tooltip": "Toggles if the Expand entries button within the Creative Screen is present",
+
+  "text.config.owo.category.info": "Debug Tooltip Info",
+
+  "text.config.owo.option.info.showTagData": "Show Tag Data",
+  "text.config.owo.option.info.showTagData.tooltip": "Adjust if the Tag info for the Entry should be shown either being disabled, only showing with advanced tooltips, or always showing",
+
+  "text.config.owo.option.info.showEntryData": "Show Entry Data",
+  "text.config.owo.option.info.showEntryData.tooltip": "Adjust if the Entry Info, like id and for the Entry should be shown either being disabled, only showing with advanced tooltips, or always showing",
+
+  "text.config.owo.enum.displayState.always": "Always",
+  "text.config.owo.enum.displayState.requires_advance_type": "With Advanced",
+  "text.config.owo.enum.displayState.never": "Never"
 }

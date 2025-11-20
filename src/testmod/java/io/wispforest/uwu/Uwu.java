@@ -1,29 +1,28 @@
 package io.wispforest.uwu;
 
-import blue.endless.jankson.JsonPrimitive;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.logging.LogUtils;
 import io.netty.buffer.Unpooled;
 import io.wispforest.endec.format.gson.GsonDeserializer;
-import io.wispforest.endec.format.gson.GsonEndec;
 import io.wispforest.endec.format.gson.GsonSerializer;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.ConfigSynchronizer;
 import io.wispforest.owo.config.Option;
-import io.wispforest.owo.itemgroup.Icon;
-import io.wispforest.owo.itemgroup.OwoItemGroup;
-import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
+import io.wispforest.owo.itemgroup.OwoItemGroupBuilder;
+import io.wispforest.owo.itemgroup.base.Icon;
+import io.wispforest.owo.itemgroup.core.CondensedEntries;
+import io.wispforest.owo.itemgroup.core.ScrollerTextures;
+import io.wispforest.owo.itemgroup.core.TabTextures;
+import io.wispforest.owo.itemgroup.core.ItemGroupButton;
 import io.wispforest.owo.network.OwoNetChannel;
 import io.wispforest.owo.particles.ClientParticles;
 import io.wispforest.owo.particles.systems.ParticleSystem;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
-import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
 import io.wispforest.endec.SerializationContext;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.format.bytebuf.ByteBufSerializer;
@@ -31,10 +30,8 @@ import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.RegistriesAttribute;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.serialization.format.nbt.NbtDeserializer;
-import io.wispforest.owo.serialization.format.nbt.NbtEndec;
 import io.wispforest.owo.serialization.format.nbt.NbtSerializer;
 import io.wispforest.owo.text.CustomTextRegistry;
-import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.util.TagInjector;
 import io.wispforest.uwu.config.BruhConfig;
 import io.wispforest.uwu.config.UwuConfig;
@@ -47,29 +44,23 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.command.argument.GameProfileArgumentType;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.item.*;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.particle.DragonBreathParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.resource.featuretoggle.FeatureFlags;
 import net.minecraft.screen.ScreenHandlerType;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
@@ -100,48 +91,90 @@ public class Uwu implements ModInitializer {
         new ScreenHandlerType<>(EpicScreenHandler::new, FeatureFlags.VANILLA_FEATURES)
     );
 
-    public static final OwoItemGroup FOUR_TAB_GROUP = OwoItemGroup.builder(Identifier.of("uwu", "four_tab_group"), () -> Icon.of(Items.AXOLOTL_BUCKET))
-            .disableDynamicTitle()
+    public static final RegistryKey<ItemGroup> FOUR_TAB_GROUP = OwoItemGroupBuilder.createItemGroup(Identifier.of("uwu", "four_tab_group"), () -> Icon.of(Items.AXOLOTL_BUCKET), builder -> {
+        builder.disableDynamicTitle()
             .buttonStackHeight(1)
-            .initializer(group -> {
-                group.addTab(Icon.of(ANIMATED_BUTTON_TEXTURE, 32, 1000, false), "tab_1", null, true);
-                group.addTab(Icon.of(Items.EMERALD), "tab_2", TAB_2_CONTENT, false);
-                group.addTab(Icon.of(Items.AMETHYST_SHARD), "tab_3", null, false);
-                group.addTab(Icon.of(Items.GOLD_INGOT), "tab_4", null, false);
+            .initializer(ext -> {
+                ext.addTab(Icon.of(ANIMATED_BUTTON_TEXTURE, 32, 32, 1000, true, true), "tab_1", null, true);
+                ext.addTab(Icon.of(Items.EMERALD), "tab_2", TAB_2_CONTENT, false);
+                ext.addTab(Icon.of(Items.AMETHYST_SHARD), "tab_3", null, false);
+                ext.addTab(Icon.of(Items.GOLD_INGOT), "tab_4", null, false);
 
-                group.addButton(ItemGroupButton.github(group, "https://github.com/wisp-forest/owo-lib"));
-            })
-            .build();
+                ext.addButton(ItemGroupButton.github(ext.itemGroupId(), "https://github.com/wisp-forest/owo-lib"));
+            });
+    });
 
-    public static final OwoItemGroup SIX_TAB_GROUP = OwoItemGroup.builder(Identifier.of("uwu", "six_tab_group"), () -> Icon.of(Items.POWDER_SNOW_BUCKET))
-            .tabStackHeight(3)
+    public static final RegistryKey<ItemGroup> SIX_TAB_GROUP = OwoItemGroupBuilder.createItemGroup(Identifier.of("uwu", "six_tab_group"), () -> Icon.of(Items.POWDER_SNOW_BUCKET), builder -> {
+        builder.tabStackHeight(3)
             .backgroundTexture(GROUP_TEXTURE)
-            .scrollerTextures(new OwoItemGroup.ScrollerTextures(Identifier.of("uwu", "scroller"), Identifier.of("uwu", "scroller_disabled")))
-            .tabTextures(new OwoItemGroup.TabTextures(
-                    Identifier.of("uwu", "top_selected"),
-                    Identifier.of("uwu", "top_selected_first_column"),
-                    Identifier.of("uwu", "top_unselected"),
-                    Identifier.of("uwu", "bottom_selected"),
-                    Identifier.of("uwu", "bottom_selected_first_column"),
-                    Identifier.of("uwu", "bottom_unselected")))
-            .initializer(group -> {
-                group.addTab(Icon.of(Items.DIAMOND), "tab_1", null, true);
-                group.addTab(Icon.of(Items.EMERALD), "tab_2", null, false);
-                group.addTab(Icon.of(Items.AMETHYST_SHARD), "tab_3", null, false);
-                group.addTab(Icon.of(Items.GOLD_INGOT), "tab_4", null, false);
-                group.addCustomTab(Icon.of(Items.IRON_INGOT), "tab_5", (context, entries) -> entries.add(UwuItems.SCREEN_SHARD), false);
-                group.addTab(Icon.of(Items.QUARTZ), "tab_6", null, false);
+            .scrollerTextures(new ScrollerTextures(Identifier.of("uwu", "scroller"), Identifier.of("uwu", "scroller_disabled")))
+            .tabTextures(new TabTextures(
+                Identifier.of("uwu", "top_selected"),
+                Identifier.of("uwu", "top_selected_first_column"),
+                Identifier.of("uwu", "top_unselected"),
+                Identifier.of("uwu", "bottom_selected"),
+                Identifier.of("uwu", "bottom_selected_first_column"),
+                Identifier.of("uwu", "bottom_unselected")))
+            .initializer(ext -> {
+                ext.addTab(Icon.of(Items.DIAMOND), "tab_1", null, true);
+                ext.addTab(Icon.of(Items.EMERALD), "tab_2", null, false);
+                ext.addTab(Icon.of(Items.AMETHYST_SHARD), "tab_3", null, false);
+                ext.addTab(Icon.of(Items.GOLD_INGOT), "tab_4", null, false);
+                ext.addCustomTab(Icon.of(Items.IRON_INGOT), "tab_5", (context, entries) -> entries.add(UwuItems.SCREEN_SHARD), false);
+                ext.addTab(Icon.of(Items.QUARTZ), "tab_6", null, false);
 
-                group.addButton(new ItemGroupButton(group, Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16), "owo", () -> {
+                ext.addButton(new ItemGroupButton(ext.itemGroupId(), Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16), "owo", () -> {
                     MinecraftClient.getInstance().player.sendMessage(Text.of("oωo button pressed!"), false);
                 }));
-            })
-            .build();
+            });
+    });
 
-    public static final OwoItemGroup SINGLE_TAB_GROUP = OwoItemGroup.builder(Identifier.of("uwu", "single_tab_group"), () -> Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16))
-            .displaySingleTab()
-            .initializer(group -> group.addTab(Icon.of(Items.SPONGE), "tab_1", null, true))
-            .build();
+    public static final RegistryKey<ItemGroup> SINGLE_TAB_GROUP = OwoItemGroupBuilder.createItemGroup(Identifier.of("uwu", "single_tab_group"), () -> Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16), builder -> {
+        builder.initializer(group -> group.addCustomTab(Icon.of(Items.SPONGE), "tab_1", (context, entries) -> {
+            entries.add(Items.EGG);
+        }, true));
+    });
+
+    public static final RegistryKey<ItemGroup> CONDENSED_ENTRIES_GROUP = OwoItemGroupBuilder.createItemGroup(Identifier.of("uwu", "condensed_entries_group"), () -> Icon.of(Items.BEDROCK.getDefaultStack()), builder -> {
+        builder.initializer(group -> {
+            group.addCustomTab(Icon.of(Items.SPONGE), "tab_1", (context, entries) -> {
+                entries
+                    .globalCondensedEntries(true)
+                    .add(Items.DIAMOND)
+                    .addEntry(ItemTags.LOGS)
+                    .add(Items.EMERALD)
+                    .addEntry(ItemTags.BEDS)
+                    .add(Items.GOLD_INGOT);
+            }, true);
+        });
+    });
+
+    public static final RegistryKey<ItemGroup> ALOT_CONDENSED_ENTRIES_GROUP = OwoItemGroupBuilder.createItemGroup(Identifier.of("uwu", "alot_condensed_entries_group"), () -> Icon.of(Items.CHEST.getDefaultStack()), builder -> {
+        builder.initializer(group -> {
+            group.addCustomTab(Icon.of(Items.SPONGE), "tab_1", (context, entries) -> {
+                entries.globalCondensedEntries(true);
+
+                Registries.ITEM.getTags().forEach(tagEntries -> {
+                    var tag = tagEntries.getTag();
+
+                    if (tagEntries.size() <= 0) return;
+
+                    try {
+                        entries.addEntry(tag)
+                            .add(Items.DEBUG_STICK.getDefaultStack());
+                    } catch (Exception e) {}
+                });
+            }, true);
+        });
+    });
+
+    static {
+        CondensedEntries.registerFor(ItemGroups.COLORED_BLOCKS)
+            .addEntry(Identifier.of("uwu", "wool"), ItemTags.WOOL)
+            .addEntry(Identifier.of("uwu", "carpets"), ItemTags.WOOL_CARPETS)
+            .addEntry(Identifier.of("uwu", "concrete_powders"), BlockTags.CONCRETE_POWDER)
+            .addEntry(Identifier.of("uwu", "shulkers"), BlockTags.SHULKER_BOXES);
+    }
 
     public static final ItemGroup VANILLA_GROUP = Registry.register(Registries.ITEM_GROUP, Identifier.of("uwu", "vanilla_group"), FabricItemGroup.builder()
             .displayName(Text.literal("who did this"))
@@ -203,11 +236,6 @@ public class Uwu implements ModInitializer {
 
         TagInjector.inject(Registries.BLOCK, BlockTags.BASE_STONE_OVERWORLD.id(), Blocks.GLASS);
         TagInjector.injectTagReference(Registries.ITEM, ItemTags.COALS.id(), ItemTags.FOX_FOOD.id());
-
-        FOUR_TAB_GROUP.initialize();
-        SIX_TAB_GROUP.initialize();
-        SINGLE_TAB_GROUP.initialize();
-
         CHANNEL.registerClientbound(TestMessage.class, (message, access) -> {
             access.player().sendMessage(Text.of(message.string), false);
         });

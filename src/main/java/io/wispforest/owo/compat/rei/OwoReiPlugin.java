@@ -1,21 +1,28 @@
 package io.wispforest.owo.compat.rei;
 
-import io.wispforest.owo.itemgroup.OwoItemGroup;
-import io.wispforest.owo.mixin.itemgroup.CreativeInventoryScreenAccessor;
+import io.wispforest.owo.Owo;
+import io.wispforest.owo.itemgroup.base.OwoItemGroupState;
+import io.wispforest.owo.itemgroup.util.DisplayContextUtils;
+import io.wispforest.owo.itemgroup.gui.OwoItemGroupRendererHandler;
+import io.wispforest.owo.mixin.ui.layers.HandledScreenAccessor;
 import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
-import io.wispforest.owo.util.pond.OwoCreativeInventoryScreenExtensions;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
+import me.shedaniel.rei.api.client.registry.entry.CollapsibleEntryRegistry;
 import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import me.shedaniel.rei.api.client.registry.screen.OverlayDecider;
 import me.shedaniel.rei.api.client.registry.screen.OverlayRendererProvider;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
+import net.minecraft.item.ItemGroups;
+import net.minecraft.item.ItemStack;
+import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.SequencedCollection;
+import java.util.function.Predicate;
 
 public class OwoReiPlugin implements REIClientPlugin {
 
@@ -25,31 +32,56 @@ public class OwoReiPlugin implements REIClientPlugin {
     @Override
     public void registerExclusionZones(ExclusionZones zones) {
         zones.register(CreativeInventoryScreen.class, screen -> {
-            var group = CreativeInventoryScreenAccessor.owo$getSelectedTab();
-            if (!(group instanceof OwoItemGroup owoGroup)) return Collections.emptySet();
-            if (owoGroup.getButtons().isEmpty()) return Collections.emptySet();
+            int x = ((HandledScreenAccessor) screen).owo$getRootX();
+            int y = ((HandledScreenAccessor) screen).owo$getRootY();
 
-            int x = ((OwoCreativeInventoryScreenExtensions) screen).owo$getRootX();
-            int y = ((OwoCreativeInventoryScreenExtensions) screen).owo$getRootY();
-
-            int stackHeight = owoGroup.getButtonStackHeight();
-            y -= 13 * (stackHeight - 4);
-
-            final var rectangles = new ArrayList<Rectangle>();
-            for (int i = 0; i < owoGroup.getButtons().size(); i++) {
-                int xOffset = x + 198 + (i / stackHeight) * 26;
-                int yOffset = y + 10 + (i % stackHeight) * 30;
-                rectangles.add(new Rectangle(xOffset, yOffset, 24, 24));
-            }
-
-            return rectangles;
+            return OwoItemGroupRendererHandler.getSelectedRenderer()
+                .getExclusionZones(x, y, rect -> new Rectangle(rect.x(), rect.y(), rect.width(), rect.height()))
+                .toList();
         });
 
         zones.register(BaseOwoHandledScreen.class, screen -> {
-            return ((BaseOwoHandledScreen<?, ?>) screen).componentsForExclusionAreas()
-                    .map(rect -> new Rectangle(rect.x(), rect.y(), rect.width(), rect.height()))
-                    .toList();
+            return ((BaseOwoHandledScreen<?, ?>) screen)
+                .componentsForExclusionAreas(rect -> new Rectangle(rect.x(), rect.y(), rect.width(), rect.height()))
+                .toList();
         });
+    }
+
+    @Override
+    public void registerCollapsibleEntries(CollapsibleEntryRegistry registry) {
+        for (var group : ItemGroups.getGroups()) {
+            var state = OwoItemGroupState.get(group);
+
+            if (state == null) continue;
+
+            var entries = state.gatherGlobalCondensedEntries(DisplayContextUtils.createClientContext());
+
+            entries.forEach((id, condensedEntry) -> {
+                registry.group(condensedEntry.id(), Text.of(condensedEntry.getTranslationKey()), new Predicate<>() {
+                    private SequencedCollection<ItemStack> childrenEntries = null;
+
+                    @Override
+                    public boolean test(EntryStack<?> entryStack) {
+                        if (childrenEntries == null) {
+                            childrenEntries = condensedEntry.childrenEntries().get();
+
+                            if (childrenEntries.isEmpty() && Owo.DEBUG) {
+                                Owo.LOGGER.warn("A Condensed Entry loaded into REI was found to be empty? Ignore if intentional.");
+                            }
+                        }
+
+                        if (entryStack.getValue() instanceof ItemStack stack) {
+                            for (var childrenEntry : childrenEntries) {
+                                // TODO: MAYBE FINE?
+                                if (ItemStack.areItemsEqual(childrenEntry, stack)) return true;
+                            }
+                        }
+
+                        return false;
+                    }
+                });
+            });
+        }
     }
 
     @Override

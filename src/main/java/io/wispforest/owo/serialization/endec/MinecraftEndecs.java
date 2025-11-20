@@ -1,5 +1,6 @@
 package io.wispforest.owo.serialization.endec;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Function3;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.SerializationAttributes;
@@ -9,6 +10,7 @@ import io.wispforest.owo.serialization.CodecUtils;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.tag.TagKey;
@@ -132,5 +134,15 @@ public final class MinecraftEndecs {
                 components -> constructor.apply(components.get(0), components.get(1), components.get(2)),
                 vector -> List.of(xGetter.apply(vector), yGetter.apply(vector), zGetter.apply(vector))
         );
+    }
+
+    public static Endec<Identifier> identifierEndec(String defaultNamespace) {
+        return Endec.STRING.xmap(s -> {
+            var parts = s.split(":");
+
+            return (parts.length > 1)
+                ? Identifier.of(s)
+                : Identifier.of(defaultNamespace, s);
+        }, Identifier::toString);
     }
 }

@@ -1,5 +1,7 @@
 package io.wispforest.owo.config.annotation;
 
+import com.mojang.datafixers.types.templates.Hook;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

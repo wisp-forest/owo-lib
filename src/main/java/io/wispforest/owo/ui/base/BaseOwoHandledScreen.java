@@ -25,8 +25,11 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends ScreenHandler> extends HandledScreen<S> implements DisposableScreen {
@@ -198,6 +201,12 @@ public abstract class BaseOwoHandledScreen<R extends ParentComponent, S extends 
         children.remove(rootComponent);
 
         return children.stream().filter(component -> !(component instanceof ParentComponent parent) || parent.surface() != Surface.BLANK);
+    }
+
+    public final <T> Stream<T> componentsForExclusionAreas(Function<PositionedRectangle, T> conversionFunc) {
+        var zones = componentsForExclusionAreas();
+
+        return zones.map(conversionFunc);
     }
 
     @Override

@@ -1,9 +1,10 @@
 package io.wispforest.owo.util.pond;
 
-import io.wispforest.owo.itemgroup.OwoItemGroup;
-import io.wispforest.owo.itemgroup.json.OwoItemGroupLoader;
+import io.wispforest.owo.itemgroup.base.OwoItemGroup;
+import io.wispforest.owo.itemgroup.data.OwoItemGroupLoader;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.registry.RegistryKey;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiConsumer;
@@ -27,12 +28,12 @@ public interface OwoItemExtensions {
      *
      * @param group The group to replace the current on with
      */
-    void owo$setGroup(ItemGroup group);
+    void owo$setGroup(RegistryKey<ItemGroup> group);
 
     /**
      * @return The item group this item should reside in
      */
-    @Nullable ItemGroup owo$group();
+    @Nullable RegistryKey<ItemGroup> owo$group();
 
     /**
      * @return {@code true} if this item should automatically

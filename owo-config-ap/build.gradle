@@ -1,0 +1,19 @@
+loom {
+    runConfigs.client.ideConfigGenerated = true
+}
+
+configurations {
+    owoConfigAPJava {
+        canBeResolved = false
+        canBeConsumed = true
+    }
+    owoConfigAPResources {
+        canBeResolved = false
+        canBeConsumed = true
+    }
+}
+
+artifacts {
+    owoConfigAPJava sourceSets.main.java.sourceDirectories.singleFile
+    owoConfigAPResources sourceSets.main.resources.sourceDirectories.singleFile
+}

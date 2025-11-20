@@ -1,8 +1,11 @@
 package io.wispforest.owo.itemgroup;
 
+import io.wispforest.owo.itemgroup.base.OwoItemGroup;
+import io.wispforest.owo.itemgroup.core.ItemGroupReference;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 
@@ -17,11 +20,11 @@ public interface OwoItemSettingsExtension {
     /**
      * @param group The item group this item should appear in
      */
-    default Item.Settings group(OwoItemGroup group) {
+    default Item.Settings group(RegistryKey<ItemGroup> group) {
         throw new IllegalStateException("Implemented in mixin.");
     }
 
-    default OwoItemGroup group() {
+    default RegistryKey<ItemGroup> group() {
         throw new IllegalStateException("Implemented in mixin.");
     }
 

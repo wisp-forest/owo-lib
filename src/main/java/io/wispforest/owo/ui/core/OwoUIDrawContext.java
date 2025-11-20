@@ -20,9 +20,12 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.gui.tooltip.TooltipPositioner;
+import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Util;
+import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2f;
@@ -158,6 +161,10 @@ public class OwoUIDrawContext extends DrawContext {
     }
 
     public void drawText(Text text, float x, float y, float scale, int color, TextAnchor anchorPoint) {
+        drawText(text, x, y, scale, color, anchorPoint, false);
+    }
+
+    public void drawText(Text text, float x, float y, float scale, int color, TextAnchor anchorPoint, boolean shadow) {
         final var textRenderer = MinecraftClient.getInstance().textRenderer;
 
         this.getMatrices().pushMatrix();
@@ -173,12 +180,56 @@ public class OwoUIDrawContext extends DrawContext {
         }
 
 
-        this.drawText(textRenderer, text, (int) (x * (1 / scale)), (int) (y * (1 / scale)), color, false);
+        this.drawText(textRenderer, text, (int) (x * (1 / scale)), (int) (y * (1 / scale)), color, shadow);
         this.getMatrices().popMatrix();
     }
 
     public enum TextAnchor {
         TOP_RIGHT, BOTTOM_RIGHT, TOP_LEFT, BOTTOM_LEFT
+    }
+
+    public void drawScrollableText(Text text, int x, int y, int width, int height, int horizontalMargin, int color, boolean centerText, boolean shadow) {
+        int x1 = x + horizontalMargin;
+        int x2 = x + width - horizontalMargin;
+        
+        drawScrollableText(text, x1, y, x2, y + height, color, centerText, shadow);
+    }
+
+    public void drawScrollableText(Text text, int startX, int startY, int endX, int endY, int color, boolean centerText, boolean shadow) {
+        final var textRenderer = MinecraftClient.getInstance().textRenderer;
+        
+        int textWidth = textRenderer.getWidth(text);
+        
+        int totalHeight = startY + endY;
+        int totalWidth = endX - startX;
+
+        int centerY = (totalHeight - 9) / 2 + 1;
+        
+        if (textWidth > totalWidth) {
+            int widthDelta = textWidth - totalWidth;
+
+            double measuredSeconds = Util.getMeasuringTimeMs() / 1000.0D;
+            
+            double halfOrSoWidthDelta = Math.max(widthDelta * 0.5D, 3.0F);
+            
+            double delta = Math.sin((Math.PI / 2D) * Math.cos((Math.PI * 2D) * measuredSeconds / halfOrSoWidthDelta)) / 2.0D + 0.5D;
+
+            double currentXOffset = MathHelper.lerp(delta, 0.0F, widthDelta);
+            
+            this.enableScissor(startX, startY, endX, endY);
+
+            this.drawText(textRenderer, text, startX - (int)currentXOffset, centerY, color, shadow);
+
+            this.disableScissor();
+        } else if (centerText) {
+            int centerX = (startX + endX) / 2;
+
+            int y = MathHelper.clamp(centerX, startX + textWidth / 2, endX - textWidth / 2);
+
+            this.drawText(textRenderer, text, centerX - textRenderer.getWidth(text) / 2, y, color, shadow);
+        } else {
+            this.drawText(textRenderer, text, startX, startY, color, shadow);
+        }
     }
 
     public void drawLine(int x1, int y1, int x2, int y2, double thiccness, Color color) {
