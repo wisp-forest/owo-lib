@@ -33,9 +33,7 @@ public record CondensedEntry(Identifier id, ItemStacksSupplier childrenEntries, 
     }
 
     public void addExtraInfo(Consumer<Text> tooltipAddCallback, TooltipType type) {
-        if (!type.isAdvanced()) return;
-
-        if (Owo.CONFIG.info.showTagData() && childrenEntries instanceof ItemStacksSupplier.RegistryTag registryTag) {
+        if (Owo.CONFIG.info.showTagData().shouldDisplay(type.isAdvanced()) && childrenEntries instanceof ItemStacksSupplier.RegistryTag registryTag) {
             var tagKey = registryTag.tagKey();
 
             tooltipAddCallback.accept(Text.empty());
@@ -46,7 +44,7 @@ public record CondensedEntry(Identifier id, ItemStacksSupplier childrenEntries, 
             tooltipAddCallback.accept(Text.translatable("text.owo.condensed_entries.tag.key", tagKey.id().toString()));
         }
 
-        if (Owo.CONFIG.info.showEntryData()) {
+        if (Owo.CONFIG.info.showEntryData().shouldDisplay(type.isAdvanced())) {
             tooltipAddCallback.accept(Text.empty());
 
             tooltipAddCallback.accept(Text.translatable("text.owo.condensed_entries.type", Text.translatable(childrenEntries.translationKey())));

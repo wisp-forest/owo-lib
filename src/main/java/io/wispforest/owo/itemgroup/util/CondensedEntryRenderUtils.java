@@ -27,7 +27,7 @@ public class CondensedEntryRenderUtils {
     private static final Identifier MINUS_ICON = Identifier.of("owo", "textures/gui/condensed_entry/minus_logo.png");
 
     public static void renderBackground(DrawContext context, Slot slot, CondensedEntry.State state) {
-        if(!(slot instanceof CreativeInventoryScreen.LockableSlot && state.showChildren() && Owo.CONFIG.showBackgroundColor())) return;
+        if(!(slot instanceof CreativeInventoryScreen.LockableSlot && state.showChildren() && Owo.CONFIG.shouldRenderBackground())) return;
 
         context.drawTexture(RenderPipelines.GUI_TEXTURED, CONDENSED_ENTRY_BACKGROUND, slot.x - 1, slot.y - 1, 0, 0, 18, 18, 18, 18);
     }
@@ -41,7 +41,7 @@ public class CondensedEntryRenderUtils {
         int maxX = minX + 16;
         int maxY = minY + 16;
 
-        if(state.showChildren() && Owo.CONFIG.showBorderColor()) {
+        if(state.showChildren() && Owo.CONFIG.shouldRenderBorder()) {
             var outlineColor = Owo.CONFIG.borderColor()/*.interpolate(Color.ofArgb(0xFF000000), 0.25f)*/;//borderColor;
 
             if (!isSlotAboveFromEntry(slot, state)) {

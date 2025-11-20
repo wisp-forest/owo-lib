@@ -10,8 +10,8 @@ public class OwoConfigModel {
     @SectionHeader("condensed_entries")
     public boolean expandedCondensedEntries = false;
 
-    public boolean showBackgroundColor = true;
-    public boolean showBorderColor = true;
+    public boolean shouldRenderBackground = true;
+    public boolean shouldRenderBorder = true;
 
     @WithAlpha
     public Color borderColor = Color.ofArgb(0xFF3955e5);
@@ -27,7 +27,17 @@ public class OwoConfigModel {
     public AdvancedTooltipInfo info = new AdvancedTooltipInfo();
 
     public static class AdvancedTooltipInfo {
-        public boolean showTagData = true;
-        public boolean showEntryData = true;
+        public DisplayState showTagData = DisplayState.REQUIRES_ADVANCE_TYPE;
+        public DisplayState showEntryData = DisplayState.REQUIRES_ADVANCE_TYPE;
+    }
+
+    public enum DisplayState {
+        ALWAYS,
+        REQUIRES_ADVANCE_TYPE,
+        NEVER;
+
+        public boolean shouldDisplay(boolean isAdvanced) {
+            return this == ALWAYS || (this == REQUIRES_ADVANCE_TYPE && isAdvanced);
+        }
     }
 }
