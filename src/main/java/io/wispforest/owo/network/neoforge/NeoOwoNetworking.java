@@ -1,5 +1,6 @@
 package io.wispforest.owo.network.neoforge;
 
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.client.screens.ScreenInternals;
 import io.wispforest.owo.network.OwoHandshake;
 import net.minecraft.entity.player.PlayerEntity;
@@ -11,23 +12,23 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadHandler;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
 import static io.wispforest.owo.network.OwoNetChannel.MessagePayload;
 
 public class NeoOwoNetworking {
 
-    public static final Map<CustomPayload.Id<MessagePayload>, SidedPacketCodec<MessagePayload>> PAYLOAD_ID_TO_SIDED_CODEC = new HashMap<>();
+    private static final Map<CustomPayload.Id<?>, PayloadCodec<?>> PAYLOAD_ID_TO_CLIENT_CODEC = new ConcurrentHashMap<>();
+    private static final Map<CustomPayload.Id<?>, PayloadHandler<?>> PAYLOAD_ID_TO_CLIENT_HANDLER = new ConcurrentHashMap<>();
 
-    public static final Map<CustomPayload.Id<?>, PayloadCodec<?>> PAYLOAD_ID_TO_CLIENT_CODEC = new HashMap<>();
-    public static final Map<CustomPayload.Id<?>, PayloadHandler<?>> PAYLOAD_ID_TO_CLIENT_HANDLER = new HashMap<>();
+    private static final Map<CustomPayload.Id<MessagePayload>, SidedPacketCodec<MessagePayload>> PAYLOAD_ID_TO_SIDED_CODEC = new ConcurrentHashMap<>();
 
-    public static final Map<CustomPayload.Id<MessagePayload>, PayloadHandler<MessagePayload>> PAYLOAD_ID_TO_SERVER_PAYLOAD_HANDLER = new HashMap<>();
-    public static final Map<CustomPayload.Id<MessagePayload>, PayloadHandler<MessagePayload>> PAYLOAD_ID_TO_CLIENT_PAYLOAD_HANDLER = new HashMap<>();
+    private static final Map<CustomPayload.Id<MessagePayload>, PayloadHandler<MessagePayload>> PAYLOAD_ID_TO_SERVER_PAYLOAD_HANDLER = new ConcurrentHashMap<>();
+    private static final Map<CustomPayload.Id<MessagePayload>, PayloadHandler<MessagePayload>> PAYLOAD_ID_TO_CLIENT_PAYLOAD_HANDLER = new ConcurrentHashMap<>();
+
+    private static boolean hasNetworkRegistrationTakenPlace = false;
 
     public static void onNetworkRegister(RegisterPayloadHandlersEvent event) {
         var registrar = event.registrar("1.0.0");
@@ -70,11 +71,17 @@ public class NeoOwoNetworking {
 
             registrar.playBidirectional(id, entry.getValue(), biDiHandler, biDiHandler);
         }
+
+        hasNetworkRegistrationTakenPlace = true;
     }
 
     public static void registerMessageCodecs(CustomPayload.Id<MessagePayload> id, PacketCodec<PacketByteBuf, MessagePayload> serverCodec, PacketCodec<PacketByteBuf, MessagePayload> clientCodec) {
         if (PAYLOAD_ID_TO_SIDED_CODEC.containsKey(id)) {
             throw new IllegalStateException("Unable to register the given codec as such already exists within codec map! Id: " + id);
+        }
+
+        if (hasNetworkRegistrationTakenPlace) {
+            throw new IllegalStateException("Unable to register the given codec as network registration has already occurred! Id: " + id);
         }
 
         PAYLOAD_ID_TO_SIDED_CODEC.put(id, new SidedPacketCodec<>(serverCodec, clientCodec));
@@ -85,19 +92,26 @@ public class NeoOwoNetworking {
             throw new IllegalStateException("Unable to register the given codec as such already exists within codec map! Id: " + id);
         }
 
+        if (hasNetworkRegistrationTakenPlace) {
+            throw new IllegalStateException("Unable to register the given codec as network registration has already occurred! Id: " + id);
+        }
+
         PAYLOAD_ID_TO_CLIENT_CODEC.put(id, new PayloadCodec<T>(id, codec, Optional.of(NetworkSide.CLIENTBOUND)));
     }
 
     public static <T extends CustomPayload> void registerClientPayload(CustomPayload.Id<T> id, PayloadHandler<T> payloadHandler) {
         if (PAYLOAD_ID_TO_CLIENT_HANDLER.containsKey(id)) {
-            throw new IllegalStateException("Unable to register the given codec as such already exists within codec map! Id: " + id);
+            throw new IllegalStateException("Unable to register the given payload handler as such already exists within payload handler map! Id: " + id);
+        }
+
+        if (hasNetworkRegistrationTakenPlace) {
+            throw new IllegalStateException("Unable to register the given payload handler as network registration has already occurred! Id: " + id);
         }
 
         PAYLOAD_ID_TO_CLIENT_HANDLER.put(id, payloadHandler);
     }
 
-
-    private record PayloadCodec<T extends CustomPayload>(CustomPayload.Id<T> id, PacketCodec<PacketByteBuf, T> codec, Optional<NetworkSide> possibleSide) {
+    public record PayloadCodec<T extends CustomPayload>(CustomPayload.Id<T> id, PacketCodec<PacketByteBuf, T> codec, Optional<NetworkSide> possibleSide) {
         public void registerPlayPayload(PayloadRegistrar registrar, PayloadHandler<?> handler) {
             var castedHandler = (PayloadHandler<T>) handler;
 
@@ -120,12 +134,20 @@ public class NeoOwoNetworking {
             throw new IllegalStateException("Unable to register the given server handler as such already exists within handler map! Id: " + id);
         }
 
+        if (hasNetworkRegistrationTakenPlace) {
+            throw new IllegalStateException("Unable to register the given payload handler as network registration has already occurred! Id: " + id);
+        }
+
         PAYLOAD_ID_TO_SERVER_PAYLOAD_HANDLER.put(id, handler);
     }
 
     public static void registerClientMessageHandler(CustomPayload.Id<MessagePayload> id, PayloadHandler<MessagePayload> handler) {
         if (PAYLOAD_ID_TO_CLIENT_PAYLOAD_HANDLER.containsKey(id)) {
             throw new IllegalStateException("Unable to register the given client handler as such already exists within handler map! Id: " + id);
+        }
+
+        if (hasNetworkRegistrationTakenPlace) {
+            throw new IllegalStateException("Unable to register the given payload handler as network registration has already occurred! Id: " + id);
         }
 
         PAYLOAD_ID_TO_CLIENT_PAYLOAD_HANDLER.put(id, handler);
