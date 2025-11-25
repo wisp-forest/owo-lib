@@ -74,32 +74,28 @@ public class LayoutWidgetExamples extends StatelessWidget {
         return new LayoutBuilder(
             (builderContext, constraints) -> {
                 var crossAxisCells = MathHelper.floor(constraints.maxWidth() / 150);
-
-                var cellWidth = constraints.maxWidth() / crossAxisCells;
-                var rows = MathHelper.ceilDiv(examples.size(), crossAxisCells);
-
                 return new VerticallyScrollable(
                     null, ScrollAnimationSettings.DEFAULT,
                     new Align(
                         Alignment.TOP,
-                        new Sized(
-                            Double.POSITIVE_INFINITY, cellWidth * rows,
-                            new Grid(
-                                LayoutAxis.VERTICAL,
-                                crossAxisCells,
-                                Grid.CellFit.tight(),
-                                widget -> new Padding(
-                                    Insets.all(5),
-                                    new Box(
-                                        Color.BLACK.withA(.25),
-                                        new Padding(
-                                            Insets.all(5),
+                        new Grid(
+                            LayoutAxis.VERTICAL,
+                            crossAxisCells,
+                            Grid.CellFit.loose(),
+                            widget -> new Padding(
+                                Insets.all(5),
+                                new Box(
+                                    Color.BLACK.withA(.25),
+                                    new Padding(
+                                        Insets.all(5),
+                                        new AspectRatio(
+                                            1,
                                             widget
                                         )
                                     )
-                                ),
-                                examples
-                            )
+                                )
+                            ),
+                            examples
                         )
                     )
                 );
