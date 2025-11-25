@@ -60,6 +60,10 @@ public class MultiChildInstanceWidgetProxy extends InstanceWidgetProxy {
         // refreshChild calls always index into the correct list
         this.childInstances = Stream.<WidgetInstance<?>>generate(() -> null).limit(newChildren.size()).collect(Collectors.toList());
         copyInto(this.childInstances, 0, this.instance().children, 0, Math.min(this.childInstances.size(), this.instance().children.size()));
+
+        if (this.instance().children.size() > this.childInstances.size()) {
+            this.instance().markNeedsLayout();
+        }
         this.instance().children = this.childInstances;
 
         // sync from the top
