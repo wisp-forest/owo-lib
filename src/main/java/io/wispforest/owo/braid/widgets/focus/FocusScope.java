@@ -161,7 +161,6 @@ public class FocusScope extends Focusable {
             }
 
             if (!poppedHistory && !this.focusedDescendants.isEmpty()) {
-                this.traversalHistory.push(this.focusedDescendants.getFirst());
                 this.historyDirection = direction;
             }
 
@@ -193,13 +192,15 @@ public class FocusScope extends Focusable {
             if (!candidatesInBand.isEmpty()) {
                 candidatesInBand.sort(this.sortInBand(focusedCenter, direction));
 
+                this.traversalHistory.push(this.focusedDescendants.getFirst());
                 this.updateFocus(candidatesInBand.getFirst().state(), FocusLevel.HIGHLIGHT, true);
                 return;
             }
 
-            candidates.sort(this.sortOutOfBand(focusedCenter, direction));
-
             if (!candidates.isEmpty()) {
+                candidates.sort(this.sortOutOfBand(focusedCenter, direction));
+
+                this.traversalHistory.push(this.focusedDescendants.getFirst());
                 this.updateFocus(candidates.getFirst().state(), FocusLevel.HIGHLIGHT, true);
             }
         }
