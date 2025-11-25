@@ -57,7 +57,8 @@ public class BraidSamplesItem extends Item {
     private static List<Sample> allSamples() {
         return List.of(
             new Sample(new SimpleCounter(), "Simple Counter"),
-            new Sample(new SharedCounter(), "Shared Counter")
+            new Sample(new SharedCounter(), "Shared Counter"),
+            new Sample(new LayoutWidgetExamples(), "Layout Widget Examples")
         );
     }
 
