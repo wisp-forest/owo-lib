@@ -2,16 +2,16 @@ package io.wispforest.owo.braid.display;
 
 import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.core.AppState;
 import io.wispforest.owo.braid.core.EventBinding;
 import io.wispforest.owo.braid.core.TextureSurface;
 import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.mixin.braid.RenderLayerInvoker;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.RenderPhase;
+import net.minecraft.client.render.RenderSetup;
 import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.ApiStatus;
@@ -57,7 +57,7 @@ public class BraidDisplay {
             client.getRenderTickCounter().getDynamicDeltaTicks()
         );
 
-        this.app.draw(this.surface.guiRenderer.newDrawContext());
+        this.app.draw(this.surface.guiRenderer.newDrawContext(this.app.cursorPosition().x(), this.app.cursorPosition().y()));
     }
 
     public void render(MatrixStack matrices, OrderedRenderCommandQueue queue, int light) {
@@ -73,29 +73,18 @@ public class BraidDisplay {
 
     // ---
 
-    public static final RenderPipeline PIPELINE = RenderPipeline.builder(RenderPipelines.TERRAIN_SNIPPET)
+    public static final RenderPipeline PIPELINE = RenderPipeline.builder(RenderPipelines.BLOCK_SNIPPET)
         .withLocation(Owo.id("pipeline/braid_display"))
         .withShaderDefine("ALPHA_CUTOUT", 0.1F)
         .withCull(false)
         .withBlend(BlendFunction.TRANSLUCENT)
         .build();
 
-    private static final Function<TextureSurface, RenderLayer> RENDER_TYPE = surface -> RenderLayer.of(
+    private static final Function<TextureSurface, RenderLayer> RENDER_TYPE = surface -> RenderLayerInvoker.owo$of(
         Owo.id("braid_display").toString(),
-        16384,
-        PIPELINE,
-        RenderLayer.MultiPhaseParameters.builder()
-            .texture(new SurfaceTexture(surface))
-            .lightmap(RenderPhase.ENABLE_LIGHTMAP)
-            .build(false)
+        RenderSetup.builder(PIPELINE)
+            .texture("Sampler0", surface.registeredTextureId)
+            .useLightmap()
+            .build()
     );
-
-    private static class SurfaceTexture extends RenderPhase.TextureBase {
-        public SurfaceTexture(TextureSurface surface) {
-            super(
-                () -> RenderSystem.setShaderTexture(0, surface.texture()),
-                () -> {}
-            );
-        }
-    }
 }

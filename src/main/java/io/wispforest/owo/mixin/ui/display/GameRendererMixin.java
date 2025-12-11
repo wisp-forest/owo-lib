@@ -36,12 +36,11 @@ public class GameRendererMixin {
         BraidDisplayBinding.updateAndDrawDisplays();
     }
 
-    @Inject(method = "updateCrosshairTarget", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/GameRenderer;findCrosshairTarget(Lnet/minecraft/entity/Entity;DDF)Lnet/minecraft/util/hit/HitResult;"))
+    @Inject(method = "updateCrosshairTarget", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;method_76762(FLnet/minecraft/entity/Entity;)Lnet/minecraft/util/hit/HitResult;"))
     public void updateTargetDisplay(
         float tickDelta,
         CallbackInfo ci,
         @Local Entity camera,
-        @Local(ordinal = 0) double reach,
         @Share("camera") LocalRef<Entity> cameraRef,
         @Share("target_display") LocalRef<BraidDisplayBinding.DisplayHitResult> targetDisplay
     ) {

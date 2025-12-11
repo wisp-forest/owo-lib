@@ -28,7 +28,7 @@ public class BraidWindowScheduler {
                 MinecraftClient.getInstance().getRenderTickCounter().getDynamicDeltaTicks()
             );
 
-            app.state().draw(app.surface().guiRenderer.newDrawContext());
+            app.state().draw(app.surface().guiRenderer.newDrawContext(app.state().cursorPosition().x(), app.state().cursorPosition().y()));
         }
     }
 

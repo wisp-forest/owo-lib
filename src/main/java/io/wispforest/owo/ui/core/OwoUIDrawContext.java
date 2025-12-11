@@ -20,6 +20,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.gui.tooltip.TooltipPositioner;
+import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -39,8 +40,8 @@ public class OwoUIDrawContext extends DrawContext {
 
     private final Consumer<Runnable> setTooltipDrawer;
 
-    protected OwoUIDrawContext(MinecraftClient client, GuiRenderState renderState, Consumer<Runnable> setTooltipDrawer) {
-        super(client, renderState);
+    protected OwoUIDrawContext(MinecraftClient client, GuiRenderState renderState, int mouseX, int mouseY, Consumer<Runnable> setTooltipDrawer) {
+        super(client, renderState, mouseX, mouseY);
         this.setTooltipDrawer = setTooltipDrawer;
     }
 
@@ -48,6 +49,8 @@ public class OwoUIDrawContext extends DrawContext {
         var owoContext = new OwoUIDrawContext(
             MinecraftClient.getInstance(),
             context.state,
+            ((DrawContextAccessor) context).owo$getMouseY(),
+            ((DrawContextAccessor) context).owo$getMouseX(),
             ((DrawContextAccessor) context)::owo$setTooltipDrawer
         );
 
@@ -320,8 +323,8 @@ public class OwoUIDrawContext extends DrawContext {
                 int inspectorY = child.y() + child.height() + child.margins().get().bottom() + 1;
 
                 final var message = Text.literal(child.getClass().getSimpleName())
-                        .append(child.id() == null ? "\n" : " '" + child.id() + "'\n")
-                        .append(child.inspectorDescriptor());
+                    .append(child.id() == null ? "\n" : " '" + child.id() + "'\n")
+                    .append(child.inspectorDescriptor());
                 final var wrappedMessage = textRenderer.wrapLines(message, client.getWindow().getScaledWidth() + 4);
                 int inspectorWidth = wrappedMessage.stream().mapToInt(textRenderer::getWidth).max().orElse(30);
                 int inspectorHeight = textRenderer.fontHeight * wrappedMessage.size() + 4;
@@ -352,8 +355,6 @@ public class OwoUIDrawContext extends DrawContext {
 
         private static UtilityScreen INSTANCE;
 
-        private Screen linkSourceScreen = null;
-
         private UtilityScreen() {
             super(Text.empty());
         }
@@ -364,7 +365,6 @@ public class OwoUIDrawContext extends DrawContext {
 
                 final var client = MinecraftClient.getInstance();
                 INSTANCE.init(
-                    client,
                     client.getWindow().getScaledWidth(),
                     client.getWindow().getScaledHeight()
                 );
@@ -373,46 +373,17 @@ public class OwoUIDrawContext extends DrawContext {
             return INSTANCE;
         }
 
-        /**
-         * Set the screen to which the game should return after the {@link net.minecraft.client.gui.screen.ConfirmLinkScreen}
-         * opened by {@link #handleTextClick(Style)} to {@code screen}
-         *
-         * @see #handleTextClick(Style)
-         */
-        public void setLinkSource(Screen screen) {
-            this.linkSourceScreen = screen;
-        }
+        public boolean handleTextClick(Style style, Screen screenAfterRun) {
+            if (style.getClickEvent() == null) return false;
+            handleClickEvent(style.getClickEvent(), this.client, screenAfterRun);
 
-        /**
-         * Invoke {@link #setLinkSource(Screen)} with the current screen. Used by the default text click handler
-         * in {@link io.wispforest.owo.ui.component.LabelComponent}
-         */
-        public void captureLinkSource() {
-            this.setLinkSource(this.client.currentScreen);
-        }
-
-        @ApiStatus.Internal
-        public @Nullable Screen getAndClearLinkSource() {
-            var source = this.linkSourceScreen;
-            this.linkSourceScreen = null;
-
-            return source;
-        }
-
-        /**
-         * Since the vanilla implementation of this method always returns to the screen the method was invoked on
-         * (which, here, would be the utility screen which is not what we want), either {@link #captureLinkSource()}
-         * or {@link #setLinkSource(Screen)} must be called prior to invoking this method
-         */
-        @Override
-        public boolean handleTextClick(Style style) {
-            return super.handleTextClick(style);
+            return true;
         }
 
         static {
             WindowResizeCallback.EVENT.register((client, window) -> {
                 if (INSTANCE == null) return;
-                INSTANCE.init(client, window.getScaledWidth(), window.getScaledHeight());
+                INSTANCE.init(window.getScaledWidth(), window.getScaledHeight());
             });
         }
     }

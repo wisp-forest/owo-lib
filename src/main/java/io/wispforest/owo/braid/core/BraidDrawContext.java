@@ -19,8 +19,8 @@ public class BraidDrawContext extends OwoUIDrawContext {
 
     private final Surface surface;
 
-    protected BraidDrawContext(MinecraftClient client, GuiRenderState renderState, Consumer<Runnable> setTooltipDrawer, Surface surface) {
-        super(client, renderState, setTooltipDrawer);
+    protected BraidDrawContext(MinecraftClient client, GuiRenderState renderState, int mouseX, int mouseY, Consumer<Runnable> setTooltipDrawer, Surface surface) {
+        super(client, renderState, mouseX, mouseY, setTooltipDrawer);
         this.surface = surface;
     }
 
@@ -28,6 +28,8 @@ public class BraidDrawContext extends OwoUIDrawContext {
         var braidContext = new BraidDrawContext(
             MinecraftClient.getInstance(),
             context.state,
+            ((DrawContextAccessor) context).owo$getMouseX(),
+            ((DrawContextAccessor) context).owo$getMouseY(),
             ((DrawContextAccessor) context)::owo$setTooltipDrawer,
             surface
         );

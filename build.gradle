@@ -1,6 +1,6 @@
 //file:noinspection GradlePackageVersionRange
 plugins {
-    id 'fabric-loom' version '1.11-SNAPSHOT'
+    id 'net.fabricmc.fabric-loom-remap' version '1.14-SNAPSHOT'
     id 'maven-publish'
 }
 
@@ -13,6 +13,10 @@ allprojects {
 
     version = "${project.mod_version}+${rootProject.minecraft_base_version}"
     group = rootProject.maven_group
+
+    base {
+        archivesName = project.archives_base_name
+    }
 
     dependencies {
         minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
@@ -50,7 +54,6 @@ allprojects {
         if (JavaVersion.current() < javaVersion) {
             toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
         }
-        archivesBaseName = project.archives_base_name
         // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
         // if it is present.
         // If you remove this line, sources will not be generated.

@@ -10,13 +10,13 @@ import org.jetbrains.annotations.ApiStatus;
 @ApiStatus.Internal
 public class ConfigToggleButton extends ButtonComponent implements OptionValueProvider {
 
-    protected static final Text ENABLED_MESSAGE = Text.translatable("text.owo.config.boolean_toggle.enabled");
-    protected static final Text DISABLED_MESSAGE = Text.translatable("text.owo.config.boolean_toggle.disabled");
+    protected static final net.minecraft.text.Text ENABLED_MESSAGE = net.minecraft.text.Text.translatable("text.owo.config.boolean_toggle.enabled");
+    protected static final net.minecraft.text.Text DISABLED_MESSAGE = net.minecraft.text.Text.translatable("text.owo.config.boolean_toggle.disabled");
 
     protected boolean enabled = false;
 
     public ConfigToggleButton() {
-        super(Text.empty(), button -> {});
+        super(net.minecraft.text.Text.empty(), button -> {});
         this.verticalSizing(Sizing.fixed(20));
         this.updateMessage();
     }

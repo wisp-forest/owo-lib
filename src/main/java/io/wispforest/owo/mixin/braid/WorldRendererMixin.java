@@ -26,7 +26,7 @@ public class WorldRendererMixin {
     private OrderedRenderCommandQueueImpl entityRenderCommandQueue;
 
     @Inject(method = "method_62214", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/WorldRenderer;renderBlockEntities(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/state/WorldRenderState;Lnet/minecraft/client/render/command/OrderedRenderCommandQueueImpl;)V", shift = At.Shift.AFTER))
-    private void renderBraidDisplays(GpuBufferSlice gpuBufferSlice, WorldRenderState worldRenderState, Profiler profiler, Matrix4f matrix4f, Handle<?> handle, Handle<?> handle2, boolean bl, Frustum frustum, Handle<?> handle3, Handle<?> handle4, CallbackInfo ci, @Local MatrixStack matrixStack) {
+    private void renderBraidDisplays(GpuBufferSlice gpuBufferSlice, WorldRenderState worldRenderState, Profiler profiler, Matrix4f matrix4f, Handle<?> handle, Handle<?> handle2, boolean bl, Handle<?> handle3, Handle<?> handle4, CallbackInfo ci, @Local MatrixStack matrixStack) {
         BraidDisplayBinding.renderAutomaticDisplays(matrixStack, worldRenderState.cameraRenderState, entityRenderCommandQueue);
     }
 }

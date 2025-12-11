@@ -9,14 +9,21 @@ import io.wispforest.owo.braid.framework.instance.LeafWidgetInstance;
 import io.wispforest.owo.braid.framework.instance.MouseListener;
 import io.wispforest.owo.braid.framework.instance.TooltipProvider;
 import io.wispforest.owo.braid.framework.widget.LeafInstanceWidget;
+import io.wispforest.owo.mixin.braid.ClickHandlerAccessor;
 import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.DrawnTextConsumer;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.text.*;
+import net.minecraft.text.OrderedText;
+import net.minecraft.text.StringVisitable;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
 import net.minecraft.util.Language;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector2f;
 
 import java.util.List;
 import java.util.Objects;
@@ -49,8 +56,7 @@ public class RawLabel extends LeafInstanceWidget {
         private int renderTextHeight = 0;
 
         protected Function<Style, Boolean> textClickHandler = style -> {
-            OwoUIDrawContext.utilityScreen().captureLinkSource();
-            return style != null && OwoUIDrawContext.utilityScreen().handleTextClick(style);
+            return style != null && OwoUIDrawContext.utilityScreen().handleTextClick(style, MinecraftClient.getInstance().currentScreen);
         };
 
         public Instance(RawLabel widget) {
@@ -155,6 +161,22 @@ public class RawLabel extends LeafInstanceWidget {
             }
         }
 
+        // this reimplementation of RawLabel.draw is pretty cringe, however
+        // mojang has left our hands tied since the text collector interface
+        // does not give us control over text color and shadow
+        public void collectText(DrawnTextConsumer collector) {
+            var textRenderer = this.host().client().textRenderer;
+            var yOffset = this.widget.style.textAlignment().alignVertical(this.transform.height(), this.renderTextHeight);
+
+            for (int lineIdx = 0; lineIdx < this.renderText.size(); lineIdx++) {
+                collector.text(
+                    (int) this.widget.style.textAlignment().alignHorizontal(this.transform.width(), this.renderTextWidths.getDouble(lineIdx)),
+                    (int) yOffset + lineIdx * textRenderer.fontHeight,
+                    this.renderText.get(lineIdx)
+                );
+            }
+        }
+
         @Override
         @Nullable
         public List<TooltipComponent> getTooltipComponentsAt(double x, double y) {
@@ -165,8 +187,14 @@ public class RawLabel extends LeafInstanceWidget {
         @Nullable
         public Style getStyleAt(double x, double y) {
             if (this.renderText.isEmpty()) return null;
-            var renderer = this.host().client().textRenderer;
-            return renderer.getTextHandler().getStyleAt(this.renderText.get(Math.min((int) y / renderer.fontHeight, this.renderText.size() - 1)), (int) x);
+
+            var transform = this.computeGlobalTransform().invert();
+            var clickPos = transform.transformPosition((float) x, (float) y, new Vector2f());
+
+            var collector = new StyleCollector(this.host().client().textRenderer, (int) clickPos.x, (int) clickPos.y);
+            this.collectText(collector);
+
+            return collector.getStyle();
         }
 
         @Override
@@ -181,6 +209,14 @@ public class RawLabel extends LeafInstanceWidget {
             if (style == null) return null;
             if (style.getClickEvent() != null) return CursorStyle.HAND;
             return null;
+        }
+
+        public static class StyleCollector extends DrawnTextConsumer.ClickHandler {
+
+            public StyleCollector(TextRenderer textRenderer, int clickX, int clickY) {
+                super(textRenderer, clickX, clickY);
+                ((ClickHandlerAccessor) this).owo$setSetStyleCallback(((ClickHandlerAccessor) this)::owo$setStyle);
+            }
         }
     }
 

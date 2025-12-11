@@ -98,10 +98,10 @@ public abstract class CreativeInventoryScreenMixin extends HandledScreen<Creativ
     }
 
     @Inject(method = "renderTabIcon", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemGroup;getIcon()Lnet/minecraft/item/ItemStack;"))
-    private void renderOwoIcon(DrawContext context, ItemGroup group, CallbackInfo ci, @Local(ordinal = 3) int j, @Local(ordinal = 4) int k) {
+    private void renderOwoIcon(DrawContext context, int mouseX, int mouseY, ItemGroup group, CallbackInfo ci, @Local(ordinal = 3) int j, @Local(ordinal = 4) int k) {
         if (!(group instanceof OwoItemGroup owoGroup)) return;
 
-        owoGroup.icon().render(context, j, k, 0, 0, 0);
+        owoGroup.icon().render(context, j + 5, k + 7, 0, 0, 0);
     }
 
     // -------------

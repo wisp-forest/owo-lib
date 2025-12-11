@@ -39,4 +39,10 @@ public interface DrawContextAccessor {
 
     @Accessor("tooltipDrawer")
     Runnable owo$getTooltipDrawer();
+
+    @Accessor("mouseX")
+    int owo$getMouseX();
+
+    @Accessor("mouseY")
+    int owo$getMouseY();
 }

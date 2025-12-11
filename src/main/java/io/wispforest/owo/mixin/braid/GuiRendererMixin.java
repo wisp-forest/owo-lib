@@ -3,26 +3,25 @@ package io.wispforest.owo.mixin.braid;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.llamalad7.mixinextras.sugar.Share;
-import com.llamalad7.mixinextras.sugar.ref.LocalRef;
-import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
-import com.mojang.blaze3d.systems.RenderPass;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.AddressMode;
 import com.mojang.blaze3d.textures.FilterMode;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import io.wispforest.owo.braid.core.BraidRenderPipelines;
 import io.wispforest.owo.braid.util.BraidGuiRenderer;
 import io.wispforest.owo.util.pond.BraidGuiRendererExtension;
 import net.minecraft.client.gl.Framebuffer;
+import net.minecraft.client.gl.GpuSampler;
 import net.minecraft.client.gui.render.GuiRenderer;
 import net.minecraft.client.gui.render.SpecialGuiElementRenderer;
 import net.minecraft.client.gui.render.state.special.SpecialGuiElementRenderState;
 import net.minecraft.client.render.ProjectionMatrix2;
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 import java.util.Map;
 
@@ -79,35 +78,22 @@ public class GuiRendererMixin implements BraidGuiRendererExtension {
 
     // ---
 
-    @Inject(method = "render(Lnet/minecraft/client/gui/render/GuiRenderer$Draw;Lcom/mojang/blaze3d/systems/RenderPass;Lcom/mojang/blaze3d/buffers/GpuBuffer;Lcom/mojang/blaze3d/vertex/VertexFormat$IndexType;)V", at = @At(value = "HEAD"))
-    private void setupTextureFilter(GuiRenderer.Draw draw, RenderPass pass, GpuBuffer indexBuffer, VertexFormat.IndexType indexType, CallbackInfo ci, @Share("minFilter") LocalRef<FilterMode> minFilter, @Share("magFilter") LocalRef<FilterMode> magFilter) {
+    @ModifyArg(
+        method = "render(Lnet/minecraft/client/gui/render/GuiRenderer$Draw;Lcom/mojang/blaze3d/systems/RenderPass;Lcom/mojang/blaze3d/buffers/GpuBuffer;Lcom/mojang/blaze3d/vertex/VertexFormat$IndexType;)V",
+        at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderPass;bindTexture(Ljava/lang/String;Lcom/mojang/blaze3d/textures/GpuTextureView;Lnet/minecraft/client/gl/GpuSampler;)V", ordinal = 0),
+        index = 2
+    )
+    private @Nullable GpuSampler injectTextureFilter(GpuSampler sampler, @Local(argsOnly = true) GuiRenderer.Draw draw) {
         if (draw.textureSetup().texure0() == null) {
-            return;
+            return sampler;
         }
-
-        var texture = draw.textureSetup().texure0().texture();
-        var textureAccess = (GpuTextureAccessor) texture;
 
         if (draw.pipeline() == BraidRenderPipelines.TEXTURED_BILINEAR) {
-            minFilter.set(textureAccess.owo$getMinFilter());
-            magFilter.set(textureAccess.owo$getMagFilter());
-
-            texture.setTextureFilter(FilterMode.LINEAR, FilterMode.LINEAR, textureAccess.owo$getUseMipmaps());
+            return RenderSystem.getSamplerCache().get(AddressMode.REPEAT, AddressMode.REPEAT, FilterMode.LINEAR, FilterMode.LINEAR, false);
         } else if (draw.pipeline() == BraidRenderPipelines.TEXTURED_NEAREST) {
-            minFilter.set(textureAccess.owo$getMinFilter());
-            magFilter.set(textureAccess.owo$getMagFilter());
-
-            texture.setTextureFilter(FilterMode.NEAREST, FilterMode.NEAREST, textureAccess.owo$getUseMipmaps());
-        }
-    }
-
-    @Inject(method = "render(Lnet/minecraft/client/gui/render/GuiRenderer$Draw;Lcom/mojang/blaze3d/systems/RenderPass;Lcom/mojang/blaze3d/buffers/GpuBuffer;Lcom/mojang/blaze3d/vertex/VertexFormat$IndexType;)V", at = @At("TAIL"))
-    private void resetTextureFilter(GuiRenderer.Draw draw, RenderPass pass, GpuBuffer indexBuffer, VertexFormat.IndexType indexType, CallbackInfo ci, @Share("minFilter") LocalRef<FilterMode> minFilter, @Share("magFilter") LocalRef<FilterMode> magFilter) {
-        if (minFilter.get() != null && magFilter.get() != null) {
-            var texture = draw.textureSetup().texure0().texture();
-            var textureAccess = (GpuTextureAccessor) texture;
-
-            texture.setTextureFilter(minFilter.get(), magFilter.get(), textureAccess.owo$getUseMipmaps());
+            return RenderSystem.getSamplerCache().get(AddressMode.REPEAT, AddressMode.REPEAT, FilterMode.NEAREST, FilterMode.NEAREST, false);
+        } else {
+            return sampler;
         }
     }
 

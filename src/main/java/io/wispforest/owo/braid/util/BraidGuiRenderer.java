@@ -30,11 +30,12 @@ public class BraidGuiRenderer extends GuiRenderer {
         this.client = client;
     }
 
-    public DrawContext newDrawContext() {
+    public DrawContext newDrawContext(double mouseX, double mouseY) {
         this.trySetFabricState();
         return new DrawContext(
             this.client,
-            ((GuiRendererAccessor) this).owo$getState()
+            ((GuiRendererAccessor) this).owo$getState(),
+            (int) mouseX, (int) mouseY
         );
     }
 
