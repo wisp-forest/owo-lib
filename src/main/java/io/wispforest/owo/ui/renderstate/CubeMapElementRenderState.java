@@ -73,7 +73,7 @@ public record CubeMapElementRenderState(
         @Override
         protected void render(CubeMapElementRenderState state, MatrixStack matrices) {
             if (dummyContext == null) {
-                dummyContext = new DrawContext(MinecraftClient.getInstance(), new GuiRenderState());
+                dummyContext = new DrawContext(MinecraftClient.getInstance(), new GuiRenderState(), 0, 0);
             }
 
             dummyContext.state.clear();

@@ -25,7 +25,7 @@ public class ConfigEnumButton extends ButtonComponent implements OptionValueProv
     protected boolean wasRightClicked = false;
 
     public ConfigEnumButton() {
-        super(Text.empty(), button -> {});
+        super(net.minecraft.text.Text.empty(), button -> {});
         this.verticalSizing(Sizing.fixed(20));
         this.updateMessage();
     }
@@ -65,8 +65,8 @@ public class ConfigEnumButton extends ButtonComponent implements OptionValueProv
         var optionValueKey = this.backingOption.translationKey() + ".value." + valueName;
 
         this.setMessage(I18n.hasTranslation(optionValueKey)
-                ? Text.translatable(optionValueKey)
-                : Text.translatable("text.config." + this.backingOption.configName() + ".enum." + enumName + "." + valueName)
+                ? net.minecraft.text.Text.translatable(optionValueKey)
+                : net.minecraft.text.Text.translatable("text.config." + this.backingOption.configName() + ".enum." + enumName + "." + valueName)
         );
     }
 

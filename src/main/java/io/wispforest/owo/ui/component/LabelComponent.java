@@ -6,12 +6,14 @@ import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.util.Observable;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.DrawnTextConsumer;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.Click;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix3x2f;
 import org.w3c.dom.Element;
 
 import java.util.ArrayList;
@@ -36,11 +38,7 @@ public class LabelComponent extends BaseComponent {
     protected int maxWidth;
 
     protected Function<@Nullable Style, Boolean> textClickHandler = style -> {
-        OwoUIDrawContext.utilityScreen().captureLinkSource();
-        var success = style != null && OwoUIDrawContext.utilityScreen().handleTextClick(style);
-        OwoUIDrawContext.utilityScreen().getAndClearLinkSource();
-
-        return success;
+        return style != null && OwoUIDrawContext.utilityScreen().handleTextClick(style, MinecraftClient.getInstance().currentScreen);
     };
 
     protected LabelComponent(Text text) {
@@ -180,10 +178,11 @@ public class LabelComponent extends BaseComponent {
 
     @Override
     public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
-        var matrices = context.getMatrices();
+        this.draw(context.getTextConsumer());
+    }
 
-        matrices.pushMatrix();
-        matrices.translate(0, 1f / MinecraftClient.getInstance().getWindow().getScaleFactor());
+    protected void draw(DrawnTextConsumer textConsumer) {
+        textConsumer.setTransformation(textConsumer.getTransformation().withPose(new Matrix3x2f().translate(0, 1f / MinecraftClient.getInstance().getWindow().getScaleFactor())));
 
         int x = this.x;
         int y = this.y;
@@ -215,10 +214,8 @@ public class LabelComponent extends BaseComponent {
             int renderY = lambdaY + i * (this.lineHeight() + this.lineSpacing());
             renderY += this.lineHeight() - this.textRenderer.fontHeight;
 
-            context.drawText(this.textRenderer, renderText, renderX, renderY, this.color.get().argb(), this.shadow);
+            textConsumer.text(renderX, renderY, renderText);
         }
-
-        matrices.popMatrix();
     }
 
     @Override
@@ -240,7 +237,10 @@ public class LabelComponent extends BaseComponent {
 
     @Nullable
     protected Style styleAt(int mouseX, int mouseY) {
-        return this.textRenderer.getTextHandler().getStyleAt(this.wrappedText.get(Math.min(mouseY / (this.lineHeight() + this.lineSpacing()), this.wrappedText.size() - 1)), mouseX);
+        var clickHandler = new DrawnTextConsumer.ClickHandler(this.textRenderer, this.x + mouseX, this.y + mouseY);
+        this.draw(clickHandler);
+
+        return clickHandler.getStyle();
     }
 
     @Override

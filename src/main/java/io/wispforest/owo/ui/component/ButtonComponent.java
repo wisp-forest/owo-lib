@@ -1,7 +1,5 @@
 package io.wispforest.owo.ui.component;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.mixin.ui.access.ButtonWidgetAccessor;
 import io.wispforest.owo.mixin.ui.access.ClickableWidgetAccessor;
 import io.wispforest.owo.ui.core.Color;
@@ -17,7 +15,6 @@ import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.w3c.dom.Element;
@@ -35,13 +32,13 @@ public class ButtonComponent extends ButtonWidget {
     protected Renderer renderer = Renderer.VANILLA;
     protected boolean textShadow = true;
 
-    protected ButtonComponent(Text message, Consumer<ButtonComponent> onPress) {
+    protected ButtonComponent(net.minecraft.text.Text message, Consumer<ButtonComponent> onPress) {
         super(0, 0, 0, 0, message, button -> onPress.accept((ButtonComponent) button), ButtonWidget.DEFAULT_NARRATION_SUPPLIER);
         this.sizing(Sizing.content());
     }
 
     @Override
-    public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void drawIcon(DrawContext context, int mouseX, int mouseY, float delta) {
         this.renderer.draw((OwoUIDrawContext) context, this, delta);
 
         var textRenderer = MinecraftClient.getInstance().textRenderer;

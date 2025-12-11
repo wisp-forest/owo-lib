@@ -110,7 +110,7 @@ public record BlurQuadElementRenderState(
     }
 
     private static TextureSetup createTextureSetup(int directions, float quality, float size) {
-        var setup = TextureSetup.withoutGlTexture(null);
+        var setup = TextureSetup.empty();
         blurSetups.put(setup, new BlurSetup(directions, quality, size));
         return setup;
     }

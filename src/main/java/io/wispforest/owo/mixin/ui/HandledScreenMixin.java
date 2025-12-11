@@ -41,7 +41,7 @@ public abstract class HandledScreenMixin extends Screen {
     }
 
     @Inject(method = "drawSlot", at = @At("HEAD"))
-    private void injectSlotScissors(DrawContext context, Slot slot, CallbackInfo ci) {
+    private void injectSlotScissors(DrawContext context, Slot slot, int mouseX, int mouseY, CallbackInfo ci) {
         if (!owo$inOwoScreen) return;
 
         var scissorArea = ((OwoSlotExtension) slot).owo$getScissorArea();
@@ -52,7 +52,7 @@ public abstract class HandledScreenMixin extends Screen {
     }
 
     @Inject(method = "drawSlot", at = @At("RETURN"))
-    private void clearSlotScissors(DrawContext context, Slot slot, CallbackInfo ci) {
+    private void clearSlotScissors(DrawContext context, Slot slot, int mouseX, int mouseY, CallbackInfo ci) {
         if (!owo$inOwoScreen) return;
 
         var scissorArea = ((OwoSlotExtension) slot).owo$getScissorArea();

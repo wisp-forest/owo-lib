@@ -22,7 +22,7 @@ public abstract class NbtCompoundMixin implements MapCarrier {
     @Shadow
     public abstract @Nullable NbtElement put(String key, NbtElement element);
     @Shadow
-    public abstract void remove(String key);
+    public abstract @org.jspecify.annotations.Nullable NbtElement remove(String key);
     @Shadow
     public abstract boolean contains(String key);
 

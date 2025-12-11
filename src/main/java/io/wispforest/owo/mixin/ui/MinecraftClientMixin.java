@@ -78,7 +78,7 @@ public class MinecraftClientMixin {
         }
     }
 
-    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;initRenderer(JIZLjava/util/function/BiFunction;Z)V", shift = At.Shift.AFTER))
+    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;initRenderer(JIZLnet/minecraft/client/gl/ShaderSourceGetter;Z)V", shift = At.Shift.AFTER))
     private void initBlurRenderer(RunArgs args, CallbackInfo ci) {
         BlurQuadElementRenderState.initialize((MinecraftClient) (Object) this);
     }

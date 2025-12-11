@@ -10,9 +10,9 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 @Mixin(StatusEffectsDisplay.class)
 public class StatusEffectsDisplayMixin {
 
-    @ModifyVariable(method = "drawStatusEffects(Lnet/minecraft/client/gui/DrawContext;II)V",
-            at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/screen/ingame/HandledScreen;width:I", ordinal = 0),
-            ordinal = 2)
+    @ModifyVariable(method = "drawStatusEffects",
+        at = @At("HEAD"),
+        ordinal = 0, argsOnly = true)
     private int shiftStatusEffects(int x) {
         if (!((Object) this instanceof CreativeInventoryScreen)) return x;
         if (!(CreativeInventoryScreenAccessor.owo$getSelectedTab() instanceof OwoItemGroup group)) return x;
