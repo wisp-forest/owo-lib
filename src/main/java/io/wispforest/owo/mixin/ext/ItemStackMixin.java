@@ -39,13 +39,13 @@ public class ItemStackMixin {
         derivedMap.derive((ItemStack)(Object) this);
     }
 
-    @Inject(method = "applyComponents", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/component/PatchedDataComponentMap;applyPatch(Lnet/minecraft/core/component/DataComponentPatch;)V", shift = At.Shift.AFTER))
+    @Inject(method = "applyComponents(Lnet/minecraft/core/component/DataComponentPatch;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/component/PatchedDataComponentMap;applyPatch(Lnet/minecraft/core/component/DataComponentPatch;)V", shift = At.Shift.AFTER))
     private void deriveComponents3(DataComponentPatch changes, CallbackInfo ci) {
         if (derivedMap == null) return;
         derivedMap.derive((ItemStack)(Object) this);
     }
 
-    @Inject(method = "applyComponents", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/component/PatchedDataComponentMap;applyPatch(Lnet/minecraft/core/component/DataComponentPatch;)V", shift = At.Shift.AFTER))
+    @Inject(method = "applyComponents(Lnet/minecraft/core/component/DataComponentMap;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/component/PatchedDataComponentMap;setAll(Lnet/minecraft/core/component/DataComponentMap;)V", shift = At.Shift.AFTER))
     private void deriveComponents4(DataComponentMap components, CallbackInfo ci) {
         if (derivedMap == null) return;
         derivedMap.derive((ItemStack)(Object) this);

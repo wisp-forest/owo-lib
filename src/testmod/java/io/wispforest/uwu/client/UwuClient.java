@@ -75,7 +75,7 @@ public class UwuClient implements ClientModInitializer {
         KeyBindingHelper.registerKeyBinding(bindingButCooler);
 
         final var hudComponentId = Identifier.fromNamespaceAndPath("uwu", "test_element");
-        final Supplier<Component> hudComponent = () ->
+        final Supplier<UIComponent> hudComponent = () ->
             UIContainers.verticalFlow(Sizing.content(), Sizing.content())
                 .child(UIComponents.item(Items.DIAMOND.getDefaultInstance()).margins(Insets.of(3)))
                 .child(UIComponents.label(Component.literal("epic stuff in hud")))
@@ -87,7 +87,7 @@ public class UwuClient implements ClientModInitializer {
                 .positioning(Positioning.relative(100, 25));
 
         final var coolerComponentId = Identifier.fromNamespaceAndPath("uwu", "test_element_two");
-        final Supplier<Component> coolerComponent = () -> UIModel.load(Path.of("../src/testmod/resources/assets/uwu/owo_ui/test_element_two.xml")).expandTemplate(FlowLayout.class, "hud-element", Map.of());
+        final Supplier<UIComponent> coolerComponent = () -> UIModel.load(Path.of("../src/testmod/resources/assets/uwu/owo_ui/test_element_two.xml")).expandTemplate(FlowLayout.class, "hud-element", Map.of());
         Hud.add(coolerComponentId, coolerComponent);
 
         TooltipComponentCallback.EVENT.register(data -> {
