@@ -3,7 +3,7 @@ package io.wispforest.owo.braid.widgets.cycle;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 
 import java.util.Arrays;
 import java.util.List;
@@ -54,7 +54,7 @@ public class Cycler<T> extends StatelessWidget {
             this.values.get(this.currentIndex),
             this.currentIndex,
             amount -> {
-                var newIndex = this.wrap ? MathHelper.floorMod(this.currentIndex + amount, this.values.size()) : MathHelper.clamp(this.currentIndex + amount, 0, this.values.size() - 1);
+                var newIndex = this.wrap ? Mth.positiveModulo(this.currentIndex + amount, this.values.size()) : Mth.clamp(this.currentIndex + amount, 0, this.values.size() - 1);
                 if (newIndex == this.currentIndex) return false;
                 this.onChanged.cycle(this.values.get(newIndex), newIndex);
                 return true;

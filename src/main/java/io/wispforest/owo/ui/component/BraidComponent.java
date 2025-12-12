@@ -13,20 +13,20 @@ import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.Sized;
 import io.wispforest.owo.braid.widgets.drag.DragArena;
 import io.wispforest.owo.braid.widgets.drag.DragArenaElement;
-import io.wispforest.owo.ui.base.BaseComponent;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
+import io.wispforest.owo.ui.base.BaseUIComponent;
+import io.wispforest.owo.ui.core.OwoUIGraphics;
 import io.wispforest.owo.ui.core.Size;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.lang.ref.Cleaner;
 import java.lang.ref.WeakReference;
 import java.util.function.Consumer;
 
-public class BraidComponent extends BaseComponent {
+public class BraidComponent extends BaseUIComponent {
 
     private static final Cleaner APP_CLEANER = Cleaner.create();
 
@@ -41,7 +41,7 @@ public class BraidComponent extends BaseComponent {
         this.appState = new AppState(
             null,
             AppState.formatName("BraidComponent", braidWidget),
-            MinecraftClient.getInstance(),
+            Minecraft.getInstance(),
             new EmbedSurface(this),
             eventBinding,
             new BraidWidget(
@@ -85,18 +85,18 @@ public class BraidComponent extends BaseComponent {
     }
 
     @Override
-    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
-        appState.draw(context);
+    public void draw(OwoUIGraphics graphics, int mouseX, int mouseY, float partialTicks, float delta) {
+        appState.draw(graphics);
     }
 
     @Override
-    public boolean onMouseDown(Click click, boolean doubled) {
+    public boolean onMouseDown(MouseButtonEvent click, boolean doubled) {
         eventBinding.add(new MouseButtonPressEvent(click.button(), click.modifiers()));
         return true;
     }
 
     @Override
-    public boolean onMouseUp(Click click) {
+    public boolean onMouseUp(MouseButtonEvent click) {
         eventBinding.add(new MouseButtonReleaseEvent(click.button(), click.modifiers()));
         return true;
     }
@@ -109,14 +109,14 @@ public class BraidComponent extends BaseComponent {
     }
 
     @Override
-    public boolean onKeyPress(KeyInput input) {
+    public boolean onKeyPress(KeyEvent input) {
         this.eventBinding.add(new KeyPressEvent(input.key(), input.scancode(), input.modifiers()));
         this.eventBinding.add(new KeyReleaseEvent(input.key(), input.scancode(), input.modifiers()));
         return true;
     }
 
     @Override
-    public boolean onCharTyped(CharInput input) {
+    public boolean onCharTyped(CharacterEvent input) {
         this.eventBinding.add(new CharInputEvent((char) input.codepoint(), input.modifiers()));
         return true;
     }

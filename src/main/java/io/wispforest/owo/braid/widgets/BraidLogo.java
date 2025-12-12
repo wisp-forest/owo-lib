@@ -7,7 +7,7 @@ import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.Sized;
 import io.wispforest.owo.braid.widgets.basic.TextureWidget;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 
 public class BraidLogo extends StatelessWidget {
     @Override

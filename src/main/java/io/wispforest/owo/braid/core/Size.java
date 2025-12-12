@@ -1,6 +1,6 @@
 package io.wispforest.owo.braid.core;
 
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -57,8 +57,8 @@ public record Size(double width, double height) {
 
     public Size constrained(Constraints constraints) {
         return new Size(
-            MathHelper.clamp(this.width, constraints.minWidth(), constraints.maxWidth()),
-            MathHelper.clamp(this.height, constraints.minHeight(), constraints.maxHeight())
+            Mth.clamp(this.width, constraints.minWidth(), constraints.maxWidth()),
+            Mth.clamp(this.height, constraints.minHeight(), constraints.maxHeight())
         );
     }
 }

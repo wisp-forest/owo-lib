@@ -4,8 +4,8 @@ import dev.emi.emi.api.FabricEmiStack;
 import dev.emi.emi.api.stack.EmiStack;
 import io.wispforest.owo.util.ViewerStack;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.item.Item;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.material.Fluid;
 
 public class EmiStackUtil {
     public static ViewerStack fromEmi(EmiStack stack) {

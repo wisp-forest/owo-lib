@@ -2,7 +2,7 @@ package io.wispforest.owo.braid.framework.instance;
 
 import com.google.common.base.Preconditions;
 import io.wispforest.owo.Owo;
-import io.wispforest.owo.braid.core.BraidDrawContext;
+import io.wispforest.owo.braid.core.BraidGraphics;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.core.Size;
@@ -11,7 +11,7 @@ import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.util.NinePatchTexture;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
-import net.minecraft.util.math.Box;
+import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -101,7 +101,7 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
 
     // ---
 
-    public abstract void draw(BraidDrawContext ctx);
+    public abstract void draw(BraidGraphics graphics);
 
     public abstract void visitChildren(Visitor visitor);
 
@@ -138,13 +138,13 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
         return false;
     }
 
-    protected void debugDrawVisualizers(BraidDrawContext ctx) {}
+    protected void debugDrawVisualizers(BraidGraphics graphics) {}
 
     // ---
 
-    protected void drawChild(BraidDrawContext ctx, WidgetInstance<?> child) {
+    protected void drawChild(BraidGraphics ctx, WidgetInstance<?> child) {
         ctx.push();
-        child.transform.transformToParent(ctx.getMatrices());
+        child.transform.transformToParent(ctx.pose());
         child.draw(ctx);
 
         if (child.debugHasVisualizers() && child.debugDrawVisualizers) {
@@ -254,13 +254,13 @@ public abstract class WidgetInstance<T extends InstanceWidget> implements Compar
         return result;
     }
 
-    public Box computeGlobalBounds() {
+    public AABB computeGlobalBounds() {
         var global = this.parent != null ? this.parent.computeGlobalTransform().invert() : new Matrix3x2f();
 
         var min = global.transformPosition(new Vector2f((float) this.transform.x, (float) this.transform.y));
         var max = global.transformPosition(new Vector2f((float) (this.transform.x + this.transform.width), (float) (this.transform.y + this.transform.height)));
 
-        return new Box(min.x, min.y, 0, max.x, max.y, 0);
+        return new AABB(min.x, min.y, 0, max.x, max.y, 0);
     }
 
     public Vector2d computeGlobalPosition() {

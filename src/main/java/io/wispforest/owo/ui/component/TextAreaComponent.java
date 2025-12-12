@@ -1,8 +1,8 @@
 package io.wispforest.owo.ui.component;
 
 import io.wispforest.owo.Owo;
-import io.wispforest.owo.mixin.ui.access.EditBoxAccessor;
-import io.wispforest.owo.mixin.ui.access.EditBoxWidgetAccessor;
+import io.wispforest.owo.mixin.ui.access.MultiLineEditBoxAccessor;
+import io.wispforest.owo.mixin.ui.access.MultilineTextFieldAccessor;
 import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.CursorStyle;
 import io.wispforest.owo.ui.core.Size;
@@ -12,39 +12,37 @@ import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.Observable;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.EditBox;
-import net.minecraft.client.gui.widget.EditBoxWidget;
-import net.minecraft.client.input.CursorMovement;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.Text;
-import org.lwjgl.glfw.GLFW;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.MultiLineEditBox;
+import net.minecraft.client.gui.components.MultilineTextField;
+import net.minecraft.client.gui.components.Whence;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.network.chat.Component;
 import org.w3c.dom.Element;
 
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class TextAreaComponent extends EditBoxWidget {
+public class TextAreaComponent extends MultiLineEditBox {
 
     protected final Observable<String> textValue = Observable.of("");
     protected final EventStream<OnChanged> changedEvents = OnChanged.newStream();
-    protected final EditBox editBox;
+    protected final MultilineTextField editBox;
 
     protected final Observable<Boolean> displayCharCount = Observable.of(false);
     protected final Observable<Integer> maxLines = Observable.of(-1);
 
     protected TextAreaComponent(Sizing horizontalSizing, Sizing verticalSizing) {
-        super(MinecraftClient.getInstance().textRenderer, 0, 0, 0, 0, Text.empty(), Text.empty(), Color.WHITE.argb(), false, Color.WHITE.argb(), true, true);
-        this.editBox = ((EditBoxWidgetAccessor) this).owo$getEditBox();
+        super(Minecraft.getInstance().font, 0, 0, 0, 0, Component.empty(), Component.empty(), Color.WHITE.argb(), false, Color.WHITE.argb(), true, true);
+        this.editBox = ((MultiLineEditBoxAccessor) this).owo$getTextField();
         this.sizing(horizontalSizing, verticalSizing);
 
         this.textValue.observe(this.changedEvents.sink()::onChanged);
         Observable.observeAll(this.widgetWrapper()::notifyParentIfMounted, this.displayCharCount, this.maxLines);
 
-        super.setChangeListener(s -> {
+        super.setValueListener(s -> {
             this.textValue.set(s);
 
             if (this.maxLines.get() < 0) return;
@@ -54,46 +52,46 @@ public class TextAreaComponent extends EditBoxWidget {
 
     @Override
     @Deprecated(forRemoval = true)
-    public void setChangeListener(Consumer<String> changeListener) {
+    public void setValueListener(Consumer<String> changeListener) {
         Owo.debugWarn(Owo.LOGGER, "setChangeListener stub on TextAreaComponent invoked");
     }
 
     @Override
     public void update(float delta, int mouseX, int mouseY) {
         super.update(delta, mouseX, mouseY);
-        this.cursorStyle(this.overflows() && mouseX >= this.getX() + this.width - 9 ? CursorStyle.NONE : CursorStyle.TEXT);
+        this.cursorStyle(this.scrollbarVisible() && mouseX >= this.getX() + this.width - 9 ? CursorStyle.NONE : CursorStyle.TEXT);
     }
 
     @Override
-    protected void renderOverlay(DrawContext context) {
+    protected void renderDecorations(GuiGraphics context) {
         this.height -= 1;
 
-        var matrices = context.getMatrices();
+        var matrices = context.pose();
         matrices.pushMatrix();
         matrices.translate(-9, 1);
 
-        int previousMaxLength = this.editBox.getMaxLength();
-        this.editBox.setMaxLength(Integer.MAX_VALUE);
+        int previousMaxLength = this.editBox.characterLimit();
+        this.editBox.setCharacterLimit(Integer.MAX_VALUE);
 
-        super.renderOverlay(context);
+        super.renderDecorations(context);
 
-        this.editBox.setMaxLength(previousMaxLength);
+        this.editBox.setCharacterLimit(previousMaxLength);
 
         matrices.popMatrix();
         this.height += 1;
 
         if (this.displayCharCount.get()) {
-            var text = this.editBox.hasMaxLength()
-                    ? Text.translatable("gui.multiLineEditBox.character_limit", this.editBox.getText().length(), this.editBox.getMaxLength())
-                    : Text.literal(String.valueOf(this.editBox.getText().length()));
+            var text = this.editBox.hasCharacterLimit()
+                    ? Component.translatable("gui.multiLineEditBox.character_limit", this.editBox.value().length(), this.editBox.characterLimit())
+                    : Component.literal(String.valueOf(this.editBox.value().length()));
 
-            var textRenderer = MinecraftClient.getInstance().textRenderer;
-            context.drawTextWithShadow(textRenderer, text, this.getX() + this.width - textRenderer.getWidth(text), this.getY() + this.height + 3, 0xa0a0a0);
+            var textRenderer = Minecraft.getInstance().font;
+            context.drawString(textRenderer, text, this.getX() + this.width - textRenderer.width(text), this.getY() + this.height + 3, 0xa0a0a0);
         }
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         this.width -= 9;
         var result = super.mouseClicked(click, doubled);
         this.width += 9;
@@ -102,11 +100,11 @@ public class TextAreaComponent extends EditBoxWidget {
     }
 
     @Override
-    public boolean keyPressed(KeyInput input) {
+    public boolean keyPressed(KeyEvent input) {
         boolean result = super.keyPressed(input);
 
-        if (input.isTab()) {
-            this.editBox.replaceSelection("    ");
+        if (input.isCycleFocus()) {
+            this.editBox.insertText("    ");
             return true;
         } else {
             return result;
@@ -117,17 +115,17 @@ public class TextAreaComponent extends EditBoxWidget {
     public void inflate(Size space) {
         super.inflate(space);
 
-        int cursor = this.editBox.getCursor();
-        int selection = ((EditBoxAccessor) this.editBox).owo$getSelectionEnd();
+        int cursor = this.editBox.cursor();
+        int selection = ((MultilineTextFieldAccessor) this.editBox).owo$getSelectCursor();
 
-        ((EditBoxAccessor) this.editBox).owo$setWidth(this.width() - this.getPadding() - 9);
-        this.editBox.setText(this.getText(), false);
+        ((MultilineTextFieldAccessor) this.editBox).owo$setWidth(this.width() - this.totalInnerPadding() - 9);
+        this.editBox.setValue(this.getValue(), false);
 
         super.inflate(space);
-        this.editBox.setText(this.getText(), false);
+        this.editBox.setValue(this.getValue(), false);
 
-        this.editBox.moveCursor(CursorMovement.ABSOLUTE, cursor);
-        ((EditBoxAccessor) this.editBox).owo$setSelectionEnd(selection);
+        this.editBox.seekCursor(Whence.ABSOLUTE, cursor);
+        ((MultilineTextFieldAccessor) this.editBox).owo$setSelectCursor(selection);
     }
 
     public EventSource<OnChanged> onChanged() {
@@ -153,7 +151,7 @@ public class TextAreaComponent extends EditBoxWidget {
     }
 
     public TextAreaComponent text(String text) {
-        this.setText(text);
+        this.setValue(text);
         return this;
     }
 
@@ -167,7 +165,7 @@ public class TextAreaComponent extends EditBoxWidget {
         super.parseProperties(model, element, children);
 
         UIParsing.apply(children, "display-char-count", UIParsing::parseBool, this::displayCharCount);
-        UIParsing.apply(children, "max-length", UIParsing::parseUnsignedInt, this::setMaxLength);
+        UIParsing.apply(children, "max-length", UIParsing::parseUnsignedInt, this::setCharacterLimit);
         UIParsing.apply(children, "max-lines", UIParsing::parseUnsignedInt, this::maxLines);
         UIParsing.apply(children, "text", $ -> $.getTextContent().strip(), this::text);
     }

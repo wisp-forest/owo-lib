@@ -1,8 +1,8 @@
 package io.wispforest.owo.braid.core;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import io.wispforest.owo.braid.core.events.UserEvent;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.util.InputUtil;
+import net.minecraft.client.Minecraft;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -68,7 +68,7 @@ public abstract class EventBinding {
     public static class Default extends EventBinding {
         @Override
         public boolean isKeyPressed(int keyCode) {
-            return InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow(), keyCode);
+            return InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), keyCode);
         }
     }
 }

@@ -1,6 +1,6 @@
 package io.wispforest.owo.braid.core;
 
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -121,10 +121,10 @@ public record Constraints(double minWidth, double minHeight, double maxWidth, do
         }
 
         return new Constraints(
-            MathHelper.clamp(this.minWidth, other.minWidth, other.maxWidth),
-            MathHelper.clamp(this.minHeight, other.minHeight, other.maxHeight),
-            MathHelper.clamp(this.maxWidth, other.minWidth, other.maxWidth),
-            MathHelper.clamp(this.maxHeight, other.minHeight, other.maxHeight)
+            Mth.clamp(this.minWidth, other.minWidth, other.maxWidth),
+            Mth.clamp(this.minHeight, other.minHeight, other.maxHeight),
+            Mth.clamp(this.maxWidth, other.minWidth, other.maxWidth),
+            Mth.clamp(this.maxHeight, other.minHeight, other.maxHeight)
         );
     }
 

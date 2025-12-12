@@ -10,8 +10,8 @@ import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
 import io.wispforest.owo.braid.widgets.basic.Box;
 import io.wispforest.owo.braid.widgets.basic.Padding;
 import io.wispforest.owo.braid.widgets.focus.Focusable;
-import net.minecraft.text.Style;
-import net.minecraft.util.Colors;
+import net.minecraft.network.chat.Style;
+import net.minecraft.util.CommonColors;
 
 public class TextBox extends StatefulWidget {
 
@@ -27,7 +27,7 @@ public class TextBox extends StatefulWidget {
             controller,
             widget -> {
                 setupCallback.setup(widget);
-                widget.suggestion(widget.suggestion().copy().styled(style -> style.withParent(Style.EMPTY.withColor(Colors.GRAY))));
+                widget.suggestion(widget.suggestion().copy().withStyle(style -> style.applyTo(Style.EMPTY.withColor(CommonColors.GRAY))));
             }
         );
     }
@@ -45,7 +45,7 @@ public class TextBox extends StatefulWidget {
         public Widget build(BuildContext context) {
             return new Box(
                 //TODO: use panel instead of box here
-                this.focused ? Color.WHITE : new Color(Colors.LIGHT_GRAY),
+                this.focused ? Color.WHITE : new Color(CommonColors.LIGHT_GRAY),
                 new Focusable(
                     widget -> widget
                         .focusGainedCallback(() -> this.setState(() -> this.focused = true))

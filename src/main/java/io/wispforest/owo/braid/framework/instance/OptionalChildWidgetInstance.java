@@ -1,7 +1,7 @@
 package io.wispforest.owo.braid.framework.instance;
 
 import com.google.common.base.Preconditions;
-import io.wispforest.owo.braid.core.BraidDrawContext;
+import io.wispforest.owo.braid.core.BraidGraphics;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.framework.widget.InstanceWidget;
 import org.jetbrains.annotations.Nullable;
@@ -17,9 +17,9 @@ public abstract class OptionalChildWidgetInstance<T extends InstanceWidget> exte
     }
 
     @Override
-    public void draw(BraidDrawContext ctx) {
+    public void draw(BraidGraphics graphics) {
         if (this.child != null) {
-            this.drawChild(ctx, this.child);
+            this.drawChild(graphics, this.child);
         }
     }
 

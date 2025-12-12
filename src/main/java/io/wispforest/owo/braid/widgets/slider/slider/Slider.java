@@ -17,12 +17,11 @@ import io.wispforest.owo.braid.widgets.slider.SliderStyle;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.util.UISounds;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
-import java.util.Optional;
 
 public class Slider extends StatefulWidget {
 
@@ -206,7 +205,7 @@ public class Slider extends StatefulWidget {
                         ? content
                         : new Incrementor(
                             widget.axis,
-                            increment -> this.applyValue(MathHelper.clamp(this.normalizedValue + this.incrementStep * increment, 0, 1)),
+                            increment -> this.applyValue(Mth.clamp(this.normalizedValue + this.incrementStep * increment, 0, 1)),
                             new MouseArea(
                                 mouseArea -> mouseArea
                                     //TODO: decide what to do with buttons here
@@ -255,14 +254,14 @@ public class Slider extends StatefulWidget {
         protected void move(Constraints constraints, double dx, double dy) {
             this.dragValue += this.widget().axis.choose(dx, dy) / (constraints.maxFiniteOrMinOnAxis(this.widget().axis) - this.handleSize);
 
-            this.applyValue(MathHelper.clamp(this.dragValue, 0, 1));
+            this.applyValue(Mth.clamp(this.dragValue, 0, 1));
         }
 
         protected double setAbsolute(Constraints constraints, double x, double y) {
             if (this.widget().onChanged == null) return this.normalizedValue;
 
             var axis = this.widget().axis;
-            var newNormalizedValue = MathHelper.clamp((axis.choose(x, y) - this.handleSize / 2) / (constraints.maxFiniteOrMinOnAxis(axis) - this.handleSize), 0, 1);
+            var newNormalizedValue = Mth.clamp((axis.choose(x, y) - this.handleSize / 2) / (constraints.maxFiniteOrMinOnAxis(axis) - this.handleSize), 0, 1);
 
             this.applyValue(newNormalizedValue);
             return newNormalizedValue;

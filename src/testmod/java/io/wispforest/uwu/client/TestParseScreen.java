@@ -5,7 +5,7 @@ import io.wispforest.owo.ui.component.*;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.core.*;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
 public class TestParseScreen extends BaseUIModelScreen<FlowLayout> {
 
@@ -41,7 +41,7 @@ public class TestParseScreen extends BaseUIModelScreen<FlowLayout> {
         rootComponent.childById(ButtonComponent.class, "allay-button").onPress(button -> {
             verticalAnimation.reverse();
             horizontalAnimation.reverse();
-            button.setMessage(Text.of(button.getMessage().getString().equals("+") ? "-" : "+"));
+            button.setMessage(Component.nullToEmpty(button.getMessage().getString().equals("+") ? "-" : "+"));
         });
 
         rootComponent.childById(TextureComponent.class, "java-logo").visibleArea().animate(

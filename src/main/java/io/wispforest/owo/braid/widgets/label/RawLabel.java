@@ -1,6 +1,6 @@
 package io.wispforest.owo.braid.widgets.label;
 
-import io.wispforest.owo.braid.core.BraidDrawContext;
+import io.wispforest.owo.braid.core.BraidGraphics;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.KeyModifiers;
 import io.wispforest.owo.braid.core.Size;
@@ -9,19 +9,19 @@ import io.wispforest.owo.braid.framework.instance.LeafWidgetInstance;
 import io.wispforest.owo.braid.framework.instance.MouseListener;
 import io.wispforest.owo.braid.framework.instance.TooltipProvider;
 import io.wispforest.owo.braid.framework.widget.LeafInstanceWidget;
-import io.wispforest.owo.mixin.braid.ClickHandlerAccessor;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
+import io.wispforest.owo.mixin.braid.ClickableStyleFinderAccessor;
+import io.wispforest.owo.ui.core.OwoUIGraphics;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.DrawnTextConsumer;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.StringVisitable;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Language;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ActiveTextCollector;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.locale.Language;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.Style;
+import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2f;
 
@@ -35,9 +35,9 @@ public class RawLabel extends LeafInstanceWidget {
     public final LabelStyle style;
     public final boolean softWrap;
     public final boolean ellipsize;
-    public final Text text;
+    public final Component text;
 
-    public RawLabel(LabelStyle style, boolean softWrap, boolean ellipsize, Text text) {
+    public RawLabel(LabelStyle style, boolean softWrap, boolean ellipsize, Component text) {
         this.style = style;
         this.softWrap = softWrap;
         this.ellipsize = ellipsize;
@@ -51,12 +51,12 @@ public class RawLabel extends LeafInstanceWidget {
 
     public static class Instance extends LeafWidgetInstance<RawLabel> implements TooltipProvider, MouseListener {
 
-        private List<OrderedText> renderText = List.of();
+        private List<FormattedCharSequence> renderText = List.of();
         private DoubleList renderTextWidths = new DoubleArrayList();
         private int renderTextHeight = 0;
 
         protected Function<Style, Boolean> textClickHandler = style -> {
-            return style != null && OwoUIDrawContext.utilityScreen().handleTextClick(style, MinecraftClient.getInstance().currentScreen);
+            return style != null && OwoUIGraphics.utilityScreen().handleTextClick(style, Minecraft.getInstance().screen);
         };
 
         public Instance(RawLabel widget) {
@@ -76,38 +76,38 @@ public class RawLabel extends LeafInstanceWidget {
             this.markNeedsLayout();
         }
 
-        protected List<OrderedText> wrapText(TextRenderer textRenderer, int maxWidth, double maxHeight) {
-            var styledText = this.widget.text.copy().styled(textStyle -> textStyle.withParent(this.widget.style.textStyle()));
-            var wrappedLines = textRenderer.getTextHandler().wrapLines(styledText, this.widget.softWrap ? maxWidth : Integer.MAX_VALUE, Style.EMPTY);
+        protected List<FormattedCharSequence> wrapText(Font font, int maxWidth, double maxHeight) {
+            var styledText = this.widget.text.copy().withStyle(textStyle -> textStyle.applyTo(this.widget.style.textStyle()));
+            var wrappedLines = font.getSplitter().splitLines(styledText, this.widget.softWrap ? maxWidth : Integer.MAX_VALUE, Style.EMPTY);
 
-            var maxLines = (int) Math.floor(maxHeight / textRenderer.fontHeight);
-            if (this.widget.ellipsize && !wrappedLines.isEmpty() && maxLines > 0 && (wrappedLines.size() > maxLines || textRenderer.getWidth(wrappedLines.getLast()) > maxWidth)) {
+            var maxLines = (int) Math.floor(maxHeight / font.lineHeight);
+            if (this.widget.ellipsize && !wrappedLines.isEmpty() && maxLines > 0 && (wrappedLines.size() > maxLines || font.width(wrappedLines.getLast()) > maxWidth)) {
                 wrappedLines = wrappedLines.subList(0, maxLines);
 
-                var ellipsis = StringVisitable.plain("…");
-                var ellipsisLength = textRenderer.getWidth(ellipsis);
+                var ellipsis = FormattedText.of("…");
+                var ellipsisLength = font.width(ellipsis);
 
-                var trimmedLastLine = textRenderer.trimToWidth(wrappedLines.getLast(), maxWidth - ellipsisLength);
+                var trimmedLastLine = font.substrByWidth(wrappedLines.getLast(), maxWidth - ellipsisLength);
                 wrappedLines.set(
                     wrappedLines.size() - 1,
-                    StringVisitable.concat(trimmedLastLine, ellipsis)
+                    FormattedText.composite(trimmedLastLine, ellipsis)
                 );
             }
 
-            return Language.getInstance().reorder(wrappedLines);
+            return Language.getInstance().getVisualOrder(wrappedLines);
         }
 
-        protected TextMetrics measureText(TextRenderer textRenderer, List<OrderedText> lines) {
+        protected TextMetrics measureText(Font font, List<FormattedCharSequence> lines) {
             var textWidth = 0;
             var textHeight = 0;
             var lineWidths = new DoubleArrayList();
 
             for (var line : lines) {
-                var lineWidth = textRenderer.getWidth(line);
+                var lineWidth = font.width(line);
                 lineWidths.add(lineWidth);
 
                 textWidth = Math.max(textWidth, lineWidth);
-                textHeight += textRenderer.fontHeight;
+                textHeight += font.lineHeight;
             }
 
             return new TextMetrics(textWidth, textHeight, lineWidths);
@@ -115,10 +115,10 @@ public class RawLabel extends LeafInstanceWidget {
 
         @Override
         protected void doLayout(Constraints constraints) {
-            var textRenderer = this.host().client().textRenderer;
-            this.renderText = this.wrapText(textRenderer, (int) constraints.maxWidth(), (int) constraints.maxHeight());
+            var font = this.host().client().font;
+            this.renderText = this.wrapText(font, (int) constraints.maxWidth(), (int) constraints.maxHeight());
 
-            var metrics = this.measureText(textRenderer, this.renderText);
+            var metrics = this.measureText(font, this.renderText);
 
             this.renderTextWidths = metrics.lineWidths();
             this.renderTextHeight = metrics.height();
@@ -129,32 +129,32 @@ public class RawLabel extends LeafInstanceWidget {
 
         @Override
         protected double measureIntrinsicWidth(double height) {
-            var renderer = this.host().client().textRenderer;
+            var renderer = this.host().client().font;
             return this.measureText(renderer, this.wrapText(renderer, Integer.MAX_VALUE, (int) height)).width;
         }
 
         @Override
         protected double measureIntrinsicHeight(double width) {
-            var renderer = this.host().client().textRenderer;
+            var renderer = this.host().client().font;
             return this.measureText(renderer, this.wrapText(renderer, this.widget.softWrap ? (int) width : Integer.MAX_VALUE, Integer.MAX_VALUE)).height;
         }
 
         @Override
         protected OptionalDouble measureBaselineOffset() {
-            return OptionalDouble.of(this.host().client().textRenderer.fontHeight - 2);
+            return OptionalDouble.of(this.host().client().font.lineHeight - 2);
         }
 
         @Override
-        public void draw(BraidDrawContext ctx) {
-            var textRenderer = this.host().client().textRenderer;
+        public void draw(BraidGraphics graphics) {
+            var font = this.host().client().font;
             var yOffset = this.widget.style.textAlignment().alignVertical(this.transform.height(), this.renderTextHeight);
 
             for (int lineIdx = 0; lineIdx < this.renderText.size(); lineIdx++) {
-                ctx.drawText(
-                    textRenderer,
+                graphics.drawString(
+                    font,
                     this.renderText.get(lineIdx),
                     (int) this.widget.style.textAlignment().alignHorizontal(this.transform.width(), this.renderTextWidths.getDouble(lineIdx)),
-                    (int) yOffset + lineIdx * textRenderer.fontHeight,
+                    (int) yOffset + lineIdx * font.lineHeight,
                     this.widget.style.baseColor().argb(),
                     this.widget.style.shadow()
                 );
@@ -164,14 +164,14 @@ public class RawLabel extends LeafInstanceWidget {
         // this reimplementation of RawLabel.draw is pretty cringe, however
         // mojang has left our hands tied since the text collector interface
         // does not give us control over text color and shadow
-        public void collectText(DrawnTextConsumer collector) {
-            var textRenderer = this.host().client().textRenderer;
+        public void collectText(ActiveTextCollector collector) {
+            var font = this.host().client().font;
             var yOffset = this.widget.style.textAlignment().alignVertical(this.transform.height(), this.renderTextHeight);
 
             for (int lineIdx = 0; lineIdx < this.renderText.size(); lineIdx++) {
-                collector.text(
+                collector.accept(
                     (int) this.widget.style.textAlignment().alignHorizontal(this.transform.width(), this.renderTextWidths.getDouble(lineIdx)),
-                    (int) yOffset + lineIdx * textRenderer.fontHeight,
+                    (int) yOffset + lineIdx * font.lineHeight,
                     this.renderText.get(lineIdx)
                 );
             }
@@ -179,7 +179,7 @@ public class RawLabel extends LeafInstanceWidget {
 
         @Override
         @Nullable
-        public List<TooltipComponent> getTooltipComponentsAt(double x, double y) {
+        public List<ClientTooltipComponent> getTooltipComponentsAt(double x, double y) {
             return null;
         }
 
@@ -191,10 +191,10 @@ public class RawLabel extends LeafInstanceWidget {
             var transform = this.computeGlobalTransform().invert();
             var clickPos = transform.transformPosition((float) x, (float) y, new Vector2f());
 
-            var collector = new StyleCollector(this.host().client().textRenderer, (int) clickPos.x, (int) clickPos.y);
+            var collector = new StyleCollector(this.host().client().font, (int) clickPos.x, (int) clickPos.y);
             this.collectText(collector);
 
-            return collector.getStyle();
+            return collector.result();
         }
 
         @Override
@@ -211,11 +211,11 @@ public class RawLabel extends LeafInstanceWidget {
             return null;
         }
 
-        public static class StyleCollector extends DrawnTextConsumer.ClickHandler {
+        public static class StyleCollector extends ActiveTextCollector.ClickableStyleFinder {
 
-            public StyleCollector(TextRenderer textRenderer, int clickX, int clickY) {
-                super(textRenderer, clickX, clickY);
-                ((ClickHandlerAccessor) this).owo$setSetStyleCallback(((ClickHandlerAccessor) this)::owo$setStyle);
+            public StyleCollector(Font font, int clickX, int clickY) {
+                super(font, clickX, clickY);
+                ((ClickableStyleFinderAccessor) this).owo$setStyleScanner(((ClickableStyleFinderAccessor) this)::owo$setResult);
             }
         }
     }

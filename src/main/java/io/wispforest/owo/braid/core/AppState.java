@@ -15,16 +15,16 @@ import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.Tooltip;
 import io.wispforest.owo.braid.widgets.basic.VisitorWidget;
+import io.wispforest.owo.braid.widgets.eventstream.BraidEventStream;
 import io.wispforest.owo.braid.widgets.focus.FocusClickArea;
 import io.wispforest.owo.braid.widgets.focus.RootFocusScope;
-import io.wispforest.owo.braid.widgets.eventstream.BraidEventStream;
 import io.wispforest.owo.braid.widgets.inspector.BraidInspector;
 import io.wispforest.owo.braid.widgets.inspector.InstancePicker;
 import io.wispforest.owo.util.EventSource;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.text.Style;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.network.chat.Style;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
@@ -42,7 +42,7 @@ import java.util.function.Consumer;
 public class AppState implements InstanceHost, ProxyHost {
 
     public final @Nullable Logger logger;
-    private final MinecraftClient client;
+    private final Minecraft client;
 
     public final Surface surface;
     public final EventBinding eventBinding;
@@ -86,7 +86,7 @@ public class AppState implements InstanceHost, ProxyHost {
     public AppState(
         @Nullable Logger logger,
         @Nullable String name,
-        MinecraftClient client,
+        Minecraft client,
         Surface surface,
         EventBinding eventBinding,
         Widget root
@@ -146,24 +146,24 @@ public class AppState implements InstanceHost, ProxyHost {
 
     private @Nullable TooltipState activeTooltip;
 
-    public void draw(DrawContext ctx) {
+    public void draw(GuiGraphics graphics) {
         this.surface.beginRendering();
 
-        ctx.push();
-        this.rootInstance().transform.transformToParent(ctx.getMatrices());
+        graphics.push();
+        this.rootInstance().transform.transformToParent(graphics.pose());
 
-        var braidContext = BraidDrawContext.create(ctx, this.surface);
+        var braidContext = BraidGraphics.create(graphics, this.surface);
 
         GlStateManager._enableScissorTest();
         this.rootInstance().draw(braidContext);
         GlStateManager._disableScissorTest();
 
         if (this.activeTooltip != null) {
-            if (this.activeTooltip.components() != null) braidContext.drawTooltip(this.client.textRenderer, this.activeTooltip.x(), this.activeTooltip.y(), this.activeTooltip.components());
-            if (this.activeTooltip.style() != null) ctx.drawHoverEvent(this.client.textRenderer, this.activeTooltip.style(), this.activeTooltip.x(), this.activeTooltip.y());
+            if (this.activeTooltip.components() != null) braidContext.drawTooltip(this.client.font, this.activeTooltip.x(), this.activeTooltip.y(), this.activeTooltip.components());
+            if (this.activeTooltip.style() != null) graphics.renderComponentHoverEffect(this.client.font, this.activeTooltip.style(), this.activeTooltip.x(), this.activeTooltip.y());
         }
 
-        ctx.pop();
+        graphics.pop();
 
         this.surface.endRendering();
     }
@@ -455,7 +455,7 @@ public class AppState implements InstanceHost, ProxyHost {
     // ---
 
     @Override
-    public MinecraftClient client() {
+    public Minecraft client() {
         return this.client;
     }
 
@@ -677,7 +677,7 @@ class AppWidget extends InheritedWidget {
     }
 }
 
-record TooltipState(@Nullable List<TooltipComponent> components, @Nullable Style style, int x, int y) {}
+record TooltipState(@Nullable List<ClientTooltipComponent> components, @Nullable Style style, int x, int y) {}
 
 record MousePosition(double x, double y) {
     public static final MousePosition ORIGIN = new MousePosition(0, 0);

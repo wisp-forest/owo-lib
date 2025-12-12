@@ -1,23 +1,23 @@
 package io.wispforest.owo.ui.container;
 
-import io.wispforest.owo.ui.base.BaseParentComponent;
+import io.wispforest.owo.ui.base.BaseParentUIComponent;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.MountingHelper;
 import io.wispforest.owo.util.Observable;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import java.util.*;
 
-public class FlowLayout extends BaseParentComponent {
+public class FlowLayout extends BaseParentUIComponent {
 
-    protected final List<Component> children = new ArrayList<>();
-    protected final List<Component> childrenView = Collections.unmodifiableList(this.children);
+    protected final List<UIComponent> children = new ArrayList<>();
+    protected final List<UIComponent> childrenView = Collections.unmodifiableList(this.children);
     protected final Algorithm algorithm;
 
     protected Size contentSize = Size.zero();
@@ -51,7 +51,7 @@ public class FlowLayout extends BaseParentComponent {
      *
      * @param child The child to append to this layout
      */
-    public FlowLayout child(Component child) {
+    public FlowLayout child(UIComponent child) {
         this.children.add(child);
         this.updateLayout();
         return this;
@@ -59,11 +59,11 @@ public class FlowLayout extends BaseParentComponent {
 
     /**
      * Add a collection of children to this layout. If you only need to
-     * add a single child to, use {@link #child(Component)} instead
+     * add a single child to, use {@link #child(UIComponent)} instead
      *
      * @param children The children to add to this layout
      */
-    public FlowLayout children(Collection<? extends Component> children) {
+    public FlowLayout children(Collection<? extends UIComponent> children) {
         this.children.addAll(children);
         this.updateLayout();
         return this;
@@ -76,7 +76,7 @@ public class FlowLayout extends BaseParentComponent {
      * @param index The index at which to insert the child
      * @param child The child to append to this layout
      */
-    public FlowLayout child(int index, Component child) {
+    public FlowLayout child(int index, UIComponent child) {
         this.children.add(index, child);
         this.updateLayout();
         return this;
@@ -84,19 +84,19 @@ public class FlowLayout extends BaseParentComponent {
 
     /**
      * Insert a collection of children into this layout. If you only need to
-     * insert a single child to, use {@link #child(int, Component)} instead
+     * insert a single child to, use {@link #child(int, UIComponent)} instead
      *
      * @param index    The index at which to begin inserting children
      * @param children The children to add to this layout
      */
-    public FlowLayout children(int index, Collection<? extends Component> children) {
+    public FlowLayout children(int index, Collection<? extends UIComponent> children) {
         this.children.addAll(index, children);
         this.updateLayout();
         return this;
     }
 
     @Override
-    public FlowLayout removeChild(Component child) {
+    public FlowLayout removeChild(UIComponent child) {
         if (this.children.remove(child)) {
             child.dismount(DismountReason.REMOVED);
             this.updateLayout();
@@ -120,7 +120,7 @@ public class FlowLayout extends BaseParentComponent {
     }
 
     @Override
-    public List<Component> children() {
+    public List<UIComponent> children() {
         return this.childrenView;
     }
 
@@ -142,9 +142,9 @@ public class FlowLayout extends BaseParentComponent {
     }
 
     @Override
-    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
-        super.draw(context, mouseX, mouseY, partialTicks, delta);
-        this.drawChildren(context, mouseX, mouseY, partialTicks, delta, this.children);
+    public void draw(OwoUIGraphics graphics, int mouseX, int mouseY, float partialTicks, float delta) {
+        super.draw(graphics, mouseX, mouseY, partialTicks, delta);
+        this.drawChildren(graphics, mouseX, mouseY, partialTicks, delta, this.children);
     }
 
     @Override
@@ -158,15 +158,15 @@ public class FlowLayout extends BaseParentComponent {
                 .orElse(Collections.emptyList());
 
         for (var child : components) {
-            this.child(model.parseComponent(Component.class, child));
+            this.child(model.parseComponent(UIComponent.class, child));
         }
     }
 
     @Override
-    public MutableText inspectorDescriptor() {
+    public MutableComponent inspectorDescriptor() {
         final var descriptor = super.inspectorDescriptor();
         return this.gap() == 0 ? descriptor : descriptor.append(
-                Text.literal(" [" + this.gap() + "]")
+                Component.literal(" [" + this.gap() + "]")
         );
     }
 
@@ -174,9 +174,9 @@ public class FlowLayout extends BaseParentComponent {
         UIParsing.expectAttributes(element, "direction");
 
         return switch (element.getAttribute("direction")) {
-            case "horizontal" -> Containers.horizontalFlow(Sizing.content(), Sizing.content());
-            case "ltr-text-flow" -> Containers.ltrTextFlow(Sizing.content(), Sizing.content());
-            default -> Containers.verticalFlow(Sizing.content(), Sizing.content());
+            case "horizontal" -> UIContainers.horizontalFlow(Sizing.content(), Sizing.content());
+            case "ltr-text-flow" -> UIContainers.ltrTextFlow(Sizing.content(), Sizing.content());
+            default -> UIContainers.verticalFlow(Sizing.content(), Sizing.content());
         };
     }
 
@@ -188,7 +188,7 @@ public class FlowLayout extends BaseParentComponent {
             var layoutWidth = new MutableInt(0);
             var layoutHeight = new MutableInt(0);
 
-            final var layout = new ArrayList<Component>();
+            final var layout = new ArrayList<UIComponent>();
             final var padding = container.padding.get();
             final var childSpace = container.calculateChildSpace(container.space);
 
@@ -235,7 +235,7 @@ public class FlowLayout extends BaseParentComponent {
             var layoutHeight = new MutableInt(0);
             var layoutWidth = new MutableInt(0);
 
-            final var layout = new ArrayList<Component>();
+            final var layout = new ArrayList<UIComponent>();
             final var padding = container.padding.get();
             final var childSpace = container.calculateChildSpace(container.space);
 
@@ -289,7 +289,7 @@ public class FlowLayout extends BaseParentComponent {
             var rowWidth = new MutableInt(0);
             var rowOffset = new MutableInt(0);
 
-            final var layout = new ArrayList<Component>();
+            final var layout = new ArrayList<UIComponent>();
             final var padding = container.padding.get();
             final var childSpace = container.calculateChildSpace(container.space);
 

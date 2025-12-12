@@ -7,8 +7,8 @@ import io.wispforest.owo.braid.widgets.recipeviewer.RecipeViewerExclusionZone;
 import io.wispforest.owo.braid.widgets.recipeviewer.RecipeViewerStack;
 import io.wispforest.owo.braid.widgets.recipeviewer.StackDropArea;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
-import io.wispforest.owo.mixin.itemgroup.CreativeInventoryScreenAccessor;
-import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
+import io.wispforest.owo.mixin.itemgroup.CreativeModeInventoryScreenAccessor;
+import io.wispforest.owo.ui.base.BaseOwoContainerScreen;
 import io.wispforest.owo.util.pond.OwoCreativeInventoryScreenExtensions;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
@@ -20,8 +20,8 @@ import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import me.shedaniel.rei.api.client.registry.screen.OverlayDecider;
 import me.shedaniel.rei.api.client.registry.screen.OverlayRendererProvider;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -36,8 +36,8 @@ public class OwoReiPlugin implements REIClientPlugin {
 
     @Override
     public void registerExclusionZones(ExclusionZones zones) {
-        zones.register(CreativeInventoryScreen.class, screen -> {
-            var group = CreativeInventoryScreenAccessor.owo$getSelectedTab();
+        zones.register(CreativeModeInventoryScreen.class, screen -> {
+            var group = CreativeModeInventoryScreenAccessor.owo$getSelectedTab();
             if (!(group instanceof OwoItemGroup owoGroup)) return Collections.emptySet();
             if (owoGroup.getButtons().isEmpty()) return Collections.emptySet();
 
@@ -57,8 +57,8 @@ public class OwoReiPlugin implements REIClientPlugin {
             return rectangles;
         });
 
-        zones.register(BaseOwoHandledScreen.class, screen -> {
-            return ((BaseOwoHandledScreen<?, ?>) screen).componentsForExclusionAreas()
+        zones.register(BaseOwoContainerScreen.class, screen -> {
+            return ((BaseOwoContainerScreen<?, ?>) screen).componentsForExclusionAreas()
                 .map(rect -> new Rectangle(rect.x(), rect.y(), rect.width(), rect.height()))
                 .toList();
         });
@@ -90,7 +90,7 @@ public class OwoReiPlugin implements REIClientPlugin {
         registry.registerDecider(new OverlayDecider() {
             @Override
             public <R extends Screen> boolean isHandingScreen(Class<R> screen) {
-                return BaseOwoHandledScreen.class.isAssignableFrom(screen);
+                return BaseOwoContainerScreen.class.isAssignableFrom(screen);
             }
 
             @Override

@@ -7,7 +7,7 @@ import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
 import io.wispforest.owo.braid.widgets.stack.Stack;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
 public class MessageRangeSlider extends StatelessWidget {
@@ -15,12 +15,12 @@ public class MessageRangeSlider extends StatelessWidget {
     public final double minValue, maxValue;
     public final @Nullable WidgetSetupCallback<RangeSlider> setupCallback;
     public final @Nullable RangeSliderCallback onChanged;
-    public final Text message;
+    public final Component message;
 
     public MessageRangeSlider(
         double minValue,
         double maxValue,
-        Text message,
+        Component message,
         @Nullable WidgetSetupCallback<RangeSlider> setupCallback,
         @Nullable RangeSliderCallback onChanged
     ) {
@@ -34,7 +34,7 @@ public class MessageRangeSlider extends StatelessWidget {
     public MessageRangeSlider(
         double minValue,
         double maxValue,
-        Text message,
+        Component message,
         @Nullable WidgetSetupCallback<RangeSlider> setupCallback,
         boolean active,
         RangeSliderCallback onChanged

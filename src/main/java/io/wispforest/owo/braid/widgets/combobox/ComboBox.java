@@ -13,11 +13,11 @@ import io.wispforest.owo.braid.widgets.SpriteWidget;
 import io.wispforest.owo.braid.widgets.basic.HoverableBuilder;
 import io.wispforest.owo.braid.widgets.basic.Padding;
 import io.wispforest.owo.braid.widgets.basic.Panel;
-import io.wispforest.owo.braid.widgets.intents.*;
 import io.wispforest.owo.braid.widgets.flex.CrossAxisAlignment;
 import io.wispforest.owo.braid.widgets.flex.Flexible;
 import io.wispforest.owo.braid.widgets.flex.MainAxisAlignment;
 import io.wispforest.owo.braid.widgets.flex.Row;
+import io.wispforest.owo.braid.widgets.intents.*;
 import io.wispforest.owo.braid.widgets.overlay.Overlay;
 import io.wispforest.owo.braid.widgets.overlay.OverlayEntry;
 import io.wispforest.owo.braid.widgets.overlay.OverlayEntryBuilder;
@@ -25,8 +25,8 @@ import io.wispforest.owo.braid.widgets.textinput.EditableText;
 import io.wispforest.owo.braid.widgets.textinput.TextEditingController;
 import io.wispforest.owo.braid.widgets.textinput.TextEditingValue;
 import io.wispforest.owo.braid.widgets.textinput.TextSelection;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -44,13 +44,13 @@ public class ComboBox<T> extends StatefulWidget {
 
     // ---
 
-    public final Function<T, Text> optionToName;
+    public final Function<T, Component> optionToName;
 
     public final List<T> options;
     public final @Nullable T selectedOption;
     public final SelectCallback<T> onSelect;
 
-    public ComboBox(Function<T, Text> optionToName, List<T> options, @Nullable T selectedOption, SelectCallback<T> onSelect) {
+    public ComboBox(Function<T, Component> optionToName, List<T> options, @Nullable T selectedOption, SelectCallback<T> onSelect) {
         this.optionToName = optionToName;
         this.options = options;
         this.selectedOption = selectedOption;
@@ -58,7 +58,7 @@ public class ComboBox<T> extends StatefulWidget {
     }
 
     public ComboBox(List<T> options, @Nullable T selectedOption, SelectCallback<T> onSelect) {
-        this(option -> Text.literal(Objects.toString(option)), options, selectedOption, onSelect);
+        this(option -> Component.literal(Objects.toString(option)), options, selectedOption, onSelect);
     }
 
     @Override
@@ -66,14 +66,14 @@ public class ComboBox<T> extends StatefulWidget {
         return new State<>();
     }
 
-    public List<Text> optionNames() {
+    public List<Component> optionNames() {
         return this.options.stream().map(this::nameOption).toList();
     }
 
-    public Text nameOption(@Nullable T option) {
+    public Component nameOption(@Nullable T option) {
         return option != null
             ? this.optionToName.apply(option)
-            : Text.empty();
+            : Component.empty();
     }
 
     public interface SelectCallback<T> {
@@ -120,7 +120,7 @@ public class ComboBox<T> extends StatefulWidget {
             if (Objects.equals(this.controller.value().text(), this.lastText)) return;
             this.lastText = controller.value().text();
 
-            if (this.widget().optionNames().stream().map(Text::getString).anyMatch(s -> s.equals(this.controller.value().text()))) {
+            if (this.widget().optionNames().stream().map(Component::getString).anyMatch(s -> s.equals(this.controller.value().text()))) {
                 return;
             }
 

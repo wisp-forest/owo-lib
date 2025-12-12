@@ -5,7 +5,6 @@ import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.HoverableBuilder;
 import io.wispforest.owo.braid.widgets.basic.Panel;
-import io.wispforest.owo.braid.widgets.focus.FocusLevel;
 import io.wispforest.owo.braid.widgets.focus.Focusable;
 import io.wispforest.owo.ui.component.ButtonComponent;
 

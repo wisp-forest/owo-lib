@@ -14,8 +14,8 @@ import io.wispforest.owo.braid.widgets.slider.slider.SliderFunction;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.util.UISounds;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -372,10 +372,10 @@ public class RangeSlider extends StatefulWidget {
 
             if (grabbedHandle == Handle.MAX) {
                 var denom = Math.max(1, constraints.maxFiniteOrMinOnAxis(widget.axis) - this.maxHandleSize * 2);
-                return MathHelper.clamp((coordinate - this.maxHandleSize * 1.5) / denom, 0, 1);
+                return Mth.clamp((coordinate - this.maxHandleSize * 1.5) / denom, 0, 1);
             } else {
                 var denom = Math.max(1, constraints.maxFiniteOrMinOnAxis(widget.axis) - this.minHandleSize * 2);
-                return MathHelper.clamp((coordinate - this.minHandleSize / 2) / denom, 0, 1);
+                return Mth.clamp((coordinate - this.minHandleSize / 2) / denom, 0, 1);
             }
         }
 
@@ -390,11 +390,11 @@ public class RangeSlider extends StatefulWidget {
             if (this.grabbedHandle == Handle.MIN) {
                 var upper = newNormalizedMax - minRangeNorm;
                 var lower = maxRangeNorm >= 0 ? newNormalizedMax - maxRangeNorm : 0;
-                newNormalizedMin = MathHelper.clamp(normalizedValue, Math.max(0, lower), Math.max(0, upper));
+                newNormalizedMin = Mth.clamp(normalizedValue, Math.max(0, lower), Math.max(0, upper));
             } else if (this.grabbedHandle == Handle.MAX) {
                 var lower = newNormalizedMin + minRangeNorm;
                 var upper = maxRangeNorm >= 0 ? newNormalizedMin + maxRangeNorm : 1;
-                newNormalizedMax = MathHelper.clamp(normalizedValue, Math.min(1, lower), Math.min(1, upper));
+                newNormalizedMax = Mth.clamp(normalizedValue, Math.min(1, lower), Math.min(1, upper));
             }
 
             this.applyValue(newNormalizedMin, newNormalizedMax);
@@ -418,18 +418,18 @@ public class RangeSlider extends StatefulWidget {
                 case MIN -> {
                     var maxCap = this.normalizedMax - minRangeNorm;
                     var minCap = maxRangeNorm >= 0 ? this.normalizedMax - maxRangeNorm : 0;
-                    var newMin = MathHelper.clamp(this.dragValue, Math.max(0, minCap), Math.max(0, maxCap));
+                    var newMin = Mth.clamp(this.dragValue, Math.max(0, minCap), Math.max(0, maxCap));
                     this.applyValue(newMin, this.normalizedMax);
                 }
                 case MAX -> {
                     var minCap = this.normalizedMin + minRangeNorm;
                     var maxCap = maxRangeNorm >= 0 ? this.normalizedMin + maxRangeNorm : 1;
-                    var newMax = MathHelper.clamp(this.dragValue, Math.min(1, minCap), Math.min(1, maxCap));
+                    var newMax = Mth.clamp(this.dragValue, Math.min(1, minCap), Math.min(1, maxCap));
                     this.applyValue(this.normalizedMin, newMax);
                 }
                 case BOTH -> {
                     var width = this.dragWidth;
-                    this.dragValue = MathHelper.clamp(this.dragValue, 0, 1 - width);
+                    this.dragValue = Mth.clamp(this.dragValue, 0, 1 - width);
                     var newMin = this.dragValue;
                     var newMax = newMin + width;
                     this.applyValue(newMin, newMax);
@@ -448,14 +448,14 @@ public class RangeSlider extends StatefulWidget {
             if (target == Handle.MIN) {
                 var upper = newMax - minRangeNorm;
                 var lower = maxRangeNorm >= 0 ? newMax - maxRangeNorm : 0;
-                newMin = MathHelper.clamp(newMin + delta, Math.max(0, lower), Math.max(0, upper));
+                newMin = Mth.clamp(newMin + delta, Math.max(0, lower), Math.max(0, upper));
             } else if (target == Handle.MAX) {
                 var lower = newMin + minRangeNorm;
                 var upper = maxRangeNorm >= 0 ? newMin + maxRangeNorm : 1;
-                newMax = MathHelper.clamp(newMax + delta, Math.min(1, lower), Math.min(1, upper));
+                newMax = Mth.clamp(newMax + delta, Math.min(1, lower), Math.min(1, upper));
             } else {
-                newMin = MathHelper.clamp(newMin + delta, 0, 1);
-                newMax = MathHelper.clamp(newMax + delta, 0, 1);
+                newMin = Mth.clamp(newMin + delta, 0, 1);
+                newMax = Mth.clamp(newMax + delta, 0, 1);
             }
             this.applyValue(newMin, newMax);
         }
@@ -472,8 +472,8 @@ public class RangeSlider extends StatefulWidget {
                 newMaxValue = Math.round(newMaxValue / step) * step;
             }
 
-            newMinValue = MathHelper.clamp(newMinValue, widget.min, widget.max);
-            newMaxValue = MathHelper.clamp(newMaxValue, widget.min, widget.max);
+            newMinValue = Mth.clamp(newMinValue, widget.min, widget.max);
+            newMaxValue = Mth.clamp(newMaxValue, widget.min, widget.max);
 
             widget.onChanged.accept(newMinValue, newMaxValue);
         }

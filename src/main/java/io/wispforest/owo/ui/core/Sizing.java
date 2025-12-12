@@ -1,12 +1,11 @@
 package io.wispforest.owo.ui.core;
 
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 import org.w3c.dom.Element;
 
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Random;
 import java.util.function.Function;
 
 public class Sizing implements Animatable<Sizing> {
@@ -329,7 +328,7 @@ public class Sizing implements Animatable<Sizing> {
         if (next.method != this.method) {
             return new MergedSizing(this, next, delta);
         } else {
-            return new Sizing(MathHelper.lerp(delta, this.value, next.value), this.method);
+            return new Sizing(Mth.lerpInt(delta, this.value, next.value), this.method);
         }
     }
 
@@ -388,7 +387,7 @@ public class Sizing implements Animatable<Sizing> {
 
         @Override
         public int inflate(int space, Function<Sizing, Integer> contentSizeFunction) {
-            return MathHelper.lerp(
+            return Mth.lerpInt(
                     this.delta,
                     this.first.inflate(space, contentSizeFunction),
                     this.second.inflate(space, contentSizeFunction)

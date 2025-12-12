@@ -1,8 +1,8 @@
 package io.wispforest.owo.braid.widgets.slider.slider;
 
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 
-import static net.minecraft.util.math.MathHelper.EPSILON;
+import static net.minecraft.util.Mth.EPSILON;
 
 public interface SliderFunction {
     double normalize(double value, double min, double max);
@@ -32,7 +32,7 @@ public interface SliderFunction {
                 value += offset;
             }
 
-            value = MathHelper.clamp(value, min, max);
+            value = Mth.clamp(value, min, max);
 
             var logMin = Math.log(min);
             var logMax = Math.log(max);

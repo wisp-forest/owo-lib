@@ -10,11 +10,11 @@ import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.InheritedWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.Align;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.toast.Toast;
-import net.minecraft.client.toast.ToastManager;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.toasts.Toast;
+import net.minecraft.client.gui.components.toasts.ToastManager;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,7 +34,7 @@ public class BraidToast implements Toast {
         this.app = new AppState(
             Owo.LOGGER,
             AppState.formatName("BraidToast", widget),
-            MinecraftClient.getInstance(),
+            Minecraft.getInstance(),
             new Surface.Default(),
             new EventBinding.Headless(),
             new Align(
@@ -53,11 +53,11 @@ public class BraidToast implements Toast {
     }
 
     public static void show(@Nullable Duration timeout, @Nullable Object token, Widget widget) {
-        MinecraftClient.getInstance().getToastManager().add(new BraidToast(timeout, token, widget));
+        Minecraft.getInstance().getToastManager().addToast(new BraidToast(timeout, token, widget));
     }
 
     public static void hideWithToken(Object token) {
-        var toast = MinecraftClient.getInstance().getToastManager().getToast(BraidToast.class, token);
+        var toast = Minecraft.getInstance().getToastManager().getToast(BraidToast.class, token);
         if (toast != null) {
             toast.visibility = Visibility.HIDE;
         }
@@ -78,17 +78,17 @@ public class BraidToast implements Toast {
     }
 
     @Override
-    public void draw(DrawContext context, TextRenderer textRenderer, long startTime) {
-        this.app.draw(context);
+    public void render(GuiGraphics graphics, Font font, long startTime) {
+        this.app.draw(graphics);
     }
 
     @Override
-    public int getWidth() {
+    public int width() {
         return (int) this.rootInstance.transform.width();
     }
 
     @Override
-    public int getHeight() {
+    public int height() {
         return (int) this.rootInstance.transform.height();
     }
 
@@ -102,19 +102,19 @@ public class BraidToast implements Toast {
             this.visibility = Visibility.HIDE;
         }
 
-        var tickCounter = MinecraftClient.getInstance().getRenderTickCounter();
+        var tickCounter = Minecraft.getInstance().getDeltaTracker();
         this.app.processEvents(
-            tickCounter.getDynamicDeltaTicks()
+            tickCounter.getGameTimeDeltaTicks()
         );
     }
 
     @Override
-    public Visibility getVisibility() {
+    public Visibility getWantedVisibility() {
         return this.visibility;
     }
 
     @Override
-    public Object getType() {
+    public Object getToken() {
         return this.token;
     }
 }

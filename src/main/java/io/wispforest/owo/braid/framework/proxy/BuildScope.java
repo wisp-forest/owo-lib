@@ -1,6 +1,5 @@
 package io.wispforest.owo.braid.framework.proxy;
 
-import com.google.common.collect.Iterables;
 import io.wispforest.owo.Owo;
 import org.jetbrains.annotations.Nullable;
 

@@ -1,12 +1,12 @@
 package io.wispforest.owo.braid.framework.proxy;
 
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 
 import java.time.Duration;
 
 public interface ProxyHost {
 
-    MinecraftClient client();
+    Minecraft client();
 
     void scheduleAnimationCallback(AnimationCallback callback);
 

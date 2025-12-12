@@ -3,20 +3,20 @@ package io.wispforest.owo.ui.util;
 import io.wispforest.owo.Owo;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 
 public final class UISounds {
 
-    public static final SoundEvent UI_INTERACTION = SoundEvent.of(Owo.id("ui.owo.interaction"));
+    public static final SoundEvent UI_INTERACTION = SoundEvent.createVariableRangeEvent(Owo.id("ui.owo.interaction"));
 
     private UISounds() {}
 
     @Environment(EnvType.CLIENT)
     public static void play(SoundEvent event) {
-        MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(event, 1));
+        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(event, 1));
     }
 
     @Environment(EnvType.CLIENT)

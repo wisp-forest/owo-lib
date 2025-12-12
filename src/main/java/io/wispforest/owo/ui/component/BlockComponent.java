@@ -3,28 +3,26 @@ package io.wispforest.owo.ui.component;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.mixin.ui.access.BlockEntityAccessor;
-import io.wispforest.owo.ui.base.BaseComponent;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
+import io.wispforest.owo.ui.base.BaseUIComponent;
+import io.wispforest.owo.ui.core.OwoUIGraphics;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.renderstate.BlockElementRenderState;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.ScreenRect;
-import net.minecraft.client.render.block.entity.state.BlockEntityRenderState;
-import net.minecraft.client.render.command.ModelCommandRenderer;
-import net.minecraft.client.render.entity.state.EntityRenderState;
-import net.minecraft.command.argument.BlockArgumentParser;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.Registries;
-import net.minecraft.storage.NbtReadView;
-import net.minecraft.util.ErrorReporter;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import net.minecraft.commands.arguments.blocks.BlockStateParser;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 
-public class BlockComponent extends BaseComponent {
+public class BlockComponent extends BaseUIComponent {
 
     private final BlockState state;
     private final @Nullable BlockEntity entity;
@@ -35,34 +33,34 @@ public class BlockComponent extends BaseComponent {
     }
 
     @Override
-    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+    public void draw(OwoUIGraphics graphics, int mouseX, int mouseY, float partialTicks, float delta) {
         BlockEntityRenderState entity = null;
         if (this.entity != null) {
-            var renderer = MinecraftClient.getInstance().getBlockEntityRenderDispatcher().get(this.entity);
+            var renderer = Minecraft.getInstance().getBlockEntityRenderDispatcher().getRenderer(this.entity);
             if (renderer != null) {
                 entity = renderer.createRenderState();
 
-                renderer.updateRenderState(
-                    this.entity, entity, partialTicks, Vec3d.ZERO, null
+                renderer.extractRenderState(
+                    this.entity, entity, partialTicks, Vec3.ZERO, null
                 );
             }
         }
 
-        context.state.addSpecialElement(new BlockElementRenderState(
+        graphics.guiRenderState.submitPicturesInPictureState(new BlockElementRenderState(
             this.state,
             entity,
-            new ScreenRect(this.x, this.y, this.width, this.height),
-            context.scissorStack.peekLast()
+            new ScreenRectangle(this.x, this.y, this.width, this.height),
+            graphics.scissorStack.peek()
         ));
     }
 
-    protected static void prepareBlockEntity(BlockState state, BlockEntity blockEntity, @Nullable NbtCompound nbt) {
+    protected static void prepareBlockEntity(BlockState state, BlockEntity blockEntity, @Nullable CompoundTag nbt) {
         if (blockEntity == null) return;
 
-        var world = MinecraftClient.getInstance().world;
+        var world = Minecraft.getInstance().level;
 
-        ((BlockEntityAccessor) blockEntity).owo$setCachedState(state);
-        blockEntity.setWorld(world);
+        ((BlockEntityAccessor) blockEntity).owo$setBlockState(state);
+        blockEntity.setLevel(world);
 
         if (nbt == null) return;
 
@@ -72,15 +70,15 @@ public class BlockComponent extends BaseComponent {
         nbtCopy.putInt("y", 0);
         nbtCopy.putInt("z", 0);
 
-        blockEntity.read(NbtReadView.create(new ErrorReporter.Logging(Owo.LOGGER), world.getRegistryManager(), nbtCopy));
+        blockEntity.loadWithComponents(TagValueInput.create(new ProblemReporter.ScopedCollector(Owo.LOGGER), world.registryAccess(), nbtCopy));
     }
 
     public static BlockComponent parse(Element element) {
         UIParsing.expectAttributes(element, "state");
 
         try {
-            var result = BlockArgumentParser.block(Registries.BLOCK, element.getAttribute("state"), true);
-            return Components.block(result.blockState(), result.nbt());
+            var result = BlockStateParser.parseForBlock(BuiltInRegistries.BLOCK, element.getAttribute("state"), true);
+            return UIComponents.block(result.blockState(), result.nbt());
         } catch (CommandSyntaxException cse) {
             throw new UIModelParsingException("Invalid block state", cse);
         }

@@ -2,34 +2,34 @@ package io.wispforest.owo.network;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.player.LocalPlayer;
 
-public class ClientAccess implements OwoNetChannel.EnvironmentAccess<ClientPlayerEntity, MinecraftClient, ClientPlayNetworkHandler> {
+public class ClientAccess implements OwoNetChannel.EnvironmentAccess<LocalPlayer, Minecraft, ClientPacketListener> {
 
-    @Environment(EnvType.CLIENT) private final ClientPlayNetworkHandler netHandler;
-    @Environment(EnvType.CLIENT) private final MinecraftClient instance = MinecraftClient.getInstance();
+    @Environment(EnvType.CLIENT) private final ClientPacketListener packetListener;
+    @Environment(EnvType.CLIENT) private final Minecraft instance = Minecraft.getInstance();
 
-    public ClientAccess(ClientPlayNetworkHandler netHandler) {
-        this.netHandler = netHandler;
+    public ClientAccess(ClientPacketListener packetListener) {
+        this.packetListener = packetListener;
     }
 
     @Override
     @Environment(EnvType.CLIENT)
-    public ClientPlayerEntity player() {
+    public LocalPlayer player() {
         return instance.player;
     }
 
     @Override
     @Environment(EnvType.CLIENT)
-    public MinecraftClient runtime() {
+    public Minecraft runtime() {
         return instance;
     }
 
     @Override
     @Environment(EnvType.CLIENT)
-    public ClientPlayNetworkHandler netHandler() {
-        return netHandler;
+    public ClientPacketListener packetListener() {
+        return packetListener;
     }
 }

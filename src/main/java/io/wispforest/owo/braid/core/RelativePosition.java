@@ -5,8 +5,6 @@ import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.framework.BuildContext;
 import org.joml.Vector2d;
 import org.joml.Vector2f;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
 
 public record RelativePosition(BuildContext context, double x, double y) {
 

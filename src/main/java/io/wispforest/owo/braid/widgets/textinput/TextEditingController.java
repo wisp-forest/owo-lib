@@ -1,8 +1,8 @@
 package io.wispforest.owo.braid.widgets.textinput;
 
 import io.wispforest.owo.braid.core.ListenableValue;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 
 public class TextEditingController extends ListenableValue<TextEditingValue> {
 
@@ -18,7 +18,7 @@ public class TextEditingController extends ListenableValue<TextEditingValue> {
         this("");
     }
 
-    public Text createTextForRendering(Style baseStyle) {
-        return Text.literal(this.value().text()).styled(style -> baseStyle.withParent(baseStyle));
+    public Component createTextForRendering(Style baseStyle) {
+        return Component.literal(this.value().text()).withStyle(style -> baseStyle.applyTo(baseStyle));
     }
 }

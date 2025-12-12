@@ -1,12 +1,9 @@
 package io.wispforest.owo.braid.core.cursor;
 
 import io.wispforest.owo.braid.core.LayoutAxis;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import org.joml.*;
+import net.minecraft.util.Mth;
+import org.joml.Matrix3x2f;
 import org.lwjgl.glfw.GLFW;
-
-import java.lang.Math;
 
 public sealed interface CursorStyle permits SystemCursorStyle {
     CursorStyle NONE = new SystemCursorStyle(0);
@@ -32,7 +29,7 @@ public sealed interface CursorStyle permits SystemCursorStyle {
         // apply axis adjustment
         if (axis == LayoutAxis.VERTICAL) rotation += 90;
         // Normalize to [0, 180) (because the cursors are symmetric)
-        rotation = MathHelper.floorMod(rotation, 180);
+        rotation = Mth.positiveModulo(rotation, 180);
         // Map to [0, 8)
         rotation /= 22.5;
 

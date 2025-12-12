@@ -1,10 +1,10 @@
 package io.wispforest.owo.ui.component;
 
 import io.wispforest.owo.Owo;
-import io.wispforest.owo.ui.base.BaseComponent;
+import io.wispforest.owo.ui.base.BaseUIComponent;
 import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.ui.core.CursorStyle;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
+import io.wispforest.owo.ui.core.OwoUIGraphics;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
@@ -12,29 +12,28 @@ import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.Observable;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 import org.w3c.dom.Element;
 
 import java.util.Map;
 
-public class SmallCheckboxComponent extends BaseComponent {
+public class SmallCheckboxComponent extends BaseUIComponent {
 
     public static final Identifier TEXTURE = Owo.id("textures/gui/smol_checkbox.png");
 
     protected final EventStream<OnChanged> checkedEvents = OnChanged.newStream();
 
-    protected final Observable<@Nullable Text> label;
+    protected final Observable<@Nullable Component> label;
     protected boolean labelShadow = false;
     protected boolean checked = false;
 
-    public SmallCheckboxComponent(Text label) {
+    public SmallCheckboxComponent(Component label) {
         this.cursorStyle(CursorStyle.HAND);
 
         this.label = Observable.of(label);
@@ -46,21 +45,21 @@ public class SmallCheckboxComponent extends BaseComponent {
     }
 
     @Override
-    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+    public void draw(OwoUIGraphics graphics, int mouseX, int mouseY, float partialTicks, float delta) {
         if (this.label.get() != null) {
-            context.drawText(MinecraftClient.getInstance().textRenderer, this.label.get(), this.x + 13 + 2, this.y + 3, Color.WHITE.argb(), this.labelShadow);
+            graphics.drawString(Minecraft.getInstance().font, this.label.get(), this.x + 13 + 2, this.y + 3, Color.WHITE.argb(), this.labelShadow);
         }
 
-        context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, this.x, this.y, 0, 0, 13, 13, 13, 13, 32, 16);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, this.x, this.y, 0, 0, 13, 13, 13, 13, 32, 16);
         if (this.checked) {
-            context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, this.x, this.y, 16, 0, 13, 13, 13, 13, 32, 16);
+            graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, this.x, this.y, 16, 0, 13, 13, 13, 13, 32, 16);
         }
     }
 
     @Override
     protected int determineHorizontalContentSize(Sizing sizing) {
         return this.label.get() != null
-                ? 13 + 2 + MinecraftClient.getInstance().textRenderer.getWidth(this.label.get())
+                ? 13 + 2 + Minecraft.getInstance().font.width(this.label.get())
                 : 13;
     }
 
@@ -70,7 +69,7 @@ public class SmallCheckboxComponent extends BaseComponent {
     }
 
     @Override
-    public boolean onMouseDown(Click click, boolean doubled) {
+    public boolean onMouseDown(MouseButtonEvent click, boolean doubled) {
         boolean result = super.onMouseDown(click, doubled);
 
         if (click.isLeft()) {
@@ -82,10 +81,10 @@ public class SmallCheckboxComponent extends BaseComponent {
     }
 
     @Override
-    public boolean onKeyPress(KeyInput input) {
+    public boolean onKeyPress(KeyEvent input) {
         boolean result = super.onKeyPress(input);
 
-        if (input.isEnterOrSpace()) {
+        if (input.isSelection()) {
             this.toggle();
             return true;
         }
@@ -118,12 +117,12 @@ public class SmallCheckboxComponent extends BaseComponent {
         return checked;
     }
 
-    public SmallCheckboxComponent label(Text label) {
+    public SmallCheckboxComponent label(Component label) {
         this.label.set(label);
         return this;
     }
 
-    public Text label() {
+    public Component label() {
         return this.label.get();
     }
 

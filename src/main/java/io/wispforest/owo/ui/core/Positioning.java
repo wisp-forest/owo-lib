@@ -2,7 +2,7 @@ package io.wispforest.owo.ui.core;
 
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 import org.w3c.dom.Element;
 
 import java.util.Locale;
@@ -41,8 +41,8 @@ public class Positioning implements Animatable<Positioning> {
         }
 
         return new Positioning(
-                MathHelper.lerp(delta, this.x, next.x),
-                MathHelper.lerp(delta, this.y, next.y),
+                Mth.lerpInt(delta, this.x, next.x),
+                Mth.lerpInt(delta, this.y, next.y),
                 this.type
         );
     }

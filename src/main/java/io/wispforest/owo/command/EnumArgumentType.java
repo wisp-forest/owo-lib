@@ -9,10 +9,9 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.wispforest.owo.Owo;
 import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.argument.serialize.ConstantArgumentSerializer;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.synchronization.SingletonArgumentInfo;
+import net.minecraft.network.chat.Component;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -21,7 +20,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * A simple implementation of {@link ArgumentType} that works with any {@code enum}.
  * It is recommended to create one instance of this and use it both in the call
- * to {@link net.minecraft.server.command.CommandManager#argument(String, ArgumentType)}
+ * to {@link net.minecraft.commands.Commands#argument(String, ArgumentType)}
  * as well as for getting the supplied argument via {@link #get(CommandContext, String)}
  *
  * @param <T> The {@code enum} this instance can parse
@@ -35,7 +34,7 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<Enum<T>
     private EnumArgumentType(Class<T> enumClass, String noElementMessage) {
         this.enumClass = enumClass;
         this.noElementMessage = noElementMessage;
-        this.noValueException = new DynamicCommandExceptionType(o -> Text.literal(this.noElementMessage.replace("{}", o.toString())));
+        this.noValueException = new DynamicCommandExceptionType(o -> Component.literal(this.noElementMessage.replace("{}", o.toString())));
     }
 
     /**
@@ -51,7 +50,7 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<Enum<T>
      */
     public static <T extends Enum<T>> EnumArgumentType<T> create(Class<T> enumClass) {
         final var type = new EnumArgumentType<>(enumClass, "Invalid enum value '{}'");
-        ArgumentTypeRegistry.registerArgumentType(Owo.id("enum_" + enumClass.getName().toLowerCase(Locale.ROOT)), type.getClass(), ConstantArgumentSerializer.of(() -> type));
+        ArgumentTypeRegistry.registerArgumentType(Owo.id("enum_" + enumClass.getName().toLowerCase(Locale.ROOT)), type.getClass(), SingletonArgumentInfo.contextFree(() -> type));
         return type;
     }
 
@@ -71,7 +70,7 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<Enum<T>
      */
     public static <T extends Enum<T>> EnumArgumentType<T> create(Class<T> enumClass, String noElementMessage) {
         final var type = new EnumArgumentType<>(enumClass, noElementMessage);
-        ArgumentTypeRegistry.registerArgumentType(Owo.id("enum_" + enumClass.getName().toLowerCase(Locale.ROOT)), type.getClass(), ConstantArgumentSerializer.of(() -> type));
+        ArgumentTypeRegistry.registerArgumentType(Owo.id("enum_" + enumClass.getName().toLowerCase(Locale.ROOT)), type.getClass(), SingletonArgumentInfo.contextFree(() -> type));
         return type;
     }
 
@@ -81,7 +80,7 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<Enum<T>
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return CommandSource.suggestMatching(Arrays.stream(enumClass.getEnumConstants()).map(Enum::toString), builder);
+        return SharedSuggestionProvider.suggest(Arrays.stream(enumClass.getEnumConstants()).map(Enum::toString), builder);
     }
 
     @Override

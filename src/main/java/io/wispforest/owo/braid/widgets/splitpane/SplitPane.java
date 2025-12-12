@@ -17,7 +17,7 @@ import io.wispforest.owo.braid.widgets.flex.CrossAxisAlignment;
 import io.wispforest.owo.braid.widgets.flex.Flex;
 import io.wispforest.owo.braid.widgets.flex.Flexible;
 import io.wispforest.owo.braid.widgets.flex.MainAxisAlignment;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 
 public class SplitPane extends StatefulWidget {
 
@@ -48,7 +48,7 @@ class SplitPaneState extends WidgetState<SplitPane> {
             var maxSize = constraints.maxOnAxis(axis) - 2;
 
             if (this.splitCoordinate == -1) this.splitCoordinate = .5 * maxSize;
-            var split = Math.floor(MathHelper.clamp(this.splitCoordinate, .1 * maxSize, .9 * maxSize));
+            var split = Math.floor(Mth.clamp(this.splitCoordinate, .1 * maxSize, .9 * maxSize));
 
             var firstConstraints = Constraints.tight(axis.createSize(split, constraints.maxOnAxis(axis.opposite())));
             var secondConstraints = Constraints.tight(axis.createSize(maxSize - split, constraints.maxOnAxis(axis.opposite())));
@@ -66,7 +66,7 @@ class SplitPaneState extends WidgetState<SplitPane> {
                                 System.out.println("Split coordinate: " + this.splitCoordinate);
                             }))
                             .dragEndCallback(() -> {
-                                this.splitCoordinate = MathHelper.clamp(this.splitCoordinate, .1 * maxSize, .9 * maxSize);
+                                this.splitCoordinate = Mth.clamp(this.splitCoordinate, .1 * maxSize, .9 * maxSize);
                             })
                             .cursorStyleSupplier((x, y) -> axis.choose(CursorStyle.HORIZONTAL_RESIZE, CursorStyle.VERTICAL_RESIZE)),
                         new Box(Color.WHITE)

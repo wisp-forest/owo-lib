@@ -1,7 +1,7 @@
 package io.wispforest.owo.text;
 
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
 public interface TextLanguage {
-    Text getText(String key);
+    Component getText(String key);
 }

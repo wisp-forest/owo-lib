@@ -8,14 +8,10 @@ import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
-import io.wispforest.owo.braid.widgets.basic.Center;
-import io.wispforest.owo.braid.widgets.basic.ControlsOverride;
-import io.wispforest.owo.braid.widgets.basic.LayoutBuilder;
-import io.wispforest.owo.braid.widgets.basic.MouseArea;
-import io.wispforest.owo.braid.widgets.basic.Sized;
+import io.wispforest.owo.braid.widgets.basic.*;
 import io.wispforest.owo.braid.widgets.slider.Incrementor;
 import io.wispforest.owo.braid.widgets.slider.slider.SliderCallback;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
 public class RawDrag extends StatefulWidget {
@@ -271,7 +267,7 @@ public class RawDrag extends StatefulWidget {
                     newValue = min + offset;
                 }
             } else {
-                newValue = MathHelper.clamp(newValue, min, max);
+                newValue = Mth.clamp(newValue, min, max);
             }
             var step = widget.step;
             newValue = step != null ? Math.round(newValue / step) * step : newValue;
@@ -283,7 +279,7 @@ public class RawDrag extends StatefulWidget {
                     newValue = min + offset;
                 }
             } else {
-                newValue = MathHelper.clamp(newValue, min, max);
+                newValue = Mth.clamp(newValue, min, max);
             }
             widget.onChanged.accept(newValue);
         }

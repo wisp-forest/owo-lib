@@ -2,8 +2,8 @@ package io.wispforest.owo.serialization;
 
 import io.wispforest.endec.SerializationAttribute;
 import io.wispforest.owo.mixin.serialization.CachedRegistryInfoGetterAccessor;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.RegistryOps;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.RegistryOps;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -12,56 +12,56 @@ public final class RegistriesAttribute implements SerializationAttribute.Instanc
 
     public static final SerializationAttribute.WithValue<RegistriesAttribute> REGISTRIES = SerializationAttribute.withValue("registries");
 
-    private final RegistryOps.RegistryInfoGetter infoGetter;
-    private final @Nullable DynamicRegistryManager registryManager;
+    private final RegistryOps.RegistryInfoLookup infoLookup;
+    private final @Nullable RegistryAccess registryAccess;
 
-    private RegistriesAttribute(RegistryOps.RegistryInfoGetter infoGetter, @Nullable DynamicRegistryManager registryManager) {
-        this.infoGetter = infoGetter;
-        this.registryManager = registryManager;
+    private RegistriesAttribute(RegistryOps.RegistryInfoLookup infoLookup, @Nullable RegistryAccess registryAccess) {
+        this.infoLookup = infoLookup;
+        this.registryAccess = registryAccess;
     }
 
-    public static RegistriesAttribute of(DynamicRegistryManager registryManager) {
+    public static RegistriesAttribute of(RegistryAccess registryAccess) {
         return new RegistriesAttribute(
-                new RegistryOps.CachedRegistryInfoGetter(registryManager),
-                registryManager
+                new RegistryOps.HolderLookupAdapter(registryAccess),
+                registryAccess
         );
     }
 
     @ApiStatus.Internal
-    public static RegistriesAttribute tryFromCachedInfoGetter(RegistryOps.RegistryInfoGetter lookup) {
-        return (lookup instanceof RegistryOps.CachedRegistryInfoGetter cachedGetter)
+    public static RegistriesAttribute tryFromCachedInfoGetter(RegistryOps.RegistryInfoLookup lookup) {
+        return (lookup instanceof RegistryOps.HolderLookupAdapter cachedGetter)
                 ? fromCachedInfoGetter(cachedGetter)
                 : fromInfoGetter(lookup);
     }
 
-    public static RegistriesAttribute fromCachedInfoGetter(RegistryOps.CachedRegistryInfoGetter cachedGetter) {
-        DynamicRegistryManager registryManager = null;
+    public static RegistriesAttribute fromCachedInfoGetter(RegistryOps.HolderLookupAdapter cachedGetter) {
+        RegistryAccess registryAccess = null;
 
-        if(((CachedRegistryInfoGetterAccessor) (Object) cachedGetter).owo$getRegistriesLookup() instanceof DynamicRegistryManager drm) {
-            registryManager = drm;
+        if(((CachedRegistryInfoGetterAccessor) (Object) cachedGetter).owo$getRegistriesLookup() instanceof RegistryAccess drm) {
+            registryAccess = drm;
         }
 
-        return new RegistriesAttribute(cachedGetter, registryManager);
+        return new RegistriesAttribute(cachedGetter, registryAccess);
     }
 
-    public static RegistriesAttribute fromInfoGetter(RegistryOps.RegistryInfoGetter lookup) {
+    public static RegistriesAttribute fromInfoGetter(RegistryOps.RegistryInfoLookup lookup) {
         return new RegistriesAttribute(lookup, null);
     }
 
-    public RegistryOps.RegistryInfoGetter infoGetter() {
-        return this.infoGetter;
+    public RegistryOps.RegistryInfoLookup infoGetter() {
+        return this.infoLookup;
     }
 
-    public boolean hasRegistryManager() {
-        return this.registryManager != null;
+    public boolean hasRegistryAccess() {
+        return this.registryAccess != null;
     }
 
-    public @NotNull DynamicRegistryManager registryManager() {
-        if (!this.hasRegistryManager()) {
-            throw new IllegalStateException("This instance of RegistriesAttribute does not supply a DynamicRegistryManager");
+    public @NotNull RegistryAccess registryAccess() {
+        if (!this.hasRegistryAccess()) {
+            throw new IllegalStateException("This instance of RegistriesAttribute does not supply RegistryAccess");
         }
 
-        return this.registryManager;
+        return this.registryAccess;
     }
 
     @Override

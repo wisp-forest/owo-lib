@@ -1,14 +1,14 @@
 package io.wispforest.owo.ui.hud;
 
 import io.wispforest.owo.ui.container.FlowLayout;
-import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.OwoUIAdapter;
+import io.wispforest.owo.ui.core.UIComponent;
 import io.wispforest.owo.ui.event.ClientRenderCallback;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ public class Hud {
     static @Nullable OwoUIAdapter<FlowLayout> adapter = null;
     static boolean suppress = false;
 
-    private static final Map<Identifier, Component> activeComponents = new HashMap<>();
+    private static final Map<Identifier, UIComponent> activeComponents = new HashMap<>();
     private static final List<Consumer<FlowLayout>> pendingActions = new ArrayList<>();
 
     /**
@@ -41,7 +41,7 @@ public class Hud {
      * @param component A function creating the component
      *                  when the HUD is first rendered
      */
-    public static void add(Identifier id, Supplier<Component> component) {
+    public static void add(Identifier id, Supplier<UIComponent> component) {
         pendingActions.add(flowLayout -> {
             var instance = component.get();
 
@@ -71,7 +71,7 @@ public class Hud {
      * @param id The ID of the HUD component to query
      * @return The relevant HUD component, or {@code null} if there is none
      */
-    public static @Nullable Component getComponent(Identifier id) {
+    public static @Nullable UIComponent getComponent(Identifier id) {
         return activeComponents.get(id);
     }
 
@@ -83,9 +83,9 @@ public class Hud {
     }
 
     private static void initializeAdapter() {
-        var window = MinecraftClient.getInstance().getWindow();
+        var window = Minecraft.getInstance().getWindow();
         adapter = OwoUIAdapter.createWithoutScreen(
-            0, 0, window.getScaledWidth(), window.getScaledHeight(), HudContainer::new
+            0, 0, window.getGuiScaledWidth(), window.getGuiScaledHeight(), HudContainer::new
         );
 
         adapter.inflateAndMount();
@@ -94,11 +94,11 @@ public class Hud {
     static {
         WindowResizeCallback.EVENT.register((client, window) -> {
             if (adapter == null) return;
-            adapter.moveAndResize(0, 0, window.getScaledWidth(), window.getScaledHeight());
+            adapter.moveAndResize(0, 0, window.getGuiScaledWidth(), window.getGuiScaledHeight());
         });
 
         ClientRenderCallback.BEFORE.register(client -> {
-            if (client.world == null) return;
+            if (client.level == null) return;
             if (!pendingActions.isEmpty()) {
                 if (adapter == null) initializeAdapter();
 
@@ -107,9 +107,9 @@ public class Hud {
             }
         });
 
-        HudElementRegistry.addLast(Identifier.of("owo", "owo_ui_hud"), (context, tickCounter) -> {
-            if (adapter == null || suppress || MinecraftClient.getInstance().options.hudHidden) return;
-            adapter.render(context, -69, -69, tickCounter.getTickProgress(false));
+        HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("owo", "owo_ui_hud"), (context, tickCounter) -> {
+            if (adapter == null || suppress || Minecraft.getInstance().options.hideGui) return;
+            adapter.render(context, -69, -69, tickCounter.getGameTimeDeltaPartialTick(false));
         });
     }
 }

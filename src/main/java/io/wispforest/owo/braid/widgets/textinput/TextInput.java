@@ -8,18 +8,17 @@ import io.wispforest.owo.braid.framework.instance.LeafWidgetInstance;
 import io.wispforest.owo.braid.framework.instance.MouseListener;
 import io.wispforest.owo.braid.framework.widget.LeafInstanceWidget;
 import io.wispforest.owo.ui.core.Color;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Colors;
-import net.minecraft.util.StringHelper;
-import net.minecraft.util.math.MathHelper;
+import io.wispforest.owo.ui.core.OwoUIGraphics;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.util.CommonColors;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.Mth;
+import net.minecraft.util.StringUtil;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
-import org.lwjgl.glfw.GLFW;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -33,16 +32,16 @@ public class TextInput extends LeafInstanceWidget {
     public final List<Formatter> formatters;
     public final Style baseStyle;
     public final boolean textShadow;
-    public final Text suggestion;
+    public final Component suggestion;
 
-    public TextInput(TextEditingController controller, boolean showCursor, boolean softWrap, List<Formatter> formatters, Style baseStyle, boolean textShadow, @Nullable Text suggestion) {
+    public TextInput(TextEditingController controller, boolean showCursor, boolean softWrap, List<Formatter> formatters, Style baseStyle, boolean textShadow, @Nullable Component suggestion) {
         this.controller = controller;
         this.showCursor = showCursor;
         this.softWrap = softWrap;
         this.formatters = formatters;
         this.baseStyle = baseStyle;
         this.textShadow = textShadow;
-        this.suggestion = suggestion == null ? Text.empty() : suggestion;
+        this.suggestion = suggestion == null ? Component.empty() : suggestion;
     }
 
     @Override
@@ -63,7 +62,7 @@ public class TextInput extends LeafInstanceWidget {
         protected CursorLocation cursorLocation;
 
         protected TextLayout.EditMetrics metrics = null;
-        protected List<OrderedText> renderLines = List.of();
+        protected List<FormattedCharSequence> renderLines = List.of();
 
         public Instance(TextInput widget) {
             super(widget);
@@ -99,13 +98,13 @@ public class TextInput extends LeafInstanceWidget {
             var wrapWidth = this.widget.softWrap ? maxWidth - 2 : Integer.MAX_VALUE;
 
             this.metrics = TextLayout.measure(
-                this.host().client().textRenderer,
+                this.host().client().font,
                 this.value.text() + this.widget.suggestion.getString(),
                 this.widget.baseStyle,
                 wrapWidth
             );
 
-            this.renderLines = new ArrayList<>(this.host().client().textRenderer.wrapLines(
+            this.renderLines = new ArrayList<>(this.host().client().font.split(
                 this.widget.controller.createTextForRendering(this.widget.baseStyle).copy().append(this.widget.suggestion),
                 wrapWidth
             ));
@@ -124,7 +123,7 @@ public class TextInput extends LeafInstanceWidget {
         @Override
         protected double measureIntrinsicWidth(double height) {
             return TextLayout.measure(
-                this.host().client().textRenderer,
+                this.host().client().font,
                 this.value.text(),
                 this.widget.baseStyle,
                 Integer.MAX_VALUE
@@ -134,7 +133,7 @@ public class TextInput extends LeafInstanceWidget {
         @Override
         protected double measureIntrinsicHeight(double width) {
             return TextLayout.measure(
-                this.host().client().textRenderer,
+                this.host().client().font,
                 this.value.text(),
                 this.widget.baseStyle,
                 this.widget.softWrap ? (int) width : Integer.MAX_VALUE
@@ -143,31 +142,31 @@ public class TextInput extends LeafInstanceWidget {
 
         @Override
         protected OptionalDouble measureBaselineOffset() {
-            return OptionalDouble.of(this.host().client().textRenderer.fontHeight - 2);
+            return OptionalDouble.of(this.host().client().font.lineHeight - 2);
         }
 
-        private void drawSelection(OwoUIDrawContext ctx, double startX, double endX, double lineBaseY) {
-            var height = this.host().client().textRenderer.fontHeight;
+        private void drawSelection(OwoUIGraphics ctx, double startX, double endX, double lineBaseY) {
+            var height = this.host().client().font.lineHeight;
 
             ctx.push();
             ctx.translate(startX, lineBaseY - height);
 
             var width = endX - startX;
-            ctx.fill(RenderPipelines.GUI_TEXT_HIGHLIGHT, 0, 0, (int) width, height, Colors.BLUE);
+            ctx.fill(RenderPipelines.GUI_TEXT_HIGHLIGHT, 0, 0, (int) width, height, CommonColors.BLUE);
 
             ctx.pop();
         }
 
         @Override
-        public void draw(BraidDrawContext ctx) {
-            var textRenderer = this.host().client().textRenderer;
+        public void draw(BraidGraphics graphics) {
+            var font = this.host().client().font;
 
             for (int lineIdx = 0; lineIdx < this.renderLines.size(); lineIdx++) {
-                ctx.drawText(
-                    textRenderer,
+                graphics.drawString(
+                    font,
                     this.renderLines.get(lineIdx),
                     0,
-                    lineIdx * textRenderer.fontHeight,
+                    lineIdx * font.lineHeight,
                     Color.WHITE.argb(),
                     this.widget.textShadow
                 );
@@ -184,20 +183,20 @@ public class TextInput extends LeafInstanceWidget {
                     var startPos = this.coordinatesAtCharIdx(selection.lower());
                     var endPos = this.coordinatesAtCharIdx(selection.upper());
 
-                    this.drawSelection(ctx, startPos.x, endPos.x, endPos.y);
+                    this.drawSelection(graphics, startPos.x, endPos.x, endPos.y);
                 } else {
                     var startPos = this.coordinatesAtCharIdx(selection.lower());
-                    this.drawSelection(ctx, startPos.x, this.metrics.lineMetrics().get(startLine).width(), startPos.y);
+                    this.drawSelection(graphics, startPos.x, this.metrics.lineMetrics().get(startLine).width(), startPos.y);
 
                     for (var lineIdx = startLine + 1; lineIdx < endLine; lineIdx++) {
                         var line = this.metrics.lineMetrics().get(lineIdx);
                         var width = line.beginIdx() != line.endIdx() ? line.width() : 2;
 
-                        this.drawSelection(ctx, 0, width, (lineIdx + 1) * textRenderer.fontHeight);
+                        this.drawSelection(graphics, 0, width, (lineIdx + 1) * font.lineHeight);
                     }
 
                     var endPos = this.coordinatesAtCharIdx(selection.upper());
-                    drawSelection(ctx, 0, endPos.x, endPos.y);
+                    drawSelection(graphics, 0, endPos.x, endPos.y);
                 }
             }
 
@@ -206,9 +205,9 @@ public class TextInput extends LeafInstanceWidget {
             if (this.widget.showCursor) {
                 var cursorPos = this.coordinatesAtCharIdx(this.value.selection().end());
 
-                ctx.drawVerticalLine(
+                graphics.vLine(
                     (int) cursorPos.x,
-                    (int) (cursorPos.y - textRenderer.fontHeight - 2),
+                    (int) (cursorPos.y - font.lineHeight - 2),
                     (int) (cursorPos.y),
                     0xaad0d0d0
                 );
@@ -235,17 +234,17 @@ public class TextInput extends LeafInstanceWidget {
             var lineIdx = this.lineIdxAtCharIdx(charIdx);
             var line = this.metrics.lineMetrics().get(lineIdx);
 
-            var textRenderer = this.host().client().textRenderer;
+            var font = this.host().client().font;
             var text = this.value.text();
 
-            var x = textRenderer.getWidth(text.substring(line.beginIdx(), Math.min(text.length(), charIdx)));
-            var y = (lineIdx + 1) * textRenderer.fontHeight;
+            var x = font.width(text.substring(line.beginIdx(), Math.min(text.length(), charIdx)));
+            var y = (lineIdx + 1) * font.lineHeight;
 
             return new Vector2d(x, y);
         }
 
         public void insert(String insertion) {
-            insertion = StringHelper.stripInvalidChars(insertion, true);
+            insertion = StringUtil.filterText(insertion, true);
 
             var chars = new StringBuilder(this.value.text());
             var selection = this.value.selection();
@@ -276,7 +275,7 @@ public class TextInput extends LeafInstanceWidget {
         }
 
         private void moveCursorVertically(int byLines, boolean selecting) {
-            var newLineIdx = MathHelper.clamp(this.cursorLocation.line + byLines, 0, this.lastTextLineIdx());
+            var newLineIdx = Mth.clamp(this.cursorLocation.line + byLines, 0, this.lastTextLineIdx());
             var currentX = this.cursorPosition().x;
 
             var newLine = this.metrics.lineMetrics().get(newLineIdx);
@@ -285,10 +284,10 @@ public class TextInput extends LeafInstanceWidget {
             var text = this.value.text();
             var actualEndIdx = Math.min(newLine.endIdx(), text.length());
             while (newLocalRune < (actualEndIdx - newLine.beginIdx())) {
-                var glyphX = this.host().client().textRenderer.getWidth(text.substring(newLine.beginIdx(), newLine.beginIdx() + newLocalRune));
+                var glyphX = this.host().client().font.width(text.substring(newLine.beginIdx(), newLine.beginIdx() + newLocalRune));
 
                 if (glyphX >= currentX) {
-                    var previousGlyphX = this.host().client().textRenderer.getWidth(text.substring(newLine.beginIdx(), newLine.beginIdx() + Math.max(0, newLocalRune - 1)));
+                    var previousGlyphX = this.host().client().font.width(text.substring(newLine.beginIdx(), newLine.beginIdx() + Math.max(0, newLocalRune - 1)));
 
                     if (Math.abs(currentX - previousGlyphX) < Math.abs(currentX - glyphX)) {
                         newLocalRune--;
@@ -304,12 +303,12 @@ public class TextInput extends LeafInstanceWidget {
         }
 
         private int charIdxAt(double x, double y) {
-            var textRenderer = this.host().client().textRenderer;
+            var font = this.host().client().font;
 
-            var clickedLine = this.metrics.lineMetrics().get(MathHelper.clamp((int) (y / textRenderer.fontHeight), 0, this.lastTextLineIdx()));
+            var clickedLine = this.metrics.lineMetrics().get(Mth.clamp((int) (y / font.lineHeight), 0, this.lastTextLineIdx()));
             var lineText = this.value.text().substring(clickedLine.beginIdx(), Math.min(clickedLine.endIdx(), this.value.text().length()));
 
-            return clickedLine.beginIdx() + textRenderer.trimToWidth(lineText, (int) x + 1).length();
+            return clickedLine.beginIdx() + font.plainSubstrByWidth(lineText, (int) x + 1).length();
         }
 
         private void setCursorPosition(int toRune, boolean selecting) {
@@ -339,7 +338,7 @@ public class TextInput extends LeafInstanceWidget {
 
         private char safeCharAt(int charIdx) {
             var text = this.value.text();
-            return !text.isEmpty() ? text.charAt(MathHelper.clamp(charIdx, 0, text.length() - 1)) : ' ';
+            return !text.isEmpty() ? text.charAt(Mth.clamp(charIdx, 0, text.length() - 1)) : ' ';
         }
 
         private void formatAndSetValue(TextEditingValue newValue) {
@@ -440,11 +439,11 @@ public class TextInput extends LeafInstanceWidget {
         }
 
         public void pasteFromClipboard() {
-            this.insert(MinecraftClient.getInstance().keyboard.getClipboard());
+            this.insert(Minecraft.getInstance().keyboardHandler.getClipboard());
         }
 
         public void copyToClipboard(CopyTextIntent intent) {
-            MinecraftClient.getInstance().keyboard.setClipboard(this.value.text().substring(
+            Minecraft.getInstance().keyboardHandler.setClipboard(this.value.text().substring(
                 this.value.selection().lower(),
                 this.value.selection().upper()
             ));

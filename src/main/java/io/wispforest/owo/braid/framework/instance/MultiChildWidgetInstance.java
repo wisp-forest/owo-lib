@@ -1,6 +1,6 @@
 package io.wispforest.owo.braid.framework.instance;
 
-import io.wispforest.owo.braid.core.BraidDrawContext;
+import io.wispforest.owo.braid.core.BraidGraphics;
 import io.wispforest.owo.braid.core.BraidUtils;
 import io.wispforest.owo.braid.framework.widget.MultiChildInstanceWidget;
 
@@ -17,9 +17,9 @@ public abstract class MultiChildWidgetInstance<T extends MultiChildInstanceWidge
     }
 
     @Override
-    public void draw(BraidDrawContext ctx) {
+    public void draw(BraidGraphics graphics) {
         for (var child : this.children) {
-            this.drawChild(ctx, child);
+            this.drawChild(graphics, child);
         }
     }
 

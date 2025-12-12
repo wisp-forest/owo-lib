@@ -1,11 +1,11 @@
 package io.wispforest.owo.braid.display;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import io.wispforest.owo.braid.core.events.MouseMoveEvent;
-import net.minecraft.client.render.LightmapTextureManager;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.render.state.CameraRenderState;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2dc;
@@ -32,7 +32,7 @@ public class BraidDisplayBinding {
     public static @Nullable DisplayHitResult targetDisplay;
 
     @ApiStatus.Internal
-    public static @Nullable DisplayHitResult queryTargetDisplay(Vec3d rayOrigin, Vec3d rayDirection) {
+    public static @Nullable DisplayHitResult queryTargetDisplay(Vec3 rayOrigin, Vec3 rayDirection) {
         DisplayHitResult closestResult = null;
         double closestRayOffset = Double.POSITIVE_INFINITY;
 
@@ -65,16 +65,16 @@ public class BraidDisplayBinding {
     }
 
     @ApiStatus.Internal
-    public static void renderAutomaticDisplays(MatrixStack matrices, CameraRenderState camera, OrderedRenderCommandQueue queue) {
+    public static void renderAutomaticDisplays(PoseStack matrices, CameraRenderState camera, SubmitNodeCollector nodeCollector) {
         for (var display : ACTIVE_DISPLAYS) {
             if (!display.renderAutomatically) continue;
 
-            matrices.push();
+            matrices.pushPose();
             matrices.translate(display.quad.pos.subtract(camera.pos));
 
-            display.render(matrices, queue, LightmapTextureManager.MAX_LIGHT_COORDINATE);
+            display.render(matrices, nodeCollector, LightTexture.FULL_BRIGHT);
 
-            matrices.pop();
+            matrices.popPose();
         }
     }
 

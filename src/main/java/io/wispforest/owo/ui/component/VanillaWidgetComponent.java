@@ -1,29 +1,32 @@
 package io.wispforest.owo.ui.component;
 
-import io.wispforest.owo.mixin.ui.access.ClickableWidgetAccessor;
-import io.wispforest.owo.mixin.ui.access.TextFieldWidgetAccessor;
-import io.wispforest.owo.ui.base.BaseComponent;
+import io.wispforest.owo.mixin.ui.access.AbstractWidgetAccessor;
+import io.wispforest.owo.mixin.ui.access.EditBoxAccessor;
+import io.wispforest.owo.ui.base.BaseUIComponent;
 import io.wispforest.owo.ui.core.*;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.widget.*;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Checkbox;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.util.Mth;
 
 import java.util.function.Consumer;
 
-public class VanillaWidgetComponent extends BaseComponent {
+public class VanillaWidgetComponent extends BaseUIComponent {
 
-    private final ClickableWidget widget;
+    private final AbstractWidget widget;
 
-    protected VanillaWidgetComponent(ClickableWidget widget) {
+    protected VanillaWidgetComponent(AbstractWidget widget) {
         this.widget = widget;
 
         this.horizontalSizing.set(Sizing.fixed(this.widget.getWidth()));
         this.verticalSizing.set(Sizing.fixed(this.widget.getHeight()));
 
-        if (widget instanceof TextFieldWidget) {
+        if (widget instanceof EditBox) {
             this.margins(Insets.none());
         }
     }
@@ -33,7 +36,7 @@ public class VanillaWidgetComponent extends BaseComponent {
     }
 
     @Override
-    public void mount(ParentComponent parent, int x, int y) {
+    public void mount(ParentUIComponent parent, int x, int y) {
         super.mount(parent, x, y);
         this.applyToWidget();
     }
@@ -56,16 +59,16 @@ public class VanillaWidgetComponent extends BaseComponent {
 
     @Override
     protected int determineVerticalContentSize(Sizing sizing) {
-        if (this.widget instanceof ButtonWidget || this.widget instanceof CheckboxWidget || this.widget instanceof SliderComponent) {
+        if (this.widget instanceof Button || this.widget instanceof Checkbox || this.widget instanceof SliderComponent) {
             return 20;
-        } else if (this.widget instanceof TextFieldWidget textField) {
-            if (((TextFieldWidgetAccessor) textField).owo$drawsBackground()) {
+        } else if (this.widget instanceof EditBox textField) {
+            if (((EditBoxAccessor) textField).owo$bordered()) {
                 return 20;
             } else {
                 return 9;
             }
         } else if (this.widget instanceof TextAreaComponent textArea && textArea.maxLines() > 0) {
-            return MathHelper.clamp(textArea.getContentsHeight() / 9 + 1, 2, textArea.maxLines()) * 9 + (textArea.displayCharCount() ? 9 + 12 : 9);
+            return Mth.clamp(textArea.getInnerHeight() / 9 + 1, 2, textArea.maxLines()) * 9 + (textArea.displayCharCount() ? 9 + 12 : 9);
         } else {
             throw new UnsupportedOperationException(this.widget.getClass().getSimpleName() + " does not support Sizing.content() on the vertical axis");
         }
@@ -73,18 +76,18 @@ public class VanillaWidgetComponent extends BaseComponent {
 
     @Override
     protected int determineHorizontalContentSize(Sizing sizing) {
-        if (this.widget instanceof ButtonWidget button) {
-            return MinecraftClient.getInstance().textRenderer.getWidth(button.getMessage()) + 8;
-        } else if (this.widget instanceof CheckboxWidget checkbox) {
-            return MinecraftClient.getInstance().textRenderer.getWidth(checkbox.getMessage()) + 24;
+        if (this.widget instanceof Button button) {
+            return Minecraft.getInstance().font.width(button.getMessage()) + 8;
+        } else if (this.widget instanceof Checkbox checkbox) {
+            return Minecraft.getInstance().font.width(checkbox.getMessage()) + 24;
         } else {
             throw new UnsupportedOperationException(this.widget.getClass().getSimpleName() + " does not support Sizing.content() on the horizontal axis");
         }
     }
 
     @Override
-    public BaseComponent margins(Insets margins) {
-        if (widget instanceof TextFieldWidget) {
+    public BaseUIComponent margins(Insets margins) {
+        if (widget instanceof EditBox) {
             return super.margins(margins.add(1, 1, 1, 1));
         } else {
             return super.margins(margins);
@@ -110,7 +113,7 @@ public class VanillaWidgetComponent extends BaseComponent {
     }
 
     private void applyToWidget() {
-        var accessor = (ClickableWidgetAccessor) this.widget;
+        var accessor = (AbstractWidgetAccessor) this.widget;
 
         accessor.owo$setX(this.x + this.widget.xOffset());
         accessor.owo$setY(this.y + this.widget.yOffset());
@@ -121,7 +124,7 @@ public class VanillaWidgetComponent extends BaseComponent {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <C extends Component> C configure(Consumer<C> closure) {
+    public <C extends UIComponent> C configure(Consumer<C> closure) {
         try {
             this.runAndDeferEvents(() -> closure.accept((C) this.widget));
         } catch (ClassCastException theUserDidBadItWasNotMyFault) {
@@ -140,8 +143,8 @@ public class VanillaWidgetComponent extends BaseComponent {
     }
 
     @Override
-    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
-        this.widget.render(context, mouseX, mouseY, 0);
+    public void draw(OwoUIGraphics graphics, int mouseX, int mouseY, float partialTicks, float delta) {
+        this.widget.render(graphics, mouseX, mouseY, 0);
     }
 
     @Override
@@ -150,14 +153,14 @@ public class VanillaWidgetComponent extends BaseComponent {
     }
 
     @Override
-    public boolean onMouseDown(Click click, boolean doubled) {
-        return this.widget.mouseClicked(new Click(this.x + click.x(), this.y + click.y(), click.buttonInfo()), doubled)
+    public boolean onMouseDown(MouseButtonEvent click, boolean doubled) {
+        return this.widget.mouseClicked(new MouseButtonEvent(this.x + click.x(), this.y + click.y(), click.buttonInfo()), doubled)
                 | super.onMouseDown(click, doubled);
     }
 
     @Override
-    public boolean onMouseUp(Click click) {
-        return this.widget.mouseReleased(new Click(this.x + click.x(), this.y + click.y(), click.buttonInfo()))
+    public boolean onMouseUp(MouseButtonEvent click) {
+        return this.widget.mouseReleased(new MouseButtonEvent(this.x + click.x(), this.y + click.y(), click.buttonInfo()))
                 | super.onMouseUp(click);
     }
 
@@ -168,19 +171,19 @@ public class VanillaWidgetComponent extends BaseComponent {
     }
 
     @Override
-    public boolean onMouseDrag(Click click, double deltaX, double deltaY) {
-        return this.widget.mouseDragged(new Click(this.x + click.x(), this.y + click.y(), click.buttonInfo()), deltaX, deltaY)
+    public boolean onMouseDrag(MouseButtonEvent click, double deltaX, double deltaY) {
+        return this.widget.mouseDragged(new MouseButtonEvent(this.x + click.x(), this.y + click.y(), click.buttonInfo()), deltaX, deltaY)
                 | super.onMouseDrag(click, deltaX, deltaY);
     }
 
     @Override
-    public boolean onCharTyped(CharInput input) {
+    public boolean onCharTyped(CharacterEvent input) {
         return this.widget.charTyped(input)
                 | super.onCharTyped(input);
     }
 
     @Override
-    public boolean onKeyPress(KeyInput input) {
+    public boolean onKeyPress(KeyEvent input) {
         return this.widget.keyPressed(input)
                 | super.onKeyPress(input);
     }

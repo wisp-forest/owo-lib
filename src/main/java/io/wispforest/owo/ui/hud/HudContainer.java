@@ -1,9 +1,9 @@
 package io.wispforest.owo.ui.hud;
 
 import io.wispforest.owo.ui.container.FlowLayout;
-import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.Positioning;
 import io.wispforest.owo.ui.core.Sizing;
+import io.wispforest.owo.ui.core.UIComponent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
@@ -19,7 +19,7 @@ public class HudContainer extends FlowLayout {
     }
 
     @Override
-    protected void mountChild(@Nullable Component child, Consumer<Component> layoutFunc) {
+    protected void mountChild(@Nullable UIComponent child, Consumer<UIComponent> layoutFunc) {
         if (child == null) return;
 
         if (child.positioning().get().type == Positioning.Type.LAYOUT) {

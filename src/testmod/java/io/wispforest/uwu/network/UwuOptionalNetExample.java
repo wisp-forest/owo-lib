@@ -7,13 +7,13 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
 
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.literal;
 
 public class UwuOptionalNetExample {
     public static final boolean SERVER_CHANNEL_IN_CLIENT = false;
@@ -21,16 +21,16 @@ public class UwuOptionalNetExample {
 
     public static void init() {
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER || SERVER_CHANNEL_IN_CLIENT) {
-            var serverChannel = OwoNetChannel.createOptional(Identifier.of("uwu", "optional_server"));
+            var serverChannel = OwoNetChannel.createOptional(Identifier.fromNamespaceAndPath("uwu", "optional_server"));
 
             serverChannel.registerClientbound(StringPacket.class, (message, access) -> {
-                access.player().sendMessage(Text.of(message.value()), false);
+                access.player().displayClientMessage(Component.nullToEmpty(message.value()), false);
             });
 
             CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> {
                 dispatcher.register(literal("test_optional_channels")
                         .executes(context -> {
-                            ServerPlayerEntity player = context.getSource().getPlayer();
+                            ServerPlayer player = context.getSource().getPlayer();
 
                             if (serverChannel.canSendToPlayer(player))
                                 serverChannel.serverHandle(player).send(new StringPacket("Based™"));
@@ -40,7 +40,7 @@ public class UwuOptionalNetExample {
             });
 
             if (CLIENT_CHANNEL_IN_SERVER) {
-                var clientChannel = OwoNetChannel.createOptional(Identifier.of("uwu", "optional_client"));
+                var clientChannel = OwoNetChannel.createOptional(Identifier.fromNamespaceAndPath("uwu", "optional_client"));
 
                 clientChannel.registerServerbound(KeycodePacket.class, (message, access) -> {
                     System.out.println(message.key());
@@ -51,10 +51,10 @@ public class UwuOptionalNetExample {
 
     @Environment(EnvType.CLIENT)
     public static final class Client {
-        public static final KeyBinding NETWORK_TEST = new KeyBinding("key.uwu.network_opt_test", GLFW.GLFW_KEY_M, KeyBinding.Category.MISC);
+        public static final KeyMapping NETWORK_TEST = new KeyMapping("key.uwu.network_opt_test", GLFW.GLFW_KEY_M, KeyMapping.Category.MISC);
 
         public static void init() {
-            var clientChannel = OwoNetChannel.createOptional(Identifier.of("uwu", "optional_client"));
+            var clientChannel = OwoNetChannel.createOptional(Identifier.fromNamespaceAndPath("uwu", "optional_client"));
 
             clientChannel.registerServerbound(KeycodePacket.class, (message, access) -> {
                 System.out.println(message.key());
@@ -62,11 +62,11 @@ public class UwuOptionalNetExample {
 
             KeyBindingHelper.registerKeyBinding(NETWORK_TEST);
             ClientTickEvents.END_CLIENT_TICK.register(client -> {
-                while (NETWORK_TEST.wasPressed()) {
+                while (NETWORK_TEST.consumeClick()) {
                     if (clientChannel.canSendToServer()) {
-                        clientChannel.clientHandle().send(new KeycodePacket(KeyBindingHelper.getBoundKeyOf(NETWORK_TEST).getCode()));
+                        clientChannel.clientHandle().send(new KeycodePacket(KeyBindingHelper.getBoundKeyOf(NETWORK_TEST).getValue()));
                     } else {
-                        client.player.sendMessage(Text.of("channel unavailable"), false);
+                        client.player.displayClientMessage(Component.nullToEmpty("channel unavailable"), false);
                     }
                 }
             });

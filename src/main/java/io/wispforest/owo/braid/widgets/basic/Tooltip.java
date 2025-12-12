@@ -5,9 +5,9 @@ import io.wispforest.owo.braid.framework.instance.SingleChildWidgetInstance;
 import io.wispforest.owo.braid.framework.instance.TooltipProvider;
 import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import net.minecraft.client.gui.tooltip.OrderedTextTooltipComponent;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTextTooltip;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,23 +16,23 @@ import java.util.List;
 
 public class Tooltip extends SingleChildInstanceWidget {
 
-    public final @Nullable List<TooltipComponent> tooltip;
-    public final Text tooltipText;
+    public final @Nullable List<ClientTooltipComponent> tooltip;
+    public final Component tooltipText;
 
-    public Tooltip(@NotNull List<TooltipComponent> tooltip, Widget child) {
+    public Tooltip(@NotNull List<ClientTooltipComponent> tooltip, Widget child) {
         super(child);
         this.tooltip = tooltip;
         this.tooltipText = null;
     }
 
-    public Tooltip(Collection<Text> tooltip, Widget child) {
+    public Tooltip(Collection<Component> tooltip, Widget child) {
         this(
-            tooltip.stream().map(Text::asOrderedText).<TooltipComponent>map(OrderedTextTooltipComponent::new).toList(),
+            tooltip.stream().map(Component::getVisualOrderText).<ClientTooltipComponent>map(ClientTextTooltip::new).toList(),
             child
         );
     }
 
-    public Tooltip(Text tooltip, Widget child) {
+    public Tooltip(Component tooltip, Widget child) {
         super(child);
         this.tooltip = null;
         this.tooltipText = tooltip;
@@ -44,7 +44,7 @@ public class Tooltip extends SingleChildInstanceWidget {
     }
 
     public static class Instance extends SingleChildWidgetInstance.ShrinkWrap<Tooltip> implements TooltipProvider {
-        private @Nullable List<TooltipComponent> tooltip;
+        private @Nullable List<ClientTooltipComponent> tooltip;
 
         public Instance(Tooltip widget) {
             super(widget);
@@ -64,16 +64,16 @@ public class Tooltip extends SingleChildInstanceWidget {
 
         private void setup() {
             this.tooltip = widget.tooltipText != null
-                ? this.host().client().textRenderer
-                .wrapLines(widget.tooltipText, Integer.MAX_VALUE)
+                ? this.host().client().font
+                .split(widget.tooltipText, Integer.MAX_VALUE)
                 .stream()
-                .<TooltipComponent>map(OrderedTextTooltipComponent::new)
+                .<ClientTooltipComponent>map(ClientTextTooltip::new)
                 .toList()
                 : widget.tooltip;
         }
 
         @Override
-        public @Nullable List<TooltipComponent> getTooltipComponentsAt(double x, double y) {
+        public @Nullable List<ClientTooltipComponent> getTooltipComponentsAt(double x, double y) {
             return tooltip;
         }
     }

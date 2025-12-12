@@ -1,30 +1,30 @@
 package io.wispforest.owo.braid.widgets;
 
-import io.wispforest.owo.braid.core.BraidDrawContext;
+import io.wispforest.owo.braid.core.BraidGraphics;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.Size;
 import io.wispforest.owo.braid.framework.instance.LeafWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.LeafInstanceWidget;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.util.SpriteIdentifier;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.Material;
+import net.minecraft.resources.Identifier;
 
 import java.util.OptionalDouble;
 
 public class SpriteWidget extends LeafInstanceWidget {
 
-    public static final Identifier GUI_ATLAS_ID = Identifier.of("textures/atlas/gui.png");
+    public static final Identifier GUI_ATLAS_ID = Identifier.parse("textures/atlas/gui.png");
 
-    public final SpriteIdentifier spriteIdentifier;
+    public final Material spriteIdentifier;
 
-    public SpriteWidget(SpriteIdentifier spriteIdentifier) {
+    public SpriteWidget(Material spriteIdentifier) {
         this.spriteIdentifier = spriteIdentifier;
     }
 
     public SpriteWidget(Identifier spriteIdentifier) {
-        this.spriteIdentifier = new SpriteIdentifier(GUI_ATLAS_ID, spriteIdentifier);
+        this.spriteIdentifier = new Material(GUI_ATLAS_ID, spriteIdentifier);
     }
 
     @Override
@@ -34,7 +34,7 @@ public class SpriteWidget extends LeafInstanceWidget {
 
     public static class Instance extends LeafWidgetInstance<SpriteWidget> {
 
-        protected Sprite sprite;
+        protected TextureAtlasSprite sprite;
 
         public Instance(SpriteWidget widget) {
             super(widget);
@@ -48,8 +48,8 @@ public class SpriteWidget extends LeafInstanceWidget {
             this.markNeedsLayout();
         }
 
-        protected Sprite findSprite() {
-            return this.sprite = MinecraftClient.getInstance().getAtlasManager().getSprite(this.widget.spriteIdentifier);
+        protected TextureAtlasSprite findSprite() {
+            return this.sprite = Minecraft.getInstance().getAtlasManager().get(this.widget.spriteIdentifier);
         }
 
         @Override
@@ -57,8 +57,8 @@ public class SpriteWidget extends LeafInstanceWidget {
             this.sprite = this.findSprite();
 
             var size = Size.of(
-                this.sprite.getContents().getWidth(),
-                this.sprite.getContents().getHeight()
+                this.sprite.contents().width(),
+                this.sprite.contents().height()
             ).constrained(constraints);
 
             this.transform.setSize(size);
@@ -66,12 +66,12 @@ public class SpriteWidget extends LeafInstanceWidget {
 
         @Override
         protected double measureIntrinsicWidth(double height) {
-            return this.findSprite().getContents().getWidth();
+            return this.findSprite().contents().width();
         }
 
         @Override
         protected double measureIntrinsicHeight(double width) {
-            return this.findSprite().getContents().getHeight();
+            return this.findSprite().contents().height();
         }
 
         @Override
@@ -80,8 +80,8 @@ public class SpriteWidget extends LeafInstanceWidget {
         }
 
         @Override
-        public void draw(BraidDrawContext ctx) {
-            ctx.drawSpriteStretched(
+        public void draw(BraidGraphics graphics) {
+            graphics.blitSprite(
                 RenderPipelines.GUI_TEXTURED,
                 this.sprite,
                 0,

@@ -8,13 +8,13 @@ import io.wispforest.owo.config.ui.component.OptionValueProvider;
 import io.wispforest.owo.ui.component.BoxComponent;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.ColorPickerComponent;
-import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.component.UIComponents;
+import io.wispforest.owo.ui.container.UIContainers;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.util.NumberReflection;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 
 import java.util.List;
 import java.util.Map;
@@ -59,7 +59,7 @@ public interface OptionComponentFactory<T> {
         return OptionComponents.createTextBox(model, option, configTextBox -> {
             configTextBox.inputPredicate(s -> s.matches("[a-z0-9_.:\\-]*"));
             configTextBox.applyPredicate(s -> Identifier.tryParse(s) != null);
-            configTextBox.valueParser(Identifier::of);
+            configTextBox.valueParser(Identifier::parse);
         });
     };
 
@@ -81,14 +81,14 @@ public interface OptionComponentFactory<T> {
                     ? (Color) result.optionProvider.parsedValue()
                     : Color.BLACK;
 
-            var box = Components.box(Sizing.fixed(15), Sizing.fixed(15)).color(valueGetter.get()).fill(true);
+            var box = UIComponents.box(Sizing.fixed(15), Sizing.fixed(15)).color(valueGetter.get()).fill(true);
             box.margins(Insets.right(5)).cursorStyle(CursorStyle.HAND);
             controls.child(0, box);
 
             result.optionProvider.onChanged().subscribe(value -> box.color(valueGetter.get()));
 
             box.mouseDown().subscribe((click, doubled) -> {
-                ((FlowLayout) box.root()).child(Containers.overlay(
+                ((FlowLayout) box.root()).child(UIContainers.overlay(
                         model.expandTemplate(
                                 FlowLayout.class,
                                 "color-picker-panel",
@@ -139,5 +139,5 @@ public interface OptionComponentFactory<T> {
      */
     Result<?, ?> make(UIModel model, Option<T> option);
 
-    record Result<B extends Component, P extends OptionValueProvider>(B baseComponent, P optionProvider) {}
+    record Result<B extends UIComponent, P extends OptionValueProvider>(B baseComponent, P optionProvider) {}
 }

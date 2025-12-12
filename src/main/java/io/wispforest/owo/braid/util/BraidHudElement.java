@@ -7,9 +7,9 @@ import io.wispforest.owo.braid.core.Surface;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.RenderTickCounter;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import org.jetbrains.annotations.Nullable;
 
 public class BraidHudElement implements HudElement {
@@ -34,7 +34,7 @@ public class BraidHudElement implements HudElement {
     }
 
     @Override
-    public void render(DrawContext context, RenderTickCounter tickCounter) {
+    public void render(GuiGraphics graphics, DeltaTracker deltaTracker) {
         if (this.app == null) {
             if (!Owo.DEBUG) {
                 return;
@@ -43,15 +43,15 @@ public class BraidHudElement implements HudElement {
             throw new IllegalStateException("tried to render a BraidHudElement before it was initialized");
         }
 
-        this.app.processEvents(tickCounter.getDynamicDeltaTicks());
-        this.app.draw(context);
+        this.app.processEvents(deltaTracker.getGameTimeDeltaTicks());
+        this.app.draw(graphics);
     }
 
     protected void setupAppState() {
         this.app = new AppState(
             null,
             AppState.formatName("BraidHudElement", widget),
-            MinecraftClient.getInstance(),
+            Minecraft.getInstance(),
             new Surface.Default(),
             new EventBinding.Headless(),
             widget

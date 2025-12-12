@@ -6,21 +6,21 @@ import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
 public class MessageButton extends StatelessWidget {
 
-    public final Text text;
+    public final Component text;
     public final @Nullable Runnable onClick;
 
-    public MessageButton(Text text, @Nullable Runnable onClick) {
+    public MessageButton(Component text, @Nullable Runnable onClick) {
         this.text = text;
         this.onClick = onClick;
     }
 
-    public MessageButton(Text text, boolean active, Runnable onClick) {
+    public MessageButton(Component text, boolean active, Runnable onClick) {
         this(text, active ? onClick : null);
     }
 
@@ -32,7 +32,7 @@ public class MessageButton extends StatelessWidget {
             new Label(
                 this.onClick != null
                     ? LabelStyle.SHADOW
-                    : new LabelStyle(null, Color.formatting(Formatting.GRAY), null, false),
+                    : new LabelStyle(null, Color.formatting(ChatFormatting.GRAY), null, false),
                 true,
                 this.text
             )

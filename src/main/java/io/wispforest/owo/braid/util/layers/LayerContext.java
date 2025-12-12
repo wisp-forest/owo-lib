@@ -7,15 +7,14 @@ import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.eventstream.BraidEventSource;
 import io.wispforest.owo.braid.widgets.eventstream.StreamListenerState;
-import io.wispforest.owo.mixin.ui.layers.HandledScreenAccessor;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.LayoutWidget;
+import io.wispforest.owo.mixin.ui.layers.AbstractContainerScreenAccessor;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.layouts.Layout;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.util.Unit;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
-import org.joml.Vector2dc;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,13 +64,15 @@ public class LayerContext extends StatefulWidget {
         return layerContext;
     }
 
-    public static ClickableWidget findWidget(BuildContext context, Predicate<ClickableWidget> predicate) {
+    public static AbstractWidget findWidget(BuildContext context, Predicate<AbstractWidget> predicate) {
         var layerContext = of(context);
 
-        var widgets = new ArrayList<ClickableWidget>();
-        for (var element : layerContext.contextScreen.children()) collectChildren(element, widgets);
+        var widgets = new ArrayList<AbstractWidget>();
+        for (var element : layerContext.contextScreen.children()) {
+            collectChildren(element, widgets);
+        }
 
-        ClickableWidget widget = null;
+        AbstractWidget widget = null;
         for (var candidate : widgets) {
             if (!predicate.test(candidate)) continue;
             widget = candidate;
@@ -85,20 +86,20 @@ public class LayerContext extends StatefulWidget {
         return of(context).contextScreen;
     }
 
-    public static @Nullable Vector2d handledScreenRootOf(BuildContext context) {
+    public static @Nullable Vector2d containerScreenRootOf(BuildContext context) {
         var screen = screenOf(context);
-        if (!(screen instanceof HandledScreenAccessor handled)) return null;
+        if (!(screen instanceof AbstractContainerScreenAccessor containerScreen)) return null;
 
         return new Vector2d(
-            handled.owo$getRootX(),
-            handled.owo$getRootY()
+            containerScreen.owo$getRootX(),
+            containerScreen.owo$getRootY()
         );
     }
 
-    private static void collectChildren(Element element, List<ClickableWidget> children) {
-        if (element instanceof ClickableWidget widget) children.add(widget);
-        if (element instanceof LayoutWidget layout) {
-            layout.forEachChild(child -> collectChildren(child, children));
+    private static void collectChildren(GuiEventListener element, List<AbstractWidget> children) {
+        if (element instanceof AbstractWidget widget) children.add(widget);
+        if (element instanceof Layout layout) {
+            layout.visitWidgets(child -> collectChildren(child, children));
         }
     }
 }

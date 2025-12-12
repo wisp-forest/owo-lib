@@ -1,7 +1,7 @@
 package io.wispforest.owo.braid.core;
 
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.ChatFormatting;
+import net.minecraft.util.Mth;
 
 public class Color {
 
@@ -54,24 +54,24 @@ public class Color {
 
     public static Color hsv(double hue, double saturation, double value, double alpha) {
         // we call .5e-7f the magic "do not turn a hue value of 1f into yellow" constant
-        return new Color((int) (alpha * 255) << 24 | MathHelper.hsvToRgb((float) (hue - .5e-7f), (float) saturation, (float) value));
+        return new Color((int) (alpha * 255) << 24 | Mth.hsvToRgb((float) (hue - .5e-7f), (float) saturation, (float) value));
     }
 
     public static Color hsv(double hue, double saturation, double value) {
         return hsv(hue, saturation, value, 1);
     }
 
-    public static Color formatting(Formatting formatting) {
-        var rgb = formatting.getColorValue();
+    public static Color formatting(ChatFormatting formatting) {
+        var rgb = formatting.getColor();
         return rgb(rgb != null ? rgb : 0);
     }
 
     public static Color mix(double t, Color a, Color b) {
         return Color.values(
-            MathHelper.lerp(t, a.r, b.r),
-            MathHelper.lerp(t, a.g, b.g),
-            MathHelper.lerp(t, a.b, b.b),
-            MathHelper.lerp(t, a.a, b.a)
+            Mth.lerp(t, a.r, b.r),
+            Mth.lerp(t, a.g, b.g),
+            Mth.lerp(t, a.b, b.b),
+            Mth.lerp(t, a.a, b.a)
         );
     }
 

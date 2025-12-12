@@ -1,6 +1,6 @@
 package io.wispforest.owo.util;
 
-import net.minecraft.block.Block;
+import net.minecraft.world.level.block.Block;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -1,7 +1,7 @@
 package io.wispforest.owo.braid.widgets.slider.range;
 
 import io.wispforest.owo.braid.framework.widget.Widget;
-import net.minecraft.sound.SoundEvent;
+import net.minecraft.sounds.SoundEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;

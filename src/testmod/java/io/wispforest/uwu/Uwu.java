@@ -44,38 +44,38 @@ import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.client.Minecraft;
 import net.minecraft.item.*;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.particle.DragonBreathParticleEffect;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.resource.featuretoggle.FeatureFlags;
-import net.minecraft.screen.ScreenHandlerType;
-import net.minecraft.text.Text;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.core.particles.PowerParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.resources.Identifier;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import org.slf4j.Logger;
 
 import java.util.*;
 import java.util.function.Consumer;
 
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 
 public class Uwu implements ModInitializer {
 
@@ -83,21 +83,21 @@ public class Uwu implements ModInitializer {
 
     public static final boolean WE_TESTEN_HANDSHAKE = false;
 
-    public static final TagKey<Item> TAB_2_CONTENT = TagKey.of(RegistryKeys.ITEM, Identifier.of("uwu", "tab_2_content"));
-    public static final Identifier GROUP_TEXTURE = Identifier.of("uwu", "textures/gui/group.png");
-    public static final Identifier OWO_ICON_TEXTURE = Identifier.of("uwu", "textures/gui/icon.png");
-    public static final Identifier ANIMATED_BUTTON_TEXTURE = Identifier.of("uwu", "textures/gui/animated_icon_test.png");
+    public static final TagKey<Item> TAB_2_CONTENT = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("uwu", "tab_2_content"));
+    public static final Identifier GROUP_TEXTURE = Identifier.fromNamespaceAndPath("uwu", "textures/gui/group.png");
+    public static final Identifier OWO_ICON_TEXTURE = Identifier.fromNamespaceAndPath("uwu", "textures/gui/icon.png");
+    public static final Identifier ANIMATED_BUTTON_TEXTURE = Identifier.fromNamespaceAndPath("uwu", "textures/gui/animated_icon_test.png");
 
-    public static final ScreenHandlerType<EpicScreenHandler> EPIC_SCREEN_HANDLER_TYPE = Registry.register(
-        Registries.SCREEN_HANDLER,
-        Identifier.of("uwu", "epic_screen_handler"),
-        new ScreenHandlerType<>(EpicScreenHandler::new, FeatureFlags.VANILLA_FEATURES)
+    public static final MenuType<EpicMenu> EPIC_SCREEN_HANDLER_TYPE = Registry.register(
+        BuiltInRegistries.MENU,
+        Identifier.fromNamespaceAndPath("uwu", "epic_screen_handler"),
+        new MenuType<>(EpicMenu::new, FeatureFlags.VANILLA_SET)
     );
 
-    public static final Block BRAID_DISPLAY_BLOCK = new BraidDisplayBlock(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK).registryKey(RegistryKey.of(RegistryKeys.BLOCK, Identifier.of("uwu", "braid_display"))));
+    public static final Block BRAID_DISPLAY_BLOCK = new BraidDisplayBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK).setId(ResourceKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("uwu", "braid_display"))));
     public static final BlockEntityType<BraidDisplayBlockEntity> BRAID_DISPLAY_ENTITY = FabricBlockEntityTypeBuilder.create(BraidDisplayBlockEntity::new, BRAID_DISPLAY_BLOCK).build();
 
-    public static final OwoItemGroup FOUR_TAB_GROUP = OwoItemGroup.builder(Identifier.of("uwu", "four_tab_group"), () -> Icon.of(Items.AXOLOTL_BUCKET))
+    public static final OwoItemGroup FOUR_TAB_GROUP = OwoItemGroup.builder(Identifier.fromNamespaceAndPath("uwu", "four_tab_group"), () -> Icon.of(Items.AXOLOTL_BUCKET))
         .disableDynamicTitle()
         .buttonStackHeight(1)
         .initializer(group -> {
@@ -110,61 +110,61 @@ public class Uwu implements ModInitializer {
         })
         .build();
 
-    public static final OwoItemGroup SIX_TAB_GROUP = OwoItemGroup.builder(Identifier.of("uwu", "six_tab_group"), () -> Icon.of(Items.POWDER_SNOW_BUCKET))
+    public static final OwoItemGroup SIX_TAB_GROUP = OwoItemGroup.builder(Identifier.fromNamespaceAndPath("uwu", "six_tab_group"), () -> Icon.of(Items.POWDER_SNOW_BUCKET))
         .tabStackHeight(3)
         .backgroundTexture(GROUP_TEXTURE)
-        .scrollerTextures(new OwoItemGroup.ScrollerTextures(Identifier.of("uwu", "scroller"), Identifier.of("uwu", "scroller_disabled")))
+        .scrollerTextures(new OwoItemGroup.ScrollerTextures(Identifier.fromNamespaceAndPath("uwu", "scroller"), Identifier.fromNamespaceAndPath("uwu", "scroller_disabled")))
         .tabTextures(new OwoItemGroup.TabTextures(
-            Identifier.of("uwu", "top_selected"),
-            Identifier.of("uwu", "top_selected_first_column"),
-            Identifier.of("uwu", "top_unselected"),
-            Identifier.of("uwu", "bottom_selected"),
-            Identifier.of("uwu", "bottom_selected_first_column"),
-            Identifier.of("uwu", "bottom_unselected")))
+            Identifier.fromNamespaceAndPath("uwu", "top_selected"),
+            Identifier.fromNamespaceAndPath("uwu", "top_selected_first_column"),
+            Identifier.fromNamespaceAndPath("uwu", "top_unselected"),
+            Identifier.fromNamespaceAndPath("uwu", "bottom_selected"),
+            Identifier.fromNamespaceAndPath("uwu", "bottom_selected_first_column"),
+            Identifier.fromNamespaceAndPath("uwu", "bottom_unselected")))
         .initializer(group -> {
             group.addTab(Icon.of(Items.DIAMOND), "tab_1", null, true);
             group.addTab(Icon.of(Items.EMERALD), "tab_2", null, false);
             group.addTab(Icon.of(Items.AMETHYST_SHARD), "tab_3", null, false);
             group.addTab(Icon.of(Items.GOLD_INGOT), "tab_4", null, false);
             group.addCustomTab(Icon.of(Items.IRON_INGOT), "tab_5", (context, entries) -> {
-                entries.add(UwuItems.SCREEN_SHARD);
-                entries.add(UwuItems.BRAID);
-                entries.add(BRAID_DISPLAY_BLOCK);
+                entries.accept(UwuItems.SCREEN_SHARD);
+                entries.accept(UwuItems.BRAID);
+                entries.accept(BRAID_DISPLAY_BLOCK);
             }, false);
             group.addTab(Icon.of(Items.QUARTZ), "tab_6", null, false);
 
             group.addButton(new ItemGroupButton(group, Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16), Owo.MOD_ID, () -> {
-                MinecraftClient.getInstance().player.sendMessage(Text.of("oωo button pressed!"), false);
+                Minecraft.getInstance().player.displayClientMessage(Component.nullToEmpty("oωo button pressed!"), false);
             }));
         })
         .build();
 
-    public static final OwoItemGroup SINGLE_TAB_GROUP = OwoItemGroup.builder(Identifier.of("uwu", "single_tab_group"), () -> Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16))
+    public static final OwoItemGroup SINGLE_TAB_GROUP = OwoItemGroup.builder(Identifier.fromNamespaceAndPath("uwu", "single_tab_group"), () -> Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16))
         .displaySingleTab()
         .initializer(group -> group.addTab(Icon.of(Items.SPONGE), "tab_1", null, true))
         .build();
 
-    public static final ItemGroup VANILLA_GROUP = Registry.register(Registries.ITEM_GROUP, Identifier.of("uwu", "vanilla_group"), FabricItemGroup.builder()
-        .displayName(Text.literal("who did this"))
-        .icon(Items.ACACIA_BOAT::getDefaultStack)
-        .entries((context, entries) -> entries.add(Items.MANGROVE_CHEST_BOAT))
+    public static final CreativeModeTab VANILLA_GROUP = Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, Identifier.fromNamespaceAndPath("uwu", "vanilla_group"), FabricItemGroup.builder()
+        .title(Component.literal("who did this"))
+        .icon(Items.ACACIA_BOAT::getDefaultInstance)
+        .displayItems((context, entries) -> entries.accept(Items.MANGROVE_CHEST_BOAT))
         .build());
 
-    public static final OwoNetChannel CHANNEL = OwoNetChannel.create(Identifier.of("uwu", "uwu"));
+    public static final OwoNetChannel CHANNEL = OwoNetChannel.create(Identifier.fromNamespaceAndPath("uwu", "uwu"));
 
     public static final TestMessage MESSAGE = new TestMessage("hahayes", 69, Long.MAX_VALUE, ItemStack.EMPTY, Short.MAX_VALUE, Byte.MAX_VALUE, new BlockPos(69, 420, 489),
-        Float.NEGATIVE_INFINITY, Double.NaN, false, Identifier.of("uowou", "hahayes"), Collections.emptyMap(),
+        Float.NEGATIVE_INFINITY, Double.NaN, false, Identifier.fromNamespaceAndPath("uowou", "hahayes"), Collections.emptyMap(),
         new int[]{10, 20}, new String[]{"trollface"}, new short[]{1, 2, 3}, new long[]{Long.MAX_VALUE, 1, 3}, new byte[]{1, 2, 3, 4},
         Optional.of("NullableString"), Optional.empty(),
         ImmutableList.of(new BlockPos(9786, 42, 9234)), new SealedSubclassOne("basede", 10), new SealedSubclassTwo(10, null));
 
-    public static final ParticleSystemController PARTICLE_CONTROLLER = new ParticleSystemController(Identifier.of("uwu", "particles"));
+    public static final ParticleSystemController PARTICLE_CONTROLLER = new ParticleSystemController(Identifier.fromNamespaceAndPath("uwu", "particles"));
     public static final ParticleSystem<Void> CUBE = PARTICLE_CONTROLLER.registerDeferred(Void.class);
     public static final ParticleSystem<Void> BREAK_BLOCK_PARTICLES = PARTICLE_CONTROLLER.register(Void.class, (world, pos, data) -> {
         ClientParticles.persist();
 
         ClientParticles.setParticleCount(30);
-        ClientParticles.spawnLine(DragonBreathParticleEffect.of(ParticleTypes.DRAGON_BREATH, 1), world, pos.add(.5, .5, .5), pos.add(.5, 2.5, .5), .015f);
+        ClientParticles.spawnLine(PowerParticleOption.create(ParticleTypes.DRAGON_BREATH, 1), world, pos.add(.5, .5, .5), pos.add(.5, 2.5, .5), .015f);
 
         ClientParticles.randomizeVelocityOnAxis(.1, Direction.Axis.Z);
         ClientParticles.spawn(ParticleTypes.CLOUD, world, pos.add(.5, 2.5, .5), 0);
@@ -202,35 +202,35 @@ public class Uwu implements ModInitializer {
 
         UwuItems.init();
 
-        TagInjector.inject(Registries.BLOCK, BlockTags.BASE_STONE_OVERWORLD.id(), Blocks.GLASS);
-        TagInjector.injectTagReference(Registries.ITEM, ItemTags.COALS.id(), ItemTags.FOX_FOOD.id());
+        TagInjector.inject(BuiltInRegistries.BLOCK, BlockTags.BASE_STONE_OVERWORLD.location(), Blocks.GLASS);
+        TagInjector.injectTagReference(BuiltInRegistries.ITEM, ItemTags.COALS.location(), ItemTags.FOX_FOOD.location());
 
         FOUR_TAB_GROUP.initialize();
         SIX_TAB_GROUP.initialize();
         SINGLE_TAB_GROUP.initialize();
 
         CHANNEL.registerClientbound(TestMessage.class, (message, access) -> {
-            access.player().sendMessage(Text.of(message.string), false);
+            access.player().displayClientMessage(Component.nullToEmpty(message.string), false);
         });
 
         CHANNEL.registerClientboundDeferred(OtherTestMessage.class);
 
         CHANNEL.registerServerbound(TestMessage.class, (message, access) -> {
-            access.player().sendMessage(Text.of(String.valueOf(message.bite)), false);
-            access.player().sendMessage(Text.of(String.valueOf(message)), false);
+            access.player().displayClientMessage(Component.nullToEmpty(String.valueOf(message.bite)), false);
+            access.player().displayClientMessage(Component.nullToEmpty(String.valueOf(message)), false);
         });
 
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER && WE_TESTEN_HANDSHAKE) {
-            OwoNetChannel.create(Identifier.of("uwu", "server_only_channel"));
-            new ParticleSystemController(Identifier.of("uwu", "server_only_particles"));
+            OwoNetChannel.create(Identifier.fromNamespaceAndPath("uwu", "server_only_channel"));
+            new ParticleSystemController(Identifier.fromNamespaceAndPath("uwu", "server_only_particles"));
         }
 
-        System.out.println(Registries.ITEM.getEntry(Items.ACACIA_BOAT));
-        System.out.println(Registries.ITEM.getEntry(Identifier.of("acacia_planks")));
+        System.out.println(BuiltInRegistries.ITEM.wrapAsHolder(Items.ACACIA_BOAT));
+        System.out.println(BuiltInRegistries.ITEM.get(Identifier.parse("acacia_planks")));
 
-        Registry.register(Registries.BLOCK, Identifier.of("uwu", "braid_display"), BRAID_DISPLAY_BLOCK);
-        Registry.register(Registries.ITEM, Identifier.of("uwu", "braid_display"), new BlockItem(BRAID_DISPLAY_BLOCK, new Item.Settings().registryKey(RegistryKey.of(RegistryKeys.ITEM, Identifier.of("uwu", "braid_display"))).useBlockPrefixedTranslationKey()));
-        Registry.register(Registries.BLOCK_ENTITY_TYPE, Identifier.of("uwu", "braid_display"), BRAID_DISPLAY_ENTITY);
+        Registry.register(BuiltInRegistries.BLOCK, Identifier.fromNamespaceAndPath("uwu", "braid_display"), BRAID_DISPLAY_BLOCK);
+        Registry.register(BuiltInRegistries.ITEM, Identifier.fromNamespaceAndPath("uwu", "braid_display"), new BlockItem(BRAID_DISPLAY_BLOCK, new Item.Properties().setId(ResourceKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("uwu", "braid_display"))).useBlockDescriptionPrefix()));
+        Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Identifier.fromNamespaceAndPath("uwu", "braid_display"), BRAID_DISPLAY_ENTITY);
 
 //        UwuShapedRecipe.init();
 
@@ -244,14 +244,14 @@ public class Uwu implements ModInitializer {
                             StringArgumentType.getString(context, "config")
                         ).get(new Option.Key(StringArgumentType.getString(context, "option")));
 
-                        context.getSource().sendFeedback(() -> Text.literal(String.valueOf(value)), false);
+                        context.getSource().sendSuccess(() -> Component.literal(String.valueOf(value)), false);
 
                         return 0;
                     }))));
 
             dispatcher.register(literal("kodeck_test")
                 .executes(context -> {
-                    var rand = context.getSource().getWorld().random;
+                    var rand = context.getSource().getLevel().random;
                     var source = context.getSource();
 
                     //--
@@ -306,7 +306,7 @@ public class Uwu implements ModInitializer {
 
                     if (source.getPlayer() == null) return 0;
 
-                    ItemStack handStack = source.getPlayer().getStackInHand(Hand.MAIN_HAND);
+                    ItemStack handStack = source.getPlayer().getItemInHand(InteractionHand.MAIN_HAND);
 
                     LOGGER.info(handStack.toString());
                     LOGGER.info(handStack.getComponents().toString().replace("\n", "\\n"));
@@ -316,7 +316,7 @@ public class Uwu implements ModInitializer {
                     JsonElement stackJsonData;
 
                     try {
-                        stackJsonData = MinecraftEndecs.ITEM_STACK.encodeFully(SerializationContext.attributes(RegistriesAttribute.of(context.getSource().getWorld().getRegistryManager())), GsonSerializer::of, handStack);
+                        stackJsonData = MinecraftEndecs.ITEM_STACK.encodeFully(SerializationContext.attributes(RegistriesAttribute.of(context.getSource().getLevel().registryAccess())), GsonSerializer::of, handStack);
                     } catch (Exception exception) {
                         LOGGER.info(exception.getMessage());
                         LOGGER.info((Arrays.toString(exception.getStackTrace())));
@@ -329,7 +329,7 @@ public class Uwu implements ModInitializer {
                     LOGGER.info("---");
 
                     try {
-                        handStack = MinecraftEndecs.ITEM_STACK.decodeFully(SerializationContext.attributes(RegistriesAttribute.of(context.getSource().getWorld().getRegistryManager())), GsonDeserializer::of, stackJsonData);
+                        handStack = MinecraftEndecs.ITEM_STACK.decodeFully(SerializationContext.attributes(RegistriesAttribute.of(context.getSource().getLevel().registryAccess())), GsonDeserializer::of, stackJsonData);
                     } catch (Exception exception) {
                         LOGGER.info(exception.getMessage());
                         LOGGER.info((Arrays.toString(exception.getStackTrace())));
@@ -402,7 +402,7 @@ public class Uwu implements ModInitializer {
                         LOGGER.info(String.valueOf(variable2));
                         LOGGER.info(String.valueOf(variable3));
 
-                        NbtCompound compound = new NbtCompound();
+                        CompoundTag compound = new CompoundTag();
 
                         compound.put(variable1Endec, variable1);
                         compound.put(variable2Endec, variable2);
@@ -428,19 +428,19 @@ public class Uwu implements ModInitializer {
 
                     //Vanilla
                     iterations("Vanilla", (buf) -> {
-                        ItemStack stack = source.getPlayer().getStackInHand(Hand.MAIN_HAND);
+                        ItemStack stack = source.getPlayer().getItemInHand(InteractionHand.MAIN_HAND);
 
-                        ItemStack.PACKET_CODEC.encode(buf, stack);
-                        var stackFromByte = ItemStack.PACKET_CODEC.decode(buf);
+                        ItemStack.STREAM_CODEC.encode(buf, stack);
+                        var stackFromByte = ItemStack.STREAM_CODEC.decode(buf);
                     });
 
                     //Codeck
                     try {
                         iterations("Endec", (buf) -> {
-                            ItemStack stack = source.getPlayer().getStackInHand(Hand.MAIN_HAND);
-                            buf.write(SerializationContext.attributes(RegistriesAttribute.of(context.getSource().getWorld().getRegistryManager())), MinecraftEndecs.ITEM_STACK, stack);
+                            ItemStack stack = source.getPlayer().getItemInHand(InteractionHand.MAIN_HAND);
+                            buf.write(SerializationContext.attributes(RegistriesAttribute.of(context.getSource().getLevel().registryAccess())), MinecraftEndecs.ITEM_STACK, stack);
 
-                            var stackFromByte = buf.read(SerializationContext.attributes(RegistriesAttribute.of(context.getSource().getWorld().getRegistryManager())), MinecraftEndecs.ITEM_STACK);
+                            var stackFromByte = buf.read(SerializationContext.attributes(RegistriesAttribute.of(context.getSource().getLevel().registryAccess())), MinecraftEndecs.ITEM_STACK);
                         });
                     } catch (Exception exception) {
                         LOGGER.info(exception.getMessage());
@@ -459,7 +459,7 @@ public class Uwu implements ModInitializer {
         UwuOptionalNetExample.init();
     }
 
-    private static void iterations(String label, Consumer<RegistryByteBuf> action) {
+    private static void iterations(String label, Consumer<RegistryFriendlyByteBuf> action) {
         int maxTrials = 3;
         int maxIterations = 50;
 
@@ -472,7 +472,7 @@ public class Uwu implements ModInitializer {
             durations.clear();
 
             for (int i = 0; i < maxIterations; i++) {
-                RegistryByteBuf buf = new RegistryByteBuf(Unpooled.buffer(), Owo.currentServer().getRegistryManager());
+                RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), Owo.currentServer().registryAccess());
 
                 long startTime = System.nanoTime();
 

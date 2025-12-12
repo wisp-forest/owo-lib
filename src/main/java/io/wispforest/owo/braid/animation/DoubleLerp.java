@@ -1,6 +1,6 @@
 package io.wispforest.owo.braid.animation;
 
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 
 public class DoubleLerp extends Lerp<Double> {
 
@@ -10,6 +10,6 @@ public class DoubleLerp extends Lerp<Double> {
 
     @Override
     protected Double at(double t) {
-        return MathHelper.lerp(t, this.start, this.end);
+        return Mth.lerp(t, this.start, this.end);
     }
 }

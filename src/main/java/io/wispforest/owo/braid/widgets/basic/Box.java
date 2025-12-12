@@ -1,6 +1,6 @@
 package io.wispforest.owo.braid.widgets.basic;
 
-import io.wispforest.owo.braid.core.BraidDrawContext;
+import io.wispforest.owo.braid.core.BraidGraphics;
 import io.wispforest.owo.braid.core.Color;
 import io.wispforest.owo.braid.framework.instance.OptionalChildWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.OptionalChildInstanceWidget;
@@ -42,14 +42,14 @@ public class Box extends OptionalChildInstanceWidget {
         }
 
         @Override
-        public void draw(BraidDrawContext ctx) {
+        public void draw(BraidGraphics graphics) {
             if (this.widget.outline) {
-                ctx.drawRectOutline(0, 0, (int) this.transform.width(), (int) this.transform.height(), this.widget.color.argb());
+                graphics.drawRectOutline(0, 0, (int) this.transform.width(), (int) this.transform.height(), this.widget.color.argb());
             } else {
-                ctx.fill(0, 0, (int) this.transform.width(), (int) this.transform.height(), this.widget.color.argb());
+                graphics.fill(0, 0, (int) this.transform.width(), (int) this.transform.height(), this.widget.color.argb());
             }
 
-            super.draw(ctx);
+            super.draw(graphics);
         }
     }
 }

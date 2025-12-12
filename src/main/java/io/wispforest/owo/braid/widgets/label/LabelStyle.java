@@ -2,7 +2,7 @@ package io.wispforest.owo.braid.widgets.label;
 
 import io.wispforest.owo.braid.core.Alignment;
 import io.wispforest.owo.braid.core.Color;
-import net.minecraft.text.Style;
+import net.minecraft.network.chat.Style;
 import org.jetbrains.annotations.Nullable;
 
 public record LabelStyle(@Nullable Alignment textAlignment, @Nullable Color baseColor, @Nullable Style textStyle, @Nullable Boolean shadow) {

@@ -1,7 +1,7 @@
 package io.wispforest.owo.ui.util;
 
-import io.wispforest.owo.ui.core.Component;
-import io.wispforest.owo.ui.core.ParentComponent;
+import io.wispforest.owo.ui.core.ParentUIComponent;
+import io.wispforest.owo.ui.core.UIComponent;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -10,33 +10,33 @@ import java.util.ArrayList;
 
 public class FocusHandler {
 
-    protected final ParentComponent root;
-    @Nullable protected Component focused = null;
-    @Nullable protected Component.FocusSource lastFocusSource = null;
+    protected final ParentUIComponent root;
+    @Nullable protected UIComponent focused = null;
+    @Nullable protected UIComponent.FocusSource lastFocusSource = null;
 
-    public FocusHandler(ParentComponent root) {
+    public FocusHandler(ParentUIComponent root) {
         this.root = root;
     }
 
     public void updateClickFocus(double mouseX, double mouseY) {
         var clicked = this.root.childAt((int) mouseX, (int) mouseY);
-        this.focus(clicked != null && clicked.canFocus(Component.FocusSource.MOUSE_CLICK) ? clicked : null, Component.FocusSource.MOUSE_CLICK);
+        this.focus(clicked != null && clicked.canFocus(UIComponent.FocusSource.MOUSE_CLICK) ? clicked : null, UIComponent.FocusSource.MOUSE_CLICK);
     }
 
     @Contract(pure = true)
-    public @Nullable Component focused() {
+    public @Nullable UIComponent focused() {
         return this.focused;
     }
 
-    public Component.FocusSource lastFocusSource() {
+    public UIComponent.FocusSource lastFocusSource() {
         return this.lastFocusSource;
     }
 
     public void cycle(boolean forwards) {
-        var allChildren = new ArrayList<Component>();
+        var allChildren = new ArrayList<UIComponent>();
         this.root.collectDescendants(allChildren);
 
-        allChildren.removeIf(component -> !component.canFocus(Component.FocusSource.KEYBOARD_CYCLE));
+        allChildren.removeIf(component -> !component.canFocus(UIComponent.FocusSource.KEYBOARD_CYCLE));
         if (allChildren.isEmpty()) return;
 
         int newIndex = this.focused == null
@@ -46,16 +46,16 @@ public class FocusHandler {
         if (newIndex >= allChildren.size()) newIndex -= allChildren.size();
         if (newIndex < 0) newIndex += allChildren.size();
 
-        this.focus(allChildren.get(newIndex), Component.FocusSource.KEYBOARD_CYCLE);
+        this.focus(allChildren.get(newIndex), UIComponent.FocusSource.KEYBOARD_CYCLE);
     }
 
     public void moveFocus(int keyCode) {
         if (this.focused == null) return;
 
-        var allChildren = new ArrayList<Component>();
+        var allChildren = new ArrayList<UIComponent>();
         this.root.collectDescendants(allChildren);
 
-        allChildren.removeIf(component -> !component.canFocus(Component.FocusSource.KEYBOARD_CYCLE));
+        allChildren.removeIf(component -> !component.canFocus(UIComponent.FocusSource.KEYBOARD_CYCLE));
         if (allChildren.isEmpty()) return;
 
         var closest = this.focused;
@@ -114,10 +114,10 @@ public class FocusHandler {
             }
         }
 
-        this.focus(closest, Component.FocusSource.KEYBOARD_CYCLE);
+        this.focus(closest, UIComponent.FocusSource.KEYBOARD_CYCLE);
     }
 
-    public void focus(@Nullable Component component, Component.FocusSource source) {
+    public void focus(@Nullable UIComponent component, UIComponent.FocusSource source) {
         if (this.focused != component) {
             if (this.focused != null) {
                 this.focused.onFocusLost();

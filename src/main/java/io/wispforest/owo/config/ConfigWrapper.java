@@ -23,7 +23,7 @@ import io.wispforest.owo.util.Observable;
 import io.wispforest.owo.util.ReflectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -37,7 +37,6 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 /**
@@ -106,7 +105,7 @@ public abstract class ConfigWrapper<C> {
             var modmenuAnnotation = clazz.getAnnotation(Modmenu.class);
             ConfigScreenProviders.register(
                     modmenuAnnotation.modId(),
-                    screen -> ConfigScreen.createWithCustomModel(Identifier.of(modmenuAnnotation.uiModelId()), this, screen)
+                    screen -> ConfigScreen.createWithCustomModel(Identifier.parse(modmenuAnnotation.uiModelId()), this, screen)
             );
         }
 

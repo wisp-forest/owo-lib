@@ -23,21 +23,21 @@ import io.wispforest.owo.braid.widgets.stack.StackBase;
 import io.wispforest.uwu.client.braid.TestSelector;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.passive.CowEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.tooltip.TooltipData;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Colors;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Rarity;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.cow.Cow;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.util.CommonColors;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.Rarity;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.Level;
 
 import java.util.List;
 import java.util.Optional;
@@ -47,18 +47,18 @@ public class UwuBraidItem extends Item {
     @Environment(EnvType.CLIENT)
     private static BraidDisplay display;
 
-    public UwuBraidItem(Settings settings) {
+    public UwuBraidItem(Properties settings) {
         super(settings.rarity(Rarity.EPIC));
     }
 
     @Override
     @Environment(EnvType.CLIENT)
-    public ActionResult use(World world, PlayerEntity user, Hand hand) {
-        if (world.isClient()) {
-            if (user.isSneaking()) {
+    public InteractionResult use(Level world, Player user, InteractionHand hand) {
+        if (world.isClientSide()) {
+            if (user.isShiftKeyDown()) {
                 if (display == null) {
                     display = new BraidDisplay(
-                        new DisplayQuad(Vec3d.ZERO, new Vec3d(5, 0, 0), new Vec3d(0, -3, 0)),
+                        new DisplayQuad(Vec3.ZERO, new Vec3(5, 0, 0), new Vec3(0, -3, 0)),
                         750,
                         450,
                         new DisplayApp()
@@ -67,30 +67,30 @@ public class UwuBraidItem extends Item {
                     BraidDisplayBinding.activate(display);
                 }
 
-                var right = new Vec3d(-5, 0, 0)
-                    .rotateX((float) Math.toRadians(-user.getPitch()))
-                    .rotateY((float) Math.toRadians(-user.getYaw()));
+                var right = new Vec3(-5, 0, 0)
+                    .xRot((float) Math.toRadians(-user.getXRot()))
+                    .yRot((float) Math.toRadians(-user.getYRot()));
 
-                var down = new Vec3d(0, -3, 0)
-                    .rotateX((float) Math.toRadians(-user.getPitch()))
-                    .rotateY((float) Math.toRadians(-user.getYaw()));
+                var down = new Vec3(0, -3, 0)
+                    .xRot((float) Math.toRadians(-user.getXRot()))
+                    .yRot((float) Math.toRadians(-user.getYRot()));
 
                 display.quad = new DisplayQuad(
-                    user.getEyePos()
-                        .add(user.getRotationVecClient().multiply(2.5))
-                        .subtract(right.multiply(.5))
-                        .subtract(down.multiply(.5)),
+                    user.getEyePosition()
+                        .add(user.getForward().scale(2.5))
+                        .subtract(right.scale(.5))
+                        .subtract(down.scale(.5)),
                     right, down
                 );
             } else {
                 openTestSelector();
             }
         }
-        return ActionResult.PASS;
+        return InteractionResult.PASS;
     }
 
     @Override
-    public Optional<TooltipData> getTooltipData(ItemStack stack) {
+    public Optional<TooltipComponent> getTooltipImage(ItemStack stack) {
         return Optional.of(new Tooltip());
     }
 
@@ -98,10 +98,10 @@ public class UwuBraidItem extends Item {
         var settings = new BraidScreen.Settings();
         settings.shouldPause = false;
 
-        MinecraftClient.getInstance().setScreen(new BraidScreen(settings, new TestSelector()));
+        Minecraft.getInstance().setScreen(new BraidScreen(settings, new TestSelector()));
     }
 
-    public record Tooltip() implements TooltipData {}
+    public record Tooltip() implements TooltipComponent {}
 
     public static class DisplayApp extends StatelessWidget {
         @Override
@@ -112,7 +112,7 @@ public class UwuBraidItem extends Item {
                     Insets.all(1),
                     new HoverableBuilder(
                         (hoverableContext, hovered) -> new Box(
-                            hovered ? Color.rgb(Colors.BLUE) : Color.WHITE,
+                            hovered ? Color.rgb(CommonColors.BLUE) : Color.WHITE,
                             true
                         )
                     )
@@ -139,7 +139,7 @@ public class UwuBraidItem extends Item {
                                 Panel.VANILLA_DARK,
                                 new Padding(
                                     Insets.all(10),
-                                    new Label(Text.translatable("text.uwu.braid").append(Text.literal(" in world real??")))
+                                    new Label(Component.translatable("text.uwu.braid").append(Component.literal(" in world real??")))
                                 )
                             ),
                             new IntrinsicHeight(
@@ -151,21 +151,21 @@ public class UwuBraidItem extends Item {
                                         new Sized(
                                             16,
                                             16,
-                                            new ItemStackWidget(UwuItems.BRAID.getDefaultStack())
+                                            new ItemStackWidget(UwuItems.BRAID.getDefaultInstance())
                                         )
                                     ),
                                     new Button(
-                                        () -> MinecraftClient.getInstance().player.dropCreativeStack(UwuItems.BRAID.getDefaultStack()),
+                                        () -> Minecraft.getInstance().player.handleCreativeModeItemDrop(UwuItems.BRAID.getDefaultInstance()),
                                         new Label(
                                             LabelStyle.SHADOW,
                                             true,
-                                            Text.translatable("text.uwu.braid").append(Text.literal(" button"))
+                                            Component.translatable("text.uwu.braid").append(Component.literal(" button"))
                                         )
                                     )
                                 )
                             ),
                             new MessageButton(
-                                Text.literal("test selector"),
+                                Component.literal("test selector"),
                                 () -> {
                                     Navigator.push(context, new TestSelectorRoute());
                                 }
@@ -177,8 +177,8 @@ public class UwuBraidItem extends Item {
                         new Padding(
                             Insets.all(4),
                             new MessageButton(
-                                Text.literal("x"),
-                                () -> MinecraftClient.getInstance().send(() -> {
+                                Component.literal("x"),
+                                () -> Minecraft.getInstance().schedule(() -> {
                                     BraidDisplayBinding.deactivate(display);
 
                                     display.app.dispose();
@@ -205,11 +205,11 @@ public class UwuBraidItem extends Item {
                     Alignment.BOTTOM,
                     new Row(
                         new MessageButton(
-                            Text.literal("back"),
+                            Component.literal("back"),
                             () -> Navigator.pop(context)
                         ),
                         new MessageButton(
-                            Text.literal("inspector"),
+                            Component.literal("inspector"),
                             () -> AppState.of(context).activateInspector()
                         )
                     )
@@ -230,7 +230,7 @@ public class UwuBraidItem extends Item {
 
             @Override
             public void init() {
-                this.cow = new CowEntity(EntityType.COW, MinecraftClient.getInstance().world);
+                this.cow = new net.minecraft.world.entity.animal.cow.Cow(EntityType.COW, Minecraft.getInstance().level);
             }
 
             @Override

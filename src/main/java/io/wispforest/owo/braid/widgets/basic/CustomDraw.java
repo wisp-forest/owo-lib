@@ -1,6 +1,6 @@
 package io.wispforest.owo.braid.widgets.basic;
 
-import io.wispforest.owo.braid.core.BraidDrawContext;
+import io.wispforest.owo.braid.core.BraidGraphics;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.framework.instance.LeafWidgetInstance;
 import io.wispforest.owo.braid.framework.instance.WidgetTransform;
@@ -23,7 +23,7 @@ public class CustomDraw extends LeafInstanceWidget {
 
     @FunctionalInterface
     public interface CustomDrawFunction {
-        void draw(BraidDrawContext ctx, WidgetTransform transform);
+        void draw(BraidGraphics graphics, WidgetTransform transform);
     }
 
     public static class Instance extends LeafWidgetInstance<CustomDraw> {
@@ -39,8 +39,8 @@ public class CustomDraw extends LeafInstanceWidget {
         }
 
         @Override
-        public void draw(BraidDrawContext ctx) {
-            this.widget.function.draw(ctx, this.transform);
+        public void draw(BraidGraphics graphics) {
+            this.widget.function.draw(graphics, this.transform);
         }
 
         @Override

@@ -6,7 +6,7 @@ import io.wispforest.owo.util.ViewerStack;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 public class ReiStackUtil {
     public static ViewerStack fromRei(EntryStack<?> stack) {

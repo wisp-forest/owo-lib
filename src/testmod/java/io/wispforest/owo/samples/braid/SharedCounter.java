@@ -15,7 +15,7 @@ import io.wispforest.owo.braid.widgets.flex.Row;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.sharedstate.ShareableState;
 import io.wispforest.owo.braid.widgets.sharedstate.SharedState;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
 public class SharedCounter extends StatelessWidget {
     @Override
@@ -70,7 +70,7 @@ public class SharedCounter extends StatelessWidget {
         @Override
         public Widget build(BuildContext context) {
             return new MessageButton(
-                this.countBy > 0 ? Text.literal("+" + this.countBy) : Text.literal(String.valueOf(this.countBy)),
+                this.countBy > 0 ? Component.literal("+" + this.countBy) : Component.literal(String.valueOf(this.countBy)),
                 () -> SharedState.set(context, CounterState.class, state -> state.count += this.countBy)
             );
         }

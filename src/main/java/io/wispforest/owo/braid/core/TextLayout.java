@@ -1,18 +1,18 @@
 package io.wispforest.owo.braid.core;
 
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.Font;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class TextLayout {
 
-    public static EditMetrics measure(TextRenderer textRenderer, String text, Style baseStyle, int maxWidth) {
+    public static EditMetrics measure(Font font, String text, Style baseStyle, int maxWidth) {
         var lines = new ArrayList<Line>();
 
-        textRenderer.getTextHandler().wrapLines(
+        font.getSplitter().splitLines(
             text,
             maxWidth,
             baseStyle,
@@ -35,11 +35,11 @@ public class TextLayout {
         var lineMetrics = new ArrayList<LineMetrics>();
 
         for (var line : lines) {
-            var lineWidth = textRenderer.getWidth(line.substring(text));
+            var lineWidth = font.width(line.substring(text));
             lineMetrics.add(new LineMetrics(line.beginIdx, line.endIdx, lineWidth));
 
             textWidth = Math.max(textWidth, lineWidth);
-            textHeight += textRenderer.fontHeight;
+            textHeight += font.lineHeight;
         }
 
         return new EditMetrics(textWidth, textHeight, lineMetrics);
@@ -54,8 +54,8 @@ public class TextLayout {
     public record EditMetrics(int width, int height, List<LineMetrics> lineMetrics) {}
 
     private record Line(Style style, int beginIdx, int endIdx) {
-        public Text substring(String fullContent) {
-            return Text.literal(fullContent.substring(this.beginIdx, this.endIdx)).setStyle(this.style);
+        public Component substring(String fullContent) {
+            return Component.literal(fullContent.substring(this.beginIdx, this.endIdx)).setStyle(this.style);
         }
     }
 }

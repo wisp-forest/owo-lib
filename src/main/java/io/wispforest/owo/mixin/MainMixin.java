@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(value = Main.class, priority = 0)
 public class MainMixin {
 
-    @SuppressWarnings({"MixinAnnotationTarget", "UnresolvedMixinReference"})
+    @SuppressWarnings({"MixinAnnotationTarget"})
     @Group(name = "serverFreezeHooks", min = 1, max = 1)
     @Inject(method = "main", at = @At(value = "INVOKE", remap = false,
             target = "Lnet/fabricmc/loader/impl/game/minecraft/Hooks;startServer(Ljava/io/File;Ljava/lang/Object;)V", shift = At.Shift.AFTER))
@@ -19,7 +19,7 @@ public class MainMixin {
         OwoFreezer.freeze();
     }
 
-    @SuppressWarnings({"MixinAnnotationTarget", "UnresolvedMixinReference"})
+    @SuppressWarnings({"MixinAnnotationTarget"})
     @Group(name = "serverFreezeHooks", min = 1, max = 1)
     @Inject(method = "main", at = @At(value = "INVOKE", remap = false,
             target = "Lorg/quiltmc/loader/impl/game/minecraft/Hooks;startServer(Ljava/io/File;Ljava/lang/Object;)V", shift = At.Shift.AFTER))

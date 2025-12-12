@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.core;
 
+import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTextureView;
@@ -8,16 +9,15 @@ import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.util.BraidGuiRenderer;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.SimpleFramebuffer;
-import net.minecraft.client.texture.AbstractTexture;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.resources.Identifier;
 
 import java.util.UUID;
 
 public class TextureSurface implements Surface {
 
-    private final SimpleFramebuffer framebuffer;
+    private final TextureTarget target;
     private final EventStream<ResizeCallback> resizeEvents = ResizeCallback.newStream();
 
     public final TextureSurfaceTexture registeredTexture;
@@ -28,34 +28,34 @@ public class TextureSurface implements Surface {
     public final BraidGuiRenderer guiRenderer;
 
     public TextureSurface(int width, int height) {
-        this.framebuffer = new SimpleFramebuffer("texture surface", width, height, true);
-        this.guiRenderer = new BraidGuiRenderer(MinecraftClient.getInstance());
+        this.target = new TextureTarget("texture surface", width, height, true);
+        this.guiRenderer = new BraidGuiRenderer(Minecraft.getInstance());
 
         this.registeredTexture = new TextureSurfaceTexture();
         this.registeredTextureId = Owo.id("texture_surface_" + UUID.randomUUID());
 
-        MinecraftClient.getInstance().getTextureManager().registerTexture(this.registeredTextureId, this.registeredTexture);
+        Minecraft.getInstance().getTextureManager().register(this.registeredTextureId, this.registeredTexture);
     }
 
     public void resize(int width, int height) {
-        this.framebuffer.resize(width, height);
+        this.target.resize(width, height);
         this.resizeEvents.sink().onResize(width, height);
 
         this.registeredTexture.sync();
     }
 
     public GpuTextureView texture() {
-        return this.framebuffer.getColorAttachmentView();
+        return this.target.getColorTextureView();
     }
 
     @Override
     public int width() {
-        return this.framebuffer.textureWidth;
+        return this.target.width;
     }
 
     @Override
     public int height() {
-        return this.framebuffer.textureHeight;
+        return this.target.height;
     }
 
     @Override
@@ -83,9 +83,9 @@ public class TextureSurface implements Surface {
     @Override
     public void beginRendering() {
         RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(
-            this.framebuffer.getColorAttachment(),
+            this.target.getColorTexture(),
             0x00000000,
-            this.framebuffer.getDepthAttachment(),
+            this.target.getDepthTexture(),
             1
         );
     }
@@ -93,15 +93,15 @@ public class TextureSurface implements Surface {
     @Override
     public void endRendering() {
         this.guiRenderer.render(new BraidGuiRenderer.Target(
-            this.framebuffer,
+            this.target,
             this
         ));
     }
 
     @Override
     public void dispose() {
-        this.framebuffer.delete();
-        MinecraftClient.getInstance().getTextureManager().destroyTexture(this.registeredTextureId);
+        this.target.destroyBuffers();
+        Minecraft.getInstance().getTextureManager().release(this.registeredTextureId);
     }
 
     // ---
@@ -110,12 +110,12 @@ public class TextureSurface implements Surface {
 
         public TextureSurfaceTexture() {
             this.sync();
-            this.sampler = RenderSystem.getSamplerCache().get(FilterMode.NEAREST);
+            this.sampler = RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST);
         }
 
         private void sync() {
-             this.glTexture = TextureSurface.this.framebuffer.getColorAttachment();
-             this.glTextureView = TextureSurface.this.framebuffer.getColorAttachmentView();
+             this.texture = TextureSurface.this.target.getColorTexture();
+             this.textureView = TextureSurface.this.target.getColorTextureView();
         }
 
         @Override

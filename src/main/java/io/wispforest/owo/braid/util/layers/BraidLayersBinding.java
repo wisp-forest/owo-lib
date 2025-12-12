@@ -1,6 +1,8 @@
 package io.wispforest.owo.braid.util.layers;
 
 import com.google.common.base.Suppliers;
+import com.mojang.blaze3d.platform.cursor.CursorType;
+import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.core.AppState;
 import io.wispforest.owo.braid.core.EventBinding;
@@ -16,12 +18,10 @@ import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.fabricmc.fabric.api.event.Event;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.cursor.Cursor;
-import net.minecraft.client.gui.cursor.StandardCursors;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Unit;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -53,7 +53,7 @@ public class BraidLayersBinding {
     }
 
     @ApiStatus.Internal
-    public static void renderLayers(Screen screen, DrawContext context, double mouseX, double mouseY) {
+    public static void renderLayers(Screen screen, GuiGraphics graphics, double mouseX, double mouseY) {
         var state = ((OwoScreenExtension) screen).owo$getBraidLayersState();
         if (state == null) {
             return;
@@ -62,12 +62,12 @@ public class BraidLayersBinding {
         state.refreshEvents.sink().onEvent(Unit.INSTANCE);
         state.app.eventBinding.add(new MouseMoveEvent(mouseX, mouseY));
 
-        state.app.processEvents(MinecraftClient.getInstance().getRenderTickCounter().getDynamicDeltaTicks());
-        state.app.draw(context);
+        state.app.processEvents(Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaTicks());
+        state.app.draw(graphics);
 
         var cursorStyle = ((LayerSurface) state.app.surface).currentCursorStyle;
         if (cursorStyle != CursorStyle.NONE && CURSOR_MAPPINGS.get().containsKey(cursorStyle)) {
-            context.setCursor(CURSOR_MAPPINGS.get().get(cursorStyle));
+            graphics.requestCursor(CURSOR_MAPPINGS.get().get(cursorStyle));
         }
     }
 
@@ -81,7 +81,7 @@ public class BraidLayersBinding {
         var app = new AppState(
             null,
             "BraidLayersBinding",
-            MinecraftClient.getInstance(),
+            Minecraft.getInstance(),
             new LayerSurface(),
             new EventBinding.Default(),
             new LayerContext(
@@ -122,15 +122,15 @@ public class BraidLayersBinding {
         }
     }
 
-    private static final Supplier<Map<CursorStyle, Cursor>> CURSOR_MAPPINGS = Suppliers.memoize(() -> Map.of(
-        CursorStyle.POINTER, StandardCursors.ARROW,
-        CursorStyle.TEXT, StandardCursors.IBEAM,
-        CursorStyle.CROSSHAIR, StandardCursors.CROSSHAIR,
-        CursorStyle.HAND, StandardCursors.POINTING_HAND,
-        CursorStyle.VERTICAL_RESIZE, StandardCursors.RESIZE_NS,
-        CursorStyle.HORIZONTAL_RESIZE, StandardCursors.RESIZE_EW,
-        CursorStyle.MOVE, StandardCursors.RESIZE_ALL,
-        CursorStyle.NOT_ALLOWED, StandardCursors.NOT_ALLOWED
+    private static final Supplier<Map<CursorStyle, CursorType>> CURSOR_MAPPINGS = Suppliers.memoize(() -> Map.of(
+        CursorStyle.POINTER, CursorTypes.ARROW,
+        CursorStyle.TEXT, CursorTypes.IBEAM,
+        CursorStyle.CROSSHAIR, CursorTypes.CROSSHAIR,
+        CursorStyle.HAND, CursorTypes.POINTING_HAND,
+        CursorStyle.VERTICAL_RESIZE, CursorTypes.RESIZE_NS,
+        CursorStyle.HORIZONTAL_RESIZE, CursorTypes.RESIZE_EW,
+        CursorStyle.MOVE, CursorTypes.RESIZE_ALL,
+        CursorStyle.NOT_ALLOWED, CursorTypes.NOT_ALLOWED
     ));
 
     // ---

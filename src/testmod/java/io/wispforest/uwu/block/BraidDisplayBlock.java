@@ -3,55 +3,55 @@ package io.wispforest.uwu.block;
 import com.mojang.serialization.MapCodec;
 import io.wispforest.owo.braid.core.KeyModifiers;
 import io.wispforest.owo.braid.core.events.KeyPressEvent;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.BlockWithEntity;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
-public class BraidDisplayBlock extends BlockWithEntity {
+public class BraidDisplayBlock extends BaseEntityBlock {
 
-    public static final VoxelShape SHAPE = Block.createCuboidShape(
+    public static final VoxelShape SHAPE = Block.box(
         0, 0, 0, 16, 2, 16
     );
 
-    public BraidDisplayBlock(Settings settings) {
+    public BraidDisplayBlock(Properties settings) {
         super(settings);
     }
 
     @Override
-    protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        var entity = world.getBlockEntity(pos);
-        if (player.isSneaking() && entity instanceof BraidDisplayBlockEntity display && display.display != null) {
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        var entity = level.getBlockEntity(pos);
+        if (player.isShiftKeyDown() && entity instanceof BraidDisplayBlockEntity display && display.display != null) {
             display.display.app.eventBinding.add(new KeyPressEvent(GLFW.GLFW_KEY_I, GLFW.glfwGetKeyScancode(GLFW.GLFW_KEY_I), new KeyModifiers(GLFW.GLFW_MOD_SHIFT | GLFW.GLFW_MOD_CONTROL)));
 
-            return ActionResult.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
 
-        return ActionResult.PASS;
+        return InteractionResult.PASS;
     }
 
     @Override
-    protected VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+    protected VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
         return SHAPE;
     }
 
     @Override
-    public @Nullable BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+    public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new BraidDisplayBlockEntity(pos, state);
     }
 
     @Override
-    protected MapCodec<? extends BlockWithEntity> getCodec() {
+    protected MapCodec<? extends BaseEntityBlock> codec() {
         return null;
     }
 }

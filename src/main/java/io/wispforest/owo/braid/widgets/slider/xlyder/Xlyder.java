@@ -18,8 +18,8 @@ import io.wispforest.owo.braid.widgets.slider.slider.SliderFunction;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.util.UISounds;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
 import org.joml.Vector2dc;
@@ -387,8 +387,8 @@ public class Xlyder extends StatefulWidget {
                     widget.onChanged == null || ControlsOverride.controlsDisabled(context)
                         ? content
                         : new Incrementor(
-                            xIncrement -> this.applyValue(MathHelper.clamp(this.normalizedValue.x() + this.incrementStep.x() * xIncrement, 0, 1), null),
-                            yIncrement -> this.applyValue(null, MathHelper.clamp(this.normalizedValue.y() + this.incrementStep.y() * yIncrement, 0, 1)),
+                            xIncrement -> this.applyValue(Mth.clamp(this.normalizedValue.x() + this.incrementStep.x() * xIncrement, 0, 1), null),
+                            yIncrement -> this.applyValue(null, Mth.clamp(this.normalizedValue.y() + this.incrementStep.y() * yIncrement, 0, 1)),
                             new MouseArea(
                                 mouseArea -> mouseArea
                                     //TODO: decide what to do with buttons here
@@ -438,8 +438,8 @@ public class Xlyder extends StatefulWidget {
             );
 
             this.applyValue(
-                MathHelper.clamp(this.dragValue.x, 0, 1),
-                MathHelper.clamp(this.dragValue.y, 0, 1)
+                Mth.clamp(this.dragValue.x, 0, 1),
+                Mth.clamp(this.dragValue.y, 0, 1)
             );
         }
 
@@ -448,8 +448,8 @@ public class Xlyder extends StatefulWidget {
 
             var handleSize = this.handleSize;
 
-            var newNormalizedX = MathHelper.clamp((x - (handleSize.width() / 2)) / (constraints.maxWidth() - handleSize.width()), 0, 1);
-            var newNormalizedY = MathHelper.clamp((y - (handleSize.height() / 2)) / (constraints.maxHeight() - handleSize.height()), 0, 1);
+            var newNormalizedX = Mth.clamp((x - (handleSize.width() / 2)) / (constraints.maxWidth() - handleSize.width()), 0, 1);
+            var newNormalizedY = Mth.clamp((y - (handleSize.height() / 2)) / (constraints.maxHeight() - handleSize.height()), 0, 1);
 
             this.applyValue(newNormalizedX, newNormalizedY);
             return new Vector2d(newNormalizedX, newNormalizedY);

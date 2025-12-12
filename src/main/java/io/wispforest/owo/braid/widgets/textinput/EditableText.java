@@ -14,8 +14,8 @@ import io.wispforest.owo.braid.widgets.intents.Intent;
 import io.wispforest.owo.braid.widgets.scroll.ScrollAnimationSettings;
 import io.wispforest.owo.braid.widgets.scroll.ScrollController;
 import io.wispforest.owo.braid.widgets.scroll.Scrollable;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ public class EditableText extends StatefulWidget {
     protected boolean autoFocus = false;
     protected List<TextInput.Formatter> formatters = new ArrayList<>();
     protected Style baseStyle = Style.EMPTY;
-    protected Text suggestion = Text.empty();
+    protected Component suggestion = Component.empty();
     protected boolean textShadow = false;
     protected boolean suggestionIsPlaceholder = false;
 
@@ -88,17 +88,17 @@ public class EditableText extends StatefulWidget {
         return this.baseStyle;
     }
 
-    public EditableText suggestion(Text suggestion) {
+    public EditableText suggestion(Component suggestion) {
         this.assertMutable();
         this.suggestion = suggestion;
         return this;
     }
 
-    public Text suggestion() {
+    public Component suggestion() {
         return this.suggestion;
     }
 
-    public EditableText placeholder(Text placeholder) {
+    public EditableText placeholder(Component placeholder) {
         this.assertMutable();
         this.suggestionIsPlaceholder = true;
         return this.suggestion(placeholder);
@@ -203,7 +203,7 @@ public class EditableText extends StatefulWidget {
             this.schedulePostLayoutCallback(() -> {
                 var inputInstance = (TextInput.Instance) this.inputContext.instance();
                 var cursorPos = inputInstance.cursorPosition();
-                var lineHeight = inputInstance.host().client().textRenderer.fontHeight;
+                var lineHeight = inputInstance.host().client().font.lineHeight;
 
                 Scrollable.revealAabb(
                     this.inputContext,
@@ -285,7 +285,7 @@ public class EditableText extends StatefulWidget {
                                 widget.textShadow,
                                 !widget.suggestionIsPlaceholder || widget.controller.value().text().isEmpty()
                                     ? widget.suggestion
-                                    : Text.empty()
+                                    : Component.empty()
                             );
                         })
                     )

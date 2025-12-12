@@ -4,7 +4,7 @@ import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.framework.instance.SingleChildWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 
 import java.util.Objects;
 import java.util.OptionalDouble;
@@ -45,12 +45,12 @@ public abstract class ConstraintWidget extends SingleChildInstanceWidget {
 
         @Override
         protected double measureIntrinsicWidth(double height) {
-            return MathHelper.clamp(this.child.getIntrinsicWidth(height), this.widget.constraints().minWidth(), this.widget.constraints().maxWidth());
+            return Mth.clamp(this.child.getIntrinsicWidth(height), this.widget.constraints().minWidth(), this.widget.constraints().maxWidth());
         }
 
         @Override
         protected double measureIntrinsicHeight(double width) {
-            return MathHelper.clamp(this.child.getIntrinsicHeight(width), this.widget.constraints().minHeight(), this.widget.constraints().maxHeight());
+            return Mth.clamp(this.child.getIntrinsicHeight(width), this.widget.constraints().minHeight(), this.widget.constraints().maxHeight());
         }
 
         @Override

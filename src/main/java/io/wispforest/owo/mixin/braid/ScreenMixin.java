@@ -2,8 +2,8 @@ package io.wispforest.owo.mixin.braid;
 
 import io.wispforest.owo.braid.util.layers.BraidLayersBinding;
 import io.wispforest.owo.util.pond.OwoScreenExtension;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -27,8 +27,8 @@ public abstract class ScreenMixin implements OwoScreenExtension {
         return this.braidLayersState;
     }
 
-    @Inject(method = "renderWithTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;render(Lnet/minecraft/client/gui/DrawContext;IIF)V", shift = At.Shift.AFTER))
-    private void renderLayers(DrawContext context, int mouseX, int mouseY, float deltaTicks, CallbackInfo ci) {
+    @Inject(method = "renderWithTooltipAndSubtitles", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/Screen;render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V", shift = At.Shift.AFTER))
+    private void renderLayers(GuiGraphics context, int mouseX, int mouseY, float deltaTicks, CallbackInfo ci) {
         BraidLayersBinding.renderLayers(((Screen) (Object) this), context, mouseX, mouseY);
     }
 }

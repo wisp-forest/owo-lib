@@ -3,8 +3,6 @@ package io.wispforest.owo.braid.widgets.basic;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.InheritedWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import io.wispforest.owo.braid.widgets.label.LabelStyle;
-import org.jetbrains.annotations.Nullable;
 
 /// A widget that descendants can check to disable interactive controls,
 /// such as buttons or text fields.

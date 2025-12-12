@@ -16,7 +16,7 @@ import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
 import io.wispforest.owo.braid.widgets.object.ItemStackWidget;
 import io.wispforest.uwu.items.UwuItems;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import java.time.Duration;
@@ -39,11 +39,11 @@ public class HudTestWidget extends StatelessWidget {
                         CrossAxisAlignment.CENTER,
                         new Sized(
                             100, null,
-                            new Label(LabelStyle.SHADOW, true, Text.translatable("compliance.playtime.message"))
+                            new Label(LabelStyle.SHADOW, true, Component.translatable("compliance.playtime.message"))
                         ),
                         new Padding(
                             Insets.all(3),
-                            new ItemStackWidget(UwuItems.BRAID.getDefaultStack())
+                            new ItemStackWidget(UwuItems.BRAID.getDefaultInstance())
                         ),
                         new Timer()
                     )
@@ -77,7 +77,7 @@ public class HudTestWidget extends StatelessWidget {
                 return new Label(
                     LabelStyle.SHADOW,
                     true,
-                    Text.literal("time in session: " + DurationFormatUtils.formatDuration(this.seconds * 1000L, "HH:mm:ss"))
+                    Component.literal("time in session: " + DurationFormatUtils.formatDuration(this.seconds * 1000L, "HH:mm:ss"))
                 );
             }
         }

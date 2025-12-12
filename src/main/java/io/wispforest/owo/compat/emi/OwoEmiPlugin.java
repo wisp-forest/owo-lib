@@ -12,13 +12,13 @@ import io.wispforest.owo.braid.widgets.recipeviewer.RecipeViewerExclusionZone;
 import io.wispforest.owo.braid.widgets.recipeviewer.RecipeViewerStack;
 import io.wispforest.owo.braid.widgets.recipeviewer.StackDropArea;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
-import io.wispforest.owo.mixin.itemgroup.CreativeInventoryScreenAccessor;
-import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
+import io.wispforest.owo.mixin.itemgroup.CreativeModeInventoryScreenAccessor;
+import io.wispforest.owo.ui.base.BaseOwoContainerScreen;
 import io.wispforest.owo.util.pond.OwoCreativeInventoryScreenExtensions;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
-import net.minecraft.util.math.Box;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.world.phys.AABB;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,8 +26,8 @@ import java.util.List;
 public class OwoEmiPlugin implements EmiPlugin {
     @Override
     public void register(EmiRegistry registry) {
-        registry.addExclusionArea(CreativeInventoryScreen.class, (screen, consumer) -> {
-            var group = CreativeInventoryScreenAccessor.owo$getSelectedTab();
+        registry.addExclusionArea(CreativeModeInventoryScreen.class, (screen, consumer) -> {
+            var group = CreativeModeInventoryScreenAccessor.owo$getSelectedTab();
             if (!(group instanceof OwoItemGroup owoGroup)) return;
             if (owoGroup.getButtons().isEmpty()) return;
 
@@ -45,7 +45,7 @@ public class OwoEmiPlugin implements EmiPlugin {
         });
 
         registry.addGenericExclusionArea((screen, consumer) -> {
-            if (!(screen instanceof BaseOwoHandledScreen<?, ?> owoHandledScreen)) return;
+            if (!(screen instanceof BaseOwoContainerScreen<?, ?> owoHandledScreen)) return;
 
             owoHandledScreen.componentsForExclusionAreas()
                 .map(component -> new Bounds(component.x(), component.y(), component.width(), component.height()))
@@ -106,10 +106,10 @@ public class OwoEmiPlugin implements EmiPlugin {
             }
 
             @Override
-            public void render(Screen screen, EmiIngredient dragged, DrawContext draw, int mouseX, int mouseY, float delta) {
+            public void render(Screen screen, EmiIngredient dragged, GuiGraphics draw, int mouseX, int mouseY, float delta) {
                 if (!(screen instanceof BraidScreen braid)) return;
 
-                List<Box> allBounds = new ArrayList<>();
+                List<AABB> allBounds = new ArrayList<>();
 
                 var converted = EmiStackUtil.fromEmi(dragged.getEmiStacks().get(0));
 
@@ -126,7 +126,7 @@ public class OwoEmiPlugin implements EmiPlugin {
 
                 braid.state.rootInstance().visitChildren(visitor);
 
-                for (Box b : allBounds) {
+                for (AABB b : allBounds) {
                     draw.fill((int) b.minX, (int) b.minY, (int) b.maxX, (int) b.maxY, 0x8822BB33);
                 }
             }

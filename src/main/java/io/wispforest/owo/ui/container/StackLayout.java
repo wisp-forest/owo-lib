@@ -1,10 +1,10 @@
 package io.wispforest.owo.ui.container;
 
-import io.wispforest.owo.ui.base.BaseParentComponent;
-import io.wispforest.owo.ui.core.Component;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
+import io.wispforest.owo.ui.base.BaseParentUIComponent;
+import io.wispforest.owo.ui.core.OwoUIGraphics;
 import io.wispforest.owo.ui.core.Size;
 import io.wispforest.owo.ui.core.Sizing;
+import io.wispforest.owo.ui.core.UIComponent;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.MountingHelper;
@@ -14,10 +14,10 @@ import org.w3c.dom.Node;
 
 import java.util.*;
 
-public class StackLayout extends BaseParentComponent {
+public class StackLayout extends BaseParentUIComponent {
 
-    protected final List<Component> children = new ArrayList<>();
-    protected final List<Component> childrenView = Collections.unmodifiableList(this.children);
+    protected final List<UIComponent> children = new ArrayList<>();
+    protected final List<UIComponent> childrenView = Collections.unmodifiableList(this.children);
 
     protected Size contentSize = Size.zero();
 
@@ -43,7 +43,7 @@ public class StackLayout extends BaseParentComponent {
         var layoutWidth = new MutableInt();
         var layoutHeight = new MutableInt();
 
-        var layout = new ArrayList<Component>();
+        var layout = new ArrayList<UIComponent>();
         var helper = MountingHelper.mountEarly(this::mountChild, this.childrenView, child -> {
             layout.add(child);
             child.mount(this, this.x + this.padding.get().left() + child.margins().get().left(), this.y + this.padding.get().top() + child.margins().get().top());
@@ -68,9 +68,9 @@ public class StackLayout extends BaseParentComponent {
     }
 
     @Override
-    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
-        super.draw(context, mouseX, mouseY, partialTicks, delta);
-        this.drawChildren(context, mouseX, mouseY, partialTicks, delta, this.children);
+    public void draw(OwoUIGraphics graphics, int mouseX, int mouseY, float partialTicks, float delta) {
+        super.draw(graphics, mouseX, mouseY, partialTicks, delta);
+        this.drawChildren(graphics, mouseX, mouseY, partialTicks, delta, this.children);
     }
 
     /**
@@ -79,7 +79,7 @@ public class StackLayout extends BaseParentComponent {
      *
      * @param child The child to append to this layout
      */
-    public StackLayout child(Component child) {
+    public StackLayout child(UIComponent child) {
         this.children.add(child);
         this.updateLayout();
         return this;
@@ -87,11 +87,11 @@ public class StackLayout extends BaseParentComponent {
 
     /**
      * Add a collection of children to this layout. If you only need to
-     * add a single child to, use {@link #child(Component)} instead
+     * add a single child to, use {@link #child(UIComponent)} instead
      *
      * @param children The children to add to this layout
      */
-    public StackLayout children(Collection<? extends Component> children) {
+    public StackLayout children(Collection<? extends UIComponent> children) {
         this.children.addAll(children);
         this.updateLayout();
         return this;
@@ -104,7 +104,7 @@ public class StackLayout extends BaseParentComponent {
      * @param index The index at which to insert the child
      * @param child The child to append to this layout
      */
-    public StackLayout child(int index, Component child) {
+    public StackLayout child(int index, UIComponent child) {
         this.children.add(index, child);
         this.updateLayout();
         return this;
@@ -112,19 +112,19 @@ public class StackLayout extends BaseParentComponent {
 
     /**
      * Insert a collection of children into this layout. If you only need to
-     * insert a single child to, use {@link #child(int, Component)} instead
+     * insert a single child to, use {@link #child(int, UIComponent)} instead
      *
      * @param index    The index at which to begin inserting children
      * @param children The children to add to this layout
      */
-    public StackLayout children(int index, Collection<? extends Component> children) {
+    public StackLayout children(int index, Collection<? extends UIComponent> children) {
         this.children.addAll(index, children);
         this.updateLayout();
         return this;
     }
 
     @Override
-    public StackLayout removeChild(Component child) {
+    public StackLayout removeChild(UIComponent child) {
         if (this.children.remove(child)) {
             child.dismount(DismountReason.REMOVED);
             this.updateLayout();
@@ -148,7 +148,7 @@ public class StackLayout extends BaseParentComponent {
     }
 
     @Override
-    public List<Component> children() {
+    public List<UIComponent> children() {
         return this.childrenView;
     }
 
@@ -161,7 +161,7 @@ public class StackLayout extends BaseParentComponent {
                 .orElse(Collections.emptyList());
 
         for (var child : components) {
-            this.child(model.parseComponent(Component.class, child));
+            this.child(model.parseComponent(UIComponent.class, child));
         }
     }
 }

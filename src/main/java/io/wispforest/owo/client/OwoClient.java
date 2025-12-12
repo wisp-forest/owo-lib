@@ -2,7 +2,7 @@ package io.wispforest.owo.client;
 
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.display.BraidDisplay;
-import io.wispforest.owo.client.screens.ScreenInternals;
+import io.wispforest.owo.client.screens.MenuNetworkingInternals;
 import io.wispforest.owo.command.debug.OwoDebugCommands;
 import io.wispforest.owo.config.OwoConfigCommand;
 import io.wispforest.owo.itemgroup.json.OwoItemGroupLoader;
@@ -16,8 +16,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.resource.ResourceType;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -49,18 +49,18 @@ public class OwoClient implements ClientModInitializer {
     public void onInitializeClient() {
         ModDataLoader.load(OwoItemGroupLoader.INSTANCE);
 
-        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new UIModelLoader());
-        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new NinePatchTexture.MetadataLoader());
+        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new UIModelLoader());
+        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new NinePatchTexture.MetadataLoader());
 
         OwoUIPipelines.register();
         RenderPipelines.register(BraidDisplay.PIPELINE);
 
         final var renderdocPath = System.getProperty("owo.renderdocPath");
         if (renderdocPath != null) {
-            if (Util.getOperatingSystem() == Util.OperatingSystem.WINDOWS) {
+            if (Util.getPlatform() == Util.OS.WINDOWS) {
                 System.load(renderdocPath);
             } else {
-                Owo.LOGGER.warn(switch (Util.getOperatingSystem()) {
+                Owo.LOGGER.warn(switch (Util.getPlatform()) {
                     case LINUX -> LINUX_RENDERDOC_WARNING;
                     case OSX -> MAC_RENDERDOC_WARNING;
                     default -> GENERIC_RENDERDOC_WARNING;
@@ -68,7 +68,7 @@ public class OwoClient implements ClientModInitializer {
             }
         }
 
-        ScreenInternals.Client.init();
+        MenuNetworkingInternals.Client.init();
 
         ClientCommandRegistrationCallback.EVENT.register(OwoConfigCommand::register);
 

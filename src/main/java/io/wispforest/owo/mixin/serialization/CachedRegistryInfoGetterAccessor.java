@@ -1,11 +1,11 @@
 package io.wispforest.owo.mixin.serialization;
 
-import net.minecraft.registry.RegistryOps;
-import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.resources.RegistryOps;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(RegistryOps.CachedRegistryInfoGetter.class)
+@Mixin(RegistryOps.HolderLookupAdapter.class)
 public interface CachedRegistryInfoGetterAccessor {
-    @Accessor("registries") RegistryWrapper.WrapperLookup owo$getRegistriesLookup();
+    @Accessor("lookupProvider") HolderLookup.Provider owo$getRegistriesLookup();
 }

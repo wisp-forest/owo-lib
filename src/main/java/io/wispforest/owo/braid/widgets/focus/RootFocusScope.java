@@ -9,8 +9,6 @@ import io.wispforest.owo.braid.widgets.basic.Builder;
 import io.wispforest.owo.braid.widgets.eventstream.BraidEventSource;
 import io.wispforest.owo.braid.widgets.eventstream.StreamListenerState;
 
-import java.util.Objects;
-
 public class RootFocusScope extends StatefulWidget {
 
     public final BraidEventSource<KeyDownEvent> onKeyDown;

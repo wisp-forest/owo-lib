@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.util.DataExtensionUtil;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.IOException;
@@ -74,7 +74,7 @@ public final class ModDataLoader {
                     try {
                         final InputStreamReader tabData = new InputStreamReader(DataExtensionUtil.coerceJson(Files.newInputStream(path)) );
 
-                        foundFiles.put(Identifier.of(namespace, FilenameUtils.removeExtension(targetPath.relativize(path).toString())), GSON.fromJson(tabData, JsonObject.class));
+                        foundFiles.put(Identifier.fromNamespaceAndPath(namespace, FilenameUtils.removeExtension(targetPath.relativize(path).toString())), GSON.fromJson(tabData, JsonObject.class));
                     } catch (IOException e) {
                         Owo.LOGGER.warn("### Unable to open data file {} ++ Stacktrace below ###", path, e);
                     }

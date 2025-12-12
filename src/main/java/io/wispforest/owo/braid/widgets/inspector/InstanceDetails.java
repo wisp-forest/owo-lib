@@ -18,9 +18,10 @@ import io.wispforest.owo.braid.widgets.flex.*;
 import io.wispforest.owo.braid.widgets.grid.Grid;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.sharedstate.SharedState;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import org.joml.*;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import org.joml.Matrix3x2f;
+import org.joml.Vector2f;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -82,12 +83,12 @@ public class InstanceDetails extends StatefulWidget {
 
                 children.addAll(List.of(
                     new Flexible(new Padding(Insets.none())),
-                    new Label(Text.literal(instanceClassName))
+                    new Label(Component.literal(instanceClassName))
                 ));
             } else {
                 children = List.of(new Flexible(
                     new Center(
-                        new Label(Text.literal("no instance selected"))
+                        new Label(Component.literal("no instance selected"))
                     )
                 ));
             }
@@ -99,7 +100,7 @@ public class InstanceDetails extends StatefulWidget {
                     null,
                     new Column(
                         Stream.concat(
-                            Stream.of(new Padding(Insets.bottom(3), new Label(Text.literal("Instance Details")))),
+                            Stream.of(new Padding(Insets.bottom(3), new Label(Component.literal("Instance Details")))),
                             children.stream()
                         ).toList()
                     )
@@ -107,25 +108,25 @@ public class InstanceDetails extends StatefulWidget {
             );
         }
 
-        private static List<Text> gatherProperties(WidgetInstance<?> instance) {
+        private static List<Component> gatherProperties(WidgetInstance<?> instance) {
             var instanceTransform = instance.hasParent() ? instance.parent().computeGlobalTransform().invert() : new Matrix3x2f();
             var absPos = instanceTransform.transformPosition((float) instance.transform.x(), (float) instance.transform.y(), new Vector2f());
 
-            var properties = new ArrayList<>(List.<Text>of(
-                    Text.literal("Rel. Position").formatted(Formatting.BOLD),
-                    Text.literal(rounded(instance.transform.x()) + ", " + rounded(instance.transform.y())),
-                    Text.literal("Abs. Position").formatted(Formatting.BOLD),
-                    Text.literal(rounded(absPos.x()) + ", " + rounded(absPos.y())),
-                    Text.literal("Width").formatted(Formatting.BOLD),
-                    Text.literal(instance.transform.width() + "px"),
-                    Text.literal("Height").formatted(Formatting.BOLD),
-                    Text.literal(instance.transform.height() + "px"),
-                    Text.literal("Widget").formatted(Formatting.BOLD),
-                    Text.literal(instance.widget().getClass().getSimpleName())
+            var properties = new ArrayList<>(List.<Component>of(
+                    Component.literal("Rel. Position").withStyle(ChatFormatting.BOLD),
+                    Component.literal(rounded(instance.transform.x()) + ", " + rounded(instance.transform.y())),
+                    Component.literal("Abs. Position").withStyle(ChatFormatting.BOLD),
+                    Component.literal(rounded(absPos.x()) + ", " + rounded(absPos.y())),
+                    Component.literal("Width").withStyle(ChatFormatting.BOLD),
+                    Component.literal(instance.transform.width() + "px"),
+                    Component.literal("Height").withStyle(ChatFormatting.BOLD),
+                    Component.literal(instance.transform.height() + "px"),
+                    Component.literal("Widget").withStyle(ChatFormatting.BOLD),
+                    Component.literal(instance.widget().getClass().getSimpleName())
             ));
 
             for (var property : instance.debugListInspectorProperties()) {
-                properties.add(property.name().copy().formatted(Formatting.BOLD));
+                properties.add(property.name().copy().withStyle(ChatFormatting.BOLD));
                 properties.add(property.value());
             }
 

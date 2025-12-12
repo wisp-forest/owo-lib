@@ -1,30 +1,30 @@
 package io.wispforest.owo.serialization.format.nbt;
 
 import com.google.common.collect.MapMaker;
-import io.wispforest.endec.*;
+import io.wispforest.endec.Endec;
+import io.wispforest.endec.SelfDescribedSerializer;
+import io.wispforest.endec.SerializationContext;
+import io.wispforest.endec.Serializer;
 import io.wispforest.endec.util.RecursiveSerializer;
 import net.minecraft.nbt.*;
-import net.minecraft.network.encoding.VarInts;
-import net.minecraft.network.encoding.VarLongs;
+import net.minecraft.network.VarInt;
+import net.minecraft.network.VarLong;
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.spongepowered.asm.mixin.Mutable;
 
-import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
-import java.util.WeakHashMap;
 
-public class NbtSerializer extends RecursiveSerializer<NbtElement> implements SelfDescribedSerializer<NbtElement> {
+public class NbtSerializer extends RecursiveSerializer<Tag> implements SelfDescribedSerializer<Tag> {
 
-    protected NbtElement prefix;
+    protected Tag prefix;
 
-    protected NbtSerializer(NbtElement prefix) {
-        super(NbtEnd.INSTANCE);
+    protected NbtSerializer(Tag prefix) {
+        super(EndTag.INSTANCE);
         this.prefix = prefix;
     }
 
-    public static NbtSerializer of(NbtElement prefix) {
+    public static NbtSerializer of(Tag prefix) {
         return new NbtSerializer(prefix);
     }
 
@@ -36,52 +36,52 @@ public class NbtSerializer extends RecursiveSerializer<NbtElement> implements Se
 
     @Override
     public void writeByte(SerializationContext ctx, byte value) {
-        this.consume(NbtByte.of(value));
+        this.consume(ByteTag.valueOf(value));
     }
 
     @Override
     public void writeShort(SerializationContext ctx, short value) {
-        this.consume(NbtShort.of(value));
+        this.consume(ShortTag.valueOf(value));
     }
 
     @Override
     public void writeInt(SerializationContext ctx, int value) {
-        this.consume(NbtInt.of(value));
+        this.consume(IntTag.valueOf(value));
     }
 
     @Override
     public void writeLong(SerializationContext ctx, long value) {
-        this.consume(NbtLong.of(value));
+        this.consume(LongTag.valueOf(value));
     }
 
     @Override
     public void writeFloat(SerializationContext ctx, float value) {
-        this.consume(NbtFloat.of(value));
+        this.consume(FloatTag.valueOf(value));
     }
 
     @Override
     public void writeDouble(SerializationContext ctx, double value) {
-        this.consume(NbtDouble.of(value));
+        this.consume(DoubleTag.valueOf(value));
     }
 
     // ---
 
     @Override
     public void writeVarInt(SerializationContext ctx, int value) {
-        this.consume(switch (VarInts.getSizeInBytes(value)) {
-            case 0, 1 -> NbtByte.of((byte) value);
-            case 2 -> NbtShort.of((short) value);
-            default -> NbtInt.of(value);
+        this.consume(switch (VarInt.getByteSize(value)) {
+            case 0, 1 -> ByteTag.valueOf((byte) value);
+            case 2 -> ShortTag.valueOf((short) value);
+            default -> IntTag.valueOf(value);
         });
     }
 
     @Override
     public void writeVarLong(SerializationContext ctx, long value) {
-        this.consume(switch (VarLongs.getSizeInBytes(value)) {
-            case 0, 1 -> NbtByte.of((byte) value);
-            case 2 -> NbtShort.of((short) value);
-            case 3, 4 -> NbtInt.of((int) value);
-            default -> NbtLong.of(value);
+        this.consume(switch (VarLong.getByteSize(value)) {
+            case 0, 1 -> ByteTag.valueOf((byte) value);
+            case 2 -> ShortTag.valueOf((short) value);
+            case 3, 4 -> IntTag.valueOf((int) value);
+            default -> LongTag.valueOf(value);
         });
     }
 
@@ -89,24 +89,24 @@ public class NbtSerializer extends RecursiveSerializer<NbtElement> implements Se
 
     @Override
     public void writeBoolean(SerializationContext ctx, boolean value) {
-        this.consume(NbtByte.of(value));
+        this.consume(ByteTag.valueOf(value));
     }
 
     @Override
     public void writeString(SerializationContext ctx, String value) {
-        this.consume(NbtString.of(value));
+        this.consume(StringTag.valueOf(value));
     }
 
     @Override
     public void writeBytes(SerializationContext ctx, byte[] bytes) {
-        this.consume(new NbtByteArray(bytes));
+        this.consume(new ByteArrayTag(bytes));
     }
 
-    private final Set<NbtElement> encodedOptionals = Collections.newSetFromMap(new MapMaker().weakKeys().makeMap());
+    private final Set<Tag> encodedOptionals = Collections.newSetFromMap(new MapMaker().weakKeys().makeMap());
 
     @Override
     public <V> void writeOptional(SerializationContext ctx, Endec<V> endec, Optional<V> optional) {
-        MutableObject<NbtElement> frameData = new MutableObject<>();
+        MutableObject<Tag> frameData = new MutableObject<>();
 
         this.frame(encoded -> {
             try (var struct = this.struct()) {
@@ -146,20 +146,20 @@ public class NbtSerializer extends RecursiveSerializer<NbtElement> implements Se
 
         private final SerializationContext ctx;
         private final Endec<V> valueEndec;
-        private final NbtCompound result;
+        private final CompoundTag result;
 
         private Map(SerializationContext ctx, Endec<V> valueEndec) {
             this.ctx = ctx;
             this.valueEndec = valueEndec;
 
             if (NbtSerializer.this.prefix != null) {
-                if (NbtSerializer.this.prefix instanceof NbtCompound prefixMap) {
+                if (NbtSerializer.this.prefix instanceof CompoundTag prefixMap) {
                     this.result = prefixMap;
                 } else {
                     throw new IllegalStateException("Incompatible prefix of type " + NbtSerializer.this.prefix.getClass().getSimpleName() + " provided for NBT map/struct");
                 }
             } else {
-                this.result = new NbtCompound();
+                this.result = new CompoundTag();
             }
         }
 
@@ -179,9 +179,9 @@ public class NbtSerializer extends RecursiveSerializer<NbtElement> implements Se
                 var element = encoded.require("struct field");
 
                 if (mayOmit && NbtSerializer.this.encodedOptionals.contains(element)) {
-                    var nbtCompound = (NbtCompound) element;
+                    var nbtCompound = (CompoundTag) element;
 
-                    if(!nbtCompound.getBoolean("present", false)) return;
+                    if(!nbtCompound.getBooleanOr("present", false)) return;
 
                     element = nbtCompound.get("value");
                 }
@@ -202,20 +202,20 @@ public class NbtSerializer extends RecursiveSerializer<NbtElement> implements Se
 
         private final SerializationContext ctx;
         private final Endec<V> valueEndec;
-        private final NbtList result;
+        private final ListTag result;
 
         private Sequence(SerializationContext ctx, Endec<V> valueEndec) {
             this.ctx = ctx;
             this.valueEndec = valueEndec;
 
             if (NbtSerializer.this.prefix != null) {
-                if (NbtSerializer.this.prefix instanceof NbtList prefixList) {
+                if (NbtSerializer.this.prefix instanceof ListTag prefixList) {
                     this.result = prefixList;
                 } else {
                     throw new IllegalStateException("Incompatible prefix of type " + NbtSerializer.this.prefix.getClass().getSimpleName() + " provided for NBT sequence");
                 }
             } else {
-                this.result = new NbtList();
+                this.result = new ListTag();
             }
         }
 

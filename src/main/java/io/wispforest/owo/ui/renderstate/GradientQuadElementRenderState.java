@@ -1,32 +1,31 @@
 package io.wispforest.owo.ui.renderstate;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.wispforest.owo.ui.core.Color;
-import io.wispforest.owo.ui.core.OwoUIPipelines;
-import net.minecraft.client.gui.ScreenRect;
-import net.minecraft.client.gui.render.state.SimpleGuiElementRenderState;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.texture.TextureSetup;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.gui.render.TextureSetup;
+import net.minecraft.client.gui.render.state.GuiElementRenderState;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2f;
 
 public record GradientQuadElementRenderState(
     RenderPipeline pipeline,
     Matrix3x2f pose,
-    ScreenRect bounds,
-    ScreenRect scissorArea,
+    ScreenRectangle bounds,
+    ScreenRectangle scissorArea,
     Color colorTL,
     Color colorTR,
     Color colorBL,
     Color colorBR
-) implements SimpleGuiElementRenderState {
+) implements GuiElementRenderState {
 
     @Override
-    public void setupVertices(VertexConsumer vertices) {
-        vertices.vertex(this.pose(), (float) this.bounds.getLeft(), (float) this.bounds.getTop()).color(this.colorTL.argb());
-        vertices.vertex(this.pose(), (float) this.bounds.getLeft(), (float) this.bounds.getBottom()).color(this.colorBL.argb());
-        vertices.vertex(this.pose(), (float) this.bounds.getRight(), (float) this.bounds.getBottom()).color(this.colorBR.argb());
-        vertices.vertex(this.pose(), (float) this.bounds.getRight(), (float) this.bounds.getTop()).color(this.colorTR.argb());
+    public void buildVertices(VertexConsumer vertices) {
+        vertices.addVertexWith2DPose(this.pose(), (float) this.bounds.left(), (float) this.bounds.top()).setColor(this.colorTL.argb());
+        vertices.addVertexWith2DPose(this.pose(), (float) this.bounds.left(), (float) this.bounds.bottom()).setColor(this.colorBL.argb());
+        vertices.addVertexWith2DPose(this.pose(), (float) this.bounds.right(), (float) this.bounds.bottom()).setColor(this.colorBR.argb());
+        vertices.addVertexWith2DPose(this.pose(), (float) this.bounds.right(), (float) this.bounds.top()).setColor(this.colorTR.argb());
     }
 
     @Override
@@ -36,16 +35,16 @@ public record GradientQuadElementRenderState(
 
     @Override
     public TextureSetup textureSetup() {
-        return TextureSetup.empty();
+        return TextureSetup.noTexture();
     }
 
     @Override
-    public @Nullable ScreenRect scissorArea() {
+    public @Nullable ScreenRectangle scissorArea() {
         return this.scissorArea;
     }
 
     @Override
-    public @Nullable ScreenRect bounds() {
+    public @Nullable ScreenRectangle bounds() {
         return this.scissorArea != null ? this.scissorArea.intersection(this.bounds) : this.bounds;
     }
 }

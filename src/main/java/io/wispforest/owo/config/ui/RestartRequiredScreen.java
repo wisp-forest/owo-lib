@@ -5,9 +5,8 @@ import io.wispforest.owo.ui.base.BaseUIModelScreen;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Surface;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
@@ -21,21 +20,21 @@ public class RestartRequiredScreen extends BaseUIModelScreen<FlowLayout> {
     }
 
     @Override
-    public void close() {
-        this.client.setScreen(parent);
+    public void onClose() {
+        this.minecraft.setScreen(parent);
     }
 
     @Override
     @SuppressWarnings("ConstantConditions")
     protected void build(FlowLayout rootComponent) {
-        if (this.client.world == null) {
+        if (this.minecraft.level == null) {
             rootComponent.surface(Surface.optionsBackground());
         }
 
         rootComponent.childById(ButtonComponent.class, "exit-button")
-                .onPress(button -> MinecraftClient.getInstance().scheduleStop());
+                .onPress(button -> Minecraft.getInstance().stop());
 
         rootComponent.childById(ButtonComponent.class, "ignore-button")
-                .onPress(button -> this.close());
+                .onPress(button -> this.onClose());
     }
 }

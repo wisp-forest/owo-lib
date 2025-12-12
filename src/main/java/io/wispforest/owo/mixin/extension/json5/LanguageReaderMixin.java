@@ -3,9 +3,9 @@ package io.wispforest.owo.mixin.extension.json5;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import io.wispforest.owo.util.DataExtensionUtil;
-import net.minecraft.resource.Resource;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import xyz.nucleoid.server.translations.impl.language.LanguageReader;
@@ -22,7 +22,7 @@ public abstract class LanguageReaderMixin {
         method = "collectDataPackTranslations",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/resource/ResourceManager;findResources(Ljava/lang/String;Ljava/util/function/Predicate;)Ljava/util/Map;"
+            target = "Lnet/minecraft/server/packs/resources/ResourceManager;listResources(Ljava/lang/String;Ljava/util/function/Predicate;)Ljava/util/Map;"
         )
     )
     private static Map<Identifier, Resource> json5$collectDataPackTranslations(
@@ -34,7 +34,7 @@ public abstract class LanguageReaderMixin {
         var base = original.call(instance, s, identifierPredicate);
         original.call(instance, s, DataExtensionUtil.OptInIdentifierPredicate.of(path -> path.getPath().endsWith(".json5")))
             .forEach((identifier, resource) -> base.putIfAbsent(
-                identifier, new Resource(resource.getPack(), () -> coerceJson(resource.getInputStream()))
+                identifier, new Resource(resource.source(), () -> coerceJson(resource.open()))
             ));
         return base;
     }

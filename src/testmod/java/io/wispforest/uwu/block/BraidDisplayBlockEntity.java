@@ -24,13 +24,13 @@ import io.wispforest.uwu.Uwu;
 import io.wispforest.uwu.items.UwuItems;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
 
 import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
@@ -58,8 +58,8 @@ public class BraidDisplayBlockEntity extends BlockEntity {
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void markRemoved() {
-        super.markRemoved();
+    public void setRemoved() {
+        super.setRemoved();
 
         if (this.disposed != null) {
             if (!this.disposed.compareAndSet(false, true)) return;
@@ -88,24 +88,24 @@ public class BraidDisplayBlockEntity extends BlockEntity {
                             Panel.VANILLA_DARK,
                             new Padding(
                                 Insets.all(10),
-                                new Label(Text.translatable("text.uwu.braid").append(Text.literal(" on block real??")))
+                                new Label(Component.translatable("text.uwu.braid").append(Component.literal(" on block real??")))
                             )
                         ),
                         new Button(
-                            () -> MinecraftClient.getInstance().player.dropCreativeStack(UwuItems.BRAID.getDefaultStack()),
+                            () -> Minecraft.getInstance().player.handleCreativeModeItemDrop(UwuItems.BRAID.getDefaultInstance()),
                             new Row(
                                 MainAxisAlignment.START,
                                 CrossAxisAlignment.CENTER,
                                 new Sized(
                                     16,
                                     16,
-                                    new BlockWidget(Blocks.OBSERVER.getDefaultState())
+                                    new BlockWidget(Blocks.OBSERVER.defaultBlockState())
                                 ),
                                 new Padding(Insets.horizontal(2)),
                                 new Label(
                                     LabelStyle.SHADOW,
                                     true,
-                                    Text.translatable("text.uwu.braid").append(Text.literal(" button"))
+                                    Component.translatable("text.uwu.braid").append(Component.literal(" button"))
                                 )
                             )
                         )
@@ -128,7 +128,7 @@ public class BraidDisplayBlockEntity extends BlockEntity {
                 public Widget build(BuildContext context) {
                     return new MessageSlider(
                         this.value,
-                        Text.literal("size: " + BigDecimal.valueOf(this.value).setScale(2, RoundingMode.HALF_UP).toPlainString()), slider -> slider
+                        Component.literal("size: " + BigDecimal.valueOf(this.value).setScale(2, RoundingMode.HALF_UP).toPlainString()), slider -> slider
                             .range(1, 3),
                         (newValue) -> {
                             this.setState(() -> this.value = newValue);
@@ -137,8 +137,8 @@ public class BraidDisplayBlockEntity extends BlockEntity {
 
                             display.quad = new DisplayQuad(
                                 display.quad.pos,
-                                new Vec3d(0, 0, -14 / 16d),
-                                new Vec3d(14 / 16d + (this.value - 1), 0, 0)
+                                new Vec3(0, 0, -14 / 16d),
+                                new Vec3(14 / 16d + (this.value - 1), 0, 0)
                             );
 
                             display.surface.resize(128, (int) (146.29 * display.quad.left.x));

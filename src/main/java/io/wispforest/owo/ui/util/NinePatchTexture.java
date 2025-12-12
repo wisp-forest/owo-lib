@@ -8,24 +8,22 @@ import io.wispforest.owo.Owo;
 import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.ui.core.Color;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
+import io.wispforest.owo.ui.core.OwoUIGraphics;
 import io.wispforest.owo.ui.core.PositionedRectangle;
 import io.wispforest.owo.ui.core.Size;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.resource.JsonDataLoader;
-import net.minecraft.resource.ResourceFinder;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.profiler.Profiler;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.FileToIdConverter;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
+import net.minecraft.util.profiling.ProfilerFiller;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class NinePatchTexture {
 
@@ -60,34 +58,34 @@ public class NinePatchTexture {
         return this.patchSizing.centerPatchSize();
     }
 
-    public void draw(OwoUIDrawContext context, PositionedRectangle rectangle) {
+    public void draw(OwoUIGraphics context, PositionedRectangle rectangle) {
         this.draw(context, rectangle, Color.WHITE);
     }
 
-    public void draw(OwoUIDrawContext context, PositionedRectangle rectangle, Color color) {
+    public void draw(OwoUIGraphics context, PositionedRectangle rectangle, Color color) {
         this.draw(context, rectangle.x(), rectangle.y(), rectangle.width(), rectangle.height(), color);
     }
 
-    public void draw(OwoUIDrawContext context, int x, int y, int width, int height) {
+    public void draw(OwoUIGraphics context, int x, int y, int width, int height) {
         this.draw(context, x, y, width, height, Color.WHITE);
     }
 
-    public void draw(OwoUIDrawContext context, int x, int y, int width, int height, Color color) {
+    public void draw(OwoUIGraphics context, int x, int y, int width, int height, Color color) {
         this.draw(context, RenderPipelines.GUI_TEXTURED, x, y, width, height, color);
     }
 
-    public void draw(OwoUIDrawContext context, RenderPipeline pipeline, int x, int y, int width, int height) {
+    public void draw(OwoUIGraphics context, RenderPipeline pipeline, int x, int y, int width, int height) {
         this.draw(context, pipeline, x, y, width, height, Color.WHITE);
     }
 
-    public void draw(OwoUIDrawContext context, RenderPipeline pipeline, int x, int y, int width, int height, Color color) {
+    public void draw(OwoUIGraphics context, RenderPipeline pipeline, int x, int y, int width, int height, Color color) {
         int rightEdge = this.cornerPatchSize().width() + this.centerPatchSize().width();
         int bottomEdge = this.cornerPatchSize().height() + this.centerPatchSize().height();
 
-        context.drawTexture(pipeline, this.texture, x, y, this.u, this.v, this.cornerPatchSize().width(), this.cornerPatchSize().height(), this.textureSize.width(), this.textureSize.height(), color.argb());
-        context.drawTexture(pipeline, this.texture, x + width - this.cornerPatchSize().width(), y, this.u + rightEdge, this.v, this.cornerPatchSize().width(), this.cornerPatchSize().height(), this.textureSize.width(), this.textureSize.height(), color.argb());
-        context.drawTexture(pipeline, this.texture, x, y + height - this.cornerPatchSize().height(), this.u, this.v + bottomEdge, this.cornerPatchSize().width(), this.cornerPatchSize().height(), this.textureSize.width(), this.textureSize.height(), color.argb());
-        context.drawTexture(pipeline, this.texture, x + width - this.cornerPatchSize().width(), y + height - this.cornerPatchSize().height(), this.u + rightEdge, this.v + bottomEdge, this.cornerPatchSize().width(), this.cornerPatchSize().height(), this.textureSize.width(), this.textureSize.height(), color.argb());
+        context.blit(pipeline, this.texture, x, y, this.u, this.v, this.cornerPatchSize().width(), this.cornerPatchSize().height(), this.textureSize.width(), this.textureSize.height(), color.argb());
+        context.blit(pipeline, this.texture, x + width - this.cornerPatchSize().width(), y, this.u + rightEdge, this.v, this.cornerPatchSize().width(), this.cornerPatchSize().height(), this.textureSize.width(), this.textureSize.height(), color.argb());
+        context.blit(pipeline, this.texture, x, y + height - this.cornerPatchSize().height(), this.u, this.v + bottomEdge, this.cornerPatchSize().width(), this.cornerPatchSize().height(), this.textureSize.width(), this.textureSize.height(), color.argb());
+        context.blit(pipeline, this.texture, x + width - this.cornerPatchSize().width(), y + height - this.cornerPatchSize().height(), this.u + rightEdge, this.v + bottomEdge, this.cornerPatchSize().width(), this.cornerPatchSize().height(), this.textureSize.width(), this.textureSize.height(), color.argb());
 
         if (this.repeat) {
             this.drawRepeated(context, pipeline, x, y, width, height, color);
@@ -96,7 +94,7 @@ public class NinePatchTexture {
         }
     }
 
-    protected void drawStretched(OwoUIDrawContext context, RenderPipeline pipeline, int x, int y, int width, int height, Color color) {
+    protected void drawStretched(OwoUIGraphics context, RenderPipeline pipeline, int x, int y, int width, int height, Color color) {
         int doubleCornerHeight = this.cornerPatchSize().height() * 2;
         int doubleCornerWidth = this.cornerPatchSize().width() * 2;
 
@@ -104,7 +102,7 @@ public class NinePatchTexture {
         int bottomEdge = this.cornerPatchSize().height() + this.centerPatchSize().height();
 
         if (width > doubleCornerWidth && height > doubleCornerHeight) {
-            context.drawTexture(pipeline, this.texture, x + this.cornerPatchSize().width(), y + this.cornerPatchSize().height(),
+            context.blit(pipeline, this.texture, x + this.cornerPatchSize().width(), y + this.cornerPatchSize().height(),
                 this.u + this.cornerPatchSize().width(), this.v + this.cornerPatchSize().height(),
                 width - doubleCornerWidth, height - doubleCornerHeight,
                 this.centerPatchSize().width(), this.centerPatchSize().height(),
@@ -112,12 +110,12 @@ public class NinePatchTexture {
         }
 
         if (width > doubleCornerWidth) {
-            context.drawTexture(pipeline, this.texture, x + this.cornerPatchSize().width(), y,
+            context.blit(pipeline, this.texture, x + this.cornerPatchSize().width(), y,
                 this.u + this.cornerPatchSize().width(), this.v,
                 width - doubleCornerWidth, this.cornerPatchSize().height(),
                 this.centerPatchSize().width(), this.cornerPatchSize().height(),
                 this.textureSize.width(), this.textureSize.height(), color.argb());
-            context.drawTexture(pipeline, this.texture, x + this.cornerPatchSize().width(), y + height - this.cornerPatchSize().height(),
+            context.blit(pipeline, this.texture, x + this.cornerPatchSize().width(), y + height - this.cornerPatchSize().height(),
                 this.u + this.cornerPatchSize().width(), this.v + bottomEdge,
                 width - doubleCornerWidth, this.cornerPatchSize().height(),
                 this.centerPatchSize().width(), this.cornerPatchSize().height(),
@@ -125,12 +123,12 @@ public class NinePatchTexture {
         }
 
         if (height > doubleCornerHeight) {
-            context.drawTexture(pipeline, this.texture, x, y + this.cornerPatchSize().height(),
+            context.blit(pipeline, this.texture, x, y + this.cornerPatchSize().height(),
                 this.u, this.v + this.cornerPatchSize().height(),
                 this.cornerPatchSize().width(), height - doubleCornerHeight,
                 this.cornerPatchSize().width(), this.centerPatchSize().height(),
                 this.textureSize.width(), this.textureSize.height(), color.argb());
-            context.drawTexture(pipeline, this.texture, x + width - this.cornerPatchSize().width(), y + this.cornerPatchSize().height(),
+            context.blit(pipeline, this.texture, x + width - this.cornerPatchSize().width(), y + this.cornerPatchSize().height(),
                 this.u + rightEdge, this.v + this.cornerPatchSize().height(),
                 this.cornerPatchSize().width(), height - doubleCornerHeight,
                 this.cornerPatchSize().width(), this.centerPatchSize().height(),
@@ -138,7 +136,7 @@ public class NinePatchTexture {
         }
     }
 
-    protected void drawRepeated(OwoUIDrawContext context, RenderPipeline pipeline, int x, int y, int width, int height, Color color) {
+    protected void drawRepeated(OwoUIGraphics context, RenderPipeline pipeline, int x, int y, int width, int height, Color color) {
         int doubleCornerHeight = this.cornerPatchSize().height() * 2;
         int doubleCornerWidth = this.cornerPatchSize().width() * 2;
 
@@ -153,7 +151,7 @@ public class NinePatchTexture {
                 int leftoverWidth = width - doubleCornerWidth;
                 while (leftoverWidth > 0) {
                     int drawWidth = Math.min(this.centerPatchSize().width(), leftoverWidth);
-                    context.drawTexture(pipeline, this.texture,
+                    context.blit(pipeline, this.texture,
                         x + this.cornerPatchSize().width() + leftoverWidth - drawWidth, y + this.cornerPatchSize().height() + leftoverHeight - drawHeight,
                         this.u + this.cornerPatchSize().width() + this.centerPatchSize().width() - drawWidth, this.v + this.cornerPatchSize().height() + this.centerPatchSize().height() - drawHeight,
                         drawWidth, drawHeight,
@@ -171,12 +169,12 @@ public class NinePatchTexture {
             while (leftoverWidth > 0) {
                 int drawWidth = Math.min(this.centerPatchSize().width(), leftoverWidth);
 
-                context.drawTexture(pipeline, this.texture, x + this.cornerPatchSize().width() + leftoverWidth - drawWidth, y,
+                context.blit(pipeline, this.texture, x + this.cornerPatchSize().width() + leftoverWidth - drawWidth, y,
                     this.u + this.cornerPatchSize().width() + this.centerPatchSize().width() - drawWidth, this.v,
                     drawWidth, this.cornerPatchSize().height(),
                     drawWidth, this.cornerPatchSize().height(),
                     this.textureSize.width(), this.textureSize.height(), color.argb());
-                context.drawTexture(pipeline, this.texture, x + this.cornerPatchSize().width() + leftoverWidth - drawWidth, y + height - this.cornerPatchSize().height(),
+                context.blit(pipeline, this.texture, x + this.cornerPatchSize().width() + leftoverWidth - drawWidth, y + height - this.cornerPatchSize().height(),
                     this.u + this.cornerPatchSize().width() + this.centerPatchSize().width() - drawWidth, this.v + bottomEdge,
                     drawWidth, this.cornerPatchSize().height(),
                     drawWidth, this.cornerPatchSize().height(),
@@ -190,12 +188,12 @@ public class NinePatchTexture {
             int leftoverHeight = height - doubleCornerHeight;
             while (leftoverHeight > 0) {
                 int drawHeight = Math.min(this.centerPatchSize().height(), leftoverHeight);
-                context.drawTexture(pipeline, this.texture, x, y + this.cornerPatchSize().height() + leftoverHeight - drawHeight,
+                context.blit(pipeline, this.texture, x, y + this.cornerPatchSize().height() + leftoverHeight - drawHeight,
                     this.u, this.v + this.cornerPatchSize().height() + this.centerPatchSize().height() - drawHeight,
                     this.cornerPatchSize().width(), drawHeight,
                     this.cornerPatchSize().width(), drawHeight,
                     this.textureSize.width(), this.textureSize.height(), color.argb());
-                context.drawTexture(pipeline, this.texture, x + width - this.cornerPatchSize().width(), y + this.cornerPatchSize().height() + leftoverHeight - drawHeight,
+                context.blit(pipeline, this.texture, x + width - this.cornerPatchSize().width(), y + this.cornerPatchSize().height() + leftoverHeight - drawHeight,
                     this.u + rightEdge, this.v + this.cornerPatchSize().height() + this.centerPatchSize().height() - drawHeight,
                     this.cornerPatchSize().width(), drawHeight,
                     this.cornerPatchSize().width(), drawHeight,
@@ -206,27 +204,27 @@ public class NinePatchTexture {
         }
     }
 
-    public static void draw(Identifier texture, OwoUIDrawContext context, int x, int y, int width, int height) {
+    public static void draw(Identifier texture, OwoUIGraphics context, int x, int y, int width, int height) {
         draw(texture, context, RenderPipelines.GUI_TEXTURED, x, y, width, height);
     }
 
-    public static void draw(Identifier texture, OwoUIDrawContext context, int x, int y, int width, int height, Color color) {
+    public static void draw(Identifier texture, OwoUIGraphics context, int x, int y, int width, int height, Color color) {
         draw(texture, context, RenderPipelines.GUI_TEXTURED, x, y, width, height, color);
     }
 
-    public static void draw(Identifier texture, OwoUIDrawContext context, RenderPipeline pipeline, int x, int y, int width, int height) {
+    public static void draw(Identifier texture, OwoUIGraphics context, RenderPipeline pipeline, int x, int y, int width, int height) {
         ifPresent(texture, ninePatchTexture -> ninePatchTexture.draw(context, pipeline, x, y, width, height));
     }
 
-    public static void draw(Identifier texture, OwoUIDrawContext context, RenderPipeline pipeline, int x, int y, int width, int height, Color color) {
+    public static void draw(Identifier texture, OwoUIGraphics context, RenderPipeline pipeline, int x, int y, int width, int height, Color color) {
         ifPresent(texture, ninePatchTexture -> ninePatchTexture.draw(context, pipeline, x, y, width, height, color));
     }
 
-    public static void draw(Identifier texture, OwoUIDrawContext context, PositionedRectangle rectangle) {
+    public static void draw(Identifier texture, OwoUIGraphics context, PositionedRectangle rectangle) {
         ifPresent(texture, ninePatchTexture -> ninePatchTexture.draw(context, rectangle));
     }
 
-    public static void draw(Identifier texture, OwoUIDrawContext context, PositionedRectangle rectangle, Color color) {
+    public static void draw(Identifier texture, OwoUIGraphics context, PositionedRectangle rectangle, Color color) {
         ifPresent(texture, ninePatchTexture -> ninePatchTexture.draw(context, rectangle, color));
     }
 
@@ -282,12 +280,12 @@ public class NinePatchTexture {
         }
     }
 
-    public static class MetadataLoader extends JsonDataLoader<NinePatchTexture> implements IdentifiableResourceReloadListener {
+    public static class MetadataLoader extends SimpleJsonResourceReloadListener<NinePatchTexture> implements IdentifiableResourceReloadListener {
 
         private static final Map<Identifier, NinePatchTexture> LOADED_TEXTURES = new HashMap<>();
 
         public MetadataLoader() {
-            super(CodecUtils.toCodec(NinePatchTexture.ENDEC), ResourceFinder.json("nine_patch_textures"));
+            super(CodecUtils.toCodec(NinePatchTexture.ENDEC), FileToIdConverter.json("nine_patch_textures"));
         }
 
         @Override
@@ -295,7 +293,7 @@ public class NinePatchTexture {
             return Owo.id("nine_patch_metadata");
         }
 
-        protected void apply(Map<Identifier, NinePatchTexture> prepared, ResourceManager manager, Profiler profiler) {
+        protected void apply(Map<Identifier, NinePatchTexture> prepared, ResourceManager manager, ProfilerFiller profiler) {
             LOADED_TEXTURES.putAll(prepared);
         }
     }

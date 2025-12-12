@@ -9,7 +9,6 @@ import io.wispforest.owo.braid.widgets.basic.MouseArea;
 import io.wispforest.owo.braid.widgets.intents.Intent;
 import io.wispforest.owo.braid.widgets.intents.Interactable;
 import io.wispforest.owo.braid.widgets.intents.ShortcutTrigger;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.Nullable;
 

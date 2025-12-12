@@ -1,13 +1,9 @@
 package io.wispforest.owo.client.texture;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.Drawable;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Renderable;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Util;
 
 /**
@@ -19,7 +15,7 @@ import net.minecraft.util.Util;
  * @author Tempora
  * @author glisco
  */
-public class AnimatedTextureDrawable implements Drawable {
+public class AnimatedTextureDrawable implements Renderable {
 
     private final SpriteSheetMetadata metadata;
     private final Identifier texture;
@@ -72,7 +68,7 @@ public class AnimatedTextureDrawable implements Drawable {
      * Renders this drawable at the given position. The position
      * of this drawable is mutated non-temporarily
      */
-    public void render(int x, int y, DrawContext context, int mouseX, int mouseY, float delta) {
+    public void render(int x, int y, GuiGraphics context, int mouseX, int mouseY, float delta) {
         this.x = x;
         this.y = y;
         this.render(context, mouseX, mouseY, delta);
@@ -80,17 +76,17 @@ public class AnimatedTextureDrawable implements Drawable {
 
     @SuppressWarnings("IntegerDivisionInFloatingPointContext")
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        if (startTime == -1L) startTime = Util.getMeasuringTimeMs();
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+        if (startTime == -1L) startTime = Util.getMillis();
 
-        long currentTime = Util.getMeasuringTimeMs();
+        long currentTime = Util.getMillis();
         long frame = Math.min(validFrames - 1, (currentTime - startTime) / delay);
 
         if (loop && frame == validFrames - 1) {
-            startTime = Util.getMeasuringTimeMs();
+            startTime = Util.getMillis();
             frame = 0;
         }
 
-        context.drawTexture(RenderPipelines.GUI_TEXTURED, this.texture, x, y, (frame / rows) * metadata.frameWidth(), (frame % rows) * metadata.frameHeight(), width, height, metadata.width(), metadata.height());
+        context.blit(RenderPipelines.GUI_TEXTURED, this.texture, x, y, (frame / rows) * metadata.frameWidth(), (frame % rows) * metadata.frameHeight(), width, height, metadata.width(), metadata.height());
     }
 }

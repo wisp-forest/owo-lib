@@ -2,9 +2,9 @@ package io.wispforest.owo.config.ui.component;
 
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.config.ui.ConfigScreen;
-import io.wispforest.owo.ui.base.BaseComponent;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
-import io.wispforest.owo.ui.core.ParentComponent;
+import io.wispforest.owo.ui.base.BaseUIComponent;
+import io.wispforest.owo.ui.core.OwoUIGraphics;
+import io.wispforest.owo.ui.core.ParentUIComponent;
 import io.wispforest.owo.ui.core.Positioning;
 import io.wispforest.owo.ui.core.Sizing;
 
@@ -14,16 +14,16 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class SearchAnchorComponent extends BaseComponent {
+public class SearchAnchorComponent extends BaseUIComponent {
 
-    protected final ParentComponent anchorFrame;
+    protected final ParentUIComponent anchorFrame;
     protected final Supplier<String>[] searchTextSources;
     protected final Option.Key key;
 
     protected Consumer<ConfigScreen.SearchHighlighterComponent> highlightConfigurator = highlight -> {};
 
     @SafeVarargs
-    public SearchAnchorComponent(ParentComponent anchorFrame, Option.Key key, Supplier<String>... searchTextSources) {
+    public SearchAnchorComponent(ParentUIComponent anchorFrame, Option.Key key, Supplier<String>... searchTextSources) {
         this.anchorFrame = anchorFrame;
         this.searchTextSources = searchTextSources;
         this.key = key;
@@ -33,9 +33,9 @@ public class SearchAnchorComponent extends BaseComponent {
     }
 
     @Override
-    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {}
+    public void draw(OwoUIGraphics graphics, int mouseX, int mouseY, float partialTicks, float delta) {}
 
-    public ParentComponent anchorFrame() {
+    public ParentUIComponent anchorFrame() {
         return this.anchorFrame;
     }
 

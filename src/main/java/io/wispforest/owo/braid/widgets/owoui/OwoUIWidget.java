@@ -8,14 +8,14 @@ import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.Align;
 import io.wispforest.owo.braid.widgets.basic.Builder;
 import io.wispforest.owo.braid.widgets.focus.Focusable;
-import io.wispforest.owo.ui.core.ParentComponent;
+import io.wispforest.owo.ui.core.ParentUIComponent;
 
 import java.util.function.Supplier;
 
 public class OwoUIWidget extends StatefulWidget {
-    private final Supplier<ParentComponent> componentSupplier;
+    private final Supplier<ParentUIComponent> componentSupplier;
 
-    public OwoUIWidget(Supplier<ParentComponent> componentSupplier) {
+    public OwoUIWidget(Supplier<ParentUIComponent> componentSupplier) {
         this.componentSupplier = componentSupplier;
     }
 
@@ -25,7 +25,7 @@ public class OwoUIWidget extends StatefulWidget {
     }
 
     public static class State extends WidgetState<OwoUIWidget> {
-        private ParentComponent component;
+        private ParentUIComponent component;
         private BuildContext owoUiContext;
 
         @Override

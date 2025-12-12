@@ -9,7 +9,7 @@ import io.wispforest.owo.braid.widgets.basic.EmptyWidget;
 import io.wispforest.owo.braid.widgets.overlay.Overlay;
 import io.wispforest.owo.braid.widgets.overlay.OverlayEntry;
 import io.wispforest.owo.braid.widgets.overlay.OverlayEntryBuilder;
-import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.gui.components.AbstractWidget;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
 
@@ -35,11 +35,11 @@ public class LayerAlignment extends StatefulWidget {
         this.widget = widget;
     }
 
-    public static LayerAlignment atVanillaWidget(Predicate<ClickableWidget> anchorPredicate, Widget widget) {
+    public static LayerAlignment atVanillaWidget(Predicate<AbstractWidget> anchorPredicate, Widget widget) {
         return atVanillaWidget(anchorPredicate, AnchorJustification.TOP_LEFT_TO_TOP_LEFT, widget);
     }
 
-    public static LayerAlignment atVanillaWidget(Predicate<ClickableWidget> anchorPredicate, AnchorJustification justification, Widget widget) {
+    public static LayerAlignment atVanillaWidget(Predicate<AbstractWidget> anchorPredicate, AnchorJustification justification, Widget widget) {
         return new LayerAlignment(
             context -> {
                 var anchor = LayerContext.findWidget(context, anchorPredicate);
@@ -55,10 +55,10 @@ public class LayerAlignment extends StatefulWidget {
         );
     }
 
-    public static LayerAlignment atHandledScreenCoordinates(double xOffset, double yOffset, Widget widget) {
+    public static LayerAlignment atContainerScreenCoordinates(double xOffset, double yOffset, Widget widget) {
         return new LayerAlignment(
             context -> {
-                var root = LayerContext.handledScreenRootOf(context);
+                var root = LayerContext.containerScreenRootOf(context);
                 if (root == null) return null;
 
                 return root.add(xOffset, yOffset);

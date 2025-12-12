@@ -1,14 +1,14 @@
 package io.wispforest.owo.braid.widgets.object;
 
-import io.wispforest.owo.braid.core.BraidDrawContext;
+import com.mojang.math.Axis;
+import io.wispforest.owo.braid.core.BraidGraphics;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.element.BraidEntityElement;
 import io.wispforest.owo.braid.framework.instance.LeafWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.LeafInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.math.RotationAxis;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix4f;
@@ -97,8 +97,8 @@ public class EntityWidget extends LeafInstanceWidget {
 
             if (this.widget.scaleToFit) {
                 this.baseScale = Math.min(
-                    this.transform.width() / this.widget.entity.getWidth(),
-                    this.transform.height() / this.widget.entity.getHeight()
+                    this.transform.width() / this.widget.entity.getBbWidth(),
+                    this.transform.height() / this.widget.entity.getBbHeight()
                 ) * .6;
             }
         }
@@ -119,7 +119,7 @@ public class EntityWidget extends LeafInstanceWidget {
         }
 
         @Override
-        public void draw(BraidDrawContext ctx) {
+        public void draw(BraidGraphics graphics) {
             var entity = this.widget.entity;
 
             var entitySpaceToWidgetSpace = new Matrix4f();
@@ -132,21 +132,21 @@ public class EntityWidget extends LeafInstanceWidget {
                 this.widget.transform.accept(entityTransform);
             }
 
-            entityTransform.translate(0, -entity.getHeight() / 2, 0);
+            entityTransform.translate(0, -entity.getBbHeight() / 2, 0);
 
             var xRotation = 0f;
             var yRotation = 0f;
 
-            var lastHeadYaw = entity instanceof LivingEntity living ? living.lastHeadYaw : 0;
-            var lastYaw = entity.lastYaw;
-            var lastPitch = entity.lastPitch;
+            var lastHeadYaw = entity instanceof LivingEntity living ? living.yHeadRotO : 0;
+            var lastYaw = entity.yRotO;
+            var lastPitch = entity.xRotO;
 
             if (this.widget.displayMode == DisplayMode.FIXED) {
                 xRotation = 35;
                 yRotation = -45;
             } else if (this.widget.displayMode != DisplayMode.NONE) {
                 var globalCursorPos = this.host().cursorPosition();
-                var cursor4x4Buffer = ctx.getMatrices().get4x4(new float[16]);
+                var cursor4x4Buffer = graphics.pose().get4x4(new float[16]);
 
                 var cursorTransform = new Matrix4f()
                     .set(cursor4x4Buffer)
@@ -165,20 +165,20 @@ public class EntityWidget extends LeafInstanceWidget {
 
                         xRotation = (float) Math.toDegrees(Math.atan(localCursorPos.y - center.y)) * -.15f;
                         yRotation = (float) Math.toDegrees(Math.atan(localCursorPos.x - center.x)) * .15f;
-                        if (entity instanceof LivingEntity living) living.lastHeadYaw = -yRotation * 3;
+                        if (entity instanceof LivingEntity living) living.yHeadRotO = -yRotation * 3;
 
-                        entity.lastYaw = -yRotation * .65f;
-                        entity.lastPitch = xRotation * 2.5f;
+                        entity.yRotO = -yRotation * .65f;
+                        entity.xRotO = xRotation * 2.5f;
                     }
                     case VANILLA -> {
-                        var center = new Vector4f(0, entity.getHeight() / 2, 0, 1);
+                        var center = new Vector4f(0, entity.getBbHeight() / 2, 0, 1);
 
                         xRotation = (float) Math.atan(localCursorPos.y - center.y) * -20f;
                         yRotation = (float) Math.atan(localCursorPos.x - center.x) * 20f;
-                        if (entity instanceof LivingEntity living) living.lastHeadYaw = -yRotation;
+                        if (entity instanceof LivingEntity living) living.yHeadRotO = -yRotation;
 
-                        entity.lastYaw = -yRotation;
-                        entity.lastPitch = xRotation;
+                        entity.yRotO = -yRotation;
+                        entity.xRotO = xRotation;
                     }
                 }
             }
@@ -186,26 +186,26 @@ public class EntityWidget extends LeafInstanceWidget {
             // We make sure the yRotation never becomes 0, as the lighting otherwise becomes very unhappy
             if (yRotation == 0) yRotation = .1f;
 
-            entityTransform.rotate(RotationAxis.POSITIVE_X.rotationDegrees(xRotation));
-            entityTransform.rotate(RotationAxis.POSITIVE_Y.rotationDegrees(yRotation));
+            entityTransform.rotate(Axis.XP.rotationDegrees(xRotation));
+            entityTransform.rotate(Axis.YP.rotationDegrees(yRotation));
 
-            var entityState = this.host().client().getEntityRenderDispatcher().getAndUpdateRenderState(this.widget.entity, 0);
+            var entityState = this.host().client().getEntityRenderDispatcher().extractEntity(this.widget.entity, 0);
 
             if (!this.widget.showNametag) {
-                entityState.displayName = null;
+                entityState.nameTag = null;
             }
 
-            ctx.state.addSpecialElement(new BraidEntityElement(
+            graphics.guiRenderState.submitPicturesInPictureState(new BraidEntityElement(
                 entityState,
                 new Matrix4f().mul(entitySpaceToWidgetSpace).mul(entityTransform),
-                new Matrix3x2f(ctx.getMatrices()),
+                new Matrix3x2f(graphics.pose()),
                 this.transform.width(), this.transform.height(),
-                ctx.scissorStack.peekLast()
+                graphics.scissorStack.peek()
             ));
 
-            if (entity instanceof LivingEntity living) living.lastHeadYaw = lastHeadYaw;
-            entity.lastPitch = lastPitch;
-            entity.lastYaw = lastYaw;
+            if (entity instanceof LivingEntity living) living.yHeadRotO = lastHeadYaw;
+            entity.xRotO = lastPitch;
+            entity.yRotO = lastYaw;
         }
     }
 

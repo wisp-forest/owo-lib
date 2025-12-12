@@ -6,12 +6,12 @@ import io.wispforest.owo.braid.framework.widget.InheritedWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.BraidApp;
 import io.wispforest.owo.ui.util.DisposableScreen;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
 public class BraidScreen extends Screen implements DisposableScreen {
@@ -24,7 +24,7 @@ public class BraidScreen extends Screen implements DisposableScreen {
     public AppState state;
 
     public BraidScreen(Settings settings, Widget rootWidget) {
-        super(Text.empty());
+        super(Component.empty());
         this.settings = settings;
         this.rootWidget = rootWidget;
     }
@@ -45,7 +45,7 @@ public class BraidScreen extends Screen implements DisposableScreen {
             this.state = new AppState(
                 null,
                 AppState.formatName("BraidScreen", this.rootWidget),
-                this.client,
+                this.minecraft,
                 this.surface,
                 this.eventBinding,
                 new BraidScreenProvider(this, widget)
@@ -54,15 +54,15 @@ public class BraidScreen extends Screen implements DisposableScreen {
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        super.render(graphics, mouseX, mouseY, delta);
 
         this.eventBinding.add(new MouseMoveEvent(mouseX, mouseY));
         this.state.processEvents(
-            this.client.getRenderTickCounter().getDynamicDeltaTicks()
+            this.minecraft.getDeltaTracker().getGameTimeDeltaTicks()
         );
 
-        this.state.draw(context);
+        this.state.draw(graphics);
     }
 
     @Override
@@ -71,18 +71,18 @@ public class BraidScreen extends Screen implements DisposableScreen {
     }
 
     @Override
-    public boolean shouldPause() {
+    public boolean isPauseScreen() {
         return this.settings.shouldPause;
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         this.eventBinding.add(new MouseButtonPressEvent(click.button(), click.modifiers()));
         return true;
     }
 
     @Override
-    public boolean mouseReleased(Click click) {
+    public boolean mouseReleased(MouseButtonEvent click) {
         this.eventBinding.add(new MouseButtonReleaseEvent(click.button(), click.modifiers()));
         return true;
     }
@@ -94,19 +94,19 @@ public class BraidScreen extends Screen implements DisposableScreen {
     }
 
     @Override
-    public boolean keyPressed(KeyInput input) {
+    public boolean keyPressed(KeyEvent input) {
         this.eventBinding.add(new KeyPressEvent(input.key(), input.scancode(), input.modifiers()));
         return super.keyPressed(input);
     }
 
     @Override
-    public boolean keyReleased(KeyInput input) {
+    public boolean keyReleased(KeyEvent input) {
         this.eventBinding.add(new KeyReleaseEvent(input.key(), input.scancode(), input.modifiers()));
         return true;
     }
 
     @Override
-    public boolean charTyped(CharInput input) {
+    public boolean charTyped(CharacterEvent input) {
         this.eventBinding.add(new CharInputEvent((char) input.codepoint(), input.modifiers()));
         return true;
     }

@@ -1,11 +1,11 @@
 package io.wispforest.owo.braid.widgets.basic;
 
-import io.wispforest.owo.braid.core.BraidDrawContext;
+import io.wispforest.owo.braid.core.BraidGraphics;
 import io.wispforest.owo.braid.framework.instance.HitTestState;
 import io.wispforest.owo.braid.framework.instance.SingleChildWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import net.minecraft.client.gui.ScreenRect;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
 
 // TODO: stencil clip
 //  also warn in docs about transforms which aren't pure translations
@@ -36,15 +36,15 @@ public class Clip extends SingleChildInstanceWidget {
         }
 
         @Override
-        public void draw(BraidDrawContext ctx) {
+        public void draw(BraidGraphics graphics) {
             if (!this.widget.clipDrawing) {
-                super.draw(ctx);
+                super.draw(graphics);
                 return;
             }
 
-            ctx.scissorStack.push(new ScreenRect(0, 0, (int) this.transform.width(), (int) this.transform.height()).transformEachVertex(ctx.getMatrices()));
-            super.draw(ctx);
-            ctx.disableScissor();
+            graphics.scissorStack.push(new ScreenRectangle(0, 0, (int) this.transform.width(), (int) this.transform.height()).transformMaxBounds(graphics.pose()));
+            super.draw(graphics);
+            graphics.disableScissor();
         }
 
         @Override

@@ -1,10 +1,10 @@
 package io.wispforest.owo.particles.systems;
 
+import io.wispforest.endec.Endec;
 import io.wispforest.endec.impl.ReflectiveEndecBuilder;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.network.NetworkException;
 import io.wispforest.owo.network.OwoHandshake;
-import io.wispforest.endec.Endec;
 import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.util.OwoFreezer;
@@ -18,12 +18,12 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.HashMap;
@@ -47,7 +47,7 @@ public class ParticleSystemController {
     public final Int2ObjectMap<ParticleSystem<?>> systemsByIndex = new Int2ObjectOpenHashMap<>();
 
     public final Identifier channelId;
-    private final CustomPayload.Id<ParticleSystemPayload> payloadId;
+    private final CustomPacketPayload.Type<ParticleSystemPayload> payloadId;
     private int maxIndex = 0;
     private final String ownerClassName;
 
@@ -73,7 +73,7 @@ public class ParticleSystemController {
         }
 
         this.channelId = channelId;
-        this.payloadId = new CustomPayload.Id<>(channelId);
+        this.payloadId = new CustomPacketPayload.Type<>(channelId);
         this.ownerClassName = ReflectionUtils.getCallingClassName(2);
 
         var instanceEndec = Endec.<ParticleSystemInstance<?>, Integer>dispatched(
@@ -86,7 +86,7 @@ public class ParticleSystemController {
             Endec.VAR_INT
         );
         var endec = StructEndecBuilder.of(
-            MinecraftEndecs.VEC3D.fieldOf("pos", ParticleSystemPayload::pos),
+            MinecraftEndecs.VEC3.fieldOf("pos", ParticleSystemPayload::pos),
             instanceEndec.fieldOf("instance", ParticleSystemPayload::instance),
             (pos, instance) -> new ParticleSystemPayload(payloadId, pos, instance)
         );
@@ -158,10 +158,10 @@ public class ParticleSystemController {
         return this.registerDeferred(dataClass, this.builder.get(dataClass));
     }
 
-    <T> void sendPacket(ParticleSystem<T> particleSystem, ServerWorld world, Vec3d pos, T data) {
+    <T> void sendPacket(ParticleSystem<T> particleSystem, ServerLevel level, Vec3 pos, T data) {
         ParticleSystemPayload payload = new ParticleSystemPayload(payloadId, pos, new ParticleSystemInstance<>(particleSystem, data));
 
-        for (var player : PlayerLookup.tracking(world, BlockPos.ofFloored(pos))) {
+        for (var player : PlayerLookup.tracking(level, BlockPos.containing(pos))) {
             ServerPlayNetworking.send(player, payload);
         }
     }
@@ -185,14 +185,14 @@ public class ParticleSystemController {
     }
 
     private record ParticleSystemInstance<T>(ParticleSystem<T> system, T data) {
-        public void execute(World world, Vec3d pos) {
-            system.handler.executeParticleSystem(world, pos, data);
+        public void execute(Level level, Vec3 pos) {
+            system.handler.executeParticleSystem(level, pos, data);
         }
     }
 
-    private record ParticleSystemPayload(CustomPayload.Id<ParticleSystemPayload> id, Vec3d pos, ParticleSystemInstance<?> instance) implements CustomPayload {
+    private record ParticleSystemPayload(CustomPacketPayload.Type<ParticleSystemPayload> id, Vec3 pos, ParticleSystemInstance<?> instance) implements CustomPacketPayload {
         @Override
-        public Id<? extends CustomPayload> getId() {
+        public Type<? extends CustomPacketPayload> type() {
             return id;
         }
     }
@@ -200,7 +200,7 @@ public class ParticleSystemController {
     @Environment(EnvType.CLIENT)
     private static class Client {
         private void handler(ParticleSystemPayload payload, ClientPlayNetworking.Context context) {
-            payload.instance.execute(context.client().world, payload.pos);
+            payload.instance.execute(context.client().level, payload.pos);
         }
     }
 }

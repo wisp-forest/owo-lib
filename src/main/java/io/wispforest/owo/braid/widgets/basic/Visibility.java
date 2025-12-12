@@ -1,6 +1,6 @@
 package io.wispforest.owo.braid.widgets.basic;
 
-import io.wispforest.owo.braid.core.BraidDrawContext;
+import io.wispforest.owo.braid.core.BraidGraphics;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.Size;
 import io.wispforest.owo.braid.framework.instance.HitTestState;
@@ -73,9 +73,9 @@ public class Visibility extends SingleChildInstanceWidget {
         }
 
         @Override
-        public void draw(BraidDrawContext ctx) {
+        public void draw(BraidGraphics graphics) {
             if (!this.widget.visible) return;
-            super.draw(ctx);
+            super.draw(graphics);
         }
 
         @Override

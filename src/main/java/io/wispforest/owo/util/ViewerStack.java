@@ -2,15 +2,15 @@ package io.wispforest.owo.util;
 
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
-import net.minecraft.component.ComponentChanges;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 // TODO: pick better name
 public interface ViewerStack {
     long count();
 
-    ComponentChanges componentChanges();
+    DataComponentPatch componentChanges();
 
     record OfItem(ItemVariant item, long count) implements ViewerStack {
         public static final OfItem EMPTY = new OfItem(ItemVariant.of(ItemStack.EMPTY), 0);
@@ -28,14 +28,14 @@ public interface ViewerStack {
         }
 
         @Override
-        public ComponentChanges componentChanges() {
+        public DataComponentPatch componentChanges() {
             return item.getComponents();
         }
     }
 
     record OfFluid(FluidVariant fluid, long count) implements ViewerStack {
         @Override
-        public ComponentChanges componentChanges() {
+        public DataComponentPatch componentChanges() {
             return fluid.getComponents();
         }
     }

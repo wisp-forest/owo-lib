@@ -3,7 +3,7 @@ package io.wispforest.owo.ui.component;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 import org.w3c.dom.Element;
 
 import java.math.BigDecimal;
@@ -24,7 +24,7 @@ public class DiscreteSliderComponent extends SliderComponent {
         this.max = max;
 
         this.updateMessage();
-        this.message(Text::literal);
+        this.message(Component::literal);
     }
 
     @Override

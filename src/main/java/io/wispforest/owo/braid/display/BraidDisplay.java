@@ -2,18 +2,18 @@ package io.wispforest.owo.braid.display;
 
 import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.vertex.PoseStack;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.core.AppState;
 import io.wispforest.owo.braid.core.EventBinding;
 import io.wispforest.owo.braid.core.TextureSurface;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import io.wispforest.owo.mixin.braid.RenderLayerInvoker;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.RenderSetup;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.util.math.MatrixStack;
+import io.wispforest.owo.mixin.braid.RenderTypeInvoker;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.rendertype.RenderSetup;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.function.Function;
@@ -38,7 +38,7 @@ public class BraidDisplay {
         this.app = new AppState(
             null,
             AppState.formatName("BraidDisplay", widget),
-            MinecraftClient.getInstance(),
+            Minecraft.getInstance(),
             this.surface,
             new EventBinding.Headless(),
             widget
@@ -54,20 +54,20 @@ public class BraidDisplay {
         var client = this.app.client();
 
         this.app.processEvents(
-            client.getRenderTickCounter().getDynamicDeltaTicks()
+            client.getDeltaTracker().getGameTimeDeltaTicks()
         );
 
-        this.app.draw(this.surface.guiRenderer.newDrawContext(this.app.cursorPosition().x(), this.app.cursorPosition().y()));
+        this.app.draw(this.surface.guiRenderer.newGraphics(this.app.cursorPosition().x(), this.app.cursorPosition().y()));
     }
 
-    public void render(MatrixStack matrices, OrderedRenderCommandQueue queue, int light) {
+    public void render(PoseStack matrices, SubmitNodeCollector queue, int light) {
         var layer = RENDER_TYPE.apply(this.surface);
-        queue.submitCustom(matrices, layer, (matricesEntry, buffer) -> {
+        queue.submitCustomGeometry(matrices, layer, (matricesEntry, buffer) -> {
             var normal = this.quad.normal.toVector3f();
-            buffer.vertex(matricesEntry, 0, 0, 0).color(1f, 1f, 1f, 1f).texture(0, 1).light(light).normal(matricesEntry, normal);
-            buffer.vertex(matricesEntry, this.quad.left.toVector3f()).color(1f, 1f, 1f, 1f).texture(0, 0).light(light).normal(matricesEntry, normal);
-            buffer.vertex(matricesEntry, this.quad.top.add(this.quad.left).toVector3f()).color(1f, 1f, 1f, 1f).texture(1, 0).light(light).normal(matricesEntry, normal);
-            buffer.vertex(matricesEntry, this.quad.top.toVector3f()).color(1f, 1f, 1f, 1f).texture(1, 1).light(light).normal(matricesEntry, normal);
+            buffer.addVertex(matricesEntry, 0, 0, 0).setColor(1f, 1f, 1f, 1f).setUv(0, 1).setLight(light).setNormal(matricesEntry, normal);
+            buffer.addVertex(matricesEntry, this.quad.left.toVector3f()).setColor(1f, 1f, 1f, 1f).setUv(0, 0).setLight(light).setNormal(matricesEntry, normal);
+            buffer.addVertex(matricesEntry, this.quad.top.add(this.quad.left).toVector3f()).setColor(1f, 1f, 1f, 1f).setUv(1, 0).setLight(light).setNormal(matricesEntry, normal);
+            buffer.addVertex(matricesEntry, this.quad.top.toVector3f()).setColor(1f, 1f, 1f, 1f).setUv(1, 1).setLight(light).setNormal(matricesEntry, normal);
         });
     }
 
@@ -80,11 +80,11 @@ public class BraidDisplay {
         .withBlend(BlendFunction.TRANSLUCENT)
         .build();
 
-    private static final Function<TextureSurface, RenderLayer> RENDER_TYPE = surface -> RenderLayerInvoker.owo$of(
+    private static final Function<TextureSurface, RenderType> RENDER_TYPE = surface -> RenderTypeInvoker.owo$of(
         Owo.id("braid_display").toString(),
         RenderSetup.builder(PIPELINE)
-            .texture("Sampler0", surface.registeredTextureId)
+            .withTexture("Sampler0", surface.registeredTextureId)
             .useLightmap()
-            .build()
+            .createRenderSetup()
     );
 }

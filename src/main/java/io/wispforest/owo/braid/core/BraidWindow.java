@@ -1,5 +1,8 @@
 package io.wispforest.owo.braid.core;
 
+import com.mojang.blaze3d.opengl.GlDebug;
+import com.mojang.blaze3d.opengl.GlTexture;
+import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.core.cursor.CursorController;
@@ -9,10 +12,7 @@ import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.util.BraidGuiRenderer;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.GlDebug;
-import net.minecraft.client.gl.SimpleFramebuffer;
-import net.minecraft.client.texture.GlTexture;
+import net.minecraft.client.Minecraft;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL32;
@@ -36,7 +36,7 @@ public class BraidWindow implements Surface {
     private final List<NativeResource> resources = new ArrayList<>();
 
     private final EventStream<ResizeCallback> onResize = ResizeCallback.newStream();
-    private SimpleFramebuffer remoteFramebuffer;
+    private TextureTarget remoteTarget;
     private int localFbo;
 
     public final BraidGuiRenderer guiRenderer;
@@ -54,7 +54,7 @@ public class BraidWindow implements Surface {
         this.handle = handle;
         this.cursorController = new CursorController(this.handle);
 
-        this.guiRenderer = new BraidGuiRenderer(MinecraftClient.getInstance());
+        this.guiRenderer = new BraidGuiRenderer(Minecraft.getInstance());
 
         var framebufferWidthOut = new int[1];
         var framebufferHeightOut = new int[1];
@@ -62,7 +62,7 @@ public class BraidWindow implements Surface {
 
         this.framebufferWidth = framebufferWidthOut[0];
         this.framebufferHeight = framebufferHeightOut[0];
-        this.remoteFramebuffer = new SimpleFramebuffer("braid window", this.framebufferWidth, this.framebufferHeight, true);
+        this.remoteTarget = new TextureTarget("braid window", this.framebufferWidth, this.framebufferHeight, true);
         this.recreateLocalFbo();
 
         GLFW.glfwSetWindowCloseCallback(this.handle, this.storeNativeResource(GLFWWindowCloseCallback.create(window -> {
@@ -73,9 +73,9 @@ public class BraidWindow implements Surface {
             this.framebufferWidth = width;
             this.framebufferHeight = height;
 
-            withContext(MinecraftClient.getInstance().getWindow().getHandle(), () -> {
-                this.remoteFramebuffer.delete();
-                this.remoteFramebuffer = new SimpleFramebuffer("braid window", this.framebufferWidth, this.framebufferHeight, true);
+            withContext(Minecraft.getInstance().getWindow().handle(), () -> {
+                this.remoteTarget.destroyBuffers();
+                this.remoteTarget = new TextureTarget("braid window", this.framebufferWidth, this.framebufferHeight, true);
             });
 
             this.recreateLocalFbo();
@@ -141,7 +141,7 @@ public class BraidWindow implements Surface {
 
             this.localFbo = GL32.glGenFramebuffers();
             GL32.glBindFramebuffer(GL32.GL_FRAMEBUFFER, this.localFbo);
-            GL32.glFramebufferTexture2D(GL32.GL_FRAMEBUFFER, GL32.GL_COLOR_ATTACHMENT0, GL32.GL_TEXTURE_2D, ((GlTexture) this.remoteFramebuffer.getColorAttachment()).getGlId(), 0);
+            GL32.glFramebufferTexture2D(GL32.GL_FRAMEBUFFER, GL32.GL_COLOR_ATTACHMENT0, GL32.GL_TEXTURE_2D, ((GlTexture) this.remoteTarget.getColorTexture()).glId(), 0);
 
             if (GL32.glCheckFramebufferStatus(GL32.GL_FRAMEBUFFER) != GL32.GL_FRAMEBUFFER_COMPLETE) {
                 throw new UnsupportedOperationException("Failed to initialize local FBO");
@@ -152,8 +152,8 @@ public class BraidWindow implements Surface {
     }
 
     private void recalculateScale() {
-        var guiScale = MinecraftClient.getInstance().options.getGuiScale().getValue();
-        var forceUnicodeFont = MinecraftClient.getInstance().options.getForceUnicodeFont().getValue();
+        var guiScale = Minecraft.getInstance().options.guiScale().get();
+        var forceUnicodeFont = Minecraft.getInstance().options.forceUnicodeFont().get();
 
         var factor = 1;
 
@@ -190,7 +190,7 @@ public class BraidWindow implements Surface {
             GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_PROFILE, GLFW.GLFW_OPENGL_CORE_PROFILE);
             GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_FORWARD_COMPAT, GLFW.GLFW_TRUE);
 
-            var handle = GLFW.glfwCreateWindow(width, height, title, 0, MinecraftClient.getInstance().getWindow().getHandle());
+            var handle = GLFW.glfwCreateWindow(width, height, title, 0, Minecraft.getInstance().getWindow().handle());
 
             if (handle == 0) {
                 throw new UnsupportedOperationException("Failed to create a GLFW window");
@@ -199,7 +199,7 @@ public class BraidWindow implements Surface {
             GLFW.glfwMakeContextCurrent(handle);
             GLFW.glfwSwapInterval(0);
 
-            GlDebug.enableDebug(MinecraftClient.getInstance().options.glDebugVerbosity, true, new HashSet<>());
+            GlDebug.enableDebugCallback(Minecraft.getInstance().options.glDebugVerbosity, true, new HashSet<>());
 
             handleOut.setValue(handle);
         });
@@ -212,7 +212,7 @@ public class BraidWindow implements Surface {
         var app = new AppState(
             Owo.LOGGER,
             AppState.formatName("BraidWindow", widget, title),
-            MinecraftClient.getInstance(),
+            Minecraft.getInstance(),
             window,
             window.eventBinding,
             widget
@@ -231,7 +231,7 @@ public class BraidWindow implements Surface {
 
         this.guiRenderer.close();
 
-        this.remoteFramebuffer.delete();
+        this.remoteTarget.destroyBuffers();
 
         for (var resource : this.resources) {
             resource.free();
@@ -275,9 +275,9 @@ public class BraidWindow implements Surface {
     @Override
     public void beginRendering() {
         RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(
-            this.remoteFramebuffer.getColorAttachment(),
+            this.remoteTarget.getColorTexture(),
             0xFF000000,
-            this.remoteFramebuffer.getDepthAttachment(),
+            this.remoteTarget.getDepthTexture(),
             1
         );
     }
@@ -285,7 +285,7 @@ public class BraidWindow implements Surface {
     @Override
     public void endRendering() {
         this.guiRenderer.render(new BraidGuiRenderer.Target(
-            this.remoteFramebuffer,
+            this.remoteTarget,
             this
         ));
 

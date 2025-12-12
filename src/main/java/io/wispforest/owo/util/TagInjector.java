@@ -1,10 +1,10 @@
 package io.wispforest.owo.util;
 
 import com.google.common.collect.ForwardingMap;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.TagEntry;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.tags.TagEntry;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -54,7 +54,7 @@ public final class TagInjector {
      * @param values     The values to insert
      */
     public static void injectRaw(Registry<?> registry, Identifier tag, Function<Identifier, TagEntry> entryMaker, Collection<Identifier> values) {
-        ADDITIONS.computeIfAbsent(new TagLocation(RegistryKeys.getTagPath(registry.getKey()), tag),identifier -> new HashSet<>())
+        ADDITIONS.computeIfAbsent(new TagLocation(Registries.tagsDirPath(registry.key()), tag), identifier -> new HashSet<>())
                 .addAll(values.stream().map(entryMaker).toList());
     }
 
@@ -74,7 +74,7 @@ public final class TagInjector {
      * @param <T>      The type of the target registry
      */
     public static <T> void inject(Registry<T> registry, Identifier tag, Collection<T> values) {
-        injectDirectReference(registry, tag, values.stream().map(registry::getId).toList());
+        injectDirectReference(registry, tag, values.stream().map(registry::getKey).toList());
     }
 
     @SafeVarargs
@@ -92,7 +92,7 @@ public final class TagInjector {
      * @param values   The values to inject
      */
     public static void injectDirectReference(Registry<?> registry, Identifier tag, Collection<Identifier> values) {
-        injectRaw(registry, tag, TagEntry::create, values);
+        injectRaw(registry, tag, TagEntry::element, values);
     }
 
     public static void injectDirectReference(Registry<?> registry, Identifier tag, Identifier... values) {
@@ -112,7 +112,7 @@ public final class TagInjector {
      * @param values   The values to inject
      */
     public static void injectTagReference(Registry<?> registry, Identifier tag, Collection<Identifier> values) {
-        injectRaw(registry, tag, TagEntry::createTag, values);
+        injectRaw(registry, tag, TagEntry::tag, values);
     }
 
     public static void injectTagReference(Registry<?> registry, Identifier tag, Identifier... values) {

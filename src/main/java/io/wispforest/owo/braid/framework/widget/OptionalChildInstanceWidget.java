@@ -1,7 +1,6 @@
 package io.wispforest.owo.braid.framework.widget;
 
 import io.wispforest.owo.braid.framework.instance.OptionalChildWidgetInstance;
-import io.wispforest.owo.braid.framework.instance.WidgetInstance;
 import io.wispforest.owo.braid.framework.proxy.OptionalChildInstanceWidgetProxy;
 import io.wispforest.owo.braid.framework.proxy.WidgetProxy;
 import org.jetbrains.annotations.Nullable;

@@ -1,41 +1,41 @@
 package io.wispforest.owo.ui.renderstate;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.ScreenRect;
-import net.minecraft.client.gui.render.SpecialGuiElementRenderer;
-import net.minecraft.client.gui.render.state.special.SpecialGuiElementRenderState;
-import net.minecraft.client.render.DiffuseLighting;
-import net.minecraft.client.render.LightmapTextureManager;
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.item.ItemRenderState;
-import net.minecraft.client.util.math.MatrixStack;
+import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
+import net.minecraft.client.gui.render.state.pip.PictureInPictureRenderState;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import org.jetbrains.annotations.Nullable;
 
 public record OwoItemElementRenderState(
-    ItemRenderState item,
-    ScreenRect bounds,
-    ScreenRect scissorArea
-) implements SpecialGuiElementRenderState {
+    ItemStackRenderState item,
+    ScreenRectangle bounds,
+    ScreenRectangle scissorArea
+) implements PictureInPictureRenderState {
 
     @Override
-    public int x1() {
-        return this.bounds.getLeft();
+    public int x0() {
+        return this.bounds.left();
     }
 
     @Override
-    public int x2() {
-        return this.bounds.getRight();
+    public int x1() {
+        return this.bounds.right();
+    }
+
+    @Override
+    public int y0() {
+        return this.bounds.top();
     }
 
     @Override
     public int y1() {
-        return this.bounds.getTop();
-    }
-
-    @Override
-    public int y2() {
-        return this.bounds.getBottom();
+        return this.bounds.bottom();
     }
 
     @Override
@@ -44,49 +44,49 @@ public record OwoItemElementRenderState(
     }
 
     @Override
-    public @Nullable ScreenRect scissorArea() {
+    public @Nullable ScreenRectangle scissorArea() {
         return this.scissorArea;
     }
 
     @Override
-    public @Nullable ScreenRect bounds() {
+    public @Nullable ScreenRectangle bounds() {
         return this.scissorArea != null ? this.scissorArea.intersection(this.bounds) : this.bounds;
     }
 
-    public static class Renderer extends SpecialGuiElementRenderer<OwoItemElementRenderState> {
+    public static class Renderer extends PictureInPictureRenderer<OwoItemElementRenderState> {
 
-        public Renderer(VertexConsumerProvider.Immediate vertexConsumers) {
+        public Renderer(MultiBufferSource.BufferSource vertexConsumers) {
             super(vertexConsumers);
         }
 
         @Override
-        public Class<OwoItemElementRenderState> getElementClass() {
+        public Class<OwoItemElementRenderState> getRenderStateClass() {
             return OwoItemElementRenderState.class;
         }
 
         @Override
-        protected void render(OwoItemElementRenderState state, MatrixStack matrices) {
+        protected void renderToTexture(OwoItemElementRenderState state, PoseStack matrices) {
             matrices.scale(state.bounds.width(), -state.bounds.height(), -Math.min(state.bounds.width(), state.bounds.height()));
 
-            var notSideLit = !state.item.isSideLit();
+            var notSideLit = !state.item.usesBlockLight();
             if (notSideLit) {
-                MinecraftClient.getInstance().gameRenderer.getDiffuseLighting().setShaderLights(DiffuseLighting.Type.ITEMS_FLAT);
+                Minecraft.getInstance().gameRenderer.getLighting().setupFor(Lighting.Entry.ITEMS_FLAT);
             } else {
-                MinecraftClient.getInstance().gameRenderer.getDiffuseLighting().setShaderLights(DiffuseLighting.Type.ITEMS_3D);
+                Minecraft.getInstance().gameRenderer.getLighting().setupFor(Lighting.Entry.ITEMS_3D);
             }
 
-            var dispatcher = MinecraftClient.getInstance().gameRenderer.getEntityRenderDispatcher();
-            state.item.render(matrices, dispatcher.getQueue(), LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, 0);
-            dispatcher.render();
+            var dispatcher = Minecraft.getInstance().gameRenderer.getFeatureRenderDispatcher();
+            state.item.submit(matrices, dispatcher.getSubmitNodeStorage(), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
+            dispatcher.renderAllFeatures();
         }
 
         @Override
-        protected float getYOffset(int height, int windowScaleFactor) {
+        protected float getTranslateY(int height, int windowScaleFactor) {
             return height / 2f;
         }
 
         @Override
-        protected String getName() {
+        protected String getTextureLabel() {
             return "owo-item";
         }
     }

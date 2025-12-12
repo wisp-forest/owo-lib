@@ -16,8 +16,8 @@ import io.wispforest.owo.braid.widgets.label.LabelStyle;
 import io.wispforest.owo.braid.widgets.scroll.ScrollAnimationSettings;
 import io.wispforest.owo.braid.widgets.scroll.VerticallyScrollable;
 import io.wispforest.owo.samples.braid.layout.*;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 
 import java.util.List;
 
@@ -73,7 +73,7 @@ public class LayoutWidgetExamples extends StatelessWidget {
 
         return new LayoutBuilder(
             (builderContext, constraints) -> {
-                var crossAxisCells = MathHelper.floor(constraints.maxWidth() / 150);
+                var crossAxisCells = Mth.floor(constraints.maxWidth() / 150);
                 return new VerticallyScrollable(
                     null, ScrollAnimationSettings.DEFAULT,
                     new Align(
@@ -121,7 +121,7 @@ public class LayoutWidgetExamples extends StatelessWidget {
                         this.child
                     )
                 ),
-                new Label(LabelStyle.SHADOW, true, Text.literal(this.name))
+                new Label(LabelStyle.SHADOW, true, Component.literal(this.name))
             );
         }
     }

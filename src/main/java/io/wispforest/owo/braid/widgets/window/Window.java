@@ -18,10 +18,10 @@ import io.wispforest.owo.braid.widgets.flex.Row;
 import io.wispforest.owo.braid.widgets.intents.Interactable;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -31,7 +31,7 @@ import java.util.Set;
 public class Window extends StatefulWidget {
 
     public final boolean collapsible;
-    public final Text title;
+    public final Component title;
     public final @Nullable Runnable onClose;
     public final @Nullable WindowController controller;
     public final Size initialSize;
@@ -40,7 +40,7 @@ public class Window extends StatefulWidget {
 
     public final Widget content;
 
-    public Window(boolean collapsible, Text title, @Nullable Runnable onClose, @Nullable WindowController controller, Size initialSize, Size minSize, Size maxSize, Widget content) {
+    public Window(boolean collapsible, Component title, @Nullable Runnable onClose, @Nullable WindowController controller, Size initialSize, Size minSize, Size maxSize, Widget content) {
         this.collapsible = collapsible;
         this.title = title;
         this.onClose = onClose;
@@ -51,7 +51,7 @@ public class Window extends StatefulWidget {
         this.content = content;
     }
 
-    public Window(boolean collapsible, Text title, @Nullable Runnable onClose, @Nullable WindowController controller, Size initialSize, Widget content) {
+    public Window(boolean collapsible, Component title, @Nullable Runnable onClose, @Nullable WindowController controller, Size initialSize, Widget content) {
         this(collapsible, title, onClose, controller, initialSize, Size.square(40), Size.square(Double.POSITIVE_INFINITY), content);
     }
 
@@ -98,7 +98,7 @@ public class Window extends StatefulWidget {
                             () -> this.controller.toggleCollapsed(),
                             new Padding(
                                 Insets.of(2, 0, 0, 4),
-                                new Label(Text.literal(this.controller.collapsed() ? "⏶" : "⏷"))
+                                new Label(Component.literal(this.controller.collapsed() ? "⏶" : "⏷"))
                             )
                         ));
                     }
@@ -108,7 +108,7 @@ public class Window extends StatefulWidget {
                     if (this.widget().onClose != null) {
                         titleBar.add(Interactable.primary(
                             () -> this.widget().onClose.run(),
-                            new HoverStyledLabel(Text.literal("x"), Style.EMPTY.withFormatting(Formatting.RED))
+                            new HoverStyledLabel(Component.literal("x"), Style.EMPTY.applyFormat(ChatFormatting.RED))
                         ));
                     }
 
@@ -218,8 +218,8 @@ public class Window extends StatefulWidget {
 
         private void applySize(Size size) {
             this.controller.setSize(Size.of(
-                MathHelper.clamp(size.width(), this.widget().minSize.width(), this.widget().maxSize.width()),
-                MathHelper.clamp(size.height(), this.widget().minSize.height(), this.widget().maxSize.height())
+                Mth.clamp(size.width(), this.widget().minSize.width(), this.widget().maxSize.width()),
+                Mth.clamp(size.height(), this.widget().minSize.height(), this.widget().maxSize.height())
             ));
         }
 

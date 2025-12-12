@@ -3,30 +3,29 @@ package io.wispforest.owo.ui.component;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.wispforest.owo.Owo;
-import io.wispforest.owo.ui.base.BaseComponent;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
+import io.wispforest.owo.ui.base.BaseUIComponent;
+import io.wispforest.owo.ui.core.OwoUIGraphics;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.renderstate.OwoItemElementRenderState;
 import net.fabricmc.fabric.api.client.rendering.v1.TooltipComponentCallback;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.ScreenRect;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.item.ItemModelManager;
-import net.minecraft.client.render.item.ItemRenderState;
-import net.minecraft.command.argument.ItemStringReader;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemDisplayContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.renderer.item.ItemModelResolver;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.commands.arguments.item.ItemParser;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix3x2f;
 import org.w3c.dom.Element;
 
 import java.util.ArrayList;
@@ -35,15 +34,15 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-public class ItemComponent extends BaseComponent {
+public class ItemComponent extends BaseUIComponent {
 
-    protected final ItemModelManager itemModelManager;
+    protected final ItemModelResolver itemModelManager;
     protected ItemStack stack;
     protected boolean showOverlay = false;
     protected boolean setTooltipFromStack = false;
 
     protected ItemComponent(ItemStack stack) {
-        this.itemModelManager = MinecraftClient.getInstance().getItemModelManager();
+        this.itemModelManager = Minecraft.getInstance().getItemModelResolver();
         this.stack = stack;
     }
 
@@ -58,8 +57,8 @@ public class ItemComponent extends BaseComponent {
     }
 
     @Override
-    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
-        var matrices = context.getMatrices();
+    public void draw(OwoUIGraphics graphics, int mouseX, int mouseY, float partialTicks, float delta) {
+        var matrices = graphics.pose();
         matrices.pushMatrix();
 
         // Translate to the root of the component
@@ -68,18 +67,18 @@ public class ItemComponent extends BaseComponent {
         // Scale according to component size and translate to the center
         matrices.scale(this.width / 16f, this.height / 16f);
 
-        var client = MinecraftClient.getInstance();
+        var client = Minecraft.getInstance();
 
         if (this.width <= 16 && this.height <= 16) {
-            context.drawItem(this.stack, 0, 0);
+            graphics.renderItem(this.stack, 0, 0);
         } else {
-            var state = new ItemRenderState();
-            this.itemModelManager.update(state, this.stack, ItemDisplayContext.GUI, MinecraftClient.getInstance().world, MinecraftClient.getInstance().player, 0);
+            var state = new ItemStackRenderState();
+            this.itemModelManager.appendItemLayers(state, this.stack, ItemDisplayContext.GUI, Minecraft.getInstance().level, Minecraft.getInstance().player, 0);
 
-            context.state.addSpecialElement(new OwoItemElementRenderState(
+            graphics.guiRenderState.submitPicturesInPictureState(new OwoItemElementRenderState(
                 state,
-                new ScreenRect(this.x, this.y, this.width, this.height),
-                context.scissorStack.peekLast()
+                new ScreenRectangle(this.x, this.y, this.width, this.height),
+                graphics.scissorStack.peek()
             ));
         }
 
@@ -87,7 +86,7 @@ public class ItemComponent extends BaseComponent {
         matrices.popMatrix();
 
         if (this.showOverlay) {
-            context.drawStackOverlay(client.textRenderer, this.stack, this.x, this.y);
+            graphics.renderItemDecorations(client.font, this.stack, this.x, this.y);
         }
     }
 
@@ -95,10 +94,10 @@ public class ItemComponent extends BaseComponent {
         if (!this.setTooltipFromStack) return;
 
         if (!this.stack.isEmpty()) {
-            MinecraftClient client = MinecraftClient.getInstance();
-            this.tooltip(tooltipFromItem(this.stack, Item.TooltipContext.create(client.world), client.player, null));
+            Minecraft client = Minecraft.getInstance();
+            this.tooltip(tooltipFromItem(this.stack, Item.TooltipContext.of(client.level), client.player, null));
         } else {
-            this.tooltip((List<TooltipComponent>) null);
+            this.tooltip((List<ClientTooltipComponent>) null);
         }
     }
 
@@ -135,30 +134,30 @@ public class ItemComponent extends BaseComponent {
 
     /**
      * Obtain the full item stack tooltip, including custom components
-     * provided via {@link net.minecraft.item.Item#getTooltipData(ItemStack)}
+     * provided via {@link net.minecraft.world.item.Item#getTooltipImage(ItemStack)}
      *
      * @param stack   The item stack from which to obtain the tooltip
      * @param context the tooltip context
      * @param player  The player to use for context, may be {@code null}
      * @param type    The tooltip type - {@code null} to fall back to the default provided by
-     *                {@link net.minecraft.client.option.GameOptions#advancedItemTooltips}
+     *                {@link net.minecraft.client.Options#advancedItemTooltips}
      */
-    public static List<TooltipComponent> tooltipFromItem(ItemStack stack, Item.TooltipContext context, @Nullable PlayerEntity player, @Nullable TooltipType type) {
+    public static List<ClientTooltipComponent> tooltipFromItem(ItemStack stack, Item.TooltipContext context, @Nullable Player player, @Nullable TooltipFlag type) {
         if (type == null) {
-            type = MinecraftClient.getInstance().options.advancedItemTooltips ? TooltipType.ADVANCED : TooltipType.BASIC;
+            type = Minecraft.getInstance().options.advancedItemTooltips ? TooltipFlag.ADVANCED : TooltipFlag.NORMAL;
         }
 
-        var tooltip = new ArrayList<TooltipComponent>();
-        stack.getTooltip(context, player, type)
+        var tooltip = new ArrayList<ClientTooltipComponent>();
+        stack.getTooltipLines(context, player, type)
             .stream()
-            .map(Text::asOrderedText)
-            .map(TooltipComponent::of)
+            .map(Component::getVisualOrderText)
+            .map(ClientTooltipComponent::create)
             .forEach(tooltip::add);
 
-        stack.getTooltipData().ifPresent(data -> {
+        stack.getTooltipImage().ifPresent(data -> {
             tooltip.add(1, Objects.requireNonNullElseGet(
                 TooltipComponentCallback.EVENT.invoker().getComponent(data),
-                () -> TooltipComponent.of(data)
+                () -> ClientTooltipComponent.create(data)
             ));
         });
 
@@ -174,17 +173,17 @@ public class ItemComponent extends BaseComponent {
         UIParsing.apply(children, "item", UIParsing::parseIdentifier, itemId -> {
             Owo.debugWarn(Owo.LOGGER, "Deprecated <item> property populated on item component - migrate to <stack> instead");
 
-            var item = Registries.ITEM.getOptionalValue(itemId).orElseThrow(() -> new UIModelParsingException("Unknown item " + itemId));
-            this.stack(item.getDefaultStack());
+            var item = BuiltInRegistries.ITEM.getOptional(itemId).orElseThrow(() -> new UIModelParsingException("Unknown item " + itemId));
+            this.stack(item.getDefaultInstance());
         });
 
         UIParsing.apply(children, "stack", $ -> $.getTextContent().strip(), stackString -> {
             try {
-                var result = new ItemStringReader(RegistryWrapper.WrapperLookup.of(Stream.of(Registries.ITEM)))
-                    .consume(new StringReader(stackString));
+                var result = new ItemParser(HolderLookup.Provider.create(Stream.of(BuiltInRegistries.ITEM)))
+                    .parse(new StringReader(stackString));
 
                 var stack = new ItemStack(result.item());
-                stack.applyChanges(result.components());
+                stack.applyComponentsAndValidate(result.components());
 
                 this.stack(stack);
             } catch (CommandSyntaxException cse) {

@@ -4,14 +4,13 @@ import com.mojang.serialization.MapCodec;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.serialization.CodecUtils;
-import net.minecraft.text.StringVisitable;
-import net.minecraft.text.Style;
-import net.minecraft.text.TextContent;
+import net.minecraft.network.chat.ComponentContents;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.Style;
 
-import java.util.Map;
 import java.util.Optional;
 
-public class BasedTextContent implements TextContent {
+public class BasedTextContent implements ComponentContents {
 
     public static final MapCodec<BasedTextContent> CODEC = CodecUtils.toMapCodec(StructEndecBuilder.of(Endec.STRING.fieldOf("based", o -> o.basedText), BasedTextContent::new));
 
@@ -22,17 +21,17 @@ public class BasedTextContent implements TextContent {
     }
 
     @Override
-    public <T> Optional<T> visit(StringVisitable.Visitor<T> visitor) {
+    public <T> Optional<T> visit(FormattedText.ContentConsumer<T> visitor) {
         return visitor.accept("I am extremely based: " + basedText);
     }
 
     @Override
-    public <T> Optional<T> visit(StringVisitable.StyledVisitor<T> visitor, Style style) {
+    public <T> Optional<T> visit(FormattedText.StyledContentConsumer<T> visitor, Style style) {
         return visitor.accept(style, "I am extremely based: " + basedText);
     }
 
     @Override
-    public MapCodec<? extends TextContent> getCodec() {
+    public MapCodec<? extends ComponentContents> codec() {
         return CODEC;
     }
 }

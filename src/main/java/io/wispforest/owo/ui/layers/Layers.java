@@ -3,15 +3,15 @@ package io.wispforest.owo.ui.layers;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import io.wispforest.owo.Owo;
-import io.wispforest.owo.ui.core.ParentComponent;
+import io.wispforest.owo.ui.core.ParentUIComponent;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.util.pond.OwoScreenExtension;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.fabricmc.fabric.api.event.Event;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.resources.Identifier;
 
 import java.util.Collection;
 import java.util.List;
@@ -49,7 +49,7 @@ public final class Layers {
      * @param screenClasses       The screens onto which to add the new layer
      */
     @SafeVarargs
-    public static <S extends Screen, R extends ParentComponent> Layer<S, R> add(BiFunction<Sizing, Sizing, R> rootComponentMaker, Consumer<Layer<S, R>.Instance> instanceInitializer, Class<? extends S>... screenClasses) {
+    public static <S extends Screen, R extends ParentUIComponent> Layer<S, R> add(BiFunction<Sizing, Sizing, R> rootComponentMaker, Consumer<Layer<S, R>.Instance> instanceInitializer, Class<? extends S>... screenClasses) {
         final var layer = new Layer<>(rootComponentMaker, instanceInitializer);
         for (var screenClass : screenClasses) {
             LAYERS.put(screenClass, layer);

@@ -2,8 +2,8 @@ package io.wispforest.owo.registration.reflect;
 
 import io.wispforest.owo.registration.annotations.RegistryNamespace;
 import io.wispforest.owo.util.ReflectionUtils;
-import net.minecraft.registry.Registry;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.Identifier;
 
 /**
  * Main hub for all interactions with implementations of
@@ -66,7 +66,7 @@ public final class FieldRegistrationHandler {
         AutoRegistryContainer<T> container = ReflectionUtils.tryInstantiateWithNoArgs(clazz);
 
         ReflectionUtils.iterateAccessibleStaticFields(clazz, container.getTargetFieldType(), createProcessor((fieldValue, identifier, field) -> {
-            Registry.register(container.getRegistry(), Identifier.of(namespace, identifier), fieldValue);
+            Registry.register(container.getRegistry(), Identifier.fromNamespaceAndPath(namespace, identifier), fieldValue);
             container.postProcessField(namespace, fieldValue, identifier, field);
         }, container));
 

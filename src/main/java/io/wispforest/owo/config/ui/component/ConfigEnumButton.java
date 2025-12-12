@@ -3,11 +3,11 @@ package io.wispforest.owo.config.ui.component;
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.core.Sizing;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.input.AbstractInput;
-import net.minecraft.client.input.MouseInput;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.text.Text;
+import net.minecraft.client.input.InputWithModifiers;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.MouseButtonInfo;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -25,20 +25,20 @@ public class ConfigEnumButton extends ButtonComponent implements OptionValueProv
     protected boolean wasRightClicked = false;
 
     public ConfigEnumButton() {
-        super(net.minecraft.text.Text.empty(), button -> {});
+        super(Component.empty(), button -> {});
         this.verticalSizing(Sizing.fixed(20));
         this.updateMessage();
     }
 
     @Override
-    public boolean onMouseDown(Click click, boolean doubled) {
+    public boolean onMouseDown(MouseButtonEvent click, boolean doubled) {
         this.wasRightClicked = click.button() == GLFW.GLFW_MOUSE_BUTTON_RIGHT;
         return super.onMouseDown(click, doubled);
     }
 
     @Override
-    public void onPress(AbstractInput input) {
-        if (this.wasRightClicked || input.hasShift()) {
+    public void onPress(InputWithModifiers input) {
+        if (this.wasRightClicked || input.hasShiftDown()) {
             this.selectedIndex--;
             if (this.selectedIndex < 0) this.selectedIndex += this.backingValues.length;
         } else {
@@ -52,7 +52,7 @@ public class ConfigEnumButton extends ButtonComponent implements OptionValueProv
     }
 
     @Override
-    protected boolean isValidClickButton(MouseInput input) {
+    protected boolean isValidClickButton(MouseButtonInfo input) {
         return input.button() == GLFW.GLFW_MOUSE_BUTTON_RIGHT || super.isValidClickButton(input);
     }
 
@@ -64,9 +64,9 @@ public class ConfigEnumButton extends ButtonComponent implements OptionValueProv
 
         var optionValueKey = this.backingOption.translationKey() + ".value." + valueName;
 
-        this.setMessage(I18n.hasTranslation(optionValueKey)
-                ? net.minecraft.text.Text.translatable(optionValueKey)
-                : net.minecraft.text.Text.translatable("text.config." + this.backingOption.configName() + ".enum." + enumName + "." + valueName)
+        this.setMessage(I18n.exists(optionValueKey)
+                ? Component.translatable(optionValueKey)
+                : Component.translatable("text.config." + this.backingOption.configName() + ".enum." + enumName + "." + valueName)
         );
     }
 

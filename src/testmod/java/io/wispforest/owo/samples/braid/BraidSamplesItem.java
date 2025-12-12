@@ -17,32 +17,32 @@ import io.wispforest.owo.braid.widgets.flex.CrossAxisAlignment;
 import io.wispforest.owo.braid.widgets.flex.MainAxisAlignment;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.util.Util;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 
 import java.util.List;
 
 public class BraidSamplesItem extends Item {
 
-    public BraidSamplesItem(Settings settings) {
+    public BraidSamplesItem(Properties settings) {
         super(settings);
     }
 
     @Override
     @Environment(EnvType.CLIENT)
-    public ActionResult use(World world, PlayerEntity user, Hand hand) {
-        if (!world.isClient()) {
-            return ActionResult.SUCCESS;
+    public InteractionResult use(Level level, Player user, InteractionHand hand) {
+        if (!level.isClientSide()) {
+            return InteractionResult.SUCCESS;
         }
 
-        MinecraftClient.getInstance().setScreen(new BraidScreen(SCREEN_SETTINGS, new SampleSelector()));
-        return ActionResult.SUCCESS;
+        Minecraft.getInstance().setScreen(new BraidScreen(SCREEN_SETTINGS, new SampleSelector()));
+        return InteractionResult.SUCCESS;
     }
 
     // ---
@@ -92,7 +92,7 @@ public class BraidSamplesItem extends Item {
                                             new Padding(Insets.vertical(2)),
                                             allSamples().stream()
                                                 .map(sample -> new MessageButton(
-                                                    Text.literal(sample.name()),
+                                                    Component.literal(sample.name()),
                                                     () -> Navigator.push(context, sample.widget())
                                                 ))
                                                 .toList()

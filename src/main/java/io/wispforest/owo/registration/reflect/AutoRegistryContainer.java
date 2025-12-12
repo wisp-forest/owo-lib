@@ -1,7 +1,7 @@
 package io.wispforest.owo.registration.reflect;
 
 import io.wispforest.owo.registration.annotations.AssignedName;
-import net.minecraft.registry.Registry;
+import net.minecraft.core.Registry;
 
 import java.lang.reflect.Field;
 

@@ -3,8 +3,8 @@ package io.wispforest.uwu.rei;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.compat.rei.ReiUIAdapter;
 import io.wispforest.owo.ui.component.ButtonComponent;
-import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.component.UIComponents;
+import io.wispforest.owo.ui.container.UIContainers;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.uwu.items.UwuItems;
 import me.shedaniel.math.Point;
@@ -19,9 +19,9 @@ import me.shedaniel.rei.api.common.display.DisplaySerializer;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
-import net.minecraft.item.Items;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.world.item.Items;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
@@ -34,32 +34,32 @@ public class UiCategory implements DisplayCategory<Display> {
 
     @Override
     public List<Widget> setupDisplay(Display display, Rectangle bounds) {
-        var adapter = new ReiUIAdapter<>(bounds, Containers::verticalFlow);
+        var adapter = new ReiUIAdapter<>(bounds, UIContainers::verticalFlow);
         var root = adapter.rootComponent();
 
         root.horizontalAlignment(HorizontalAlignment.CENTER)
                 .surface(Surface.DARK_PANEL)
                 .padding(Insets.of(8));
 
-        var inner = Containers.verticalFlow(Sizing.fill(100), Sizing.content());
+        var inner = UIContainers.verticalFlow(Sizing.fill(100), Sizing.content());
         inner.horizontalAlignment(HorizontalAlignment.CENTER).surface(Surface.flat(0xFF00FFAF));
 
-        inner.child(Components.label(Text.of("A demonstration\ninside REI"))
+        inner.child(UIComponents.label(Component.nullToEmpty("A demonstration\ninside REI"))
                 .color(Color.BLACK)
                 .positioning(Positioning.absolute(3, 3))
         );
 
         var animation = inner.horizontalSizing().animate(250, Easing.QUADRATIC, Sizing.fill(65));
-        inner.child(Components.button(Text.of("shrink"), (ButtonComponent button) -> animation.forwards())
+        inner.child(UIComponents.button(Component.nullToEmpty("shrink"), (ButtonComponent button) -> animation.forwards())
                 .margins(Insets.vertical(25))
                 .horizontalSizing(Sizing.fixed(60)));
-        inner.child(Components.button(Text.of("grow"), (ButtonComponent button) -> animation.backwards())
+        inner.child(UIComponents.button(Component.nullToEmpty("grow"), (ButtonComponent button) -> animation.backwards())
                 .margins(Insets.vertical(25))
                 .horizontalSizing(Sizing.fixed(60)));
 
         inner.child(adapter.wrap(Widgets.createSlot(new Point(0, 0)).entry(EntryStacks.of(Items.ECHO_SHARD))));
 
-        root.child(Containers.verticalScroll(Sizing.content(), Sizing.fill(100), inner));
+        root.child(UIContainers.verticalScroll(Sizing.content(), Sizing.fill(100), inner));
 
         adapter.prepare();
         return List.of(adapter);
@@ -71,8 +71,8 @@ public class UiCategory implements DisplayCategory<Display> {
     }
 
     @Override
-    public Text getTitle() {
-        return Text.of("yes its gui very epic");
+    public Component getTitle() {
+        return Component.nullToEmpty("yes its gui very epic");
     }
 
     @Override

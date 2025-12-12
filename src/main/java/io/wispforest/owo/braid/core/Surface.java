@@ -1,12 +1,12 @@
 package io.wispforest.owo.braid.core;
 
+import com.mojang.blaze3d.platform.Window;
 import io.wispforest.owo.braid.core.cursor.CursorController;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.util.Window;
+import net.minecraft.client.Minecraft;
 
 public interface Surface {
 
@@ -32,31 +32,31 @@ public interface Surface {
         private final CursorController cursorController;
 
         public Default() {
-            this.window = MinecraftClient.getInstance().getWindow();
-            this.cursorController = new CursorController(this.window.getHandle());
+            this.window = Minecraft.getInstance().getWindow();
+            this.cursorController = new CursorController(this.window.handle());
 
             if (resizeEvents == null) {
                 resizeEvents = ResizeCallback.newStream();
 
                 WindowResizeCallback.EVENT.register((client, resizedWindow) -> {
-                    resizeEvents.sink().onResize(resizedWindow.getScaledWidth(), resizedWindow.getScaledHeight());
+                    resizeEvents.sink().onResize(resizedWindow.getGuiScaledWidth(), resizedWindow.getGuiScaledHeight());
                 });
             }
         }
 
         @Override
         public int width() {
-            return this.window.getScaledWidth();
+            return this.window.getGuiScaledWidth();
         }
 
         @Override
         public int height() {
-            return this.window.getScaledHeight();
+            return this.window.getGuiScaledHeight();
         }
 
         @Override
         public double scaleFactor() {
-            return this.window.getScaleFactor();
+            return this.window.getGuiScale();
         }
 
         @Override

@@ -6,13 +6,13 @@ import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.mixin.ui.access.BlockEntityAccessor;
-import net.minecraft.block.BlockEntityProvider;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.storage.NbtReadView;
-import net.minecraft.util.ErrorReporter;
+import net.minecraft.client.Minecraft;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.TagValueInput;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
@@ -23,10 +23,10 @@ public class BlockWidget extends StatefulWidget {
 
     public final BlockState blockState;
     public final @Nullable BlockEntity blockEntity;
-    public final @Nullable NbtCompound blockEntityNbt;
+    public final @Nullable CompoundTag blockEntityNbt;
     public final @Nullable Consumer<Matrix4f> transform;
 
-    private BlockWidget(BlockState blockState, @Nullable BlockEntity blockEntity, @Nullable NbtCompound blockEntityNbt, @Nullable Consumer<Matrix4f> transform) {
+    private BlockWidget(BlockState blockState, @Nullable BlockEntity blockEntity, @Nullable CompoundTag blockEntityNbt, @Nullable Consumer<Matrix4f> transform) {
         this.blockState = blockState;
         this.blockEntity = blockEntity;
         this.blockEntityNbt = blockEntityNbt;
@@ -41,11 +41,11 @@ public class BlockWidget extends StatefulWidget {
         this(blockState, blockEntity, null, transform);
     }
 
-    public BlockWidget(BlockState blockState, @Nullable NbtCompound blockEntityNbt) {
+    public BlockWidget(BlockState blockState, @Nullable CompoundTag blockEntityNbt) {
         this(blockState, null, blockEntityNbt, null);
     }
 
-    public BlockWidget(BlockState blockState, @Nullable NbtCompound blockEntityNbt, Consumer<Matrix4f> transform) {
+    public BlockWidget(BlockState blockState, @Nullable CompoundTag blockEntityNbt, Consumer<Matrix4f> transform) {
         this(blockState, null, blockEntityNbt, transform);
     }
 
@@ -99,22 +99,22 @@ public class BlockWidget extends StatefulWidget {
 
         // ---
 
-        private static @Nullable BlockEntity prepareBlockEntity(BlockState state, @Nullable NbtCompound nbt) {
-            var client = MinecraftClient.getInstance();
+        private static @Nullable BlockEntity prepareBlockEntity(BlockState state, @Nullable CompoundTag nbt) {
+            var client = Minecraft.getInstance();
             if (!state.hasBlockEntity()) {
                 return null;
             }
 
-            var blockEntity = ((BlockEntityProvider) state.getBlock()).createBlockEntity(client.player.getBlockPos(), state);
+            var blockEntity = ((EntityBlock) state.getBlock()).newBlockEntity(client.player.blockPosition(), state);
             if (blockEntity == null) {
                 return null;
             }
 
-            ((BlockEntityAccessor) blockEntity).owo$setCachedState(state);
-            blockEntity.setWorld(client.world);
+            ((BlockEntityAccessor) blockEntity).owo$setBlockState(state);
+            blockEntity.setLevel(client.level);
 
             if (nbt != null) {
-                blockEntity.read(NbtReadView.create(new ErrorReporter.Logging(Owo.LOGGER), client.world.getRegistryManager(), nbt));
+                blockEntity.loadWithComponents(TagValueInput.create(new ProblemReporter.ScopedCollector(Owo.LOGGER), client.level.registryAccess(), nbt));
             }
 
             return blockEntity;

@@ -16,8 +16,8 @@ import io.wispforest.owo.braid.widgets.flex.Row;
 import io.wispforest.owo.braid.widgets.focus.Focusable;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.sharedstate.SharedState;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 
 import java.util.regex.Pattern;
 
@@ -54,13 +54,13 @@ public class InstanceTitle extends StatefulWidget {
                     new Row(
                         MainAxisAlignment.START,
                         CrossAxisAlignment.CENTER,
-                        new Label(Text.literal(instanceName).styled(style -> style.withBold(this.hovered))),
+                        new Label(Component.literal(instanceName).withStyle(style -> style.withBold(this.hovered))),
                         new Visibility(
                             this.widget().instance.isRelayoutBoundary() && this.widget().instance.debugParentHasDependency(),
                             new Padding(
                                 Insets.left(2),
                                 new Tooltip(
-                                    Text.literal("Relayout Boundary\n").append(Text.literal("with parent dependency").formatted(Formatting.GRAY)),
+                                    Component.literal("Relayout Boundary\n").append(Component.literal("with parent dependency").withStyle(ChatFormatting.GRAY)),
                                     new SpriteWidget(Owo.id("braid_inspector_relayout_boundary_with_dependency"))
                                 )
                             )
@@ -70,7 +70,7 @@ public class InstanceTitle extends StatefulWidget {
                             new Padding(
                                 Insets.left(2),
                                 new Tooltip(
-                                    Text.literal("Relayout Boundary"),
+                                    Component.literal("Relayout Boundary"),
                                     new SpriteWidget(Owo.id("braid_inspector_relayout_boundary"))
                                 )
                             )
@@ -80,7 +80,7 @@ public class InstanceTitle extends StatefulWidget {
                             new Padding(
                                 Insets.left(2),
                                 new Tooltip(
-                                    Text.literal("Hit Test Boundary"),
+                                    Component.literal("Hit Test Boundary"),
                                     new SpriteWidget(Owo.id("braid_inspector_hit_test_boundary"))
                                 )
                             )

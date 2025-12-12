@@ -7,13 +7,12 @@ import io.wispforest.owo.braid.framework.instance.WidgetInstance;
 import io.wispforest.owo.braid.framework.widget.MultiChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.Padding;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.text.StyleSpriteSource;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.MathHelper;
+import io.wispforest.owo.ui.core.OwoUIGraphics;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FontDescription;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -80,7 +79,7 @@ public class Grid extends MultiChildInstanceWidget {
             var crossAxis = mainAxis.opposite();
 
             var crossAxisCells = this.widget.crossAxisCells;
-            var mainAxisCells = MathHelper.ceil(this.children.size() / (double) this.widget.crossAxisCells);
+            var mainAxisCells = Mth.ceil(this.children.size() / (double) this.widget.crossAxisCells);
 
             var mustMeasureCrossAxis = this.widget.cellFit.isTight() && !crossAxis.choose(constraints.hasTightWidth(), constraints.hasTightHeight());
             var mustMeasureMainAxis = this.widget.cellFit.isTight() && !mainAxis.choose(constraints.hasTightWidth(), constraints.hasTightHeight());
@@ -177,8 +176,8 @@ public class Grid extends MultiChildInstanceWidget {
         public List<InspectorProperty> debugListInspectorProperties() {
             return List.of(
                 new InspectorProperty(
-                    Text.literal("Main Axis"),
-                    Text.literal(this.widget.mainAxis.toString())
+                    Component.literal("Main Axis"),
+                    Component.literal(this.widget.mainAxis.toString())
                 )
             );
         }
@@ -189,9 +188,9 @@ public class Grid extends MultiChildInstanceWidget {
         }
 
         @Override
-        protected void debugDrawVisualizers(BraidDrawContext ctx) {
+        protected void debugDrawVisualizers(BraidGraphics graphics) {
             var frameColor = Color.rgb(0xFFD65A);
-            ctx.drawRectOutline(
+            graphics.drawRectOutline(
                 0, 0, (int) this.transform.width(), (int) this.transform.height(), frameColor.argb()
             );
 
@@ -206,17 +205,17 @@ public class Grid extends MultiChildInstanceWidget {
             var verticalPos = 0.0;
             for (int i = 0; i < verticalSizes.length; i++) {
                 if (i > 0) {
-                    ctx.drawDashedLine(
+                    graphics.drawDashedLine(
                         RenderPipelines.GUI,
                         0, verticalPos, this.transform.width(), verticalPos,
                         1, 2, frameColor
                     );
                 }
 
-                ctx.drawText(
-                    Text.literal(verticalSizes[i] + "px").styled(style -> style.withFont(new StyleSpriteSource.Font(MinecraftClient.UNICODE_FONT_ID))),
+                graphics.drawText(
+                    Component.literal(verticalSizes[i] + "px").withStyle(style -> style.withFont(new FontDescription.Resource(Minecraft.UNIFORM_FONT))),
                     0, (float) verticalPos, 1f, Color.WHITE.argb(),
-                    OwoUIDrawContext.TextAnchor.TOP_RIGHT
+                    OwoUIGraphics.TextAnchor.TOP_RIGHT
                 );
 
                 verticalPos += verticalSizes[i];
@@ -225,17 +224,17 @@ public class Grid extends MultiChildInstanceWidget {
             var horizontalPos = 0.0;
             for (int i = 0; i < horizontalSizes.length; i++) {
                 if (i > 0) {
-                    ctx.drawDashedLine(
+                    graphics.drawDashedLine(
                         RenderPipelines.GUI,
                         horizontalPos, 0, horizontalPos, this.transform.height(),
                         1, 2, frameColor
                     );
                 }
 
-                ctx.drawText(
-                    Text.literal(horizontalSizes[i] + "px").styled(style -> style.withFont(new StyleSpriteSource.Font(MinecraftClient.UNICODE_FONT_ID))),
+                graphics.drawText(
+                    Component.literal(horizontalSizes[i] + "px").withStyle(style -> style.withFont(new FontDescription.Resource(Minecraft.UNIFORM_FONT))),
                     (float) horizontalPos, 0, 1f, Color.WHITE.argb(),
-                    OwoUIDrawContext.TextAnchor.BOTTOM_LEFT
+                    OwoUIGraphics.TextAnchor.BOTTOM_LEFT
                 );
 
                 horizontalPos += horizontalSizes[i];
@@ -281,7 +280,7 @@ public class Grid extends MultiChildInstanceWidget {
 
         protected double[] measureMainAxis(double crossAxisCellSize) {
             var crossAxisCells = this.widget.crossAxisCells;
-            var mainAxisCells = MathHelper.ceil(this.children.size() / (double) this.widget.crossAxisCells);
+            var mainAxisCells = Mth.ceil(this.children.size() / (double) this.widget.crossAxisCells);
 
             var measureFunction = this.widget.mainAxis.<ToDoubleFunction<WidgetInstance<?>>>chooseCompute(
                 () -> child -> child.getIntrinsicWidth(crossAxisCellSize),

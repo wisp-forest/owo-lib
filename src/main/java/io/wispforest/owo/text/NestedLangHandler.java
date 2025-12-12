@@ -1,13 +1,12 @@
 package io.wispforest.owo.text;
 
 import com.google.gson.JsonElement;
-import io.wispforest.owo.Owo;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
-import java.util.regex.Matcher;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 @ApiStatus.Internal
@@ -39,7 +38,7 @@ public class NestedLangHandler {
                     objectMatcher.group(2) + suffix
                 ));
             } else if (value.isJsonArray() && listMatcher.matches()) {
-                var start = MathHelper.parseInt(listMatcher.group(2), 1);
+                var start = Mth.getInt(listMatcher.group(2), 1);
                 var array = value.getAsJsonArray();
                 for (int i = 0; i < array.size(); i++) {
                     returned.addAll(deNest(

@@ -3,10 +3,9 @@ package io.wispforest.owo.ui.core;
 import com.google.common.collect.ImmutableMap;
 import io.wispforest.endec.Endec;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
-import net.minecraft.util.DyeColor;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.ColorHelper;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.ChatFormatting;
+import net.minecraft.util.Mth;
+import net.minecraft.world.item.DyeColor;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Node;
 
@@ -27,8 +26,8 @@ public record Color(float red, float green, float blue, float alpha) implements 
     public static final Color GREEN = Color.ofRgb(0x00FF00);
     public static final Color BLUE = Color.ofRgb(0x0000FF);
 
-    private static final Map<String, Color> NAMED_TEXT_COLORS = Stream.of(Formatting.values())
-            .filter(Formatting::isColor)
+    private static final Map<String, Color> NAMED_TEXT_COLORS = Stream.of(ChatFormatting.values())
+            .filter(ChatFormatting::isColor)
             .collect(ImmutableMap.toImmutableMap(formatting -> {
                 return formatting.getName().toLowerCase(Locale.ROOT).replace("_", "-");
             }, Color::ofFormatting));
@@ -57,21 +56,21 @@ public record Color(float red, float green, float blue, float alpha) implements 
 
     public static Color ofHsv(float hue, float saturation, float value) {
         // we call .5e-7f the magic "do not turn a hue value of 1f into yellow" constant
-        return ofRgb(MathHelper.hsvToRgb(hue - .5e-7f, saturation, value));
+        return ofRgb(Mth.hsvToRgb(hue - .5e-7f, saturation, value));
     }
 
     public static Color ofHsv(float hue, float saturation, float value, float alpha) {
         // we call .5e-7f the magic "do not turn a hue value of 1f into yellow" constant
-        return ofArgb((int) (alpha * 255) << 24 | MathHelper.hsvToRgb(hue - .5e-7f, saturation, value));
+        return ofArgb((int) (alpha * 255) << 24 | Mth.hsvToRgb(hue - .5e-7f, saturation, value));
     }
 
-    public static Color ofFormatting(@NotNull Formatting formatting) {
-        var colorValue = formatting.getColorValue();
+    public static Color ofFormatting(@NotNull ChatFormatting formatting) {
+        var colorValue = formatting.getColor();
         return ofRgb(colorValue == null ? 0 : colorValue);
     }
 
     public static Color ofDye(@NotNull DyeColor dyeColor) {
-        return ofArgb(dyeColor.getEntityColor());
+        return ofArgb(dyeColor.getTextureDiffuseColor());
     }
 
     /**
@@ -144,10 +143,10 @@ public record Color(float red, float green, float blue, float alpha) implements 
     @Override
     public Color interpolate(Color next, float delta) {
         return new Color(
-                MathHelper.lerp(delta, this.red, next.red),
-                MathHelper.lerp(delta, this.green, next.green),
-                MathHelper.lerp(delta, this.blue, next.blue),
-                MathHelper.lerp(delta, this.alpha, next.alpha)
+                Mth.lerp(delta, this.red, next.red),
+                Mth.lerp(delta, this.green, next.green),
+                Mth.lerp(delta, this.blue, next.blue),
+                Mth.lerp(delta, this.alpha, next.alpha)
         );
     }
 

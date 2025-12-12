@@ -1,8 +1,8 @@
 package io.wispforest.owo.mixin.text.stapi;
 
 import io.wispforest.owo.text.TextLanguage;
-import net.minecraft.text.Text;
-import net.minecraft.util.Language;
+import net.minecraft.locale.Language;
+import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
@@ -20,7 +20,7 @@ public abstract class SystemDelegatedLanguageFixin implements TextLanguage {
     protected abstract ServerLanguage getSystemLanguage();
 
     @Override
-    public Text getText(String key) {
+    public Component getText(String key) {
         if (!(vanilla instanceof TextLanguage lang) || this.getSystemLanguage().serverTranslations().contains(key)) {
             return null;
         }

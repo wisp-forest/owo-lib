@@ -7,13 +7,13 @@ import io.wispforest.owo.braid.core.KeyModifiers;
 import io.wispforest.owo.braid.core.events.MouseButtonReleaseEvent;
 import io.wispforest.owo.braid.core.events.MouseMoveEvent;
 import io.wispforest.owo.braid.display.BraidDisplayBinding;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.GameRenderer;
-import net.minecraft.client.render.RenderTickCounter;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Final;
@@ -29,14 +29,14 @@ public class GameRendererMixin {
 
     @Shadow
     @Final
-    private MinecraftClient client;
+    private Minecraft minecraft;
 
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/GameRenderer;renderWorld(Lnet/minecraft/client/render/RenderTickCounter;)V"))
-    public void beforeWorldRender(RenderTickCounter tickCounter, boolean tick, CallbackInfo ci) {
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;renderLevel(Lnet/minecraft/client/DeltaTracker;)V"))
+    public void beforeWorldRender(DeltaTracker tickCounter, boolean tick, CallbackInfo ci) {
         BraidDisplayBinding.updateAndDrawDisplays();
     }
 
-    @Inject(method = "updateCrosshairTarget", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;method_76762(FLnet/minecraft/entity/Entity;)Lnet/minecraft/util/hit/HitResult;"))
+    @Inject(method = "pick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;raycastHitResult(FLnet/minecraft/world/entity/Entity;)Lnet/minecraft/world/phys/HitResult;"))
     public void updateTargetDisplay(
         float tickDelta,
         CallbackInfo ci,
@@ -46,11 +46,11 @@ public class GameRendererMixin {
     ) {
         cameraRef.set(camera);
         targetDisplay.set(
-            BraidDisplayBinding.queryTargetDisplay(camera.getCameraPosVec(tickDelta), camera.getRotationVec(tickDelta))
+            BraidDisplayBinding.queryTargetDisplay(camera.getEyePosition(tickDelta), camera.getViewVector(tickDelta))
         );
     }
 
-    @Inject(method = "updateCrosshairTarget", at = @At(value = "TAIL"))
+    @Inject(method = "pick", at = @At(value = "TAIL"))
     public void checkDisplayHitTest(
         float tickDelta,
         CallbackInfo ci,
@@ -64,30 +64,30 @@ public class GameRendererMixin {
 
         var displayHitPoint = targetDisplay.get().display().quad.unproject(targetDisplay.get().point());
 
-        var cameraPos = cameraRef.get().getCameraPosVec(tickDelta);
-        if (this.client.crosshairTarget.getPos().squaredDistanceTo(cameraPos) > displayHitPoint.squaredDistanceTo(cameraPos)) {
+        var cameraPos = cameraRef.get().getEyePosition(tickDelta);
+        if (this.minecraft.hitResult.getLocation().distanceToSqr(cameraPos) > displayHitPoint.distanceToSqr(cameraPos)) {
             this.setTargetDisplay(targetDisplay.get());
             BraidDisplayBinding.onDisplayHit(BraidDisplayBinding.targetDisplay);
 
             var display = BraidDisplayBinding.targetDisplay.display();
 
-            if (display.primaryPressed && !MinecraftClient.getInstance().options.useKey.isPressed()) {
+            if (display.primaryPressed && !Minecraft.getInstance().options.keyUse.isDown()) {
                 display.app.eventBinding.add(new MouseButtonReleaseEvent(GLFW.GLFW_MOUSE_BUTTON_LEFT, KeyModifiers.NONE));
                 display.primaryPressed = false;
             }
 
-            if (display.secondaryPressed && !MinecraftClient.getInstance().options.attackKey.isPressed()) {
+            if (display.secondaryPressed && !Minecraft.getInstance().options.keyAttack.isDown()) {
                 display.app.eventBinding.add(new MouseButtonReleaseEvent(GLFW.GLFW_MOUSE_BUTTON_RIGHT, KeyModifiers.NONE));
                 display.secondaryPressed = false;
             }
 
-            this.client.crosshairTarget = BlockHitResult.createMissed(
-                this.client.crosshairTarget.getPos(),
+            this.minecraft.hitResult = BlockHitResult.miss(
+                this.minecraft.hitResult.getLocation(),
                 Direction.UP,
-                BlockPos.ofFloored(this.client.crosshairTarget.getPos())
+                BlockPos.containing(this.minecraft.hitResult.getLocation())
             );
 
-            this.client.targetedEntity = null;
+            this.minecraft.crosshairPickEntity = null;
         } else {
             this.setTargetDisplay(null);
         }

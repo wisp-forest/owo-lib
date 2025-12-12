@@ -4,7 +4,7 @@ import blue.endless.jankson.Jankson;
 import blue.endless.jankson.JsonGrammar;
 import blue.endless.jankson.api.SyntaxError;
 import com.google.common.collect.MapMaker;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.io.ByteArrayInputStream;

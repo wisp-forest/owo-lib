@@ -28,10 +28,10 @@ public interface DataResultMixin {
 
     @Inject(
             method = {
-                    "error(Ljava/util/function/Supplier;)Lcom/mojang/serialization/DataResult;",
-                    "error(Ljava/util/function/Supplier;Ljava/lang/Object;)Lcom/mojang/serialization/DataResult;",
-                    "error(Ljava/util/function/Supplier;Lcom/mojang/serialization/Lifecycle;)Lcom/mojang/serialization/DataResult;",
-                    "error(Ljava/util/function/Supplier;Ljava/lang/Object;Lcom/mojang/serialization/Lifecycle;)Lcom/mojang/serialization/DataResult;"
+                "error(Ljava/util/function/Supplier;)Lcom/mojang/serialization/DataResult;",
+                "error(Ljava/util/function/Supplier;Ljava/lang/Object;)Lcom/mojang/serialization/DataResult;",
+                "error(Ljava/util/function/Supplier;Lcom/mojang/serialization/Lifecycle;)Lcom/mojang/serialization/DataResult;",
+                "error(Ljava/util/function/Supplier;Ljava/lang/Object;Lcom/mojang/serialization/Lifecycle;)Lcom/mojang/serialization/DataResult;"
             },
             at = @At(value = "HEAD"),
             remap = false
@@ -90,8 +90,8 @@ public interface DataResultMixin {
         }
 
         @WrapOperation(method ={
-                "resultOrPartial(Ljava/util/function/Consumer;)Ljava/util/Optional;",
-                "promotePartial"
+            "resultOrPartial(Ljava/util/function/Consumer;)Ljava/util/Optional;",
+            "promotePartial"
         }, at = @At(value = "INVOKE", target = "Ljava/util/function/Consumer;accept(Ljava/lang/Object;)V"))
         private <T> void printStackTrace(Consumer<T> instance, T t, Operation<Void> original) {
             original.call(instance, t);
@@ -102,8 +102,8 @@ public interface DataResultMixin {
         }
 
         @WrapOperation(method = {
-                "ap(Lcom/mojang/serialization/DataResult;)Lcom/mojang/serialization/DataResult$Error;",
-                "flatMap(Ljava/util/function/Function;)Lcom/mojang/serialization/DataResult$Error;"
+            "ap(Lcom/mojang/serialization/DataResult;)Lcom/mojang/serialization/DataResult$Error;",
+            "flatMap(Ljava/util/function/Function;)Lcom/mojang/serialization/DataResult$Error;"
         }, at = @At(value = "NEW", target = "(Ljava/util/function/Supplier;Ljava/util/Optional;Lcom/mojang/serialization/Lifecycle;)Lcom/mojang/serialization/DataResult$Error;", ordinal = 1))
         private DataResult.Error preserveStackTrace1(Supplier<String> messageSupplier, Optional partialValue, Lifecycle lifecycle, Operation<DataResult.Error> original) {
             if (this.messageSupplier instanceof StackTraceSupplier supplier) {
@@ -114,7 +114,7 @@ public interface DataResultMixin {
         }
 
         @WrapOperation(method = {
-                "mapError(Ljava/util/function/UnaryOperator;)Lcom/mojang/serialization/DataResult$Error;"
+            "mapError(Ljava/util/function/UnaryOperator;)Lcom/mojang/serialization/DataResult$Error;"
         }, at = @At(value = "NEW", target = "(Ljava/util/function/Supplier;Ljava/util/Optional;Lcom/mojang/serialization/Lifecycle;)Lcom/mojang/serialization/DataResult$Error;"))
         private DataResult.Error preserveStackTrace2(Supplier<String> messageSupplier, Optional partialValue, Lifecycle lifecycle, Operation<DataResult.Error> original) {
             if (this.messageSupplier instanceof StackTraceSupplier supplier) {

@@ -7,7 +7,7 @@ import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
 import io.wispforest.owo.braid.widgets.stack.Stack;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
 import org.joml.Vector2dc;
@@ -18,11 +18,11 @@ public class MessageXlyder extends StatelessWidget {
     public final @Nullable WidgetSetupCallback<Xlyder> setupCallback;
     public final @Nullable XlyderCallback onChanged;
 
-    public final Text message;
+    public final Component message;
 
     public MessageXlyder(
         Vector2dc value,
-        Text message,
+        Component message,
         @Nullable WidgetSetupCallback<Xlyder> setupCallback,
         @Nullable XlyderCallback onChanged
     ) {
@@ -34,7 +34,7 @@ public class MessageXlyder extends StatelessWidget {
 
     public MessageXlyder(
         Vector2dc value,
-        Text message,
+        Component message,
         @Nullable WidgetSetupCallback<Xlyder> setupCallback,
         boolean active,
         XlyderCallback onChanged
@@ -44,7 +44,7 @@ public class MessageXlyder extends StatelessWidget {
 
     public MessageXlyder(
         double x, double y,
-        Text message,
+        Component message,
         @Nullable WidgetSetupCallback<Xlyder> setupCallback,
         @Nullable XlyderCallback onChanged
     ) {
@@ -53,7 +53,7 @@ public class MessageXlyder extends StatelessWidget {
 
     public MessageXlyder(
         double x, double y,
-        Text message,
+        Component message,
         @Nullable WidgetSetupCallback<Xlyder> setupCallback,
         boolean active,
         XlyderCallback onChanged
@@ -79,6 +79,6 @@ public class MessageXlyder extends StatelessWidget {
 
     @FunctionalInterface
     public interface XlyderMessageProvider {
-        Text getMessage(double x, double y);
+        Component getMessage(double x, double y);
     }
 }

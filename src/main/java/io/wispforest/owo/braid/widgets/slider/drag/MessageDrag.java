@@ -8,7 +8,7 @@ import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
 import io.wispforest.owo.braid.widgets.slider.slider.SliderCallback;
 import io.wispforest.owo.braid.widgets.stack.Stack;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
 public class MessageDrag extends StatelessWidget {
@@ -17,13 +17,13 @@ public class MessageDrag extends StatelessWidget {
     public final @Nullable WidgetSetupCallback<Drag> setupCallback;
     public final @Nullable SliderCallback onChanged;
 
-    public final Text message;
+    public final Component message;
 
     public MessageDrag(
         double value,
         @Nullable WidgetSetupCallback<Drag> setupCallback,
         @Nullable SliderCallback onChanged,
-        Text message
+        Component message
     ) {
         this.value = value;
         this.setupCallback = setupCallback;
@@ -36,7 +36,7 @@ public class MessageDrag extends StatelessWidget {
         @Nullable WidgetSetupCallback<Drag> setupCallback,
         boolean active,
         SliderCallback onChanged,
-        Text message
+        Component message
     ) {
         this(value, setupCallback, active ? onChanged : null, message);
     }

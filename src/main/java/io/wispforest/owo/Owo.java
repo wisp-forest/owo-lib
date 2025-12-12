@@ -1,6 +1,6 @@
 package io.wispforest.owo;
 
-import io.wispforest.owo.client.screens.ScreenInternals;
+import io.wispforest.owo.client.screens.MenuNetworkingInternals;
 import io.wispforest.owo.command.debug.OwoDebugCommands;
 import io.wispforest.owo.ops.LootOps;
 import io.wispforest.owo.text.CustomTextRegistry;
@@ -9,10 +9,10 @@ import io.wispforest.owo.util.Wisdom;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,11 +30,11 @@ public class Owo implements ModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     private static MinecraftServer SERVER;
 
-    public static final Text PREFIX = Text.empty().formatted(Formatting.GRAY)
+    public static final Component PREFIX = Component.empty().withStyle(ChatFormatting.GRAY)
         .append(withColor("o", 0x3955e5))
         .append(withColor("ω", 0x13a6f0))
         .append(withColor("o", 0x3955e5))
-        .append(Text.literal(" > ").formatted(Formatting.GRAY));
+        .append(Component.literal(" > ").withStyle(ChatFormatting.GRAY));
 
     static {
         boolean debug = FabricLoader.getInstance().isDevelopmentEnvironment();
@@ -52,7 +52,7 @@ public class Owo implements ModInitializer {
     public void onInitialize() {
         LootOps.registerListener();
         CustomTextRegistry.register("index", InsertingTextContent.CODEC);
-        ScreenInternals.init();
+        MenuNetworkingInternals.init();
 
         ServerLifecycleEvents.SERVER_STARTING.register(server -> SERVER = server);
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> SERVER = null);
@@ -85,10 +85,9 @@ public class Owo implements ModInitializer {
         return SERVER;
     }
 
-
     // "eh it's only like 10-15 of them what's the big deal" - glisco, while writing the 52nd hardcoded Identifier.of("owo", ...)
     @ApiStatus.Internal
     public static Identifier id(String path) {
-        return Identifier.of(MOD_ID, path);
+        return Identifier.fromNamespaceAndPath(MOD_ID, path);
     }
 }

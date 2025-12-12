@@ -1,18 +1,16 @@
 package io.wispforest.owo.ui.component;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
-import io.wispforest.owo.ui.base.BaseComponent;
+import io.wispforest.owo.ui.base.BaseUIComponent;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
 import org.w3c.dom.Element;
 
 import java.util.Map;
 
-public class TextureComponent extends BaseComponent {
+public class TextureComponent extends BaseUIComponent {
 
     protected final Identifier texture;
     protected final int u, v;
@@ -51,8 +49,8 @@ public class TextureComponent extends BaseComponent {
     }
 
     @Override
-    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
-        var matrices = context.getMatrices();
+    public void draw(OwoUIGraphics graphics, int mouseX, int mouseY, float partialTicks, float delta) {
+        var matrices = graphics.pose();
         matrices.pushMatrix();
         matrices.translate(x, y);
         matrices.scale(this.width / (float) this.regionWidth, this.height / (float) this.regionHeight);
@@ -62,7 +60,7 @@ public class TextureComponent extends BaseComponent {
         int bottomEdge = Math.min(visibleArea.y() + visibleArea.height(), regionHeight);
         int rightEdge = Math.min(visibleArea.x() + visibleArea.width(), regionWidth);
 
-        context.drawTexture(this.blend ? RenderPipelines.GUI_TEXTURED : OwoUIPipelines.GUI_TEXTURED_NO_BLEND,
+        graphics.blit(this.blend ? RenderPipelines.GUI_TEXTURED : OwoUIPipelines.GUI_TEXTURED_NO_BLEND,
             this.texture,
             visibleArea.x(),
             visibleArea.y(),

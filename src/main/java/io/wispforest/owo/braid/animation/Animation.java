@@ -1,7 +1,7 @@
 package io.wispforest.owo.braid.animation;
 
 import io.wispforest.owo.braid.framework.proxy.ProxyHost;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
@@ -73,7 +73,7 @@ public class Animation {
     private void callback(Duration delta) {
         if (this.target == null) return;
 
-        this.progress = MathHelper.clamp(
+        this.progress = Mth.clamp(
             this.progress + this.target.direction * delta.toNanos() / (double) this.duration.toNanos(),
             0,
             1

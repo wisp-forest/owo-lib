@@ -20,7 +20,7 @@ allprojects {
 
     dependencies {
         minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
-        mappings "net.fabricmc:yarn:${rootProject.yarn_mappings}:v2"
+        mappings loom.officialMojangMappings()
         modImplementation "net.fabricmc:fabric-loader:${rootProject.loader_version}"
 
         modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"

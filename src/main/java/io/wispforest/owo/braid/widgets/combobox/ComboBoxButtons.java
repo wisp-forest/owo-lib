@@ -14,8 +14,8 @@ import io.wispforest.owo.braid.widgets.label.LabelStyle;
 import io.wispforest.owo.braid.widgets.scroll.FlatScrollbar;
 import io.wispforest.owo.braid.widgets.scroll.Scrollable;
 import io.wispforest.owo.braid.widgets.scroll.ScrollableWithBars;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -25,10 +25,10 @@ class ComboBoxButtons<T> extends StatelessWidget {
 
     public final ListenableValue<ComboBoxButtonsState<T>> state;
     public final double width;
-    public final Function<@Nullable T, Text> optionToName;
+    public final Function<@Nullable T, Component> optionToName;
     public final ComboBox.SelectCallback<T> onSelect;
 
-    public ComboBoxButtons(ListenableValue<ComboBoxButtonsState<T>> state, double width, Function<@Nullable T, Text> optionToName, ComboBox.SelectCallback<T> onSelect) {
+    public ComboBoxButtons(ListenableValue<ComboBoxButtonsState<T>> state, double width, Function<@Nullable T, Component> optionToName, ComboBox.SelectCallback<T> onSelect) {
         this.state = state;
         this.width = width;
         this.optionToName = optionToName;
@@ -93,9 +93,9 @@ class ComboBoxButtons<T> extends StatelessWidget {
         public final ComboBox.SelectCallback<T> onSelect;
         public final T option;
         public final boolean highlighted;
-        public final Function<@Nullable T, Text> optionToName;
+        public final Function<@Nullable T, Component> optionToName;
 
-        public HighlightableButton(ComboBox.SelectCallback<T> onSelect, T option, boolean highlighted, Function<@Nullable T, Text> optionToName) {
+        public HighlightableButton(ComboBox.SelectCallback<T> onSelect, T option, boolean highlighted, Function<@Nullable T, Component> optionToName) {
             this.onSelect = onSelect;
             this.option = option;
             this.highlighted = highlighted;
@@ -130,7 +130,7 @@ class ComboBoxButtons<T> extends StatelessWidget {
                                     Insets.all(2).withLeft(3),
                                     new Label(
                                         new LabelStyle(Alignment.LEFT, highlighted
-                                            ? Color.rgb(Formatting.YELLOW.getColorValue()) : null, null, highlighted),
+                                            ? Color.rgb(ChatFormatting.YELLOW.getColor()) : null, null, highlighted),
                                         true,
                                         this.widget().optionToName.apply(this.widget().option)
                                     )

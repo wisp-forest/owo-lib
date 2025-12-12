@@ -1,11 +1,11 @@
 package io.wispforest.owo.braid.framework.instance;
 
 import io.wispforest.owo.braid.widgets.basic.LayoutBuilder;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import org.joml.Vector2dc;
 
 public interface InstanceHost {
-    MinecraftClient client();
+    Minecraft client();
 
     /// Schedule a [WidgetInstance#layout] invocation for `instance`,
     /// to be executed during the next layout pass.

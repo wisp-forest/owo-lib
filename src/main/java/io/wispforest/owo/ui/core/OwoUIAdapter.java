@@ -1,16 +1,18 @@
 package io.wispforest.owo.ui.core;
 
-import com.mojang.blaze3d.opengl.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.renderdoc.RenderDoc;
 import io.wispforest.owo.ui.util.CursorAdapter;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.*;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Renderable;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.function.BiFunction;
@@ -26,15 +28,15 @@ import java.util.function.BiFunction;
  * you can always simply add it as a widget and get most of the functionality
  * working out of the box
  * <p>
- * To draw the UI tree managed by this adapter, call {@link OwoUIAdapter#render(DrawContext, int, int, float)}.
+ * To draw the UI tree managed by this adapter, call {@link OwoUIAdapter#render(GuiGraphics, int, int, float)}.
  * Note that this does not draw the current tooltip of the UI - this must be done separately
- * by invoking {@link #drawTooltip(DrawContext, int, int, float)}. If in a scenario with multiple adapters
+ * by invoking {@link #drawTooltip(GuiGraphics, int, int, float)}. If in a scenario with multiple adapters
  * or other sources rendering UI elements to the screen, it is generally desirable to delay tooltip
  * drawing until after all UI is drawn to avoid layering issues.
  *
  * @see io.wispforest.owo.ui.base.BaseOwoScreen
  */
-public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawable, Selectable {
+public class OwoUIAdapter<R extends ParentUIComponent> implements GuiEventListener, Renderable, NarratableEntry {
 
     private static boolean isRendering = false;
 
@@ -71,11 +73,11 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
      * @param <R>                The type of root component the created adapter will use
      * @return The new UI adapter, already set up for the given screen
      */
-    public static <R extends ParentComponent> OwoUIAdapter<R> create(Screen screen, BiFunction<Sizing, Sizing, R> rootComponentMaker) {
+    public static <R extends ParentUIComponent> OwoUIAdapter<R> create(Screen screen, BiFunction<Sizing, Sizing, R> rootComponentMaker) {
         var rootComponent = rootComponentMaker.apply(Sizing.fill(100), Sizing.fill(100));
 
         var adapter = new OwoUIAdapter<>(0, 0, screen.width, screen.height, rootComponent);
-        screen.addDrawableChild(adapter);
+        screen.addRenderableWidget(adapter);
         screen.setFocused(adapter);
 
         return adapter;
@@ -93,7 +95,7 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
      * @param <R>                The type of root component the created adapter will use
      * @return The new UI adapter, ready for layout inflation
      */
-    public static <R extends ParentComponent> OwoUIAdapter<R> createWithoutScreen(int x, int y, int width, int height, BiFunction<Sizing, Sizing, R> rootComponentMaker) {
+    public static <R extends ParentUIComponent> OwoUIAdapter<R> createWithoutScreen(int x, int y, int width, int height, BiFunction<Sizing, Sizing, R> rootComponentMaker) {
         var rootComponent = rootComponentMaker.apply(Sizing.fill(100), Sizing.fill(100));
         return new OwoUIAdapter<>(x, y, width, height, rootComponent);
     }
@@ -162,23 +164,23 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float partialTicks) {
-        if (!(context instanceof OwoUIDrawContext)) context = OwoUIDrawContext.of(context);
-        var owoContext = (OwoUIDrawContext) context;
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        if (!(graphics instanceof OwoUIGraphics)) graphics = OwoUIGraphics.of(graphics);
+        var owoGraphics = (OwoUIGraphics) graphics;
 
         try {
             isRendering = true;
 
             if (this.captureFrame) RenderDoc.startFrameCapture();
 
-            final var delta = MinecraftClient.getInstance().getRenderTickCounter().getDynamicDeltaTicks();
-            final var window = MinecraftClient.getInstance().getWindow();
+            final var delta = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaTicks();
+            final var window = Minecraft.getInstance().getWindow();
 
             this.rootComponent.update(delta, mouseX, mouseY);
 
-            context.enableScissor(0, 0, window.getFramebufferWidth(), window.getFramebufferHeight());
-            this.rootComponent.draw(owoContext, mouseX, mouseY, partialTicks, delta);
-            context.disableScissor();
+            graphics.enableScissor(0, 0, window.getWidth(), window.getHeight());
+            this.rootComponent.draw(owoGraphics, mouseX, mouseY, partialTicks, delta);
+            graphics.disableScissor();
 
             final var hovered = this.rootComponent.childAt(mouseX, mouseY);
             if (!disposed && hovered != null) {
@@ -186,7 +188,7 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
             }
 
             if (this.enableInspector) {
-                owoContext.drawInspector(this.rootComponent, mouseX, mouseY, !this.globalInspector);
+                OwoUIGraphics.drawInspector(owoGraphics, this.rootComponent, mouseX, mouseY, !this.globalInspector);
             }
 
             if (this.captureFrame) RenderDoc.endFrameCapture();
@@ -198,15 +200,15 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
 
     /**
      * Draw the current tooltip of the UI managed by this adapter. This method
-     * must not be called without a previous, corresponding call to {@link #render(DrawContext, int, int, float)}
+     * must not be called without a previous, corresponding call to {@link #render(GuiGraphics, int, int, float)}
      *
      * @since 0.12.19
      */
-    public void drawTooltip(DrawContext context, int mouseX, int mouseY, float partialTicks) {
-        if (!(context instanceof OwoUIDrawContext)) context = OwoUIDrawContext.of(context);
-        var owoContext = (OwoUIDrawContext) context;
+    public void drawTooltip(GuiGraphics context, int mouseX, int mouseY, float partialTicks) {
+        if (!(context instanceof OwoUIGraphics)) context = OwoUIGraphics.of(context);
+        var owoContext = (OwoUIGraphics) context;
 
-        final var delta = MinecraftClient.getInstance().getRenderTickCounter().getDynamicDeltaTicks();
+        final var delta = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaTicks();
 
         this.rootComponent.drawTooltip(owoContext, mouseX, mouseY, partialTicks, delta);
     }
@@ -225,12 +227,12 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         return this.rootComponent.onMouseDown(click, doubled);
     }
 
     @Override
-    public boolean mouseReleased(Click click) {
+    public boolean mouseReleased(MouseButtonEvent click) {
         return this.rootComponent.onMouseUp(click);
     }
 
@@ -240,22 +242,22 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
     }
 
     @Override
-    public boolean mouseDragged(Click click, double deltaX, double deltaY) {
+    public boolean mouseDragged(MouseButtonEvent click, double deltaX, double deltaY) {
         return this.rootComponent.onMouseDrag(click, deltaX, deltaY);
     }
 
     @Override
-    public boolean keyPressed(KeyInput input) {
+    public boolean keyPressed(KeyEvent input) {
         if (Owo.DEBUG && input.key() == GLFW.GLFW_KEY_LEFT_SHIFT) {
-            if (input.hasCtrl()) {
+            if (input.hasControlDown()) {
                 this.toggleInspector();
-            } else if (input.hasAlt()) {
+            } else if (input.hasAltDown()) {
                 this.toggleGlobalInspector();
             }
         }
 
         if (Owo.DEBUG && input.key() == GLFW.GLFW_KEY_R && RenderDoc.isAvailable()) {
-            if (input.hasAlt() && input.hasCtrl()) {
+            if (input.hasAltDown() && input.hasControlDown()) {
                 this.captureFrame = true;
             }
         }
@@ -264,17 +266,17 @@ public class OwoUIAdapter<R extends ParentComponent> implements Element, Drawabl
     }
 
     @Override
-    public boolean charTyped(CharInput input) {
+    public boolean charTyped(CharacterEvent input) {
         return this.rootComponent.onCharTyped(input);
     }
 
     @Override
-    public SelectionType getType() {
-        return SelectionType.NONE;
+    public NarrationPriority narrationPriority() {
+        return NarrationPriority.NONE;
     }
 
     @Override
-    public void appendNarrations(NarrationMessageBuilder builder) {}
+    public void updateNarration(NarrationElementOutput builder) {}
 
     public static boolean isRendering() {
         return isRendering;

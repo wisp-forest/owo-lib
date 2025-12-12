@@ -5,9 +5,7 @@ import io.wispforest.owo.braid.framework.instance.InstanceHost;
 import io.wispforest.owo.braid.framework.instance.OptionalChildWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.OptionalChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.TriState;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.OptionalDouble;
@@ -77,7 +75,7 @@ public class TextureWidget extends OptionalChildInstanceWidget {
         }
 
         private void refreshTextureSize() {
-            var texture = this.host().client().getTextureManager().getTexture(widget.texture).getGlTexture();
+            var texture = this.host().client().getTextureManager().getTexture(widget.texture).getTexture();
             this.textureSize = Size.of(
                 texture.getWidth(0),
                 texture.getHeight(0)
@@ -126,8 +124,8 @@ public class TextureWidget extends OptionalChildInstanceWidget {
         }
 
         @Override
-        public void draw(BraidDrawContext ctx) {
-            var matrices = ctx.getMatrices();
+        public void draw(BraidGraphics graphics) {
+            var matrices = graphics.pose();
             var stretch = this.widget.wrap == Wrap.STRETCH;
 
             var textureWidth = (int) (this.textureSize != null ? this.textureSize.width() : this.transform.width());
@@ -147,7 +145,7 @@ public class TextureWidget extends OptionalChildInstanceWidget {
                 case LINEAR -> BraidRenderPipelines.TEXTURED_BILINEAR;
             };
 
-            ctx.drawTexture(
+            graphics.blit(
                 pipeline,
                 this.widget.texture,
                 0, 0, 0, 0,
@@ -160,7 +158,7 @@ public class TextureWidget extends OptionalChildInstanceWidget {
                 matrices.popMatrix();
             }
 
-            super.draw(ctx);
+            super.draw(graphics);
         }
     }
 }

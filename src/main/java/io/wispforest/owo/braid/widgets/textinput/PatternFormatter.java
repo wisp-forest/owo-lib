@@ -1,6 +1,6 @@
 package io.wispforest.owo.braid.widgets.textinput;
 
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 
 import java.util.regex.Pattern;
 
@@ -56,12 +56,12 @@ public record PatternFormatter(Pattern pattern, String replacement, boolean allo
         }
 
         if (state.newValue.selection().start() > start) {
-            var startInRegion = MathHelper.clamp(state.newValue.selection().start(), start, end) - start;
+            var startInRegion = Mth.clamp(state.newValue.selection().start(), start, end) - start;
             state.selectionStart += replacement.length() - startInRegion;
         }
 
         if (state.newValue.selection().end() > start) {
-            var endInRegion = MathHelper.clamp(state.newValue.selection().end(), start, end) - start;
+            var endInRegion = Mth.clamp(state.newValue.selection().end(), start, end) - start;
             state.selectionEnd += replacement.length() - endInRegion;
         }
     }

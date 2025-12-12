@@ -5,7 +5,7 @@ import io.wispforest.owo.braid.animation.DoubleLerp;
 import io.wispforest.owo.braid.animation.Easing;
 import io.wispforest.owo.braid.core.Listenable;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 
 import java.time.Duration;
 
@@ -67,7 +67,7 @@ public class ScrollController extends Listenable {
     }
 
     private double clampOffset(double offset) {
-        return MathHelper.clamp(offset, 0, this.maxOffset);
+        return Mth.clamp(offset, 0, this.maxOffset);
     }
 
     public double offset() {

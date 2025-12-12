@@ -14,9 +14,9 @@ import io.wispforest.owo.braid.widgets.intents.Interactable;
 import io.wispforest.owo.braid.widgets.object.ItemStackWidget;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.uwu.items.UwuItems;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.widget.TexturedButtonWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.network.chat.Component;
 
 public class LayersTestWidget extends StatelessWidget {
     @Override
@@ -27,28 +27,28 @@ public class LayersTestWidget extends StatelessWidget {
                 new Padding(
                     Insets.all(15),
                     new MessageButton(
-                        Text.literal("layers??"),
-                        () -> MinecraftClient.getInstance().getServer().getPlayerManager().getPlayerList().getFirst().kill(MinecraftClient.getInstance().getServer().getOverworld())
+                        Component.literal("layers??"),
+                        () -> Minecraft.getInstance().getSingleplayerServer().getPlayerList().getPlayers().getFirst().kill(Minecraft.getInstance().getSingleplayerServer().overworld())
                     )
                 )
             ),
             LayerAlignment.atVanillaWidget(
-                clickableWidget -> clickableWidget instanceof TexturedButtonWidget,
+                clickableWidget -> clickableWidget instanceof ImageButton,
                 AnchorJustification.CENTER_TO_CENTER,
                 new Sized(
                     10, 10,
                     new Tooltip(
-                        Text.literal("a"),
+                        Component.literal("a"),
                         Interactable.primary(
-                            () -> MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.literal("braid layer supremacy")),
+                            () -> Minecraft.getInstance().gui.getChat().addMessage(Component.literal("braid layer supremacy")),
                             new Box(Color.RED)
                         )
                     )
                 )
             ),
-            LayerAlignment.atHandledScreenCoordinates(
+            LayerAlignment.atContainerScreenCoordinates(
                 136, 63,
-                new ItemStackWidget(UwuItems.BRAID.getDefaultStack())
+                new ItemStackWidget(UwuItems.BRAID.getDefaultInstance())
             )
         );
     }

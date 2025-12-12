@@ -9,7 +9,7 @@ import io.wispforest.owo.braid.widgets.basic.Center;
 import io.wispforest.owo.braid.widgets.basic.Padding;
 import io.wispforest.owo.braid.widgets.basic.Panel;
 import io.wispforest.owo.braid.widgets.button.MessageButton;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
 public class SimpleCounter extends StatefulWidget {
     @Override
@@ -29,7 +29,7 @@ public class SimpleCounter extends StatefulWidget {
                     new Padding(
                         Insets.all(10),
                         new MessageButton(
-                            Text.literal("Count: " + this.count),
+                            Component.literal("Count: " + this.count),
                             () -> this.setState(() -> {
                                 this.count++;
                             })

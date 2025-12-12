@@ -11,11 +11,14 @@ import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
 import io.wispforest.owo.braid.widgets.basic.MouseArea;
 import io.wispforest.owo.braid.widgets.focus.Focusable;
-import net.minecraft.util.Pair;
+import net.minecraft.util.Tuple;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 public class ShortcutDecoder extends StatefulWidget {
@@ -211,8 +214,8 @@ public class ShortcutDecoder extends StatefulWidget {
             //   - negative (poisoned) trigger index:
             //     will not step
             var steppedSequences = sequences.stream()
-                .map(sequence -> new Pair<>(sequence, sequence.step(test)))
-                .filter(pair -> pair.getRight() != ShortcutSequenceStep.IGNORE)
+                .map(sequence -> new Tuple<>(sequence, sequence.step(test)))
+                .filter(pair -> pair.getB() != ShortcutSequenceStep.IGNORE)
                 .toList();
 
             // next, get the sequence to treat as completed on this iteration - if any
@@ -222,11 +225,11 @@ public class ShortcutDecoder extends StatefulWidget {
             //   a non-singular sequence (user intent) and immediately complete a
             //   singular one (this would be an artifact)
             var completed = BraidUtils.fold(
-                Iterables.filter(steppedSequences, pair -> pair.getRight() == ShortcutSequenceStep.COMPLETE),
-                (Pair<ShortcutSequence, ShortcutSequenceStep>) null,
+                Iterables.filter(steppedSequences, pair -> pair.getB() == ShortcutSequenceStep.COMPLETE),
+                (Tuple<ShortcutSequence, ShortcutSequenceStep>) null,
                 (acc, element) -> {
                     if (acc == null) return element;
-                    if (!element.getLeft().isSingular && acc.getLeft().isSingular) return element;
+                    if (!element.getA().isSingular && acc.getA().isSingular) return element;
                     return acc;
                 }
             );
@@ -235,8 +238,8 @@ public class ShortcutDecoder extends StatefulWidget {
             // if we have successfully resolved all ambiguity, that is,
             // every remaining (non-poisoned) sequence stepped to completion,
             // dispatch immediately
-            if (steppedSequences.stream().allMatch(pair -> pair.getRight() == ShortcutSequenceStep.COMPLETE) && completed != null) {
-                return this.dispatch(completed.getLeft(), completed.getLeft().isSingular, trigger);
+            if (steppedSequences.stream().allMatch(pair -> pair.getB() == ShortcutSequenceStep.COMPLETE) && completed != null) {
+                return this.dispatch(completed.getA(), completed.getA().isSingular, trigger);
             } else {
                 // otherwise, queue up the completed sequence (if any)
                 // and queue dispatch after the maximum possible input delay
@@ -245,12 +248,12 @@ public class ShortcutDecoder extends StatefulWidget {
                     // if the sequence we just complete is non-singular, clear
                     // the queue - this is important, since otherwise we could duplicate
                     // the respective events
-                    if (!completed.getLeft().isSingular) {
+                    if (!completed.getA().isSingular) {
                         this.queuedSequences.clear();
                     }
 
-                    this.queuedSequences.add(completed.getLeft());
-                    completed.getLeft().nextTriggerIndex = 0;
+                    this.queuedSequences.add(completed.getA());
+                    completed.getA().nextTriggerIndex = 0;
                 }
 
                 this.callbackId = this.scheduleDelayedCallback(MAX_INPUT_DELAY, () -> this.dispatch(null, true, trigger));

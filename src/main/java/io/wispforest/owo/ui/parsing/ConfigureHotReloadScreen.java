@@ -7,9 +7,9 @@ import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.util.CommandOpenedScreen;
 import io.wispforest.owo.ui.util.UISounds;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.util.tinyfd.TinyFileDialogs;
@@ -36,7 +36,7 @@ public class ConfigureHotReloadScreen extends BaseUIModelScreen<FlowLayout> impl
 
     @Override
     protected void build(FlowLayout rootComponent) {
-        rootComponent.childById(LabelComponent.class, "ui-model-label").text(Text.translatable("text.owo.configure_hot_reload.model", this.modelId));
+        rootComponent.childById(LabelComponent.class, "ui-model-label").text(Component.translatable("text.owo.configure_hot_reload.model", this.modelId));
         this.fileNameLabel = rootComponent.childById(LabelComponent.class, "file-name-label");
         this.updateFileNameLabel();
 
@@ -44,32 +44,32 @@ public class ConfigureHotReloadScreen extends BaseUIModelScreen<FlowLayout> impl
             CompletableFuture.runAsync(() -> {
                 var newPath = TinyFileDialogs.tinyfd_openFileDialog("Choose UI Model source", null, null, null, false);
                 if (newPath != null) this.reloadLocation = Path.of(newPath);
-            }, Util.getMainWorkerExecutor()).whenComplete((unused, throwable) -> {
+            }, Util.backgroundExecutor()).whenComplete((unused, throwable) -> {
                 this.updateFileNameLabel();
             });
         });
 
         rootComponent.childById(ButtonComponent.class, "save-button").onPress(button -> {
             UIModelLoader.setHotReloadPath(this.modelId, this.reloadLocation);
-            this.close();
+            this.onClose();
         });
 
         rootComponent.childById(LabelComponent.class, "close-label").mouseDown().subscribe((click, doubled) -> {
             UISounds.playInteractionSound();
-            this.close();
+            this.onClose();
             return true;
         });
     }
 
     @Override
-    public void close() {
-        this.client.setScreen(this.parent);
+    public void onClose() {
+        this.minecraft.setScreen(this.parent);
     }
 
     private void updateFileNameLabel() {
-        this.fileNameLabel.text(Text.translatable(
+        this.fileNameLabel.text(Component.translatable(
                 "text.owo.configure_hot_reload.reload_from",
-                this.reloadLocation == null ? Text.translatable("text.owo.configure_hot_reload.reload_from.unset") : this.reloadLocation
+                this.reloadLocation == null ? Component.translatable("text.owo.configure_hot_reload.reload_from.unset") : this.reloadLocation
         ));
     }
 }

@@ -1,11 +1,11 @@
 package io.wispforest.owo.braid.widgets.basic;
 
-import io.wispforest.owo.braid.core.BraidDrawContext;
+import io.wispforest.owo.braid.core.BraidGraphics;
 import io.wispforest.owo.braid.framework.instance.SingleChildWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.ui.renderstate.BlurQuadElementRenderState;
-import net.minecraft.client.gui.ScreenRect;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
 import org.joml.Matrix3x2f;
 
 public class Blur extends SingleChildInstanceWidget {
@@ -33,23 +33,23 @@ public class Blur extends SingleChildInstanceWidget {
         }
 
         @Override
-        public void draw(BraidDrawContext ctx) {
+        public void draw(BraidGraphics graphics) {
             if (!this.widget.blurChild) {
-                this.drawBlur(ctx);
+                this.drawBlur(graphics);
             }
 
-            super.draw(ctx);
+            super.draw(graphics);
 
             if (this.widget.blurChild) {
-                this.drawBlur(ctx);
+                this.drawBlur(graphics);
             }
         }
 
-        private void drawBlur(BraidDrawContext ctx) {
-            ctx.state.addSimpleElement(new BlurQuadElementRenderState(
-                new Matrix3x2f(ctx.getMatrices()),
-                new ScreenRect(0, 0, (int) this.transform.width(), (int) this.transform.height()),
-                ctx.scissorStack.peekLast(),
+        private void drawBlur(BraidGraphics ctx) {
+            ctx.guiRenderState.submitGuiElement(new BlurQuadElementRenderState(
+                new Matrix3x2f(ctx.pose()),
+                new ScreenRectangle(0, 0, (int) this.transform.width(), (int) this.transform.height()),
+                ctx.scissorStack.peek(),
                 16, this.widget.quality, this.widget.size
             ));
         }

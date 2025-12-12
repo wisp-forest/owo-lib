@@ -7,8 +7,6 @@ import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.Padding;
 
-import java.util.function.Consumer;
-
 public class LazyCollapsible extends StatefulWidget {
     public final boolean showVerticalRule;
 

@@ -17,7 +17,7 @@ import io.wispforest.owo.braid.widgets.flex.CrossAxisAlignment;
 import io.wispforest.owo.braid.widgets.flex.Flex;
 import io.wispforest.owo.braid.widgets.flex.Flexible;
 import io.wispforest.owo.braid.widgets.flex.MainAxisAlignment;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -88,7 +88,7 @@ class MultiSplitPaneState extends WidgetState<MultiSplitPane> {
                                     this.splits.set(finalI,  this.splits.get(finalI) + axis.choose(dx, dy));
                                 }))
                                 .dragEndCallback(() -> {
-                                    this.splits.set(finalI, MathHelper.clamp(this.splits.get(finalI), .1 * maxSize, .9 * maxSize));
+                                    this.splits.set(finalI, Mth.clamp(this.splits.get(finalI), .1 * maxSize, .9 * maxSize));
                                 })
                                 .cursorStyleSupplier((x, y) -> axis.choose(CursorStyle.HORIZONTAL_RESIZE, CursorStyle.VERTICAL_RESIZE)),
                             new Box(Color.WHITE)

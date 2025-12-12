@@ -1,7 +1,7 @@
 package io.wispforest.owo.braid.widgets.owoui;
 
 import com.mojang.blaze3d.opengl.GlStateManager;
-import io.wispforest.owo.braid.core.BraidDrawContext;
+import io.wispforest.owo.braid.core.BraidGraphics;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.KeyModifiers;
 import io.wispforest.owo.braid.core.Size;
@@ -9,21 +9,21 @@ import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.framework.instance.LeafWidgetInstance;
 import io.wispforest.owo.braid.framework.instance.MouseListener;
 import io.wispforest.owo.braid.framework.widget.LeafInstanceWidget;
-import io.wispforest.owo.ui.core.Component;
-import io.wispforest.owo.ui.core.ParentComponent;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.client.input.MouseInput;
+import io.wispforest.owo.ui.core.ParentUIComponent;
+import io.wispforest.owo.ui.core.UIComponent;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.MouseButtonInfo;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.OptionalDouble;
 
 public class OwoUIWidgetWrapper extends LeafInstanceWidget {
-    private final ParentComponent rootComponent;
+    private final ParentUIComponent rootComponent;
 
-    public OwoUIWidgetWrapper(ParentComponent rootComponent) {
+    public OwoUIWidgetWrapper(ParentUIComponent rootComponent) {
         this.rootComponent = rootComponent;
     }
 
@@ -95,7 +95,7 @@ public class OwoUIWidgetWrapper extends LeafInstanceWidget {
         }
 
         public void onFocusLost() {
-            this.widget.rootComponent.focusHandler().focus(null, Component.FocusSource.MOUSE_CLICK);
+            this.widget.rootComponent.focusHandler().focus(null, UIComponent.FocusSource.MOUSE_CLICK);
         }
 
         @Override
@@ -121,12 +121,12 @@ public class OwoUIWidgetWrapper extends LeafInstanceWidget {
 
         @Override
         public boolean onMouseDown(double x, double y, int button, KeyModifiers modifiers) {
-            return this.widget.rootComponent.onMouseDown(new Click(x, y, new MouseInput(button, modifiers.bitMask())), false);
+            return this.widget.rootComponent.onMouseDown(new MouseButtonEvent(x, y, new MouseButtonInfo(button, modifiers.bitMask())), false);
         }
 
         @Override
         public boolean onMouseUp(double x, double y, int button, KeyModifiers modifiers) {
-            return this.widget.rootComponent.onMouseUp(new Click(x, y, new MouseInput(button, modifiers.bitMask())));
+            return this.widget.rootComponent.onMouseUp(new MouseButtonEvent(x, y, new MouseButtonInfo(button, modifiers.bitMask())));
         }
 
         @Override
@@ -141,7 +141,7 @@ public class OwoUIWidgetWrapper extends LeafInstanceWidget {
 
         @Override
         public void onMouseDrag(double x, double y, double dx, double dy) {
-            this.widget.rootComponent.onMouseDrag(new Click(x, y, new MouseInput(this.dragButton, 0)), dx, dy);
+            this.widget.rootComponent.onMouseDrag(new MouseButtonEvent(x, y, new MouseButtonInfo(this.dragButton, 0)), dx, dy);
         }
 
         @Override
@@ -150,29 +150,29 @@ public class OwoUIWidgetWrapper extends LeafInstanceWidget {
         }
 
         public boolean onKeyDown(int keyCode, KeyModifiers modifiers) {
-            return this.widget.rootComponent.onKeyPress(new KeyInput(keyCode, GLFW.glfwGetKeyScancode(keyCode), modifiers.bitMask()));
+            return this.widget.rootComponent.onKeyPress(new KeyEvent(keyCode, GLFW.glfwGetKeyScancode(keyCode), modifiers.bitMask()));
         }
 
         public boolean onChar(int charCode, KeyModifiers modifiers) {
-            return this.widget.rootComponent.onCharTyped(new CharInput(charCode, modifiers.bitMask()));
+            return this.widget.rootComponent.onCharTyped(new CharacterEvent(charCode, modifiers.bitMask()));
         }
 
         @Override
-        public void draw(BraidDrawContext ctx) {
+        public void draw(BraidGraphics graphics) {
             var client = host().client();
 
             this.widget.rootComponent.update(
-                client.getRenderTickCounter().getDynamicDeltaTicks(),
+                client.getDeltaTracker().getGameTimeDeltaTicks(),
                 mouseX,
                 mouseY
             );
 
             this.widget.rootComponent.draw(
-                ctx,
+                graphics,
                 mouseX,
                 mouseY,
-                client.getRenderTickCounter().getTickProgress(false),
-                client.getRenderTickCounter().getDynamicDeltaTicks()
+                client.getDeltaTracker().getGameTimeDeltaPartialTick(false),
+                client.getDeltaTracker().getGameTimeDeltaTicks()
             );
 
             // TODO: tooltips.

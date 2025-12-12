@@ -1,13 +1,13 @@
 package io.wispforest.owo.braid.widgets.basic;
 
 import io.wispforest.owo.Owo;
-import io.wispforest.owo.braid.core.BraidDrawContext;
+import io.wispforest.owo.braid.core.BraidGraphics;
 import io.wispforest.owo.braid.framework.instance.OptionalChildWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.OptionalChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
+import io.wispforest.owo.ui.core.OwoUIGraphics;
 import io.wispforest.owo.ui.util.NinePatchTexture;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 public class Panel extends OptionalChildInstanceWidget {
@@ -41,12 +41,12 @@ public class Panel extends OptionalChildInstanceWidget {
         }
 
         @Override
-        public void draw(BraidDrawContext ctx) {
+        public void draw(BraidGraphics graphics) {
             if (this.widget.texture != null) {
-                NinePatchTexture.draw(this.widget.texture, OwoUIDrawContext.of(ctx), 0, 0, (int) this.transform.width(), (int) this.transform.height());
+                NinePatchTexture.draw(this.widget.texture, OwoUIGraphics.of(graphics), 0, 0, (int) this.transform.width(), (int) this.transform.height());
             }
 
-            super.draw(ctx);
+            super.draw(graphics);
         }
     }
 }

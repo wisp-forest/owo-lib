@@ -2,11 +2,10 @@ package io.wispforest.owo.ui.container;
 
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.util.EventSource;
-import net.minecraft.client.gui.Click;
+import net.minecraft.client.input.MouseButtonEvent;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 
-public class OverlayContainer<C extends Component> extends WrappingParentComponent<C> {
+public class OverlayContainer<C extends UIComponent> extends WrappingParentUIComponent<C> {
 
     protected boolean closeOnClick = true;
     protected @Nullable EventSource<?>.Subscription exitSubscription = null;
@@ -19,16 +18,16 @@ public class OverlayContainer<C extends Component> extends WrappingParentCompone
     }
 
     @Override
-    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
-        super.draw(context, mouseX, mouseY, partialTicks, delta);
-        this.drawChildren(context, mouseX, mouseY, partialTicks, delta, this.childView);
+    public void draw(OwoUIGraphics graphics, int mouseX, int mouseY, float partialTicks, float delta) {
+        super.draw(graphics, mouseX, mouseY, partialTicks, delta);
+        this.drawChildren(graphics, mouseX, mouseY, partialTicks, delta, this.childView);
     }
 
     @Override
-    public void drawFocusHighlight(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {}
+    public void drawFocusHighlight(OwoUIGraphics context, int mouseX, int mouseY, float partialTicks, float delta) {}
 
     @Override
-    public void mount(ParentComponent parent, int x, int y) {
+    public void mount(ParentUIComponent parent, int x, int y) {
         super.mount(parent, x, y);
         this.exitSubscription = this.root().keyPress().subscribe((input) -> {
             if (input.isEscape()) {
@@ -50,7 +49,7 @@ public class OverlayContainer<C extends Component> extends WrappingParentCompone
     }
 
     @Override
-    public boolean onMouseDown(Click click, boolean doubled) {
+    public boolean onMouseDown(MouseButtonEvent click, boolean doubled) {
         boolean handled = super.onMouseDown(click, doubled) || this.child.isInBoundingBox(click.x(), click.y());
 
         if (!handled && this.closeOnClick) {

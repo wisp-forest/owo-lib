@@ -4,26 +4,26 @@ import com.mojang.serialization.MapCodec;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.serialization.CodecUtils;
-import net.minecraft.text.StringVisitable;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextContent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentContents;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.Style;
 
 import java.util.Optional;
 
-public record InsertingTextContent(int index) implements TextContent {
+public record InsertingTextContent(int index) implements ComponentContents {
 
     public static final MapCodec<InsertingTextContent> CODEC = CodecUtils.toMapCodec(StructEndecBuilder.of(Endec.INT.fieldOf("index", InsertingTextContent::index), InsertingTextContent::new));
 
     @Override
-    public <T> Optional<T> visit(StringVisitable.Visitor<T> visitor) {
+    public <T> Optional<T> visit(FormattedText.ContentConsumer<T> visitor) {
         var current = TranslationContext.getCurrent();
 
         if (current == null || current.getArgs().length <= index) {return visitor.accept("%" + (index + 1) + "$s");}
 
         Object arg = current.getArgs()[index];
 
-        if (arg instanceof Text text) {
+        if (arg instanceof Component text) {
             return text.visit(visitor);
         } else {
             return visitor.accept(arg.toString());
@@ -31,7 +31,7 @@ public record InsertingTextContent(int index) implements TextContent {
     }
 
     @Override
-    public <T> Optional<T> visit(StringVisitable.StyledVisitor<T> visitor, Style style) {
+    public <T> Optional<T> visit(FormattedText.StyledContentConsumer<T> visitor, Style style) {
         var current = TranslationContext.getCurrent();
 
         if (current == null || current.getArgs().length <= index) {
@@ -40,7 +40,7 @@ public record InsertingTextContent(int index) implements TextContent {
 
         Object arg = current.getArgs()[index];
 
-        if (arg instanceof Text text) {
+        if (arg instanceof Component text) {
             return text.visit(visitor, style);
         } else {
             return visitor.accept(style, arg.toString());
@@ -48,7 +48,7 @@ public record InsertingTextContent(int index) implements TextContent {
     }
 
     @Override
-    public MapCodec<? extends TextContent> getCodec() {
+    public MapCodec<? extends ComponentContents> codec() {
         return CODEC;
     }
 }

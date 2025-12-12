@@ -5,48 +5,48 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.ops.TextOps;
-import net.minecraft.command.argument.NbtPathArgumentType;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.storage.NbtWriteView;
-import net.minecraft.util.ErrorReporter;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.NbtPathArgument;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.level.storage.TagValueOutput;
 
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 
 public class CcaDataCommand {
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(literal("cca-data").executes(CcaDataCommand::executeDumpAll)
-                .then(argument("path", NbtPathArgumentType.nbtPath()).executes(CcaDataCommand::executeDumpPath)));
+                .then(argument("path", NbtPathArgument.nbtPath()).executes(CcaDataCommand::executeDumpPath)));
     }
 
-    private static int executeDumpAll(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+    private static int executeDumpAll(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         final var player = context.getSource().getPlayer();
-        final var writeView = NbtWriteView.create(new ErrorReporter.Logging(Owo.LOGGER));
-        player.saveData(writeView);
+        final var writeView = TagValueOutput.createWithoutContext(new ProblemReporter.ScopedCollector(Owo.LOGGER));
+        player.save(writeView);
 
-        final var nbt = writeView.getNbt().getCompound("cardinal_components").orElseGet(NbtCompound::new);
+        final var nbt = writeView.buildResult().getCompound("cardinal_components").orElseGet(CompoundTag::new);
 
-        context.getSource().sendFeedback(() -> TextOps.concat(Owo.PREFIX, TextOps.withFormatting("CCA Data:", Formatting.GRAY)), false);
-        context.getSource().sendFeedback(() -> NbtHelper.toPrettyPrintedText(nbt), false);
+        context.getSource().sendSuccess(() -> TextOps.concat(Owo.PREFIX, TextOps.withFormatting("CCA Data:", ChatFormatting.GRAY)), false);
+        context.getSource().sendSuccess(() -> NbtUtils.toPrettyComponent(nbt), false);
 
         return 0;
     }
 
-    private static int executeDumpPath(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+    private static int executeDumpPath(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         final var player = context.getSource().getPlayer();
-        final var path = NbtPathArgumentType.getNbtPath(context, "path");
+        final var path = NbtPathArgument.getPath(context, "path");
 
-        final var writeView = NbtWriteView.create(new ErrorReporter.Logging(Owo.LOGGER));
-        player.saveData(writeView);
+        final var writeView = TagValueOutput.createWithoutContext(new ProblemReporter.ScopedCollector(Owo.LOGGER));
+        player.save(writeView);
 
-        final var nbt = path.get(writeView.getNbt().getCompound("cardinal_components").orElseGet(NbtCompound::new)).iterator().next();
+        final var nbt = path.get(writeView.buildResult().getCompound("cardinal_components").orElseGet(CompoundTag::new)).iterator().next();
 
-        context.getSource().sendFeedback(() -> TextOps.concat(Owo.PREFIX, TextOps.withFormatting("CCA Data:", Formatting.GRAY)), false);
-        context.getSource().sendFeedback(() -> NbtHelper.toPrettyPrintedText(nbt), false);
+        context.getSource().sendSuccess(() -> TextOps.concat(Owo.PREFIX, TextOps.withFormatting("CCA Data:", ChatFormatting.GRAY)), false);
+        context.getSource().sendSuccess(() -> NbtUtils.toPrettyComponent(nbt), false);
 
         return 0;
     }

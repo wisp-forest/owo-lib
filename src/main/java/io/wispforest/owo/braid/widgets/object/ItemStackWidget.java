@@ -1,15 +1,15 @@
 package io.wispforest.owo.braid.widgets.object;
 
-import io.wispforest.owo.braid.core.BraidDrawContext;
+import io.wispforest.owo.braid.core.BraidGraphics;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.Size;
 import io.wispforest.owo.braid.core.element.BraidItemElement;
 import io.wispforest.owo.braid.framework.instance.LeafWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.LeafInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
-import net.minecraft.client.render.item.ItemRenderState;
-import net.minecraft.item.ItemDisplayContext;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix4f;
@@ -86,7 +86,6 @@ public class ItemStackWidget extends LeafInstanceWidget {
     public static class Instance extends LeafWidgetInstance<ItemStackWidget> {
 
         public static final Size DEFAULT_SIZE = Size.square(16);
-        protected static final ItemRenderState ITEM_RENDER_STATE = new ItemRenderState();
 
         public Instance(ItemStackWidget widget) {
             super(widget);
@@ -114,33 +113,33 @@ public class ItemStackWidget extends LeafInstanceWidget {
         }
 
         @Override
-        public void draw(BraidDrawContext ctx) {
+        public void draw(BraidGraphics graphics) {
             if (this.transform.width() <= 16 && this.transform.height() <= 16 && this.widget.displayContext == ItemDisplayContext.GUI && this.widget.transform == null) {
                 // scale according to widget size, since items assume a 16x16 window
-                ctx.push().scale((float) (this.transform.width() / 16f), (float) (this.transform.height() / 16f));
-                ctx.drawItem(this.widget.stack, 0, 0);
-                ctx.pop();
+                graphics.push().scale((float) (this.transform.width() / 16f), (float) (this.transform.height() / 16f));
+                graphics.renderItem(this.widget.stack, 0, 0);
+                graphics.pop();
             } else {
-                var state = new ItemRenderState();
-                this.host().client().getItemModelManager().update(state, this.widget.stack, this.widget.displayContext, this.host().client().world, this.host().client().player, 0);
+                var state = new ItemStackRenderState();
+                this.host().client().getItemModelResolver().appendItemLayers(state, this.widget.stack, this.widget.displayContext, this.host().client().level, this.host().client().player, 0);
 
                 var transformThisFrame = new Matrix4f();
                 if (this.widget.transform != null) {
                     this.widget.transform.accept(transformThisFrame);
                 }
 
-                ctx.state.addSpecialElement(new BraidItemElement(
+                graphics.guiRenderState.submitPicturesInPictureState(new BraidItemElement(
                     state,
                     this.transform.width(),
                     this.transform.height(),
-                    ctx.scissorStack.peekLast(),
+                    graphics.scissorStack.peek(),
                     transformThisFrame,
-                    new Matrix3x2f(ctx.getMatrices())
+                    new Matrix3x2f(graphics.pose())
                 ));
             }
 
             if (this.widget.showOverlay) {
-                ctx.drawStackOverlay(this.host().client().textRenderer, this.widget.stack, 0, 0);
+                graphics.renderItemDecorations(this.host().client().font, this.widget.stack, 0, 0);
             }
         }
     }

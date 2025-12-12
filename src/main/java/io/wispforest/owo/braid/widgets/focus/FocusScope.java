@@ -10,8 +10,8 @@ import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
 import io.wispforest.owo.braid.widgets.scroll.Scrollable;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.braid.widgets.stack.StackBase;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
 
@@ -142,7 +142,7 @@ public class FocusScope extends Focusable {
 
             var nextFocusIdx = searchStartIdx;
             do {
-                nextFocusIdx = MathHelper.floorMod(nextFocusIdx + offset, descendants.size());
+                nextFocusIdx = Mth.positiveModulo(nextFocusIdx + offset, descendants.size());
             } while (descendants.get(nextFocusIdx).widget().skipTraversal());
 
             this.updateFocus(descendants.get(nextFocusIdx), FocusLevel.HIGHLIGHT);
@@ -205,7 +205,7 @@ public class FocusScope extends Focusable {
             }
         }
 
-        private boolean filterCandidate(FocusTraversalCandidate candidate, Box focusedBounds, FocusTraversalDirection direction) {
+        private boolean filterCandidate(FocusTraversalCandidate candidate, AABB focusedBounds, FocusTraversalDirection direction) {
             return switch (direction) {
                 case LEFT -> candidate.center().x <= focusedBounds.minX;
                 case RIGHT -> candidate.center().x >= focusedBounds.maxX;
@@ -215,7 +215,7 @@ public class FocusScope extends Focusable {
             };
         }
 
-        private boolean filterInBand(FocusTraversalCandidate candidate, Box focusedBounds, FocusTraversalDirection direction) {
+        private boolean filterInBand(FocusTraversalCandidate candidate, AABB focusedBounds, FocusTraversalDirection direction) {
             return switch (direction) {
                 case LEFT, RIGHT -> candidate.aabb().minY < focusedBounds.maxY && candidate.aabb().maxY > focusedBounds.minY;
                 case UP, DOWN -> candidate.aabb().minX < focusedBounds.maxX && candidate.aabb().maxX > focusedBounds.minX;
@@ -382,7 +382,7 @@ class FocusScopeProxy extends StatefulProxy {
 
 record FocusEntry(Focusable.State<?> state, FocusLevel level) {}
 
-record FocusTraversalCandidate(Focusable.State<?> state, Box aabb, Vector2d center) {
+record FocusTraversalCandidate(Focusable.State<?> state, AABB aabb, Vector2d center) {
     public static FocusTraversalCandidate of(Focusable.State<?> state) {
         var aabb = state.context().instance().computeGlobalBounds();
         var center = new Vector2d(

@@ -24,10 +24,10 @@ import io.wispforest.owo.braid.widgets.scroll.ScrollAnimationSettings;
 import io.wispforest.owo.braid.widgets.scroll.ScrollableWithBars;
 import io.wispforest.owo.braid.widgets.sharedstate.SharedState;
 import io.wispforest.owo.braid.widgets.stack.Stack;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.Style;
-import net.minecraft.text.StyleSpriteSource;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FontDescription;
+import net.minecraft.network.chat.Style;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
@@ -82,7 +82,7 @@ public class InspectorWidget extends StatefulWidget {
                         return new Box(
                             Color.rgb(0x1d2026),
                             new DefaultLabelStyle(
-                                new LabelStyle(null, null, Style.EMPTY.withFont(new StyleSpriteSource.Font(MinecraftClient.UNICODE_FONT_ID)), null),
+                                new LabelStyle(null, null, Style.EMPTY.withFont(new FontDescription.Resource(Minecraft.UNIFORM_FONT)), null),
                                 new Row(
                                     new Flexible(
                                         new Stack(
@@ -108,7 +108,7 @@ public class InspectorWidget extends StatefulWidget {
                                                                 20,
                                                                 20,
                                                                 new Tooltip(
-                                                                    Text.literal(this.alwaysOnTop ? "window behavior:\nalways on top" : "window behavior:\nnormal"),
+                                                                    Component.literal(this.alwaysOnTop ? "window behavior:\nalways on top" : "window behavior:\nnormal"),
                                                                     new Button(
                                                                         () -> this.setState(() -> {
                                                                             this.alwaysOnTop = !this.alwaysOnTop;
@@ -126,7 +126,7 @@ public class InspectorWidget extends StatefulWidget {
                                                                 20,
                                                                 20,
                                                                 new Tooltip(
-                                                                    Text.literal("reassemble app"),
+                                                                    Component.literal("reassemble app"),
                                                                     new Button(
                                                                         () -> this.widget().inspector.subject.rebuildRoot(),
                                                                         new SpriteWidget(Owo.id("braid_inspector_reassemble"))
@@ -137,7 +137,7 @@ public class InspectorWidget extends StatefulWidget {
                                                                 20,
                                                                 20,
                                                                 new Tooltip(
-                                                                    Text.literal("pick widget"),
+                                                                    Component.literal("pick widget"),
                                                                     new Button(
                                                                         () -> this.widget().inspector.pick(),
                                                                         new SpriteWidget(Owo.id("braid_inspector_pick"))

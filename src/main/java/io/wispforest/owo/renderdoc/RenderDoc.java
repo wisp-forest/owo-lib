@@ -31,12 +31,12 @@ public final class RenderDoc {
         var apiPointer = new PointerByReference();
         RenderdocLibrary.RenderdocApi apiInstance = null;
 
-        var os = Util.getOperatingSystem();
+        var os = Util.getPlatform();
 
-        if (os == Util.OperatingSystem.WINDOWS || os == Util.OperatingSystem.LINUX) {
+        if (os == Util.OS.WINDOWS || os == Util.OS.LINUX) {
             try {
                 RenderdocLibrary renderdocLibrary;
-                if (os == Util.OperatingSystem.WINDOWS) {
+                if (os == Util.OS.WINDOWS) {
                     renderdocLibrary = Native.load("renderdoc", RenderdocLibrary.class);
                 } else {
                     int flags = DynamicLinkLoader.RTLD_NOW | DynamicLinkLoader.RTLD_NOLOAD;

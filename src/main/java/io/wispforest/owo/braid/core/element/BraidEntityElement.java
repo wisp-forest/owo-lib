@@ -1,15 +1,15 @@
 package io.wispforest.owo.braid.core.element;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.ScreenRect;
-import net.minecraft.client.gui.render.SpecialGuiElementRenderer;
-import net.minecraft.client.gui.render.state.special.SpecialGuiElementRenderState;
-import net.minecraft.client.render.DiffuseLighting;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.EntityRenderManager;
-import net.minecraft.client.render.entity.state.EntityRenderState;
-import net.minecraft.client.render.state.CameraRenderState;
-import net.minecraft.client.util.math.MatrixStack;
+import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
+import net.minecraft.client.gui.render.state.pip.PictureInPictureRenderState;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.state.CameraRenderState;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix4f;
@@ -21,26 +21,26 @@ public record BraidEntityElement(
     Matrix3x2f pose,
     double width,
     double height,
-    ScreenRect scissorArea
-) implements SpecialGuiElementRenderState {
+    ScreenRectangle scissorArea
+) implements PictureInPictureRenderState {
 
     @Override
-    public int x1() {
+    public int x0() {
         return 0;
     }
 
     @Override
-    public int x2() {
+    public int x1() {
         return (int) this.width;
     }
 
     @Override
-    public int y1() {
+    public int y0() {
         return 0;
     }
 
     @Override
-    public int y2() {
+    public int y1() {
         return (int) this.height;
     }
 
@@ -55,53 +55,53 @@ public record BraidEntityElement(
     }
 
     @Override
-    public @Nullable ScreenRect scissorArea() {
+    public @Nullable ScreenRectangle scissorArea() {
         return this.scissorArea;
     }
 
     @Override
-    public @Nullable ScreenRect bounds() {
-        var bounds = new ScreenRect(0, 0, (int) this.width, (int) this.height).transformEachVertex(this.pose);
+    public @Nullable ScreenRectangle bounds() {
+        var bounds = new ScreenRectangle(0, 0, (int) this.width, (int) this.height).transformMaxBounds(this.pose);
 
         return this.scissorArea != null
             ? this.scissorArea.intersection(bounds)
             : bounds;
     }
 
-    public static class Renderer extends SpecialGuiElementRenderer<BraidEntityElement> {
+    public static class Renderer extends PictureInPictureRenderer<BraidEntityElement> {
 
-        private final EntityRenderManager renderManager = MinecraftClient.getInstance().getEntityRenderDispatcher();
+        private final EntityRenderDispatcher renderManager = Minecraft.getInstance().getEntityRenderDispatcher();
 
-        public Renderer(VertexConsumerProvider.Immediate vertexConsumers) {
+        public Renderer(MultiBufferSource.BufferSource vertexConsumers) {
             super(vertexConsumers);
         }
 
         @Override
-        public Class<BraidEntityElement> getElementClass() {
+        public Class<BraidEntityElement> getRenderStateClass() {
             return BraidEntityElement.class;
         }
 
         @Override
-        protected void render(BraidEntityElement state, MatrixStack matrices) {
-            MinecraftClient.getInstance().gameRenderer.getDiffuseLighting().setShaderLights(DiffuseLighting.Type.ENTITY_IN_UI);
+        protected void renderToTexture(BraidEntityElement state, PoseStack matrices) {
+            Minecraft.getInstance().gameRenderer.getLighting().setupFor(Lighting.Entry.ENTITY_IN_UI);
 
-            matrices.multiplyPositionMatrix(state.transform);
+            matrices.mulPose(state.transform);
 
             var camera = new CameraRenderState();
             camera.orientation = state.transform.invert().getUnnormalizedRotation(new Quaternionf());
 
-            var dispatcher = MinecraftClient.getInstance().gameRenderer.getEntityRenderDispatcher();
-            this.renderManager.render(state.entityState, camera, 0, 0, 0, matrices, dispatcher.getQueue());
-            dispatcher.render();
+            var dispatcher = Minecraft.getInstance().gameRenderer.getFeatureRenderDispatcher();
+            this.renderManager.submit(state.entityState, camera, 0, 0, 0, matrices, dispatcher.getSubmitNodeStorage());
+            dispatcher.renderAllFeatures();
         }
 
         @Override
-        protected float getYOffset(int height, int windowScaleFactor) {
+        protected float getTranslateY(int height, int windowScaleFactor) {
             return 0;
         }
 
         @Override
-        protected String getName() {
+        protected String getTextureLabel() {
             return "owo-entity";
         }
     }

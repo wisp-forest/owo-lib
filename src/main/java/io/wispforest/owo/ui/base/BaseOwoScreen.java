@@ -1,23 +1,22 @@
 package io.wispforest.owo.ui.base;
 
 import io.wispforest.owo.Owo;
-import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.CursorStyle;
 import io.wispforest.owo.ui.core.OwoUIAdapter;
-import io.wispforest.owo.ui.core.ParentComponent;
-import io.wispforest.owo.ui.inject.GreedyInputComponent;
+import io.wispforest.owo.ui.core.ParentUIComponent;
+import io.wispforest.owo.ui.core.UIComponent;
+import io.wispforest.owo.ui.inject.GreedyInputUIComponent;
 import io.wispforest.owo.ui.util.DisposableScreen;
 import io.wispforest.owo.ui.util.UIErrorToast;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.function.BiFunction;
 
@@ -25,7 +24,7 @@ import java.util.function.BiFunction;
  * A minimal implementation of a Screen which fully
  * supports all aspects of the UI system. Implementing this class
  * is trivial, as you only need to provide implementations for
- * {@link #createAdapter()} to initialize the UI system and {@link #build(ParentComponent)}
+ * {@link #createAdapter()} to initialize the UI system and {@link #build(ParentUIComponent)}
  * which is where you declare your component hierarchy.
  * <p>
  * Should you be locked into a different superclass on your screen already,
@@ -35,7 +34,7 @@ import java.util.function.BiFunction;
  *
  * @param <R> The type of root component this screen uses
  */
-public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen implements DisposableScreen {
+public abstract class BaseOwoScreen<R extends ParentUIComponent> extends Screen implements DisposableScreen {
 
     /**
      * The UI adapter of this screen. This handles
@@ -51,12 +50,12 @@ public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen im
      */
     protected boolean invalid = false;
 
-    protected BaseOwoScreen(Text title) {
+    protected BaseOwoScreen(Component title) {
         super(title);
     }
 
     protected BaseOwoScreen() {
-        this(Text.empty());
+        this(Component.empty());
     }
 
     /**
@@ -87,7 +86,7 @@ public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen im
             // If it was, only resize the adapter instead of recreating it - this preserves UI state
             this.uiAdapter.moveAndResize(0, 0, this.width, this.height);
             // Re-add it as a child to circumvent vanilla clearing them
-            this.addDrawableChild(this.uiAdapter);
+            this.addRenderableWidget(this.uiAdapter);
         } else {
             try {
                 this.uiAdapter = this.createAdapter();
@@ -111,36 +110,36 @@ public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen im
      * by {@link ScreenEvents#afterRender(Screen)} so that tooltips are
      * properly rendered above content
      */
-    protected void drawComponentTooltip(DrawContext drawContext, int mouseX, int mouseY, float tickDelta) {
+    protected void drawComponentTooltip(GuiGraphics drawContext, int mouseX, int mouseY, float tickDelta) {
         if (this.uiAdapter != null) this.uiAdapter.drawTooltip(drawContext, mouseX, mouseY, tickDelta);
     }
 
     /**
      * A convenience shorthand for querying a component from the adapter's
-     * root component via {@link ParentComponent#childById(Class, String)}
+     * root component via {@link ParentUIComponent#childById(Class, String)}
      */
-    protected <C extends Component> C component(Class<C> expectedClass, String id) {
+    protected <C extends UIComponent> C component(Class<C> expectedClass, String id) {
         return this.uiAdapter.rootComponent.childById(expectedClass, id);
     }
 
     @Override
-    public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {}
+    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {}
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         if (!this.invalid) {
             super.render(context, mouseX, mouseY, delta);
         } else {
-            this.close();
+            this.onClose();
         }
     }
 
     @Override
-    public boolean keyPressed(KeyInput input) {
+    public boolean keyPressed(KeyEvent input) {
         if (this.uiAdapter == null) return false;
 
-        if (!input.hasCtrl()
-                && this.uiAdapter.rootComponent.focusHandler().focused() instanceof GreedyInputComponent inputComponent
+        if (!input.hasControlDown()
+                && this.uiAdapter.rootComponent.focusHandler().focused() instanceof GreedyInputUIComponent inputComponent
                 && inputComponent.onKeyPress(input)) {
             return true;
         }
@@ -150,7 +149,7 @@ public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen im
         }
 
         if (input.isEscape() && this.shouldCloseOnEsc()) {
-            this.close();
+            this.onClose();
             return true;
         }
 
@@ -158,7 +157,7 @@ public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen im
     }
 
     @Override
-    public boolean mouseDragged(Click click, double deltaX, double deltaY) {
+    public boolean mouseDragged(MouseButtonEvent click, double deltaX, double deltaY) {
         if (this.uiAdapter == null) return false;
 
         return this.uiAdapter.mouseDragged(click, deltaX, deltaY);
@@ -166,7 +165,7 @@ public abstract class BaseOwoScreen<R extends ParentComponent> extends Screen im
 
     @Nullable
     @Override
-    public Element getFocused() {
+    public GuiEventListener getFocused() {
         return this.uiAdapter;
     }
 

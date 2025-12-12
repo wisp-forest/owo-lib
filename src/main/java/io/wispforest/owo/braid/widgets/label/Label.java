@@ -4,7 +4,7 @@ import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.Clip;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
 public class Label extends StatelessWidget {
@@ -12,33 +12,33 @@ public class Label extends StatelessWidget {
     public final @Nullable LabelStyle style;
     public final boolean softWrap;
     public final Overflow overflow;
-    public final Text text;
+    public final Component text;
 
-    public Label(@Nullable LabelStyle style, boolean softWrap, Overflow overflow, Text text) {
+    public Label(@Nullable LabelStyle style, boolean softWrap, Overflow overflow, Component text) {
         this.style = style;
         this.softWrap = softWrap;
         this.overflow = overflow;
         this.text = text;
     }
 
-    public Label(@Nullable LabelStyle style, boolean softWrap, Text text) {
+    public Label(@Nullable LabelStyle style, boolean softWrap, Component text) {
         this(style, softWrap, Overflow.CLIP, text);
     }
 
-    public Label(boolean softWrap, Text text) {
+    public Label(boolean softWrap, Component text) {
         this(null, softWrap, text);
     }
 
-    public Label(Overflow overflow, Text text) {
+    public Label(Overflow overflow, Component text) {
         this(null, true, overflow, text);
     }
 
-    public Label(Text text) {
+    public Label(Component text) {
         this(true, text);
     }
 
     public static Label literal(String text) {
-        return new Label(Text.literal(text));
+        return new Label(Component.literal(text));
     }
 
     @Override
