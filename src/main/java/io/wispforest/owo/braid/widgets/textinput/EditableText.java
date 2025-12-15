@@ -151,6 +151,11 @@ public class EditableText extends StatefulWidget {
             );
 
             this.actions.put(
+                InsertTabIntent.class,
+                Action.<InsertTabIntent>callback((actionCtx, intent) -> this.instance().insert("  "))
+            );
+
+            this.actions.put(
                 DeleteTextIntent.class,
                 Action.<DeleteTextIntent>callback((actionCtx, intent) -> this.instance().deleteText(intent))
             );

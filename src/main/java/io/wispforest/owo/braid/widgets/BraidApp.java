@@ -78,6 +78,7 @@ public class BraidApp extends StatelessWidget {
             Trigger.ofKey(GLFW_KEY_ENTER),
             Trigger.ofKey(GLFW_KEY_KP_ENTER)
         ).withModifiers(null)), InsertNewlineIntent.INSTANCE);
+        builder.put(List.of(new ShortcutTrigger(Trigger.ofKey(GLFW_KEY_TAB))), InsertTabIntent.INSTANCE);
         builder.put(List.of(new ShortcutTrigger(Trigger.ofKey(GLFW_KEY_BACKSPACE))), new DeleteTextIntent(false, false));
         builder.put(List.of(new ShortcutTrigger(Trigger.ofKey(GLFW_KEY_BACKSPACE)).withModifiers(CTRL)), new DeleteTextIntent(false, true));
         builder.put(List.of(new ShortcutTrigger(Trigger.ofKey(GLFW_KEY_DELETE))), new DeleteTextIntent(true, false));
