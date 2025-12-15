@@ -139,7 +139,19 @@ public class ItemStackWidget extends LeafInstanceWidget {
             }
 
             if (this.widget.showOverlay) {
+                var popTransform = false;
+                if (this.transform.width() != 16 || this.transform.height() != 16) {
+                    popTransform = true;
+
+                    graphics.push();
+                    graphics.scale((float) (this.transform.width() / 16), (float) (this.transform.height() / 16));
+                }
+
                 graphics.renderItemDecorations(this.host().client().font, this.widget.stack, 0, 0);
+
+                if (popTransform) {
+                    graphics.pop();
+                }
             }
         }
     }
