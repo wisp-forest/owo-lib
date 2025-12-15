@@ -62,7 +62,7 @@ allprojects {
 
     jar {
         from("LICENSE") {
-            rename { "${it}_${project.archivesBaseName}" }
+            rename { "${it}_${inputs.properties.archivesName}" }
         }
     }
 
@@ -96,7 +96,7 @@ repositories {
     }
     maven { url "https://maven.nucleoid.xyz/" }
     maven { url 'https://maven.wispforest.io' }
-    mavenLocal()
+    maven { url 'https://jitpack.io' }
 }
 
 sourceSets {
@@ -148,6 +148,7 @@ dependencies {
     include api("io.wispforest.endec:jankson:0.1.6")
 
     include api("blue.endless:jankson:${project.jankson_version}")
+    include api("com.github.kdl-org:kdl4j:${project.kdl_version}")
 
     modCompileOnly("xyz.nucleoid:server-translations-api:${project.stapi_version}")
 

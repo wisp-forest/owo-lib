@@ -1,6 +1,11 @@
 package io.wispforest.uwu.client.braid;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.math.Axis;
+import dev.kdl.parse.Kdl2Parser;
+import io.wispforest.endec.SerializationAttributes;
+import io.wispforest.endec.SerializationContext;
 import io.wispforest.owo.braid.animation.*;
 import io.wispforest.owo.braid.core.*;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
@@ -10,6 +15,9 @@ import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.util.BraidToast;
+import io.wispforest.owo.braid.util.kdl.KdlDeserializer;
+import io.wispforest.owo.braid.util.kdl.KdlMapper;
+import io.wispforest.owo.braid.util.kdl.WidgetEndec;
 import io.wispforest.owo.braid.widgets.*;
 import io.wispforest.owo.braid.widgets.animated.AnimatedAlign;
 import io.wispforest.owo.braid.widgets.animated.AnimatedBox;
@@ -59,8 +67,8 @@ import io.wispforest.owo.braid.widgets.window.Window;
 import io.wispforest.owo.braid.widgets.window.WindowController;
 import io.wispforest.owo.ops.TextOps;
 import io.wispforest.owo.ui.component.BraidComponent;
-import io.wispforest.owo.ui.component.UIComponents;
 import io.wispforest.owo.ui.component.EntityComponent;
+import io.wispforest.owo.ui.component.UIComponents;
 import io.wispforest.owo.ui.container.UIContainers;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.util.Delta;
@@ -70,31 +78,30 @@ import io.wispforest.owo.util.Wisdom;
 import io.wispforest.uwu.client.Bikeshed;
 import io.wispforest.uwu.client.HudTestWidget;
 import io.wispforest.uwu.items.UwuItems;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.resources.model.Material;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.*;
+import net.minecraft.resources.Identifier;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.util.CommonColors;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
+import net.minecraft.util.Util;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.CommonColors;
-import net.minecraft.resources.Identifier;
-import net.minecraft.util.Util;
-import net.minecraft.core.BlockPos;
-import net.minecraft.util.Mth;
-import com.mojang.math.Axis;
-import net.minecraft.util.RandomSource;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2f;
 import org.lwjgl.glfw.GLFW;
@@ -134,7 +141,8 @@ public class TestSelector extends StatefulWidget {
         TEXT,
         SPINNY_GHAST,
         OPTIMIZATION,
-        AUTOMATIC_ANIMATION
+        AUTOMATIC_ANIMATION,
+        KDL_WIDGETS
     }
 
     @Override
@@ -243,6 +251,7 @@ public class TestSelector extends StatefulWidget {
                                             case SPINNY_GHAST -> new SpinnyGhastTest();
                                             case OPTIMIZATION -> new OptimizationTest();
                                             case AUTOMATIC_ANIMATION -> new AutomaticAnimationTest();
+                                            case KDL_WIDGETS -> new KdlWidgetsTest();
                                             case null -> new Center(new Label(Component.literal("select a test")));
                                         }
                                     )
@@ -2665,6 +2674,66 @@ public class TestSelector extends StatefulWidget {
                         )
                     );
                 }
+            }
+        }
+    }
+
+    public static class KdlWidgetsTest extends StatefulWidget {
+        @Override
+        public WidgetState<KdlWidgetsTest> createState() {
+            return new State();
+        }
+
+        public static class State extends WidgetState<KdlWidgetsTest> {
+
+            private TextEditingController textController;
+            private Widget kdlWidget = EmptyWidget.INSTANCE;
+
+            @Override
+            public void init() {
+                this.textController = new TextEditingController();
+                this.textController.addListener(() -> {
+                    try {
+                        var parsedKdl = new Kdl2Parser().parse(this.textController.value().text());
+
+                        var deserializer = new KdlDeserializer(parsedKdl.nodes().getFirst(), KdlMapper.DEFAULT_MAPPERS);
+                        var ctx = deserializer.setupContext(SerializationContext.attributes(SerializationAttributes.HUMAN_READABLE));
+
+                        var parsedWidget = WidgetEndec.ROOT.decode(ctx, deserializer);
+                        this.setState(() -> {
+                            this.kdlWidget = parsedWidget;
+                        });
+                    } catch (Exception e) {
+                        Throwable cause = e;
+                        while (cause.getCause() != null) {
+                            cause = cause.getCause();
+                        }
+
+                        var bruhJava = cause;
+                        this.setState(() -> {
+                            this.kdlWidget = new Label(LabelStyle.SHADOW, true, Component.literal(Objects.requireNonNullElse(bruhJava.getMessage(), "no message")).withStyle(ChatFormatting.RED));
+                        });
+                    }
+                });
+            }
+
+            @Override
+            public Widget build(BuildContext context) {
+                return new Row(
+                    new Sized(
+                        350, 300,
+                        new TextBox(
+                            this.textController,
+                            widget -> widget
+                                .placeholder(Component.literal("KDL goes here"))
+                                .softWrap(false)
+                        )
+                    ),
+                    new Sized(
+                        Size.square(250),
+                        new Center(kdlWidget)
+                    )
+                );
             }
         }
     }
