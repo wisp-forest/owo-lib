@@ -76,10 +76,16 @@ public class TextureWidget extends OptionalChildInstanceWidget {
 
         private void refreshTextureSize() {
             var texture = this.host().client().getTextureManager().getTexture(widget.texture).getTexture();
-            this.textureSize = Size.of(
+            var newTextureSize = Size.of(
                 texture.getWidth(0),
                 texture.getHeight(0)
             );
+
+            if (!newTextureSize.equals(this.textureSize)) {
+                this.markNeedsLayout();
+            }
+
+            this.textureSize = newTextureSize;
         }
 
         private double imageAspectRatio() {
