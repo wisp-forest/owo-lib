@@ -32,8 +32,10 @@ public class DerivedComponentMap implements ComponentMap {
     public void derive(ItemStack owner) {
         delegate.setChanges(ComponentChanges.EMPTY);
         var builder = ComponentChanges.builder();
-        owner.getItem().deriveStackComponents(owner.getComponents(), builder);
-        delegate.setChanges(builder.build());
+        if (owner.getItem() instanceof OwoItem owoItem) {
+            owoItem.deriveStackComponents(owner.getComponents(), builder);
+        }
+        delegate.applyChanges(builder.build());
     }
 
     @Nullable
@@ -53,8 +55,8 @@ public class DerivedComponentMap implements ComponentMap {
             return true;
         } else if (o instanceof DerivedComponentMap thatDerived) {
             return Objects.equals(base, thatDerived.base);
-        } else if (o instanceof ComponentMap.Builder.SimpleComponentMap simpleComponentMap) {
-            return Objects.equals(base, simpleComponentMap);
+        } else if (o instanceof ComponentMap otherMap) {
+            return Objects.equals(base, otherMap);
         }
 
         return o == EMPTY && this.base == EMPTY;
