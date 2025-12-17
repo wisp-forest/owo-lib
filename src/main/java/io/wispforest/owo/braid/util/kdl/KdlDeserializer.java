@@ -2,9 +2,7 @@ package io.wispforest.owo.braid.util.kdl;
 
 import dev.kdl.KdlNode;
 import dev.kdl.KdlValue;
-import io.wispforest.endec.Deserializer;
-import io.wispforest.endec.Endec;
-import io.wispforest.endec.SerializationContext;
+import io.wispforest.endec.*;
 import io.wispforest.endec.util.RecursiveDeserializer;
 import org.jspecify.annotations.Nullable;
 
@@ -14,13 +12,60 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-public class KdlDeserializer extends RecursiveDeserializer<KdlElement> {
+public class KdlDeserializer extends RecursiveDeserializer<KdlElement> implements SelfDescribedDeserializer<KdlElement> {
 
     public final List<KdlMapper> mappers;
 
     public KdlDeserializer(KdlNode rootNode, List<KdlMapper> mappers) {
         super(new KdlElement.KdlNodeElement(rootNode));
         this.mappers = mappers;
+    }
+
+    @Override
+    public <S> void readAny(SerializationContext ctx, Serializer<S> visitor) {
+        this.decodeElement(ctx, visitor, this.getValue());
+    }
+
+    private final Endec<KdlElement> elementEndec = Endec.of(
+        this::decodeElement,
+        (ctx, deserializer) -> { throw new AssertionError("unreachable"); }
+    );
+
+    private void decodeElement(SerializationContext ctx, Serializer<?> visitor, KdlElement element) {
+        switch (element) {
+            case KdlElement.KdlValueElement(var value) -> {
+                if (value.isBoolean()) {
+                    visitor.writeBoolean(ctx, (Boolean) value.value());
+                } else if (value.isNumber()) {
+                    visitor.writeLong(ctx, ((Number) value.value()).longValue());
+                } else if (value.isString()) {
+                    visitor.writeString(ctx, (String) value.value());
+                } else if (value.isNull()) {
+                    visitor.writeOptional(ctx, this.elementEndec, Optional.empty());
+                } else {
+                    throw new UnsupportedOperationException("unknown KDL value type");
+                }
+            }
+            case KdlElement.KdlNodeElement(var node) -> {
+                try (var state = visitor.struct()) {
+                    node.properties().forEach(entry -> {
+                        state.field(entry.getKey(), ctx, this.elementEndec, new KdlElement.KdlValueElement(entry.getValue().getFirst()));
+                    });
+                    for (var mapper : this.mappers) {
+                        if (!mapper.export()) {
+                            continue;
+                        }
+
+                        state.field(mapper.key(), ctx, this.elementEndec, mapper.get().apply(node));
+                    }
+                }
+            }
+            case KdlElement.KdlElementList(var elements) -> {
+                try (var state = visitor.sequence(ctx, this.elementEndec, elements.size())) {
+                    elements.forEach(state::element);
+                }
+            }
+        }
     }
 
     @Override

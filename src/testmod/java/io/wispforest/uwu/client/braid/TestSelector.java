@@ -1,11 +1,14 @@
 package io.wispforest.uwu.client.braid;
 
+import com.google.gson.GsonBuilder;
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.math.Axis;
+import dev.kdl.KdlNode;
 import dev.kdl.parse.Kdl2Parser;
 import io.wispforest.endec.SerializationAttributes;
 import io.wispforest.endec.SerializationContext;
+import io.wispforest.endec.format.gson.GsonSerializer;
 import io.wispforest.owo.braid.animation.*;
 import io.wispforest.owo.braid.core.*;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
@@ -2687,6 +2690,8 @@ public class TestSelector extends StatefulWidget {
         public static class State extends WidgetState<KdlWidgetsTest> {
 
             private TextEditingController textController;
+
+            private KdlNode rootNode;
             private Widget kdlWidget = EmptyWidget.INSTANCE;
 
             @Override
@@ -2695,8 +2700,9 @@ public class TestSelector extends StatefulWidget {
                 this.textController.addListener(() -> {
                     try {
                         var parsedKdl = new Kdl2Parser().parse(this.textController.value().text());
+                        this.rootNode = parsedKdl.nodes().getFirst();
 
-                        var deserializer = new KdlDeserializer(parsedKdl.nodes().getFirst(), KdlMapper.DEFAULT_MAPPERS);
+                        var deserializer = new KdlDeserializer(this.rootNode, KdlMapper.DEFAULT_MAPPERS);
                         var ctx = deserializer.setupContext(SerializationContext.attributes(SerializationAttributes.HUMAN_READABLE));
 
                         var parsedWidget = WidgetEndec.ROOT.decode(ctx, deserializer);
@@ -2717,21 +2723,61 @@ public class TestSelector extends StatefulWidget {
                 });
             }
 
+            private void showJson() {
+                var deserializer = new KdlDeserializer(this.rootNode, KdlMapper.DEFAULT_MAPPERS);
+                var jsonOut = GsonSerializer.of();
+
+                deserializer.readAny(SerializationContext.attributes(SerializationAttributes.HUMAN_READABLE), jsonOut);
+                var jsonText = new GsonBuilder().setPrettyPrinting().create().toJson(jsonOut.result());
+
+                var widget = new Box(
+                    Color.mix(.1, Color.BLACK, Color.WHITE),
+                    new VerticallyScrollable(
+                        null,
+                        ScrollAnimationSettings.DEFAULT,
+                        new Padding(
+                            Insets.all(5),
+                            new Label(
+                                new LabelStyle(Alignment.TOP_LEFT, null, Style.EMPTY.withFont(new FontDescription.Resource(Minecraft.UNIFORM_FONT)), false),
+                                true,
+                                Component.literal(jsonText)
+                            )
+                        )
+                    )
+                );
+
+                BraidWindow.open(
+                    "json preview",
+                    650, 650,
+                    widget
+                );
+            }
+
             @Override
             public Widget build(BuildContext context) {
                 return new Row(
-                    new Sized(
-                        350, 300,
-                        new TextBox(
-                            this.textController,
-                            widget -> widget
-                                .placeholder(Component.literal("KDL goes here"))
-                                .softWrap(false)
+                    MainAxisAlignment.START,
+                    CrossAxisAlignment.CENTER,
+                    new Column(
+                        MainAxisAlignment.START,
+                        CrossAxisAlignment.END,
+                        new Sized(
+                            350, 300,
+                            new TextBox(
+                                this.textController,
+                                widget -> widget
+                                    .placeholder(Component.literal("KDL goes here"))
+                                    .softWrap(false)
+                            )
+                        ),
+                        new MessageButton(
+                            Component.literal("view as json"),
+                            this::showJson
                         )
                     ),
                     new Sized(
                         Size.square(250),
-                        new Center(kdlWidget)
+                        this.kdlWidget
                     )
                 );
             }
