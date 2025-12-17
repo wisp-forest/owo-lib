@@ -313,7 +313,7 @@ public class Grid extends MultiChildInstanceWidget {
         }
     }
 
-    public static sealed abstract class CellFit permits CellFit.Loose, CellFit.Tight {
+    public static sealed abstract class CellFit {
 
         public abstract boolean isTight();
 
@@ -329,7 +329,7 @@ public class Grid extends MultiChildInstanceWidget {
             return Tight.INSTANCE;
         }
 
-        private static final class Tight extends CellFit {
+        public static final class Tight extends CellFit {
             public static final Tight INSTANCE = new Tight();
 
             @Override
@@ -338,7 +338,7 @@ public class Grid extends MultiChildInstanceWidget {
             }
         }
 
-        private static final class Loose extends CellFit {
+        public static final class Loose extends CellFit {
             public final Alignment alignment;
             public Loose(Alignment alignment) {this.alignment = alignment;}
 

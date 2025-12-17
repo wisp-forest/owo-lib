@@ -13,13 +13,17 @@ import io.wispforest.owo.braid.widgets.flex.CrossAxisAlignment;
 import io.wispforest.owo.braid.widgets.flex.Flex;
 import io.wispforest.owo.braid.widgets.flex.Flexible;
 import io.wispforest.owo.braid.widgets.flex.MainAxisAlignment;
+import io.wispforest.owo.braid.widgets.grid.Grid;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
+import io.wispforest.owo.braid.widgets.object.BlockWidget;
+import io.wispforest.owo.braid.widgets.object.EntityWidget;
 import io.wispforest.owo.braid.widgets.object.ItemStackWidget;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.braid.widgets.stack.StackBase;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import net.minecraft.client.resources.model.Material;
+import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.Identifier;
@@ -167,6 +171,39 @@ public class WidgetEndec {
             )
         );
 
+        var tightCellFitEndec = Endec.unit(Grid.CellFit.tight());
+        var looseCellFitEndec = StructEndecBuilder.of(
+            BraidKdlEndecs.ALIGNMENT.fieldOf("@argument", s -> ((Grid.CellFit.Loose)s).alignment),
+            Grid.CellFit::loose
+        );
+
+        var cellFitEndec = Endec.dispatchedStruct(
+            s -> switch (s) {
+                case "tight" -> tightCellFitEndec;
+                case "loose" -> looseCellFitEndec;
+                default -> throw new IllegalStateException("invalid cell fit: " + s);
+            },
+            cellFit -> switch (cellFit) {
+                case Grid.CellFit.Tight ignored -> "tight";
+                case Grid.CellFit.Loose ignored -> "loose";
+            },
+            Endec.STRING,
+            "@name"
+        );
+
+        //noinspection unchecked
+        register(
+            "grid",
+            Grid.class,
+            StructEndecBuilder.of(
+                BraidKdlEndecs.LAYOUT_AXIS.fieldOf("@argument", s -> s.mainAxis),
+                Endec.INT.fieldOf("cross_axis_cells", s -> s.crossAxisCells),
+                StructEndecBuilder.of(cellFitEndec.fieldOf("@child", s -> s), cellFit -> cellFit).fieldOf(".fit", s -> s.cellFit),
+                ROOT.listOf().fieldOf("@children", s ->  (java.util.List<Widget>) s.children),
+                Grid::new
+            )
+        );
+
         var labelStyleEndec = StructEndecBuilder.of(
             BraidKdlEndecs.ALIGNMENT.nullableOf().optionalFieldOf("text_alignment", LabelStyle::textAlignment, (Alignment) null),
             BraidKdlEndecs.COLOR.nullableOf().optionalFieldOf("base_color", LabelStyle::baseColor, (Color) null),
@@ -251,6 +288,28 @@ public class WidgetEndec {
                         .showOverlay(showOverlay)
                         .lightOverride(lightOverride)
                 )
+            )
+        );
+
+        register(
+            "block",
+            BlockWidget.class,
+            StructEndecBuilder.of(
+                BraidKdlEndecs.BLOCK_STRING.fieldOf("@argument", s -> new BlockStateParser.BlockResult(s.blockState, s.blockState.getValues(), s.blockEntityNbt)),
+                blockResult -> new BlockWidget(blockResult.blockState(), blockResult.nbt())
+            )
+        );
+
+        register(
+            "entity",
+            KdlEntityWidget.class,
+            StructEndecBuilder.of(
+                Endec.DOUBLE.optionalFieldOf("scale", s -> s.scale, 1.0),
+                KdlEntityWidget.EntitySpec.STRING_ENDEC.fieldOf("@argument", s -> s.spec),
+                Endec.forEnum(EntityWidget.DisplayMode.class, false).optionalFieldOf("mode", s -> s.mode, EntityWidget.DisplayMode.FIXED),
+                Endec.BOOLEAN.optionalFieldOf("scale_to_fit", s -> s.scaleToFit, true),
+                Endec.BOOLEAN.optionalFieldOf("show_nametag", s -> s.showNametag, false),
+                KdlEntityWidget::new
             )
         );
     }

@@ -12,7 +12,9 @@ import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.widgets.flex.CrossAxisAlignment;
 import io.wispforest.owo.braid.widgets.flex.MainAxisAlignment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.commands.arguments.item.ItemParser;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.ItemStack;
 import org.joml.Matrix3x2f;
 import org.joml.Vector2f;
@@ -135,5 +137,16 @@ public final class BraidKdlEndecs {
             }
         },
         stack -> { throw new UnsupportedOperationException("cannot serialize an item stack to a string"); }
+    );
+
+    public static final Endec<BlockStateParser.BlockResult> BLOCK_STRING = Endec.STRING.xmap(
+        s -> {
+            try {
+                return BlockStateParser.parseForBlock(BuiltInRegistries.BLOCK, s, true);
+            } catch (CommandSyntaxException e) {
+                throw new IllegalStateException("invalid block state: " + s, e);
+            }
+        },
+        blockState -> { throw new UnsupportedOperationException("cannot serialize a block state to a string"); }
     );
 }
