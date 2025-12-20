@@ -18,6 +18,7 @@ import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.util.BraidToast;
+import io.wispforest.owo.braid.util.kdl.BraidKdlEndecs;
 import io.wispforest.owo.braid.util.kdl.KdlDeserializer;
 import io.wispforest.owo.braid.util.kdl.KdlMapper;
 import io.wispforest.owo.braid.util.kdl.WidgetEndec;
@@ -2703,7 +2704,10 @@ public class TestSelector extends StatefulWidget {
                         this.rootNode = parsedKdl.nodes().getFirst();
 
                         var deserializer = new KdlDeserializer(this.rootNode, KdlMapper.DEFAULT_MAPPERS);
-                        var ctx = deserializer.setupContext(SerializationContext.attributes(SerializationAttributes.HUMAN_READABLE));
+                        var ctx = deserializer.setupContext(SerializationContext.attributes(
+                            SerializationAttributes.HUMAN_READABLE,
+                            BraidKdlEndecs.HANDLERS.instance(Map.of("lmao", () -> System.out.println("lmao")))
+                        ));
 
                         var parsedWidget = WidgetEndec.ROOT.decode(ctx, deserializer);
                         this.setState(() -> {

@@ -9,6 +9,8 @@ import io.wispforest.owo.braid.core.Insets;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.SpriteWidget;
 import io.wispforest.owo.braid.widgets.basic.*;
+import io.wispforest.owo.braid.widgets.button.Button;
+import io.wispforest.owo.braid.widgets.button.MessageButton;
 import io.wispforest.owo.braid.widgets.flex.CrossAxisAlignment;
 import io.wispforest.owo.braid.widgets.flex.Flex;
 import io.wispforest.owo.braid.widgets.flex.Flexible;
@@ -310,6 +312,48 @@ public class WidgetEndec {
                 Endec.BOOLEAN.optionalFieldOf("scale_to_fit", s -> s.scaleToFit, true),
                 Endec.BOOLEAN.optionalFieldOf("show_nametag", s -> s.showNametag, false),
                 KdlEntityWidget::new
+            )
+        );
+
+        var handlerEndec = Endec.STRING
+            .optionalOf()
+            .xmapWithContext(
+                (ctx, maybeHandlerId) -> maybeHandlerId.flatMap(handlerId -> {
+                    var handler = ctx.getAttributeValue(BraidKdlEndecs.HANDLERS).get(handlerId);
+                    if (handler == null) {
+                        throw new UnsupportedOperationException("missing handler with id: " + handlerId);
+                    }
+
+                    return Optional.of(handler);
+                }),
+                (context, o) -> { throw new UnsupportedOperationException("cannot serialize a braid kdl handler"); }
+            );
+
+        register(
+            "message_button",
+            MessageButton.class,
+            StructEndecBuilder.of(
+                Endec.STRING.fieldOf("message", s -> s.text.getString()),
+                Endec.BOOLEAN.optionalFieldOf("translate_message", s -> s.text.getContents() instanceof TranslatableContents, () -> false),
+                handlerEndec.fieldOf("handler", s -> Optional.ofNullable(s.onClick)),
+                (message, translateMessage, handler) -> new MessageButton(
+                    translateMessage
+                        ? Component.translatable(message)
+                        : Component.literal(message),
+                    handler.orElse(null)
+                )
+            )
+        );
+
+        register(
+            "button",
+            Button.class,
+            StructEndecBuilder.of(
+                handlerEndec.fieldOf("handler", s -> s.onClick != null ? Optional.of(() -> s.onClick.getAsBoolean()) : Optional.empty()),
+                ROOT.fieldOf("@child", s -> s.child),
+                (handler, child) -> {
+                    return new Button(handler.orElse(null), child);
+                }
             )
         );
     }
