@@ -125,7 +125,10 @@ public class KdlDeserializer extends RecursiveDeserializer<KdlElement> implement
 
     @Override
     public <V> Optional<V> readOptional(SerializationContext ctx, Endec<V> endec) {
-        return Optional.of(endec.decode(ctx, this));
+        var value = this.getValue();
+        return !(value instanceof KdlElement.KdlValueElement(var kdlValue) && kdlValue.isNull())
+            ? Optional.of(endec.decode(ctx, this))
+            : Optional.empty();
     }
 
     private <V> V expectPrimitive(Class<V> clazz) {
