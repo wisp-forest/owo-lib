@@ -52,7 +52,7 @@ public class KdlDeserializer extends RecursiveDeserializer<KdlElement> implement
                         state.field(entry.getKey(), ctx, this.elementEndec, new KdlElement.KdlValueElement(entry.getValue().getFirst()));
                     });
                     for (var mapper : this.mappers) {
-                        if (!mapper.export()) {
+                        if (!mapper.export().apply(node)) {
                             continue;
                         }
 
