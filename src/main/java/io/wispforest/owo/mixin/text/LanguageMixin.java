@@ -80,13 +80,14 @@ public class LanguageMixin {
         var rich = richTranslationsEnabled.get();
         if (rich || nestedLangEnabled.get()) {
             try {
-                if (rich && !element.isJsonPrimitive() && LanguageAccess.textConsumer != null) {
+                var consumer = LanguageAccess.textConsumer.get();
+                if (rich && !element.isJsonPrimitive() && consumer != LanguageAccess.EMPTY_CONSUMER) {
                     skipNext.set(true);
 
                     MutableComponent text = (MutableComponent) ComponentSerialization.CODEC
                         .parse(JsonOps.INSTANCE, element)
                         .getOrThrow(JsonParseException::new);
-                    LanguageAccess.textConsumer.accept(name, text);
+                    consumer.accept(name, text);
 
                     return "";
                 } else if (element.isJsonPrimitive()) {
