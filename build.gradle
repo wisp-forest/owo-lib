@@ -1,6 +1,6 @@
 //file:noinspection GradlePackageVersionRange
 plugins {
-    id 'net.fabricmc.fabric-loom-remap' version '1.14-SNAPSHOT'
+    id 'net.fabricmc.fabric-loom-remap' version '1.15-SNAPSHOT'
     id 'maven-publish'
 }
 
@@ -62,7 +62,7 @@ allprojects {
 
     jar {
         from("LICENSE") {
-            rename { "${it}_${inputs.properties.archivesName}" }
+            rename { "${it}_${project.base.archivesName.get()}" }
         }
     }
 
