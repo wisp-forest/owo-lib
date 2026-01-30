@@ -6,35 +6,35 @@ import io.wispforest.endec.impl.KeyedEndec;
 import io.wispforest.endec.util.MapCarrierEncodable;
 import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.endec.KeyedEndecEncodeError;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.storage.NbtWriteView;
-import net.minecraft.util.ErrorReporter;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.level.storage.TagValueOutput;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(NbtWriteView.class)
-public abstract class NbtWriteViewMixin implements MapCarrierEncodable {
+@Mixin(TagValueOutput.class)
+public abstract class TagValueOutputMixin implements MapCarrierEncodable {
     @Shadow
     @Final
-    private NbtCompound nbt;
+    private CompoundTag output;
 
     @Shadow
     @Final
-    private ErrorReporter reporter;
+    private ProblemReporter problemReporter;
 
     @Shadow
     @Final
-    private DynamicOps<NbtElement> ops;
+    private DynamicOps<Tag> ops;
 
     @Override
     public <T> void put(SerializationContext ctx, @NotNull KeyedEndec<T> key, @NotNull T value) {
         ctx = CodecUtils.createContext(this.ops, ctx);
 
         try {
-            this.nbt.put(ctx, key, value);
+            this.output.put(ctx, key, value);
         } catch (Exception e) {
             boolean defaultValueErrored = false;
 
@@ -45,7 +45,7 @@ public abstract class NbtWriteViewMixin implements MapCarrierEncodable {
 //                defaultValueErrored = true;
 //            }
 
-            reporter.report(new KeyedEndecEncodeError(key, value, e, !defaultValueErrored));
+            problemReporter.report(new KeyedEndecEncodeError(key, value, e, !defaultValueErrored));
         }
     }
 }

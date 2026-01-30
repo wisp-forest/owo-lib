@@ -70,52 +70,52 @@ public class KdlDeserializer extends RecursiveDeserializer<KdlElement> implement
 
     @Override
     public byte readByte(SerializationContext ctx) {
-        return this.expectPrimitive(Number.class).byteValue();
+        return this.expectPrimitive(ctx, Number.class).byteValue();
     }
 
     @Override
     public short readShort(SerializationContext ctx) {
-        return this.expectPrimitive(Number.class).shortValue();
+        return this.expectPrimitive(ctx, Number.class).shortValue();
     }
 
     @Override
     public int readInt(SerializationContext ctx) {
-        return this.expectPrimitive(Number.class).intValue();
+        return this.expectPrimitive(ctx, Number.class).intValue();
     }
 
     @Override
     public long readLong(SerializationContext ctx) {
-        return this.expectPrimitive(Number.class).longValue();
+        return this.expectPrimitive(ctx, Number.class).longValue();
     }
 
     @Override
     public float readFloat(SerializationContext ctx) {
-        return this.expectPrimitive(Number.class).floatValue();
+        return this.expectPrimitive(ctx, Number.class).floatValue();
     }
 
     @Override
     public double readDouble(SerializationContext ctx) {
-        return this.expectPrimitive(Number.class).doubleValue();
+        return this.expectPrimitive(ctx, Number.class).doubleValue();
     }
 
     @Override
     public int readVarInt(SerializationContext ctx) {
-        return this.expectPrimitive(Number.class).intValue();
+        return this.expectPrimitive(ctx, Number.class).intValue();
     }
 
     @Override
     public long readVarLong(SerializationContext ctx) {
-        return this.expectPrimitive(Number.class).longValue();
+        return this.expectPrimitive(ctx, Number.class).longValue();
     }
 
     @Override
     public boolean readBoolean(SerializationContext ctx) {
-        return this.expectPrimitive(Boolean.class);
+        return this.expectPrimitive(ctx, Boolean.class);
     }
 
     @Override
     public String readString(SerializationContext ctx) {
-        return this.expectPrimitive(String.class);
+        return this.expectPrimitive(ctx, String.class);
     }
 
     @Override
@@ -131,23 +131,26 @@ public class KdlDeserializer extends RecursiveDeserializer<KdlElement> implement
             : Optional.empty();
     }
 
-    private <V> V expectPrimitive(Class<V> clazz) {
+    private <K extends KdlElement> K expectElement(SerializationContext ctx, Class<K> clazz) {
         var value = this.getValue();
-        if (!(value instanceof KdlElement.KdlValueElement(KdlValue<?> kdlValue))) {
-            throw new IllegalStateException("Expected a " + KdlElement.KdlValueElement.class.getSimpleName() + ", found a " + value.getClass().getSimpleName());
+        if (!(clazz.isAssignableFrom(value.getClass()))) {
+            ctx.throwMalformedInput("Expected a " + KdlElement.KdlValueElement.class.getSimpleName() + ", found a " + value.getClass().getSimpleName());
         }
+        return (K) value;
+    }
 
+    private <V> V expectPrimitive(SerializationContext ctx, Class<V> clazz) {
+        var kdlValue = expectElement(ctx, KdlElement.KdlValueElement.class).value();
         if (!clazz.isAssignableFrom(kdlValue.value().getClass())) {
-            throw new IllegalStateException("Expected a " + clazz.getSimpleName() + ", found a " + kdlValue.value().getClass().getSimpleName());
+            ctx.throwMalformedInput("Expected a " + clazz.getSimpleName() + ", found a " + kdlValue.value().getClass().getSimpleName());
         }
-
         //noinspection unchecked
         return (V) kdlValue.value();
     }
 
     @Override
     public <E> Deserializer.Sequence<E> sequence(SerializationContext ctx, Endec<E> elementEndec) {
-        return new Sequence<>(ctx, elementEndec, ((KdlElement.KdlElementList) this.getValue()).elements());
+        return new Sequence<>(ctx, elementEndec, expectElement(ctx, KdlElement.KdlElementList.class).elements());
     }
 
     @Override
@@ -156,8 +159,8 @@ public class KdlDeserializer extends RecursiveDeserializer<KdlElement> implement
     }
 
     @Override
-    public Deserializer.Struct struct() {
-        return new Struct(((KdlElement.KdlNodeElement) this.getValue()).node());
+    public Deserializer.Struct struct(SerializationContext ctx) {
+        return new Struct(expectElement(ctx, KdlElement.KdlNodeElement.class).node());
     }
 
     private class Struct implements Deserializer.Struct {

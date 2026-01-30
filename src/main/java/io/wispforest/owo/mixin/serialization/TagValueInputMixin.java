@@ -5,35 +5,35 @@ import io.wispforest.endec.impl.KeyedEndec;
 import io.wispforest.endec.util.MapCarrierDecodable;
 import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.endec.KeyedEndecDecodeError;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.storage.NbtReadView;
-import net.minecraft.storage.ReadContext;
-import net.minecraft.util.ErrorReporter;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.ValueInputContextHelper;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(NbtReadView.class)
-public abstract class NbtReadViewMixin implements MapCarrierDecodable {
+@Mixin(TagValueInput.class)
+public abstract class TagValueInputMixin implements MapCarrierDecodable {
     @Shadow
     @Final
-    private NbtCompound nbt;
+    private CompoundTag input;
 
     @Shadow
     @Final
-    private ErrorReporter reporter;
+    private ProblemReporter problemReporter;
 
     @Shadow
     @Final
-    private ReadContext context;
+    private ValueInputContextHelper context;
 
     // TODO: Maybe pass in the ErrorReporter for use within Endecs?
     @Override
     public <T> T getWithErrors(SerializationContext ctx, @NotNull KeyedEndec<T> key) {
-        ctx = CodecUtils.createContext(this.context.getOps(), ctx);
+        ctx = CodecUtils.createContext(this.context.ops(), ctx);
 
-        return this.nbt.getWithErrors(ctx, key);
+        return this.input.getWithErrors(ctx, key);
     }
 
     @Override
@@ -41,7 +41,7 @@ public abstract class NbtReadViewMixin implements MapCarrierDecodable {
         try {
             return this.getWithErrors(ctx, key);
         } catch (Exception e) {
-            this.reporter.report(new KeyedEndecDecodeError(key, this.nbt.get(key.key()), e));
+            this.problemReporter.report(new KeyedEndecDecodeError(key, this.input.get(key.key()), e));
 
             return key.defaultValue();
         }
