@@ -1,19 +1,18 @@
 package io.wispforest.owo.ui.component;
 
+import io.wispforest.owo.braid.widgets.label.RawLabel;
 import io.wispforest.owo.ui.base.BaseUIComponent;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.util.Observable;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.ActiveTextCollector;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix3x2f;
 import org.w3c.dom.Element;
 
 import java.util.ArrayList;
@@ -178,12 +177,25 @@ public class LabelComponent extends BaseUIComponent {
 
     @Override
     public void draw(OwoUIGraphics graphics, int mouseX, int mouseY, float partialTicks, float delta) {
-        this.draw(graphics.textRenderer());
+        graphics
+            .push()
+            .translate(0, 1f / Minecraft.getInstance().getWindow().getGuiScale());
+
+        this.drawText((renderX, renderY, text, shadow, color) -> {
+            graphics.drawString(
+                Minecraft.getInstance().font,
+                text,
+                renderX,
+                renderY,
+                color.argb(),
+                shadow
+            );
+        });
+
+        graphics.pop();
     }
 
-    protected void draw(ActiveTextCollector textConsumer) {
-        textConsumer.defaultParameters(textConsumer.defaultParameters().withPose(new Matrix3x2f().translate(0, 1f / Minecraft.getInstance().getWindow().getGuiScale())));
-
+    protected void drawText(LabelDrawFunction goodFunction) {
         int x = this.x;
         int y = this.y;
 
@@ -214,7 +226,7 @@ public class LabelComponent extends BaseUIComponent {
             int renderY = lambdaY + i * (this.lineHeight() + this.lineSpacing());
             renderY += this.lineHeight() - this.textRenderer.lineHeight;
 
-            textConsumer.accept(renderX, renderY, renderText);
+            goodFunction.draw(renderX, renderY, renderText, this.shadow, this.color.get());
         }
     }
 
@@ -237,8 +249,8 @@ public class LabelComponent extends BaseUIComponent {
 
     @Nullable
     protected Style styleAt(int mouseX, int mouseY) {
-        var clickHandler = new ActiveTextCollector.ClickableStyleFinder(this.textRenderer, this.x + mouseX, this.y + mouseY);
-        this.draw(clickHandler);
+        var clickHandler = new RawLabel.Instance.StyleCollector(this.textRenderer, this.x + mouseX, this.y + mouseY);
+        this.drawText((renderX, renderY, text, $, $$) -> clickHandler.accept(renderX, renderY, text));
 
         return clickHandler.result();
     }
@@ -255,5 +267,10 @@ public class LabelComponent extends BaseUIComponent {
 
         UIParsing.apply(children, "vertical-text-alignment", VerticalAlignment::parse, this::verticalTextAlignment);
         UIParsing.apply(children, "horizontal-text-alignment", HorizontalAlignment::parse, this::horizontalTextAlignment);
+    }
+
+    @FunctionalInterface
+    protected interface LabelDrawFunction {
+        void draw(int renderX, int renderY, FormattedCharSequence text, boolean shadow, Color color);
     }
 }
