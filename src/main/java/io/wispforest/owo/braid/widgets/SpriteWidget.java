@@ -16,7 +16,7 @@ import java.util.OptionalDouble;
 
 public class SpriteWidget extends LeafInstanceWidget {
 
-    public static final Identifier GUI_ATLAS_ID = Identifier.parse("textures/atlas/gui.png");
+    public static final Identifier GUI_ATLAS_ID = Identifier.withDefaultNamespace("textures/atlas/gui.png");
 
     public final Material spriteIdentifier;
 
