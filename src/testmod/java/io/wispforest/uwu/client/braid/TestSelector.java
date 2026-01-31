@@ -478,7 +478,7 @@ public class TestSelector extends StatefulWidget {
                     true,
                     Component.literal(
                         "surface dimensions:\n" + this.width + ", " + this.height
-                    )
+                    ).withStyle(style -> style.withHoverEvent(new HoverEvent.ShowText(Component.literal("this is hover text"))))
                 );
             }
         }
@@ -2706,7 +2706,7 @@ public class TestSelector extends StatefulWidget {
                         var deserializer = new KdlDeserializer(this.rootNode, KdlMapper.DEFAULT_MAPPERS);
                         var ctx = deserializer.setupContext(SerializationContext.attributes(
                             SerializationAttributes.HUMAN_READABLE,
-                            BraidKdlEndecs.HANDLERS.instance(Map.of("lmao", () -> System.out.println("lmao")))
+                            BraidKdlEndecs.HANDLERS.instance(Map.of("lmao", (theArg) -> System.out.println("lmao: " + theArg)))
                         ));
 
                         var parsedWidget = WidgetEndec.ROOT.decode(ctx, deserializer);

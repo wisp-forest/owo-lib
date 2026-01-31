@@ -173,7 +173,7 @@ public class AppState implements InstanceHost, ProxyHost {
 
         var state = this.hitTest();
 
-        var tooltipSupplier = state.firstWhere(hit -> hit.instance().widget() instanceof Tooltip);
+        var tooltipSupplier = state.firstWhere(hit -> hit.instance() instanceof TooltipProvider);
         if (tooltipSupplier != null) {
             var tooltip = (TooltipProvider) tooltipSupplier.instance();
             var components = tooltip.getTooltipComponentsAt(tooltipSupplier.x(), tooltipSupplier.y());
