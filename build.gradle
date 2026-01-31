@@ -142,10 +142,10 @@ dependencies {
     modCompileOnly("com.terraformersmc:modmenu:${project.modmenu_version}")
 //    modLocalRuntime("com.terraformersmc:modmenu:${project.modmenu_version}")
 
-    include api("io.wispforest:endec:0.1.11")
-    include api("io.wispforest.endec:netty:0.1.5")
-    include api("io.wispforest.endec:gson:0.1.6")
-    include api("io.wispforest.endec:jankson:0.1.6")
+    include api("io.wispforest:endec:0.1.12")
+    include api("io.wispforest.endec:netty:0.1.6")
+    include api("io.wispforest.endec:gson:0.1.7")
+    include api("io.wispforest.endec:jankson:0.1.7")
 
     include api("blue.endless:jankson:${project.jankson_version}")
     include api("com.github.kdl-org:kdl4j:${project.kdl_version}")

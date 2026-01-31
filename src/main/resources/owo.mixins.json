@@ -41,6 +41,8 @@
     "serialization.ValueInputMixin",
     "serialization.RegistryOpsAccessor",
     "serialization.ValueOutputMixin",
+    "serialization.TagValueInputMixin",
+    "serialization.TagValueOutputMixin",
     "text.LanguageMixin",
     "text.ComponentSerializationMixin",
     "text.TranslatableContentsMixin",

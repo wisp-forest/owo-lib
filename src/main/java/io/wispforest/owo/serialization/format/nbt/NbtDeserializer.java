@@ -2,14 +2,12 @@ package io.wispforest.owo.serialization.format.nbt;
 
 import com.google.common.collect.MapMaker;
 import io.wispforest.endec.*;
+import io.wispforest.endec.format.edm.EdmElement;
 import io.wispforest.endec.util.RecursiveDeserializer;
 import net.minecraft.nbt.*;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 
 public class NbtDeserializer extends RecursiveDeserializer<Tag> implements SelfDescribedDeserializer<Tag> {
@@ -22,73 +20,73 @@ public class NbtDeserializer extends RecursiveDeserializer<Tag> implements SelfD
         return new NbtDeserializer(element);
     }
 
-    private <N extends Tag> N getAs(Tag element, Class<N> clazz) {
-        if (clazz.isInstance(element)) {
-            return clazz.cast(element);
-        } else {
-            throw new IllegalStateException("Expected a " + clazz.getSimpleName() + ", found a " + element.getClass().getSimpleName());
+    private <N extends Tag> N getAs(SerializationContext ctx, Tag element, Class<N> clazz) {
+        if (!clazz.isInstance(element)) {
+            ctx.throwMalformedInput("Expected a " + clazz.getSimpleName() + ", found a " + element.getClass().getSimpleName());
         }
+
+        return clazz.cast(element);
     }
 
     // ---
 
     @Override
     public byte readByte(SerializationContext ctx) {
-        return this.getAs(this.getValue(), ByteTag.class).byteValue();
+        return this.getAs(ctx, this.getValue(), ByteTag.class).byteValue();
     }
 
     @Override
     public short readShort(SerializationContext ctx) {
-        return this.getAs(this.getValue(), ShortTag.class).shortValue();
+        return this.getAs(ctx, this.getValue(), ShortTag.class).shortValue();
     }
 
     @Override
     public int readInt(SerializationContext ctx) {
-        return this.getAs(this.getValue(), IntTag.class).intValue();
+        return this.getAs(ctx, this.getValue(), IntTag.class).intValue();
     }
 
     @Override
     public long readLong(SerializationContext ctx) {
-        return this.getAs(this.getValue(), LongTag.class).longValue();
+        return this.getAs(ctx, this.getValue(), LongTag.class).longValue();
     }
 
     @Override
     public float readFloat(SerializationContext ctx) {
-        return this.getAs(this.getValue(), FloatTag.class).floatValue();
+        return this.getAs(ctx, this.getValue(), FloatTag.class).floatValue();
     }
 
     @Override
     public double readDouble(SerializationContext ctx) {
-        return this.getAs(this.getValue(), DoubleTag.class).doubleValue();
+        return this.getAs(ctx, this.getValue(), DoubleTag.class).doubleValue();
     }
 
     // ---
 
     @Override
     public int readVarInt(SerializationContext ctx) {
-        return this.getAs(this.getValue(), NumericTag.class).intValue();
+        return this.getAs(ctx, this.getValue(), NumericTag.class).intValue();
     }
 
     @Override
     public long readVarLong(SerializationContext ctx) {
-        return this.getAs(this.getValue(), NumericTag.class).longValue();
+        return this.getAs(ctx, this.getValue(), NumericTag.class).longValue();
     }
 
     // ---
 
     @Override
     public boolean readBoolean(SerializationContext ctx) {
-        return this.getAs(this.getValue(), ByteTag.class).byteValue() != 0;
+        return this.getAs(ctx, this.getValue(), ByteTag.class).byteValue() != 0;
     }
 
     @Override
     public String readString(SerializationContext ctx) {
-        return this.getAs(this.getValue(), StringTag.class).asString().get();
+        return this.getAs(ctx, this.getValue(), StringTag.class).asString().get();
     }
 
     @Override
     public byte[] readBytes(SerializationContext ctx) {
-        return this.getAs(this.getValue(), ByteArrayTag.class).getAsByteArray();
+        return this.getAs(ctx, this.getValue(), ByteArrayTag.class).getAsByteArray();
     }
 
     private final Set<Tag> encodedOptionals = Collections.newSetFromMap(new MapMaker().weakKeys().makeMap());
@@ -100,7 +98,7 @@ public class NbtDeserializer extends RecursiveDeserializer<Tag> implements SelfD
             return Optional.of(endec.decode(ctx, this));
         }
 
-        var struct = this.struct();
+        var struct = this.struct(ctx);
         return struct.field("present", ctx, Endec.BOOLEAN)
                 ? Optional.of(struct.field("value", ctx, endec))
                 : Optional.empty();
@@ -111,18 +109,18 @@ public class NbtDeserializer extends RecursiveDeserializer<Tag> implements SelfD
     @Override
     public <E> Deserializer.Sequence<E> sequence(SerializationContext ctx, Endec<E> elementEndec) {
         //noinspection unchecked
-        var list = this.getAs(this.getValue(), CollectionTag.class);
+        var list = this.getAs(ctx, this.getValue(), CollectionTag.class);
         return new Sequence<E>(ctx, elementEndec, list, list.size());
     }
 
     @Override
     public <V> Deserializer.Map<V> map(SerializationContext ctx, Endec<V> valueEndec) {
-        return new Map<>(ctx, valueEndec, this.getAs(this.getValue(), CompoundTag.class));
+        return new Map<>(ctx, valueEndec, this.getAs(ctx, this.getValue(), CompoundTag.class));
     }
 
     @Override
-    public Deserializer.Struct struct() {
-        return new Struct(this.getAs(this.getValue(), CompoundTag.class));
+    public Deserializer.Struct struct(SerializationContext ctx) {
+        return new Struct(this.getAs(ctx, this.getValue(), CompoundTag.class));
     }
 
     // ---

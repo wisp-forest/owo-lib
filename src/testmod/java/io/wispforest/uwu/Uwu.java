@@ -409,7 +409,7 @@ public class Uwu implements ModInitializer {
                         compound.put(variable3Endec, variable3);
 
                         LOGGER.info("");
-                        LOGGER.info(compound.asString().get());
+                        LOGGER.info(compound.toString());
 
                         LOGGER.info("");
 
@@ -426,21 +426,23 @@ public class Uwu implements ModInitializer {
 
                     //--
 
+                    var stack = !source.getPlayer().getItemInHand(InteractionHand.MAIN_HAND).isEmpty()
+                        ? source.getPlayer().getItemInHand(InteractionHand.MAIN_HAND)
+                        : Items.SHULKER_BOX.getDefaultInstance();
+
                     //Vanilla
                     iterations("Vanilla", (buf) -> {
-                        ItemStack stack = source.getPlayer().getItemInHand(InteractionHand.MAIN_HAND);
-
                         ItemStack.STREAM_CODEC.encode(buf, stack);
                         var stackFromByte = ItemStack.STREAM_CODEC.decode(buf);
                     });
 
                     //Codeck
                     try {
+                        var ctx = SerializationContext.attributes(RegistriesAttribute.of(context.getSource().getLevel().registryAccess()));
                         iterations("Endec", (buf) -> {
-                            ItemStack stack = source.getPlayer().getItemInHand(InteractionHand.MAIN_HAND);
-                            buf.write(SerializationContext.attributes(RegistriesAttribute.of(context.getSource().getLevel().registryAccess())), MinecraftEndecs.ITEM_STACK, stack);
+                            buf.write(ctx, MinecraftEndecs.ITEM_STACK, stack);
 
-                            var stackFromByte = buf.read(SerializationContext.attributes(RegistriesAttribute.of(context.getSource().getLevel().registryAccess())), MinecraftEndecs.ITEM_STACK);
+                            var stackFromByte = buf.read(ctx, MinecraftEndecs.ITEM_STACK);
                         });
                     } catch (Exception exception) {
                         LOGGER.info(exception.getMessage());
@@ -461,7 +463,7 @@ public class Uwu implements ModInitializer {
 
     private static void iterations(String label, Consumer<RegistryFriendlyByteBuf> action) {
         int maxTrials = 3;
-        int maxIterations = 50;
+        int maxIterations = 500;
 
         List<Long> durations = new ArrayList<>();
 
