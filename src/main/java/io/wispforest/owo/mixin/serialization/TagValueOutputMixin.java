@@ -36,16 +36,7 @@ public abstract class TagValueOutputMixin implements MapCarrierEncodable {
         try {
             this.output.put(ctx, key, value);
         } catch (Exception e) {
-            boolean defaultValueErrored = false;
-
-            // TODO: Unknow if such is best to encode default value as KeyedEndec have a default value getter
-//            try {
-//                this.nbt.put(ctx, key, key.defaultValue());
-//            } catch (Exception ignore) {
-//                defaultValueErrored = true;
-//            }
-
-            problemReporter.report(new KeyedEndecEncodeError(key, value, e, !defaultValueErrored));
+            problemReporter.report(new KeyedEndecEncodeError(key, value, e, false));
         }
     }
 }
