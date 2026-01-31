@@ -19,6 +19,7 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 import org.w3c.dom.Element;
 
 import java.util.Map;
@@ -72,7 +73,7 @@ public class SmallCheckboxComponent extends BaseUIComponent {
     public boolean onMouseDown(MouseButtonEvent click, boolean doubled) {
         boolean result = super.onMouseDown(click, doubled);
 
-        if (click.isLeft()) {
+        if (click.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
             this.toggle();
             return true;
         }

@@ -2,6 +2,7 @@ package io.wispforest.owo.mixin.itemgroup;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.fabricmc.fabric.api.client.itemgroup.v1.FabricCreativeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.world.item.CreativeModeTab;
 import org.spongepowered.asm.mixin.Mixin;
@@ -14,43 +15,37 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @SuppressWarnings({"MixinAnnotationTarget", "UnresolvedMixinReference"})
 @Mixin(value = CreativeModeInventoryScreen.class, priority = 1100)
-public abstract class MixinCreativeModeInventoryScreenMixin {
-
-    @Shadow
-    private static CreativeModeTab selectedTab;
-
-    @Shadow(remap = false) // FAPI
-    private static int currentPage;
+public abstract class MixinCreativeModeInventoryScreenMixin implements FabricCreativeInventoryScreen {
 
     @Unique private static final Int2ObjectMap<CreativeModeTab> selectedTabForPage = new Int2ObjectOpenHashMap<>();
-    @Unique private static boolean calledFromInit = false;
-
-    @Shadow(remap = false) // FAPI
-    private boolean isGroupVisible(CreativeModeTab itemGroup) { throw new RuntimeException(); }
-
-    @Shadow(remap = false) // FAPI
-    private void updateSelection() {}
 
     @Shadow
     protected abstract void selectTab(CreativeModeTab group);
 
     @Inject(method = "selectTab", at = @At("TAIL"))
     private void captureSetTab(CreativeModeTab group, CallbackInfo ci) {
-        selectedTabForPage.put(currentPage, group);
+        selectedTabForPage.put(getCurrentPage(), group);
     }
 
     @Inject(method = "updateSelection", at = @At("HEAD"), cancellable = true, remap = false)
     private void yesThisMakesPerfectSenseAndIsVeryUsable(CallbackInfo ci) {
-        if (selectedTabForPage.get(currentPage) != null) {
-            this.selectTab(selectedTabForPage.get(currentPage));
-            ci.cancel();
-            return;
-        }
-
-        if (this.isGroupVisible(selectedTab)) {
-            ci.cancel();
-        }
+        var selectedTab = selectedTabForPage.get(getCurrentPage());
+        if (selectedTab == null) return;
+        this.selectTab(selectedTab);
+        ci.cancel();
     }
+
+    //---
+    // Code fixes some cases of an issue where current page value is somehow returned differently.
+    // Attempted to be resolve by using MinecraftMixin to prevent off thread screen set calls
+
+    /*
+    @Unique private static boolean calledFromInit = false;
+
+    @Shadow(remap = false) // FAPI
+    private static int currentPage;
+    @Shadow(remap = false) // FAPI
+    private void updateSelection() {}
 
     @Inject(method = "init", at = @At("HEAD"))
     private void prepareTheFixForTheFix(CallbackInfo ci) {
@@ -70,4 +65,5 @@ public abstract class MixinCreativeModeInventoryScreenMixin {
         this.updateSelection();
         calledFromInit = false;
     }
+    */
 }

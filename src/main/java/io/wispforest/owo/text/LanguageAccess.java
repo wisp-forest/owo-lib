@@ -7,5 +7,7 @@ import java.util.function.BiConsumer;
 
 @ApiStatus.Internal
 public class LanguageAccess {
-    public static BiConsumer<String, Component> textConsumer;
+    public static final BiConsumer<String, Component> EMPTY_CONSUMER = (string, component) -> {};
+
+    public static ThreadLocal<BiConsumer<String, Component>> textConsumer = ThreadLocal.withInitial(() -> EMPTY_CONSUMER);
 }
