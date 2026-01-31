@@ -188,10 +188,7 @@ public class RawLabel extends LeafInstanceWidget {
         public Style getStyleAt(double x, double y) {
             if (this.renderText.isEmpty()) return null;
 
-            var transform = this.computeGlobalTransform().invert();
-            var clickPos = transform.transformPosition((float) x, (float) y, new Vector2f());
-
-            var collector = new StyleCollector(this.host().client().font, (int) clickPos.x, (int) clickPos.y);
+            var collector = new StyleCollector(this.host().client().font, (int) x, (int) y);
             this.collectText(collector);
 
             return collector.result();
