@@ -204,13 +204,14 @@ public class OwoUIAdapter<R extends ParentUIComponent> implements GuiEventListen
      *
      * @since 0.12.19
      */
-    public void drawTooltip(GuiGraphics context, int mouseX, int mouseY, float partialTicks) {
-        if (!(context instanceof OwoUIGraphics)) context = OwoUIGraphics.of(context);
-        var owoContext = (OwoUIGraphics) context;
+    public void drawTooltip(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        if (!(graphics instanceof OwoUIGraphics)) graphics = OwoUIGraphics.of(graphics);
+        var owoContext = (OwoUIGraphics) graphics;
 
         final var delta = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaTicks();
 
         this.rootComponent.drawTooltip(owoContext, mouseX, mouseY, partialTicks, delta);
+        graphics.renderDeferredElements();
     }
 
     @Override
