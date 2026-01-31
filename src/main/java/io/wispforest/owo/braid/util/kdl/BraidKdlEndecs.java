@@ -16,16 +16,18 @@ import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.commands.arguments.item.ItemParser;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2f;
 import org.joml.Vector2f;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public final class BraidKdlEndecs {
     private BraidKdlEndecs() {}
 
-    public static final SerializationAttribute.WithValue<Map<String, Runnable>> HANDLERS = SerializationAttribute.withValue("braid_handlers");
+    public static final SerializationAttribute.WithValue<Map<String, Consumer<@Nullable Object>>> HANDLERS = SerializationAttribute.withValue("braid_handlers");
 
     public static final Endec<Alignment> ALIGNMENT = Endec.STRING.xmap(
         s -> switch (s) {

@@ -1,7 +1,9 @@
 package io.wispforest.owo.braid.util.kdl;
 
 import io.wispforest.endec.Endec;
+import io.wispforest.endec.SelfDescribedDeserializer;
 import io.wispforest.endec.StructEndec;
+import io.wispforest.endec.format.java.JavaSerializer;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.braid.core.Alignment;
 import io.wispforest.owo.braid.core.Color;
@@ -78,6 +80,8 @@ public class WidgetEndec {
             Align.class,
             StructEndecBuilder.of(
                 BraidKdlEndecs.ALIGNMENT.fieldOf("@argument", s -> s.alignment),
+                Endec.DOUBLE.nullableOf().optionalFieldOf("width_factor", s -> s.widthFactor.isPresent() ? s.widthFactor.getAsDouble() : null, (Double) null),
+                Endec.DOUBLE.nullableOf().optionalFieldOf("height_factor", s -> s.heightFactor.isPresent() ? s.heightFactor.getAsDouble() : null, (Double) null),
                 ROOT.fieldOf("@child", s -> s.child),
                 Align::new
             )
@@ -87,6 +91,8 @@ public class WidgetEndec {
             "center",
             Center.class,
             StructEndecBuilder.of(
+                Endec.DOUBLE.nullableOf().optionalFieldOf("width_factor", s -> s.widthFactor.isPresent() ? s.widthFactor.getAsDouble() : null, (Double) null),
+                Endec.DOUBLE.nullableOf().optionalFieldOf("height_factor", s -> s.heightFactor.isPresent() ? s.heightFactor.getAsDouble() : null, (Double) null),
                 ROOT.fieldOf("@child", s -> s.child),
                 Center::new
             )
@@ -329,18 +335,35 @@ public class WidgetEndec {
                 (context, o) -> { throw new UnsupportedOperationException("cannot serialize a braid kdl handler"); }
             );
 
+        var handlerArgEndec = Endec.of(
+            (ctx, serializer, o) -> { throw new UnsupportedOperationException("cannot serialize a braid kdl handler argument"); },
+            (ctx, deserializer) -> {
+                if (!(deserializer instanceof SelfDescribedDeserializer<?> selfDescribedDeserializer)) {
+                    throw new UnsupportedOperationException("can only deserialize braid kdl handler arguments from self-described input");
+                }
+
+                var visitor = JavaSerializer.of();
+                selfDescribedDeserializer.readAny(ctx, visitor);
+
+                return visitor.result();
+            }
+        );
+
         register(
             "message_button",
             MessageButton.class,
             StructEndecBuilder.of(
                 Endec.STRING.fieldOf("message", s -> s.text.getString()),
                 Endec.BOOLEAN.optionalFieldOf("translate_message", s -> s.text.getContents() instanceof TranslatableContents, () -> false),
-                handlerEndec.fieldOf("handler", s -> Optional.ofNullable(s.onClick)),
-                (message, translateMessage, handler) -> new MessageButton(
+                handlerEndec.fieldOf("handler", s -> { throw new UnsupportedOperationException("cannot serialize a button callback"); }),
+                handlerArgEndec.nullableOf().optionalFieldOf("handler_arg", s -> { throw new UnsupportedOperationException("cannot serialize a button's callback argument"); }, (Object) null),
+                (message, translateMessage, handler, handlerArg) -> new MessageButton(
                     translateMessage
                         ? Component.translatable(message)
                         : Component.literal(message),
-                    handler.orElse(null)
+                    handler.<Runnable>flatMap(o -> {
+                        return Optional.of(() -> o.accept(handlerArg));
+                    }).orElse(null)
                 )
             )
         );
@@ -349,10 +372,16 @@ public class WidgetEndec {
             "button",
             Button.class,
             StructEndecBuilder.of(
-                handlerEndec.fieldOf("handler", s -> s.onClick != null ? Optional.of(() -> s.onClick.getAsBoolean()) : Optional.empty()),
+                handlerEndec.fieldOf("handler", s -> { throw new UnsupportedOperationException("cannot serialize a button callback"); }),
+                handlerArgEndec.nullableOf().optionalFieldOf("handler_arg", s -> { throw new UnsupportedOperationException("cannot serialize a button's callback argument"); }, (Object) null),
                 ROOT.fieldOf("@child", s -> s.child),
-                (handler, child) -> {
-                    return new Button(handler.orElse(null), child);
+                (handler, handlerArg, child) -> {
+                    return new Button(
+                        handler.<Runnable>flatMap(o -> {
+                            return Optional.of(() -> o.accept(handlerArg));
+                        }).orElse(null),
+                        child
+                    );
                 }
             )
         );
