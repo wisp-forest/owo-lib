@@ -45,7 +45,7 @@
     "serialization.TagValueOutputMixin",
     "text.LanguageMixin",
     "text.ComponentSerializationMixin",
-    "text.TranslatableTextContentAccessor",
+    "text.TranslatableContentsAccessor",
     "text.TranslatableContentsMixin",
     "text.stapi.SystemDelegatedLanguageFixin",
     "tweaks.EulaMixin",
