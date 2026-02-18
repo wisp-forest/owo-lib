@@ -156,6 +156,7 @@ public class TestSelector extends StatefulWidget {
 
     public static class BurningChyz extends ShareableState {
         public final Player chyz;
+
         public BurningChyz(Player chyz) {this.chyz = chyz;}
 
         public static Player of(BuildContext context) {
@@ -174,6 +175,8 @@ public class TestSelector extends StatefulWidget {
 
         private Tests test = null;
         private Player chyz;
+
+        private boolean disableEverything = false;
 
         @Override
         public void init() {
@@ -213,92 +216,95 @@ public class TestSelector extends StatefulWidget {
                 )
             );
 
-            return new DefaultCheckboxStyle(
-                new CheckboxStyle(null, null, SoundEvents.ENDER_DRAGON_FLAP),
-                new Stack(
-                    Alignment.CENTER,
-                    new RotatedLayout(
-                        this.fliptat,
-                        new Stack(
-                            Alignment.CENTER,
-                            new Transform(
-                                Util.make(() -> {
-                                    var mat = new Matrix3x2f();
-                                    mat.m01 = (float) Math.tan(this.xSkew);
-                                    mat.m10 = (float) Math.tan(this.ySkew);
-                                    mat.rotate((float) Math.toRadians(this.rotat));
-                                    return mat;
-                                }),
-                                new SharedState<>(
-                                    () -> new BurningChyz(this.chyz),
-                                    new Center(
-                                        switch (this.test) {
-                                            case COUNTER -> new Counter();
-                                            case FLEX -> new FunnySwitchLayout();
-                                            case DRAGGING -> new DragArenaTest();
-                                            case SPLIT_PANE -> new SplitPaneTest();
-                                            case SLIDERS -> new SliderTests();
-                                            case TEXT_INPUT -> new TextInputTest();
-                                            case BURNING_CHYZ -> new BurningChyzTest();
-                                            case SCROLLING -> new ScrollTest();
-                                            case INPUT -> new InputTest();
-                                            case CYCLING -> new CyclingTest();
-                                            case VANILLA -> new VanillaTest();
-                                            case SHARED_STATE -> new SharedStateTest();
-                                            case STACKS -> new StacksTest();
-                                            case GRIDS -> new GridsTest();
-                                            case CONTRIBUTORS -> new ContributorsTest();
-                                            case ANIMATIONS -> new AnimationsTest();
-                                            case NAVIGATOR -> new NavigatorTest();
-                                            case OVERLAY -> new OverlayTest();
-                                            case TEXT -> new TextTest();
-                                            case SPINNY_GHAST -> new SpinnyGhastTest();
-                                            case OPTIMIZATION -> new OptimizationTest();
-                                            case AUTOMATIC_ANIMATION -> new AutomaticAnimationTest();
-                                            case KDL_WIDGETS -> new KdlWidgetsTest();
-                                            case null -> new Center(new Label(Component.literal("select a test")));
-                                        }
+            return new ControlsOverride(
+                disableEverything,
+                new DefaultCheckboxStyle(
+                    new CheckboxStyle(null, null, SoundEvents.ENDER_DRAGON_FLAP),
+                    new Stack(
+                        Alignment.CENTER,
+                        new RotatedLayout(
+                            this.fliptat,
+                            new Stack(
+                                Alignment.CENTER,
+                                new Transform(
+                                    Util.make(() -> {
+                                        var mat = new Matrix3x2f();
+                                        mat.m01 = (float) Math.tan(this.xSkew);
+                                        mat.m10 = (float) Math.tan(this.ySkew);
+                                        mat.rotate((float) Math.toRadians(this.rotat));
+                                        return mat;
+                                    }),
+                                    new SharedState<>(
+                                        () -> new BurningChyz(this.chyz),
+                                        new Center(
+                                            switch (this.test) {
+                                                case COUNTER -> new Counter();
+                                                case FLEX -> new FunnySwitchLayout();
+                                                case DRAGGING -> new DragArenaTest();
+                                                case SPLIT_PANE -> new SplitPaneTest();
+                                                case SLIDERS -> new SliderTests();
+                                                case TEXT_INPUT -> new TextInputTest();
+                                                case BURNING_CHYZ -> new BurningChyzTest();
+                                                case SCROLLING -> new ScrollTest();
+                                                case INPUT -> new InputTest();
+                                                case CYCLING -> new CyclingTest();
+                                                case VANILLA -> new VanillaTest();
+                                                case SHARED_STATE -> new SharedStateTest();
+                                                case STACKS -> new StacksTest();
+                                                case GRIDS -> new GridsTest();
+                                                case CONTRIBUTORS -> new ContributorsTest();
+                                                case ANIMATIONS -> new AnimationsTest();
+                                                case NAVIGATOR -> new NavigatorTest();
+                                                case OVERLAY -> new OverlayTest();
+                                                case TEXT -> new TextTest();
+                                                case SPINNY_GHAST -> new SpinnyGhastTest();
+                                                case OPTIMIZATION -> new OptimizationTest();
+                                                case AUTOMATIC_ANIMATION -> new AutomaticAnimationTest();
+                                                case KDL_WIDGETS -> new KdlWidgetsTest();
+                                                case null -> new Center(new Label(Component.literal("select a test")));
+                                            }
+                                        )
                                     )
-                                )
-                            ),
-                            new Align(
-                                Alignment.LEFT,
-                                new Padding(
-                                    Insets.vertical(50).withLeft(5),
-                                    new HitTestTrap(
-                                        new Panel(
-                                            Panel.VANILLA_LIGHT,
-                                            new Padding(
-                                                Insets.all(8),
-                                                new IntrinsicWidth(
-                                                    new Column(
-                                                        new Flexible(
-                                                            new Panel(
-                                                                Panel.VANILLA_INSET,
-                                                                new Padding(
-                                                                    Insets.all(2),
-                                                                    new VerticallyScrollable(
-                                                                        null,
-                                                                        this.bouncy
-                                                                            ? new ScrollAnimationSettings(Duration.ofMillis(750), Easing.OUT_BOUNCE)
-                                                                            : new ScrollAnimationSettings(Duration.ofMillis(250), Easing.OUT_EXPO),
+                                ),
+                                new Align(
+                                    Alignment.LEFT,
+                                    new Padding(
+                                        Insets.vertical(50).withLeft(5),
+                                        new HitTestTrap(
+                                            new Panel(
+                                                Panel.VANILLA_LIGHT,
+                                                new Padding(
+                                                    Insets.all(8),
+                                                    new IntrinsicWidth(
+                                                        new Column(
+                                                            new Flexible(
+                                                                new Panel(
+                                                                    Panel.VANILLA_INSET,
+                                                                    new Padding(
+                                                                        Insets.all(2),
+                                                                        new VerticallyScrollable(
+                                                                            null,
+                                                                            this.bouncy
+                                                                                ? new ScrollAnimationSettings(Duration.ofMillis(750), Easing.OUT_BOUNCE)
+                                                                                : new ScrollAnimationSettings(Duration.ofMillis(250), Easing.OUT_EXPO),
 
-                                                                        new Column(
-                                                                            new Padding(Insets.all(2)),
-                                                                            buttons
+                                                                            new Column(
+                                                                                new Padding(Insets.all(2)),
+                                                                                buttons
+                                                                            )
                                                                         )
                                                                     )
                                                                 )
-                                                            )
-                                                        ),
-                                                        new Padding(Insets.vertical(3)),
-                                                        new Row(
-                                                            MainAxisAlignment.SPACE_AROUND,
-                                                            CrossAxisAlignment.CENTER,
-                                                            new Checkbox(CheckboxStyle.BRAID, this.bouncy, nowChecked -> this.setState(() -> this.bouncy = nowChecked)),
-                                                            new Label(
-                                                                LabelStyle.SHADOW,
-                                                                true, Component.literal("bouncy?")
+                                                            ),
+                                                            new Padding(Insets.vertical(3)),
+                                                            new Row(
+                                                                MainAxisAlignment.SPACE_AROUND,
+                                                                CrossAxisAlignment.CENTER,
+                                                                new Checkbox(CheckboxStyle.BRAID, this.bouncy, nowChecked -> this.setState(() -> this.bouncy = nowChecked)),
+                                                                new Label(
+                                                                    LabelStyle.SHADOW,
+                                                                    true, Component.literal("bouncy?")
+                                                                )
                                                             )
                                                         )
                                                     )
@@ -308,129 +314,156 @@ public class TestSelector extends StatefulWidget {
                                     )
                                 )
                             )
-                        )
-                    ),
-                    new Align(
-                        Alignment.BOTTOM_RIGHT,
-                        new Row(
-                            MainAxisAlignment.START,
-                            CrossAxisAlignment.END,
-                            new Padding(
-                                Insets.all(5),
-                                new SurfaceDimensions()
-                            ),
-                            new Sized(
-                                75, null,
-                                new Column(
-                                    new Sized(
-                                        75, 20,
-                                        new FocusPolicy(
+                        ),
+                        new Align(
+                            Alignment.BOTTOM_RIGHT,
+                            new Row(
+                                MainAxisAlignment.START,
+                                CrossAxisAlignment.END,
+                                new Padding(
+                                    Insets.all(5),
+                                    new SurfaceDimensions()
+                                ),
+                                new Sized(
+                                    75, null,
+                                    new Column(
+                                        new ControlsOverride(
                                             false,
-                                            new Grid(
-                                                LayoutAxis.VERTICAL,
-                                                4,
-                                                Grid.CellFit.tight(),
-                                                new MessageButton(
-                                                    Component.literal("↑"),
-                                                    () -> Actions.invoke(Focusable.of(context).primaryFocus().context(), new Incrementor.IncrementIntent(LayoutAxis.VERTICAL, 1))
-                                                ),
-                                                new MessageButton(
-                                                    Component.literal("↓"),
-                                                    () -> Actions.invoke(Focusable.of(context).primaryFocus().context(), new Incrementor.IncrementIntent(LayoutAxis.VERTICAL, -1))
-                                                ),
-                                                new MessageButton(
-                                                    Component.literal("←"),
-                                                    () -> Actions.invoke(Focusable.of(context).primaryFocus().context(), new Incrementor.IncrementIntent(LayoutAxis.HORIZONTAL, -1))
-                                                ),
-                                                new MessageButton(
-                                                    Component.literal("→"),
-                                                    () -> Actions.invoke(Focusable.of(context).primaryFocus().context(), new Incrementor.IncrementIntent(LayoutAxis.HORIZONTAL, 1))
-                                                )
-                                            )
-                                        )
-                                    ),
-                                    new Sized(
-                                        75, 20,
-                                        new ListenableBuilder(
-                                            HudTestWidget.SHOW_TEST_HUD,
-                                            listenableContext -> MessageCyclingButton.forBoolean(
-                                                HudTestWidget.SHOW_TEST_HUD.value(),
-                                                Component.literal("hud: " + (HudTestWidget.SHOW_TEST_HUD.value() ? "on" : "off")),
-                                                (newValue, newIndex) -> HudTestWidget.SHOW_TEST_HUD.setValue(newValue)
-                                            )
-                                        )
-                                    ),
-                                    new Sized(
-                                        75, 20,
-                                        new MessageButton(
-                                            Component.literal("yum"),
-                                            () -> BraidToast.show(
-                                                Duration.ofSeconds(5),
-                                                null,
-                                                new Row(
-                                                    Stream.generate(() -> new Amogus(
-                                                        new Box(Color.randomHue()),
-                                                        new Box(Color.WHITE),
-                                                        8
-                                                    )).limit(100).toList()
-                                                )
-                                            )
-                                        )
-                                    ),
-                                    new Sized(
-                                        75, 20,
-                                        new MessageButton(
-                                            Component.literal("reset"),
-                                            () -> this.setState(() -> {
-                                                this.xSkew = 0f;
-                                                this.ySkew = 0f;
-                                                this.rotat = 0f;
-                                                this.fliptat = 0;
-                                            })
-                                        )
-                                    ),
-                                    new Sized(
-                                        75,
-                                        null,
-                                        new Column(
-                                            new Padding(
-                                                Insets.top(5),
-                                                new Label(Component.literal("fliptat:"))
-                                            ),
                                             new Row(
-                                                MainAxisAlignment.START,
+                                                MainAxisAlignment.SPACE_EVENLY,
                                                 CrossAxisAlignment.CENTER,
-                                                new Flexible(
-                                                    new MessageButton(Component.literal("-"), () -> this.setState(() -> this.fliptat -= 1))
-                                                ),
-                                                new Flexible(
-                                                    new Label(Component.literal(String.valueOf(this.fliptat)))
-                                                ),
-                                                new Flexible(
-                                                    new MessageButton(Component.literal("+"), () -> this.setState(() -> this.fliptat += 1))
+                                                Label.literal("Disabled"),
+                                                new Checkbox(
+                                                    CheckboxStyle.BRAID,
+                                                    this.disableEverything,
+                                                    checked -> this.setState(() -> this.disableEverything = checked)
                                                 )
                                             )
-                                        )
-                                    ),
-                                    new Sized(
-                                        75, 20,
-                                        new MessageSlider(
-                                            rotat,
-                                            Component.literal("rotat: " + formatDouble(this.rotat)), widget -> widget.range(0, 360).incrementStep(1),
-                                            value -> this.setState(() -> this.rotat = value)
-                                        )
-                                    ),
-                                    new Sized(
-                                        75.0,
-                                        75.0,
-                                        new MessageXlyder(
-                                            this.xSkew, this.ySkew,
-                                            Component.literal("x skew: " + (formatDouble(this.xSkew)) + "\ny skew: " + (formatDouble(this.ySkew))), xlyder -> xlyder.range(-.75, .75),
+                                        ),
+                                        new Sized(
+                                            75, 20,
+                                            new FocusPolicy(
+                                                false,
+                                                new Grid(
+                                                    LayoutAxis.VERTICAL,
+                                                    4,
+                                                    Grid.CellFit.tight(),
+                                                    new MessageButton(
+                                                        Component.literal("↑"),
+                                                        () -> Actions.invoke(
+                                                            Focusable.of(context).primaryFocus().context(),
+                                                            new Incrementor.IncrementIntent(LayoutAxis.VERTICAL, 1)
+                                                        )
+                                                    ),
+                                                    new MessageButton(
+                                                        Component.literal("↓"),
+                                                        () -> Actions.invoke(
+                                                            Focusable.of(context).primaryFocus().context(),
+                                                            new Incrementor.IncrementIntent(LayoutAxis.VERTICAL, -1)
+                                                        )
+                                                    ),
+                                                    new MessageButton(
+                                                        Component.literal("←"),
+                                                        () -> Actions.invoke(
+                                                            Focusable.of(context).primaryFocus().context(),
+                                                            new Incrementor.IncrementIntent(LayoutAxis.HORIZONTAL, -1)
+                                                        )
+                                                    ),
+                                                    new MessageButton(
+                                                        Component.literal("→"),
+                                                        () -> Actions.invoke(
+                                                            Focusable.of(context).primaryFocus().context(),
+                                                            new Incrementor.IncrementIntent(LayoutAxis.HORIZONTAL, 1)
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        ),
+                                        new Sized(
+                                            75, 20,
+                                            new ListenableBuilder(
+                                                HudTestWidget.SHOW_TEST_HUD,
+                                                listenableContext -> MessageCyclingButton.forBoolean(
+                                                    HudTestWidget.SHOW_TEST_HUD.value(),
+                                                    Component.literal("hud: " + (HudTestWidget.SHOW_TEST_HUD.value() ? "on" : "off")),
+                                                    (newValue, newIndex) -> HudTestWidget.SHOW_TEST_HUD.setValue(newValue)
+                                                )
+                                            )
+                                        ),
+                                        new Sized(
+                                            75, 20,
+                                            new MessageButton(
+                                                Component.literal("yum"),
+                                                () -> BraidToast.show(
+                                                    Duration.ofSeconds(5),
+                                                    null,
+                                                    new Row(
+                                                        Stream.generate(() -> new Amogus(
+                                                            new Box(Color.randomHue()),
+                                                            new Box(Color.WHITE),
+                                                            8
+                                                        )).limit(100).toList()
+                                                    )
+                                                )
+                                            )
+                                        ),
+                                        new Sized(
+                                            75, 20,
+                                            new MessageButton(
+                                                Component.literal("reset"),
+                                                () -> this.setState(() -> {
+                                                    this.xSkew = 0f;
+                                                    this.ySkew = 0f;
+                                                    this.rotat = 0f;
+                                                    this.fliptat = 0;
+                                                })
+                                            )
+                                        ),
+                                        new Sized(
+                                            75,
+                                            null,
+                                            new Column(
+                                                new Padding(
+                                                    Insets.top(5),
+                                                    new Label(Component.literal("fliptat:"))
+                                                ),
+                                                new Row(
+                                                    MainAxisAlignment.START,
+                                                    CrossAxisAlignment.CENTER,
+                                                    new Flexible(
+                                                        new MessageButton(Component.literal("-"), () -> this.setState(() -> this.fliptat -= 1))
+                                                    ),
+                                                    new Flexible(
+                                                        new Label(Component.literal(String.valueOf(this.fliptat)))
+                                                    ),
+                                                    new Flexible(
+                                                        new MessageButton(Component.literal("+"), () -> this.setState(() -> this.fliptat += 1))
+                                                    )
+                                                )
+                                            )
+                                        ),
+                                        new Sized(
+                                            75, 20,
+                                            new MessageSlider(
+                                                rotat,
+                                                Component.literal("rotat: " + formatDouble(this.rotat)), widget -> widget.range(0, 360).incrementStep(1),
+                                                value -> this.setState(() -> this.rotat = value)
+                                            )
+                                        ),
+                                        new Sized(
+                                            75.0,
+                                            75.0,
+                                            new MessageXlyder(
+                                                this.xSkew,
+                                                this.ySkew,
+                                                Component.literal("x skew: " + (formatDouble(this.xSkew)) + "\ny skew: " + (formatDouble(this.ySkew))),
+                                                xlyder -> xlyder.range(-.75, .75),
 
-                                            (xValue, yValue) -> this.setState(() -> {
-                                                this.xSkew = xValue;
-                                                this.ySkew = yValue;
-                                            })
+                                                (xValue, yValue) -> this.setState(() -> {
+                                                    this.xSkew = xValue;
+                                                    this.ySkew = yValue;
+                                                })
+                                            )
                                         )
                                     )
                                 )
@@ -1189,8 +1222,12 @@ public class TestSelector extends StatefulWidget {
                                     null, 200,
                                     new MouseArea(
                                         area -> area.cursorStyle(CursorStyle.HAND)
-                                            .clickCallback((x, y, button, modifiers) -> this.addToList(getMouseButtonName(button).append(" pressed at:\n").append(formatCoordinates(x, y))))
-                                            .releaseCallback((x, y, button, modifiers) -> this.addToList(getMouseButtonName(button).append(" released at:\n").append(formatCoordinates(x, y))))
+                                            .clickCallback((x, y, button, modifiers) -> this.addToList(getMouseButtonName(button)
+                                                .append(" pressed at:\n")
+                                                .append(formatCoordinates(x, y))))
+                                            .releaseCallback((x, y, button, modifiers) -> this.addToList(getMouseButtonName(button)
+                                                .append(" released at:\n")
+                                                .append(formatCoordinates(x, y))))
                                             .dragStartCallback((button, modifiers) -> this.addToList(getMouseButtonName(button).append(" drag started")))
                                             .dragEndCallback(() -> this.addToList(Component.literal("Drag ended")))
                                             .enterCallback(() -> this.addToList(Component.literal("Mouse entered")))
@@ -1425,14 +1462,20 @@ public class TestSelector extends StatefulWidget {
                                 root.child(
                                     UIComponents.button(
                                         Component.literal("A very very cool button"),
-                                        button -> Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.GENERIC_EXPLODE, RandomSource.create().nextFloat() * 2f))
+                                        button -> Minecraft
+                                            .getInstance()
+                                            .getSoundManager()
+                                            .play(SimpleSoundInstance.forUI(SoundEvents.GENERIC_EXPLODE, RandomSource.create().nextFloat() * 2f))
                                     )
                                 ).child(
                                     new BraidComponent(
                                         new Column(
                                             new MessageButton(
                                                 Component.literal("amogus"),
-                                                () -> Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.ANVIL_BREAK, RandomSource.create().nextFloat() * 2f))
+                                                () -> Minecraft
+                                                    .getInstance()
+                                                    .getSoundManager()
+                                                    .play(SimpleSoundInstance.forUI(SoundEvents.ANVIL_BREAK, RandomSource.create().nextFloat() * 2f))
                                             ),
                                             // idk why this needs to be here but if it's not the split pane becomes
                                             // infinity sized
@@ -1687,8 +1730,18 @@ public class TestSelector extends StatefulWidget {
                             MainAxisAlignment.CENTER,
                             CrossAxisAlignment.CENTER,
                             new Padding(Insets.all(10)),
-                            new Label(murders.compareTo(BigInteger.ZERO) > 0 ? Component.literal("You have committed " + murders + " act" + (murders.compareTo(BigInteger.ONE) > 0 ? "s" : "") + " of " + Component.translatableEscape("uwu.homicide").getString() + " against the owo contributors!" + (murders.compareTo(BigInteger.valueOf(1000)) > 0 ? "... wtf bro" : "")).withColor(CommonColors.RED) : Component.literal("OWO Contributors")),
-                            new Label(eepies.compareTo(BigInteger.ZERO) > 0 ? Component.literal("You have committed " + eepies + " act" + (eepies.compareTo(BigInteger.ONE) > 0 ? "s" : "") + " of " + Component.translatableEscape("uwu.eepy").getString() + " against the owo contributors!" + (murders.compareTo(BigInteger.valueOf(1000)) > 0 ? "... idk" : "")).withColor(((BlockItem) bed.getItem()).getBlock().defaultBlockState().getMapColor(Minecraft.getInstance().level, BlockPos.ZERO).col) : Component.empty()),
+                            new Label(murders.compareTo(BigInteger.ZERO) > 0 ? Component
+                                .literal("You have committed " + murders + " act" + (murders.compareTo(BigInteger.ONE) > 0 ? "s" : "") + " of " + Component
+                                    .translatableEscape("uwu.homicide")
+                                    .getString() + " against the owo contributors!" + (murders.compareTo(BigInteger.valueOf(1000)) > 0 ? "... wtf bro" : ""))
+                                .withColor(CommonColors.RED) : Component.literal("OWO Contributors")),
+                            new Label(eepies.compareTo(BigInteger.ZERO) > 0
+                                ? Component
+                                .literal("You have committed " + eepies + " act" + (eepies.compareTo(BigInteger.ONE) > 0 ? "s" : "") + " of " + Component
+                                    .translatableEscape("uwu.eepy")
+                                    .getString() + " against the owo contributors!" + (murders.compareTo(BigInteger.valueOf(1000)) > 0 ? "... idk" : ""))
+                                .withColor(((BlockItem) bed.getItem()).getBlock().defaultBlockState().getMapColor(Minecraft.getInstance().level, BlockPos.ZERO).col)
+                                : Component.empty()),
                             new Grid(
                                 LayoutAxis.VERTICAL,
                                 3,
@@ -1711,7 +1764,17 @@ public class TestSelector extends StatefulWidget {
                                                                     new Label(
                                                                         LabelStyle.SHADOW,
                                                                         true,
-                                                                        contributor.displayName().copy().setStyle(contributor.displayName.copy().getStyle().withHoverEvent(new HoverEvent.ShowEntity(new HoverEvent.EntityTooltipInfo(EntityType.PLAYER, contributor.uuid, contributor.displayName))))
+                                                                        contributor
+                                                                            .displayName()
+                                                                            .copy()
+                                                                            .setStyle(contributor.displayName
+                                                                                .copy()
+                                                                                .getStyle()
+                                                                                .withHoverEvent(new HoverEvent.ShowEntity(new HoverEvent.EntityTooltipInfo(
+                                                                                    EntityType.PLAYER,
+                                                                                    contributor.uuid,
+                                                                                    contributor.displayName
+                                                                                ))))
                                                                     ),
                                                                     new RatingBar()
                                                                 )
@@ -1779,14 +1842,16 @@ public class TestSelector extends StatefulWidget {
                                     this.dead = true;
                                 });
                                 Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.PLAYER_DEATH, 1));
-                                SharedState.set(context, MurderState.class, state -> {
-                                    if (!displayEntity.getUUID().equals(UUID.fromString("91a033f7-1dd3-4858-9c7b-8fb61ba6363d"))) {
-                                        state.murders = state.murders.add(BigInteger.ONE);
-                                    } else {
-                                        state.eepies = state.eepies.add(BigInteger.ONE);
-                                        state.bed = BuiltInRegistries.ITEM.getRandomElementOf(ItemTags.BEDS, RandomSource.create()).get().value().getDefaultInstance();
+                                SharedState.set(
+                                    context, MurderState.class, state -> {
+                                        if (!displayEntity.getUUID().equals(UUID.fromString("91a033f7-1dd3-4858-9c7b-8fb61ba6363d"))) {
+                                            state.murders = state.murders.add(BigInteger.ONE);
+                                        } else {
+                                            state.eepies = state.eepies.add(BigInteger.ONE);
+                                            state.bed = BuiltInRegistries.ITEM.getRandomElementOf(ItemTags.BEDS, RandomSource.create()).get().value().getDefaultInstance();
+                                        }
                                     }
-                                });
+                                );
                                 scheduleDelayedCallback(
                                     Duration.ofSeconds(displayEntity.getUUID().equals(UUID.fromString("09de8a6d-86bf-4c15-bb93-ce3384ce4e96")) ? 1 : 3), () -> this.setState(() -> {
                                         this.dead = false;
@@ -1807,7 +1872,8 @@ public class TestSelector extends StatefulWidget {
                                             new Sized(
                                                 96,
                                                 96,
-                                                new EntityWidget(1.35, this.displayEntity, widget -> {
+                                                new EntityWidget(
+                                                    1.35, this.displayEntity, widget -> {
                                                     widget.displayMode(displayEntity.isDeadOrDying() ? EntityWidget.DisplayMode.NONE : EntityWidget.DisplayMode.CURSOR);
                                                     if (displayEntity.isDeadOrDying()) {
                                                         widget.transform((matrix) -> {
@@ -1818,7 +1884,8 @@ public class TestSelector extends StatefulWidget {
                                                             matrix.rotateX((float) Math.toRadians(0.01));
                                                         });
                                                     }
-                                                })
+                                                }
+                                                )
                                             )
                                         )
                                     )
@@ -2348,6 +2415,7 @@ public class TestSelector extends StatefulWidget {
     public static class GayAmogus extends StatefulWidget {
 
         public final double pixelSize;
+
         public GayAmogus(double pixelSize) {
             this.pixelSize = pixelSize;
         }
@@ -2436,7 +2504,8 @@ public class TestSelector extends StatefulWidget {
                         new VerticalCarouselThing(
                             this.selectedEntityIdx,
                             idx -> this.setState(() -> this.selectedEntityIdx = idx),
-                            Size.square(64), this.entities.stream().<Widget>map(entity -> new EntityWidget(.75, entity, null)).toList()),
+                            Size.square(64), this.entities.stream().<Widget>map(entity -> new EntityWidget(.75, entity, null)).toList()
+                        ),
                         new MouseArea(
                             widget -> widget
                                 .clickCallback((x, y, button, modifiers) -> {
@@ -2453,9 +2522,11 @@ public class TestSelector extends StatefulWidget {
                                     this.pitchDelta = dy;
 
                                     this.releasedLate = false;
-                                    this.scheduleDelayedCallback(Duration.ofMillis(200), () -> {
-                                        this.releasedLate = true;
-                                    });
+                                    this.scheduleDelayedCallback(
+                                        Duration.ofMillis(200), () -> {
+                                            this.releasedLate = true;
+                                        }
+                                    );
                                 })
                                 .dragEndCallback(() -> {
                                     if (this.releasedLate) return;
@@ -2556,8 +2627,16 @@ public class TestSelector extends StatefulWidget {
                                     LayoutAxis.HORIZONTAL,
                                     2,
                                     Grid.CellFit.tight(),
-                                    new MessageButton(Component.literal("↑"), this.widget().selectedIndex > 0 ? () -> this.widget().onChanged.accept(this.widget().selectedIndex - 1) : null),
-                                    new MessageButton(Component.literal("↓"), this.widget().selectedIndex < this.widget().children.size() - 1 ? () -> this.widget().onChanged.accept(this.widget().selectedIndex + 1) : null)
+                                    new MessageButton(
+                                        Component.literal("↑"),
+                                        this.widget().selectedIndex > 0 ? () -> this.widget().onChanged.accept(this.widget().selectedIndex - 1) : null
+                                    ),
+                                    new MessageButton(
+                                        Component.literal("↓"),
+                                        this.widget().selectedIndex < this.widget().children.size() - 1
+                                            ? () -> this.widget().onChanged.accept(this.widget().selectedIndex + 1)
+                                            : null
+                                    )
                                 )
                             ),
                             new Sized(
@@ -2721,7 +2800,11 @@ public class TestSelector extends StatefulWidget {
 
                         var bruhJava = cause;
                         this.setState(() -> {
-                            this.kdlWidget = new Label(LabelStyle.SHADOW, true, Component.literal(Objects.requireNonNullElse(bruhJava.getMessage(), "no message")).withStyle(ChatFormatting.RED));
+                            this.kdlWidget = new Label(
+                                LabelStyle.SHADOW,
+                                true,
+                                Component.literal(Objects.requireNonNullElse(bruhJava.getMessage(), "no message")).withStyle(ChatFormatting.RED)
+                            );
                         });
                     }
                 });
