@@ -4,6 +4,7 @@ import io.wispforest.owo.braid.core.Color;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.braid.widgets.basic.ControlsOverride;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
 import net.minecraft.ChatFormatting;
@@ -30,9 +31,9 @@ public class MessageButton extends StatelessWidget {
             this.onClick,
             //TODO: abstract away the million places where a ternary operator is used to determine the label style for a possibly disabled button
             new Label(
-                this.onClick != null
-                    ? LabelStyle.SHADOW
-                    : new LabelStyle(null, Color.formatting(ChatFormatting.GRAY), null, false),
+                this.onClick == null || ControlsOverride.controlsDisabled(context)
+                    ? new LabelStyle(null, Color.formatting(ChatFormatting.GRAY), null, false)
+                    : LabelStyle.SHADOW,
                 true,
                 this.text
             )
