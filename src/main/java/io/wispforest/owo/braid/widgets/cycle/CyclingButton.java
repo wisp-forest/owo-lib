@@ -10,6 +10,7 @@ import io.wispforest.owo.braid.widgets.button.DefaultButtonStyle;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.BooleanSupplier;
 
 public class CyclingButton<T> extends StatelessWidget {
 
@@ -65,14 +66,13 @@ public class CyclingButton<T> extends StatelessWidget {
 
     @Override
     public Widget build(BuildContext context) {
-        Widget content = this.child;
         if (this.onChanged != null && !ControlsOverride.controlsDisabled(context)) {
             // TODO: properly override the style once this is setupcallbackified
             var clickSound = DefaultButtonStyle.maybeOf(context) instanceof ButtonStyle style
                 ? style.clickSound()
                 : null;
 
-            content = new Cycler<>(
+            return new Cycler<>(
                 this.values,
                 this.currentValue,
                 this.wrap,
@@ -91,6 +91,6 @@ public class CyclingButton<T> extends StatelessWidget {
             );
         }
 
-        return content;
+        return new Button((BooleanSupplier) null, this.child);
     }
 }
