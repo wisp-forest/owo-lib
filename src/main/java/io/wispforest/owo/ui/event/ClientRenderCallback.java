@@ -2,7 +2,7 @@ package io.wispforest.owo.ui.event;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 
 public interface ClientRenderCallback {
 
@@ -11,6 +11,12 @@ public interface ClientRenderCallback {
      * has ticked and cleared the render task queue
      */
     Event<ClientRenderCallback> BEFORE = EventFactory.createArrayBacked(ClientRenderCallback.class, callbacks -> (client) -> {
+        for (var callback : callbacks) {
+            callback.onRender(client);
+        }
+    });
+
+    Event<ClientRenderCallback> BEFORE_SWAP = EventFactory.createArrayBacked(ClientRenderCallback.class, callbacks -> (client) -> {
         for (var callback : callbacks) {
             callback.onRender(client);
         }
@@ -26,5 +32,5 @@ public interface ClientRenderCallback {
         }
     });
 
-    void onRender(MinecraftClient client);
+    void onRender(Minecraft client);
 }

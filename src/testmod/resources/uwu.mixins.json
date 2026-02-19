@@ -6,7 +6,7 @@
   "mixins": [],
   "client": [
     "TitleScreenMixin",
-    "RenderPassImplMixin"
+    "GlRenderPassMixin"
   ],
   "injectors": {
     "defaultRequire": 1

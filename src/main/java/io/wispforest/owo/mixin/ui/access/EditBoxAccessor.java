@@ -1,21 +1,15 @@
 package io.wispforest.owo.mixin.ui.access;
 
-import net.minecraft.client.gui.EditBox;
+import net.minecraft.client.gui.components.EditBox;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(EditBox.class)
 public interface EditBoxAccessor {
+    @Accessor("bordered")
+    boolean owo$bordered();
 
-    @Mutable
-    @Accessor("width")
-    void owo$setWidth(int width);
-
-    @Accessor("selectionEnd")
-    void owo$setSelectionEnd(int width);
-
-    @Accessor("selectionEnd")
-    int owo$getSelectionEnd();
-
+    @Invoker("updateTextPosition")
+    void owo$updateTextPosition();
 }

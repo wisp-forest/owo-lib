@@ -1,10 +1,10 @@
 package io.wispforest.owo.ui.event;
 
 import io.wispforest.owo.util.EventStream;
-import net.minecraft.client.gui.Click;
+import net.minecraft.client.input.MouseButtonEvent;
 
 public interface MouseUp {
-    boolean onMouseUp(Click click);
+    boolean onMouseUp(MouseButtonEvent click);
 
     static EventStream<MouseUp> newStream() {
         return new EventStream<>(subscribers -> (click) -> {

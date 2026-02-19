@@ -1,10 +1,10 @@
 package io.wispforest.owo.ui.event;
 
 import io.wispforest.owo.util.EventStream;
-import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.CharacterEvent;
 
 public interface CharTyped {
-    boolean onCharTyped(CharInput input);
+    boolean onCharTyped(CharacterEvent input);
 
     static EventStream<CharTyped> newStream() {
         return new EventStream<>(subscribers -> (input) -> {

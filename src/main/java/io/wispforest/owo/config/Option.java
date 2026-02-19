@@ -1,11 +1,11 @@
 package io.wispforest.owo.config;
 
+import io.wispforest.endec.Endec;
 import io.wispforest.endec.impl.ReflectiveEndecBuilder;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.annotation.RestartRequired;
-import io.wispforest.endec.Endec;
 import io.wispforest.owo.util.Observable;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
@@ -165,7 +165,7 @@ public final class Option<T> {
      *
      * @param buf The packet buffer to write to
      */
-    void write(PacketByteBuf buf) {
+    void write(FriendlyByteBuf buf) {
         buf.write(this.endec, this.value());
     }
 
@@ -177,7 +177,7 @@ public final class Option<T> {
      * @return {@code null} if this option was successfully detached,
      * the server's value otherwise
      */
-    T read(PacketByteBuf buf) {
+    T read(FriendlyByteBuf buf) {
         final var newValue = buf.read(this.endec);
 
         if (!Objects.equals(newValue, this.value()) && this.backingField.hasAnnotation(RestartRequired.class)) {

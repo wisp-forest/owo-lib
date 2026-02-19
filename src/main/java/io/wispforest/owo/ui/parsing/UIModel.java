@@ -1,12 +1,12 @@
 package io.wispforest.owo.ui.parsing;
 
 import io.wispforest.owo.Owo;
-import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.OwoUIAdapter;
-import io.wispforest.owo.ui.core.ParentComponent;
+import io.wispforest.owo.ui.core.ParentUIComponent;
 import io.wispforest.owo.ui.core.Sizing;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.util.Identifier;
+import io.wispforest.owo.ui.core.UIComponent;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
@@ -134,14 +134,14 @@ public class UIModel {
      * <p>
      * If there are components in your hierarchy you need to modify in
      * code after the main hierarchy has been parsed, give them an id
-     * and look them up via {@link ParentComponent#childById(Class, String)}
+     * and look them up via {@link ParentUIComponent#childById(Class, String)}
      *
      * @param expectedRootComponentClass The class the created root component is expected to have.
      *                                   Should this be violated, an exception is thrown. If there
      *                                   are no specific expectations about the type of
-     *                                   root component to create, pass {@link Component}
+     *                                   root component to create, pass {@link UIComponent}
      */
-    public <T extends ParentComponent> OwoUIAdapter<T> createAdapter(Class<T> expectedRootComponentClass, Screen screen) {
+    public <T extends ParentUIComponent> OwoUIAdapter<T> createAdapter(Class<T> expectedRootComponentClass, Screen screen) {
         return OwoUIAdapter.create(screen, (horizontalSizing, verticalSizing) -> this.parseComponentTree(expectedRootComponentClass));
     }
 
@@ -151,14 +151,14 @@ public class UIModel {
      * <p>
      * If there are components in your hierarchy you need to modify in
      * code after the main hierarchy has been parsed, give them an id
-     * and look them up via {@link ParentComponent#childById(Class, String)}
+     * and look them up via {@link ParentUIComponent#childById(Class, String)}
      *
      * @param expectedRootComponentClass The class the created root component is expected to have.
      *                                   Should this be violated, an exception is thrown. If there
      *                                   are no specific expectations about the type of
-     *                                   root component to create, pass {@link Component}
+     *                                   root component to create, pass {@link UIComponent}
      */
-    public <T extends ParentComponent> OwoUIAdapter<T> createAdapterWithoutScreen(int x, int y, int width, int height, Class<T> expectedRootComponentClass) {
+    public <T extends ParentUIComponent> OwoUIAdapter<T> createAdapterWithoutScreen(int x, int y, int width, int height, Class<T> expectedRootComponentClass) {
         return OwoUIAdapter.createWithoutScreen(x, y, width, height, (horizontalSizing, verticalSizing) -> this.parseComponentTree(expectedRootComponentClass));
     }
 
@@ -171,13 +171,13 @@ public class UIModel {
      * @param expectedClass    The class the parsed component is expected to
      *                         have. Should this be violated, an exception is
      *                         thrown. If there are no specific expectations about
-     *                         the type of component to parse, pass {@link Component}
+     *                         the type of component to parse, pass {@link UIComponent}
      * @param componentElement The XML element represented the
      *                         component to parse.
      * @return The parsed component
      */
     @SuppressWarnings("unchecked")
-    public <T extends Component> T parseComponent(Class<T> expectedClass, Element componentElement) {
+    public <T extends UIComponent> T parseComponent(Class<T> expectedClass, Element componentElement) {
         if (componentElement.getNodeName().equals("template")) {
             var templateName = componentElement.getAttribute("name").strip();
             if (templateName.isEmpty()) {
@@ -227,7 +227,7 @@ public class UIModel {
      * @param expectedClass     The class the expanded template is expected to
      *                          have. Should this be violated, an exception is
      *                          thrown. If there are no specific expectations about
-     *                          the type of component to create, pass {@link Component}
+     *                          the type of component to create, pass {@link UIComponent}
      * @param name              The name of the template to expand
      * @param parameterSupplier The parameter mapping function to invoke
      *                          for each parameter encountered in the template
@@ -236,7 +236,7 @@ public class UIModel {
      * @return The expanded template parsed into a component
      */
     @SuppressWarnings("unchecked")
-    public <T extends Component> T expandTemplate(Class<T> expectedClass, String name, Function<String, String> parameterSupplier, Function<String, Element> childSupplier) {
+    public <T extends UIComponent> T expandTemplate(Class<T> expectedClass, String name, Function<String, String> parameterSupplier, Function<String, Element> childSupplier) {
         if (this.expansionStack.isEmpty()) {
             this.expansionStack.push(new ExpansionFrame(parameterSupplier, childSupplier));
         } else {
@@ -250,7 +250,7 @@ public class UIModel {
         Element template;
         var splitTemplateName = name.split("@");
         if (splitTemplateName.length == 2) {
-            var modelReference = UIModelLoader.get(Identifier.of(splitTemplateName[1]));
+            var modelReference = UIModelLoader.get(Identifier.parse(splitTemplateName[1]));
             if (modelReference == null) {
                 throw new UIModelParsingException("Unknown UI model " + splitTemplateName[1] + ", referenced by template " + splitTemplateName[0]);
             }
@@ -269,7 +269,7 @@ public class UIModel {
         this.expandChildren(template);
         this.applySubstitutions(template);
 
-        final var component = this.parseComponent(Component.class, UIParsing.<Element>allChildrenOfType(template, Node.ELEMENT_NODE).get(0));
+        final var component = this.parseComponent(UIComponent.class, UIParsing.<Element>allChildrenOfType(template, Node.ELEMENT_NODE).get(0));
         if (!expectedClass.isAssignableFrom(component.getClass())) {
             throw new IncompatibleUIModelException(
                     "Expected template '" + name + "'"
@@ -291,17 +291,17 @@ public class UIModel {
      * @param expectedClass The class the expanded template is expected to
      *                      have. Should this be violated, an exception is
      *                      thrown. If there are no specific expectations about
-     *                      the type of component to create, pass {@link Component}
+     *                      the type of component to create, pass {@link UIComponent}
      * @param name          The name of the template to expand
      * @param parameters    The parameter mappings to apply while
      *                      expanding the template
      * @return The expanded template parsed into a component
      */
-    public <T extends Component> T expandTemplate(Class<T> expectedClass, String name, Map<String, String> parameters) {
+    public <T extends UIComponent> T expandTemplate(Class<T> expectedClass, String name, Map<String, String> parameters) {
         return this.expandTemplate(expectedClass, name, parameters::get, s -> null);
     }
 
-    protected <T extends ParentComponent> T parseComponentTree(Class<T> expectedRootComponentClass) {
+    protected <T extends ParentUIComponent> T parseComponentTree(Class<T> expectedRootComponentClass) {
         if (this.componentsElement == null) {
             throw new IncompatibleUIModelException("This UI model does not declare a component tree and can thus only provide templates");
         }

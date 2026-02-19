@@ -1,7 +1,7 @@
 package io.wispforest.owo.blockentity;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.HashSet;
@@ -137,7 +137,7 @@ public class LinearProcessExecutor<T> {
      *
      * @param targetTag The nbt to write state into
      */
-    public void writeState(NbtCompound targetTag) {
+    public void writeState(CompoundTag targetTag) {
         targetTag.putInt("ProcessTick", processTick);
     }
 
@@ -146,8 +146,8 @@ public class LinearProcessExecutor<T> {
      *
      * @param targetTag The nbt to read state from
      */
-    public void readState(NbtCompound targetTag) {
-        this.processTick = targetTag.getInt("ProcessTick", 0);
+    public void readState(CompoundTag targetTag) {
+        this.processTick = targetTag.getIntOr("ProcessTick", 0);
 
         activeSteps.clear();
         processStepTable.forEach((index, step) -> {

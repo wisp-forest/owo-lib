@@ -1,10 +1,10 @@
 package io.wispforest.owo.ui.event;
 
 import io.wispforest.owo.util.EventStream;
-import net.minecraft.client.gui.Click;
+import net.minecraft.client.input.MouseButtonEvent;
 
 public interface MouseDrag {
-    boolean onMouseDrag(Click click, double deltaX, double deltaY);
+    boolean onMouseDrag(MouseButtonEvent click, double deltaX, double deltaY);
 
     static EventStream<MouseDrag> newStream() {
         return new EventStream<>(subscribers -> (click, deltaX, deltaY) -> {

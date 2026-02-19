@@ -3,30 +3,25 @@ package io.wispforest.owo.command.debug;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.argument.IdentifierArgumentType;
-import net.minecraft.command.argument.ItemStackArgumentType;
-import net.minecraft.command.argument.RegistryEntryArgumentType;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.NbtComponent;
-import net.minecraft.entity.TypedEntityData;
-import net.minecraft.server.command.LootCommand;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.ResourceOrIdArgument;
+import net.minecraft.commands.arguments.item.ItemArgument;
 
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 
 public class MakeLootContainerCommand {
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess) {
         dispatcher.register(literal("make-loot-container")
-                .then(argument("item", ItemStackArgumentType.itemStack(registryAccess))
-                        .then(argument("loot_table", RegistryEntryArgumentType.lootTable(registryAccess))
+                .then(argument("item", ItemArgument.item(registryAccess))
+                        .then(argument("loot_table", ResourceOrIdArgument.lootTable(registryAccess))
                                 .executes(MakeLootContainerCommand::execute))));
     }
 
     // TODO: reimplement
-    private static int execute(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+    private static int execute(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
 //        var targetStack = ItemStackArgumentType.getItemStackArgument(context, "item").createStack(1, false);
 //        var tableId = RegistryEntryArgumentType.getLootTable(context, "loot_table");
 //

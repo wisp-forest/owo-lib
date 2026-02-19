@@ -11,14 +11,19 @@ import net.neoforged.fml.loading.FMLLoader;
 
 public final class UISounds {
 
-    public static final SoundEvent UI_INTERACTION = SoundEvent.of(Identifier.of("owo", "ui.owo.interaction"));
+    public static final SoundEvent UI_INTERACTION = SoundEvent.createVariableRangeEvent(Owo.id("ui.owo.interaction"));
 
     private UISounds() {}
 
     //@OnlyIn(Dist.CLIENT)
+    public static void play(SoundEvent event) {
+        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(event, 1));
+    }
+
+    @Environment(EnvType.CLIENT)
     public static void playButtonSound() {
         if (!FMLLoader.getCurrent().getDist().isClient()) throw new IllegalStateException("Unable to execute playButtonSound as currently its not a CLIENT Dist!");
-        MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1));
+        MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK.value(), 1));
     }
 
     //@OnlyIn(Dist.CLIENT)
@@ -26,5 +31,4 @@ public final class UISounds {
         if (!FMLLoader.getCurrent().getDist().isClient()) throw new IllegalStateException("Unable to execute playInteractionSound as currently its not a CLIENT Dist!");
         MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(UI_INTERACTION, 1));
     }
-
 }

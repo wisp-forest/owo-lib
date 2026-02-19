@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import io.wispforest.owo.Owo;
+import io.wispforest.owo.client.screens.ScreenInternals;
 import io.wispforest.owo.command.debug.OwoDebugCommands;
 import io.wispforest.owo.config.OwoConfigCommand;
 import io.wispforest.owo.config.ui.ConfigScreenProviders;
@@ -79,14 +80,15 @@ public class OwoClient {
         });
 
         modBus.addListener(OwoUIPipelines::register);
+        RenderPipelines.register(BraidDisplay.PIPELINE);
 
         if (Owo.DEBUG) {
             final var renderdocPath = System.getProperty("owo.renderdocPath");
             if (renderdocPath != null) {
-                if (Util.getOperatingSystem() == Util.OperatingSystem.WINDOWS) {
+                if (Util.getPlatform() == Util.OS.WINDOWS) {
                     System.load(renderdocPath);
                 } else {
-                    Owo.LOGGER.warn(switch (Util.getOperatingSystem()) {
+                    Owo.LOGGER.warn(switch (Util.getPlatform()) {
                         case LINUX -> LINUX_RENDERDOC_WARNING;
                         case OSX -> MAC_RENDERDOC_WARNING;
                         default -> GENERIC_RENDERDOC_WARNING;

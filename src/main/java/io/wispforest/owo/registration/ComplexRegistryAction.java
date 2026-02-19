@@ -1,7 +1,7 @@
 package io.wispforest.owo.registration;
 
-import net.minecraft.registry.Registry;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,7 +24,7 @@ public class ComplexRegistryAction {
     }
 
     protected <T> boolean preCheck(Registry<T> registry) {
-        predicates.removeIf(registry::containsId);
+        predicates.removeIf(registry::containsKey);
         if (!predicates.isEmpty()) return false;
 
         action.run();

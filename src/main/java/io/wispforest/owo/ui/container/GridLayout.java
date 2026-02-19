@@ -1,10 +1,10 @@
 package io.wispforest.owo.ui.container;
 
-import io.wispforest.owo.ui.base.BaseParentComponent;
-import io.wispforest.owo.ui.core.Component;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
+import io.wispforest.owo.ui.base.BaseParentUIComponent;
+import io.wispforest.owo.ui.core.OwoUIGraphics;
 import io.wispforest.owo.ui.core.Size;
 import io.wispforest.owo.ui.core.Sizing;
+import io.wispforest.owo.ui.core.UIComponent;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
@@ -15,13 +15,13 @@ import org.w3c.dom.Node;
 
 import java.util.*;
 
-public class GridLayout extends BaseParentComponent {
+public class GridLayout extends BaseParentUIComponent {
 
     protected final int rows, columns;
 
-    protected final Component[] children;
-    protected final List<Component> nonNullChildren = new ArrayList<>();
-    protected final List<Component> nonNullChildrenView = Collections.unmodifiableList(this.nonNullChildren);
+    protected final UIComponent[] children;
+    protected final List<UIComponent> nonNullChildren = new ArrayList<>();
+    protected final List<UIComponent> nonNullChildrenView = Collections.unmodifiableList(this.nonNullChildren);
 
     protected Size contentSize = Size.zero();
 
@@ -31,7 +31,7 @@ public class GridLayout extends BaseParentComponent {
         this.rows = rows;
         this.columns = columns;
 
-        this.children = new Component[rows * columns];
+        this.children = new UIComponent[rows * columns];
     }
 
     @Override
@@ -89,12 +89,12 @@ public class GridLayout extends BaseParentComponent {
     }
 
     @Override
-    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
-        super.draw(context, mouseX, mouseY, partialTicks, delta);
-        this.drawChildren(context, mouseX, mouseY, partialTicks, delta, this.nonNullChildren);
+    public void draw(OwoUIGraphics graphics, int mouseX, int mouseY, float partialTicks, float delta) {
+        super.draw(graphics, mouseX, mouseY, partialTicks, delta);
+        this.drawChildren(graphics, mouseX, mouseY, partialTicks, delta, this.nonNullChildren);
     }
 
-    protected @Nullable Component getChild(int row, int column) {
+    protected @Nullable UIComponent getChild(int row, int column) {
         return this.children[row * this.columns + column];
     }
 
@@ -117,7 +117,7 @@ public class GridLayout extends BaseParentComponent {
         }
     }
 
-    public GridLayout child(Component child, int row, int column) {
+    public GridLayout child(UIComponent child, int row, int column) {
         var previousChild = this.getChild(row, column);
         this.children[row * this.columns + column] = child;
 
@@ -147,7 +147,7 @@ public class GridLayout extends BaseParentComponent {
     }
 
     @Override
-    public GridLayout removeChild(Component child) {
+    public GridLayout removeChild(UIComponent child) {
         for (int i = 0; i < this.children.length; i++) {
             if (Objects.equals(this.children[i], child)) {
                 this.removeChild(i / this.columns, i % columns);
@@ -159,7 +159,7 @@ public class GridLayout extends BaseParentComponent {
     }
 
     @Override
-    public List<Component> children() {
+    public List<UIComponent> children() {
         return this.nonNullChildrenView;
     }
 
@@ -183,7 +183,7 @@ public class GridLayout extends BaseParentComponent {
                         "Present component: " + existingChild.getClass().getSimpleName() + "\nNew element: " + child.getNodeName());
             }
 
-            this.child(model.parseComponent(Component.class, child), row, column);
+            this.child(model.parseComponent(UIComponent.class, child), row, column);
         }
     }
 

@@ -1,12 +1,12 @@
 package io.wispforest.owo.particles.systems;
 
-import io.wispforest.owo.network.NetworkException;
 import io.wispforest.endec.Endec;
+import io.wispforest.owo.network.NetworkException;
 import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.ServicesFrozenException;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -14,12 +14,12 @@ import org.jetbrains.annotations.Nullable;
  * at a position in a world <i>on both client and server</i>,
  * with some optional data attached.
  * <br>
- * To run this effect, call {@link #spawn(World, Vec3d, Object)}. If you call this
+ * To run this effect, call {@link #spawn(Level, Vec3, Object)}. If you call this
  * on the server, a command will be sent to the client to execute the system.
  * <b>Thus, it is important this is registered on both client and server</b>
  * <p>
  * In case your particle effect not required any additional data,
- * use {@link Void} as the data class and pass {@code null} to {@link #spawn(World, Vec3d, Object)}
+ * use {@link Void} as the data class and pass {@code null} to {@link #spawn(Level, Vec3, Object)}
  *
  * @param <T> The data class
  */
@@ -61,34 +61,34 @@ public class ParticleSystem<T> {
 
     /**
      * Spawns, or displays, whichever term you prefer,
-     * this particle system in the given world at the
+     * this particle system in the given level at the
      * given position and with the passed context data
      *
      * <p><b>{@code null} data is only allowed if the data class of this
      * particle system is {@link Void}</b>
      *
-     * @param world The world to execute in
+     * @param level The level to execute in
      * @param pos   The position to execute at
      * @param data  The context to execute with
      */
-    public void spawn(World world, Vec3d pos, @Nullable T data) {
+    public void spawn(Level level, Vec3 pos, @Nullable T data) {
         if (data == null && !permitsContextlessExecution) throw new IllegalStateException("This particle system does not permit 'null' data");
 
-        if (world.isClient()) {
-            handler.executeParticleSystem(world, pos, data);
+        if (level.isClientSide()) {
+            handler.executeParticleSystem(level, pos, data);
         } else {
-            manager.sendPacket(this, (ServerWorld) world, pos, data);
+            manager.sendPacket(this, (ServerLevel) level, pos, data);
         }
     }
 
     /**
-     * Convenience wrapper for {@link #spawn(World, Vec3d, Object)}
+     * Convenience wrapper for {@link #spawn(Level, Vec3, Object)}
      * that always passes {@code null} data
      *
-     * @param world The world to execute in
+     * @param level The level to execute in
      * @param pos   The position to execute at
      */
-    public void spawn(World world, Vec3d pos) {
-        spawn(world, pos, null);
+    public void spawn(Level level, Vec3 pos) {
+        spawn(level, pos, null);
     }
 }

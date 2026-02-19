@@ -2,13 +2,13 @@ package io.wispforest.owo.ui.base;
 
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.core.OwoUIAdapter;
-import io.wispforest.owo.ui.core.ParentComponent;
+import io.wispforest.owo.ui.core.ParentUIComponent;
 import io.wispforest.owo.ui.parsing.ConfigureHotReloadScreen;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelLoader;
 import io.wispforest.owo.ui.util.UIErrorToast;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -22,11 +22,11 @@ import java.nio.file.Path;
  * call using the relevant {@link DataSource}.
  * <p>
  * You can then query and set up different components of your UI hierarchy using
- * {@link ParentComponent#childById(Class, String)} in the {@link #build(ParentComponent)} method
+ * {@link ParentUIComponent#childById(Class, String)} in the {@link #build(ParentUIComponent)} method
  *
  * @param <R> The type of root component this screen expects from the UI model
  */
-public abstract class BaseUIModelScreen<R extends ParentComponent> extends BaseOwoScreen<R> {
+public abstract class BaseUIModelScreen<R extends ParentUIComponent> extends BaseOwoScreen<R> {
 
     /**
      * The UI model this screen is built upon, parsed from XML.
@@ -63,9 +63,9 @@ public abstract class BaseUIModelScreen<R extends ParentComponent> extends BaseO
     }
 
     @Override
-    public boolean keyPressed(KeyInput input) {
-        if (Owo.DEBUG && this.modelId != null && input.key() == GLFW.GLFW_KEY_F5 && input.hasCtrl()) {
-            this.client.setScreen(new ConfigureHotReloadScreen(this.modelId, this));
+    public boolean keyPressed(KeyEvent input) {
+        if (Owo.DEBUG && this.modelId != null && input.key() == GLFW.GLFW_KEY_F5 && input.hasControlDown()) {
+            this.minecraft.setScreen(new ConfigureHotReloadScreen(this.modelId, this));
             return true;
         }
 

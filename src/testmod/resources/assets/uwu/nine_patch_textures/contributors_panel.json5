@@ -1,0 +1,14 @@
+{
+  texture: "uwu:textures/gui/contributors_panel.png",
+  texture_width: 16,
+  texture_height: 16,
+  repeat: true,
+  corner_patch_size: {
+    width: 1,
+    height: 1
+  },
+  center_patch_size: {
+    width: 12,
+    height: 12
+  }
+}

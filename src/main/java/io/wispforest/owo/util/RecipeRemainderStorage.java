@@ -1,9 +1,9 @@
 package io.wispforest.owo.util;
 
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.Item;
 import net.minecraft.resource.SynchronousResourceReloader;
-import net.minecraft.util.Identifier;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
 import net.neoforged.neoforge.resource.VanillaServerListeners;
 import org.jetbrains.annotations.ApiStatus;

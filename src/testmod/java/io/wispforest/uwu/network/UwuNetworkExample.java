@@ -20,7 +20,7 @@ import java.util.Map;
 
 public class UwuNetworkExample {
     public static final Map<String, StructEndec<? extends DispatchedInterface>> REGISTRY = new HashMap<>();
-    public static final OwoNetChannel CHANNEL = OwoNetChannel.create(Identifier.of("uwu", "main"));
+    public static final OwoNetChannel CHANNEL = OwoNetChannel.create(Identifier.fromNamespaceAndPath("uwu", "main"));
 
     public static void init() {
         CHANNEL.addEndecs(builder -> {
@@ -31,7 +31,7 @@ public class UwuNetworkExample {
         REGISTRY.put("two", RecordEndec.create(CHANNEL.builder(), DispatchedSubclassTwo.class));
 
         CHANNEL.registerClientbound(StringPacket.class, (message, access) -> {
-            access.player().sendMessage(Text.of(message.value()), false);
+            access.player().displayClientMessage(Component.nullToEmpty(message.value()), false);
         });
 
         CHANNEL.registerServerbound(KeycodePacket.class, (message, access) -> {
@@ -39,26 +39,26 @@ public class UwuNetworkExample {
         });
 
         CHANNEL.registerServerbound(MaldingPacket.class, (message, access) -> {
-            access.player().sendMessage(Text.of(message.toString()), false);
+            access.player().displayClientMessage(Component.nullToEmpty(message.toString()), false);
         });
 
         CHANNEL.registerServerbound(NullablePacket.class, (message, access) -> {
             if(message.name() == null && message.names() == null) {
-                access.player().sendMessage(Text.of("NULLABLITY FOR THE WIN"));
+                access.player().sendSystemMessage(Component.nullToEmpty("NULLABLITY FOR THE WIN"));
             } else {
-                var text = Text.literal("");
+                var text = Component.literal("");
 
-                text.append(Text.of(String.valueOf(message.name())));
-                text.append(Text.of(String.valueOf(message.names())));
+                text.append(Component.nullToEmpty(String.valueOf(message.name())));
+                text.append(Component.nullToEmpty(String.valueOf(message.names())));
 
-                access.player().sendMessage(text);
+                access.player().sendSystemMessage(text);
             }
         });
     }
 
     //@OnlyIn(Dist.CLIENT)
     public static final class Client {
-        public static final KeyBinding NETWORK_TEST = new KeyBinding("key.uwu.network_test", GLFW.GLFW_KEY_U, KeyBinding.Category.MISC);
+        public static final KeyMapping NETWORK_TEST = new KeyMapping("key.uwu.network_test", GLFW.GLFW_KEY_U, KeyMapping.Category.MISC);
 
         public static void init(IEventBus eventBus) {
             eventBus.addListener((RegisterKeyMappingsEvent mappingsEvent) -> {
@@ -66,9 +66,9 @@ public class UwuNetworkExample {
             });
 
             NeoForge.EVENT_BUS.addListener((ClientTickEvent.Post clientEvent) -> {
-                while (NETWORK_TEST.wasPressed()) {
+                while (NETWORK_TEST.consumeClick()) {
 
-                    CHANNEL.clientHandle().send(new KeycodePacket(NETWORK_TEST.getKey().getCode()));
+                    CHANNEL.clientHandle().send(new KeycodePacket(NETWORK_TEST.getKey().getValue()));
 
                     CHANNEL.clientHandle().send(new MaldingPacket(new DispatchedSubclassOne("base")));
                     CHANNEL.clientHandle().send(new MaldingPacket(new DispatchedSubclassTwo(20)));

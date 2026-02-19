@@ -1,7 +1,7 @@
 package io.wispforest.owo.ext;
 
-import net.minecraft.component.ComponentChanges;
-import net.minecraft.component.ComponentMap;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponentPatch;
 import org.jetbrains.annotations.ApiStatus;
 
 public interface OwoItem {
@@ -11,5 +11,5 @@ public interface OwoItem {
      * @param target a builder for the derived component map
      */
     @ApiStatus.Experimental
-    default void deriveStackComponents(ComponentMap source, ComponentChanges.Builder target) { }
+    default void deriveStackComponents(DataComponentMap source, DataComponentPatch.Builder target) { }
 }

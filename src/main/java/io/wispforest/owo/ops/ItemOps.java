@@ -1,10 +1,8 @@
 package io.wispforest.owo.ops;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.util.Hand;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * A collection of common checks and operations done on {@link ItemStack}
@@ -22,7 +20,7 @@ public final class ItemOps {
      * @return {@code true} if addition can stack onto base
      */
     public static boolean canStack(ItemStack base, ItemStack addition) {
-        return base.isEmpty() || (canIncreaseBy(base, addition.getCount()) && ItemStack.areItemsAndComponentsEqual(base, addition));
+        return base.isEmpty() || (canIncreaseBy(base, addition.getCount()) && ItemStack.isSameItemSameComponents(base, addition));
     }
 
     /**
@@ -32,7 +30,7 @@ public final class ItemOps {
      * @return stack.getCount() &lt; stack.getMaxCount()
      */
     public static boolean canIncrease(ItemStack stack) {
-        return stack.isStackable() && stack.getCount() < stack.getMaxCount();
+        return stack.isStackable() && stack.getCount() < stack.getMaxStackSize();
     }
 
     /**
@@ -43,7 +41,7 @@ public final class ItemOps {
      * @return {@code true} if the stack can increase by the given amount
      */
     public static boolean canIncreaseBy(ItemStack stack, int by) {
-        return stack.isStackable() && stack.getCount() + by <= stack.getMaxCount();
+        return stack.isStackable() && stack.getCount() + by <= stack.getMaxStackSize();
     }
 
     /**
@@ -73,7 +71,7 @@ public final class ItemOps {
      * @return {@code false} if the stack is empty after the operation
      */
     public static boolean emptyAwareDecrement(ItemStack stack, int amount) {
-        stack.decrement(amount);
+        stack.shrink(amount);
         return !stack.isEmpty();
     }
 
@@ -85,7 +83,7 @@ public final class ItemOps {
      * @param hand   The hand to affect
      * @return {@code false} if the stack is empty after the operation
      */
-    public static boolean decrementPlayerHandItem(PlayerEntity player, Hand hand) {
+    public static boolean decrementPlayerHandItem(Player player, InteractionHand hand) {
         return decrementPlayerHandItem(player, hand, 1);
     }
 
@@ -98,10 +96,10 @@ public final class ItemOps {
      * @param amount The amount to decrement
      * @return {@code false} if the stack is empty after the operation
      */
-    public static boolean decrementPlayerHandItem(PlayerEntity player, Hand hand, int amount) {
-        var stack = player.getStackInHand(hand);
+    public static boolean decrementPlayerHandItem(Player player, InteractionHand hand, int amount) {
+        var stack = player.getItemInHand(hand);
         if (!player.isCreative()) {
-            if (!emptyAwareDecrement(stack, amount)) player.setStackInHand(hand, ItemStack.EMPTY);
+            if (!emptyAwareDecrement(stack, amount)) player.setItemInHand(hand, ItemStack.EMPTY);
         }
         return !stack.isEmpty();
     }

@@ -2,8 +2,8 @@ package io.wispforest.owo.util.pond;
 
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.json.OwoItemGroupLoader;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiConsumer;
@@ -20,7 +20,7 @@ public interface OwoItemExtensions {
      * @return The function used for adding stacks of
      * this item to an {@link OwoItemGroup} it resides in
      */
-    BiConsumer<Item, ItemGroup.Entries> owo$stackGenerator();
+    BiConsumer<Item, CreativeModeTab.Output> owo$stackGenerator();
 
     /**
      * Sets the group of this item, used by {@link OwoItemGroupLoader} to ensure
@@ -30,14 +30,14 @@ public interface OwoItemExtensions {
      */
     void owo$setGroup(Supplier<ItemGroup> group);
 
-    default void owo$setGroup(ItemGroup group) {
+    default void owo$setGroup(CreativeModeTab group) {
         owo$setGroup(() -> group);
     }
 
     /**
      * @return The item group this item should reside in
      */
-    @Nullable ItemGroup owo$group();
+    @Nullable CreativeModeTab owo$group();
 
     /**
      * @return {@code true} if this item should automatically

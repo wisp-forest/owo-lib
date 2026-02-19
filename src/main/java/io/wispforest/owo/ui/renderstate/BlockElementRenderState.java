@@ -1,46 +1,46 @@
 package io.wispforest.owo.ui.renderstate;
 
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.ScreenRect;
-import net.minecraft.client.gui.render.SpecialGuiElementRenderer;
-import net.minecraft.client.gui.render.state.special.SpecialGuiElementRenderState;
-import net.minecraft.client.render.DiffuseLighting;
-import net.minecraft.client.render.LightmapTextureManager;
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.block.entity.state.BlockEntityRenderState;
-import net.minecraft.client.render.state.CameraRenderState;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.RotationAxis;
+import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
+import net.minecraft.client.gui.render.state.pip.PictureInPictureRenderState;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 public record BlockElementRenderState(
     BlockState state,
     @Nullable BlockEntityRenderState entity,
-    ScreenRect bounds,
-    ScreenRect scissorArea
-) implements SpecialGuiElementRenderState {
+    ScreenRectangle bounds,
+    ScreenRectangle scissorArea
+) implements PictureInPictureRenderState {
 
     @Override
-    public int x1() {
-        return this.bounds.getLeft();
+    public int x0() {
+        return this.bounds.left();
     }
 
     @Override
-    public int x2() {
-        return this.bounds.getRight();
+    public int x1() {
+        return this.bounds.right();
+    }
+
+    @Override
+    public int y0() {
+        return this.bounds.top();
     }
 
     @Override
     public int y1() {
-        return this.bounds.getTop();
-    }
-
-    @Override
-    public int y2() {
-        return this.bounds.getBottom();
+        return this.bounds.bottom();
     }
 
     @Override
@@ -49,30 +49,30 @@ public record BlockElementRenderState(
     }
 
     @Override
-    public @Nullable ScreenRect scissorArea() {
+    public @Nullable ScreenRectangle scissorArea() {
         return this.scissorArea;
     }
 
     @Override
-    public @Nullable ScreenRect bounds() {
+    public @Nullable ScreenRectangle bounds() {
         return this.scissorArea != null ? this.scissorArea.intersection(this.bounds) : this.bounds;
     }
 
-    public static class Renderer extends SpecialGuiElementRenderer<BlockElementRenderState> {
+    public static class Renderer extends PictureInPictureRenderer<BlockElementRenderState> {
 
-        public Renderer(VertexConsumerProvider.Immediate vertexConsumers) {
+        public Renderer(MultiBufferSource.BufferSource vertexConsumers) {
             super(vertexConsumers);
         }
 
         @Override
-        public Class<BlockElementRenderState> getElementClass() {
+        public Class<BlockElementRenderState> getRenderStateClass() {
             return BlockElementRenderState.class;
         }
 
         @Override
         @SuppressWarnings("NonAsciiCharacters")
-        protected void render(BlockElementRenderState state, MatrixStack matrices) {
-            MinecraftClient.getInstance().gameRenderer.getDiffuseLighting().setShaderLights(DiffuseLighting.Type.ENTITY_IN_UI);
+        protected void renderToTexture(BlockElementRenderState state, PoseStack matrices) {
+            Minecraft.getInstance().gameRenderer.getLighting().setupFor(Lighting.Entry.ENTITY_IN_UI);
 
             var width = state.bounds.width();
             var height = state.bounds.height();
@@ -80,30 +80,30 @@ public record BlockElementRenderState(
             matrices.translate(0, -height / 2f, 100);
             matrices.scale(40 * width / 64f, -40 * height / 64f, -40);
 
-            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(30));
-            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(45 + 180));
+            matrices.mulPose(Axis.XP.rotationDegrees(30));
+            matrices.mulPose(Axis.YP.rotationDegrees(45 + 180));
 
             matrices.translate(-.5, -.5, -.5);
 
-            if (state.state.getRenderType() != BlockRenderType.INVISIBLE) {
-                MinecraftClient.getInstance().getBlockRenderManager().renderBlockAsEntity(
-                    state.state, matrices, vertexConsumers,
-                    LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV
+            if (state.state.getRenderShape() != RenderShape.INVISIBLE) {
+                Minecraft.getInstance().getBlockRenderer().renderSingleBlock(
+                    state.state, matrices, bufferSource,
+                    LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY
                 );
             }
 
             if (state.entity != null) {
-                var медведь = MinecraftClient.getInstance().getBlockEntityRenderDispatcher().getByRenderState(state.entity);
+                var медведь = Minecraft.getInstance().getBlockEntityRenderDispatcher().getRenderer(state.entity);
                 if (медведь != null) {
-                    var dispatcher = MinecraftClient.getInstance().gameRenderer.getEntityRenderDispatcher();
-                    медведь.render(state.entity, matrices, dispatcher.getQueue(), new CameraRenderState());
-                    dispatcher.render();
+                    var dispatcher = Minecraft.getInstance().gameRenderer.getFeatureRenderDispatcher();
+                    медведь.submit(state.entity, matrices, dispatcher.getSubmitNodeStorage(), new CameraRenderState());
+                    dispatcher.renderAllFeatures();
                 }
             }
         }
 
         @Override
-        protected String getName() {
+        protected String getTextureLabel() {
             return "owo-ui_block";
         }
     }

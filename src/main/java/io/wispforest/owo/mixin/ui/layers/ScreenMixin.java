@@ -1,18 +1,18 @@
 package io.wispforest.owo.mixin.ui.layers;
 
-import io.wispforest.owo.ui.core.ParentComponent;
+import io.wispforest.owo.ui.core.ParentUIComponent;
 import io.wispforest.owo.ui.layers.Layer;
 import io.wispforest.owo.ui.layers.Layers;
 import io.wispforest.owo.util.pond.OwoScreenExtension;
-import net.minecraft.client.gui.AbstractParentElement;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
+import net.minecraft.client.gui.screens.Screen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.*;
 
 @Mixin(value = Screen.class, priority = 1100)
-public abstract class ScreenMixin extends AbstractParentElement implements OwoScreenExtension {
+public abstract class ScreenMixin extends AbstractContainerEventHandler implements OwoScreenExtension {
 
     @Shadow public int width;
     @Shadow public int height;
@@ -52,7 +52,7 @@ public abstract class ScreenMixin extends AbstractParentElement implements OwoSc
 
     @Override
     @SuppressWarnings("unchecked")
-    public <S extends Screen, R extends ParentComponent> Layer<S, R>.Instance owo$getInstance(Layer<S, R> layer) {
+    public <S extends Screen, R extends ParentUIComponent> Layer<S, R>.Instance owo$getInstance(Layer<S, R> layer) {
         return (Layer<S, R>.Instance) this.owo$layersToInstances.get(layer);
     }
 

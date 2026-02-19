@@ -2,9 +2,9 @@ package io.wispforest.owo.serialization.format;
 
 import com.mojang.serialization.DynamicOps;
 import io.wispforest.endec.SerializationContext;
-import net.minecraft.util.dynamic.ForwardingDynamicOps;
+import net.minecraft.resources.DelegatingOps;
 
-public class DynamicOpsWithContext<T> extends ForwardingDynamicOps<T> implements ContextHolder {
+public class DynamicOpsWithContext<T> extends DelegatingOps<T> implements ContextHolder {
 
     private final SerializationContext capturedContext;
 

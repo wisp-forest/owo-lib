@@ -1,16 +1,17 @@
 package io.wispforest.owo.mixin;
 
 import io.wispforest.owo.util.Maldenhagen;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.ChunkSectionCache;
-import net.minecraft.world.StructureWorldAccess;
-import net.minecraft.world.chunk.ChunkSection;
-import net.minecraft.world.gen.feature.OreFeature;
-import net.minecraft.world.gen.feature.OreFeatureConfig;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.BulkSectionAccess;
+import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.levelgen.feature.OreFeature;
+import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -28,7 +29,7 @@ import java.util.Map;
 public class Copenhagen {
 
     // this map contains the seethe'd orr blocks. its quite important
-    private final ThreadLocal<Map<BlockPos, BlockState>> OWO$COPING = ThreadLocal.withInitial(HashMap::new);
+    @Unique private final ThreadLocal<Map<BlockPos, BlockState>> COPING = ThreadLocal.withInitial(HashMap::new);
 
     // this target method is just so damn complex that not even mixin can correctly guess the injector signature.
     // i just kinda gave up and deleted some of them until it worked. very epic
@@ -40,28 +41,28 @@ public class Copenhagen {
     // now you would think this throws an error when you then try to modify those sections. but no.
     // it just silently deadlocks the entire game
     @SuppressWarnings("InvalidInjectorMethodSignature")
-    @Inject(method = "generateVeinPart", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/ChunkSection;setBlockState(IIILnet/minecraft/block/BlockState;Z)Lnet/minecraft/block/BlockState;"), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void malding(StructureWorldAccess world, Random random, OreFeatureConfig config, double startX, double endX, double startZ, double endZ,
+    @Inject(method = "doPlace", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunkSection;setBlockState(IIILnet/minecraft/world/level/block/state/BlockState;Z)Lnet/minecraft/world/level/block/state/BlockState;"), locals = LocalCapture.CAPTURE_FAILHARD)
+    private void malding(WorldGenLevel world, RandomSource random, OreConfiguration config, double startX, double endX, double startZ, double endZ,
                          double startY, double endY, int p_x, int p_y, int p_z, int p_horizontalSize, int p_verticalSize, CallbackInfoReturnable<Boolean> cir,
-                         int i, BitSet bitSet, BlockPos.Mutable mutable, int j, double[] ds, ChunkSectionCache chunkSectionCache, int m, double d, double e,
-                         double g, double h, int n, int o, int p, int q, int r, int s, int t, double u, int v, double w, int aa, double x, int ab, ChunkSection chunkSection,
-                         int ad, int ae, int af, BlockState blockState, Iterator<OreFeatureConfig.Target> var57, OreFeatureConfig.Target target) {
+                         int i, BitSet bitSet, BlockPos.MutableBlockPos mutable, int j, double[] ds, BulkSectionAccess chunkSectionCache, int m, double d, double e,
+                         double g, double h, int n, int o, int p, int q, int r, int s, int t, double u, int v, double w, int aa, double x, int ab, LevelChunkSection chunkSection,
+                         int ad, int ae, int af, BlockState blockState, Iterator<OreConfiguration.TargetBlockState> var57, OreConfiguration.TargetBlockState target) {
 
         if (!Maldenhagen.isOnCopium(target.state.getBlock())) return;
-        OWO$COPING.get().put(new BlockPos(t, v, aa), target.state);
+        COPING.get().put(new BlockPos(t, v, aa), target.state);
     }
 
     // now in here we read all the gleaming ore spots from our cache and actually cause a block update so that the
     // lighting calculations happen. all of this just so that some dumb orr block can glow.
-    @Inject(method = "generateVeinPart", at = @At("TAIL"))
-    private void coping(StructureWorldAccess world, net.minecraft.util.math.random.Random random, OreFeatureConfig config, double startX, double endX,
+    @Inject(method = "doPlace", at = @At("TAIL"))
+    private void coping(WorldGenLevel world, net.minecraft.util.RandomSource random, OreConfiguration config, double startX, double endX,
                         double startZ, double endZ, double startY, double endY, int x, int y, int z, int horizontalSize,
                         int verticalSize, CallbackInfoReturnable<Boolean> cir) {
 
-        OWO$COPING.get().forEach((blockPos, state) -> {
-            world.setBlockState(blockPos, state, Block.NOTIFY_ALL);
+        COPING.get().forEach((blockPos, state) -> {
+            world.setBlock(blockPos, state, Block.UPDATE_ALL);
         });
-        OWO$COPING.get().clear();
+        COPING.get().clear();
     }
 
 }

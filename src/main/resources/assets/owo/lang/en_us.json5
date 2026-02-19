@@ -1,0 +1,73 @@
+{
+  "text.owo.{}": {
+    "itemGroup.{}": {
+      tab_template: [
+        {index: 0},
+        {text: " > ", color: "gray"},
+        {index: 1, color: "dark_gray"}
+      ],
+      select_hint: {text: "Shift-click to select multiple", color: "gray"}
+    },
+    "configure_hot_reload.{}": {
+      title: "Configure Hot Reload",
+      choose_file: "Choose file",
+      save: "Save",
+      model: [
+        {text: "Model: ", color: "yellow"},
+        {index: 0, color: "gray"}
+      ],
+      "reload_from.{}": {
+        "": [
+          {text: "Reload from: ", color: "yellow"},
+          {index: 0, color: "gray"}
+        ],
+        unset: "Unset"
+      }
+    },
+    "config.{}": {
+      "search.{}": {
+        "": "Search...",
+        matches: "%d of %d",
+        no_matches: "No matches"
+      },
+      must_restart: "Some changes you made require a restart to apply",
+      "button.{}": {
+        reload: "Reload",
+        done: "Done",
+        exit_minecraft: "Exit Minecraft",
+        ignore_restart: "Restart later",
+        "range.{}": {
+          edit_as_text: "Edit as text",
+          edit_with_slider: "Edit with slider"
+        }
+      },
+      applies_after_restart: [
+        {text: "⏻ ", color: "#FAEA48"},
+        {text: "This option applies after a restart", color: "gray"}
+      ],
+      managed_by_server: [
+        {text: "⚑ ", color: "#EB1D36"},
+        {text: "This option is being managed by the server\n   Disconnect to edit it", color: "gray"}
+      ],
+      sections: {text: "Sections", underlined: true},
+      sections_tooltip: "Sections",
+      "list.add_entry": "Add entry",
+      "boolean_toggle.{}": {
+        enabled: [
+          "",
+          {text: "[", color: "gray"},
+          {text: "✔", color: "#28FFBF"},
+          {text: "]", color: "gray"},
+          " Enabled"
+        ],
+        disabled: [
+          "",
+          {text: "[", color: "gray"},
+          {text: "❌", color: "#EB1D36"},
+          {text: "]", color: "gray"},
+          " Disabled"
+        ]
+      }
+    }
+  }
+}

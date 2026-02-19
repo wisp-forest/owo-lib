@@ -4,8 +4,8 @@ import io.wispforest.owo.ui.base.BaseUIModelScreen;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.SliderComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
-import io.wispforest.owo.ui.core.Component;
-import net.minecraft.client.gui.widget.TextFieldWidget;
+import io.wispforest.owo.ui.core.UIComponent;
+import net.minecraft.client.gui.components.EditBox;
 
 import java.util.Map;
 
@@ -27,7 +27,7 @@ public class UwuConfigScreen extends BaseUIModelScreen<FlowLayout> {
         }
     }
 
-    protected Component createTextOption(final int index) {
+    protected UIComponent createTextOption(final int index) {
         var option = this.model.expandTemplate(FlowLayout.class,
                 "text-config-option",
                 Map.of(
@@ -36,15 +36,15 @@ public class UwuConfigScreen extends BaseUIModelScreen<FlowLayout> {
                 )
         );
 
-        var valueBox = option.childById(TextFieldWidget.class, "value-box");
+        var valueBox = option.childById(EditBox.class, "value-box");
         option.childById(ButtonComponent.class, "reset-button").onPress(button -> {
-            valueBox.setText(String.valueOf(index * index));
+            valueBox.setValue(String.valueOf(index * index));
         });
 
         return option;
     }
 
-    protected Component createRangeOption(final int index) {
+    protected UIComponent createRangeOption(final int index) {
         var option = this.model.expandTemplate(FlowLayout.class,
                 "range-config-option",
                 Map.of(

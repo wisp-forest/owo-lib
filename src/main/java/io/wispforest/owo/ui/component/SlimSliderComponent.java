@@ -1,22 +1,23 @@
 package io.wispforest.owo.ui.component;
 
-import io.wispforest.owo.ui.base.BaseComponent;
-import io.wispforest.owo.ui.core.Component;
+import io.wispforest.owo.Owo;
+import io.wispforest.owo.ui.base.BaseUIComponent;
 import io.wispforest.owo.ui.core.CursorStyle;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
+import io.wispforest.owo.ui.core.OwoUIGraphics;
 import io.wispforest.owo.ui.core.Sizing;
+import io.wispforest.owo.ui.core.UIComponent;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.NinePatchTexture;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.Observable;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 
@@ -26,12 +27,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-public class SlimSliderComponent extends BaseComponent {
+public class SlimSliderComponent extends BaseUIComponent {
 
-    public static final Function<Double, Text> VALUE_TOOLTIP_SUPPLIER = value -> Text.literal(String.valueOf(value));
+    public static final Function<Double, Component> VALUE_TOOLTIP_SUPPLIER = value -> Component.literal(String.valueOf(value));
 
-    protected static final Identifier TEXTURE = Identifier.of("owo", "textures/gui/slim_slider.png");
-    protected static final Identifier TRACK_TEXTURE = Identifier.of("owo", "slim_slider_track");
+    protected static final Identifier TEXTURE = Owo.id("textures/gui/slim_slider.png");
+    protected static final Identifier TRACK_TEXTURE = Owo.id("slim_slider_track");
 
     protected final EventStream<OnChanged> changedEvents = OnChanged.newStream();
     protected final EventStream<OnSlideEnd> slideEndEvents = OnSlideEnd.newStream();
@@ -41,7 +42,7 @@ public class SlimSliderComponent extends BaseComponent {
 
     protected double min = 0d, max = 1d;
     protected double stepSize = 0;
-    protected @Nullable Function<Double, Text> tooltipSupplier = null;
+    protected @Nullable Function<Double, Component> tooltipSupplier = null;
 
     public SlimSliderComponent(Axis axis) {
         this.cursorStyle(CursorStyle.MOVE);
@@ -72,32 +73,32 @@ public class SlimSliderComponent extends BaseComponent {
     }
 
     @Override
-    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+    public void draw(OwoUIGraphics graphics, int mouseX, int mouseY, float partialTicks, float delta) {
         if (this.axis == Axis.HORIZONTAL) {
-            NinePatchTexture.draw(TRACK_TEXTURE, context, this.x + 1, this.y + 3, this.width - 2, 3);
-            context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, (int) (this.x + (this.width - 4) * this.value.get()), this.y + 1, 0, 3, 4, 7, 4, 7, 16, 16);
+            NinePatchTexture.draw(TRACK_TEXTURE, graphics, this.x + 1, this.y + 3, this.width - 2, 3);
+            graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, (int) (this.x + (this.width - 4) * this.value.get()), this.y + 1, 0, 3, 4, 7, 4, 7, 16, 16);
         } else {
-            NinePatchTexture.draw(TRACK_TEXTURE, context, this.x + 3, this.y + 1, 3, this.height - 2);
-            context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, this.x + 1, (int) (this.y + (this.height - 4) * this.value.get()), 4, 3, 7, 4, 7, 4, 16, 16);
+            NinePatchTexture.draw(TRACK_TEXTURE, graphics, this.x + 3, this.y + 1, 3, this.height - 2);
+            graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, this.x + 1, (int) (this.y + (this.height - 4) * this.value.get()), 4, 3, 7, 4, 7, 4, 16, 16);
         }
     }
 
     @Override
-    public boolean onMouseDown(Click click, boolean doubled) {
+    public boolean onMouseDown(MouseButtonEvent click, boolean doubled) {
         super.onMouseDown(click, doubled);
         this.setValueFromMouse(click.x(), click.y());
         return true;
     }
 
     @Override
-    public boolean onMouseDrag(Click click, double deltaX, double deltaY) {
+    public boolean onMouseDrag(MouseButtonEvent click, double deltaX, double deltaY) {
         super.onMouseDrag(click, deltaX, deltaY);
         this.setValueFromMouse(click.x(), click.y());
         return true;
     }
 
     @Override
-    public boolean onMouseUp(Click click) {
+    public boolean onMouseUp(MouseButtonEvent click) {
         super.onMouseUp(click);
         this.slideEndEvents.sink().onSlideEnd();
         return true;
@@ -128,7 +129,7 @@ public class SlimSliderComponent extends BaseComponent {
             value = Math.round(value / this.stepSize) * this.stepSize;
         }
 
-        this.value.set(MathHelper.clamp(value / (this.max - this.min), 0, 1));
+        this.value.set(Mth.clamp(value / (this.max - this.min), 0, 1));
         return this;
     }
 
@@ -163,14 +164,14 @@ public class SlimSliderComponent extends BaseComponent {
         return stepSize;
     }
 
-    public SlimSliderComponent tooltipSupplier(Function<Double, Text> tooltipSupplier) {
+    public SlimSliderComponent tooltipSupplier(Function<Double, Component> tooltipSupplier) {
         this.tooltipSupplier = tooltipSupplier;
         this.updateTooltip();
 
         return this;
     }
 
-    public Function<Double, Text> tooltipSupplier() {
+    public Function<Double, Component> tooltipSupplier() {
         return tooltipSupplier;
     }
 
@@ -178,7 +179,7 @@ public class SlimSliderComponent extends BaseComponent {
         if (this.tooltipSupplier != null) {
             this.tooltip(this.tooltipSupplier.apply(this.value()));
         } else {
-            this.tooltip((List<TooltipComponent>) null);
+            this.tooltip((List<ClientTooltipComponent>) null);
         }
     }
 
@@ -192,14 +193,14 @@ public class SlimSliderComponent extends BaseComponent {
         UIParsing.apply(children, "value", UIParsing::parseDouble, this::value);
     }
 
-    public static Component parse(Element element) {
+    public static UIComponent parse(Element element) {
         return element.getAttribute("direction").equals("vertical")
             ? new SlimSliderComponent(Axis.VERTICAL)
             : new SlimSliderComponent(Axis.HORIZONTAL);
     }
 
-    public static Function<Double, Text> valueTooltipSupplier(int decimalPlaces) {
-        return value -> Text.literal(new BigDecimal(value).setScale(decimalPlaces, RoundingMode.HALF_UP).toPlainString());
+    public static Function<Double, Component> valueTooltipSupplier(int decimalPlaces) {
+        return value -> Component.literal(new BigDecimal(value).setScale(decimalPlaces, RoundingMode.HALF_UP).toPlainString());
     }
 
     public enum Axis {

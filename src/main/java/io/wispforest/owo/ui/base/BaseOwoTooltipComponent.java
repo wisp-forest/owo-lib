@@ -1,18 +1,18 @@
 package io.wispforest.owo.ui.base;
 
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
-import io.wispforest.owo.ui.core.ParentComponent;
+import io.wispforest.owo.ui.core.OwoUIGraphics;
+import io.wispforest.owo.ui.core.ParentUIComponent;
 import io.wispforest.owo.ui.core.Size;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.function.Supplier;
 
 @ApiStatus.Experimental
-public abstract class BaseOwoTooltipComponent<R extends ParentComponent> implements TooltipComponent {
+public abstract class BaseOwoTooltipComponent<R extends ParentUIComponent> implements ClientTooltipComponent {
 
     protected final R rootComponent;
     protected int virtualWidth = 1000, virtualHeight = 1000;
@@ -25,20 +25,20 @@ public abstract class BaseOwoTooltipComponent<R extends ParentComponent> impleme
     }
 
     @Override
-    public void drawItems(TextRenderer textRenderer, int x, int y, int width, int height, DrawContext context) {
-        var tickCounter = MinecraftClient.getInstance().getRenderTickCounter();
+    public void renderImage(Font textRenderer, int x, int y, int width, int height, GuiGraphics context) {
+        var tickCounter = Minecraft.getInstance().getDeltaTracker();
 
         this.rootComponent.moveTo(x, y);
-        this.rootComponent.draw(OwoUIDrawContext.of(context), -1000, -1000, tickCounter.getTickProgress(false), tickCounter.getDynamicDeltaTicks());
+        this.rootComponent.draw(OwoUIGraphics.of(context), -1000, -1000, tickCounter.getGameTimeDeltaPartialTick(false), tickCounter.getGameTimeDeltaTicks());
     }
 
     @Override
-    public int getHeight(TextRenderer textRenderer) {
+    public int getHeight(Font textRenderer) {
         return this.rootComponent.fullSize().height();
     }
 
     @Override
-    public int getWidth(TextRenderer textRenderer) {
+    public int getWidth(Font textRenderer) {
         return this.rootComponent.fullSize().width();
     }
 }

@@ -1,14 +1,11 @@
 package io.wispforest.owo.ui.util;
 
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.GuiGraphics;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix3x2fStack;
-import org.joml.Matrix4f;
-import org.joml.Quaternionf;
 
 /**
- * Helper interface implemented on top of the {@link DrawContext} to allow for easier matrix stack transformations
+ * Helper interface implemented on top of the {@link GuiGraphics} to allow for easier matrix stack transformations
  */
 public interface MatrixStackTransformer {
 

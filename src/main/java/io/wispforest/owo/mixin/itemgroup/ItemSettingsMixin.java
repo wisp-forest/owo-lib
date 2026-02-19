@@ -3,30 +3,30 @@ package io.wispforest.owo.mixin.itemgroup;
 import io.wispforest.owo.itemgroup.ItemGroupReference;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.OwoItemSettingsExtension;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
-@Mixin(Item.Settings.class)
+@Mixin(Item.Properties.class)
 public class ItemSettingsMixin implements OwoItemSettingsExtension {
     private Supplier<OwoItemGroup> owo$group = null;
     private int owo$tab = 0;
-    private BiConsumer<Item, ItemGroup.Entries> owo$stackGenerator = null;
+    private BiConsumer<Item, CreativeModeTab.Output> owo$stackGenerator = null;
     private boolean owo$trackUsageStat = false;
 
     @Override
-    public Item.Settings group(ItemGroupReference ref) {
+    public Item.Properties group(ItemGroupReference ref) {
         this.owo$group = ref.groupSup();
         this.owo$tab = ref.tab();
 
-        return (Item.Settings)(Object) this;
+        return (Item.Properties)(Object) this;
     }
 
     @Override
-    public Item.Settings group(OwoItemGroup group) {
+    public Item.Properties group(OwoItemGroup group) {
         this.owo$group = () -> group;
 
         return (Item.Settings)(Object) this;
@@ -36,7 +36,7 @@ public class ItemSettingsMixin implements OwoItemSettingsExtension {
     public Item.Settings group(Supplier<OwoItemGroup> groupSupplier) {
         this.owo$group = groupSupplier;
 
-        return (Item.Settings)(Object) this;
+        return (Item.Properties)(Object) this;
     }
 
     @Override
@@ -50,10 +50,10 @@ public class ItemSettingsMixin implements OwoItemSettingsExtension {
     }
 
     @Override
-    public Item.Settings tab(int tab) {
+    public Item.Properties tab(int tab) {
         this.owo$tab = tab;
 
-        return (Item.Settings)(Object) this;
+        return (Item.Properties)(Object) this;
     }
 
     @Override
@@ -62,22 +62,22 @@ public class ItemSettingsMixin implements OwoItemSettingsExtension {
     }
 
     @Override
-    public Item.Settings stackGenerator(BiConsumer<Item, ItemGroup.Entries> generator) {
+    public Item.Properties stackGenerator(BiConsumer<Item, CreativeModeTab.Output> generator) {
         this.owo$stackGenerator = generator;
 
-        return (Item.Settings)(Object) this;
+        return (Item.Properties)(Object) this;
     }
 
     @Override
-    public BiConsumer<Item, ItemGroup.Entries> stackGenerator() {
+    public BiConsumer<Item, CreativeModeTab.Output> stackGenerator() {
         return owo$stackGenerator;
     }
 
     @Override
-    public Item.Settings trackUsageStat() {
+    public Item.Properties trackUsageStat() {
         this.owo$trackUsageStat = true;
 
-        return (Item.Settings)(Object) this;
+        return (Item.Properties)(Object) this;
     }
 
     @Override

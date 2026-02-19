@@ -16,7 +16,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import org.lwjgl.glfw.GLFW;
 
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.literal;
 
 public class UwuOptionalNetExample {
     public static final boolean SERVER_CHANNEL_IN_CLIENT = false;
@@ -24,10 +24,10 @@ public class UwuOptionalNetExample {
 
     public static void init() {
         if (FMLLoader.getCurrent().getDist() == Dist.DEDICATED_SERVER || SERVER_CHANNEL_IN_CLIENT) {
-            var serverChannel = OwoNetChannel.createOptional(Identifier.of("uwu", "optional_server"));
+            var serverChannel = OwoNetChannel.createOptional(Identifier.fromNamespaceAndPath("uwu", "optional_server"));
 
             serverChannel.registerClientbound(StringPacket.class, (message, access) -> {
-                access.player().sendMessage(Text.of(message.value()), false);
+                access.player().displayClientMessage(Component.nullToEmpty(message.value()), false);
             });
 
             NeoForge.EVENT_BUS.addListener((RegisterCommandsEvent commandEvent) -> {
@@ -37,7 +37,7 @@ public class UwuOptionalNetExample {
 
                 dispatcher.register(literal("test_optional_channels")
                         .executes(context -> {
-                            ServerPlayerEntity player = context.getSource().getPlayer();
+                            ServerPlayer player = context.getSource().getPlayer();
 
                             if (serverChannel.canSendToPlayer(player))
                                 serverChannel.serverHandle(player).send(new StringPacket("Based™"));
@@ -47,7 +47,7 @@ public class UwuOptionalNetExample {
             });
 
             if (CLIENT_CHANNEL_IN_SERVER) {
-                var clientChannel = OwoNetChannel.createOptional(Identifier.of("uwu", "optional_client"));
+                var clientChannel = OwoNetChannel.createOptional(Identifier.fromNamespaceAndPath("uwu", "optional_client"));
 
                 clientChannel.registerServerbound(KeycodePacket.class, (message, access) -> {
                     System.out.println(message.key());
@@ -58,10 +58,10 @@ public class UwuOptionalNetExample {
 
     //@OnlyIn(Dist.CLIENT)
     public static final class Client {
-        public static final KeyBinding NETWORK_TEST = new KeyBinding("key.uwu.network_opt_test", GLFW.GLFW_KEY_M, KeyBinding.Category.MISC);
+        public static final KeyMapping NETWORK_TEST = new KeyMapping("key.uwu.network_opt_test", GLFW.GLFW_KEY_M, KeyMapping.Category.MISC);
 
         public static void init(IEventBus eventBus) {
-            var clientChannel = OwoNetChannel.createOptional(Identifier.of("uwu", "optional_client"));
+            var clientChannel = OwoNetChannel.createOptional(Identifier.fromNamespaceAndPath("uwu", "optional_client"));
 
             clientChannel.registerServerbound(KeycodePacket.class, (message, access) -> {
                 System.out.println(message.key());
@@ -72,11 +72,11 @@ public class UwuOptionalNetExample {
             });
 
             NeoForge.EVENT_BUS.addListener((ClientTickEvent.Post clientEvent) -> {
-                while (NETWORK_TEST.wasPressed()) {
+                while (NETWORK_TEST.consumeClick()) {
                     if (clientChannel.canSendToServer()) {
-                        clientChannel.clientHandle().send(new KeycodePacket(NETWORK_TEST.getKey().getCode()));
+                        clientChannel.clientHandle().send(new KeycodePacket(NETWORK_TEST.getKey().getValue()));
                     } else {
-                        MinecraftClient.getInstance().player.sendMessage(Text.of("channel unavailable"), false);
+                        MinecraftClient.getInstance().player.displayClientMessage(Component.nullToEmpty("channel unavailable"), false);
                     }
                 }
             });

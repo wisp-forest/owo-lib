@@ -1,24 +1,27 @@
 package io.wispforest.owo.ui.component;
 
-import io.wispforest.owo.ui.base.BaseComponent;
-import io.wispforest.owo.ui.core.*;
+import io.wispforest.owo.ui.base.BaseUIComponent;
+import io.wispforest.owo.ui.core.Color;
+import io.wispforest.owo.ui.core.CursorStyle;
+import io.wispforest.owo.ui.core.OwoUIGraphics;
+import io.wispforest.owo.ui.core.OwoUIPipelines;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.renderstate.GradientQuadElementRenderState;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.Observable;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.ScreenPos;
-import net.minecraft.client.gui.ScreenRect;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.gui.navigation.ScreenPosition;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2f;
 import org.w3c.dom.Element;
 
 import java.util.Map;
 
-public class ColorPickerComponent extends BaseComponent {
+public class ColorPickerComponent extends BaseUIComponent {
 
     protected EventStream<OnChanged> changedEvents = OnChanged.newStream();
     protected Observable<Color> selectedColor = Observable.of(Color.BLACK);
@@ -46,23 +49,23 @@ public class ColorPickerComponent extends BaseComponent {
     }
 
     @Override
-    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+    public void draw(OwoUIGraphics graphics, int mouseX, int mouseY, float partialTicks, float delta) {
         this.lastCursorX = mouseX - this.x;
 
         // Color area
 
-        context.state.addSimpleElement(new GradientQuadElementRenderState(
+        graphics.guiRenderState.submitGuiElement(new GradientQuadElementRenderState(
             OwoUIPipelines.GUI_HSV,
-            new Matrix3x2f(context.getMatrices()),
-            new ScreenRect(new ScreenPos(this.renderX(), this.renderY()), this.colorAreaWidth(), this.renderHeight()),
-            context.scissorStack.peekLast(),
+            new Matrix3x2f(graphics.pose()),
+            new ScreenRectangle(new ScreenPosition(this.renderX(), this.renderY()), this.colorAreaWidth(), this.renderHeight()),
+            graphics.scissorStack.peek(),
             new Color(this.hue, 0f, 1f),
             new Color(this.hue, 1f, 1f),
             new Color(this.hue, 0f, 0f),
             new Color(this.hue, 1f, 0f)
         ));
 
-        context.drawRectOutline(
+        graphics.drawRectOutline(
                 (int) (this.renderX() + (this.saturation * this.colorAreaWidth()) - 1),
                 (int) (this.renderY() + ((1 - this.value) * (this.renderHeight() - 1)) - 1),
                 3, 3,
@@ -71,8 +74,8 @@ public class ColorPickerComponent extends BaseComponent {
 
         // Hue selector
 
-        context.drawSpectrum(this.renderX() + this.hueSelectorX(), this.renderY(), this.selectorWidth, this.renderHeight(), true);
-        context.drawRectOutline(
+        graphics.drawSpectrum(this.renderX() + this.hueSelectorX(), this.renderY(), this.selectorWidth, this.renderHeight(), true);
+        graphics.drawRectOutline(
                 this.renderX() + this.hueSelectorX() - 1,
                 this.renderY() + (int) ((this.renderHeight() - 1) * (1 - this.hue) - 1),
                 this.selectorWidth + 2, 3,
@@ -83,8 +86,8 @@ public class ColorPickerComponent extends BaseComponent {
 
         if (this.showAlpha) {
             var color = 0xFF << 24 | this.selectedColor.get().rgb();
-            context.drawGradientRect(this.renderX() + this.alphaSelectorX(), this.renderY(), this.selectorWidth, this.renderHeight(), color, color, 0, 0);
-            context.drawRectOutline(
+            graphics.drawGradientRect(this.renderX() + this.alphaSelectorX(), this.renderY(), this.selectorWidth, this.renderHeight(), color, color, 0, 0);
+            graphics.drawRectOutline(
                     this.renderX() + this.alphaSelectorX() - 1,
                     this.renderY() + (int) ((this.renderHeight() - 1) * (1 - this.alpha) - 1),
                     this.selectorWidth + 2, 3,
@@ -94,7 +97,7 @@ public class ColorPickerComponent extends BaseComponent {
     }
 
     @Override
-    public boolean onMouseDown(Click click, boolean doubled) {
+    public boolean onMouseDown(MouseButtonEvent click, boolean doubled) {
         this.lastClicked = this.showAlpha && click.x() >= this.alphaSelectorX()
                 ? Section.ALPHA_SELECTOR
                 : click.x() > this.hueSelectorX()
@@ -108,7 +111,7 @@ public class ColorPickerComponent extends BaseComponent {
     }
 
     @Override
-    public boolean onMouseDrag(Click click, double deltaX, double deltaY) {
+    public boolean onMouseDrag(MouseButtonEvent click, double deltaX, double deltaY) {
         this.updateFromMouse(click.x(), click.y());
 
         super.onMouseDrag(click, deltaX, deltaY);
@@ -130,8 +133,8 @@ public class ColorPickerComponent extends BaseComponent {
     }
 
     protected void updateFromMouse(double mouseX, double mouseY) {
-        mouseX = MathHelper.clamp(mouseX - 1, 0, this.renderWidth());
-        mouseY = MathHelper.clamp(mouseY - 1, 0, this.renderHeight());
+        mouseX = Mth.clamp(mouseX - 1, 0, this.renderWidth());
+        mouseY = Mth.clamp(mouseY - 1, 0, this.renderHeight());
 
         if (this.lastClicked == Section.ALPHA_SELECTOR) {
             this.alpha = 1f - (float) (mouseY / this.renderHeight());

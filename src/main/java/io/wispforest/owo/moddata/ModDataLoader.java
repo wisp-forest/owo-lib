@@ -71,11 +71,11 @@ public final class ModDataLoader {
 
             try (var stream = Files.walk(targetPath)) {
                 stream.forEach(path -> {
-                    if (!path.toString().endsWith(".json")) return;
+                    if (!path.toString().endsWith(".json") && !path.toString().endsWith(".json5")) return;
                     try {
-                        final InputStreamReader tabData = new InputStreamReader(Files.newInputStream(path));
+                        final InputStreamReader tabData = new InputStreamReader(DataExtensionUtil.coerceJson(Files.newInputStream(path)) );
 
-                        foundFiles.put(Identifier.of(namespace, FilenameUtils.removeExtension(targetPath.relativize(path).toString())), GSON.fromJson(tabData, JsonObject.class));
+                        foundFiles.put(Identifier.fromNamespaceAndPath(namespace, FilenameUtils.removeExtension(targetPath.relativize(path).toString())), GSON.fromJson(tabData, JsonObject.class));
                     } catch (IOException e) {
                         Owo.LOGGER.warn("### Unable to open data file {} ++ Stacktrace below ###", path, e);
                     }

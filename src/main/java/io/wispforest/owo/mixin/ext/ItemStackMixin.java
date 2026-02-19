@@ -1,11 +1,11 @@
 package io.wispforest.owo.mixin.ext;
 
 import io.wispforest.owo.ext.DerivedComponentMap;
-import net.minecraft.component.ComponentChanges;
-import net.minecraft.component.ComponentMap;
-import net.minecraft.component.MergedComponentMap;
-import net.minecraft.item.ItemConvertible;
-import net.minecraft.item.ItemStack;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.PatchedDataComponentMap;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ItemLike;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -17,37 +17,37 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ItemStack.class)
 public class ItemStackMixin {
     @Shadow @Final
-    MergedComponentMap components;
+    PatchedDataComponentMap components;
 
-    @Unique private DerivedComponentMap owo$derivedMap;
+    @Unique private DerivedComponentMap derivedMap;
 
-    @Inject(method = "<init>(Lnet/minecraft/item/ItemConvertible;ILnet/minecraft/component/MergedComponentMap;)V", at = @At("TAIL"))
-    private void injectDerivedComponentMap(ItemConvertible item, int count, MergedComponentMap components, CallbackInfo ci) {
-        var base = ((MergedComponentMapAccessor)(Object) this.components).owo$getBaseComponents();
+    @Inject(method = "<init>(Lnet/minecraft/world/level/ItemLike;ILnet/minecraft/core/component/PatchedDataComponentMap;)V", at = @At("TAIL"))
+    private void injectDerivedComponentMap(ItemLike item, int count, PatchedDataComponentMap components, CallbackInfo ci) {
+        var base = ((PatchedDataComponentMapAccessor)(Object) this.components).owo$getPrototype();
 
         if (base instanceof DerivedComponentMap derived) {
-            owo$derivedMap = derived;
+            derivedMap = derived;
         } else {
-            owo$derivedMap = new DerivedComponentMap(base);
-            ((MergedComponentMapAccessor)(Object) this.components).owo$setBaseComponents(owo$derivedMap);
+            derivedMap = new DerivedComponentMap(base);
+            ((PatchedDataComponentMapAccessor)(Object) this.components).owo$setPrototype(derivedMap);
         }
     }
 
-    @Inject(method = "applyChanges", at = @At(value = "INVOKE", target = "Lnet/minecraft/component/MergedComponentMap;applyChanges(Lnet/minecraft/component/ComponentChanges;)V", shift = At.Shift.AFTER))
-    private void deriveComponents2(ComponentChanges changes, CallbackInfo ci) {
-        if (owo$derivedMap == null) return;
-        owo$derivedMap.derive((ItemStack)(Object) this);
+    @Inject(method = "applyComponentsAndValidate", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/component/PatchedDataComponentMap;applyPatch(Lnet/minecraft/core/component/DataComponentPatch;)V", shift = At.Shift.AFTER))
+    private void deriveComponents2(DataComponentPatch changes, CallbackInfo ci) {
+        if (derivedMap == null) return;
+        derivedMap.derive((ItemStack)(Object) this);
     }
 
-    @Inject(method = "applyUnvalidatedChanges", at = @At(value = "INVOKE", target = "Lnet/minecraft/component/MergedComponentMap;applyChanges(Lnet/minecraft/component/ComponentChanges;)V", shift = At.Shift.AFTER))
-    private void deriveComponents3(ComponentChanges changes, CallbackInfo ci) {
-        if (owo$derivedMap == null) return;
-        owo$derivedMap.derive((ItemStack)(Object) this);
+    @Inject(method = "applyComponents(Lnet/minecraft/core/component/DataComponentPatch;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/component/PatchedDataComponentMap;applyPatch(Lnet/minecraft/core/component/DataComponentPatch;)V", shift = At.Shift.AFTER))
+    private void deriveComponents3(DataComponentPatch changes, CallbackInfo ci) {
+        if (derivedMap == null) return;
+        derivedMap.derive((ItemStack)(Object) this);
     }
 
-    @Inject(method = "applyComponentsFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/component/MergedComponentMap;setAll(Lnet/minecraft/component/ComponentMap;)V", shift = At.Shift.AFTER))
-    private void deriveComponents4(ComponentMap components, CallbackInfo ci) {
-        if (owo$derivedMap == null) return;
-        owo$derivedMap.derive((ItemStack)(Object) this);
+    @Inject(method = "applyComponents(Lnet/minecraft/core/component/DataComponentMap;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/component/PatchedDataComponentMap;setAll(Lnet/minecraft/core/component/DataComponentMap;)V", shift = At.Shift.AFTER))
+    private void deriveComponents4(DataComponentMap components, CallbackInfo ci) {
+        if (derivedMap == null) return;
+        derivedMap.derive((ItemStack)(Object) this);
     }
 }

@@ -1,16 +1,16 @@
 package io.wispforest.uwu;
 
-import blue.endless.jankson.JsonPrimitive;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.logging.LogUtils;
 import io.netty.buffer.Unpooled;
+import io.wispforest.endec.Endec;
+import io.wispforest.endec.SerializationContext;
+import io.wispforest.endec.format.bytebuf.ByteBufSerializer;
 import io.wispforest.endec.format.gson.GsonDeserializer;
-import io.wispforest.endec.format.gson.GsonEndec;
 import io.wispforest.endec.format.gson.GsonSerializer;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.Owo;
@@ -23,19 +23,15 @@ import io.wispforest.owo.network.OwoNetChannel;
 import io.wispforest.owo.particles.ClientParticles;
 import io.wispforest.owo.particles.systems.ParticleSystem;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
-import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
-import io.wispforest.endec.SerializationContext;
-import io.wispforest.endec.Endec;
-import io.wispforest.endec.format.bytebuf.ByteBufSerializer;
 import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.RegistriesAttribute;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.serialization.format.nbt.NbtDeserializer;
-import io.wispforest.owo.serialization.format.nbt.NbtEndec;
 import io.wispforest.owo.serialization.format.nbt.NbtSerializer;
 import io.wispforest.owo.text.CustomTextRegistry;
-import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.util.TagInjector;
+import io.wispforest.uwu.block.BraidDisplayBlock;
+import io.wispforest.uwu.block.BraidDisplayBlockEntity;
 import io.wispforest.uwu.config.BruhConfig;
 import io.wispforest.uwu.config.UwuConfig;
 import io.wispforest.uwu.items.UwuItems;
@@ -53,23 +49,23 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.particle.DragonBreathParticleEffect;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.resource.featuretoggle.FeatureFlags;
-import net.minecraft.screen.ScreenHandlerType;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.text.Text;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.core.particles.PowerParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.resources.Identifier;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
@@ -83,8 +79,8 @@ import org.slf4j.Logger;
 import java.util.*;
 import java.util.function.Consumer;
 
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 
 @Mod(value = "uwu")
 public class Uwu {
@@ -93,12 +89,12 @@ public class Uwu {
 
     public static final boolean WE_TESTEN_HANDSHAKE = false;
 
-    public static final TagKey<Item> TAB_2_CONTENT = TagKey.of(RegistryKeys.ITEM, Identifier.of("uwu", "tab_2_content"));
-    public static final Identifier GROUP_TEXTURE = Identifier.of("uwu", "textures/gui/group.png");
-    public static final Identifier OWO_ICON_TEXTURE = Identifier.of("uwu", "textures/gui/icon.png");
-    public static final Identifier ANIMATED_BUTTON_TEXTURE = Identifier.of("uwu", "textures/gui/animated_icon_test.png");
+    public static final TagKey<Item> TAB_2_CONTENT = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("uwu", "tab_2_content"));
+    public static final Identifier GROUP_TEXTURE = Identifier.fromNamespaceAndPath("uwu", "textures/gui/group.png");
+    public static final Identifier OWO_ICON_TEXTURE = Identifier.fromNamespaceAndPath("uwu", "textures/gui/icon.png");
+    public static final Identifier ANIMATED_BUTTON_TEXTURE = Identifier.fromNamespaceAndPath("uwu", "textures/gui/animated_icon_test.png");
 
-    public static ScreenHandlerType<EpicScreenHandler> EPIC_SCREEN_HANDLER_TYPE;
+    public static MenuType<EpicScreenHandler> EPIC_SCREEN_HANDLER_TYPE;
 
     public static OwoItemGroup FOUR_TAB_GROUP;
 
@@ -130,6 +126,9 @@ public class Uwu {
         ClientParticles.reset();
     });
 
+    public static final Block BRAID_DISPLAY_BLOCK = new BraidDisplayBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK).setId(ResourceKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("uwu", "braid_display"))));
+    public static final BlockEntityType<BraidDisplayBlockEntity> BRAID_DISPLAY_ENTITY = FabricBlockEntityTypeBuilder.create(BraidDisplayBlockEntity::new, BRAID_DISPLAY_BLOCK).build();
+
     public static final UwuConfig CONFIG = UwuConfig.createAndLoad();
     public static final BruhConfig BRUHHHHH = BruhConfig.createAndLoad(builder -> {
 //        builder.janksonBuilder().registerSerializer(Color.class, (color, marshaller) -> new JsonPrimitive("bruv"));
@@ -140,7 +139,7 @@ public class Uwu {
             event.register(RegistryKeys.SCREEN_HANDLER, Identifier.of("uwu", "epic_screen_handler"), () -> EPIC_SCREEN_HANDLER_TYPE = new ScreenHandlerType<>(EpicScreenHandler::new, FeatureFlags.VANILLA_FEATURES));
 
             event.register(RegistryKeys.ITEM_GROUP, helper -> {
-                FOUR_TAB_GROUP = OwoItemGroup.builder(Identifier.of("uwu", "four_tab_group"), () -> Icon.of(Items.AXOLOTL_BUCKET))
+                FOUR_TAB_GROUP = OwoItemGroup.builder(Identifier.fromNamespaceAndPath("uwu", "four_tab_group"), () -> Icon.of(Items.AXOLOTL_BUCKET))
                         .disableDynamicTitle()
                         .buttonStackHeight(1)
                         .initializer(group -> {
@@ -153,32 +152,36 @@ public class Uwu {
                         })
                         .build();
 
-                SIX_TAB_GROUP = OwoItemGroup.builder(Identifier.of("uwu", "six_tab_group"), () -> Icon.of(Items.POWDER_SNOW_BUCKET))
+                SIX_TAB_GROUP = OwoItemGroup.builder(Identifier.fromNamespaceAndPath("uwu", "six_tab_group"), () -> Icon.of(Items.POWDER_SNOW_BUCKET))
                         .tabStackHeight(3)
                         .backgroundTexture(GROUP_TEXTURE)
-                        .scrollerTextures(new OwoItemGroup.ScrollerTextures(Identifier.of("uwu", "scroller"), Identifier.of("uwu", "scroller_disabled")))
+                        .scrollerTextures(new OwoItemGroup.ScrollerTextures(Identifier.fromNamespaceAndPath("uwu", "scroller"), Identifier.fromNamespaceAndPath("uwu", "scroller_disabled")))
                         .tabTextures(new OwoItemGroup.TabTextures(
-                                Identifier.of("uwu", "top_selected"),
-                                Identifier.of("uwu", "top_selected_first_column"),
-                                Identifier.of("uwu", "top_unselected"),
-                                Identifier.of("uwu", "bottom_selected"),
-                                Identifier.of("uwu", "bottom_selected_first_column"),
-                                Identifier.of("uwu", "bottom_unselected")))
+                                Identifier.fromNamespaceAndPath("uwu", "top_selected"),
+                                Identifier.fromNamespaceAndPath("uwu", "top_selected_first_column"),
+                                Identifier.fromNamespaceAndPath("uwu", "top_unselected"),
+                                Identifier.fromNamespaceAndPath("uwu", "bottom_selected"),
+                                Identifier.fromNamespaceAndPath("uwu", "bottom_selected_first_column"),
+                                Identifier.fromNamespaceAndPath("uwu", "bottom_unselected")))
                         .initializer(group -> {
                             group.addTab(Icon.of(Items.DIAMOND), "tab_1", null, true);
                             group.addTab(Icon.of(Items.EMERALD), "tab_2", null, false);
                             group.addTab(Icon.of(Items.AMETHYST_SHARD), "tab_3", null, false);
                             group.addTab(Icon.of(Items.GOLD_INGOT), "tab_4", null, false);
-                            group.addCustomTab(Icon.of(Items.IRON_INGOT), "tab_5", (context, entries) -> entries.add(UwuItems.SCREEN_SHARD), false);
+                            group.addCustomTab(Icon.of(Items.IRON_INGOT), "tab_5", (context, entries) -> {
+                entries.accept(UwuItems.SCREEN_SHARD);
+                entries.accept(UwuItems.BRAID);
+                entries.accept(BRAID_DISPLAY_BLOCK);
+            }, false);
                             group.addTab(Icon.of(Items.QUARTZ), "tab_6", null, false);
 
-                            group.addButton(new ItemGroupButton(group, Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16), "owo", () -> {
-                                MinecraftClient.getInstance().player.sendMessage(Text.of("oωo button pressed!"), false);
+                            group.addButton(new ItemGroupButton(group, Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16), Owo.MOD_ID, () -> {
+                                Minecraft.getInstance().player.displayClientMessage(Component.nullToEmpty("oωo button pressed!"), false);
                             }));
                         })
                         .build();
 
-                SINGLE_TAB_GROUP = OwoItemGroup.builder(Identifier.of("uwu", "single_tab_group"), () -> Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16))
+                SINGLE_TAB_GROUP = OwoItemGroup.builder(Identifier.fromNamespaceAndPath("uwu", "single_tab_group"), () -> Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16))
                         .displaySingleTab()
                         .initializer(group -> group.addTab(Icon.of(Items.SPONGE), "tab_1", null, true))
                         .build();
@@ -201,14 +204,14 @@ public class Uwu {
 
         var stackEndec = CodecUtils.toEndec(ItemStack.CODEC);
         var stackData = """
-                        {
-                            "id": "minecraft:shroomlight",
-                            "Count": 42,
-                            "tag": {
-                                "Enchantments": [{"id": "unbreaking", "lvl": 3}]
-                            }
+                    {
+                        "id": "minecraft:shroomlight",
+                        "Count": 42,
+                        "tag": {
+                            "Enchantments": [{"id": "unbreaking", "lvl": 3}]
                         }
-                """;
+                    }
+            """;
 
         var stacknite = stackEndec.decode(SerializationContext.empty(), GsonDeserializer.of(new Gson().fromJson(stackData, JsonObject.class)));
         System.out.println(stacknite);
@@ -219,27 +222,31 @@ public class Uwu {
         System.out.println(serializer.result().read(SerializationContext.empty(), stackEndec));
         System.out.println(CodecUtils.toCodec(MinecraftEndecs.BLOCK_POS).encodeStart(NbtOps.INSTANCE, new BlockPos(34, 35, 69)).result().get());
 
-        TagInjector.inject(Registries.BLOCK, BlockTags.BASE_STONE_OVERWORLD.id(), Blocks.GLASS);
-        TagInjector.injectTagReference(Registries.ITEM, ItemTags.COALS.id(), ItemTags.FOX_FOOD.id());
+        TagInjector.inject(BuiltInRegistries.BLOCK, BlockTags.BASE_STONE_OVERWORLD.location(), Blocks.GLASS);
+        TagInjector.injectTagReference(BuiltInRegistries.ITEM, ItemTags.COALS.location(), ItemTags.FOX_FOOD.location());
 
         CHANNEL.registerClientbound(TestMessage.class, (message, access) -> {
-            access.player().sendMessage(Text.of(message.string), false);
+            access.player().displayClientMessage(Component.nullToEmpty(message.string), false);
         });
 
         CHANNEL.registerClientboundDeferred(OtherTestMessage.class);
 
         CHANNEL.registerServerbound(TestMessage.class, (message, access) -> {
-            access.player().sendMessage(Text.of(String.valueOf(message.bite)), false);
-            access.player().sendMessage(Text.of(String.valueOf(message)), false);
+            access.player().displayClientMessage(Component.nullToEmpty(String.valueOf(message.bite)), false);
+            access.player().displayClientMessage(Component.nullToEmpty(String.valueOf(message)), false);
         });
 
         if (FMLLoader.getCurrent().getDist() == Dist.DEDICATED_SERVER && WE_TESTEN_HANDSHAKE) {
-            OwoNetChannel.create(Identifier.of("uwu", "server_only_channel"));
-            new ParticleSystemController(Identifier.of("uwu", "server_only_particles"));
+            OwoNetChannel.create(Identifier.fromNamespaceAndPath("uwu", "server_only_channel"));
+            new ParticleSystemController(Identifier.fromNamespaceAndPath("uwu", "server_only_particles"));
         }
 
-        System.out.println(Registries.ITEM.getEntry(Items.ACACIA_BOAT));
-        System.out.println(Registries.ITEM.getEntry(Identifier.of("acacia_planks")));
+        System.out.println(BuiltInRegistries.ITEM.wrapAsHolder(Items.ACACIA_BOAT));
+        System.out.println(BuiltInRegistries.ITEM.get(Identifier.parse("acacia_planks")));
+
+        Registry.register(BuiltInRegistries.BLOCK, Identifier.fromNamespaceAndPath("uwu", "braid_display"), BRAID_DISPLAY_BLOCK);
+        Registry.register(BuiltInRegistries.ITEM, Identifier.fromNamespaceAndPath("uwu", "braid_display"), new BlockItem(BRAID_DISPLAY_BLOCK, new Item.Properties().setId(ResourceKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("uwu", "braid_display"))).useBlockDescriptionPrefix()));
+        Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Identifier.fromNamespaceAndPath("uwu", "braid_display"), BRAID_DISPLAY_ENTITY);
 
 //        UwuShapedRecipe.init();
 
@@ -249,115 +256,115 @@ public class Uwu {
             var environment = commandEvent.getCommandSelection();
 
             dispatcher.register(literal("get_option")
-                    .then(argument("config", StringArgumentType.string())
-                            .then(argument("option", StringArgumentType.string()).executes(context -> {
-                                var value = ConfigSynchronizer.getClientOptions(
-                                        context.getSource().getPlayer(),
-                                        StringArgumentType.getString(context, "config")
-                                ).get(new Option.Key(StringArgumentType.getString(context, "option")));
+                .then(argument("config", StringArgumentType.string())
+                    .then(argument("option", StringArgumentType.string()).executes(context -> {
+                        var value = ConfigSynchronizer.getClientOptions(
+                            context.getSource().getPlayer(),
+                            StringArgumentType.getString(context, "config")
+                        ).get(new Option.Key(StringArgumentType.getString(context, "option")));
 
-                                context.getSource().sendFeedback(() -> Text.literal(String.valueOf(value)), false);
+                        context.getSource().sendSuccess(() -> Component.literal(String.valueOf(value)), false);
 
-                                return 0;
-                            }))));
+                        return 0;
+                    }))));
 
             dispatcher.register(literal("kodeck_test")
-                    .executes(context -> {
-                        var rand = context.getSource().getWorld().random;
-                        var source = context.getSource();
+                .executes(context -> {
+                    var rand = context.getSource().getLevel().random;
+                    var source = context.getSource();
 
-                        //--
+                    //--
 
-                        String testPhrase = "This is a test to see how kodeck dose.";
+                    String testPhrase = "This is a test to see how kodeck dose.";
 
-                        LOGGER.info("Input:  " + testPhrase);
+                    LOGGER.info("Input:  " + testPhrase);
 
-                        var nbtData = Endec.STRING.encodeFully(NbtSerializer::of, testPhrase);
-                        var fromNbtData = Endec.STRING.decodeFully(NbtDeserializer::of, nbtData);
+                    var nbtData = Endec.STRING.encodeFully(NbtSerializer::of, testPhrase);
+                    var fromNbtData = Endec.STRING.decodeFully(NbtDeserializer::of, nbtData);
 
-                        var jsonData = Endec.STRING.encodeFully(GsonSerializer::of, fromNbtData);
-                        var fromJsonData = Endec.STRING.decodeFully(GsonDeserializer::of, jsonData);
+                    var jsonData = Endec.STRING.encodeFully(GsonSerializer::of, fromNbtData);
+                    var fromJsonData = Endec.STRING.decodeFully(GsonDeserializer::of, jsonData);
 
-                        LOGGER.info("Output: " + fromJsonData);
+                    LOGGER.info("Output: " + fromJsonData);
 
-                        LOGGER.info("");
+                    LOGGER.info("");
 
-                        //--
+                    //--
 
-                        int randomNumber = rand.nextInt(20000);
+                    int randomNumber = rand.nextInt(20000);
 
-                        LOGGER.info("Input:  " + randomNumber);
+                    LOGGER.info("Input:  " + randomNumber);
 
-                        var jsonNum = Endec.INT.encodeFully(GsonSerializer::of, randomNumber);
+                    var jsonNum = Endec.INT.encodeFully(GsonSerializer::of, randomNumber);
 
-                        LOGGER.info("Output: " + Endec.INT.decodeFully(GsonDeserializer::of, jsonNum));
+                    LOGGER.info("Output: " + Endec.INT.decodeFully(GsonDeserializer::of, jsonNum));
 
-                        LOGGER.info("");
+                    LOGGER.info("");
 
-                        //--
+                    //--
 
-                        List<Integer> randomNumbers = new ArrayList<>();
+                    List<Integer> randomNumbers = new ArrayList<>();
 
-                        var maxCount = rand.nextInt(20);
+                    var maxCount = rand.nextInt(20);
 
-                        for(int i = 0; i < maxCount; i++){
-                            randomNumbers.add(rand.nextInt(20000));
-                        }
+                    for (int i = 0; i < maxCount; i++) {
+                        randomNumbers.add(rand.nextInt(20000));
+                    }
 
-                        LOGGER.info("Input:  " + randomNumbers);
+                    LOGGER.info("Input:  " + randomNumbers);
 
-                        Endec<List<Integer>> INT_LIST_KODECK = Endec.INT.listOf();
+                    Endec<List<Integer>> INT_LIST_KODECK = Endec.INT.listOf();
 
-                        var nbtListData = INT_LIST_KODECK.encodeFully(NbtSerializer::of, randomNumbers);
+                    var nbtListData = INT_LIST_KODECK.encodeFully(NbtSerializer::of, randomNumbers);
 
-                        LOGGER.info("Output: " + INT_LIST_KODECK.decodeFully(NbtDeserializer::of, nbtListData));
+                    LOGGER.info("Output: " + INT_LIST_KODECK.decodeFully(NbtDeserializer::of, nbtListData));
 
-                        LOGGER.info("");
+                    LOGGER.info("");
 
-                        //---
+                    //---
 
-                        if (source.getPlayer() == null) return 0;
+                    if (source.getPlayer() == null) return 0;
 
-                        ItemStack handStack = source.getPlayer().getStackInHand(Hand.MAIN_HAND);
+                    ItemStack handStack = source.getPlayer().getItemInHand(InteractionHand.MAIN_HAND);
 
-                        LOGGER.info(handStack.toString());
-                        LOGGER.info(handStack.getComponents().toString().replace("\n", "\\n"));
+                    LOGGER.info(handStack.toString());
+                    LOGGER.info(handStack.getComponents().toString().replace("\n", "\\n"));
 
-                        LOGGER.info("---");
+                    LOGGER.info("---");
 
-                        JsonElement stackJsonData;
+                    JsonElement stackJsonData;
 
-                        try {
-                            stackJsonData = MinecraftEndecs.ITEM_STACK.encodeFully(SerializationContext.attributes(RegistriesAttribute.of(context.getSource().getWorld().getRegistryManager())), GsonSerializer::of, handStack);
-                        } catch (Exception exception){
-                            LOGGER.info(exception.getMessage());
-                            LOGGER.info((Arrays.toString(exception.getStackTrace())));
+                    try {
+                        stackJsonData = MinecraftEndecs.ITEM_STACK.encodeFully(SerializationContext.attributes(RegistriesAttribute.of(context.getSource().getLevel().registryAccess())), GsonSerializer::of, handStack);
+                    } catch (Exception exception) {
+                        LOGGER.info(exception.getMessage());
+                        LOGGER.info((Arrays.toString(exception.getStackTrace())));
 
-                            return 0;
-                        }
+                        return 0;
+                    }
 
-                        LOGGER.info(stackJsonData.toString());
+                    LOGGER.info(stackJsonData.toString());
 
-                        LOGGER.info("---");
+                    LOGGER.info("---");
 
-                        try {
-                            handStack = MinecraftEndecs.ITEM_STACK.decodeFully(SerializationContext.attributes(RegistriesAttribute.of(context.getSource().getWorld().getRegistryManager())), GsonDeserializer::of, stackJsonData);
-                        } catch (Exception exception){
-                            LOGGER.info(exception.getMessage());
-                            LOGGER.info((Arrays.toString(exception.getStackTrace())));
+                    try {
+                        handStack = MinecraftEndecs.ITEM_STACK.decodeFully(SerializationContext.attributes(RegistriesAttribute.of(context.getSource().getLevel().registryAccess())), GsonDeserializer::of, stackJsonData);
+                    } catch (Exception exception) {
+                        LOGGER.info(exception.getMessage());
+                        LOGGER.info((Arrays.toString(exception.getStackTrace())));
 
-                            return 0;
-                        }
+                        return 0;
+                    }
 
-                        LOGGER.info(handStack.toString());
-                        LOGGER.info(handStack.getComponents().toString().replace("\n", "\\n"));
+                    LOGGER.info(handStack.toString());
+                    LOGGER.info(handStack.getComponents().toString().replace("\n", "\\n"));
 
-                        LOGGER.info("");
+                    LOGGER.info("");
 
-                        //--
+                    //--
 
-                        // TODO: kodeck test
-//                        {
+                    // TODO: kodeck test
+//{
 //                            LOGGER.info("--- Format Based Endec Test");
 //
 //                            var nbtDataStack = handStack.toNbt(access);
@@ -374,12 +381,12 @@ public class Uwu {
 //
 //                            LOGGER.info("---");
 //
-//                            LOGGER.info("");
+//                        LOGGER.info("");
 //                        }
 //
-//                        //--
+                    ////--
 //
-//                        {
+//                    {
 //                            LOGGER.info("--- Transpose Format Based Endec Test");
 //
 //                            var nbtDataStack = handStack.toNbt(access);
@@ -396,74 +403,75 @@ public class Uwu {
 //
 //                            LOGGER.info("---");
 //
-//                            LOGGER.info("");
+//                        LOGGER.info("");
 //                        }
 
-                        //--
+                    //--
 
-                        {
-                            var variable1Endec = Endec.STRING.keyed("variable1", "");
-                            var variable2Endec = Endec.INT.keyed("variable2", 0);
-                            var variable3Endec = TestRecord.ENDEC.keyed("variable3Endec", (TestRecord) null);
+                    {
+                        var variable1Endec = Endec.STRING.keyed("variable1", "");
+                        var variable2Endec = Endec.INT.keyed("variable2", 0);
+                        var variable3Endec = TestRecord.ENDEC.keyed("variable3Endec", (TestRecord) null);
 
-                            var variable1 = "Weeeeeee";
-                            var variable2 = 1000;
-                            var variable3 = new TestRecord("Matt", 24, List.of("One", "Two", "Three", "Four"));
+                        var variable1 = "Weeeeeee";
+                        var variable2 = 1000;
+                        var variable3 = new TestRecord("Matt", 24, List.of("One", "Two", "Three", "Four"));
 
-                            LOGGER.info(variable1);
-                            LOGGER.info(String.valueOf(variable2));
-                            LOGGER.info(String.valueOf(variable3));
+                        LOGGER.info(variable1);
+                        LOGGER.info(String.valueOf(variable2));
+                        LOGGER.info(String.valueOf(variable3));
 
-                            NbtCompound compound = new NbtCompound();
+                        CompoundTag compound = new CompoundTag();
 
-                            compound.put(variable1Endec, variable1);
-                            compound.put(variable2Endec, variable2);
-                            compound.put(variable3Endec, variable3);
+                        compound.put(variable1Endec, variable1);
+                        compound.put(variable2Endec, variable2);
+                        compound.put(variable3Endec, variable3);
 
-                            LOGGER.info("");
-                            LOGGER.info(compound.asString().get());
+                        LOGGER.info("");
+                        LOGGER.info(compound.toString());
 
-                            LOGGER.info("");
+                        LOGGER.info("");
 
-                            LOGGER.info(compound.get(variable1Endec));
-                            LOGGER.info(compound.get(variable2Endec).toString());
-                            LOGGER.info(compound.get(variable3Endec).toString());
+                        LOGGER.info(compound.get(variable1Endec));
+                        LOGGER.info(compound.get(variable2Endec).toString());
+                        LOGGER.info(compound.get(variable3Endec).toString());
 
-                            LOGGER.info("---");
-                            LOGGER.info("");
-                        }
+                        LOGGER.info("---");
+                        LOGGER.info("");
+                    }
 
-                        //--
+                    //--
 
 
+                    //--
 
-                        //--
+                    var stack = !source.getPlayer().getItemInHand(InteractionHand.MAIN_HAND).isEmpty()
+                        ? source.getPlayer().getItemInHand(InteractionHand.MAIN_HAND)
+                        : Items.SHULKER_BOX.getDefaultInstance();
 
-                        //Vanilla
-                        iterations("Vanilla", (buf) -> {
-                            ItemStack stack = source.getPlayer().getStackInHand(Hand.MAIN_HAND);
+                    //Vanilla
+                    iterations("Vanilla", (buf) -> {
+                        ItemStack.STREAM_CODEC.encode(buf, stack);
+                        var stackFromByte = ItemStack.STREAM_CODEC.decode(buf);
+                    });
 
-                            ItemStack.PACKET_CODEC.encode(buf, stack);
-                            var stackFromByte = ItemStack.PACKET_CODEC.decode(buf);
+                    //Codeck
+                    try {
+                        var ctx = SerializationContext.attributes(RegistriesAttribute.of(context.getSource().getLevel().registryAccess()));
+                        iterations("Endec", (buf) -> {
+                            buf.write(ctx, MinecraftEndecs.ITEM_STACK, stack);
+
+                            var stackFromByte = buf.read(ctx, MinecraftEndecs.ITEM_STACK);
                         });
-
-                        //Codeck
-                        try {
-                            iterations("Endec", (buf) -> {
-                                ItemStack stack = source.getPlayer().getStackInHand(Hand.MAIN_HAND);
-                                buf.write(SerializationContext.attributes(RegistriesAttribute.of(context.getSource().getWorld().getRegistryManager())), MinecraftEndecs.ITEM_STACK, stack);
-
-                                var stackFromByte = buf.read(SerializationContext.attributes(RegistriesAttribute.of(context.getSource().getWorld().getRegistryManager())), MinecraftEndecs.ITEM_STACK);
-                            });
-                        } catch (Exception exception){
-                            LOGGER.info(exception.getMessage());
-                            LOGGER.info(Arrays.toString(exception.getStackTrace()));
-
-                            return 0;
-                        }
+                    } catch (Exception exception) {
+                        LOGGER.info(exception.getMessage());
+                        LOGGER.info(Arrays.toString(exception.getStackTrace()));
 
                         return 0;
-                    }));
+                    }
+
+                    return 0;
+                }));
         });
 
         CustomTextRegistry.register("based", BasedTextContent.CODEC);
@@ -472,9 +480,9 @@ public class Uwu {
         UwuOptionalNetExample.init();
     }
 
-    private static void iterations(String label, Consumer<RegistryByteBuf> action){
+    private static void iterations(String label, Consumer<RegistryFriendlyByteBuf> action) {
         int maxTrials = 3;
-        int maxIterations = 50;
+        int maxIterations = 500;
 
         List<Long> durations = new ArrayList<>();
 
@@ -485,7 +493,7 @@ public class Uwu {
             durations.clear();
 
             for (int i = 0; i < maxIterations; i++) {
-                RegistryByteBuf buf = new RegistryByteBuf(Unpooled.buffer(), Owo.currentServer().getRegistryManager());
+                RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), Owo.currentServer().registryAccess());
 
                 long startTime = System.nanoTime();
 
@@ -503,10 +511,10 @@ public class Uwu {
 
     public record TestRecord(String name, int count, List<String> names) {
         public static final Endec<TestRecord> ENDEC = StructEndecBuilder.of(
-                Endec.STRING.fieldOf("name", TestRecord::name),
-                Endec.INT.fieldOf("count", TestRecord::count),
-                Endec.STRING.listOf().fieldOf("names", TestRecord::names),
-                TestRecord::new
+            Endec.STRING.fieldOf("name", TestRecord::name),
+            Endec.INT.fieldOf("count", TestRecord::count),
+            Endec.STRING.listOf().fieldOf("names", TestRecord::names),
+            TestRecord::new
         );
     }
 

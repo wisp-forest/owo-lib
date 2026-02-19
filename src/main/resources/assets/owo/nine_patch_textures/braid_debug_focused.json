@@ -1,0 +1,14 @@
+{
+  "texture": "owo:textures/gui/braid_debug_focused.png",
+  "texture_width": 128,
+  "texture_height": 128,
+  "repeat": true,
+  "corner_patch_size": {
+    "width": 4,
+    "height": 4
+  },
+  "center_patch_size": {
+    "width": 120,
+    "height": 120
+  }
+}

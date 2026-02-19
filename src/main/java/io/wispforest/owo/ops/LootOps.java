@@ -38,8 +38,8 @@ public final class LootOps {
      * @param chance       The chance for the item to actually generate
      * @param targetTables The LootTable(s) to inject into
      */
-    public static void injectItem(ItemConvertible item, float chance, Identifier... targetTables) {
-        ADDITIONS.put(targetTables, () -> ItemEntry.builder(item).conditionally(RandomChanceLootCondition.builder(chance)));
+    public static void injectItem(ItemLike item, float chance, Identifier... targetTables) {
+        ADDITIONS.put(targetTables, () -> LootItem.lootTableItem(item).when(LootItemRandomChanceCondition.randomChance(chance)));
     }
 
     /**
@@ -52,10 +52,10 @@ public final class LootOps {
      * @param max          The maximum amount of items to generate
      * @param targetTables The LootTable(s) to inject into
      */
-    public static void injectItemWithCount(ItemConvertible item, float chance, int min, int max, Identifier... targetTables) {
-        ADDITIONS.put(targetTables, () -> ItemEntry.builder(item)
-                .conditionally(RandomChanceLootCondition.builder(chance))
-                .apply(SetCountLootFunction.builder(UniformLootNumberProvider.create(min, max))));
+    public static void injectItemWithCount(ItemLike item, float chance, int min, int max, Identifier... targetTables) {
+        ADDITIONS.put(targetTables, () -> LootItem.lootTableItem(item)
+                .when(LootItemRandomChanceCondition.randomChance(chance))
+                .apply(SetItemCountFunction.setCount(UniformGenerator.between(min, max))));
     }
 
     /**
@@ -65,12 +65,11 @@ public final class LootOps {
      * @param chance       The chance for the ItemStack to actually generate
      * @param targetTables The LootTable(s) to inject into
      */
-    @SuppressWarnings("deprecation")
     public static void injectItemStack(ItemStack stack, float chance, Identifier... targetTables) {
-        ADDITIONS.put(targetTables, () -> ItemEntry.builder(stack.getItem())
-                .conditionally(RandomChanceLootCondition.builder(chance))
-                .apply(() -> SetComponentsLootFunctionAccessor.createSetComponentsLootFunction(List.of(), stack.getComponentChanges()))
-                .apply(SetCountLootFunction.builder(ConstantLootNumberProvider.create(stack.getCount()))));
+        ADDITIONS.put(targetTables, () -> LootItem.lootTableItem(stack.getItem())
+                .when(LootItemRandomChanceCondition.randomChance(chance))
+                .apply(() -> SetComponentsFunctionAccessor.createSetComponentsLootFunction(List.of(), stack.getComponentsPatch()))
+                .apply(SetItemCountFunction.setCount(ConstantValue.exactly(stack.getCount()))));
     }
 
     /**

@@ -1,25 +1,32 @@
 accessWidener v2 named
 
-extendable method net/minecraft/item/ItemGroup <init> (Lnet/minecraft/item/ItemGroup$Row;ILnet/minecraft/item/ItemGroup$Type;Lnet/minecraft/text/Text;Ljava/util/function/Supplier;Lnet/minecraft/item/ItemGroup$EntryCollector;Lnet/minecraft/util/Identifier;ZILnet/minecraft/util/Identifier;IILjava/util/List;Ljava/util/List;)V
-transitive-accessible class net/minecraft/item/ItemGroup$Entries
-transitive-accessible class net/minecraft/item/ItemGroup$EntriesImpl
+accessible method net/minecraft/client/gui/screens/Screen addRenderableWidget (Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;
 
-transitive-accessible class net/minecraft/client/gui/DrawContext$ScissorStack
-extendable method net/minecraft/client/gui/DrawContext drawTooltip (Lnet/minecraft/client/font/TextRenderer;Ljava/util/List;IILnet/minecraft/client/gui/tooltip/TooltipPositioner;Lnet/minecraft/util/Identifier;Z)V
-transitive-extendable method net/minecraft/client/gui/widget/CheckboxWidget <init> (IIILnet/minecraft/text/Text;Lnet/minecraft/client/font/TextRenderer;ZLnet/minecraft/client/gui/widget/CheckboxWidget$Callback;)V
+extendable method net/minecraft/world/item/CreativeModeTab <init> (Lnet/minecraft/world/item/CreativeModeTab$Row;ILnet/minecraft/world/item/CreativeModeTab$Type;Lnet/minecraft/network/chat/Component;Ljava/util/function/Supplier;Lnet/minecraft/world/item/CreativeModeTab$DisplayItemsGenerator;)V
+transitive-accessible class net/minecraft/world/item/CreativeModeTab$Output
+transitive-accessible class net/minecraft/world/item/CreativeModeTab$ItemDisplayBuilder
+
+transitive-accessible class net/minecraft/client/gui/GuiGraphics$ScissorStack
+extendable method net/minecraft/client/gui/GuiGraphics setTooltipForNextFrameInternal (Lnet/minecraft/client/gui/Font;Ljava/util/List;IILnet/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipPositioner;Lnet/minecraft/resources/Identifier;Z)V
+transitive-extendable method net/minecraft/client/gui/components/Checkbox <init> (IIILnet/minecraft/network/chat/Component;Lnet/minecraft/client/gui/Font;ZLnet/minecraft/client/gui/components/Checkbox$OnValueChange;)V
 
 accessible class net/minecraft/client/gui/render/GuiRenderer$Draw
 
-accessible class net/minecraft/registry/RegistryOps$CachedRegistryInfoGetter
-accessible method net/minecraft/client/gui/widget/EditBoxWidget <init> (Lnet/minecraft/client/font/TextRenderer;IIIILnet/minecraft/text/Text;Lnet/minecraft/text/Text;IZIZZ)V
+accessible class net/minecraft/client/gui/components/toasts/ToastManager$ToastInstance
+
+accessible class net/minecraft/resources/RegistryOps$HolderLookupAdapter
+accessible method net/minecraft/client/gui/components/MultiLineEditBox <init> (Lnet/minecraft/client/gui/Font;IIIILnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/Component;IZIZZ)V
 
 accessible class net/minecraft/server/world/ServerChunkLoadingManager$EntityTracker
 
-extendable method net/minecraft/client/gui/screen/ingame/HandledScreen drawSlotHighlightBack (Lnet/minecraft/client/gui/DrawContext;)V
-extendable method net/minecraft/client/gui/screen/ingame/HandledScreen drawSlotHighlightFront (Lnet/minecraft/client/gui/DrawContext;)V
-extendable method net/minecraft/client/gui/screen/ingame/HandledScreen drawItem (Lnet/minecraft/client/gui/DrawContext;Lnet/minecraft/item/ItemStack;IILjava/lang/String;)V
+extendable method net/minecraft/client/gui/screens/inventory/AbstractContainerScreen renderSlotHighlightBack (Lnet/minecraft/client/gui/GuiGraphics;)V
+extendable method net/minecraft/client/gui/screens/inventory/AbstractContainerScreen renderSlotHighlightFront (Lnet/minecraft/client/gui/GuiGraphics;)V
+extendable method net/minecraft/client/gui/screens/inventory/AbstractContainerScreen renderFloatingItem (Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/world/item/ItemStack;IILjava/lang/String;)V
 
-accessible class net/minecraft/component/ComponentMap$Builder$SimpleComponentMap
+accessible class net/minecraft/core/component/DataComponentMap$Builder$SimpleMap
+
+accessible class net/minecraft/server/packs/resources/FallbackResourceManager$PackEntry
+accessible field net/minecraft/server/packs/resources/FallbackResourceManager$PackEntry resources Lnet/minecraft/server/packs/PackResources;
 
 accessible field net/minecraft/client/gui/DrawContext state Lnet/minecraft/client/gui/render/state/GuiRenderState;
 accessible field net/minecraft/client/gui/DrawContext scissorStack Lnet/minecraft/client/gui/DrawContext$ScissorStack;

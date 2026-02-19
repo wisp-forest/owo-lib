@@ -1,6 +1,6 @@
 package io.wispforest.owo;
 
-import io.wispforest.owo.client.screens.ScreenInternals;
+import io.wispforest.owo.client.screens.MenuNetworkingInternals;
 import io.wispforest.owo.command.debug.OwoDebugCommands;
 import io.wispforest.owo.network.neoforge.NeoOwoNetworking;
 import io.wispforest.owo.ops.LootOps;
@@ -8,8 +8,6 @@ import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.RecipeRemainderStorage;
 import io.wispforest.owo.util.Wisdom;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
@@ -29,18 +27,19 @@ import static io.wispforest.owo.ops.TextOps.withColor;
 @Mod("owo")
 public class Owo {
 
+    public static final String MOD_ID = "owo";
     /**
      * Whether oωo debug is enabled, this defaults to {@code true} in a development environment.
      * To override that behavior, add the {@code -Dowo.debug=false} java argument
      */
     public static final boolean DEBUG;
-    public static final Logger LOGGER = LoggerFactory.getLogger("owo");
+    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-    public static final Text PREFIX = Text.empty().formatted(Formatting.GRAY)
-            .append(withColor("o", 0x3955e5))
-            .append(withColor("ω", 0x13a6f0))
-            .append(withColor("o", 0x3955e5))
-            .append(Text.literal(" > ").formatted(Formatting.GRAY));
+    public static final Component PREFIX = Component.empty().withStyle(ChatFormatting.GRAY)
+        .append(withColor("o", 0x3955e5))
+        .append(withColor("ω", 0x13a6f0))
+        .append(withColor("o", 0x3955e5))
+        .append(Component.literal(" > ").withStyle(ChatFormatting.GRAY));
 
     static {
         boolean debug = !FMLLoader.getCurrent().isProduction();
@@ -92,6 +91,12 @@ public class Owo {
      */
     public static MinecraftServer currentServer() {
         return ServerLifecycleHooks.getCurrentServer();
+    }
+
+    // "eh it's only like 10-15 of them what's the big deal" - glisco, while writing the 52nd hardcoded Identifier.of("owo", ...)
+    @ApiStatus.Internal
+    public static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath(MOD_ID, path);
     }
 
     public static IEventBus getModBus() {

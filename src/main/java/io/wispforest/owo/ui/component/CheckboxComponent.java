@@ -1,40 +1,40 @@
 package io.wispforest.owo.ui.component;
 
-import io.wispforest.owo.mixin.ui.access.CheckboxWidgetAccessor;
+import io.wispforest.owo.mixin.ui.access.CheckboxAccessor;
 import io.wispforest.owo.ui.core.CursorStyle;
 import io.wispforest.owo.ui.core.Size;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.util.Observable;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.widget.CheckboxWidget;
-import net.minecraft.client.input.AbstractInput;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.Checkbox;
+import net.minecraft.client.input.InputWithModifiers;
+import net.minecraft.network.chat.Component;
 import org.w3c.dom.Element;
 
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class CheckboxComponent extends CheckboxWidget {
+public class CheckboxComponent extends Checkbox {
 
     protected final Observable<Boolean> listeners;
 
-    protected CheckboxComponent(Text message) {
-        super(0, 0, 0, message, MinecraftClient.getInstance().textRenderer, false, (checkbox, checked) -> {});
-        this.listeners = Observable.of(this.isChecked());
+    protected CheckboxComponent(Component message) {
+        super(0, 0, 0, message, Minecraft.getInstance().font, false, (checkbox, checked) -> {});
+        this.listeners = Observable.of(this.selected());
         this.sizing(Sizing.content(), Sizing.fixed(20));
     }
 
     @Override
-    public void onPress(AbstractInput input) {
+    public void onPress(InputWithModifiers input) {
         super.onPress(input);
-        this.listeners.set(this.isChecked());
+        this.listeners.set(this.selected());
     }
 
     public CheckboxComponent checked(boolean checked) {
-        ((CheckboxWidgetAccessor) this).owo$setChecked(checked);
-        this.listeners.set(this.isChecked());
+        ((CheckboxAccessor) this).owo$setSelected(checked);
+        this.listeners.set(this.selected());
         return this;
     }
 
@@ -46,13 +46,13 @@ public class CheckboxComponent extends CheckboxWidget {
     @Override
     public void inflate(Size space) {
         super.inflate(space);
-        ((CheckboxWidgetAccessor) this).owo$getTextWidget().setMaxWidth(this.width);
+        ((CheckboxAccessor) this).owo$getTextWidget().setMaxWidth(this.width);
     }
 
     @Override
-    public void setMessage(Text message) {
+    public void setMessage(Component message) {
         super.setMessage(message);
-        ((CheckboxWidgetAccessor)this).owo$getTextWidget().setMessage(message);
+        ((CheckboxAccessor)this).owo$getTextWidget().setMessage(message);
     }
 
     @Override

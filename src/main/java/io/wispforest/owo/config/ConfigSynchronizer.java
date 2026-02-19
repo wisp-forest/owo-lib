@@ -2,24 +2,24 @@ package io.wispforest.owo.config;
 
 import com.google.common.collect.HashMultimap;
 import io.netty.buffer.Unpooled;
+import io.wispforest.endec.Endec;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.Owo;
-import io.wispforest.owo.mixin.ServerCommonNetworkHandlerAccessor;
+import io.wispforest.owo.mixin.ServerCommonPacketListenerImplAccessor;
 import io.wispforest.owo.ops.TextOps;
-import io.wispforest.endec.Endec;
 import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.network.ClientConnection;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.Connection;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Tuple;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.EventPriority;
@@ -39,12 +39,12 @@ import java.util.function.BiConsumer;
 
 public class ConfigSynchronizer {
 
-    public static final Identifier CONFIG_SYNC_CHANNEL = Identifier.of("owo", "config_sync");
+    public static final Identifier CONFIG_SYNC_CHANNEL = Owo.id("config_sync");
 
-    private static final Map<ClientConnection, Map<String, Map<Option.Key, Object>>> CLIENT_OPTION_STORAGE = new WeakHashMap<>();
+    private static final Map<Connection, Map<String, Map<Option.Key, Object>>> CLIENT_OPTION_STORAGE = new WeakHashMap<>();
 
     private static final Map<String, ConfigWrapper<?>> KNOWN_CONFIGS = new HashMap<>();
-    private static final MutableText PREFIX = TextOps.concat(Owo.PREFIX, Text.of("§cunrecoverable config mismatch\n\n"));
+    private static final MutableComponent PREFIX = TextOps.concat(Owo.PREFIX, Component.nullToEmpty("§cunrecoverable config mismatch\n\n"));
 
     static void register(ConfigWrapper<?> config) {
         KNOWN_CONFIGS.put(config.name(), config);
@@ -59,20 +59,20 @@ public class ConfigSynchronizer {
      * @return The player's client's values of the given config options,
      * or {@code null} if no config with the given name was synced
      */
-    public static @Nullable Map<Option.Key, ?> getClientOptions(ServerPlayerEntity player, String configName) {
-        var storage = CLIENT_OPTION_STORAGE.get(((ServerCommonNetworkHandlerAccessor) player.networkHandler).owo$getConnection());
+    public static @Nullable Map<Option.Key, ?> getClientOptions(ServerPlayer player, String configName) {
+        var storage = CLIENT_OPTION_STORAGE.get(((ServerCommonPacketListenerImplAccessor) player.connection).owo$getConnection());
         if (storage == null) return null;
 
         return storage.get(configName);
     }
 
     /**
-     * Safer, more clear version of {@link #getClientOptions(ServerPlayerEntity, String)} to
+     * Safer, more clear version of {@link #getClientOptions(ServerPlayer, String)} to
      * be used when the actual config wrapper is available
      *
-     * @see #getClientOptions(ServerPlayerEntity, String)
+     * @see #getClientOptions(ServerPlayer, String)
      */
-    public static @Nullable Map<Option.Key, ?> getClientOptions(ServerPlayerEntity player, ConfigWrapper<?> config) {
+    public static @Nullable Map<Option.Key, ?> getClientOptions(ServerPlayer player, ConfigWrapper<?> config) {
         return getClientOptions(player, config.name());
     }
 
@@ -85,7 +85,7 @@ public class ConfigSynchronizer {
             config.allOptions().forEach((key, option) -> {
                 if (option.syncMode().ordinal() < targetMode.ordinal()) return;
 
-                PacketByteBuf optionBuf = new PacketByteBuf(Unpooled.buffer());
+                FriendlyByteBuf optionBuf = new PacketByteBuf(Unpooled.buffer());
                 option.write(optionBuf);
 
                 entry.options().put(key.asString(), optionBuf);
@@ -97,7 +97,7 @@ public class ConfigSynchronizer {
         return new ConfigSyncPacket(configs);
     }
 
-    private static void read(ConfigSyncPacket packet, BiConsumer<Option<?>, PacketByteBuf> optionConsumer) {
+    private static void read(ConfigSyncPacket packet, BiConsumer<Option<?>, FriendlyByteBuf> optionConsumer) {
         for (var configEntry : packet.configs().entrySet()) {
             var configName = configEntry.getKey();
             var config = KNOWN_CONFIGS.get(configName);
@@ -127,7 +127,7 @@ public class ConfigSynchronizer {
         Owo.LOGGER.info("Applying server overrides");
         var mismatchedOptions = new HashMap<Option<?>, Object>();
 
-        if (!(client.isIntegratedServerRunning() && client.getServer().isSingleplayer())) {
+        if (!(client.hasSingleplayerServer() && client.getSingleplayerServer().isSingleplayer())) {
             read(payload, (option, packetByteBuf) -> {
                 var mismatchedValue = option.read(packetByteBuf);
                 if (mismatchedValue != null) mismatchedOptions.put(option, mismatchedValue);
@@ -140,26 +140,26 @@ public class ConfigSynchronizer {
                             option.key().asString(), option.configName(), option.value(), serverValue);
                 });
 
-                var errorMessage = Text.empty();
-                var optionsByConfig = HashMultimap.<String, Pair<Option<?>, Object>>create();
+                var errorMessage = Component.empty();
+                var optionsByConfig = HashMultimap.<String, Tuple<Option<?>, Object>>create();
 
-                mismatchedOptions.forEach((option, serverValue) -> optionsByConfig.put(option.configName(), new Pair<>(option, serverValue)));
+                mismatchedOptions.forEach((option, serverValue) -> optionsByConfig.put(option.configName(), new Tuple<>(option, serverValue)));
                 for (var configName : optionsByConfig.keys()) {
-                    errorMessage.append(TextOps.withFormatting("in config ", Formatting.GRAY)).append(configName).append("\n");
+                    errorMessage.append(TextOps.withFormatting("in config ", ChatFormatting.GRAY)).append(configName).append("\n");
                     for (var option : optionsByConfig.get(configName)) {
-                        errorMessage.append(Text.translatable(option.getLeft().translationKey()).formatted(Formatting.YELLOW)).append(" -> ");
-                        errorMessage.append(option.getLeft().value().toString()).append(TextOps.withFormatting(" (client)", Formatting.GRAY));
-                        errorMessage.append(TextOps.withFormatting(" / ", Formatting.DARK_GRAY));
-                        errorMessage.append(option.getRight().toString()).append(TextOps.withFormatting(" (server)", Formatting.GRAY)).append("\n");
+                        errorMessage.append(Component.translatable(option.getA().translationKey()).withStyle(ChatFormatting.YELLOW)).append(" -> ");
+                        errorMessage.append(option.getA().value().toString()).append(TextOps.withFormatting(" (client)", ChatFormatting.GRAY));
+                        errorMessage.append(TextOps.withFormatting(" / ", ChatFormatting.DARK_GRAY));
+                        errorMessage.append(option.getB().toString()).append(TextOps.withFormatting(" (server)", ChatFormatting.GRAY)).append("\n");
                     }
                     errorMessage.append("\n");
                 }
 
-                errorMessage.append(TextOps.withFormatting("these options could not be synchronized because\n", Formatting.GRAY));
-                errorMessage.append(TextOps.withFormatting("they require your client to be restarted\n", Formatting.GRAY));
-                errorMessage.append(TextOps.withFormatting("change them manually and restart if you want to join this server", Formatting.GRAY));
+                errorMessage.append(TextOps.withFormatting("these options could not be synchronized because\n", ChatFormatting.GRAY));
+                errorMessage.append(TextOps.withFormatting("they require your client to be restarted\n", ChatFormatting.GRAY));
+                errorMessage.append(TextOps.withFormatting("change them manually and restart if you want to join this server", ChatFormatting.GRAY));
 
-                ((ClientPlayerEntity) context.player()).networkHandler.getConnection().disconnect(TextOps.concat(PREFIX, errorMessage));
+                ((ClientPlayerEntity) context.player()).connection.getConnection().disconnect(TextOps.concat(PREFIX, errorMessage));
                 return;
             }
         }
@@ -170,7 +170,7 @@ public class ConfigSynchronizer {
 
     private static void applyServer(ConfigSyncPacket payload, IPayloadContext context) {
         Owo.LOGGER.info("Receiving client config");
-        var connection = ((ServerCommonNetworkHandlerAccessor) ((ServerPlayerEntity) context.player()).networkHandler).owo$getConnection();
+        var connection = ((ServerCommonPacketListenerImplAccessor) ((ServerPlayerEntity) context.player()).connection).owo$getConnection();
 
         read(payload, (option, optionBuf) -> {
             var config = CLIENT_OPTION_STORAGE.computeIfAbsent(connection, $ -> new HashMap<>()).computeIfAbsent(option.configName(), s -> new HashMap<>());
@@ -178,22 +178,22 @@ public class ConfigSynchronizer {
         });
     }
 
-    private record ConfigSyncPacket(Map<String, ConfigEntry> configs) implements CustomPayload {
-        public static final Id<ConfigSyncPacket> ID = new Id<>(CONFIG_SYNC_CHANNEL);
+    private record ConfigSyncPacket(Map<String, ConfigEntry> configs) implements CustomPacketPayload {
+        public static final Type<ConfigSyncPacket> ID = new Type<>(CONFIG_SYNC_CHANNEL);
         public static final Endec<ConfigSyncPacket> ENDEC = StructEndecBuilder.of(
                 ConfigEntry.ENDEC.mapOf().fieldOf("configs", ConfigSyncPacket::configs),
                 ConfigSyncPacket::new
         );
 
         @Override
-        public Id<? extends CustomPayload> getId() {
+        public Type<? extends CustomPacketPayload> type() {
             return ID;
         }
     }
 
-    private record ConfigEntry(Map<String, PacketByteBuf> options) {
+    private record ConfigEntry(Map<String, FriendlyByteBuf> options) {
         public static final Endec<ConfigEntry> ENDEC = StructEndecBuilder.of(
-                MinecraftEndecs.PACKET_BYTE_BUF.mapOf().fieldOf("options", ConfigEntry::options),
+                MinecraftEndecs.FRIENDLY_BYTE_BUF.mapOf().fieldOf("options", ConfigEntry::options),
                 ConfigEntry::new
         );
     }

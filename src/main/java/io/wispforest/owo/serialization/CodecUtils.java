@@ -17,7 +17,7 @@ import io.wispforest.endec.format.forwarding.ForwardingSerializer;
 import io.wispforest.endec.format.gson.GsonDeserializer;
 import io.wispforest.endec.format.gson.GsonEndec;
 import io.wispforest.endec.format.gson.GsonSerializer;
-import io.wispforest.owo.mixin.serialization.ForwardingDynamicOpsAccessor;
+import io.wispforest.owo.mixin.serialization.DelegatingOpsAccessor;
 import io.wispforest.owo.mixin.serialization.RegistryOpsAccessor;
 import io.wispforest.owo.serialization.endec.EitherEndec;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
@@ -30,15 +30,15 @@ import io.wispforest.owo.serialization.format.nbt.NbtEndec;
 import io.wispforest.owo.serialization.format.nbt.NbtSerializer;
 import io.wispforest.owo.util.Scary;
 import io.wispforest.owo.util.StackTraceSupplier;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.NbtString;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.registry.RegistryOps;
-import net.minecraft.util.dynamic.ForwardingDynamicOps;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.DelegatingOps;
+import net.minecraft.resources.RegistryOps;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -101,23 +101,23 @@ public class CodecUtils {
             : codec.parse(pair.getFirst(), copyDecodedValue(pair.getSecond(), selfDescribedDeserializer)).getOrThrow();
     }
 
-    public static <T> Endec<T> toEndec(Codec<T> codec, PacketCodec<ByteBuf, T> packetCodec) {
+    public static <T> Endec<T> toEndec(Codec<T> codec, StreamCodec<ByteBuf, T> packetCodec) {
         var encoder = encoderOfCodec(codec);
         var decoder = decoderOfCodec(codec);
 
         return Endec.of(
             (ctx, serializer, value) -> {
                 if (serializer instanceof ByteBufSerializer<?>) {
-                    var buffer = new PacketByteBuf(Unpooled.buffer());
+                    var buffer = new FriendlyByteBuf(Unpooled.buffer());
                     packetCodec.encode(buffer, value);
-                    MinecraftEndecs.PACKET_BYTE_BUF.encode(ctx, serializer, buffer);
+                    MinecraftEndecs.FRIENDLY_BYTE_BUF.encode(ctx, serializer, buffer);
                 } else {
                     encoder.encode(ctx, serializer, value);
                 }
             },
             (ctx, deserializer) -> {
                 if (deserializer instanceof ByteBufDeserializer) {
-                    return packetCodec.decode(MinecraftEndecs.PACKET_BYTE_BUF.decode(ctx, deserializer));
+                    return packetCodec.decode(MinecraftEndecs.FRIENDLY_BYTE_BUF.decode(ctx, deserializer));
                 } else {
                     return decoder.decode(ctx, deserializer);
                 }
@@ -125,18 +125,18 @@ public class CodecUtils {
         );
     }
 
-    public static <T> Endec<T> toEndecWithRegistries(Codec<T> codec, PacketCodec<RegistryByteBuf, T> packetCodec) {
+    public static <T> Endec<T> toEndecWithRegistries(Codec<T> codec, StreamCodec<RegistryFriendlyByteBuf, T> packetCodec) {
         var encoder = encoderOfCodec(codec);
         var decoder = decoderOfCodec(codec);
 
         return Endec.of(
             (ctx, serializer, value) -> {
                 if (serializer instanceof ByteBufSerializer<?>) {
-                    var buffer = new RegistryByteBuf(new PacketByteBuf(Unpooled.buffer()), ctx.requireAttributeValue(RegistriesAttribute.REGISTRIES).registryManager());
+                    var buffer = new RegistryFriendlyByteBuf(new FriendlyByteBuf(Unpooled.buffer()), ctx.requireAttributeValue(RegistriesAttribute.REGISTRIES).registryAccess());
 
                     packetCodec.encode(buffer, value);
 
-                    MinecraftEndecs.PACKET_BYTE_BUF.encode(ctx, serializer, buffer);
+                    MinecraftEndecs.FRIENDLY_BYTE_BUF.encode(ctx, serializer, buffer);
                 } else {
                     encoder.encode(ctx, serializer, value);
                 }
@@ -144,9 +144,9 @@ public class CodecUtils {
             (ctx, deserializer) -> {
                 if (deserializer instanceof ByteBufDeserializer) {
                     return packetCodec.decode(
-                        new RegistryByteBuf(
-                            MinecraftEndecs.PACKET_BYTE_BUF.decode(ctx, deserializer),
-                            ctx.requireAttributeValue(RegistriesAttribute.REGISTRIES).registryManager()
+                        new RegistryFriendlyByteBuf(
+                            MinecraftEndecs.FRIENDLY_BYTE_BUF.decode(ctx, deserializer),
+                            ctx.requireAttributeValue(RegistriesAttribute.REGISTRIES).registryAccess()
                         ));
                 } else {
                     return decoder.decode(ctx, deserializer);
@@ -369,12 +369,12 @@ public class CodecUtils {
     // mostly impossible because the system turns into one opaque spaghetti mess
     //
     // glisco, 28.04.2024
-    public static <B extends PacketByteBuf, T> PacketCodec<B, T> toPacketCodec(Endec<T> endec) {
-        return new PacketCodec<>() {
+    public static <B extends FriendlyByteBuf, T> StreamCodec<B, T> toPacketCodec(Endec<T> endec) {
+        return new StreamCodec<>() {
             @Override
             public T decode(B buf) {
-                var ctx = buf instanceof RegistryByteBuf registryByteBuf
-                    ? SerializationContext.attributes(RegistriesAttribute.of(registryByteBuf.getRegistryManager()))
+                var ctx = buf instanceof RegistryFriendlyByteBuf registryByteBuf
+                    ? SerializationContext.attributes(RegistriesAttribute.of(registryByteBuf.registryAccess()))
                     : SerializationContext.empty();
 
                 return endec.decode(ctx, ByteBufDeserializer.of(buf));
@@ -382,8 +382,8 @@ public class CodecUtils {
 
             @Override
             public void encode(B buf, T value) {
-                var ctx = buf instanceof RegistryByteBuf registryByteBuf
-                    ? SerializationContext.attributes(RegistriesAttribute.of(registryByteBuf.getRegistryManager()))
+                var ctx = buf instanceof RegistryFriendlyByteBuf registryByteBuf
+                    ? SerializationContext.attributes(RegistriesAttribute.of(registryByteBuf.registryAccess()))
                     : SerializationContext.empty();
 
                 endec.encode(ctx, ByteBufSerializer.of(buf), value);
@@ -393,14 +393,14 @@ public class CodecUtils {
 
     // ---
 
-    private static SerializationContext createContext(DynamicOps<?> ops, SerializationContext assumedContext) {
+    public static SerializationContext createContext(DynamicOps<?> ops, SerializationContext assumedContext) {
         var rootOps = ops;
         var context = rootOps instanceof ContextHolder holder
             ? holder.capturedContext().and(assumedContext)
             : null;
 
-        while (rootOps instanceof ForwardingDynamicOps<?>) {
-            rootOps = ((ForwardingDynamicOpsAccessor<?>) rootOps).owo$delegate();
+        while (rootOps instanceof DelegatingOps<?>) {
+            rootOps = ((DelegatingOpsAccessor<?>) rootOps).owo$delegate();
 
             if (context == null && rootOps instanceof ContextHolder holder) {
                 context = holder.capturedContext().and(assumedContext);
@@ -420,7 +420,7 @@ public class CodecUtils {
         DynamicOps<EdmElement<?>> ops = EdmOps.withContext(ctx);
 
         if (ctx.hasAttribute(RegistriesAttribute.REGISTRIES)) {
-            ops = RegistryOps.of(ops, ctx.getAttributeValue(RegistriesAttribute.REGISTRIES).infoGetter());
+            ops = RegistryOps.create(ops, ctx.getAttributeValue(RegistriesAttribute.REGISTRIES).infoGetter());
         }
 
         return ops;
@@ -459,7 +459,7 @@ public class CodecUtils {
 
     private static <T> DynamicOps<T> unpackOps(DynamicOps<T> ops) {
         var rootOps = ops;
-        while (rootOps instanceof ForwardingDynamicOps<T>) rootOps = ((ForwardingDynamicOpsAccessor<T>) rootOps).owo$delegate();
+        while (rootOps instanceof DelegatingOps<T>) rootOps = ((DelegatingOpsAccessor<T>) rootOps).owo$delegate();
         return rootOps;
     }
 
@@ -483,7 +483,7 @@ public class CodecUtils {
 
         DynamicOps<T> ops = DynamicOpsWithContext.of(ctx, adapter.getOps());
         if (ctx.hasAttribute(RegistriesAttribute.REGISTRIES)) {
-            ops = RegistryOps.of(ops, ctx.getAttributeValue(RegistriesAttribute.REGISTRIES).infoGetter());
+            ops = RegistryOps.create(ops, ctx.getAttributeValue(RegistriesAttribute.REGISTRIES).infoGetter());
         }
 
         return new Pair<>(ops, adapter);
@@ -497,7 +497,7 @@ public class CodecUtils {
 
         DynamicOps<T> ops = DynamicOpsWithContext.of(ctx, adapter.getOps());
         if (ctx.hasAttribute(RegistriesAttribute.REGISTRIES)) {
-            ops = RegistryOps.of(ops, ctx.getAttributeValue(RegistriesAttribute.REGISTRIES).infoGetter());
+            ops = RegistryOps.create(ops, ctx.getAttributeValue(RegistriesAttribute.REGISTRIES).infoGetter());
         }
 
         return new Pair<>(ops, adapter);
@@ -582,19 +582,19 @@ public class CodecUtils {
     }
 
     static {
-        registerCodecAdapter(new CodecAdapter<NbtElement, NbtSerializer, NbtDeserializer>() {
+        registerCodecAdapter(new CodecAdapter<Tag, NbtSerializer, NbtDeserializer>() {
             @Override
-            public Class<? extends Serializer<NbtElement>> serializerClass() {
+            public Class<? extends Serializer<Tag>> serializerClass() {
                 return NbtSerializer.class;
             }
 
             @Override
-            public Class<? extends Deserializer<NbtElement>> deserializerClass() {
+            public Class<? extends Deserializer<Tag>> deserializerClass() {
                 return NbtDeserializer.class;
             }
 
             @Override
-            public Class<? extends DynamicOps<NbtElement>> opsClass() {
+            public Class<? extends DynamicOps<Tag>> opsClass() {
                 return NbtOps.class;
             }
 
@@ -604,24 +604,24 @@ public class CodecUtils {
             }
 
             @Override
-            public NbtDeserializer createDeserializer(NbtElement value) {
+            public NbtDeserializer createDeserializer(Tag value) {
                 return NbtDeserializer.of(value);
             }
 
             @Override
-            public DynamicOps<NbtElement> getOps() {
+            public DynamicOps<Tag> getOps() {
                 return NbtOps.INSTANCE;
             }
 
             @Override
-            public NbtElement unpackMapLike(MapLike<NbtElement> mapLike) {
-                var compound = new NbtCompound();
+            public Tag unpackMapLike(MapLike<Tag> mapLike) {
+                var compound = new CompoundTag();
 
                 mapLike.entries().forEach(pairs -> {
                     var key = pairs.getFirst();
                     var value = pairs.getSecond();
 
-                    if (!(key instanceof NbtString primitive)) {
+                    if (!(key instanceof StringTag primitive)) {
                         throw new IllegalStateException("Unable to parse key: " + key);
                     }
 
@@ -632,13 +632,13 @@ public class CodecUtils {
             }
 
             @Override
-            public RecordBuilder<NbtElement> addToBuilder(NbtElement value, RecordBuilder<NbtElement> builder) {
-                if (!(value instanceof NbtCompound compoundTag)) {
+            public RecordBuilder<Tag> addToBuilder(Tag value, RecordBuilder<Tag> builder) {
+                if (!(value instanceof CompoundTag compoundTag)) {
                     throw new IllegalStateException("Cannot add non-NbtCompound value into record builder: " + value);
                 }
 
                 var result = builder;
-                for (var key : compoundTag.getKeys()) {
+                for (var key : compoundTag.keySet()) {
                     result = result.add(key, compoundTag.get(key));
                 }
 
@@ -646,16 +646,16 @@ public class CodecUtils {
             }
 
             @Override
-            public void encodeStruct(SerializationContext ctx, NbtSerializer serializer, Serializer.Struct struct, NbtElement value) {
-                if (!(value instanceof NbtCompound compoundTag)) {
+            public void encodeStruct(SerializationContext ctx, NbtSerializer serializer, Serializer.Struct struct, Tag value) {
+                if (!(value instanceof CompoundTag compoundTag)) {
                     throw new IllegalStateException("Cannot encode non-NbtCompound value as struct: " + value);
                 }
 
-                compoundTag.getKeys().forEach(key -> struct.field(key, ctx, NbtEndec.ELEMENT, compoundTag.get(key)));
+                compoundTag.keySet().forEach(key -> struct.field(key, ctx, NbtEndec.ELEMENT, compoundTag.get(key)));
             }
 
             @Override
-            public NbtElement copyDecodedStruct(SerializationContext ctx, NbtDeserializer deserializer, Deserializer.Struct struct) {
+            public Tag copyDecodedStruct(SerializationContext ctx, NbtDeserializer deserializer, Deserializer.Struct struct) {
                 return NbtEndec.COMPOUND.decode(ctx, deserializer);
             }
         });

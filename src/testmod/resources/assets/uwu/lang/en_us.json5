@@ -1,0 +1,241 @@
+{
+  "block.uwu.braid_display": [
+    {translate: "text.uwu.braid"},
+    " display"
+  ],
+
+  "item.{}": {
+    "uwu.{}": {
+      counter: "Counter",
+      test_stick: [
+        "",
+        {text: "Test", color: "green"},
+        {text: " Stick", color: "red"}
+      ],
+      screen_shard: [
+        {text: "Screen Shard", color: "#3AB0FF"}
+      ],
+      braid: [
+        {translate: "text.uwu.braid"},
+        {text: " (chyz tried)", color: "#FFFFFF"}
+      ],
+      braid_samples: [
+        {translate: "text.uwu.braid"},
+        {text: " samples", color: "#FFFFFF"}
+      ]
+    },
+    "uowou.owo_ingot": [
+      {text: "uωu", color: "#3AB0FF"},
+      {text: " Ingot", color: "#FFFFFF"}
+    ]
+  },
+  "itemGroup.{}": {
+    "food_and_drink.button.consume": "C o n s u m e",
+    "ingredients.tab.{}": {
+      the_logs: "The Logs",
+      extra_ores: "Extra Ores"
+    },
+    "uwu.{}": {
+      "four_tab_group.{}": {
+        "": "uωu",
+        "tab.tab_{}": [
+          "Tab 1",
+          "Tab 2",
+          "Tab 3",
+          "Tab 4",
+          "Tab 5"
+        ],
+        "button.github": "oωo GitHub"
+      },
+      "six_tab_group.{}": {
+        "": "uωu",
+        "tab.tab_{}": [
+          "Tab 1",
+          "Tab 2",
+          "Tab 3",
+          "Tab 4",
+          "Tab 5",
+          "Tab 6"
+        ],
+        "button.owo": "ouωuo"
+      },
+      "single_tab_group.{}": {
+        "": "uωu",
+        "tab.tab_1": "uωu~"
+      },
+      "vanilla_group.{}": {
+        "": "uωu (.❛ ᴗ ❛.)",
+        "tab.tab_{0}": [
+          "(´• ω •`)",
+          "(o˘◡˘o)"
+        ]
+      }
+    }
+  },
+  /*
+  I'm
+  honestly
+  just
+  writing
+  comments
+  cuz
+  I
+  can
+  */
+
+  "key.uwu.hud_test": [
+    {text: "Toggle Test HUD", color: "#0096FF"}
+  ],
+
+  "menu.returnTo{}": {
+    Game: {
+      text: "Back to Game",
+      color: "#FF5272"
+    },
+    Menu: [
+      "",
+      {text: "Save", color: "#52BDFF"},
+      {text: " and", color: "#52FFAA"},
+      {text: " Quit", color: "#FFEF52"},
+      {text: " to", color: "#FF9052"},
+      {text: " Title", color: "#FF5272"}
+    ]
+  },
+
+  "text.{}": {
+    "uwu.{}": {
+      chyz: [
+        {text: "c", color: "#fdf433"},
+        {text: "h", color: "#fffdff"},
+        {text: "y", color: "#9b57d0"},
+        {text: "z", color: "#2f2f2f"}
+      ],
+      glisco: [
+        {text: "g", color: "#ff7166"},
+        {text: "l", color: "#ffb266"},
+        {text: "i", color: "#ceff66"},
+        {text: "s", color: "#90ff66"},
+        {text: "c", color: "#66d4ff"},
+        {text: "o", color: "#c366ff"}
+      ],
+      braid: [
+        {text: "b", color: "#ff7166"},
+        {text: "r", color: "#ffb266"},
+        {text: "a", color: "#ceff66"},
+        {text: "i", color: "#90ff66"},
+        {text: "d", color: "#66d4ff"}
+      ]
+    },
+    "config.{}": {
+      "uwu.{}": {
+        title: "Test Config Screen",
+        "section.{}": {
+          top: "Top Text",
+          bottom: "Bottom Text",
+          "nesting_yo?": "That's Nestnite"
+        },
+        "category.{}": {
+          "nestingTime.{}": {
+            "": "Nesting Time",
+            tooltip: "Yep, it's nesting Time",
+            nestingTimeIntensifies: "Nesting Time Intensifies"
+          }
+        },
+        "option.{}": {
+          aValue: "A Value",
+          "regex.{}": {
+            "": "Regex'd",
+            tooltip: "Regex tooltip, this is epic"
+          },
+          "nestingTime.{}": {
+            togglee: "Togglee",
+            yesThisIsAlsoNested: "Yes this is also nested",
+            "nestedIntegers.{}": {
+              "": "A nested List of Integers",
+              tooltip: [
+                "A very epic nested Integers tooltip",
+                {text: "\nwith multiple lines", color: "#ae0000"}
+              ]
+            },
+            "nestingTimeIntensifies.wowSoNested": "Wow so nested"
+          },
+          someOption: "Hello, yes, this is the predicate constraint tutorial",
+          "floting.{}": {
+            "": "Floting",
+            tooltip: "messes with button?"
+          },
+          thisIsAStringValue: "Clearly, this is a string value",
+          thereAreStringsHere: "There are Strings here",
+          "brotheresAnEnum.{}": {
+            "": "Bro, there's an Enum!",
+            tooltip: "Yeah, it's crazy"
+          },
+          "anEpicColor.{}": {
+            "": "An epic color",
+            WithAlpha: "An epic color with alpha"
+          }
+        },
+        "enum.wowValues.{}": {
+          first: "First",
+          second: "Second",
+          third: "Third",
+          fourth: "Fourth"
+        }
+      },
+      "uowou.option.thisIsNotSyncable": "Unsyncable Option",
+    },
+    "ui.test_slider": "Value: %s"
+  },
+
+  "uwu.{}": {
+    a: {index: 0, color: "#ae0000"},
+    homicide: "homicide",
+    eepy: "honk mimimimimimimimimi"
+  },
+
+  //Nested lang tests
+
+  "nestedLangTests.{}": {
+    "prefixTest.{}": {
+      prefixTestKey: "nestedLangTests.prefixTest.prefixTestKey"
+    },
+    "middleTest.{}.Suffix": {
+      middleTestKey: "nestedLangTests.middleTest.middleTestKey.Suffix"
+    },
+    "{}.suffixTest": {
+      suffixTestKey: "nestedLangTests.suffixTestKey.suffixTest"
+    },
+
+    "listPrefixTest.{}": [
+      "nestedLangTests.listPrefixTest.1",
+      "nestedLangTests.listPrefixTest.2"
+    ],
+    "listPrefixTestWithIndex.{2}": [
+      "nestedLangTests.listPrefixTestWithIndex.2",
+      "nestedLangTests.listPrefixTestWithIndex.3"
+    ],
+    "listMiddleTest.{}.Suffix": [
+      "nestedLangTests.listMiddleTest.1.Suffix",
+      "nestedLangTests.listMiddleTest.2.Suffix"
+    ],
+    "listMiddleTestWithIndex.{2}.Suffix": [
+      "nestedLangTests.listMiddleTestWithIndex.2.Suffix",
+      "nestedLangTests.listMiddleTestWithIndex.3.Suffix"
+    ],
+    "{}.ListSuffixTest": [
+      "nestedLangTests.1.ListSuffixTest",
+      "nestedLangTests.2.ListSuffixTest"
+    ],
+    "{2}.ListSuffixTestWithIndex": [
+      "nestedLangTests.2.ListSuffixTestWithIndex",
+      "nestedLangTests.3.ListSuffixTestWithIndex"
+    ],
+    "escapeTest./+=_!{}": {
+      "": "nestedLangTests.escapeTest",
+    }
+  },
+
+  "This key is here to trigger owo language loading fail prevention": {
+    "does it work?": "probably"
+  }
+}

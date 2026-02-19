@@ -1,7 +1,7 @@
 package io.wispforest.owo.registration;
 
-import net.minecraft.registry.Registry;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.registries.callback.AddCallback;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -59,7 +59,7 @@ public final class RegistryHelper<T> {
      */
     public void runWhenPresent(Identifier id, Consumer<T> action) {
         if (isContained(registry, id)) {
-            action.accept(registry.get(id));
+            action.accept(registry.getValue(id));
         } else {
             this.actions.put(id, action);
         }
@@ -78,7 +78,7 @@ public final class RegistryHelper<T> {
     }
 
     private static <T> boolean isContained(Registry<T> registry, Identifier identifier) {
-        return registry.containsId(identifier);
+        return registry.containsKey(identifier);
     }
 
 }

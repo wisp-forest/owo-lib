@@ -1,16 +1,17 @@
 package io.wispforest.owo.ui.component;
 
-import io.wispforest.owo.ui.base.BaseComponent;
+import io.wispforest.owo.braid.widgets.label.RawLabel;
+import io.wispforest.owo.ui.base.BaseUIComponent;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.util.Observable;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.Click;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 
@@ -19,31 +20,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-public class LabelComponent extends BaseComponent {
+public class LabelComponent extends BaseUIComponent {
 
-    protected final TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
+    protected final Font textRenderer = Minecraft.getInstance().font;
 
-    protected Text text;
-    protected List<OrderedText> wrappedText;
+    protected Component text;
+    protected List<FormattedCharSequence> wrappedText;
 
     protected VerticalAlignment verticalTextAlignment = VerticalAlignment.TOP;
     protected HorizontalAlignment horizontalTextAlignment = HorizontalAlignment.LEFT;
 
     protected final AnimatableProperty<Color> color = AnimatableProperty.of(Color.WHITE);
-    protected final Observable<Integer> lineHeight = Observable.of(this.textRenderer.fontHeight);
+    protected final Observable<Integer> lineHeight = Observable.of(this.textRenderer.lineHeight);
     protected final Observable<Integer> lineSpacing = Observable.of(2);
     protected boolean shadow;
     protected int maxWidth;
 
     protected Function<@Nullable Style, Boolean> textClickHandler = style -> {
-        OwoUIDrawContext.utilityScreen().captureLinkSource();
-        var success = style != null && OwoUIDrawContext.utilityScreen().handleTextClick(style);
-        OwoUIDrawContext.utilityScreen().getAndClearLinkSource();
-
-        return success;
+        return style != null && OwoUIGraphics.utilityScreen().handleTextClick(style, Minecraft.getInstance().screen);
     };
 
-    protected LabelComponent(Text text) {
+    protected LabelComponent(Component text) {
         this.text = text;
         this.wrappedText = new ArrayList<>();
 
@@ -53,13 +50,13 @@ public class LabelComponent extends BaseComponent {
         Observable.observeAll(this::notifyParentIfMounted, this.lineHeight, this.lineSpacing);
     }
 
-    public LabelComponent text(Text text) {
+    public LabelComponent text(Component text) {
         this.text = text;
         this.notifyParentIfMounted();
         return this;
     }
 
-    public Text text() {
+    public Component text() {
         return this.text;
     }
 
@@ -140,7 +137,7 @@ public class LabelComponent extends BaseComponent {
     protected int determineHorizontalContentSize(Sizing sizing) {
         int widestText = 0;
         for (var line : this.wrappedText) {
-            int width = this.textRenderer.getWidth(line);
+            int width = this.textRenderer.width(line);
             if (width > widestText) widestText = width;
         }
 
@@ -165,7 +162,7 @@ public class LabelComponent extends BaseComponent {
     }
 
     private void wrapLines() {
-        this.wrappedText = this.textRenderer.wrapLines(this.text, this.horizontalSizing.get().isContent() ? this.maxWidth : this.width);
+        this.wrappedText = this.textRenderer.split(this.text, this.horizontalSizing.get().isContent() ? this.maxWidth : this.width);
     }
 
     protected int textHeight() {
@@ -179,12 +176,26 @@ public class LabelComponent extends BaseComponent {
     }
 
     @Override
-    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
-        var matrices = context.getMatrices();
+    public void draw(OwoUIGraphics graphics, int mouseX, int mouseY, float partialTicks, float delta) {
+        graphics
+            .push()
+            .translate(0, 1f / Minecraft.getInstance().getWindow().getGuiScale());
 
-        matrices.pushMatrix();
-        matrices.translate(0, 1f / MinecraftClient.getInstance().getWindow().getScaleFactor());
+        this.drawText((renderX, renderY, text, shadow, color) -> {
+            graphics.drawString(
+                Minecraft.getInstance().font,
+                text,
+                renderX,
+                renderY,
+                color.argb(),
+                shadow
+            );
+        });
 
+        graphics.pop();
+    }
+
+    protected void drawText(LabelDrawFunction goodFunction) {
         int x = this.x;
         int y = this.y;
 
@@ -208,23 +219,21 @@ public class LabelComponent extends BaseComponent {
             int renderX = lambdaX;
 
             switch (this.horizontalTextAlignment) {
-                case CENTER -> renderX += (this.width - this.textRenderer.getWidth(renderText)) / 2;
-                case RIGHT -> renderX += this.width - this.textRenderer.getWidth(renderText);
+                case CENTER -> renderX += (this.width - this.textRenderer.width(renderText)) / 2;
+                case RIGHT -> renderX += this.width - this.textRenderer.width(renderText);
             }
 
             int renderY = lambdaY + i * (this.lineHeight() + this.lineSpacing());
-            renderY += this.lineHeight() - this.textRenderer.fontHeight;
+            renderY += this.lineHeight() - this.textRenderer.lineHeight;
 
-            context.drawText(this.textRenderer, renderText, renderX, renderY, this.color.get().argb(), this.shadow);
+            goodFunction.draw(renderX, renderY, renderText, this.shadow, this.color.get());
         }
-
-        matrices.popMatrix();
     }
 
     @Override
-    public void drawTooltip(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+    public void drawTooltip(OwoUIGraphics context, int mouseX, int mouseY, float partialTicks, float delta) {
         super.drawTooltip(context, mouseX, mouseY, partialTicks, delta);
-        context.drawHoverEvent(this.textRenderer, this.styleAt(mouseX - this.x, mouseY - this.y), mouseX, mouseY);
+        context.renderComponentHoverEffect(this.textRenderer, this.styleAt(mouseX - this.x, mouseY - this.y), mouseX, mouseY);
     }
 
     @Override
@@ -234,13 +243,16 @@ public class LabelComponent extends BaseComponent {
     }
 
     @Override
-    public boolean onMouseDown(Click click, boolean doubled) {
+    public boolean onMouseDown(MouseButtonEvent click, boolean doubled) {
         return this.textClickHandler.apply(this.styleAt((int) click.x(), (int) click.y())) | super.onMouseDown(click, doubled);
     }
 
     @Nullable
     protected Style styleAt(int mouseX, int mouseY) {
-        return this.textRenderer.getTextHandler().getStyleAt(this.wrappedText.get(Math.min(mouseY / (this.lineHeight() + this.lineSpacing()), this.wrappedText.size() - 1)), mouseX);
+        var clickHandler = new RawLabel.Instance.StyleCollector(this.textRenderer, this.x + mouseX, this.y + mouseY);
+        this.drawText((renderX, renderY, text, $, $$) -> clickHandler.accept(renderX, renderY, text));
+
+        return clickHandler.result();
     }
 
     @Override
@@ -255,5 +267,10 @@ public class LabelComponent extends BaseComponent {
 
         UIParsing.apply(children, "vertical-text-alignment", VerticalAlignment::parse, this::verticalTextAlignment);
         UIParsing.apply(children, "horizontal-text-alignment", HorizontalAlignment::parse, this::horizontalTextAlignment);
+    }
+
+    @FunctionalInterface
+    protected interface LabelDrawFunction {
+        void draw(int renderX, int renderY, FormattedCharSequence text, boolean shadow, Color color);
     }
 }

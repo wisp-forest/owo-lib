@@ -2,44 +2,44 @@ package io.wispforest.owo.ui.renderstate;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTextureView;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.RotatingCubeMapRenderer;
-import net.minecraft.client.gui.ScreenRect;
-import net.minecraft.client.gui.render.SpecialGuiElementRenderer;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
 import net.minecraft.client.gui.render.state.GuiRenderState;
-import net.minecraft.client.gui.render.state.special.SpecialGuiElementRenderState;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.render.state.pip.PictureInPictureRenderState;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.PanoramaRenderer;
 import org.jetbrains.annotations.Nullable;
 
 public record CubeMapElementRenderState(
-    RotatingCubeMapRenderer cubeMap,
+    PanoramaRenderer cubeMap,
     boolean rotate,
-    ScreenRect bounds,
-    ScreenRect scissorArea
-) implements SpecialGuiElementRenderState {
+    ScreenRectangle bounds,
+    ScreenRectangle scissorArea
+) implements PictureInPictureRenderState {
 
     public static OutputOverride outputOverride = null;
 
     @Override
-    public int x1() {
-        return this.bounds.getLeft();
+    public int x0() {
+        return this.bounds.left();
     }
 
     @Override
-    public int x2() {
-        return this.bounds.getRight();
+    public int x1() {
+        return this.bounds.right();
+    }
+
+    @Override
+    public int y0() {
+        return this.bounds.top();
     }
 
     @Override
     public int y1() {
-        return this.bounds.getTop();
-    }
-
-    @Override
-    public int y2() {
-        return this.bounds.getBottom();
+        return this.bounds.bottom();
     }
 
     @Override
@@ -48,35 +48,35 @@ public record CubeMapElementRenderState(
     }
 
     @Override
-    public @Nullable ScreenRect scissorArea() {
+    public @Nullable ScreenRectangle scissorArea() {
         return this.scissorArea;
     }
 
     @Override
-    public @Nullable ScreenRect bounds() {
+    public @Nullable ScreenRectangle bounds() {
         return this.scissorArea != null ? this.scissorArea.intersection(this.bounds) : this.bounds;
     }
 
-    public static class Renderer extends SpecialGuiElementRenderer<CubeMapElementRenderState> {
+    public static class Renderer extends PictureInPictureRenderer<CubeMapElementRenderState> {
 
-        private static DrawContext dummyContext;
+        private static GuiGraphics dummyContext;
 
-        protected Renderer(VertexConsumerProvider.Immediate vertexConsumers) {
+        protected Renderer(MultiBufferSource.BufferSource vertexConsumers) {
             super(vertexConsumers);
         }
 
         @Override
-        public Class<CubeMapElementRenderState> getElementClass() {
+        public Class<CubeMapElementRenderState> getRenderStateClass() {
             return CubeMapElementRenderState.class;
         }
 
         @Override
-        protected void render(CubeMapElementRenderState state, MatrixStack matrices) {
+        protected void renderToTexture(CubeMapElementRenderState state, PoseStack matrices) {
             if (dummyContext == null) {
-                dummyContext = new DrawContext(MinecraftClient.getInstance(), new GuiRenderState());
+                dummyContext = new GuiGraphics(Minecraft.getInstance(), new GuiRenderState(), 0, 0);
             }
 
-            dummyContext.state.clear();
+            dummyContext.guiRenderState.reset();
 
             try {
                 CubeMapElementRenderState.outputOverride = new OutputOverride(
@@ -92,7 +92,7 @@ public record CubeMapElementRenderState(
         }
 
         @Override
-        protected String getName() {
+        protected String getTextureLabel() {
             return "owo-ui_cubemap";
         }
     }

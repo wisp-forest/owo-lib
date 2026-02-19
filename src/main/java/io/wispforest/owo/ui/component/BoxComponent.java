@@ -1,9 +1,9 @@
 package io.wispforest.owo.ui.component;
 
-import io.wispforest.owo.ui.base.BaseComponent;
+import io.wispforest.owo.ui.base.BaseUIComponent;
 import io.wispforest.owo.ui.core.AnimatableProperty;
 import io.wispforest.owo.ui.core.Color;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
+import io.wispforest.owo.ui.core.OwoUIGraphics;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
@@ -15,7 +15,7 @@ import java.util.Map;
  * A colored rectangle either filled or outlined
  * by a given color or gradient
  */
-public class BoxComponent extends BaseComponent {
+public class BoxComponent extends BaseUIComponent {
 
     protected boolean fill = false;
     protected GradientDirection direction = GradientDirection.TOP_TO_BOTTOM;
@@ -35,23 +35,23 @@ public class BoxComponent extends BaseComponent {
     }
 
     @Override
-    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+    public void draw(OwoUIGraphics graphics, int mouseX, int mouseY, float partialTicks, float delta) {
         final int startColor = this.startColor.get().argb();
         final int endColor = this.endColor.get().argb();
 
         if (this.fill) {
             switch (this.direction) {
-                case TOP_TO_BOTTOM -> context.drawGradientRect(this.x, this.y, this.width, this.height,
+                case TOP_TO_BOTTOM -> graphics.drawGradientRect(this.x, this.y, this.width, this.height,
                         startColor, startColor, endColor, endColor);
-                case RIGHT_TO_LEFT -> context.drawGradientRect(this.x, this.y, this.width, this.height,
+                case RIGHT_TO_LEFT -> graphics.drawGradientRect(this.x, this.y, this.width, this.height,
                         endColor, startColor, startColor, endColor);
-                case BOTTOM_TO_TOP -> context.drawGradientRect(this.x, this.y, this.width, this.height,
+                case BOTTOM_TO_TOP -> graphics.drawGradientRect(this.x, this.y, this.width, this.height,
                         endColor, endColor, startColor, startColor);
-                case LEFT_TO_RIGHT -> context.drawGradientRect(this.x, this.y, this.width, this.height,
+                case LEFT_TO_RIGHT -> graphics.drawGradientRect(this.x, this.y, this.width, this.height,
                         startColor, endColor, endColor, startColor);
             }
         } else {
-            context.drawRectOutline(this.x, this.y, this.width, this.height, startColor);
+            graphics.drawRectOutline(this.x, this.y, this.width, this.height, startColor);
         }
     }
 

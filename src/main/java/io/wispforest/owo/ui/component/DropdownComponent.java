@@ -1,18 +1,19 @@
 package io.wispforest.owo.ui.component;
 
-import io.wispforest.owo.ui.base.BaseComponent;
-import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.Owo;
+import io.wispforest.owo.ui.base.BaseUIComponent;
+import io.wispforest.owo.ui.container.UIContainers;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.UISounds;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import org.apache.commons.lang3.mutable.MutableBoolean;
@@ -26,14 +27,14 @@ import java.util.function.Function;
 
 public class DropdownComponent extends FlowLayout {
 
-    protected static final Identifier ICONS_TEXTURE = Identifier.of("owo", "textures/gui/dropdown_icons.png");
+    protected static final Identifier ICONS_TEXTURE = Owo.id("textures/gui/dropdown_icons.png");
     protected final FlowLayout entries;
     protected boolean closeWhenNotHovered = false;
 
     protected DropdownComponent(Sizing horizontalSizing) {
         super(Sizing.content(), Sizing.content(), Algorithm.HORIZONTAL);
 
-        this.entries = Containers.verticalFlow(horizontalSizing, Sizing.content());
+        this.entries = UIContainers.verticalFlow(horizontalSizing, Sizing.content());
         this.entries.padding(Insets.of(1));
         this.entries.allowOverflow(true);
         this.entries.surface(Surface.flat(0xC7000000).and(Surface.blur(3, 5)).and(Surface.outline(0xFF121212)));
@@ -52,7 +53,7 @@ public class DropdownComponent extends FlowLayout {
      * @param mouseY        The y-coordinate at which to open the dropdown
      * @param builder       A function to add entries to the dropdown
      */
-    public static <R extends ParentComponent> DropdownComponent openContextMenu(Screen screen, R rootComponent, BiConsumer<R, DropdownComponent> mountFunction, double mouseX, double mouseY, Consumer<DropdownComponent> builder) {
+    public static <R extends ParentUIComponent> DropdownComponent openContextMenu(Screen screen, R rootComponent, BiConsumer<R, DropdownComponent> mountFunction, double mouseX, double mouseY, Consumer<DropdownComponent> builder) {
         var dropdown = new DropdownComponent(Sizing.content());
         builder.accept(dropdown);
 
@@ -93,15 +94,15 @@ public class DropdownComponent extends FlowLayout {
     }
 
     @Override
-    public ParentComponent surface(Surface surface) {
+    public ParentUIComponent surface(Surface surface) {
         this.entries.surface(surface);
 
         return this;
     }
 
     @Override
-    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
-        super.draw(context, mouseX, mouseY, partialTicks, delta);
+    public void draw(OwoUIGraphics graphics, int mouseX, int mouseY, float partialTicks, float delta) {
+        super.draw(graphics, mouseX, mouseY, partialTicks, delta);
         if (this.closeWhenNotHovered && !this.isInBoundingBox(mouseX, mouseY)) {
             this.queue(() -> {
                 this.closeWhenNotHovered(false);
@@ -128,22 +129,22 @@ public class DropdownComponent extends FlowLayout {
         return this;
     }
 
-    public DropdownComponent text(Text text) {
-        this.entries.child(Components.label(text).color(Color.ofFormatting(Formatting.GRAY)).margins(Insets.of(2)));
+    public DropdownComponent text(Component text) {
+        this.entries.child(UIComponents.label(text).color(Color.ofFormatting(ChatFormatting.GRAY)).margins(Insets.of(2)));
         return this;
     }
 
-    public DropdownComponent button(Text text, Consumer<DropdownComponent> onClick) {
+    public DropdownComponent button(Component text, Consumer<DropdownComponent> onClick) {
         this.entries.child(new Button(this, text, onClick).margins(Insets.of(2)));
         return this;
     }
 
-    public DropdownComponent checkbox(Text text, boolean state, Consumer<Boolean> onClick) {
+    public DropdownComponent checkbox(Component text, boolean state, Consumer<Boolean> onClick) {
         this.entries.child(new Checkbox(this, text, state, onClick).margins(Insets.of(2)));
         return this;
     }
 
-    public DropdownComponent nested(Text text, Sizing horizontalSizing, Consumer<DropdownComponent> builder) {
+    public DropdownComponent nested(Component text, Sizing horizontalSizing, Consumer<DropdownComponent> builder) {
         var nested = new DropdownComponent(horizontalSizing);
         builder.accept(nested);
         this.entries.child(new NestEntry(this, text, nested).margins(Insets.of(2)));
@@ -151,7 +152,7 @@ public class DropdownComponent extends FlowLayout {
     }
 
     @Override
-    public FlowLayout removeChild(Component child) {
+    public FlowLayout removeChild(UIComponent child) {
         if (child == this.entries) {
             this.queue(() -> {
                 this.closeWhenNotHovered(false);
@@ -204,16 +205,16 @@ public class DropdownComponent extends FlowLayout {
                 }
                 case "nested" -> {
                     var text = entry.getAttribute("translate").equals("true")
-                            ? Text.translatable(entry.getAttribute("name"))
-                            : Text.literal(entry.getAttribute("name"));
+                            ? Component.translatable(entry.getAttribute("name"))
+                            : Component.literal(entry.getAttribute("name"));
                     this.nested(text, Sizing.content(), dropdownComponent -> dropdownComponent.parseAndApplyEntries(entry));
                 }
             }
         }
     }
 
-    protected static void drawIconFromTexture(OwoUIDrawContext context, ParentComponent dropdown, int y, int u, int v) {
-        context.drawTexture(RenderPipelines.GUI_TEXTURED, ICONS_TEXTURE,
+    protected static void drawIconFromTexture(OwoUIGraphics context, ParentUIComponent dropdown, int y, int u, int v) {
+        context.blit(RenderPipelines.GUI_TEXTURED, ICONS_TEXTURE,
                 dropdown.x() + dropdown.width() - dropdown.padding().get().right() - 10, y,
                 u, v,
                 9, 9,
@@ -225,16 +226,16 @@ public class DropdownComponent extends FlowLayout {
         void setWidth(int width);
     }
 
-    protected static class Divider extends BaseComponent implements ResizeableComponent {
+    protected static class Divider extends BaseUIComponent implements ResizeableComponent {
 
         public Divider() {
             this.sizing(Sizing.fixed(1));
         }
 
         @Override
-        public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+        public void draw(OwoUIGraphics graphics, int mouseX, int mouseY, float partialTicks, float delta) {
             var margins = this.margins.get();
-            context.fill(
+            graphics.fill(
                     this.x - margins.left(),
                     this.y - margins.top(),
                     this.x + this.width + margins.right(),
@@ -253,7 +254,7 @@ public class DropdownComponent extends FlowLayout {
 
         private final DropdownComponent child;
 
-        protected NestEntry(DropdownComponent parentDropdown, Text text, DropdownComponent child) {
+        protected NestEntry(DropdownComponent parentDropdown, Component text, DropdownComponent child) {
             super(text);
             this.child = child;
 
@@ -268,9 +269,9 @@ public class DropdownComponent extends FlowLayout {
         }
 
         @Override
-        public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
-            super.draw(context, mouseX, mouseY, partialTicks, delta);
-            drawIconFromTexture(context, this.parent, this.y, 0, 16);
+        public void draw(OwoUIGraphics graphics, int mouseX, int mouseY, float partialTicks, float delta) {
+            super.draw(graphics, mouseX, mouseY, partialTicks, delta);
+            drawIconFromTexture(graphics, this.parent, this.y, 0, 16);
 
             this.child.closeWhenNotHovered(!PositionedRectangle.of(this.x, this.y, this.parent.width(), this.height).isInBoundingBox(mouseX, mouseY));
         }
@@ -286,7 +287,7 @@ public class DropdownComponent extends FlowLayout {
         protected final DropdownComponent parentDropdown;
         protected Consumer<DropdownComponent> onClick;
 
-        protected Button(DropdownComponent parentDropdown, Text text, Consumer<DropdownComponent> onClick) {
+        protected Button(DropdownComponent parentDropdown, Component text, Consumer<DropdownComponent> onClick) {
             super(text);
             this.onClick = onClick;
             this.parentDropdown = parentDropdown;
@@ -300,7 +301,7 @@ public class DropdownComponent extends FlowLayout {
         }
 
         @Override
-        public boolean onMouseDown(Click click, boolean doubled) {
+        public boolean onMouseDown(MouseButtonEvent click, boolean doubled) {
             super.onMouseDown(click, doubled);
 
             this.onClick.accept(this.parentDropdown);
@@ -310,10 +311,10 @@ public class DropdownComponent extends FlowLayout {
         }
 
         @Override
-        public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+        public void draw(OwoUIGraphics graphics, int mouseX, int mouseY, float partialTicks, float delta) {
             if (this.isInBoundingBox(mouseX, mouseY)) {
                 var margins = this.margins.get();
-                context.fill(
+                graphics.fill(
                         this.x - margins.left(),
                         this.y - margins.top(),
                         this.x + this.width + margins.right(),
@@ -322,7 +323,7 @@ public class DropdownComponent extends FlowLayout {
                 );
             }
 
-            super.draw(context, mouseX, mouseY, partialTicks, delta);
+            super.draw(graphics, mouseX, mouseY, partialTicks, delta);
         }
 
         protected void playInteractionSound() {
@@ -334,7 +335,7 @@ public class DropdownComponent extends FlowLayout {
 
         protected boolean state;
 
-        public Checkbox(DropdownComponent parentDropdown, Text text, boolean state, Consumer<Boolean> onClick) {
+        public Checkbox(DropdownComponent parentDropdown, Component text, boolean state, Consumer<Boolean> onClick) {
             super(parentDropdown, text, dropdownComponent -> {
             });
 
@@ -346,9 +347,9 @@ public class DropdownComponent extends FlowLayout {
         }
 
         @Override
-        public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
-            super.draw(context, mouseX, mouseY, partialTicks, delta);
-            drawIconFromTexture(context, this.parent, this.y, this.state ? 16 : 0, 0);
+        public void draw(OwoUIGraphics graphics, int mouseX, int mouseY, float partialTicks, float delta) {
+            super.draw(graphics, mouseX, mouseY, partialTicks, delta);
+            drawIconFromTexture(graphics, this.parent, this.y, this.state ? 16 : 0, 0);
         }
 
         @Override

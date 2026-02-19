@@ -3,7 +3,7 @@ package io.wispforest.uwu.config;
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.config.annotation.*;
 import io.wispforest.owo.ui.core.Color;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 
 import java.util.Set;
 
@@ -16,7 +16,7 @@ public class UowouConfigModel {
     public boolean thisIsNotSyncable = false;
 
     @Hook
-    public Identifier idPlease = Identifier.of("uowou", "bruh");
+    public Identifier idPlease = Identifier.fromNamespaceAndPath("uowou", "bruh");
 
     @Sync(Option.SyncMode.NONE)
     public Set<String> setPlease = Set.of("that's a value");

@@ -1,12 +1,12 @@
 package io.wispforest.owo.util.pond;
 
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.entry.RegistryEntryInfo;
+import net.minecraft.core.Holder;
+import net.minecraft.core.RegistrationInfo;
+import net.minecraft.resources.ResourceKey;
 import org.jetbrains.annotations.ApiStatus;
 
 public interface OwoSimpleRegistryExtensions<T> {
 
     @ApiStatus.Internal
-    RegistryEntry.Reference<T> owo$set(int id, RegistryKey<T> arg, T object, RegistryEntryInfo arg2);
+    Holder.Reference<T> owo$set(int id, ResourceKey<T> arg, T object, RegistrationInfo arg2);
 }

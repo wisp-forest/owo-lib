@@ -1,15 +1,15 @@
 package io.wispforest.owo.compat.rei;
 
-import io.wispforest.owo.ui.base.BaseComponent;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
-import io.wispforest.owo.ui.core.ParentComponent;
+import io.wispforest.owo.ui.base.BaseUIComponent;
+import io.wispforest.owo.ui.core.OwoUIGraphics;
+import io.wispforest.owo.ui.core.ParentUIComponent;
 import io.wispforest.owo.ui.core.Sizing;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 
-public class ReiWidgetComponent extends BaseComponent {
+public class ReiWidgetComponent extends BaseUIComponent {
 
     private final WidgetWithBounds widget;
 
@@ -30,18 +30,18 @@ public class ReiWidgetComponent extends BaseComponent {
     }
 
     @Override
-    public void mount(ParentComponent parent, int x, int y) {
+    public void mount(ParentUIComponent parent, int x, int y) {
         super.mount(parent, x, y);
         this.applyToWidget();
     }
 
     @Override
-    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
-        this.widget.render(context, mouseX, mouseY, partialTicks);
+    public void draw(OwoUIGraphics graphics, int mouseX, int mouseY, float partialTicks, float delta) {
+        this.widget.render(graphics, mouseX, mouseY, partialTicks);
     }
 
     @Override
-    public void drawFocusHighlight(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {}
+    public void drawFocusHighlight(OwoUIGraphics context, int mouseX, int mouseY, float partialTicks, float delta) {}
 
     @Override
     protected int determineHorizontalContentSize(Sizing sizing) {
@@ -76,14 +76,14 @@ public class ReiWidgetComponent extends BaseComponent {
     }
 
     @Override
-    public boolean onMouseDown(Click click, boolean doubled) {
-        return this.widget.mouseClicked(new Click(this.x + click.x(), this.y + click.y(), click.buttonInfo()), doubled)
+    public boolean onMouseDown(MouseButtonEvent click, boolean doubled) {
+        return this.widget.mouseClicked(new MouseButtonEvent(this.x + click.x(), this.y + click.y(), click.buttonInfo()), doubled)
                 | super.onMouseDown(click, doubled);
     }
 
     @Override
-    public boolean onMouseUp(Click click) {
-        return this.widget.mouseReleased(new Click(this.x + click.x(), this.y + click.y(), click.buttonInfo()))
+    public boolean onMouseUp(MouseButtonEvent click) {
+        return this.widget.mouseReleased(new MouseButtonEvent(this.x + click.x(), this.y + click.y(), click.buttonInfo()))
                 | super.onMouseUp(click);
     }
 
@@ -94,19 +94,19 @@ public class ReiWidgetComponent extends BaseComponent {
     }
 
     @Override
-    public boolean onMouseDrag(Click click, double deltaX, double deltaY) {
-        return this.widget.mouseDragged(new Click(this.x + click.x(), this.y + click.y(), click.buttonInfo()), deltaX, deltaY)
+    public boolean onMouseDrag(MouseButtonEvent click, double deltaX, double deltaY) {
+        return this.widget.mouseDragged(new MouseButtonEvent(this.x + click.x(), this.y + click.y(), click.buttonInfo()), deltaX, deltaY)
                 | super.onMouseDrag(click, deltaX, deltaY);
     }
 
     @Override
-    public boolean onCharTyped(CharInput input) {
+    public boolean onCharTyped(CharacterEvent input) {
         return this.widget.charTyped(input)
                 | super.onCharTyped(input);
     }
 
     @Override
-    public boolean onKeyPress(KeyInput input) {
+    public boolean onKeyPress(KeyEvent input) {
         return this.widget.keyPressed(input)
                 | super.onKeyPress(input);
     }

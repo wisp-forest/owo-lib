@@ -1,8 +1,8 @@
 package io.wispforest.owo.ui.util;
 
+import com.mojang.blaze3d.platform.Window;
 import io.wispforest.owo.ui.core.CursorStyle;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.util.Window;
+import net.minecraft.client.Minecraft;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.EnumMap;
@@ -28,11 +28,11 @@ public class CursorAdapter {
     }
 
     public static CursorAdapter ofClientWindow() {
-        return new CursorAdapter(MinecraftClient.getInstance().getWindow().getHandle());
+        return new CursorAdapter(Minecraft.getInstance().getWindow().handle());
     }
 
     public static CursorAdapter ofWindow(Window window) {
-        return new CursorAdapter(window.getHandle());
+        return new CursorAdapter(window.handle());
     }
 
     public static CursorAdapter ofWindow(long windowHandle) {

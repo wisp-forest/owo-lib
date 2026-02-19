@@ -5,19 +5,19 @@ import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.buffers.Std140Builder;
 import com.mojang.blaze3d.buffers.Std140SizeCalculator;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTextureView;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.wispforest.owo.ui.core.OwoUIPipelines;
 import io.wispforest.owo.ui.event.ClientRenderCallback;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.DynamicUniformStorage;
-import net.minecraft.client.gl.Framebuffer;
-import net.minecraft.client.gl.SimpleFramebuffer;
-import net.minecraft.client.gui.ScreenRect;
-import net.minecraft.client.gui.render.state.SimpleGuiElementRenderState;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.texture.TextureSetup;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.gui.render.TextureSetup;
+import net.minecraft.client.gui.render.state.GuiElementRenderState;
+import net.minecraft.client.renderer.DynamicUniformStorage;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.ApiStatus;
@@ -31,30 +31,30 @@ import java.util.Map;
 public record BlurQuadElementRenderState(
     RenderPipeline pipeline,
     Matrix3x2f pose,
-    ScreenRect bounds,
-    ScreenRect scissorArea,
+    ScreenRectangle bounds,
+    ScreenRectangle scissorArea,
     TextureSetup textureSetup
-) implements SimpleGuiElementRenderState {
+) implements GuiElementRenderState {
 
     public static Uniforms uniforms;
-    public static Framebuffer input;
+    public static RenderTarget input;
     public static GpuTextureView inputView;
 
     @ApiStatus.Internal
-    public static void initialize(MinecraftClient client) {
+    public static void initialize(Minecraft client) {
         uniforms = new Uniforms();
 
         var window = client.getWindow();
 
-        input = new SimpleFramebuffer("owo_blur_input", window.getFramebufferWidth(), window.getFramebufferHeight(), false);
-        inputView = RenderSystem.getDevice().createTextureView(input.getColorAttachment());
+        input = new TextureTarget("owo_blur_input", window.getWidth(), window.getHeight(), false);
+        inputView = RenderSystem.getDevice().createTextureView(input.getColorTexture());
 
         WindowResizeCallback.EVENT.register((innerClient, innerWindow) -> {
             if (input == null) return;
-            input.resize(innerWindow.getFramebufferWidth(), innerWindow.getFramebufferHeight());
+            input.resize(innerWindow.getWidth(), innerWindow.getHeight());
 
             inputView.close();
-            inputView = RenderSystem.getDevice().createTextureView(input.getColorAttachment());
+            inputView = RenderSystem.getDevice().createTextureView(input.getColorTexture());
         });
 
         ClientRenderCallback.AFTER.register($ -> {
@@ -65,16 +65,16 @@ public record BlurQuadElementRenderState(
     @ApiStatus.Internal
     public BlurQuadElementRenderState {}
 
-    public BlurQuadElementRenderState(Matrix3x2f pose, ScreenRect bounds, ScreenRect scissorArea, int directions, float quality, float size) {
+    public BlurQuadElementRenderState(Matrix3x2f pose, ScreenRectangle bounds, ScreenRectangle scissorArea, int directions, float quality, float size) {
         this(OwoUIPipelines.GUI_BLUR, pose, bounds, scissorArea, createTextureSetup(directions, quality, size));
     }
 
     @Override
-    public void setupVertices(VertexConsumer vertices) {
-        vertices.vertex(this.pose(), (float) this.bounds.getLeft(), (float) this.bounds.getTop());
-        vertices.vertex(this.pose(), (float) this.bounds.getLeft(), (float) this.bounds.getBottom());
-        vertices.vertex(this.pose(), (float) this.bounds.getRight(), (float) this.bounds.getBottom());
-        vertices.vertex(this.pose(), (float) this.bounds.getRight(), (float) this.bounds.getTop());
+    public void buildVertices(VertexConsumer vertices) {
+        vertices.addVertexWith2DPose(this.pose(), (float) this.bounds.left(), (float) this.bounds.top());
+        vertices.addVertexWith2DPose(this.pose(), (float) this.bounds.left(), (float) this.bounds.bottom());
+        vertices.addVertexWith2DPose(this.pose(), (float) this.bounds.right(), (float) this.bounds.bottom());
+        vertices.addVertexWith2DPose(this.pose(), (float) this.bounds.right(), (float) this.bounds.top());
     }
 
     @Override
@@ -88,12 +88,12 @@ public record BlurQuadElementRenderState(
     }
 
     @Override
-    public @Nullable ScreenRect scissorArea() {
+    public @Nullable ScreenRectangle scissorArea() {
         return this.scissorArea;
     }
 
     @Override
-    public @Nullable ScreenRect bounds() {
+    public @Nullable ScreenRectangle bounds() {
         return this.scissorArea != null ? this.scissorArea.intersection(this.bounds) : this.bounds;
     }
 
@@ -110,7 +110,7 @@ public record BlurQuadElementRenderState(
     }
 
     private static TextureSetup createTextureSetup(int directions, float quality, float size) {
-        var setup = TextureSetup.withoutGlTexture(null);
+        var setup = TextureSetup.singleTexture(null, null);
         blurSetups.put(setup, new BlurSetup(directions, quality, size));
         return setup;
     }
@@ -124,15 +124,15 @@ public record BlurQuadElementRenderState(
         private final DynamicUniformStorage<Value> storage = new DynamicUniformStorage<>("Blur Settings UBO", SIZE, 4);
 
         public void clear() {
-            this.storage.clear();
+            this.storage.endFrame();
         }
 
         public GpuBufferSlice write(Vector2i inputResolution, int directions, float quality, float size) {
-            return this.storage.write(new Value(inputResolution, directions, quality, size));
+            return this.storage.writeUniform(new Value(inputResolution, directions, quality, size));
         }
 
         //@OnlyIn(Dist.CLIENT)
-        public record Value(Vector2i inputResolution, int directions, float quality, float size) implements DynamicUniformStorage.Uploadable {
+        public record Value(Vector2i inputResolution, int directions, float quality, float size) implements DynamicUniformStorage.DynamicUniform {
             @Override
             public void write(ByteBuffer buffer) {
                 Std140Builder.intoBuffer(buffer)

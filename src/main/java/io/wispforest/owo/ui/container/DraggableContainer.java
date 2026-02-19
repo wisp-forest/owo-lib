@@ -3,13 +3,13 @@ package io.wispforest.owo.ui.container;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
-import net.minecraft.client.gui.Click;
+import net.minecraft.client.input.MouseButtonEvent;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 
 import java.util.Map;
 
-public class DraggableContainer<C extends Component> extends WrappingParentComponent<C> {
+public class DraggableContainer<C extends UIComponent> extends WrappingParentUIComponent<C> {
 
     protected int foreheadSize = 10;
 
@@ -22,9 +22,9 @@ public class DraggableContainer<C extends Component> extends WrappingParentCompo
     }
 
     @Override
-    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
-        super.draw(context, mouseX, mouseY, partialTicks, delta);
-        this.drawChildren(context, mouseX, mouseY, partialTicks, delta, this.childView);
+    public void draw(OwoUIGraphics graphics, int mouseX, int mouseY, float partialTicks, float delta) {
+        super.draw(graphics, mouseX, mouseY, partialTicks, delta);
+        this.drawChildren(graphics, mouseX, mouseY, partialTicks, delta, this.childView);
     }
 
     @Override
@@ -33,7 +33,7 @@ public class DraggableContainer<C extends Component> extends WrappingParentCompo
     }
 
     @Override
-    public boolean onMouseDrag(Click click, double deltaX, double deltaY) {
+    public boolean onMouseDrag(MouseButtonEvent click, double deltaX, double deltaY) {
         this.xOffset += deltaX;
         this.yOffset += deltaY;
 
@@ -43,7 +43,7 @@ public class DraggableContainer<C extends Component> extends WrappingParentCompo
     }
 
     @Override
-    public @Nullable Component childAt(int x, int y) {
+    public @Nullable UIComponent childAt(int x, int y) {
         if (this.isInBoundingBox(x, y) && y - this.y < this.foreheadSize) {
             return this;
         }
@@ -74,7 +74,7 @@ public class DraggableContainer<C extends Component> extends WrappingParentCompo
     }
 
     @Override
-    public ParentComponent padding(Insets padding) {
+    public ParentUIComponent padding(Insets padding) {
         return super.padding(Insets.of(padding.top() + this.foreheadSize, padding.bottom(), padding.left(), padding.right()));
     }
 

@@ -1,18 +1,28 @@
 package io.wispforest.owo.compat.rei;
 
+import dev.architectury.event.CompoundEventResult;
+import io.wispforest.owo.braid.core.BraidScreen;
+import io.wispforest.owo.braid.framework.instance.WidgetInstance;
+import io.wispforest.owo.braid.widgets.recipeviewer.RecipeViewerExclusionZone;
+import io.wispforest.owo.braid.widgets.recipeviewer.RecipeViewerStack;
+import io.wispforest.owo.braid.widgets.recipeviewer.StackDropArea;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
-import io.wispforest.owo.mixin.itemgroup.CreativeInventoryScreenAccessor;
-import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
+import io.wispforest.owo.mixin.itemgroup.CreativeModeInventoryScreenAccessor;
+import io.wispforest.owo.ui.base.BaseOwoContainerScreen;
 import io.wispforest.owo.util.pond.OwoCreativeInventoryScreenExtensions;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
+import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitor;
+import me.shedaniel.rei.api.client.gui.drag.DraggedAcceptorResult;
+import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import me.shedaniel.rei.api.client.registry.screen.OverlayDecider;
 import me.shedaniel.rei.api.client.registry.screen.OverlayRendererProvider;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.forge.REIPluginClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.util.math.RotationAxis;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.common.NeoForge;
@@ -21,6 +31,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
 
 @REIPluginClient
 public class OwoReiPlugin implements REIClientPlugin {
@@ -30,8 +42,8 @@ public class OwoReiPlugin implements REIClientPlugin {
 
     @Override
     public void registerExclusionZones(ExclusionZones zones) {
-        zones.register(CreativeInventoryScreen.class, screen -> {
-            var group = CreativeInventoryScreenAccessor.owo$getSelectedTab();
+        zones.register(CreativeModeInventoryScreen.class, screen -> {
+            var group = CreativeModeInventoryScreenAccessor.owo$getSelectedTab();
             if (!(group instanceof OwoItemGroup owoGroup)) return Collections.emptySet();
             if (owoGroup.getButtons().isEmpty()) return Collections.emptySet();
 
@@ -51,10 +63,31 @@ public class OwoReiPlugin implements REIClientPlugin {
             return rectangles;
         });
 
-        zones.register(BaseOwoHandledScreen.class, screen -> {
-            return ((BaseOwoHandledScreen<?, ?>) screen).componentsForExclusionAreas()
-                    .map(rect -> new Rectangle(rect.x(), rect.y(), rect.width(), rect.height()))
-                    .toList();
+        zones.register(BaseOwoContainerScreen.class, screen -> {
+            return ((BaseOwoContainerScreen<?, ?>) screen).componentsForExclusionAreas()
+                .map(rect -> new Rectangle(rect.x(), rect.y(), rect.width(), rect.height()))
+                .toList();
+        });
+
+        zones.register(BraidScreen.class, screen -> {
+            List<Rectangle> rectangles = new ArrayList<>();
+
+            var visitor = new WidgetInstance.Visitor() {
+                @Override
+                public void visit(WidgetInstance<?> child) {
+                    if (child instanceof RecipeViewerExclusionZone.Instance area) {
+                        var bounds = area.computeGlobalBounds();
+
+                        rectangles.add(new Rectangle(bounds.minX, bounds.minY, bounds.maxX - bounds.minX, bounds.maxY - bounds.minY));
+                    }
+
+                    child.visitChildren(this);
+                }
+            };
+
+            screen.state.rootInstance().visitChildren(visitor);
+
+            return rectangles;
         });
     }
 
@@ -63,7 +96,7 @@ public class OwoReiPlugin implements REIClientPlugin {
         registry.registerDecider(new OverlayDecider() {
             @Override
             public <R extends Screen> boolean isHandingScreen(Class<R> screen) {
-                return BaseOwoHandledScreen.class.isAssignableFrom(screen);
+                return BaseOwoContainerScreen.class.isAssignableFrom(screen);
             }
 
             @Override
@@ -80,6 +113,72 @@ public class OwoReiPlugin implements REIClientPlugin {
                         renderSink = null;
                     }
                 };
+            }
+        });
+
+        registry.registerFocusedStack((screen, mouse) -> {
+            if (!(screen instanceof BraidScreen braid)) return CompoundEventResult.pass();
+
+            var hit = braid.state.hitTest(mouse.x, mouse.y)
+                .firstWhere(x -> x.instance() instanceof RecipeViewerStack.Instance);
+
+            if (hit == null) return CompoundEventResult.pass();
+
+            var instance = (RecipeViewerStack.Instance) hit.instance();
+
+            return CompoundEventResult.interruptTrue(ReiStackUtil.toRei(instance.widget().stackProvider.get()));
+        });
+
+        registry.registerDraggableStackVisitor(new DraggableStackVisitor<Screen>() {
+            @Override
+            public <R extends Screen> boolean isHandingScreen(R screen) {
+                return screen instanceof BraidScreen;
+            }
+
+            @Override
+            public Stream<BoundsProvider> getDraggableAcceptingBounds(DraggingContext<Screen> context, DraggableStack stack) {
+                if (!(context.getScreen() instanceof BraidScreen braid)) return Stream.empty();
+
+                List<BoundsProvider> allBounds = new ArrayList<>();
+
+                var converted = ReiStackUtil.fromRei(stack.getStack());
+
+                var visitor = new WidgetInstance.Visitor() {
+                    @Override
+                    public void visit(WidgetInstance<?> child) {
+                        if (child instanceof StackDropArea.Instance area && area.widget().stackPredicate.test(converted)) {
+                            var bounds = area.computeGlobalBounds();
+
+                            allBounds.add(BoundsProvider.ofRectangle(new Rectangle(bounds.minX, bounds.minY, bounds.maxX - bounds.minX, bounds.maxY - bounds.minY)));
+                        }
+
+                        child.visitChildren(this);
+                    }
+                };
+
+                braid.state.rootInstance().visitChildren(visitor);
+
+                return allBounds.stream();
+            }
+
+            @Override
+            public DraggedAcceptorResult acceptDraggedStack(DraggingContext<Screen> context, DraggableStack stack) {
+                if (!(context.getScreen() instanceof BraidScreen braid)) return DraggedAcceptorResult.PASS;
+
+                var hit = braid.state.hitTest(context.getCurrentPosition().x, context.getCurrentPosition().y)
+                    .firstWhere(x -> x.instance() instanceof StackDropArea.Instance);
+
+                if (hit == null) return DraggedAcceptorResult.PASS;
+
+                var instance = (StackDropArea.Instance) hit.instance();
+
+                var converted = ReiStackUtil.fromRei(stack.getStack());
+
+                if (!instance.widget().stackPredicate.test(converted)) return DraggedAcceptorResult.PASS;
+
+                instance.widget().stackAcceptor.accept(converted);
+
+                return DraggedAcceptorResult.ACCEPTED;
             }
         });
     }

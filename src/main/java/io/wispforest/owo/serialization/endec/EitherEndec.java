@@ -58,7 +58,7 @@ public final class EitherEndec<L, R> implements Endec<Either<L, R>> {
 
             throw new IllegalStateException("Neither alternative read successfully");
         } else {
-            var struct = deserializer.struct();
+            var struct = deserializer.struct(ctx);
 
             return (struct.field("is_left", ctx, Endec.BOOLEAN))
                     ? Either.left(struct.field("left", ctx, this.leftEndec))

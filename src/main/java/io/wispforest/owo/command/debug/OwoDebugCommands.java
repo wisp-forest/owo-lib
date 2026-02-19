@@ -40,18 +40,18 @@ import net.neoforged.neoforge.registries.RegisterEvent;
 import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.event.Level;
 
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 
 @ApiStatus.Internal
 public class OwoDebugCommands {
 
     private static EnumArgumentType<Level> LEVEL_ARGUMENT_TYPE;
 
-    private static final SuggestionProvider<ServerCommandSource> POI_TYPES =
-        (context, builder) -> CommandSource.suggestIdentifiers(Registries.POINT_OF_INTEREST_TYPE.getIds(), builder);
+    private static final SuggestionProvider<CommandSourceStack> POI_TYPES =
+        (context, builder) -> SharedSuggestionProvider.suggestResource(BuiltInRegistries.POINT_OF_INTEREST_TYPE.keySet(), builder);
 
-    private static final SimpleCommandExceptionType NO_POI_TYPE = new SimpleCommandExceptionType(Text.of("Invalid POI type"));
+    private static final SimpleCommandExceptionType NO_POI_TYPE = new SimpleCommandExceptionType(Component.nullToEmpty("Invalid POI type"));
     public static final int GENERAL_PURPLE = 0xB983FF;
     public static final int KEY_BLUE = 0x94B3FD;
     public static final int VALUE_BLUE = 0x94DAFF;
@@ -71,36 +71,36 @@ public class OwoDebugCommands {
                 final var level = LEVEL_ARGUMENT_TYPE.get(context, "level");
                 LogUtils.configureRootLoggingLevel(level);
 
-                context.getSource().sendFeedback(() -> TextOps.concat(Owo.PREFIX, Text.of("global logging level set to: §9" + level)), false);
+                context.getSource().sendSuccess(() -> TextOps.concat(Owo.PREFIX, Component.nullToEmpty("global logging level set to: §9" + level)), false);
                 return 0;
             })));
 
-            dispatcher.register(literal("query-poi").then(argument("poi_type", IdentifierArgumentType.identifier()).suggests(POI_TYPES)
+            dispatcher.register(literal("query-poi").then(argument("poi_type", IdentifierArgument.id()).suggests(POI_TYPES)
                 .then(argument("radius", IntegerArgumentType.integer()).executes(context -> {
                     var player = context.getSource().getPlayer();
-                    var poiType = Registries.POINT_OF_INTEREST_TYPE.getOptionalValue(IdentifierArgumentType.getIdentifier(context, "poi_type"))
+                    var poiType = BuiltInRegistries.POINT_OF_INTEREST_TYPE.getOptional(IdentifierArgument.getId(context, "poi_type"))
                         .orElseThrow(NO_POI_TYPE::create);
 
-                    var entries = ((ServerWorld) player.getEntityWorld()).getPointOfInterestStorage().getInCircle(type -> type.value() == poiType,
-                        player.getBlockPos(), IntegerArgumentType.getInteger(context, "radius"), PointOfInterestStorage.OccupationStatus.ANY).toList();
+                    var entries = ((ServerLevel) player.level()).getPoiManager().getInRange(type -> type.value() == poiType,
+                        player.blockPosition(), IntegerArgumentType.getInteger(context, "radius"), PoiManager.Occupancy.ANY).toList();
 
-                    player.sendMessage(TextOps.concat(Owo.PREFIX, TextOps.withColor("Found §" + entries.size() + " §entr" + (entries.size() == 1 ? "y" : "ies"),
-                        TextOps.color(Formatting.GRAY), GENERAL_PURPLE, TextOps.color(Formatting.GRAY))), false);
+                    player.displayClientMessage(TextOps.concat(Owo.PREFIX, TextOps.withColor("Found §" + entries.size() + " §entr" + (entries.size() == 1 ? "y" : "ies"),
+                        TextOps.color(ChatFormatting.GRAY), GENERAL_PURPLE, TextOps.color(ChatFormatting.GRAY))), false);
 
                     for (var entry : entries) {
 
                         final var entryPos = entry.getPos();
-                        final var blockId = Registries.BLOCK.getId(player.getEntityWorld().getBlockState(entryPos).getBlock()).toString();
+                        final var blockId = BuiltInRegistries.BLOCK.getKey(player.level().getBlockState(entryPos).getBlock()).toString();
                         final var posString = "(" + entryPos.getX() + " " + entryPos.getY() + " " + entryPos.getZ() + ")";
 
                         final var message = TextOps.withColor("-> §" + blockId + " §" + posString,
-                            TextOps.color(Formatting.GRAY), KEY_BLUE, VALUE_BLUE);
+                            TextOps.color(ChatFormatting.GRAY), KEY_BLUE, VALUE_BLUE);
 
-                        message.styled(style -> style.withClickEvent(new ClickEvent.SuggestCommand(
+                        message.withStyle(style -> style.withClickEvent(new ClickEvent.SuggestCommand(
                                 "/tp " + entryPos.getX() + " " + entryPos.getY() + " " + entryPos.getZ()))
-                            .withHoverEvent(new HoverEvent.ShowText(Text.of("Click to teleport"))));
+                            .withHoverEvent(new HoverEvent.ShowText(Component.nullToEmpty("Click to teleport"))));
 
-                        player.sendMessage(message, false);
+                        player.displayClientMessage(message, false);
                     }
 
                     return entries.size();
@@ -108,20 +108,20 @@ public class OwoDebugCommands {
 
             dispatcher.register(literal("dumpfield").then(argument("field_name", StringArgumentType.string()).executes(context -> {
                 final var targetField = StringArgumentType.getString(context, "field_name");
-                final ServerCommandSource source = context.getSource();
-                final ServerPlayerEntity player = source.getPlayer();
-                HitResult target = player.raycast(5, 0, false);
+                final CommandSourceStack source = context.getSource();
+                final ServerPlayer player = source.getPlayer();
+                HitResult target = player.pick(5, 0, false);
 
                 if (target.getType() != HitResult.Type.BLOCK) {
-                    source.sendError(TextOps.concat(Owo.PREFIX, Text.literal("You're not looking at a block")));
+                    source.sendFailure(TextOps.concat(Owo.PREFIX, Component.literal("You're not looking at a block")));
                     return 1;
                 }
 
                 BlockPos pos = ((BlockHitResult) target).getBlockPos();
-                final var blockEntity = player.getEntityWorld().getBlockEntity(pos);
+                final var blockEntity = player.level().getBlockEntity(pos);
 
                 if (blockEntity == null) {
-                    source.sendError(TextOps.concat(Owo.PREFIX, Text.literal(("No block entity"))));
+                    source.sendFailure(TextOps.concat(Owo.PREFIX, Component.literal(("No block entity"))));
                     return 1;
                 }
 
@@ -133,10 +133,10 @@ public class OwoDebugCommands {
                     if (!field.canAccess(blockEntity)) field.setAccessible(true);
                     final var value = field.get(blockEntity);
 
-                    source.sendFeedback(() -> TextOps.concat(Owo.PREFIX, TextOps.withColor("Field value: §" + value, TextOps.color(Formatting.GRAY), KEY_BLUE)), false);
+                    source.sendSuccess(() -> TextOps.concat(Owo.PREFIX, TextOps.withColor("Field value: §" + value, TextOps.color(ChatFormatting.GRAY), KEY_BLUE)), false);
 
                 } catch (Exception e) {
-                    source.sendError(TextOps.concat(Owo.PREFIX, Text.literal("Could not access field - " + e.getClass().getSimpleName() + ": " + e.getMessage())));
+                    source.sendFailure(TextOps.concat(Owo.PREFIX, Component.literal("Could not access field - " + e.getClass().getSimpleName() + ": " + e.getMessage())));
                 }
 
                 return 0;

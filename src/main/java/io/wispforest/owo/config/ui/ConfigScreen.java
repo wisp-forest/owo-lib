@@ -8,26 +8,29 @@ import io.wispforest.owo.config.annotation.Expanded;
 import io.wispforest.owo.config.annotation.RestartRequired;
 import io.wispforest.owo.config.annotation.SectionHeader;
 import io.wispforest.owo.config.ui.component.*;
-import io.wispforest.owo.ui.base.BaseComponent;
+import io.wispforest.owo.ui.base.BaseUIComponent;
 import io.wispforest.owo.ui.base.BaseUIModelScreen;
 import io.wispforest.owo.ui.component.ButtonComponent;
-import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.component.TextBoxComponent;
-import io.wispforest.owo.ui.container.*;
+import io.wispforest.owo.ui.component.UIComponents;
+import io.wispforest.owo.ui.container.CollapsibleContainer;
+import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.container.ScrollContainer;
+import io.wispforest.owo.ui.container.UIContainers;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.owo.util.NumberReflection;
 import io.wispforest.owo.util.ReflectionUtils;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.FormattedCharSequence;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -51,7 +54,7 @@ import java.util.function.Predicate;
  */
 public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
 
-    public static final Identifier DEFAULT_MODEL_ID = Identifier.of("owo", "config");
+    public static final Identifier DEFAULT_MODEL_ID = Owo.id("config");
 
     private static final Map<Predicate<Option<?>>, OptionComponentFactory<?>> DEFAULT_FACTORIES = new HashMap<>();
     /**
@@ -104,22 +107,22 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
     protected void build(FlowLayout rootComponent) {
         this.options.clear();
 
-        rootComponent.childById(LabelComponent.class, "title").text(Text.translatable("text.config." + this.config.name() + ".title"));
-        if (this.client.world == null) {
+        rootComponent.childById(LabelComponent.class, "title").text(Component.translatable("text.config." + this.config.name() + ".title"));
+        if (this.minecraft.level == null) {
             rootComponent.surface(Surface.optionsBackground());
         }
 
-        rootComponent.childById(ButtonComponent.class, "done-button").onPress(button -> this.close());
+        rootComponent.childById(ButtonComponent.class, "done-button").onPress(button -> this.onClose());
         rootComponent.childById(ButtonComponent.class, "reload-button").onPress(button -> {
             this.config.load();
             this.uiAdapter = null;
-            this.clearAndInit();
+            this.rebuildWidgets();
 
             // TODO check if any options changed and warn
         });
 
         var optionPanel = rootComponent.childById(FlowLayout.class, "option-panel");
-        var sections = new LinkedHashMap<Component, Text>();
+        var sections = new LinkedHashMap<UIComponent, Component>();
 
         var containers = new HashMap<Option.Key, FlowLayout>();
         containers.put(Option.Key.ROOT, optionPanel);
@@ -128,20 +131,20 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
             var matchIndicator = rootComponent.childById(LabelComponent.class, "search-match-indicator");
             var optionScroll = rootComponent.childById(ScrollContainer.class, "option-panel-scroll");
 
-            var searchHint = I18n.translate("text.owo.config.search");
+            var searchHint = I18n.get("text.owo.config.search");
             searchField.setSuggestion(searchHint);
             searchField.onChanged().subscribe(s -> {
                 searchField.setSuggestion(s.isEmpty() ? searchHint : "");
                 if (!s.equals(this.lastSearchFieldText)) {
-                    searchField.setEditableColor(TextBoxComponent.DEFAULT_EDITABLE_COLOR);
-                    matchIndicator.text(Text.empty());
+                    searchField.setTextColor(TextBoxComponent.DEFAULT_TEXT_COLOR);
+                    matchIndicator.text(Component.empty());
                 }
             });
 
             searchField.keyPress().subscribe((input) -> {
-                if (!input.isEnter()) return false;
+                if (!input.isConfirmation()) return false;
 
-                var query = searchField.getText().toLowerCase(Locale.ROOT);
+                var query = searchField.getValue().toLowerCase(Locale.ROOT);
                 if (query.isBlank()) return false;
 
                 if (this.currentMatches != null && this.currentMatches.query.equals(query)) {
@@ -155,17 +158,17 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
 
                     this.currentMatchIndex = 0;
                     this.currentMatches = new SearchMatches(query, this.collectSearchAnchors(optionScroll)
-                            .stream()
-                            .filter(anchor -> Arrays.stream(splitQuery).allMatch(anchor.currentSearchText()::contains))
-                            .toList());
+                        .stream()
+                        .filter(anchor -> Arrays.stream(splitQuery).allMatch(anchor.currentSearchText()::contains))
+                        .toList());
                 }
 
                 if (this.currentMatches.matches.isEmpty()) {
-                    matchIndicator.text(Text.translatable("text.owo.config.search.no_matches"));
-                    searchField.setEditableColor(0xEB1D36);
+                    matchIndicator.text(Component.translatable("text.owo.config.search.no_matches"));
+                    searchField.setTextColor(0xEB1D36);
                 } else {
-                    matchIndicator.text(Text.translatable("text.owo.config.search.matches", this.currentMatchIndex + 1, this.currentMatches.matches.size()));
-                    searchField.setEditableColor(0x28FFBF);
+                    matchIndicator.text(Component.translatable("text.owo.config.search.matches", this.currentMatchIndex + 1, this.currentMatches.matches.size()));
+                    searchField.setTextColor(0x28FFBF);
 
                     var selectedMatch = this.currentMatches.matches.get(this.currentMatchIndex);
                     var anchorFrame = selectedMatch.anchorFrame();
@@ -218,26 +221,26 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
 
             var expanded = !parentKey.isRoot() && this.config.fieldForKey(parentKey).isAnnotationPresent(Expanded.class);
             var container = containers.getOrDefault(
-                    parentKey,
-                    Containers.collapsible(
-                            Sizing.fill(100), Sizing.content(),
-                            Text.translatable("text.config." + this.config.name() + ".category." + parentKey.asString()),
-                            expanded
-                    ).<CollapsibleContainer>configure(nestedContainer -> {
-                        final var categoryKey = "text.config." + this.config.name() + ".category." + parentKey.asString();
-                        if (I18n.hasTranslation(categoryKey + ".tooltip")) {
-                            nestedContainer.titleLayout().tooltip(Text.translatable(categoryKey + ".tooltip"));
-                        }
+                parentKey,
+                UIContainers.collapsible(
+                    Sizing.fill(100), Sizing.content(),
+                    Component.translatable("text.config." + this.config.name() + ".category." + parentKey.asString()),
+                    expanded
+                ).<CollapsibleContainer>configure(nestedContainer -> {
+                    final var categoryKey = "text.config." + this.config.name() + ".category." + parentKey.asString();
+                    if (I18n.exists(categoryKey + ".tooltip")) {
+                        nestedContainer.titleLayout().tooltip(Component.translatable(categoryKey + ".tooltip"));
+                    }
 
-                        nestedContainer.titleLayout().child(new SearchAnchorComponent(
-                                nestedContainer.titleLayout(),
-                                option.key(),
-                                () -> I18n.translate(categoryKey)
-                        ).highlightConfigurator(highlight ->
-                                highlight.positioning(Positioning.absolute(-5, -5))
-                                        .verticalSizing(Sizing.fixed(19))
-                        ));
-                    })
+                    nestedContainer.titleLayout().child(new SearchAnchorComponent(
+                        nestedContainer.titleLayout(),
+                        option.key(),
+                        () -> I18n.get(categoryKey)
+                    ).highlightConfigurator(highlight ->
+                        highlight.positioning(Positioning.absolute(-5, -5))
+                            .verticalSizing(Sizing.fixed(19))
+                    ));
+                })
             );
 
             if (!containers.containsKey(parentKey) && containers.containsKey(parentKey.parent())) {
@@ -251,23 +254,23 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
 
             if (option.detached()) {
                 result.baseComponent().tooltip(
-                        this.client.textRenderer.wrapLines(Text.translatable("text.owo.config.managed_by_server"), Integer.MAX_VALUE)
-                                .stream().map(TooltipComponent::of).toList()
+                    this.minecraft.font.split(Component.translatable("text.owo.config.managed_by_server"), Integer.MAX_VALUE)
+                        .stream().map(ClientTooltipComponent::create).toList()
                 );
             } else {
-                var tooltipText = new ArrayList<OrderedText>();
+                var tooltipText = new ArrayList<FormattedCharSequence>();
                 var tooltipTranslationKey = option.translationKey() + ".tooltip";
 
-                if (I18n.hasTranslation(tooltipTranslationKey)) {
-                    tooltipText.addAll(this.client.textRenderer.wrapLines(Text.translatable(tooltipTranslationKey), Integer.MAX_VALUE));
+                if (I18n.exists(tooltipTranslationKey)) {
+                    tooltipText.addAll(this.minecraft.font.split(Component.translatable(tooltipTranslationKey), Integer.MAX_VALUE));
                 }
 
                 if (option.backingField().hasAnnotation(RestartRequired.class)) {
-                    tooltipText.add(Text.translatable("text.owo.config.applies_after_restart").asOrderedText());
+                    tooltipText.add(Component.translatable("text.owo.config.applies_after_restart").getVisualOrderText());
                 }
 
                 if (!tooltipText.isEmpty()) {
-                    result.baseComponent().tooltip(tooltipText.stream().map(TooltipComponent::of).toList());
+                    result.baseComponent().tooltip(tooltipText.stream().map(ClientTooltipComponent::create).toList());
                 }
             }
 
@@ -285,9 +288,9 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
 
             var buttonPanel = this.model.expandTemplate(FlowLayout.class, "section-buttons", Map.of());
             sections.forEach((component, text) -> {
-                var hoveredText = text.copy().formatted(Formatting.YELLOW);
+                var hoveredText = text.copy().withStyle(ChatFormatting.YELLOW);
 
-                final var label = Components.label(text);
+                final var label = UIComponents.label(text);
                 label.cursorStyle(CursorStyle.HAND).margins(Insets.of(2));
 
                 label.mouseEnter().subscribe(() -> label.text(hoveredText));
@@ -302,8 +305,8 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                 buttonPanel.child(label);
             });
 
-            var closeButton = Components.label(Text.literal("<").formatted(Formatting.BOLD));
-            closeButton.tooltip(Text.translatable("text.owo.config.sections_tooltip"));
+            var closeButton = UIComponents.label(Component.literal("<").withStyle(ChatFormatting.BOLD));
+            closeButton.tooltip(Component.translatable("text.owo.config.sections_tooltip"));
             closeButton.positioning(Positioning.relative(100, 50)).cursorStyle(CursorStyle.HAND).margins(Insets.right(2));
 
             panelContainer.child(closeButton);
@@ -315,7 +318,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                 }
 
                 buttonPanel.horizontalSizing().animation().reverse();
-                closeButton.text(Text.literal(closeButton.text().getString().equals(">") ? "<" : ">").formatted(Formatting.BOLD));
+                closeButton.text(Component.literal(closeButton.text().getString().equals(">") ? "<" : ">").withStyle(ChatFormatting.BOLD));
 
                 UISounds.playInteractionSound();
                 return true;
@@ -325,22 +328,22 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
         }
     }
 
-    protected void appendSection(Map<Component, Text> sections, Field field, FlowLayout container) {
+    protected void appendSection(Map<UIComponent, Component> sections, Field field, FlowLayout container) {
         var translationKey = "text.config." + this.config.name() + ".section."
-                + field.getAnnotation(SectionHeader.class).value();
+            + field.getAnnotation(SectionHeader.class).value();
 
         final var header = this.model.expandTemplate(FlowLayout.class, "section-header", Map.of());
         header.childById(LabelComponent.class, "header").<LabelComponent>configure(label -> {
-            label.text(Text.translatable(translationKey).formatted(Formatting.YELLOW, Formatting.BOLD));
+            label.text(Component.translatable(translationKey).withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD));
             header.child(new SearchAnchorComponent(header, Option.Key.ROOT, () -> label.text().getString()));
         });
 
-        sections.put(header, Text.translatable(translationKey));
+        sections.put(header, Component.translatable(translationKey));
 
         container.child(header);
     }
 
-    protected List<SearchAnchorComponent> collectSearchAnchors(ParentComponent root) {
+    protected List<SearchAnchorComponent> collectSearchAnchors(ParentUIComponent root) {
         var discovered = new ArrayList<SearchAnchorComponent>();
         var candidates = new ArrayDeque<>(root.children());
 
@@ -349,7 +352,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
             if (candidate instanceof CollapsibleContainer collapsible) {
                 candidates.addAll(collapsible.children());
                 if (!collapsible.expanded()) candidates.addAll(collapsible.collapsibleChildren());
-            } else if (candidate instanceof ParentComponent parentComponent) {
+            } else if (candidate instanceof ParentUIComponent parentComponent) {
                 candidates.addAll(parentComponent.children());
             } else if (candidate instanceof SearchAnchorComponent anchor) {
                 discovered.add(anchor);
@@ -360,11 +363,11 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
     }
 
     @Override
-    public boolean keyPressed(KeyInput input) {
-        if (input.key() == GLFW.GLFW_KEY_F && input.hasCtrl()) {
+    public boolean keyPressed(KeyEvent input) {
+        if (input.key() == GLFW.GLFW_KEY_F && input.hasControlDown()) {
             this.uiAdapter.rootComponent.focusHandler().focus(
-                    this.uiAdapter.rootComponent.childById(Component.class, "search-field"),
-                    Component.FocusSource.MOUSE_CLICK
+                this.uiAdapter.rootComponent.childById(UIComponent.class, "search-field"),
+                UIComponent.FocusSource.MOUSE_CLICK
             );
             return true;
         } else {
@@ -374,7 +377,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void close() {
+    public void onClose() {
         var shouldRestart = new MutableBoolean();
         this.options.forEach((option, component) -> {
             if (!option.backingField().hasAnnotation(RestartRequired.class)) return;
@@ -383,7 +386,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
             shouldRestart.setTrue();
         });
 
-        this.client.setScreen(shouldRestart.booleanValue() ? new RestartRequiredScreen(this.parent) : this.parent);
+        this.minecraft.setScreen(shouldRestart.booleanValue() ? new RestartRequiredScreen(this.parent) : this.parent);
     }
 
     @Override
@@ -428,7 +431,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
 
     protected record SearchMatches(String query, List<SearchAnchorComponent> matches) {}
 
-    public static class SearchHighlighterComponent extends BaseComponent {
+    public static class SearchHighlighterComponent extends BaseUIComponent {
 
         private final Color startColor = Color.ofArgb(0x008d9be0);
         private final Color endColor = Color.ofArgb(0x4c8d9be0);
@@ -441,23 +444,23 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
         }
 
         @Override
-        public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+        public void draw(OwoUIGraphics graphics, int mouseX, int mouseY, float partialTicks, float delta) {
             final var mainColor = startColor.interpolate(endColor, (float) Math.sin(age / 25 * Math.PI)).argb();
 
             int segmentWidth = (int) (this.width * .3f);
             int baseX = (int) ((this.x - segmentWidth) + (Easing.CUBIC.apply(this.age / 25)) * (this.width + segmentWidth * 2));
 
-            context.drawGradientRect(
-                    baseX - segmentWidth, this.y,
-                    segmentWidth, this.height,
-                    0, mainColor,
-                    mainColor, 0
+            graphics.drawGradientRect(
+                baseX - segmentWidth, this.y,
+                segmentWidth, this.height,
+                0, mainColor,
+                mainColor, 0
             );
-            context.drawGradientRect(
-                    baseX, this.y,
-                    segmentWidth, this.height,
-                    mainColor, 0,
-                    0, mainColor
+            graphics.drawGradientRect(
+                baseX, this.y,
+                segmentWidth, this.height,
+                mainColor, 0,
+                0, mainColor
             );
         }
 

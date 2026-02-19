@@ -2,7 +2,7 @@ package io.wispforest.owo.ui.core;
 
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 
 import java.util.Arrays;
 import java.util.List;
@@ -48,7 +48,7 @@ public class Animation<A extends Animatable<A>> {
             else return;
         }
 
-        this.delta = MathHelper.clamp(this.delta + (delta * 50 / duration) * this.direction.multiplier, 0, 1);
+        this.delta = Mth.clamp(this.delta + (delta * 50 / duration) * this.direction.multiplier, 0, 1);
 
         this.setter.accept(this.from.interpolate(this.to, this.easing.apply(this.delta)));
     }

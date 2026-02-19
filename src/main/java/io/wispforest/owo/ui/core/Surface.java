@@ -5,12 +5,12 @@ import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.renderstate.BlurQuadElementRenderState;
 import io.wispforest.owo.ui.renderstate.CubeMapElementRenderState;
 import io.wispforest.owo.ui.util.NinePatchTexture;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.RotatingCubeMapRenderer;
-import net.minecraft.client.gui.ScreenRect;
-import net.minecraft.client.gui.tooltip.TooltipBackgroundRenderer;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.gui.screens.inventory.tooltip.TooltipRenderUtil;
+import net.minecraft.client.renderer.PanoramaRenderer;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2f;
 import org.w3c.dom.Element;
@@ -29,7 +29,7 @@ public interface Surface {
     };
 
     Surface PANEL_INSET = (context, component) -> {
-        NinePatchTexture.draw(OwoUIDrawContext.PANEL_INSET_NINE_PATCH_TEXTURE, context, component);
+        NinePatchTexture.draw(OwoUIGraphics.PANEL_INSET_NINE_PATCH_TEXTURE, context, component);
     };
 
     Surface VANILLA_TRANSLUCENT = (context, component) -> {
@@ -43,16 +43,16 @@ public interface Surface {
 
     static Surface tooltip(@Nullable Identifier texture) {
         return (context, component) -> {
-            TooltipBackgroundRenderer.render(context, component.x() + 4, component.y() + 4, component.width() - 8, component.height() - 8, texture);
+            TooltipRenderUtil.renderTooltipBackground(context, component.x() + 4, component.y() + 4, component.width() - 8, component.height() - 8, texture);
         };
     }
 
     static Surface blur(float quality, float size) {
         return (context, component) -> {
-            context.state.addSimpleElement(new BlurQuadElementRenderState(
-                new Matrix3x2f(context.getMatrices()),
-                new ScreenRect(component.x(), component.y(), component.width(), component.height()),
-                context.scissorStack.peekLast(),
+            context.guiRenderState.submitGuiElement(new BlurQuadElementRenderState(
+                new Matrix3x2f(context.pose()),
+                new ScreenRectangle(component.x(), component.y(), component.width(), component.height()),
+                context.scissorStack.peek(),
                 16, quality, size
             ));
         };
@@ -63,16 +63,16 @@ public interface Surface {
     }
 
     static Surface vanillaPanorama(boolean alwaysVisible) {
-        return panorama(MinecraftClient.getInstance().gameRenderer.getRotatingPanoramaRenderer(), alwaysVisible);
+        return panorama(Minecraft.getInstance().gameRenderer.getPanorama(), alwaysVisible);
     }
 
-    static Surface panorama(RotatingCubeMapRenderer renderer, boolean alwaysVisible) {
+    static Surface panorama(PanoramaRenderer renderer, boolean alwaysVisible) {
         return (context, component) -> {
-            if (!alwaysVisible && MinecraftClient.getInstance().world != null) return;
-            context.state.addSpecialElement(new CubeMapElementRenderState(
+            if (!alwaysVisible && Minecraft.getInstance().level != null) return;
+            context.guiRenderState.submitPicturesInPictureState(new CubeMapElementRenderState(
                 renderer, true,
-                new ScreenRect(component.x(), component.y(), component.width(), component.height()),
-                context.scissorStack.peekLast()
+                new ScreenRectangle(component.x(), component.y(), component.width(), component.height()),
+                context.scissorStack.peek()
             ));
         };
     }
@@ -87,14 +87,14 @@ public interface Surface {
 
     static Surface tiled(Identifier texture, int textureWidth, int textureHeight) {
         return (context, component) -> {
-            context.drawTexture(RenderPipelines.GUI_TEXTURED, texture, component.x(), component.y(), 0, 0, component.width(), component.height(), textureWidth, textureHeight);
+            context.blit(RenderPipelines.GUI_TEXTURED, texture, component.x(), component.y(), 0, 0, component.width(), component.height(), textureWidth, textureHeight);
         };
     }
 
     static Surface panelWithInset(int insetWidth) {
         return Surface.PANEL.and((context, component) -> {
             NinePatchTexture.draw(
-                OwoUIDrawContext.PANEL_INSET_NINE_PATCH_TEXTURE,
+                OwoUIGraphics.PANEL_INSET_NINE_PATCH_TEXTURE,
                 context,
                 component.x() + insetWidth,
                 component.y() + insetWidth,
@@ -104,7 +104,7 @@ public interface Surface {
         });
     }
 
-    void draw(OwoUIDrawContext context, ParentComponent component);
+    void draw(OwoUIGraphics context, ParentUIComponent component);
 
     default Surface and(Surface surface) {
         return (context, component) -> {

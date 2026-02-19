@@ -1,0 +1,14 @@
+{
+  "texture": "owo:textures/gui/braid_inspector_selected.png",
+  "texture_width": 5,
+  "texture_height": 5,
+  "repeat": false,
+  "corner_patch_size": {
+    "width": 2,
+    "height": 2
+  },
+  "center_patch_size": {
+    "width": 1,
+    "height": 1
+  }
+}

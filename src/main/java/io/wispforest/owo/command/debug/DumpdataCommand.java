@@ -7,28 +7,27 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.ops.TextOps;
-import net.minecraft.command.argument.NbtPathArgumentType;
-import net.minecraft.component.ComponentChanges;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.entity.projectile.ProjectileUtil;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtHelper;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.NbtPathArgument;
+import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.storage.NbtWriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.ErrorReporter;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.level.storage.TagValueOutput;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 
 import java.util.regex.Pattern;
 
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 
 public class DumpdataCommand {
 
@@ -36,107 +35,107 @@ public class DumpdataCommand {
     private static final int KEY_BLUE = 0x94B3FD;
     private static final int VALUE_BLUE = 0x94DAFF;
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(literal("dumpdata")
                 .then(literal("item").executes(withRootPath(DumpdataCommand::executeItem))
-                        .then(argument("nbt_path", NbtPathArgumentType.nbtPath()).executes(withPathArg(DumpdataCommand::executeItem))))
+                        .then(argument("nbt_path", NbtPathArgument.nbtPath()).executes(withPathArg(DumpdataCommand::executeItem))))
                 .then(literal("block").executes(withRootPath(DumpdataCommand::executeBlock))
-                        .then(argument("nbt_path", NbtPathArgumentType.nbtPath()).executes(withPathArg(DumpdataCommand::executeBlock))))
+                        .then(argument("nbt_path", NbtPathArgument.nbtPath()).executes(withPathArg(DumpdataCommand::executeBlock))))
                 .then(literal("entity").executes(withRootPath(DumpdataCommand::executeEntity))
-                        .then(argument("nbt_path", NbtPathArgumentType.nbtPath()).executes(withPathArg(DumpdataCommand::executeEntity)))));
+                        .then(argument("nbt_path", NbtPathArgument.nbtPath()).executes(withPathArg(DumpdataCommand::executeEntity)))));
     }
 
-    private static Command<ServerCommandSource> withRootPath(DataDumper dumper) {
-        return context -> dumper.dump(context, NbtPathArgumentType.nbtPath().parse(new StringReader("")));
+    private static Command<CommandSourceStack> withRootPath(DataDumper dumper) {
+        return context -> dumper.dump(context, NbtPathArgument.nbtPath().parse(new StringReader("")));
     }
 
-    private static Command<ServerCommandSource> withPathArg(DataDumper dumper) {
+    private static Command<CommandSourceStack> withPathArg(DataDumper dumper) {
         return context -> {
-            final var path = NbtPathArgumentType.getNbtPath(context, "nbt_path");
+            final var path = NbtPathArgument.getPath(context, "nbt_path");
             return dumper.dump(context, path);
         };
     }
 
-    private static int executeItem(CommandContext<ServerCommandSource> context, NbtPathArgumentType.NbtPath path) throws CommandSyntaxException {
+    private static int executeItem(CommandContext<CommandSourceStack> context, NbtPathArgument.NbtPath path) throws CommandSyntaxException {
         final var source = context.getSource();
-        final var stack = source.getPlayer().getMainHandStack();
+        final var stack = source.getPlayer().getMainHandItem();
 
         informationHeader(source, "Item");
-        sendIdentifier(source, stack.getItem(), Registries.ITEM);
+        sendIdentifier(source, stack.getItem(), BuiltInRegistries.ITEM);
 
-        if (stack.get(DataComponentTypes.MAX_DAMAGE) != null) {
-            feedback(source, TextOps.withColor("Durability: §" + stack.get(DataComponentTypes.MAX_DAMAGE),
-                    TextOps.color(Formatting.GRAY), KEY_BLUE));
+        if (stack.get(DataComponents.MAX_DAMAGE) != null) {
+            feedback(source, TextOps.withColor("Durability: §" + stack.get(DataComponents.MAX_DAMAGE),
+                    TextOps.color(ChatFormatting.GRAY), KEY_BLUE));
         } else {
-            feedback(source, TextOps.withFormatting("Not damageable", Formatting.GRAY));
+            feedback(source, TextOps.withFormatting("Not damageable", ChatFormatting.GRAY));
         }
 
-        if (!stack.getComponentChanges().isEmpty()) {
-            feedback(source, TextOps.withFormatting("Component changes" + formatPath(path) + ": ", Formatting.GRAY)
-                    .append(NbtHelper.toPrettyPrintedText(getPath(ComponentChanges.CODEC.encodeStart(NbtOps.INSTANCE, stack.getComponentChanges()).getOrThrow(), path))));
+        if (!stack.getComponentsPatch().isEmpty()) {
+            feedback(source, TextOps.withFormatting("Component changes" + formatPath(path) + ": ", ChatFormatting.GRAY)
+                    .append(NbtUtils.toPrettyComponent(getPath(DataComponentPatch.CODEC.encodeStart(NbtOps.INSTANCE, stack.getComponentsPatch()).getOrThrow(), path))));
         } else {
-            feedback(source, TextOps.withFormatting("No component changes", Formatting.GRAY));
+            feedback(source, TextOps.withFormatting("No component changes", ChatFormatting.GRAY));
         }
 
-        feedback(source, TextOps.withFormatting("-----------------------", Formatting.GRAY));
+        feedback(source, TextOps.withFormatting("-----------------------", ChatFormatting.GRAY));
 
         return 0;
     }
 
-    private static int executeEntity(CommandContext<ServerCommandSource> context, NbtPathArgumentType.NbtPath path) throws CommandSyntaxException {
+    private static int executeEntity(CommandContext<CommandSourceStack> context, NbtPathArgument.NbtPath path) throws CommandSyntaxException {
         final var source = context.getSource();
         final var player = source.getPlayer();
 
-        final var target = ProjectileUtil.raycast(
+        final var target = ProjectileUtil.getEntityHitResult(
                 player,
-                player.getCameraPosVec(0),
-                player.getCameraPosVec(0).add(player.getRotationVec(0).multiply(5)),
-                player.getBoundingBox().stretch(player.getRotationVec(0).multiply(5)).expand(1),
+                player.getEyePosition(0),
+                player.getEyePosition(0).add(player.getViewVector(0).scale(5)),
+                player.getBoundingBox().expandTowards(player.getViewVector(0).scale(5)).inflate(1),
                 entity -> true,
                 5 * 5);
 
         if (target == null || target.getType() != HitResult.Type.ENTITY) {
-            source.sendError(TextOps.concat(Owo.PREFIX, Text.literal("You're not looking at an entity")));
+            source.sendFailure(TextOps.concat(Owo.PREFIX, Component.literal("You're not looking at an entity")));
             return 1;
         }
 
         final var entity = target.getEntity();
 
         informationHeader(source, "Entity");
-        sendIdentifier(source, entity.getType(), Registries.ENTITY_TYPE);
+        sendIdentifier(source, entity.getType(), BuiltInRegistries.ENTITY_TYPE);
 
-        var writeView = NbtWriteView.create(new ErrorReporter.Logging(Owo.LOGGER));
-        entity.saveData(writeView);
+        var writeView = TagValueOutput.createWithoutContext(new ProblemReporter.ScopedCollector(Owo.LOGGER));
+        entity.save(writeView);
 
-        feedback(source, TextOps.withFormatting("NBT" + formatPath(path) + ": ", Formatting.GRAY)
-                .append(NbtHelper.toPrettyPrintedText(getPath(writeView.getNbt(), path))));
+        feedback(source, TextOps.withFormatting("NBT" + formatPath(path) + ": ", ChatFormatting.GRAY)
+                .append(NbtUtils.toPrettyComponent(getPath(writeView.buildResult(), path))));
 
-        feedback(source, TextOps.withFormatting("-----------------------", Formatting.GRAY));
+        feedback(source, TextOps.withFormatting("-----------------------", ChatFormatting.GRAY));
 
         return 0;
     }
 
-    private static int executeBlock(CommandContext<ServerCommandSource> context, NbtPathArgumentType.NbtPath path) throws CommandSyntaxException {
+    private static int executeBlock(CommandContext<CommandSourceStack> context, NbtPathArgument.NbtPath path) throws CommandSyntaxException {
         final var source = context.getSource();
         final var player = source.getPlayer();
 
-        final var target = player.raycast(5, 0, false);
+        final var target = player.pick(5, 0, false);
 
         if (target.getType() != HitResult.Type.BLOCK) {
-            source.sendError(TextOps.concat(Owo.PREFIX, Text.literal("You're not looking at a block")));
+            source.sendFailure(TextOps.concat(Owo.PREFIX, Component.literal("You're not looking at a block")));
             return 1;
         }
 
         final var pos = ((BlockHitResult) target).getBlockPos();
 
-        final var blockState = player.getEntityWorld().getBlockState(pos);
+        final var blockState = player.level().getBlockState(pos);
         final var blockStateString = blockState.toString();
 
         informationHeader(source, "Block");
-        sendIdentifier(source, blockState.getBlock(), Registries.BLOCK);
+        sendIdentifier(source, blockState.getBlock(), BuiltInRegistries.BLOCK);
 
         if (blockStateString.contains("[")) {
-            feedback(source, TextOps.withFormatting("State properties: ", Formatting.GRAY));
+            feedback(source, TextOps.withFormatting("State properties: ", ChatFormatting.GRAY));
 
             var stateString = blockStateString.split(Pattern.quote("["))[1];
             stateString = stateString.substring(0, stateString.length() - 1);
@@ -146,46 +145,46 @@ public class DumpdataCommand {
                 feedback(source, TextOps.withColor("    " + property, KEY_BLUE, VALUE_BLUE));
             }
         } else {
-            feedback(source, TextOps.withFormatting("No state properties", Formatting.GRAY));
+            feedback(source, TextOps.withFormatting("No state properties", ChatFormatting.GRAY));
         }
 
-        final var blockEntity = player.getEntityWorld().getBlockEntity(pos);
+        final var blockEntity = player.level().getBlockEntity(pos);
         if (blockEntity != null) {
-            feedback(source, TextOps.withFormatting("Block Entity NBT" + formatPath(path) + ": ", Formatting.GRAY)
-                    .append(NbtHelper.toPrettyPrintedText(getPath(blockEntity.createNbt(player.getRegistryManager()), path))));
+            feedback(source, TextOps.withFormatting("Block Entity NBT" + formatPath(path) + ": ", ChatFormatting.GRAY)
+                    .append(NbtUtils.toPrettyComponent(getPath(blockEntity.saveWithoutMetadata(player.registryAccess()), path))));
         } else {
-            feedback(source, TextOps.withFormatting("No block entity", Formatting.GRAY));
+            feedback(source, TextOps.withFormatting("No block entity", ChatFormatting.GRAY));
         }
 
-        feedback(source, TextOps.withFormatting("-----------------------", Formatting.GRAY));
+        feedback(source, TextOps.withFormatting("-----------------------", ChatFormatting.GRAY));
 
         return 0;
     }
 
-    private static <T> void sendIdentifier(ServerCommandSource source, T object, Registry<T> registry) {
-        final var id = registry.getId(object).toString().split(":");
-        feedback(source, TextOps.withColor("Identifier: §" + id[0] + ":§" + id[1], TextOps.color(Formatting.GRAY), KEY_BLUE, VALUE_BLUE));
+    private static <T> void sendIdentifier(CommandSourceStack source, T object, Registry<T> registry) {
+        final var id = registry.getKey(object).toString().split(":");
+        feedback(source, TextOps.withColor("Identifier: §" + id[0] + ":§" + id[1], TextOps.color(ChatFormatting.GRAY), KEY_BLUE, VALUE_BLUE));
     }
 
-    private static void informationHeader(ServerCommandSource source, String name) {
+    private static void informationHeader(CommandSourceStack source, String name) {
         feedback(source, TextOps.withColor("---[§ " + name + " Information §]---",
-                TextOps.color(Formatting.GRAY), GENERAL_PURPLE, TextOps.color(Formatting.GRAY)));
+                TextOps.color(ChatFormatting.GRAY), GENERAL_PURPLE, TextOps.color(ChatFormatting.GRAY)));
     }
 
-    private static void feedback(ServerCommandSource source, Text message) {
-        source.sendFeedback(() -> message, false);
+    private static void feedback(CommandSourceStack source, Component message) {
+        source.sendSuccess(() -> message, false);
     }
 
-    private static String formatPath(NbtPathArgumentType.NbtPath path) {
+    private static String formatPath(NbtPathArgument.NbtPath path) {
         return path.toString().isBlank() ? "" : "(" + path + ")";
     }
 
-    private static NbtElement getPath(NbtElement nbt, NbtPathArgumentType.NbtPath path) throws CommandSyntaxException {
+    private static Tag getPath(Tag nbt, NbtPathArgument.NbtPath path) throws CommandSyntaxException {
         return path.get(nbt).iterator().next();
     }
 
     @FunctionalInterface
     private interface DataDumper {
-        int dump(CommandContext<ServerCommandSource> context, NbtPathArgumentType.NbtPath path) throws CommandSyntaxException;
+        int dump(CommandContext<CommandSourceStack> context, NbtPathArgument.NbtPath path) throws CommandSyntaxException;
     }
 }

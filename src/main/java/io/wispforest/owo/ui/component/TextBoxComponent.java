@@ -1,33 +1,32 @@
 package io.wispforest.owo.ui.component;
 
-import io.wispforest.owo.mixin.ui.access.TextFieldWidgetAccessor;
+import io.wispforest.owo.mixin.ui.access.EditBoxAccessor;
 import io.wispforest.owo.ui.core.CursorStyle;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
+import io.wispforest.owo.ui.core.OwoUIGraphics;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.Observable;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.text.Text;
-import org.lwjgl.glfw.GLFW;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.network.chat.Component;
 import org.w3c.dom.Element;
 
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class TextBoxComponent extends TextFieldWidget {
+public class TextBoxComponent extends EditBox {
 
-    protected final Observable<Boolean> showsBackground = Observable.of(((TextFieldWidgetAccessor) this).owo$drawsBackground());
+    protected final Observable<Boolean> showsBackground = Observable.of(((EditBoxAccessor) this).owo$bordered());
 
     protected final Observable<String> textValue = Observable.of("");
     protected final EventStream<OnChanged> changedEvents = OnChanged.newStream();
 
     protected TextBoxComponent(Sizing horizontalSizing) {
-        super(MinecraftClient.getInstance().textRenderer, 0, 0, 0, 0, Text.empty());
+        super(Minecraft.getInstance().font, 0, 0, 0, 0, Component.empty());
 
         this.textValue.observe(this.changedEvents.sink()::onChanged);
         this.sizing(horizontalSizing, Sizing.content());
@@ -40,21 +39,21 @@ public class TextBoxComponent extends TextFieldWidget {
      */
     @Override
     @Deprecated(forRemoval = true)
-    public void setChangedListener(Consumer<String> changedListener) {
-        super.setChangedListener(changedListener);
+    public void setResponder(Consumer<String> changedListener) {
+        super.setResponder(changedListener);
     }
 
     @Override
-    public void drawFocusHighlight(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+    public void drawFocusHighlight(OwoUIGraphics context, int mouseX, int mouseY, float partialTicks, float delta) {
         // noop, since TextFieldWidget already does this
     }
 
     @Override
-    public boolean keyPressed(KeyInput input) {
+    public boolean keyPressed(KeyEvent input) {
         boolean result = super.keyPressed(input);
 
-        if (input.isTab()) {
-            this.write("    ");
+        if (input.isCycleFocus()) {
+            this.insertText("    ");
             return true;
         } else {
             return result;
@@ -64,18 +63,18 @@ public class TextBoxComponent extends TextFieldWidget {
     @Override
     public void updateX(int x) {
         super.updateX(x);
-        ((TextFieldWidgetAccessor) this).owo$updateTextPosition();
+        ((EditBoxAccessor) this).owo$updateTextPosition();
     }
 
     @Override
     public void updateY(int y) {
         super.updateY(y);
-        ((TextFieldWidgetAccessor) this).owo$updateTextPosition();
+        ((EditBoxAccessor) this).owo$updateTextPosition();
     }
 
     @Override
-    public void setDrawsBackground(boolean drawsBackground) {
-        super.setDrawsBackground(drawsBackground);
+    public void setBordered(boolean drawsBackground) {
+        super.setBordered(drawsBackground);
         this.showsBackground.set(drawsBackground);
     }
 
@@ -84,15 +83,15 @@ public class TextBoxComponent extends TextFieldWidget {
     }
 
     public TextBoxComponent text(String text) {
-        this.setText(text);
-        this.setCursorToStart(false);
+        this.setValue(text);
+        this.moveCursorToStart(false);
         return this;
     }
 
     @Override
     public void parseProperties(UIModel spec, Element element, Map<String, Element> children) {
         super.parseProperties(spec, element, children);
-        UIParsing.apply(children, "show-background", UIParsing::parseBool, this::setDrawsBackground);
+        UIParsing.apply(children, "show-background", UIParsing::parseBool, this::setBordered);
         UIParsing.apply(children, "max-length", UIParsing::parseUnsignedInt, this::setMaxLength);
         UIParsing.apply(children, "text", e -> e.getTextContent().strip(), this::text);
     }

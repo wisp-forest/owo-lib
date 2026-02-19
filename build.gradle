@@ -1,6 +1,6 @@
 //file:noinspection GradlePackageVersionRange
 plugins {
-    id "dev.architectury.loom" version "1.11.+"
+    id "dev.architectury.loom" version "1.15-SNAPSHOT"
     id 'maven-publish'
 }
 
@@ -20,16 +20,17 @@ allprojects {
     version = "${project.mod_version}+${rootProject.minecraft_base_version}"
     group = rootProject.maven_group
 
+    base {
+        archivesName = project.archives_base_name
+    }
+
     repositories {
         maven { url 'https://maven.neoforged.net/releases/' }
     }
 
     dependencies {
         minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
-        mappings loom.layered {
-            it.mappings("net.fabricmc:yarn:${rootProject.yarn_mappings}:v2")
-            it.mappings("dev.architectury:yarn-mappings-patch-neoforge:1.21+build.6")
-        }
+        mappings loom.officialMojangMappings()
         //modImplementation "net.fabricmc:fabric-loader:${rootProject.loader_version}"
 
         neoForge "net.neoforged:neoforge:${project.neoforge_version}"
@@ -64,13 +65,15 @@ allprojects {
         if (JavaVersion.current() < javaVersion) {
             toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
         }
-        archivesBaseName = project.archives_base_name
+        // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
+        // if it is present.
+        // If you remove this line, sources will not be generated.
         withSourcesJar()
     }
 
     jar {
         from("LICENSE") {
-            rename { "${it}_${project.archivesBaseName}" }
+            rename { "${it}_${project.base.archivesName.get()}" }
         }
     }
 
@@ -99,7 +102,7 @@ repositories {
     maven { url "https://maven.nucleoid.xyz/" }
     maven { url 'https://maven.wispforest.io/releases' }
     maven { url "https://maven.su5ed.dev/releases" }
-    mavenLocal()
+    maven { url 'https://jitpack.io' }
 }
 
 sourceSets {
@@ -155,7 +158,7 @@ dependencies {
     //modImplementation("org.sinytra.forgified-fabric-api:forgified-fabric-api:${project.fabric_version}")
 
     //modLocalRuntime("me.shedaniel:RoughlyEnoughItems-neoforge:${project.rei_version}")
-    modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin:${project.rei_version}") {
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:${project.rei_version}") {
         exclude "group": "net.fabricmc.fabric-api"
     }
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-neoforge:${project.rei_version}") {
@@ -164,12 +167,13 @@ dependencies {
 
     modCompileOnly("dev.emi:emi-neoforge:${project.emi_version}")
 
-    forgeRuntimeLibrary(include(api("io.wispforest:endec:0.1.11")))
-    forgeRuntimeLibrary(include(api("io.wispforest.endec:netty:0.1.5")))
-    forgeRuntimeLibrary(include(api("io.wispforest.endec:gson:0.1.6")))
-    forgeRuntimeLibrary(include(api("io.wispforest.endec:jankson:0.1.6")))
+    forgeRuntimeLibrary(include(api("io.wispforest:endec:0.1.12")))
+    forgeRuntimeLibrary(include(api("io.wispforest.endec:netty:0.1.6")))
+    forgeRuntimeLibrary(include(api("io.wispforest.endec:gson:0.1.7")))
+    forgeRuntimeLibrary(include(api("io.wispforest.endec:jankson:0.1.7")))
 
     forgeRuntimeLibrary(include(api("blue.endless:jankson:${project.jankson_version}")))
+    forgeRuntimeLibrary(include(api("com.github.kdl-org:kdl4j:${project.kdl_version}")))
 
     //include implementation("org.sinytra:forgified-fabric-loader:${project.loader_version}:full")
     include modApi("org.sinytra.forgified-fabric-api:fabric-api-base:0.4.42+d1308dedd1") { exclude group: "fabric-api" }

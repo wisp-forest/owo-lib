@@ -1,7 +1,6 @@
 package io.wispforest.owo.config.ui;
 
-import net.minecraft.client.gui.screen.Screen;
-import org.jetbrains.annotations.ApiStatus;
+import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;

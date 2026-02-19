@@ -38,7 +38,6 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 /**
@@ -107,7 +106,7 @@ public abstract class ConfigWrapper<C> {
             var modmenuAnnotation = clazz.getAnnotation(Modmenu.class);
             ConfigScreenProviders.register(
                     modmenuAnnotation.modId(),
-                    screen -> ConfigScreen.createWithCustomModel(Identifier.of(modmenuAnnotation.uiModelId()), this, screen)
+                    screen -> ConfigScreen.createWithCustomModel(Identifier.parse(modmenuAnnotation.uiModelId()), this, screen)
             );
         }
 

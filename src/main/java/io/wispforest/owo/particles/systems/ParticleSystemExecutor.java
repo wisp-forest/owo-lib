@@ -1,17 +1,17 @@
 package io.wispforest.owo.particles.systems;
 
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
 public interface ParticleSystemExecutor<T> {
     /**
      * Called when particles should be displayed
-     * at the given position in the given world,
+     * at the given position in the given level,
      * with the given data as additional context
      *
-     * @param world The world to display in
+     * @param level The level to display in
      * @param pos   The position to display at
      * @param data  The data to display with
      */
-    void executeParticleSystem(World world, Vec3d pos, T data);
+    void executeParticleSystem(Level level, Vec3 pos, T data);
 }

@@ -1,15 +1,16 @@
 package io.wispforest.owo.ui.container;
 
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.Delta;
 import io.wispforest.owo.ui.util.NinePatchTexture;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 import org.lwjgl.glfw.GLFW;
@@ -20,14 +21,14 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-public class ScrollContainer<C extends Component> extends WrappingParentComponent<C> {
+public class ScrollContainer<C extends UIComponent> extends WrappingParentUIComponent<C> {
 
-    public static final Identifier VERTICAL_VANILLA_SCROLLBAR_TEXTURE = Identifier.of("owo", "scrollbar/vanilla_vertical");
-    public static final Identifier DISABLED_VERTICAL_VANILLA_SCROLLBAR_TEXTURE = Identifier.of("owo", "scrollbar/vanilla_vertical_disabled");
-    public static final Identifier HORIZONTAL_VANILLA_SCROLLBAR_TEXTURE = Identifier.of("owo", "scrollbar/vanilla_horizontal_disabled");
-    public static final Identifier DISABLED_HORIZONTAL_VANILLA_SCROLLBAR_TEXTURE = Identifier.of("owo", "scrollbar/vanilla_horizontal_disabled");
-    public static final Identifier VANILLA_SCROLLBAR_TRACK_TEXTURE = Identifier.of("owo", "scrollbar/track");
-    public static final Identifier FLAT_VANILLA_SCROLLBAR_TEXTURE = Identifier.of("owo", "scrollbar/vanilla_flat");
+    public static final Identifier VERTICAL_VANILLA_SCROLLBAR_TEXTURE = Owo.id("scrollbar/vanilla_vertical");
+    public static final Identifier DISABLED_VERTICAL_VANILLA_SCROLLBAR_TEXTURE = Owo.id("scrollbar/vanilla_vertical_disabled");
+    public static final Identifier HORIZONTAL_VANILLA_SCROLLBAR_TEXTURE = Owo.id("scrollbar/vanilla_horizontal_disabled");
+    public static final Identifier DISABLED_HORIZONTAL_VANILLA_SCROLLBAR_TEXTURE = Owo.id("scrollbar/vanilla_horizontal_disabled");
+    public static final Identifier VANILLA_SCROLLBAR_TRACK_TEXTURE = Owo.id("scrollbar/track");
+    public static final Identifier FLAT_VANILLA_SCROLLBAR_TEXTURE = Owo.id("scrollbar/vanilla_flat");
 
     protected double scrollOffset = 0;
     protected double currentScrollPosition = 0;
@@ -77,7 +78,7 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
         super.layout(space);
 
         this.maxScroll = Math.max(0, this.direction.sizeGetter.apply(child) - (this.direction.sizeGetter.apply(this) - this.direction.insetGetter.apply(this.padding.get())));
-        this.scrollOffset = MathHelper.clamp(this.scrollOffset, 0, this.maxScroll + .5);
+        this.scrollOffset = Mth.clamp(this.scrollOffset, 0, this.maxScroll + .5);
         this.childSize = this.direction.sizeGetter.apply(this.child);
         this.lastScrollPosition = -1;
     }
@@ -99,8 +100,8 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
     }
 
     @Override
-    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
-        super.draw(context, mouseX, mouseY, partialTicks, delta);
+    public void draw(OwoUIGraphics graphics, int mouseX, int mouseY, float partialTicks, float delta) {
+        super.draw(graphics, mouseX, mouseY, partialTicks, delta);
 
         // Update child
         int effectiveScrollOffset = this.scrollStep > 0
@@ -120,15 +121,15 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
         }
 
         // Draw, adding the fractional part of the offset via matrix translation
-        context.getMatrices().pushMatrix();
+        graphics.pose().pushMatrix();
 
         double visualOffset = -(this.currentScrollPosition % 1d);
         if (visualOffset > 9999999e-7 || visualOffset < .1e-6) visualOffset = 0;
 
-        context.getMatrices().translate((float) this.direction.choose(visualOffset, 0), (float) this.direction.choose(0, visualOffset));
-        this.drawChildren(context, mouseX, mouseY, partialTicks, delta, this.childView);
+        graphics.pose().translate((float) this.direction.choose(visualOffset, 0), (float) this.direction.choose(0, visualOffset));
+        this.drawChildren(graphics, mouseX, mouseY, partialTicks, delta, this.childView);
 
-        context.getMatrices().popMatrix();
+        graphics.pose().popMatrix();
 
         // -----
 
@@ -155,7 +156,7 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
                 : 0;
 
         if (this.direction == ScrollDirection.VERTICAL) {
-            this.scrollbar.draw(context,
+            this.scrollbar.draw(graphics,
                     this.scrollbarOffset,
                     (int) (this.y + scrollbarPosition + padding.top()),
                     this.scrollbarThiccness,
@@ -166,7 +167,7 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
                     this.maxScroll > 0
             );
         } else {
-            this.scrollbar.draw(context,
+            this.scrollbar.draw(graphics,
                     (int) (this.x + scrollbarPosition + padding.left()),
                     this.scrollbarOffset,
                     (int) (this.lastScrollbarLength),
@@ -199,7 +200,7 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
     }
 
     @Override
-    public boolean onMouseDown(Click click, boolean doubled) {
+    public boolean onMouseDown(MouseButtonEvent click, boolean doubled) {
         if (this.isInScrollbar(this.x + click.x(), this.y + click.y())) {
             super.onMouseDown(click, doubled);
             return true;
@@ -209,7 +210,7 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
     }
 
     @Override
-    public boolean onMouseDrag(Click click, double deltaX, double deltaY) {
+    public boolean onMouseDrag(MouseButtonEvent click, double deltaX, double deltaY) {
         if (!this.scrollbaring && !this.isInScrollbar(this.x + click.x(), this.y + click.y()))
             return super.onMouseDrag(click, deltaX, deltaY);
 
@@ -225,7 +226,7 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
     }
 
     @Override
-    public boolean onKeyPress(KeyInput input) {
+    public boolean onKeyPress(KeyEvent input) {
         if (input.key() == this.direction.lessKeycode) {
             this.scrollBy(-10, false, true);
         } else if (input.key() == this.direction.moreKeycode) {
@@ -241,13 +242,13 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
     }
 
     @Override
-    public boolean onMouseUp(Click click) {
+    public boolean onMouseUp(MouseButtonEvent click) {
         this.scrollbaring = false;
         return true;
     }
 
     @Override
-    public @Nullable Component childAt(int x, int y) {
+    public @Nullable UIComponent childAt(int x, int y) {
         if (this.isInScrollbar(x, y)) {
             return this;
         } else {
@@ -256,7 +257,7 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
     }
 
     protected void scrollBy(double offset, boolean instant, boolean showScrollbar) {
-        this.scrollOffset = MathHelper.clamp(this.scrollOffset + offset, 0, this.maxScroll + .5);
+        this.scrollOffset = Mth.clamp(this.scrollOffset + offset, 0, this.maxScroll + .5);
         if (instant) this.currentScrollPosition = this.scrollOffset;
         if (showScrollbar) this.lastScrollbarInteractTime = System.currentTimeMillis() + 1250;
     }
@@ -268,11 +269,11 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
     /**
      * Scroll to the given component
      */
-    public ScrollContainer<C> scrollTo(Component component) {
+    public ScrollContainer<C> scrollTo(UIComponent component) {
         if (this.direction == ScrollDirection.VERTICAL) {
-            this.scrollOffset = MathHelper.clamp(this.scrollOffset - (this.y - component.y() + component.margins().get().top()), 0, this.maxScroll);
+            this.scrollOffset = Mth.clamp(this.scrollOffset - (this.y - component.y() + component.margins().get().top()), 0, this.maxScroll);
         } else {
-            this.scrollOffset = MathHelper.clamp(this.scrollOffset - (this.x - component.x() + component.margins().get().right()), 0, this.maxScroll);
+            this.scrollOffset = Mth.clamp(this.scrollOffset - (this.x - component.x() + component.margins().get().right()), 0, this.maxScroll);
         }
         return this;
     }
@@ -365,8 +366,8 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
 
     public static ScrollContainer<?> parse(Element element) {
         return element.getAttribute("direction").equals("vertical")
-                ? Containers.verticalScroll(Sizing.content(), Sizing.content(), null)
-                : Containers.horizontalScroll(Sizing.content(), Sizing.content(), null);
+                ? UIContainers.verticalScroll(Sizing.content(), Sizing.content(), null)
+                : UIContainers.horizontalScroll(Sizing.content(), Sizing.content(), null);
     }
 
     @FunctionalInterface
@@ -381,7 +382,7 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
             return (context, x, y, width, height, trackX, trackY, trackWidth, trackHeight, lastInteractTime, direction, active) -> {
                 if (!active) return;
 
-                final var progress = Easing.SINE.apply(MathHelper.clamp(lastInteractTime - System.currentTimeMillis(), 0, 750) / 750f);
+                final var progress = Easing.SINE.apply(Mth.clamp(lastInteractTime - System.currentTimeMillis(), 0, 750) / 750f);
                 int alpha = (int) (progress * (scrollbarColor >>> 24));
 
                 context.fill(
@@ -417,7 +418,7 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
             };
         }
 
-        void draw(OwoUIDrawContext context, int x, int y, int width, int height, int trackX, int trackY, int trackWidth, int trackHeight,
+        void draw(OwoUIGraphics context, int x, int y, int width, int height, int trackX, int trackY, int trackWidth, int trackHeight,
                   long lastInteractTime, ScrollDirection direction, boolean active);
 
         static Scrollbar parse(Element element) {
@@ -437,17 +438,17 @@ public class ScrollContainer<C extends Component> extends WrappingParentComponen
     }
 
     public enum ScrollDirection {
-        VERTICAL(Component::height, Component::updateY, Component::y, Insets::vertical, GLFW.GLFW_KEY_UP, GLFW.GLFW_KEY_DOWN),
-        HORIZONTAL(Component::width, Component::updateX, Component::x, Insets::horizontal, GLFW.GLFW_KEY_LEFT, GLFW.GLFW_KEY_RIGHT);
+        VERTICAL(UIComponent::height, UIComponent::updateY, UIComponent::y, Insets::vertical, GLFW.GLFW_KEY_UP, GLFW.GLFW_KEY_DOWN),
+        HORIZONTAL(UIComponent::width, UIComponent::updateX, UIComponent::x, Insets::horizontal, GLFW.GLFW_KEY_LEFT, GLFW.GLFW_KEY_RIGHT);
 
-        public final Function<Component, Integer> sizeGetter;
-        public final BiConsumer<Component, Integer> coordinateSetter;
+        public final Function<UIComponent, Integer> sizeGetter;
+        public final BiConsumer<UIComponent, Integer> coordinateSetter;
         public final Function<ScrollContainer<?>, Integer> coordinateGetter;
         public final Function<Insets, Integer> insetGetter;
 
         public final int lessKeycode, moreKeycode;
 
-        ScrollDirection(Function<Component, Integer> sizeGetter, BiConsumer<Component, Integer> coordinateSetter, Function<ScrollContainer<?>, Integer> coordinateGetter, Function<Insets, Integer> insetGetter, int lessKeycode, int moreKeycode) {
+        ScrollDirection(Function<UIComponent, Integer> sizeGetter, BiConsumer<UIComponent, Integer> coordinateSetter, Function<ScrollContainer<?>, Integer> coordinateGetter, Function<Insets, Integer> insetGetter, int lessKeycode, int moreKeycode) {
             this.sizeGetter = sizeGetter;
             this.coordinateSetter = coordinateSetter;
             this.coordinateGetter = coordinateGetter;

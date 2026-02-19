@@ -1,13 +1,13 @@
 package io.wispforest.owo.network;
 
+import io.wispforest.endec.Endec;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.Owo;
-import io.wispforest.owo.mixin.ClientCommonNetworkHandlerAccessor;
-import io.wispforest.owo.mixin.ServerCommonNetworkHandlerAccessor;
+import io.wispforest.owo.mixin.ClientCommonPacketListenerImplAccessor;
+import io.wispforest.owo.mixin.ServerCommonPacketListenerImplAccessor;
 import io.wispforest.owo.network.neoforge.SidedPacketCodec;
 import io.wispforest.owo.ops.TextOps;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
-import io.wispforest.endec.Endec;
 import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.util.OwoFreezer;
@@ -18,11 +18,8 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerConfigurationNetworkHandler;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
+import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
+import net.minecraft.util.Tuple;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.network.event.RegisterConfigurationTasksEvent;
@@ -44,9 +41,9 @@ public final class OwoHandshake {
 
     private static final Endec<Map<Identifier, Integer>> CHANNEL_HASHES_ENDEC = Endec.map(MinecraftEndecs.IDENTIFIER, Endec.INT);
 
-    public static final MutableText PREFIX = TextOps.concat(Owo.PREFIX, Text.of("§chandshake failure\n"));
-    public static final Identifier CHANNEL_ID = Identifier.of("owo", "handshake");
-    public static final Identifier OFF_CHANNEL_ID = Identifier.of("owo", "handshake_off");
+    public static final MutableComponent PREFIX = TextOps.concat(Owo.PREFIX, Component.nullToEmpty("§chandshake failure\n"));
+    public static final Identifier CHANNEL_ID = Owo.id("handshake");
+    public static final Identifier OFF_CHANNEL_ID = Owo.id("handshake_off");
 
     public static final boolean ENABLED = System.getProperty("owo.handshake.enabled") != null ? Boolean.getBoolean("owo.handshake.enabled") : Owo.DEBUG;
     private static boolean HANDSHAKE_REQUIRED = false;
@@ -99,7 +96,7 @@ public final class OwoHandshake {
         });
 
         if (!ENABLED) {
-            registrar.configurationToClient(HandshakeOff.ID, PacketCodec.unit(new HandshakeOff()), (payload, context) -> {});
+            registrar.configurationToClient(HandshakeOff.ID, StreamCodec.unit(new HandshakeOff()), (payload, context) -> {});
         }
     }
 
@@ -116,7 +113,7 @@ public final class OwoHandshake {
     // Packets
     // -------
 
-    private static void configureStart(ServerConfigurationNetworkHandler handler, MinecraftServer server) {
+    private static void configureStart(ServerConfigurationPacketListenerImpl handler, MinecraftServer server) {
         if (!ENABLED) return;
 
         if (NetworkRegistry.hasChannel(handler, OFF_CHANNEL_ID)) {
@@ -127,7 +124,7 @@ public final class OwoHandshake {
         if (!NetworkRegistry.hasChannel(handler, CHANNEL_ID)) {
             if (!HANDSHAKE_REQUIRED) return;
 
-            handler.disconnect(TextOps.concat(PREFIX, Text.of("incompatible client")));
+            handler.disconnect(TextOps.concat(PREFIX, Component.nullToEmpty("incompatible client")));
             Owo.LOGGER.info("[Handshake] Handshake failed, client doesn't understand channel packet");
             return;
         }
@@ -160,23 +157,23 @@ public final class OwoHandshake {
         isAllGood &= verifyReceivedHashes("controllers", response.requiredControllers(), ParticleSystemController.REGISTERED_CONTROLLERS, OwoHandshake::hashController, disconnectMessage);
 
         if (!isAllGood) {
-            context.disconnect(TextOps.concat(PREFIX, Text.of(disconnectMessage.toString())));
+            context.disconnect(TextOps.concat(PREFIX, Component.nullToEmpty(disconnectMessage.toString())));
         }
 
-        ((OwoClientConnectionExtension) ((ServerCommonNetworkHandlerAccessor) ((ServerPayloadContext)context).listener()).owo$getConnection()).owo$setChannelSet(filterOptionalServices(response.optionalChannels(), OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel));
+        ((OwoClientConnectionExtension) ((ServerCommonPacketListenerImplAccessor) ((ServerPayloadContext)context).listener()).owo$getConnection()).owo$setChannelSet(filterOptionalServices(response.optionalChannels(), OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel));
 
         Owo.LOGGER.info("[Handshake] Handshake completed successfully");
     }
 
 //    @OnlyIn(Dist.CLIENT)
-//    public static void handleReadyClient(ClientConfigurationNetworkHandler handler, MinecraftClient client) {
+//    public static void handleReadyClient(ClientConfigurationPacketListenerImpl handler, Minecraft client) {
 //        // TODO: Report issues with ClientConfigurationNetworking.canSend(CHANNEL_ID)
 //        if (NetworkRegistry.hasChannel(handler, CHANNEL_ID) || !HANDSHAKE_REQUIRED || !ENABLED) return;
 //
 //        client.execute(() -> {
-//            ((ClientCommonNetworkHandlerAccessor) handler)
+//            ((ClientCommonPacketListenerImplAccessor) handler)
 //                    .getConnection()
-//                    .disconnect(TextOps.concat(PREFIX, Text.of("incompatible server")));
+//                    .disconnect(TextOps.concat(PREFIX, Component.nullToEmpty("incompatible server")));
 //        });
 //    }
 
@@ -207,14 +204,14 @@ public final class OwoHandshake {
 
             var leftovers = findCollisions(clientMap.keySet(), serverMap.keySet());
 
-            if (!leftovers.getLeft().isEmpty()) {
+            if (!leftovers.getA().isEmpty()) {
                 disconnectMessage.append("server is missing ").append(serviceNamePlural).append(":\n");
-                leftovers.getLeft().forEach(identifier -> disconnectMessage.append("§7").append(identifier).append("§r\n"));
+                leftovers.getA().forEach(identifier -> disconnectMessage.append("§7").append(identifier).append("§r\n"));
             }
 
-            if (!leftovers.getRight().isEmpty()) {
+            if (!leftovers.getB().isEmpty()) {
                 disconnectMessage.append("client is missing ").append(serviceNamePlural).append(":\n");
-                leftovers.getRight().forEach(identifier -> disconnectMessage.append("§7").append(identifier).append("§r\n"));
+                leftovers.getB().forEach(identifier -> disconnectMessage.append("§7").append(identifier).append("§r\n"));
             }
         }
 
@@ -250,7 +247,7 @@ public final class OwoHandshake {
         return hashes;
     }
 
-    private static Pair<Set<Identifier>, Set<Identifier>> findCollisions(Set<Identifier> first, Set<Identifier> second) {
+    private static Tuple<Set<Identifier>, Set<Identifier>> findCollisions(Set<Identifier> first, Set<Identifier> second) {
         var firstLeftovers = new HashSet<Identifier>();
         var secondLeftovers = new HashSet<Identifier>();
 
@@ -262,7 +259,7 @@ public final class OwoHandshake {
             if (!first.contains(identifier)) secondLeftovers.add(identifier);
         });
 
-        return new Pair<>(firstLeftovers, secondLeftovers);
+        return new Tuple<>(firstLeftovers, secondLeftovers);
     }
 
     private static int hashChannel(OwoNetChannel channel) {
@@ -281,25 +278,25 @@ public final class OwoHandshake {
         return 31 * controller.channelId.hashCode() + serializersHash;
     }
 
-    public record HandshakeRequest(Map<Identifier, Integer> optionalChannels) implements CustomPayload {
+    public record HandshakeRequest(Map<Identifier, Integer> optionalChannels) implements CustomPacketPayload {
 
-        public static final Id<HandshakeRequest> ID = new Id<>(OwoHandshake.CHANNEL_ID);
+        public static final Type<HandshakeRequest> ID = new Type<>(OwoHandshake.CHANNEL_ID);
         public static final Endec<HandshakeRequest> ENDEC = StructEndecBuilder.of(
                 CHANNEL_HASHES_ENDEC.fieldOf("optionalChannels", HandshakeRequest::optionalChannels),
                 HandshakeRequest::new
         );
 
         @Override
-        public Id<? extends CustomPayload> getId() {
+        public Type<? extends CustomPacketPayload> type() {
             return ID;
         }
     }
 
-    public record HandshakeOff() implements CustomPayload {
-        public static final Id<HandshakeOff> ID = new Id<>(OwoHandshake.OFF_CHANNEL_ID);
+    public record HandshakeOff() implements CustomPacketPayload {
+        public static final Type<HandshakeOff> ID = new Type<>(OwoHandshake.OFF_CHANNEL_ID);
 
         @Override
-        public Id<? extends CustomPayload> getId() {
+        public Type<? extends CustomPacketPayload> type() {
             return ID;
         }
 
@@ -307,9 +304,9 @@ public final class OwoHandshake {
 
     private record HandshakeResponse(Map<Identifier, Integer> requiredChannels,
                                      Map<Identifier, Integer> requiredControllers,
-                                     Map<Identifier, Integer> optionalChannels) implements CustomPayload {
+                                     Map<Identifier, Integer> optionalChannels) implements CustomPacketPayload {
 
-        public static final Id<HandshakeResponse> ID = new Id<>(OwoHandshake.CHANNEL_ID);
+        public static final Type<HandshakeResponse> ID = new Type<>(OwoHandshake.CHANNEL_ID);
         public static final Endec<HandshakeResponse> ENDEC = StructEndecBuilder.of(
                 CHANNEL_HASHES_ENDEC.fieldOf("requiredChannels", HandshakeResponse::requiredChannels),
                 CHANNEL_HASHES_ENDEC.fieldOf("requiredControllers", HandshakeResponse::requiredControllers),
@@ -318,7 +315,7 @@ public final class OwoHandshake {
         );
 
         @Override
-        public Id<? extends CustomPayload> getId() {
+        public Type<? extends CustomPacketPayload> type() {
             return ID;
         }
     }

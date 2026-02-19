@@ -1,13 +1,13 @@
 package io.wispforest.owo.ui.base;
 
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
-import io.wispforest.owo.ui.core.ParentComponent;
+import io.wispforest.owo.ui.core.OwoUIGraphics;
+import io.wispforest.owo.ui.core.ParentUIComponent;
 import io.wispforest.owo.ui.core.Size;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.toast.Toast;
-import net.minecraft.client.toast.ToastManager;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.toasts.Toast;
+import net.minecraft.client.gui.components.toasts.ToastManager;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.time.Duration;
@@ -15,7 +15,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.function.Supplier;
 
 @ApiStatus.Experimental
-public abstract class BaseOwoToast<R extends ParentComponent> implements Toast {
+public abstract class BaseOwoToast<R extends ParentUIComponent> implements Toast {
 
     protected final R rootComponent;
     protected final VisibilityPredicate<R> visibilityPredicate;
@@ -38,9 +38,9 @@ public abstract class BaseOwoToast<R extends ParentComponent> implements Toast {
 
     @Override
     public void update(ToastManager manager, long time) {
-        final var delta = MinecraftClient.getInstance().getRenderTickCounter().getDynamicDeltaTicks();
+        final var delta = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaTicks();
 
-        var client = manager.getClient();
+        var client = manager.getMinecraft();
         var window = client.getWindow();
 
         int mouseX = -1000; //(int)(client.mouse.getX() * (double) window.getScaledWidth() / (double) window.getWidth());
@@ -52,32 +52,32 @@ public abstract class BaseOwoToast<R extends ParentComponent> implements Toast {
     }
 
     @Override
-    public Visibility getVisibility() {
+    public Visibility getWantedVisibility() {
         return this.visibility;
     }
 
     @Override
-    public void draw(DrawContext context, TextRenderer textRenderer, long startTime) {
-        var tickCounter = MinecraftClient.getInstance().getRenderTickCounter();
+    public void render(GuiGraphics context, Font textRenderer, long startTime) {
+        var tickCounter = Minecraft.getInstance().getDeltaTracker();
 
-        this.rootComponent.draw(OwoUIDrawContext.of(context), -1000, -1000, tickCounter.getTickProgress(false), tickCounter.getDynamicDeltaTicks());
+        this.rootComponent.draw(OwoUIGraphics.of(context), -1000, -1000, tickCounter.getGameTimeDeltaPartialTick(false), tickCounter.getGameTimeDeltaTicks());
     }
 
     @Override
-    public int getHeight() {
+    public int height() {
         return this.rootComponent.fullSize().height();
     }
 
     @Override
-    public int getWidth() {
+    public int width() {
         return this.rootComponent.fullSize().width();
     }
 
     @FunctionalInterface
-    public interface VisibilityPredicate<R extends ParentComponent> {
+    public interface VisibilityPredicate<R extends ParentUIComponent> {
         Visibility test(BaseOwoToast<R> toast, long startTime);
 
-        static <R extends ParentComponent> VisibilityPredicate<R> timeout(Duration timeout) {
+        static <R extends ParentUIComponent> VisibilityPredicate<R> timeout(Duration timeout) {
             return (toast, startTime) -> System.currentTimeMillis() - startTime <= timeout.get(ChronoUnit.MILLIS) ? Visibility.HIDE : Visibility.SHOW;
         }
     }
