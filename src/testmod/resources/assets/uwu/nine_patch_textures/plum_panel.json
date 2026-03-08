@@ -1,0 +1,14 @@
+{
+  "texture": "uwu:textures/gui/plum_panel.png",
+  "texture_width": 32,
+  "texture_height": 32,
+  "repeat": false,
+  "corner_patch_size": {
+    "width": 8,
+    "height": 8
+  },
+  "center_patch_size": {
+    "width": 1,
+    "height": 1
+  }
+}

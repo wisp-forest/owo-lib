@@ -49,6 +49,7 @@ import io.wispforest.owo.braid.widgets.object.ItemStackWidget;
 import io.wispforest.owo.braid.widgets.overlay.Overlay;
 import io.wispforest.owo.braid.widgets.overlay.OverlayEntryBuilder;
 import io.wispforest.owo.braid.widgets.owoui.OwoUIWidget;
+import io.wispforest.owo.braid.widgets.physics.WowzersThatsPhysics;
 import io.wispforest.owo.braid.widgets.recipeviewer.RecipeViewerExclusionZone;
 import io.wispforest.owo.braid.widgets.recipeviewer.RecipeViewerStack;
 import io.wispforest.owo.braid.widgets.recipeviewer.StackDropArea;
@@ -123,6 +124,9 @@ import static io.wispforest.uwu.client.braid.SliderTests.formatDouble;
 
 public class TestSelector extends StatefulWidget {
 
+    public static final Identifier PLUM_PANEL = Identifier.fromNamespaceAndPath("uwu", "plum_panel");
+    public static final Identifier PLUM_PANEL_INSET = Identifier.fromNamespaceAndPath("uwu", "plum_panel_inset");
+
     public enum Tests {
         COUNTER,
         FLEX,
@@ -146,7 +150,9 @@ public class TestSelector extends StatefulWidget {
         SPINNY_GHAST,
         OPTIMIZATION,
         AUTOMATIC_ANIMATION,
-        KDL_WIDGETS
+        KDL_WIDGETS,
+        PLUM,
+        PHYSICS
     }
 
     @Override
@@ -168,6 +174,7 @@ public class TestSelector extends StatefulWidget {
         private double xSkew = 0f;
         private double ySkew = 0f;
 
+        private double rotatTarget = 0f;
         private double rotat = 0f;
         private int fliptat = 0;
         private boolean bouncy = false;
@@ -183,6 +190,18 @@ public class TestSelector extends StatefulWidget {
             ));
 
             this.chyz.setSharedFlagOnFire(true);
+            this.scheduleAnimationCallback(this::smoothRotation);
+        }
+
+        private void smoothRotation(Duration delta) {
+            var prevRotat = this.rotat;
+            this.rotat += Delta.compute(this.rotat, this.rotatTarget, ((double) delta.toNanos() / Duration.ofSeconds(1).toNanos()) * 5);
+
+            if (Math.abs(prevRotat - this.rotat) > 1e-3) {
+                this.setState(() -> {});
+            }
+
+            this.scheduleAnimationCallback(this::smoothRotation);
         }
 
         @Override
@@ -256,6 +275,8 @@ public class TestSelector extends StatefulWidget {
                                             case OPTIMIZATION -> new OptimizationTest();
                                             case AUTOMATIC_ANIMATION -> new AutomaticAnimationTest();
                                             case KDL_WIDGETS -> new KdlWidgetsTest();
+                                            case PLUM -> new PlumTests();
+                                            case PHYSICS -> new PhysicsTest();
                                             case null -> new Center(new Label(Component.literal("select a test")));
                                         }
                                     )
@@ -267,14 +288,14 @@ public class TestSelector extends StatefulWidget {
                                     Insets.vertical(50).withLeft(5),
                                     new HitTestTrap(
                                         new Panel(
-                                            Panel.VANILLA_LIGHT,
+                                            PLUM_PANEL,
                                             new Padding(
                                                 Insets.all(8),
                                                 new IntrinsicWidth(
                                                     new Column(
                                                         new Flexible(
                                                             new Panel(
-                                                                Panel.VANILLA_INSET,
+                                                                PLUM_PANEL_INSET,
                                                                 new Padding(
                                                                     Insets.all(2),
                                                                     new VerticallyScrollable(
@@ -384,7 +405,7 @@ public class TestSelector extends StatefulWidget {
                                             () -> this.setState(() -> {
                                                 this.xSkew = 0f;
                                                 this.ySkew = 0f;
-                                                this.rotat = 0f;
+                                                this.rotatTarget = 0f;
                                                 this.fliptat = 0;
                                             })
                                         )
@@ -415,9 +436,9 @@ public class TestSelector extends StatefulWidget {
                                     new Sized(
                                         75, 20,
                                         new MessageSlider(
-                                            rotat,
-                                            Component.literal("rotat: " + formatDouble(this.rotat)), widget -> widget.range(0, 360).incrementStep(1),
-                                            value -> this.setState(() -> this.rotat = value)
+                                            this.rotatTarget,
+                                            Component.literal("rotat: " + formatDouble(this.rotatTarget)), widget -> widget.range(0, 360).incrementStep(1),
+                                            value -> this.setState(() -> this.rotatTarget = value)
                                         )
                                     ),
                                     new Sized(
@@ -541,7 +562,7 @@ public class TestSelector extends StatefulWidget {
                     ),
                     new Padding(Insets.all(5)),
                     new Panel(
-                        Panel.VANILLA_LIGHT,
+                        PLUM_PANEL,
                         new Padding(
                             Insets.all(10),
                             new Column(
@@ -977,11 +998,11 @@ public class TestSelector extends StatefulWidget {
                         250.0,
                         250.0,
                         new Panel(
-                            Panel.VANILLA_LIGHT,
+                            PLUM_PANEL,
                             new Padding(
                                 Insets.all(8),
                                 new Panel(
-                                    Panel.VANILLA_INSET,
+                                    PLUM_PANEL_INSET,
                                     new RecipeViewerStack(
                                         () -> ViewerStack.OfItem.of(Items.GOLD_BLOCK),
                                         new StackDropArea(
@@ -1180,7 +1201,7 @@ public class TestSelector extends StatefulWidget {
                     250.0,
                     null,
                     new Panel(
-                        Panel.VANILLA_LIGHT,
+                        PLUM_PANEL,
                         new Padding(
                             Insets.all(8),
                             new Column(
@@ -1203,7 +1224,7 @@ public class TestSelector extends StatefulWidget {
                                                     .focusLostCallback(() -> this.addToList(Component.literal("Focus lost")))
                                                     .charCallback((charCode, modifiers) -> this.addToList(Component.literal("Character typed: \"" + (char) charCode + "\""))),
                                             new Panel(
-                                                Panel.VANILLA_INSET,
+                                                PLUM_PANEL_INSET,
                                                 new VerticallyScrollable(
                                                     controller,
                                                     null,
@@ -1521,7 +1542,7 @@ public class TestSelector extends StatefulWidget {
                     return new Panel(
                         SharedState.select(context, CounterState.class, state -> state.dark)
                             ? Panel.VANILLA_DARK
-                            : Panel.VANILLA_LIGHT,
+                            : PLUM_PANEL,
                         new CounterText()
                     );
                 }
@@ -1566,20 +1587,20 @@ public class TestSelector extends StatefulWidget {
             return new Center(
                 new Row(
                     new Stack(
-                        new Panel(Panel.VANILLA_LIGHT),
+                        new Panel(PLUM_PANEL),
                         new StackBase(new Sized(100, 100, new Padding(Insets.none()))),
                         new Label(new LabelStyle(Alignment.BOTTOM_RIGHT, null, null, null), true, Component.literal("based corner text"))
                     ),
                     new Padding(Insets.horizontal(20)),
                     new Stack(
-                        new Sized(100, 100, new Panel(Panel.VANILLA_LIGHT)),
+                        new Sized(100, 100, new Panel(PLUM_PANEL)),
                         new Label(new LabelStyle(Alignment.BOTTOM_RIGHT, null, null, null), true, Component.literal("failed corner text"))
                     ),
                     new Padding(Insets.horizontal(20)),
                     new IntrinsicWidth(
                         new IntrinsicHeight(
                             new Stack(
-                                new Sized(100, 100, new Panel(Panel.VANILLA_LIGHT)),
+                                new Sized(100, 100, new Panel(PLUM_PANEL)),
                                 new Label(new LabelStyle(Alignment.BOTTOM_RIGHT, null, null, null), true, Component.literal("intrinsic corner text"))
                             )
                         )
@@ -1699,7 +1720,7 @@ public class TestSelector extends StatefulWidget {
                                                 return new Padding(
                                                     Insets.all(8),
                                                     new Panel(
-                                                        Panel.VANILLA_LIGHT,
+                                                        PLUM_PANEL,
                                                         new Padding(
                                                             Insets.all(8),
                                                             new Column(
@@ -2126,7 +2147,7 @@ public class TestSelector extends StatefulWidget {
                                         () -> Navigator.pushOverlay(
                                             context, new Dialog(
                                                 new Panel(
-                                                    Panel.VANILLA_LIGHT,
+                                                    PLUM_PANEL,
                                                     new Padding(
                                                         Insets.all(5),
                                                         new Sized(
@@ -2210,7 +2231,7 @@ public class TestSelector extends StatefulWidget {
                                     }),
                                 new Center(
                                     new Panel(
-                                        Panel.VANILLA_LIGHT,
+                                        PLUM_PANEL,
                                         new Padding(
                                             Insets.all(10),
                                             new Sized(
@@ -2504,7 +2525,7 @@ public class TestSelector extends StatefulWidget {
                 @Override
                 public Widget build(BuildContext context) {
                     var displayChildren = new ArrayList<Widget>();
-                    displayChildren.add(new Panel(Panel.VANILLA_INSET));
+                    displayChildren.add(new Panel(PLUM_PANEL_INSET));
 
                     var offset = -this.widget().selectedIndex * this.widget().itemSize.height() / 2;
                     offset -= this.widget().itemSize.height() / 4;
@@ -2785,6 +2806,15 @@ public class TestSelector extends StatefulWidget {
                     )
                 );
             }
+        }
+    }
+
+    public static class PhysicsTest extends StatelessWidget {
+        @Override
+        public Widget build(BuildContext context) {
+            return new Center(
+                new WowzersThatsPhysics(2)
+            );
         }
     }
 

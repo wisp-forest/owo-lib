@@ -13,6 +13,7 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class BraidScreen extends Screen implements DisposableScreen {
 
@@ -43,7 +44,7 @@ public class BraidScreen extends Screen implements DisposableScreen {
                 : this.rootWidget;
 
             this.state = new AppState(
-                null,
+                this.settings.logger,
                 AppState.formatName("BraidScreen", this.rootWidget),
                 this.minecraft,
                 this.surface,
@@ -121,6 +122,7 @@ public class BraidScreen extends Screen implements DisposableScreen {
     public static class Settings {
         public boolean shouldPause = true;
         public boolean useBraidAppWidget = true;
+        public @Nullable Logger logger = null;
     }
 }
 

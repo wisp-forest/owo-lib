@@ -2,12 +2,14 @@ package io.wispforest.owo.serialization.format.nbt;
 
 import com.google.common.collect.MapMaker;
 import io.wispforest.endec.*;
-import io.wispforest.endec.format.edm.EdmElement;
 import io.wispforest.endec.util.RecursiveDeserializer;
 import net.minecraft.nbt.*;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 
 public class NbtDeserializer extends RecursiveDeserializer<Tag> implements SelfDescribedDeserializer<Tag> {

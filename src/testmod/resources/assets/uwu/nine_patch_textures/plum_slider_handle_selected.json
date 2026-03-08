@@ -1,0 +1,10 @@
+{
+  "texture": "uwu:textures/gui/plum_slider_handle_selected.png",
+  "texture_width": 12,
+  "texture_height": 12,
+  "repeat": false,
+  "patch_size": {
+    "width": 4,
+    "height": 4
+  }
+}

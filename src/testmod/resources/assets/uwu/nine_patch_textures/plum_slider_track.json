@@ -1,0 +1,14 @@
+{
+  "texture": "uwu:textures/gui/plum_slider_track.png",
+  "texture_width": 32,
+  "texture_height": 32,
+  "repeat": true,
+  "corner_patch_size": {
+    "width": 3,
+    "height": 3
+  },
+  "center_patch_size": {
+    "width": 26,
+    "height": 26
+  }
+}
