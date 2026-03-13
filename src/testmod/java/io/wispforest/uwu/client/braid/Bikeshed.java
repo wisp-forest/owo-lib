@@ -1,4 +1,4 @@
-package io.wispforest.uwu.client;
+package io.wispforest.uwu.client.braid;
 
 import io.wispforest.owo.braid.core.Color;
 import io.wispforest.owo.braid.framework.BuildContext;

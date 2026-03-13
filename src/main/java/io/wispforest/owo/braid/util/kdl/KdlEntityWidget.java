@@ -9,7 +9,9 @@ import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import io.wispforest.owo.braid.widgets.object.EntityWidget;
+import io.wispforest.owo.braid.widgets.object.entity.EntityDisplayMode;
+import io.wispforest.owo.braid.widgets.object.entity.EntityRenderStateWidget;
+import io.wispforest.owo.braid.widgets.object.entity.EntityWidget;
 import net.minecraft.IdentifierException;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -29,11 +31,11 @@ public class KdlEntityWidget extends StatefulWidget {
     public final double scale;
     public final EntitySpec spec;
 
-    public final EntityWidget.DisplayMode mode;
+    public final EntityDisplayMode mode;
     public final boolean scaleToFit;
     public final boolean showNametag;
 
-    public KdlEntityWidget(double scale, EntitySpec spec, EntityWidget.DisplayMode mode, boolean scaleToFit, boolean showNametag) {
+    public KdlEntityWidget(double scale, EntitySpec spec, EntityDisplayMode mode, boolean scaleToFit, boolean showNametag) {
         this.scale = scale;
         this.spec = spec;
         this.mode = mode;
