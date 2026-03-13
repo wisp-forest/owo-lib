@@ -1,4 +1,4 @@
-package io.wispforest.uwu.client.braid;
+package io.wispforest.uwu.client.braid.test;
 
 import io.wispforest.owo.braid.core.*;
 import io.wispforest.owo.braid.framework.BuildContext;
@@ -28,7 +28,8 @@ import io.wispforest.owo.braid.widgets.slider.xlyder.MessageXlyder;
 import io.wispforest.owo.braid.widgets.slider.xlyder.Xlyder;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.ui.core.OwoUIGraphics;
-import io.wispforest.uwu.client.Bikeshed;
+import io.wispforest.uwu.client.braid.Bikeshed;
+import io.wispforest.uwu.client.braid.GayAmogus;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.network.chat.Component;
 import org.joml.Matrix3x2f;
@@ -40,20 +41,20 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class SliderTests extends StatefulWidget {
+public class SliderTest extends StatefulWidget {
 
-    public enum SliderTest {
+    public enum Test {
         BASIC, DIRECTION, REDUNDANT, SLIDER
     }
 
     @Override
-    public WidgetState<SliderTests> createState() {
+    public WidgetState<SliderTest> createState() {
         return new State();
     }
 
-    public static class State extends WidgetState<SliderTests> {
+    public static class State extends WidgetState<SliderTest> {
 
-        private SliderTest test = SliderTest.BASIC;
+        private Test test = Test.BASIC;
 
         @Override
         public Widget build(BuildContext context) {
@@ -63,7 +64,7 @@ public class SliderTests extends StatefulWidget {
                     new SliderStyle<>(
                         null,
                         active -> new HoverableBuilder((hoverableContext, hovered) -> {
-                            return hovered ? new TestSelector.GayAmogus(4) : new Box(Color.WHITE);
+                            return hovered ? new GayAmogus(4) : new Box(Color.WHITE);
                         }),
                         Size.of(16, 16),
                         null
@@ -95,7 +96,7 @@ public class SliderTests extends StatefulWidget {
                                                     MainAxisAlignment.START,
                                                     CrossAxisAlignment.CENTER,
                                                     new Padding(Insets.all(2)),
-                                                    Stream.of(SliderTest.values()).map(test -> new MessageButton(
+                                                    Stream.of(Test.values()).map(test -> new MessageButton(
                                                         Component.literal(test.name().toLowerCase(Locale.ROOT).replace('_', ' ')),
                                                         test != this.test ? () -> this.setState(() -> this.test = test) : null
                                                     )).collect(Collectors.toList())

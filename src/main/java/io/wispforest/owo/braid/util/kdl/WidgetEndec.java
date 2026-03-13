@@ -21,7 +21,7 @@ import io.wispforest.owo.braid.widgets.grid.Grid;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
 import io.wispforest.owo.braid.widgets.object.BlockWidget;
-import io.wispforest.owo.braid.widgets.object.EntityWidget;
+import io.wispforest.owo.braid.widgets.object.entity.EntityDisplayMode;
 import io.wispforest.owo.braid.widgets.object.ItemStackWidget;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.braid.widgets.stack.StackBase;
@@ -314,7 +314,7 @@ public class WidgetEndec {
             StructEndecBuilder.of(
                 Endec.DOUBLE.optionalFieldOf("scale", s -> s.scale, 1.0),
                 KdlEntityWidget.EntitySpec.STRING_ENDEC.fieldOf("@argument", s -> s.spec),
-                Endec.forEnum(EntityWidget.DisplayMode.class, false).optionalFieldOf("mode", s -> s.mode, EntityWidget.DisplayMode.FIXED),
+                Endec.forEnum(EntityDisplayMode.class, false).optionalFieldOf("mode", s -> s.mode, EntityDisplayMode.FIXED),
                 Endec.BOOLEAN.optionalFieldOf("scale_to_fit", s -> s.scaleToFit, true),
                 Endec.BOOLEAN.optionalFieldOf("show_nametag", s -> s.showNametag, false),
                 KdlEntityWidget::new

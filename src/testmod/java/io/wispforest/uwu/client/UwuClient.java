@@ -25,7 +25,7 @@ import io.wispforest.owo.ui.layers.Layers;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.uwu.Uwu;
-import io.wispforest.uwu.client.braid.TestSelector;
+import io.wispforest.uwu.client.braid.Amogus;
 import io.wispforest.uwu.items.UwuBraidItem;
 import io.wispforest.uwu.network.UwuNetworkExample;
 import io.wispforest.uwu.network.UwuOptionalNetExample;
@@ -103,7 +103,7 @@ public class UwuClient implements ClientModInitializer {
                                 LayoutAxis.VERTICAL,
                                 6,
                                 Grid.CellFit.loose(),
-                                Stream.generate(() -> new TestSelector.Amogus(
+                                Stream.generate(() -> new Amogus(
                                         new Box(io.wispforest.owo.braid.core.Color.hsv(random.nextDouble(), .75, 1)),
                                         new Box(Color.WHITE.toBraid()),
                                         8
