@@ -43,8 +43,8 @@ public class FlexTest extends StatefulWidget {
                         new Column(
                             MainAxisAlignment.START,
                             CrossAxisAlignment.CENTER,
-                            new Label(Component.literal("that's text")),
-                            new Label(Component.literal("some more text")),
+                            Label.literal("that's text"),
+                            Label.literal("some more text"),
                             new Padding(
                                 Insets.top(5),
                                 new CounterTest()
@@ -60,8 +60,8 @@ public class FlexTest extends StatefulWidget {
                         new Column(
                             MainAxisAlignment.START,
                             CrossAxisAlignment.CENTER,
-                            new Label(Component.literal("that's text")),
-                            new Label(Component.literal("some more text")),
+                            Label.literal("that's text"),
+                            Label.literal("some more text"),
                             new Padding(
                                 Insets.top(5),
                                 new CounterTest()

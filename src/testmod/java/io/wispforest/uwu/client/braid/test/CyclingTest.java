@@ -89,10 +89,10 @@ public class CyclingTest extends StatefulWidget {
                         Grid.CellFit.tight(),
                         widget -> new Padding(Insets.all(5), widget),
                         null,
-                        new Label(Component.literal("Cycler")),
-                        new Label(Component.literal("No Wrap")),
-                        new Label(Component.literal("Values")),
-                        new Label(Component.literal("Enum")),
+                        Label.literal("Cycler"),
+                        Label.literal("No Wrap"),
+                        Label.literal("Values"),
+                        Label.literal("Enum"),
                         MessageCyclingButton.forEnum(
                             this.selectedEnum,
                             Component.literal(selectedEnum.name()),
@@ -104,8 +104,8 @@ public class CyclingTest extends StatefulWidget {
                             Component.literal(selectedEnumNoWrap.name()),
                             (value, index) -> this.setState(() -> this.selectedEnumNoWrap = value)
                         ),
-                        new Label(Component.literal(String.join(", ", Arrays.stream(CoolEnum.values()).map(Enum::name).collect(Collectors.toList())))),
-                        new Label(Component.literal("Boolean")),
+                        Label.literal(String.join(", ", Arrays.stream(CoolEnum.values()).map(Enum::name).collect(Collectors.toList()))),
+                        Label.literal("Boolean"),
                         MessageCyclingButton.forBoolean(
                             this.selectedBoolean,
                             Component.literal(this.selectedBoolean ? "true" : "false"),
@@ -116,8 +116,8 @@ public class CyclingTest extends StatefulWidget {
                             Component.literal(this.selectedBooleanNoWrap ? "true" : "false"),
                             (value, index) -> this.setState(() -> this.selectedBooleanNoWrap = value)
                         ),
-                        new Label(Component.literal("false, true")),
-                        new Label(Component.literal("String")),
+                        Label.literal("false, true"),
+                        Label.literal("String"),
                         new MessageCyclingButton<>(
                             coolStrings,
                             this.selectedString,
@@ -131,8 +131,8 @@ public class CyclingTest extends StatefulWidget {
                             Component.literal(this.selectedStringNoWrap),
                             (value, index) -> this.setState(() -> this.selectedStringNoWrap = value)
                         ),
-                        new Label(Component.literal(String.join(", ", coolStrings))),
-                        new Label(Component.literal("Int")),
+                        Label.literal(String.join(", ", coolStrings)),
+                        Label.literal("Int"),
                         new MessageCyclingButton<>(
                             coolNumbers,
                             this.selectedInt,
@@ -146,11 +146,9 @@ public class CyclingTest extends StatefulWidget {
                             Component.literal(coolNumbers.get(this.selectedIntNoWrap).toString()),
                             (value, index) -> this.setState(() -> this.selectedIntNoWrap = index)
                         ),
-                        new Label(
-                            Component.literal(coolNumbers.stream()
+                        Label.literal(coolNumbers.stream()
                                 .map(String::valueOf)
                                 .collect(Collectors.joining(", ")))
-                        )
                     )
                 ),
                 new Row(

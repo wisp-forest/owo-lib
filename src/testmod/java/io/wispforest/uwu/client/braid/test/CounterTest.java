@@ -27,7 +27,7 @@ public class CounterTest extends StatefulWidget {
                 50.0,
                 null,
                 new Column(
-                    new Label(Component.literal("count: " + this.count)),
+                    Label.literal("count: " + this.count),
                     new Row(
                         new Flexible(
                             new MessageButton(

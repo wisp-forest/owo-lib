@@ -40,14 +40,14 @@ public class NavigatorTest extends StatelessWidget {
             return new Column(
                 new MessageButton(
                     Component.literal("page 1"),
-                    () -> Navigator.push(context, new BasePage(new Label(Component.literal("page 1"))))
+                    () -> Navigator.push(context, new BasePage(Label.literal("page 1")))
                 ),
                 new MessageButton(
                     Component.literal("page 2"),
                     () -> Navigator.push(
                         context, new BasePage(
                             new Column(
-                                new Label(Component.literal("page 2")),
+                                Label.literal("page 2"),
                                 new MessageButton(
                                     Component.literal("popup"),
                                     () -> Navigator.pushOverlay(

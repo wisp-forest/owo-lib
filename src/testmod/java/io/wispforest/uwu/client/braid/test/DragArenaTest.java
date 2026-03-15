@@ -61,7 +61,7 @@ public class DragArenaTest extends StatefulWidget {
                                 16d / 9d,
                                 new Box(
                                     Color.WHITE.withA(.5),
-                                    new Label(Component.literal("16:9 aspect ratio"))
+                                    Label.literal("16:9 aspect ratio")
                                 )
                             )
                         ),
