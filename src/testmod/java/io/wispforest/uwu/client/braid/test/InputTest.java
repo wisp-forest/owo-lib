@@ -49,7 +49,7 @@ public class InputTest extends StatefulWidget {
                     new Padding(
                         Insets.all(8),
                         new Column(
-                            new Label(Component.literal("Interact with V this V")),
+                            Label.literal("Interact with V this V"),
                             new Sized(
                                 null, 200,
                                 new MouseArea(

@@ -179,7 +179,7 @@ public class TestSelector extends StatefulWidget {
                                                 case OPTIMIZATION -> new OptimizationTest();
                                                 case AUTOMATIC_ANIMATION -> new AutomaticAnimationTest();
                                                 case KDL_WIDGETS -> new KdlWidgetsTest();
-                                                case null -> new Center(new Label(Component.literal("select a test")));
+                                                case null -> new Center(Label.literal("select a test"));
                                             }
                                         )
                                     )
@@ -343,7 +343,7 @@ public class TestSelector extends StatefulWidget {
                                             new Column(
                                                 new Padding(
                                                     Insets.top(5),
-                                                    new Label(Component.literal("fliptat:"))
+                                                    Label.literal("fliptat:")
                                                 ),
                                                 new Row(
                                                     MainAxisAlignment.START,
@@ -352,7 +352,7 @@ public class TestSelector extends StatefulWidget {
                                                         new MessageButton(Component.literal("-"), () -> this.setState(() -> this.fliptat -= 1))
                                                     ),
                                                     new Flexible(
-                                                        new Label(Component.literal(String.valueOf(this.fliptat)))
+                                                        Label.literal(String.valueOf(this.fliptat))
                                                     ),
                                                     new Flexible(
                                                         new MessageButton(Component.literal("+"), () -> this.setState(() -> this.fliptat += 1))

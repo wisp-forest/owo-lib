@@ -406,7 +406,7 @@ public class SliderTest extends StatefulWidget {
                     CrossAxisAlignment.CENTER,
                     new Padding(
                         Insets.all(20),
-                        new Label(Component.literal("incredibly redundant slider™"))
+                        Label.literal("incredibly redundant slider™")
                     ),
                     new Sized(
                         100.0,

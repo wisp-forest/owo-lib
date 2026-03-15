@@ -230,7 +230,7 @@ public class TextInputTest extends StatefulWidget {
                                 this.widget
                             )
                         ),
-                        new Label(Component.literal(this.label))
+                        Label.literal(this.label)
                     )
                 );
             }

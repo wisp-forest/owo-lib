@@ -14,7 +14,6 @@ import io.wispforest.owo.braid.widgets.flex.CrossAxisAlignment;
 import io.wispforest.owo.braid.widgets.flex.MainAxisAlignment;
 import io.wispforest.owo.braid.widgets.grid.Grid;
 import io.wispforest.owo.braid.widgets.label.Label;
-import net.minecraft.network.chat.Component;
 
 public class GridsTest extends StatelessWidget {
     @Override
@@ -54,7 +53,7 @@ public class GridsTest extends StatelessWidget {
                             new Sized(20, 20, new Box(Color.WHITE)),
                             new Sized(60, 40, new Box(Color.WHITE))
                         ),
-                        new Button(() -> {}, new Label(Component.literal("a")))
+                        new Button(() -> {}, Label.literal("a"))
                     )
                 ),
                 new IntrinsicWidth(
@@ -70,7 +69,7 @@ public class GridsTest extends StatelessWidget {
                             new Sized(20, 20, new Box(Color.WHITE)),
                             new Sized(40, 40, new Box(Color.WHITE))
                         ),
-                        new Button(() -> {}, new Label(Component.literal("a")))
+                        new Button(() -> {}, Label.literal("a"))
                     )
                 )
             )

@@ -15,7 +15,6 @@ import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.sharedstate.ShareableState;
 import io.wispforest.owo.braid.widgets.sharedstate.SharedState;
 import io.wispforest.uwu.client.braid.TestSelector;
-import net.minecraft.network.chat.Component;
 
 public class SharedStateTest extends StatefulWidget {
     @Override
@@ -77,11 +76,11 @@ public class SharedStateTest extends StatefulWidget {
                     new Column(
                         new Button(
                             () -> SharedState.set(context, CounterState.class, state -> state.count += 1),
-                            new Label(Component.literal("increment"))
+                            Label.literal("increment")
                         ),
                         new Button(
                             () -> SharedState.set(context, CounterState.class, state -> state.dark = !state.dark),
-                            new Label(Component.literal("toggle darkness"))
+                            Label.literal("toggle darkness")
                         )
                     )
                 );
@@ -92,7 +91,7 @@ public class SharedStateTest extends StatefulWidget {
             @Override
             public Widget build(BuildContext context) {
                 System.out.println("text rebuild");
-                return new Label(Component.literal("current state: " + SharedState.select(context, CounterState.class, state -> state.count)));
+                return Label.literal("current state: " + SharedState.select(context, CounterState.class, state -> state.count));
             }
         }
     }
