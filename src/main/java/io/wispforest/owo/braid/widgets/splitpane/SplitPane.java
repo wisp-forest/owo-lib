@@ -1,79 +1,53 @@
 package io.wispforest.owo.braid.widgets.splitpane;
 
-import io.wispforest.owo.braid.core.Color;
-import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.LayoutAxis;
-import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.framework.BuildContext;
-import io.wispforest.owo.braid.framework.proxy.WidgetState;
-import io.wispforest.owo.braid.framework.widget.Key;
-import io.wispforest.owo.braid.framework.widget.StatefulWidget;
+import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import io.wispforest.owo.braid.widgets.basic.Box;
-import io.wispforest.owo.braid.widgets.basic.Constrain;
-import io.wispforest.owo.braid.widgets.basic.LayoutBuilder;
-import io.wispforest.owo.braid.widgets.basic.MouseArea;
-import io.wispforest.owo.braid.widgets.flex.CrossAxisAlignment;
-import io.wispforest.owo.braid.widgets.flex.Flex;
-import io.wispforest.owo.braid.widgets.flex.Flexible;
-import io.wispforest.owo.braid.widgets.flex.MainAxisAlignment;
-import net.minecraft.util.Mth;
+import org.jetbrains.annotations.Nullable;
 
-public class SplitPane extends StatefulWidget {
+import java.util.Arrays;
+import java.util.List;
 
-    public final Widget firstChild;
-    public final Widget secondChild;
+public class SplitPane extends StatelessWidget {
     public final LayoutAxis axis;
+    public final @Nullable SplitController controller;
+    public final @Nullable SplitPaneStyle style;
+    public final boolean enabled;
+    public final List<? extends Widget> children;
 
-    public SplitPane(Widget firstChild, Widget secondChild, LayoutAxis axis) {
-        this.firstChild = firstChild;
-        this.secondChild = secondChild;
+    public SplitPane(
+        LayoutAxis axis,
+        @Nullable SplitController controller,
+        @Nullable SplitPaneStyle style,
+        boolean enabled,
+        List<? extends Widget> children
+    ) {
         this.axis = axis;
+        this.controller = controller;
+        this.style = style;
+        this.enabled = enabled;
+        this.children = children;
     }
 
-    @Override
-    public WidgetState<SplitPane> createState() {
-        return new SplitPaneState();
+    public SplitPane(LayoutAxis axis, Widget... children) {
+        this(axis, null, null, true, Arrays.asList(children));
     }
-}
 
-class SplitPaneState extends WidgetState<SplitPane> {
+    public SplitPane(LayoutAxis axis, SplitController controller, Widget... children) {
+        this(axis, controller, null, true, Arrays.asList(children));
+    }
 
-    private double splitCoordinate = -1;
+    public SplitPane(LayoutAxis axis, SplitPaneStyle style, Widget... children) {
+        this(axis, null, style, true, Arrays.asList(children));
+    }
+
+    public SplitPane(LayoutAxis axis, SplitController controller, SplitPaneStyle style, Widget... children) {
+        this(axis, controller, style, true, Arrays.asList(children));
+    }
 
     @Override
     public Widget build(BuildContext context) {
-        return new LayoutBuilder((innerContext, constraints) -> {
-            var axis = this.widget().axis;
-            var maxSize = constraints.maxOnAxis(axis) - 2;
-
-            if (this.splitCoordinate == -1) this.splitCoordinate = .5 * maxSize;
-            var split = Math.floor(Mth.clamp(this.splitCoordinate, .1 * maxSize, .9 * maxSize));
-
-            var firstConstraints = Constraints.tight(axis.createSize(split, constraints.maxOnAxis(axis.opposite())));
-            var secondConstraints = Constraints.tight(axis.createSize(maxSize - split, constraints.maxOnAxis(axis.opposite())));
-
-            return new Flex(
-                axis,
-                MainAxisAlignment.START,
-                CrossAxisAlignment.START,
-                new Constrain(firstConstraints, this.widget().firstChild).key(this.widget().firstChild.key()),
-                new Flexible(
-                    new MouseArea(
-                        widget -> widget
-                            .dragCallback((x, y, dx, dy) -> setState(() -> {
-                                this.splitCoordinate = this.splitCoordinate + axis.choose(dx, dy);
-                                System.out.println("Split coordinate: " + this.splitCoordinate);
-                            }))
-                            .dragEndCallback(() -> {
-                                this.splitCoordinate = Mth.clamp(this.splitCoordinate, .1 * maxSize, .9 * maxSize);
-                            })
-                            .cursorStyleSupplier((x, y) -> axis.choose(CursorStyle.HORIZONTAL_RESIZE, CursorStyle.VERTICAL_RESIZE)),
-                        new Box(Color.WHITE)
-                    )
-                ).key(Key.of("splitter")),
-                new Constrain(secondConstraints, this.widget().secondChild).key(this.widget().secondChild.key())
-            );
-        });
+        return new RawSplitPane(this.axis, this.controller, this.style, this.enabled, this.children);
     }
 }

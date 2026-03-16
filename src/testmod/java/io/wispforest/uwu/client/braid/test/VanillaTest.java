@@ -15,7 +15,7 @@ import io.wispforest.owo.braid.widgets.flex.CrossAxisAlignment;
 import io.wispforest.owo.braid.widgets.flex.MainAxisAlignment;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.owoui.OwoUIWidget;
-import io.wispforest.owo.braid.widgets.splitpane.MultiSplitPane;
+import io.wispforest.owo.braid.widgets.splitpane.SplitPane;
 import io.wispforest.owo.braid.widgets.vanilla.VanillaWidget;
 import io.wispforest.owo.ui.component.BraidComponent;
 import io.wispforest.owo.ui.component.UIComponents;
@@ -89,27 +89,23 @@ public class VanillaTest extends StatefulWidget {
                                         // infinity sized
                                         new Sized(
                                             180, 180,
-                                            new MultiSplitPane(
+                                            new SplitPane(
                                                 LayoutAxis.HORIZONTAL,
-                                                MainAxisAlignment.START,
-                                                CrossAxisAlignment.CENTER,
-                                                List.of(
-                                                    new Box(
-                                                        Color.mix(.5, Color.GREEN, new Color(0)),
-                                                        new Label(Component.literal("no way is"))
-                                                    ),
-                                                    new Box(
-                                                        Color.mix(.5, Color.GREEN, new Color(0)),
-                                                        new Label(Component.literal("that braid"))
-                                                    ),
-                                                    new Box(
-                                                        Color.mix(.5, Color.GREEN, new Color(0)),
-                                                        new Label(Component.literal("inside owoui"))
-                                                    ),
-                                                    new Box(
-                                                        Color.mix(.5, Color.GREEN, new Color(0)),
-                                                        new Label(Component.literal("inside braid?"))
-                                                    )
+                                                new Box(
+                                                    Color.mix(.5, Color.GREEN, new Color(0)),
+                                                    Label.literal("no way is")
+                                                ),
+                                                new Box(
+                                                    Color.mix(.5, Color.GREEN, new Color(0)),
+                                                    Label.literal("that braid")
+                                                ),
+                                                new Box(
+                                                    Color.mix(.5, Color.GREEN, new Color(0)),
+                                                    Label.literal("inside owoui")
+                                                ),
+                                                new Box(
+                                                    Color.mix(.5, Color.GREEN, new Color(0)),
+                                                    Label.literal("inside braid?")
                                                 )
                                             )
                                         )
