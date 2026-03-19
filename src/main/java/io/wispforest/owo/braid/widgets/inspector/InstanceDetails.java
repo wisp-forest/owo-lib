@@ -23,12 +23,12 @@ import net.minecraft.network.chat.Component;
 import org.joml.Matrix3x2f;
 import org.joml.Vector2f;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+
+import static io.wispforest.owo.braid.framework.instance.InspectorProperty.roundedWithCommas;
 
 public class InstanceDetails extends StatefulWidget {
 
@@ -114,15 +114,11 @@ public class InstanceDetails extends StatefulWidget {
 
             var properties = new ArrayList<>(List.<Component>of(
                     Component.literal("Rel. Position").withStyle(ChatFormatting.BOLD),
-                    Component.literal(rounded(instance.transform.x()) + ", " + rounded(instance.transform.y())),
+                    Component.literal(roundedWithCommas(instance.transform.x(), instance.transform.y())),
                     Component.literal("Abs. Position").withStyle(ChatFormatting.BOLD),
-                    Component.literal(rounded(absPos.x()) + ", " + rounded(absPos.y())),
-                    Component.literal("Width").withStyle(ChatFormatting.BOLD),
-                    Component.literal(instance.transform.width() + "px"),
-                    Component.literal("Height").withStyle(ChatFormatting.BOLD),
-                    Component.literal(instance.transform.height() + "px"),
-                    Component.literal("Widget").withStyle(ChatFormatting.BOLD),
-                    Component.literal(instance.widget().getClass().getSimpleName())
+                    Component.literal(roundedWithCommas(absPos.x, absPos.y)),
+                    Component.literal("Size").withStyle(ChatFormatting.BOLD),
+                    Component.literal(roundedWithCommas(instance.transform.width(), instance.transform.height()))
             ));
 
             for (var property : instance.debugListInspectorProperties()) {
@@ -154,10 +150,6 @@ public class InstanceDetails extends StatefulWidget {
             }
 
             return result;
-        }
-
-        private static String rounded(double value) {
-            return BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP).toPlainString();
         }
 
         // ---

@@ -23,7 +23,7 @@ import net.minecraft.util.Util;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.wispforest.uwu.client.braid.test.SliderTest.formatDouble;
+import static io.wispforest.owo.braid.framework.instance.InspectorProperty.rounded;
 
 public class InputTest extends StatefulWidget {
     @Override
@@ -110,7 +110,7 @@ public class InputTest extends StatefulWidget {
         }
 
         private Component formatCoordinates(double x, double y) {
-            return Component.literal("[x: " + formatDouble(x) + ", y: " + formatDouble(y) + "]");
+            return Component.literal("[x: " + rounded(x) + ", y: " + rounded(y) + "]");
         }
     }
 }
