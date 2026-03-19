@@ -21,6 +21,7 @@ import io.wispforest.owo.braid.widgets.flex.*;
 import io.wispforest.owo.braid.widgets.focus.FocusPolicy;
 import io.wispforest.owo.braid.widgets.focus.Focusable;
 import io.wispforest.owo.braid.widgets.globalstate.GlobalState;
+import io.wispforest.owo.braid.widgets.globalstate.GlobalStateStorage;
 import io.wispforest.owo.braid.widgets.grid.Grid;
 import io.wispforest.owo.braid.widgets.intents.*;
 import io.wispforest.owo.braid.widgets.label.Label;
@@ -117,11 +118,11 @@ public class TestSelector extends StatefulWidget {
                 SelectedTest.INSTANCE, selectedTest -> {
                     var buttons = Arrays.stream(Tests.values()).map(test -> {
                         if (test == Tests.BURNING_CHYZ) {
-                            return new BurningChyzButton(this.chyz, () -> SelectedTest.INSTANCE.setState(() -> SelectedTest.INSTANCE.selectedTest = Tests.BURNING_CHYZ));
+                            return new BurningChyzButton(this.chyz, () -> selectedTest.setState(() -> selectedTest.selectedTest = Tests.BURNING_CHYZ));
                         } else {
                             return new MessageButton(
                                 Component.literal(test.name().toLowerCase(Locale.ROOT).replace('_', ' ')),
-                                selectedTest.selectedTest != test ? () -> SelectedTest.INSTANCE.setState(() -> SelectedTest.INSTANCE.selectedTest = test) : null
+                                selectedTest.selectedTest != test ? () -> selectedTest.setState(() -> selectedTest.selectedTest = test) : null
                             );
                         }
                     }).collect(Collectors.toList());
@@ -403,30 +404,23 @@ public class TestSelector extends StatefulWidget {
     }
 
     public static class SelectedTest extends GlobalState {
-        public static final SelectedTest INSTANCE = GlobalState.load(new SelectedTest());
+        public @Nullable Tests selectedTest = null;
 
         private static final Endec<SelectedTest> ENDEC = StructEndecBuilder.of(
-            Endec.STRING.xmap(TestSelector.Tests::valueOf, TestSelector.Tests::name).nullableOf()
-                .optionalFieldOf("selected_test", s -> s.selectedTest, (TestSelector.Tests) null),
+            Endec.forEnum(Tests.class).nullableOf()
+                .optionalFieldOf("selected_test", s -> s.selectedTest, (Tests) null),
             selectedTest -> {
-                //I dont like this either
                 var state = new SelectedTest();
                 state.selectedTest = selectedTest;
                 return state;
             }
         );
 
-        public @Nullable TestSelector.Tests selectedTest = null;
-
-        @Override
-        protected Identifier id() {
-            return Identifier.fromNamespaceAndPath("uwu", "test_selector");
-        }
-
-        @Override
-        protected Endec<? extends GlobalState> endec() {
-            return ENDEC;
-        }
+        public static final SelectedTest INSTANCE = GlobalStateStorage.persist(
+            "uwu", "test_selector",
+            ENDEC,
+            SelectedTest::new
+        );
     }
 
     public static class SurfaceDimensions extends StatefulWidget {
