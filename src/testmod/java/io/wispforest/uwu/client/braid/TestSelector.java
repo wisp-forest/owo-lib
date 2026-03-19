@@ -20,8 +20,8 @@ import io.wispforest.owo.braid.widgets.cycle.MessageCyclingButton;
 import io.wispforest.owo.braid.widgets.flex.*;
 import io.wispforest.owo.braid.widgets.focus.FocusPolicy;
 import io.wispforest.owo.braid.widgets.focus.Focusable;
-import io.wispforest.owo.braid.widgets.globalstate.GlobalState;
-import io.wispforest.owo.braid.widgets.globalstate.GlobalStateStorage;
+import io.wispforest.owo.braid.widgets.sharedstate.ShareableState;
+import io.wispforest.owo.braid.widgets.sharedstate.SharedStateStorage;
 import io.wispforest.owo.braid.widgets.grid.Grid;
 import io.wispforest.owo.braid.widgets.intents.*;
 import io.wispforest.owo.braid.widgets.label.Label;
@@ -29,7 +29,6 @@ import io.wispforest.owo.braid.widgets.label.LabelStyle;
 import io.wispforest.owo.braid.widgets.object.entity.EntityDisplayMode;
 import io.wispforest.owo.braid.widgets.object.entity.EntityWidget;
 import io.wispforest.owo.braid.widgets.scroll.*;
-import io.wispforest.owo.braid.widgets.globalstate.GlobalStateListener;
 import io.wispforest.owo.braid.widgets.sharedstate.SharedState;
 import io.wispforest.owo.braid.widgets.slider.Incrementor;
 import io.wispforest.owo.braid.widgets.slider.slider.MessageSlider;
@@ -41,7 +40,6 @@ import io.wispforest.uwu.client.HudTestWidget;
 import io.wispforest.uwu.client.braid.test.*;
 import io.wispforest.uwu.client.braid.test.FlexTest;
 import net.minecraft.network.chat.*;
-import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.Entity;
@@ -113,9 +111,11 @@ public class TestSelector extends StatefulWidget {
         }
 
         @Override
-        public Widget build(BuildContext context) {
-            return GlobalStateListener.of(
-                SelectedTest.INSTANCE, selectedTest -> {
+        public Widget build(BuildContext ctx) {
+            return new SharedState<>(
+                SelectedTest.INSTANCE,
+                new Builder(context -> {
+                    var selectedTest = SharedState.get(context, SelectedTest.class);
                     var buttons = Arrays.stream(Tests.values()).map(test -> {
                         if (test == Tests.BURNING_CHYZ) {
                             return new BurningChyzButton(this.chyz, () -> selectedTest.setState(() -> selectedTest.selectedTest = Tests.BURNING_CHYZ));
@@ -398,12 +398,12 @@ public class TestSelector extends StatefulWidget {
                             )
                         )
                     );
-                }
+                })
             );
         }
     }
 
-    public static class SelectedTest extends GlobalState {
+    public static class SelectedTest extends ShareableState {
         public @Nullable Tests selectedTest = null;
 
         private static final Endec<SelectedTest> ENDEC = StructEndecBuilder.of(
@@ -416,7 +416,7 @@ public class TestSelector extends StatefulWidget {
             }
         );
 
-        public static final SelectedTest INSTANCE = GlobalStateStorage.persist(
+        public static final SelectedTest INSTANCE = SharedStateStorage.persist(
             "uwu", "test_selector",
             ENDEC,
             SelectedTest::new
