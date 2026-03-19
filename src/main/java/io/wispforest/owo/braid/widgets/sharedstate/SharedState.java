@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+@SuppressWarnings("unchecked")
 public class SharedState<T extends ShareableState> extends StatefulWidget {
     public final Supplier<T> initState;
     public final Widget child;
@@ -58,13 +59,21 @@ public class SharedState<T extends ShareableState> extends StatefulWidget {
     public static class State<T extends ShareableState> extends WidgetState<SharedState<T>> {
         public T state;
         public int generation = 0;
+        private Runnable listener;
 
         @Override
         public void init() {
             super.init();
 
             this.state = widget().initState.get();
-            this.state.backingState = this;
+            this.listener = () -> setState(() -> this.generation++);
+            this.state.addListener(this.listener);
+        }
+
+        @Override
+        public void dispose() {
+            super.dispose();
+            this.state.removeListener(this.listener);
         }
 
         @Override
