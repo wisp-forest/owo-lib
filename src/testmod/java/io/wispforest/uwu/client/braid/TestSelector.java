@@ -52,7 +52,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.wispforest.uwu.client.braid.test.SliderTest.formatDouble;
+import static io.wispforest.owo.braid.framework.instance.InspectorProperty.rounded;
+
 
 public class TestSelector extends StatefulWidget {
 
@@ -372,7 +373,7 @@ public class TestSelector extends StatefulWidget {
                                                     75, 20,
                                                     new MessageSlider(
                                                         rotat,
-                                                        Component.literal("rotat: " + formatDouble(this.rotat)), widget -> widget.range(0, 360).incrementStep(1),
+                                                        Component.literal("rotat: " + rounded(this.rotat)), widget -> widget.range(0, 360).incrementStep(1),
                                                         value -> this.setState(() -> this.rotat = value)
                                                     )
                                                 ),
@@ -382,7 +383,7 @@ public class TestSelector extends StatefulWidget {
                                                     new MessageXlyder(
                                                         this.xSkew,
                                                         this.ySkew,
-                                                        Component.literal("x skew: " + (formatDouble(this.xSkew)) + "\ny skew: " + (formatDouble(this.ySkew))),
+                                                        Component.literal("x skew: " + (rounded(this.xSkew)) + "\ny skew: " + (rounded(this.ySkew))),
                                                         xlyder -> xlyder.range(-.75, .75),
 
                                                         (xValue, yValue) -> this.setState(() -> {
