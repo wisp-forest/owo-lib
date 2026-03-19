@@ -100,6 +100,7 @@ public class TestSelector extends StatefulWidget {
         private Player chyz;
 
         private boolean disableEverything = false;
+        private final SelectedTest localSelectedTest = new SelectedTest();
 
         @Override
         public void init() {
@@ -114,7 +115,10 @@ public class TestSelector extends StatefulWidget {
         @Override
         public Widget build(BuildContext ctx) {
             return new SharedState<>(
-                SelectedTest.INSTANCE,
+                GlobalStateTest.INSTANCE, new Builder(outerCtx -> {
+                var useGlobal = SharedState.get(outerCtx, GlobalStateTest.class);
+                return new SharedState<>(
+                useGlobal.global ? SelectedTest.INSTANCE : this.localSelectedTest,
                 new Builder(context -> {
                     var selectedTest = SharedState.get(context, SelectedTest.class);
                     var buttons = Arrays.stream(Tests.values()).map(test -> {
@@ -267,6 +271,19 @@ public class TestSelector extends StatefulWidget {
                                                         )
                                                     )
                                                 ),
+                                                new ControlsOverride(
+                                                    false,
+                                                    new Row(
+                                                        MainAxisAlignment.SPACE_EVENLY,
+                                                        CrossAxisAlignment.CENTER,
+                                                        Label.literal("Global"),
+                                                        new Checkbox(
+                                                            CheckboxStyle.BRAID,
+                                                            useGlobal.global,
+                                                            checked -> useGlobal.setState(() -> useGlobal.global = checked)
+                                                        )
+                                                    )
+                                                ),
                                                 new Sized(
                                                     75, 20,
                                                     new FocusPolicy(
@@ -401,6 +418,7 @@ public class TestSelector extends StatefulWidget {
                     );
                 })
             );
+            }));
         }
     }
 
@@ -421,6 +439,25 @@ public class TestSelector extends StatefulWidget {
             "uwu", "test_selector",
             ENDEC,
             SelectedTest::new
+        );
+    }
+
+    public static class GlobalStateTest extends ShareableState {
+        public boolean global = false;
+
+        private static final Endec<GlobalStateTest> ENDEC = StructEndecBuilder.of(
+            Endec.BOOLEAN.fieldOf("use_global", s -> s.global),
+            useGlobal -> {
+                var state = new GlobalStateTest();
+                state.global = useGlobal;
+                return state;
+            }
+        );
+
+        public static final GlobalStateTest INSTANCE = SharedStateStorage.persist(
+            "uwu", "test_selector_global",
+            ENDEC,
+            GlobalStateTest::new
         );
     }
 
