@@ -19,6 +19,7 @@ import io.wispforest.owo.braid.widgets.focus.FocusClickArea;
 import io.wispforest.owo.braid.widgets.focus.RootFocusScope;
 import io.wispforest.owo.braid.widgets.inspector.BraidInspector;
 import io.wispforest.owo.braid.widgets.inspector.InstancePicker;
+import io.wispforest.owo.mixin.ui.access.GuiGraphicsAccessor;
 import io.wispforest.owo.util.EventSource;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -164,6 +165,12 @@ public class AppState implements InstanceHost, ProxyHost {
             if (this.activeTooltip.style() != null) {
                 graphics.componentHoverEffect(this.client.font, this.activeTooltip.style(), this.activeTooltip.x(), this.activeTooltip.y());
             }
+        }
+
+        var deferredTooltip = ((GuiGraphicsAccessor) graphics).owo$getDeferredTooltip();
+        if (deferredTooltip != null) {
+            ((GuiGraphicsAccessor) graphics).owo$setDeferredTooltip(null);
+            deferredTooltip.run();
         }
 
         graphics.pop();

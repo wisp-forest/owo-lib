@@ -90,6 +90,20 @@ public class InspectorWidget extends StatefulWidget {
                                 new SplitPane(
                                     LayoutAxis.HORIZONTAL,
                                     new SplitPaneStyle(1d, null, null, null, true),
+                                    new SplitChild(
+                                        pane -> pane.weight(0),
+                                        new ScrollableWithBars(
+                                            null,
+                                            null,
+                                            null,
+                                            3,
+                                            (axis, controller) -> new FlatScrollbar(axis, controller, Color.rgb(0xabb0bf), Color.rgb(0xabb0bf)),
+                                            new Align(
+                                                Alignment.TOP_LEFT,
+                                                new ProxyTreeView(this.widget().rootProxy)
+                                            )
+                                        )
+                                    ),
                                     new Flexible(
                                         new Stack(
                                             new ScrollableWithBars(
