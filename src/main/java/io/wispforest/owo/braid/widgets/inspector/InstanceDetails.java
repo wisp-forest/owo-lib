@@ -93,18 +93,18 @@ public class InstanceDetails extends StatefulWidget {
                 ));
             }
 
-            return new Row(
-                new Sized(1, null, new Box(Color.WHITE)),
-                new Sized(
-                    150,
-                    null,
-                    new Column(
+//            return new Row(
+//                new Sized(1, null, new Box(Color.WHITE)),
+//                new Sized(
+//                    150,
+//                    null,
+                    return new Column(
                         Stream.concat(
                             Stream.of(new Padding(Insets.bottom(3), new Label(Component.literal("Instance Details")))),
                             children.stream()
                         ).toList()
-                    )
-                )
+//                    )
+//                )
             );
         }
 

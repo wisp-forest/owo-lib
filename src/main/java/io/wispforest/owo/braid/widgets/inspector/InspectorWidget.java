@@ -4,6 +4,7 @@ import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.core.Alignment;
 import io.wispforest.owo.braid.core.Color;
 import io.wispforest.owo.braid.core.Insets;
+import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.instance.WidgetInstance;
 import io.wispforest.owo.braid.framework.proxy.WidgetProxy;
@@ -23,6 +24,9 @@ import io.wispforest.owo.braid.widgets.scroll.FlatScrollbar;
 import io.wispforest.owo.braid.widgets.scroll.ScrollAnimationSettings;
 import io.wispforest.owo.braid.widgets.scroll.ScrollableWithBars;
 import io.wispforest.owo.braid.widgets.sharedstate.SharedState;
+import io.wispforest.owo.braid.widgets.splitpane.SplitChild;
+import io.wispforest.owo.braid.widgets.splitpane.SplitPane;
+import io.wispforest.owo.braid.widgets.splitpane.SplitPaneStyle;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -83,7 +87,9 @@ public class InspectorWidget extends StatefulWidget {
                             Color.rgb(0x1d2026),
                             new DefaultLabelStyle(
                                 new LabelStyle(null, null, Style.EMPTY.withFont(new FontDescription.Resource(Minecraft.UNIFORM_FONT)), null),
-                                new Row(
+                                new SplitPane(
+                                    LayoutAxis.HORIZONTAL,
+                                    new SplitPaneStyle(1d, null, null, null, true),
                                     new Flexible(
                                         new Stack(
                                             new ScrollableWithBars(
@@ -150,7 +156,10 @@ public class InspectorWidget extends StatefulWidget {
                                             )
                                         )
                                     ),
-                                    new InstanceDetails()
+                                    new SplitChild(
+                                        pane -> pane.size(150),
+                                        new InstanceDetails()
+                                    )
                                 )
                             )
                         );

@@ -17,7 +17,6 @@ import io.wispforest.owo.braid.widgets.flex.Row;
 import io.wispforest.owo.braid.widgets.intents.Interactable;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.braid.widgets.stack.StackBase;
-
 import java.util.ArrayList;
 
 public class Collapsible extends StatefulWidget {
@@ -68,7 +67,9 @@ public class Collapsible extends StatefulWidget {
             }
 
             body.add(new StackBase(
-                new Padding(Insets.left(10), this.widget().content)
+                this.widget().showVerticalRule
+                    ? new Padding(Insets.left(10), this.widget().content)
+                    : this.widget().content
             ));
 
             return new Column(

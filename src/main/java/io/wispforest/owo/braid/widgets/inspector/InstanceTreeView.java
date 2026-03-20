@@ -15,7 +15,6 @@ import io.wispforest.owo.braid.widgets.basic.Sized;
 import io.wispforest.owo.braid.widgets.eventstream.BraidEventSource;
 import io.wispforest.owo.braid.widgets.eventstream.BraidEventStream;
 import io.wispforest.owo.braid.widgets.eventstream.StreamListenerState;
-import io.wispforest.owo.braid.widgets.flex.Column;
 import io.wispforest.owo.braid.widgets.flex.CrossAxisAlignment;
 import io.wispforest.owo.braid.widgets.flex.MainAxisAlignment;
 import io.wispforest.owo.braid.widgets.flex.Row;
@@ -81,10 +80,11 @@ public class InstanceTreeView extends StatefulWidget {
 
         @Override
         public Widget build(BuildContext context) {
-            var title = new InstanceTitle(this.widget().viewInstance);
+            var widget = this.widget();
+            var title = new InstanceTitle(widget.viewInstance);
 
             var children = new ArrayList<WidgetInstance<?>>();
-            this.widget().viewInstance.visitChildren(children::add);
+            widget.viewInstance.visitChildren(children::add);
 
             if (this.highlight) {
                 this.schedulePostLayoutCallback(() -> this.setState(() -> this.highlight = false));
@@ -95,41 +95,38 @@ public class InstanceTreeView extends StatefulWidget {
                 this.builtOnce = true;
 
                 var lastRevealEvent = SharedState.getWithoutDependency(context, InspectorState.class).lastRevealEvent;
-                if (lastRevealEvent != null && lastRevealEvent.instance == this.widget().viewInstance) {
+                if (lastRevealEvent != null && lastRevealEvent.instance == widget.viewInstance) {
                     this.reveal();
                 }
 
-                startCollapsed = lastRevealEvent == null || !lastRevealEvent.fullPath.contains(this.widget().viewInstance);
+                startCollapsed = lastRevealEvent == null || !lastRevealEvent.fullPath.contains(widget.viewInstance);
+            }
+
+            Widget entry;
+            if (!children.isEmpty()) {
+                entry = new CollapsibleEntry(
+                    this.expandEvents.source(),
+                    startCollapsed,
+                    title,
+                    children.stream()
+                        .map(child -> new InstanceTreeView(widget.revealEvents, child))
+                        .toList()
+                );
+            } else {
+                entry = new Row(
+                    MainAxisAlignment.START,
+                    CrossAxisAlignment.CENTER,
+                    new Sized(12, 12, new SpriteWidget(Owo.id("braid_inspector_leaf"))),
+                    title
+                );
             }
 
             return new AnimatedBox(
                 this.highlight ? Duration.ZERO : Duration.ofMillis(1250),
                 Easing.IN_OUT_SINE,
-                this.highlight ? Color.hsv((this.widget().viewInstance.depth() % 15) / 15d, .75, 1, .5) : new Color(0),
+                this.highlight ? Color.hsv((widget.viewInstance.depth() % 15) / 15d, .75, 1, .5) : new Color(0),
                 true,
-                !children.isEmpty()
-                    ?
-                    new CollapsibleEntry(
-                        this.expandEvents.source(),
-                        startCollapsed,
-                        title,
-                        new Column(
-                            children.stream()
-                                .map(child -> new InstanceTreeView(this.widget().revealEvents, child))
-                                .toList()
-                        )
-                    )
-                    :
-                        new Row(
-                            MainAxisAlignment.START,
-                            CrossAxisAlignment.CENTER,
-                            new Sized(
-                                12,
-                                12,
-                                new SpriteWidget(Owo.id("braid_inspector_leaf"))
-                            ),
-                            title
-                        )
+                entry
             );
         }
     }
