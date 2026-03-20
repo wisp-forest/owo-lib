@@ -81,7 +81,7 @@ public class BraidInspector {
     public void revealInstance(WidgetInstance<?> instance) {
         if (!this.active) return;
         this.revealEvents.sink().onEvent(new RevealInstanceEvent(instance));
-        if (currentWindow != null) GLFW.glfwRestoreWindow(currentWindow.handle);
+        if (currentWindow != null) GLFW.glfwShowWindow(currentWindow.handle);
     }
 
     public void refresh() {
