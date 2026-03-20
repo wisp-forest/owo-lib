@@ -17,7 +17,7 @@ public class BraidInspector {
     public WidgetInstance<?> rootInstance;
 
     private final BraidEventStream<Unit> refreshEvents = new BraidEventStream<>();
-    private final BraidEventStream<Unit> pickEvents = new BraidEventStream<>();
+    private final BraidEventStream<Boolean> pickEvents = new BraidEventStream<>();
     private final BraidEventStream<RevealInstanceEvent> revealEvents = new BraidEventStream<>();
 
     private boolean active = false;
@@ -28,12 +28,12 @@ public class BraidInspector {
         this.subject = subject;
     }
 
-    public BraidEventSource<Unit> onPick() {
+    public BraidEventSource<Boolean> onPick() {
         return this.pickEvents.source();
     }
 
-    public void pick() {
-        this.pickEvents.sink().onEvent(Unit.INSTANCE);
+    public void pick(boolean picking) {
+        this.pickEvents.sink().onEvent(picking);
     }
 
     public BraidEventSource<Unit> onRefresh() {
@@ -70,6 +70,7 @@ public class BraidInspector {
         this.currentWindow = result.window();
 
         this.currentApp.onTerminate(() -> {
+            pick(false);
             this.currentApp = null;
             this.currentWindow = null;
             this.active = false;
