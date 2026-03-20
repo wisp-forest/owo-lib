@@ -15,7 +15,6 @@ import io.wispforest.owo.braid.widgets.eventstream.BraidEventSource;
 import io.wispforest.owo.braid.widgets.eventstream.StreamListenerState;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.braid.widgets.stack.StackBase;
-import net.minecraft.util.Unit;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -86,10 +85,10 @@ public class InstancePicker extends StatefulWidget {
                             if (this.pickedInstance != null) this.pickedInstance.debugHighlighted = true;
                         })
                         .clickCallback((x, y, button, modifiers) -> {
-                            if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+                            if (button <= 1) {
                                 if (this.pickedInstance != null) {
                                     this.pickedInstance.debugHighlighted = false;
-                                    this.widget().pickCallback.onPick(this.pickedInstance);
+                                    if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) this.widget().pickCallback.onPick(this.pickedInstance);
                                 }
 
                                 this.setState(() -> this.picking = false);

@@ -34,6 +34,7 @@ public class BraidInspector {
 
     public void pick(boolean picking) {
         this.pickEvents.sink().onEvent(picking);
+        if (currentWindow != null && picking) GLFW.glfwIconifyWindow(currentWindow.handle);
     }
 
     public BraidEventSource<Unit> onRefresh() {
@@ -80,6 +81,7 @@ public class BraidInspector {
     public void revealInstance(WidgetInstance<?> instance) {
         if (!this.active) return;
         this.revealEvents.sink().onEvent(new RevealInstanceEvent(instance));
+        if (currentWindow != null) GLFW.glfwRestoreWindow(currentWindow.handle);
     }
 
     public void refresh() {
