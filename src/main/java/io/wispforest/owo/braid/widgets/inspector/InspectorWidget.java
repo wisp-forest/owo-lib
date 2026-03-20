@@ -139,7 +139,7 @@ public class InspectorWidget extends StatefulWidget {
                                                                 new Tooltip(
                                                                     Component.literal("pick widget"),
                                                                     new Button(
-                                                                        () -> this.widget().inspector.pick(),
+                                                                        () -> this.widget().inspector.pick(true),
                                                                         new SpriteWidget(Owo.id("braid_inspector_pick"))
                                                                     )
                                                                 )
