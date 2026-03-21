@@ -14,6 +14,7 @@ public record InspectorProperty(Component name, Component value) {
     }
 
     public static String rounded(double value) {
+        if (Double.isNaN(value) || Double.isInfinite(value)) return String.valueOf(value);
         return BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP).toPlainString().replaceAll("(\\.0*|(?<=\\d)\\.0+)$", "");
     }
 
