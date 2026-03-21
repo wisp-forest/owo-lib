@@ -29,10 +29,16 @@ public class InstanceTreeView extends StatefulWidget {
 
     public final BraidEventSource<RevealInstanceEvent> revealEvents;
     public final WidgetInstance<?> viewInstance;
+    public final int parentChildCount;
 
     public InstanceTreeView(BraidEventSource<RevealInstanceEvent> revealEvents, WidgetInstance<?> viewInstance) {
+        this(revealEvents, viewInstance, 0);
+    }
+
+    public InstanceTreeView(BraidEventSource<RevealInstanceEvent> revealEvents, WidgetInstance<?> viewInstance, int parentChildCount) {
         this.revealEvents = revealEvents;
         this.viewInstance = viewInstance;
+        this.parentChildCount = parentChildCount;
     }
 
     @Override
@@ -104,14 +110,16 @@ public class InstanceTreeView extends StatefulWidget {
 
             Widget entry;
             if (!children.isEmpty()) {
-                entry = new CollapsibleEntry(
+                var collapsibleEntry = new CollapsibleEntry(
                     this.expandEvents.source(),
                     startCollapsed,
+                    widget.parentChildCount,
                     title,
                     children.stream()
-                        .map(child -> new InstanceTreeView(widget.revealEvents, child))
+                        .map(child -> new InstanceTreeView(widget.revealEvents, child, children.size()))
                         .toList()
                 );
+                entry = collapsibleEntry;
             } else {
                 entry = new Row(
                     MainAxisAlignment.START,

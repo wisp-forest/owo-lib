@@ -9,6 +9,7 @@ import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.Align;
 import io.wispforest.owo.braid.widgets.basic.Box;
+import io.wispforest.owo.braid.widgets.basic.Builder;
 import io.wispforest.owo.braid.widgets.basic.MouseArea;
 import io.wispforest.owo.braid.widgets.basic.Padding;
 import io.wispforest.owo.braid.widgets.basic.Sized;
@@ -22,7 +23,8 @@ import io.wispforest.owo.braid.widgets.flex.Row;
 import io.wispforest.owo.braid.widgets.intents.Intent;
 import io.wispforest.owo.braid.widgets.intents.Interactable;
 import io.wispforest.owo.braid.widgets.intents.ShortcutTrigger;
-import io.wispforest.owo.braid.widgets.label.Label;
+import io.wispforest.owo.braid.widgets.sharedstate.ShareableState;
+import io.wispforest.owo.braid.widgets.sharedstate.SharedState;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.braid.widgets.stack.StackBase;
 import net.minecraft.util.Unit;
@@ -35,12 +37,14 @@ public class CollapsibleEntry extends StatefulWidget {
 
     public final BraidEventSource<Unit> onExpand;
     public final boolean startCollapsed;
+    public final int parentChildCount;
     public final Widget title;
     public final List<? extends Widget> children;
 
-    public CollapsibleEntry(BraidEventSource<Unit> onExpand, boolean startCollapsed, Widget title, List<? extends Widget> children) {
+    public CollapsibleEntry(BraidEventSource<Unit> onExpand, boolean startCollapsed, int parentChildCount, Widget title, List<? extends Widget> children) {
         this.onExpand = onExpand;
         this.startCollapsed = startCollapsed;
+        this.parentChildCount = parentChildCount;
         this.title = title;
         this.children = children;
     }
@@ -53,7 +57,6 @@ public class CollapsibleEntry extends StatefulWidget {
     public static class State extends StreamListenerState<CollapsibleEntry> {
 
         private boolean collapsed;
-        private boolean hovered;
 
         @Override
         public void init() {
@@ -64,55 +67,100 @@ public class CollapsibleEntry extends StatefulWidget {
         @Override
         public Widget build(BuildContext context) {
             var children = this.widget().children;
-            var single = children.size() == 1;
-            var lineColor = this.hovered ? Color.WHITE : Color.mix(.5f, Color.WHITE, Color.BLACK);
 
-            return new Interactable(
-                SHORTCUTS,
-                widget -> widget.addCallbackAction(
-                    SetCollapsedIntent.class, (actionCtx, intent) -> {
-                        this.setState(() -> this.collapsed = intent.collapsed());
-                    }
-                ),
-                new LazyCollapsible(
-                    false,
-                    this.collapsed,
-                    nowCollapsed -> this.setState(() -> this.collapsed = nowCollapsed),
-                    new MouseArea(
-                        w -> w.enterCallback(() -> this.setState(() -> this.hovered = true))
-                            .exitCallback(() -> this.setState(() -> this.hovered = false)),
-                        this.widget().title
+            if (children.size() == 1) {
+                if (this.widget().parentChildCount == 1) {
+                    var hovered = SharedState.select(context, BranchHoverState.class, s -> s.hovered);
+                    var lineColor = hovered ? Color.WHITE : Color.mix(.5f, Color.WHITE, Color.BLACK);
+                    return new Column(
+                        new Stack(
+                            new Align(
+                                Alignment.TOP_LEFT,
+                                new Padding(Insets.left(6), new Sized(1, Double.POSITIVE_INFINITY, new Box(lineColor)))
+                            ),
+                            new StackBase(new Row(
+                                MainAxisAlignment.START,
+                                CrossAxisAlignment.CENTER,
+                                new Sized(12, 12, new Padding(Insets.none())),
+                                this.widget().title
+                            ))
+                        ),
+                        children.getFirst()
+                    );
+                }
+                return new SharedState<>(BranchHoverState::new, new Builder(ctx -> new Interactable(
+                    SHORTCUTS,
+                    widget -> widget.addCallbackAction(
+                        SetCollapsedIntent.class, (actionCtx, intent) -> {
+                            this.setState(() -> this.collapsed = intent.collapsed());
+                        }
                     ),
-                    single
-                        ? children.getFirst()
-                        : new Column(
+                    new LazyCollapsible(
+                        false,
+                        this.collapsed,
+                        nowCollapsed -> this.setState(() -> this.collapsed = nowCollapsed),
+                        new MouseArea(
+                            w -> w.enterCallback(() -> SharedState.set(ctx, BranchHoverState.class, s -> s.hovered = true))
+                                .exitCallback(() -> SharedState.set(ctx, BranchHoverState.class, s -> s.hovered = false)),
+                            this.widget().title
+                        ),
+                        children.getFirst()
+                    )
+                )));
+            }
+
+            return new SharedState<>(BranchHoverState::new, new Builder(ctx -> {
+                var hovered = SharedState.select(ctx, BranchHoverState.class, s -> s.hovered);
+                var lineColor = hovered ? Color.WHITE : Color.mix(.5f, Color.WHITE, Color.BLACK);
+                return new Interactable(
+                    SHORTCUTS,
+                    widget -> widget.addCallbackAction(
+                        SetCollapsedIntent.class, (actionCtx, intent) -> {
+                            this.setState(() -> this.collapsed = intent.collapsed());
+                        }
+                    ),
+                    new LazyCollapsible(
+                        false,
+                        this.collapsed,
+                        nowCollapsed -> this.setState(() -> this.collapsed = nowCollapsed),
+                        new MouseArea(
+                            w -> w.enterCallback(() -> SharedState.set(ctx, BranchHoverState.class, s -> s.hovered = true))
+                                .exitCallback(() -> SharedState.set(ctx, BranchHoverState.class, s -> s.hovered = false)),
+                            this.widget().title
+                        ),
+                        new Column(
                             IntStream.range(0, children.size())
                                 .mapToObj(i -> new Stack(
                                     new Align(
                                         Alignment.TOP_LEFT,
-                                        new Padding(Insets.left(5), new Sized(1, i == children.size() - 1 ? 7 : Double.POSITIVE_INFINITY, new Box(lineColor)))
+                                        new Padding(Insets.left(6), new Sized(1, i == children.size() - 1 ? 7 : Double.POSITIVE_INFINITY, new Box(lineColor)))
                                     ),
                                     new Align(
                                         Alignment.TOP_LEFT,
-                                        new Padding(Insets.top(6).withLeft(5), new Sized(5, 1, new Box(lineColor)))
+                                        new Padding(Insets.top(6).withLeft(6), new Sized(5, 1, new Box(lineColor)))
                                     ),
                                     new Align(
                                         Alignment.TOP_LEFT,
                                         new MouseArea(
-                                            w1 -> w1.enterCallback(() -> this.setState(() -> this.hovered = true))
-                                                .exitCallback(() -> this.setState(() -> this.hovered = false)),
+                                            w1 -> w1.enterCallback(() -> SharedState.set(ctx, BranchHoverState.class, s -> s.hovered = true))
+                                                .exitCallback(() -> SharedState.set(ctx, BranchHoverState.class, s -> s.hovered = false)),
                                             new Sized(10, Double.POSITIVE_INFINITY, new Padding(Insets.none()))
                                         )
                                     ),
                                     new StackBase(new Padding(Insets.left(10), children.get(i)))
                                 )).toList()
                         )
-                )
-            );
+                    )
+                );
+            }));
         }
     }
 
     // ---
+
+    public static class BranchHoverState extends ShareableState {
+        public boolean hovered = false;
+    }
 
     public static final Map<List<ShortcutTrigger>, Intent> SHORTCUTS = Map.of(
         List.of(ShortcutTrigger.LEFT), new SetCollapsedIntent(true),

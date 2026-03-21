@@ -17,9 +17,15 @@ import java.util.ArrayList;
 public class ProxyTreeView extends StatefulWidget {
 
     public final WidgetProxy viewProxy;
+    public final int parentChildCount;
 
     public ProxyTreeView(WidgetProxy viewProxy) {
+        this(viewProxy, 0);
+    }
+
+    public ProxyTreeView(WidgetProxy viewProxy, int parentChildCount) {
         this.viewProxy = viewProxy;
+        this.parentChildCount = parentChildCount;
     }
 
     @Override
@@ -41,9 +47,10 @@ public class ProxyTreeView extends StatefulWidget {
                 return new CollapsibleEntry(
                     null,
                     true,
+                    widget.parentChildCount,
                     title,
                     children.stream()
-                        .map(ProxyTreeView::new)
+                        .map(child -> new ProxyTreeView(child, children.size()))
                         .toList()
                 );
             } else {
