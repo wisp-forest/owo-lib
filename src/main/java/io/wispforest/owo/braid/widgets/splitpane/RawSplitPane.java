@@ -122,7 +122,7 @@ public class RawSplitPane extends StatefulWidget {
                 var numDividers = children.size() - 1;
                 var dividerThickness = style.dividerThickness();
 
-                this.contentSpace = constraints.maxOnAxis(axis) - numDividers * dividerThickness;
+                this.contentSpace = Math.floor(constraints.maxOnAxis(axis) - numDividers * dividerThickness);
                 var crossSize = constraints.maxOnAxis(axis.opposite());
 
                 if (this.ratiosInitialized && this.contentSpace != this.prevContentSpace && this.draggingIndex == -1 && this.widget().controller == null) {
@@ -140,7 +140,9 @@ public class RawSplitPane extends StatefulWidget {
                     var prevRatio = 0d;
                     for (var i = 0; i < children.size(); i++) {
                         var nextRatio = i < numDividers ? ratios[i] : 1.0;
-                        this.paneSizes[i] = (nextRatio - prevRatio) * this.contentSpace;
+                        this.paneSizes[i] = i < children.size() - 1
+                            ? Math.floor(nextRatio * this.contentSpace) - Math.floor(prevRatio * this.contentSpace)
+                            : this.contentSpace - Math.floor(prevRatio * this.contentSpace);
                         prevRatio = nextRatio;
                     }
                     this.ratiosInitialized = true;
@@ -158,7 +160,9 @@ public class RawSplitPane extends StatefulWidget {
                     var splitChild = children.get(i);
                     var child = splitChild.child;
                     var nextRatio = i < numDividers ? ratios[i] : 1.0;
-                    var paneSize = (nextRatio - prevRatio) * this.contentSpace;
+                    var paneSize = i < children.size() - 1
+                        ? Math.floor(nextRatio * this.contentSpace) - Math.floor(prevRatio * this.contentSpace)
+                        : this.contentSpace - Math.floor(prevRatio * this.contentSpace);
 
                     var childConstraints = Constraints.tight(axis.createSize(paneSize, crossSize));
                     widgets.add(new Constrain(childConstraints, child).key(child.key()));
@@ -201,7 +205,9 @@ public class RawSplitPane extends StatefulWidget {
             var prevRatio = 0d;
             for (var i = 0; i < children.size(); i++) {
                 var nextRatio = i < numDividers ? this.controller.getRatio(i) : 1.0;
-                this.paneSizes[i] = (nextRatio - prevRatio) * this.contentSpace;
+                this.paneSizes[i] = i < children.size() - 1
+                    ? Math.floor(nextRatio * this.contentSpace) - Math.floor(prevRatio * this.contentSpace)
+                    : this.contentSpace - Math.floor(prevRatio * this.contentSpace);
                 prevRatio = nextRatio;
             }
         }
@@ -255,39 +261,51 @@ public class RawSplitPane extends StatefulWidget {
         }
 
         private void moveDivider(int index, double pixelDelta) {
-            this.dragRatio += pixelDelta / this.contentSpace;
-            if (Boolean.TRUE.equals(this.resolvedStyle.pushDividers())) {
-                var overflow = this.dragRatio - clampDivider(index, this.dragRatio);
-                if (overflow != 0) pushDivider(overflow > 0 ? index + 1 : index - 1, overflow);
-            }
+            var children = this.widget().children;
+            var numDividers = children.size() - 1;
+            var cs = this.contentSpace;
+            this.dragRatio += pixelDelta / cs;
             this.controller.setRatio(index, clampDivider(index, this.dragRatio));
-        }
 
-        private void pushDivider(int startIndex, double ratioOverflow) {
-            var numDividers = this.widget().children.size() - 1;
-            var step = ratioOverflow > 0 ? 1 : -1;
-            var remaining = ratioOverflow;
-            for (var i = startIndex; i >= 0 && i < numDividers && remaining != 0; i += step) {
-                var target = this.controller.getRatio(i) + remaining;
-                var clamped = clampDivider(i, target);
-                this.controller.ratios[i] = clamped;
-                remaining = target - clamped;
+            if (Boolean.TRUE.equals(this.resolvedStyle.pushDividers())) {
+                for (var i = index - 1; i >= 0; i--) {
+                    var max = this.controller.ratios[i + 1] - children.get(i + 1).minSize / cs;
+                    if (this.controller.ratios[i] <= max) break;
+                    this.controller.ratios[i] = max;
+                }
+                for (var i = index + 1; i < numDividers; i++) {
+                    var min = this.controller.ratios[i - 1] + children.get(i).minSize / cs;
+                    if (this.controller.ratios[i] >= min) break;
+                    this.controller.ratios[i] = min;
+                }
             }
         }
 
-        //I hate that 73% of this method is variable declarations
         private double clampDivider(int index, double target) {
             var children = this.widget().children;
             var numDividers = children.size() - 1;
-            var lower = index == 0 ? 0 : this.controller.getRatio(index - 1);
-            var upper = index == numDividers - 1 ? 1 : this.controller.getRatio(index + 1);
+            var cs = this.contentSpace;
+            var push = Boolean.TRUE.equals(this.resolvedStyle.pushDividers());
+
+            var lower = push ? 0d : (index == 0 ? 0 : this.controller.getRatio(index - 1));
+            var upper = push ? 1d : (index == numDividers - 1 ? 1 : this.controller.getRatio(index + 1));
+
+            if (push) {
+                for (var i = 0; i <= index; i++) lower += children.get(i).minSize / cs;
+                for (var i = index + 1; i < children.size(); i++) upper -= children.get(i).minSize / cs;
+            } else {
+                lower += children.get(index).minSize / cs;
+                upper -= children.get(index + 1).minSize / cs;
+            }
+
             var left = children.get(index);
             var right = children.get(index + 1);
-            var min = lower + left.minSize / this.contentSpace;
-            var max = upper - right.minSize / this.contentSpace;
-            if (left.maxSize != Double.POSITIVE_INFINITY) max = Math.min(max, lower + left.maxSize / this.contentSpace);
-            if (right.maxSize != Double.POSITIVE_INFINITY) min = Math.max(min, upper - right.maxSize / this.contentSpace);
-            return Mth.clamp(target, min, max);
+            if (!push && left.maxSize != Double.POSITIVE_INFINITY)
+                upper = Math.min(upper, (index == 0 ? 0 : this.controller.getRatio(index - 1)) + left.maxSize / cs);
+            if (!push && right.maxSize != Double.POSITIVE_INFINITY)
+                lower = Math.max(lower, (index == numDividers - 1 ? 1 : this.controller.getRatio(index + 1)) - right.maxSize / cs);
+
+            return Mth.clamp(target, lower, upper);
         }
 
         private void recomputeRatiosOnResize(List<SplitChild> children, double newCS, int numDividers, SplitPaneStyle style) {
