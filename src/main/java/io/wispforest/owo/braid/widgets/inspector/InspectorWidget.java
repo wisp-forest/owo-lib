@@ -89,7 +89,7 @@ public class InspectorWidget extends StatefulWidget {
                                 new LabelStyle(null, null, Style.EMPTY.withFont(new FontDescription.Resource(Minecraft.UNIFORM_FONT)), null),
                                 new SplitPane(
                                     LayoutAxis.HORIZONTAL,
-                                    new SplitPaneStyle(1d, null, null, null, true),
+                                    new SplitPaneStyle(1d, null, null, null, null, null),
                                     new SplitChild(
                                         pane -> pane.weight(0),
                                         new ScrollableWithBars(

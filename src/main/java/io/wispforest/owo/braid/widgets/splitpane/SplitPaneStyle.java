@@ -10,9 +10,10 @@ public record SplitPaneStyle(
     @Nullable DividerBuilder dividerBuilder,
     @Nullable ResizeDistribution overflowPolicy,
     @Nullable ResizeDistribution underflowPolicy,
+    @Nullable Boolean preserveSizes,
     @Nullable Boolean pushDividers
 ) {
-    public static final SplitPaneStyle DEFAULT = new SplitPaneStyle(null, null, null, null, null);
+    public static final SplitPaneStyle DEFAULT = new SplitPaneStyle(null, null, null, null, null, null);
 
     public SplitPaneStyle overriding(SplitPaneStyle other) {
         return new SplitPaneStyle(
@@ -20,6 +21,7 @@ public record SplitPaneStyle(
             this.dividerBuilder != null ? this.dividerBuilder : other.dividerBuilder,
             this.overflowPolicy != null ? this.overflowPolicy : other.overflowPolicy,
             this.underflowPolicy != null ? this.underflowPolicy : other.underflowPolicy,
+            this.preserveSizes != null ? this.preserveSizes : other.preserveSizes,
             this.pushDividers != null ? this.pushDividers : other.pushDividers
         );
     }
@@ -29,8 +31,9 @@ public record SplitPaneStyle(
         return new SplitPaneStyle(
             this.dividerThickness != null ? this.dividerThickness : 2,
             this.dividerBuilder != null ? this.dividerBuilder : dragging -> new Box(Color.WHITE),
-            this.overflowPolicy != null ? this.overflowPolicy : ResizeDistribution.DONT,
-            this.underflowPolicy != null ? this.underflowPolicy : ResizeDistribution.DONT,
+            this.overflowPolicy != null ? this.overflowPolicy : ResizeDistribution.LARGEST,
+            this.underflowPolicy != null ? this.underflowPolicy : ResizeDistribution.SMALLEST,
+            this.preserveSizes != null ? this.preserveSizes : true,
             this.pushDividers != null ? this.pushDividers : false
         );
     }

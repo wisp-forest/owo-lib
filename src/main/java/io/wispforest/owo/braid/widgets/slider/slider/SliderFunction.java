@@ -2,7 +2,8 @@ package io.wispforest.owo.braid.widgets.slider.slider;
 
 import net.minecraft.util.Mth;
 
-import static net.minecraft.util.Mth.EPSILON;
+import static com.mojang.math.Constants.EPSILON;
+
 
 public interface SliderFunction {
     double normalize(double value, double min, double max);

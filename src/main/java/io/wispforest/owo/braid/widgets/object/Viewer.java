@@ -12,6 +12,8 @@ import org.joml.Vector3f;
 import java.time.Duration;
 import java.util.function.Consumer;
 
+import static com.mojang.math.Constants.EPSILON;
+
 public class Viewer extends StatefulWidget {
     public final ViewerBuilder builder;
 
@@ -56,14 +58,14 @@ public class Viewer extends StatefulWidget {
                 var needsMore = false;
 
                 float speed = this.angularVelocity.length();
-                if (speed > 1e-4f) {
+                if (speed > EPSILON) {
                     var newRot = new Quaternionf().rotateAxis(
                         speed * (float) seconds,
                         new Vector3f(this.angularVelocity).normalize()
                     );
                     newRot.mul(this.rotation, this.rotation);
                     this.angularVelocity.mul((float) Math.exp(-seconds * 5));
-                    if (this.angularVelocity.length() > 1e-4f) needsMore = true;
+                    if (this.angularVelocity.length() > EPSILON) needsMore = true;
                 }
 
                 this.zoom = Math.max(0.1, this.zoom + this.zoomVelocity * seconds);
@@ -104,7 +106,7 @@ public class Viewer extends StatefulWidget {
                         var totalDy = sc[1] - this.dragStartSpherePos.y;
                         var dist = (float) Math.sqrt(totalDx * totalDx + totalDy * totalDy);
 
-                        if (dist > 1e-6f) {
+                        if (dist > EPSILON) {
                             var newRot = new Quaternionf().rotateAxis(dist, new Vector3f(-totalDy / dist, totalDx / dist, 0));
                             setState(() -> newRot.mul(this.dragStartRotation, this.rotation));
                         }
@@ -126,7 +128,7 @@ public class Viewer extends StatefulWidget {
                         var ddx = this.currSpherePos.x - this.prevSpherePos.x;
                         var ddy = this.currSpherePos.y - this.prevSpherePos.y;
                         var dist = (float) Math.sqrt(ddx * ddx + ddy * ddy);
-                        if (dist < 1e-6f) return;
+                        if (dist < EPSILON) return;
 
                         float speed = Math.min(dist / (dt / 1e9f), 20f);
                         this.angularVelocity.set(new Vector3f(-ddy / dist, ddx / dist, 0).mul(speed));

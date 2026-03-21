@@ -40,18 +40,21 @@ public class SplitPaneTest extends StatefulWidget {
     }
 
     public static class State extends WidgetState<SplitPaneTest> {
-        private ResizeDistribution overflowPolicy = ResizeDistribution.DONT;
-        private ResizeDistribution underflowPolicy = ResizeDistribution.DONT;
-        private double dividerThickness = 2;
+        private static final ResizeDistribution[] DISTRIBUTIONS = {ResizeDistribution.ALL, ResizeDistribution.FIRST, ResizeDistribution.LAST, ResizeDistribution.LARGEST, ResizeDistribution.SMALLEST};
+        private static final String[] DISTRIBUTION_NAMES = {"ALL", "FIRST", "LAST", "LARGEST", "SMALLEST"};
+
+        private int overflowIndex = 0;
+        private int underflowIndex = 0;
+        private double dividerThickness = 1;
         private boolean pushDividers = false;
+        private boolean preserveSizes = true;
 
         private final SplitController sharedGridController = new SplitController(2);
         private final SplitController fiveLayerController = new SplitController(2);
 
         @Override
         public Widget build(BuildContext context) {
-            var style = new SplitPaneStyle(dividerThickness, null, overflowPolicy, underflowPolicy, pushDividers);
-            var policies = ResizeDistribution.values();
+            var style = new SplitPaneStyle(dividerThickness, null, DISTRIBUTIONS[overflowIndex], DISTRIBUTIONS[underflowIndex], preserveSizes, pushDividers);
 
             var controller1 = sharedGridController;
             var style1 = style;
@@ -59,8 +62,7 @@ public class SplitPaneTest extends StatefulWidget {
             var style2 = style;
             return new Stack(
                 Alignment.CENTER,
-                new Sized(
-                    500, 500, new Column(
+                new Column(
                     MainAxisAlignment.CENTER,
                     CrossAxisAlignment.CENTER,
                     new Row(
@@ -125,19 +127,15 @@ public class SplitPaneTest extends StatefulWidget {
                             new Sized(
                                 TEST_WIDTH, TEST_HEIGHT, new SplitPane(
                                 LayoutAxis.HORIZONTAL, style,
-                                new SplitChild(
-                                    sc -> sc.weight(1), new SplitPane(
+                                new SplitPane(
                                     LayoutAxis.VERTICAL, style,
                                     pane(Color.AQUA, "1"),
-                                    pane(Color.AQUA, "2")
-                                )
+                                    new SplitChild(sc -> sc.weight(2),pane(Color.AQUA, "2"))
                                 ),
-                                new SplitChild(
-                                    sc -> sc.weight(1), new SplitPane(
+                                new SplitPane(
                                     LayoutAxis.VERTICAL, style,
-                                    pane(Color.MAGENTA, "3"),
+                                    new SplitChild(sc -> sc.weight(2), pane(Color.MAGENTA, "3")),
                                     pane(Color.MAGENTA, "4")
-                                )
                                 )
                             )
                             )
@@ -168,19 +166,15 @@ public class SplitPaneTest extends StatefulWidget {
                                 public Widget build(BuildContext context) {
                                     return new SplitPane(
                                         LayoutAxis.HORIZONTAL, style,
-                                        new SplitChild(
-                                            sc -> sc.weight(1.0), new SplitPane(
+                                        new SplitPane(
                                             LayoutAxis.VERTICAL, controller, style,
                                             pane(Color.RED, "1"),
                                             pane(Color.RED, "2")
-                                        )
                                         ),
-                                        new SplitChild(
-                                            sc -> sc.weight(1.0), new SplitPane(
+                                        new SplitPane(
                                             LayoutAxis.VERTICAL, controller, style,
                                             pane(Color.GREEN, "3"),
                                             pane(Color.GREEN, "4")
-                                        )
                                         )
                                     );
                                 }
@@ -192,7 +186,7 @@ public class SplitPaneTest extends StatefulWidget {
                             new Sized(
                                 TEST_WIDTH, TEST_HEIGHT, new SplitPane(
                                 LayoutAxis.HORIZONTAL,
-                                new SplitPaneStyle(dividerThickness, null, overflowPolicy, underflowPolicy, true),
+                                style,
                                 pane(Color.RED, "1"),
                                 pane(Color.mix(0.5, Color.RED, Color.YELLOW), "2"),
                                 pane(Color.YELLOW, "3"),
@@ -243,7 +237,6 @@ public class SplitPaneTest extends StatefulWidget {
                             )
                         )
                     )
-                )
                 ),
                 new Align(
                     Alignment.TOP_RIGHT,
@@ -259,12 +252,12 @@ public class SplitPaneTest extends StatefulWidget {
                                             MainAxisAlignment.START,
                                             CrossAxisAlignment.STRETCH,
                                             new MessageButton(
-                                                Component.literal("Overflow: " + overflowPolicy.name()),
-                                                () -> setState(() -> overflowPolicy = policies[(overflowPolicy.ordinal() + 1) % policies.length])
+                                                Component.literal("Overflow: " + DISTRIBUTION_NAMES[overflowIndex]),
+                                                () -> setState(() -> overflowIndex = (overflowIndex + 1) % DISTRIBUTIONS.length)
                                             ),
                                             new MessageButton(
-                                                Component.literal("Underflow: " + underflowPolicy.name()),
-                                                () -> setState(() -> underflowPolicy = policies[(underflowPolicy.ordinal() + 1) % policies.length])
+                                                Component.literal("Underflow: " + DISTRIBUTION_NAMES[underflowIndex]),
+                                                () -> setState(() -> underflowIndex = (underflowIndex + 1) % DISTRIBUTIONS.length)
                                             ),
                                             new Sized(
                                                 null, 20, new MessageSlider(
@@ -273,6 +266,10 @@ public class SplitPaneTest extends StatefulWidget {
                                                 slider -> slider.range(1, 12).step(1),
                                                 v -> setState(() -> dividerThickness = v)
                                             )
+                                            ),
+                                            new MessageButton(
+                                                Component.literal("Preserve: " + preserveSizes),
+                                                () -> setState(() -> preserveSizes = !preserveSizes)
                                             ),
                                             new MessageButton(
                                                 Component.literal("Push: " + pushDividers),
